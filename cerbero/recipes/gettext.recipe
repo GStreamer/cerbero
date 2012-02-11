@@ -1,0 +1,11 @@
+from cerbero import recipe
+from cerbero.config import Platform
+
+
+class Recipe(recipe.Recipe):
+    name = 'gettext'
+    version = '0.18.1.1'
+
+    def prepare (self):
+        if self.config.platform == Platform.WINDOWS:
+            self.build.configure_options = '--enable-threads=win32'

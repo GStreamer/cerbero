@@ -1,0 +1,16 @@
+from cerbero import recipe
+from cerbero.config import Platform
+
+
+class Recipe(recipe.Recipe):
+    name = 'zlib'
+    version = '1.2.6'
+
+    def prepare(self):
+        if self.config.platform == Platform.Windows:
+            self.build.make = 'make -f win32/Makefile.gcc'
+            self.build.install = 'make install -f win32/Makefile.gcc '\
+                                'INCLUDE_PATH=%(prefix)sinclude '\
+                                'LIBRARY_PATH=%(prefix)slib ' \
+                                'BINARY_PATH=%(prefix)sbin ' % {'prefix':self.config.prefix}
+            self._remove_steps (['configure'])

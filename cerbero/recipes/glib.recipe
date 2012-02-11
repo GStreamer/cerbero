@@ -1,0 +1,10 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'glib'
+    version = '2.30.2'
+    deps = ['libiconv', 'gettext', 'zlib']

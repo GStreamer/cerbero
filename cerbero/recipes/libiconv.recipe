@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libiconv'
+    version = '1.14'
+    deps = ['gettext']
