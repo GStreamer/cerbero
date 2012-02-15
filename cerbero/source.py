@@ -93,7 +93,6 @@ class LocalTarball (Source):
     def fetch (self):
         if not os.path.exists(self.repo_dir):
             raise FatalError(_("Repository %s doesn't exists") % self.repo_dir)
-        self._find_tarball ()
         # wipe the repository
         git.clean (self.repo_dir)
         # fetch remote branches
@@ -104,6 +103,7 @@ class LocalTarball (Source):
     def extract (self):
         if not os.path.exists (self.build_dir):
             os.mkdir (self.build_dir)
+        self._find_tarball ()
         shell.unpack (self.tarball_path, self.unpack_dir)
         # apply common patches
         self._apply_patches(self.repo_dir)
@@ -111,12 +111,11 @@ class LocalTarball (Source):
         self._apply_patches(self.platform_patches_dir)
 
     def _find_tarball (self):
-        pass
         tarball = [x for x in os.listdir(self.repo_dir) if
                    x.startswith(self.package_name)]
         if len(tarball) != 1:
-            FatalError (_("The local repository for %s do not have a valid "
-                          "tarbal") % self.repo_dir)
+            raise FatalError (_("The local repository %s do not have a "
+                                "valid tarball") % self.repo_dir)
         self.tarball_path = os.path.join(self.repo_dir, tarball[0])
 
     def _apply_patches (self, patches_dir):
