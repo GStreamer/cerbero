@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libtheora'
+    version = '1.1.1'
+    deps = ['libogg', 'libvorbis']
