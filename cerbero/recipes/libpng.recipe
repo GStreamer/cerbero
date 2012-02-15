@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libpng'
+    version = '1.5.8'
+    deps = ['zlib']
