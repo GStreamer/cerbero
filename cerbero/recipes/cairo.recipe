@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'cairo'
+    version = '1.10.2'
+    deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
