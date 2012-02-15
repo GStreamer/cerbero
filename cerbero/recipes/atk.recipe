@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'atk'
+    version = '2.2.0'
+    deps = ['glib']
