@@ -3,4 +3,4 @@ from cerbero import recipe
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.7.6'
+    version = '2.7.8'
