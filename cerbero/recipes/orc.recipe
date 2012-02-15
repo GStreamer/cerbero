@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'orc'
+    version = '0.4.16'
