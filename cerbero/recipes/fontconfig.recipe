@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'fontconfig'
+    version = '2.8.0'
+    deps = ['expat', 'freetype', 'libiconv']
