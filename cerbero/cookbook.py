@@ -119,7 +119,9 @@ class CookBook (object):
             logging.warning (_("Could not cache the CookBook: %s"), ex)
 
     def _recipe_status (self, recipe_name):
-        return self.status.get(recipe_name, RecipeStatus())
+        if recipe_name not in self.status:
+            self.status[recipe_name] = RecipeStatus(steps=[])
+        return self.status[recipe_name]
 
     def _update_status(self):
         pass
