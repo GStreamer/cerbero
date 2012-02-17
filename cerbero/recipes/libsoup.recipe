@@ -1,0 +1,8 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libsoup'
+    version = '2.36.1'
+    configure_options = '--without-gnome'
+    deps = ['glib-networking', 'libgcrypt', 'gnutls', 'libxml2', 'glib']
