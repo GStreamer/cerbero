@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'gnutls'
+    version = '3.0.9'
+    deps = ['nettle', 'libgcrypt']
