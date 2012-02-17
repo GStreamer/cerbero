@@ -1,0 +1,27 @@
+from cerbero import recipe
+from cerbero.config import Platform, Architecture
+
+
+class Recipe(recipe.Recipe):
+    name = 'libvpx'
+    version = 'v1.0.0'
+    configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
+                    "--libdir=%(libdir)s %(options)s"
+
+    def prepare (self):
+        if self.config.arch == Architecture.X86_64:
+            arch = 'x86_64'
+        else:
+            arch = 'x86'
+
+        if self.config.target == Platform.DARWIN:
+            platform = 'darwin11'
+        if self.config.target == Platform.WINDOWS:
+            if self.config.arch == Architecture.X86_64:
+                platform = 'win64'
+            else:
+                platform = 'win32'
+        else:
+            platform = 'linux'
+
+        self.configure_options = '--target=%s-%s-gcc' % (arch, platform)
