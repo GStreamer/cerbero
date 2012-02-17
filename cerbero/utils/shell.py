@@ -28,6 +28,7 @@ from cerbero.errors import FatalError
 
 
 PATCH = 'patch'
+TAR = 'tar'
 
 
 def call (cmd, cmd_dir):
@@ -56,7 +57,9 @@ def apply_patch(patch, directory, strip=1):
 
 
 def unpack(filename, dest):
+    logging.info("Unpacking %s in %s" % (filename, dest))
     if filename.endswith('tar.gz') or filename.endswith('tar.bz2'):
-        logging.info("Unpacking %s in %s" % (filename, dest))
         tf = tarfile.open(filename, mode='r:*')
         tf.extractall(path=dest)
+    if filename.endswith('tar.xz'):
+        call ("%s -Jxf %s" % (TAR, filename), dest)
