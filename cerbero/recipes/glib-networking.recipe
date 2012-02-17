@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'glib-networking'
+    version = '2.30.2'
+    deps = ['glib', 'gnutls']
