@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'speex'
+    version = '1.2rc1'
+    deps = ['libogg']
