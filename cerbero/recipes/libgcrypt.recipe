@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libgcrypt'
+    version = '1.5.0'
+    deps = ['libgpg-error']
