@@ -32,18 +32,25 @@ class Build(Command):
     def __init__(self):
         Command.__init__(self,
             [ArgparseArgument('recipe', nargs=1,
-                             help=_('name of the recipe to build'))
+                             help=_('name of the recipe to build')),
+            ArgparseArgument('--force', action='store_true', default=False,
+                             help=_('force the build of the recipe ingoring '
+                                    'its cached state')),
+            ArgparseArgument('--no-deps', action='store_true', default=False,
+                             help=_('do not build dependencies')),
             ])
 
     def run(self, config, args):
         cookbook = CookBook.load(config)
         recipe_name = args.recipe[0]
+        force = args.force
+        no_deps = args.no_deps
 
         recipe = cookbook.get_recipe(recipe_name)
         if recipe is None:
             raise FatalError(_("Recipe %s not found" % recipe_name))
 
-        oven = Oven(recipe, cookbook)
+        oven = Oven(recipe, cookbook, force=force, no_deps=no_deps)
         oven.start_cooking()
 
 register_command(Build)

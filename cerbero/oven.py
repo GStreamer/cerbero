@@ -30,19 +30,28 @@ class Oven (object):
     @type: L{cerberos.recipe.recipe}
     @ivar cookbook: Cookbook with the recipes status
     @type: L{cerberos.cookbook.CookBook}
+    @ivar force: Force the build of the recipe
+    @type: bool
+    @ivar no_deps: Ignore dependencies
+    @type: bool 
     '''
 
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
-    def __init__(self, recipe, cookbook):
+    def __init__(self, recipe, cookbook, force=False, no_deps=False):
         self.recipe = recipe
         self.cookbook = cookbook
+        self.force = force
+        self.no_deps = no_deps
 
     def start_cooking (self):
         '''
         Cooks the recipe and all its dependencies
         '''
-        ordered_recipes =  self._process_deps (self.recipe)
+        if self.no_deps:
+            ordered_recipes = [self.recipe]
+        else:
+            ordered_recipes =  self._process_deps (self.recipe)
 
         logging.info(_("Building the following recipes %s: ") %
                      ' '.join([x.name for x in ordered_recipes]))
@@ -53,14 +62,15 @@ class Oven (object):
             i += 1
 
     def _cook_recipe (self, recipe, count, total):
-        if not self.cookbook.recipe_needs_build(recipe.name):
+        if not self.cookbook.recipe_needs_build(recipe.name) and \
+                not self.force:
             logging.info(_("%s already built") % recipe.name)
             return
 
         for desc, step in recipe._steps:
             logging.info(self.STEP_TPL % (count, total, recipe.name, step))
             # check if the current step needs to be done
-            if self.cookbook.step_done (recipe.name, step):
+            if self.cookbook.step_done (recipe.name, step) and not self.force:
                 logging.info(_("Step done"))
                 continue
             try:
