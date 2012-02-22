@@ -73,7 +73,36 @@ class Source (object):
         raise NotImplemented ("'extrat' must be implemented by subclasses")
 
 
-class LocalTarball (Source):
+class GitCache (Source):
+    '''
+    Base class for source handlers using a Git repository
+    '''
+
+    remotes = {}
+    commit = 'origin/master'
+
+    _properties_keys = ['commit', 'remotes']
+
+    def __init__ (self, recipe, config):
+        Source.__init__ (self, recipe, config)
+        self.remotes = {'origin': '%s/%s' % (config.git_root, recipe.name)}
+        self.repo_dir = os.path.join(config.local_sources, recipe.name)
+        self.build_dir = os.path.join(config.sources, recipe.package_name)
+
+    def fetch (self):
+        if not os.path.exists (self.repo_dir):
+            git.init(self.repo_dir)
+        for remote, url in self.remotes.iteritems():
+            git.add_remote (self.repo_dir, remote, url)
+        # wipe the repository
+        git.clean (self.repo_dir)
+        # fetch remote branches
+        git.fetch (self.repo_dir)
+        # checkout the current version
+        git.checkout (self.repo_dir,  self.commit)
+
+
+class LocalTarball (GitCache):
     '''
     Source handler for cerbero's local sources, a local git repository with
     the release tarball and a set of patches
@@ -82,23 +111,11 @@ class LocalTarball (Source):
     BRANCH_PREFIX = 'sdk'
 
     def __init__(self, recipe, config):
-        Source.__init__(self, recipe, config)
-        self.repo_dir = os.path.join(config.local_sources, recipe.name)
+        GitCache.__init__(self, recipe, config)
+        self.commit = "%s-%s" % (self.BRANCH_PREFIX, recipe.version)
         self.platform_patches_dir = os.path.join(self.repo_dir, config.platform)
-        self.branch = "%s-%s" % (self.BRANCH_PREFIX, recipe.version)
         self.package_name = recipe.package_name
         self.unpack_dir = config.sources
-        self.build_dir = os.path.join(config.sources, self.recipe.name)
-
-    def fetch (self):
-        if not os.path.exists(self.repo_dir):
-            raise FatalError(_("Repository %s doesn't exists") % self.repo_dir)
-        # wipe the repository
-        git.clean (self.repo_dir)
-        # fetch remote branches
-        git.fetch (self.repo_dir)
-        # checkout the current version
-        git.checkout (self.repo_dir,  self.branch)
 
     def extract (self):
         if not os.path.exists (self.build_dir):
@@ -131,28 +148,12 @@ class LocalTarball (Source):
             shell.apply_patch(self.build_dir, patch)
 
 
-class LocalGit (Source):
+class Git (GitCache):
     '''
     Source handler for git repositories
     '''
 
     commit = 'origin/sdk-master'
-
-    _properties_keys = ['commit']
-
-    def __init__(self, recipe, config):
-        Source.__init__(self, recipe, config)
-        self.repo_dir = os.path.join(config.local_sources, recipe.name)
-        self.build_dir = os.path.join(config.sources,
-                                      self.recipe.package_name)
-
-    def fetch (self):
-        if not os.path.exists(self.repo_dir):
-            raise FatalError(_("Repository %s doesn't exists") % self.repo_dir)
-        # wipe the repository
-        git.clean (self.repo_dir)
-        # fetch remote branches
-        git.fetch (self.repo_dir)
 
     def extract (self):
         if os.path.exists (self.build_dir):
@@ -165,5 +166,5 @@ class LocalGit (Source):
 
 class SourceType (object):
     LOCAL_TARBALL = LocalTarball
-    LOCAL_GIT = LocalGit
+    GIT = Git
 
