@@ -21,7 +21,7 @@ import os
 import sys
 import traceback
 
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _
 
 
@@ -46,10 +46,11 @@ class Architecture:
     X86_64 = 'x86_64'
 
 
-class Config:
+class Config (object):
 
     _known_properties = [ 'platform', 'prefix', 'arch', 'recipes_dir', 'host',
-                          'build', 'target', 'sources', 'local_sources' ]
+                          'build', 'target', 'sources', 'local_sources',
+                          'use_lib64']
 
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
@@ -71,7 +72,7 @@ class Config:
             raise FatalError(_('Could not include config file (%s)') % filename)
         for key in self._known_properties:
             if key in config:
-                setattr(self, key, config[key])
+                self.set_property(self, key, config[key])
 
     def setup_env(self):
         self._create_path(self.prefix)
@@ -136,30 +137,37 @@ class Config:
 
     def load_defaults (self):
         cerbero_home = os.path.expanduser('~/cerbero')
-        self.prefix = os.path.join(cerbero_home, 'dist')
-        self.sources = os.path.join(cerbero_home, 'sources')
-        self.local_sources = os.path.join(self.sources, 'local')
-        self.recipes_dir = os.path.join(cerbero_home, 'recipes')
-        self.host = None
-        self.build = None
-        self.target = None
+        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
+        self.set_property('local_sources', os.path.join(self.sources, 'local'))
+        self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
+        self.set_property('host', None)
+        self.set_property('build', None)
+        self.set_property('target', None)
         platform = sys.platform
         if platform.startswith('linux'):
-            self.platform = Platform.LINUX
+            self.set_property('platform', Platform.LINUX)
         elif platform.startswith('win'):
-            self.platform = Platform.WINDOWS
+            self.set_property('platform', Platform.WINDOWS)
 
         self.get_system_arch()
-        #self.recipes_dir = os.path.join(os.environ['HOME'], CONFIG_DIR, PROPS_FILENAME)
 
     def get_system_arch (self):
         try:
             uname = os.uname()
-            self.use_lib64 = (uname[0], uname[4]) in [ ('Linux', 'x86_64'),
+            use_lib64 = (uname[0], uname[4]) in [ ('Linux', 'x86_64'),
                                                        ('Linux', 'ppc64'),
                                                        ('Linux', 's390x') ]
-            self.arch = 'x86_64'
+
+            arch = 'x86_64'
         except AttributeError:
             # FIXME: Get windows arch
-            self.arch = 'i686'
-            self.use_lib64 = False
+            arch = 'i686'
+            use_lib64 = False
+        self.set_property ('use_lib64', use_lib64)
+        self.set_property ('arch', arch)
+
+    def set_property (self, name, value):
+        if name not in self._known_properties:
+            raise ConfigurationError ('Unkown key %s' % name)
+        setattr(self, name, value)
