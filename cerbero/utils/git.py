@@ -40,8 +40,10 @@ def checkout(git_dir, ref):
 
 
 def local_checkout(git_dir, local_repo_dir, ref):
-    shell.call('%s clone --local %s .' % (GIT, local_repo_dir), git_dir)
-    return shell.call('%s reset --hard %s' % (GIT, ref), git_dir)
+    shell.call('%s branch build' % GIT, local_repo_dir, fail=False)
+    shell.call('%s checkout build' % GIT, local_repo_dir)
+    shell.call('%s reset --hard %s' % (GIT, ref), local_repo_dir)
+    return shell.call('%s clone %s -b build .' % (GIT, local_repo_dir), git_dir)
 
 
 def add_remote(git_dir, name, url):
