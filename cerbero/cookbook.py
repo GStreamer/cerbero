@@ -113,6 +113,8 @@ class CookBook (object):
 
     def save (self):
         try:
+            if not os.path.exists (CONFIG_DIR):
+                os.mkdir (CONFIG_DIR)
             with open(COOKBOOK_FILE, 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
