@@ -31,7 +31,7 @@ PATCH = 'patch'
 TAR = 'tar'
 
 
-def call (cmd, cmd_dir, fail=True):
+def call (cmd, cmd_dir='.', fail=True):
     try:
         logging.info ("Running command '%s'" % cmd)
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
