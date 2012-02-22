@@ -7,4 +7,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'glib'
     version = '2.30.2'
-    deps = ['libiconv', 'gettext', 'zlib']
+    configure_options = '--with-libiconv'
+    deps = ['libiconv', 'libffi', 'gettext', 'zlib']
