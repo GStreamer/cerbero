@@ -31,7 +31,7 @@ PATCH = 'patch'
 TAR = 'tar'
 
 
-def call (cmd, cmd_dir):
+def call (cmd, cmd_dir, fail=True):
     try:
         logging.info ("Running command '%s'" % cmd)
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
@@ -39,7 +39,10 @@ def call (cmd, cmd_dir):
                                     stdout=sys.stdout, env=os.environ.copy(),
                                     shell=True)
     except Exception, ex:
-        raise FatalError (_("Error running command %s: %s") % (cmd, ex))
+        if fail:
+            raise FatalError (_("Error running command %s: %s") % (cmd, ex))
+        else:
+            ret = 0
     return ret
 
 
