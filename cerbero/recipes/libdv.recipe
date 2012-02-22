@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libdv'
+    version = '1.0.0'
