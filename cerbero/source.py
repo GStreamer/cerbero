@@ -112,7 +112,7 @@ class LocalTarball (GitCache):
 
     def __init__(self, recipe, config):
         GitCache.__init__(self, recipe, config)
-        self.commit = "%s-%s" % (self.BRANCH_PREFIX, recipe.version)
+        self.commit = "%s/%s-%s" % ('origin', self.BRANCH_PREFIX, recipe.version)
         self.platform_patches_dir = os.path.join(self.repo_dir, config.platform)
         self.package_name = recipe.package_name
         self.unpack_dir = config.sources
