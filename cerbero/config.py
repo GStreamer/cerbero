@@ -29,6 +29,7 @@ CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
 PROPS_FILENAME = 'properties.%s' % CONFIG_EXT
 USER_PROPS_FILE = os.path.join(CONFIG_DIR, PROPS_FILENAME)
+GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
 
 # Platforms
 
@@ -50,7 +51,7 @@ class Config (object):
 
     _known_properties = [ 'platform', 'prefix', 'arch', 'recipes_dir', 'host',
                           'build', 'target', 'sources', 'local_sources',
-                          'use_lib64']
+                          'use_lib64', 'git_root']
 
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
@@ -141,6 +142,7 @@ class Config (object):
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
         self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
+        self.set_property('git_root', GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
