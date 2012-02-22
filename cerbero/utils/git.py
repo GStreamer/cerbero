@@ -22,6 +22,11 @@ from cerbero.utils import shell
 GIT = '/usr/bin/git'
 
 
+def init (git_dir):
+    shell.call ('mkdir -p %s')
+    shell.call ('%s init .' % GIT, git_dir)
+
+
 def clean(git_dir):
     return shell.call('%s clean -dfx' % GIT, git_dir)
 
@@ -33,6 +38,12 @@ def fetch(git_dir):
 def checkout(git_dir, ref):
     return shell.call('%s reset --hard %s' % (GIT, ref), git_dir)
 
+
 def local_checkout(git_dir, local_repo_dir, ref):
     shell.call('%s clone --local %s .' % (GIT, local_repo_dir), git_dir)
     return shell.call('%s reset --hard %s' % (GIT, ref), git_dir)
+
+
+def add_remote(git_dir, name, url):
+    shell.call('%s remote add %s %s' % (GIT, name, url), git_dir,
+               fail=False)
