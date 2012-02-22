@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libffi'
+    version = '3.0.10'
