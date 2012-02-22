@@ -23,7 +23,7 @@ GIT = '/usr/bin/git'
 
 
 def init (git_dir):
-    shell.call ('mkdir -p %s')
+    shell.call ('mkdir -p %s' % git_dir)
     shell.call ('%s init .' % GIT, git_dir)
 
 
