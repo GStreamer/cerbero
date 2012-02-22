@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libshout'
+    version = '2.2.2'
+    deps = ['libtheora', 'libogg', 'libvorbis', 'speex']
