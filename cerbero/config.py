@@ -30,6 +30,7 @@ CONFIG_EXT = 'cbc'
 PROPS_FILENAME = 'properties.%s' % CONFIG_EXT
 USER_PROPS_FILE = os.path.join(CONFIG_DIR, PROPS_FILENAME)
 GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
+CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 # Platforms
 
@@ -56,6 +57,7 @@ class Config (object):
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
 
+        self._check_uninstalled()
         self.load_defaults()
         if not os.path.exists(self.filename):
             msg = _('Using default configuration because %s is missing') % self.filename
@@ -123,6 +125,9 @@ class Config (object):
         for e, v in env.iteritems():
             os.environ[e] = v
 
+    def _check_uninstalled (self):
+        self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
+
     def _create_path (self, path):
         if not os.path.exists(path):
             try:
@@ -141,7 +146,11 @@ class Config (object):
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
-        self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
+        if not self.uninstalled:
+            self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
+        else:
+            self.set_property('recipes_dir', 
+                os.path.join(os.path.dirname(__file__), 'recipes'))
         self.set_property('git_root', GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)
