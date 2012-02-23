@@ -88,7 +88,7 @@ class Autotools (Build):
                     "--libdir %(libdir)s %(options)s"
     configure_options = ''
     make = 'make'
-    install = 'make install'
+    make_install = 'make install'
     clean = 'clean'
 
     _properties_keys = ['config_sh', 'configure_tpl', 'configure_options',
@@ -120,7 +120,7 @@ class Autotools (Build):
         shell.call (self.make, self.build_dir)
 
     def do_install (self):
-        shell.call (self.install, self.build_dir)
+        shell.call (self.make_install, self.build_dir)
 
     def do_clean (self):
         shell.call (self.clean, self.build_dir)
