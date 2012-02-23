@@ -167,7 +167,9 @@ class CookBook (object):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
         try:
             execfile(filepath, locals(), globals())
-            return Recipe(self._config)
+            r = Recipe(self._config)
+            r.prepare()
+            return r
         except Exception, ex:
             import traceback; traceback.print_exc()
             logging.warning("Error loading recipe %s" % ex)
