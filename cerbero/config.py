@@ -44,7 +44,7 @@ class Platform:
 
 class Architecture:
     ''' Enumeration of supported acrchitectures '''
-    I686 = 'i686'
+    X86 = 'x86'
     X86_64 = 'x86_64'
 
 
