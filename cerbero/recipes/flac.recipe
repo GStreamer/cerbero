@@ -1,0 +1,8 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'flac'
+    version = '1.2.1'
+    config_sh = 'sh autogen.sh'
+    deps = ['libiconv']
