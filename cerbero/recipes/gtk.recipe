@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'gtk+'
+    version = '2.24.10'
+    deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
