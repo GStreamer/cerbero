@@ -54,6 +54,7 @@ class Recipe(object):
               (N_('Post Install'), 'post_install')]
 
     def __init__(self, config):
+        self.config = config
         if self.package_name is None:
             self.package_name = "%s-%s" % (self.name, self.version)
         self.source = source.get_handler(self, config)
