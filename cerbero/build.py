@@ -102,15 +102,18 @@ class Autotools (Build):
     def do_configure (self):
         configure_tpl = self.configure_tpl
         if self.config.host is not None:
-            configure_tpl += ' --host %(host)'
+            configure_tpl += ' --host=%(host)s'
         if self.config.build is not None:
-            configure_tpl += ' --build %(build)'
-        shell.call (self.configure_tpl % {'config-sh': self.config_sh,
-                                          'prefix': self.config.prefix,
-                                          'libdir': self.config.libdir,
-                                          'host:': self.config.host,
-                                          'build': self.config.build,
-                                          'options': self.configure_options},
+            configure_tpl += ' --build=%(build)s'
+        if self.config.target is not None:
+            configure_tpl += ' --target=%(target)s'
+        shell.call (configure_tpl % {'config-sh': self.config_sh,
+                                     'prefix': self.config.prefix,
+                                     'libdir': self.config.libdir,
+                                     'host': self.config.host,
+                                     'target': self.config.target,
+                                     'build': self.config.build,
+                                     'options': self.configure_options},
                     self.build_dir)
 
     def do_make (self):
