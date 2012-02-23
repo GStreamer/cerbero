@@ -1,0 +1,5 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'a52dec'
+    version = '0.7.4'
