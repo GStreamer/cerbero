@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'jasper'
+    version = '1.900.1'
+    config_sh = 'sh configure'
