@@ -1,0 +1,10 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'bzip2'
+    version = '1.0.6'
+
+    def prepare (self):
+        self._remove_steps(['configure'])
+        self.build.make_install = 'make install PREFIX=%s' % self.config.prefix
