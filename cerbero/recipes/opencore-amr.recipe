@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'opencore-amr'
+    version = '0.1.3'
