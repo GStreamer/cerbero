@@ -1,0 +1,5 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'json-glib'
+    version = '0.12.6'
