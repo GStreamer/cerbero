@@ -22,6 +22,7 @@ import shlex
 import sys
 import os
 import tarfile
+import zipfile
 
 from cerbero.utils import _
 from cerbero.errors import FatalError
@@ -66,3 +67,7 @@ def unpack(filename, dest):
         tf.extractall(path=dest)
     if filename.endswith('tar.xz'):
         call ("%s -Jxf %s" % (TAR, filename), dest)
+    if filename.endswith('.zip'):
+        zf = zipfile.ZipFile(filename, "r")
+        zf.extractall(path=dest)
+
