@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'tiff'
+    version = '4.0.1'
