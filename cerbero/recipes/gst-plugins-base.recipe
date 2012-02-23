@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
     stype = SourceType.GIT
     config_sh = 'sh autogen.sh'
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
-            'libvorbis', 'zlib']
+            'libvorbis', 'zlib', 'orc']
