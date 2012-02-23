@@ -1,0 +1,8 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'wavpack'
+    version = '4.60.1'
+    config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'
+    deps = ['libiconv']
