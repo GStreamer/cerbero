@@ -75,7 +75,7 @@ class Config (object):
             raise FatalError(_('Could not include config file (%s)') % filename)
         for key in self._known_properties:
             if key in config:
-                self.set_property(self, key, config[key])
+                self.set_property(key, config[key])
 
     def setup_env(self):
         self._create_path(self.prefix)
