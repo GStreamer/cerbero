@@ -4,3 +4,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'nettle'
     version = '2.4'
+    deps = ['gmp']
