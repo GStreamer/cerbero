@@ -39,7 +39,7 @@ class Platform:
     ''' Enumeration of supported platforms '''
     LINUX = 'linux'
     WINDOWS = 'windows'
-    OSX = 'osx'
+    DARWIN  = 'darwin'
 
 
 class Architecture:
