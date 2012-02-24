@@ -1,0 +1,9 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'taglib'
+    version = '1.7'
+    configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON'
+    from cerbero.build import BuildType
+    btype = BuildType.CMAKE
