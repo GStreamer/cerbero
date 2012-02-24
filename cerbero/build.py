@@ -78,18 +78,17 @@ class Build (object):
         raise NotImplemented ("'install' must be implemented by subclasses")
 
 
-class Autotools (Build):
+class MakefilesBase (Build):
     '''
-    Build handler for autotools project
+    Base class for makefiles build systems like autotools and cmake
     '''
 
-    config_sh = './configure'
-    configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
-                    "--libdir %(libdir)s %(options)s"
+    config_sh = ''
+    configure_tpl = ''
     configure_options = ''
     make = 'make'
     make_install = 'make install'
-    clean = 'clean'
+    clean = 'make clean'
 
     _properties_keys = ['config_sh', 'configure_tpl', 'configure_options',
                         'make', 'make_install', 'clean']
@@ -100,20 +99,13 @@ class Autotools (Build):
                                       self.recipe.package_name)
 
     def do_configure (self):
-        configure_tpl = self.configure_tpl
-        if self.config.host is not None:
-            configure_tpl += ' --host=%(host)s'
-        if self.config.build is not None:
-            configure_tpl += ' --build=%(build)s'
-        if self.config.target is not None:
-            configure_tpl += ' --target=%(target)s'
-        shell.call (configure_tpl % {'config-sh': self.config_sh,
-                                     'prefix': self.config.prefix,
-                                     'libdir': self.config.libdir,
-                                     'host': self.config.host,
-                                     'target': self.config.target,
-                                     'build': self.config.build,
-                                     'options': self.configure_options},
+        shell.call (self.configure_tpl % {'config-sh': self.config_sh,
+                                          'prefix': self.config.prefix,
+                                          'libdir': self.config.libdir,
+                                          'host': self.config.host,
+                                          'target': self.config.target,
+                                          'build': self.config.build,
+                                          'options': self.configure_options},
                     self.build_dir)
 
     def do_make (self):
@@ -126,6 +118,39 @@ class Autotools (Build):
         shell.call (self.clean, self.build_dir)
 
 
+class Autotools (MakefilesBase):
+    '''
+    Build handler for autotools project
+    '''
+
+    config_sh = './configure'
+    configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
+                    "--libdir %(libdir)s %(options)s"
+
+
+    def do_configure (self):
+        if self.config.host is not None:
+            self.configure_tpl += ' --host=%(host)s'
+        if self.config.build is not None:
+            self.configure_tpl += ' --build=%(build)s'
+        if self.config.target is not None:
+            self.configure_tpl += ' --target=%(target)s'
+        MakefilesBase.do_configure (self)
+
+
+class CMake (MakefilesBase):
+    '''
+    Build handler for cmake projects
+    '''
+
+    config_sh = 'cmake'
+    configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '\
+                    '-DCMAKE_BUILD_TYPE=Release '\
+                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s %(options)s'
+    configure_options = ''
+
+
 class BuildType (object):
 
     AUTOTOOLS = Autotools
+    CMAKE = CMake
