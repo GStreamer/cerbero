@@ -114,7 +114,7 @@ class Config (object):
                'XDG_DATA_DIRS': xdgdatadir,
                'XDG_CONFIG_DIRS': xdgconfigdir,
                'XCURSOR_PATH': xcursordir,
-               'ACLOCAL': aclocaldir,
+               #'ACLOCAL': aclocaldir,
                'PERL5LIB': perl5lib,
                'MONO_PREFIX': self.prefix,
                'MONO_GAC_PREFIX': self.prefix,
@@ -149,7 +149,7 @@ class Config (object):
         if not self.uninstalled:
             self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
         else:
-            self.set_property('recipes_dir', 
+            self.set_property('recipes_dir',
                 os.path.join(os.path.dirname(__file__), 'recipes'))
         self.set_property('git_root', GIT_ROOT)
         self.set_property('host', None)
