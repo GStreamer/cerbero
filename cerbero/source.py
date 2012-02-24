@@ -78,14 +78,15 @@ class GitCache (Source):
     Base class for source handlers using a Git repository
     '''
 
-    remotes = {}
+    remotes = None
     commit = 'origin/master'
 
     _properties_keys = ['commit', 'remotes']
 
     def __init__ (self, recipe, config):
         Source.__init__ (self, recipe, config)
-        self.remotes = {'origin': '%s/%s' % (config.git_root, recipe.name)}
+        if self.remotes is None:
+            self.remotes = {'origin': '%s/%s' % (config.git_root, recipe.name)}
         self.repo_dir = os.path.join(config.local_sources, recipe.name)
         self.build_dir = os.path.join(config.sources, recipe.package_name)
 
