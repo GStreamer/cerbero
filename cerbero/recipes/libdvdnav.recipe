@@ -1,0 +1,8 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'libdvdnav'
+    version = '4.2.0'
+    config_sh = 'sh autogen.sh'
+    deps = ['libdvdread']
