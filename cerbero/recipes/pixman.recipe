@@ -4,3 +4,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'pixman'
     version = '0.24.4'
+    config_sh = 'autoreconf -f; ./configure'
+    
