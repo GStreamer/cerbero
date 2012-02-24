@@ -1,0 +1,10 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-bad'
+    version = '0.10.19'
+    config_sh = 'sh autogen.sh'
+    deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
+            'faad2', 'libkate', 'libshout', 'libvpx']
+

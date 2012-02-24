@@ -3,10 +3,8 @@ from cerbero import recipe
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-good'
-    version = '0.10.35'
-    from cerbero.source import SourceType
-    stype = SourceType.GIT
+    version = '0.10.31'
     config_sh = 'sh autogen.sh'
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
             'speex', 'libdv', 'gdk-pixbuf', 'libshout', 'libsoup',
-            'orc', 'wavpack'] #, 'flac']
+            'orc', 'wavpack', 'flac']

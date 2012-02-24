@@ -3,9 +3,7 @@ from cerbero import recipe
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-base'
-    version = '0.10.35'
-    from cerbero.source import SourceType
-    stype = SourceType.GIT
+    version = '0.10.36'
     config_sh = 'sh autogen.sh'
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']

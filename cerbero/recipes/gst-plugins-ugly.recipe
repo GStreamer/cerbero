@@ -1,0 +1,9 @@
+from cerbero import recipe
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-ugly'
+    version = '0.10.19'
+    config_sh = 'sh autogen.sh'
+    deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
+            'libdvdread', 'libmpeg2']
