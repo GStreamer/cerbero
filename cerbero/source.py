@@ -79,7 +79,7 @@ class GitCache (Source):
     '''
 
     remotes = None
-    commit = 'origin/master'
+    commit =  None
 
     _properties_keys = ['commit', 'remotes']
 
@@ -154,7 +154,10 @@ class Git (GitCache):
     Source handler for git repositories
     '''
 
-    commit = 'origin/sdk-master'
+    def __init__ (self, recipe, config):
+        GitCache.__init__ (self, recipe, config)
+        if self.commit is None:
+            self.commit = 'origin/sdk-%s' % self.recipe.version
 
     def extract (self):
         if os.path.exists (self.build_dir):
@@ -168,4 +171,3 @@ class Git (GitCache):
 class SourceType (object):
     LOCAL_TARBALL = LocalTarball
     GIT = Git
-
