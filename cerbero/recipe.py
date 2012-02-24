@@ -44,7 +44,7 @@ class Recipe(object):
     version = None
     package_name = None
     sources = None
-    stype = source.SourceType.LOCAL_TARBALL
+    stype = source.SourceType.GIT
     btype = build.BuildType.AUTOTOOLS
     deps = list()
     _mtime = 0
