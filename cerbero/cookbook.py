@@ -19,6 +19,7 @@
 import os
 import logging
 import pickle
+import time
 
 from cerbero.config import CONFIG_DIR
 from cerbero.errors import FatalError
@@ -32,9 +33,13 @@ COOKBOOK_FILE = os.path.join(CONFIG_DIR, COOKBOOK_NAME)
 
 class RecipeStatus (object):
 
-    def __init__ (self, steps=[], needs_build=True):
+    def __init__ (self, steps=[], needs_build=True, mtime=time.time()):
         self.steps = steps
-        self.needs_build = True
+        self.needs_build = needs_build
+        self.mtime = mtime
+
+    def touch (self):
+        self.mtime = time.time()
 
     def __repr__ (self):
         return "Steps: %r Needs Build: %r" % (self.steps, self.needs_build)
@@ -43,7 +48,7 @@ class RecipeStatus (object):
 class CookBook (object):
 
     recipes = {} # recipe_name -> recipe
-    status = {}   # recipe_name -> (needs_build, [steps_done])
+    status = {}   # recipe_name -> RecipeStatus
 
     _mtimes = {}
 
@@ -63,11 +68,7 @@ class CookBook (object):
         self.status = status
 
     def update (self):
-        self._get_mtimes()
-        #if not self._cache_is_old():
-        #    return
         self._load_recipes ()
-        self._update_status ()
         self.save()
 
     def get_recipes_list (self):
@@ -83,12 +84,14 @@ class CookBook (object):
     def update_step_status (self, recipe_name, step):
         status = self._recipe_status(recipe_name)
         status.steps.append(step)
+        status.touch()
         self.status[recipe_name] = status
         self.save()
 
     def update_build_status (self, recipe_name, needs_build):
         status = self._recipe_status(recipe_name)
         status.needs_build = needs_build
+        status.touch()
         self.status[recipe_name] = status
         self.save()
 
@@ -125,28 +128,6 @@ class CookBook (object):
             self.status[recipe_name] = RecipeStatus(steps=[])
         return self.status[recipe_name]
 
-    def _update_status(self):
-        pass
-
-    def _get_mtimes (self):
-        # first, list all files in the recipes directory with their full path
-        files = [os.path.join(self._config.recipes_dir, x)
-                 for x in os.listdir(self._config.recipes_dir)]
-        files.append (self._config.recipes_dir)
-        # get a list of all files and their modification time
-        # where mtimes is a lit of tuples (file_name, mtime)
-        self._mtimes = {}
-        map(lambda x: self._mtimes.update({x: os.path.getmtime(x)}), files)
-
-    def _cache_is_old (self):
-        # Check if we have a cache file
-        if not os.path.exists(COOKBOOK_FILE):
-            return True
-
-        # check if the cached cookbook is older than any of these files
-        cmtime = os.path.getmtime(COOKBOOK_FILE)
-        return cmtime < max (self._mtimes.values())
-
     def _load_recipes (self):
         self.recipes = {}
         for f in os.listdir(self._config.recipes_dir):
@@ -160,8 +141,15 @@ class CookBook (object):
                 logging.warning(_("The recipe in file %s doesn't contain a "
                                   "name") % f)
                 continue
-            recipe.set_mtime(self._mtimes[filepath])
             self.recipes[recipe.name] = recipe
+
+            # Check for updates in the recipe file to reset the status
+            rmtime = os.path.getmtime(filepath)
+            if recipe.name in self.status:
+                if rmtime > self.status[recipe.name].mtime:
+                    self.status[recipe.name].touch()
+                    self.status[recipe.name] = RecipeStatus()
+
 
     def _load_recipe_from_file (self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])

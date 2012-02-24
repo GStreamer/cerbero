@@ -47,7 +47,6 @@ class Recipe(object):
     stype = source.SourceType.GIT
     btype = build.BuildType.AUTOTOOLS
     deps = list()
-    _mtime = 0
     _steps = [(N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
               (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
               (N_('Install'), 'install'),
@@ -102,9 +101,6 @@ class Recipe(object):
         Runs a custom post-install step
         '''
         pass
-
-    def set_mtime (self, mtime):
-        self._mtime = mtime
 
     def _remove_steps (self, steps):
         self._steps = [x for x in self._steps if x[1] not in steps]
