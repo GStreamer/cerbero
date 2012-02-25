@@ -22,30 +22,78 @@ from cerbero.utils import shell
 GIT = '/usr/bin/git'
 
 
-def init (git_dir):
+def init(git_dir):
+    '''
+    Initialize a git repository with 'git init'
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    '''
     shell.call ('mkdir -p %s' % git_dir)
     shell.call ('%s init .' % GIT, git_dir)
 
 
 def clean(git_dir):
+    '''
+    Clean a git respository with clean -dfx
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    '''
     return shell.call('%s clean -dfx' % GIT, git_dir)
 
 
-def fetch(git_dir):
-    return shell.call('%s fetch --all' % GIT, git_dir)
+def fetch(git_dir, fail=True):
+    '''
+    Fetch all refs from all the remotes
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param fail: raise an error if the command failed
+    @type fail: false
+    '''
+    return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
 
-def checkout(git_dir, ref):
-    return shell.call('%s reset --hard %s' % (GIT, ref), git_dir)
+def checkout(git_dir, commit):
+    '''
+    Reset a git repository to a given commit
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param commit: the commit to checkout
+    @type commit: str
+    '''
+    return shell.call('%s reset --hard %s' % (GIT, commit), git_dir)
 
 
-def local_checkout(git_dir, local_repo_dir, ref):
-    shell.call('%s branch build' % GIT, local_repo_dir, fail=False)
-    shell.call('%s checkout build' % GIT, local_repo_dir)
-    shell.call('%s reset --hard %s' % (GIT, ref), local_repo_dir)
-    return shell.call('%s clone %s -b build .' % (GIT, local_repo_dir), git_dir)
+def local_checkout(git_dir, local_git_dir, commit):
+    '''
+    Clone a repository for a given commit in a different location
+
+    @param git_dir: destination path of the git repository
+    @type git_dir: str
+    @param local_git_dir: path of the source git repository
+    @type local_git_dir: str
+    @param commit: the commit to checkout
+    @type commit: false
+    '''
+    shell.call('%s branch build' % GIT, local_git_dir, fail=False)
+    shell.call('%s checkout build' % GIT, local_git_dir)
+    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
+    return shell.call('%s clone %s -b build .' % (GIT, local_git_dir), git_dir)
 
 
 def add_remote(git_dir, name, url):
+    '''
+    Add a remote to a git repository
+
+    @param git_dir: destination path of the git repository
+    @type git_dir: str
+    @param name: name of the remote
+    @type name: str
+    @param url: url of the remote 
+    @type url: str
+    '''
     shell.call('%s remote add %s %s' % (GIT, name, url), git_dir,
                fail=False)
