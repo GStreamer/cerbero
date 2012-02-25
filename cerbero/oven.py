@@ -51,7 +51,7 @@ class Oven (object):
         if self.no_deps:
             ordered_recipes = [self.recipe]
         else:
-            ordered_recipes =  self._process_deps (self.recipe)
+            ordered_recipes =  self.cookbook.list_recipe_deps(self.recipe)
 
         logging.info(_("Building the following recipes %s: ") %
                      ' '.join([x.name for x in ordered_recipes]))
@@ -87,22 +87,3 @@ class Oven (object):
                 raise FatalError (_("Error performing step %s: %s") % (step,
                                   ex))
         self.cookbook.update_build_status (recipe.name, False)
-
-    def _process_deps (self, recipe, state={}, ordered=[]):
-        if state.get(recipe, 'clean') == 'processed':
-            return
-        if state.get(recipe, 'clean') == 'in-progress':
-            raise FatalError(_("Dependency Cycle"))
-        state[recipe] = 'in-progress'
-        for recipe_name in recipe.deps:
-            try:
-                recipedep = self.cookbook.get_recipe(recipe_name)
-                if recipedep == None:
-                    raise FatalError (_("Recipe %s has a uknown dependency %s"
-                                      % (recipe.name , recipe_name)))
-                self._process_deps(recipedep, state, ordered)
-            except KeyError:
-                pass # user already notified via logging.info above
-        state[recipe] = 'processed'
-        ordered.append(recipe)
-        return ordered

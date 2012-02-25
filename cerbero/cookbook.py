@@ -101,6 +101,12 @@ class CookBook (object):
     def recipe_needs_build (self, recipe_name):
         return self._recipe_status(recipe_name).needs_build
 
+    def list_recipe_deps (self, recipe_name):
+        recipe = self.get_recipe(recipe_name)
+        if not recipe:
+            raise FatalError (_('Recipe %s not found') % recipe_name)
+        return self._find_deps(recipe)
+
     @staticmethod
     def load (config):
         status = {}
@@ -122,6 +128,22 @@ class CookBook (object):
                 pickle.dump(self.status, f)
         except IOError, ex:
             logging.warning (_("Could not cache the CookBook: %s"), ex)
+
+    def _find_deps (self, recipe, state={}, ordered=[]):
+        if state.get(recipe, 'clean') == 'processed':
+            return
+        if state.get(recipe, 'clean') == 'in-progress':
+            raise FatalError(_("Dependency Cycle"))
+        state[recipe] = 'in-progress'
+        for recipe_name in recipe.deps:
+            recipedep = self.get_recipe(recipe_name)
+            if recipedep == None:
+                raise FatalError (_("Recipe %s has a uknown dependency %s"
+                                  % (recipe.name , recipe_name)))
+            self._find_deps(recipedep, state, ordered)
+        state[recipe] = 'processed'
+        ordered.append(recipe)
+        return ordered
 
     def _recipe_status (self, recipe_name):
         if recipe_name not in self.status:
