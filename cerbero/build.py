@@ -83,6 +83,7 @@ class MakefilesBase (Build):
     Base class for makefiles build systems like autotools and cmake
     '''
 
+    autoreconf = False
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
@@ -90,7 +91,7 @@ class MakefilesBase (Build):
     make_install = 'make install'
     clean = 'make clean'
 
-    _properties_keys = ['config_sh', 'configure_tpl', 'configure_options',
+    _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl', 'configure_options',
                         'make', 'make_install', 'clean']
 
     def __init__(self, recipe, config):
@@ -99,6 +100,8 @@ class MakefilesBase (Build):
                                       self.recipe.package_name)
 
     def do_configure (self):
+        if self.autoreconf:
+            shell.call ('autoreconf -f', self.build_dir)
         shell.call (self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
