@@ -31,13 +31,26 @@ class Deps(Command):
         Command.__init__(self,
             [ArgparseArgument('recipe', nargs=1,
                              help=_('name of the recipe')),
+            ArgparseArgument('--all', action='store_true', default=False,
+                             help=_('list all dependencies, including the '
+                                    'build ones')),
             ])
 
     def run(self, config, args):
         cookbook = CookBook.load(config)
         recipe_name = args.recipe[0]
+        all_deps = args.all
 
-        for recipe in cookbook.list_recipe_deps(recipe_name):
+        if all_deps:
+            recipes = cookbook.list_recipe_deps(recipe_name)
+        else:
+            recipes = [cookbook.get_recipe(x) for x in 
+                        cookbook.get_recipe(recipe_name).deps]
+
+        if len(recipes) == 0:
+            logging.info (_('%s has 0 dependencies') % recipe_name)
+            return
+        for recipe in recipes:
             # Don't print the recipe we asked for
             if recipe.name == recipe_name:
                 continue
