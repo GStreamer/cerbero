@@ -84,6 +84,7 @@ class MakefilesBase (Build):
     '''
 
     autoreconf = False
+    autoreconf_sh = 'autoreconf -f -i'
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
@@ -101,7 +102,7 @@ class MakefilesBase (Build):
 
     def do_configure (self):
         if self.autoreconf:
-            shell.call ('autoreconf -f', self.build_dir)
+            shell.call (self.autoreconf_sh, self.build_dir)
         shell.call (self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
