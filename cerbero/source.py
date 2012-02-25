@@ -95,12 +95,8 @@ class GitCache (Source):
             git.init(self.repo_dir)
         for remote, url in self.remotes.iteritems():
             git.add_remote (self.repo_dir, remote, url)
-        # wipe the repository
-        git.clean (self.repo_dir)
         # fetch remote branches
-        git.fetch (self.repo_dir)
-        # checkout the current version
-        git.checkout (self.repo_dir,  self.commit)
+        git.fetch (self.repo_dir, fail=False)
 
 
 class LocalTarball (GitCache):
