@@ -51,7 +51,8 @@ class Oven (object):
         if self.no_deps:
             ordered_recipes = [self.recipe]
         else:
-            ordered_recipes =  self.cookbook.list_recipe_deps(self.recipe)
+            ordered_recipes = \
+                self.cookbook.list_recipe_deps(self.recipe.name)
 
         logging.info(_("Building the following recipes %s: ") %
                      ' '.join([x.name for x in ordered_recipes]))
