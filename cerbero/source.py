@@ -164,6 +164,45 @@ class Git (GitCache):
         git.local_checkout (self.build_dir, self.repo_dir, self.commit)
 
 
+class GitExtractedTarball(Git):
+    '''
+    Source handle for git repositories with an extracted tarball
+
+    Git doesn't conserve timestamps, which are reset after clonning the repo.
+    This can confuse the autotools build system, producing innecessary calls
+    to autoconf, aclocal, autoheaders or automake.
+    For instance after doing './configure && make', 'configure' is called
+    again if 'configure.ac' is newer than 'configure'.
+    '''
+
+    matches = ['.m4', '.in', 'configure']
+    _files = {}
+
+    def extract(self):
+        Git.extract(self)
+        for match in self.matches:
+            self._files[match] = []
+        self._find_files(self.build_dir)
+        self._fix_ts()
+
+    def _fix_ts(self):
+        for match in self.matches:
+            for path in self._files[match]:
+                shell.call('touch %s' % path)
+
+    def _find_files(self, directory):
+        for path in os.listdir(directory):
+            full_path = os.path.join(directory, path)
+            if os.path.isdir(full_path):
+                self._find_files(full_path)
+            if path == 'configure.in':
+                continue
+            for match in self.matches:
+                if path.endswith(match):
+                    self._files[match].append(full_path)
+
+
 class SourceType (object):
     LOCAL_TARBALL = LocalTarball
     GIT = Git
+    GIT_TARBALL = GitExtractedTarball
