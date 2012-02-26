@@ -7,4 +7,4 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
             'speex', 'libdv', 'gdk-pixbuf', 'libshout', 'libsoup',
-            'orc', 'wavpack', 'flac']
+            'orc', 'wavpack', 'flac', 'taglib']
