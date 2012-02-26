@@ -1,0 +1,5 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'gtk-doc'
+    version = '1.18'
