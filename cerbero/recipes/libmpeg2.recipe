@@ -3,3 +3,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'libmpeg2'
     version = '0.5.1'
+    autoreconf = True
