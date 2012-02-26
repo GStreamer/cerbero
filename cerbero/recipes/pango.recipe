@@ -4,4 +4,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'pango'
     version = '1.28.4'
+    autoreconf = True
     deps = ['cairo', 'fontconfig', 'freetype']
