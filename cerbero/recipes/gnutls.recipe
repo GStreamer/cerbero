@@ -3,5 +3,5 @@ from cerbero import recipe
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.0.9'
-    deps = ['zlib', 'nettle', 'libgcrypt']
+    version = '3.0.14'
+    deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
