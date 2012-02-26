@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'pygobject'
+    version = '2.28.6'
+    configure_options = '--disable-introspection'
