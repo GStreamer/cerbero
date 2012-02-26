@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = 'v1.0.0'
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
+    configure_options = "--enable-pic"
 
     def prepare (self):
         from cerbero.config import Platform, Architecture
