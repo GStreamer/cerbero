@@ -4,3 +4,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'libkate'
     version = '0.4.1'
+    deps = ['libogg', 'libpng']
