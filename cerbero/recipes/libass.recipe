@@ -4,3 +4,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'libass'
     version = '0.10.0'
+    deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']

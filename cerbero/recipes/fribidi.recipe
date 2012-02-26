@@ -1,0 +1,5 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'fribidi'
+    version = '0.10.9'
