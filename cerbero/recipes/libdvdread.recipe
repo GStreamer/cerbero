@@ -5,3 +5,4 @@ class Recipe(recipe.Recipe):
     name = 'libdvdread'
     version = '4.2.0'
     config_sh = 'sh autogen.sh'
+    deps = ['libdvdnav']
