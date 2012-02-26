@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'py2cairo'
+    version = '1.10.0'
+    autoreconf = True
