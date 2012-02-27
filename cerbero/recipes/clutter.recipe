@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'clutter'
+    version = '1.8.4'
+    deps = ['glib']
+    use_system_libs = True
