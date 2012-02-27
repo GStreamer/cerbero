@@ -149,7 +149,8 @@ class Autotools (MakefilesBase):
 
     def do_configure(self):
         # skip configure if we are already configured
-        if os.path.exists('configure') and os.path.exists('Makefile'):
+        if os.path.exists(os.path.join(self.build_dir, 'configure')) and\
+                os.path.exists(os.path.join(self.build_dir, 'Makefile')):
             return
         if self.config.host is not None:
             self.configure_tpl += ' --host=%(host)s'

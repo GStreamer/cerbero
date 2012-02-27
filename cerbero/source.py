@@ -164,7 +164,7 @@ class Git (GitCache):
                 commit_hash = git.get_hash(self.repo_dir, self.commit)
                 checkout_hash = git.get_hash(self.repo_dir, 'HEAD')
                 if commit_hash == checkout_hash:
-                    return
+                    return False
             except Exception:
                 pass
             shutil.rmtree(self.build_dir)
@@ -189,7 +189,8 @@ class GitExtractedTarball(Git):
     _files = {}
 
     def extract(self):
-        Git.extract(self)
+        if not Git.extract(self):
+            return False
         for match in self.matches:
             self._files[match] = []
         self._find_files(self.build_dir)
