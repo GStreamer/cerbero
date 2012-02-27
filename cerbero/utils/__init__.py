@@ -31,15 +31,15 @@ N_ = lambda x: x
 
 class ArgparseArgument(object):
 
-    def __init__ (self, name, **kwargs):
+    def __init__(self, name, **kwargs):
         self.name = name
         self.args = kwargs
 
-    def add_to_parser (self, parser):
-        parser.add_argument (self.name, **self.args)
+    def add_to_parser(self, parser):
+        parser.add_argument(self.name, **self.args)
 
 
-def user_is_root ():
+def user_is_root():
         ''' Check if the user running the process is root '''
         return hasattr(os, 'getuid') and os.getuid() == 0
 
@@ -91,7 +91,7 @@ def system_info():
         if distro in dmap:
             distro = dmap[distro]
         else:
-            raise FatalError ("Windows version '%s' not supported" % distro)
+            raise FatalError("Windows version '%s' not supported" % distro)
     if platform == Platform.DARWIN:
         raise NotImplemented()
 

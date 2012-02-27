@@ -22,7 +22,7 @@ from cerbero.errors import FatalError
 from cerbero.utils import shell, _
 
 
-def get_handler (recipe, config):
+def get_handler(recipe, config):
     '''
     Returns a L{cerbero.build.Build} for a L{cerbero.recipe.Recipe}
 
@@ -58,23 +58,23 @@ class Build (object):
             if hasattr(recipe, conf):
                 setattr(self, conf, getattr(recipe, conf))
 
-    def do_configure (self):
+    def do_configure(self):
         '''
         Configures the module
         '''
-        raise NotImplemented ("'configure' must be implemented by subclasses")
+        raise NotImplemented("'configure' must be implemented by subclasses")
 
-    def do_make (self):
+    def do_make(self):
         '''
         Compiles the module
         '''
-        raise NotImplemented ("'make' must be implemented by subclasses")
+        raise NotImplemented("'make' must be implemented by subclasses")
 
-    def do_install (self):
+    def do_install(self):
         '''
         Installs the module
         '''
-        raise NotImplemented ("'install' must be implemented by subclasses")
+        raise NotImplemented("'install' must be implemented by subclasses")
 
 
 class MakefilesBase (Build):
@@ -101,11 +101,11 @@ class MakefilesBase (Build):
         self.build_dir = os.path.join(config.sources,
                                       self.recipe.package_name)
 
-    def do_configure (self):
+    def do_configure(self):
         self._add_system_libs()
         if self.autoreconf:
-            shell.call (self.autoreconf_sh, self.build_dir)
-        shell.call (self.configure_tpl % {'config-sh': self.config_sh,
+            shell.call(self.autoreconf_sh, self.build_dir)
+        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
                                           'host': self.config.host,
@@ -114,14 +114,14 @@ class MakefilesBase (Build):
                                           'options': self.configure_options},
                     self.build_dir)
 
-    def do_make (self):
-        shell.call (self.make, self.build_dir)
+    def do_make(self):
+        shell.call(self.make, self.build_dir)
 
-    def do_install (self):
-        shell.call (self.make_install, self.build_dir)
+    def do_install(self):
+        shell.call(self.make_install, self.build_dir)
 
-    def do_clean (self):
-        shell.call (self.clean, self.build_dir)
+    def do_clean(self):
+        shell.call(self.clean, self.build_dir)
         self._restore_pkg_config_path()
 
     def _add_system_libs(self):
@@ -147,14 +147,14 @@ class Autotools (MakefilesBase):
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
 
-    def do_configure (self):
+    def do_configure(self):
         if self.config.host is not None:
             self.configure_tpl += ' --host=%(host)s'
         if self.config.build is not None:
             self.configure_tpl += ' --build=%(build)s'
         if self.config.target is not None:
             self.configure_tpl += ' --target=%(target)s'
-        MakefilesBase.do_configure (self)
+        MakefilesBase.do_configure(self)
 
 
 class CMake (MakefilesBase):

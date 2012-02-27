@@ -29,8 +29,8 @@ def init(git_dir):
     @param git_dir: path of the git repository
     @type git_dir: str
     '''
-    shell.call ('mkdir -p %s' % git_dir)
-    shell.call ('%s init .' % GIT, git_dir)
+    shell.call('mkdir -p %s' % git_dir)
+    shell.call('%s init .' % GIT, git_dir)
 
 
 def clean(git_dir):

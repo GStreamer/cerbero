@@ -23,7 +23,7 @@ from cerbero.utils import git, shell, _
 from cerbero.errors import FatalError
 
 
-def get_handler (recipe, config):
+def get_handler(recipe, config):
     '''
     Returns a L{cerbero.source.Source} for a L{cerbero.recipe.Recipe}
 
@@ -59,17 +59,17 @@ class Source (object):
             if hasattr(recipe, conf):
                 setattr(self, conf, getattr(recipe, conf))
 
-    def fetch (self):
+    def fetch(self):
         '''
         Fetch the sources
         '''
-        raise NotImplemented ("'fetch' must be implemented by subclasses")
+        raise NotImplemented("'fetch' must be implemented by subclasses")
 
-    def extract (self):
+    def extract(self):
         '''
         Extracts the sources
         '''
-        raise NotImplemented ("'extrat' must be implemented by subclasses")
+        raise NotImplemented("'extrat' must be implemented by subclasses")
 
 
 class GitCache (Source):
@@ -82,21 +82,21 @@ class GitCache (Source):
 
     _properties_keys = ['commit', 'remotes']
 
-    def __init__ (self, recipe, config):
-        Source.__init__ (self, recipe, config)
+    def __init__(self, recipe, config):
+        Source.__init__(self, recipe, config)
         if self.remotes is None:
             self.remotes = {'origin': '%s/%s' %
                             (config.git_root, recipe.name)}
         self.repo_dir = os.path.join(config.local_sources, recipe.name)
         self.build_dir = os.path.join(config.sources, recipe.package_name)
 
-    def fetch (self):
-        if not os.path.exists (self.repo_dir):
+    def fetch(self):
+        if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
         for remote, url in self.remotes.iteritems():
-            git.add_remote (self.repo_dir, remote, url)
+            git.add_remote(self.repo_dir, remote, url)
         # fetch remote branches
-        git.fetch (self.repo_dir, fail=False)
+        git.fetch(self.repo_dir, fail=False)
 
 
 class LocalTarball (GitCache):
@@ -116,26 +116,26 @@ class LocalTarball (GitCache):
         self.package_name = recipe.package_name
         self.unpack_dir = config.sources
 
-    def extract (self):
-        if not os.path.exists (self.build_dir):
-            os.mkdir (self.build_dir)
-        self._find_tarball ()
-        shell.unpack (self.tarball_path, self.unpack_dir)
+    def extract(self):
+        if not os.path.exists(self.build_dir):
+            os.mkdir(self.build_dir)
+        self._find_tarball()
+        shell.unpack(self.tarball_path, self.unpack_dir)
         # apply common patches
         self._apply_patches(self.repo_dir)
         # apply platform patches
         self._apply_patches(self.platform_patches_dir)
 
-    def _find_tarball (self):
+    def _find_tarball(self):
         tarball = [x for x in os.listdir(self.repo_dir) if
                    x.startswith(self.package_name)]
         if len(tarball) != 1:
-            raise FatalError (_("The local repository %s do not have a "
+            raise FatalError(_("The local repository %s do not have a "
                                 "valid tarball") % self.repo_dir)
         self.tarball_path = os.path.join(self.repo_dir, tarball[0])
 
-    def _apply_patches (self, patches_dir):
-        if not os.path.isdir (patches_dir):
+    def _apply_patches(self, patches_dir):
+        if not os.path.isdir(patches_dir):
             # FIXME: Add logs
             return
 
@@ -152,18 +152,18 @@ class Git (GitCache):
     Source handler for git repositories
     '''
 
-    def __init__ (self, recipe, config):
-        GitCache.__init__ (self, recipe, config)
+    def __init__(self, recipe, config):
+        GitCache.__init__(self, recipe, config)
         if self.commit is None:
             self.commit = 'origin/sdk-%s' % self.recipe.version
 
-    def extract (self):
-        if os.path.exists (self.build_dir):
+    def extract(self):
+        if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        if not os.path.exists (self.build_dir):
+        if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
         # checkout the current version
-        git.local_checkout (self.build_dir, self.repo_dir, self.commit)
+        git.local_checkout(self.build_dir, self.repo_dir, self.commit)
 
 
 class GitExtractedTarball(Git):

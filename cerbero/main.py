@@ -40,19 +40,19 @@ class Main(object):
         self.load_config()
         self.run_command()
 
-    def log_error (self, msg, print_usage=False):
+    def log_error(self, msg, print_usage=False):
         ''' Log an error and exit '''
         sys.stderr.write('%s\n' % msg)
         if print_usage:
             self.parser.print_usage()
         sys.exit(1)
 
-    def init_logging (self):
+    def init_logging(self):
         ''' Initialize logging '''
         logging.getLogger().setLevel(logging.INFO)
         logging.getLogger().addHandler(logging.StreamHandler())
 
-    def create_parser (self):
+    def create_parser(self):
         ''' Creates the arguments parser '''
         self.parser = argparse.ArgumentParser(description=_(description))
 
@@ -60,19 +60,19 @@ class Main(object):
         ''' Parse the command line arguments '''
         self.args = self.parser.parse_args(args)
 
-    def load_commands (self):
+    def load_commands(self):
         subparsers = self.parser.add_subparsers(help=_('sub-command help'),
                                                 dest='command')
         commands.load_commands(subparsers)
 
-    def load_config (self):
+    def load_config(self):
         ''' Load the configuration '''
         try:
             self.config = config.Config()
         except FatalError, exc:
             self.log_error(exc)
 
-    def run_command (self):
+    def run_command(self):
         command = self.args.command
         try:
             res = commands.run(command, self.config, self.args)

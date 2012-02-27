@@ -118,23 +118,23 @@ class Config (object):
         for e, v in env.iteritems():
             os.environ[e] = v
 
-    def _check_uninstalled (self):
+    def _check_uninstalled(self):
         self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
 
-    def _create_path (self, path):
+    def _create_path(self, path):
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
             except:
                 raise FatalError(_('directory (%s) can not be created') % path)
 
-    def _join_path (self, env, path):
+    def _join_path(self, env, path):
         if env not in os.environ:
             return path
         else:
             return "%s:%s" % (path, os.environ['PATH'])
 
-    def load_defaults (self):
+    def load_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
@@ -155,7 +155,7 @@ class Config (object):
         self.set_property('distro', distro)
         self.set_property('lib_suffix', '')
 
-    def set_property (self, name, value):
+    def set_property(self, name, value):
         if name not in self._known_properties:
-            raise ConfigurationError ('Unkown key %s' % name)
+            raise ConfigurationError('Unkown key %s' % name)
         setattr(self, name, value)

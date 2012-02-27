@@ -48,7 +48,7 @@ class Deps(Command):
                         cookbook.get_recipe(recipe_name).deps]
 
         if len(recipes) == 0:
-            logging.info (_('%s has 0 dependencies') % recipe_name)
+            logging.info(_('%s has 0 dependencies') % recipe_name)
             return
         for recipe in recipes:
             # Don't print the recipe we asked for

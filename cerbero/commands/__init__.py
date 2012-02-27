@@ -53,7 +53,7 @@ def register_command(command_class):
     _commands[command.name] = command
 
 
-def load_commands (subparsers):
+def load_commands(subparsers):
     import os
     commands_dir = os.path.abspath(os.path.dirname(__file__))
 

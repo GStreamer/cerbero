@@ -59,48 +59,48 @@ class Recipe(object):
         self.source = source.get_handler(self, config)
         self.build = build.get_handler(self, config)
 
-    def prepare (self):
+    def prepare(self):
         '''
         Can be overriden by subclasess to modify the recipe in function of
         the configuration, like modifying steps for a given platform
         '''
         pass
 
-    def fetch (self):
+    def fetch(self):
         '''
         Fetch the sources
         '''
         self.source.fetch()
 
-    def extract (self):
+    def extract(self):
         '''
         Extracts the sources
         '''
         self.source.extract()
 
-    def configure (self):
+    def configure(self):
         '''
         Configures the module
         '''
         self.build.do_configure()
 
-    def compile (self):
+    def compile(self):
         '''
         Compiles the module
         '''
         self.build.do_make()
 
-    def install (self):
+    def install(self):
         '''
         Installs the module
         '''
         self.build.do_install()
 
-    def post_install (self):
+    def post_install(self):
         '''
         Runs a custom post-install step
         '''
         pass
 
-    def _remove_steps (self, steps):
+    def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x[1] not in steps]
