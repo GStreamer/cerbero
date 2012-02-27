@@ -92,7 +92,7 @@ def add_remote(git_dir, name, url):
     @type git_dir: str
     @param name: name of the remote
     @type name: str
-    @param url: url of the remote 
+    @param url: url of the remote
     @type url: str
     '''
     shell.call('%s remote add %s %s' % (GIT, name, url), git_dir,

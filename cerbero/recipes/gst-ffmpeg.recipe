@@ -6,4 +6,3 @@ class Recipe(recipe.Recipe):
     version = '0.10.13'
     config_sh = 'sh autogen.sh'
     deps = ['gstreamer', 'gst-plugins-base']
-

@@ -30,7 +30,6 @@ COOKBOOK_NAME = 'cookbook'
 COOKBOOK_FILE = os.path.join(CONFIG_DIR, COOKBOOK_NAME)
 
 
-
 class RecipeStatus (object):
 
     def __init__ (self, steps=[], needs_build=True, mtime=time.time()):
@@ -47,8 +46,8 @@ class RecipeStatus (object):
 
 class CookBook (object):
 
-    recipes = {} # recipe_name -> recipe
-    status = {}   # recipe_name -> RecipeStatus
+    recipes = {}  # recipe_name -> recipe
+    status = {}    # recipe_name -> RecipeStatus
 
     _mtimes = {}
 
@@ -139,7 +138,7 @@ class CookBook (object):
             recipedep = self.get_recipe(recipe_name)
             if recipedep == None:
                 raise FatalError (_("Recipe %s has a uknown dependency %s"
-                                  % (recipe.name , recipe_name)))
+                                  % (recipe.name, recipe_name)))
             self._find_deps(recipedep, state, ordered)
         state[recipe] = 'processed'
         ordered.append(recipe)
@@ -172,7 +171,6 @@ class CookBook (object):
                     self.status[recipe.name].touch()
                     self.status[recipe.name] = RecipeStatus()
 
-
     def _load_recipe_from_file (self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
         try:
@@ -181,6 +179,7 @@ class CookBook (object):
             r.prepare()
             return r
         except Exception, ex:
-            import traceback; traceback.print_exc()
+            import traceback
+            traceback.print_exc()
             logging.warning("Error loading recipe %s" % ex)
         return None

@@ -47,6 +47,7 @@ class Command:
 # command_name -> command_instance
 _commands = {}
 
+
 def register_command(command_class):
     command = command_class()
     _commands[command.name] = command

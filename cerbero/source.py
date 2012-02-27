@@ -35,7 +35,6 @@ def get_handler (recipe, config):
     try:
         source = recipe.stype(recipe, config)
     except Exception:
-        import traceback; traceback.print_exc()
         raise FatalError(_("Could not find a source handler for %s") %
                          recipe.stype)
     return source
@@ -79,14 +78,15 @@ class GitCache (Source):
     '''
 
     remotes = None
-    commit =  None
+    commit = None
 
     _properties_keys = ['commit', 'remotes']
 
     def __init__ (self, recipe, config):
         Source.__init__ (self, recipe, config)
         if self.remotes is None:
-            self.remotes = {'origin': '%s/%s' % (config.git_root, recipe.name)}
+            self.remotes = {'origin': '%s/%s' %
+                            (config.git_root, recipe.name)}
         self.repo_dir = os.path.join(config.local_sources, recipe.name)
         self.build_dir = os.path.join(config.sources, recipe.package_name)
 
@@ -109,8 +109,10 @@ class LocalTarball (GitCache):
 
     def __init__(self, recipe, config):
         GitCache.__init__(self, recipe, config)
-        self.commit = "%s/%s-%s" % ('origin', self.BRANCH_PREFIX, recipe.version)
-        self.platform_patches_dir = os.path.join(self.repo_dir, config.platform)
+        self.commit = "%s/%s-%s" % ('origin',
+                                    self.BRANCH_PREFIX, recipe.version)
+        self.platform_patches_dir = os.path.join(self.repo_dir,
+                                                 config.platform)
         self.package_name = recipe.package_name
         self.unpack_dir = config.sources
 

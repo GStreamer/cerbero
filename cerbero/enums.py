@@ -21,7 +21,7 @@ class Platform:
     ''' Enumeration of supported platforms '''
     LINUX = 'linux'
     WINDOWS = 'windows'
-    DARWIN  = 'darwin'
+    DARWIN = 'darwin'
 
 
 class Architecture:

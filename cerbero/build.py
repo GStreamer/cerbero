@@ -34,7 +34,6 @@ def get_handler (recipe, config):
     try:
         build = recipe.btype(recipe, config)
     except Exception:
-        import traceback; traceback.print_exc()
         raise FatalError(_("Could not find a build handler for %s"),
                          recipe.btype)
     return build
@@ -93,8 +92,9 @@ class MakefilesBase (Build):
     clean = 'make clean'
     use_system_libs = False
 
-    _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl', 'configure_options',
-                        'make', 'make_install', 'clean', 'use_system_libs']
+    _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl',
+                        'configure_options', 'make', 'make_install',
+                        'clean', 'use_system_libs']
 
     def __init__(self, recipe, config):
         Build.__init__(self, recipe, config)
@@ -131,7 +131,7 @@ class MakefilesBase (Build):
             os.environ['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
                                                        self.pkgconfiglibdir)
             del os.environ['PKG_CONFIG_LIBDIR']
-    
+
     def _restore_pkg_config_path(self):
         if self.use_system_libs:
             os.environ['PKG_CONFIG_PATH'] = self.pkgconfigpath

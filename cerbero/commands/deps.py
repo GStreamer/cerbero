@@ -44,7 +44,7 @@ class Deps(Command):
         if all_deps:
             recipes = cookbook.list_recipe_deps(recipe_name)
         else:
-            recipes = [cookbook.get_recipe(x) for x in 
+            recipes = [cookbook.get_recipe(x) for x in
                         cookbook.get_recipe(recipe_name).deps]
 
         if len(recipes) == 0:

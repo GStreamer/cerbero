@@ -25,8 +25,6 @@ import platform as pplatform
 from cerbero.enums import Platform, Architecture, Distro
 from cerbero.errors import FatalError
 
-__all__=['ArgparseArgument', '_', 'N_']
-
 _ = gettext.gettext
 N_ = lambda x: x
 
@@ -79,7 +77,7 @@ def system_info():
         distro = pplatform.linux_distribution()[0]
         if distro in ['Ubuntu', 'Debian']:
             distro = Distro.DEBIAN
-        elif distro in ['RedHat', 'Fedora']: 
+        elif distro in ['RedHat', 'Fedora']:
             distro = Distro.REDHAT
     if platform == Platform.WINDOWS:
         distro = platform.win32_ver()[0]
@@ -93,4 +91,3 @@ def system_info():
         raise NotImplemented()
 
     return platform, arch, distro
-

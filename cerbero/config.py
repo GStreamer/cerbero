@@ -40,9 +40,9 @@ Distro = enums.Distro
 
 class Config (object):
 
-    _known_properties = [ 'platform', 'prefix', 'arch', 'recipes_dir', 'host',
-                          'build', 'target', 'sources', 'local_sources',
-                          'lib_suffix', 'git_root', 'distro']
+    _known_properties = ['platform', 'prefix', 'arch', 'recipes_dir',
+                         'host', 'build', 'target', 'sources',
+                         'local_sources', 'lib_suffix', 'git_root', 'distro']
 
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
@@ -50,7 +50,8 @@ class Config (object):
         self._check_uninstalled()
         self.load_defaults()
         if not os.path.exists(self.filename):
-            msg = _('Using default configuration because %s is missing') % self.filename
+            msg = _('Using default configuration because %s is missing') % \
+                    self.filename
             logging.warning(msg)
         else:
             self.parse(self.filename)
@@ -62,7 +63,8 @@ class Config (object):
             execfile(filename, config)
             self.__file__ = self.filename
         except:
-            raise FatalError(_('Could not include config file (%s)') % filename)
+            raise FatalError(_('Could not include config file (%s)') %
+                             filename)
         for key in self._known_properties:
             if key in config:
                 self.set_property(key, config[key])
@@ -138,7 +140,8 @@ class Config (object):
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
         if not self.uninstalled:
-            self.set_property('recipes_dir', os.path.join(cerbero_home, 'recipes'))
+            self.set_property('recipes_dir',
+                              os.path.join(cerbero_home, 'recipes'))
         else:
             self.set_property('recipes_dir',
                 os.path.join(os.path.dirname(__file__), 'recipes'))
@@ -151,7 +154,6 @@ class Config (object):
         self.set_property('arch', arch)
         self.set_property('distro', distro)
         self.set_property('lib_suffix', '')
-
 
     def set_property (self, name, value):
         if name not in self._known_properties:

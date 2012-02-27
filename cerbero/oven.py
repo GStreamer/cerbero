@@ -33,7 +33,7 @@ class Oven (object):
     @ivar force: Force the build of the recipe
     @type: bool
     @ivar no_deps: Ignore dependencies
-    @type: bool 
+    @type: bool
     '''
 
     STEP_TPL = '[(%s/%s) %s -> %s ]'
