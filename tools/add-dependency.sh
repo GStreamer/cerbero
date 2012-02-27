@@ -24,8 +24,9 @@ $EXTRACT $DEPENDENCY*
 mv $DEPENDENCY-$VERSION/* .
 rm *.tar.xz
 rm *.tar.gz
-rm *.tar.bz
+rm *.tar.bz2
 rm *.zip
+rm -rf $DEPENDENCY-$VERSION
 git add *
 git commit -m "Import upstream release $DEPENDENCY-$VERSION"
 git remote add origin $REMOTE_GIT_ROOT/$DEPENDENCY.git
