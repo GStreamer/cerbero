@@ -18,7 +18,6 @@
 
 import logging
 import os
-import traceback
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -42,7 +41,8 @@ class Config (object):
 
     _known_properties = ['platform', 'prefix', 'arch', 'recipes_dir',
                          'host', 'build', 'target', 'sources',
-                         'local_sources', 'lib_suffix', 'git_root', 'distro']
+                         'local_sources', 'lib_suffix', 'git_root', 'distro',
+                         'environ_dir']
 
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
@@ -56,9 +56,17 @@ class Config (object):
         else:
             self.parse(self.filename)
         self.setup_env()
+        self._load_platform_config()
 
-    def parse(self, filename):
-        config = {}
+    def parse(self, filename, reset=True):
+        if reset:
+            config = {}
+        else:
+            config = {}
+            for prop in self._known_properties:
+                if hasattr(self, prop):
+                    config[prop] = getattr(self, prop)
+
         try:
             execfile(filename, config)
             self.__file__ = self.filename
@@ -154,6 +162,11 @@ class Config (object):
         self.set_property('arch', arch)
         self.set_property('distro', distro)
         self.set_property('lib_suffix', '')
+        if not self.uninstalled:
+            self.set_property('environ_dir', os.path.join(CONFIG_DIR))
+        else:
+            self.set_property('environ_dir',
+                os.path.join(os.path.dirname(__file__), '..', 'config'))
 
     def set_property(self, name, value):
         if name not in self._known_properties:
