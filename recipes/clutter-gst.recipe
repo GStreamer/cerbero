@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'clutter-gst'
+    version = '1.4.6'
+    deps = ['clutter', 'gstreamer', 'gst-plugins-base']
