@@ -55,6 +55,8 @@ class Main(object):
     def create_parser(self):
         ''' Creates the arguments parser '''
         self.parser = argparse.ArgumentParser(description=_(description))
+        self.parser.add_argument('--config', type=str, default=None,
+                                 help=_('Configuration file used for the build'))
 
     def parse_arguments(self, args):
         ''' Parse the command line arguments '''
@@ -68,7 +70,7 @@ class Main(object):
     def load_config(self):
         ''' Load the configuration '''
         try:
-            self.config = config.Config()
+            self.config = config.Config(self.args.config)
         except FatalError, exc:
             self.log_error(exc)
 

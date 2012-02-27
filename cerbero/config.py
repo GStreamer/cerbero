@@ -44,7 +44,9 @@ class Config (object):
                          'local_sources', 'lib_suffix', 'git_root', 'distro',
                          'environ_dir']
 
-    def __init__(self, filename=USER_PROPS_FILE):
+    def __init__(self, filename=None):
+        if filename is None:
+            filename = USER_PROPS_FILE
         self.filename = filename
 
         self._check_uninstalled()
@@ -141,6 +143,16 @@ class Config (object):
             return path
         else:
             return "%s:%s" % (path, os.environ['PATH'])
+
+    def _load_platform_config(self):
+        platform_config = os.path.join(self.environ_dir, '%s.config' %
+                                       self.platform)
+        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
+                                   (self.platform, self.arch))
+
+        for config in [platform_config, arch_config]:
+            if os.path.exists(config):
+                self.parse(config, reset=False)
 
     def load_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
