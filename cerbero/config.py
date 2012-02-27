@@ -39,8 +39,8 @@ Distro = enums.Distro
 
 class Config (object):
 
-    _known_properties = ['platform', 'prefix', 'arch', 'recipes_dir',
-                         'host', 'build', 'target', 'sources',
+    _known_properties = ['platform', 'prefix', 'arch', 'target_arch',
+                         'recipes_dir', 'host', 'build', 'target', 'sources',
                          'local_sources', 'lib_suffix', 'git_root', 'distro',
                          'environ_dir']
 
@@ -146,9 +146,9 @@ class Config (object):
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
-                                       self.platform)
+                                       self.target)
         arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
-                                   (self.platform, self.arch))
+                                   (self.target, self.target_arch))
 
         for config in [platform_config, arch_config]:
             if os.path.exists(config):
@@ -172,6 +172,7 @@ class Config (object):
         platform, arch, distro = system_info()
         self.set_property('platform', platform)
         self.set_property('arch', arch)
+        self.set_property('target_arch', arch)
         self.set_property('distro', distro)
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
