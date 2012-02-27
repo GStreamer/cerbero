@@ -144,7 +144,7 @@ class Config (object):
                               os.path.join(cerbero_home, 'recipes'))
         else:
             self.set_property('recipes_dir',
-                os.path.join(os.path.dirname(__file__), 'recipes'))
+                os.path.join(os.path.dirname(__file__), '..', 'recipes'))
         self.set_property('git_root', GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)
