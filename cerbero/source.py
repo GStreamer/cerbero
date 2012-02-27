@@ -160,6 +160,13 @@ class Git (GitCache):
 
     def extract(self):
         if os.path.exists(self.build_dir):
+            try:
+                commit_hash = git.get_hash(self.repo_dir, self.commit)
+                checkout_hash = git.get_hash(self.repo_dir, 'HEAD')
+                if commit_hash == checkout_hash:
+                    return
+            except Exception:
+                pass
             shutil.rmtree(self.build_dir)
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)

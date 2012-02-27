@@ -77,7 +77,7 @@ def get_hash(git_dir, commit):
     @param commit: the commit to log
     @type commit: str
     '''
-    return shell.call('%s show -s --pretty=%%H %s' % (GIT, commit), git_dir)
+    return shell.check_call('%s show -s --pretty=%%H %s' % (GIT, commit), git_dir)
 
 
 def local_checkout(git_dir, local_git_dir, commit):
