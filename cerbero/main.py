@@ -23,9 +23,9 @@ import argparse
 import logging
 import traceback
 
-from cerbero import config, commands, utils
+from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError
-from cerbero.utils import _, N_
+from cerbero.utils import _, N_, user_is_root
 
 description = N_('Build and package a set of modules to distribute them in '\
                  'a SDK')
@@ -34,6 +34,9 @@ description = N_('Build and package a set of modules to distribute them in '\
 class Main(object):
 
     def __init__(self, args):
+        if user_is_root():
+            raise FatalError(_("cerbero can't be run as root"))
+
         self.init_logging()
         self.create_parser()
         self.load_commands()

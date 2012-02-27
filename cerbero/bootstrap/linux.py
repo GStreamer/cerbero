@@ -28,17 +28,13 @@ class UnixBootstraper (BootstraperBase):
     tool = ''
     packages = []
 
-    def __init__(self):
-        if not user_is_root():
-            raise FatalError(_("The bootstrap command must be run as root"))
-
     def start(self):
         shell.call('%s %s' % (self.tool, ' '.join(self.packages)))
 
 
 class DebianBootstraper (UnixBootstraper):
 
-    tool = 'apt-get install'
+    tool = 'sudo apt-get install'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
