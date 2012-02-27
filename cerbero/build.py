@@ -91,9 +91,10 @@ class MakefilesBase (Build):
     make = 'make'
     make_install = 'make install'
     clean = 'make clean'
+    use_system_libs = False
 
     _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl', 'configure_options',
-                        'make', 'make_install', 'clean']
+                        'make', 'make_install', 'clean', 'use_system_libs']
 
     def __init__(self, recipe, config):
         Build.__init__(self, recipe, config)
@@ -101,6 +102,7 @@ class MakefilesBase (Build):
                                       self.recipe.package_name)
 
     def do_configure (self):
+        self._add_system_libs()
         if self.autoreconf:
             shell.call (self.autoreconf_sh, self.build_dir)
         shell.call (self.configure_tpl % {'config-sh': self.config_sh,
@@ -120,6 +122,20 @@ class MakefilesBase (Build):
 
     def do_clean (self):
         shell.call (self.clean, self.build_dir)
+        self._restore_pkg_config_path()
+
+    def _add_system_libs(self):
+        if self.use_system_libs:
+            self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
+            self.pkgconfigpath = os.environ['PKG_CONFIG_PATH']
+            os.environ['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
+                                                       self.pkgconfiglibdir)
+            del os.environ['PKG_CONFIG_LIBDIR']
+    
+    def _restore_pkg_config_path(self):
+        if self.use_system_libs:
+            os.environ['PKG_CONFIG_PATH'] = self.pkgconfigpath
+            os.environ['PKG_CONFIG_LIBDIR'] = self.pkgconfiglibdir
 
 
 class Autotools (MakefilesBase):
@@ -130,7 +146,6 @@ class Autotools (MakefilesBase):
     config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
-
 
     def do_configure (self):
         if self.config.host is not None:
