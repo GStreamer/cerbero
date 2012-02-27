@@ -33,7 +33,7 @@ class Architecture:
 class Distro:
     ''' Enumeration of supported distributions '''
     DEBIAN = 'debian'
-    READ_HAT = 'red_hat'
+    REDHAT = 'red_hat'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
