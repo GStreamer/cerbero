@@ -39,6 +39,11 @@ class ArgparseArgument(object):
         parser.add_argument (self.name, **self.args)
 
 
+def user_is_root ():
+        ''' Check if the user running the process is root '''
+        return hasattr(os, 'getuid') and os.getuid() == 0
+
+
 def system_info():
     '''
     Get the sysem information.

@@ -22,7 +22,7 @@ import errno
 import argparse
 import logging
 
-from cerbero import config, commands
+from cerbero import config, commands, utils
 from cerbero.errors import UsageError, FatalError
 from cerbero.utils import _, N_
 
@@ -33,7 +33,6 @@ description = N_('Build and package a set of modules to distribute them in '\
 class Main(object):
 
     def __init__(self, args):
-        self.check_user_is_root()
         self.init_logging()
         self.create_parser()
         self.load_commands()
@@ -47,11 +46,6 @@ class Main(object):
         if print_usage:
             self.parser.print_usage()
         sys.exit(1)
-
-    def check_user_is_root (self):
-        ''' Check if the user running the process is root '''
-        if hasattr(os, 'getuid') and os.getuid() == 0:
-            self.log_error(_('You should not run jhbuild as root.\n'))
 
     def init_logging (self):
         ''' Initialize logging '''
