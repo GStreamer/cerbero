@@ -68,6 +68,7 @@ class Config (object):
         for key in self._known_properties:
             if key in config:
                 self.set_property(key, config[key])
+        self._update_prefix_paths(self.prefix)
 
     def setup_env(self):
         self._create_path(self.prefix)
@@ -134,17 +135,19 @@ class Config (object):
         else:
             return "%s:%s" % (path, os.environ['PATH'])
 
-    def load_defaults(self):
-        cerbero_home = os.path.expanduser('~/cerbero')
-        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
-        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
+    def _update_prefix_paths(self, home):
+        self.set_property('prefix', os.path.join(home, 'dist'))
+        self.set_property('sources', os.path.join(home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
         if not self.uninstalled:
-            self.set_property('recipes_dir',
-                              os.path.join(cerbero_home, 'recipes'))
+            self.set_property('recipes_dir', os.path.join(home, 'recipes'))
         else:
             self.set_property('recipes_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'recipes'))
+
+    def load_defaults(self):
+        cerbero_home = os.path.expanduser('~/cerbero')
+        self._update_prefix_paths(cerbero_home)
         self.set_property('git_root', GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)
