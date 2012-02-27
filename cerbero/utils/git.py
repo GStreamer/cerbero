@@ -78,6 +78,9 @@ def local_checkout(git_dir, local_git_dir, commit):
     @param commit: the commit to checkout
     @type commit: false
     '''
+    # reset to a commit in case it's the first checkout and the masterbranch is
+    # missing
+    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
     shell.call('%s branch build' % GIT, local_git_dir, fail=False)
     shell.call('%s checkout build' % GIT, local_git_dir)
     shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
