@@ -4,4 +4,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
     version = '2.24.1'
-    deps = ['jpeg', 'glib', 'libpng']
+    deps = ['jpeg', 'glib', 'libpng', 'tiff']
