@@ -7,3 +7,7 @@ class Recipe(recipe.Recipe):
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON'
     from cerbero.build import BuildType
     btype = BuildType.CMAKE
+
+    def prepare(self):
+        lib_suffix = self.config.use_lib64 and 'lib64' or 'lib'
+        self.build.configure_options += ' -DLIB_SUFFIX=%s' % lib_suffix
