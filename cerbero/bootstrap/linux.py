@@ -16,16 +16,11 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero import utils
+from cerbero.bootstrap import BootstraperBase
+from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Distro
 from cerbero.errors import FatalError
-from cerbero.utils import shell, _
-
-
-class BootstraperBase (object):
-
-    def start(self):
-        raise NotImplemented("'start' must be implemented by subclasess")
+from cerbero.utils import shell, _, user_is_root
 
 
 class UnixBootstraper (BootstraperBase):
@@ -34,7 +29,7 @@ class UnixBootstraper (BootstraperBase):
     packages = []
 
     def __init__(self):
-        if not utils.user_is_root():
+        if not user_is_root():
             raise FatalError(_("The bootstrap command must be run as root"))
 
     def start(self):
@@ -56,22 +51,6 @@ class RedHatBootstraper (UnixBootstraper):
     packages = ['']
 
 
-class WindowsBootstraper (BootstraperBase):
-    pass
-
-
-bootstrapers = {Distro.DEBIAN: DebianBootstraper,
-                Distro.REDHAT: RedHatBootstraper,
-                Distro.WINDOWS_7: WindowsBootstraper,
-                Distro.WINDOWS_VISTA: WindowsBootstraper,
-                Distro.WINDOWS_XP: WindowsBootstraper,
-                }
-
-
-class Bootstraper (object):
-
-    def __new__(klass, config):
-        distro = config.distro
-        if distro not in bootstrapers:
-            raise FatalError(_("Not bootstrapper for the distro %s" % distro))
-        return bootstrapers[distro]()
+def register_all():
+    register_bootstraper(Distro.DEBIAN, DebianBootstraper)
+    register_bootstraper(Distro.REDHAT, RedHatBootstraper)

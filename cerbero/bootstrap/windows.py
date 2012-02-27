@@ -17,20 +17,15 @@
 # Boston, MA 02111-1307, USA.
 
 
-from cerbero.commands import Command, register_command
-from cerbero.utils import N_
-from cerbero.bootstrap.bootstraper import Bootstraper
+from cerbero.bootstrap import BootstraperBase
+from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.config import Distro
 
 
-class Bootstrap(Command):
-    doc = N_('Bootstrap the build system installing all the dependencies')
-    name = 'bootstrap'
+class WindowsBootstraper(BootstraperBase):
+    pass
 
-    def __init__(self):
-        Command.__init__(self, [])
-
-    def run(self, config, args):
-        bootstraper = Bootstraper(config)
-        bootstraper.start()
-
-register_command(Bootstrap)
+def register_all():
+    register_bootstraper(Distro.WINDOWS_7, WindowsBootstraper)
+    register_bootstraper(Distro.WINDOWS_VISTA, WindowsBootstraper)
+    register_bootstraper(Distro.WINDOWS_XP, WindowsBootstraper)

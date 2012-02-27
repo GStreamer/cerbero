@@ -17,20 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 
-from cerbero.commands import Command, register_command
-from cerbero.utils import N_
-from cerbero.bootstrap.bootstraper import Bootstraper
+class BootstraperBase (object):
 
-
-class Bootstrap(Command):
-    doc = N_('Bootstrap the build system installing all the dependencies')
-    name = 'bootstrap'
-
-    def __init__(self):
-        Command.__init__(self, [])
-
-    def run(self, config, args):
-        bootstraper = Bootstraper(config)
-        bootstraper.start()
-
-register_command(Bootstrap)
+    def start(self):
+        raise NotImplemented("'start' must be implemented by subclasess")

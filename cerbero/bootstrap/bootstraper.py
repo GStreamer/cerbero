@@ -16,21 +16,29 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-
-from cerbero.commands import Command, register_command
-from cerbero.utils import N_
-from cerbero.bootstrap.bootstraper import Bootstraper
+from cerbero.errors import FatalError
+from cerbero.utils import  _
 
 
-class Bootstrap(Command):
-    doc = N_('Bootstrap the build system installing all the dependencies')
-    name = 'bootstrap'
+bootstrapers = {}
 
-    def __init__(self):
-        Command.__init__(self, [])
 
-    def run(self, config, args):
-        bootstraper = Bootstraper(config)
-        bootstraper.start()
+def register_bootstraper(distro, klass):
+    bootstrapers[distro] = klass
 
-register_command(Bootstrap)
+
+class Bootstraper (object):
+
+    def __new__(klass, config):
+        distro = config.distro
+        if distro not in bootstrapers:
+            raise FatalError(_("Not bootstrapper for the distro %s" % distro))
+        return bootstrapers[distro]()
+
+
+from cerbero.bootstrap import linux, windows
+
+linux.register_all()
+windows.register_all()
+
+
