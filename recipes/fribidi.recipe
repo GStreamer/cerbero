@@ -2,4 +2,4 @@ from cerbero import recipe
 
 class Recipe(recipe.Recipe):
     name = 'fribidi'
-    version = '0.10.9'
+    version = '0.19.2'
