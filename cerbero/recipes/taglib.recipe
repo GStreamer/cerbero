@@ -9,5 +9,4 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CMAKE
 
     def prepare(self):
-        lib_suffix = self.config.use_lib64 and 'lib64' or 'lib'
-        self.build.configure_options += ' -DLIB_SUFFIX=%s' % lib_suffix
+        self.build.configure_options += ' -DLIB_SUFFIX=%s' % self.config.lib_suffix

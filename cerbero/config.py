@@ -18,11 +18,11 @@
 
 import logging
 import os
-import sys
 import traceback
 
+from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.utils import _
+from cerbero.utils import _, system_info
 
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
@@ -32,27 +32,17 @@ USER_PROPS_FILE = os.path.join(CONFIG_DIR, PROPS_FILENAME)
 GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
-# Platforms
 
-
-class Platform:
-    ''' Enumeration of supported platforms '''
-    LINUX = 'linux'
-    WINDOWS = 'windows'
-    DARWIN  = 'darwin'
-
-
-class Architecture:
-    ''' Enumeration of supported acrchitectures '''
-    X86 = 'x86'
-    X86_64 = 'x86_64'
+Platform = enums.Platform
+Architecture = enums.Architecture
+Distro = enums.Distro
 
 
 class Config (object):
 
     _known_properties = [ 'platform', 'prefix', 'arch', 'recipes_dir', 'host',
                           'build', 'target', 'sources', 'local_sources',
-                          'use_lib64', 'git_root']
+                          'lib_suffix', 'git_root', 'distro']
 
     def __init__(self, filename=USER_PROPS_FILE):
         self.filename = filename
@@ -80,7 +70,7 @@ class Config (object):
     def setup_env(self):
         self._create_path(self.prefix)
 
-        libdir = os.path.join(self.prefix, self.use_lib64 and 'lib64' or 'lib')
+        libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
 
         # Get paths for environment variables
@@ -156,28 +146,12 @@ class Config (object):
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
-        platform = sys.platform
-        if platform.startswith('linux'):
-            self.set_property('platform', Platform.LINUX)
-        elif platform.startswith('win'):
-            self.set_property('platform', Platform.WINDOWS)
+        platform, arch, distro = system_info()
+        self.set_property('platform', platform)
+        self.set_property('arch', arch)
+        self.set_property('distro', distro)
+        self.set_property('lib_suffix', '')
 
-        self.get_system_arch()
-
-    def get_system_arch (self):
-        try:
-            uname = os.uname()
-            use_lib64 = (uname[0], uname[4]) in [ ('Linux', 'x86_64'),
-                                                       ('Linux', 'ppc64'),
-                                                       ('Linux', 's390x') ]
-
-            arch = 'x86_64'
-        except AttributeError:
-            # FIXME: Get windows arch
-            arch = 'i686'
-            use_lib64 = False
-        self.set_property ('use_lib64', use_lib64)
-        self.set_property ('arch', arch)
 
     def set_property (self, name, value):
         if name not in self._known_properties:
