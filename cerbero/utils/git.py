@@ -67,6 +67,19 @@ def checkout(git_dir, commit):
     return shell.call('%s reset --hard %s' % (GIT, commit), git_dir)
 
 
+def get_hash(git_dir, commit):
+    '''
+    Get a commit hash from a valid commit.
+    Can be used to check if a commit exists
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param commit: the commit to log
+    @type commit: str
+    '''
+    return shell.call('%s show -s format=%%H %s' % (GIT, commit), git_dir)
+
+
 def local_checkout(git_dir, local_git_dir, commit):
     '''
     Clone a repository for a given commit in a different location
