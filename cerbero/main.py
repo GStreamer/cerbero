@@ -21,6 +21,7 @@ import os
 import errno
 import argparse
 import logging
+import traceback
 
 from cerbero import config, commands, utils
 from cerbero.errors import UsageError, FatalError
@@ -72,6 +73,7 @@ class Main(object):
         try:
             self.config = config.Config(self.args.config)
         except FatalError, exc:
+            traceback.print_exc()
             self.log_error(exc)
 
     def run_command(self):
@@ -82,6 +84,7 @@ class Main(object):
             self.log_error('cerbero %s: %s\n' % (command, exc), True)
             sys.exit(1)
         except FatalError, exc:
+            traceback.print_exc()
             self.log_error('cerbero %s: %s\n' % (command, exc), True)
         except KeyboardInterrupt:
             self.log_error(_('Interrupted'))
