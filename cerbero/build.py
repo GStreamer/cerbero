@@ -18,25 +18,7 @@
 
 import os
 
-from cerbero.errors import FatalError
-from cerbero.utils import shell, _
-
-
-def get_handler(recipe, config):
-    '''
-    Returns a L{cerbero.build.Build} for a L{cerbero.recipe.Recipe}
-
-    @param config: cerbero's configuration
-    @type: L{cerbero.config.Config}
-    @param recipe: the recipe to fetch
-    @type: L{cerbero.recipe.Recipe}
-    '''
-    try:
-        build = recipe.btype(recipe, config)
-    except Exception:
-        raise FatalError(_("Could not find a build handler for %s"),
-                         recipe.btype)
-    return build
+from cerbero.utils import shell
 
 
 class Build (object):
@@ -51,26 +33,19 @@ class Build (object):
 
     _properties_keys = []
 
-    def __init__(self, recipe, config):
-        self.recipe = recipe
-        self.config = config
-        for conf in self._properties_keys:
-            if hasattr(recipe, conf):
-                setattr(self, conf, getattr(recipe, conf))
-
-    def do_configure(self):
+    def configure(self):
         '''
         Configures the module
         '''
         raise NotImplemented("'configure' must be implemented by subclasses")
 
-    def do_make(self):
+    def make(self):
         '''
         Compiles the module
         '''
         raise NotImplemented("'make' must be implemented by subclasses")
 
-    def do_install(self):
+    def install(self):
         '''
         Installs the module
         '''
@@ -94,20 +69,15 @@ class MakefilesBase (Build):
     use_system_libs = False
     srcdir = '.'
 
-    _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl',
-                        'configure_options', 'make', 'make_install',
-                        'clean', 'use_system_libs', 'srcdir',
-                        'force_configure']
+    def __init__(self):
+        Build.__init__(self)
+        self.make_dir = os.path.abspath(os.path.join(self.build_dir,
+                                                     self.srcdir))
 
-    def __init__(self, recipe, config):
-        Build.__init__(self, recipe, config)
-        self.build_dir = os.path.join(self.config.sources,
-                                      self.recipe.package_name, self.srcdir)
-
-    def do_configure(self):
+    def configure(self):
         self._add_system_libs()
         if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.build_dir)
+            shell.call(self.autoreconf_sh, self.make_dir)
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
@@ -115,16 +85,16 @@ class MakefilesBase (Build):
                                           'target': self.config.target,
                                           'build': self.config.build,
                                           'options': self.configure_options},
-                    self.build_dir)
+                    self.make_dir)
 
-    def do_make(self):
-        shell.call(self.make, self.build_dir)
+    def compile(self):
+        shell.call(self.make, self.make_dir)
 
-    def do_install(self):
-        shell.call(self.make_install, self.build_dir)
+    def install(self):
+        shell.call(self.make_install, self.make_dir)
 
-    def do_clean(self):
-        shell.call(self.clean, self.build_dir)
+    def clean(self):
+        shell.call(self.clean, self.make_dir)
         self._restore_pkg_config_path()
 
     def _add_system_libs(self):
@@ -150,11 +120,11 @@ class Autotools (MakefilesBase):
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
 
-    def do_configure(self):
+    def configure(self):
         # skip configure if we are already configured
-        if os.path.exists(os.path.join(self.build_dir, 'configure')) and\
-                os.path.exists(os.path.join(self.build_dir, 'Makefile')):
-            if not self.force_configure and not self.recipe.force:
+        if os.path.exists(os.path.join(self.make_dir, 'configure')) and\
+                os.path.exists(os.path.join(self.make_dir, 'Makefile')):
+            if not self.force_configure and not self.force:
                 return
         if self.config.host is not None:
             self.configure_tpl += ' --host=%(host)s'
@@ -162,7 +132,7 @@ class Autotools (MakefilesBase):
             self.configure_tpl += ' --build=%(build)s'
         if self.config.target is not None:
             self.configure_tpl += ' --target=%(target)s'
-        MakefilesBase.do_configure(self)
+        MakefilesBase.configure(self)
 
 
 class CMake (MakefilesBase):

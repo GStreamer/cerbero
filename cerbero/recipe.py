@@ -16,9 +16,21 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+
 from cerbero import build
 from cerbero import source
 from cerbero.utils import  N_
+
+
+class MetaRecipe(type):
+
+   def __new__(cls, name, bases, dct):
+       if dct.get('stype'):
+           bases = (dct['stype'], ) + bases
+       if dct.get('btype'):
+           bases = (dct['btype'], ) + bases
+       return super(MetaRecipe, cls).__new__(cls, name, bases, dct)
 
 
 class Recipe(object):
@@ -40,6 +52,8 @@ class Recipe(object):
     @type deps: list
     '''
 
+    __metaclass__ = MetaRecipe
+
     name = None
     version = None
     package_name = None
@@ -57,8 +71,12 @@ class Recipe(object):
         self.config = config
         if self.package_name is None:
             self.package_name = "%s-%s" % (self.name, self.version)
-        self.source = source.get_handler(self, config)
-        self.build = build.get_handler(self, config)
+        self.repo_dir = os.path.join(self.config.local_sources, self.package_name)
+        self.repo_dir = os.path.abspath(self.repo_dir)
+        self.build_dir = os.path.join(self.config.sources, self.package_name)
+        self.build_dir = os.path.abspath(self.build_dir)
+        self.stype.__init__(self)
+        self.btype.__init__(self)
 
     def prepare(self):
         '''
@@ -67,40 +85,7 @@ class Recipe(object):
         '''
         pass
 
-    def fetch(self):
-        '''
-        Fetch the sources
-        '''
-        self.source.fetch()
-
-    def extract(self):
-        '''
-        Extracts the sources
-        '''
-        self.source.extract()
-
-    def configure(self):
-        '''
-        Configures the module
-        '''
-        self.build.do_configure()
-
-    def compile(self):
-        '''
-        Compiles the module
-        '''
-        self.build.do_make()
-
-    def install(self):
-        '''
-        Installs the module
-        '''
-        self.build.do_install()
-
-    def post_install(self):
-        '''
-        Runs a custom post-install step
-        '''
+    def post_install (self):
         pass
 
     def _remove_steps(self, steps):

@@ -23,23 +23,6 @@ from cerbero.utils import git, shell, _
 from cerbero.errors import FatalError
 
 
-def get_handler(recipe, config):
-    '''
-    Returns a L{cerbero.source.Source} for a L{cerbero.recipe.Recipe}
-
-    @param config: cerbero's configuration
-    @type: L{cerbero.config.Config}
-    @param recipe: the recipe to fetch
-    @type: L{cerbero.recipe.Recipe}
-    '''
-    try:
-        source = recipe.stype(recipe, config)
-    except Exception:
-        raise FatalError(_("Could not find a source handler for %s") %
-                         recipe.stype)
-    return source
-
-
 class Source (object):
     '''
     Base class for sources handlers
@@ -49,15 +32,6 @@ class Source (object):
     @ivar config: cerbero's configuration
     @type config: L{cerbero.config.Config}
     '''
-
-    _properties_keys = []
-
-    def __init__(self, recipe, config):
-        self.recipe = recipe
-        self.config = config
-        for conf in self._properties_keys:
-            if hasattr(recipe, conf):
-                setattr(self, conf, getattr(recipe, conf))
 
     def fetch(self):
         '''
@@ -79,18 +53,21 @@ class GitCache (Source):
 
     remotes = None
     commit = None
+    supports_non_src_build = False
 
-    _properties_keys = ['commit', 'remotes']
-
-    def __init__(self, recipe, config):
-        Source.__init__(self, recipe, config)
+    def __init__(self):
+        Source.__init__(self)
         if self.remotes is None:
             self.remotes = {'origin': '%s/%s' %
-                            (config.git_root, recipe.name)}
-        self.repo_dir = os.path.join(config.local_sources, recipe.name)
-        self.build_dir = os.path.join(config.sources, recipe.package_name)
+                            (self.config.git_root, self.name)}
+        self.repo_dir = os.path.join(self.config.local_sources, self.name)
 
     def fetch(self):
+        if self.supports_non_src_build:
+            if not os.path.exists(self.repo_dir):
+                os.mkdir(self.repo_dir)
+            return
+
         if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
         for remote, url in self.remotes.iteritems():
@@ -108,14 +85,14 @@ class LocalTarball (GitCache):
 
     BRANCH_PREFIX = 'sdk'
 
-    def __init__(self, recipe, config):
-        GitCache.__init__(self, recipe, config)
+    def __init__(self):
+        GitCache.__init__(self)
         self.commit = "%s/%s-%s" % ('origin',
-                                    self.BRANCH_PREFIX, recipe.version)
+                                    self.BRANCH_PREFIX, self.version)
         self.platform_patches_dir = os.path.join(self.repo_dir,
-                                                 config.platform)
-        self.package_name = recipe.package_name
-        self.unpack_dir = config.sources
+                                                 self.config.platform)
+        self.package_name = self.package_name
+        self.unpack_dir = self.config.sources
 
     def extract(self):
         if not os.path.exists(self.build_dir):
@@ -153,16 +130,16 @@ class Git (GitCache):
     Source handler for git repositories
     '''
 
-    def __init__(self, recipe, config):
-        GitCache.__init__(self, recipe, config)
+    def __init__(self):
+        GitCache.__init__(self)
         if self.commit is None:
-            self.commit = 'origin/sdk-%s' % self.recipe.version
+            self.commit = 'origin/sdk-%s' % self.version
 
     def extract(self):
         if os.path.exists(self.build_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit)
-                checkout_hash = git.get_hash(self.repo_dir, 'HEAD')
+                checkout_hash = git.get_hash(self.build_dir, 'HEAD')
                 if commit_hash == checkout_hash:
                     return False
             except Exception:

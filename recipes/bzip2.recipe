@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
 
     def prepare (self):
         self._remove_steps(['configure'])
-        self.build.make_install = 'make install PREFIX=%s' % self.config.prefix
+        self.make_install = 'make install PREFIX=%s' % self.config.prefix
