@@ -38,10 +38,4 @@ git push origin upstream
 git push --tags
 
 chdir $curdir
-echo "from cerbero import recipe\n\
-\n\
-class Recipe(recipe.Recipe):\n\
-    name = '$DEPENDENCY'\n\
-    version = '$VERSION'\
-" > cerbero/recipes/$DEPENDENCY.recipe
-
+./cerbero-uninstalled add-recipe $DEPENDENCY $VERSION
