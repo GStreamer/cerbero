@@ -4,3 +4,4 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'freetype'
     version = '2.4.8'
+    configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
