@@ -78,6 +78,7 @@ class Config (object):
         for key in self._known_properties:
             if key in config:
                 self.set_property(key, config[key])
+        os.environ['CERBERO_PREFIX'] = self.prefix
 
     def setup_env(self):
         self._create_path(self.prefix)
