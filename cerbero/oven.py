@@ -68,6 +68,7 @@ class Oven (object):
             logging.info(_("%s already built") % recipe.name)
             return
 
+        recipe.force = self.force
         for desc, step in recipe._steps:
             logging.info(self.STEP_TPL % (count, total, recipe.name, step))
             # check if the current step needs to be done

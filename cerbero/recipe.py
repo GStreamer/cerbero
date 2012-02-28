@@ -47,6 +47,7 @@ class Recipe(object):
     stype = source.SourceType.GIT_TARBALL
     btype = build.BuildType.AUTOTOOLS
     deps = list()
+    force = False
     _steps = [(N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
               (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
               (N_('Install'), 'install'),
