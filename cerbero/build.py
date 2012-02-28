@@ -87,6 +87,7 @@ class MakefilesBase (Build):
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
+    force_configure = False
     make = 'make'
     make_install = 'make install'
     clean = 'make clean'
@@ -95,7 +96,8 @@ class MakefilesBase (Build):
 
     _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl',
                         'configure_options', 'make', 'make_install',
-                        'clean', 'use_system_libs', 'srcdir']
+                        'clean', 'use_system_libs', 'srcdir',
+                        'force_configure']
 
     def __init__(self, recipe, config):
         Build.__init__(self, recipe, config)
@@ -152,7 +154,8 @@ class Autotools (MakefilesBase):
         # skip configure if we are already configured
         if os.path.exists(os.path.join(self.build_dir, 'configure')) and\
                 os.path.exists(os.path.join(self.build_dir, 'Makefile')):
-            return
+            if not self.force_configure:
+                return
         if self.config.host is not None:
             self.configure_tpl += ' --host=%(host)s'
         if self.config.build is not None:

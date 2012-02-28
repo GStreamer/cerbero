@@ -4,6 +4,7 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'zlib'
     version = '1.2.6'
+    force_configure = True
 
     def prepare(self):
         from cerbero.config import Platform
