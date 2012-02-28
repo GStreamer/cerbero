@@ -91,15 +91,16 @@ class MakefilesBase (Build):
     make_install = 'make install'
     clean = 'make clean'
     use_system_libs = False
+    srcdir = '.'
 
     _properties_keys = ['autoreconf', 'config_sh', 'configure_tpl',
                         'configure_options', 'make', 'make_install',
-                        'clean', 'use_system_libs']
+                        'clean', 'use_system_libs', 'srcdir']
 
     def __init__(self, recipe, config):
         Build.__init__(self, recipe, config)
-        self.build_dir = os.path.join(config.sources,
-                                      self.recipe.package_name)
+        self.build_dir = os.path.join(self.config.sources,
+                                      self.recipe.package_name, self.srcdir)
 
     def do_configure(self):
         self._add_system_libs()
