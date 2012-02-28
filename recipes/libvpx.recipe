@@ -15,9 +15,9 @@ class Recipe(recipe.Recipe):
         else:
             arch = 'x86'
 
-        if self.config.target == Platform.DARWIN:
+        if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin11'
-        if self.config.target == Platform.WINDOWS:
+        if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 platform = 'win64'
             else:

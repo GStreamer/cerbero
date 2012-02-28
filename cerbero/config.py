@@ -39,10 +39,10 @@ Distro = enums.Distro
 
 class Config (object):
 
-    _known_properties = ['platform', 'prefix', 'arch', 'target_arch',
-                         'recipes_dir', 'host', 'build', 'target', 'sources',
-                         'local_sources', 'lib_suffix', 'git_root', 'distro',
-                         'environ_dir']
+    _properties = ['platform', 'target_platform', 'arch', 'target_arch',
+                   'prefix', 'recipes_dir', 'host', 'build', 'target',
+                   'sources', 'local_sources', 'lib_suffix', 'git_root',
+                   'distro', 'environ_dir', 'toolchain_prefix']
 
     def __init__(self, filename=None):
         if filename is None:
@@ -65,7 +65,7 @@ class Config (object):
             config = {}
         else:
             config = {}
-            for prop in self._known_properties:
+            for prop in self._properties:
                 if hasattr(self, prop):
                     config[prop] = getattr(self, prop)
 
@@ -75,7 +75,7 @@ class Config (object):
         except:
             raise FatalError(_('Could not include config file (%s)') %
                              filename)
-        for key in self._known_properties:
+        for key in self._properties:
             if key in config:
                 self.set_property(key, config[key])
         os.environ['CERBERO_PREFIX'] = self.prefix
@@ -147,9 +147,9 @@ class Config (object):
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
-                                       self.target)
+                                       self.target_platform)
         arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
-                                   (self.target, self.target_arch))
+                                   (self.target_platform, self.target_arch))
 
         for config in [platform_config, arch_config]:
             if os.path.exists(config):
@@ -172,6 +172,7 @@ class Config (object):
         self.set_property('target', None)
         platform, arch, distro = system_info()
         self.set_property('platform', platform)
+        self.set_property('target_platform', platform)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
@@ -183,6 +184,6 @@ class Config (object):
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
 
     def set_property(self, name, value):
-        if name not in self._known_properties:
+        if name not in self._properties:
             raise ConfigurationError('Unkown key %s' % name)
         setattr(self, name, value)
