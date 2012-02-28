@@ -172,6 +172,7 @@ class Git (GitCache):
             os.mkdir(self.build_dir)
         # checkout the current version
         git.local_checkout(self.build_dir, self.repo_dir, self.commit)
+        return True
 
 
 class GitExtractedTarball(Git):
