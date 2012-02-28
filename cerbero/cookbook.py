@@ -109,8 +109,9 @@ class CookBook (object):
     @staticmethod
     def load(config):
         status = {}
+        cache_file = config.cache_file or COOKBOOK_FILE
         try:
-            with open(COOKBOOK_FILE, 'rb') as f:
+            with open(cache_file, 'rb') as f:
                 status = pickle.load(f)
         except Exception:
             logging.warning(_("Could not recover status"))

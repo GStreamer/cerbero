@@ -42,7 +42,7 @@ class Config (object):
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
-                   'distro', 'environ_dir', 'toolchain_prefix']
+                   'distro', 'environ_dir', 'cache_file', 'toolchain_prefix']
 
     def __init__(self, filename=None):
         if filename is None:
@@ -157,6 +157,7 @@ class Config (object):
 
     def load_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
+        self.set_property('cache_file', None)
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
