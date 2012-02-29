@@ -5,3 +5,11 @@ class Recipe(recipe.Recipe):
     name = 'fontconfig'
     version = '2.8.0'
     deps = ['expat', 'freetype', 'libiconv']
+
+    def prepare(self):
+        from cerbero.config import Platform, Architecture
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86_64:
+                self.configure_options = '--with-arch=x86_64'
+            else:
+                self.configure_options = '--with-arch=i686'
