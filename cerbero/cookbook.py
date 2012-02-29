@@ -31,6 +31,18 @@ COOKBOOK_FILE = os.path.join(CONFIG_DIR, COOKBOOK_NAME)
 
 
 class RecipeStatus (object):
+    '''
+    Stores the current build status of a L{cerbero.recipe.Recipe}
+
+    @ivar steps: list of steps currently done
+    @type steps: list
+    @ivar needs_build: whether the recipe needs to be build or not
+                       True when all steps where successful
+    @type needs_build: bool
+    @ivar mtime: modification time of the recipe file, used to reset the
+                 state when the recipe was modified
+    @type mtime: float
+    '''
 
     def __init__(self, steps=[], needs_build=True, mtime=time.time()):
         self.steps = steps
@@ -38,6 +50,7 @@ class RecipeStatus (object):
         self.mtime = mtime
 
     def touch(self):
+        ''' Touches the recipe updating its modification time '''
         self.mtime = time.time()
 
     def __repr__(self):
@@ -45,6 +58,15 @@ class RecipeStatus (object):
 
 
 class CookBook (object):
+    '''
+    Stores a list of recipes and their build status saving it's state to a
+    cache file
+
+    @ivar recipes: dictionary with L{cerbero.recipe.Recipe} availables
+    @type recipes: dict
+    @ivar recipes: dictionary with the L{cerbero.cookbook.RecipeStatus}
+    @type recipes: dict
+    '''
 
     recipes = {}  # recipe_name -> recipe
     status = {}    # recipe_name -> RecipeStatus
@@ -58,29 +80,70 @@ class CookBook (object):
                              config.recipes_dir)
 
     def set_config(self, config):
+        '''
+        Set the configuration used
+
+        @param config: configuration used
+        @type config: L{cerbero.config.Config}
+        '''
         self._config = config
 
     def get_config(self):
+        '''
+        Gets the configuration used
+
+        @return: current configuration
+        @rtype: L{cerbero.config.Config}
+        '''
         return self._config
 
     def set_status(self, status):
+        '''
+        Sets the recipes status
+
+        @param status: the recipes status
+        @rtype: dict
+        '''
         self.status = status
 
     def update(self):
+        '''
+        Reloads the recipes list adn updates the cookbook
+        '''
         self._load_recipes()
         self.save()
 
     def get_recipes_list(self):
+        '''
+        Gets the list of recipes
+
+        @return: list of recipes
+        @rtype: list
+        '''
         recipes = self.recipes.values()
         recipes.sort(key=lambda x: x.name)
         return recipes
 
     def get_recipe(self, name):
+        '''
+        Gets a recipe from its name
+
+        @param name: name of the recipe
+        @type name: str
+        '''
         if name not in self.recipes:
             return None
         return self.recipes[name]
 
     def update_step_status(self, recipe_name, step):
+        '''
+        Updates the status of a recipe's step
+
+        @param recipe_name: name of the recipe
+        @type recipe: str
+        @param step: name of the step
+        @type step: str
+        '''
         status = self._recipe_status(recipe_name)
         status.steps.append(step)
         status.touch()
@@ -88,6 +151,14 @@ class CookBook (object):
         self.save()
 
     def update_build_status(self, recipe_name, needs_build):
+        '''
+        Updates the recipe's build status
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @param needs_build: wheter it's already built or not
+        @type needs_build: str
+        '''
         status = self._recipe_status(recipe_name)
         status.needs_build = needs_build
         status.touch()
@@ -95,12 +166,37 @@ class CookBook (object):
         self.save()
 
     def step_done(self, recipe_name, step):
+        '''
+        Marks a step as done
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @param step: name of the step
+        @type step: bool
+        '''
         return step in self._recipe_status(recipe_name).steps
 
     def recipe_needs_build(self, recipe_name):
+        '''
+        Whether a recipe needs to be build or not
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @return: True if the recipe needs to be build
+        @rtype: bool
+        '''
         return self._recipe_status(recipe_name).needs_build
 
     def list_recipe_deps(self, recipe_name):
+        '''
+        List the dependencies that needs to be built in the correct build
+        order for a recipe
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @return: list of L{cerbero.recipe.Recipe}
+        @rtype: list
+        '''
         recipe = self.get_recipe(recipe_name)
         if not recipe:
             raise FatalError(_('Recipe %s not found') % recipe_name)
