@@ -63,8 +63,6 @@ class MakefilesBase (Build):
     Base class for makefiles build systems like autotools and cmake
     '''
 
-    autoreconf = False
-    autoreconf_sh = 'autoreconf -f -i'
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
@@ -83,8 +81,6 @@ class MakefilesBase (Build):
 
     def configure(self):
         self._add_system_libs()
-        if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.make_dir)
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
@@ -127,6 +123,8 @@ class Autotools (MakefilesBase):
     Build handler for autotools project
     '''
 
+    autoreconf = False
+    autoreconf_sh = 'autoreconf -f -i'
     config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
@@ -139,6 +137,10 @@ class Autotools (MakefilesBase):
                 os.path.exists(os.path.join(self.make_dir, 'Makefile')):
             if not self.force_configure and not self.force:
                 return
+
+        if self.autoreconf:
+            shell.call(self.autoreconf_sh, self.make_dir)
+
         if self.add_host_build_target:
             if self.config.host is not None:
                 self.configure_tpl += ' --host=%(host)s'
