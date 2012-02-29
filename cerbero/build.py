@@ -119,6 +119,7 @@ class Autotools (MakefilesBase):
     config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
+    add_host_build_target = True
 
     def configure(self):
         # skip configure if we are already configured
@@ -126,12 +127,13 @@ class Autotools (MakefilesBase):
                 os.path.exists(os.path.join(self.make_dir, 'Makefile')):
             if not self.force_configure and not self.force:
                 return
-        if self.config.host is not None:
-            self.configure_tpl += ' --host=%(host)s'
-        if self.config.build is not None:
-            self.configure_tpl += ' --build=%(build)s'
-        if self.config.target is not None:
-            self.configure_tpl += ' --target=%(target)s'
+        if self.add_host_build_target:
+            if self.config.host is not None:
+                self.configure_tpl += ' --host=%(host)s'
+            if self.config.build is not None:
+                self.configure_tpl += ' --build=%(build)s'
+            if self.config.target is not None:
+                self.configure_tpl += ' --target=%(target)s'
         MakefilesBase.configure(self)
 
 
