@@ -7,3 +7,8 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
+
+    def prepare(self):
+        from cerbero.config import Platform
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' --disable-gtk-doc'
