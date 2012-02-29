@@ -4,6 +4,7 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'gettext'
     version = '0.18.1.1'
+    srcdir = 'gettext-runtime'
 
     def prepare (self):
         from cerbero.config import Platform
