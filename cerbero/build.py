@@ -51,6 +51,12 @@ class Build (object):
         '''
         raise NotImplemented("'install' must be implemented by subclasses")
 
+    def check(self):
+        '''
+        Runs any checks on the module
+        '''
+        pass
+
 
 class MakefilesBase (Build):
     '''
@@ -65,6 +71,7 @@ class MakefilesBase (Build):
     force_configure = False
     make = 'make'
     make_install = 'make install'
+    make_check = None
     clean = 'make clean'
     use_system_libs = False
     srcdir = '.'
@@ -97,6 +104,10 @@ class MakefilesBase (Build):
         shell.call(self.clean, self.make_dir)
         self._restore_pkg_config_path()
 
+    def check(self):
+        if self.make_check:
+            shell.call(self.make_check, self.build_dir)
+
     def _add_system_libs(self):
         if self.use_system_libs:
             self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
@@ -119,6 +130,7 @@ class Autotools (MakefilesBase):
     config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
+    make_check = 'make check'
     add_host_build_target = True
 
     def configure(self):

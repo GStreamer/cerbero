@@ -66,6 +66,7 @@ class Recipe(object):
               (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
               (N_('Install'), 'install'),
               (N_('Post Install'), 'post_install')]
+              # Not adding check as it's not automaticall done
 
     def __init__(self, config):
         self.config = config
