@@ -107,11 +107,17 @@ class CookBook (object):
         return self._find_deps(recipe)
 
     @staticmethod
+    def cache_file(config):
+        if config.cache_file is not None:
+            return os.path.join(CONFIG_DIR, config.cache_file)
+        else:
+            return COOKBOOK_FILE
+
+    @staticmethod
     def load(config):
         status = {}
-        cache_file = config.cache_file or COOKBOOK_FILE
         try:
-            with open(cache_file, 'rb') as f:
+            with open(CookBook.cache_file(config), 'rb') as f:
                 status = pickle.load(f)
         except Exception:
             logging.warning(_("Could not recover status"))
@@ -124,10 +130,11 @@ class CookBook (object):
         try:
             if not os.path.exists(CONFIG_DIR):
                 os.mkdir(CONFIG_DIR)
-            with open(COOKBOOK_FILE, 'wb') as f:
+            with open(CookBook.cache_file(self.get_config()), 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
             logging.warning(_("Could not cache the CookBook: %s"), ex)
+
 
     def _find_deps(self, recipe, state={}, ordered=[]):
         if state.get(recipe, 'clean') == 'processed':
