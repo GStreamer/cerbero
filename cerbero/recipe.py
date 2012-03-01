@@ -25,12 +25,16 @@ from cerbero.utils import  N_
 
 class MetaRecipe(type):
 
-   def __new__(cls, name, bases, dct):
-       if dct.get('stype'):
-           bases = (dct['stype'], ) + bases
-       if dct.get('btype'):
-           bases = (dct['btype'], ) + bases
-       return super(MetaRecipe, cls).__new__(cls, name, bases, dct)
+    def __new__(cls, name, bases, dct):
+        if bases[0] != object :
+            basedict = {'btype': None, 'stype': None}
+            basedict['stype'] = bases[0].stype
+            basedict['btype'] = bases[0].btype
+            for base in ['stype', 'btype']:
+                if dct.get(base):
+                    basedict[base] = dct[base]
+            bases = bases + tuple(basedict.values())
+        return type.__new__(cls, name, bases, dct)
 
 
 class Recipe(object):
