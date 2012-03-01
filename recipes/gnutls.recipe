@@ -5,3 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'gnutls'
     version = '3.0.14'
     deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
+
+    def prepare(self):
+        from cerbero.config import Platform
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options = ' --enable-threads=win32'
