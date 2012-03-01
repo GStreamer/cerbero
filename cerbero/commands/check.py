@@ -31,32 +31,43 @@ class Check(Command):
         Command.__init__(self,
             [ArgparseArgument('recipe', nargs=1,
                              help=_('name of the recipe to run checks on')),
+            ArgparseArgument('--recursive', action='store_true', default=False,
+                             help=_('Recursively run checks on dependencies')),
             ])
 
     def run(self, config, args):
         cookbook = CookBook.load(config)
         recipe_name = args.recipe[0]
+        recursive = args.recursive
 
         recipe = cookbook.get_recipe(recipe_name)
         if recipe is None:
             raise FatalError(_("Recipe %s not found" % recipe_name))
 
-        if cookbook.recipe_needs_build(recipe_name):
-            raise FatalError(_("Recipe %s is not build yet" % recipe_name))
+        if recursive:
+            ordered_recipes = cookbook.list_recipe_deps(recipe_name)
+        else:
+            ordered_recipes =  [recipe]
 
-        # call step function
-        stepfunc = None
-        try:
-            stepfunc = getattr(recipe, 'check')
-        except:
-            print 'no check step'
+        for recipe in ordered_recipes:
+            if cookbook.recipe_needs_build(recipe.name):
+                raise FatalError(_("Recipe %s is not built yet" % recipe.name))
 
-        if stepfunc:
+        for recipe in ordered_recipes:
+            # call step function
+            stepfunc = None
             try:
-                stepfunc()
-            except FatalError, e:
-                raise e
-            except Exception, ex:
-                raise FatalError(_("Error running checks: %s") % (ex))
+                stepfunc = getattr(recipe, 'check')
+            except:
+                print '%s has no check step, skipped' % recipe.name
+
+            if stepfunc:
+                try:
+                    stepfunc()
+                except FatalError, e:
+                    raise e
+                except Exception, ex:
+                    raise FatalError(_("Error running %s checks: %s") %
+                        (recipe.name, ex))
 
 register_command(Check)
