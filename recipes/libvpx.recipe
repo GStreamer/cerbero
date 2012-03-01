@@ -6,7 +6,9 @@ class Recipe(recipe.Recipe):
     version = 'v1.0.0'
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
-    configure_options = "--enable-pic"
+    configure_options = "--enable-pic --as=yasm "
+    add_host_build_target = False
+
 
     def prepare (self):
         from cerbero.config import Platform, Architecture
@@ -18,11 +20,13 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin11'
         if self.config.target_platform == Platform.WINDOWS:
-            if self.config.arch == Architecture.X86_64:
+            self.config_sh = 'LD=$CC ./configure'
+            if self.config.target_arch == Architecture.X86_64:
                 platform = 'win64'
             else:
                 platform = 'win32'
         else:
+            self.configure_options += '--enable_shared '
             platform = 'linux'
 
-        self.configure_options = '--target=%s-%s-gcc' % (arch, platform)
+        self.configure_options += '--target=%s-%s-gcc ' % (arch, platform)
