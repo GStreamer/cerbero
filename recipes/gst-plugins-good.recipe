@@ -8,3 +8,14 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
             'speex', 'libdv', 'gdk-pixbuf', 'libshout', 'libsoup',
             'orc', 'wavpack', 'flac', 'taglib']
+
+    def prepare(self):
+        from cerbero.config import Platform
+        if self.config.target_platform == Platform.WINDOWS:
+            # remove libdv dependency, which requires pthreads
+            self.deps.remove('libdv')
+            if self.config.platform == Platform.LINUX:
+                # remove taglib dependency, which cannot be crosscompiled
+                self.deps.remove('taglib')
+            self.configure_options += '--disable-aalib --disable-esd '\
+                '--disable-dv '
