@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-bad'
     version = '0.10.23'
     config_sh = 'sh autogen.sh'
+    configure_options = '--disable-introspection '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
             'faad2', 'libkate', 'libshout', 'libvpx']
@@ -14,4 +15,4 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                 '--disable-assrender --disable-cog --disable-sdl '\
-                '--disable-cdaudio '
+                '--disable-cdaudio --disable-gtk-doc'
