@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.10.36'
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-instrospection'
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2', 'gtk-doc']
 
     def prepare(self):

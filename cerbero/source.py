@@ -57,9 +57,9 @@ class GitCache (Source):
 
     def __init__(self):
         Source.__init__(self)
-        if self.remotes is None:
-            self.remotes = {'origin': '%s/%s' %
-                            (self.config.git_root, self.name)}
+        if not 'origin' in self.remotes:
+            self.remotes['origin'] = '%s/%s' % \
+                                     (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
 
     def fetch(self):
