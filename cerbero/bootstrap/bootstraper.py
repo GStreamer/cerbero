@@ -33,12 +33,10 @@ class Bootstraper (object):
         distro = config.distro
         if distro not in bootstrapers:
             raise FatalError(_("Not bootstrapper for the distro %s" % distro))
-        return bootstrapers[distro]()
+        return bootstrapers[distro](config)
 
 
 from cerbero.bootstrap import linux, windows
 
 linux.register_all()
 windows.register_all()
-
-
