@@ -23,6 +23,7 @@ import sys
 import os
 import tarfile
 import zipfile
+import tempfile
 
 from cerbero.utils import _
 from cerbero.errors import FatalError
@@ -57,7 +58,7 @@ def call(cmd, cmd_dir='.', fail=True):
     return ret
 
 
-def check_call(cmd, cmd_dir):
+def check_call(cmd, cmd_dir=None):
     try:
         ret = subprocess.check_output(shlex.split(cmd), cwd=cmd_dir)
     except Exception, ex:
@@ -98,3 +99,56 @@ def unpack(filepath, output_dir):
     if filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
+
+def download(url, destination=None, recursive=False):
+    '''
+    Downloads a file with wget
+
+    @param url: url to download
+    @type: str
+    @param destination: destination where the file will be saved
+    @type destination: str
+    '''
+    cmd = "wget %s " % url
+    path = None
+    if recursive:
+        cmd += "-r "
+        path = destination
+    else:
+        if destination is not None:
+            cmd += "-O %s " % destination
+
+    if not recursive and os.path.exists(destination):
+        logging.info("File %s already downloaded." % destination)
+    else:
+        logging.info("Downloading %s", url)
+        try:
+            call(cmd, path)
+        except FatalError, e:
+            os.remove (tarfile)
+            raise e
+
+
+def _splitter(string, base_url):
+    lines = string.split('\n')
+    for line in lines:
+        try:
+            yield "%s/%s" % (base_url, line.split(' ')[2])
+        except:
+            continue
+
+
+def recursive_download(url, destination):
+    '''
+    Recursive download for servers that don't return a list a url's but only the
+    index.html file
+    '''
+    raw_list = check_call('curl %s' % url)
+
+    with tempfile.NamedTemporaryFile() as f:
+        for path in _splitter(raw_list, url):
+            f.file.write(path + '\n')
+        if not os.path.exists(destination):
+            os.makedirs(destination)
+        call("wget -i %s %s" % (f.name, url), destination)
+
