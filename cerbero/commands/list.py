@@ -36,6 +36,6 @@ class List(Command):
         if len(recipes) == 0:
             logging.info(_("No recipes found"))
         for recipe in recipes:
-            logging.info("%s - %s" % (recipe.name, recipe.version))
+            print("%s - %s" % (recipe.name, recipe.version))
 
 register_command(List)
