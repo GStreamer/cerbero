@@ -3,5 +3,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'clutter'
     version = '1.8.4'
-    deps = ['glib']
+    deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True

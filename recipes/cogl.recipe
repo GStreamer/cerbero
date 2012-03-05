@@ -1,0 +1,5 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'cogl'
+    version = '1.8.2'
