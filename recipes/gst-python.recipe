@@ -6,4 +6,4 @@ class Recipe(recipe.Recipe):
     version = '0.10.22'
     config_sh = 'sh autogen.sh'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
-    deps = ['gstreamer', 'gst-plugins-base', 'glib']
+    deps = ['gstreamer', 'gst-plugins-base', 'glib', 'pygobject']
