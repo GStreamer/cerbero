@@ -60,7 +60,7 @@ class GitCache (Source):
         if self.remotes is None:
             self.remotes = {}
         if not 'origin' in self.remotes:
-            self.remotes['origin'] = '%s/%s' % \
+            self.remotes['origin'] = '%s/%s.git' % \
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
 

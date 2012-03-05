@@ -54,6 +54,8 @@ class Recipe(object):
     @type btype: L{cerbero.build.BuildType}
     @cvar deps: module dependencies
     @type deps: list
+    @cvar platform_deps: platform conditional depencies
+    @type platform_deps: dict
     '''
 
     __metaclass__ = MetaRecipe
@@ -65,6 +67,7 @@ class Recipe(object):
     stype = source.SourceType.GIT_TARBALL
     btype = build.BuildType.AUTOTOOLS
     deps = list()
+    platform_deps = {}
     force = False
     _steps = [(N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
               (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
@@ -92,6 +95,15 @@ class Recipe(object):
 
     def post_install (self):
         pass
+
+    def list_deps(self):
+        '''
+        List all dependencies including conditional depencies
+        '''
+        deps = self.deps or []
+        if self.config.target_platform in self.platform_deps:
+            deps.append(self.platform_deps[self.config.target_platform])
+        return deps
 
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x[1] not in steps]

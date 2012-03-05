@@ -45,7 +45,7 @@ class Deps(Command):
             recipes = cookbook.list_recipe_deps(recipe_name)
         else:
             recipes = [cookbook.get_recipe(x) for x in
-                        cookbook.get_recipe(recipe_name).deps]
+                        cookbook.get_recipe(recipe_name).list_deps()]
 
         if len(recipes) == 0:
             logging.info(_('%s has 0 dependencies') % recipe_name)

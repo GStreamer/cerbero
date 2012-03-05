@@ -238,7 +238,7 @@ class CookBook (object):
         if state.get(recipe, 'clean') == 'in-progress':
             raise FatalError(_("Dependency Cycle"))
         state[recipe] = 'in-progress'
-        for recipe_name in recipe.deps:
+        for recipe_name in recipe.list_deps():
             recipedep = self.get_recipe(recipe_name)
             if recipedep == None:
                 raise FatalError(_("Recipe %s has a uknown dependency %s"
