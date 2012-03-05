@@ -59,6 +59,8 @@ class Config (object):
             self.parse(self.filename)
         self.setup_env()
         self._load_platform_config()
+        self._create_path(self.local_sources)
+        self._create_path(self.sources)
 
     def parse(self, filename, reset=True):
         if reset:
