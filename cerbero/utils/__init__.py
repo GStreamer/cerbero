@@ -93,6 +93,10 @@ def system_info():
         else:
             raise FatalError("Windows version '%s' not supported" % distro)
     if platform == Platform.DARWIN:
-        raise NotImplemented()
+        ver = pplatform.mac_ver()[0]
+        if ver.startswith('10.7'):
+            distro = Distro.LION
+        else:
+            raise FatalError("Mac version %s not supported" % ver)
 
     return platform, arch, distro

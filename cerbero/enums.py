@@ -37,3 +37,4 @@ class Distro:
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
+    LION = 'lion'
