@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'zlib'
     version = '1.2.6'
     force_configure = True
+    add_host_build_target = False
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
