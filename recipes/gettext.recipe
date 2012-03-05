@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gettext'
     version = '0.18.1.1'
     srcdir = 'gettext-runtime'
+    autoreconf = True
 
     def prepare (self):
         if self.config.target_platform == Platform.WINDOWS:
