@@ -4,7 +4,7 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
     version = '2.8.0'
-    deps = ['expat', 'freetype', 'libiconv']
+    deps = ['expat', 'freetype', 'libiconv', 'zlib']
 
     def prepare(self):
         from cerbero.config import Platform, Architecture
