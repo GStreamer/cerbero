@@ -18,6 +18,7 @@
 
 import os
 import logging
+import tempfile
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
@@ -25,17 +26,33 @@ from cerbero.config import Architecture, Distro, Platform
 from cerbero.utils import shell, _
 
 
-MINGW_DOWNLOAD_SOURCE = \
-'''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Automated%20Builds/'''
-MINGW_TARBALL_TPL = "mingw-w32-bin_%s-%s_%s.tar.bz2"
-MINGW_W32_i686_LINUX = MINGW_TARBALL_TPL % ('i686', 'linux', 20111220)
-MINGW_W64_i686_LINUX = MINGW_TARBALL_TPL % ('x86_64', 'linux', 20111220)
-MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('i686', 'mingw', 20111220)
-MINGW_W64_i686_WINDOWS = MINGW_TARBALL_TPL % ('x86_64', 'mingw', 20111220)
+MINGW_DOWNLOAD_SOURCE = {'w32':
+'''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Automated%20Builds/''',
+                         'w64':
+'''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Automated%20Builds/'''}
+MINGW_TARBALL_TPL = "mingw-%s-bin_%s-%s_%s.tar.bz2"
+MINGW_W32_i686_LINUX = MINGW_TARBALL_TPL % ('w32', 'i686', 'linux', 20111220)
+MINGW_W64_x86_64_LINUX = MINGW_TARBALL_TPL % ('w64', 'x86_64', 'linux', 20111220)
+MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111220)
+MINGW_W64_x86_64_WINDOWS = MINGW_TARBALL_TPL % ('w64', 'x86_64', 'mingw', 20111220)
+MINGW_SYSROOT = {'w32':
+'''/buildslaves/mingw-w64/linux-x86_64-x86_64/build/build/root/x86_64-w64-mingw32/lib/../lib''',
+                 'w64':
+'''/buildslaves/mingw-w64/linux-x86-x86/build/build/root/i686-w64-mingw32/lib/../lib'''}
+W32_x86_64_LINUX_SYSROOT = "/opt/buildbot/linux-x86_64-x86/build/build/root/i686-w64-mingw32/lib"
+
 PTHREADS_URL = \
-'''ttp://downloads.sourceforge.net/project/mingw-w64/External%20binary%20packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
+'''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
+
 PYTHON_URL = \
 '''http://hg.python.org/cpython/raw-file/ccd16ad37544/Include'''
+
+
+DIRECTX_HEADERS = \
+"https://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk/mingw-w64-headers/direct-x/include"\
+
+
+SED = "sed -i 's/%s/%s/g' %s"
 
 
 class WindowsBootstraper(BootstraperBase):
@@ -48,11 +65,16 @@ class WindowsBootstraper(BootstraperBase):
         self.prefix = self.config.toolchain_prefix
         self.target_platform = self.config.target_platform
         self.target_arch = self.config.target_arch
+        if self.target_arch == Architecture.X86:
+            self.version = 'w32'
+        else:
+            self.version = 'w64'
         self.platform = self.config.platform
         self.check_dirs()
         self.install_mingw()
         self.install_directx_headers()
         self.install_python_headers()
+        self.install_pthreads()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -64,21 +86,27 @@ class WindowsBootstraper(BootstraperBase):
             if self.target_arch == Architecture.X86:
                 tarball = MINGW_W32_i686_LINUX
             if self.target_arch == Architecture.X86_64:
-                tarball = MINGW_W64_i686_LINUX
+                tarball = MINGW_W64_x86_64_LINUX
         if self.platform == Platform.WINDOWS:
             if self.target_arch == Architecture.X86:
                 tarball = MINGW_W32_i686_WINDOWS
             if self.target_arch == Architecture.X86_64:
-                tarball = MINGW_W64_i686_WINDOWS
+                tarball = MINGW_W64_x86_64_WINDOWS
 
         tarfile = os.path.join(self.prefix, tarball)
-        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
+        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE[self.version], tarball), tarfile)
         shell.unpack(tarfile, self.prefix)
+        self.fix_lib_paths()
 
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
-        shell.download(MINGW_DOWNLOAD_SOURCE, pthreadszip)
-        shell.unpack(pthreadszip)
+        shell.download(PTHREADS_URL, pthreadszip)
+        temp = tempfile.mkdtemp()
+        # real pthreads stuff is in a zip file inside the previous zip file
+        # under mingwxx/pthreads-xx.zip
+        shell.unpack(pthreadszip, temp)
+        shell.unpack(os.path.join(temp, 'pthreads-20100604', 'ming%s' % self.version,
+                                  'pthreads-%s.zip' % self.version), self.prefix)
 
     def install_python_headers(self):
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
@@ -91,10 +119,26 @@ class WindowsBootstraper(BootstraperBase):
         directx_headers = os.path.join(self.prefix, 'include', 'DirectX')
         logging.info(_("Installing DirectX headers"))
         cmd = "svn checkout --trust-server-cert --non-interactive "\
-              "--no-auth-cache "\
-              "https://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk/mingw-w64-headers/direct-x/include "\
-              "%s" % directx_headers
+              "--no-auth-cache %s %s" % (DIRECTX_HEADERS, directx_headers)
         shell.call(cmd)
+
+    def fix_lib_paths(self):
+
+        def escape(s):
+            return s.replace('/', '\\/')
+
+        orig_sysroot = MINGW_SYSROOT[self.version]
+        if self.target_arch == Architecture.X86:
+            new_sysroot = os.path.join(self.prefix, 'i686-w64-mingw32', 'lib')
+        else:
+            new_sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32', 'lib')
+        lib_path = new_sysroot
+
+        # Replace the old sysroot in all .la files
+        for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
+            sed_cmd = SED % (escape(orig_sysroot), escape(new_sysroot),
+                             os.path.abspath(os.path.join(lib_path, path)))
+            shell.call(sed_cmd)
 
 
 def register_all():
