@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'
+            self.config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'

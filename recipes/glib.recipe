@@ -12,6 +12,6 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            configure_options = '--with-libiconv=gnu'
+            self.configure_options = '--with-libiconv=gnu'
         else:
-            configure_options = '--with-libiconv=native'
+            self.configure_options = '--with-libiconv=native'
