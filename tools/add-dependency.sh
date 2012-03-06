@@ -2,30 +2,29 @@
 # usage:
 # sh tools/add-dependency.sh /home/andoni/cerbero/sources/local libtasn1 2.11 http://ftp.gnu.org/gnu/libtasn1/libtasn1-2.11.tar.gz "tar -xvzf"
 
+set -e
+
 PREFIX=$1
 DEPENDENCY=$2
 VERSION=$3
 LOCATION=$4
 EXTRACT=$5
 
-SSH_LOGIN="amorales@git.keema.collabora.co.uk"
+SSH_LOGIN="git.keema.collabora.co.uk"
 GIT_ROOT="/srv/git.keema.collabora.co.uk/git/gst-sdk"
-REMOTE_GIT_ROOT="ssh+git://amorales@git.keema.collabora.co.uk/git/gst-sdk"
+REMOTE_GIT_ROOT="ssh+git://git.keema.collabora.co.uk/git/gst-sdk"
 
 curdir=`pwd`
 
 ssh $SSH_LOGIN "git init --bare $GIT_ROOT/$DEPENDENCY.git"
 git init $PREFIX/$DEPENDENCY
-chdir $PREFIX/$DEPENDENCY
+cd $PREFIX/$DEPENDENCY
 wget $LOCATION
 
 $EXTRACT $DEPENDENCY*
 
 mv $DEPENDENCY-$VERSION/* .
-rm *.tar.xz
-rm *.tar.gz
-rm *.tar.bz2
-rm *.zip
+rm -f *.tar.xz *.tar.gz *.tar.bz2 *.zip
 rm -rf $DEPENDENCY-$VERSION
 git add *
 git commit -m "Import upstream release $DEPENDENCY-$VERSION"
@@ -37,5 +36,5 @@ git push origin sdk-$VERSION
 git push origin upstream
 git push --tags
 
-chdir $curdir
+cd $curdir
 ./cerbero-uninstalled add-recipe $DEPENDENCY $VERSION
