@@ -126,6 +126,7 @@ class Autotools (MakefilesBase):
     autoreconf = False
     autoreconf_sh = 'autoreconf -f -i'
     config_sh = './configure'
+    configure_options = ' --disable-maintainer-mode'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
     make_check = 'make check'
