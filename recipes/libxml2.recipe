@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options = '--without-python'
+            self.configure_options = '--without-python --without-threads'
