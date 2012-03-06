@@ -4,5 +4,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'nettle'
     version = '2.4'
-    configure_options = '--enable-shared --disable-static'
+    configure_options = '--enable-shared'
     deps = ['gmp']
