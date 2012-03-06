@@ -126,7 +126,6 @@ class Autotools (MakefilesBase):
     autoreconf = False
     autoreconf_sh = 'autoreconf -f -i'
     config_sh = './configure'
-    configure_options = ' --disable-maintainer-mode'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
     make_check = 'make check'
@@ -138,6 +137,11 @@ class Autotools (MakefilesBase):
                 os.path.exists(os.path.join(self.make_dir, 'Makefile')):
             if not self.force_configure and not self.force:
                 return
+
+        # Only use --disable-maintainer mode for real autotools based projects
+        if os.path.exists(os.path.join(self.make_dir, 'configure.in')) or\
+                os.path.exists(os.path.join(self.make_dir, 'configure.ac')):
+            self.configure_tpl += " --disable-maintainer-mode"
 
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
