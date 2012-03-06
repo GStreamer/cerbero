@@ -23,7 +23,7 @@ import time
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture
 from cerbero.build import BuildType
-from cerbero.sources import SourceType
+from cerbero.source import SourceType
 from cerbero.errors import FatalError
 from cerbero.utils import _
 
