@@ -9,4 +9,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.config_sh = '--with-included-modules'
+            self.configure_options += '--with-included-modules'
