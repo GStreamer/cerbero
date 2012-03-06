@@ -5,4 +5,5 @@ class Recipe(recipe.Recipe):
     name = 'flac'
     version = '1.2.1'
     config_sh = 'sh autogen.sh'
-    deps = ['libiconv']
+    from cerbero.config import Platform
+    platform_deps = { Platform.WINDOWS: ['libiconv'] }
