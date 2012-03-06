@@ -19,6 +19,7 @@
 
 __all__ = ['Command', 'register_command', 'run']
 
+import logging
 
 from cerbero.errors import FatalError
 from cerbero.utils import _
@@ -63,8 +64,8 @@ def load_commands(subparsers):
             continue
         try:
             __import__('cerbero.commands.%s' % name)
-        except ImportError:
-            pass
+        except ImportError, e:
+            logging.warning("Error importing command %s:\n %s", name, e)
     for command in _commands.values():
         command.add_parser(subparsers)
 
