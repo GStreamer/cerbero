@@ -4,7 +4,6 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'gmp'
     version = '5.0.4'
-    configure_options = '--enable-shared --disable-static '
 
     def prepare(self):
         from cerbero.config import Platform
