@@ -102,7 +102,7 @@ class Recipe(object):
         '''
         deps = self.deps or []
         if self.config.target_platform in self.platform_deps:
-            deps.append(self.platform_deps[self.config.target_platform])
+            deps.extend(self.platform_deps[self.config.target_platform])
         return deps
 
     def _remove_steps(self, steps):
