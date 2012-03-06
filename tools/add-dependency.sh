@@ -19,12 +19,12 @@ curdir=`pwd`
 ssh $SSH_LOGIN "git init --bare $GIT_ROOT/$DEPENDENCY.git"
 git init $PREFIX/$DEPENDENCY
 cd $PREFIX/$DEPENDENCY
-wget $LOCATION
+curl $LOCATION 2>&1 > $DEPENDENCY.tarball 
 
-$EXTRACT $DEPENDENCY*
+$EXTRACT $DEPENDENCY.tarball
 
 mv $DEPENDENCY-$VERSION/* .
-rm -f *.tar.xz *.tar.gz *.tar.bz2 *.zip
+rm $DEPENDENCY.tarball
 rm -rf $DEPENDENCY-$VERSION
 git add *
 git commit -m "Import upstream release $DEPENDENCY-$VERSION"
