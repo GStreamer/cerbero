@@ -12,7 +12,6 @@ class Recipe(recipe.Recipe):
             'orc', 'wavpack', 'flac', 'taglib']
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             # remove libdv dependency, which requires pthreads
             self.deps.remove('libdv')

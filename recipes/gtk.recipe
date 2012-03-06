@@ -7,6 +7,5 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             self.config_sh = './configure lt_cv_deplibs_check_method=pass_all'

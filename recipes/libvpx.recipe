@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
 
 
     def prepare (self):
-        from cerbero.config import Platform, Architecture
         if self.config.target_arch == Architecture.X86_64:
             arch = 'x86_64'
         else:

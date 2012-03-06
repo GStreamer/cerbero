@@ -4,10 +4,8 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'libxml2'
     version = '2.7.8'
-    from cerbero.config import Platform
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--without-python'

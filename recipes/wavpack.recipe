@@ -4,10 +4,8 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'wavpack'
     version = '4.60.1'
-    from cerbero.config import Platform
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
-	    config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'
+            config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'

@@ -7,6 +7,5 @@ class Recipe(recipe.Recipe):
     srcdir = 'gettext-runtime'
 
     def prepare (self):
-        from cerbero.config import Platform
         if self.config.platform == Platform.WINDOWS:
             self.build.configure_options = '--enable-threads=win32'

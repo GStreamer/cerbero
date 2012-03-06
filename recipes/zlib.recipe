@@ -7,7 +7,6 @@ class Recipe(recipe.Recipe):
     force_configure = True
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             self.make = 'PREFIX=%s- make -f win32/Makefile.gcc' % self.config.host
             self.make_install = 'make install -f win32/Makefile.gcc '\

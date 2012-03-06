@@ -4,7 +4,6 @@
 from cerbero import recipe
 
 class Recipe(recipe.Recipe):
-    from cerbero.config import Platform
     name = 'glib'
     version = '2.30.2'
     configure_sh = 'sh autogen.sh'
@@ -12,7 +11,6 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.WINDOWS: ['libiconv', 'gettext'] }
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             configure_options = '--with-libiconv=gnu'
         else:

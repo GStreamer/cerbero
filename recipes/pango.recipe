@@ -8,6 +8,5 @@ class Recipe(recipe.Recipe):
     deps = ['cairo', 'fontconfig', 'freetype']
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             self.config_sh = '--with-included-modules'

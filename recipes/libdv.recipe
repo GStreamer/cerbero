@@ -6,6 +6,5 @@ class Recipe(recipe.Recipe):
     version = '1.0.0'
 
     def prepare(self):
-        from cerbero.config import Platform
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = ' --disable-xv --without-x'
