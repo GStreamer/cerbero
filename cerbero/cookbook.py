@@ -243,7 +243,7 @@ class CookBook (object):
         for recipe_name in recipe.list_deps():
             recipedep = self.get_recipe(recipe_name)
             if recipedep == None:
-                raise FatalError(_("Recipe %s has a uknown dependency %s"
+                raise FatalError(_("Recipe %s has a unknown dependency %s"
                                  % (recipe.name, recipe_name)))
             self._find_deps(recipedep, state, ordered)
         state[recipe] = 'processed'
