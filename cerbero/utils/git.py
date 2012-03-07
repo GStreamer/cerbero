@@ -19,7 +19,7 @@
 from cerbero.utils import shell
 
 
-GIT = '/usr/bin/git'
+GIT = 'git'
 
 
 def init(git_dir):
