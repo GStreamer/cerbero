@@ -89,6 +89,7 @@ class MakefilesBase (Build):
                                           'build': self.config.build,
                                           'options': self.configure_options},
                     self.make_dir)
+        self._restore_pkg_config_path()
 
     def compile(self):
         shell.call(self.make, self.make_dir)
@@ -98,7 +99,6 @@ class MakefilesBase (Build):
 
     def clean(self):
         shell.call(self.make_clean, self.make_dir)
-        self._restore_pkg_config_path()
 
     def check(self):
         if self.make_check:
