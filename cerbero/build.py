@@ -70,7 +70,7 @@ class MakefilesBase (Build):
     make = 'make'
     make_install = 'make install'
     make_check = None
-    clean = 'make clean'
+    make_clean = 'make clean'
     use_system_libs = False
     srcdir = '.'
 
@@ -97,7 +97,7 @@ class MakefilesBase (Build):
         shell.call(self.make_install, self.make_dir)
 
     def clean(self):
-        shell.call(self.clean, self.make_dir)
+        shell.call(self.make_clean, self.make_dir)
         self._restore_pkg_config_path()
 
     def check(self):
