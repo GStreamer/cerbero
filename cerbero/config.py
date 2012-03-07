@@ -42,7 +42,8 @@ class Config (object):
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
-                   'distro', 'environ_dir', 'cache_file', 'toolchain_prefix']
+                   'distro', 'target_distro', 'environ_dir', 'cache_file',
+                   'toolchain_prefix']
 
     def __init__(self, filename=None):
         if filename is None:
@@ -179,6 +180,7 @@ class Config (object):
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
+        self.set_property('target_distro', distro)
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
             self.set_property('environ_dir', os.path.join(CONFIG_DIR))
