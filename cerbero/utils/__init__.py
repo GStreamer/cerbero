@@ -96,6 +96,8 @@ def system_info():
         ver = pplatform.mac_ver()[0]
         if ver.startswith('10.7'):
             distro = Distro.LION
+        elif ver.startswith('10.6'):
+            distro = Distro.LEOPARD
         else:
             raise FatalError("Mac version %s not supported" % ver)
 
