@@ -30,10 +30,16 @@ def register_bootstraper(distro, klass):
 class Bootstraper (object):
 
     def __new__(klass, config):
+        bs = {}
+        target_distro = config.target_distro
         distro = config.distro
-        if distro not in bootstrapers:
-            raise FatalError(_("Not bootstrapper for the distro %s" % distro))
-        return bootstrapers[distro](config)
+
+        for dist in [target_distro, distro]:
+            if dist not in bootstrapers:
+                raise FatalError(_("Not bootstrapper for the distro %s" % dist))
+            if dist not in bs:
+                bs[dist] = bootstrapers[dist](config)
+        return bs.values()
 
 
 from cerbero.bootstrap import linux, windows

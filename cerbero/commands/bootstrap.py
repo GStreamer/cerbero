@@ -30,7 +30,8 @@ class Bootstrap(Command):
         Command.__init__(self, [])
 
     def run(self, config, args):
-        bootstraper = Bootstraper(config)
-        bootstraper.start()
+        bootstrapers = Bootstraper(config)
+        for bootstraper in bootstrapers:
+            bootstraper.start()
 
 register_command(Bootstrap)
