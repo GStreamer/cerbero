@@ -5,3 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libtheora'
     version = '1.1.1'
     deps = ['libogg', 'libvorbis']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options = ' --disable-doc'
