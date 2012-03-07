@@ -39,7 +39,7 @@ class DebianBootstraper (UnixBootstraper):
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
                 'libpulse-dev', 'python2.7-dev', 'texinfo', 'gettext',
-                'build-essential', 'pkg-config']
+                'build-essential', 'pkg-config', 'doxygen']
 
 
 class RedHatBootstraper (UnixBootstraper):
