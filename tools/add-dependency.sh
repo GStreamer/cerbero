@@ -16,10 +16,12 @@ REMOTE_GIT_ROOT="ssh+git://git.keema.collabora.co.uk/git/gst-sdk"
 
 curdir=`pwd`
 
+
+set -x
 ssh $SSH_LOGIN "git init --bare $GIT_ROOT/$DEPENDENCY.git"
 git init $PREFIX/$DEPENDENCY
 cd $PREFIX/$DEPENDENCY
-curl $LOCATION 2>&1 > $DEPENDENCY.tarball 
+wget $LOCATION -O $DEPENDENCY.tarball 
 
 $EXTRACT $DEPENDENCY.tarball
 
