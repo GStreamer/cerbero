@@ -8,13 +8,13 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
-            'speex', 'libdv', 'gdk-pixbuf', 'libshout', 'libsoup',
+            'speex', 'gdk-pixbuf', 'libshout', 'libsoup',
             'orc', 'wavpack', 'flac', 'taglib']
+    platform_deps = {Platform.LINUX: ['libdv'],
+                     Platform.DARWIN: ['libdv']}
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            # remove libdv dependency, which requires pthreads
-            self.deps.remove('libdv')
             if self.config.platform == Platform.LINUX:
                 # remove taglib dependency, which cannot be crosscompiled
                 self.deps.remove('taglib')

@@ -15,3 +15,5 @@ class Recipe(recipe.Recipe):
             self.configure_options += \
                 '--disable-assrender --disable-cog --disable-sdl '\
                 '--disable-cdaudio --disable-gtk-doc'
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += ' --disable-gtk-doc'
