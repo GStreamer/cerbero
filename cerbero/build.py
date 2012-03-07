@@ -39,7 +39,7 @@ class Build (object):
         '''
         raise NotImplemented("'configure' must be implemented by subclasses")
 
-    def make(self):
+    def compile(self):
         '''
         Compiles the module
         '''
