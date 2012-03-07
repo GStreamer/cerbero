@@ -5,3 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'libgcrypt'
     version = '1.5.0'
     deps = ['libgpg-error']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86_64:
+                self.configure_options += ' --disable-asm'
