@@ -1,0 +1,35 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'docbook-xsl'
+    version = '1.76.1'
+
+    def prepare(self):
+        self._remove_steps(['configure', 'compile'])
+
+    def install(self):
+        import os
+        etc_catalog_path = os.path.join(self.config.prefix, 'etc', 'catalog.xml')
+        new_catalog_path = os.path.join(self.build_dir, 'catalog.xml')
+
+        def read_catalog(path):
+            try:
+                with open(path, 'r') as f:
+                    lines= f.readlines()
+                    if len(lines) != 0:
+                        lines = lines[2:-1]
+            except Exception, ex:
+                lines = ['']
+            return ''.join(lines)
+
+	etc_catalog_lines = read_catalog(etc_catalog_path)
+	new_catalog_lines = read_catalog(new_catalog_path)
+        if new_catalog_lines in etc_catalog_lines:
+            return
+        with open(etc_catalog_path, 'w') as f:
+            f.write("<?xml version='1.0'?>\n")
+            f.write('<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">\n')
+            f.write(etc_catalog_lines)
+            f.write("\n")
+            f.write(new_catalog_lines)
+            f.write("</catalog>")
