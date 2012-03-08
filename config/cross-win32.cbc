@@ -6,6 +6,6 @@ sources=os.path.expanduser('~/cerbero/sources/win32')
 toolchain_prefix=os.path.expanduser('~/mingw/w32')
 target_platform=Platform.WINDOWS
 target_arch=Architecture.X86
-target_distro=Distro.WINDOWS_7
+target_distro=Distro.WINDOWS
 cache_file='win32'
 build = 'x86_64-pc-linux'
