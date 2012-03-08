@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options = ' --disable-doc'
+            self.configure_options = ' --disable-spec --disable-doc'
