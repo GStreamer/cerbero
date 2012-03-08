@@ -14,3 +14,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
+        if self.config.target_platform == Platform.DARWIN:
+            self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
