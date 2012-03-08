@@ -11,5 +11,4 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-threads=win32'
         if self.config.target_platform == Platform.DARWIN:
-            if self.config.target_arch == Architecture.X86_64:
-                self.configure_options += ' --disable-hardware-acceleration'
+            self.configure_options += ' --disable-hardware-acceleration'
