@@ -26,9 +26,9 @@ from cerbero.utils import _, system_info
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
-PROPS_FILENAME = 'properties.%s' % CONFIG_EXT
-USER_PROPS_FILE = os.path.join(CONFIG_DIR, PROPS_FILENAME)
-GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
+DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
+DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
+DEFAULT_GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 
@@ -46,18 +46,25 @@ class Config (object):
                    'toolchain_prefix']
 
     def __init__(self, filename=None):
-        if filename is None:
-            filename = USER_PROPS_FILE
-        self.filename = filename
-
         self._check_uninstalled()
+        # First load the default configuration
         self.load_defaults()
-        if not os.path.exists(self.filename):
-            msg = _('Using default configuration because %s is missing') % \
+        # Next allow to override with our custom defaults
+        if os.path.exists(DEFAULT_CONFIG_FILE):
+            self.filename = DEFAULT_CONFIG_FILE
+            self.parse(DEFAULT_CONFIG_FILE)
+
+        # Finally if a config file is provided use it to override
+        if filename is not None:
+            if os.path.exists(filename):
+                self.filename = filename
+                self.parse(filename)
+            else:
+                msg = _('Using default configuration because %s is missing') % \
                     self.filename
-            logging.warning(msg)
-        else:
-            self.parse(self.filename)
+                logging.warning(msg)
+                self.filename = DEFAULT_CONFIG_FILE
+
         self.setup_env()
         self._load_platform_config()
         self._create_path(self.local_sources)
@@ -170,7 +177,7 @@ class Config (object):
         else:
             self.set_property('recipes_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'recipes'))
-        self.set_property('git_root', GIT_ROOT)
+        self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
