@@ -23,19 +23,31 @@ class Platform:
     WINDOWS = 'windows'
     DARWIN = 'darwin'
 
-
 class Architecture:
     ''' Enumeration of supported acrchitectures '''
     X86 = 'x86'
     X86_64 = 'x86_64'
 
-
 class Distro:
     ''' Enumeration of supported distributions '''
     DEBIAN = 'debian'
-    REDHAT = 'red_hat'
+    UBUNTU = 'ubuntu'
+    REDHAT = 'redhat'
+    SUSE = 'suse'
+    WINDOWS = 'windows'
+    OS_X = 'osx'
+
+class DistroVersion:
+    ''' Enumeration of supported distribution versions '''
+    DEBIAN_SQUEEZE = 'debian_squeeze'
+    DEBIAN_WHEEZY = 'debian_wheezy'
+    UBUNTU_LUCID = 'ubuntu_lucid'
+    UBUNTU_ONEIRIC = 'ubuntu_oneiric'
+    FEDORA_16 = 'fedora_16'
+    REDHAT_6 = 'redhat_6'
+    OPENSUSE_12_1 = 'opensuse_12_1'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
-    LION = 'lion'
-    LEOPARD = 'leopard'
+    OS_X_LION = 'osx_lion'
+    OS_X_LEOPARD = 'osx_leopard'

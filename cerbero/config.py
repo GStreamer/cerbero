@@ -43,7 +43,7 @@ class Config (object):
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
-                   'toolchain_prefix']
+                   'toolchain_prefix', 'distro_version', 'target_distro_version']
 
     def __init__(self, filename=None):
         self._check_uninstalled()
@@ -180,13 +180,15 @@ class Config (object):
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
-        platform, arch, distro = system_info()
+        platform, arch, distro, distro_version = system_info()
         self.set_property('platform', platform)
         self.set_property('target_platform', platform)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
         self.set_property('target_distro', distro)
+        self.set_property('distro_version', distro_version)
+        self.set_property('target_distro_version', distro_version)
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
             self.set_property('environ_dir', os.path.join(CONFIG_DIR))

@@ -23,24 +23,32 @@ from cerbero.utils import  _
 bootstrapers = {}
 
 
-def register_bootstraper(distro, klass):
-    bootstrapers[distro] = klass
+def register_bootstraper(distro, klass, distro_version=None):
+    if not distro in bootstrapers:
+        bootstrapers[distro] = {}
+    bootstrapers[distro][distro_version] = klass
 
 
 class Bootstraper (object):
-
     def __new__(klass, config):
         bs = {}
+        ret = []
         target_distro = config.target_distro
         distro = config.distro
+        target_distro_version = config.target_distro_version
+        distro_version = config.distro_version
 
-        for dist in [target_distro, distro]:
-            if dist not in bootstrapers:
-                raise FatalError(_("Not bootstrapper for the distro %s" % dist))
-            if dist not in bs:
-                bs[dist] = bootstrapers[dist](config)
+        for version in [None, target_distro_version, distro_version]:
+            for dist in [target_distro, distro]:
+                if dist not in bootstrapers:
+                    raise FatalError(_("Not bootstrapper for the distro %s" % dist))
+                if dist not in bs:
+                    bs[dist] = {}
+                
+                if version in bootstrapers[dist] and not version in bs[dist]:
+                    bs[dist][version] = bootstrapers[dist][version](config)
+                    ret.append(bs[dist][version])
         return bs.values()
-
 
 from cerbero.bootstrap import linux, windows
 

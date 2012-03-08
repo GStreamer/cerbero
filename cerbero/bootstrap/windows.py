@@ -142,6 +142,4 @@ class WindowsBootstraper(BootstraperBase):
 
 
 def register_all():
-    register_bootstraper(Distro.WINDOWS_7, WindowsBootstraper)
-    register_bootstraper(Distro.WINDOWS_VISTA, WindowsBootstraper)
-    register_bootstraper(Distro.WINDOWS_XP, WindowsBootstraper)
+    register_bootstraper(Distro.WINDOWS, WindowsBootstraper)
