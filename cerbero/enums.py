@@ -42,6 +42,7 @@ class DistroVersion:
     DEBIAN_SQUEEZE = 'debian_squeeze'
     DEBIAN_WHEEZY = 'debian_wheezy'
     UBUNTU_LUCID = 'ubuntu_lucid'
+    UBUNTU_NATTY = 'ubuntu_natty'
     UBUNTU_ONEIRIC = 'ubuntu_oneiric'
     FEDORA_16 = 'fedora_16'
     REDHAT_6 = 'redhat_6'
