@@ -81,7 +81,6 @@ class Config (object):
 
         try:
             execfile(filename, config)
-            self.__file__ = self.filename
         except:
             raise FatalError(_('Could not include config file (%s)') %
                              filename)
