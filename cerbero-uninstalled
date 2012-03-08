@@ -1,5 +1,11 @@
+#!/bin/sh
 export PYTHONPATH=$PYTHONPATH:`pwd`
 export CERBERO_UNINSTALLED=1
 
-python bin/cerbero "$@"
+if [ -z $PYTHON ]
+then
+  PYTHON=python
+fi
+
+$PYTHON bin/cerbero "$@"
 
