@@ -66,8 +66,8 @@ class Config (object):
                 logging.warning(msg)
                 self.filename = DEFAULT_CONFIG_FILE
 
-        self.setup_env()
         self._load_platform_config()
+        self.setup_env()
         self._create_path(self.local_sources)
         self._create_path(self.sources)
 
