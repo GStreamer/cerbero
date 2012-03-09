@@ -33,7 +33,7 @@ def register_bootstraper(distro, klass, distro_version=None):
 
 class Bootstraper (object):
     def __new__(klass, config):
-        bs = {}
+        bs = []
         target_distro = config.target_distro
         distro = config.distro
         target_distro_version = config.target_distro_version
@@ -60,10 +60,9 @@ class Bootstraper (object):
                                    % v))
                 v = None
 
-            if (d,v) not in bs:
-                bs[(d, v)] = bootstrapers[d][v](config)
+            bs.append(bootstrapers[d][v](config))
 
-        return bs.values()
+        return bs
 
 from cerbero.bootstrap import linux, windows
 
