@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import logging
+
 from cerbero.errors import FatalError
 from cerbero.utils import  _
 
@@ -32,22 +34,35 @@ def register_bootstraper(distro, klass, distro_version=None):
 class Bootstraper (object):
     def __new__(klass, config):
         bs = {}
-        ret = []
         target_distro = config.target_distro
         distro = config.distro
         target_distro_version = config.target_distro_version
         distro_version = config.distro_version
 
-        for version in [None, target_distro_version, distro_version]:
-            for dist in [target_distro, distro]:
-                if dist not in bootstrapers:
-                    raise FatalError(_("Not bootstrapper for the distro %s" % dist))
-                if dist not in bs:
-                    bs[dist] = {}
-                
-                if version in bootstrapers[dist] and not version in bs[dist]:
-                    bs[dist][version] = bootstrapers[dist][version](config)
-                    ret.append(bs[dist][version])
+        # Try to find a bootstraper for the distro-distro_version combination,
+        # both for the target host and the build one. For instance, when
+        # bootstraping to cross-compile for windows we also need to bootstrap
+        # the build host.
+        target = (target_distro, target_distro_version)
+        build = (distro, distro_version)
+
+        if target == build:
+            blist = [target]
+        else:
+            blist = [target, build]
+
+        for d, v in blist:
+            if d not in bootstrapers:
+                raise FatalError(_("No bootstrapper for the distro %s" % d))
+            if v not in bootstrapers[d]:
+                # Be tolerant with the distro version
+                logging.warning(_("No bootstrapper for the distro version %s"
+                                   % v))
+                v = None
+
+            if (d,v) not in bs:
+                bs[(d, v)] = bootstrapers[d][v](config)
+
         return bs.values()
 
 from cerbero.bootstrap import linux, windows
