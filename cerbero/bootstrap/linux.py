@@ -41,7 +41,8 @@ class DebianBootstraper (UnixBootstraper):
                 'libpulse-dev', 'python-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
-                'libxrender-dev']
+                'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
+                'libxdamage-dev', 'libxcomposite-dev']
 
 
 class RedHatBootstraper (UnixBootstraper):
