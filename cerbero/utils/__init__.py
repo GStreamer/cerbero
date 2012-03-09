@@ -78,7 +78,9 @@ def system_info():
         if arch == 'x86_64':
             arch = Architecture.X86_64
         elif arch.endswith('86'):
-            arch == Architecture.X86
+            arch = Architecture.X86
+        else:
+            raise FatalError(_("Architecture %s not supported") % arch)
 
     # Get the distro info
     if platform == Platform.LINUX:
