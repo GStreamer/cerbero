@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'libXtst'
+    version = '1.1.0'
+    use_system_libs = True
