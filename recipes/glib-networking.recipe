@@ -4,4 +4,5 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
     version = '2.30.2'
+    configure_options = "--without-ca-certificates"
     deps = ['glib', 'gnutls']
