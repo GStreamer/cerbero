@@ -31,7 +31,6 @@ class Architecture:
 class Distro:
     ''' Enumeration of supported distributions '''
     DEBIAN = 'debian'
-    UBUNTU = 'ubuntu'
     REDHAT = 'redhat'
     SUSE = 'suse'
     WINDOWS = 'windows'
