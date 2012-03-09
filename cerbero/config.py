@@ -179,7 +179,6 @@ class Config (object):
 
     def _load_last_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
-        import pdb; pdb.set_trace()
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
