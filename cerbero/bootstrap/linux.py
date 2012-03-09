@@ -38,7 +38,7 @@ class DebianBootstraper (UnixBootstraper):
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
-                'libpulse-dev', 'python2.7-dev', 'texinfo', 'gettext',
+                'libpulse-dev', 'python-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev']
 
