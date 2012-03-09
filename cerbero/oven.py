@@ -18,7 +18,7 @@
 
 import logging
 
-from cerbero.errors import FatalError
+from cerbero.errors import BuildStepError, FatalError
 from cerbero.utils import _
 
 
@@ -84,7 +84,7 @@ class Oven (object):
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
             except FatalError, e:
-                raise e
+                raise BuildStepError(e.msg)
             except Exception, ex:
                 raise FatalError(_("Error performing step %s: %s") % (step,
                                   ex))

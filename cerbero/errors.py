@@ -19,8 +19,10 @@
 
 class CerberoException(Exception):
     header = ''
+    msg = ''
 
     def __init__(self, msg=''):
+        self.msg = msg
         Exception.__init__(self, self.header + msg)
 
 

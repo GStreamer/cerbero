@@ -24,7 +24,7 @@ import logging
 import traceback
 
 from cerbero import config, commands
-from cerbero.errors import UsageError, FatalError
+from cerbero.errors import UsageError, FatalError, BuildStepError
 from cerbero.utils import _, N_, user_is_root
 
 description = N_('Build and package a set of modules to distribute them in '\
@@ -89,6 +89,8 @@ class Main(object):
         except FatalError, exc:
             traceback.print_exc()
             self.log_error('cerbero %s: %s\n' % (command, exc), True)
+        except BuildStepError, exc:
+            self.log_error('cerbero %s: %s\n' % (command, exc))
         except KeyboardInterrupt:
             self.log_error(_('Interrupted'))
         except IOError, e:
