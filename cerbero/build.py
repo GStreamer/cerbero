@@ -92,10 +92,14 @@ class MakefilesBase (Build):
         self._restore_pkg_config_path()
 
     def compile(self):
+        self._add_system_libs()
         shell.call(self.make, self.make_dir)
+        self._restore_pkg_config_path()
 
     def install(self):
+        self._add_system_libs()
         shell.call(self.make_install, self.make_dir)
+        self._restore_pkg_config_path()
 
     def clean(self):
         shell.call(self.make_clean, self.make_dir)
