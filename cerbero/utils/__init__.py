@@ -18,7 +18,10 @@
 
 import os
 import sys
-import sysconfig
+try:
+    import sysconfig
+except:
+    from distutils import sysconfig
 import gettext
 import platform as pplatform
 
