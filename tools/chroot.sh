@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 CHROOT_PREFIX=$1
 DISTRO=$2
 USER=$3
