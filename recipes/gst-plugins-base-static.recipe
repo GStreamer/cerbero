@@ -1,0 +1,18 @@
+from cerbero import recipe
+
+import os
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-base-static'
+    version = '0.10.36'
+    config_sh = 'sh autogen.sh'
+    configure_options = '--disable-introspection --disable-shared --enable-static '
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
+    deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
+            'libvorbis', 'zlib', 'orc']
+
+    def prepare(self):
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
+            self.configure_options += ' --disable-gtk-doc'
+        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')

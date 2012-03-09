@@ -1,0 +1,23 @@
+from cerbero import recipe
+
+import os
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-bad-static'
+    version = '0.10.23'
+    config_sh = 'sh autogen.sh'
+    configure_options = '--disable-introspection --disable-shared --enable-static '
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
+    deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
+            'faad2', 'libkate', 'libshout', 'libvpx']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += \
+                '--disable-assrender --disable-cog --disable-sdl '\
+                '--disable-cdaudio --disable-gtk-doc'
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += ' --disable-gtk-doc'
+
+        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-bad')

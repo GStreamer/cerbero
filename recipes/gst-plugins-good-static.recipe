@@ -1,0 +1,26 @@
+from cerbero import recipe
+
+import os
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-good-static'
+    version = '0.10.31'
+    config_sh = 'sh autogen.sh'
+    configure_options = '--disable-introspection --disable-shared --enable-static '
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
+    deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
+            'speex', 'gdk-pixbuf', 'libshout', 'libsoup',
+            'orc', 'wavpack', 'flac', 'taglib']
+    platform_deps = {Platform.LINUX: ['libdv'],
+                     Platform.DARWIN: ['libdv']}
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.platform == Platform.LINUX:
+                # remove taglib dependency, which cannot be crosscompiled
+                self.deps.remove('taglib')
+            self.configure_options += '--disable-aalib --disable-esd '\
+                '--disable-dv '
+
+        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')

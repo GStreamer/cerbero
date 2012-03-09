@@ -1,0 +1,15 @@
+from cerbero import recipe
+
+import os
+
+class Recipe(recipe.Recipe):
+    name = 'gst-ffmpeg-static'
+    version = '0.10.13'
+    config_sh = 'sh autogen.sh'
+    configure_options = '--disable-shared --enable-static '
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
+    deps = ['gstreamer', 'gst-plugins-base']
+
+    def prepare(self):
+        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
