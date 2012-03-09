@@ -80,7 +80,7 @@ def system_info():
     # Get the distro info
     if platform == Platform.LINUX:
         d = pplatform.linux_distribution()
-        if d[0] in ['Ubuntu', 'Debian']:
+        if d[0] in ['Ubuntu', 'debian']:
             distro = Distro.DEBIAN
             if d[2] == 'lucid':
                 distro_version = DistroVersion.UBUNTU_LUCID
@@ -88,9 +88,9 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_NATTY
             elif d[2] == 'oneiric':
                 distro_version = DistroVersion.UBUNTU_ONEIRIC
-            elif d[2] == 'squeeze':
+            elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
-            elif d[2] == 'wheezy':
+            elif d[1].startswith('7.') or d[1].startswith('wheezy'):
                 distro_version = DistroVersion.DEBIAN_WHEEZY
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
