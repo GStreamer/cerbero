@@ -8,5 +8,5 @@ class Recipe(recipe.Recipe):
     deps = ['libxml2', 'glib']
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX and self.config.target_distro_version not in [ DistroVersion.DEBIAN_WHEEZY, DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC ]:
+        if self.config.target_platform != Platform.LINUX or self.config.target_distro_version not in [ DistroVersion.DEBIAN_WHEEZY, DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC ]:
 	    deps += [ 'glib-networking' ]
