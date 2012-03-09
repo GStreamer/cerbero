@@ -153,6 +153,10 @@ def recursive_download(url, destination):
         call("wget -i %s %s" % (f.name, url), destination)
 
 # Copied from python 2.7
+# Copyright (c) 2003-2005 by Peter Astrand <astrand@lysator.liu.se>
+#
+# Licensed to PSF under a Contributor Agreement.
+# See http://www.python.org/2.4/license for licensing details.
 def check_output(*popenargs, **kwargs):
     r"""Run command with arguments and return its output as a byte string.
 
