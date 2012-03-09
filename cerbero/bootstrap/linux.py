@@ -40,7 +40,8 @@ class DebianBootstraper (UnixBootstraper):
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
                 'libpulse-dev', 'python-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
-                'libxext-dev', 'libxi-dev', 'x11proto-record-dev']
+                'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
+                'libxrender-dev']
 
 
 class RedHatBootstraper (UnixBootstraper):
