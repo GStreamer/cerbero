@@ -5,4 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'libsoup'
     version = '2.36.1'
     configure_options = '--without-gnome'
-    deps = ['glib-networking', 'libgcrypt', 'gnutls', 'libxml2', 'glib']
+    deps = ['libxml2', 'glib']
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX and self.config.target_distro_version not in [ DistroVersion.DEBIAN_WHEEZY, DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC ]:
+	    deps += [ 'glib-networking' ]
