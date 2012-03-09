@@ -48,25 +48,36 @@ class Config (object):
 
     def __init__(self, filename=None):
         self._check_uninstalled()
+
+        for a in self._properties:
+            setattr(self, a, None)
+
         # First load the default configuration
         self.load_defaults()
-        # Next allow to override with our custom defaults
-        if os.path.exists(DEFAULT_CONFIG_FILE):
-            self.filename = DEFAULT_CONFIG_FILE
-            self.parse(DEFAULT_CONFIG_FILE)
 
-        # Finally if a config file is provided use it to override
+        # Next parse the main configuration file
+        if os.path.exists(DEFAULT_CONFIG_FILE):
+            self.parse(DEFAULT_CONFIG_FILE)
+        else:
+            msg = _('Using default configuration because %s is missing') % \
+                    DEFAULT_CONFIG_FILE
+            logging.warning(msg)
+
+        # Next, if a config file is provided use it to override the settings
+        # from the main configuration file
         if filename is not None:
             if os.path.exists(filename):
-                self.filename = filename
                 self.parse(filename)
-            else:
-                msg = _('Using default configuration because %s is missing') % \
-                    self.filename
-                logging.warning(msg)
                 self.filename = DEFAULT_CONFIG_FILE
+            else:
+                raise FatalError(_("Configuration file %s doesn't exsits"))
 
+        # Next, load the platform configuration
         self._load_platform_config()
+
+        # Finally fill the missing gaps in the config
+        self._load_last_defaults()
+
         self.setup_env()
         self._create_path(self.local_sources)
         self._create_path(self.sources)
@@ -87,11 +98,12 @@ class Config (object):
                              filename)
         for key in self._properties:
             if key in config:
-                self.set_property(key, config[key])
-        os.environ['CERBERO_PREFIX'] = self.prefix
+                self.set_property(key, config[key], True)
 
     def setup_env(self):
         self._create_path(self.prefix)
+
+        os.environ['CERBERO_PREFIX'] = self.prefix
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
@@ -165,12 +177,19 @@ class Config (object):
             if os.path.exists(config):
                 self.parse(config, reset=False)
 
-    def load_defaults(self):
+    def _load_last_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
-        self.set_property('cache_file', None)
+        import pdb; pdb.set_trace()
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources', os.path.join(self.sources, 'local'))
+
+    def load_defaults(self):
+        cerbero_home = os.path.expanduser('~/cerbero')
+        self.set_property('cache_file', None)
+        self.set_property('prefix', None)
+        self.set_property('sources', None)
+        self.set_property('local_sources', None)
         if not self.uninstalled:
             self.set_property('recipes_dir',
                               os.path.join(cerbero_home, 'recipes'))
@@ -197,7 +216,8 @@ class Config (object):
             self.set_property('environ_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
 
-    def set_property(self, name, value):
+    def set_property(self, name, value, force=False):
         if name not in self._properties:
             raise ConfigurationError('Unkown key %s' % name)
-        setattr(self, name, value)
+        if force or getattr(self, name) is None:
+            setattr(self, name, value)
