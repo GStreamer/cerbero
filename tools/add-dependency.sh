@@ -18,7 +18,7 @@ curdir=`pwd`
 
 
 set -x
-ssh $SSH_LOGIN "git init --bare $GIT_ROOT/$DEPENDENCY.git"
+ssh $SSH_LOGIN "git init --shared --bare $GIT_ROOT/$DEPENDENCY.git"
 git init $PREFIX/$DEPENDENCY
 cd $PREFIX/$DEPENDENCY
 wget $LOCATION -O $DEPENDENCY.tarball 
