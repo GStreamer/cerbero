@@ -35,6 +35,7 @@ CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 Platform = enums.Platform
 Architecture = enums.Architecture
 Distro = enums.Distro
+DistroVersion = enums.DistroVersion
 
 
 class Config (object):

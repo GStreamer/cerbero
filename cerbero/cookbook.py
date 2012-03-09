@@ -21,7 +21,7 @@ import logging
 import pickle
 import time
 
-from cerbero.config import CONFIG_DIR, Platform, Architecture
+from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro, DistroVersion
 from cerbero.build import BuildType
 from cerbero.source import SourceType
 from cerbero.errors import FatalError
@@ -281,7 +281,8 @@ class CookBook (object):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
-                 'BuildType': BuildType, 'SourceType': SourceType}
+                 'BuildType': BuildType, 'SourceType': SourceType,
+                 'Distro': Distro, 'DistroVersion': DistroVersion}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.prepare()
