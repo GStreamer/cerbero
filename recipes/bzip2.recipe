@@ -4,8 +4,14 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'bzip2'
     version = '1.0.6'
-    make = 'make -f Makefile-libbz2_so'
 
     def prepare (self):
         self._remove_steps(['configure'])
-        self.make_install = 'make install PREFIX=%s' % self.config.prefix
+        if self.config.target_platform == Platform.DARWIN:
+            shared_makefile = 'Makefile-libbz2_dylib'
+        elif self.config.target_platform == Platform.WINDOWS:
+            shared_makefile = 'Makefile-libbz2_dll'
+        else:
+            shared_makefile = 'Makefile-libbz2_so'
+        self.make = 'make; make -f %s' % shared_makefile 
+        self.make_install = 'make install PREFIX=%s; make -f %s install PREFIX=%s' % (self.config.prefix, shared_makefile, self.config.prefix)
