@@ -79,6 +79,8 @@ def system_info():
             arch = Architecture.X86_64
         elif arch.endswith('86'):
             arch = Architecture.X86
+        elif arch == "Power Macintosh":
+            arch = Architecture.PPC
         else:
             raise FatalError(_("Architecture %s not supported") % arch)
 
@@ -120,9 +122,13 @@ def system_info():
     elif platform == Platform.DARWIN:
         distro = Distro.OS_X
         ver = pplatform.mac_ver()[0]
-        if ver.startswith('10.7'):
+        if ver.startswith('10.8'):
+            distro_version = DistroVersion.OS_X_MOUNTAIN_LION
+        elif ver.startswith('10.7'):
             distro_version = DistroVersion.OS_X_LION
         elif ver.startswith('10.6'):
+            distro_version = DistroVersion.OS_X_SNOW_LEOPARD
+        elif ver.startswith('10.5'):
             distro_version = DistroVersion.OS_X_LEOPARD
         else:
             raise FatalError("Mac version %s not supported" % ver)
