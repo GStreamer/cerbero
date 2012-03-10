@@ -27,6 +27,7 @@ class Architecture:
     ''' Enumeration of supported acrchitectures '''
     X86 = 'x86'
     X86_64 = 'x86_64'
+    PPC = 'ppc'
 
 class Distro:
     ''' Enumeration of supported distributions '''
@@ -49,5 +50,7 @@ class DistroVersion:
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
+    OS_X_MOUNTAIN_LION = 'osx_mountain_lion'
     OS_X_LION = 'osx_lion'
+    OS_X_SNOW_LEOPARD = 'osx_snow_leopard'
     OS_X_LEOPARD = 'osx_leopard'
