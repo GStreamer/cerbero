@@ -181,7 +181,7 @@ class Config (object):
         cerbero_home = os.path.expanduser('~/cerbero')
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
-        self.set_property('local_sources', os.path.join(self.sources, 'local'))
+        self.set_property('local_sources', os.path.join(cerbero_home, 'sources', 'local'))
 
     def load_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
