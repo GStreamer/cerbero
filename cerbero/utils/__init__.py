@@ -115,7 +115,7 @@ def system_info():
             raise FatalError("Distribution '%s' not supported" % str(d))
     elif platform == Platform.WINDOWS:
         distro = Distro.WINDOWS
-        win32_ver = platform.win32_ver()
+        win32_ver = pplatform.win32_ver()[0]
         dmap = {'xp': DistroVersion.WINDOWS_XP, 'vista': DistroVersion.WINDOWS_VISTA, '7': DistroVersion.WINDOWS_7}
         if win32_ver in dmap:
             distro_version = dmap[win32_ver]
