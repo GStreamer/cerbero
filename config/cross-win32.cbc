@@ -1,5 +1,5 @@
 import os
-from cerbero.config import Platform, Architecture, Distro
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
 
 prefix=os.path.expanduser('~/cerbero/windows-x86')
 sources=os.path.expanduser('~/cerbero/sources/win32')
@@ -7,5 +7,6 @@ toolchain_prefix=os.path.expanduser('~/mingw/w32')
 target_platform=Platform.WINDOWS
 target_arch=Architecture.X86
 target_distro=Distro.WINDOWS
+target_distro_version=DistroVersion.WINDOWS_7
 cache_file='win32'
 build = 'x86_64-pc-linux'
