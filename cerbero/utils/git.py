@@ -30,7 +30,7 @@ def init(git_dir):
     @type git_dir: str
     '''
     shell.call('mkdir -p %s' % git_dir)
-    shell.call('%s init .' % GIT, git_dir)
+    shell.call('%s init' % GIT, git_dir)
 
 
 def clean(git_dir):
