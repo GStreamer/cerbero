@@ -25,12 +25,16 @@ import tarfile
 import zipfile
 import tempfile
 
-from cerbero.utils import _
+from cerbero.config import Platform
+from cerbero.utils import _, path, system_info
 from cerbero.errors import FatalError
 
 
 PATCH = 'patch'
 TAR = 'tar'
+
+
+PLATFORM = system_info()[0]
 
 
 def call(cmd, cmd_dir='.', fail=True):
@@ -46,10 +50,21 @@ def call(cmd, cmd_dir='.', fail=True):
     '''
     try:
         logging.info("Running command '%s'" % cmd)
+        shell = True
+        if PLATFORM == Platform.WINDOWS:
+            # windows do not understand ./
+            if cmd.startswith('./'):
+                cmd = cmd[2:]
+            # run all processes through sh.exe to get scripts working
+            cmd = '%s "%s"' % ('sh -c', cmd)
+            # replace backward slashes with forward slashes in paths
+            cmd = cmd.replace('\\', '/')
+            # Disable shell which uses cmd.exe
+            shell = False
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
                                     stderr=subprocess.STDOUT,
                                     stdout=sys.stdout, env=os.environ.copy(),
-                                    shell=True)
+                                    shell=shell)
     except subprocess.CalledProcessError:
         if fail:
             raise FatalError(_("Error running command: %s") % cmd)
