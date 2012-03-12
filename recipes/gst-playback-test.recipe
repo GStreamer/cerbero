@@ -1,0 +1,9 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'gst-playback-test'
+    version = '0.0.1'
+    config_sh = 'sh autogen.sh'
+    remotes = {'upstream': 'git://git.collabora.co.uk/git/user/slomo/gst-playback-test.git'}
+    deps = ['glib', 'gstreamer', 'gtk+']
+
