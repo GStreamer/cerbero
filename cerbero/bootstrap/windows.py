@@ -17,13 +17,13 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import logging
 import tempfile
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Architecture, Distro, Platform
 from cerbero.utils import shell, _
+from cerbero.utils import messages as m
 
 
 MINGW_DOWNLOAD_SOURCE = {'w32':
@@ -112,12 +112,12 @@ class WindowsBootstraper(BootstraperBase):
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
         if not os.path.exists(python_headers):
             os.makedirs(python_headers)
-        logging.info(_("Installing Python headers"))
+        m.action(_("Installing Python headers"))
         shell.recursive_download(PYTHON_URL, python_headers)
 
     def install_directx_headers(self):
         directx_headers = os.path.join(self.prefix, 'include', 'DirectX')
-        logging.info(_("Installing DirectX headers"))
+        m.action(_("Installing DirectX headers"))
         cmd = "svn checkout --trust-server-cert --non-interactive "\
               "--no-auth-cache %s %s" % (DIRECTX_HEADERS, directx_headers)
         shell.call(cmd)

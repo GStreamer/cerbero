@@ -26,6 +26,7 @@ from cerbero.build import BuildType
 from cerbero.source import SourceType
 from cerbero.errors import FatalError
 from cerbero.utils import _
+from cerbero.utils import messages as m
 
 
 COOKBOOK_NAME = 'cookbook'
@@ -218,7 +219,7 @@ class CookBook (object):
             with open(CookBook.cache_file(config), 'rb') as f:
                 status = pickle.load(f)
         except Exception:
-            logging.warning(_("Could not recover status"))
+            m.warning(_("Could not recover status"))
         c = CookBook(config)
         c.set_status(status)
         c.update()
@@ -231,7 +232,7 @@ class CookBook (object):
             with open(CookBook.cache_file(self.get_config()), 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
-            logging.warning(_("Could not cache the CookBook: %s"), ex)
+            m.warning(_("Could not cache the CookBook: %s"), ex)
 
 
     def _find_deps(self, recipe, state={}, ordered=[]):
@@ -261,11 +262,11 @@ class CookBook (object):
             filepath = os.path.join(self._config.recipes_dir, f)
             recipe = self._load_recipe_from_file(filepath)
             if recipe is None:
-                logging.warning(_("Could not found a valid recipe in %s") %
+                m.warning(_("Could not found a valid recipe in %s") %
                                 f)
                 continue
             elif recipe.name is None:
-                logging.warning(_("The recipe in file %s doesn't contain a "
+                m.warning(_("The recipe in file %s doesn't contain a "
                                   "name") % f)
                 continue
             self.recipes[recipe.name] = recipe
@@ -290,5 +291,5 @@ class CookBook (object):
         except Exception, ex:
             import traceback
             traceback.print_exc()
-            logging.warning("Error loading recipe %s" % ex)
+            m.warning("Error loading recipe %s" % ex)
         return None

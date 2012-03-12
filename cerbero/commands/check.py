@@ -21,6 +21,7 @@ from cerbero.commands import Command, register_command
 from cerbero.cookbook import CookBook
 from cerbero.errors import FatalError
 from cerbero.utils import _, N_, ArgparseArgument
+from cerbero.utils import messages as m
 
 
 class Check(Command):
@@ -59,7 +60,7 @@ class Check(Command):
             try:
                 stepfunc = getattr(recipe, 'check')
             except:
-                print '%s has no check step, skipped' % recipe.name
+                m.message('%s has no check step, skipped' % recipe.name)
 
             if stepfunc:
                 try:

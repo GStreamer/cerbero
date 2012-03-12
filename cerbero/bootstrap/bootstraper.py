@@ -20,6 +20,7 @@ import logging
 
 from cerbero.errors import FatalError
 from cerbero.utils import  _
+from cerbero.utils import  messages as m
 
 
 bootstrapers = {}
@@ -56,7 +57,7 @@ class Bootstraper (object):
                 raise FatalError(_("No bootstrapper for the distro %s" % d))
             if v not in bootstrapers[d]:
                 # Be tolerant with the distro version
-                logging.warning(_("No bootstrapper for the distro version %s"
+                m.warning(_("No bootstrapper for the distro version %s"
                                    % v))
                 v = None
 

@@ -16,12 +16,12 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
 import os
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info
+from cerbero.utils import messages as m
 
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
@@ -61,7 +61,7 @@ class Config (object):
         else:
             msg = _('Using default configuration because %s is missing') % \
                     DEFAULT_CONFIG_FILE
-            logging.warning(msg)
+            m.warning(msg)
 
         # Next, if a config file is provided use it to override the settings
         # from the main configuration file

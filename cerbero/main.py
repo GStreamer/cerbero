@@ -26,6 +26,7 @@ import traceback
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError
 from cerbero.utils import _, N_, user_is_root
+from cerbero.utils import messages as m
 
 description = N_('Build and package a set of modules to distribute them in '\
                  'a SDK')
@@ -44,9 +45,11 @@ class Main(object):
         self.load_config()
         self.run_command()
 
-    def log_error(self, msg, print_usage=False):
+    def log_error(self, msg, print_usage=False, command=None):
         ''' Log an error and exit '''
-        sys.stderr.write('%s\n' % msg)
+        if command is not None:
+            m.error("***** Error running '%s' command:" % command)
+        m.error('%s' % msg)
         if print_usage:
             self.parser.print_usage()
         sys.exit(1)
@@ -84,13 +87,13 @@ class Main(object):
         try:
             res = commands.run(command, self.config, self.args)
         except UsageError, exc:
-            self.log_error('cerbero %s: %s\n' % (command, exc), True)
+            self.log_error(exc, True, command)
             sys.exit(1)
         except FatalError, exc:
             traceback.print_exc()
-            self.log_error('cerbero %s: %s\n' % (command, exc), True)
+            self.log_error(exc, True, command)
         except BuildStepError, exc:
-            self.log_error('cerbero %s: %s\n' % (command, exc))
+            self.log_error(exc.msg, False, command)
         except KeyboardInterrupt:
             self.log_error(_('Interrupted'))
         except IOError, e:

@@ -16,11 +16,11 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
 
 from cerbero.commands import Command, register_command
 from cerbero.cookbook import CookBook
 from cerbero.utils import _, N_, ArgparseArgument
+from cerbero.utils import messages as m
 
 
 class Deps(Command):
@@ -48,12 +48,12 @@ class Deps(Command):
                         cookbook.get_recipe(recipe_name).list_deps()]
 
         if len(recipes) == 0:
-            logging.info(_('%s has 0 dependencies') % recipe_name)
+            m.message(_('%s has 0 dependencies') % recipe_name)
             return
         for recipe in recipes:
             # Don't print the recipe we asked for
             if recipe.name == recipe_name:
                 continue
-            logging.info(recipe.name)
+            m.message(recipe.name)
 
 register_command(Deps)

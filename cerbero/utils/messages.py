@@ -16,25 +16,28 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.commands import Command, register_command
-from cerbero.cookbook import CookBook
-from cerbero.utils import _, N_
-from cerbero.utils import messages as m
+import sys
 
 
-class List(Command):
-    doc = N_('List all the available recipes')
-    name = 'list'
+ACTION_TPL = '-----> %s'
+STEP_TPL = '[(%s/%s) %s -> %s ]'
 
-    def __init__(self):
-        Command.__init__(self, [])
 
-    def run(self, config, args):
-        cookbook = CookBook.load(config)
-        recipes = cookbook.get_recipes_list()
-        if len(recipes) == 0:
-            m.message(_("No recipes found"))
-        for recipe in recipes:
-            m.message("%s - %s" % (recipe.name, recipe.version))
+def message(msg):
+    sys.stdout.write(msg + '\n')
 
-register_command(List)
+
+def error(msg):
+    sys.stderr.write(msg + '\n')
+
+
+def warning(msg):
+    message("WARNING: %s" % msg)
+
+
+def action(msg):
+    message(ACTION_TPL % msg)
+
+
+def build_step(count, total, recipe, step):
+    message(STEP_TPL % (count, total, recipe, step))

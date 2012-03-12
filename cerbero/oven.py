@@ -16,10 +16,9 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
-
 from cerbero.errors import BuildStepError, FatalError
 from cerbero.utils import _
+from cerbero.utils import messages as m
 
 
 class Oven (object):
@@ -54,8 +53,8 @@ class Oven (object):
             ordered_recipes = \
                 self.cookbook.list_recipe_deps(self.recipe.name)
 
-        logging.info(_("Building the following recipes %s: ") %
-                     ' '.join([x.name for x in ordered_recipes]))
+        m.message(_("Building the following recipes: %s") %
+                  ' '.join([x.name for x in ordered_recipes]))
 
         i = 1
         for recipe in ordered_recipes:
@@ -65,15 +64,15 @@ class Oven (object):
     def _cook_recipe(self, recipe, count, total):
         if not self.cookbook.recipe_needs_build(recipe.name) and \
                 not self.force:
-            logging.info(_("%s already built") % recipe.name)
+            m.build_step(count, total, recipe.name, _("already built"))
             return
 
         recipe.force = self.force
         for desc, step in recipe._steps:
-            logging.info(self.STEP_TPL % (count, total, recipe.name, step))
+            m.build_step(count, total, recipe.name, step)
             # check if the current step needs to be done
             if self.cookbook.step_done(recipe.name, step) and not self.force:
-                logging.info(_("Step done"))
+                m.action(_("Step done"))
                 continue
             try:
                 # call step function
