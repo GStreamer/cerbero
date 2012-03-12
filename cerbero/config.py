@@ -70,7 +70,7 @@ class Config (object):
                 self.parse(filename)
                 self.filename = DEFAULT_CONFIG_FILE
             else:
-                raise FatalError(_("Configuration file %s doesn't exsits"))
+                raise ConfigurationError(_("Configuration file %s doesn't exsits"))
 
         # Next, load the platform configuration
         self._load_platform_config()
@@ -94,7 +94,7 @@ class Config (object):
         try:
             execfile(filename, config)
         except:
-            raise FatalError(_('Could not include config file (%s)') %
+            raise ConfigurationError(_('Could not include config file (%s)') %
                              filename)
         for key in self._properties:
             if key in config:

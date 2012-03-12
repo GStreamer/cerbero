@@ -17,14 +17,14 @@
 # Boston, MA 02111-1307, USA.
 
 import sys
-import os
 import errno
 import argparse
 import logging
 import traceback
 
 from cerbero import config, commands
-from cerbero.errors import UsageError, FatalError, BuildStepError
+from cerbero.errors import UsageError, FatalError, BuildStepError, \
+    ConfigurationError
 from cerbero.utils import _, N_, user_is_root
 from cerbero.utils import messages as m
 
@@ -78,9 +78,9 @@ class Main(object):
         ''' Load the configuration '''
         try:
             self.config = config.Config(self.args.config)
-        except FatalError, exc:
+        except ConfigurationError, exc:
             traceback.print_exc()
-            self.log_error(exc)
+            self.log_error(exc, False)
 
     def run_command(self):
         command = self.args.command
