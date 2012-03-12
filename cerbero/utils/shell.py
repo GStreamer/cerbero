@@ -65,8 +65,8 @@ def check_call(cmd, cmd_dir=None):
         output, unused_err = process.communicate()
         if process.poll():
             raise Exception()
-    except Exception, ex:
-        raise FatalError(_("Error running command %s: %s") % (cmd, ex))
+    except Exception:
+        raise FatalError(_("Error running command: %s") % cmd)
     return output
 
 
