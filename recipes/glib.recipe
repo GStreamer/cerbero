@@ -20,7 +20,10 @@ class Recipe(recipe.Recipe):
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID]:
                 self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1 -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\"" ./configure'
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC]:
-                self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\"" ./configure'
+                if self.config.target_arch == Architecture.X86:
+                    self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\" -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=\\\\\\\"/usr/lib/i386-linux-gnu/gio/modules\\\\\\\"" ./configure'
+                elif self.config.target_arch == Architecture.X86_64:
+                    self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\" -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=\\\\\\\"/usr/lib/x86_64-linux-gnu/gio/modules\\\\\\\"" ./configure'
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY]:
                 if self.config.target_arch == Architecture.X86:
                     self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/i386-linux-gnu/gio/modules\\\\\\\"" ./configure'
