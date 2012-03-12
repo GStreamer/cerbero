@@ -17,6 +17,9 @@
 # Boston, MA 02111-1307, USA.
 
 
+from gettext import gettext as _
+
+
 class CerberoException(Exception):
     header = ''
     msg = ''
@@ -43,4 +46,10 @@ class CommandError(CerberoException):
 
 
 class BuildStepError(CerberoException):
-    header = 'Build step'
+    header = 'Build step error: '
+
+
+class RecipeNotFoundError(CerberoException):
+
+    def __init__(self, recipe):
+        CerberoException.__init__(self, _("Recipe '%s' not found") % recipe)
