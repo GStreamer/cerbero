@@ -6,4 +6,4 @@ class Recipe(recipe.Recipe):
     version = '0.10.13'
     config_sh = 'sh autogen.sh'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
-    deps = ['gstreamer', 'gst-plugins-base', 'bzip2' ]
+    deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]

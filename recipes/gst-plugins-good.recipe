@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
             'speex', 'gdk-pixbuf', 'libshout', 'libsoup',
-            'orc', 'wavpack', 'flac', 'taglib', 'bzip2' ]
+            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True

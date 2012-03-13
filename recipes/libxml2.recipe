@@ -4,6 +4,7 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'libxml2'
     version = '2.7.8'
+    deps = [ 'zlib' ]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     def prepare(self):
