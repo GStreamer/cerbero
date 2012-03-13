@@ -80,8 +80,22 @@ class MakefilesBase (Build):
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
 
+    def system_libs(func):
+        ''' Decorator to use system libs'''
+        def call(*args):
+            self = args[0]
+            if self.use_system_libs:
+                self._add_system_libs()
+            res = func(*args)
+            if self.use_system_libs:
+                self._restore_pkg_config_path()
+            return res
+
+        call.func_name = func.func_name
+        return call
+
+    @system_libs
     def configure(self):
-        self._add_system_libs()
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': self.config.prefix,
                                           'libdir': self.config.libdir,
@@ -90,37 +104,39 @@ class MakefilesBase (Build):
                                           'build': self.config.build,
                                           'options': self.configure_options},
                     self.make_dir)
-        self._restore_pkg_config_path()
 
+    @system_libs
     def compile(self):
-        self._add_system_libs()
         shell.call(self.make, self.make_dir)
-        self._restore_pkg_config_path()
 
+    @system_libs
     def install(self):
-        self._add_system_libs()
         shell.call(self.make_install, self.make_dir)
-        self._restore_pkg_config_path()
 
+    @system_libs
     def clean(self):
         shell.call(self.make_clean, self.make_dir)
 
+    @system_libs
     def check(self):
         if self.make_check:
             shell.call(self.make_check, self.build_dir)
 
     def _add_system_libs(self):
-        if self.use_system_libs:
-            self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
-            self.pkgconfigpath = os.environ['PKG_CONFIG_PATH']
-            os.environ['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
-                                                       self.pkgconfiglibdir)
-            del os.environ['PKG_CONFIG_LIBDIR']
+        if self._with_system_libs:
+            # Don't mess the env too much
+            return
+        self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
+        self.pkgconfigpath = os.environ['PKG_CONFIG_PATH']
+        os.environ['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
+                                                   self.pkgconfiglibdir)
+        del os.environ['PKG_CONFIG_LIBDIR']
+        self._with_system_libs = True
 
     def _restore_pkg_config_path(self):
-        if self.use_system_libs:
-            os.environ['PKG_CONFIG_PATH'] = self.pkgconfigpath
-            os.environ['PKG_CONFIG_LIBDIR'] = self.pkgconfiglibdir
+        os.environ['PKG_CONFIG_PATH'] = self.pkgconfigpath
+        os.environ['PKG_CONFIG_LIBDIR'] = self.pkgconfiglibdir
+        self._with_system_libs = False
 
 
 class Autotools (MakefilesBase):
