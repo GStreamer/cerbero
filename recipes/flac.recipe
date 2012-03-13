@@ -6,3 +6,8 @@ class Recipe(recipe.Recipe):
     version = '1.2.1'
     config_sh = 'sh autogen.sh'
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86:
+                self.configure_options += ' --disable-asm-optimizations'
