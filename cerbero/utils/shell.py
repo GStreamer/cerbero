@@ -26,7 +26,7 @@ import zipfile
 import tempfile
 
 from cerbero.config import Platform
-from cerbero.utils import _, path, system_info
+from cerbero.utils import _, system_info
 from cerbero.errors import FatalError
 
 

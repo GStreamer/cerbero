@@ -18,6 +18,7 @@
 
 import os
 
+from cerbero.config import Platform
 from cerbero.utils import shell
 
 
@@ -149,6 +150,14 @@ class Autotools (MakefilesBase):
 
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
+
+        if self.config.platform == Platform.WINDOWS:
+            # On windows, environment variables are upperscase, but we still
+            # need to pass things like am_cv_python_platform in lowercase for
+            # configure and autogen.sh
+            for k, v in os.environ.iteritems():
+                if k.islower():
+                    self.configure_tpl += ' %s="%s"' % (k, v)
 
         if self.add_host_build_target:
             if self.config.host is not None:
