@@ -91,7 +91,7 @@ def system_info():
             distro = Distro.DEBIAN
             if d[2] == 'lucid':
                 distro_version = DistroVersion.UBUNTU_LUCID
-            if d[2] == 'natty':
+            elif d[2] == 'natty':
                 distro_version = DistroVersion.UBUNTU_NATTY
             elif d[2] == 'oneiric':
                 distro_version = DistroVersion.UBUNTU_ONEIRIC
