@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN:
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
         elif self.config.target_platform == Platform.LINUX:
-            if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID]:
+            if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1 -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\"" ./configure'
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC]:
                 if self.config.target_arch == Architecture.X86:

@@ -89,7 +89,9 @@ def system_info():
         d = pplatform.linux_distribution()
         if d[0] in ['Ubuntu', 'debian']:
             distro = Distro.DEBIAN
-            if d[2] == 'lucid':
+            if d[2] == 'maverick':
+                distro_version = DistroVersion.UBUNTU_MAVERICK
+            elif d[2] == 'lucid':
                 distro_version = DistroVersion.UBUNTU_LUCID
             elif d[2] == 'natty':
                 distro_version = DistroVersion.UBUNTU_NATTY
