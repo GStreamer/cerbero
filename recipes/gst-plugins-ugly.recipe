@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-ugly'
     version = '0.10.19'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection '
+    configure_options = '--disable-introspection --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2']
