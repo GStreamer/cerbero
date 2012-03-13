@@ -44,7 +44,9 @@ class Config (object):
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
-                   'toolchain_prefix', 'distro_version', 'target_distro_version']
+                   'toolchain_prefix', 'distro_version',
+                   'target_distro_version', 'allow_system_libs'
+                   ]
 
     def __init__(self, filename=None):
         self._check_uninstalled()
@@ -214,6 +216,7 @@ class Config (object):
         else:
             self.set_property('environ_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
+        self.set_property('allow_system_libs', True)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:

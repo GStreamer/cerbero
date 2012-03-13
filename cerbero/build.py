@@ -84,10 +84,10 @@ class MakefilesBase (Build):
         ''' Decorator to use system libs'''
         def call(*args):
             self = args[0]
-            if self.use_system_libs:
+            if self.use_system_libs and self.config.allow_system_libs:
                 self._add_system_libs()
             res = func(*args)
-            if self.use_system_libs:
+            if self.use_system_libs and self.config.allow_system_libs:
                 self._restore_pkg_config_path()
             return res
 
