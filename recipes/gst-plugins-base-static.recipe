@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-base-static'
     version = '0.10.36'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection --disable-shared --enable-static '
+    configure_options = '--disable-introspection --disable-shared --enable-static --disable-video4linux '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
