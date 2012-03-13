@@ -3,7 +3,7 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'gtk-doc'
     version = '1.18'
-    platform_deps = {Platform.WINDOWS: ['docbook-xsl', 'docbook-xml'],
+    platform_deps = {Platform.WINDOWS: ['docbook-xsl', 'docbook-xml', 'libxslt'],
                      Platform.DARWIN: ['docbook-xsl', 'docbook-xml']}
     
     def prepare(self):
