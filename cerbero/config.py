@@ -28,7 +28,7 @@ CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
-DEFAULT_GIT_ROOT = 'git://git.keema.collabora.co.uk/gst-sdk/'
+DEFAULT_GIT_ROOT = 'git+ssh://git.keema.collabora.co.uk/git/gst-sdk/'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 
