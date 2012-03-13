@@ -17,10 +17,12 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import subprocess
 
+from cerbero.config import Platform
 from cerbero.commands import Command, register_command
 from cerbero.utils import N_
-
+from cerbero.utils import shell as sh
 
 class Shell(Command):
     doc = N_('Starts a shell with the build environment')
@@ -30,7 +32,10 @@ class Shell(Command):
         Command.__init__(self, [])
 
     def run(self, config, args):
-        shell = os.environ.get('SHELL', '/bin/sh')
-        os.execlp(shell, shell)
+        if config.platform == Platform.WINDOWS:
+            subprocess.check_call('sh -i')
+        else:
+            shell = os.environ.get('SHELL', '/bin/bash')
+            os.execlp(shell, shell)
 
 register_command(Shell)
