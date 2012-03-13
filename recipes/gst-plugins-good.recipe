@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-good'
     version = '0.10.31'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection --disable-oss4 --disable-ossaudio --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack '
+    configure_options = '--disable-introspection --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng', 'cairo',
             'speex', 'gdk-pixbuf', 'libshout', 'libsoup',
