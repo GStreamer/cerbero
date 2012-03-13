@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-shared --enable-static '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
-    deps = ['gstreamer', 'gst-plugins-base']
+    deps = ['gstreamer', 'gst-plugins-base', 'bzip2' ]
 
     def prepare(self):
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
