@@ -167,7 +167,11 @@ class Config (object):
         if env not in os.environ:
             return path
         else:
-            return "%s:%s" % (path, os.environ['PATH'])
+            if self.platform == Platform.WINDOWS:
+                separator = ';'
+            else:
+                separator = ':'
+            return "%s%s%s" % (path, separator, os.environ['PATH'])
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
