@@ -33,7 +33,7 @@ MINGW_DOWNLOAD_SOURCE = {'w32':
 MINGW_TARBALL_TPL = "mingw-%s-bin_%s-%s_%s.%s"
 MINGW_W32_i686_LINUX = MINGW_TARBALL_TPL % ('w32', 'i686', 'linux', 20111220, 'tar.bz2')
 MINGW_W64_x86_64_LINUX = MINGW_TARBALL_TPL % ('w64', 'x86_64', 'linux', 20111220, 'tar.bz2')
-MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111220, 'zip')
+MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111219, 'zip')
 MINGW_W64_x86_64_WINDOWS = MINGW_TARBALL_TPL % ('w64', 'i686', 'mingw', 20111220, 'zip')
 MINGW_SYSROOT = {'w64':
 '''/buildslaves/mingw-w64/linux-x86_64-x86_64/build/build/root/x86_64-w64-mingw32/lib/../lib''',
@@ -47,10 +47,15 @@ PTHREADS_URL = \
 PYTHON_URL = \
 '''http://hg.python.org/cpython/raw-file/ccd16ad37544/Include'''
 
-
 DIRECTX_HEADERS = \
 "https://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk/mingw-w64-headers/direct-x/include"\
 
+MINGWGET_DEPS = ['msys-wget']
+
+WINDOWS_BIN_DEPS = ['http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
+                    'http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip',
+                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
+                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip']
 
 SED = "sed -i 's/%s/%s/g' %s"
 
@@ -70,8 +75,15 @@ class WindowsBootstraper(BootstraperBase):
         else:
             self.version = 'w64'
         self.platform = self.config.platform
+
         self.check_dirs()
+        if self.platform == Platform.WINDOWS:
+            # For wget
+            self.install_mingwget_deps()
         self.install_mingw()
+        if self.platform == Platform.WINDOWS:
+            # After mingw is beeing installed
+            self.install_bin_deps()
         self.install_directx_headers()
         self.install_python_headers()
         self.install_pthreads()
@@ -94,7 +106,7 @@ class WindowsBootstraper(BootstraperBase):
                 tarball = MINGW_W64_x86_64_WINDOWS
 
         tarfile = os.path.join(self.prefix, tarball)
-        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE[self.version], tarball), tarfile)
+        shell.download("%s%s" % (MINGW_DOWNLOAD_SOURCE[self.version], tarball), tarfile)
         shell.unpack(tarfile, self.prefix)
         self.fix_lib_paths()
 
@@ -121,6 +133,20 @@ class WindowsBootstraper(BootstraperBase):
         cmd = "svn checkout --trust-server-cert --non-interactive "\
               "--no-auth-cache %s %s" % (DIRECTX_HEADERS, directx_headers)
         shell.call(cmd)
+
+    def install_mingwget_deps(self):
+        for dep in MINGWGET_DEPS:
+            shell.call('mingw-get install %s' % dep)
+
+    def install_bin_deps(self):
+        # On windows, we need to install first wget than SVN, for the DirectX headers,
+        # and pkg-config. pkg-config can't be installed otherwise because it depends
+        # on glib and glib depends on pkg-config
+        for url in WINDOWS_BIN_DEPS:
+            temp = tempfile.mkdtemp()
+            path = os.path.join(temp, 'download.zip')
+            shell.download(url, path)
+            shell.unpack(path, self.config.toolchain_prefix)
 
     def fix_lib_paths(self):
 
