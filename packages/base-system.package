@@ -1,0 +1,25 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'base-deps'
+    shortdesc = 'Base system dependencies'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    libraries = ['libcairo', 'libcairo-gobject',
+                 'libcairo-script-interpreter', 'libexpat',
+                 'libffi', 'libfontconfig', 'libfreetype',
+                 'libgio-2.0', 'libglib-2.0', 'libgmodule-2.0',
+                 'libgobject-2.0', 'libgthread-2.0', 'liborc-0.4',
+                 'libpango-1.0', 'libpangocairo-1.0', 'libpangoft2-1.0',
+                 'libpng15', 'libxml2', 'zlib1']
+
+    platform_libs = {
+        Platform.WINDOWS: ['libasprintf', 'libcharset', 'libiconv',
+                           'libintl', 'libpangowin32-1.0', 'libpixman-1-0'],
+        Platform.DARWIN: ['libasprintf', 'libcharset', 'libiconv',
+                           'libintl', 'libpangowin32-1.0', 'libpixman-1-0']}
