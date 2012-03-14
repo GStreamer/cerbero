@@ -5,7 +5,5 @@ class Recipe(recipe.Recipe):
     version = '0.0.1'
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
-    deps = [ 'glib', 'gtk-doc' ]
-    # FIXME this also needs DBus
-    use_system_libs = True
+    deps = [ 'glib', 'gtk-doc', 'dbus' ]
 

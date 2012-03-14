@@ -6,5 +6,3 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
     deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'gtk-doc' ]
-    # FIXME: for DBus
-    use_system_libs = True
