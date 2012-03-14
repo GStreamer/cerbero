@@ -3,9 +3,11 @@ from cerbero import recipe
 class Recipe(recipe.Recipe):
     name = 'gtk-doc'
     version = '1.18'
-    platform_deps = {Platform.WINDOWS: ['docbook-xsl', 'docbook-xml', 'libxslt'],
+    platform_deps = {Platform.WINDOWS: ['docbook-xsl', 'docbook-xml'],
                      Platform.DARWIN: ['docbook-xsl', 'docbook-xml']}
-    
+
     def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            self.deps += 'libxslt'
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options = '--with-xml-catalog=%s/etc/catalog.xml' % self.config.prefix
