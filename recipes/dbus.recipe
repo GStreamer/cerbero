@@ -1,0 +1,7 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'dbus'
+    version = '1.4.16'
+    deps = ['expat']
+    configure_options = '--disable-xml-docs --disable-doxygen-docs --disable-selinux --disable-libaudit --disable-launchd --disable-tests --disable-x11-autolaunch --disable-Werror '
