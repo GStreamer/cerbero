@@ -85,7 +85,7 @@ class WindowsBootstraper(BootstraperBase):
             # After mingw is beeing installed
             self.install_bin_deps()
         self.install_directx_headers()
-        self.install_python_headers()
+        self.install_python_sdk()
         self.install_pthreads()
 
     def check_dirs(self):
@@ -120,16 +120,26 @@ class WindowsBootstraper(BootstraperBase):
         shell.unpack(os.path.join(temp, 'pthreads-20100604', 'ming%s' % self.version,
                                   'pthreads-%s.zip' % self.version), self.prefix)
 
-    def install_python_headers(self):
+    def install_python_sdk(self):
+        m.action(_("Installing Python headers"))
+        temp = tempfile.mkdtemp()
+        shell.call("git clone %s" % os.path.join(self.config.git_root,
+                                                 'windows-external-sdk'),
+                   temp)
+
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
         if not os.path.exists(python_headers):
             os.makedirs(python_headers)
-        m.action(_("Installing Python headers"))
-        shell.recursive_download(PYTHON_URL, python_headers)
+        python_libs = os.path.join(self.prefix, 'lib')
+
+        shell.call('cp -f %s/windows-external-sdk/python27/%s/include/* %s' %
+                  (temp, self.version, python_headers))
+        shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
+                  (temp, self.version, python_libs))
 
     def install_directx_headers(self):
-        directx_headers = os.path.join(self.prefix, 'include', 'DirectX')
         m.action(_("Installing DirectX headers"))
+        directx_headers = os.path.join(self.prefix, 'include', 'DirectX')
         cmd = "svn checkout --trust-server-cert --non-interactive "\
               "--no-auth-cache %s %s" % (DIRECTX_HEADERS, directx_headers)
         shell.call(cmd)
