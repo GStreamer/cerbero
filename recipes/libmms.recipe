@@ -1,0 +1,6 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'libmms'
+    version = '0.6.2'
+    deps = [ 'glib' ]
