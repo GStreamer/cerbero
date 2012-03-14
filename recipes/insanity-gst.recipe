@@ -1,0 +1,10 @@
+from cerbero import recipe
+
+class Recipe(recipe.Recipe):
+    name = 'insanity-gst'
+    version = '0.0.1'
+    config_sh = 'sh autogen.sh'
+    configure_options = '--disable-introspection '
+    deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'gtk-doc' ]
+    # FIXME: for DBus
+    use_system_libs = True
