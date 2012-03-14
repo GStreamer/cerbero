@@ -76,6 +76,7 @@ class MakefilesBase (Build):
     srcdir = '.'
 
     def __init__(self):
+        self._with_system_libs = False
         Build.__init__(self)
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
