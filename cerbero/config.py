@@ -45,7 +45,8 @@ class Config (object):
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
                    'toolchain_prefix', 'distro_version',
-                   'target_distro_version', 'allow_system_libs'
+                   'target_distro_version', 'allow_system_libs',
+                   'packages_dir',
                    ]
 
     def __init__(self, filename=None):
@@ -198,9 +199,13 @@ class Config (object):
         if not self.uninstalled:
             self.set_property('recipes_dir',
                               os.path.join(cerbero_home, 'recipes'))
+            self.set_property('packages_dir',
+                              os.path.join(cerbero_home, 'packages'))
         else:
             self.set_property('recipes_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'recipes'))
+            self.set_property('packages_dir',
+                os.path.join(os.path.dirname(__file__), '..', 'packages'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('host', None)
         self.set_property('build', None)

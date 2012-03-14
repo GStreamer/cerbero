@@ -34,12 +34,12 @@ N_ = lambda x: x
 
 class ArgparseArgument(object):
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, *name, **kwargs):
         self.name = name
         self.args = kwargs
 
     def add_to_parser(self, parser):
-        parser.add_argument(self.name, **self.args)
+        parser.add_argument(*self.name, **self.args)
 
 
 def user_is_root():

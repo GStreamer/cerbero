@@ -20,6 +20,7 @@ from cerbero.commands import Command, register_command
 from cerbero.cookbook import CookBook
 from cerbero.utils import _, N_
 from cerbero.utils import messages as m
+from cerbero.packages.packagesstore import PackagesStore
 
 
 class List(Command):
@@ -37,4 +38,22 @@ class List(Command):
         for recipe in recipes:
             m.message("%s - %s" % (recipe.name, recipe.version))
 
+
+class ListPackages(Command):
+    doc = N_('List all the available packages')
+    name = 'list-packages'
+
+    def __init__(self):
+        Command.__init__(self, [])
+
+    def run(self, config, args):
+        store = PackagesStore(config)
+        packages = store.get_packages_list()
+        if len(packages) == 0:
+            m.message(_("No packages found"))
+        for p in packages:
+            m.message("%s - %s" % (p.name, p.version))
+
+
 register_command(List)
+register_command(ListPackages)

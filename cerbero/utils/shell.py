@@ -73,12 +73,14 @@ def call(cmd, cmd_dir='.', fail=True):
     return ret
 
 
-def check_call(cmd, cmd_dir=None):
+def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
     try:
-        process = subprocess.Popen(shlex.split(cmd), cwd=cmd_dir,
-            stdout=subprocess.PIPE)
+        if split:
+            cmd = shlex.split(cmd)
+        process = subprocess.Popen(cmd, cwd=cmd_dir,
+            stdout=subprocess.PIPE, shell=shell)
         output, unused_err = process.communicate()
-        if process.poll():
+        if process.poll() and fail:
             raise Exception()
     except Exception:
         raise FatalError(_("Error running command: %s") % cmd)
