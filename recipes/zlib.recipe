@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.make = 'PREFIX=%s- make -f win32/Makefile.gcc' % self.config.host
+            self.make = 'make -f win32/Makefile.gcc PREFIX=%s- ' % self.config.host
             self.make_install = 'make install -f win32/Makefile.gcc '\
                                 'INCLUDE_PATH=%(prefix)s/include '\
                                 'LIBRARY_PATH=%(prefix)s/lib ' \
