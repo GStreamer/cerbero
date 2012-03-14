@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
             'faad2', 'libkate', 'libshout', 'libvpx', 'libdvdnav', 'zlib',
-            'schroedinger', 'libdca' ]
+            'schroedinger', 'libdca', 'libjasper' ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
