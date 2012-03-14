@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
-            'libdvdread', 'libmpeg2']
+            'libdvdread', 'libmpeg2', 'libmad']
