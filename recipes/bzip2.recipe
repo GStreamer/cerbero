@@ -13,5 +13,5 @@ class Recipe(recipe.Recipe):
             shared_makefile = 'Makefile-libbz2_dll'
         else:
             shared_makefile = 'Makefile-libbz2_so'
-        self.make = 'make; make -f %s' % shared_makefile 
-        self.make_install = 'make install PREFIX=%s; make -f %s install PREFIX=%s' % (self.config.prefix, shared_makefile, self.config.prefix)
+        self.make = 'make -f %s; make' % shared_makefile
+        self.make_install = 'make -f %s install PREFIX=%s; make install PREFIX=%s' % (self.config.prefix, shared_makefile, self.config.prefix)
