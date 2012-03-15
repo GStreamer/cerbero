@@ -57,6 +57,9 @@ WINDOWS_BIN_DEPS = ['http://downloads.sourceforge.net/project/win32svn/1.7.2/svn
                     'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
                     'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip']
 
+GL_HEADERS = ["http://cgit.freedesktop.org/mesa/mesa/plain/include/GL/gl.h",
+              "http://www.opengl.org/registry/api/glext.h"]
+
 SED = "sed -i 's/%s/%s/g' %s"
 
 
@@ -85,6 +88,7 @@ class WindowsBootstraper(BootstraperBase):
             # After mingw is beeing installed
             self.install_bin_deps()
         self.install_directx_headers()
+        self.install_gl_headers()
         self.install_python_sdk()
         self.install_pthreads()
 
@@ -157,6 +161,16 @@ class WindowsBootstraper(BootstraperBase):
             path = os.path.join(temp, 'download.zip')
             shell.download(url, path)
             shell.unpack(path, self.config.toolchain_prefix)
+
+    def install_gl_headers(self):
+        m.action(_("Installing OpenGL headers"))
+        gl_path = "%s/include/GL" % (self.config.prefix)
+        if not os.path.exists(gl_path):
+            os.mkdir(gl_path)
+        wget = 'wget %s -O %s'
+        for h in GL_HEADERS:
+            cmd = wget % (h, "%s/%s" % (gl_path, os.path.basename(h)))
+            shell.call(cmd)
 
     def fix_lib_paths(self):
 
