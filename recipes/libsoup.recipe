@@ -9,4 +9,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or self.config.target_distro_version not in [ DistroVersion.DEBIAN_WHEEZY, DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC ]:
-	    self.deps += [ 'glib-networking' ]
+            self.deps += [ 'glib-networking' ]
