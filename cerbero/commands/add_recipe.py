@@ -24,7 +24,7 @@ from cerbero.utils import _, N_, ArgparseArgument
 
 
 RECEIPT_TPL =\
-'''from cerbero import recipe
+'''# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 class Recipe(recipe.Recipe):
     name = '%(name)s'
