@@ -32,7 +32,7 @@ MINGW_DOWNLOAD_SOURCE = {'w32':
 '''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Automated%20Builds/'''}
 MINGW_TARBALL_TPL = "mingw-%s-bin_%s-%s_%s.%s"
 MINGW_W32_i686_LINUX = MINGW_TARBALL_TPL % ('w32', 'i686', 'linux', 20111220, 'tar.bz2')
-MINGW_W64_x86_64_LINUX = MINGW_TARBALL_TPL % ('w64', 'x86_64', 'linux', 20111220, 'tar.bz2')
+MINGW_W64_i686_LINUX = MINGW_TARBALL_TPL % ('w64', 'i686', 'linux', 20111220, 'tar.bz2')
 MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111219, 'zip')
 MINGW_W64_x86_64_WINDOWS = MINGW_TARBALL_TPL % ('w64', 'i686', 'mingw', 20111220, 'zip')
 MINGW_SYSROOT = {'w64':
@@ -102,7 +102,7 @@ class WindowsBootstraper(BootstraperBase):
             if self.target_arch == Architecture.X86:
                 tarball = MINGW_W32_i686_LINUX
             if self.target_arch == Architecture.X86_64:
-                tarball = MINGW_W64_x86_64_LINUX
+                tarball = MINGW_W64_i686_LINUX
         if self.platform == Platform.WINDOWS:
             if self.target_arch == Architecture.X86:
                 tarball = MINGW_W32_i686_WINDOWS
