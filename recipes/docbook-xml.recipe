@@ -1,4 +1,4 @@
-from cerbero import recipe
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 class Recipe(recipe.Recipe):
     name = 'docbook-xml'
@@ -22,8 +22,8 @@ class Recipe(recipe.Recipe):
                 lines = ['']
             return ''.join(lines)
 
-	etc_catalog_lines = read_catalog(etc_catalog_path)
-	new_catalog_lines = read_catalog(new_catalog_path)
+        etc_catalog_lines = read_catalog(etc_catalog_path)
+        new_catalog_lines = read_catalog(new_catalog_path)
         if new_catalog_lines in etc_catalog_lines:
             return
         with open(etc_catalog_path, 'w') as f:
