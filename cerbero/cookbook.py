@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import logging
 import pickle
 import time
 
@@ -27,6 +26,7 @@ from cerbero.source import SourceType
 from cerbero.errors import FatalError
 from cerbero.utils import _
 from cerbero.utils import messages as m
+from cerbero import recipe
 
 
 COOKBOOK_NAME = 'cookbook'
@@ -283,7 +283,8 @@ class CookBook (object):
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'BuildType': BuildType, 'SourceType': SourceType,
-                 'Distro': Distro, 'DistroVersion': DistroVersion}
+                 'Distro': Distro, 'DistroVersion': DistroVersion,
+                 'recipe': recipe}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.prepare()
