@@ -164,7 +164,7 @@ class WindowsBootstraper(BootstraperBase):
 
     def install_gl_headers(self):
         m.action(_("Installing OpenGL headers"))
-        gl_path = "%s/include/GL" % (self.config.prefix)
+        gl_path = "%s/include/GL" % (self.prefix)
         if not os.path.exists(gl_path):
             os.mkdir(gl_path)
         wget = 'wget %s -O %s'
