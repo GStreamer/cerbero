@@ -5,3 +5,4 @@ class Recipe(recipe.Recipe):
     version = '1.4.6'
     deps = ['clutter', 'gstreamer', 'gst-plugins-base']
     use_system_libs = True
+    autoreconf = True
