@@ -19,6 +19,7 @@
 from cerbero.commands import Command, register_command
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
+from cerbero.errors import PackageNotFoundError
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.disttarball import DistTarball
 
@@ -44,7 +45,7 @@ class Package(Command):
         store = PackagesStore(config)
         p = store.get_package(args.package[0])
         if p is None:
-            m.message(_("Package %p not found") % p)
+            raise PackageNotFoundError(args.package[0])
         if args.tarball:
             pkg = DistTarball(p)
         else:
