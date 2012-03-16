@@ -1,0 +1,48 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-effects'
+    shortdesc = 'GStreamer effects and instrumentaion plugins'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = [
+             'lib/gstreamer-0.10/libgstalphacolor%(sext)s',
+             'lib/gstreamer-0.10/libgstalpha%(sext)s',
+             'lib/gstreamer-0.10/libgstaudiofx%(sext)s',
+             'lib/gstreamer-0.10/libgstbayer%(sext)s',
+             'lib/gstreamer-0.10/libgstcairo%(sext)s',
+             'lib/gstreamer-0.10/libgstcutter%(sext)s',
+             'lib/gstreamer-0.10/libgsteffectv%(sext)s',
+             'lib/gstreamer-0.10/libgstequalizer%(sext)s',
+             'lib/gstreamer-0.10/libgstfaceoverlay%(sext)s',
+             'lib/gstreamer-0.10/libgstfieldanalysis%(sext)s',
+             'lib/gstreamer-0.10/libgstfreeverb%(sext)s',
+             'lib/gstreamer-0.10/libgstfrei0r%(sext)s',
+             'lib/gstreamer-0.10/libgstgaudieffects%(sext)s',
+             'lib/gstreamer-0.10/libgstgeometrictransform%(sext)s',
+             'lib/gstreamer-0.10/libgstgdkpixbuf%(sext)s',
+             'lib/gstreamer-0.10/libgstimagefreeze%(sext)s',
+             'lib/gstreamer-0.10/libgstinterlace%(sext)s',
+             'lib/gstreamer-0.10/libgstinterleave%(sext)s',
+             'lib/gstreamer-0.10/libgstjp2kdecimator%(sext)s',
+             'lib/gstreamer-0.10/libgstlevel%(sext)s',
+             'lib/gstreamer-0.10/libgstliveadder%(sext)s',
+             'lib/gstreamer-0.10/libgstpatchdetect%(sext)s',
+             'lib/gstreamer-0.10/libgstpango%(sext)s',
+             'lib/gstreamer-0.10/libgstreplaygain%(sext)s',
+             'lib/gstreamer-0.10/libgstremovesilence%(sext)s',
+             'lib/gstreamer-0.10/libgstscaletempoplugin%(sext)s',
+             'lib/gstreamer-0.10/libgstsegmentclip%(sext)s',
+             'lib/gstreamer-0.10/libgstspectrum%(sext)s',
+             'lib/gstreamer-0.10/libgstsmooth%(sext)s',
+             'lib/gstreamer-0.10/libgstspeed%(sext)s',
+             'lib/gstreamer-0.10/libgststereo%(sext)s',
+             'lib/gstreamer-0.10/libgstvideofiltersbad%(sext)s',
+             'lib/gstreamer-0.10/libgstvideomeasure%(sext)s',
+             'lib/gstreamer-0.10/libgstvideosignal%(sext)s',
+    ]

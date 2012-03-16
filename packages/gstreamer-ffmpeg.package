@@ -1,0 +1,15 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-libav'
+    shortdesc = 'GStreamer libav wrapper'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = [
+             'lib/gstreamer-0.10/libgstffmpeg%(sext)s',
+    ]

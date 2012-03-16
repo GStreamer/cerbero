@@ -1,0 +1,34 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-playback'
+    shortdesc = 'GStreamer plugins for playback'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = [
+             'lib/gstreamer-0.10/libgstaudiovisualizers%(sext)s',
+             'lib/gstreamer-0.10/libgstdecodebin2%(sext)s',
+             'lib/gstreamer-0.10/libgstgoom2k1%(sext)s',
+             'lib/gstreamer-0.10/libgstgoom%(sext)s',
+             'lib/gstreamer-0.10/libgstplaybin%(sext)s',
+             'lib/gstreamer-0.10/libgstvisual%(sext)s',
+    ]
+
+    platform_files = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstalsasink%(sext)s',
+             'lib/gstreamer-0.10/libgstpulsesink%(sext)s',
+             'lib/gstreamer-0.10/libgstximagesink%(sext)s',
+             'lib/gstreamer-0.10/libgstxvimagesink%(sext)s',
+	],
+        Platform.WINDOWS: [
+             'lib/gstreamer-0.10/libgstdirectsoundsink%(sext)s',
+             'lib/gstreamer-0.10/libgstdirectdrawsink%(sext)s',
+             'lib/gstreamer-0.10/libgstd3dvideosink%(sext)s',
+	]
+    }

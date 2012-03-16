@@ -1,0 +1,37 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-networking'
+    shortdesc = 'GStreamer plugins for network protocols'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    libraries = [
+                 'libgcrypt',
+                 'libgmp',
+                 'libgnutls',
+                 'libgnutls-openssl',
+                 'libgpg-error'
+                 'libshout',
+                 'libsoup',
+                 'libtasn1',
+                 'glibnetworking',
+    ]
+
+    files = [
+             'lib/gstreamer-0.10/libgstshout2%(sext)s',
+             'lib/gstreamer-0.10/libgstsdpelem%(sext)s',
+             'lib/gstreamer-0.10/libgstshouphttpsrc%(sext)s',
+             'lib/gstreamer-0.10/libgstudp%(sext)s',
+    ]
+
+    platform_files = {
+        Platform.WINDOWS: [
+             'lib/gstreamer-0.10/libgstwininet%(sext)s',
+        ]
+    }
+

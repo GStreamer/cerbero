@@ -1,0 +1,30 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-clutter'
+    shortdesc = 'GStreamer Clutter support'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    libraries = [
+                 'libcogl',
+                 'libcogl-pango',
+                 'libclutter-gst',
+                 'libjson-glib-1.0'
+    ]
+
+    platform_libraries = {
+        Platform.WINDOWS: [
+             'libclutter-win32',
+        ]
+        Platform.DARWIN: [
+             'libclutter-osx',
+        ]
+        Platform.LINUX: [
+             'libclutter-x11',
+        ]
+    }

@@ -1,0 +1,128 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-codecs'
+    shortdesc = 'GStreamer codecs'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    libraries = [
+                 'libass',
+                 'libdca',
+                 'libdvdnav',
+                 'libdvdnavmini',
+                 'libdvdread',
+                 'libFLAC',
+                 'libfribidi',
+                 'libjasper',
+                 'libjpeg',
+                 'libkate',
+                 'libmpeg2',
+                 'libogg',
+                 'liboggkate',
+                 'libopencore-amrnb',
+                 'libopencore-amrwb',
+                 'libschroedinger',
+                 'libspeex',
+                 'libspeexdsp',
+                 'libtheora',
+                 'libtheoraenc',
+                 'libtheoradec',
+                 'libvorbis',
+                 'libvorbisenc',
+                 'libwavpack',
+    ]
+
+    platform_libraries = [
+        Platform.DARWIN: ['libvpx'],
+        Platform.UNIX: ['libvpx']
+    ]
+
+    files = [
+             'lib/gstreamer-0.10/libgstadpcmdec%(sext)s',
+             'lib/gstreamer-0.10/libgstadpcmenc%(sext)s',
+             'lib/gstreamer-0.10/libgstaiff%(sext)s',
+             'lib/gstreamer-0.10/libgstamrnb%(sext)s',
+             'lib/gstreamer-0.10/libgstamrwbdec%(sext)s',
+             'lib/gstreamer-0.10/libgstannodex%(sext)s',
+             'lib/gstreamer-0.10/libgstapetag%(sext)s',
+             'lib/gstreamer-0.10/libgstasf%(sext)s',
+             'lib/gstreamer-0.10/libgstasfmux%(sext)s',
+             'lib/gstreamer-0.10/libgstassrender%(sext)s',
+             'lib/gstreamer-0.10/libgstaudioparsers%(sext)s',
+             'lib/gstreamer-0.10/libgstauparse%(sext)s',
+             'lib/gstreamer-0.10/libgstavi%(sext)s',
+             'lib/gstreamer-0.10/libgstcdxaparse%(sext)s',
+             'lib/gstreamer-0.10/libgstdccp%(sext)s',
+             'lib/gstreamer-0.10/libgstdtsdec%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdlpcmdec%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdread%(sext)s',
+             'lib/gstreamer-0.10/libgstdvbsuboverlay%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdsub%(sext)s',
+             'lib/gstreamer-0.10/libgstfaad%(sext)s',
+             'lib/gstreamer-0.10/libgstflac%(sext)s',
+             'lib/gstreamer-0.10/libgstflv%(sext)s',
+             'lib/gstreamer-0.10/libgstflxdec%(sext)s',
+             'lib/gstreamer-0.10/libgstfragmented%(sext)s',
+             'lib/gstreamer-0.10/libgsthdvparse%(sext)s',
+             'lib/gstreamer-0.10/libgsticydemux%(sext)s',
+             'lib/gstreamer-0.10/libgstid3demux%(sext)s',
+             'lib/gstreamer-0.10/libgstid3tag%(sext)s',
+             'lib/gstreamer-0.10/libgstisomp4%(sext)s',
+             'lib/gstreamer-0.10/libgstivfparse%(sext)s',
+             'lib/gstreamer-0.10/libgstjpeg%(sext)s',
+             'lib/gstreamer-0.10/libgstjpegformat%(sext)s',
+             'lib/gstreamer-0.10/libgstkate%(sext)s',
+             'lib/gstreamer-0.10/libgstmad%(sext)s',
+             'lib/gstreamer-0.10/libgstmatroska%(sext)s',
+             'lib/gstreamer-0.10/libgstmpeg2dec%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegaudioparse%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegpsmux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegtsdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegtsmux%(sext)s',
+             'lib/gstreamer-0.10/libgstmulaw%(sext)s',
+             'lib/gstreamer-0.10/libgstmultipart%(sext)s',
+             'lib/gstreamer-0.10/libgstmve%(sext)s',
+             'lib/gstreamer-0.10/libgstmxf%(sext)s',
+             'lib/gstreamer-0.10/libgstnsf%(sext)s',
+             'lib/gstreamer-0.10/libgstogg%(sext)s',
+             'lib/gstreamer-0.10/libgstpcapparse%(sext)s',
+             'lib/gstreamer-0.10/libgstpng%(sext)s',
+             'lib/gstreamer-0.10/libgstpnm%(sext)s',
+             'lib/gstreamer-0.10/libgstrawparse%(sext)s',
+             'lib/gstreamer-0.10/libgstrmdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpmux%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpvp8%(sext)s',
+             'lib/gstreamer-0.10/libgstrtsp%(sext)s',
+             'lib/gstreamer-0.10/libgstschro%(sext)s',
+             'lib/gstreamer-0.10/libgstsiren%(sext)s',
+             'lib/gstreamer-0.10/libgstsmpte%(sext)s',
+             'lib/gstreamer-0.10/libgstspeex%(sext)s',
+             'lib/gstreamer-0.10/libgstsubenc%(sext)s',
+             'lib/gstreamer-0.10/libgstsubparse%(sext)s',
+             'lib/gstreamer-0.10/libgsttheora%(sext)s',
+             'lib/gstreamer-0.10/libgstvmnc%(sext)s',
+             'lib/gstreamer-0.10/libgstvorbis%(sext)s',
+             'lib/gstreamer-0.10/libgstvp8%(sext)s',
+             'lib/gstreamer-0.10/libgstwavenc%(sext)s',
+             'lib/gstreamer-0.10/libgstwavpack%(sext)s',
+             'lib/gstreamer-0.10/libgstwavparse%(sext)s',
+             'lib/gstreamer-0.10/libgsty4mdec%(sext)s',
+             'lib/gstreamer-0.10/libgsty4menc%(sext)s',
+             'lib/gstreamer-0.10/libresindvd%(sext)s',
+    ]
+
+    platform_files = {
+        Platform.WINDOWS: [
+             'lib/gstreamer-0.10/libgstdshowdecwrapper%(sext)s',
+        ]
+        Platform.DARWIN: [
+             'lib/gstreamer-0.10/libgstdshowdecwrapper%(sext)s',
+        ]
+    }
+

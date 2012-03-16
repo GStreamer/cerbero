@@ -1,0 +1,29 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-capture'
+    shortdesc = 'GStreamer plugins for capture'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = [
+             'lib/gstreamer-0.10/libgstcamerabin2%(sext)s',
+             'lib/gstreamer-0.10/libgstdataurisrc%(sext)s',
+             'lib/gstreamer-0.10/libgstrfbsrc%(sext)s',
+             'lib/gstreamer-0.10/libgstsdi%(sext)s',
+    ]
+
+    platform_files = {
+        Platform.WINDOWS: [
+             'lib/gstreamer-0.10/libgstdirectsoundsrc%(sext)s',
+             'lib/gstreamer-0.10/libgstdshowsrcwrapper%(sext)s',
+             ],
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstpulsesrc%(sext)s',
+             'lib/gstreamer-0.10/libgstv4lsrc%(sext)s',
+             ]
+    }
