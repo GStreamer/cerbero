@@ -36,10 +36,9 @@ MINGW_W64_i686_LINUX = MINGW_TARBALL_TPL % ('w64', 'i686', 'linux', 20111220, 't
 MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111219, 'zip')
 MINGW_W64_x86_64_WINDOWS = MINGW_TARBALL_TPL % ('w64', 'i686', 'mingw', 20111220, 'zip')
 MINGW_SYSROOT = {'w64':
-'''/buildslaves/mingw-w64/linux-x86_64-x86_64/build/build/root/x86_64-w64-mingw32/lib/../lib''',
+'''/hdd/m64bs/linux-x86-x86_64/build/build/root/x86_64-w64-mingw32/lib/../lib''',
                  'w32':
 '''/buildslaves/mingw-w64/linux-x86-x86/build/build/root/i686-w64-mingw32/lib/../lib'''}
-W32_x86_64_LINUX_SYSROOT = "/opt/buildbot/linux-x86_64-x86/build/build/root/i686-w64-mingw32/lib"
 
 PTHREADS_URL = \
 '''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
