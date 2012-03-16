@@ -41,10 +41,11 @@ class DistTarball(object):
 
         tar = tarfile.open(filename, "w:bz2")
         for f in self.package.get_files_list():
-            if not os.path.exists(os.path.join(self.prefix, f)):
+            filepath = os.path.join(self.prefix, f)
+            if not os.path.exists(filepath):
                 m.warning(_("File %s do not exists and won't be added to the "
-                            "package") % f)
+                            "package") % filepath)
                 continue
-            tar.add(os.path.join(self.prefix,f), f)
+            tar.add(filepath, f)
         tar.close()
         return filename
