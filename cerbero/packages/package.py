@@ -33,6 +33,8 @@ class Package(object):
     @type longdesc: str
     @cvar version: version of the package
     @type version: str
+    @cvar uuid: unique id for this package
+    @type uuid: str
     @cvar licenses:  list of the package linceses
     @type licenses: list
     @cvar vendor: vendor for this package
@@ -58,6 +60,7 @@ class Package(object):
     shortdesc = ''
     longdesc = ''
     version = ''
+    uuid = ''
     licenses = list()
     vendor = ''
     libraries = list()
