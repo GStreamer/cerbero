@@ -38,8 +38,8 @@ class Package(package.Package):
     ]
 
     platform_libraries = {
-        Platform.DARWIN: [ 'libvpx' ],
-        Platform.LINUX: [ 'libvpx' ]
+        Platform.DARWIN: ['libvpx'],
+        Platform.LINUX: ['libvpx']
     }
 
     files = [
