@@ -132,4 +132,5 @@ class Package(object):
         sfiles = shell.check_call('ls %s' % ' '.join(libsmatch),
                                  self.config.prefix, True, False, False).split('\n')
         sfiles.remove('')
-        return sfiles
+        # remove duplicates
+        return list(set(sfiles))
