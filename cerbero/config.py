@@ -29,6 +29,7 @@ CONFIG_EXT = 'cbc'
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git+ssh://git.keema.collabora.co.uk/git/gst-sdk/'
+DEFAULT_WIX_PREFIX = 'C:\\\\Program Files\\Windows Installer XML v3.5\\bin\\'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 
@@ -46,7 +47,7 @@ class Config (object):
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
-                   'packages_dir',
+                   'packages_dir', 'wix_prefix'
                    ]
 
     def __init__(self, filename=None):
@@ -207,6 +208,7 @@ class Config (object):
             self.set_property('packages_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'packages'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
+        self.set_property('wix_prefix', DEFAULT_WIX_PREFIX)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)

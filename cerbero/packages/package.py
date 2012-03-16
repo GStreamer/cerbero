@@ -60,7 +60,7 @@ class Package(object):
     shortdesc = ''
     longdesc = ''
     version = ''
-    uuid = ''
+    uuid = None
     licenses = list()
     vendor = ''
     libraries = list()
