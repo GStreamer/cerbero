@@ -115,10 +115,18 @@ class Package(object):
         libraries.extend(self.libraries)
         if self.config.target_platform in self.platform_libs:
             libraries.extend(self.platform_libs[self.config.target_platform])
+        if len(libraries) == 0:
+            return []
+
+        pattern = '%(sdir)s/%(file)s*%(sext)s'
+        if self.config.target_platform == Platform.LINUX:
+            # libfoo.so.X, libfoo.so.X.Y.Z
+            pattern += '.*'
+
         libsmatch = []
         for f in libraries:
             self.extensions['file'] = f
-            libsmatch.append('%(sdir)s/%(file)s*%(sext)s' % self.extensions)
+            libsmatch.append(pattern % self.extensions)
         # FIXME: I think's that's the fastest way of getting the list of
         # libraries that matches the library name
         sfiles = shell.check_call('ls %s' % ' '.join(libsmatch),
