@@ -30,12 +30,15 @@ from cerbero.packages.wix import MergeModule
 class DummyConfig(object):
     prefix = '/test/'
     target_platform = Platform.WINDOWS
+    platform = None
+    wix_prefix = ''
 
 
 class Package(package.Package):
 
     name = 'gstreamer-test'
     shortdesc = 'GStreamer Test'
+    longdesc = 'test'
     version = '1.0'
     licences = ['LGPL']
     uuid = '1'
@@ -46,37 +49,36 @@ class Package(package.Package):
 
 MERGE_MODULE = \
 '''<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="gstreamer-test" Version="1.0">
-    <Package Id="1" Description="GStreamer Test" Comments="" Manufacturer="GStreamer Project">
-      <Directory Id="TARGETDIR" Name="SourceDir">
-        <Directory Id="bin" Name="bin">
-          <Component Id="bin_test.exe" Guid="1">
-            <File Id="bin_testexe" Name="test.exe" Source="/test/bin/test.exe"/>
-          </Component>
-          <Component Id="bin_test2.exe" Guid="1">
-            <File Id="bin_test2exe" Name="test2.exe" Source="/test/bin/test2.exe"/>
-          </Component>
-          <Component Id="bin_test3.exe" Guid="1">
-            <File Id="bin_test3exe" Name="test3.exe" Source="/test/bin/test3.exe"/>
-          </Component>
-        </Directory>
-        <Component Id="README" Guid="1">
-          <File Id="README" Name="README" Source="/test/README"/>
+  <Module Id="gstreamer_test" Version="1.0" Language="1033">
+    <Package Id="1" Description="GStreamer Test" Comments="test" Manufacturer="GStreamer Project"/>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="bin" Name="bin">
+        <Component Id="bin_test.exe" Guid="1">
+          <File Id="bin_testexe" Name="test.exe" Source="/test/bin/test.exe"/>
         </Component>
-        <Directory Id="lib" Name="lib">
-          <Component Id="lib_libfoo.dll" Guid="1">
-            <File Id="lib_libfoodll" Name="libfoo.dll" Source="/test/lib/libfoo.dll"/>
+        <Component Id="bin_test2.exe" Guid="1">
+          <File Id="bin_test2exe" Name="test2.exe" Source="/test/bin/test2.exe"/>
+        </Component>
+        <Component Id="bin_test3.exe" Guid="1">
+          <File Id="bin_test3exe" Name="test3.exe" Source="/test/bin/test3.exe"/>
+        </Component>
+      </Directory>
+      <Component Id="README" Guid="1">
+        <File Id="README" Name="README" Source="/test/README"/>
+      </Component>
+      <Directory Id="lib" Name="lib">
+        <Component Id="lib_libfoo.dll" Guid="1">
+          <File Id="lib_libfoodll" Name="libfoo.dll" Source="/test/lib/libfoo.dll"/>
+        </Component>
+        <Directory Id="lib_gstreamer_0.10" Name="lib_gstreamer_0.10">
+          <Component Id="lib_gstreamer_0.10_libgstplugins.dll" Guid="1">
+            <File Id="lib_gstreamer_010_libgstpluginsdll" Name="libgstplugins.dll" Source="/test/lib/gstreamer-0.10/libgstplugins.dll"/>
           </Component>
-          <Directory Id="lib_gstreamer-0.10" Name="lib_gstreamer-0.10">
-            <Component Id="lib_gstreamer-0.10_libgstplugins.dll" Guid="1">
-              <File Id="lib_gstreamer-010_libgstpluginsdll" Name="libgstplugins.dll" Source="/test/lib/gstreamer-0.10/libgstplugins.dll"/>
-            </Component>
-          </Directory>
         </Directory>
       </Directory>
-    </Package>
+    </Directory>
   </Module>
-</Wix>'''
+</Wix>\n'''
 
 class MergeModuleTest(unittest.TestCase):
 
@@ -96,7 +98,7 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule._add_module()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer-test" Version="1.0"/>'
+                '<Module Id="gstreamer_test" Version="1.0" Language="1033"/>'
             '</Wix>', etree.tostring(mergemodule.root))
 
     def test_add_package(self):
@@ -106,8 +108,8 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule._add_package()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer-test" Version="1.0">'
-                    '<Package Id="1" Description="GStreamer Test" Comments="" '
+                '<Module Id="gstreamer_test" Version="1.0" Language="1033">'
+                    '<Package Id="1" Description="GStreamer Test" Comments="test" '
                     'Manufacturer="GStreamer Project"/>'
                 '</Module>'
             '</Wix>', etree.tostring(mergemodule.root))
@@ -120,11 +122,10 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule._add_root_dir()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer-test" Version="1.0">'
-                    '<Package Id="1" Description="GStreamer Test" Comments="" '
-                    'Manufacturer="GStreamer Project">'
-                        '<Directory Id="TARGETDIR" Name="SourceDir"/>'
-                    '</Package>'
+                '<Module Id="gstreamer_test" Version="1.0" Language="1033">'
+                    '<Package Id="1" Description="GStreamer Test" Comments="test" '
+                    'Manufacturer="GStreamer Project"/>'
+                    '<Directory Id="TARGETDIR" Name="SourceDir"/>'
                 '</Module>'
             '</Wix>', etree.tostring(mergemodule.root))
 
@@ -165,4 +166,4 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule = MergeModule(self.config, self.package)
         mergemodule._get_uuid = lambda : '1'
         mergemodule.fill()
-        self.assertTrue(MERGE_MODULE, mergemodule.render_xml())
+        self.assertEquals(MERGE_MODULE, mergemodule.render_xml())
