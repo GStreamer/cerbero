@@ -88,7 +88,8 @@ class Package(object):
 
     def _get_files(self):
         # Fille the list of regular files
-        files = self.files
+        files = []
+        files.extend(self.files)
         if self.config.target_platform in self.platform_files:
             files.extend(self.platform_files[self.config.target_platform])
         return [f % self.extensions for f in files]
@@ -96,7 +97,8 @@ class Package(object):
     def _get_binaries(self):
         files = []
         # Fill the list of binaries
-        binaries = self.binaries
+        binaries = []
+        binaries.extend(self.binaries)
         if self.config.target_platform in self.platform_bins:
             binaries.extend(self.platform_bins[self.config.target_platform])
         for f in binaries:
@@ -109,7 +111,8 @@ class Package(object):
         # Unfortunately the filename might vary depending on the platform and we
         # need to match the library name and it's extension with the list of
         # files in the prefix
-        libraries = self.libraries
+        libraries = []
+        libraries.extend(self.libraries)
         if self.config.target_platform in self.platform_libs:
             libraries.extend(self.platform_libs[self.config.target_platform])
         libsmatch = []
