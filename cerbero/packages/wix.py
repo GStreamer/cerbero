@@ -164,6 +164,7 @@ class MergeModule(WixBase):
 
 
 class Candle(object):
+    ''' Compile WiX objects with candle '''
 
     cmd = '%(wine)s %(q)s%(prefix)s/candle.exe%(q)s %(source)s'
 
@@ -183,6 +184,7 @@ class Candle(object):
 
 
 class Light(object):
+    ''' Compile WiX objects with light'''
 
     cmd = '%(wine)s %(q)s%(prefix)s/light.exe%(q)s %(objects)s -o '\
           '%(msi)s.%(ext)s -sval'
