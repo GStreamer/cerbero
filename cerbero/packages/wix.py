@@ -27,13 +27,7 @@ from cerbero.utils import shell
 from cerbero.config import Platform
 
 
-class MergeModule(object):
-    '''
-    Creates WiX merge modules from cerbero packages
-
-    @ivar package: package with the info to build the merge package
-    @type pacakge: L{cerbero.packages.package.Package}
-    '''
+class WixBase(object):
 
     def __init__(self, config, package):
         self.platform = config.platform
@@ -44,23 +38,57 @@ class MergeModule(object):
             self.prefix = config.prefix
         self.wix_prefix = config.wix_prefix
         self.package = package
-        self.files_list = package.get_files_list()
-        self._dirnodes = {}
         self.filled = False
 
     def fill(self):
         if self.filled:
             return
-        self._add_root()
-        self._add_module()
-        self._add_package()
-        self._add_root_dir()
-        self._add_files()
+        self._fill()
         self.filled = True
 
     def render_xml(self):
         self.fill()
         return etree.tostring(self.root, pretty_print=True)
+
+    def _set(self, node, **kwargs):
+        for key in sorted(kwargs.keys()):
+            value = kwargs[key]
+            if value is None or value is "":
+                return
+            node.set(key, value)
+
+    def _add_root(self):
+        self.root = etree.Element("Wix")
+        self._set(self.root, xmlns='http://schemas.microsoft.com/wix/2006/wi')
+
+    def _to_wine_path(self, path):
+        path = path.replace('/', '\\\\')
+        # wine maps the filesystem root '/' to 'z:\'
+        path = 'z:\\%s' % path
+        return path
+
+    def _format_id(self, path, replace_dots=False):
+        ret = path.replace('/', '_').replace('-', '_')
+        if replace_dots:
+            ret = ret.replace('.', '')
+        return ret
+
+    def _get_uuid(self):
+        return "%s" % uuid.uuid1()
+
+
+class MergeModule(WixBase):
+    '''
+    Creates WiX merge modules from cerbero packages
+
+    @ivar package: package with the info to build the merge package
+    @type pacakge: L{cerbero.packages.package.Package}
+    '''
+
+    def __init__(self, config, package):
+        WixBase.__init__(self, config, package)
+        self.files_list = package.get_files_list()
+        self._dirnodes = {}
 
     def build(self, output_dir):
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
@@ -78,38 +106,29 @@ class MergeModule(object):
         light = Light(self.wix_prefix, self._with_wine)
         light.compile(wixobj, self.package.name, output_dir, True)
 
-    def _to_wine_path(self, path):
-        path = path.replace('/', '\\\\')
-        # wine maps the filesystem root '/' to 'z:\'
-        path = 'z:\\%s' % path
-        return path
-
-    def _set(self, node, key, value):
-        if value is None or value is "":
-            return
-        node.set(key, value)
-
-    def _add_root(self):
-        self.root = etree.Element("Wix")
-        self._set(self.root, 'xmlns', 'http://schemas.microsoft.com/wix/2006/wi')
+    def _fill(self):
+        self._add_root()
+        self._add_module()
+        self._add_package()
+        self._add_root_dir()
+        self._add_files()
 
     def _add_module(self):
         self.module = etree.SubElement(self.root, "Module")
-        self._set(self.module, 'Id', self._format_id(self.package.name))
-        self._set(self.module, 'Version', self.package.version)
-        self._set(self.module, 'Language', '1033')
+        self._set(self.module, Id=self._format_id(self.package.name),
+                               Version=self.package.version,
+                               Language= '1033')
 
     def _add_package(self):
         self.pkg = etree.SubElement(self.module, "Package")
-        self._set(self.pkg, 'Id', self.package.uuid or self._get_uuid())
-        self._set(self.pkg, 'Description', self.package.shortdesc)
-        self._set(self.pkg, 'Comments', self.package.longdesc)
-        self._set(self.pkg, 'Manufacturer', self.package.vendor)
+        self._set(self.pkg, Id=self.package.uuid or self._get_uuid(),
+                            Description=self.package.shortdesc,
+                            Comments=self.package.longdesc,
+                            Manufacturer=self.package.vendor)
 
     def _add_root_dir(self):
         self.rdir = etree.SubElement(self.module, "Directory")
-        self._set(self.rdir, 'Id', 'TARGETDIR')
-        self._set(self.rdir, 'Name', 'SourceDir')
+        self._set(self.rdir, Id='TARGETDIR', Name='SourceDir')
         self._dirnodes[''] = self.rdir
 
     def _add_files(self):
@@ -128,8 +147,8 @@ class MergeModule(object):
 
         parent = self._dirnodes[parentpath]
         dirnode = etree.SubElement(parent, "Directory")
-        self._set(dirnode, 'Id', self._format_id(dirpath))
-        self._set(dirnode, 'Name', self._format_id(dirpath))
+        self._set(dirnode, Id=self._format_id(dirpath),
+                           Name=self._format_id(dirpath))
         self._dirnodes[dirpath] = dirnode
 
     def _add_file(self, filepath):
@@ -137,21 +156,11 @@ class MergeModule(object):
         self._add_directory(dirpath)
         dirnode = self._dirnodes[dirpath]
         component = etree.SubElement(dirnode, 'Component')
-        self._set(component, 'Id', self._format_id(filepath))
-        self._set(component, 'Guid', self._get_uuid())
+        self._set(component, Id=self._format_id(filepath),
+                             Guid=self._get_uuid())
         filenode = etree.SubElement(component, 'File')
-        self._set(filenode, 'Id', self._format_id(filepath, True))
-        self._set(filenode, 'Name', filename)
-        self._set(filenode, 'Source', os.path.join(self.prefix, filepath))
-
-    def _format_id(self, path, replace_dots=False):
-        ret = path.replace('/', '_').replace('-', '_')
-        if replace_dots:
-            ret = ret.replace('.', '')
-        return ret
-
-    def _get_uuid(self):
-        return "%s" % uuid.uuid1()
+        self._set(filenode, Id=self._format_id(filepath, True), Name=filename,
+                            Source=os.path.join(self.prefix, filepath))
 
 
 class Candle(object):
