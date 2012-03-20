@@ -125,6 +125,9 @@ class Config (object):
         xcursordir = os.path.join(self.prefix, 'share', 'icons')
         aclocaldir = os.path.join(self.prefix, 'share', 'aclocal')
         perl5lib = os.path.join(self.prefix, 'lib', 'perl5')
+        gstpluginpath = os.path.join(self.prefix, 'lib', 'gstreamer-0.10')
+        gstregistry = os.path.join(os.path.expanduser('~'), '.gstreamer-0.10',
+                                    '.cerbero-registry-%s' % self.target_arch)
 
         self._create_path(aclocaldir)
 
@@ -148,6 +151,8 @@ class Config (object):
                'PERL5LIB': perl5lib,
                'MONO_PREFIX': self.prefix,
                'MONO_GAC_PREFIX': self.prefix,
+               'GST_PLUGIN_PATH': gstpluginpath,
+               'GST_REGISTRY': gstregistry,
                }
 
         # set all the variables
