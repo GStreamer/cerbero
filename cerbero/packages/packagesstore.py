@@ -68,6 +68,21 @@ class PackagesStore (object):
             raise PackageNotFoundError(name)
         return self.packages[name]
 
+    def get_package_deps(self, package_name):
+        '''
+        Gets the dependencies of a package
+
+        @param name: name of the package
+        @type name: str
+        @return: a list with the package dependencies
+        @rtype: list 
+        '''
+        p = self.get_package(package_name)
+        if isinstance(p, package.MetaPackage):
+            return map(lambda x: x.name, self._list_metapackage_deps(p))
+        else:
+            return p.deps
+
     def get_package_files_list(self, name):
         '''
         Gets the list of files provided by a package
@@ -84,14 +99,7 @@ class PackagesStore (object):
         else:
             return p.get_files_list()
 
-    def _list_metapackage_files(self, metapackage):
-        l = []
-        for p in self._list_metapackage_packages(metapackage):
-            l.extend(p.get_files_list())
-        # remove duplicates and sort
-        return sorted(list(set(l)))
-
-    def _list_metapackage_packages(self, metapackage):
+    def _list_metapackage_deps(self, metapackage):
 
         def get_package_deps(package_name, visited=[], depslist=[]):
             if package_name in visited:
@@ -107,6 +115,13 @@ class PackagesStore (object):
         for p in metapackage.list_packages():
             deps.extend(get_package_deps(p, [], []))
         return list(set(deps))
+
+    def _list_metapackage_files(self, metapackage):
+        l = []
+        for p in self._list_metapackage_deps(metapackage):
+            l.extend(p.get_files_list())
+        # remove duplicates and sort
+        return sorted(list(set(l)))
 
     def _load_packages(self):
         self.packages = {}
