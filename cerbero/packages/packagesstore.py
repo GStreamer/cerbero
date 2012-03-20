@@ -87,7 +87,10 @@ class PackagesStore (object):
                  'Distro': Distro, 'DistroVersion': DistroVersion,
                  'package': package}
             execfile(filepath, d)
-            p = d['Package'](self._config)
+            if 'Package' in d:
+                p = d['Package'](self._config)
+            elif 'MetaPackage' in d:
+                p = d['MetaPackage'](self._config)
             return p
         except Exception, ex:
             import traceback

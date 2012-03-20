@@ -20,10 +20,9 @@ from cerbero.config import Platform
 from cerbero.utils import shell
 
 
-class Package(object):
+class PackageDescription(object):
     '''
-    Describes a set of files to produce disctribution packages for the different
-    target platforms
+    Common field to describe a package
 
     @cvar name: name of the package
     @type name: str
@@ -35,10 +34,28 @@ class Package(object):
     @type version: str
     @cvar uuid: unique id for this package
     @type uuid: str
-    @cvar licenses:  list of the package linceses
+    @cvar licenses:  list of the package licenses
     @type licenses: list
     @cvar vendor: vendor for this package
     @type vendor: str
+    @cvar url: url for this pacakge
+    @type url: str
+    '''
+    name = ''
+    shortdesc = ''
+    longdesc = ''
+    version = ''
+    uuid = None
+    licenses = list()
+    vendor = ''
+    url = ''
+
+
+class Package(PackageDescription):
+    '''
+    Describes a set of files to produce disctribution packages for the different
+    target platforms
+
     @cvar libraries: list of libraries
     @type libraries: list
     @cvar platform_libs: list of platform dependant libraries
@@ -56,13 +73,6 @@ class Package(object):
     @type bext: dict
     '''
 
-    name = ''
-    shortdesc = ''
-    longdesc = ''
-    version = ''
-    uuid = None
-    licenses = list()
-    vendor = ''
     libraries = list()
     platform_libs = {}
     binaries = list()
@@ -134,3 +144,23 @@ class Package(object):
         sfiles.remove('')
         # remove duplicates
         return list(set(sfiles))
+
+
+class MetaPackage(PackageDescription):
+    '''
+    Group of packages used to build an installer package
+
+    @cvar packages: list of packages grouped in this meta package
+    @type packages: list
+    @cvar icon: filename of the package icon
+    @type icon: str
+    @cvar install_dir: dictionary with the installation paths for all platforms
+    @type install_dir: str
+    '''
+
+    icon = None
+    install_dir = {}
+    packages =[]
+
+    def __init__(self, config):
+        self.config = config
