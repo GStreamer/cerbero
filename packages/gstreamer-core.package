@@ -27,7 +27,7 @@ class Package(package.Package):
                  'libgstvideo-0.10',]
 
     files = [
-             'libexec/gstreamer-0.10/gst-plugin-scanner%(bext)s'
+             'libexec/gstreamer-0.10/gst-plugin-scanner%(bext)s',
              'lib/gstreamer-0.10/libgstadder%(sext)s',
              'lib/gstreamer-0.10/libgstapp%(sext)s',
              'lib/gstreamer-0.10/libgstaudioconvert%(sext)s',
