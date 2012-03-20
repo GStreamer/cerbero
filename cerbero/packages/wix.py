@@ -176,6 +176,8 @@ class Installer(WixBase):
     @type package: L{cerbero.packages.package.MetaPackage}
     '''
 
+    UI_EXT = '-ext WixUIExtension'
+
     def __init__(self, config, package):
         WixBase.__init__(self, config, package)
         self.store = PackagesStore(config)
@@ -204,7 +206,7 @@ class Installer(WixBase):
 
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(sources, output_dir)
-        light = Light(self.wix_prefix, self._with_wine)
+        light = Light(self.wix_prefix, self._with_wine, self.UI_EXT)
         light.compile(wixobjs, self.package.name, output_dir)
 
     def _fill(self):
@@ -296,11 +298,12 @@ class Light(object):
     ''' Compile WiX objects with light'''
 
     cmd = '%(wine)s %(q)s%(prefix)s/light.exe%(q)s %(objects)s -o '\
-          '%(msi)s.%(ext)s -sval'
+          '%(msi)s.%(ext)s -sval %(extra)s'
 
-    def __init__(self, wix_prefix, with_wine):
+    def __init__(self, wix_prefix, with_wine, extra=''):
         self.options = {}
         self.options['prefix'] = wix_prefix
+        self.options['extra'] = extra
         if with_wine:
             self.options['wine'] = 'wine'
             self.options['q'] = '"'
