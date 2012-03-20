@@ -20,9 +20,9 @@ from cerbero.config import Platform
 from cerbero.utils import shell
 
 
-class PackageDescription(object):
+class PackageBase(object):
     '''
-    Common field to describe a package
+    Base class for packages with the common field to describe a package
 
     @cvar name: name of the package
     @type name: str
@@ -51,7 +51,7 @@ class PackageDescription(object):
     url = ''
 
 
-class Package(PackageDescription):
+class Package(PackageBase):
     '''
     Describes a set of files to produce disctribution packages for the different
     target platforms
@@ -146,7 +146,7 @@ class Package(PackageDescription):
         return list(set(sfiles))
 
 
-class MetaPackage(PackageDescription):
+class MetaPackage(PackageBase):
     '''
     Group of packages used to build an installer package
 
