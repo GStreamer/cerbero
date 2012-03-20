@@ -55,7 +55,7 @@ class WixBase(object):
         for key in sorted(kwargs.keys()):
             value = kwargs[key]
             if value is None or value is "":
-                return
+                continue
             node.set(key, value)
 
     def _add_root(self):
