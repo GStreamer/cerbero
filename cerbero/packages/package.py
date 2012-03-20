@@ -163,7 +163,13 @@ class MetaPackage(PackageBase):
 
     icon = None
     install_dir = {}
-    packages =[]
+    packages = []
 
     def __init__(self, config):
         self.config = config
+
+    def list_packages(self):
+        plist = []
+        for l in self.packages.values():
+            plist.extend(map(lambda x: x[0], l))
+        return plist

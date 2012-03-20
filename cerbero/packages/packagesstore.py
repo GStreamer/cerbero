@@ -22,7 +22,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 from cerbero.packages import package
 from cerbero.build import BuildType
 from cerbero.source import SourceType
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, PackageNotFoundError
 from cerbero.utils import _
 from cerbero.utils import messages as m
 
@@ -65,8 +65,48 @@ class PackagesStore (object):
         @rtype: L{cerbero.packages.package.Package}
         '''
         if name not in self.packages:
-            return None
+            raise PackageNotFoundError(name)
         return self.packages[name]
+
+    def get_package_files_list(self, name):
+        '''
+        Gets the list of files provided by a package
+
+        @param name: name of the package
+        @type name: str
+        @return: the package instance
+        @rtype: L{cerbero.packages.package.PackageBase}
+        '''
+        p = self.get_package(name)
+
+        if isinstance(p, package.MetaPackage):
+            return self._list_metapackage_files(p)
+        else:
+            return p.get_files_list()
+
+    def _list_metapackage_files(self, metapackage):
+        l = []
+        for p in self._list_metapackage_packages(metapackage):
+            l.extend(p.get_files_list())
+        # remove duplicates and sort
+        return sorted(list(set(l)))
+
+    def _list_metapackage_packages(self, metapackage):
+
+        def get_package_deps(package_name, visited=[], depslist=[]):
+            if package_name in visited:
+                return
+            visited.append(package_name)
+            p = self.get_package(package_name)
+            depslist.append(p)
+            for p_name in p.deps:
+                get_package_deps(p_name, visited, depslist)
+            return depslist
+
+        deps = []
+        for p in metapackage.list_packages():
+            deps.extend(get_package_deps(p, [], []))
+        return list(set(deps))
 
     def _load_packages(self):
         self.packages = {}
