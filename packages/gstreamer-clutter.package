@@ -9,6 +9,7 @@ class Package(package.Package):
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'
+    deps = ['gstreamer-core']
 
     libraries = [
                  'libcogl',

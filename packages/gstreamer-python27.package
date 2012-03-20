@@ -9,6 +9,7 @@ class Package(package.Package):
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'
+    deps = ['gobject-python27']
 
     files = [
              'lib/Python27/Lib/site-packages/gstoption%(sext)s',

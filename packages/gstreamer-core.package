@@ -9,6 +9,7 @@ class Package(package.Package):
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'
+    deps = ['base-deps']
 
     binaries = ['gst-feedback', 'gst-discoverer-0.10',
                 'gst-inspect', 'gst-inspect-0.10',
