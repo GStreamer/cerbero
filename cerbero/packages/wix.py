@@ -23,7 +23,9 @@ try:
 except ImportError:
     import xml.etree.cElementTree as etree
 
+from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import shell
+from cerbero.errors import PackageNotFoundError
 from cerbero.config import Platform
 
 
@@ -31,6 +33,8 @@ class WixBase(object):
 
     def __init__(self, config, package):
         self.platform = config.platform
+        self.target_platform = config.target_platform
+        self.config = config
         self._with_wine = self.platform != Platform.WINDOWS
         if self._with_wine:
             self.prefix = self._to_wine_path(config.prefix)
@@ -104,7 +108,7 @@ class MergeModule(WixBase):
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(sources, output_dir)
         light = Light(self.wix_prefix, self._with_wine)
-        light.compile(wixobj, self.package.name, output_dir, True)
+        light.compile([wixobj], self.package.name, output_dir, True)
 
     def _fill(self):
         self._add_root()
@@ -160,7 +164,111 @@ class MergeModule(WixBase):
                              Guid=self._get_uuid())
         filenode = etree.SubElement(component, 'File')
         self._set(filenode, Id=self._format_id(filepath, True), Name=filename,
-                            Source=os.path.join(self.prefix, filepath))
+                            Source=wfilepath)
+
+
+class Installer(WixBase):
+    '''Creates an installer package from a
+       L{cerbero.packages.package.MetaPackage}
+
+    @ivar package: meta package used to create the installer package
+    @type package: L{cerbero.packages.package.MetaPackage}
+    '''
+
+    def __init__(self, config, package):
+        WixBase.__init__(self, config, package)
+        self.store = PackagesStore(config)
+
+    def build(self, output_dir):
+        output_dir = os.path.realpath(output_dir)
+        mergemodules = []
+        for p in self.package.packages:
+            package = self.store.get_package(p)
+            if package is None:
+                raise PackageNotFoundError(p)
+            mergemodule = MergeModule(self.config, package)
+            mergemodule.build(output_dir)
+            mergemodules.append('%s.msm' % package.name)
+
+        sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
+        with open(sources, 'wb') as f:
+            f.write(self.render_xml())
+
+        wixobjs = [os.path.join(output_dir, "%s.wixobj" % self.package.name)]
+        wixobjs.append(os.path.join(output_dir, "ui.wixobj"))
+
+        if self._with_wine:
+            wixobjs = [self._to_wine_path(x) for x in wixobjs]
+            sources = self._to_wine_path(sources)
+
+        candle = Candle(self.wix_prefix, self._with_wine)
+        candle.compile(sources, output_dir)
+        light = Light(self.wix_prefix, self._with_wine)
+        light.compile(wixobjs, self.package.name, output_dir)
+
+    def _fill(self):
+        self._add_root()
+        self._add_product()
+        self._add_package()
+        self._add_install_dir()
+        self._add_ui_props()
+        self._add_media()
+        self._add_merge_modules()
+
+    def _add_product(self):
+        self.product = etree.SubElement(self.root, "Product")
+        self._set(self.product, Id=self.package.uuid or self._get_uuid(),
+                                Version=self.package.version,
+                                UpgradeCode=self.package.uuid,
+                                Language='1033', Name=self.package.name,
+                                Manufacturer=self.package.vendor)
+
+    def _add_package(self):
+        self.pkg = etree.SubElement(self.product, "Package")
+        self._set(self.pkg, Description=self.package.shortdesc,
+                            Comments=self.package.longdesc,
+                            Manufacturer=self.package.vendor)
+
+    def _add_dir(self, parent, dir_id, name):
+        tdir = etree.SubElement(parent, "Directory")
+        self._set(tdir, Id=dir_id, Name=name)
+        return tdir
+
+    def _add_install_dir(self):
+        tdir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
+        pfdir = self._add_dir(tdir, 'ProgramFilesFolder', 'PFiles')
+        install_dir = self.package.install_dir[self.target_platform]
+        sdkdir = self._add_dir(pfdir, self._format_id(install_dir),
+                               install_dir)
+        self.installdir = self._add_dir(sdkdir, 'INSTALLDIR', '.')
+
+    def _add_merge_modules(self):
+        self.main_feature = etree.SubElement(self.product, "Feature")
+        self._set(self.main_feature, Id=self._format_id(self.package.name),
+                  Title=self.package.title, Level='1', Display="expand",
+                  AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
+
+        for p in self.package.packages:
+            package = self.store.get_package(p)
+            if not package:
+                raise PackageNotFoundError(p)
+            self._add_merge_module(package)
+
+    def _add_ui_props(self):
+        prop = etree.SubElement(self.product, 'Property')
+        self._set(prop, Id='WIXUI_INSTALLDIR', Value='INSTALLDIR')
+
+    def _add_media(self):
+        prop = etree.SubElement(self.product, 'Media')
+        self._set(prop, Id='1', Cabinet='product.cab', EmbedCab='yes')
+
+    def _add_merge_module(self, package):
+        mergemodule = etree.SubElement(self.installdir, 'Merge')
+        self._set(mergemodule, Id=self._format_id(package.name),
+                  Language='1033', SourceFile='%s.msm' % package.name,
+                  DiskId='1')
+        mergeref = etree.SubElement(self.main_feature, "MergeRef")
+        self._set(mergeref, Id=self._format_id(package.name))
 
 
 class Candle(object):
@@ -199,8 +307,8 @@ class Light(object):
             self.options['wine'] = ''
             self.options['q'] = ''
 
-    def compile(self, objects, msi_file, output_dir, merge_module=True):
-        self.options['objects'] = objects
+    def compile(self, objects, msi_file, output_dir, merge_module=False):
+        self.options['objects'] = ' '.join(objects)
         self.options['msi'] = msi_file
         if merge_module:
             self.options['ext'] = 'msm'
