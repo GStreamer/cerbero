@@ -36,10 +36,7 @@ class WixBase(object):
         self.target_platform = config.target_platform
         self.config = config
         self._with_wine = self.platform != Platform.WINDOWS
-        if self._with_wine:
-            self.prefix = self._to_wine_path(config.prefix)
-        else:
-            self.prefix = config.prefix
+        self.prefix = config.prefix
         self.wix_prefix = config.wix_prefix
         self.package = package
         self.filled = False
@@ -95,6 +92,7 @@ class MergeModule(WixBase):
         self._dirnodes = {}
 
     def build(self, output_dir):
+        output_dir = os.path.realpath(output_dir)
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
         with open(sources, 'wb') as f:
             f.write(self.render_xml())
@@ -163,6 +161,9 @@ class MergeModule(WixBase):
         self._set(component, Id=self._format_id(filepath),
                              Guid=self._get_uuid())
         filenode = etree.SubElement(component, 'File')
+        filepath = os.path.join(self.prefix, filepath)
+        if self._with_wine:
+            wfilepath = self._to_wine_path(filepath)
         self._set(filenode, Id=self._format_id(filepath, True), Name=filename,
                             Source=wfilepath)
 
