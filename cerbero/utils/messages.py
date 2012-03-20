@@ -32,7 +32,7 @@ def error(msg):
 
 
 def warning(msg):
-    message("WARNING: %s" % msg)
+    error("WARNING: %s" % msg)
 
 
 def action(msg):
