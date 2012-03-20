@@ -37,10 +37,10 @@ class Package(package.Package):
                  'libwavpack',
     ]
 
-    platform_libraries = [
-        Platform.DARWIN: ['libvpx'],
-        Platform.UNIX: ['libvpx']
-    ]
+    platform_libraries = {
+        Platform.DARWIN: [ 'libvpx' ],
+        Platform.LINUX: [ 'libvpx' ]
+    }
 
     files = [
              'lib/gstreamer-0.10/libgstadpcmdec%(sext)s',
@@ -120,7 +120,7 @@ class Package(package.Package):
     platform_files = {
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstdshowdecwrapper%(sext)s',
-        ]
+        ],
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgstdshowdecwrapper%(sext)s',
         ]

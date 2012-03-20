@@ -20,10 +20,10 @@ class Package(package.Package):
     platform_libraries = {
         Platform.WINDOWS: [
              'libclutter-win32',
-        ]
+        ],
         Platform.DARWIN: [
              'libclutter-osx',
-        ]
+        ],
         Platform.LINUX: [
              'libclutter-x11',
         ]
