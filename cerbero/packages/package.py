@@ -68,6 +68,8 @@ class Package(PackageBase):
     @type type: files
     @cvar platform_files: list of files included for a specific platform
     @type type: dict
+    @cvar deps: list of packages dependencies
+    @type deps: list
 
     @ivar extensions: file extensions for binaries and shared libraries
     @type bext: dict
@@ -79,6 +81,7 @@ class Package(PackageBase):
     platform_bins = {}
     files = list()
     platform_files = {}
+    deps = list()
 
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin'},
