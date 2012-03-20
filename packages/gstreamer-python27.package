@@ -1,0 +1,29 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-python27'
+    shortdesc = 'GStreamer python bingings'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = [
+             'lib/Python27/Lib/site-packages/gstoption%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/audio%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/_gst%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/__init__.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/interfaces%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/pbutils%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/tag%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/video%(sext)s',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/discoverer.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/__init__.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/jukebox.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/leveller.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/sources.py',
+             'lib/Python27/Lib/site-packages/gst-0.10/gst/extend/utils.py',
+             'lib/Python27/Lib/site-packages/pygst.py',
+    ]
