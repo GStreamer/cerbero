@@ -32,7 +32,7 @@ class Package(Command):
         Command.__init__(self,
             [ArgparseArgument('package', nargs=1,
                              help=_('name of the package to create')),
-            ArgparseArgument('-o', '--output-dir', action='store_true', default=False,
+            ArgparseArgument('-o', '--output-dir', default='.',
                              help=_('Output directory for the tarball file')),
             ArgparseArgument('-t', '--tarball', action='store_true', default=False,
                              help=_('Creates a tarball instead of a native '
