@@ -16,7 +16,7 @@ class Package(package.Package):
                  'libgmp',
                  'libgnutls',
                  'libgnutls-openssl',
-                 'libgpg-error'
+                 'libgpg-error',
                  'libshout',
                  'libsoup',
                  'libtasn1',
