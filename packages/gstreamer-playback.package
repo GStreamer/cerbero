@@ -11,6 +11,10 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     deps = ['gstreamer-core']
 
+    libraries = [
+                 'libvisual'
+    ]
+
     files = [
              'lib/gstreamer-0.10/libgstaudiovisualizers%(sext)s',
              'lib/gstreamer-0.10/libgstdecodebin2%(sext)s',
@@ -26,10 +30,10 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstpulsesink%(sext)s',
              'lib/gstreamer-0.10/libgstximagesink%(sext)s',
              'lib/gstreamer-0.10/libgstxvimagesink%(sext)s',
-	],
+        ],
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstdirectsoundsink%(sext)s',
              'lib/gstreamer-0.10/libgstdirectdrawsink%(sext)s',
              'lib/gstreamer-0.10/libgstd3dvideosink%(sext)s',
-	]
+        ]
     }
