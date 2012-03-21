@@ -31,11 +31,11 @@ class PackagesStore (object):
     '''
     Stores a list of L{cerbero.packages.package.Package}
 
-    @ivar packages: L{cerbero.packages.package.Package} availables
-    @type packages: dict
+    @ivar _packages: L{cerbero.packages.package.Package} availables
+    @type _packages: dict
     '''
 
-    packages = {}  # package_name -> package
+    _packages = {}  # package_name -> package
 
     def __init__(self, config):
         self._config = config
@@ -51,7 +51,7 @@ class PackagesStore (object):
         @return: list of packages
         @rtype: list
         '''
-        packages = self.packages.values()
+        packages = self._packages.values()
         packages.sort(key=lambda x: x.name)
         return packages
 
@@ -64,9 +64,9 @@ class PackagesStore (object):
         @return: the package instance
         @rtype: L{cerbero.packages.package.Package}
         '''
-        if name not in self.packages:
+        if name not in self._packages:
             raise PackageNotFoundError(name)
-        return self.packages[name]
+        return self._packages[name]
 
     def get_package_deps(self, package_name):
         '''
@@ -99,6 +99,15 @@ class PackagesStore (object):
         else:
             return p.get_files_list()
 
+    def add_package(self, package):
+        '''
+        Adds a new package to the store
+
+        @param package: the package to add
+        @type  package: L{cerbero.packages.package.PackageBase}
+        '''
+        self._packages[package.name] = package
+
     def _list_metapackage_deps(self, metapackage):
 
         def get_package_deps(package_name, visited=[], depslist=[]):
@@ -124,7 +133,7 @@ class PackagesStore (object):
         return sorted(list(set(l)))
 
     def _load_packages(self):
-        self.packages = {}
+        self._packages = {}
         for f in os.listdir(self._config.packages_dir):
             filepath = os.path.join(self._config.packages_dir, f)
             p = self._load_package_from_file(filepath)
@@ -132,7 +141,7 @@ class PackagesStore (object):
                 m.warning(_("Could not found a valid package in %s") %
                                 f)
                 continue
-            self.packages[p.name] = p
+            self.add_package(p)
 
     def _load_package_from_file(self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
