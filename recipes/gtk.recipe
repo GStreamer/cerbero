@@ -10,3 +10,11 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-papi --disable-cups --with-included-immodules'
 
+    def post_install(self):
+        theme = "Clearlooks"
+        if self.config.target_platform == Platform.WINDOWS:
+            theme = "MS-Windows"
+        gtkrc = 'gtk-theme-name = "%s"\n '\
+                'gtk-fallback-icon-theme = "Tango"' % theme
+        with open(os.path.join(self.config.prefix, 'etc', 'gtkrc'), 'w') as f:
+            f.write(gtkrc)
