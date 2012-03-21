@@ -23,6 +23,7 @@ try:
 except ImportError:
     import xml.etree.cElementTree as etree
 
+from cerbero.packages.package import Package
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import shell
 from cerbero.errors import PackageNotFoundError
@@ -91,7 +92,7 @@ class MergeModule(WixBase):
         self.files_list = package.get_files_list()
         self._dirnodes = {}
 
-    def build(self, output_dir):
+    def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
         with open(sources, 'wb') as f:
@@ -182,7 +183,7 @@ class Installer(WixBase):
         WixBase.__init__(self, config, package)
         self.store = PackagesStore(config)
 
-    def build(self, output_dir):
+    def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
         mergemodules = []
         for p in self.package.packages:
@@ -190,7 +191,7 @@ class Installer(WixBase):
             if package is None:
                 raise PackageNotFoundError(p)
             mergemodule = MergeModule(self.config, package)
-            mergemodule.build(output_dir)
+            mergemodule.pack(output_dir)
             mergemodules.append('%s.msm' % package.name)
 
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
@@ -274,6 +275,15 @@ class Installer(WixBase):
         self._set(mergeref, Id=self._format_id(package.name))
 
 
+class Packager(object):
+
+    def __new__(klass, config, package):
+        if isinstance(package, Package):
+            return MergeModule(config, package)
+        else:
+            return Installer(config, package)
+
+
 class Candle(object):
     ''' Compile WiX objects with candle '''
 
@@ -319,3 +329,9 @@ class Light(object):
         else:
             self.options['ext'] = 'msi'
         shell.call(self.cmd % self.options, output_dir)
+
+
+def register():
+    from cerbero.packages.packager import register_packager
+    from cerbero.config import Distro
+    register_packager(Distro.WINDOWS, Packager)

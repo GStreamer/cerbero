@@ -20,6 +20,7 @@ from cerbero.commands import Command, register_command
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.errors import PackageNotFoundError
+from cerbero.packages.packager import Packager
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.disttarball import DistTarball
 
@@ -49,7 +50,7 @@ class Package(Command):
         if args.tarball:
             pkg = DistTarball(p)
         else:
-            raise NotImplemented()
+            pkg = Packager(config, p)
         m.action(_("Creating package for %s") % p.name)
         path = pkg.pack(args.output_dir, args.force)
         m.action(_("Package successfully created in %s") % path)

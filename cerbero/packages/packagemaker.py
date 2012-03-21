@@ -35,7 +35,7 @@ class Package(object):
         self.package = package
         self.files_list = package.get_files_list()
 
-    def build(self, output_dir):
+    def pack(self, output_dir):
         output_dir = os.path.realpath(output_dir)
         output_file = os.path.join(output_dir, "%s.pkg" % self.package.name)
 
@@ -95,3 +95,18 @@ class PackageMaker(object):
 
     def _execute(self, cmd):
         shell.call(self.cmd)
+
+
+class Packager(object):
+
+    def __new__(klass, config, package):
+        if isinstance(package, Package):
+            return Package(config, package)
+        else:
+            raise NotImplemented()
+
+
+def register():
+    from cerbero.packages.packager import register_packager
+    from cerbero.config import Distro
+    register_packager(Distro.OS_X, Packager)
