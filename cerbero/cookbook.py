@@ -26,7 +26,7 @@ from cerbero.source import SourceType
 from cerbero.errors import FatalError
 from cerbero.utils import _
 from cerbero.utils import messages as m
-from cerbero import recipe
+from cerbero import recipe as crecipe
 
 
 COOKBOOK_NAME = 'cookbook'
@@ -284,7 +284,7 @@ class CookBook (object):
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'BuildType': BuildType, 'SourceType': SourceType,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'recipe': recipe}
+                 'recipe': crecipe, 'os': os}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.prepare()
