@@ -5,3 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'gtk+'
     version = '2.24.10'
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += '--disable-papi --disable-cups --with-included-immodules'
+
