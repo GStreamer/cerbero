@@ -21,7 +21,7 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstgoom2k1%(sext)s',
              'lib/gstreamer-0.10/libgstgoom%(sext)s',
              'lib/gstreamer-0.10/libgstplaybin%(sext)s',
-             'lib/gstreamer-0.10/libgstvisual%(sext)s',
+             'lib/gstreamer-0.10/libgstlibvisual%(sext)s',
     ]
 
     platform_files = {
