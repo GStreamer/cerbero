@@ -11,6 +11,10 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     deps = ['gstreamer-core']
 
+    libraries = [
+                 'libgstbasecamerabinsrc'
+    ]
+
     files = [
              'lib/gstreamer-0.10/libgstcamerabin2%(sext)s',
              'lib/gstreamer-0.10/libgstdataurisrc%(sext)s',
