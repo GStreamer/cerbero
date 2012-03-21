@@ -9,3 +9,4 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.autoreconf = True
+            self.configure_options += '--without-gdiplus --with-included-loaders'
