@@ -159,10 +159,10 @@ class MergeModule(WixBase):
                              Guid=self._get_uuid())
         filenode = etree.SubElement(component, 'File')
         filepath = os.path.join(self.prefix, filepath)
+        p_id = self._format_id(filepath, True)
         if self._with_wine:
-            wfilepath = self._to_wine_path(filepath)
-        self._set(filenode, Id=self._format_id(filepath, True), Name=filename,
-                            Source=wfilepath)
+            filepath = self._to_wine_path(filepath)
+        self._set(filenode, Id=p_id, Name=filename, Source=filepath)
 
 
 class Installer(WixBase):
