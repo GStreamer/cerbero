@@ -24,9 +24,11 @@ class Package(package.Package):
     ]
 
     files = [
+             'lib/gstreamer-0.10/libgstrtp%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpmanager%(sext)s',
              'lib/gstreamer-0.10/libgstshout2%(sext)s',
              'lib/gstreamer-0.10/libgstsdpelem%(sext)s',
-             'lib/gstreamer-0.10/libgstshouphttpsrc%(sext)s',
+             'lib/gstreamer-0.10/libgstsouphttpsrc%(sext)s',
              'lib/gstreamer-0.10/libgstudp%(sext)s',
     ]
 

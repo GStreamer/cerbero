@@ -44,6 +44,8 @@ class Package(package.Package):
     }
 
     files = [
+             'lib/gstreamer-0.10/libgsta52dec%(sext)s',
+             'lib/gstreamer-0.10/libgstalaw%(sext)s',
              'lib/gstreamer-0.10/libgstadpcmdec%(sext)s',
              'lib/gstreamer-0.10/libgstadpcmenc%(sext)s',
              'lib/gstreamer-0.10/libgstaiff%(sext)s',
@@ -63,6 +65,7 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstdvdlpcmdec%(sext)s',
              'lib/gstreamer-0.10/libgstdvdread%(sext)s',
              'lib/gstreamer-0.10/libgstdvbsuboverlay%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdspu%(sext)s',
              'lib/gstreamer-0.10/libgstdvdsub%(sext)s',
              'lib/gstreamer-0.10/libgstfaad%(sext)s',
              'lib/gstreamer-0.10/libgstflac%(sext)s',
@@ -91,6 +94,7 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstmve%(sext)s',
              'lib/gstreamer-0.10/libgstmxf%(sext)s',
              'lib/gstreamer-0.10/libgstnsf%(sext)s',
+             'lib/gstreamer-0.10/libgstnuvdemux%(sext)s',
              'lib/gstreamer-0.10/libgstogg%(sext)s',
              'lib/gstreamer-0.10/libgstpcapparse%(sext)s',
              'lib/gstreamer-0.10/libgstpng%(sext)s',
