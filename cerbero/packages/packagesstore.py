@@ -37,8 +37,13 @@ class PackagesStore (object):
 
     _packages = {}  # package_name -> package
 
-    def __init__(self, config):
+    def __init__(self, config, load=True):
         self._config = config
+
+        # used in tests to skip loading a dir with packages definitions
+        if not load:
+            return
+
         if not os.path.exists(config.packages_dir):
             raise FatalError(_("Packages dir %s not found") %
                              config.packages_dir)
