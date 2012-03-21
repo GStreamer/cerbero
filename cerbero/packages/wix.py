@@ -19,6 +19,7 @@
 import os
 import uuid
 
+from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import shell, etree
@@ -26,16 +27,15 @@ from cerbero.errors import PackageNotFoundError
 from cerbero.config import Platform
 
 
-class WixBase(object):
+class WixBase(PackagerBase):
 
-    def __init__(self, config, package):
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
         self.platform = config.platform
         self.target_platform = config.target_platform
-        self.config = config
         self._with_wine = self.platform != Platform.WINDOWS
         self.prefix = config.prefix
         self.wix_prefix = config.wix_prefix
-        self.package = package
         self.filled = False
 
     def fill(self):
@@ -83,8 +83,8 @@ class MergeModule(WixBase):
     @type pacakge: L{cerbero.packages.package.Package}
     '''
 
-    def __init__(self, config, package):
-        WixBase.__init__(self, config, package)
+    def __init__(self, config, package, store):
+        WixBase.__init__(self, config, package, store)
         self.files_list = package.get_files_list()
         self._dirnodes = {}
 
@@ -175,9 +175,8 @@ class Installer(WixBase):
 
     UI_EXT = '-ext WixUIExtension'
 
-    def __init__(self, config, package):
-        WixBase.__init__(self, config, package)
-        self.store = PackagesStore(config)
+    def __init__(self, config, package, store):
+        WixBase.__init__(self, config, package, store)
 
     def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)

@@ -54,14 +54,14 @@ class MergeModuleTest(unittest.TestCase):
         self.package = Package(self.config)
 
     def test_add_root(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" />',
                           etree.tostring(mergemodule.root))
 
     def test_add_module(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         mergemodule._add_module()
         self.assertEquals(
@@ -70,7 +70,7 @@ class MergeModuleTest(unittest.TestCase):
             '</Wix>', etree.tostring(mergemodule.root))
 
     def test_add_package(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         mergemodule._add_module()
         mergemodule._add_package()
@@ -83,7 +83,7 @@ class MergeModuleTest(unittest.TestCase):
             '</Wix>', etree.tostring(mergemodule.root))
 
     def test_add_root_dir(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         mergemodule._add_module()
         mergemodule._add_package()
@@ -98,7 +98,7 @@ class MergeModuleTest(unittest.TestCase):
             '</Wix>', etree.tostring(mergemodule.root))
 
     def test_add_directory(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         mergemodule._add_module()
         mergemodule._add_package()
@@ -114,7 +114,7 @@ class MergeModuleTest(unittest.TestCase):
         self.assertTrue('bin' in mergemodule._dirnodes)
 
     def test_add_file(self):
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._add_root()
         mergemodule._add_module()
         mergemodule._add_package()
@@ -132,7 +132,7 @@ class MergeModuleTest(unittest.TestCase):
 
     def test_render_xml(self):
         self.config.platform = Platform.WINDOWS
-        mergemodule = MergeModule(self.config, self.package)
+        mergemodule = MergeModule(self.config, self.package, None)
         mergemodule._get_uuid = lambda : '1'
         mergemodule.fill()
         self.assertEquals(MERGE_MODULE, mergemodule.render_xml())

@@ -34,7 +34,7 @@ def register_packager(distro, klass, distro_version=None):
 
 class Packager (object):
 
-    def __new__(klass, config, package):
+    def __new__(klass, config, package, store):
         d = config.target_distro
         v = config.target_distro_version
 
@@ -45,7 +45,7 @@ class Packager (object):
             m.warning(_("No packager available for the distro version %s" % v))
             v = None
 
-        return _packagers[d][v](config, package)
+        return _packagers[d][v](config, package, store)
 
 
 from cerbero.packages import wix, packagemaker

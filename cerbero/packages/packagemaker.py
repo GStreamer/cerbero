@@ -20,12 +20,13 @@ import os
 import tempfile
 import shutil
 
+from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package as CPackage
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 
 
-class Package(object):
+class Package(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.packages.package.Package}
 
@@ -33,9 +34,8 @@ class Package(object):
     @type package: L{cerbero.packages.package.Package}
     '''
 
-    def __init__(self, config, package):
-        self.config = config
-        self.package = package
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
         self.files = package.get_files_list()
 
     def pack(self, output_dir, force=False):

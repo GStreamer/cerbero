@@ -15,3 +15,24 @@
 # License along with this library; if not, write to the
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
+
+
+class PackagerBase(object):
+    ''' Base class for packagers '''
+
+    def __init__(self, config, package, store):
+        self.config = config
+        self.package = package
+        self.store = store
+
+    def pack(self, output_dir, force=False):
+        '''
+        Creates a package and puts it the the output directory
+
+        @param output_dir: output directory where the package will be saved
+        @type  output_dir: str
+        @param force: forces the creation of the package
+        @type  force: bool
+        '''
+        raise NotImplemented("'pack' must be implemented by subclasses")
+

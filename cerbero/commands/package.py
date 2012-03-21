@@ -50,7 +50,7 @@ class Package(Command):
         if args.tarball:
             pkg = DistTarball(p)
         else:
-            pkg = Packager(config, p)
+            pkg = Packager(config, p, store)
         m.action(_("Creating package for %s") % p.name)
         path = pkg.pack(args.output_dir, args.force)
         m.action(_("Package successfully created in %s") % path)
