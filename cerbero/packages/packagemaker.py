@@ -18,8 +18,11 @@
 
 import os
 import tempfile
+import shutil
 
+from cerbero.packages.package import Package as CPackage
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 
 class Package(object):
@@ -33,26 +36,35 @@ class Package(object):
     def __init__(self, config, package):
         self.config = config
         self.package = package
-        self.files_list = package.get_files_list()
+        self.files = package.get_files_list()
 
-    def pack(self, output_dir):
+    def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
         output_file = os.path.join(output_dir, "%s.pkg" % self.package.name)
 
         root = self._create_bundle()
         packagemaker = PackageMaker()
-        packagemaker.create_package(root, self.package.uuid,
-                                    self.package.version, self.package.title,
-                                    output_file)
+        packagemaker.create_package(root, self.package.name,
+            self.package.version, self.package.shortdesc, output_file)
+        return output_file
 
-    def _create_bundle(self, files):
+    def _create_bundle(self):
         '''
         Moves all the files that are going to be package to a temporary
         directory to create the bundle
         '''
         tmp = tempfile.mkdtemp()
-        for f in files:
-            os.move(os.path.join(self.config.prefix, f), os.path.join(tmp, f))
+        for f in self.files:
+            in_path = os.path.join(self.config.prefix, f) 
+            if not os.path.exists(in_path):
+                m.warning("File %s is missing and won't be added to the "
+                          "package" % in_path)
+                continue
+            out_path = os.path.join(tmp, f) 
+            out_dir = os.path.split(out_path)[0]
+            if not os.path.exists(out_dir):
+                os.makedirs(out_dir)
+            shutil.copy(in_path, out_path)
         return tmp
 
 
@@ -62,7 +74,7 @@ class PackageMaker(object):
 
     PACKAGE_MAKER_PATH = \
         '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/'
-    CMD = 'PackageMaker'
+    CMD = './PackageMaker'
 
     def create_package(self, root, pkg_id, version, title, output_file,
                        destination='/opt/'):
@@ -83,24 +95,24 @@ class PackageMaker(object):
         @param destination: installation path
         @type  destination: str
         '''
-        args = {'r': root, 'i': pkg_id, '-n': version, 't': title,
+        args = {'r': root, 'i': pkg_id, 'n': version, 't': title,
                 'l': destination, 'o': output_file}
         self._execute(self._cmd_with_options(args))
 
-    def _set_cmd_options(self, args):
+    def _cmd_with_options(self, args):
         args_str = ''
         for k, v in args.iteritems():
-            args_str += ' -%s %s' % (k, v)
+            args_str += ' -%s "%s"' % (k, v)
         return "%s %s" % (self.CMD, args_str)
 
     def _execute(self, cmd):
-        shell.call(self.cmd)
+        shell.call(cmd, self.PACKAGE_MAKER_PATH)
 
 
 class Packager(object):
 
     def __new__(klass, config, package):
-        if isinstance(package, Package):
+        if isinstance(package, CPackage):
             return Package(config, package)
         else:
             raise NotImplemented()
