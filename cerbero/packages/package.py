@@ -97,7 +97,7 @@ class Package(PackageBase):
         files.extend(self._get_files())
         files.extend(self._get_binaries())
         files.extend(self._get_libraries())
-        return files
+        return sorted(files)
 
     def _get_files(self):
         # Fille the list of regular files

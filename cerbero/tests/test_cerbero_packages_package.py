@@ -115,5 +115,7 @@ class PackageTest(unittest.TestCase):
         win32files += ['bin/libgstreamer.dll', 'bin/libgstreamer-win32.dll']
         linuxfiles += ['lib/libgstreamer.so.1', 'lib/libgstreamer-x11.so.1']
         self._add_files()
-        self.assertEquals(self.win32package.get_files_list(), win32files)
-        self.assertEquals(self.linuxpackage.get_files_list(), linuxfiles)
+        self.assertEquals(self.win32package.get_files_list(),
+                          sorted(win32files))
+        self.assertEquals(self.linuxpackage.get_files_list(),
+                          sorted(linuxfiles))
