@@ -1,0 +1,29 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class MetaPackage(package.MetaPackage):
+
+    name = "gstreamer-runtime"
+    shortdesc = "GStreamer runtime"
+    longdesc = "GStreamer runtime"
+    title = "GStreamer runtime"
+    url = "http://www.gstreamer.net"
+    version = '1.0'
+    uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
+    vendor = "GStreamer Project"
+    packages = {
+        '': [('gstreamer-core', True, True),
+             ('gstreamer-playback', False, True),
+             ('gstreamer-codecs', False, True),
+             ('gstreamer-effects', False, True),
+             ('gstreamer-networking', False, True),
+             ('gstreamer-libav', False, False),
+             ('gstreamer-clutter', False, False)],
+        'bindings': [('gstreamer-python27', False, False)]
+        }
+    features = {'bindings': 'GStreamer Bindings'}
+    icon = "gstreamer.ico"
+    install_dir = {
+        Platform.WINDOWS: 'GStreamer',
+        Platform.LINUX: '/usr/local/gstreamer',
+        Platform.DARWIN: 'GStreamer.framework'}
