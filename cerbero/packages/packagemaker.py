@@ -40,7 +40,7 @@ class OSXPackage(PackagerBase):
 
     def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
-        output_file = os.path.join(output_dir, "%s.pkg" % self.package.name)
+        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
 
         root = self._create_bundle()
         packagemaker = PackageMaker()
@@ -55,18 +55,17 @@ class OSXPackage(PackagerBase):
         '''
         tmp = tempfile.mkdtemp()
         for f in self.files:
-            in_path = os.path.join(self.config.prefix, f) 
+            in_path = os.path.join(self.config.prefix, f)
             if not os.path.exists(in_path):
                 m.warning("File %s is missing and won't be added to the "
                           "package" % in_path)
                 continue
-            out_path = os.path.join(tmp, f) 
+            out_path = os.path.join(tmp, f)
             out_dir = os.path.split(out_path)[0]
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
             shutil.copy(in_path, out_path)
         return tmp
-
 
 
 class PackageMaker(object):
@@ -81,7 +80,7 @@ class PackageMaker(object):
         '''
         Creates an osx package, where all files are properly bundled in a
         directory that is set as the package root
-        
+
         @param root: root path
         @type  root: str
         @param pkg_id: package indentifier
@@ -102,8 +101,8 @@ class PackageMaker(object):
     def _cmd_with_args(self, args):
         args_str = ''
         for k, v in args.iteritems():
-            args_str += ' -%s "%s"' % (k, v)
-        return "%s %s" % (self.CMD, args_str)
+            args_str += " -%s '%s'" % (k, v)
+        return '%s %s' % (self.CMD, args_str)
 
     def _execute(self, cmd):
         shell.call(cmd, self.PACKAGE_MAKER_PATH)
