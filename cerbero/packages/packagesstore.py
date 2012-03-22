@@ -82,9 +82,9 @@ class PackagesStore (object):
         '''
         p = self.get_package(package_name)
         if isinstance(p, package.MetaPackage):
-            return map(lambda x: x.name, self._list_metapackage_deps(p))
+            return sorted(x.name for x in self._list_metapackage_deps(p))
         else:
-            return p.deps
+            return sorted(p.deps)
 
     def get_package_files_list(self, name):
         '''
@@ -98,9 +98,9 @@ class PackagesStore (object):
         p = self.get_package(name)
 
         if isinstance(p, package.MetaPackage):
-            return self._list_metapackage_files(p)
+            return sorted(self._list_metapackage_files(p))
         else:
-            return p.get_files_list()
+            return sorted(p.get_files_list())
 
     def add_package(self, package):
         '''
