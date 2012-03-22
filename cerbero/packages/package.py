@@ -38,6 +38,8 @@ class PackageBase(object):
     @type licenses: list
     @cvar vendor: vendor for this package
     @type vendor: str
+    @cvar org: organization for this package (eg: net.foo.bar)
+    @type org: str
     @cvar url: url for this pacakge
     @type url: str
     '''
@@ -45,6 +47,7 @@ class PackageBase(object):
     shortdesc = ''
     longdesc = ''
     version = ''
+    org = ''
     uuid = None
     licenses = list()
     vendor = ''
