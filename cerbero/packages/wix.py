@@ -47,16 +47,9 @@ class WixBase(PackagerBase):
         self.fill()
         return etree.tostring(self.root)
 
-    def _set(self, node, **kwargs):
-        for key in sorted(kwargs.keys()):
-            value = kwargs[key]
-            if value is None or value is "":
-                continue
-            node.set(key, value)
-
     def _add_root(self):
-        self.root = etree.Element("Wix")
-        self._set(self.root, xmlns='http://schemas.microsoft.com/wix/2006/wi')
+        self.root = etree.Element("Wix",
+                xmlns='http://schemas.microsoft.com/wix/2006/wi')
 
     def _to_wine_path(self, path):
         path = path.replace('/', '\\\\')
@@ -112,21 +105,20 @@ class MergeModule(WixBase):
         self._add_files()
 
     def _add_module(self):
-        self.module = etree.SubElement(self.root, "Module")
-        self._set(self.module, Id=self._format_id(self.package.name),
-                               Version=self.package.version,
-                               Language= '1033')
+        self.module = etree.SubElement(self.root, "Module",
+            Id=self._format_id(self.package.name),
+            Version=self.package.version, Language= '1033')
 
     def _add_package(self):
-        self.pkg = etree.SubElement(self.module, "Package")
-        self._set(self.pkg, Id=self.package.uuid or self._get_uuid(),
-                            Description=self.package.shortdesc,
-                            Comments=self.package.longdesc,
-                            Manufacturer=self.package.vendor)
+        self.pkg = etree.SubElement(self.module, "Package",
+            Id=self.package.uuid or self._get_uuid(),
+            Description=self.package.shortdesc,
+            Comments=self.package.longdesc,
+            Manufacturer=self.package.vendor)
 
     def _add_root_dir(self):
-        self.rdir = etree.SubElement(self.module, "Directory")
-        self._set(self.rdir, Id='TARGETDIR', Name='SourceDir')
+        self.rdir = etree.SubElement(self.module, "Directory",
+            Id='TARGETDIR', Name='SourceDir')
         self._dirnodes[''] = self.rdir
 
     def _add_files(self):
@@ -144,24 +136,25 @@ class MergeModule(WixBase):
             self._add_directory(parentpath)
 
         parent = self._dirnodes[parentpath]
-        dirnode = etree.SubElement(parent, "Directory")
-        self._set(dirnode, Id=self._format_id(dirpath),
-                           Name=self._format_id(dirpath))
+        dirnode = etree.SubElement(parent, "Directory",
+            Id=self._format_id(dirpath),
+            Name=self._format_id(dirpath))
         self._dirnodes[dirpath] = dirnode
 
     def _add_file(self, filepath):
         dirpath, filename = os.path.split(filepath)
         self._add_directory(dirpath)
         dirnode = self._dirnodes[dirpath]
-        component = etree.SubElement(dirnode, 'Component')
-        self._set(component, Id=self._format_id(filepath),
-                             Guid=self._get_uuid())
-        filenode = etree.SubElement(component, 'File')
+
+        component = etree.SubElement(dirnode, 'Component',
+            Id=self._format_id(filepath), Guid=self._get_uuid())
+
         filepath = os.path.join(self.prefix, filepath)
         p_id = self._format_id(filepath, True)
         if self._with_wine:
             filepath = self._to_wine_path(filepath)
-        self._set(filenode, Id=p_id, Name=filename, Source=filepath)
+        etree.SubElement(component, 'File', Id=p_id, Name=filename,
+                         Source=filepath)
 
 
 class Installer(WixBase):
@@ -214,22 +207,21 @@ class Installer(WixBase):
         self._add_merge_modules()
 
     def _add_product(self):
-        self.product = etree.SubElement(self.root, "Product")
-        self._set(self.product, Id=self.package.uuid or self._get_uuid(),
-                                Version=self.package.version,
-                                UpgradeCode=self.package.uuid,
-                                Language='1033', Name=self.package.name,
-                                Manufacturer=self.package.vendor)
+        self.product = etree.SubElement(self.root, "Product",
+            Id=self.package.uuid or self._get_uuid(),
+            Version=self.package.version, UpgradeCode=self.package.uuid,
+            Language='1033', Name=self.package.name,
+            Manufacturer=self.package.vendor)
 
     def _add_package(self):
-        self.pkg = etree.SubElement(self.product, "Package")
-        self._set(self.pkg, Description=self.package.shortdesc,
-                            Comments=self.package.longdesc,
-                            Manufacturer=self.package.vendor)
+        self.pkg = etree.SubElement(self.product, "Package",
+            Description=self.package.shortdesc,
+            Comments=self.package.longdesc,
+            Manufacturer=self.package.vendor)
 
     def _add_dir(self, parent, dir_id, name):
-        tdir = etree.SubElement(parent, "Directory")
-        self._set(tdir, Id=dir_id, Name=name)
+        tdir = etree.SubElement(parent, "Directory",
+            Id=dir_id, Name=name)
         return tdir
 
     def _add_install_dir(self):
@@ -241,10 +233,10 @@ class Installer(WixBase):
         self.installdir = self._add_dir(sdkdir, 'INSTALLDIR', '.')
 
     def _add_merge_modules(self):
-        self.main_feature = etree.SubElement(self.product, "Feature")
-        self._set(self.main_feature, Id=self._format_id(self.package.name),
-                  Title=self.package.title, Level='1', Display="expand",
-                  AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
+        self.main_feature = etree.SubElement(self.product, "Feature",
+            Id=self._format_id(self.package.name),
+            Title=self.package.title, Level='1', Display="expand",
+            AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
 
         for p in self.package.packages:
             package = self.store.get_package(p)
@@ -253,20 +245,19 @@ class Installer(WixBase):
             self._add_merge_module(package)
 
     def _add_ui_props(self):
-        prop = etree.SubElement(self.product, 'Property')
-        self._set(prop, Id='WIXUI_INSTALLDIR', Value='INSTALLDIR')
+        etree.SubElement(self.product, 'Property',
+            Id='WIXUI_INSTALLDIR', Value='INSTALLDIR')
 
     def _add_media(self):
-        prop = etree.SubElement(self.product, 'Media')
-        self._set(prop, Id='1', Cabinet='product.cab', EmbedCab='yes')
+        etree.SubElement(self.product, 'Media',
+            Id='1', Cabinet='product.cab', EmbedCab='yes')
 
     def _add_merge_module(self, package):
-        mergemodule = etree.SubElement(self.installdir, 'Merge')
-        self._set(mergemodule, Id=self._format_id(package.name),
-                  Language='1033', SourceFile='%s.msm' % package.name,
-                  DiskId='1')
-        mergeref = etree.SubElement(self.main_feature, "MergeRef")
-        self._set(mergeref, Id=self._format_id(package.name))
+        etree.SubElement(self.installdir, 'Merge',
+            Id=self._format_id(package.name), Language='1033',
+            SourceFile='%s.msm' % package.name, DiskId='1')
+        etree.SubElement(self.main_feature, "MergeRef",
+            Id=self._format_id(package.name))
 
 
 class Packager(object):
