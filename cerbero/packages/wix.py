@@ -46,7 +46,7 @@ class WixBase(object):
 
     def render_xml(self):
         self.fill()
-        return etree.tostring(self.root, pretty_print=True)
+        return etree.tostring(self.root)
 
     def _set(self, node, **kwargs):
         for key in sorted(kwargs.keys()):

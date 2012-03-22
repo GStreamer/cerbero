@@ -45,37 +45,7 @@ class Package(package.Package):
 
 
 MERGE_MODULE = \
-'''<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Module Id="gstreamer_test" Language="1033" Version="1.0">
-    <Package Comments="test" Description="GStreamer Test" Id="1" Manufacturer="GStreamer Project"/>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="bin" Name="bin">
-        <Component Guid="1" Id="bin_test.exe">
-          <File Id="bin_testexe" Name="test.exe" Source="/test/bin/test.exe"/>
-        </Component>
-        <Component Guid="1" Id="bin_test2.exe">
-          <File Id="bin_test2exe" Name="test2.exe" Source="/test/bin/test2.exe"/>
-        </Component>
-        <Component Guid="1" Id="bin_test3.exe">
-          <File Id="bin_test3exe" Name="test3.exe" Source="/test/bin/test3.exe"/>
-        </Component>
-      </Directory>
-      <Component Guid="1" Id="README">
-        <File Id="README" Name="README" Source="/test/README"/>
-      </Component>
-      <Directory Id="lib" Name="lib">
-        <Component Guid="1" Id="lib_libfoo.dll">
-          <File Id="lib_libfoodll" Name="libfoo.dll" Source="/test/lib/libfoo.dll"/>
-        </Component>
-        <Directory Id="lib_gstreamer_0.10" Name="lib_gstreamer_0.10">
-          <Component Guid="1" Id="lib_gstreamer_0.10_libgstplugins.dll">
-            <File Id="lib_gstreamer_010_libgstpluginsdll" Name="libgstplugins.dll" Source="/test/lib/gstreamer-0.10/libgstplugins.dll"/>
-          </Component>
-        </Directory>
-      </Directory>
-    </Directory>
-  </Module>
-</Wix>\n'''
+'''<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"><Module Id="gstreamer_test" Language="1033" Version="1.0"><Package Comments="test" Description="GStreamer Test" Id="1" Manufacturer="GStreamer Project" /><Directory Id="TARGETDIR" Name="SourceDir"><Component Guid="1" Id="README"><File Id="_test_README" Name="README" Source="/test/README" /></Component><Directory Id="bin" Name="bin"><Component Guid="1" Id="bin_test.exe"><File Id="_test_bin_testexe" Name="test.exe" Source="/test/bin/test.exe" /></Component><Component Guid="1" Id="bin_test2.exe"><File Id="_test_bin_test2exe" Name="test2.exe" Source="/test/bin/test2.exe" /></Component><Component Guid="1" Id="bin_test3.exe"><File Id="_test_bin_test3exe" Name="test3.exe" Source="/test/bin/test3.exe" /></Component></Directory><Directory Id="lib" Name="lib"><Directory Id="lib_gstreamer_0.10" Name="lib_gstreamer_0.10"><Component Guid="1" Id="lib_gstreamer_0.10_libgstplugins.dll"><File Id="_test_lib_gstreamer_010_libgstpluginsdll" Name="libgstplugins.dll" Source="/test/lib/gstreamer-0.10/libgstplugins.dll" /></Component></Directory><Component Guid="1" Id="lib_libfoo.dll"><File Id="_test_lib_libfoodll" Name="libfoo.dll" Source="/test/lib/libfoo.dll" /></Component></Directory></Directory></Module></Wix>'''
 
 class MergeModuleTest(unittest.TestCase):
 
