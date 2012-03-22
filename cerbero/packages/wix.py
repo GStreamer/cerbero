@@ -18,14 +18,10 @@
 
 import os
 import uuid
-try:
-  from lxml import etree
-except ImportError:
-    import xml.etree.cElementTree as etree
 
 from cerbero.packages.package import Package
 from cerbero.packages.packagesstore import PackagesStore
-from cerbero.utils import shell
+from cerbero.utils import shell, etree
 from cerbero.errors import PackageNotFoundError
 from cerbero.config import Platform
 

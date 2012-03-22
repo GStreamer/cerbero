@@ -17,14 +17,11 @@
 # Boston, MA 02111-1307, USA.
 
 import unittest
-try:
-  from lxml import etree
-except ImportError:
-    import xml.etree.cElementTree as etree
 
 from cerbero.config import Platform
 from cerbero.packages import package
 from cerbero.packages.wix import MergeModule
+from cerbero.utils import etree
 
 
 class DummyConfig(object):
@@ -89,7 +86,8 @@ class MergeModuleTest(unittest.TestCase):
     def test_add_root(self):
         mergemodule = MergeModule(self.config, self.package)
         mergemodule._add_root()
-        self.assertEquals('<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"/>',
+        self.assertEquals(
+            '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" />',
                           etree.tostring(mergemodule.root))
 
     def test_add_module(self):
@@ -98,7 +96,7 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule._add_module()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer_test" Language="1033" Version="1.0"/>'
+                '<Module Id="gstreamer_test" Language="1033" Version="1.0" />'
             '</Wix>', etree.tostring(mergemodule.root))
 
     def test_add_package(self):
@@ -110,7 +108,7 @@ class MergeModuleTest(unittest.TestCase):
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
                 '<Module Id="gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
-                    'Manufacturer="GStreamer Project"/>'
+                    'Manufacturer="GStreamer Project" />'
                 '</Module>'
             '</Wix>', etree.tostring(mergemodule.root))
 
@@ -124,8 +122,8 @@ class MergeModuleTest(unittest.TestCase):
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
                 '<Module Id="gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
-                    'Manufacturer="GStreamer Project"/>'
-                    '<Directory Id="TARGETDIR" Name="SourceDir"/>'
+                    'Manufacturer="GStreamer Project" />'
+                    '<Directory Id="TARGETDIR" Name="SourceDir" />'
                 '</Module>'
             '</Wix>', etree.tostring(mergemodule.root))
 

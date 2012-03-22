@@ -22,6 +22,10 @@ try:
     import sysconfig
 except:
     from distutils import sysconfig
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    from lxml import etree
 import gettext
 import platform as pplatform
 
