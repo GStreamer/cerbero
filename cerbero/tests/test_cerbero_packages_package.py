@@ -23,6 +23,7 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.packages import package
+from cerbero.tests.test_packages_common import Package1
 from cerbero.utils import shell
 
 
@@ -33,39 +34,14 @@ class DummyConfig(object):
         self.target_platform = target_platform
 
 
-class Package(package.Package):
-
-    name = 'gstreamer-test'
-    shortdesc = 'GStreamer Test'
-    version = '1.0'
-    licences = ['LGPL']
-    uuid = '1'
-    vendor = 'GStreamer Project'
-
-    files = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
-    platform_files = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
-
-    binaries = ['gst-launch']
-    platform_bins = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
-
-    libraries = ['libgstreamer']
-    platform_libs = {
-        Platform.WINDOWS: ['libgstreamer-win32'],
-        Platform.LINUX: ['libgstreamer-x11']}
-
-
 class PackageTest(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         win32config = DummyConfig(self.tmp, Platform.WINDOWS)
         linuxconfig = DummyConfig(self.tmp, Platform.LINUX)
-        self.win32package = Package(win32config)
-        self.linuxpackage = Package(linuxconfig)
+        self.win32package = Package1(win32config)
+        self.linuxpackage = Package1(linuxconfig)
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
