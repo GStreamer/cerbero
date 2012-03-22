@@ -21,7 +21,6 @@ import uuid
 
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
-from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import shell, etree
 from cerbero.errors import PackageNotFoundError
 from cerbero.config import Platform
