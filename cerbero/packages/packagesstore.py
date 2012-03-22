@@ -30,15 +30,13 @@ from cerbero.utils import messages as m
 class PackagesStore (object):
     '''
     Stores a list of L{cerbero.packages.package.Package}
-
-    @ivar _packages: L{cerbero.packages.package.Package} availables
-    @type _packages: dict
     '''
 
-    _packages = {}  # package_name -> package
 
     def __init__(self, config, load=True):
         self._config = config
+
+        self._packages = {}  # package_name -> package
 
         # used in tests to skip loading a dir with packages definitions
         if not load:
