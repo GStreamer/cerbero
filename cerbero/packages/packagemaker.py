@@ -21,12 +21,12 @@ import tempfile
 import shutil
 
 from cerbero.packages import PackagerBase
-from cerbero.packages.package import Package as CPackage
+from cerbero.packages.package import Package
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 
 
-class Package(PackagerBase):
+class OSXPackage(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.packages.package.Package}
 
@@ -97,9 +97,9 @@ class PackageMaker(object):
         '''
         args = {'r': root, 'i': pkg_id, 'n': version, 't': title,
                 'l': destination, 'o': output_file}
-        self._execute(self._cmd_with_options(args))
+        self._execute(self._cmd_with_args(args))
 
-    def _cmd_with_options(self, args):
+    def _cmd_with_args(self, args):
         args_str = ''
         for k, v in args.iteritems():
             args_str += ' -%s "%s"' % (k, v)
@@ -112,8 +112,8 @@ class PackageMaker(object):
 class Packager(object):
 
     def __new__(klass, config, package):
-        if isinstance(package, CPackage):
-            return Package(config, package)
+        if isinstance(package, Package):
+            return OSXPackage(config, package)
         else:
             raise NotImplemented()
 
