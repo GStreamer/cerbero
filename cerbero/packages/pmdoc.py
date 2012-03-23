@@ -22,11 +22,36 @@ import itertools
 from cerbero.utils import etree
 
 
-class Index(object):
+class PMDocXML(object):
+
+    TAG_CONTENTS = 'contents'
+    TAG_DESCRIPTION = 'description'
+    TAG_FLAGS = 'flags'
+    TAG_MOD = 'mod'
+    TAG_PKGREF = 'pkgref'
+    TAG_SCRIPTS = 'scripts'
+    TAG_TITLE = 'title'
+    TAG_VERSION = 'version'
+    SPEC_VERSION = '1.12'
+
+    def render(self):
+        return etree.tostring(self.root)
+
+    def _add_mods(self, parent, mods):
+        for mod in mods:
+            el = etree.SubElement(parent, self.TAG_MOD)
+            el.text = mod
+
+    def _subelement_text(self, parent, tag, text, **attrib):
+        el = etree.SubElement(parent, tag, **attrib)
+        el.text = text
+        return el
+
+
+class Index(PMDocXML):
     ''' Index file for PackageMake document '''
 
     DOCUMENT_TAG = 'pkmdoc'
-    SPEC_VERSION = '1.12'
     MIN_SPEC = '1.000000'
     PROP_USER_SEES = 'custom'
     PROP_MIN_TARGET = '2'
@@ -34,11 +59,8 @@ class Index(object):
     ATTR_MIN_SPEC = 'min-spec'
     TAG_BUILD = 'build'
     TAG_CHOICE = 'choice'
-    TAG_CONTENTS = 'contents'
-    TAG_DESCRIPTION = 'description'
     TAG_DISTRIBUTION = 'ditribution'
     TAG_DOMAIN = 'domain'
-    TAG_FLAGS = 'flags'
     TAG_ITEM = 'item'
     TAG_MIN_TARGET = 'min-target'
     TAG_MOD = 'mod'
@@ -46,16 +68,17 @@ class Index(object):
     TAG_PROPERTIES = 'properties'
     TAG_PKGREF = 'pkgref'
     TAG_SCRIPTS = 'scripts'
-    TAG_TITLE = 'title'
     TAG_USER_SEES = 'userSees'
-    TAG_VERSION = 'version'
 
-    def __init__(self, package, store, out_dir):
+    def __init__(self, package, store, out_dir, fill=True):
         self.package = package
         self.store = store
         self.out_dir = out_dir
+        if fill:
+            self._fill()
 
-    def render(self):
+    def _fill(self):
+        self._add_root()
         self._add_properties()
         self._add_distribution()
         self._add_description()
@@ -92,12 +115,8 @@ class Index(object):
         desc.text = self.package.shortdesc
 
     def _add_mod(self):
-        mod = etree.SubElement(self.root, self.TAG_MOD)
-        mod.text = 'description'
-        mod = etree.SubElement(self.root, self.TAG_MOD)
-        mod.text = 'properties.title'
-        mod = etree.SubElement(self.root, self.TAG_MOD)
-        mod.text = 'properties.customizeOption'
+        self._add_mods(self.root, ['description', 'properties.title',
+            'properties.customizeOption'])
 
     def _add_flags(self):
         etree.SubElement(self.root, self.TAG_FLAGS)
@@ -133,3 +152,72 @@ class Index(object):
             if value is None or value is '':
                 continue
             node.set(key, value)
+
+
+class PkgRef(PMDocXML):
+    ''' PkgRef for packages in a PackageMaker document '''
+
+    TAG_CONFIG = 'config'
+    TAG_IDENTIFIER = 'identifier'
+    TAG_POST_INSTALL = 'post-install'
+    TAG_REQ_AUTH = 'requireAuthorization'
+    TAG_INSTALL_TO = 'intallTo'
+    TAG_FOLLOW_SYMLINKS = 'followSymbolicLinks'
+    TAG_PACKAGE_STORE = 'packageStore'
+    TAG_FILE_LIST = 'file-list'
+    TAG_FILTER = 'filter'
+    TAG_EXTRA = 'extra'
+    TAG_PACKAGE_PATH = 'packagePath'
+    TAG_SCRIPTS_DIR = 'scripts-dir'
+
+
+    def __init__(self, package, package_path, fill=True):
+        self.package = package
+        self.package_path = package_path
+        if fill:
+            self._fill()
+
+    def _fill(self):
+        self._add_root()
+        self._add_config()
+        self._add_scripts()
+        self._add_contents()
+        self._add_extra()
+
+    def _add_root(self):
+        if self.package.uuid is None:
+            raise FatalError("uuid for package '%s' is None" % self.package.name)
+        self.root = etree.Element(self.TAG_PKGREF, spec=self.SPEC_VERSION,
+                                  uuid=self.package.uuid)
+
+    def _add_config(self):
+        config = etree.SubElement(self.root, self.TAG_CONFIG)
+        self._subelement_text(config, self.TAG_VERSION, '1.0')
+        self._subelement_text(config, self.TAG_IDENTIFIER, self.package.name)
+        self._subelement_text(config, self.TAG_DESCRIPTION, self.package.shortdesc)
+        etree.SubElement(config, self.TAG_POST_INSTALL, type="none")
+        etree.SubElement(config, self.TAG_REQ_AUTH)
+        self._subelement_text(config, self.TAG_INSTALL_TO, '.',
+                              relative="true", mod="true")
+        etree.SubElement(config, self.TAG_PACKAGE_STORE, type="internal")
+        self._add_mods(config, ['installTo.isAbsoluteType', 'installTo.path',
+            'parent', 'installTo.isRelativeType', 'installTo'])
+        flags = etree.SubElement(config, self.TAG_FLAGS)
+        etree.SubElement(flags, self.TAG_FOLLOW_SYMLINKS)
+
+    def _add_scripts(self):
+        scripts = etree.SubElement(self.root, self.TAG_SCRIPTS)
+        self._subelement_text(scripts, self.TAG_SCRIPTS_DIR,
+                os.path.join(self.package_path, 'Contents', 'Resources'))
+
+    def _add_contents(self):
+        contents = etree.SubElement(self.root, self.TAG_CONTENTS)
+        self._subelement_text(contents, self.TAG_FILE_LIST,
+                              "%s-contents.xml" % self.package.name)
+        for f in ['.DS_Store$']:
+            self._subelement_text(contents, self.TAG_FILTER, f)
+
+    def _add_extra(self):
+        extra = etree.SubElement(self.root, self.TAG_EXTRA)
+        self._subelement_text(extra, self.TAG_TITLE, self.package.shortdesc)
+        self._subelement_text(extra, self.TAG_PACKAGE_PATH, self.package_path)

@@ -17,17 +17,15 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import shutil
 import unittest
-import tempfile
 
 from cerbero.config import Platform
-from cerbero.packages.pmdoc import Index
+from cerbero.packages.pmdoc import Index, PkgRef
 from cerbero.tests.test_packages_common import create_store, DummyConfig
-from cerbero.utils import shell, etree
+from cerbero.tests.test_common import XMLMixin
 
 
-class IndexTest(unittest.TestCase):
+class IndexTest(unittest.TestCase, XMLMixin):
 
     def setUp(self):
         self.config = DummyConfig()
@@ -35,24 +33,8 @@ class IndexTest(unittest.TestCase):
         self.store = create_store(self.config)
         self.package = self.store.get_package('gstreamer-runtime')
         self.outdir = '/test'
-        self.index = Index(self.package, self.store, self.outdir)
+        self.index = Index(self.package, self.store, self.outdir, False)
 
-    def _find_one(self, el, tag):
-        children = list(el.iterfind(tag))
-        if len(children) == 0:
-            self.fail("Element with tag %s not found in parent %s" % (tag, el))
-        return children[0] 
-
-    def _test_attrib(self, parent, tag, attrib, value):
-        n = self._find_one(parent, tag)
-        if attrib not in n.attrib:
-            self.fail("Attribute %s not found in %s" % (attrib, n))
-        self.assertEquals(n.attrib[attrib], value)
-
-    def _test_text(self, parent, tag, value):
-        n = self._find_one(parent, tag)
-        self.assertEquals(n.text, value)
-        
     def testAddRoot(self):
         self.index._add_root()
         self.assertEquals(self.index.root.tag, Index.DOCUMENT_TAG)
@@ -66,15 +48,15 @@ class IndexTest(unittest.TestCase):
         self.assertEquals(len(children), 1)
         properties = children[0]
         self.assertEquals(len(properties.getchildren()), 6)
-        self._test_text(properties, Index.TAG_ORGANIZATION, self.package.org)
-        self._test_text(properties, Index.TAG_TITLE, self.package.title)
-        self._test_text(properties, Index.TAG_BUILD,
+        self.check_text(properties, Index.TAG_ORGANIZATION, self.package.org)
+        self.check_text(properties, Index.TAG_TITLE, self.package.title)
+        self.check_text(properties, Index.TAG_BUILD,
                 os.path.join(self.outdir, '%s.pkg' % self.package.name))
-        self._test_attrib(properties, Index.TAG_USER_SEES, 'ui',
+        self.check_attrib(properties, Index.TAG_USER_SEES, 'ui',
                 Index.PROP_USER_SEES)
-        self._test_attrib(properties, Index.TAG_MIN_TARGET, 'os',
+        self.check_attrib(properties, Index.TAG_MIN_TARGET, 'os',
                 Index.PROP_MIN_TARGET)
-        self._test_attrib(properties, Index.TAG_DOMAIN, 'anywhere',
+        self.check_attrib(properties, Index.TAG_DOMAIN, 'anywhere',
                 Index.PROP_DOMAIN)
 
     def testAddDistribution(self):
@@ -83,20 +65,20 @@ class IndexTest(unittest.TestCase):
         children = self.index.root.getchildren()
         self.assertEquals(len(children), 1)
         dist =children[0]
-        self._find_one(dist, Index.TAG_SCRIPTS)
-        self._test_attrib(dist, Index.TAG_VERSION, Index.ATTR_MIN_SPEC,
+        self.find_one(dist, Index.TAG_SCRIPTS)
+        self.check_attrib(dist, Index.TAG_VERSION, Index.ATTR_MIN_SPEC,
                 Index.MIN_SPEC)
 
     def testAddDescription(self):
         self.index._add_root()
         self.index._add_description()
-        self._test_text(self.index.root, Index.TAG_DESCRIPTION,
+        self.check_text(self.index.root, Index.TAG_DESCRIPTION,
                 self.package.shortdesc)
 
     def testAddFlags(self):
         self.index._add_root()
         self.index._add_flags()
-        self._find_one(self.index.root, Index.TAG_FLAGS)
+        self.find_one(self.index.root, Index.TAG_FLAGS)
 
     def testAddContents(self):
         self.index._add_root()
@@ -104,7 +86,7 @@ class IndexTest(unittest.TestCase):
         children = self.index.root.getchildren()
         # 1 choice + 4 item
         self.assertEquals(len(children), 5)
-        contents = self._find_one(self.index.root, Index.TAG_CONTENTS)
+        contents = self.find_one(self.index.root, Index.TAG_CONTENTS)
         packages =[]
 
         for choice in contents.iterfind(Index.TAG_CHOICE):
@@ -126,3 +108,61 @@ class IndexTest(unittest.TestCase):
         items = [x.text[:-4] for x in self.index.root.iterfind(Index.TAG_ITEM) if
                  x.attrib['type']=='pkgref']
         self.assertEquals(sorted(packages), sorted(items))
+
+
+class PkgRefTest(unittest.TestCase, XMLMixin):
+
+    def setUp(self):
+        self.config = DummyConfig()
+        self.config.target_platform = Platform.LINUX
+        self.store = create_store(self.config)
+        self.package = self.store.get_package('gstreamer-runtime')
+        self.package_path = '/test/package.pkg'
+        self.pkgref = PkgRef(self.package, self.store, self.package_path)
+
+    def testAddRoot(self):
+        self.pkgref._add_root()
+        self.assertEquals(self.pkgref.root.tag, PkgRef.TAG_PKGREF)
+        self.assertEquals(self.pkgref.root.attrib['spec'], PkgRef.SPEC_VERSION)
+        self.assertEquals(self.pkgref.root.attrib['uuid'], self.package.uuid)
+        self.assertEquals(len(self.pkgref.root.getchildren()), 0)
+
+    def testAddScripts(self):
+        self.pkgref._add_root()
+        self.pkgref._add_scripts()
+        scripts = self.find_one(self.pkgref.root, PkgRef.TAG_SCRIPTS)
+        self.check_text(scripts, PkgRef.TAG_SCRIPTS_DIR,
+                os.path.join(self.package_path, 'Contents', 'Resources'))
+
+    def testAddExtra(self):
+        self.pkgref._add_root()
+        self.pkgref._add_extra()
+        extra = self.find_one(self.pkgref.root, PkgRef.TAG_EXTRA)
+        self.check_text(extra, PkgRef.TAG_PACKAGE_PATH, self.package_path)
+        self.check_text(extra, PkgRef.TAG_TITLE, self.package.shortdesc)
+
+    def testAddContents(self):
+        self.pkgref._add_root()
+        self.pkgref._add_contents()
+        contents = self.find_one(self.pkgref.root, PkgRef.TAG_CONTENTS)
+        self.check_text(contents, PkgRef.TAG_FILE_LIST, '%s-contents.xml' %
+                self.package.name)
+
+    def testAddConfig(self):
+        self.pkgref._add_root()
+        self.pkgref._add_config()
+        config = self.find_one(self.pkgref.root, PkgRef.TAG_CONFIG)
+        self.check_text(config, PkgRef.TAG_IDENTIFIER, self.package.name)
+        self.check_text(config, PkgRef.TAG_VERSION, self.package.version)
+        self.check_text(config, PkgRef.TAG_DESCRIPTION, self.package.shortdesc)
+        self.check_attrib(config, PkgRef.TAG_POST_INSTALL, 'type', 'none')
+        self.check_attrib(config, PkgRef.TAG_INSTALL_TO, 'relative', 'true')
+        self.check_attrib(config, PkgRef.TAG_INSTALL_TO, 'mod', 'true')
+        self.check_text(config, PkgRef.TAG_INSTALL_TO, '.')
+        self.find_one(config, PkgRef.TAG_REQ_AUTH)
+        mods = ['installTo.isAbsoluteType', 'installTo.path',
+                'parent', 'installTo.isRelativeType', 'installTo']
+        docmods = [x.text for x in config.iterfind(PkgRef.TAG_MOD)]
+        self.assertEquals(sorted(mods), sorted(docmods))
+        flags = self.find_one(config, PkgRef.TAG_FLAGS)
+        self.find_one(flags, PkgRef.TAG_FOLLOW_SYMLINKS)
