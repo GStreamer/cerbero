@@ -19,7 +19,7 @@
 import os
 import itertools
 
-from cerbero.utils import etree
+from cerbero.utils import etree, shell
 
 
 class PMDocXML(object):
@@ -221,3 +221,90 @@ class PkgRef(PMDocXML):
         extra = etree.SubElement(self.root, self.TAG_EXTRA)
         self._subelement_text(extra, self.TAG_TITLE, self.package.shortdesc)
         self._subelement_text(extra, self.TAG_PACKAGE_PATH, self.package_path)
+
+
+class PkgContents(PMDocXML):
+    '''
+    Creates a contents.xml files list for PackageMaker documents,
+    using lsbom to list the files inside a packages.
+    '''
+
+    TAG_PKG_CONTENTS = 'pkg-contents'
+    TAG_F = 'f'
+    OWNER = 'root'
+    GROUP = 'admin'
+
+    def __init__(self, package_path, fill=True):
+        self.package_path = package_path
+        self.bom_path = os.path.join(self.package_path, 'Contents',
+                                     'Archive.bom')
+        if fill:
+            self._fill()
+
+    def _fill(self):
+        self._add_root()
+        self._list_directories()
+        self._list_files()
+        self._add_dirs()
+        self._add_files()
+
+    def _list_bom_dirs(self):
+        return shell.check_call('lsbom %s -s -d' % self.bom_path)
+
+    def _list_bom_files(self):
+        return shell.check_call('lsbom %s -p fm' % self.bom_path)
+
+    def _list_directories(self):
+        self.dirs = self._list_bom_dirs().split('\n')
+        try:
+            self.dirs.remove('')
+        except:
+            pass
+
+    def _list_files(self):
+        self.files_modes = dict()
+        for line in self._list_bom_files().split('\n')[1:]:
+            if line == '':
+                continue
+            path, mode = line.split('\t')
+            self.files_modes[path] = mode
+        try:
+            del self.files_modes['']
+        except:
+            pass
+
+    def _add_root(self):
+        self.root = etree.Element(self.TAG_PKG_CONTENTS, spec=self.SPEC_VERSION)
+
+    def _add_package_root(self):
+        self.proot = etree.SubElement(self.root, self.TAG_F,
+            n='PackageRoot', o=self.OWNER, g=self.GROUP, pt='.', m='true',
+            t='bom')
+        for mod in ['name']:
+            self._subelement_text(self.proot, self.TAG_MOD, mod)
+        return self.proot
+
+    def _add_dirs(self):
+        self.dirs_nodes = dict()
+        for path in self.dirs:
+            parent, dirname = os.path.split(path)
+            if dirname == '.':
+                self.dirs_nodes['.'] = self._add_package_root()
+            else:
+                # all directories are listed in the correct order, so we assume
+                # that the parent has already been created
+                parent_node = self.dirs_nodes[parent]
+                self.dirs_nodes[path] = self._add_entry(parent_node, dirname,
+                        self.files_modes[path])
+
+    def _add_files(self):
+        for f, m in self.files_modes.iteritems():
+            if f in self.dirs:
+                continue
+            parent, filename = os.path.split(f)
+            self._add_entry(self.dirs_nodes[parent], filename, m)
+
+    def _add_entry(self, parent, name, mode):
+        return etree.SubElement(parent, self.TAG_F, n=name, o=self.OWNER,
+                g=self.GROUP, p=mode)
+

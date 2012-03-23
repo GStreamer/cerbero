@@ -18,9 +18,12 @@
 
 import os
 import unittest
+import tempfile
+import shutil
 
 from cerbero.config import Platform
-from cerbero.packages.pmdoc import Index, PkgRef
+from cerbero.packages.pmdoc import Index, PkgRef, PkgContents
+from cerbero.utils import shell
 from cerbero.tests.test_packages_common import create_store, DummyConfig
 from cerbero.tests.test_common import XMLMixin
 
@@ -166,3 +169,65 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
         self.assertEquals(sorted(mods), sorted(docmods))
         flags = self.find_one(config, PkgRef.TAG_FLAGS)
         self.find_one(flags, PkgRef.TAG_FOLLOW_SYMLINKS)
+
+
+
+class PkgContentsWrap(PkgContents):
+
+    dirs = ['.', './bin', './lib', './lib/gstreamer-0.10', '']
+    files = ['./bin/gst-inspect', './lib/libgstreamer.so.1.0',
+             './lib/gstreamer-0.10/libgstplugin.so', './README', '']
+
+    def _list_bom_dirs(self):
+        return '\n'.join(self.dirs)
+
+    def _list_bom_files(self):
+        paths = self.dirs + self.files
+        return '\n'.join(['%s\t00000' % f for f in paths])
+
+
+class PkgContentsTest(unittest.TestCase, XMLMixin):
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.pkgcontents = PkgContentsWrap(self.tmp)
+        os.makedirs(os.path.join(self.tmp, 'bin'))
+        os.makedirs(os.path.join(self.tmp, 'lib/gstreamer-0.10'))
+        shell.call('touch %s' % ' '.join(PkgContentsWrap.files), self.tmp)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def testAddRoot(self):
+        self.pkgcontents._add_root()
+        self.assertEquals(self.pkgcontents.root.tag,
+                PkgContents.TAG_PKG_CONTENTS)
+        self.assertEquals(self.pkgcontents.root.attrib['spec'], PkgContents.SPEC_VERSION)
+        self.assertEquals(len(self.pkgcontents.root.getchildren()), 0)
+
+    def testAddPackageRoot(self):
+        self.pkgcontents._add_root()
+        self.pkgcontents._add_package_root()
+        for k, v in [('n', 'PackageRoot'), ('o', PkgContents.OWNER),
+                     ('g', PkgContents.GROUP), ('pt', '.'), ('m', 'true'),
+                     ('t', 'bom')]:
+            self.check_attrib(self.pkgcontents.root, PkgContents.TAG_F, k, v)
+
+    def testFill(self):
+        self.pkgcontents._fill()
+        children = [x for x in self.pkgcontents.proot.getchildren()
+                    if x.tag == PkgContents.TAG_F]
+        children_path = [x.attrib['n'] for x in children]
+        self.assertEquals(sorted(children_path), sorted(['bin', 'lib', 'README']))
+        for c in children:
+            if c.attrib['n'] == 'bin':
+                self.check_attrib(c, PkgContents.TAG_F, 'n', 'gst-inspect')
+            elif c.attrib['n'] == 'lib':
+                for c in c.getchildren():
+                    if c.attrib['n'] == 'gstreamer-0.10':
+                        self.check_attrib(c, PkgContents.TAG_F, 'n',
+                                         'libgstplugin.so')
+                    else:
+                        self.assertEquals(c.attrib['n'], 'libgstreamer.so.1.0')
+            else:
+                self.assertEquals(c.attrib['n'], 'README')
