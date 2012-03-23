@@ -22,7 +22,6 @@ import unittest
 import tempfile
 
 from cerbero.config import Platform
-from cerbero.packages import package
 from cerbero.tests.test_packages_common import Package1
 from cerbero.utils import shell
 
