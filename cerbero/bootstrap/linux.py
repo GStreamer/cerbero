@@ -29,12 +29,12 @@ class UnixBootstraper (BootstraperBase):
     packages = []
 
     def start(self):
-        shell.call('%s %s' % (self.tool, ' '.join(self.packages)))
+        shell.call(self.tool % ' '.join(self.packages))
 
 
 class DebianBootstraper (UnixBootstraper):
 
-    tool = 'sudo apt-get install'
+    tool = 'sudo apt-get install %s'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
@@ -47,8 +47,13 @@ class DebianBootstraper (UnixBootstraper):
 
 class RedHatBootstraper (UnixBootstraper):
 
-    tool = 'yum install'
-    packages = ['']
+    tool = 'su -c "yum install %s"'
+    packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool', 'gettext-devel',
+                'make', 'cmake', 'bison', 'flex', 'yasm', 'pkgconfig-0.25',
+                'gtk-doc', 'curl', 'doxygen', 'text-info', 'texlive-dvips',
+                'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
+                'docbook-style-xsl', 'redhat-rpm-config',
+                'pulseaudio-libs-devel', 'libXv-devel']
 
 
 def register_all():
