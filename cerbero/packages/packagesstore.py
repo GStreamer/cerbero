@@ -156,6 +156,8 @@ class PackagesStore (object):
                 p = d['Package'](self._config)
             elif 'MetaPackage' in d:
                 p = d['MetaPackage'](self._config)
+            else:
+                raise Exception('Package or MetaPackage class found')
             return p
         except Exception, ex:
             import traceback
