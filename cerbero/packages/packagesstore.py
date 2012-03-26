@@ -20,8 +20,6 @@ import os
 
 from cerbero.config import Platform, Architecture, Distro, DistroVersion
 from cerbero.packages import package
-from cerbero.build import BuildType
-from cerbero.source import SourceType
 from cerbero.errors import FatalError, PackageNotFoundError
 from cerbero.utils import _
 from cerbero.utils import messages as m
@@ -148,9 +146,9 @@ class PackagesStore (object):
 
     def _load_package_from_file(self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
+
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
-                 'BuildType': BuildType, 'SourceType': SourceType,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
                  'package': package}
             execfile(filepath, d)
