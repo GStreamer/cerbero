@@ -5,3 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.8.4'
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            self.autoreconf=True
