@@ -50,7 +50,7 @@ class Package(Command):
         if p is None:
             raise PackageNotFoundError(args.package[0])
         if args.tarball:
-            pkg = DistTarball(p)
+            pkg = DistTarball(config, p, store)
         else:
             pkg = Packager(config, p, store)
         m.action(_("Creating package for %s") % p.name)

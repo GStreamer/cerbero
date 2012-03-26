@@ -22,12 +22,14 @@ import tarfile
 from cerbero.utils import _
 from cerbero.utils import messages as m
 from cerbero.errors import UsageError
+from cerbero.packages import PackagerBase
 
 
-class DistTarball(object):
+class DistTarball(PackagerBase):
     ''' Creates a distribution tarball '''
 
-    def __init__(self, package):
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
         self.package = package
         self.prefix = self.package.config.prefix
 
