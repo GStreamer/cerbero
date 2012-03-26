@@ -32,6 +32,18 @@ class Recipe(recipe.Recipe):
     }
 
 
+    def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
+        flags = ''
+        def escape(path):
+            return '\\\\\\\"%s\\\\\\\"' % path
+        if path1 is not None:
+            flags += ' -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=%s' % escape(path1)
+        if path2 is not None:
+            flags += ' -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=%s' % escape(path2)
+        if use_old_uri_scheme:
+            flags += ' -DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1'
+        return flags
+         
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
@@ -39,16 +51,19 @@ class Recipe(recipe.Recipe):
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
-                self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1 -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\"" ./configure'
+                self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', None, True)
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\" -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=\\\\\\\"/usr/lib/i386-linux-gnu/gio/modules\\\\\\\"" ./configure'
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', '/usr/lib/i386-linux-gnu/gio/modules')
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/gio/modules\\\\\\\" -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=\\\\\\\"/usr/lib/x86_64-linux-gnu/gio/modules\\\\\\\"" ./configure'
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', '/usr/lib/x86_64-linux-gnu/gio/modules')
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/i386-linux-gnu/gio/modules\\\\\\\"" ./configure'
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/i386-linux-gnu/gio/modules')
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = '''CFLAGS="$CFLAGS -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=\\\\\\\"/usr/lib/x86_64-linux-gnu/gio/modules\\\\\\\"" ./configure'''
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/x86_64-linux-gnu/gio/modules')
+            elif self.config.target_distro == Distro.REDHAT:
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/')
+                    
             else:
                 raise FatalError(_("Add specific for other Linux distributions here"))
