@@ -74,7 +74,8 @@ class Config (object):
                 self.parse(filename)
                 self.filename = DEFAULT_CONFIG_FILE
             else:
-                raise ConfigurationError(_("Configuration file %s doesn't exsits"))
+                raise ConfigurationError(_("Configuration file %s doesn't "
+                                           "exsits") % filename)
 
         # Next, load the platform configuration
         self._load_platform_config()
