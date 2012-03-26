@@ -119,10 +119,9 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
     def setUp(self):
         self.config = DummyConfig()
         self.config.target_platform = Platform.LINUX
-        self.store = create_store(self.config)
-        self.package = self.store.get_package('gstreamer-runtime')
+        self.package = Package1(self.config)
         self.package_path = '/test/package.pkg'
-        self.pkgref = PkgRef(self.package, self.store, self.package_path)
+        self.pkgref = PkgRef(self.package, self.package_path)
 
     def testAddRoot(self):
         self.pkgref._add_root()
