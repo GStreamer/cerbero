@@ -136,3 +136,37 @@ class MergeModuleTest(unittest.TestCase):
         mergemodule._get_uuid = lambda : '1'
         mergemodule.fill()
         self.assertEquals(MERGE_MODULE, mergemodule.render_xml())
+
+
+class InstallerTest(unittest.TestCase):
+
+
+    def setUp(self):
+        pass
+
+    def testAddRoot(self):
+        pass
+
+    def testAddProduct(self):
+        pass
+
+    def testAddPackage(self):
+        pass
+
+    def testAddInstallDir(self):
+        pass
+
+    def testAddUIProps(self):
+        pass
+
+    def testAddMedia(self):
+        pass
+
+    def testAddMergeModules(self):
+        pass
+
+    def testAddMergeModules(self):
+        pass
+
+    def testRender(self):
+        pass
