@@ -43,15 +43,15 @@ class PackageBase(object):
     @cvar url: url for this pacakge
     @type url: str
     '''
-    name = ''
-    shortdesc = ''
-    longdesc = ''
-    version = ''
-    org = ''
+    name = 'default'
+    shortdesc = 'default'
+    longdesc = 'default'
+    version = 'default'
+    org = 'default'
     uuid = None
     licenses = list()
-    vendor = ''
-    url = ''
+    vendor = 'default'
+    url = 'default'
 
 
 class Package(PackageBase):
