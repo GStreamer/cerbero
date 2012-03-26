@@ -94,12 +94,10 @@ class MetaPackage(package.MetaPackage):
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
     vendor = "GStreamer Project"
     org = 'net.gstreamer'
-    packages = {
-        '': [('gstreamer-test1', True, True),
-             ('gstreamer-test3', False, True),
-            ],
-        'bindings': [('gstreamer-test-bindings', False, False)]
-        }
+    packages = [
+                ('gstreamer-test1', True, True),
+                ('gstreamer-test3', False, True),
+                ('gstreamer-test-bindings', False, False)]
     features = {'bindings': 'GStreamer Bindings'}
     icon = "gstreamer.ico"
     install_dir = {

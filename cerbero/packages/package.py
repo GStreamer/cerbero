@@ -172,7 +172,4 @@ class MetaPackage(PackageBase):
         self.config = config
 
     def list_packages(self):
-        plist = []
-        for l in self.packages.values():
-            plist.extend(map(lambda x: x[0], l))
-        return plist
+        return [p[0] for p in self.packages]

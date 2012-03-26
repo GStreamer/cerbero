@@ -12,17 +12,16 @@ class MetaPackage(package.MetaPackage):
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
     vendor = "GStreamer Project"
     org = "net.gstreamer"
-    packages = {
-        '': [('gstreamer-core', True, True),
-             ('gstreamer-playback', False, True),
-             ('gstreamer-codecs', False, True),
-             ('gstreamer-effects', False, True),
-             ('gstreamer-networking', False, True),
-             ('gstreamer-libav', False, False),
-             ('gstreamer-clutter', False, False)],
-        'bindings': [('gstreamer-python27', False, False)]
-        }
-    features = {'bindings': 'GStreamer Bindings'}
+    packages =[
+               ('gstreamer-core', True, True),
+               ('gstreamer-playback', False, True),
+               ('gstreamer-codecs', False, True),
+               ('gstreamer-effects', False, True),
+               ('gstreamer-networking', False, True),
+               ('gstreamer-libav', False, False),
+               ('gstreamer-clutter', False, False),
+               ('gstreamer-python27', False, False)
+              ]
     icon = "gstreamer.ico"
     install_dir = {
         Platform.WINDOWS: 'GStreamer',

@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import itertools
 
 from cerbero.utils import etree, shell
 from cerbero.errors import FatalError
@@ -129,11 +128,7 @@ class Index(PMDocXML):
     def _add_contents(self):
         contents = etree.SubElement(self.root, self.TAG_CONTENTS)
 
-        # With PackageMaker choices can't be nested so we group all packages
-        # no matter the feature they belong to.
-        packages = itertools.chain(*self.package.packages.values())
-
-        for p, required, selected in packages:
+        for p, required, selected in self.package.packages:
             package = self.store.get_package(p)
             self._add_choice(package, not required, selected, contents)
 
