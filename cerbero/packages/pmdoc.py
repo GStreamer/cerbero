@@ -141,7 +141,7 @@ class Index(PMDocXML):
         choice = etree.SubElement(contents, self.TAG_CHOICE,
             title=package.shortdesc, id=package.name,
             starts_selected=self._boolstr(selected),
-            starts_enabled=self._boolstr(enabled), start_hidden='false')
+            starts_enabled=self._boolstr(enabled), starts_hidden='false')
         packages = [package.name] + package.deps
         for p_name in packages:
             etree.SubElement(choice, self.TAG_PKGREF, id=p_name)
