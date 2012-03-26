@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+
 from cerbero.commands import Command, register_command
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
@@ -53,7 +55,8 @@ class Package(Command):
             pkg = Packager(config, p, store)
         m.action(_("Creating package for %s") % p.name)
         path = pkg.pack(args.output_dir, args.force)
-        m.action(_("Package successfully created in %s") % path)
+        m.action(_("Package successfully created in %s") %
+                 os.path.abspath(path))
 
 
 register_command(Package)
