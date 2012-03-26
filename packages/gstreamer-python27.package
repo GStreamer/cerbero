@@ -9,6 +9,7 @@ class Package(package.Package):
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'
+    uuid = '5fc36752-4165-511f-8387-e8f2a898f853'
     deps = ['gobject-python27']
 
     files = [
