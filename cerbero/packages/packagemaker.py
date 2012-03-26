@@ -22,7 +22,8 @@ import shutil
 
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
-from cerbero.utils import shell
+from cerbero.packages.pmdoc import PMDoc
+from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
 
@@ -68,6 +69,44 @@ class OSXPackage(PackagerBase):
         return tmp
 
 
+class PMDocPackage(PackagerBase):
+    '''
+    Creates an osx package from a L{cerbero.package.package.MetaPackage} using
+    a packagemaker's pmdoc file
+
+    @ivar package: package with the info to build the installer package
+    @type package: L{cerbero.packages.package.MetaPackage}
+    '''
+
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
+        self.packages = self.store.get_package_deps(package.name)
+        self.packages_paths = dict()
+
+    def pack(self, output_dir, force=False):
+        self.tmp = tempfile.mkdtemp()
+        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
+        self._create_packages()
+        pmdoc_path = self._create_pmdoc()
+        pm = PackageMaker()
+        pm.create_package_from_pmdoc(pmdoc_path, output_file)
+        return output_file
+
+    def _create_packages(self):
+        for p_name in self.packages:
+            package = self.store.get_package(p_name)
+            m.action(_("Creating package %s ") % p_name)
+            packager = OSXPackage(self.config, package, self.store)
+            path = packager.pack(self.tmp)
+            m.action(_("Package created sucessfully"))
+            self.packages_paths[package.name] = path
+
+    def _create_pmdoc(self):
+        m.action(_("Creating pmdoc for package %s " % self.package))
+        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths)
+        return pmdoc.create()
+
+
 class PackageMaker(object):
     ''' Warpper for the PackageMaker application '''
 
@@ -98,6 +137,13 @@ class PackageMaker(object):
                 'l': destination, 'o': output_file}
         self._execute(self._cmd_with_args(args))
 
+    def create_package_from_pmdoc(self, pmdoc_path, output_file):
+        '''
+        Creates an osx package from a pmdoc configuration files
+        '''
+        args = {'d': pmdoc_path, 'o': output_file}
+        self._execute(self._cmd_with_args(args))
+
     def _cmd_with_args(self, args):
         args_str = ''
         for k, v in args.iteritems():
@@ -114,7 +160,7 @@ class Packager(object):
         if isinstance(package, Package):
             return OSXPackage(config, package)
         else:
-            raise NotImplemented()
+            return PMDocPackage(config, package)
 
 
 def register():
