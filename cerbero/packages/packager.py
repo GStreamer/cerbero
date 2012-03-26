@@ -48,7 +48,8 @@ class Packager (object):
         return _packagers[d][v](config, package, store)
 
 
-from cerbero.packages import wix, packagemaker
+from cerbero.packages import wix, packagemaker, rpm
 
 wix.register()
 packagemaker.register()
+rpm.register()
