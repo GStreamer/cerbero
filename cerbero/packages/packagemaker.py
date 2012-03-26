@@ -156,11 +156,11 @@ class PackageMaker(object):
 
 class Packager(object):
 
-    def __new__(klass, config, package):
+    def __new__(klass, config, package, store):
         if isinstance(package, Package):
-            return OSXPackage(config, package)
+            return OSXPackage(config, package, store)
         else:
-            return PMDocPackage(config, package)
+            return PMDocPackage(config, package, store)
 
 
 def register():

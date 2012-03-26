@@ -262,11 +262,11 @@ class Installer(WixBase):
 
 class Packager(object):
 
-    def __new__(klass, config, package):
+    def __new__(klass, config, package, store):
         if isinstance(package, Package):
-            return MergeModule(config, package)
+            return MergeModule(config, package, store)
         else:
-            return Installer(config, package)
+            return Installer(config, package, store)
 
 
 class Candle(object):
