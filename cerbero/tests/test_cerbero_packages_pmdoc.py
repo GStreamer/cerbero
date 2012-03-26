@@ -22,9 +22,10 @@ import tempfile
 import shutil
 
 from cerbero.config import Platform
-from cerbero.packages.pmdoc import Index, PkgRef, PkgContents
+from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
-from cerbero.tests.test_packages_common import create_store, DummyConfig
+from cerbero.tests.test_packages_common import create_store, DummyConfig, \
+        Package1
 from cerbero.tests.test_common import XMLMixin
 
 
@@ -231,3 +232,35 @@ class PkgContentsTest(unittest.TestCase, XMLMixin):
                         self.assertEquals(c.attrib['n'], 'libgstreamer.so.1.0')
             else:
                 self.assertEquals(c.attrib['n'], 'README')
+
+
+class TestPMDoc(unittest.TestCase):
+
+    def setUp(self):
+        self.config = DummyConfig()
+        self.config.target_platform = Platform.LINUX
+        self.store = create_store(self.config)
+        self.tmp = tempfile.mkdtemp()
+        self.package = self.store.get_package('gstreamer-runtime')
+        self.packages_path = os.path.join(self.tmp, 'test.pkg')
+        os.mkdir(self.packages_path)
+        shell.call('touch %s file1 file2 file3', self.packages_path)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def testAllFilesCreated(self):
+        d = dict()
+        packages = ['gstreamer-test1', 'gstreamer-test3',
+                    'gstreamer-test-bindings']
+        for name in packages:
+            d[name] =self.packages_path
+        pmdoc = PMDoc(self.package, self.store, self.tmp, d)
+        path = pmdoc.create()
+        files = os.listdir(path)
+
+        expected_files = ['index.xml']
+        for p in packages:
+            expected_files.append("%s.xml" % p)
+            expected_files.append("%s-contents.xml" % p)
+        self.assertEquals(sorted(files), sorted(expected_files))

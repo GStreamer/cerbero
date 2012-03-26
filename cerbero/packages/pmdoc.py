@@ -20,6 +20,7 @@ import os
 import itertools
 
 from cerbero.utils import etree, shell
+from cerbero.errors import FatalError
 
 
 class PMDocXML(object):
@@ -312,3 +313,36 @@ class PkgContents(PMDocXML):
         return etree.SubElement(parent, self.TAG_F, n=name, o=self.OWNER,
                 g=self.GROUP, p=mode)
 
+
+class PMDoc(object):
+    '''
+    Creates a .pmdoc file from a metapackage
+
+    '''
+
+    def __init__(self, package, store, output_dir, pkgspath):
+        self.outdir = os.path.join(output_dir, "%s.pmdoc" % package.name)
+        os.makedirs(self.outdir)
+        self.package = package
+        self.pkgspath = pkgspath
+        self.store = store
+        self.done_packages = []
+
+    def create(self):
+        packages = self.store.get_package_deps(self.package.name)
+        for p_name in packages:
+            self._create_pkgref_and_contents(self.store.get_package(p_name))
+
+        index = Index(self.package, self.store, self.outdir)
+        index.write(os.path.join(self.outdir, "index.xml"))
+        return self.outdir
+
+    def _create_pkgref_and_contents(self, package):
+        if package.name in self.done_packages:
+            return
+        pkgref = PkgRef(package, self.pkgspath[package.name])
+        pkgref.write(os.path.join(self.outdir, "%s.xml" % package.name))
+        pkgcontents = PkgContents(self.pkgspath[package.name])
+        pkgcontents.write(os.path.join(self.outdir, "%s-contents.xml" %
+                                       package.name))
+        self.done_packages.append(package.name)
