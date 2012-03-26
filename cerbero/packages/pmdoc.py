@@ -37,6 +37,10 @@ class PMDocXML(object):
     def render(self):
         return etree.tostring(self.root)
 
+    def write(self, path):
+        tree = etree.ElementTree(self.root)
+        tree.write(path, encoding='utf-8')
+
     def _add_mods(self, parent, mods):
         for mod in mods:
             el = etree.SubElement(parent, self.TAG_MOD)
