@@ -38,7 +38,6 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstaudiotestsrc%(sext)s',
              'lib/gstreamer-0.10/libgstautoconvert%(sext)s',
              'lib/gstreamer-0.10/libgstautodetect%(sext)s',
-             'lib/gstreamer-0.10/libgstcolorspace%(sext)s',
              'lib/gstreamer-0.10/libgstcoreelements%(sext)s',
              'lib/gstreamer-0.10/libgstcoreindexers%(sext)s',
              'lib/gstreamer-0.10/libgstdebug%(sext)s',

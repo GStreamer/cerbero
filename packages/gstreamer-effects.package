@@ -18,6 +18,7 @@ class Package(package.Package):
              'lib/gstreamer-0.10/libgstaudiofx%(sext)s',
              'lib/gstreamer-0.10/libgstbayer%(sext)s',
              'lib/gstreamer-0.10/libgstcairo%(sext)s',
+             'lib/gstreamer-0.10/libgstcolorspace%(sext)s',
              'lib/gstreamer-0.10/libgstcoloreffects%(sext)s',
              'lib/gstreamer-0.10/libgstcutter%(sext)s',
              'lib/gstreamer-0.10/libgsteffectv%(sext)s',
