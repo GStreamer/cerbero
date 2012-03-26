@@ -16,16 +16,33 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-import shutil
 import unittest
 import tempfile
 
 from cerbero.config import Platform
-from cerbero.utils import shell
 from cerbero.errors import PackageNotFoundError
+from cerbero.packages.package import Package, MetaPackage
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.tests import test_packages_common as common
+
+
+PACKAGE = '''
+class Package(package.Package):
+
+    name = 'test-package'
+
+    def test_imports(self):
+        Platform.WINDOWS
+        Distro.WINDOWS
+        DistroVersion.WINDOWS_7
+        Architecture.X86
+'''
+
+METAPACKAGE = '''
+class MetaPackage(package.MetaPackage):
+
+    name = 'test-package'
+'''
 
 
 class PackageTest(unittest.TestCase):
@@ -79,3 +96,30 @@ class PackageTest(unittest.TestCase):
         deps = ['gstreamer-test-bindings', 'gstreamer-test1',
                 'gstreamer-test2', 'gstreamer-test3']
         self.assertEquals(deps, self.store.get_package_deps(metapackage.name))
+
+    def testLoadPackageFromFile(self):
+        package_file = tempfile.NamedTemporaryFile()
+        package_file.write(PACKAGE)
+        package_file.flush()
+        p = self.store._load_package_from_file(package_file.name)
+        self.assertIsInstance(p, Package)
+        self.assertEquals('test-package', p.name)
+
+    def testLoadMetaPackageFromFile(self):
+        package_file = tempfile.NamedTemporaryFile()
+        package_file.write(METAPACKAGE)
+        package_file.flush()
+        p = self.store._load_package_from_file(package_file.name)
+        self.assertIsInstance(p, MetaPackage)
+        self.assertEquals('test-package', p.name)
+
+    def testImports(self):
+        package_file = tempfile.NamedTemporaryFile()
+        package_file.write(PACKAGE)
+        package_file.flush()
+        p = self.store._load_package_from_file(package_file.name)
+        self.assertIsInstance(p, Package)
+        try:
+            p.test_imports()
+        except ImportError, e:
+            self.fail("Import error raised, %s", e)
