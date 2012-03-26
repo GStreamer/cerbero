@@ -18,11 +18,11 @@
 
 import os
 import uuid
+import itertools
 
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
 from cerbero.utils import shell, etree
-from cerbero.errors import PackageNotFoundError
 from cerbero.config import Platform
 
 
@@ -43,9 +43,20 @@ class WixBase(PackagerBase):
         self._fill()
         self.filled = True
 
+    def write(self, filepath):
+        self.fill()
+        tree = etree.ElementTree(self.root)
+        tree.write(filepath, encoding='utf-8')
+
     def render_xml(self):
         self.fill()
         return etree.tostring(self.root)
+
+    def _format_level(self, selected):
+        return selected and '1' or '2'
+
+    def _format_absent(self, required):
+        return required and 'disallow' or 'allow'
 
     def _add_root(self):
         self.root = etree.Element("Wix",
@@ -58,7 +69,7 @@ class WixBase(PackagerBase):
         return path
 
     def _format_id(self, path, replace_dots=False):
-        ret = path.replace('/', '_').replace('-', '_')
+        ret = path.replace('/', '_').replace('-', '_').replace(' ', '_')
         if replace_dots:
             ret = ret.replace('.', '')
         return ret
@@ -83,8 +94,7 @@ class MergeModule(WixBase):
     def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
-        with open(sources, 'wb') as f:
-            f.write(self.render_xml())
+        self.write(sources)
 
         wixobj = os.path.join(output_dir, "%s.wixobj" % self.package.name)
 
@@ -173,17 +183,15 @@ class Installer(WixBase):
     def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
         mergemodules = []
-        for p in self.package.packages:
+        packagedeps = self.store.get_package_deps(self.package)
+        for p in packagedeps:
             package = self.store.get_package(p)
-            if package is None:
-                raise PackageNotFoundError(p)
-            mergemodule = MergeModule(self.config, package)
+            mergemodule = MergeModule(self.config, package, self.store)
             mergemodule.pack(output_dir)
             mergemodules.append('%s.msm' % package.name)
 
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
-        with open(sources, 'wb') as f:
-            f.write(self.render_xml())
+        self.write(sources)
 
         wixobjs = [os.path.join(output_dir, "%s.wixobj" % self.package.name)]
         wixobjs.append(os.path.join(output_dir, "ui.wixobj"))
@@ -238,11 +246,15 @@ class Installer(WixBase):
             Title=self.package.title, Level='1', Display="expand",
             AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
 
-        for p in self.package.packages:
+        # Fill the list of required packages
+        required_packages = [self.store.get_package_deps(x[0]) for x \
+                             in self.package.packages if x[1] == True]
+        required_packages = itertools.chain(*required_packages)
+
+        for p, required, selected in self.package.packages:
             package = self.store.get_package(p)
-            if not package:
-                raise PackageNotFoundError(p)
-            self._add_merge_module(package)
+            self._add_merge_module(package, required, selected,
+                                   required_packages)
 
     def _add_ui_props(self):
         etree.SubElement(self.product, 'Property',
@@ -252,12 +264,29 @@ class Installer(WixBase):
         etree.SubElement(self.product, 'Media',
             Id='1', Cabinet='product.cab', EmbedCab='yes')
 
-    def _add_merge_module(self, package):
+    def _package_id(self, package_name):
+        return self._format_id(package_name)
+
+    def _add_merge_module(self, package, required, selected,
+                          required_packages):
+        # Add the merge module ref for this package in the Directory element
         etree.SubElement(self.installdir, 'Merge',
-            Id=self._format_id(package.name), Language='1033',
-            SourceFile='%s.msm' % package.name, DiskId='1')
-        etree.SubElement(self.main_feature, "MergeRef",
-            Id=self._format_id(package.name))
+                Id=self._package_id(package.name), Language='1033',
+                SourceFile='%s.msm' % package.name, DiskId='1')
+
+        # Create a new feature for this package
+        feature = etree.SubElement(self.main_feature, 'Feature',
+                Id=self._format_id(package.shortdesc), Title=package.shortdesc,
+                Level=self._format_level(selected),
+                Display='expand', Absent=self._format_absent(required))
+        deps = self.store.get_package_deps(package.name)
+        # Add all the merge modules required by this package, but expluding
+        # all the ones that are forced to be installed
+        mergerefs = list(set(deps) - set(required_packages))
+        for package_name in mergerefs:
+            etree.SubElement(feature, "MergeRef",
+                             Id=self._package_id(package_name))
+        etree.SubElement(feature, "MergeRef", Id=self._package_id(package.name))
 
 
 class Packager(object):
