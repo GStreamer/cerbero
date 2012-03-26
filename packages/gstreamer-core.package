@@ -12,12 +12,12 @@ class Package(package.Package):
     uuid = '32fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['base-deps']
 
-    binaries = ['gst-feedback', 'gst-discoverer-0.10',
-                'gst-inspect', 'gst-inspect-0.10',
-                'gst-typefind', 'gst-typefind-0.10',
-                'gst-xmlinspect', 'gst-xmlinspect-0.10',
-                'gst-xmllaunch', 'gst-xmllaunch-0.10',
-                'gst-launch', 'gst-launch-0.10']
+    binaries = ['gst-discoverer-0.10',
+                'gst-inspect-0.10',
+                'gst-typefind-0.10',
+                'gst-xmlinspect-0.10',
+                'gst-xmllaunch-0.10',
+                'gst-launch-0.10']
 
     libraries = ['libgstapp-0.10', 'libgstaudio-0.10', 'libgstcontroller-0.10',
                  'libgstbase-0.10', 'libgstbasevideo-0.10', 'libgstcodecparsers-0.10',
