@@ -24,15 +24,29 @@ from cerbero.utils import  N_
 
 
 class MetaRecipe(type):
+    ''' This metaclass modifies the base classes of a Receipt, adding 2 new
+    base classes based on the class attributes 'stype' and 'btype'.
+
+    class NewReceipt(Receipt):
+        btype = Class1    ------>  class NewReceipt(Receipt, Class1, Class2)
+        stype = Class2
+    '''
 
     def __new__(cls, name, bases, dct):
-        if bases[0] != object :
-            basedict = {'btype': None, 'stype': None}
-            basedict['stype'] = bases[0].stype
-            basedict['btype'] = bases[0].btype
+        clsname = '%s.%s' % (dct['__module__'], name)
+        recipeclsname = '%s.%s' % (cls.__module__, 'Recipe')
+        # only modify it for Receipt's subclasses
+        if clsname != recipeclsname:
+            # get the default build and source classes from Receipt
+            # Receipt(DefaultSourceType, DefaultBaseType)
+            basedict = {'btype': bases[0].btype, 'stype': bases[0].stype}
+            # if this class define stype or btype, override the default one
+            # Receipt(OverridenSourceType, OverridenBaseType)
             for base in ['stype', 'btype']:
-                if dct.get(base):
+                if base in dct:
                     basedict[base] = dct[base]
+            # finally add this classes the Receipt bases
+            # Receipt(BaseClass, OverridenSourceType, OverridenBaseType)
             bases = bases + tuple(basedict.values())
         return type.__new__(cls, name, bases, dct)
 
@@ -83,8 +97,13 @@ class Recipe(object):
         self.repo_dir = os.path.abspath(self.repo_dir)
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
-        self.stype.__init__(self)
-        self.btype.__init__(self)
+        try:
+            self.stype.__init__(self)
+            self.btype.__init__(self)
+        except TypeError:
+            # should only work with subclasses that really have Build and Source
+            # in bases
+            pass
 
     def prepare(self):
         '''
