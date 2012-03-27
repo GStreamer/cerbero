@@ -4,3 +4,8 @@ class Recipe(recipe.Recipe):
     name = 'a52dec'
     version = '0.7.4'
     configure_options = '--with-pic'
+    license = 'GPLv2'
+
+    files_libs = ['liba52']
+    files_bins = ['a52dec']
+    files_devel = ['include/a52dec']

@@ -3,10 +3,31 @@
 class Recipe(recipe.Recipe):
     name = 'glib'
     version = '2.30.3'
+    license = 'LGPLv2'
     configure_sh = 'sh autogen.sh'
     deps = ['libffi', 'zlib']
     platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
                      Platform.DARWIN: ['libiconv', 'gettext']}
+
+    files_libs = [
+        'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
+        'libgthread-2.0']
+    files_bins = [
+        'glib-gettextize', 'glib-mkenums', 'glib-compile-schemas',
+        'glib-genmarshal']
+    files_dev = [
+        'lib/gio'
+        'lib/glib-2.0/include/glibconfig.h',
+        'lib/pkgconfig/gio-2.0.pc',
+        'lib/pkgconfig/glib-2.0.pc',
+        'lib/pkgconfig/gmodule-2.0.pc',
+        'lib/pkgconfig/gobject-2.0.pc',
+        'lib/pkgconfig/gthread-2.0.pc',
+        'include/glib-2.0']
+    files_dev_platform = {
+        Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
+    }
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

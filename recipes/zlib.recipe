@@ -4,8 +4,13 @@
 class Recipe(recipe.Recipe):
     name = 'zlib'
     version = '1.2.6'
+    license = 'BSD-like'
     force_configure = True
     add_host_build_target = False
+
+    files_libs = ['libz']
+    files_devel = ['include/zlib.h', 'lib/pkgconfig/zlib.pc']
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

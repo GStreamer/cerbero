@@ -4,3 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'libgpg-error'
     version = '1.10'
+    license = 'LGPLv2.1'
+
+    files_libs = ['libgpg-error']
+    files_bins = ['gpg-error']
+    files_devel = ['include/gpg-eror.h', 'bin/gpg-error-config']

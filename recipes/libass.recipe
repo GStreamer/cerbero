@@ -4,4 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'libass'
     version = '0.10.0'
+    license = 'BSD-like'
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
+
+    files_libs = ['libass']
+    files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']

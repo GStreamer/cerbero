@@ -4,4 +4,9 @@
 class Recipe(recipe.Recipe):
     name = 'libdvdread'
     version = '4.2.0'
+    license = 'GPLv2'
     config_sh = 'sh autogen.sh'
+
+    files_libs = ['libdvread']
+    files_devel = ['include/dvdread', 'lib/pkgconfig/libdvnav.pc',
+                   'lib/pkgconfig/libdvnavmini.pc', 'bin/dvdread-config']

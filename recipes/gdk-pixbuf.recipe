@@ -4,7 +4,16 @@
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
     version = '2.24.1'
+    license = 'LGPLv2.1'
     deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
+
+    files_libs = ['libgdk_pixbuf']
+    files_bin = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
+    files_devel = [
+        'lib/gdk-pixbuf-2.0',
+        'lib/pkgconfig/gdk-pixbuf-2.0.pc',
+        'include/gdk-pixbuf-2.0',
+    ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

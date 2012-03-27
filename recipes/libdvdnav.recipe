@@ -4,5 +4,10 @@
 class Recipe(recipe.Recipe):
     name = 'libdvdnav'
     version = '4.2.0'
+    license = 'GPLv2'
     config_sh = 'sh autogen.sh'
     deps = ['libdvdread']
+
+    files_libs = ['libdvdnav', 'libdvdnavmini']
+    files_devel = ['include/dvdnav', 'lib/pkgconfig/libdvnav.pc',
+                   'lib/pkgconfig/libdvnavmini.pc', 'bin/dvdnav-config']

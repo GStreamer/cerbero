@@ -4,7 +4,14 @@
 class Recipe(recipe.Recipe):
     name = 'libtheora'
     version = '1.1.1'
+    license = 'BSD'
     deps = ['libogg', 'libvorbis']
+
+    files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
+    files_bins = ['dvconnect', 'encodedv', 'dubdv']
+    files_devel = ['include/theora', 'lib/pkgconfig/libtheora.pc',
+                   'lib/pkgconfig/libtheoraenc.pc', 'lib/pkgconfig/libtheoradec.pc']
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

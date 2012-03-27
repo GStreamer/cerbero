@@ -4,7 +4,11 @@
 class Recipe(recipe.Recipe):
     name = 'libgcrypt'
     version = '1.5.0'
+    license = 'LGPLv2.1'
     deps = ['libgpg-error']
+
+    files_libs = ['libgcrypt']
+    files_devel = ['include/gcrypt.h', 'bin/gcrypt-config']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

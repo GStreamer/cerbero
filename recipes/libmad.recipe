@@ -3,3 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libmad'
     version = '0.15.1b'
+    license = 'GPLv2'
+
+    files_libs = ['libmad']
+    files_devel = ['include/mad.h']

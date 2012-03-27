@@ -4,8 +4,13 @@
 class Recipe(recipe.Recipe):
     name = 'gnutls'
     version = '3.0.14'
+    license = 'LGPLv2.1+'
     configure_options = "--enable-local-libopts "
     deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
+
+    files_libs = ['libgnutls', 'libgnutlsxx', 'libgnutls-openssl']
+    files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
+    files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

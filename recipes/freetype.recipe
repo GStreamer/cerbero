@@ -4,5 +4,10 @@
 class Recipe(recipe.Recipe):
     name = 'freetype'
     version = '2.4.8'
+    license = 'FreeType'
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
     force_configure = True
+
+    files_libs = ['libfreetype']
+    files_bin = ['freetype-config']
+    files_devel = ['lib/pkgconfig/freetype2.pc', 'include/freetype2']

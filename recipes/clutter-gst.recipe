@@ -6,3 +6,6 @@ class Recipe(recipe.Recipe):
     deps = ['clutter', 'gstreamer', 'gst-plugins-base']
     use_system_libs = True
     autoreconf = True
+
+    files_libs = ['libclutter-gst-1.0']
+    files_devel = ['lib/pkgconfig/clutter-gst.pc', 'include/clutter-1.0/clutter-gst']

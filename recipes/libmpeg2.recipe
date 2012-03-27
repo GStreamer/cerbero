@@ -3,7 +3,13 @@
 class Recipe(recipe.Recipe):
     name = 'libmpeg2'
     version = '0.5.1'
+    license = 'GPLv2'
     autoreconf = True
+
+    files_libs = ['libmpeg2', 'libmpeg2convert']
+    files_bins = ['mpeg2dec', 'extract-mpeg2', 'corrupt_mpeg2']
+    files_devel = ['include/mpeg2dec', 'lib/pkgconfig/libmpeg2.pc',
+                   'lib/pkgconfig/libmpeg2.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:

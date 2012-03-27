@@ -4,4 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'libvisual'
     version = '0.4.0'
+    license = 'LGPLv2.1'
     autoreconf = True
+
+    files_libs = ['libvisual-0.4']
+    files_devel = ['include/libvisual-0.4', 'lib/pkgconfig/libvisual-0.4.pc']

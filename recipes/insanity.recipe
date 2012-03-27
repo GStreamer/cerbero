@@ -7,4 +7,3 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection '
     remotes = {'upstream': 'git+ssh://git.keema.collabora.co.uk/git/insanity/insanity.git'}
     deps = [ 'glib', 'gtk-doc', 'dbus' ]
-

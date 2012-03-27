@@ -4,3 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'jpeg'
     version = '8d'
+    license = 'JPEG'
+
+    files_libs = ['libjpeg']
+    files_bins = ['cjpeg', 'djpeg', 'jpegtran']
+    files_devel = ['include/jpeglib.h']

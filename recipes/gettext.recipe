@@ -6,6 +6,11 @@ class Recipe(recipe.Recipe):
     version = '0.18.1.1'
     srcdir = 'gettext-runtime'
     autoreconf = True
+    license = 'LGPL'
+
+    files_libs = ['libintl', 'libasnprintf']
+    files_bins = ['gettext', 'ngettext', 'envsubst']
+    files_devel = ['include/autosnprintf.h']
 
     def prepare (self):
         if self.config.target_platform == Platform.WINDOWS:

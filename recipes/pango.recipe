@@ -5,7 +5,20 @@ class Recipe(recipe.Recipe):
     name = 'pango'
     version = '1.28.4'
     autoreconf = True
+    license = 'LGPLv2.1'
     deps = ['cairo', 'fontconfig', 'freetype']
+
+    files_libs = ['libpangocairo', 'libpango', 'libpangoft2']
+    files_bins = ['pango-querymodules', 'pango-view']
+    files_devel = ['include/pango-1.0', 'lib/pango',
+        'lib/pkgconfig/pangoft2.pc', 'lib/pkgconfig/pango.pc',
+        'lib/pkgconfig/pangocairo.pc']
+    files_libs_platform = {
+        Platform.WINDOWS: ['libpangowin32'],
+    }
+    files_devel_platform = {
+        Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
+    }
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

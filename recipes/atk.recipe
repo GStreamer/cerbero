@@ -5,3 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'atk'
     version = '2.2.0'
     deps = ['glib']
+    license = 'LGPLv2'
+
+    files_libs = ['atk']
+    files_devel = ['lib/pkgconfig/atk.pc', 'include/atk-1.0']

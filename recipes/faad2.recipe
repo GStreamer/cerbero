@@ -3,3 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'faad2'
     version = '2.7'
+    license = 'GPLv2'
+
+    files_libs = ['libfaad']
+    files_bin = ['faad']
+    files_devel = ['include/faad.h']

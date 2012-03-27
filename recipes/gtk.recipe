@@ -4,7 +4,27 @@
 class Recipe(recipe.Recipe):
     name = 'gtk+'
     version = '2.24.10'
+    license = 'LGPLv2'
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
+
+    files_bins = [
+        'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immmodules-2.0',
+        'gtk-builder-convert']
+    files_etc = ['gtkrc']
+    files_devel = [
+        'lib/gtk-2.0'
+        'lib/pkgconfig/gtk+-2.0.pc',
+        'lib/pkgconfig/gdk-2.0.pc',
+        'include/gtk-2.0',
+        'include/gdk-2.0',
+    ]
+    files_bins_platform = {
+        Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
+        }
+    files_devel_platform = {
+        Platform.WINDOWS: [
+        'lib/pkgconfig/gtk+-win32-2.0.pc', 'lib/pkgconfig/gdk''win32-2.0.pc'],
+        }
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

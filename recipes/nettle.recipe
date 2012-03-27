@@ -4,5 +4,10 @@
 class Recipe(recipe.Recipe):
     name = 'nettle'
     version = '2.4'
+    license = 'LGPLv2.1'
     configure_options = '--enable-shared'
     deps = ['gmp']
+
+    files_bins = ['nettle-hash', 'nettle-lfib-stream']
+    files_libs = ['libnettle']
+    files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc']

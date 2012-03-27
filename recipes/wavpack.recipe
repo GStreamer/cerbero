@@ -4,7 +4,13 @@
 class Recipe(recipe.Recipe):
     name = 'wavpack'
     version = '4.60.1'
+    lincense = 'BSD-like'
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
+
+    files_libs = ['libwavpack']
+    files_bins = ['wavpack']
+    files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

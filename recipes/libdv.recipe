@@ -4,6 +4,11 @@
 class Recipe(recipe.Recipe):
     name = 'libdv'
     version = '1.0.0'
+    license = 'LGPLv2.1'
+
+    files_libs = ['libdv']
+    files_bins = ['dvconnect', 'encodedv', 'dubdv']
+    files_devel = ['include/libdv', 'lib/pkgconfig/libdv.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

@@ -3,3 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'libdca'
     version = '0.0.5'
+    license = 'GPL'
+
+    files_libs = ['libdca']
+    files_bins = ['extract_dca', 'dcadec']
+    files_devel = ['include/dca.h', 'lib/pkgconfig/libdca.pc']

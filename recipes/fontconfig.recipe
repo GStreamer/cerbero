@@ -4,8 +4,12 @@
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
     version = '2.8.0'
+    license = 'MIT'
     deps = ['expat', 'freetype', 'zlib']
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
+
+    files_libs = ['libfontconfig']
+    files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

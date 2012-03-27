@@ -4,10 +4,15 @@
 class Recipe(recipe.Recipe):
     name = 'libvpx'
     version = 'v1.0.0'
+    license = 'BSD'
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm "
     add_host_build_target = False
+
+    files_libs = ['libvpx']
+    files_bins = ['vpxenc', 'vpxdec']
+    files_devel = ['include/vpx', 'lib/pkgconfig/vpx.pc']
 
 
     def prepare (self):

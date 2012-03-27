@@ -4,4 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'libshout'
     version = '2.2.2'
+    license = 'LGPLv2.1'
     deps = ['libtheora', 'libogg', 'libvorbis', 'speex']
+
+    files_libs = ['libshout']
+    files_devel = ['include/shout', 'lib/pkgconfig/shout.pc']

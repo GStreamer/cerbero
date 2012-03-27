@@ -3,5 +3,10 @@
 class Recipe(recipe.Recipe):
     name = 'dbus'
     version = '1.4.16'
+    license = 'AFLv2.1'
     deps = ['expat']
     configure_options = '--disable-xml-docs --disable-doxygen-docs --disable-selinux --disable-libaudit --disable-launchd --disable-tests --disable-x11-autolaunch --disable-Werror '
+
+    files_libs = ['libdbus']
+    files_bins = ['dbus-launch', 'dbus-send', 'dbus-daemon', 'dbus-monitor']
+    files_devel = ['lib/pkgconfig/dbus-1.0.pc', 'include/dbus-1.0']

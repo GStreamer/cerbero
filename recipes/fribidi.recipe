@@ -3,3 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'fribidi'
     version = '0.19.2'
+    license = 'LGPLv2.1'
+
+    files_libs = ['libfribidi']
+    files_bin = ['fribidi']
+    files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']

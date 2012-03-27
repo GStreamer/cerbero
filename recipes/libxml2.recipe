@@ -4,8 +4,13 @@
 class Recipe(recipe.Recipe):
     name = 'libxml2'
     version = '2.7.8'
+    license = 'MIT'
     deps = [ 'zlib' ]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
+
+    files_libs = ['libxml']
+    files_devel = ['include/libxml2', 'bin/xml2-config']
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

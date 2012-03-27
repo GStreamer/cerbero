@@ -3,6 +3,10 @@
 class Recipe(recipe.Recipe):
     name = 'jasper'
     version = '1.900.1'
+    license = 'Jasper'
     config_sh = 'sh configure'
     configure_options = '--enable-shared '
 
+    files_libs = ['libjasper']
+    files_bins = ['jasper']
+    files_devel = ['include/jasper']

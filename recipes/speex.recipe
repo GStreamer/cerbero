@@ -4,4 +4,10 @@
 class Recipe(recipe.Recipe):
     name = 'speex'
     version = '1.2rc1'
+    license = 'BSD-like'
     deps = ['libogg']
+
+    files_libs = ['libspeex', 'libspeexdsp']
+    files_bins = ['speexdec', 'speexenc']
+    files_devel = ['include/speex', 'lib/pkgconfig/speex.pc',
+        'lib/pkgconfig/speexdsp.pc']
