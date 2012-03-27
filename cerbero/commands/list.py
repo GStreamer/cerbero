@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.commands import Command, register_command
-from cerbero.cookbook import CookBook
+from cerbero.build.cookbook import CookBook
 from cerbero.utils import _, N_
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore

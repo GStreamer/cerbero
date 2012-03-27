@@ -18,8 +18,8 @@
 
 import os
 
-from cerbero import build
-from cerbero import source
+from cerbero.build import build
+from cerbero.build import source
 from cerbero.utils import  N_
 
 

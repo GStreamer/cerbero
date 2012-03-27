@@ -21,12 +21,12 @@ import pickle
 import time
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro, DistroVersion
-from cerbero.build import BuildType
-from cerbero.source import SourceType
+from cerbero.build.build import BuildType
+from cerbero.build.source import SourceType
 from cerbero.errors import FatalError
 from cerbero.utils import _
 from cerbero.utils import messages as m
-from cerbero import recipe as crecipe
+from cerbero.build import recipe as crecipe
 
 
 COOKBOOK_NAME = 'cookbook'

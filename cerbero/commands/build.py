@@ -19,9 +19,9 @@
 
 #from cerbero.oven import Oven
 from cerbero.commands import Command, register_command
-from cerbero.cookbook import CookBook
+from cerbero.build.cookbook import CookBook
+from cerbero.build.oven import Oven
 from cerbero.errors import RecipeNotFoundError
-from cerbero.oven import Oven
 from cerbero.utils import _, N_, ArgparseArgument
 
 

@@ -18,7 +18,7 @@
 
 
 from cerbero.commands import Command, register_command
-from cerbero.cookbook import CookBook
+from cerbero.build.cookbook import CookBook
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 
