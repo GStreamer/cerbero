@@ -20,7 +20,8 @@ import os
 
 from cerbero.build import build
 from cerbero.build import source
-from cerbero.utils import  N_
+from cerbero.build.filesprovider import FilesProvider
+from cerbero.utils import N_
 
 
 class MetaRecipe(type):
@@ -51,7 +52,7 @@ class MetaRecipe(type):
         return type.__new__(cls, name, bases, dct)
 
 
-class Recipe(object):
+class Recipe(FilesProvider):
     '''
     Base class for recipes.
     A Recipe describes a module and the way it's built.
