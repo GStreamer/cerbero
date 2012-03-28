@@ -97,6 +97,8 @@ class Recipe(object):
         self.repo_dir = os.path.abspath(self.repo_dir)
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
+        self.deps = self.deps or []
+        self.platform_deps = self.platform_deps or []
         try:
             self.stype.__init__(self)
             self.btype.__init__(self)
@@ -119,7 +121,8 @@ class Recipe(object):
         '''
         List all dependencies including conditional depencies
         '''
-        deps = self.deps or []
+        deps = []
+        deps.extend(self.deps)
         if self.config.target_platform in self.platform_deps:
             deps.extend(self.platform_deps[self.config.target_platform])
         return deps
