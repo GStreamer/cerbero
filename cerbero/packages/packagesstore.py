@@ -18,6 +18,7 @@
 
 import os
 
+from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform, Architecture, Distro, DistroVersion
 from cerbero.packages import package
 from cerbero.errors import FatalError, PackageNotFoundError
@@ -36,6 +37,7 @@ class PackagesStore (object):
 
         self._packages = {}  # package_name -> package
 
+        self.cookbook = CookBook(config, load)
         # used in tests to skip loading a dir with packages definitions
         if not load:
             return
@@ -153,9 +155,9 @@ class PackagesStore (object):
                  'package': package}
             execfile(filepath, d)
             if 'Package' in d:
-                p = d['Package'](self._config)
+                p = d['Package'](self._config, self.cookbook)
             elif 'MetaPackage' in d:
-                p = d['MetaPackage'](self._config)
+                p = d['MetaPackage'](self._config, self.cookbook)
             else:
                 raise Exception('Package or MetaPackage class found')
             return p

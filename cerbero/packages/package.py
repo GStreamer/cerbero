@@ -16,9 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Platform
-from cerbero.utils import shell
-
 
 class PackageBase(object):
     '''
@@ -34,8 +31,8 @@ class PackageBase(object):
     @type version: str
     @cvar uuid: unique id for this package
     @type uuid: str
-    @cvar licenses:  list of the package licenses
-    @type licenses: list
+    @cvar license:  package license
+    @type license: str
     @cvar vendor: vendor for this package
     @type vendor: str
     @cvar org: organization for this package (eg: net.foo.bar)
@@ -49,7 +46,7 @@ class PackageBase(object):
     version = 'default'
     org = 'default'
     uuid = None
-    licenses = list()
+    licenses = 'GPL'
     vendor = 'default'
     url = 'default'
 
@@ -63,13 +60,17 @@ class Package(PackageBase):
     @type deps: list
     @cvar files: list of files included in this package
     @type files: list
+    @cvar platform_files: list of platform files included in this package
+    @type platform_files: list
     '''
 
     deps = list()
+    files = list()
+    platform_files = dict()
 
     def __init__(self, config, cookbook):
         self.cookbook = cookbook
-        self._files.extend = self.platform_files.get(config.target_platform, [])
+        self._files = self.files + self.platform_files.get(config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):
@@ -77,14 +78,22 @@ class Package(PackageBase):
     
     def files_list(self):
         files = []
-        for recipe, categories in self._recipes_files:
-            rfiles = self.cookbook.get_recipe(recipe).files_list(categories)
+        for recipe_name, categories in self._recipes_files.iteritems():
+            recipe = self.cookbook.get_recipe(recipe_name)
+            rfiles = recipe.files_list_by_categories(categories)
+            files.extend(rfiles)
+        return files
+
+    def devel_files_list(self):
+        files = []
+        for recipe, categories in self._recipes_files.iteritems():
+            rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
             files.extend(rfiles)
         return files
 
     def _parse_files(self):
         self._recipes_files = {}
-        for r in self.files:
+        for r in self._files:
             l = r.split(':')
             self._recipes_files[l[0]] = l[1:]
 
@@ -102,7 +111,7 @@ class MetaPackage(PackageBase):
     icon = None
     packages = []
 
-    def __init__(self, config):
+    def __init__(self, config, cookbook=None):
         self.config = config
 
     def list_packages(self):

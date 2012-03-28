@@ -88,7 +88,7 @@ class MergeModule(WixBase):
 
     def __init__(self, config, package, store):
         WixBase.__init__(self, config, package, store)
-        self.files_list = package.get_files_list()
+        self.files_list = package.files_list()
         self._dirnodes = {}
 
     def pack(self, output_dir, force=False):

@@ -37,7 +37,7 @@ class OSXPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.files = package.get_files_list()
+        self.files = package.files_list()
 
     def pack(self, output_dir, force=False):
         output_dir = os.path.realpath(output_dir)
