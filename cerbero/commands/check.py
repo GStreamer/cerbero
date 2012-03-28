@@ -46,7 +46,7 @@ class Check(Command):
         if recursive:
             ordered_recipes = cookbook.list_recipe_deps(recipe_name)
         else:
-            ordered_recipes =  [recipe]
+            ordered_recipes = [recipe]
 
         for recipe in ordered_recipes:
             if cookbook.recipe_needs_build(recipe.name):

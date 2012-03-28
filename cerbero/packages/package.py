@@ -53,8 +53,8 @@ class PackageBase(object):
 
 class Package(PackageBase):
     '''
-    Describes a set of files to produce disctribution packages for the different
-    target platforms
+    Describes a set of files to produce disctribution packages for the
+    different target platforms
 
     @cvar deps: list of packages dependencies
     @type deps: list
@@ -70,12 +70,13 @@ class Package(PackageBase):
 
     def __init__(self, config, cookbook):
         self.cookbook = cookbook
-        self._files = self.files + self.platform_files.get(config.target_platform, [])
+        self._files = self.files + \
+                self.platform_files.get(config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):
         return [x.split(':')[0] for x in self._files]
-    
+
     def files_list(self):
         files = []
         for recipe_name, categories in self._recipes_files.iteritems():

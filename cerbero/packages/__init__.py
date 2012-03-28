@@ -35,4 +35,3 @@ class PackagerBase(object):
         @type  force: bool
         '''
         raise NotImplemented("'pack' must be implemented by subclasses")
-

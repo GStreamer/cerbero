@@ -37,11 +37,11 @@ class Package(Command):
                              help=_('name of the package to create')),
             ArgparseArgument('-o', '--output-dir', default='.',
                              help=_('Output directory for the tarball file')),
-            ArgparseArgument('-t', '--tarball', action='store_true', default=False,
-                             help=_('Creates a tarball instead of a native '
-                                    'package')),
-            ArgparseArgument('-f', '--force', action='store_true', default=False,
-                             help=_('Delete any existing package file')),
+            ArgparseArgument('-t', '--tarball', action='store_true',
+                default=False,
+                help=_('Creates a tarball instead of a native package')),
+            ArgparseArgument('-f', '--force', action='store_true',
+                default=False, help=_('Delete any existing package file')),
             ])
 
     def run(self, config, args):

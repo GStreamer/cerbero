@@ -22,7 +22,7 @@ import subprocess
 from cerbero.config import Platform
 from cerbero.commands import Command, register_command
 from cerbero.utils import N_
-from cerbero.utils import shell as sh
+
 
 class Shell(Command):
     doc = N_('Starts a shell with the build environment')

@@ -22,6 +22,7 @@ import inspect
 from cerbero.config import Platform
 from cerbero.utils import shell
 
+
 class FilesProvider(object):
     '''
     List files by categories using class attributes named file_$category
@@ -96,7 +97,7 @@ class FilesProvider(object):
         return sorted(list(set(categories)))
 
     def _get_category_files_list(self, category):
-        ''' 
+        '''
         Get the raw list of files in a category, without pattern match nor
         extensions replacement, which should be done in the search function
         '''

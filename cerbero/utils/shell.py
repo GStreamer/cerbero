@@ -121,6 +121,7 @@ def unpack(filepath, output_dir):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
 
+
 def download(url, destination=None, recursive=False):
     '''
     Downloads a file with wget
@@ -146,7 +147,7 @@ def download(url, destination=None, recursive=False):
         try:
             call(cmd, path)
         except FatalError, e:
-            os.remove (tarfile)
+            os.remove(tarfile)
             raise e
 
 
@@ -161,8 +162,8 @@ def _splitter(string, base_url):
 
 def recursive_download(url, destination):
     '''
-    Recursive download for servers that don't return a list a url's but only the
-    index.html file
+    Recursive download for servers that don't return a list a url's but only
+    the index.html file
     '''
     raw_list = check_call('curl %s' % url)
 

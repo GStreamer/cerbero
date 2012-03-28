@@ -23,11 +23,13 @@ class Platform:
     WINDOWS = 'windows'
     DARWIN = 'darwin'
 
+
 class Architecture:
     ''' Enumeration of supported acrchitectures '''
     X86 = 'x86'
     X86_64 = 'x86_64'
     PPC = 'ppc'
+
 
 class Distro:
     ''' Enumeration of supported distributions '''
@@ -36,6 +38,7 @@ class Distro:
     SUSE = 'suse'
     WINDOWS = 'windows'
     OS_X = 'osx'
+
 
 class DistroVersion:
     ''' Enumeration of supported distribution versions '''

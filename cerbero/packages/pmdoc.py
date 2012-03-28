@@ -106,7 +106,7 @@ class Index(PMDocXML):
                 (self.TAG_MIN_TARGET, 'os', self.PROP_MIN_TARGET),
                 (self.TAG_DOMAIN, 'anywhere', self.PROP_DOMAIN)]:
             node = etree.SubElement(properties, e)
-            self._set(node, **{k:v})
+            self._set(node, **{k: v})
 
     def _add_distribution(self):
         distribution = etree.SubElement(self.root, self.TAG_DISTRIBUTION)
@@ -145,7 +145,7 @@ class Index(PMDocXML):
 
     def _boolstr(self, boolean):
         return boolean and 'true' or 'false'
-    
+
     def _set(self, node, **kwargs):
         for key in sorted(kwargs.keys()):
             value = kwargs[key]
@@ -170,7 +170,6 @@ class PkgRef(PMDocXML):
     TAG_PACKAGE_PATH = 'packagePath'
     TAG_SCRIPTS_DIR = 'scripts-dir'
 
-
     def __init__(self, package, package_path, fill=True):
         self.package = package
         self.package_path = package_path
@@ -186,7 +185,8 @@ class PkgRef(PMDocXML):
 
     def _add_root(self):
         if self.package.uuid is None:
-            raise FatalError("uuid for package '%s' is None" % self.package.name)
+            raise FatalError("uuid for package '%s' is None" %
+                             self.package.name)
         self.root = etree.Element(self.TAG_PKGREF, spec=self.SPEC_VERSION,
                                   uuid=self.package.uuid)
 
@@ -194,7 +194,8 @@ class PkgRef(PMDocXML):
         config = etree.SubElement(self.root, self.TAG_CONFIG)
         self._subelement_text(config, self.TAG_VERSION, '1.0')
         self._subelement_text(config, self.TAG_IDENTIFIER, self.package.name)
-        self._subelement_text(config, self.TAG_DESCRIPTION, self.package.shortdesc)
+        self._subelement_text(config, self.TAG_DESCRIPTION,
+                self.package.shortdesc)
         etree.SubElement(config, self.TAG_POST_INSTALL, type="none")
         etree.SubElement(config, self.TAG_REQ_AUTH)
         self._subelement_text(config, self.TAG_INSTALL_TO, '.',
@@ -274,7 +275,8 @@ class PkgContents(PMDocXML):
             pass
 
     def _add_root(self):
-        self.root = etree.Element(self.TAG_PKG_CONTENTS, spec=self.SPEC_VERSION)
+        self.root = etree.Element(self.TAG_PKG_CONTENTS,
+                spec=self.SPEC_VERSION)
 
     def _add_package_root(self):
         self.proot = etree.SubElement(self.root, self.TAG_F,
@@ -291,8 +293,8 @@ class PkgContents(PMDocXML):
             if dirname == '.':
                 self.dirs_nodes['.'] = self._add_package_root()
             else:
-                # all directories are listed in the correct order, so we assume
-                # that the parent has already been created
+                # all directories are listed in the correct order, so we
+                # assume that the parent has already been created
                 parent_node = self.dirs_nodes[parent]
                 self.dirs_nodes[path] = self._add_entry(parent_node, dirname,
                         self.files_modes[path])

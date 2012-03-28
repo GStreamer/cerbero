@@ -31,7 +31,6 @@ class PackagesStore (object):
     Stores a list of L{cerbero.packages.package.Package}
     '''
 
-
     def __init__(self, config, load=True):
         self._config = config
 
@@ -78,7 +77,7 @@ class PackagesStore (object):
         @param name: name of the package
         @type name: str
         @return: a list with the package dependencies
-        @rtype: list 
+        @rtype: list
         '''
         p = self.get_package(package_name)
         if isinstance(p, package.MetaPackage):

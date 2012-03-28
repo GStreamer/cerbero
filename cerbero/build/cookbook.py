@@ -20,7 +20,8 @@ import os
 import pickle
 import time
 
-from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro, DistroVersion
+from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
+        DistroVersion
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError
@@ -70,7 +71,6 @@ class CookBook (object):
     @ivar recipes: dictionary with the L{cerbero.cookbook.RecipeStatus}
     @type recipes: dict
     '''
-
 
     def __init__(self, config, load=True):
         self.set_config(config)
@@ -245,7 +245,6 @@ class CookBook (object):
                 pickle.dump(self.status, f)
         except IOError, ex:
             m.warning(_("Could not cache the CookBook: %s"), ex)
-
 
     def _find_deps(self, recipe, state={}, ordered=[]):
         if state.get(recipe, 'clean') == 'processed':

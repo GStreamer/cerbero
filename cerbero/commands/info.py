@@ -22,7 +22,7 @@ from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
 
 
-INFO_TPL='''
+INFO_TPL = '''
 Name:          %(name)s
 Version:       %(version)s
 Homepage:      %(url)s
@@ -30,6 +30,7 @@ Dependencies:  %(deps)s
 Licences:      %(licenses)s
 Description:   %(desc)s
 '''
+
 
 class PackageInfo(Command):
     doc = N_('Print information about this package')
@@ -39,8 +40,9 @@ class PackageInfo(Command):
         Command.__init__(self,
             [ArgparseArgument('package', nargs=1,
                              help=_('name of the package')),
-            ArgparseArgument('-l', '--list-files', action='store_true', default=False,
-                             help=_('List all files installed by this package')),
+            ArgparseArgument('-l', '--list-files', action='store_true',
+                default=False,
+                help=_('List all files installed by this package')),
             ])
 
     def run(self, config, args):
@@ -54,5 +56,5 @@ class PackageInfo(Command):
                  'licenses': ' '.join(p.licenses), 'desc': p.shortdesc,
                  'deps': ', '.join(store.get_package_deps(p_name))}
             m.message(INFO_TPL % d)
-            
+
 register_command(PackageInfo)

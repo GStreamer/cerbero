@@ -31,6 +31,7 @@ class Recipe(recipe.Recipe):
     version = '%(version)s'
 '''
 
+
 class AddRecipe(Command):
     doc = N_('Adds a new recipe')
     name = 'add-recipe'

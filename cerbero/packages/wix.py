@@ -117,7 +117,7 @@ class MergeModule(WixBase):
     def _add_module(self):
         self.module = etree.SubElement(self.root, "Module",
             Id=self._format_id(self.package.name),
-            Version=self.package.version, Language= '1033')
+            Version=self.package.version, Language='1033')
 
     def _add_package(self):
         self.pkg = etree.SubElement(self.module, "Package",
@@ -286,7 +286,8 @@ class Installer(WixBase):
         for package_name in mergerefs:
             etree.SubElement(feature, "MergeRef",
                              Id=self._package_id(package_name))
-        etree.SubElement(feature, "MergeRef", Id=self._package_id(package.name))
+        etree.SubElement(feature, "MergeRef",
+                         Id=self._package_id(package.name))
 
 
 class Packager(object):

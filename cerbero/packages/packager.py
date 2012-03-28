@@ -52,4 +52,3 @@ from cerbero.packages import wix, packagemaker
 
 wix.register()
 packagemaker.register()
-

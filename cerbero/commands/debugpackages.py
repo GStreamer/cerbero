@@ -39,14 +39,14 @@ class DebugPackages(Command):
 
     def run(self, config, args):
         store = PackagesStore(config)
-       
+
         allfiles = [p.get_files_list() for p in store.get_packages_list() if\
                     isinstance(p, Package)]
         allfiles = list(itertools.chain(*allfiles))
 
         self.find_duplicates(allfiles)
         self.find_orphan_files(allfiles, config.prefix, args.exclude)
-    
+
     def find_duplicates(self, allfiles):
         count = collections.Counter(allfiles)
         duplicates = [x for x in count if count[x] > 1]
@@ -56,18 +56,17 @@ class DebugPackages(Command):
 
     def find_orphan_files(self, allfiles, prefix, excludes=[]):
         cmd = 'find . -type f %s'
-        exc = map(lambda x: "\\( ! -name '%s' \\)" % x, excludes) 
+        exc = map(lambda x: "\\( ! -name '%s' \\)" % x, excludes)
         cmd = cmd % ' '.join(exc)
 
         distfiles = shell.check_call(cmd, prefix).split('\n')
         # remove './' from the list of files
         distfiles = [f[2:] for f in distfiles]
         orphan = sorted(list((set(distfiles) - set(allfiles))))
-        
+
         if len(orphan) > 0:
             m.message("Found orphan files:")
             m.message('\n'.join(orphan))
 
 
 register_command(DebugPackages)
-
