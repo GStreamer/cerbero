@@ -76,11 +76,16 @@ class CookBook (object):
 
     _mtimes = {}
 
-    def __init__(self, config):
+    def __init__(self, config, load=True):
         self.set_config(config)
+
+        if not load:
+            return
+
         if not os.path.exists(config.recipes_dir):
             raise FatalError(_("Recipes dir %s not found") %
                              config.recipes_dir)
+        self.update()
 
     def set_config(self, config):
         '''
@@ -222,7 +227,6 @@ class CookBook (object):
             m.warning(_("Could not recover status"))
         c = CookBook(config)
         c.set_status(status)
-        c.update()
         return c
 
     def save(self):
