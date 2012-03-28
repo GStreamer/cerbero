@@ -54,14 +54,14 @@ class PackageTest(unittest.TestCase):
         self.store = PackagesStore(self.config, False)
 
     def testAddPackage(self):
-        package = common.Package1(self.config)
+        package = common.Package1(self.config, None)
         self.assertEquals(len(self.store._packages), 0)
         self.store.add_package(package)
         self.assertEquals(len(self.store._packages), 1)
         self.assertEquals(package, self.store._packages[package.name])
 
     def testGetPackage(self):
-        package = common.Package1(self.config)
+        package = common.Package1(self.config, None)
         self.store.add_package(package)
         self.assertEquals(package, self.store.get_package(package.name))
 
@@ -70,28 +70,28 @@ class PackageTest(unittest.TestCase):
             'unknown')
 
     def testPackagesList(self):
-        package = common.Package1(self.config)
-        metapackage = common.MetaPackage(self.config)
+        package = common.Package1(self.config, None)
+        metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(package)
         self.store.add_package(metapackage)
         l = sorted([package, metapackage], key=lambda x: x.name)
         self.assertEquals(l, self.store.get_packages_list())
 
     def testPackageDeps(self):
-        package = common.Package1(self.config)
+        package = common.Package1(self.config, None)
         self.store.add_package(package)
         self.assertEquals(package.deps,
             self.store.get_package_deps(package.name))
 
     def testMetaPackageDeps(self):
-        metapackage = common.MetaPackage(self.config)
+        metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(metapackage)
         # the metapackage depends on package that are not yet in the store
         self.failUnlessRaises(PackageNotFoundError,
             self.store.get_package_deps, metapackage.name)
         for klass in [common.Package1, common.Package2, common.Package3,
                 common.Package4, common.MetaPackage]:
-            p = klass(self.config)
+            p = klass(self.config, None)
             self.store.add_package(p)
         deps = ['gstreamer-test-bindings', 'gstreamer-test1',
                 'gstreamer-test2', 'gstreamer-test3']

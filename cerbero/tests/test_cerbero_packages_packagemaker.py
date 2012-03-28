@@ -24,7 +24,15 @@ import tempfile
 from cerbero.config import Platform
 from cerbero.packages.packagemaker import OSXPackage, PackageMaker
 from cerbero.utils import shell
-from cerbero.tests.test_packages_common import create_store, DummyConfig
+from cerbero.tests.test_packages_common import create_store
+
+
+class DummyConfig(object):
+    target_platform = Platform.LINUX
+    prefix = ''
+    local_sources = ''
+    sources = ''
+    git_root = ''
 
 
 class PackageMakerTest(unittest.TestCase):
@@ -42,7 +50,7 @@ class PackageMakerTest(unittest.TestCase):
     def testCreateBundle(self):
         self._add_files()
         p = self.store.get_package('gstreamer-test1')
-        self.files = p.get_files_list()
+        self.files = p.files_list()
         packager = OSXPackage(self.config, p, self.store)
         tmpdest = packager._create_bundle()
         bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')

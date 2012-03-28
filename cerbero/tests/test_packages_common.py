@@ -19,6 +19,7 @@
 from cerbero.config import Platform
 from cerbero.packages import package
 from cerbero.packages.packagesstore import PackagesStore
+from cerbero.tests.test_build_common import create_cookbook
 
 
 class Package1(package.Package):
@@ -31,20 +32,10 @@ class Package1(package.Package):
     vendor = 'GStreamer Project'
     deps = ['gstreamer-test2']
 
-    files = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
+    files = ['recipe1:misc:libs:bins']
     platform_files = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
-
-    binaries = ['gst-launch']
-    platform_bins = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
-
-    libraries = ['libgstreamer']
-    platform_libs = {
-        Platform.WINDOWS: ['libgstreamer-win32'],
-        Platform.LINUX: ['libgstreamer-x11']}
+            Platform.WINDOWS: ['recipe5:libs']
+            }
 
 
 class Package2(package.Package):
@@ -56,7 +47,7 @@ class Package2(package.Package):
     uuid = '1'
     vendor = 'GStreamer Project'
 
-    files = ['README2']
+    files = ['recipe2:misc']
 
 
 class Package3(package.Package):
@@ -68,7 +59,7 @@ class Package3(package.Package):
     uuid = '1'
     vendor = 'GStreamer Project'
 
-    files = ['README2']
+    files = ['recipe3:misc']
 
 
 class Package4(package.Package):
@@ -80,7 +71,7 @@ class Package4(package.Package):
     uuid = '1'
     vendor = 'GStreamer Project'
 
-    files = ['README3']
+    files = ['recipe4:misc']
 
 
 class MetaPackage(package.MetaPackage):
@@ -98,12 +89,7 @@ class MetaPackage(package.MetaPackage):
                 ('gstreamer-test1', True, True),
                 ('gstreamer-test3', False, True),
                 ('gstreamer-test-bindings', False, False)]
-    features = {'bindings': 'GStreamer Bindings'}
     icon = "gstreamer.ico"
-    install_dir = {
-        Platform.WINDOWS: 'GStreamer',
-        Platform.LINUX: '/usr/local/gstreamer',
-        Platform.DARWIN: 'GStreamer.framework'}
 
 
 class DummyConfig(object):
@@ -111,9 +97,10 @@ class DummyConfig(object):
 
 
 def create_store(config):
-    store = PackagesStore(object(), False)
+    cookbook = create_cookbook(config)
+    store = PackagesStore(config, False)
 
     for klass in [Package1, Package2, Package3, Package4, MetaPackage]:
-        package = klass(config)
+        package = klass(config, cookbook)
         store.add_package(package)
     return store

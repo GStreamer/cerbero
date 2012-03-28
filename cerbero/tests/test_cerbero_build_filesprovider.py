@@ -23,7 +23,7 @@ import tempfile
 
 from cerbero.build import filesprovider
 from cerbero.config import Platform
-from cerbero.utils import shell
+from cerbero.tests.test_build_common import add_files
 
 
 class DummyConfig(object):
@@ -65,29 +65,11 @@ class PackageTest(unittest.TestCase):
         self.devfiles = ['include/gstreamer.h', 'lib/libgstreamer.a',
                 'lib/libgstreamer-win32.a', 'lib/libgstreamer-win32.so',
                 'lib/libgstreamer-win32.la', 'lib/libgstreamer.la',
-                'lib/libgstreamer.so']
+                'lib/libgstreamer-x11.a', 'lib/libgstreamer-x11.la',
+                'lib/libgstreamer-x11.so', 'lib/libgstreamer.so']
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
-
-    def _add_files(self):
-        bindir = os.path.join(self.tmp, 'bin')
-        libdir = os.path.join(self.tmp, 'lib')
-        os.path.join(self.tmp, 'include')
-        os.makedirs(bindir)
-        os.makedirs(libdir)
-        shell.call('touch '
-            '%(bindir)s/libgstreamer.dll '
-            '%(bindir)s/libgstreamer-win32.dll '
-            '%(libdir)s/libgstreamer.so.1 '
-            '%(libdir)s/libgstreamer.la '
-            '%(libdir)s/libgstreamer.a '
-            '%(libdir)s/libgstreamer.so '
-            '%(libdir)s/libgstreamer-win32.la '
-            '%(libdir)s/libgstreamer-win32.a '
-            '%(libdir)s/libgstreamer-win32.so '
-            '%(libdir)s/libgstreamer-x11.so.1 ' %
-            {'bindir': bindir, 'libdir':libdir})
 
     def testFilesCategories(self):
         self.assertEquals(sorted(['bins', 'libs', 'misc', 'devel']),
@@ -100,27 +82,27 @@ class PackageTest(unittest.TestCase):
                 sorted(self.linuxbin))
 
     def testListLibraries(self):
-        self._add_files()
+        add_files(self.tmp)
         self.assertEquals(self.win32recipe.files_list_by_category('libs'),
                 sorted(self.winlib))
         self.assertEquals(self.linuxrecipe.files_list_by_category('libs'),
                 sorted(self.linuxlib))
 
     def testDevelFiles(self):
-        self._add_files()
+        add_files(self.tmp)
         self.assertEquals(self.win32recipe.devel_files_list(),
                 sorted(self.devfiles))
 
     def testDistFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc
-        self._add_files()
+        add_files(self.tmp)
         self.assertEquals(self.win32recipe.dist_files_list(), sorted(win32files))
         self.assertEquals(self.linuxrecipe.dist_files_list(), sorted(linuxfiles))
 
     def testGetAllFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc + self.devfiles
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc + self.devfiles
-        self._add_files()
+        add_files(self.tmp)
         self.assertEquals(self.win32recipe.files_list(), sorted(win32files))
         self.assertEquals(self.linuxrecipe.files_list(), sorted(linuxfiles))

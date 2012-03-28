@@ -23,7 +23,7 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.tests.test_packages_common import Package1
-from cerbero.utils import shell
+from cerbero.tests.test_build_common import create_cookbook, add_files
 
 
 class DummyConfig(object):
@@ -31,6 +31,9 @@ class DummyConfig(object):
     def __init__(self, prefix, target_platform):
         self.prefix = prefix
         self.target_platform = target_platform
+        self.local_sources = ''
+        self.sources = ''
+        self.git_root = ''
 
 
 class PackageTest(unittest.TestCase):
@@ -39,58 +42,45 @@ class PackageTest(unittest.TestCase):
         self.tmp = tempfile.mkdtemp()
         win32config = DummyConfig(self.tmp, Platform.WINDOWS)
         linuxconfig = DummyConfig(self.tmp, Platform.LINUX)
-        self.win32package = Package1(win32config)
-        self.linuxpackage = Package1(linuxconfig)
+        self.win32package = Package1(win32config, create_cookbook(win32config))
+        self.linuxpackage = Package1(linuxconfig, create_cookbook(linuxconfig))
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
 
-    def _add_files(self):
-        bindir = os.path.join(self.tmp, 'bin')
-        libdir = os.path.join(self.tmp, 'lib')
-        os.makedirs(bindir)
-        os.makedirs(libdir)
-        shell.call('touch '
-            '%(bindir)s/libgstreamer.dll '
-            '%(bindir)s/libgstreamer-win32.dll '
-            '%(libdir)s/libgstreamer.so.1 '
-            '%(libdir)s/libgstreamer-x11.so.1 ' %
-            {'bindir': bindir, 'libdir':libdir})
+    def testParseFiles(self):
+        self.assertEquals(self.win32package._recipes_files['recipe1'],
+                ['misc', 'libs', 'bins'])
+        self.assertEquals(self.win32package._recipes_files['recipe5'], ['libs'])
 
-    def test_list_files(self):
-        win32files = ['README', 'libexec/gstreamer-0.10/pluginsloader.exe',
-                      'windows']
-        linuxfiles = ['README', 'libexec/gstreamer-0.10/pluginsloader',
-                      'linux']
+    def testListRecipesDeps(self):
+        self.assertEquals(self.win32package.recipes_dependencies(),
+                          ['recipe1', 'recipe5'])
+        self.assertEquals(self.linuxpackage.recipes_dependencies(),
+                          ['recipe1'])
 
-        self.assertEquals(self.win32package._get_files(), win32files)
-        self.assertEquals(self.linuxpackage._get_files(), linuxfiles)
+    def testFilesList(self):
+        add_files(self.tmp)
+        winfiles = ['README', 'bin/gst-launch.exe', 'bin/libgstreamer-win32.dll',
+                'bin/libgstreamer.dll', 'bin/windows.exe',
+                'libexec/gstreamer-0.10/pluginsloader.exe',
+                'windows', 'bin/libtest.dll']
+        linuxfiles = ['README', 'bin/gst-launch', 'bin/linux',
+                'lib/libgstreamer-x11.so.1', 'lib/libgstreamer.so.1',
+                'libexec/gstreamer-0.10/pluginsloader', 'linux']
 
-    def test_list_binaries(self):
-        win32files = ['bin/gst-launch.exe', 'bin/windows.exe']
-        linuxfiles = ['bin/gst-launch', 'bin/linux']
+        self.assertEquals(winfiles, self.win32package.files_list())
+        self.assertEquals(linuxfiles, self.linuxpackage.files_list())
 
-        self.assertEquals(self.win32package._get_binaries(), win32files)
-        self.assertEquals(self.linuxpackage._get_binaries(), linuxfiles)
+    def testDevelFilesList(self):
+        add_files(self.tmp)
+        linuxdevfiles = ['lib/libgstreamer-win32.a', 'lib/libgstreamer-win32.la',
+            'lib/libgstreamer-win32.so', 'lib/libgstreamer-x11.a',
+            'lib/libgstreamer-x11.la', 'lib/libgstreamer-x11.so',
+            'lib/libgstreamer.a', 'lib/libgstreamer.la',
+            'lib/libgstreamer.so']
+        windevfiles = linuxdevfiles + ['lib/libtest.a', 'lib/libtest.la',
+            'lib/libtest.so']
 
-    def test_list_libraries(self):
-        win32files = ['bin/libgstreamer.dll', 'bin/libgstreamer-win32.dll']
-        linuxfiles = ['lib/libgstreamer.so.1', 'lib/libgstreamer-x11.so.1']
-        self._add_files()
-        self.assertEquals(self.win32package._get_libraries(), win32files)
-        self.assertEquals(self.linuxpackage._get_libraries(), linuxfiles)
-
-    def test_get_all_files(self):
-        win32files = ['README', 'libexec/gstreamer-0.10/pluginsloader.exe',
-                      'windows']
-        linuxfiles = ['README', 'libexec/gstreamer-0.10/pluginsloader',
-                      'linux']
-        win32files += ['bin/gst-launch.exe', 'bin/windows.exe']
-        linuxfiles += ['bin/gst-launch', 'bin/linux']
-        win32files += ['bin/libgstreamer.dll', 'bin/libgstreamer-win32.dll']
-        linuxfiles += ['lib/libgstreamer.so.1', 'lib/libgstreamer-x11.so.1']
-        self._add_files()
-        self.assertEquals(self.win32package.get_files_list(),
-                          sorted(win32files))
-        self.assertEquals(self.linuxpackage.get_files_list(),
-                          sorted(linuxfiles))
+        self.assertEquals(windevfiles, self.win32package.devel_files_list())
+        self.assertEquals(linuxdevfiles, self.linuxpackage.devel_files_list())

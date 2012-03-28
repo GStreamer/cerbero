@@ -18,17 +18,28 @@
 
 import unittest
 
+from cerbero.build import recipe
 from cerbero.config import Platform
 from cerbero.packages import package
 from cerbero.packages.wix import MergeModule
 from cerbero.utils import etree
+from cerbero.tests.test_build_common import create_cookbook
 
 
 class DummyConfig(object):
     prefix = '/test/'
     target_platform = Platform.WINDOWS
     platform = None
+    sources = ''
+    local_sources = ''
     wix_prefix = ''
+    git_root = ''
+
+
+class Recipe1(recipe.Recipe):
+    name = 'recipe-test'
+    files_misc = ['bin/test.exe', 'bin/test2.exe', 'bin/test3.exe',
+                  'README', 'lib/libfoo.dll', 'lib/gstreamer-0.10/libgstplugins.dll']
 
 
 class Package(package.Package):
@@ -40,8 +51,7 @@ class Package(package.Package):
     licences = ['LGPL']
     uuid = '1'
     vendor = 'GStreamer Project'
-    files = ['bin/test.exe', 'bin/test2.exe', 'bin/test3.exe',
-             'README', 'lib/libfoo.dll', 'lib/gstreamer-0.10/libgstplugins.dll']
+    files = ['recipe-test:misc']
 
 
 MERGE_MODULE = \
@@ -51,7 +61,9 @@ class MergeModuleTest(unittest.TestCase):
 
     def setUp(self):
         self.config = DummyConfig()
-        self.package = Package(self.config)
+        cb =  create_cookbook(self.config)
+        cb.add_recipe(Recipe1(self.config))
+        self.package = Package(self.config, cb)
 
     def test_add_root(self):
         mergemodule = MergeModule(self.config, self.package, None)

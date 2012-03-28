@@ -25,7 +25,10 @@ from cerbero.utils import N_
 
 
 class DummyConfig(object):
-    pass
+    target_platform = Platform.LINUX
+    prefix = ''
+    local_sources = ''
+    sources = ''
 
 
 class Class1(object):

@@ -24,16 +24,22 @@ import shutil
 from cerbero.config import Platform
 from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
-from cerbero.tests.test_packages_common import create_store, DummyConfig, \
-        Package1
+from cerbero.tests.test_packages_common import create_store, Package1
 from cerbero.tests.test_common import XMLMixin
+
+
+class DummyConfig(object):
+    target_platform = Platform.LINUX
+    sources = ''
+    local_sources = ''
+    prefix = ''
+    git_root = ''
 
 
 class IndexTest(unittest.TestCase, XMLMixin):
 
     def setUp(self):
         self.config = DummyConfig()
-        self.config.target_platform = Platform.LINUX
         self.store = create_store(self.config)
         self.package = self.store.get_package('gstreamer-runtime')
         self.outdir = '/test'
@@ -119,7 +125,7 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
     def setUp(self):
         self.config = DummyConfig()
         self.config.target_platform = Platform.LINUX
-        self.package = Package1(self.config)
+        self.package = Package1(self.config, None)
         self.package_path = '/test/package.pkg'
         self.pkgref = PkgRef(self.package, self.package_path)
 
@@ -237,7 +243,6 @@ class TestPMDoc(unittest.TestCase):
 
     def setUp(self):
         self.config = DummyConfig()
-        self.config.target_platform = Platform.LINUX
         self.store = create_store(self.config)
         self.tmp = tempfile.mkdtemp()
         self.package = self.store.get_package('gstreamer-runtime')
