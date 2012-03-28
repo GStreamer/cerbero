@@ -42,8 +42,6 @@ class Check(Command):
         recursive = args.recursive
 
         recipe = cookbook.get_recipe(recipe_name)
-        if recipe is None:
-            raise FatalError(_("Recipe %s not found" % recipe_name))
 
         if recursive:
             ordered_recipes = cookbook.list_recipe_deps(recipe_name)

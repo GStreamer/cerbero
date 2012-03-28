@@ -21,7 +21,6 @@
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.build.oven import Oven
-from cerbero.errors import RecipeNotFoundError
 from cerbero.utils import _, N_, ArgparseArgument
 
 
@@ -47,8 +46,6 @@ class Build(Command):
         no_deps = args.no_deps
 
         recipe = cookbook.get_recipe(recipe_name)
-        if recipe is None:
-            raise RecipeNotFoundError(recipe_name)
 
         oven = Oven(recipe, cookbook, force=force, no_deps=no_deps)
         oven.start_cooking()

@@ -23,7 +23,7 @@ import time
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro, DistroVersion
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, RecipeNotFoundError
 from cerbero.utils import _
 from cerbero.utils import messages as m
 from cerbero.build import recipe as crecipe
@@ -149,7 +149,7 @@ class CookBook (object):
         @type name: str
         '''
         if name not in self.recipes:
-            return None
+            raise RecipeNotFoundError(name)
         return self.recipes[name]
 
     def update_step_status(self, recipe_name, step):
@@ -273,14 +273,11 @@ class CookBook (object):
         self.recipes = {}
         for f in os.listdir(self._config.recipes_dir):
             filepath = os.path.join(self._config.recipes_dir, f)
-            recipe = self._load_recipe_from_file(filepath)
-            if recipe is None:
+            try:
+                recipe = self._load_recipe_from_file(filepath)
+            except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") %
                                 f)
-                continue
-            elif recipe.name is None:
-                m.warning(_("The recipe in file %s doesn't contain a "
-                                  "name") % f)
                 continue
             self.recipes[recipe.name] = recipe
 

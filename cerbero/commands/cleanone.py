@@ -37,8 +37,6 @@ class CleanOne(Command):
         recipe_name = args.recipe[0]
 
         recipe = cookbook.get_recipe(recipe_name)
-        if recipe is None:
-            raise FatalError(_("Recipe %s not found" % recipe_name))
         # call step function
         stepfunc = None
         try:
