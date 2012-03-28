@@ -71,13 +71,12 @@ class CookBook (object):
     @type recipes: dict
     '''
 
-    recipes = {}  # recipe_name -> recipe
-    status = {}    # recipe_name -> RecipeStatus
-
-    _mtimes = {}
 
     def __init__(self, config, load=True):
         self.set_config(config)
+        self.recipes = {}  # recipe_name -> recipe
+        self.status = {}    # recipe_name -> RecipeStatus
+        self._mtimes = {}
 
         if not load:
             return
