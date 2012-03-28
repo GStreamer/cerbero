@@ -100,6 +100,7 @@ class Recipe(FilesProvider):
         self.build_dir = os.path.abspath(self.build_dir)
         self.deps = self.deps or []
         self.platform_deps = self.platform_deps or []
+        FilesProvider.__init__(self, config)
         try:
             self.stype.__init__(self)
             self.btype.__init__(self)
