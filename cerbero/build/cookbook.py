@@ -132,6 +132,15 @@ class CookBook (object):
         recipes.sort(key=lambda x: x.name)
         return recipes
 
+    def add_recipe(self, recipe):
+        '''
+        Adds a new recipe to the cookbook
+
+        @param recipe: the recipe to add
+        @type  recipe: L{cerbero.build.cookbook.Recipe}
+        '''
+        self.recipes[recipe.name] = recipe
+
     def get_recipe(self, name):
         '''
         Gets a recipe from its name
