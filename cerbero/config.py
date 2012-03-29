@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import sys
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -47,7 +48,7 @@ class Config (object):
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
-                   'packages_dir', 'wix_prefix'
+                   'packages_dir', 'wix_prefix', 'py_prefix',
                    ]
 
     def __init__(self, filename=None):
@@ -227,6 +228,8 @@ class Config (object):
         self.set_property('target_distro', distro)
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
+        self.set_property('py_prefix', 'lib/python%s.%s' %
+                (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
             self.set_property('environ_dir', os.path.join(CONFIG_DIR))
