@@ -16,6 +16,11 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import cerbero.utils.messages as m
+from cerbero.errors import EmptyPackageError
+from cerbero.utils import _
+from cerbero.utils.shell import ls_files
+
 
 class PackagerBase(object):
     ''' Base class for packagers '''
@@ -25,13 +30,29 @@ class PackagerBase(object):
         self.package = package
         self.store = store
 
-    def pack(self, output_dir, force=False):
+    def pack(self, output_dir, devel=False, force=False):
         '''
         Creates a package and puts it the the output directory
 
         @param output_dir: output directory where the package will be saved
         @type  output_dir: str
+        @param devel: whether to build the development package or not
+        @type  devel: bool
         @param force: forces the creation of the package
         @type  force: bool
         '''
         raise NotImplemented("'pack' must be implemented by subclasses")
+
+    def files_list(self, devel):
+        if devel:
+            files = self.package.devel_files_list()
+        else:
+            files = self.package.files_list()
+        real_files = ls_files(files, self.config.prefix)
+        diff = list(set(files) - set(real_files))
+        if len(diff) != 0:
+            m.warning(_("Some files required by this package are missing in "
+                      "the prefix:\n%s" % '\n'.join(diff)))
+        if len(real_files) == 0:
+            raise EmptyPackageError(self.package.name)
+        return real_files
