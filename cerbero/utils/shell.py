@@ -181,4 +181,4 @@ def ls_files(files, prefix):
     sfiles = check_call('ls %s' % ' '.join(files),
         prefix, True, False, False).split('\n')
     sfiles.remove('')
-    return sfiles
+    return list(set(sfiles))
