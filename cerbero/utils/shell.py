@@ -173,3 +173,12 @@ def recursive_download(url, destination):
         if not os.path.exists(destination):
             os.makedirs(destination)
         call("wget -i %s %s" % (f.name, url), destination)
+
+
+def ls_files(files, prefix):
+    if files == []:
+        return files
+    sfiles = check_call('ls %s' % ' '.join(files),
+        prefix, True, False, False).split('\n')
+    sfiles.remove('')
+    return sfiles

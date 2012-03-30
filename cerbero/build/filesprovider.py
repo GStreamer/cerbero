@@ -138,7 +138,7 @@ class FilesProvider(object):
         if len(paths) != 0:
             for path in paths:
                 fs.remove(path)
-            fs.extend(self._ls_files(paths))
+            fs.extend(shell.ls_files(paths))
         return fs
 
     def _search_binaries(self, files):
@@ -200,17 +200,6 @@ class FilesProvider(object):
         libsmatch = [pattern % {'f':x} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]
         return self._ls_files(libsmatch)
-
-    def _ls_files(self, files):
-        # FIXME: I think's that's the fastest way of getting the list of
-        # files that matches a name. glob or fnmatch+os.walk could
-        # be used, but requiring a function call ')) each entry instead
-        # of a single one
-        sfiles = shell.check_call('ls %s' % ' '.join(files),
-                self.prefix, True, False, False).split('\n')
-        sfiles.remove('')
-        # remove duplicates
-        return list(set(sfiles))
 
     def _ls_dir(self, dirpath):
         files = []
