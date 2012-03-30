@@ -156,7 +156,7 @@ class PackagesStore (object):
             if 'Package' in d:
                 p = d['Package'](self._config, self.cookbook)
             elif 'MetaPackage' in d:
-                p = d['MetaPackage'](self._config, self.cookbook)
+                p = d['MetaPackage'](self._config, self)
             else:
                 raise Exception('Package or MetaPackage class found')
             return p
