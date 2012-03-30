@@ -138,7 +138,7 @@ class FilesProvider(object):
         if len(paths) != 0:
             for path in paths:
                 fs.remove(path)
-            fs.extend(shell.ls_files(paths))
+            fs.extend(shell.ls_files(paths, self.config.prefix))
         return fs
 
     def _search_binaries(self, files):
@@ -171,7 +171,7 @@ class FilesProvider(object):
         for f in files:
             self.extensions['file'] = f
             libsmatch.append(pattern % self.extensions)
-        return self._ls_files(libsmatch)
+        return shell.ls_files(libsmatch, self.config.prefix)
 
     def _search_pyfiles(self, files):
         '''
@@ -199,7 +199,7 @@ class FilesProvider(object):
 
         libsmatch = [pattern % {'f':x} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]
-        return self._ls_files(libsmatch)
+        return shell.ls_files(libsmatch, self.config.prefix)
 
     def _ls_dir(self, dirpath):
         files = []
