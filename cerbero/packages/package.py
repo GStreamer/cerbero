@@ -16,6 +16,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import itertools
+
+from cerbero.build.filesprovider import FilesProvider
+
 
 class PackageBase(object):
     '''
@@ -49,6 +53,17 @@ class PackageBase(object):
     licenses = 'GPL'
     vendor = 'default'
     url = 'default'
+
+    def files_list(self):
+        raise NotImplemented("'files_list' must be implemented by subclasses")
+
+    def devel_files_list(self):
+        raise NotImplemented("'devel_files_list' must be implemented by "
+                             "subclasses")
+
+    def all_files_list(self):
+        raise NotImplemented("'all_files_list' must be implemented by "
+                             "subclasses")
 
 
 class Package(PackageBase):
@@ -92,6 +107,11 @@ class Package(PackageBase):
             files.extend(rfiles)
         return files
 
+    def all_files_list(self):
+        files = self.files_list()
+        files.extend(self.devel_files_list())
+        return sorted(files)
+
     def _parse_files(self):
         self._recipes_files = {}
         for r in self._files:
@@ -112,8 +132,25 @@ class MetaPackage(PackageBase):
     icon = None
     packages = []
 
-    def __init__(self, config, cookbook=None):
+    def __init__(self, config, store):
         self.config = config
+        self.store = store
 
     def list_packages(self):
         return [p[0] for p in self.packages]
+
+    def files_list(self):
+        return self._list_files(Package.files_list)
+
+    def devel_files_list(self):
+        return self._list_files(Package.devel_files_list)
+
+    def all_files_list(self):
+        return self._list_files(Package.all_files_list)
+
+    def _list_files(self, func):
+        # for each package, call the function that list files
+        files = []
+        for name, _, _ in self.packages:
+            files.extend(func(self.store.get_package(name)))
+        return files
