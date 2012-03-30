@@ -214,6 +214,9 @@ class FilesProvider(object):
 
     def _ls_dir(self, dirpath):
         files = []
-        for root, dirnames, filenames in os.walk('dirpath'):
-            files.extend([os.path.join(root, x) for x in filenames])
+        for root, dirnames, filenames in os.walk(dirpath):
+            _root = root.split(self.prefix)[1]
+            if _root[0] == '/':
+                _root = _root[1:]
+            files.extend([os.path.join(_root, x) for x in filenames])
         return files
