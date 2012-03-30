@@ -25,3 +25,5 @@ class Recipe(recipe.Recipe):
              'site-packages/gst-0.10/gst/extend/utils.py',
              'site-packages/pygst.py',
     ]
+
+    files_devel = ['lib/pkgconfig/gst-python-0.10.pc']

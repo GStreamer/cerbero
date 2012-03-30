@@ -12,8 +12,8 @@ class Package(package.Package):
     uuid = '2ffe6732-4565-411f-8281-e8f1a892f853'
     deps = ['gstreamer-core']
 
-    files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs', 'libgpg-error:lobs',
+    files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs', 'libgpg-error:libs',
             'libshout:libs', 'libsoup:libs', 'libtasn1:libs',
-            'glib-networking:libs',
+            'glib-networking:libs', 'nettle:libs',
             'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net'
     ]

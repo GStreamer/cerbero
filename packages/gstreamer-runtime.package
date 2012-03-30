@@ -20,6 +20,8 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-networking', False, True),
                ('gstreamer-libav', False, False),
                ('gstreamer-clutter', False, False),
+               ('gstreamer-visualizers', False, False),
+               ('gstreamer-codecs-gpl', False, False),
                ('gstreamer-python', False, False)
               ]
     icon = "gstreamer.ico"

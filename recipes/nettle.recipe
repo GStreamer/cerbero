@@ -9,5 +9,5 @@ class Recipe(recipe.Recipe):
     deps = ['gmp']
 
     files_bins = ['nettle-hash', 'nettle-lfib-stream']
-    files_libs = ['libnettle']
-    files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc']
+    files_libs = ['libnettle', 'libhogweed']
+    files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']

@@ -19,3 +19,5 @@ class Recipe(recipe.Recipe):
          'site-packages/gtk-2.0/gtk/keysyms.py',
          'site-packages/gtk-2.0/gtk/_lazyutils.py',
     ]
+
+    files_devel = ['include/pygtk-2.0/pyglib.h', 'include/pygtk-2.0/pygobject.h']

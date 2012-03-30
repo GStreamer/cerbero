@@ -10,4 +10,4 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libfreetype']
     files_bin = ['freetype-config']
-    files_devel = ['lib/pkgconfig/freetype2.pc', 'include/freetype2']
+    files_devel = ['lib/pkgconfig/freetype2.pc', 'include/ft2build.h', 'include/freetype2']
