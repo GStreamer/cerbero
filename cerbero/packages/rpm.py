@@ -154,7 +154,7 @@ class RPMPackage(PackagerBase):
 
     def _fill_spec(self, sources, topdir):
         requires = self._get_requires()
-        files  = self._get_files()
+        files  = self.files_list(self.devel)
         self._spec_str = SPEC_TPL % {
                 'name': self.package.name,
                 'version': self.package.version,
@@ -170,16 +170,15 @@ class RPMPackage(PackagerBase):
 
     def _get_requires(self):
         deps = self.store.get_package_deps(self.package.name)
+        deps = list(set(deps) - set(self._empty_packages))
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
-    def _get_files(self):
+    def files_list(self, devel):
         # metapackages only have dependencies in other packages
         if isinstance(self.package, MetaPackage):
-            return ''
-        else:
-            import pdb; pdb.set_trace()
-            return '\n'.join([os.path.join('%{prefix}',  x) for x in \
-                              self.store.get_package_files_list(self.package.name)])
+            return []
+        files = PackagerBase.files_list(self, devel)
+        return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
 
 class Packager(object):
