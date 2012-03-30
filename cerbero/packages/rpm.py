@@ -21,6 +21,7 @@ import shutil
 import tempfile
 
 from cerbero.config import Architecture
+from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase
 from cerbero.packages.disttarball import DistTarball
 from cerbero.packages.package import MetaPackage
@@ -117,7 +118,10 @@ class RPMPackage(PackagerBase):
         for p in self.store.get_package_deps(self.package.name):
             packager = RPMPackage(self.config, self.store.get_package(p),
                                   self.store)
-            packager.pack(tmpdir, force, False, tmpdir)
+            try:
+                packager.pack(tmpdir, self.devel, force, False, tmpdir)
+            except EmptyPackageError:
+                self._empty_packages.append(p)
         
     def _build_rpm(self, spec_path):
         if self.config.target_arch == Architecture.X86:
