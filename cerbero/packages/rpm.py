@@ -75,7 +75,17 @@ class RPMPackage(PackagerBase):
         self.install_dir = '/opt/usr/local/gst-sdk' 
         self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
 
-    def pack(self, output_dir, force=False, pack_deps=True, tmpdir=None):
+    def pack(self, output_dir, devel=False, force=False,
+             pack_deps=True, tmpdir=None):
+        self._empty_packages = []
+        # add the -devel suffix for devel packages
+        self.devel = devel
+        package_name = self.package.name
+        full_package_name = self.full_package_name
+        if devel:
+            package_name += '-devel'
+            full_package_name += '-devel'
+
         # Create a tmpdir for packages
         tmpdir, rpmdir, srcdir = self._create_rpm_tree(tmpdir)
         
@@ -85,12 +95,12 @@ class RPMPackage(PackagerBase):
 
         # create a tarball with all the package's files
         tarball_packager = DistTarball(self.config, self.package, self.store)
-        tarball = tarball_packager.pack(output_dir, True, self.full_package_name) 
+        tarball = tarball_packager.pack(output_dir, devel, True, full_package_name) 
 
-        m.action(_("Creating RPM package for %s") % self.package.name)
+        m.action(_("Creating RPM package for %s") % package_name)
         # fill the spec file
         self._fill_spec(os.path.split(tarball)[1], tmpdir)
-        spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
+        spec_path = os.path.join(tmpdir, '%s.spec' % package_name)
         with open(spec_path, 'w') as f:
             f.write(self._spec_str)
 
