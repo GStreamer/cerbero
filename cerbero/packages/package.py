@@ -106,8 +106,11 @@ class Package(PackageBase):
     def devel_files_list(self):
         files = []
         for recipe, categories in self._recipes_files.iteritems():
-            rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
-            files.extend(rfiles)
+            # only add development files for recipe from which used the 'libs'
+            # category
+            if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
+                rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
+                files.extend(rfiles)
         return files
 
     def all_files_list(self):
