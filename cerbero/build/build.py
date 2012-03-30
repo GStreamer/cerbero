@@ -80,6 +80,8 @@ class MakefilesBase (Build):
         Build.__init__(self)
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
+        if self.config.allow_parallel_build and self.config.num_of_cpus > 1:
+            self.make += ' -j%d' % self.config.num_of_cpus
 
     def system_libs(func):
         ''' Decorator to use system libs'''

@@ -28,6 +28,8 @@ class DummyConfig(object):
     wix_prefix = ''
     py_prefix= ''
     git_root = ''
+    allow_parallel_build = False
+    num_of_cpus = 1
 
 
 class XMLMixin():

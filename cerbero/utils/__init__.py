@@ -51,6 +51,17 @@ def user_is_root():
         return hasattr(os, 'getuid') and os.getuid() == 0
 
 
+def determine_num_of_cpus():
+    ''' Number of virtual or physical CPUs on this system '''
+
+    # Python 2.6+
+    try:
+        import multiprocessing
+        return multiprocessing.cpu_count()
+    except (ImportError,NotImplementedError):
+        return 1
+
+
 def system_info():
     '''
     Get the sysem information.
@@ -144,4 +155,6 @@ def system_info():
         else:
             raise FatalError("Mac version %s not supported" % ver)
 
-    return platform, arch, distro, distro_version
+    num_of_cpus = determine_num_of_cpus()
+
+    return platform, arch, distro, distro_version, num_of_cpus

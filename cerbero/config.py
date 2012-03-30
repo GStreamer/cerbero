@@ -31,6 +31,7 @@ DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git+ssh://git.keema.collabora.co.uk/git/gst-sdk/'
 DEFAULT_WIX_PREFIX = 'C:\\\\Program Files\\Windows Installer XML v3.5\\bin\\'
+DEFAULT_ALLOW_PARALLEL_BUILD = False
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 
@@ -49,8 +50,7 @@ class Config (object):
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
-                   'install_dir',
-                   ]
+                   'install_dir', 'allow_parallel_build', 'num_of_cpus']
 
     def __init__(self, filename=None):
         self._check_uninstalled()
@@ -218,12 +218,14 @@ class Config (object):
             self.set_property('packages_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'packages'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
+        self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
         self.set_property('wix_prefix', DEFAULT_WIX_PREFIX)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
-        platform, arch, distro, distro_version = system_info()
+        platform, arch, distro, distro_version, num_of_cpus = system_info()
         self.set_property('platform', platform)
+        self.set_property('num_of_cpus', num_of_cpus)
         self.set_property('target_platform', platform)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
