@@ -186,8 +186,17 @@ class FilesProvider(object):
         return pyfiles
 
     def _search_devel_libraries(self):
-        pattern = 'lib/%(f)s*.a lib/%(f)s*.la \
-                   lib/%(f)s*.so'
+        if self.LIBS_CAT not in self.categories:
+            return []
+
+        pattern = 'lib/%(f)s*.a lib/%(f)s*.la '
+        if self.platform == Platform.LINUX:
+            pattern += 'lib/%(f)s*.so'
+        elif self.platform == Platform.WINDOWS:
+            pattern += 'lib/%(f)s*.dll.a'
+        elif self.platform == Platform.DARWIN:
+            pattern += 'lib/%(f)s*.dylib'
+
         libsmatch = [pattern % {'f':x} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]
         return self._ls_files(libsmatch)
