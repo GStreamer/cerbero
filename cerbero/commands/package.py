@@ -42,6 +42,9 @@ class Package(Command):
                 help=_('Creates a tarball instead of a native package')),
             ArgparseArgument('-f', '--force', action='store_true',
                 default=False, help=_('Delete any existing package file')),
+            ArgparseArgument('-d', '--devel', action='store_true',
+                default=False, help=_('Create also the development version of '
+                    'this package')),
             ])
 
     def run(self, config, args):
@@ -54,7 +57,7 @@ class Package(Command):
         else:
             pkg = Packager(config, p, store)
         m.action(_("Creating package for %s") % p.name)
-        path = pkg.pack(args.output_dir, args.force)
+        path = pkg.pack(args.output_dir, args.devel, args.force)
         m.action(_("Package successfully created in %s") %
                  os.path.abspath(path))
 

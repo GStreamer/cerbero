@@ -31,18 +31,25 @@ class DistTarball(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.package = package
-        self.prefix = self.package.config.prefix
+        self.prefix = config.prefix
 
-    def pack(self, output_dir, force=False):
-        filename = "%s-%s.tar.bz2" % (self.package.name, self.package.version)
+    def pack(self, output_dir, devel=False, force=False):
+        filename = "%s-%s%s.tar.bz2" % (self.package.name, self.package.version,
+                devel and '-devel' or '')
         if os.path.exists(filename):
             if force:
                 os.remove(filename)
             else:
                 raise UsageError("File %s already exists" % filename)
 
+        if devel:
+            files = self.package.devel_files_list()
+        else:
+            files = self.package.files_list()
+
         tar = tarfile.open(filename, "w:bz2")
-        for f in self.package.get_files_list():
+
+        for f in files:
             filepath = os.path.join(self.prefix, f)
             if not os.path.exists(filepath):
                 m.warning(_("File %s do not exists and won't be added to the "
