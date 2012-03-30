@@ -24,16 +24,7 @@ from cerbero.packages import package
 from cerbero.packages.wix import MergeModule
 from cerbero.utils import etree
 from cerbero.tests.test_build_common import create_cookbook
-
-
-class DummyConfig(object):
-    prefix = '/test/'
-    target_platform = Platform.WINDOWS
-    platform = None
-    sources = ''
-    local_sources = ''
-    wix_prefix = ''
-    git_root = ''
+from cerbero.tests.test_common import DummyConfig
 
 
 class Recipe1(recipe.Recipe):

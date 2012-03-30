@@ -16,7 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
 import shutil
 import unittest
 import tempfile
@@ -24,13 +23,14 @@ import tempfile
 from cerbero.build import filesprovider
 from cerbero.config import Platform
 from cerbero.tests.test_build_common import add_files
+from cerbero.tests.test_common import DummyConfig
 
 
-class DummyConfig(object):
+class Config(DummyConfig):
 
-    def __init__(self, prefix, target_platform):
-        self.prefix = prefix
-        self.target_platform = target_platform
+    def __init__(self, tmp, platform):
+        self.prefix = tmp
+        self.target_platform = platform
 
 
 class FilesProvider(filesprovider.FilesProvider):
@@ -39,10 +39,10 @@ class FilesProvider(filesprovider.FilesProvider):
     files_libs = ['libgstreamer']
     files_bins = ['gst-launch']
     files_devel = ['include/gstreamer.h']
-    files_bins_platform = {
+    platform_files_bins = {
             Platform.WINDOWS: ['windows'],
             Platform.LINUX: ['linux']}
-    files_libs_platform = {
+    platform_files_libs = {
             Platform.WINDOWS: ['libgstreamer-win32'],
             Platform.LINUX: ['libgstreamer-x11']}
 
@@ -51,8 +51,8 @@ class PackageTest(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        win32config = DummyConfig(self.tmp, Platform.WINDOWS)
-        linuxconfig = DummyConfig(self.tmp, Platform.LINUX)
+        win32config = Config(self.tmp, Platform.WINDOWS)
+        linuxconfig = Config(self.tmp, Platform.LINUX)
         self.win32recipe = FilesProvider(win32config)
         self.linuxrecipe = FilesProvider(linuxconfig)
 

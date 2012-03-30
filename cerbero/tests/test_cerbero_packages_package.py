@@ -16,7 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
 import shutil
 import unittest
 import tempfile
@@ -24,24 +23,22 @@ import tempfile
 from cerbero.config import Platform
 from cerbero.tests.test_packages_common import Package1
 from cerbero.tests.test_build_common import create_cookbook, add_files
+from cerbero.tests.test_common import DummyConfig
 
 
-class DummyConfig(object):
+class Config(DummyConfig):
 
-    def __init__(self, prefix, target_platform):
-        self.prefix = prefix
-        self.target_platform = target_platform
-        self.local_sources = ''
-        self.sources = ''
-        self.git_root = ''
+    def __init__(self, tmp, platform):
+        self.prefix = tmp
+        self.target_platform = platform
 
 
 class PackageTest(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        win32config = DummyConfig(self.tmp, Platform.WINDOWS)
-        linuxconfig = DummyConfig(self.tmp, Platform.LINUX)
+        win32config = Config(self.tmp, Platform.WINDOWS)
+        linuxconfig = Config(self.tmp, Platform.LINUX)
         self.win32package = Package1(win32config, create_cookbook(win32config))
         self.linuxpackage = Package1(linuxconfig, create_cookbook(linuxconfig))
 

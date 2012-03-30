@@ -22,13 +22,7 @@ import os
 from cerbero.build import recipe
 from cerbero.config import Platform
 from cerbero.utils import N_
-
-
-class DummyConfig(object):
-    target_platform = Platform.LINUX
-    prefix = ''
-    local_sources = ''
-    sources = ''
+from cerbero.tests.test_common import DummyConfig
 
 
 class Class1(object):

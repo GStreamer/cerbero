@@ -31,17 +31,17 @@ class Recipe1(recipe.Recipe):
     uuid = '1'
 
     files_misc = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
-    files_misc_platform = {
+    platform_files_misc = {
         Platform.WINDOWS: ['windows'],
         Platform.LINUX: ['linux']}
 
     files_bins = ['gst-launch']
-    files_bins_platform = {
+    platform_files_bins = {
         Platform.WINDOWS: ['windows'],
         Platform.LINUX: ['linux']}
 
     files_libs = ['libgstreamer']
-    files_libs_platform = {
+    platform_files_libs = {
         Platform.WINDOWS: ['libgstreamer-win32'],
         Platform.LINUX: ['libgstreamer-x11']}
 

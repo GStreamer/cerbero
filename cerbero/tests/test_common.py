@@ -16,6 +16,19 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+from cerbero.config import Platform
+
+
+class DummyConfig(object):
+    prefix = '/test/'
+    target_platform = Platform.WINDOWS
+    platform = None
+    sources = ''
+    local_sources = ''
+    wix_prefix = ''
+    py_prefix= ''
+    git_root = ''
+
 
 class XMLMixin():
 

@@ -25,15 +25,7 @@ from cerbero.config import Platform
 from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
 from cerbero.tests.test_packages_common import create_store, Package1
-from cerbero.tests.test_common import XMLMixin
-
-
-class DummyConfig(object):
-    target_platform = Platform.LINUX
-    sources = ''
-    local_sources = ''
-    prefix = ''
-    git_root = ''
+from cerbero.tests.test_common import XMLMixin, DummyConfig
 
 
 class IndexTest(unittest.TestCase, XMLMixin):

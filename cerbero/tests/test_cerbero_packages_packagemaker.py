@@ -25,14 +25,7 @@ from cerbero.config import Platform
 from cerbero.packages.packagemaker import OSXPackage, PackageMaker
 from cerbero.utils import shell
 from cerbero.tests.test_packages_common import create_store
-
-
-class DummyConfig(object):
-    target_platform = Platform.LINUX
-    prefix = ''
-    local_sources = ''
-    sources = ''
-    git_root = ''
+from cerbero.tests.test_common import DummyConfig
 
 
 class PackageMakerTest(unittest.TestCase):
