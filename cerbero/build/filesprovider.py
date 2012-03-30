@@ -30,6 +30,7 @@ class FilesProvider(object):
 
     LIBS_CAT = 'libs'
     BINS_CAT = 'bins'
+    PY_CAT = 'python'
     DEVEL_CAT = 'devel'
 
     EXTENSIONS = {
@@ -41,9 +42,11 @@ class FilesProvider(object):
         self.platform = config.target_platform
         self.prefix = config.prefix
         self.extensions = self.EXTENSIONS[self.platform]
+        self.py_prefix = config.py_prefix
         self.categories = self._files_categories()
         self._searchfuncs = {self.LIBS_CAT: self._search_libraries,
                              self.BINS_CAT: self._search_binaries,
+                             self.PY_CAT: self._search_pyfiles,
                              'default': self._search_files}
 
     def devel_files_list(self):
@@ -54,6 +57,7 @@ class FilesProvider(object):
         '''
         devfiles = self.files_list_by_category(self.DEVEL_CAT)
         devfiles.extend(self._search_devel_libraries())
+
         return sorted(list(set(devfiles)))
 
     def dist_files_list(self):
@@ -61,6 +65,7 @@ class FilesProvider(object):
         Return the list of files that should be included in a distribution
         tarball, which include all files except the development files
         '''
+
         return self.files_list_by_categories([x for x in self.categories \
                 if x != self.DEVEL_CAT])
 
@@ -159,6 +164,18 @@ class FilesProvider(object):
             self.extensions['file'] = f
             libsmatch.append(pattern % self.extensions)
         return self._ls_files(libsmatch)
+
+    def _search_pyfiles(self, files):
+        '''
+        Search for python files in the prefix. This function doesn't do any
+        real search, it only preprend the lib/Python$PYVERSION/site-packages/
+        path to the given list of files
+        '''
+        pyfiles = []
+        for f in files:
+            f = f % self.extensions
+            pyfiles.append('%s/%s' % (self.py_prefix, f))
+        return pyfiles
 
     def _search_devel_libraries(self):
         pattern = 'lib/%(f)s*.a lib/%(f)s*.la \
