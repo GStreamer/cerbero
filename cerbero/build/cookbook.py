@@ -72,10 +72,10 @@ class CookBook (object):
     @type recipes: dict
     '''
 
-    def __init__(self, config, load=True):
+    def __init__(self, config, load=True, status={}):
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
-        self.status = {}    # recipe_name -> RecipeStatus
+        self.status = status    # recipe_name -> RecipeStatus
         self._mtimes = {}
 
         if not load:
@@ -233,9 +233,7 @@ class CookBook (object):
                 status = pickle.load(f)
         except Exception:
             m.warning(_("Could not recover status"))
-        c = CookBook(config)
-        c.set_status(status)
-        return c
+        return CookBook(config, status=status)
 
     def save(self):
         try:
