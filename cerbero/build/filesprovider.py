@@ -132,7 +132,13 @@ class FilesProvider(object):
         dirs = [x for x in fs if os.path.isdir(os.path.join(self.prefix, x))]
         for directory in dirs:
             fs.remove(directory)
-            fs.exend(self._ls_dir(os.path.join(self.prefix, directory)))
+            fs.extend(self._ls_dir(os.path.join(self.prefix, directory)))
+        # fill paths with pattern expansion *
+        paths = [x for x in fs if '*' in x]
+        if len(paths) != 0:
+            for path in paths:
+                fs.remove(path)
+            fs.extend(self._ls_files(paths))
         return fs
 
     def _search_binaries(self, files):
