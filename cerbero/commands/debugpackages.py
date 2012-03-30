@@ -33,14 +33,14 @@ class DebugPackages(Command):
 
     def __init__(self):
         Command.__init__(self, [
-            ArgparseArgument('-e', '--exclude',  nargs='*',
-                             help=_('Output directory for the tarball file')),
+            ArgparseArgument('-e', '--exclude',  nargs='*', default=[],
+                help=_('Filter pattern to exclude files from the search')),
             ])
 
     def run(self, config, args):
         store = PackagesStore(config)
 
-        allfiles = [p.get_files_list() for p in store.get_packages_list() if\
+        allfiles = [p.all_files_list() for p in store.get_packages_list() if\
                     isinstance(p, Package)]
         allfiles = list(itertools.chain(*allfiles))
 
