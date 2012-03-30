@@ -33,7 +33,7 @@ class DistTarball(PackagerBase):
         self.package = package
         self.prefix = config.prefix
 
-    def pack(self, output_dir, devel=False, force=False):
+    def pack(self, output_dir, devel=False, force=False, package_prefix=''):
         filename = "%s-%s%s.tar.bz2" % (self.package.name, self.package.version,
                 devel and '-devel' or '')
         if os.path.exists(filename):
@@ -46,7 +46,7 @@ class DistTarball(PackagerBase):
 
         for f in self.files_list(devel):
             filepath = os.path.join(self.prefix, f)
-            tar.add(filepath, f)
+            tar.add(filepath, os.path.join(package_prefix, f))
         tar.close()
 
         return filename
