@@ -9,8 +9,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
-    files_devel = ['include/theora', 'lib/pkgconfig/libtheora.pc',
-                   'lib/pkgconfig/libtheoraenc.pc', 'lib/pkgconfig/libtheoradec.pc']
+    files_devel = ['include/theora', 'lib/pkgconfig/theora.pc',
+                   'lib/pkgconfig/theoraenc.pc', 'lib/pkgconfig/theoradec.pc']
 
 
     def prepare(self):

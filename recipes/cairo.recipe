@@ -12,15 +12,16 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/cairo-fc.pc',
         'lib/pkgconfig/cairo.pc',
         'lib/pkgconfig/cairo-ps.pc',
-        'lib/pkgconfig/cairo-win32.pc',
         'lib/pkgconfig/cairo-ft.pc',
         'lib/pkgconfig/cairo-pdf.pc',
         'lib/pkgconfig/cairo-svg.pc',
-        'lib/pkgconfig/pangocairo.pc',
         'lib/pkgconfig/cairo-gobject.pc',
         'lib/pkgconfig/cairo-png.pc',
         'include/cairo',
         ]
-    files_devel_platform = {
-        Platform.WINDOWS: ['lib/pkgconfig/cairo-win32-font.pc']
+    platform_files_devel = {
+        Platform.WINDOWS: [ 'lib/pkgconfig/cairo-win32-font.pc',
+                            'lib/pkgconfig/cairo-win32.pc'],
+        Platform.LINUX: ['lib/pkgconfig/cairo-xlib-xrender.pc',
+                         'lib/pkgconfig/cairo-xlib.pc']
     }

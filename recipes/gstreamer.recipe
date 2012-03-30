@@ -9,6 +9,39 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2', 'gtk-doc']
 
+    files_bins = ['gst-discoverer-0.10',
+                  'gst-feedback-0.10',
+                  'gst-inspect-0.10',
+                  'gst-typefind-0.10',
+                  'gst-xmlinspect-0.10',
+                  'gst-xmllaunch-0.10',
+                  'gst-launch-0.10']
+
+    files_libs = ['libgstbase-0.10', 'libgstcheck-0.10', 'libgstcontroller-0.10',
+                  'libgstdataprotocol-0.10', 'libgstnet-0.10',
+                  'libgstreamer-0.10']
+
+    files_plugins = ['lib/gstreamer-0.10/libgstcoreelements%(sext)s',
+                     'lib/gstreamer-0.10/libgstcoreindexers%(sext)s']
+
+    files_misc = ['libexec/gstreamer-0.10/gst-plugin-scanner%(bext)s']
+
+    files_devel = [
+            'include/gstreamer-0.10/gst/*.h',
+            'include/gstreamer-0.10/gst/base',
+            'include/gstreamer-0.10/gst/check',
+            'include/gstreamer-0.10/gst/controller',
+            'include/gstreamer-0.10/gst/dataprotocol',
+            'include/gstreamer-0.10/gst/net',
+            'lib/pkgconfig/gstreamer-0.10.pc',
+            'lib/pkgconfig/gstreamer-base-0.10.pc',
+            'lib/pkgconfig/gstreamer-check-0.10.pc',
+            'lib/pkgconfig/gstreamer-controller-0.10.pc',
+            'lib/pkgconfig/gstreamer-dataprotocol-0.10.pc',
+            'lib/pkgconfig/gstreamer-net-0.10.pc',
+            'lib/pkgconfig/gstreamer-plugins-base-0.10.pc',
+    ]
+
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'

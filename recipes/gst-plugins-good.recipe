@@ -14,6 +14,85 @@ class Recipe(recipe.Recipe):
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True
 
+
+    files_effects = [
+             'lib/gstreamer-0.10/libgstalpha%(sext)s',
+             'lib/gstreamer-0.10/libgstalphacolor%(sext)s',
+             'lib/gstreamer-0.10/libgstaudiofx%(sext)s',
+             'lib/gstreamer-0.10/libgstautodetect%(sext)s',
+             'lib/gstreamer-0.10/libgstcairo%(sext)s',
+             'lib/gstreamer-0.10/libgstcutter%(sext)s',
+             'lib/gstreamer-0.10/libgstdeinterlace%(sext)s',
+             'lib/gstreamer-0.10/libgsteffectv%(sext)s',
+             'lib/gstreamer-0.10/libgstequalizer%(sext)s',
+             'lib/gstreamer-0.10/libgstgdkpixbuf%(sext)s',
+             'lib/gstreamer-0.10/libgstimagefreeze%(sext)s',
+             'lib/gstreamer-0.10/libgstinterleave%(sext)s',
+             'lib/gstreamer-0.10/libgstlevel%(sext)s',
+             'lib/gstreamer-0.10/libgstreplaygain%(sext)s',
+             'lib/gstreamer-0.10/libgstshapewipe%(sext)s',
+             'lib/gstreamer-0.10/libgstspectrum%(sext)s',
+             'lib/gstreamer-0.10/libgstvideobox%(sext)s',
+             'lib/gstreamer-0.10/libgstvideocrop%(sext)s',
+             'lib/gstreamer-0.10/libgstvideofilter%(sext)s',
+             'lib/gstreamer-0.10/libgstvideomixer%(sext)s',
+    ]
+
+    files_codecs = [
+             'lib/gstreamer-0.10/libgstalaw%(sext)s',
+             'lib/gstreamer-0.10/libgstannodex%(sext)s',
+             'lib/gstreamer-0.10/libgstapetag%(sext)s',
+             'lib/gstreamer-0.10/libgstaudioparsers%(sext)s',
+             'lib/gstreamer-0.10/libgstauparse%(sext)s',
+             'lib/gstreamer-0.10/libgstavi%(sext)s',
+             'lib/gstreamer-0.10/libgstflac%(sext)s',
+             'lib/gstreamer-0.10/libgstflv%(sext)s',
+             'lib/gstreamer-0.10/libgstflxdec%(sext)s',
+             'lib/gstreamer-0.10/libgsticydemux%(sext)s',
+             'lib/gstreamer-0.10/libgstid3demux%(sext)s',
+             'lib/gstreamer-0.10/libgstisomp4%(sext)s',
+             'lib/gstreamer-0.10/libgstjpeg%(sext)s',
+             'lib/gstreamer-0.10/libgstmatroska%(sext)s',
+             'lib/gstreamer-0.10/libgstmulaw%(sext)s',
+             'lib/gstreamer-0.10/libgstmultipart%(sext)s',
+             'lib/gstreamer-0.10/libgstpng%(sext)s',
+             'lib/gstreamer-0.10/libgstsmpte%(sext)s',
+             'lib/gstreamer-0.10/libgstspeex%(sext)s',
+             'lib/gstreamer-0.10/libgsttaglib%(sext)s',
+             'lib/gstreamer-0.10/libgstwavenc%(sext)s',
+             'lib/gstreamer-0.10/libgstwavpack%(sext)s',
+             'lib/gstreamer-0.10/libgstwavparse%(sext)s',
+             'lib/gstreamer-0.10/libgsty4menc%(sext)s',
+    ]
+
+    files_net = [
+             'lib/gstreamer-0.10/libgstrtsp%(sext)s',
+             'lib/gstreamer-0.10/libgstrtp%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpmanager%(sext)s',
+             'lib/gstreamer-0.10/libgstsouphttpsrc%(sext)s',
+             'lib/gstreamer-0.10/libgstudp%(sext)s',
+    ]
+
+    files_vis = [
+             'lib/gstreamer-0.10/libgstgoom%(sext)s',
+             'lib/gstreamer-0.10/libgstgoom2k1%(sext)s',
+            ]
+
+    platform_files_codecs = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstdv%(sext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-0.10/libgstdv%(sext)s',
+            ]
+    }
+
+    platform_files_sys = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstpulse%(sext)s',
+            ]
+    }
+
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.platform == Platform.LINUX:

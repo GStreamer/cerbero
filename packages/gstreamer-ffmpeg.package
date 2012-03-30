@@ -12,6 +12,4 @@ class Package(package.Package):
     uuid = 'afce67f2-4165-411f-8287-e8f2a892f853'
     deps = ['gstreamer-core']
 
-    files = [
-             'lib/gstreamer-0.10/libgstffmpeg%(sext)s',
-    ]
+    files = ['gst-ffmpeg:codecs']

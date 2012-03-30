@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     files_libs = ['libclutter-gst-1.0']
-    files_devel = ['lib/pkgconfig/clutter-gst.pc', 'include/clutter-1.0/clutter-gst']
+    files_devel = ['lib/pkgconfig/clutter-gst-1.0.pc', 'include/clutter-1.0/clutter-gst']

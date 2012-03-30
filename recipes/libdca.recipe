@@ -6,5 +6,6 @@ class Recipe(recipe.Recipe):
     license = 'GPL'
 
     files_libs = ['libdca']
-    files_bins = ['extract_dca', 'dcadec']
-    files_devel = ['include/dca.h', 'lib/pkgconfig/libdca.pc']
+    files_bins = ['extract_dca', 'extract_dcs', 'dcadec', 'dcsdec']
+    files_devel = ['include/dca.h', 'include/dts.h',
+                   'lib/pkgconfig/libdca.pc', 'lib/pkgconfig/libdts.pc']

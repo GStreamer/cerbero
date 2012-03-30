@@ -12,21 +12,4 @@ class Package(package.Package):
     uuid = '3fde61c2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core']
 
-    libraries = [
-                 'libcogl',
-                 'libcogl-pango',
-                 'libclutter-gst',
-                 'libjson-glib-1.0'
-    ]
-
-    platform_libs = {
-        Platform.WINDOWS: [
-             'libclutter-win32',
-        ],
-        Platform.DARWIN: [
-             'libclutter-osx',
-        ],
-        Platform.LINUX: [
-             'libclutter-x11',
-        ]
-    }
+    files = ['cogl', 'clutter', 'clutter-gst', 'json-glib']

@@ -7,3 +7,21 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
     deps = ['gstreamer', 'gst-plugins-base', 'glib', 'pygobject']
+
+    files_python = [
+             'site-packages/gstoption%(sext)s',
+             'site-packages/gst-0.10/gst/audio%(sext)s',
+             'site-packages/gst-0.10/gst/_gst%(sext)s',
+             'site-packages/gst-0.10/gst/__init__.py',
+             'site-packages/gst-0.10/gst/interfaces%(sext)s',
+             'site-packages/gst-0.10/gst/pbutils%(sext)s',
+             'site-packages/gst-0.10/gst/tag%(sext)s',
+             'site-packages/gst-0.10/gst/video%(sext)s',
+             'site-packages/gst-0.10/gst/extend/discoverer.py',
+             'site-packages/gst-0.10/gst/extend/__init__.py',
+             'site-packages/gst-0.10/gst/extend/jukebox.py',
+             'site-packages/gst-0.10/gst/extend/leveller.py',
+             'site-packages/gst-0.10/gst/extend/sources.py',
+             'site-packages/gst-0.10/gst/extend/utils.py',
+             'site-packages/pygst.py',
+    ]

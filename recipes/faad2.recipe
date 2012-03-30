@@ -7,4 +7,5 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libfaad']
     files_bin = ['faad']
-    files_devel = ['include/faad.h']
+    files_devel = ['include/faad.h', 'include/neaacdec.h', 'include/mp4ff.h',
+            'include/mp4ffint.h']

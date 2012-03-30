@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     files_libs = ['libFLAC', 'libFLAC++']
-    files_bin = ['flac', 'metaflac']
+    files_bins = ['flac', 'metaflac']
     files_devel = [
         'lib/pkgconfig/flac.pc',
         'lib/pkgconfig/flac++.pc',

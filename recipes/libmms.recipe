@@ -3,4 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'libmms'
     version = '0.6.2'
+    license = 'LGPL'
     deps = [ 'glib' ]
+
+    files_libs = ['libmms']
+    files_devel = ['include/libmms', 'lib/pkgconfig/libmms.pc']

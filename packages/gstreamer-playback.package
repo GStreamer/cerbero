@@ -12,29 +12,6 @@ class Package(package.Package):
     uuid = '5fce6752-4165-511f-8287-e8f2a895f853'
     deps = ['gstreamer-core']
 
-    libraries = [
-                 'libvisual'
+    files = ['libvisual', 'gst-plugins-base:playback',
+            'gst-plugins-good:playback', 'gst-plugins-bad:playback'
     ]
-
-    files = [
-             'lib/gstreamer-0.10/libgstaudiovisualizers%(sext)s',
-             'lib/gstreamer-0.10/libgstdecodebin2%(sext)s',
-             'lib/gstreamer-0.10/libgstgoom2k1%(sext)s',
-             'lib/gstreamer-0.10/libgstgoom%(sext)s',
-             'lib/gstreamer-0.10/libgstplaybin%(sext)s',
-             'lib/gstreamer-0.10/libgstlibvisual%(sext)s',
-    ]
-
-    platform_files = {
-        Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstalsasink%(sext)s',
-             'lib/gstreamer-0.10/libgstpulsesink%(sext)s',
-             'lib/gstreamer-0.10/libgstximagesink%(sext)s',
-             'lib/gstreamer-0.10/libgstxvimagesink%(sext)s',
-        ],
-        Platform.WINDOWS: [
-             'lib/gstreamer-0.10/libgstdirectsoundsink%(sext)s',
-             'lib/gstreamer-0.10/libgstdirectdrawsink%(sext)s',
-             'lib/gstreamer-0.10/libgstd3dvideosink%(sext)s',
-        ]
-    }

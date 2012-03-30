@@ -9,3 +9,16 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
+
+    files_codecs = [
+             'lib/gstreamer-0.10/libgsta52dec%(sext)s',
+             'lib/gstreamer-0.10/libgstamrnb%(sext)s',
+             'lib/gstreamer-0.10/libgstamrwbdec%(sext)s',
+             'lib/gstreamer-0.10/libgstasf%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdlpcmdec%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdread%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdsub%(sext)s',
+             'lib/gstreamer-0.10/libgstmad%(sext)s',
+             'lib/gstreamer-0.10/libgstmpeg2dec%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegaudioparse%(sext)s',
+    ]

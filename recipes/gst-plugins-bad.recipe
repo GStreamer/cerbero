@@ -8,8 +8,116 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
-            'faad2', 'libkate', 'libshout', 'libvpx', 'libdvdnav', 'zlib',
+            'faad2', 'libkate', 'libshout', 'libvpx', 'zlib',
             'schroedinger', 'libdca', 'jasper', 'libmms' ]
+
+    files_libs = [
+            'libgstbasecamerabinsrc',
+            'libgstbasevideo',
+            'libgstcodecparsers',
+            'libgstphotography',
+            'libgstsignalprocessor',
+    ]
+
+    files_effects = [
+             'lib/gstreamer-0.10/libgstautoconvert%(sext)s',
+             'lib/gstreamer-0.10/libgstbayer%(sext)s',
+             'lib/gstreamer-0.10/libgstcog%(sext)s',
+             'lib/gstreamer-0.10/libgstcoloreffects%(sext)s',
+             'lib/gstreamer-0.10/libgstfaceoverlay%(sext)s',
+             'lib/gstreamer-0.10/libgstfieldanalysis%(sext)s',
+             'lib/gstreamer-0.10/libgstfreeverb%(sext)s',
+             'lib/gstreamer-0.10/libgstfrei0r%(sext)s',
+             'lib/gstreamer-0.10/libgstgaudieffects%(sext)s',
+             'lib/gstreamer-0.10/libgstgeometrictransform%(sext)s',
+             'lib/gstreamer-0.10/libgstinterlace%(sext)s',
+             'lib/gstreamer-0.10/libgstjp2kdecimator%(sext)s',
+             'lib/gstreamer-0.10/libgstliveadder%(sext)s',
+             'lib/gstreamer-0.10/libgstremovesilence%(sext)s',
+             'lib/gstreamer-0.10/libgstscaletempoplugin%(sext)s',
+             'lib/gstreamer-0.10/libgstsegmentclip%(sext)s',
+             'lib/gstreamer-0.10/libgstspeed%(sext)s',
+             'lib/gstreamer-0.10/libgststereo%(sext)s',
+             'lib/gstreamer-0.10/libgstvideofiltersbad%(sext)s',
+             'lib/gstreamer-0.10/libgstvideomeasure%(sext)s',
+             'lib/gstreamer-0.10/libgstvideosignal%(sext)s',
+    ]
+
+    files_codecs = [
+             'lib/gstreamer-0.10/libgstadpcmdec%(sext)s',
+             'lib/gstreamer-0.10/libgstadpcmenc%(sext)s',
+             'lib/gstreamer-0.10/libgstaiff%(sext)s',
+             'lib/gstreamer-0.10/libgstasfmux%(sext)s',
+             'lib/gstreamer-0.10/libgstassrender%(sext)s',
+             'lib/gstreamer-0.10/libgstcdxaparse%(sext)s',
+             'lib/gstreamer-0.10/libgstdccp%(sext)s',
+             'lib/gstreamer-0.10/libgstdtmf%(sext)s',
+             'lib/gstreamer-0.10/libgstdtsdec%(sext)s',
+             'lib/gstreamer-0.10/libgstdvbsuboverlay%(sext)s',
+             'lib/gstreamer-0.10/libgstdvdspu%(sext)s',
+             'lib/gstreamer-0.10/libgstfaad%(sext)s',
+             'lib/gstreamer-0.10/libgstfragmented%(sext)s',
+             'lib/gstreamer-0.10/libgsthdvparse%(sext)s',
+             'lib/gstreamer-0.10/libgstid3tag%(sext)s',
+             'lib/gstreamer-0.10/libgstivfparse%(sext)s',
+             'lib/gstreamer-0.10/libgstgsm%(sext)s',
+             'lib/gstreamer-0.10/libgstjp2k%(sext)s',
+             'lib/gstreamer-0.10/libgstjpegformat%(sext)s',
+             'lib/gstreamer-0.10/libgstkate%(sext)s',
+             'lib/gstreamer-0.10/libgstmms%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegpsmux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegtsdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstmpegtsmux%(sext)s',
+             'lib/gstreamer-0.10/libgstmve%(sext)s',
+             'lib/gstreamer-0.10/libgstmxf%(sext)s',
+             'lib/gstreamer-0.10/libgstnsf%(sext)s',
+             'lib/gstreamer-0.10/libgstnuvdemux%(sext)s',
+             'lib/gstreamer-0.10/libgstpcapparse%(sext)s',
+             'lib/gstreamer-0.10/libgstpnm%(sext)s',
+             'lib/gstreamer-0.10/libgstrawparse%(sext)s',
+             'lib/gstreamer-0.10/libresindvd%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpmux%(sext)s',
+             'lib/gstreamer-0.10/libgstrtpvp8%(sext)s',
+             'lib/gstreamer-0.10/libgstschro%(sext)s',
+             'lib/gstreamer-0.10/libgstsiren%(sext)s',
+             'lib/gstreamer-0.10/libgstsmooth%(sext)s',
+             'lib/gstreamer-0.10/libgstsubenc%(sext)s',
+             'lib/gstreamer-0.10/libgsttta%(sext)s',
+             'lib/gstreamer-0.10/libgstvmnc%(sext)s',
+             'lib/gstreamer-0.10/libgstvp8%(sext)s',
+             'lib/gstreamer-0.10/libgsty4mdec%(sext)s',
+    ]
+
+    files_net = [
+             'lib/gstreamer-0.10/libgstdataurisrc%(sext)s',
+             'lib/gstreamer-0.10/libgstshout2%(sext)s',
+             'lib/gstreamer-0.10/libgstsdpelem%(sext)s',
+    ]
+
+    files_capture = [
+             'lib/gstreamer-0.10/libgstcamerabin2%(sext)s',
+             'lib/gstreamer-0.10/libgstdvb%(sext)s',
+             'lib/gstreamer-0.10/libgstsdi%(sext)s',
+            ]
+
+    files_vis = [
+             'lib/gstreamer-0.10/libgstaudiovisualizers%(sext)s',
+            ]
+
+    files_devel = [
+            'include/gstreamer-0.10/gst/basecamerabinsrc',
+            'include/gstreamer-0.10/gst/basevideo',
+            'include/gstreamer-0.10/gst/codecparsers',
+            'include/gstreamer-0.10/gst/photography',
+            'include/gstreamer-0.10/gst/signalprocessor',
+            'lib/pkgconfig/gstreamer-basecamerabinsrc-0.10.pc',
+            'lib/pkgconfig/gstreamer-basevideo-0.10.pc',
+            'lib/pkgconfig/gstreamer-codecparsers-0.10.pc',
+            'lib/pkgconfig/gstreamer-photography-0.10.pc',
+            'lib/pkgconfig/gstreamer-signalprocessor-0.10.pc',
+            'lib/pkgconfig/gstreamer-plugins-bad-0.10.pc',
+    ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

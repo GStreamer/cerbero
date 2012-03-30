@@ -12,24 +12,5 @@ class Package(package.Package):
     uuid = '58fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core']
 
-    libraries = [
-                 'libgstbasecamerabinsrc'
-    ]
-
-    files = [
-             'lib/gstreamer-0.10/libgstcamerabin2%(sext)s',
-             'lib/gstreamer-0.10/libgstdataurisrc%(sext)s',
-             'lib/gstreamer-0.10/libgstrfbsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstsdi%(sext)s',
-    ]
-
-    platform_files = {
-        Platform.WINDOWS: [
-             'lib/gstreamer-0.10/libgstdirectsoundsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstdshowsrcwrapper%(sext)s',
-             ],
-        Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstpulsesrc%(sext)s',
-             'lib/gstreamer-0.10/libgstv4lsrc%(sext)s',
-             ]
-    }
+    files = ['gst-plugins-good:capture', 'gst-plugins-base:capture',
+             'gst-plugins-bad:capture']

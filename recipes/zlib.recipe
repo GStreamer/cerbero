@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     add_host_build_target = False
 
     files_libs = ['libz']
-    files_devel = ['include/zlib.h', 'lib/pkgconfig/zlib.pc']
+    files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
 
 
     def prepare(self):

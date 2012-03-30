@@ -1,0 +1,16 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-visualizers'
+    shortdesc = 'GStreamer visualization plugins'
+    version = '1.0'
+    licences = ['GPL']
+    vendor = 'GStreamer Project'
+    uuid = '3fde61c2-4535-411f-8287-e8f6a892f853'
+    deps = ['gstreamer-core']
+
+    files = ['gst-plugins-base:vis', 'gst-plugins-good:vis',
+            'gst-plugins-bad:vis']

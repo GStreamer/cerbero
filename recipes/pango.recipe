@@ -13,11 +13,13 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pango-1.0', 'lib/pango',
         'lib/pkgconfig/pangoft2.pc', 'lib/pkgconfig/pango.pc',
         'lib/pkgconfig/pangocairo.pc']
-    files_libs_platform = {
+    platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32'],
+        Platform.LINUX: ['libpangox'],
     }
-    files_devel_platform = {
+    platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
+        Platform.LINUX: ['lib/pkgconfig/pangox.pc'],
     }
 
     def prepare(self):

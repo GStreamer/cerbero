@@ -12,47 +12,4 @@ class Package(package.Package):
     uuid = '32fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['base-deps']
 
-    binaries = ['gst-discoverer-0.10',
-                'gst-inspect-0.10',
-                'gst-typefind-0.10',
-                'gst-xmlinspect-0.10',
-                'gst-xmllaunch-0.10',
-                'gst-launch-0.10']
-
-    libraries = ['libgstapp-0.10', 'libgstaudio-0.10', 'libgstcontroller-0.10',
-                 'libgstbase-0.10', 'libgstbasevideo-0.10', 'libgstcodecparsers-0.10',
-                 'libgstcontroller-0.10', 'libgstdataprotocol-0.10', 'libgstfft-0.10',
-                 'libgstinterfaces-0.10', 'libgstnet-0.10','libgstnetbuffer-0.10',
-                 'libgstpbutils-0.10', 'libgstphotography-0.10', 'libgstreamer-0.10',
-                 'libgstriff-0.10', 'libgstrtp-0.10', 'libgstrtsp-0.10',
-                 'libgstsdp-0.10', 'libgstsignalprocessor-0.10', 'libgsttag-0.10',
-                 'libgstvideo-0.10',]
-
-    files = [
-             'libexec/gstreamer-0.10/gst-plugin-scanner%(bext)s',
-             'lib/gstreamer-0.10/libgstadder%(sext)s',
-             'lib/gstreamer-0.10/libgstapp%(sext)s',
-             'lib/gstreamer-0.10/libgstaudioconvert%(sext)s',
-             'lib/gstreamer-0.10/libgstaudiorate%(sext)s',
-             'lib/gstreamer-0.10/libgstaudioresample%(sext)s',
-             'lib/gstreamer-0.10/libgstaudiotestsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstautoconvert%(sext)s',
-             'lib/gstreamer-0.10/libgstautodetect%(sext)s',
-             'lib/gstreamer-0.10/libgstcoreelements%(sext)s',
-             'lib/gstreamer-0.10/libgstcoreindexers%(sext)s',
-             'lib/gstreamer-0.10/libgstdebug%(sext)s',
-             'lib/gstreamer-0.10/libgstdeinterlace%(sext)s',
-             'lib/gstreamer-0.10/libgstffmpegcolorspace%(sext)s',
-             'lib/gstreamer-0.10/libgstgdp%(sext)s',
-             'lib/gstreamer-0.10/libgstgio%(sext)s',
-             'lib/gstreamer-0.10/libgstmultifile%(sext)s',
-             'lib/gstreamer-0.10/libgsttypefindfunctions%(sext)s',
-             'lib/gstreamer-0.10/libgstvideobox%(sext)s',
-             'lib/gstreamer-0.10/libgstvideocrop%(sext)s',
-             'lib/gstreamer-0.10/libgstvideofilter%(sext)s',
-             'lib/gstreamer-0.10/libgstvideomixer%(sext)s',
-             'lib/gstreamer-0.10/libgstvideorate%(sext)s',
-             'lib/gstreamer-0.10/libgstvideoscale%(sext)s',
-             'lib/gstreamer-0.10/libgstvideotestsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstvolume%(sext)s',
-    ]
+    files = ['gstreamer', 'gst-plugins-base:libs:effects']

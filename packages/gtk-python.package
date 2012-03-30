@@ -1,0 +1,13 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gtk-python'
+    shortdesc = 'Gtk python bingings'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+
+    files = ['py2cairo', 'pygtk']

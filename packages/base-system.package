@@ -4,7 +4,7 @@
 
 class Package(package.Package):
 
-    name = 'base-deps'
+    name = 'base-system'
     shortdesc = 'Base system dependencies'
     version = '1.0'
     licences = ['LGPL']
@@ -12,8 +12,9 @@ class Package(package.Package):
     uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
 
     files = ['cairo:libs', 'dbus:libs', 'expat:libs', 'fontconfig:libs',
-            'freetype:libs', 'glib:libs', 'orc:libs', 'pango:libs',
-            'png:libs', 'tiff:libs', 'xml2:libs', 'zlib:libs']
+             'gdk-pixbuf:libs', 'libffi:libs', 'freetype:libs', 'glib:libs',
+             'orc:libs', 'pango:libs', 'libpng:libs', 'tiff:libs',
+             'libxml2:libs', 'pixman:libs', 'zlib:libs']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs'],

@@ -9,7 +9,6 @@ class Recipe(recipe.Recipe):
     deps = ['libxml2', 'glib']
 
     files_libs = ['libsoup-2.4']
-    files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
 
 

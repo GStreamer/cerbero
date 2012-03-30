@@ -6,5 +6,5 @@ class Recipe(recipe.Recipe):
     license = 'LGPLv2.1'
 
     files_libs = ['libfribidi']
-    files_bin = ['fribidi']
+    files_bins = ['fribidi']
     files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']

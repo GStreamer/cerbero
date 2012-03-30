@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'a52dec'
     version = '0.7.4'
-    configure_options = '--with-pic'
+    configure_options = '--with-pic --enable-shared'
     license = 'GPLv2'
 
     files_libs = ['liba52']

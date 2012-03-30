@@ -9,5 +9,5 @@ class Recipe(recipe.Recipe):
     deps = ['libdvdread']
 
     files_libs = ['libdvdnav', 'libdvdnavmini']
-    files_devel = ['include/dvdnav', 'lib/pkgconfig/libdvnav.pc',
-                   'lib/pkgconfig/libdvnavmini.pc', 'bin/dvdnav-config']
+    files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc',
+                   'lib/pkgconfig/dvdnavmini.pc', 'bin/dvdnav-config']

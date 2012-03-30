@@ -7,6 +7,5 @@ class Recipe(recipe.Recipe):
     license = 'Apachev2.0'
 
     files_libs = ['libopencore-amrnb', 'libopencore-amrwb']
-    files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = ['include/opencore-amrwb', 'include/opencore-amrnb',
         'lib/pkgconfig/opencore-amrwb.pc', 'lib/pkgconfig/opencore-amrnb.pc']

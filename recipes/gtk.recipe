@@ -18,10 +18,10 @@ class Recipe(recipe.Recipe):
         'include/gtk-2.0',
         'include/gdk-2.0',
     ]
-    files_bins_platform = {
+    platform_files_bins = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
         }
-    files_devel_platform = {
+    platform_files_devel = {
         Platform.WINDOWS: [
         'lib/pkgconfig/gtk+-win32-2.0.pc', 'lib/pkgconfig/gdk''win32-2.0.pc'],
         }

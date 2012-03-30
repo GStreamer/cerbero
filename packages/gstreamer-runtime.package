@@ -20,7 +20,7 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-networking', False, True),
                ('gstreamer-libav', False, False),
                ('gstreamer-clutter', False, False),
-               ('gstreamer-python27', False, False)
+               ('gstreamer-python', False, False)
               ]
     icon = "gstreamer.ico"
     install_dir = {

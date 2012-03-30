@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     deps = [ 'gdk-pixbuf' ]
     license = 'LGPLv2.1'
 
-    files_libs = ['libcogl', 'libcogl-pango'],
+    files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [
         'lib/pkgconfig/cogl-gl-1.0.pc',
         'lib/pkgconfig/cogl-1.0.pc',

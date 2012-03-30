@@ -1,0 +1,15 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-python'
+    shortdesc = 'GStreamer python bingings'
+    version = '1.0'
+    licences = ['LGPL']
+    vendor = 'GStreamer Project'
+    uuid = '5fc36752-4165-511f-8387-e8f2a898f853'
+    deps = ['gobject-python']
+
+    files = ['gst-python:python']

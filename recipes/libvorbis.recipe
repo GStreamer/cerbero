@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     deps = ['libogg']
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']
-    files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = [
         'include/vorbis', 'lib/pkgconfig/vorbis.pc',
         'lib/pkgconfig/vorbisenc.pc', 'lib/pkgconfig/vorbisfile.pc']
