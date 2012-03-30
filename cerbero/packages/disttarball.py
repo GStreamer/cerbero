@@ -42,19 +42,11 @@ class DistTarball(PackagerBase):
             else:
                 raise UsageError("File %s already exists" % filename)
 
-        if devel:
-            files = self.package.devel_files_list()
-        else:
-            files = self.package.files_list()
-
         tar = tarfile.open(filename, "w:bz2")
 
-        for f in files:
+        for f in self.files_list(devel):
             filepath = os.path.join(self.prefix, f)
-            if not os.path.exists(filepath):
-                m.warning(_("File %s do not exists and won't be added to the "
-                            "package") % filepath)
-                continue
             tar.add(filepath, f)
         tar.close()
+
         return filename
