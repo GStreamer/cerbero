@@ -52,8 +52,9 @@ class RedHatBootstraper (UnixBootstraper):
                 'make', 'cmake', 'bison', 'flex', 'yasm', 'pkgconfig-0.25',
                 'gtk-doc', 'curl', 'doxygen', 'text-info', 'texlive-dvips',
                 'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
-                'docbook-style-xsl', 'redhat-rpm-config',
-                'pulseaudio-libs-devel', 'libXv-devel']
+                'docbook-style-xsl', 'redhat-rpm-config', 'pyhton-devel',
+                'pulseaudio-libs-devel', 'libXv-devel', 'mesa-libGL-devel',
+                'libXcomposite-devel', 'alsa-lib-devel']
 
 
 def register_all():
