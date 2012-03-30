@@ -96,7 +96,10 @@ class Package(PackageBase):
         files = []
         for recipe_name, categories in self._recipes_files.iteritems():
             recipe = self.cookbook.get_recipe(recipe_name)
-            rfiles = recipe.files_list_by_categories(categories)
+            if len(categories) == 0:
+                rfiles = recipe.dist_files_list()
+            else:
+                rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
         return files
 
