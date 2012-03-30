@@ -96,9 +96,11 @@ class FilesProvider(object):
         ''' Get the list of categories available '''
         categories = []
         for name, value in inspect.getmembers(self):
-            if (isinstance(value, list) or isinstance(value, dict)) and \
-                    name.startswith('files_'):
-                categories.append(name.split('_')[1])
+            if (isinstance(value, list) or isinstance(value, dict)):
+                if name.startswith('files_'):
+                    categories.append(name.split('files_')[1])
+                if name.startswith('platform_files_'):
+                    categories.append(name.split('platform_files_')[1])
         return sorted(list(set(categories)))
 
     def _get_category_files_list(self, category):
@@ -108,11 +110,11 @@ class FilesProvider(object):
         '''
         files = []
         files_attr = 'files_%s' % category
-        files_plat_attr = 'files_%s_platform' % category
+        files_p_attr = 'platform_files_%s' % category
         if hasattr(self, files_attr):
             files.extend(getattr(self, files_attr))
-        if hasattr(self, files_plat_attr):
-            files.extend(getattr(self, files_plat_attr)[self.platform])
+        if hasattr(self, files_p_attr):
+            files.extend(getattr(self, files_p_attr).get(self.platform, []))
         return files
 
     def _list_files_by_category(self, category):
