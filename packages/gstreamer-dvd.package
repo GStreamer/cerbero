@@ -1,0 +1,16 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-dvd'
+    shortdesc = 'GStreamer DVD support'
+    version = '1.0'
+    licences = ['GPL']
+    vendor = 'GStreamer Project'
+    uuid = '3fdd61c2-4565-411f-8287-e1faa892f853'
+    deps = ['gstreamer-core']
+
+    files = ['libdvdnav:libs', 'libdvdread:libs', 'gst-plugins-bad:dvd',
+            'gst-plugins-good:dvd']
