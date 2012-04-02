@@ -35,7 +35,7 @@ class IndexTest(unittest.TestCase, XMLMixin):
         self.store = create_store(self.config)
         self.package = self.store.get_package('gstreamer-runtime')
         self.outdir = '/test'
-        self.index = Index(self.package, self.store, self.outdir, False)
+        self.index = Index(self.package, self.store, self.outdir, [], False)
 
     def testAddRoot(self):
         self.index._add_root()
@@ -58,7 +58,7 @@ class IndexTest(unittest.TestCase, XMLMixin):
                 Index.PROP_USER_SEES)
         self.check_attrib(properties, Index.TAG_MIN_TARGET, 'os',
                 Index.PROP_MIN_TARGET)
-        self.check_attrib(properties, Index.TAG_DOMAIN, 'anywhere',
+        self.check_attrib(properties, Index.TAG_DOMAIN, 'system',
                 Index.PROP_DOMAIN)
 
     def testAddDistribution(self):
@@ -248,7 +248,7 @@ class TestPMDoc(unittest.TestCase):
     def testAllFilesCreated(self):
         d = dict()
         packages = ['gstreamer-test1', 'gstreamer-test3',
-                    'gstreamer-test-bindings']
+                    'gstreamer-test-bindings', 'gstreamer-test2']
         for name in packages:
             d[name] =self.packages_path
         pmdoc = PMDoc(self.package, self.store, self.tmp, d)

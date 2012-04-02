@@ -45,6 +45,7 @@ class PackageMakerTest(unittest.TestCase):
         p = self.store.get_package('gstreamer-test1')
         self.files = p.files_list()
         packager = OSXPackage(self.config, p, self.store)
+        packager.files = OSXPackage.files_list(packager, False)
         tmpdest = packager._create_bundle()
         bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')
         bundlefiles = sorted([f[2:] for f in bundlefiles])[1:]
@@ -63,7 +64,7 @@ class PackageMakerTest(unittest.TestCase):
             'libexec/gstreamer-0.10/pluginsloader '
             'bin/gst-launch '
             'bin/linux '
-            'lib/libgstreamer.so.1 '
+            'lib/libgstreamer-0.10.so.1 '
             'lib/libgstreamer-x11.so.1 '
             'lib/notincluded1 '
             'notincluded2 ', self.tmp)

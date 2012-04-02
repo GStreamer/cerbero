@@ -59,7 +59,7 @@ class Index(PMDocXML):
     MIN_SPEC = '1.000000'
     PROP_USER_SEES = 'custom'
     PROP_MIN_TARGET = '2'
-    PROP_DOMAIN = 'anywhere'
+    PROP_DOMAIN = 'true'
     ATTR_MIN_SPEC = 'min-spec'
     TAG_BUILD = 'build'
     TAG_CHOICE = 'choice'
@@ -74,10 +74,13 @@ class Index(PMDocXML):
     TAG_SCRIPTS = 'scripts'
     TAG_USER_SEES = 'userSees'
 
-    def __init__(self, package, store, out_dir, fill=True):
+    def __init__(self, package, store, out_dir, emptypkgs=[],
+                 devel=False, fill=True):
         self.package = package
         self.store = store
         self.out_dir = out_dir
+        self.emptypkgs = emptypkgs
+        self.devel = devel
         if fill:
             self._fill()
 
@@ -104,7 +107,7 @@ class Index(PMDocXML):
 
         for e, k, v in [(self.TAG_USER_SEES, 'ui', self.PROP_USER_SEES),
                 (self.TAG_MIN_TARGET, 'os', self.PROP_MIN_TARGET),
-                (self.TAG_DOMAIN, 'anywhere', self.PROP_DOMAIN)]:
+                (self.TAG_DOMAIN, 'system', self.PROP_DOMAIN)]:
             node = etree.SubElement(properties, e)
             self._set(node, **{k: v})
 
@@ -129,6 +132,8 @@ class Index(PMDocXML):
         contents = etree.SubElement(self.root, self.TAG_CONTENTS)
 
         for p, required, selected in self.package.packages:
+            if p in self.emptypkgs:
+                continue
             package = self.store.get_package(p)
             self._add_choice(package, not required, selected, contents)
 
@@ -139,7 +144,17 @@ class Index(PMDocXML):
             starts_enabled=self._boolstr(enabled), starts_hidden='false')
         packages = [package.name] + package.deps
         for p_name in packages:
-            etree.SubElement(choice, self.TAG_PKGREF, id=p_name)
+            if p_name != package.name:
+                # Don't add twice packages that are required and selected, and
+                # therefore always installed
+                if (p_name, True, True) in self.package.packages:
+                    continue
+            if p_name in self.emptypkgs:
+                continue
+            p_id = p_name
+            if self.devel:
+                p_id += '-devel'
+            etree.SubElement(choice, self.TAG_PKGREF, id=p_id)
             item = etree.SubElement(self.root, self.TAG_ITEM, type='pkgref')
             item.text = '%s.xml' % p_name
 
@@ -268,7 +283,8 @@ class PkgContents(PMDocXML):
             if line == '':
                 continue
             path, mode = line.split('\t')
-            self.files_modes[path] = mode
+            # convert from unix shell permissions to stat mode
+            self.files_modes[path] = str(int(mode, 8))
         try:
             del self.files_modes['']
         except:
@@ -317,12 +333,15 @@ class PMDoc(object):
 
     '''
 
-    def __init__(self, package, store, output_dir, pkgspath):
+    def __init__(self, package, store, output_dir, pkgspath,
+                 emptypkgs=[], devel=False):
         self.outdir = os.path.join(output_dir, "%s.pmdoc" % package.name)
         os.makedirs(self.outdir)
         self.package = package
         self.pkgspath = pkgspath
+        self.emptypkgs = emptypkgs
         self.store = store
+        self.devel = devel
         self.done_packages = []
 
     def create(self):
@@ -330,12 +349,17 @@ class PMDoc(object):
         for p_name in packages:
             self._create_pkgref_and_contents(self.store.get_package(p_name))
 
-        index = Index(self.package, self.store, self.outdir)
+        index = Index(self.package, self.store, self.outdir, self.emptypkgs,
+                      self.devel)
         index.write(os.path.join(self.outdir, "index.xml"))
         return self.outdir
 
     def _create_pkgref_and_contents(self, package):
+        # package already created
         if package.name in self.done_packages:
+            return
+        # package is empty
+        if package.name in self.emptypkgs:
             return
         pkgref = PkgRef(package, self.pkgspath[package.name])
         pkgref.write(os.path.join(self.outdir, "%s.xml" % package.name))

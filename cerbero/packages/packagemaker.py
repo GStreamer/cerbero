@@ -20,6 +20,7 @@ import os
 import tempfile
 import shutil
 
+from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
 from cerbero.packages.pmdoc import PMDoc
@@ -37,16 +38,22 @@ class OSXPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.files = package.files_list()
 
-    def pack(self, output_dir, force=False):
+    def pack(self, output_dir, devel=False, force=False):
+        self.files = self.files_list(devel)
+
+        package_name = self.package.name
+        if devel:
+            package_name += '-devel'
+
         output_dir = os.path.realpath(output_dir)
-        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
+        output_file = os.path.join(output_dir, '%s.pkg' %package_name)
 
         root = self._create_bundle()
         packagemaker = PackageMaker()
-        packagemaker.create_package(root, self.package.name,
-            self.package.version, self.package.shortdesc, output_file)
+        packagemaker.create_package(root, package_name,
+            self.package.version, self.package.shortdesc, output_file,
+            self.package.get_install_dir())
         return output_file
 
     def _create_bundle(self):
@@ -83,32 +90,42 @@ class PMDocPackage(PackagerBase):
         self.packages = self.store.get_package_deps(package.name)
         self.packages_paths = dict()
 
-    def pack(self, output_dir, force=False):
+    def pack(self, output_dir, devel=False, force=False):
         self.tmp = tempfile.mkdtemp()
-        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
-        self._create_packages()
-        pmdoc_path = self._create_pmdoc()
+        package_name = self.package.name
+        if devel:
+            package_name += '-devel'
+        output_file = os.path.abspath(os.path.join(output_dir, '%s.pkg' %
+            package_name))
+        self._create_packages(devel, force)
+        pmdoc_path = self._create_pmdoc(devel)
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
 
-    def _create_packages(self):
+    def _create_packages(self, devel, force):
+        self.empty_packages = []
         for p_name in self.packages:
             package = self.store.get_package(p_name)
             m.action(_("Creating package %s ") % p_name)
             packager = OSXPackage(self.config, package, self.store)
-            path = packager.pack(self.tmp)
-            m.action(_("Package created sucessfully"))
-            self.packages_paths[package.name] = path
+            try:
+                path = packager.pack(self.tmp, devel, force)
+                m.action(_("Package created sucessfully"))
+                self.packages_paths[package.name] = path
+            except EmptyPackageError:
+                self.empty_packages.append(p_name)
+                m.warning(_("Package %s is empty") % p_name)
 
-    def _create_pmdoc(self):
+    def _create_pmdoc(self, devel):
         m.action(_("Creating pmdoc for package %s " % self.package))
-        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths)
+        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths,
+                      self.empty_packages, devel)
         return pmdoc.create()
 
 
 class PackageMaker(object):
-    ''' Warpper for the PackageMaker application '''
+    ''' Wrapper for the PackageMaker application '''
 
     PACKAGE_MAKER_PATH = \
         '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/'
