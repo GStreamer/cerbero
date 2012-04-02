@@ -66,7 +66,35 @@ rm -rf $RPM_BUILD_ROOT
 %(files)s
 '''
 
+META_SPEC_TPL = '''
+Name:           %(name)s
+Version:        %(version)s
+Release:        1
+Summary:        %(summary)s
+Group:          Applications/Internet
+License:	%(license)s
+URL:            %(url)s
+
+%(requires)s
+
+%%description
+%(description)s
+
+%%prep
+
+%%build
+
+%%install
+rm -rf $RPM_BUILD_ROOT
+
+%%clean
+rm -rf $RPM_BUILD_ROOT
+
+%%files
+'''
+
 REQUIRE_TPL = 'Requires: %s-gstsdk\n'
+
 
 class RPMPackage(PackagerBase):
 
@@ -93,19 +121,23 @@ class RPMPackage(PackagerBase):
         if pack_deps:
             self._pack_deps(tmpdir, force)
 
-        # create a tarball with all the package's files
-        tarball_packager = DistTarball(self.config, self.package, self.store)
-        tarball = tarball_packager.pack(output_dir, devel, True, full_package_name) 
+        if not isinstance(self.package, MetaPackage):
+            # create a tarball with all the package's files
+            tarball_packager = DistTarball(self.config, self.package, self.store)
+            tarball = tarball_packager.pack(output_dir, devel, True, full_package_name) 
+            # move the tarball to SOURCES
+            shutil.move(tarball, srcdir)
+            tarname = os.path.split(tarball)[1]
+        else:
+            # metapackages only contains Requires dependencies with other packages
+            tarname = None
 
         m.action(_("Creating RPM package for %s") % package_name)
         # fill the spec file
-        self._fill_spec(os.path.split(tarball)[1], tmpdir)
+        self._fill_spec(tarname, tmpdir)
         spec_path = os.path.join(tmpdir, '%s.spec' % package_name)
         with open(spec_path, 'w') as f:
             f.write(self._spec_str)
-
-        # move the tarball to SOURCES
-        shutil.move(tarball, srcdir)
 
         # and build the package with rpmbuild
         self._build_rpm(spec_path)
@@ -116,11 +148,7 @@ class RPMPackage(PackagerBase):
             for f in os.listdir(os.path.join(rpmdir, d)):
                 out_path = os.path.join(output_dir, f)
                 if os.path.exists(out_path):
-                    if force:
-                        os.remove(out_path)
-                    else:
-                        raise FatalError(_("File %s already exists.\
-                            Use --force to override it") % out_path)
+                    os.remove(out_path)
                 shutil.move(os.path.join(rpmdir, d, f), output_dir)
         return output_dir
   
@@ -155,7 +183,12 @@ class RPMPackage(PackagerBase):
     def _fill_spec(self, sources, topdir):
         requires = self._get_requires()
         files  = self.files_list(self.devel)
-        self._spec_str = SPEC_TPL % {
+        if isinstance(self.package, MetaPackage):
+            template = META_SPEC_TPL
+        else:
+            template = SPEC_TPL
+           
+        self._spec_str = template % {
                 'name': self.package.name,
                 'version': self.package.version,
                 'summary': self.package.shortdesc,
