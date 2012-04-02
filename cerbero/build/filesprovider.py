@@ -166,7 +166,7 @@ class FilesProvider(object):
             return []
 
         pattern = '%(sdir)s/%(file)s*%(sext)s'
-        if self.platform == Platform.LINUX:
+        if self.platform in [Platform.LINUX, Platform.DARWIN]:
             # libfoo.so.X, libfoo.so.X.Y.Z
             pattern += '.*'
 
@@ -194,11 +194,11 @@ class FilesProvider(object):
 
         pattern = 'lib/%(f)s*.a lib/%(f)s*.la '
         if self.platform == Platform.LINUX:
-            pattern += 'lib/%(f)s*.so'
+            pattern += 'lib/%(f)s.so'
         elif self.platform == Platform.WINDOWS:
             pattern += 'lib/%(f)s*.dll.a'
         elif self.platform == Platform.DARWIN:
-            pattern += 'lib/%(f)s*.dylib'
+            pattern += 'lib/%(f)s.dylib'
 
         libsmatch = [pattern % {'f':x} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]
