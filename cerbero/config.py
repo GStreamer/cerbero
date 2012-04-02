@@ -49,6 +49,7 @@ class Config (object):
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
+                   'install_dir',
                    ]
 
     def __init__(self, filename=None):
@@ -195,6 +196,7 @@ class Config (object):
     def _load_last_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+        self.set_property('install_dir', self.prefix)
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources',
                 os.path.join(cerbero_home, 'sources', 'local'))
