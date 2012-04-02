@@ -210,8 +210,15 @@ class RPMPackage(PackagerBase):
     def files_list(self, devel):
         # metapackages only have dependencies in other packages
         if isinstance(self.package, MetaPackage):
-            return []
+            return ''
         files = PackagerBase.files_list(self, devel)
+        # the files list only include python files, whithout the compiled
+        # version, so we need to fix that because they will be byte-compiled
+        # in the rpm build
+        for f in files:
+            if f.endswith('.py'):
+                files.append(f+'o')
+                files.append(f+'c')
         return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
 
