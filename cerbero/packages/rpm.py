@@ -21,7 +21,7 @@ import shutil
 import tempfile
 
 from cerbero.config import Architecture
-from cerbero.errors import EmptyPackageError
+from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackagerBase
 from cerbero.packages.disttarball import DistTarball
 from cerbero.packages.package import MetaPackage
