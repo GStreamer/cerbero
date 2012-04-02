@@ -13,5 +13,4 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['a52dec:libs', 'opencore-amr:libs', 'libmad:libs', 'libmpeg2:libs',
-            'libdvdread:libs', 'libdvdnav:libs',
              'gst-plugins-ugly:codecs']

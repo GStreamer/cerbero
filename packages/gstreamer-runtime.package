@@ -18,14 +18,17 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-codecs', False, True),
                ('gstreamer-effects', False, True),
                ('gstreamer-networking', False, True),
+               ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
                ('gstreamer-clutter', False, False),
                ('gstreamer-visualizers', False, False),
                ('gstreamer-codecs-gpl', False, False),
-               ('gstreamer-python', False, False)
+               ('gstreamer-python', False, False),
+               ('gtk+-2.0', False, False),
+               ('gtk+-2.0-python', False, False),
               ]
     icon = "gstreamer.ico"
     install_dir = {
         Platform.WINDOWS: 'GStreamer',
-        Platform.LINUX: '/usr/local/gstreamer',
-        Platform.DARWIN: 'GStreamer.framework'}
+        Platform.LINUX: '/opt/gst-sdk/',
+        Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/Version/1.0'}

@@ -14,9 +14,9 @@ class Package(package.Package):
     files = ['cairo:libs', 'dbus:libs', 'expat:libs', 'fontconfig:libs',
              'gdk-pixbuf:libs', 'libffi:libs', 'freetype:libs', 'glib:libs',
              'orc:libs', 'pango:libs', 'libpng:libs', 'tiff:libs',
-             'libxml2:libs', 'pixman:libs', 'zlib:libs']
+             'libxml2:libs', 'pixman:libs', 'zlib:libs', 'bzip2:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['gettext:libs'],
-        Platform.DARWIN: ['gettext:libs']
+        Platform.WINDOWS: ['gettext:libs', 'libiconv:libs'],
+        Platform.DARWIN: ['gettext:libs', 'libiconv:libs']
         }

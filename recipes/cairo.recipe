@@ -23,5 +23,10 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: [ 'lib/pkgconfig/cairo-win32-font.pc',
                             'lib/pkgconfig/cairo-win32.pc'],
         Platform.LINUX: ['lib/pkgconfig/cairo-xlib-xrender.pc',
-                         'lib/pkgconfig/cairo-xlib.pc']
+                         'lib/pkgconfig/cairo-xlib.pc'],
+        Platform.DARWIN: ['lib/pkgconfig/cairo-xlib-xrender.pc',
+                         'lib/pkgconfig/cairo-xlib.pc',
+                         'lib/pkgconfig/cairo-quartz-font.pc',
+                         'lib/pkgconfig/cairo-quartz.pc',
+                         ]
     }

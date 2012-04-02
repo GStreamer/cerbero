@@ -20,6 +20,7 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
         Platform.LINUX: ['lib/pkgconfig/pangox.pc'],
+        Platform.DARWIN: ['lib/pkgconfig/pangox.pc'],
     }
 
     def prepare(self):

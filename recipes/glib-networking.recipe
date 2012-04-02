@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
     configure_options = "--without-ca-certificates"
     deps = ['glib', 'gnutls']
 
-    files_misc = ['lib/gio/modules/libgiognutls%(sext)s']
+    files_misc = ['lib/gio/modules/libgiognutls%(mext)s']

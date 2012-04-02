@@ -1,0 +1,14 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gtk+-2.0'
+    shortdesc = 'Gtk toolkit'
+    version = '2.24'
+    licences = ['LGPL']
+    vendor = 'GTK+ Project'
+    uuid = '58fe67c2-4565-411f-8287-e8fda893f853'
+
+    files = ['atk', 'gtk+']

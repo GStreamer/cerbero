@@ -29,6 +29,7 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
         Platform.LINUX: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.DARWIN: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
     }
 
 

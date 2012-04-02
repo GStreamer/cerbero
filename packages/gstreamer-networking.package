@@ -14,6 +14,6 @@ class Package(package.Package):
 
     files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs', 'libgpg-error:libs',
             'libshout:libs', 'libsoup:libs', 'libtasn1:libs',
-            'glib-networking:libs', 'nettle:libs',
+            'glib-networking', 'nettle:libs',
             'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net'
     ]

@@ -12,49 +12,49 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
     use_system_libs = True
 
-    files_libs = ['libgstapp-0.10', 'libgstaudio-0.10', 'libgstcdda-0.10',
+    files_libs = ['libgstapp-0.10', 'libgstaudio-0.10', 'libgstcdda-0.10', 'libgstfloatcast-0.10',
                  'libgstfft-0.10', 'libgstinterfaces-0.10', 'libgstnetbuffer-0.10',
                  'libgstpbutils-0.10', 'libgstriff-0.10', 'libgstrtp-0.10',
                  'libgstrtsp-0.10', 'libgstsdp-0.10', 'libgsttag-0.10',
                  'libgstvideo-0.10',]
 
     files_effects = [
-             'lib/gstreamer-0.10/libgstadder%(sext)s',
-             'lib/gstreamer-0.10/libgstapp%(sext)s',
-             'lib/gstreamer-0.10/libgstaudioconvert%(sext)s',
-             'lib/gstreamer-0.10/libgstaudiorate%(sext)s',
-             'lib/gstreamer-0.10/libgstaudioresample%(sext)s',
-             'lib/gstreamer-0.10/libgstaudiotestsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstffmpegcolorspace%(sext)s',
-             'lib/gstreamer-0.10/libgstgdp%(sext)s',
-             'lib/gstreamer-0.10/libgstgio%(sext)s',
-             'lib/gstreamer-0.10/libgsttypefindfunctions%(sext)s',
-             'lib/gstreamer-0.10/libgstvideorate%(sext)s',
-             'lib/gstreamer-0.10/libgstvideoscale%(sext)s',
-             'lib/gstreamer-0.10/libgstvideotestsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstvolume%(sext)s',
+             'lib/gstreamer-0.10/libgstadder%(mext)s',
+             'lib/gstreamer-0.10/libgstapp%(mext)s',
+             'lib/gstreamer-0.10/libgstaudioconvert%(mext)s',
+             'lib/gstreamer-0.10/libgstaudiorate%(mext)s',
+             'lib/gstreamer-0.10/libgstaudioresample%(mext)s',
+             'lib/gstreamer-0.10/libgstaudiotestsrc%(mext)s',
+             'lib/gstreamer-0.10/libgstffmpegcolorspace%(mext)s',
+             'lib/gstreamer-0.10/libgstgdp%(mext)s',
+             'lib/gstreamer-0.10/libgstgio%(mext)s',
+             'lib/gstreamer-0.10/libgsttypefindfunctions%(mext)s',
+             'lib/gstreamer-0.10/libgstvideorate%(mext)s',
+             'lib/gstreamer-0.10/libgstvideoscale%(mext)s',
+             'lib/gstreamer-0.10/libgstvideotestsrc%(mext)s',
+             'lib/gstreamer-0.10/libgstvolume%(mext)s',
     ]
 
     files_playback = [
-             'lib/gstreamer-0.10/libgstcdparanoia%(sext)s',
-             'lib/gstreamer-0.10/libgstdecodebin2%(sext)s',
-             'lib/gstreamer-0.10/libgstlibvisual%(sext)s',
+             'lib/gstreamer-0.10/libgstcdparanoia%(mext)s',
+             'lib/gstreamer-0.10/libgstdecodebin2%(mext)s',
+             'lib/gstreamer-0.10/libgstlibvisual%(mext)s',
             ]
 
     files_net = [
-             'lib/gstreamer-0.10/libgsttcp%(sext)s',
+             'lib/gstreamer-0.10/libgsttcp%(mext)s',
             ]
 
     files_codecs = [
-             'lib/gstreamer-0.10/libgstsubparse%(sext)s',
-             'lib/gstreamer-0.10/libgstogg%(sext)s',
-             'lib/gstreamer-0.10/libgstpango%(sext)s',
-             'lib/gstreamer-0.10/libgsttheora%(sext)s',
-             'lib/gstreamer-0.10/libgstvorbis%(sext)s',
+             'lib/gstreamer-0.10/libgstsubparse%(mext)s',
+             'lib/gstreamer-0.10/libgstogg%(mext)s',
+             'lib/gstreamer-0.10/libgstpango%(mext)s',
+             'lib/gstreamer-0.10/libgsttheora%(mext)s',
+             'lib/gstreamer-0.10/libgstvorbis%(mext)s',
             ]
 
     files_vis = [
-             'lib/gstreamer-0.10/libgstlibvisual%(sext)s',
+             'lib/gstreamer-0.10/libgstlibvisual%(mext)s',
             ]
 
     files_devel = [
@@ -62,6 +62,7 @@ class Recipe(recipe.Recipe):
             'include/gstreamer-0.10/gst/audio',
             'include/gstreamer-0.10/gst/cdda',
             'include/gstreamer-0.10/gst/fft',
+            'include/gstreamer-0.10/gst/floatcast',
             'include/gstreamer-0.10/gst/interfaces',
             'include/gstreamer-0.10/gst/netbuffer',
             'include/gstreamer-0.10/gst/pbutils',
@@ -75,6 +76,7 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gstreamer-audio-0.10.pc',
             'lib/pkgconfig/gstreamer-cdda-0.10.pc',
             'lib/pkgconfig/gstreamer-fft-0.10.pc',
+            'lib/pkgconfig/gstreamer-floatcast-0.10.pc',
             'lib/pkgconfig/gstreamer-interfaces-0.10.pc',
             'lib/pkgconfig/gstreamer-netbuffer-0.10.pc',
             'lib/pkgconfig/gstreamer-pbutils-0.10.pc',
@@ -89,9 +91,9 @@ class Recipe(recipe.Recipe):
 
     platform_files_sys = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstalsa%(sext)s',
-             'lib/gstreamer-0.10/libgstximagesink%(sext)s',
-             'lib/gstreamer-0.10/libgstxvimagesink%(sext)s',
+             'lib/gstreamer-0.10/libgstalsa%(mext)s',
+             'lib/gstreamer-0.10/libgstximagesink%(mext)s',
+             'lib/gstreamer-0.10/libgstxvimagesink%(mext)s',
             ]
     }
 

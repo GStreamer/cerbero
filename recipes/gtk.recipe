@@ -7,23 +7,31 @@ class Recipe(recipe.Recipe):
     license = 'LGPLv2'
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
 
+    files_libs = ['libgailutil']
     files_bins = [
         'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immmodules-2.0',
         'gtk-builder-convert']
     files_etc = ['gtkrc']
     files_devel = [
-        'lib/gtk-2.0'
+        'lib/gtk-2.0',
         'lib/pkgconfig/gtk+-2.0.pc',
         'lib/pkgconfig/gdk-2.0.pc',
+        'lib/pkgconfig/gail.pc',
         'include/gtk-2.0',
-        'include/gdk-2.0',
+        'include/gail-1.0',
     ]
-    platform_files_bins = {
+    platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
+        Platform.DARWIN: ['libgtk-x11-2.0', 'libgdk-x11-2.0'],
+        Platform.LINUX: ['libgtk-x11-2.0', 'libgdk-x11-2.0'],
         }
     platform_files_devel = {
         Platform.WINDOWS: [
-        'lib/pkgconfig/gtk+-win32-2.0.pc', 'lib/pkgconfig/gdk''win32-2.0.pc'],
+            'lib/pkgconfig/gtk+-win32-2.0.pc', 'lib/pkgconfig/gdk-win32-2.0.pc'],
+        Platform.DARWIN: [
+            'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
+        Platform.LINUX: [
+            'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
 
     def prepare(self):

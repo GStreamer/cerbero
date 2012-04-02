@@ -16,80 +16,84 @@ class Recipe(recipe.Recipe):
 
 
     files_effects = [
-             'lib/gstreamer-0.10/libgstalpha%(sext)s',
-             'lib/gstreamer-0.10/libgstalphacolor%(sext)s',
-             'lib/gstreamer-0.10/libgstaudiofx%(sext)s',
-             'lib/gstreamer-0.10/libgstautodetect%(sext)s',
-             'lib/gstreamer-0.10/libgstcairo%(sext)s',
-             'lib/gstreamer-0.10/libgstcutter%(sext)s',
-             'lib/gstreamer-0.10/libgstdeinterlace%(sext)s',
-             'lib/gstreamer-0.10/libgsteffectv%(sext)s',
-             'lib/gstreamer-0.10/libgstequalizer%(sext)s',
-             'lib/gstreamer-0.10/libgstgdkpixbuf%(sext)s',
-             'lib/gstreamer-0.10/libgstimagefreeze%(sext)s',
-             'lib/gstreamer-0.10/libgstinterleave%(sext)s',
-             'lib/gstreamer-0.10/libgstlevel%(sext)s',
-             'lib/gstreamer-0.10/libgstreplaygain%(sext)s',
-             'lib/gstreamer-0.10/libgstshapewipe%(sext)s',
-             'lib/gstreamer-0.10/libgstspectrum%(sext)s',
-             'lib/gstreamer-0.10/libgstvideobox%(sext)s',
-             'lib/gstreamer-0.10/libgstvideocrop%(sext)s',
-             'lib/gstreamer-0.10/libgstvideofilter%(sext)s',
-             'lib/gstreamer-0.10/libgstvideomixer%(sext)s',
+             'lib/gstreamer-0.10/libgstalpha%(mext)s',
+             'lib/gstreamer-0.10/libgstalphacolor%(mext)s',
+             'lib/gstreamer-0.10/libgstaudiofx%(mext)s',
+             'lib/gstreamer-0.10/libgstautodetect%(mext)s',
+             'lib/gstreamer-0.10/libgstcairo%(mext)s',
+             'lib/gstreamer-0.10/libgstcutter%(mext)s',
+             'lib/gstreamer-0.10/libgstdeinterlace%(mext)s',
+             'lib/gstreamer-0.10/libgsteffectv%(mext)s',
+             'lib/gstreamer-0.10/libgstequalizer%(mext)s',
+             'lib/gstreamer-0.10/libgstgdkpixbuf%(mext)s',
+             'lib/gstreamer-0.10/libgstimagefreeze%(mext)s',
+             'lib/gstreamer-0.10/libgstinterleave%(mext)s',
+             'lib/gstreamer-0.10/libgstlevel%(mext)s',
+             'lib/gstreamer-0.10/libgstreplaygain%(mext)s',
+             'lib/gstreamer-0.10/libgstshapewipe%(mext)s',
+             'lib/gstreamer-0.10/libgstspectrum%(mext)s',
+             'lib/gstreamer-0.10/libgstvideobox%(mext)s',
+             'lib/gstreamer-0.10/libgstvideocrop%(mext)s',
+             'lib/gstreamer-0.10/libgstvideofilter%(mext)s',
+             'lib/gstreamer-0.10/libgstvideomixer%(mext)s',
     ]
 
     files_codecs = [
-             'lib/gstreamer-0.10/libgstalaw%(sext)s',
-             'lib/gstreamer-0.10/libgstannodex%(sext)s',
-             'lib/gstreamer-0.10/libgstapetag%(sext)s',
-             'lib/gstreamer-0.10/libgstaudioparsers%(sext)s',
-             'lib/gstreamer-0.10/libgstauparse%(sext)s',
-             'lib/gstreamer-0.10/libgstavi%(sext)s',
-             'lib/gstreamer-0.10/libgstflac%(sext)s',
-             'lib/gstreamer-0.10/libgstflv%(sext)s',
-             'lib/gstreamer-0.10/libgstflxdec%(sext)s',
-             'lib/gstreamer-0.10/libgsticydemux%(sext)s',
-             'lib/gstreamer-0.10/libgstid3demux%(sext)s',
-             'lib/gstreamer-0.10/libgstisomp4%(sext)s',
-             'lib/gstreamer-0.10/libgstjpeg%(sext)s',
-             'lib/gstreamer-0.10/libgstmatroska%(sext)s',
-             'lib/gstreamer-0.10/libgstmulaw%(sext)s',
-             'lib/gstreamer-0.10/libgstmultipart%(sext)s',
-             'lib/gstreamer-0.10/libgstpng%(sext)s',
-             'lib/gstreamer-0.10/libgstsmpte%(sext)s',
-             'lib/gstreamer-0.10/libgstspeex%(sext)s',
-             'lib/gstreamer-0.10/libgsttaglib%(sext)s',
-             'lib/gstreamer-0.10/libgstwavenc%(sext)s',
-             'lib/gstreamer-0.10/libgstwavpack%(sext)s',
-             'lib/gstreamer-0.10/libgstwavparse%(sext)s',
-             'lib/gstreamer-0.10/libgsty4menc%(sext)s',
+             'lib/gstreamer-0.10/libgstalaw%(mext)s',
+             'lib/gstreamer-0.10/libgstannodex%(mext)s',
+             'lib/gstreamer-0.10/libgstapetag%(mext)s',
+             'lib/gstreamer-0.10/libgstaudioparsers%(mext)s',
+             'lib/gstreamer-0.10/libgstauparse%(mext)s',
+             'lib/gstreamer-0.10/libgstavi%(mext)s',
+             'lib/gstreamer-0.10/libgstflac%(mext)s',
+             'lib/gstreamer-0.10/libgstflv%(mext)s',
+             'lib/gstreamer-0.10/libgstflxdec%(mext)s',
+             'lib/gstreamer-0.10/libgsticydemux%(mext)s',
+             'lib/gstreamer-0.10/libgstid3demux%(mext)s',
+             'lib/gstreamer-0.10/libgstisomp4%(mext)s',
+             'lib/gstreamer-0.10/libgstjpeg%(mext)s',
+             'lib/gstreamer-0.10/libgstmatroska%(mext)s',
+             'lib/gstreamer-0.10/libgstmulaw%(mext)s',
+             'lib/gstreamer-0.10/libgstmultipart%(mext)s',
+             'lib/gstreamer-0.10/libgstpng%(mext)s',
+             'lib/gstreamer-0.10/libgstsmpte%(mext)s',
+             'lib/gstreamer-0.10/libgstspeex%(mext)s',
+             'lib/gstreamer-0.10/libgsttaglib%(mext)s',
+             'lib/gstreamer-0.10/libgstwavenc%(mext)s',
+             'lib/gstreamer-0.10/libgstwavpack%(mext)s',
+             'lib/gstreamer-0.10/libgstwavparse%(mext)s',
+             'lib/gstreamer-0.10/libgsty4menc%(mext)s',
     ]
 
     files_net = [
-             'lib/gstreamer-0.10/libgstrtsp%(sext)s',
-             'lib/gstreamer-0.10/libgstrtp%(sext)s',
-             'lib/gstreamer-0.10/libgstrtpmanager%(sext)s',
-             'lib/gstreamer-0.10/libgstsouphttpsrc%(sext)s',
-             'lib/gstreamer-0.10/libgstudp%(sext)s',
+             'lib/gstreamer-0.10/libgstrtsp%(mext)s',
+             'lib/gstreamer-0.10/libgstrtp%(mext)s',
+             'lib/gstreamer-0.10/libgstrtpmanager%(mext)s',
+             'lib/gstreamer-0.10/libgstsouphttpsrc%(mext)s',
+             'lib/gstreamer-0.10/libgstudp%(mext)s',
     ]
 
     files_vis = [
-             'lib/gstreamer-0.10/libgstgoom%(sext)s',
-             'lib/gstreamer-0.10/libgstgoom2k1%(sext)s',
+             'lib/gstreamer-0.10/libgstgoom%(mext)s',
+             'lib/gstreamer-0.10/libgstgoom2k1%(mext)s',
             ]
 
     platform_files_codecs = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstdv%(sext)s',
+             'lib/gstreamer-0.10/libgstdv%(mext)s',
             ],
         Platform.DARWIN: [
-             'lib/gstreamer-0.10/libgstdv%(sext)s',
+             'lib/gstreamer-0.10/libgstdv%(mext)s',
             ]
     }
 
     platform_files_sys = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstpulse%(sext)s',
+             'lib/gstreamer-0.10/libgstpulse%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-0.10/libgstosxaudiosink%(mext)s',
+             'lib/gstreamer-0.10/libgstosxvideosink%(mext)s',
             ]
     }
 

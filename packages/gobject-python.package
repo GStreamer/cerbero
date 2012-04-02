@@ -11,4 +11,4 @@ class Package(package.Package):
     uuid = '58fe67c2-4565-431f-8287-e8fba892f853'
     vendor = 'GStreamer Project'
 
-    files = ['pygobject:python']
+    files = ['pygobject']

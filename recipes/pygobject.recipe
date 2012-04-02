@@ -5,10 +5,12 @@ class Recipe(recipe.Recipe):
     version = '2.28.6'
     configure_options = '--disable-introspection'
 
-    files_python = ['site-packages/glib/_glib%(sext)s',
+    files_libs = ['libpyglib-2.0-python']
+    files_python = ['site-packages/glib/_glib%(mext)s',
                     'site-packages/glib/__init__.py',
                     'site-packages/glib/option.py',
                     'site-packages/gobject/constants.py',
-                    'site-packages/gobject/_gobject%(sext)s',
+                    'site-packages/gobject/_gobject%(mext)s',
                     'site-packages/gobject/__init__.py',
                     'site-packages/gobject/propertyhelper.py']
+    files_devel = ['lib/pkgconfig/pygobject-2.0.pc']
