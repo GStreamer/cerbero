@@ -36,7 +36,7 @@ class Config(DummyConfig):
 class FilesProvider(filesprovider.FilesProvider):
 
     files_misc = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
-    files_libs = ['libgstreamer']
+    files_libs = ['libgstreamer-0.10']
     files_bins = ['gst-launch']
     files_devel = ['include/gstreamer.h']
     platform_files_bins = {
@@ -58,15 +58,19 @@ class PackageTest(unittest.TestCase):
 
         self.winbin = ['bin/gst-launch.exe', 'bin/windows.exe']
         self.linuxbin = ['bin/gst-launch', 'bin/linux']
-        self.winlib = ['bin/libgstreamer.dll', 'bin/libgstreamer-win32.dll']
-        self.linuxlib = ['lib/libgstreamer.so.1', 'lib/libgstreamer-x11.so.1']
+        self.winlib = ['bin/libgstreamer-0.10.dll', 'bin/libgstreamer-win32.dll']
+        self.linuxlib = ['lib/libgstreamer-0.10.so.1', 'lib/libgstreamer-x11.so.1']
         self.winmisc = ['README', 'libexec/gstreamer-0.10/pluginsloader.exe']
         self.linuxmisc = ['README', 'libexec/gstreamer-0.10/pluginsloader']
-        self.devfiles = ['include/gstreamer.h', 'lib/libgstreamer.a',
-                'lib/libgstreamer-win32.a', 'lib/libgstreamer-win32.so',
-                'lib/libgstreamer-win32.la', 'lib/libgstreamer.la',
+        devfiles = ['include/gstreamer.h', 'lib/libgstreamer-0.10.a',
+                    'lib/libgstreamer-0.10.la']
+
+        self.windevfiles = devfiles + ['lib/libgstreamer-win32.a',
+                'lib/libgstreamer-win32.la', 'lib/libgstreamer-win32.dll.a',
+                'lib/libgstreamer-0.10.dll.a']
+        self.lindevfiles = devfiles + ['lib/libgstreamer-0.10.so',
                 'lib/libgstreamer-x11.a', 'lib/libgstreamer-x11.la',
-                'lib/libgstreamer-x11.so', 'lib/libgstreamer.so']
+                'lib/libgstreamer-x11.so', 'lib/libgstreamer-0.10.dll.a']
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -91,7 +95,9 @@ class PackageTest(unittest.TestCase):
     def testDevelFiles(self):
         add_files(self.tmp)
         self.assertEquals(self.win32recipe.devel_files_list(),
-                sorted(self.devfiles))
+                sorted(self.windevfiles))
+        self.assertEquals(self.linuxrecipe.devel_files_list(),
+                sorted(self.lindevfiles))
 
     def testDistFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc
@@ -101,8 +107,8 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(self.linuxrecipe.dist_files_list(), sorted(linuxfiles))
 
     def testGetAllFiles(self):
-        win32files = self.winlib + self.winbin + self.winmisc + self.devfiles
-        linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc + self.devfiles
+        win32files = self.winlib + self.winbin + self.winmisc + self.windevfiles
+        linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc + self.lindevfiles
         add_files(self.tmp)
         self.assertEquals(self.win32recipe.files_list(), sorted(win32files))
         self.assertEquals(self.linuxrecipe.files_list(), sorted(linuxfiles))

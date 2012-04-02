@@ -40,7 +40,7 @@ class Recipe1(recipe.Recipe):
         Platform.WINDOWS: ['windows'],
         Platform.LINUX: ['linux']}
 
-    files_libs = ['libgstreamer']
+    files_libs = ['libgstreamer-0.10']
     platform_files_libs = {
         Platform.WINDOWS: ['libgstreamer-win32'],
         Platform.LINUX: ['libgstreamer-x11']}
@@ -85,20 +85,23 @@ def add_files(tmp):
     os.makedirs(bindir)
     os.makedirs(libdir)
     shell.call('touch '
-        '%(bindir)s/libgstreamer.dll '
+        '%(bindir)s/libgstreamer-0.10.dll '
         '%(bindir)s/libgstreamer-win32.dll '
         '%(bindir)s/libtest.dll '
         '%(libdir)s/libtest.so.1 '
         '%(libdir)s/libtest.la '
         '%(libdir)s/libtest.a '
         '%(libdir)s/libtest.so '
-        '%(libdir)s/libgstreamer.so.1 '
-        '%(libdir)s/libgstreamer.la '
-        '%(libdir)s/libgstreamer.a '
-        '%(libdir)s/libgstreamer.so '
+        '%(libdir)s/libtest.dll.a '
+        '%(libdir)s/libgstreamer-0.10.so.1 '
+        '%(libdir)s/libgstreamer-0.10.la '
+        '%(libdir)s/libgstreamer-0.10.a '
+        '%(libdir)s/libgstreamer-0.10.so '
+        '%(libdir)s/libgstreamer-0.10.dll.a '
         '%(libdir)s/libgstreamer-win32.la '
         '%(libdir)s/libgstreamer-win32.a '
         '%(libdir)s/libgstreamer-win32.so '
+        '%(libdir)s/libgstreamer-win32.dll.a '
         '%(libdir)s/libgstreamer-x11.so.1 '
         '%(libdir)s/libgstreamer-x11.so '
         '%(libdir)s/libgstreamer-x11.a '

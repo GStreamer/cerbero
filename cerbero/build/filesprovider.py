@@ -42,6 +42,7 @@ class FilesProvider(object):
                           'mext': '.so'}}
 
     def __init__(self, config):
+        self.config = config
         self.platform = config.target_platform
         self.prefix = config.prefix
         self.extensions = self.EXTENSIONS[self.platform]
@@ -165,10 +166,16 @@ class FilesProvider(object):
         if len(files) == 0:
             return []
 
-        pattern = '%(sdir)s/%(file)s*%(sext)s'
-        if self.platform in [Platform.LINUX, Platform.DARWIN]:
+        if self.platform == Platform.LINUX:
             # libfoo.so.X, libfoo.so.X.Y.Z
-            pattern += '.*'
+            pattern = '%(sdir)s/%(file)s%(sext)s.*'
+        elif self.platform == Platform.DARWIN:
+            # libfoo.X.dylib
+            pattern = '%(sdir)s/%(file)s.*%(sext)s'
+        elif self.platform == Platform.WINDOWS:
+            # libfoo.X.dll, libfoo.dll
+            # FIXME: this will include libfoo-bar.dll too
+            pattern = '%(sdir)s/%(file)s*%(sext)s'
 
         libsmatch = []
         for f in files:
@@ -196,7 +203,7 @@ class FilesProvider(object):
         if self.platform == Platform.LINUX:
             pattern += 'lib/%(f)s.so'
         elif self.platform == Platform.WINDOWS:
-            pattern += 'lib/%(f)s*.dll.a'
+            pattern += 'lib/%(f)s.dll.a'
         elif self.platform == Platform.DARWIN:
             pattern += 'lib/%(f)s.dylib'
 

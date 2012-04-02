@@ -38,7 +38,6 @@ class Recipe(recipe.Recipe):
     files_playback = [
              'lib/gstreamer-0.10/libgstcdparanoia%(mext)s',
              'lib/gstreamer-0.10/libgstdecodebin2%(mext)s',
-             'lib/gstreamer-0.10/libgstlibvisual%(mext)s',
             ]
 
     files_net = [

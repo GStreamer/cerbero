@@ -8,14 +8,15 @@ class Recipe(recipe.Recipe):
     license = 'LGPLv2.1'
     deps = ['cairo', 'fontconfig', 'freetype']
 
-    files_libs = ['libpangocairo', 'libpango', 'libpangoft2']
+    files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
     files_devel = ['include/pango-1.0', 'lib/pango',
         'lib/pkgconfig/pangoft2.pc', 'lib/pkgconfig/pango.pc',
         'lib/pkgconfig/pangocairo.pc']
     platform_files_libs = {
-        Platform.WINDOWS: ['libpangowin32'],
-        Platform.LINUX: ['libpangox'],
+        Platform.WINDOWS: ['libpangowin32-1.0'],
+        Platform.LINUX: ['libpangox-1.0'],
+        Platform.DARWIN: ['libpangox-1.0'],
     }
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],

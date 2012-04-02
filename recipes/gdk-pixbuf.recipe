@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     license = 'LGPLv2.1'
     deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
 
-    files_libs = ['libgdk_pixbuf']
+    files_libs = ['libgdk_pixbuf-2.0']
     files_bin = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
     files_devel = [
         'lib/gdk-pixbuf-2.0',

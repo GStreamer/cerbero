@@ -12,11 +12,11 @@ class Recipe(recipe.Recipe):
             'schroedinger', 'libdca', 'jasper', 'libmms', 'libdvdnav' ]
 
     files_libs = [
-            'libgstbasevideo',
-            'libgstbasecamerabinsrc',
-            'libgstcodecparsers',
-            'libgstphotography',
-            'libgstsignalprocessor',
+            'libgstbasevideo-0.10',
+            'libgstbasecamerabinsrc-0.10',
+            'libgstcodecparsers-0.10',
+            'libgstphotography-0.10',
+            'libgstsignalprocessor-0.10',
     ]
 
     files_effects = [
