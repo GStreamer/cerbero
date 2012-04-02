@@ -100,12 +100,13 @@ class RPMPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.install_dir = '/opt/usr/local/gst-sdk' 
         self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
 
     def pack(self, output_dir, devel=False, force=False,
              pack_deps=True, tmpdir=None):
+        self.install_dir = self.package.get_install_dir() 
         self._empty_packages = []
+
         # add the -devel suffix for devel packages
         self.devel = devel
         package_name = self.package.name
