@@ -54,6 +54,9 @@ class PackageBase(object):
     vendor = 'default'
     url = 'default'
 
+    def __init__(self, config):
+        self.config = config
+
     def files_list(self):
         raise NotImplemented("'files_list' must be implemented by subclasses")
 
@@ -64,6 +67,12 @@ class PackageBase(object):
     def all_files_list(self):
         raise NotImplemented("'all_files_list' must be implemented by "
                              "subclasses")
+
+    def get_install_dir(self):
+        try:
+            return self.install_dir[self.config.target_platform]
+        except:
+            return self.config.install_dir
 
 
 class Package(PackageBase):
@@ -84,6 +93,7 @@ class Package(PackageBase):
     platform_files = dict()
 
     def __init__(self, config, cookbook):
+        PackageBase.__init__(self, config)
         self.cookbook = cookbook
         self._files = self.files + \
                 self.platform_files.get(config.target_platform, [])
@@ -139,7 +149,7 @@ class MetaPackage(PackageBase):
     packages = []
 
     def __init__(self, config, store):
-        self.config = config
+        PackageBase.__init__(self, config)
         self.store = store
 
     def list_packages(self):
