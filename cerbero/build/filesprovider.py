@@ -34,9 +34,12 @@ class FilesProvider(object):
     DEVEL_CAT = 'devel'
 
     EXTENSIONS = {
-        Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin'},
-        Platform.LINUX: {'bext': '', 'sext': '.so', 'sdir': 'lib'},
-        Platform.DARWIN: {'bext': '', 'sext': '.dylib', 'sdir': 'lib'}}
+        Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin',
+                           'mext': '.dll'},
+        Platform.LINUX: {'bext': '', 'sext': '.so', 'sdir': 'lib',
+                         'mext': '.so'},
+        Platform.DARWIN: {'bext': '', 'sext': '.dylib', 'sdir': 'lib',
+                          'mext': '.so'}}
 
     def __init__(self, config):
         self.platform = config.target_platform
