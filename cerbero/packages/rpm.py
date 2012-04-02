@@ -166,7 +166,7 @@ class RPMPackage(PackagerBase):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-redhat-linux'
         elif self.config.target_arch == Architecture.X86_64:
-            arch = 'x86_64-redhat-linux'
+            target = 'x86_64-redhat-linux'
         else:
             raise FatalError(_('Architecture %s not supported') % \
                              self.config.target_arch)
