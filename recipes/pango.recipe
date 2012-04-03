@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
-    files_devel = ['include/pango-1.0', 'lib/pango',
+    files_devel = ['include/pango-1.0',
         'lib/pkgconfig/pangoft2.pc', 'lib/pkgconfig/pango.pc',
         'lib/pkgconfig/pangocairo.pc']
     platform_files_libs = {
@@ -23,6 +23,9 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: ['lib/pkgconfig/pangox.pc'],
         Platform.DARWIN: ['lib/pkgconfig/pangox.pc'],
     }
+    platform_files_modules = {
+        Platform.LINUX: ['lib/pango'],
+        Platform.DARWIN: ['lib/pango']}
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
