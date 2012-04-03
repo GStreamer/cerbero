@@ -31,13 +31,11 @@ from cerbero.utils import messages as m
 
 SPEC_TPL = '''
 %%define _topdir %(topdir)s
-%%define _name %(name)s
-%%define _version %(version)s
-%%define _package_name %%{_name}-%%{_version}
+%%define _package_name %(package_name)s
 
 
-Name:           %%{_name}-gstsdk
-Version:        %%{_version}
+Name:           %(name)s-gstsdk
+Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
 Source:         %(source)s
@@ -109,11 +107,10 @@ class RPMPackage(PackagerBase):
 
         # add the -devel suffix for devel packages
         self.devel = devel
-        package_name = self.package.name
-        full_package_name = self.full_package_name
+        self.package_name = self.package.name
         if devel:
-            package_name += '-devel'
-            full_package_name += '-devel'
+            self.package_name += '-devel'
+            self.full_package_name += '-devel'
 
         # Create a tmpdir for packages
         tmpdir, rpmdir, srcdir = self._create_rpm_tree(tmpdir)
@@ -125,7 +122,8 @@ class RPMPackage(PackagerBase):
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files
             tarball_packager = DistTarball(self.config, self.package, self.store)
-            tarball = tarball_packager.pack(output_dir, devel, True, full_package_name) 
+            tarball = tarball_packager.pack(output_dir, devel, True,
+                                            self.full_package_name)
             # move the tarball to SOURCES
             shutil.move(tarball, srcdir)
             tarname = os.path.split(tarball)[1]
@@ -133,10 +131,10 @@ class RPMPackage(PackagerBase):
             # metapackages only contains Requires dependencies with other packages
             tarname = None
 
-        m.action(_("Creating RPM package for %s") % package_name)
+        m.action(_("Creating RPM package for %s") % self.package_name)
         # fill the spec file
         self._fill_spec(tarname, tmpdir)
-        spec_path = os.path.join(tmpdir, '%s.spec' % package_name)
+        spec_path = os.path.join(tmpdir, '%s.spec' % self.package_name)
         with open(spec_path, 'w') as f:
             f.write(self._spec_str)
 
@@ -190,8 +188,9 @@ class RPMPackage(PackagerBase):
             template = SPEC_TPL
            
         self._spec_str = template % {
-                'name': self.package.name,
+                'name': self.package_name,
                 'version': self.package.version,
+                'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc,
                 'license': ' '.join(self.package.licenses),
@@ -205,6 +204,8 @@ class RPMPackage(PackagerBase):
     def _get_requires(self):
         deps = self.store.get_package_deps(self.package.name)
         deps = list(set(deps) - set(self._empty_packages))
+        if self.devel:
+            deps = map(lambda x: x+'-devel', deps)
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
     def files_list(self, devel):
