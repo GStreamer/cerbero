@@ -54,7 +54,7 @@ class RedHatBootstraper (UnixBootstraper):
                 'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
                 'docbook-style-xsl', 'redhat-rpm-config', 'pyhton-devel',
                 'pulseaudio-libs-devel', 'libXv-devel', 'mesa-libGL-devel',
-                'libXcomposite-devel', 'alsa-lib-devel']
+                'libXcomposite-devel', 'libXrender-devel', 'alsa-lib-devel']
 
 
 def register_all():
