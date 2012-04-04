@@ -19,7 +19,7 @@
 import os
 
 from cerbero.commands import Command, register_command
-from cerbero.ide.common import PkgConfig
+from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.pkgconfig2vsprops import PkgConfig2VSProps, CommonVSProps
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
