@@ -37,6 +37,15 @@ TAR = 'tar'
 PLATFORM = system_info()[0]
 
 
+def _fix_mingw_cmd(path):
+    l_path = list(path)
+    for i in range(len(path)):
+        if path[i] == '\\':
+            if i+1 == len(path) or path [i+1] != '/':
+                l_path[i] = '/'
+    return ''.join(l_path)
+
+
 def call(cmd, cmd_dir='.', fail=True):
     '''
     Run a shell command
@@ -58,7 +67,7 @@ def call(cmd, cmd_dir='.', fail=True):
             # run all processes through sh.exe to get scripts working
             cmd = '%s "%s"' % ('sh -c', cmd)
             # replace backward slashes with forward slashes in paths
-            cmd = cmd.replace('\\', '/')
+            cmd = _fix_mingw_cmd(cmd)
             # Disable shell which uses cmd.exe
             shell = False
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
