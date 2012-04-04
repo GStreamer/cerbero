@@ -17,41 +17,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import subprocess
 import sys
-
-
-class PkgConfig(object):
-    '''
-    Thin wrapper around pkg-config. This file is ment to be installed without
-    cerbero and therefore can't import the shell utils
-    '''
-
-    cmd = 'pkg-config'
-
-    def __init__(self, libs):
-        self.libs = libs
-
-    def headers_search_path(self):
-        return self._exec('--cflags-only-I', 'I')
-
-    def cflags(self):
-        return self._exec('--clags-only-other')
-
-    def libraries_search_path(self):
-        return self._exec('--libs-only-L', 'L')
-
-    def libraries(self):
-        return self._exec('--libs-only-l')
-
-    def _exec(self, mode, delimiter=None):
-        cmd = '%s %s %s' % (self.cmd, mode, ' '.join(self.libs))
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        output, unused_err = process.communicate()
-        output = output.strip()
-        if delimiter:
-            output = ' '.join(output.split('-%s' % delimiter)[1:])
-        return output
+from cerbero.ide.pkgconfig import PkgConfig
 
 
 XCCONFIG_TPL = '''
@@ -73,12 +40,17 @@ class XCConfig(object):
         self.pkgconfig = PkgConfig(libraries)
 
     def create(self, outfile):
-        args = dict()
-        args['hsp'] = self.pkgconfig.headers_search_path()
-        args['lsp'] = self.pkgconfig.libraries_search_path()
-        args['libs'] = self.pkgconfig.libraries()
+        args = self._fill()
         with open(outfile, 'w') as f:
             f.write(XCCONFIG_TPL % args)
+
+    def _fill(self):
+        args = dict()
+        args['hsp'] = ' '.join(self.pkgconfig.include_dirs())
+        args['lsp'] = ' '.join(self.pkgconfig.libraries_dirs())
+        args['libs'] = reduce(lambda x, y: '%s -l%s' % (x, y),
+                              self.pkgconfig.libraries(), '')
+        return args
 
 
 if __name__ == "__main__":
