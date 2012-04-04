@@ -131,10 +131,13 @@ def system_info():
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['openSUSE']:
+        elif d[0].strip() in ['openSUSE']:
             distro = Distro.SUSE
-            # FIXME Fill this
-            raise FatalError("Distribution '%s' not supported" % str(d))
+            if d[1] == '12.1':
+                distro_version = DistroVersion.OPENSUSE_12_1
+            else:
+                # FIXME Fill this
+                raise FatalError("Distribution OpenSuse '%s' not supported" % str(d))
         else:
             raise FatalError("Distribution '%s' not supported" % str(d))
     elif platform == Platform.WINDOWS:

@@ -52,11 +52,20 @@ class RedHatBootstraper (UnixBootstraper):
                 'make', 'cmake', 'bison', 'flex', 'yasm', 'pkgconfig-0.25',
                 'gtk-doc', 'curl', 'doxygen', 'text-info', 'texlive-dvips',
                 'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
-                'docbook-style-xsl', 'redhat-rpm-config', 'pyhton-devel',
+                'redhat-rpm-config', 'python-devel', 'libXrender-devel',
                 'pulseaudio-libs-devel', 'libXv-devel', 'mesa-libGL-devel',
-                'libXcomposite-devel', 'libXrender-devel', 'alsa-lib-devel']
+                'libXcomposite-devel', 'alsa-lib-devel']
 
+class OpenSuseBootstraper (UnixBootstraper):
+
+    tool = 'sudo zypper install %s'
+    packages = ['intltool', 'cmake', 'gcc-c++', 'doxygen', 'gtk-doc', 'libtool',
+                'bison', 'flex', 'automake', 'autoconf', 'make', 'gcc', 'curl',
+                'gettext-tools', 'alsa-devel', 'yasm', 'docbook-xsl-stylesheets',
+                'transfig', 'xorg-x11-libXrender-devel', 'xorg-x11-libXv-devel',
+                'Mesa-devel', 'python-devel', 'devel_rpm_build']
 
 def register_all():
     register_bootstraper(Distro.DEBIAN, DebianBootstraper)
     register_bootstraper(Distro.REDHAT, RedHatBootstraper)
+    register_bootstraper(Distro.SUSE, OpenSuseBootstraper)
