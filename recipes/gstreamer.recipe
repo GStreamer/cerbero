@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gstreamer'
     version = '0.10.36'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-instrospection'
+    configure_options = '--disable-instrospection --disable-examples '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2', 'gtk-doc']
 
