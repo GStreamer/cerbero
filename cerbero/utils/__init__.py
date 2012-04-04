@@ -62,6 +62,12 @@ def determine_num_of_cpus():
         return 1
 
 
+def to_winpath(path):
+    if path.startswith('/'):
+        path = '%s:%s' % (path[1], path[2:])
+    return path.replace('/', '\\')
+
+
 def system_info():
     '''
     Get the sysem information.
