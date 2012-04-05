@@ -32,6 +32,7 @@ class FilesProvider(object):
     BINS_CAT = 'bins'
     PY_CAT = 'python'
     DEVEL_CAT = 'devel'
+    ETC_CAT = 'etc'
 
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin',
@@ -51,6 +52,7 @@ class FilesProvider(object):
         self._searchfuncs = {self.LIBS_CAT: self._search_libraries,
                              self.BINS_CAT: self._search_binaries,
                              self.PY_CAT: self._search_pyfiles,
+                             self.ETC_CAT: self._search_etcfiles,
                              'default': self._search_files}
 
     def devel_files_list(self):
@@ -200,6 +202,13 @@ class FilesProvider(object):
             f = f % self.extensions
             pyfiles.append('%s/%s' % (self.py_prefix, f))
         return pyfiles
+
+    def _search_etcfiles(self, files):
+        '''
+        Search for etc files in the prefix. This function prepends '/etc' to the
+        file name.
+        '''
+        return ['etc/%s' % f for f in files]
 
     def _search_devel_libraries(self):
         if self.LIBS_CAT not in self.categories:
