@@ -51,6 +51,7 @@ class RecipeTest(recipe.Recipe):
     version = '0.0.0'
     deps = ['dep1', 'dep2']
     platform_deps = {Platform.LINUX: ['dep3'], Platform.WINDOWS: ['dep4']}
+    post_install = lambda x: 'CODEPASS'
 
 
 class TestReceiptMetaClass(unittest.TestCase):
@@ -77,6 +78,7 @@ class TestReceiptMetaClass(unittest.TestCase):
         self.assertTrue(hasattr(self.t, 'class2_method'))
         self.assertEquals(self.t.fetch(), 'CODEPASS')
         self.assertEquals(self.t.compile(), 'CODEPASS')
+        self.assertEquals(self.t.post_install(), 'CODEPASS')
 
     def testSubclassesInit(self):
         self.assertEquals(self.t.test, 'CODEPASS')
