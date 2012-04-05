@@ -39,7 +39,6 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gstreamer-controller-0.10.pc',
             'lib/pkgconfig/gstreamer-dataprotocol-0.10.pc',
             'lib/pkgconfig/gstreamer-net-0.10.pc',
-            'lib/pkgconfig/gstreamer-plugins-base-0.10.pc',
     ]
 
     def prepare(self):
