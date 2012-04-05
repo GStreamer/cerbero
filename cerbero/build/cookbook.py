@@ -227,7 +227,7 @@ class CookBook (object):
 
     def _restore_cache(self):
         try:
-            with open(self._cache_file(self.config), 'rb') as f:
+            with open(self._cache_file(self.get_config()), 'rb') as f:
                 self.status = pickle.load(f)
         except Exception:
             self.status = {}
