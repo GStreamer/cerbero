@@ -31,7 +31,7 @@ class List(Command):
         Command.__init__(self, [])
 
     def run(self, config, args):
-        cookbook = CookBook.load(config)
+        cookbook = CookBook(config)
         recipes = cookbook.get_recipes_list()
         if len(recipes) == 0:
             m.message(_("No recipes found"))

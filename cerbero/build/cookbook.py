@@ -72,14 +72,15 @@ class CookBook (object):
     @type recipes: dict
     '''
 
-    def __init__(self, config, load=True, status={}):
+    def __init__(self, config, load=True):
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
-        self.status = status    # recipe_name -> RecipeStatus
         self._mtimes = {}
 
         if not load:
             return
+
+        self._restore_cache()
 
         if not os.path.exists(config.recipes_dir):
             raise FatalError(_("Recipes dir %s not found") %
@@ -218,28 +219,25 @@ class CookBook (object):
             raise FatalError(_('Recipe %s not found') % recipe_name)
         return self._find_deps(recipe)
 
-    @staticmethod
-    def cache_file(config):
+    def _cache_file(self, config):
         if config.cache_file is not None:
             return os.path.join(CONFIG_DIR, config.cache_file)
         else:
             return COOKBOOK_FILE
 
-    @staticmethod
-    def load(config):
-        status = {}
+    def _restore_cache(self):
         try:
-            with open(CookBook.cache_file(config), 'rb') as f:
-                status = pickle.load(f)
+            with open(self._cache_file(self.config), 'rb') as f:
+                self.status = pickle.load(f)
         except Exception:
+            self.status = {}
             m.warning(_("Could not recover status"))
-        return CookBook(config, status=status)
 
     def save(self):
         try:
             if not os.path.exists(CONFIG_DIR):
                 os.mkdir(CONFIG_DIR)
-            with open(CookBook.cache_file(self.get_config()), 'wb') as f:
+            with open(self._cache_file(self.get_config()), 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
             m.warning(_("Could not cache the CookBook: %s"), ex)

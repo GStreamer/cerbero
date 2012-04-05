@@ -46,7 +46,7 @@ class GenLibraryFiles(Command):
         if args.output_dir is not None and not os.path.exists(args.output_dir):
             os.makedirs(args.output_dir)
 
-        cookbook = CookBook.load(config)
+        cookbook = CookBook(config)
         recipes = cookbook.get_recipes_list()
         for recipe in recipes:
             try:

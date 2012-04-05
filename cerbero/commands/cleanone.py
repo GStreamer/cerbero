@@ -33,7 +33,7 @@ class CleanOne(Command):
             ])
 
     def run(self, config, args):
-        cookbook = CookBook.load(config)
+        cookbook = CookBook(config)
         recipe_name = args.recipe[0]
 
         recipe = cookbook.get_recipe(recipe_name)
