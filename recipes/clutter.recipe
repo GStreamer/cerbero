@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',
         'lib/pkgconfig/cally-1.0.pc',
-        'include/clutter-1.0',
+        'include/clutter-1.0/clutter',
+        'include/clutter-1.0/cally',
     ]
     platform_files_libs = {
         Platform.WINDOWS: ['libclutter-win32-1.0'],
