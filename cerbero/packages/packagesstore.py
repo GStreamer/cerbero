@@ -31,6 +31,8 @@ class PackagesStore (object):
     Stores a list of L{cerbero.packages.package.Package}
     '''
 
+    PKG_EXT = '.package'
+
     def __init__(self, config, load=True):
         self._config = config
 
@@ -137,6 +139,8 @@ class PackagesStore (object):
     def _load_packages(self):
         self._packages = {}
         for f in os.listdir(self._config.packages_dir):
+            if not f.endswith(self.PKG_EXT):
+                continue
             filepath = os.path.join(self._config.packages_dir, f)
             p = self._load_package_from_file(filepath)
             if p is None:
