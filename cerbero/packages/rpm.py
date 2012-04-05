@@ -117,7 +117,7 @@ class RPMPackage(PackagerBase):
         
         # only build each package once
         if pack_deps:
-            self._pack_deps(tmpdir, force)
+            self._pack_deps(output_dir, tmpdir, force)
 
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files
@@ -151,12 +151,12 @@ class RPMPackage(PackagerBase):
                 shutil.move(os.path.join(rpmdir, d, f), output_dir)
         return output_dir
   
-    def _pack_deps(self, tmpdir, force):
+    def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
             packager = RPMPackage(self.config, self.store.get_package(p),
                                   self.store)
             try:
-                packager.pack(tmpdir, self.devel, force, False, tmpdir)
+                packager.pack(output_dir, self.devel, force, False, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p)
         
