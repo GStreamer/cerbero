@@ -19,3 +19,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.autoreconf = True
             self.configure_options += '--without-gdiplus --with-included-loaders'
+        if self.config.target_platform == Platform.DARWIN:
+            self.autoreconf = True
+            self.configure_options += '--without-x11 '

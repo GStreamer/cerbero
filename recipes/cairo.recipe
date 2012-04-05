@@ -30,3 +30,7 @@ class Recipe(recipe.Recipe):
                          'lib/pkgconfig/cairo-quartz.pc',
                          ]
     }
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += '--without-x --enable-quartz-font --enable-quartz-image'

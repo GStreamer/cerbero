@@ -39,6 +39,8 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-papi --disable-cups --with-included-immodules'
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += '--with-gdktarget=quartz '
 
     def post_install(self):
         theme = "Clearlooks"
