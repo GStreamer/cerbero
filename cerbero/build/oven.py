@@ -16,8 +16,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import tempfile
+
 from cerbero.errors import BuildStepError, FatalError
-from cerbero.utils import _
+from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 
 
@@ -33,15 +35,19 @@ class Oven (object):
     @type: bool
     @ivar no_deps: Ignore dependencies
     @type: bool
+    @ivar missing_files: check for files missing in the recipe
+    @type missing_files: bool
     '''
 
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
-    def __init__(self, recipe, cookbook, force=False, no_deps=False):
+    def __init__(self, recipe, cookbook, force=False, no_deps=False,
+                 missing_files=False):
         self.recipe = recipe
         self.cookbook = cookbook
         self.force = force
         self.no_deps = no_deps
+        self.missing_files = missing_files
 
     def start_cooking(self):
         '''
@@ -67,6 +73,10 @@ class Oven (object):
             m.build_step(count, total, recipe.name, _("already built"))
             return
 
+        if self.missing_files:
+            # create a temp file that will be used to find newer files
+            tmp = tempfile.NamedTemporaryFile()
+
         recipe.force = self.force
         for desc, step in recipe._steps:
             m.build_step(count, total, recipe.name, step)
@@ -88,3 +98,23 @@ class Oven (object):
                 raise FatalError(_("Error performing step %s: %s") % (step,
                                   ex))
         self.cookbook.update_build_status(recipe.name, False)
+
+        if self.missing_files:
+            self._print_missing_files(recipe, tmp)
+
+    def _print_missing_files(self, recipe, tmp):
+        recipe_files = set(recipe.files_list())
+        installed_files = set(shell.find_newer_files(recipe.config.prefix,
+                                                     tmp.name))
+        not_in_recipe = list(installed_files - recipe_files)
+        not_installed = list(recipe_files - installed_files)
+
+        if len(not_in_recipe) != 0:
+            m.message(_("The following files where installed, but are not "
+                        "listed in the recipe:"))
+            m.message('\n'.join(not_in_recipe))
+
+        if len(not_installed) != 0:
+            m.message(_("The following files are listed in the recipe, but "
+                        "where not installed:"))
+            m.message('\n'.join(not_installed))
