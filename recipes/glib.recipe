@@ -65,6 +65,11 @@ class Recipe(recipe.Recipe):
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/x86_64-linux-gnu/gio/modules')
             elif self.config.target_distro == Distro.REDHAT:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/')
-                    
+            elif self.config.target_distro == Distro.SUSE:
+                if self.config.target_arch == Architecture.X86:
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules')
+                elif self.config.target_arch == Architecture.X86_64:
+                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib64/gio/modules')
             else:
+                from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
