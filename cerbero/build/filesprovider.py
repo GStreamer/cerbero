@@ -96,6 +96,12 @@ class FilesProvider(object):
         '''
         return self.files_list_by_categories([category])
 
+    def libraries(self):
+        '''
+        Return a list of the libraries
+        '''
+        return self.files_list_by_category(self.LIBS_CAT)
+
     def _files_categories(self):
         ''' Get the list of categories available '''
         categories = []
@@ -201,11 +207,13 @@ class FilesProvider(object):
 
         pattern = 'lib/%(f)s*.a lib/%(f)s*.la '
         if self.platform == Platform.LINUX:
-            pattern += 'lib/%(f)s.so'
+            pattern += 'lib/%(f)s.so '
         elif self.platform == Platform.WINDOWS:
-            pattern += 'lib/%(f)s.dll.a'
+            pattern += 'lib/%(f)s.dll.a '
+            pattern += 'lib/%(f)s*.def '
+            pattern += 'lib/%(f)s.lib '
         elif self.platform == Platform.DARWIN:
-            pattern += 'lib/%(f)s.dylib'
+            pattern += 'lib/%(f)s.dylib '
 
         libsmatch = [pattern % {'f':x} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]

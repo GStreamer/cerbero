@@ -17,10 +17,12 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import logging
 
-from cerbero.build import build
-from cerbero.build import source
+from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.config import Platform
+from cerbero.ide.vs.genlib import GenLib
 from cerbero.utils import N_
 
 
@@ -84,11 +86,12 @@ class Recipe(FilesProvider):
     deps = list()
     platform_deps = {}
     force = False
-    _steps = [(N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
-              (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
-              (N_('Install'), 'install'),
-              (N_('Post Install'), 'post_install')]
-              # Not adding check as it's not automaticall done
+    _default_steps = [
+            (N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
+            (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
+            (N_('Install'), 'install'),
+            (N_('Post Install'), 'post_install')]
+            # Not adding check as it's not automaticall done
 
     def __init__(self, config):
         self.config = config
@@ -110,6 +113,10 @@ class Recipe(FilesProvider):
             # Source in bases
             pass
 
+        self._steps = self._default_steps[:]
+        if self.config.target_platform == Platform.WINDOWS:
+            self._steps.append((N_('Gen Library File'), 'gen_library_file'))
+
     def prepare(self):
         '''
         Can be overriden by subclasess to modify the recipe in function of
@@ -129,6 +136,17 @@ class Recipe(FilesProvider):
         if self.config.target_platform in self.platform_deps:
             deps.extend(self.platform_deps[self.config.target_platform])
         return deps
+
+    def gen_library_file(self, output_dir=None):
+        '''
+        Generates library files (.lib) for the dll's provided by this recipe
+        '''
+        genlib = GenLib()
+        for dllpath in self.libraries():
+            implib = genlib.create(os.path.join(self.config.prefix, dllpath),
+                    os.path.join(self.config.prefix, 'lib'))
+            logging.debug('Created %s' % implib)
+
 
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x[1] not in steps]
