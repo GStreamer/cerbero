@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.28.4'
     autoreconf = True
     license = 'LGPLv2.1'
+    configure_options = '--with-included-modules '
     deps = ['cairo', 'fontconfig', 'freetype']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
@@ -28,7 +29,5 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['lib/pango']}
 
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--with-included-modules'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --without-x '

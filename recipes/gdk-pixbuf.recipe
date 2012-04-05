@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
     version = '2.24.1'
     license = 'LGPLv2.1'
+    configure_options = '--with-included-loaders '
     deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
 
     files_libs = ['libgdk_pixbuf-2.0']
@@ -18,7 +19,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.autoreconf = True
-            self.configure_options += '--without-gdiplus --with-included-loaders'
+            self.configure_options += '--without-gdiplus '
         if self.config.target_platform == Platform.DARWIN:
             self.autoreconf = True
             self.configure_options += '--without-x11 '
