@@ -72,6 +72,8 @@ class CookBook (object):
     @type recipes: dict
     '''
 
+    RECIPE_EXT = '.recipe'
+
     def __init__(self, config, load=True):
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
@@ -266,6 +268,8 @@ class CookBook (object):
     def _load_recipes(self):
         self.recipes = {}
         for f in os.listdir(self._config.recipes_dir):
+            if not f.endswith(self.RECIPE_EXT):
+                continue
             filepath = os.path.join(self._config.recipes_dir, f)
             try:
                 recipe = self._load_recipe_from_file(filepath)
