@@ -112,9 +112,9 @@ class Oven (object):
         if len(not_in_recipe) != 0:
             m.message(_("The following files where installed, but are not "
                         "listed in the recipe:"))
-            m.message('\n'.join(not_in_recipe))
+            m.message('\n'.join(sorted(not_in_recipe)))
 
         if len(not_installed) != 0:
             m.message(_("The following files are listed in the recipe, but "
                         "where not installed:"))
-            m.message('\n'.join(not_installed))
+            m.message('\n'.join(sorted(not_installed)))
