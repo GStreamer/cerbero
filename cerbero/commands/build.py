@@ -28,26 +28,54 @@ class Build(Command):
     doc = N_('Build a recipe')
     name = 'build'
 
-    def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('recipe', nargs=1,
-                             help=_('name of the recipe to build')),
-            ArgparseArgument('--force', action='store_true', default=False,
-                             help=_('force the build of the recipe ingoring '
-                                    'its cached state')),
-            ArgparseArgument('--no-deps', action='store_true', default=False,
-                             help=_('do not build dependencies')),
-            ])
+    def __init__(self, force=None, no_deps=None):
+            args = [
+                ArgparseArgument('recipe', nargs=1,
+                    help=_('name of the recipe to build')),
+                ArgparseArgument('--missing-files', action='store_true',
+                    default=False,
+                    help=_('prints a list of files installed that are '
+                           'listed in the recipe'))]
+            if force is None:
+                args.append(
+                    ArgparseArgument('--force', action='store_true',
+                        default=False,
+                        help=_('force the build of the recipe ingoring '
+                                    'its cached state')))
+            if no_deps is None:
+                args.append(
+                    ArgparseArgument('--no-deps', action='store_true',
+                        default=False,
+                        help=_('do not build dependencies')))
+
+            self.force = force
+            self.no_deps = no_deps
+            Command.__init__(self, args)
 
     def run(self, config, args):
         cookbook = CookBook(config)
         recipe_name = args.recipe[0]
-        force = args.force
-        no_deps = args.no_deps
+        missing_files = args.missing_files
+
+        if self.force is None:
+            self.force = args.force
+        if self.no_deps is None:
+            self.no_deps = args.no_deps
 
         recipe = cookbook.get_recipe(recipe_name)
 
-        oven = Oven(recipe, cookbook, force=force, no_deps=no_deps)
+        oven = Oven(recipe, cookbook, force=self.force,
+                    no_deps=self.no_deps, missing_files=missing_files)
         oven.start_cooking()
 
+
+class BuildOne(Build):
+    doc = N_('Build or rebuild a single recipe without its dependencies')
+    name = 'buildone'
+
+    def __init__(self):
+        Build.__init__(self, True, True)
+
+
+register_command(BuildOne)
 register_command(Build)
