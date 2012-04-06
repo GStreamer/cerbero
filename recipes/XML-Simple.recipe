@@ -1,0 +1,7 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'XML-Simple'
+    version = '2.18'
+    btype = BuildType.MAKEFILE
+    configure_tpl = 'perl Makefile.PL PREFIX=$CERBERO_PREFIX'
