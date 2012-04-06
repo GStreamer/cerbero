@@ -11,4 +11,4 @@ class Package(package.Package):
     vendor = 'GTK+ Project'
     uuid = '58fe67c2-4565-411f-8287-e8fda893f853'
 
-    files = ['atk', 'gtk+']
+    files = ['atk', 'gtk+', 'gtk-engines']

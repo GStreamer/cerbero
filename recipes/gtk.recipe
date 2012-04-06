@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     files_bins = [
         'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immmodules-2.0',
         'gtk-builder-convert']
-    files_etc = ['gtkrc']
+    files_etc = ['gtk-2.0/gtkrc']
     files_devel = [
         'lib/gtk-2.0',
         'lib/pkgconfig/gtk+-2.0.pc',
@@ -49,5 +49,5 @@ class Recipe(recipe.Recipe):
             theme = "MS-Windows"
         gtkrc = 'gtk-theme-name = "%s"\n '\
                 'gtk-fallback-icon-theme = "Tango"' % theme
-        with open(os.path.join(self.config.prefix, 'etc', 'gtkrc'), 'w') as f:
+        with open(os.path.join(self.config.prefix, 'etc', 'gtk-2.0' 'gtkrc'), 'w') as f:
             f.write(gtkrc)
