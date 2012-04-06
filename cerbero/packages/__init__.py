@@ -22,6 +22,13 @@ from cerbero.utils import _
 from cerbero.utils.shell import ls_files
 
 
+class PackageType(object):
+
+    RUNTIME = ''
+    DEVEL = '-devel'
+    DEBUG = '-debug'
+
+
 class PackagerBase(object):
     ''' Base class for packagers '''
 
@@ -30,21 +37,24 @@ class PackagerBase(object):
         self.package = package
         self.store = store
 
-    def pack(self, output_dir, devel=False, force=False):
+    def pack(self, output_dir, devel=True, force=False):
         '''
         Creates a package and puts it the the output directory
 
         @param output_dir: output directory where the package will be saved
         @type  output_dir: str
-        @param devel: whether to build the development package or not
+        @param devel: build the development version of this package
         @type  devel: bool
         @param force: forces the creation of the package
         @type  force: bool
+
+        @return: list of filenames for the packages created
+        @rtype: list
         '''
         raise NotImplemented("'pack' must be implemented by subclasses")
 
-    def files_list(self, devel):
-        if devel:
+    def files_list(self, package_type):
+        if package_type == PackageType.DEVEL:
             files = self.package.devel_files_list()
         else:
             files = self.package.files_list()

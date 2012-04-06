@@ -19,10 +19,8 @@
 import os
 import tarfile
 
-from cerbero.utils import _
-from cerbero.utils import messages as m
 from cerbero.errors import UsageError
-from cerbero.packages import PackagerBase
+from cerbero.packages import PackagerBase, PackageType
 
 
 class DistTarball(PackagerBase):
@@ -33,9 +31,35 @@ class DistTarball(PackagerBase):
         self.package = package
         self.prefix = config.prefix
 
-    def pack(self, output_dir, devel=False, force=False, package_prefix=''):
-        filename = "%s-%s%s.tar.bz2" % (self.package.name, self.package.version,
-                devel and '-devel' or '')
+    def pack(self, output_dir, devel=True, force=False, split=True,
+             package_prefix=''):
+        dist_files =  self.files_list(PackageType.RUNTIME)
+        if devel:
+            devel_files = self.files_list(PackageType.DEVEL)
+        else:
+            devel_files = []
+
+        if not split:
+            self.dist_files += devel_files
+
+        filenames = []
+        runtime = self._create_tarball(output_dir, PackageType.RUNTIME,
+                                       dist_files, force, package_prefix)
+        filenames.append(runtime)
+
+        if split and devel:
+            devel = self._create_tarball(output_dir, PackageType.DEVEL,
+                                         devel_files, force, package_prefix)
+            filenames.append(devel)
+        return filenames
+
+    def _get_name(self, package_type):
+        return "%s-%s%s.tar.bz2" % (self.package.name, self.package.version,
+                                    package_type)
+
+    def _create_tarball(self, output_dir, package_type, files, force,
+                        package_prefix):
+        filename = os.path.join(output_dir, self._get_name(package_type))
         if os.path.exists(filename):
             if force:
                 os.remove(filename)
@@ -44,7 +68,7 @@ class DistTarball(PackagerBase):
 
         tar = tarfile.open(filename, "w:bz2")
 
-        for f in self.files_list(devel):
+        for f in files:
             filepath = os.path.join(self.prefix, f)
             tar.add(filepath, os.path.join(package_prefix, f))
         tar.close()
