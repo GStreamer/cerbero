@@ -1,0 +1,6 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'icon-naming-utils'
+    version = '0.8.7'
+    license = 'GPL'

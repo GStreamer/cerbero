@@ -1,0 +1,9 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'tango-icon-theme'
+    version = '0.8.1'
+    license = 'LGPL'
+    configure_options = '--disable-icon-framing '
+
+    files_icons = ['share/icons/Tango']
