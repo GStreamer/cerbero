@@ -202,5 +202,6 @@ class CMake (MakefilesBase):
 
 class BuildType (object):
 
+    MAKEFILE = MakefilesBase
     AUTOTOOLS = Autotools
     CMAKE = CMake
