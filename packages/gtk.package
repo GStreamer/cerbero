@@ -10,6 +10,7 @@ class Package(package.Package):
     licences = ['LGPL']
     vendor = 'GTK+ Project'
     uuid = '58fe67c2-4565-411f-8287-e8fda893f853'
+    deps = ['cerbero-base-system']
 
     files = ['atk', 'gtk+', 'gtk-engines', 'tango-icon-theme']
     platform_files = {

@@ -4,7 +4,7 @@
 
 class Package(package.Package):
 
-    name = 'base-system'
+    name = 'cerbero-base-system'
     shortdesc = 'Base system dependencies'
     version = '1.0'
     licences = ['LGPL']
