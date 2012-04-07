@@ -100,7 +100,10 @@ def create_store(config):
     cookbook = create_cookbook(config)
     store = PackagesStore(config, False)
 
-    for klass in [Package1, Package2, Package3, Package4, MetaPackage]:
+    for klass in [Package1, Package2, Package3, Package4]:
         package = klass(config, cookbook)
+        store.add_package(package)
+    for klass in [MetaPackage]:
+        package = klass(config, store)
         store.add_package(package)
     return store
