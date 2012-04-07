@@ -22,7 +22,7 @@ import tempfile
 
 from cerbero.config import Architecture
 from cerbero.errors import FatalError, EmptyPackageError
-from cerbero.packages import PackagerBase
+from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
@@ -34,7 +34,7 @@ SPEC_TPL = '''
 %%define _package_name %(package_name)s
 
 
-Name:           %(name)s-gstsdk
+Name:           %(name)s
 Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
@@ -47,6 +47,8 @@ Prefix:         %(prefix)s
 
 %%description
 %(description)s
+
+%(devel_package)s
 
 %%prep
 %%setup -n %%{_package_name}
@@ -62,6 +64,19 @@ rm -rf $RPM_BUILD_ROOT
 
 %%files
 %(files)s
+
+%(devel_files)s
+'''
+
+
+DEVEL_PACKAGE_TPL = '''
+%%package devel
+%(requires)s
+Summary: %(summary)s
+Provides: %(name)s-devel
+
+%%description devel
+%(description)s
 '''
 
 META_SPEC_TPL = '''
@@ -91,7 +106,8 @@ rm -rf $RPM_BUILD_ROOT
 %%files
 '''
 
-REQUIRE_TPL = 'Requires: %s-gstsdk\n'
+REQUIRE_TPL = 'Requires: %s\n'
+DEVEL_TPL = '%%files devel \n%s'
 
 
 class RPMPackage(PackagerBase):
@@ -100,17 +116,11 @@ class RPMPackage(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
         self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
 
-    def pack(self, output_dir, devel=False, force=False,
+    def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
         self.install_dir = self.package.get_install_dir() 
-        self._empty_packages = []
-
-        # add the -devel suffix for devel packages
         self.devel = devel
-        self.package_name = self.package.name
-        if devel:
-            self.package_name += '-devel'
-            self.full_package_name += '-devel'
+        self._empty_packages = []
 
         # Create a tmpdir for packages
         tmpdir, rpmdir, srcdir = self._create_rpm_tree(tmpdir)
@@ -121,9 +131,10 @@ class RPMPackage(PackagerBase):
 
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files
-            tarball_packager = DistTarball(self.config, self.package, self.store)
+            tarball_packager = DistTarball(self.config, self.package,
+                                           self.store)
             tarball = tarball_packager.pack(output_dir, devel, True,
-                                            self.full_package_name)
+                    split=False, package_prefix=self.full_package_name)[0]
             # move the tarball to SOURCES
             shutil.move(tarball, srcdir)
             tarname = os.path.split(tarball)[1]
@@ -131,10 +142,10 @@ class RPMPackage(PackagerBase):
             # metapackages only contains Requires dependencies with other packages
             tarname = None
 
-        m.action(_("Creating RPM package for %s") % self.package_name)
+        m.action(_("Creating RPM package for %s") % self.package.name)
         # fill the spec file
         self._fill_spec(tarname, tmpdir)
-        spec_path = os.path.join(tmpdir, '%s.spec' % self.package_name)
+        spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
         with open(spec_path, 'w') as f:
             f.write(self._spec_str)
 
@@ -179,16 +190,31 @@ class RPMPackage(PackagerBase):
         return (tmpdir, os.path.join(tmpdir, 'RPMS'),
                 os.path.join(tmpdir, 'SOURCES'))
 
+    def _devel_package_and_files(self):
+        args = {}
+        args['summary'] = 'Development files for %s' % self.package.name
+        args['description'] = args['summary']
+        args['requires'] =  self._get_requires(PackageType.DEVEL)
+        args['name'] = self.package.name
+        devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
+        return DEVEL_PACKAGE_TPL % args, devel
+
     def _fill_spec(self, sources, topdir):
-        requires = self._get_requires()
-        files  = self.files_list(self.devel)
+        requires = self._get_requires(PackageType.RUNTIME)
+        runtime_files  = self.files_list(PackageType.RUNTIME)
+
+        if self.devel:
+            devel_package, devel_files = self._devel_package_and_files()
+        else:
+            devel_files, devel_files = ('', '')
+
         if isinstance(self.package, MetaPackage):
             template = META_SPEC_TPL
         else:
             template = SPEC_TPL
            
         self._spec_str = template % {
-                'name': self.package_name,
+                'name': self.package.name,
                 'version': self.package.version,
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
@@ -199,12 +225,14 @@ class RPMPackage(PackagerBase):
                 'prefix': self.install_dir,
                 'source': sources,
                 'topdir': topdir,
-                'files':  files}
+                'devel_package': devel_package,
+                'devel_files': devel_files,
+                'files':  runtime_files}
 
-    def _get_requires(self):
+    def _get_requires(self, package_type):
         deps = self.store.get_package_deps(self.package.name)
         deps = list(set(deps) - set(self._empty_packages))
-        if self.devel:
+        if package_type == PackageType.DEVEL:
             deps = map(lambda x: x+'-devel', deps)
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
