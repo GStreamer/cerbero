@@ -111,7 +111,7 @@ class Package(PackageBase):
             else:
                 rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
-        return files
+        return sorted(files)
 
     def devel_files_list(self):
         files = []
@@ -121,7 +121,7 @@ class Package(PackageBase):
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
                 rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
                 files.extend(rfiles)
-        return files
+        return sorted(files)
 
     def all_files_list(self):
         files = self.files_list()
@@ -169,4 +169,4 @@ class MetaPackage(PackageBase):
         files = []
         for name, _, _ in self.packages:
             files.extend(func(self.store.get_package(name)))
-        return files
+        return sorted(files)
