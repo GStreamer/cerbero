@@ -1,0 +1,16 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'snappy'
+    shortdesc = 'Snappy media player'
+    version = '1.0'
+    licences = ['GPL']
+    vendor = 'GStreamer Project'
+    uuid = '5fce6752-4165-511f-8287-e8f2a895f853'
+    deps = ['gstreamer-core', 'gstreamer-codecs', 'gstreamer-playback', 
+            'gstreamer-clutter']
+
+    files = ['snappy']
