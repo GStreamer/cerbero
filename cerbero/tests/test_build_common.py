@@ -81,32 +81,50 @@ class Recipe5(recipe.Recipe):
 def add_files(tmp):
     bindir = os.path.join(tmp, 'bin')
     libdir = os.path.join(tmp, 'lib')
-    os.path.join(tmp, 'include')
+    gstlibdir = os.path.join(tmp, 'libexec', 'gstreamer-0.10')
     os.makedirs(bindir)
     os.makedirs(libdir)
+    os.makedirs(gstlibdir)
     shell.call('touch '
-        '%(bindir)s/libgstreamer-0.10.dll '
-        '%(bindir)s/libgstreamer-win32.dll '
-        '%(bindir)s/libtest.dll '
-        '%(libdir)s/libtest.so.1 '
-        '%(libdir)s/libtest.la '
-        '%(libdir)s/libtest.a '
-        '%(libdir)s/libtest.so '
-        '%(libdir)s/libtest.dll.a '
-        '%(libdir)s/libgstreamer-0.10.so.1 '
-        '%(libdir)s/libgstreamer-0.10.la '
-        '%(libdir)s/libgstreamer-0.10.a '
-        '%(libdir)s/libgstreamer-0.10.so '
-        '%(libdir)s/libgstreamer-0.10.dll.a '
-        '%(libdir)s/libgstreamer-win32.la '
-        '%(libdir)s/libgstreamer-win32.a '
-        '%(libdir)s/libgstreamer-win32.so '
-        '%(libdir)s/libgstreamer-win32.dll.a '
-        '%(libdir)s/libgstreamer-x11.so.1 '
-        '%(libdir)s/libgstreamer-x11.so '
-        '%(libdir)s/libgstreamer-x11.a '
-        '%(libdir)s/libgstreamer-x11.la ' %
-        {'bindir': bindir, 'libdir':libdir})
+        'windows '
+        'linux '
+        'README '
+        'README3 '
+        'README4 '
+        'bin/gst-launch.exe '
+        'bin/gst-launch '
+        'bin/windows.exe '
+        'bin/linux '
+        'bin/libgstreamer-0.10.dll '
+        'bin/libgstreamer-win32.dll '
+        'bin/libtest.dll '
+        'lib/libtest.so.1 '
+        'lib/libtest.la '
+        'lib/libtest.a '
+        'lib/libtest.so '
+        'lib/libtest.dll.a '
+        'lib/libtest.def '
+        'lib/libtest.lib '
+        'lib/libgstreamer-0.10.so.1 '
+        'lib/libgstreamer-0.10.la '
+        'lib/libgstreamer-0.10.a '
+        'lib/libgstreamer-0.10.so '
+        'lib/libgstreamer-0.10.dll.a '
+        'lib/libgstreamer-0.10.lib '
+        'lib/libgstreamer-0.10.def '
+        'lib/libgstreamer-win32.la '
+        'lib/libgstreamer-win32.a '
+        'lib/libgstreamer-win32.so '
+        'lib/libgstreamer-win32.dll.a '
+        'lib/libgstreamer-win32.lib '
+        'lib/libgstreamer-win32.def '
+        'lib/libgstreamer-x11.so.1 '
+        'lib/libgstreamer-x11.so '
+        'lib/libgstreamer-x11.a '
+        'lib/libgstreamer-x11.la '
+        'libexec/gstreamer-0.10/pluginsloader '
+        'libexec/gstreamer-0.10/pluginsloader.exe ',
+        tmp)
 
 
 def create_cookbook(config):

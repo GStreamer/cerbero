@@ -67,7 +67,9 @@ class PackageTest(unittest.TestCase):
 
         self.windevfiles = devfiles + ['lib/libgstreamer-win32.a',
                 'lib/libgstreamer-win32.la', 'lib/libgstreamer-win32.dll.a',
-                'lib/libgstreamer-0.10.dll.a']
+                'lib/libgstreamer-win32.def', 'lib/libgstreamer-win32.lib',
+                'lib/libgstreamer-0.10.dll.a', 'lib/libgstreamer-0.10.def',
+                'lib/libgstreamer-0.10.lib']
         self.lindevfiles = devfiles + ['lib/libgstreamer-0.10.so',
                 'lib/libgstreamer-x11.a', 'lib/libgstreamer-x11.la',
                 'lib/libgstreamer-x11.so', 'lib/libgstreamer-0.10.dll.a']
