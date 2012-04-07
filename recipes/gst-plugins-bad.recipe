@@ -11,6 +11,8 @@ class Recipe(recipe.Recipe):
             'faad2', 'libkate', 'libshout', 'libvpx', 'zlib',
             'schroedinger', 'libdca', 'jasper', 'libmms', 'libdvdnav' ]
 
+    files_lang = ['gst-plugins-bad-0.10']
+
     files_libs = [
             'libgstbasevideo-0.10',
             'libgstbasecamerabinsrc-0.10',

@@ -33,6 +33,7 @@ class FilesProvider(object):
     PY_CAT = 'python'
     DEVEL_CAT = 'devel'
     ETC_CAT = 'etc'
+    LANG_CAT = 'lang'
 
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin',
@@ -53,6 +54,7 @@ class FilesProvider(object):
                              self.BINS_CAT: self._search_binaries,
                              self.PY_CAT: self._search_pyfiles,
                              self.ETC_CAT: self._search_etcfiles,
+                             self.LANG_CAT: self._search_langfiles,
                              'default': self._search_files}
 
     def devel_files_list(self):
@@ -209,6 +211,14 @@ class FilesProvider(object):
         file name.
         '''
         return ['etc/%s' % f for f in files]
+
+    def _search_langfiles(self, files):
+        '''
+        Search for translations in share/locale/*/LC_MESSAGES/ '
+        '''
+        pattern = 'share/locale/*/LC_MESSAGES/%s.mo'
+        return shell.ls_files([pattern % x for x in files],
+                              self.config.prefix)
 
     def _search_devel_libraries(self):
         if self.LIBS_CAT not in self.categories:

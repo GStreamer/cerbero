@@ -95,6 +95,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstxvimagesink%(mext)s',
             ]
     }
+    files_lang = ['gst-plugins-base-0.10']
+
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:

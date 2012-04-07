@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
 
+    files_lang = ['gst-plugins-good-0.10']
     files_effects = [
              'lib/gstreamer-0.10/libgstalpha%(mext)s',
              'lib/gstreamer-0.10/libgstalphacolor%(mext)s',

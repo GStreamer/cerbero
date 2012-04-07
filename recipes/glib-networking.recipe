@@ -9,3 +9,4 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'gnutls']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
+    files_lang = ['glib-networking']

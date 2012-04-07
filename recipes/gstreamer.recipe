@@ -40,6 +40,7 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gstreamer-dataprotocol-0.10.pc',
             'lib/pkgconfig/gstreamer-net-0.10.pc',
     ]
+    files_lang = ['gstreamer-0.10']
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:

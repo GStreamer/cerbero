@@ -25,3 +25,4 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstdvdread%(mext)s',
              'lib/gstreamer-0.10/libgstdvdsub%(mext)s',
     ]
+    files_lang = ['gst-plugins-ugly-0.10']

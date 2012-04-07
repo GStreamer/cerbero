@@ -33,6 +33,8 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: [
             'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
+    files_lang = ['gtk20', 'gtk20-properties']
+
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

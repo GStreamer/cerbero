@@ -23,6 +23,7 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['lib/pkgconfig/clutter-osx-1.0.pc'],
         Platform.LINUX: ['lib/pkgconfig/clutter-glx-1.0.pc'],
     }
+    files_lang = ['clutter-1.0']
 
 
     def prepare(self):

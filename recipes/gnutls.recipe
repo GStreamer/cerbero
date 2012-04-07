@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libgnutls', 'libgnutlsxx', 'libgnutls-openssl']
     files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
     files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
+    files_lang = ['gnutls']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
