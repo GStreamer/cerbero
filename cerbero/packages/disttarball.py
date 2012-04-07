@@ -40,7 +40,7 @@ class DistTarball(PackagerBase):
             devel_files = []
 
         if not split:
-            self.dist_files += devel_files
+            dist_files += devel_files
 
         filenames = []
         runtime = self._create_tarball(output_dir, PackageType.RUNTIME,
