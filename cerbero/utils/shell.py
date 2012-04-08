@@ -87,7 +87,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
         if split:
             cmd = shlex.split(cmd)
         process = subprocess.Popen(cmd, cwd=cmd_dir,
-            stdout=subprocess.PIPE, shell=shell)
+            stdout=subprocess.PIPE, stderr=open(os.devnull), shell=shell)
         output, unused_err = process.communicate()
         if process.poll() and fail:
             raise Exception()
