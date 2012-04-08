@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgailutil']
     files_bins = [
-        'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immmodules-2.0',
+        'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immodules-2.0',
         'gtk-builder-convert']
     files_etc = ['gtk-2.0/gtkrc']
     files_devel = [
@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
         'include/gtk-2.0',
         'include/gail-1.0',
     ]
+    files_share_demo = ['share/gtk-2.0/demo']
     platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
         Platform.DARWIN: ['libgtk-x11-2.0', 'libgdk-x11-2.0'],
