@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
 
     files_python = [
          'site-packages/gtk-2.0/atk%(mext)s',
-         'site-packages/gtk-2.0/smextras.py',
+         'site-packages/gtk-2.0/dsextras.py',
          'site-packages/gtk-2.0/pango%(mext)s',
          'site-packages/gtk-2.0/pangocairo%(mext)s',
          'site-packages/gtk-2.0/gio/_gio%(mext)s',
