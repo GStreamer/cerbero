@@ -13,14 +13,6 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-bad-0.10']
 
-    files_libs = [
-            'libgstbasevideo-0.10',
-            'libgstbasecamerabinsrc-0.10',
-            'libgstcodecparsers-0.10',
-            'libgstphotography-0.10',
-            'libgstsignalprocessor-0.10',
-    ]
-
     files_effects = [
              'lib/gstreamer-0.10/libgstautoconvert%(mext)s',
              'lib/gstreamer-0.10/libgstbayer%(mext)s',
@@ -43,6 +35,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvideofiltersbad%(mext)s',
              'lib/gstreamer-0.10/libgstvideomeasure%(mext)s',
              'lib/gstreamer-0.10/libgstvideosignal%(mext)s',
+             'lib/libgstbasevideo-0.10%(sext)s',
     ]
 
     files_codecs = [
@@ -86,6 +79,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvmnc%(mext)s',
              'lib/gstreamer-0.10/libgstvp8%(mext)s',
              'lib/gstreamer-0.10/libgsty4mdec%(mext)s',
+             'lib/gstreamer-0.10/libgstvideoparsersbad%(mext)s',
+             'lib/libgstcodecparsers-0.10%(sext)s'
     ]
 
     files_dvd = [
@@ -103,6 +98,8 @@ class Recipe(recipe.Recipe):
     files_capture = [
              'lib/gstreamer-0.10/libgstcamerabin2%(mext)s',
              'lib/gstreamer-0.10/libgstdvb%(mext)s',
+             'lib/libgstbasecamerabinsrc-0.10%(sext)s',
+             'lib/libgstphotography-0.10%(sext)s',
             ]
 
     files_vis = [
@@ -114,19 +111,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstapplemedia%(mext)s',
             ]
     }
-
-    files_devel = [
-            'include/gstreamer-0.10/gst/basecamerabinsrc',
-            'include/gstreamer-0.10/gst/codecparsers',
-            'include/gstreamer-0.10/gst/photography',
-            'include/gstreamer-0.10/gst/signalprocessor',
-            'lib/pkgconfig/gstreamer-basecamerabinsrc-0.10.pc',
-            'lib/pkgconfig/gstreamer-basevideo-0.10.pc',
-            'lib/pkgconfig/gstreamer-codecparsers-0.10.pc',
-            'lib/pkgconfig/gstreamer-photography-0.10.pc',
-            'lib/pkgconfig/gstreamer-signalprocessor-0.10.pc',
-            'lib/pkgconfig/gstreamer-plugins-bad-0.10.pc',
-    ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
