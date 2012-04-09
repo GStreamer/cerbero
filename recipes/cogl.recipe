@@ -3,6 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'cogl'
     version = '1.8.2'
+    configure_options = "--disable-introspection "
     use_system_libs = True
     deps = [ 'gdk-pixbuf' ]
     license = 'LGPLv2.1'
