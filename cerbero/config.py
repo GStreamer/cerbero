@@ -127,7 +127,8 @@ class Config (object):
         xdgconfigdir = os.path.join(self.prefix, 'etc', 'xdg')
         xcursordir = os.path.join(self.prefix, 'share', 'icons')
         aclocaldir = os.path.join(self.prefix, 'share', 'aclocal')
-        perl5lib = os.path.join(self.prefix, 'lib', 'perl5')
+        perl5lib = self._join_path(os.path.join(self.prefix, 'lib', 'perl5'),
+                os.path.join(self.prefix, 'lib', 'perl5', 'site_perl'))
         gstpluginpath = os.path.join(self.prefix, 'lib', 'gstreamer-0.10')
         gstregistry = os.path.join(os.path.expanduser('~'), '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
