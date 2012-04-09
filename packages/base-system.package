@@ -11,7 +11,7 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
 
-    files = ['cairo:libs', 'dbus:libs', 'expat:libs', 'fontconfig:libs',
+    files = ['cairo:libs', 'expat:libs', 'fontconfig:libs',
              'gdk-pixbuf:libs:modules', 'libffi:libs', 'freetype:libs', 'glib:libs',
              'orc:libs', 'pango:libs:modules', 'libpng:libs', 'tiff:libs',
              'libxml2:libs', 'pixman:libs', 'zlib:libs', 'bzip2:libs']
