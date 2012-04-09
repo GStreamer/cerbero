@@ -14,7 +14,7 @@ class Package(package.Package):
 
     files = ['libass:libs', 'libdca:libs', 'faad2:libs', 'flac:libs',
             'fribidi:libs', 'jasper:libs', 'jpeg:libs', 'libkate:libs',
-            'libogg:libs', 'schroedinger:libs', 'speex:libs', 'libmms:libs',
+            'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
             'libdv:libs', 'taglib:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',

@@ -13,7 +13,7 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs', 'libgpg-error:libs',
-            'libshout:libs', 'libsoup:libs', 'libtasn1:libs',
+            'libshout:libs', 'libsoup:libs', 'libtasn1:libs', 'libmms:libs',
             'glib-networking', 'nettle:libs',
             'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net'
     ]
