@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',
+        'lib/pkgconfig/clutter-cogl-1.0.pc',
         'lib/pkgconfig/cally-1.0.pc',
         'include/clutter-1.0/clutter',
         'include/clutter-1.0/cally',
@@ -22,7 +23,7 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/clutter-win32-1.0.pc'],
         Platform.DARWIN: ['lib/pkgconfig/clutter-osx-1.0.pc'],
-        Platform.LINUX: ['lib/pkgconfig/clutter-glx-1.0.pc'],
+        Platform.LINUX: ['lib/pkgconfig/clutter-glx-1.0.pc', 'lib/pkgconfig/clutter-x11-1.0.pc'],
     }
     files_lang = ['clutter-1.0']
 

@@ -7,4 +7,4 @@ class Recipe(recipe.Recipe):
     license = 'BSD-like'
 
     files_libs = ['libexpat']
-    files_devel = ['include/expat.h', 'include/expat_external.h']
+    files_devel = ['include/expat.h', 'include/expat_external.h', 'lib/pkgconfig/expat.pc']

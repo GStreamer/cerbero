@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
     }
 
-    files_lang = ['glib2.0']
+    files_lang = ['glib20']
 
     def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
         flags = ''
