@@ -79,6 +79,10 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstgoom2k1%(mext)s',
             ]
 
+    files_capture = [
+             'lib/gstreamer-0.10/libgstvideo4linux2%(mext)s',
+            ]
+
     platform_files_codecs = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstdv%(mext)s',
