@@ -13,12 +13,18 @@ class Recipe(recipe.Recipe):
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True
 
+
+    files_playback = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstautodetect%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvideofilter%(smext)s',
+    ]
+
     files_effects = [
              'gstreamer-static/lib/gstreamer-0.10/libgstalpha%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstalphacolor%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstaudiofx%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstautodetect%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstcutter%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdebug%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstdeinterlace%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgsteffectv%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstequalizer%(smext)s',
@@ -26,12 +32,13 @@ class Recipe(recipe.Recipe):
              'gstreamer-static/lib/gstreamer-0.10/libgstimagefreeze%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstinterleave%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstlevel%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstmultifile%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstreplaygain%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstshapewipe%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstsmpte%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstspectrum%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstvideobox%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstvideocrop%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvideofilter%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstvideomixer%(smext)s',
     ]
 
@@ -53,7 +60,6 @@ class Recipe(recipe.Recipe):
              'gstreamer-static/lib/gstreamer-0.10/libgstmulaw%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstmultipart%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstpng%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstsmpte%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstspeex%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgsttaglib%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstwavenc%(smext)s',
@@ -75,9 +81,12 @@ class Recipe(recipe.Recipe):
              'gstreamer-static/lib/gstreamer-0.10/libgstgoom2k1%(smext)s',
             ]
 
-    files_capture = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstvideo4linux2%(smext)s',
-            ]
+    platform_files_capture = {
+        Platform.LINUX: [
+              'gstreamer-static/lib/gstreamer-0.10/libgstvideo4linux2%(smext)s',
+              'gstreamer-static/lib/gstreamer-0.10/libgstximagesrc%(smext)s',
+             ]
+    }
 
     platform_files_codecs = {
         Platform.LINUX: [
