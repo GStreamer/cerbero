@@ -120,6 +120,7 @@ class RPMPackage(PackagerBase):
              pack_deps=True, tmpdir=None):
         self.install_dir = self.package.get_install_dir() 
         self.devel = devel
+        self.force = force
         self._empty_packages = []
 
         # Create a tmpdir for packages
@@ -236,11 +237,11 @@ class RPMPackage(PackagerBase):
             deps = map(lambda x: x+'-devel', deps)
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
-    def files_list(self, devel):
+    def files_list(self, package_type):
         # metapackages only have dependencies in other packages
         if isinstance(self.package, MetaPackage):
             return ''
-        files = PackagerBase.files_list(self, devel)
+        files = PackagerBase.files_list(self, package_type, self.force)
         # the files list only include python files, whithout the compiled
         # version, so we need to fix that because they will be byte-compiled
         # in the rpm build

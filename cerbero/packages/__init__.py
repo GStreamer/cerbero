@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import cerbero.utils.messages as m
-from cerbero.errors import EmptyPackageError
+from cerbero.errors import EmptyPackageError, MissingPackageFilesError
 from cerbero.utils import _
 from cerbero.utils.shell import ls_files
 
@@ -53,7 +53,7 @@ class PackagerBase(object):
         '''
         raise NotImplemented("'pack' must be implemented by subclasses")
 
-    def files_list(self, package_type):
+    def files_list(self, package_type, force):
         if package_type == PackageType.DEVEL:
             files = self.package.devel_files_list()
         else:
@@ -61,8 +61,11 @@ class PackagerBase(object):
         real_files = ls_files(files, self.config.prefix)
         diff = list(set(files) - set(real_files))
         if len(diff) != 0:
-            m.warning(_("Some files required by this package are missing in "
-                      "the prefix:\n%s" % '\n'.join(diff)))
+            if force:
+                m.warning(_("Some files required by this package are missing in "
+                           "the prefix:\n%s" % '\n'.join(diff)))
+            else:
+                raise MissingPackageFilesError(diff)
         if len(real_files) == 0:
             raise EmptyPackageError(self.package.name)
         return real_files

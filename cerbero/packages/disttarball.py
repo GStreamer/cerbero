@@ -33,9 +33,9 @@ class DistTarball(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False, split=True,
              package_prefix=''):
-        dist_files =  self.files_list(PackageType.RUNTIME)
+        dist_files =  self.files_list(PackageType.RUNTIME, force)
         if devel:
-            devel_files = self.files_list(PackageType.DEVEL)
+            devel_files = self.files_list(PackageType.DEVEL, force)
         else:
             devel_files = []
 

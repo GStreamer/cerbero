@@ -62,6 +62,13 @@ class PackageNotFoundError(CerberoException):
 
 
 class EmptyPackageError(CerberoException):
-    
+
     def __init__(self, package):
         CerberoException.__init__(self, _("Package '%s' is empty") % package)
+
+
+class MissingPackageFilesError(CerberoException):
+
+    def __init__(self, files):
+        CerberoException.__init__(self, _("The following files required by "
+            "this package are missing:\n %s") % '\n'.join(files))
