@@ -4,6 +4,6 @@ class Recipe(recipe.Recipe):
     name = 'cdparanoia'
     version = '10.3'
 
-   files_libs = ['libcdda_paranoia']
+   files_libs = ['libcdda_paranoia', 'libcdda_interface']
    files_devel = ['include/cdda_interface.h', 'include/cdda_paranoia.h', 'include/utils.h']
 
