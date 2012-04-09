@@ -65,7 +65,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstjp2k%(mext)s',
              'lib/gstreamer-0.10/libgstjpegformat%(mext)s',
              'lib/gstreamer-0.10/libgstkate%(mext)s',
-             'lib/gstreamer-0.10/libgstmms%(mext)s',
              'lib/gstreamer-0.10/libgstmpegdemux%(mext)s',
              'lib/gstreamer-0.10/libgstmpegpsmux%(mext)s',
              'lib/gstreamer-0.10/libgstmpegtsdemux%(mext)s',
@@ -98,6 +97,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstdataurisrc%(mext)s',
              'lib/gstreamer-0.10/libgstshout2%(mext)s',
              'lib/gstreamer-0.10/libgstsdpelem%(mext)s',
+             'lib/gstreamer-0.10/libgstmms%(mext)s',
     ]
 
     files_capture = [
