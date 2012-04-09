@@ -10,11 +10,8 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'libxml2', 'gtk-doc']
 
     files_bins = ['gst-discoverer-0.10',
-                  'gst-feedback-0.10',
                   'gst-inspect-0.10',
                   'gst-typefind-0.10',
-                  'gst-xmlinspect-0.10',
-                  'gst-xmllaunch-0.10',
                   'gst-launch-0.10']
 
     files_libs = ['libgstbase-0.10', 'libgstcheck-0.10', 'libgstcontroller-0.10',
