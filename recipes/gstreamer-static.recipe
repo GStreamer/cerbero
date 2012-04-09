@@ -8,6 +8,9 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2', 'gtk-doc']
 
+    files_plugins = ['gstreamer-static/lib/gstreamer-0.10/libgstcoreelements%(smext)s',
+                     'gstreamer-static/lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
+
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'

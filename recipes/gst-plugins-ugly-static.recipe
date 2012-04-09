@@ -9,6 +9,22 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
 
+    files_codecs = [
+             'gstreamer-static/lib/gstreamer-0.10/libgsta52dec%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstamrnb%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstamrwbdec%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstasf%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstmad%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstmpeg2dec%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstmpegaudioparse%(smext)s',
+    ]
+
+    files_dvd = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstdvdlpcmdec%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdvdread%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdvdsub%(smext)s',
+    ]
+
     def prepare(self):
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-ugly')

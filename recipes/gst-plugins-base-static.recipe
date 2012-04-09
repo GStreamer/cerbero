@@ -8,8 +8,54 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.DARWIN: [ 'cdparanoia' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
     use_system_libs = True
+
+    files_effects = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstadder%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstapp%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstaudioconvert%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstaudiorate%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstaudioresample%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstaudiotestsrc%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstffmpegcolorspace%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstgdp%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstgio%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgsttypefindfunctions%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvideorate%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvideoscale%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvideotestsrc%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvolume%(smext)s',
+    ]
+
+    files_playback = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
+            ]
+
+    files_net = [
+             'gstreamer-static/lib/gstreamer-0.10/libgsttcp%(smext)s',
+            ]
+
+    files_codecs = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstsubparse%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstogg%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstpango%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgsttheora%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstvorbis%(smext)s',
+            ]
+
+    files_vis = [
+             'gstreamer-static/lib/gstreamer-0.10/libgstlibvisual%(smext)s',
+            ]
+
+    platform_files_sys = {
+        Platform.LINUX: [
+             'gstreamer-static/lib/gstreamer-0.10/libgstalsa%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstximagesink%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstxvimagesink%(smext)s',
+            ]
+    }
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:

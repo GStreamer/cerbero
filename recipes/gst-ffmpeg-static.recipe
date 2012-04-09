@@ -8,6 +8,8 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
+    files_codecs = ['gstreamer-static/lib/gstreamer-0.10/libgstffmpeg%(smext)s']
+
     def prepare(self):
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
