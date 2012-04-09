@@ -19,6 +19,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstmad%(mext)s',
              'lib/gstreamer-0.10/libgstmpeg2dec%(mext)s',
              'lib/gstreamer-0.10/libgstmpegaudioparse%(mext)s',
+             'lib/gstreamer-0.10/libgstrmdemux%(mext)s',
     ]
 
     files_dvd = [

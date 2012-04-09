@@ -85,6 +85,7 @@ class Recipe(recipe.Recipe):
     platform_files_capture = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstvideo4linux2%(mext)s',
+             'lib/gstreamer-0.10/libgstximagesrc%(mext)s',
             ]
     }
 

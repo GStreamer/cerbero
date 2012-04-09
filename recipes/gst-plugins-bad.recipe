@@ -73,6 +73,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstsiren%(mext)s',
              'lib/gstreamer-0.10/libgstsubenc%(mext)s',
              'lib/gstreamer-0.10/libgsttta%(mext)s',
+             'lib/gstreamer-0.10/libgstvcdsrc%(mext)s',
              'lib/gstreamer-0.10/libgstvideoparsersbad%(mext)s',
              'lib/gstreamer-0.10/libgstvmnc%(mext)s',
              'lib/gstreamer-0.10/libgstvp8%(mext)s',
