@@ -42,6 +42,10 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstplaybin%(mext)s',
             ]
 
+    files_encoding = [
+             'lib/gstreamer-0.10/libgstencodebin%(mext)s',
+            ]
+
     files_net = [
              'lib/gstreamer-0.10/libgsttcp%(mext)s',
             ]
