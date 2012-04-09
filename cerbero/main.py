@@ -26,7 +26,7 @@ import traceback
 
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
-    ConfigurationError, RecipeNotFoundError, PackageNotFoundError
+    ConfigurationError, CerberoException
 from cerbero.utils import _, N_, user_is_root
 from cerbero.utils import messages as m
 
@@ -94,10 +94,10 @@ class Main(object):
         except FatalError, exc:
             traceback.print_exc()
             self.log_error(exc, True, command)
-        except (PackageNotFoundError, RecipeNotFoundError), exc:
-            self.log_error(exc, False)
         except BuildStepError, exc:
             self.log_error(exc.msg, False, command)
+        except CerberoException, exc:
+            self.log_error(exc, False, command)
         except KeyboardInterrupt:
             self.log_error(_('Interrupted'))
         except IOError, e:
