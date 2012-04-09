@@ -16,11 +16,16 @@ class Recipe(recipe.Recipe):
 
 
     files_lang = ['gst-plugins-good-0.10']
+
+    files_playback = [
+             'lib/gstreamer-0.10/libgstautodetect%(mext)s',
+             'lib/gstreamer-0.10/libgstvideofilter%(mext)s',
+    ]
+
     files_effects = [
              'lib/gstreamer-0.10/libgstalpha%(mext)s',
              'lib/gstreamer-0.10/libgstalphacolor%(mext)s',
              'lib/gstreamer-0.10/libgstaudiofx%(mext)s',
-             'lib/gstreamer-0.10/libgstautodetect%(mext)s',
              'lib/gstreamer-0.10/libgstcutter%(mext)s',
              'lib/gstreamer-0.10/libgstdeinterlace%(mext)s',
              'lib/gstreamer-0.10/libgsteffectv%(mext)s',
@@ -31,10 +36,10 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstlevel%(mext)s',
              'lib/gstreamer-0.10/libgstreplaygain%(mext)s',
              'lib/gstreamer-0.10/libgstshapewipe%(mext)s',
+             'lib/gstreamer-0.10/libgstsmpte%(mext)s',
              'lib/gstreamer-0.10/libgstspectrum%(mext)s',
              'lib/gstreamer-0.10/libgstvideobox%(mext)s',
              'lib/gstreamer-0.10/libgstvideocrop%(mext)s',
-             'lib/gstreamer-0.10/libgstvideofilter%(mext)s',
              'lib/gstreamer-0.10/libgstvideomixer%(mext)s',
     ]
 
@@ -56,7 +61,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstmulaw%(mext)s',
              'lib/gstreamer-0.10/libgstmultipart%(mext)s',
              'lib/gstreamer-0.10/libgstpng%(mext)s',
-             'lib/gstreamer-0.10/libgstsmpte%(mext)s',
              'lib/gstreamer-0.10/libgstspeex%(mext)s',
              'lib/gstreamer-0.10/libgsttaglib%(mext)s',
              'lib/gstreamer-0.10/libgstwavenc%(mext)s',
@@ -78,9 +82,11 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstgoom2k1%(mext)s',
             ]
 
-    files_capture = [
+    platform_files_capture = {
+        Platform.LINUX: [
              'lib/gstreamer-0.10/libgstvideo4linux2%(mext)s',
             ]
+    }
 
     platform_files_codecs = {
         Platform.LINUX: [
