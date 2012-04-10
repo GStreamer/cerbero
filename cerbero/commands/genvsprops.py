@@ -20,7 +20,8 @@ import os
 
 from cerbero.commands import Command, register_command
 from cerbero.ide.pkgconfig import PkgConfig
-from cerbero.ide.vs.pkgconfig2vsprops import PkgConfig2VSProps, CommonVSProps
+from cerbero.ide.vs.pkgconfig2vsprops import PkgConfig2VSProps
+from cerbero.ide.vs.props import CommonProps
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 
@@ -42,13 +43,13 @@ class GenVSProps(Command):
             os.makedirs(args.output_dir)
 
         for pc in PkgConfig.list_all():
-            m.action('Created %s.vsprops' % pc)
-            p2v = PkgConfig2VSProps(pc, config.prefix, '$(%s)' %
-                    DEFAULT_PREFIX_MACRO, False)
+            p2v = PkgConfig2VSProps(pc, prefix=config.prefix,
+                    prefix_replacement='$(%s)' % DEFAULT_PREFIX_MACRO,
+                    inherit_common=True)
             p2v.create(args.output_dir)
             m.action('Created %s.vsprops' % pc)
 
-        common = CommonVSProps(config.prefix, DEFAULT_PREFIX_MACRO)
+        common = CommonProps(config.prefix, DEFAULT_PREFIX_MACRO)
         common.create(args.output_dir)
         m.message('Property sheets files were sucessfully created in %s' %
                   os.path.abspath(args.output_dir))

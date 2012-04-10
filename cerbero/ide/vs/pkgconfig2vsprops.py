@@ -18,113 +18,60 @@
 # Boston, MA 02111-1307, USA.
 
 import sys
-import os
+import argparse
+
+from cerbero.errors import FatalError
+from cerbero.ide.vs.props import Props
+from cerbero.ide.vs.vsprops import VSProps
 from cerbero.ide.pkgconfig import PkgConfig
-from cerbero.utils import etree, to_winpath
-
-
-class VSPropsBase(object):
-
-    def __init__(self, name):
-        self.name = name
-
-    def _add_root(self, name):
-        self.root = etree.Element("VisualStudioPropertySheet",
-                ProjectType="Visual C++", Version="10.00", Name=name)
-
-    def create(self, outdir):
-        el = etree.ElementTree(self.root)
-        el.write(os.path.join(outdir, '%s.vsprops' % self.name),
-                 encoding='utf-8')
-
-
-class CommonVSProps(VSPropsBase):
-
-    def __init__(self, prefix, prefix_macro):
-        VSPropsBase.__init__(self, 'Common')
-        self._add_root('Common')
-        self._add_sdk_root_macro(prefix, prefix_macro)
-
-    def _add_sdk_root_macro(self, prefix, prefix_macro):
-        etree.SubElement(self.root, 'Macro', Name=prefix_macro, Value=to_winpath(prefix))
-
-
-class VSProps(VSPropsBase):
-    '''
-    Creates an VS properties sheet that imitaties a pkgconfig files to link
-    against a library from VS:
-      * inherits from others properties sheets
-      * add additional includes directories
-      * add additional libraries directories
-      * add link libraries
-    '''
-
-    def __init__(self, name, requires, include_dirs, libs_dirs, libs,
-                 inherit_common=False):
-        VSPropsBase.__init__(self, name)
-        if inherit_common:
-            requires.append('Common')
-        self._add_root(name, requires)
-        self.root.set('InheritedPropertySheets', self._format_requires(requires))
-        self._add_include_dirs(include_dirs)
-        self._add_libs(libs, libs_dirs)
-
-    def _add_root(self, name, requires):
-        VSPropsBase._add_root(self, name)
-        self.root.set('InheritedPropertySheets',
-                      self._format_requires(requires))
-
-    def _add_include_dirs(self, dirs):
-        self._add_tool("VCCLCompilerTool",
-                       AdditionalIncludeDirectories=self._format_paths(dirs))
-
-    def _add_libs(self, libs, dirs):
-        self._add_tool("VCLinkerTool",
-                       AdditionalDependencies=self._format_libs(libs),
-                       AdditionalLibraryDirectories=self._format_paths(dirs))
-
-    def _format_requires(self, requires):
-        return ';'.join([".\\%s.vsprops" % x for x in requires])
-
-    def _format_libs(self, libs):
-        return ' '.join(['%s.lib' % x for x in libs])
-
-    def _format_paths(self, paths):
-        return ';'.join([self._fix_path_and_quote(x) for x in paths])
-
-    def _fix_path_and_quote(self, path):
-        path = to_winpath(path)
-        return "&quot;%s&quot;" % path
-
-    def _add_tool(self, name, **kwargs):
-        etree.SubElement(self.root, 'Tool', Name=name, **kwargs)
+from cerbero.utils import messages as m
 
 
 class PkgConfig2VSProps(object):
+    
+    generators = {'vs2008': VSProps, 'vs2010': Props}
 
-    def __init__(self, libname, prefix=None, prefix_replacement=None,
-                 inherit_common=False):
-        pkgconfig = PkgConfig([libname], True)
+    def __init__(self, libname, target='vs2010', prefix=None,
+            prefix_replacement=None, inherit_common=False):
+
+        if target not in self.generators:
+            raise FatalError('Target version must be one of %s' %
+                             generators.keys())
+
+        pkgconfig = PkgConfig([libname], False)
         requires = pkgconfig.requires()
         include_dirs = pkgconfig.include_dirs()
         libraries_dirs = pkgconfig.libraries_dirs()
+
         libs = pkgconfig.libraries()
         if None not in [prefix_replacement, prefix]:
             libraries_dirs = [x.replace(prefix, prefix_replacement)
                     for x in libraries_dirs]
             include_dirs = [x.replace(prefix, prefix_replacement)
                     for x in include_dirs]
-        self.vsprops = VSProps(libname, requires, include_dirs, libraries_dirs,
-                libs, inherit_common)
+        self.vsprops = self.generators[target](libname, requires, include_dirs,
+                libraries_dirs, libs, inherit_common)
 
     def create(self, outdir):
         self.vsprops.create(outdir)
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        print "usage: pkgconfg2vsprops output_file library"
-        sys.exit(1)
-    p2v = PkgConfig2VSProps(sys.argv[2])
-    p2v.create(sys.argv[1])
+    parser = argparse.ArgumentParser(description= 'Creates VS property '
+        'sheets with pkg-config')
+    parser.add_argument('library', help='Library name')
+    parser.add_argument('-o', type=str, default='.',
+                    help='Output directory for generated files')
+    parser.add_argument('-c', type=str, default='vs2010',
+                    help='Target version (vs2008 or vs2010) name')
 
+    generators = {'vs2008': VSProps, 'vs2010': Props}
+    args = parser.parse_args(sys.argv[1:])
+    try:
+        p2v = PkgConfig2VSProps(args.library, args.c)
+        p2v.create(args.o)
+    except Exception, e:
+        import traceback; traceback.print_exc()
+        m.error(str(e))
+        exit(1)
+    exit(0)
