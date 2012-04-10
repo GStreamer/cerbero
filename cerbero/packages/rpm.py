@@ -118,14 +118,14 @@ class RPMPackage(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
-        self.install_dir = self.package.get_install_dir() 
+        self.install_dir = self.package.get_install_dir()
         self.devel = devel
         self.force = force
         self._empty_packages = []
 
         # Create a tmpdir for packages
         tmpdir, rpmdir, srcdir = self._create_rpm_tree(tmpdir)
-        
+
         # only build each package once
         if pack_deps:
             self._pack_deps(output_dir, tmpdir, force)
@@ -162,7 +162,7 @@ class RPMPackage(PackagerBase):
                     os.remove(out_path)
                 shutil.move(os.path.join(rpmdir, d, f), output_dir)
         return output_dir
-  
+
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
             packager = RPMPackage(self.config, self.store.get_package(p),
@@ -171,7 +171,7 @@ class RPMPackage(PackagerBase):
                 packager.pack(output_dir, self.devel, force, False, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p)
-        
+
     def _build_rpm(self, spec_path):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-redhat-linux'
@@ -213,7 +213,7 @@ class RPMPackage(PackagerBase):
             template = META_SPEC_TPL
         else:
             template = SPEC_TPL
-           
+
         self._spec_str = template % {
                 'name': self.package.name,
                 'version': self.package.version,
