@@ -36,11 +36,11 @@ class FilesProvider(object):
     LANG_CAT = 'lang'
 
     EXTENSIONS = {
-        Platform.WINDOWS: {'bext': '.exe', 'sext': '.dll', 'sdir': 'bin',
+        Platform.WINDOWS: {'bext': '.exe', 'sext': '*.dll', 'sdir': 'bin',
                            'mext': '.dll', 'smext': '.a'},
-        Platform.LINUX: {'bext': '', 'sext': '.so', 'sdir': 'lib',
+        Platform.LINUX: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
                          'mext': '.so', 'smext': '.a'},
-        Platform.DARWIN: {'bext': '', 'sext': '.dylib', 'sdir': 'lib',
+        Platform.DARWIN: {'bext': '', 'sext': '.*.dylib', 'sdir': 'lib',
                           'mext': '.so', 'smext': '.a'}}
 
     def __init__(self, config):
@@ -176,16 +176,7 @@ class FilesProvider(object):
         if len(files) == 0:
             return []
 
-        if self.platform == Platform.LINUX:
-            # libfoo.so.X, libfoo.so.X.Y.Z
-            pattern = '%(sdir)s/%(file)s%(sext)s.*'
-        elif self.platform == Platform.DARWIN:
-            # libfoo.X.dylib
-            pattern = '%(sdir)s/%(file)s.*%(sext)s'
-        elif self.platform == Platform.WINDOWS:
-            # libfoo.X.dll, libfoo.dll
-            # FIXME: this will include libfoo-bar.dll too
-            pattern = '%(sdir)s/%(file)s*%(sext)s'
+        pattern = '%(sdir)s/%(file)s%(sext)s'
 
         libsmatch = []
         for f in files:
