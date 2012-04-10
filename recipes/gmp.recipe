@@ -6,8 +6,8 @@ class Recipe(recipe.Recipe):
     version = '5.0.4'
     license = 'LGPL'
 
-    files_libs = ['libgmp', 'libgmpxx']
-    files_devel = ['include/gmp.h', 'include/gmpxx.h']
+    files_libs = ['libgmp']
+    files_devel = ['include/gmp.h']
 
     def prepare(self):
         # --enable-cxx must be set to enable a proper detection of the link system
