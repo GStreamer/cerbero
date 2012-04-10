@@ -6,8 +6,8 @@ class Recipe(recipe.Recipe):
     version = '0.4.16'
     license = 'BSD-like'
 
-    files_libs = ['liborc-0.4']
+    files_libs = ['liborc-0.4', 'liborc-test-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
         'bin/orc-bugreport%(bext)s', 'share/aclocal/orc.m4',
-	'bin/orcc%(bext)s']
+        'bin/orcc%(bext)s']
 
