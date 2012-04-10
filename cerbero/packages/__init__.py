@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+
 import cerbero.utils.messages as m
 from cerbero.errors import EmptyPackageError, MissingPackageFilesError
 from cerbero.utils import _
@@ -58,7 +60,10 @@ class PackagerBase(object):
             files = self.package.devel_files_list()
         else:
             files = self.package.files_list()
-        real_files = ls_files(files, self.config.prefix)
+        real_files = []
+        for f in files:
+            if os.path.exists(os.path.join(self.config.prefix, f)):
+                real_files.append(f)
         diff = list(set(files) - set(real_files))
         if len(diff) != 0:
             if force:
