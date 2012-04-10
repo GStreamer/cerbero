@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'gtk-mac-integration'
     version = '1.0.1'
     license = 'LGPLv2.1'
-    deps = ['gtk+']
+    deps = ['gtk+', 'pygtk']
 
     files_libs = ['libgtkmacintegration']
     files_devel = ['include/gtkmacintegration', 'lib/pkgconfig/gtk-mac-integration.pc']
