@@ -58,6 +58,8 @@ class Package(Command):
             pkg = Packager(config, p, store)
         m.action(_("Creating package for %s") % p.name)
         paths = pkg.pack(args.output_dir, args.no_devel, args.force)
+        if None in paths:
+            paths.remove(None)
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
