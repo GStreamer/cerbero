@@ -149,7 +149,6 @@ class PMDocPackage(PackagerBase):
                 if paths[1] is not None:
                     self.packages_paths[devel_name] = paths[1]
                 else:
-                    print self.empty_packages
                     self.empty_packages.append(devel_name)
 
 

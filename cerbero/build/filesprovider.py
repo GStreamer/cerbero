@@ -194,8 +194,9 @@ class FilesProvider(object):
             f = '%s/%s' % (self.py_prefix, f)
             pyfiles.append(f)
             if f.endswith('.py'):
-                pyfiles.append(f+'o')
-                pyfiles.append(f+'c')
+                for e in ['o', 'c']:
+                    if os.path.exists(os.path.join(self.config.prefix, f+e)):
+                        pyfiles.append(f+e)
         return pyfiles
 
     def _search_langfiles(self, files):
