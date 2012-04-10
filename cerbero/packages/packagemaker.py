@@ -21,7 +21,7 @@ import tempfile
 import shutil
 
 from cerbero.errors import EmptyPackageError
-from cerbero.packages import PackagerBase
+from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package
 from cerbero.packages.pmdoc import PMDoc
 from cerbero.utils import shell, _
@@ -32,37 +32,49 @@ class OSXPackage(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.packages.package.Package}
 
-    @ivar package: package with the info to build the merge package
+    @ivar package: package used to create the osx package
     @type package: L{cerbero.packages.package.Package}
     '''
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
 
-    def pack(self, output_dir, devel=False, force=False):
-        self.files = self.files_list(devel)
-
-        package_name = self.package.name
-        if devel:
-            package_name += '-devel'
-
+    def pack(self, output_dir, devel=True, force=False):
         output_dir = os.path.realpath(output_dir)
-        output_file = os.path.join(output_dir, '%s.pkg' %package_name)
 
-        root = self._create_bundle()
+        # create the runtime package
+        runtime_path = self._create_package(PackageType.RUNTIME, output_dir,
+                force)
+
+        if not devel:
+            return [runtime_path]
+
+        try:
+            # create the development package
+            devel_path = self._create_package(PackageType.DEVEL, output_dir,
+                    force)
+        except EmptyPackageError:
+            devel_path = None
+        return [runtime_path, devel_path]
+
+    def _create_package(self, package_type, output_dir, force):
+        package_name = self.package.name + package_type
+        files = self.files_list(package_type, force)
+        output_file = os.path.join(output_dir, '%s.pkg' % package_name)
+        root = self._create_bundle(files)
         packagemaker = PackageMaker()
         packagemaker.create_package(root, package_name,
             self.package.version, self.package.shortdesc, output_file,
             self.package.get_install_dir())
         return output_file
 
-    def _create_bundle(self):
+    def _create_bundle(self, files):
         '''
         Moves all the files that are going to be package to a temporary
         directory to create the bundle
         '''
         tmp = tempfile.mkdtemp()
-        for f in self.files:
+        for f in files:
             in_path = os.path.join(self.config.prefix, f)
             if not os.path.exists(in_path):
                 m.warning("File %s is missing and won't be added to the "
@@ -92,13 +104,29 @@ class PMDocPackage(PackagerBase):
 
     def pack(self, output_dir, devel=False, force=False):
         self.tmp = tempfile.mkdtemp()
-        package_name = self.package.name
-        if devel:
-            package_name += '-devel'
-        output_file = os.path.abspath(os.path.join(output_dir, '%s.pkg' %
-            package_name))
+
         self._create_packages(devel, force)
-        pmdoc_path = self._create_pmdoc(devel)
+
+        paths = []
+        # create runtime package
+        r_path = self._create_pmdoc(PackageType.RUNTIME, force, output_dir)
+        paths.append(r_path)
+
+        if devel:
+            # create devel package
+            d_path = self._create_pmdoc(PackageType.DEVEL, force, output_dir)
+            paths.append(d_path)
+
+        return paths
+
+    def _create_pmdoc(self, package_type, force, output_dir):
+        m.action(_("Creating pmdoc for package %s " % self.package))
+        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths,
+                      self.empty_packages, package_type)
+        pmdoc_path = pmdoc.create()
+
+        output_file = os.path.abspath(os.path.join(output_dir, '%s.pkg' %
+            (self.package.name + package_type)))
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
@@ -110,18 +138,19 @@ class PMDocPackage(PackagerBase):
             m.action(_("Creating package %s ") % p_name)
             packager = OSXPackage(self.config, package, self.store)
             try:
-                path = packager.pack(self.tmp, devel, force)
-                m.action(_("Package created sucessfully"))
-                self.packages_paths[package.name] = path
+                paths = packager.pack(self.tmp, devel, force)
             except EmptyPackageError:
                 self.empty_packages.append(p_name)
                 m.warning(_("Package %s is empty") % p_name)
-
-    def _create_pmdoc(self, devel):
-        m.action(_("Creating pmdoc for package %s " % self.package))
-        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths,
-                      self.empty_packages, devel)
-        return pmdoc.create()
+            m.action(_("Package created sucessfully"))
+            self.packages_paths[package.name] = paths[0]
+            if devel:
+                devel_name = package.name + PackageType.DEVEL
+                if paths[1] is not None:
+                    self.packages_paths[devel_name] = paths[1]
+                else:
+                    print self.empty_packages
+                    self.empty_packages.append(devel_name)
 
 
 class PackageMaker(object):

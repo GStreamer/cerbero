@@ -20,6 +20,7 @@ import os
 
 from cerbero.utils import etree, shell
 from cerbero.errors import FatalError
+from cerbero.packages import PackageType
 
 
 class PMDocXML(object):
@@ -75,12 +76,13 @@ class Index(PMDocXML):
     TAG_USER_SEES = 'userSees'
 
     def __init__(self, package, store, out_dir, emptypkgs=[],
-                 devel=False, fill=True):
+                 package_type=PackageType.RUNTIME, fill=True):
         self.package = package
+        self.package_name = package.name + package_type
         self.store = store
         self.out_dir = out_dir
         self.emptypkgs = emptypkgs
-        self.devel = devel
+        self.package_type = package_type
         if fill:
             self._fill()
 
@@ -103,7 +105,7 @@ class Index(PMDocXML):
         title = etree.SubElement(properties, self.TAG_TITLE)
         title.text = self.package.title
         build = etree.SubElement(properties, self.TAG_BUILD)
-        build.text = os.path.join(self.out_dir, "%s.pkg" % self.package.name)
+        build.text = os.path.join(self.out_dir, "%s.pkg" % self.package_name)
 
         for e, k, v in [(self.TAG_USER_SEES, 'ui', self.PROP_USER_SEES),
                 (self.TAG_MIN_TARGET, 'os', self.PROP_MIN_TARGET),
@@ -132,31 +134,30 @@ class Index(PMDocXML):
         contents = etree.SubElement(self.root, self.TAG_CONTENTS)
 
         for p, required, selected in self.package.packages:
-            if p in self.emptypkgs:
+            if p + self.package_type in self.emptypkgs:
                 continue
             package = self.store.get_package(p)
             self._add_choice(package, not required, selected, contents)
 
     def _add_choice(self, package, enabled, selected, contents):
+        package_name = package.name + self.package_type
         choice = etree.SubElement(contents, self.TAG_CHOICE,
-            title=package.shortdesc, id=package.name,
+            title=package.shortdesc, id=package_name,
             starts_selected=self._boolstr(selected),
             starts_enabled=self._boolstr(enabled), starts_hidden='false')
-        packages = [package.name] + package.deps
+        packages = [package.name] +  package.deps
         for p_name in packages:
             if p_name != package.name:
                 # Don't add twice packages that are required and selected, and
                 # therefore always installed
                 if (p_name, True, True) in self.package.packages:
                     continue
-            if p_name in self.emptypkgs:
+            if p_name + self.package_type in self.emptypkgs:
                 continue
-            p_id = p_name
-            if self.devel:
-                p_id += '-devel'
+            p_id = p_name + self.package_type
             etree.SubElement(choice, self.TAG_PKGREF, id=p_id)
             item = etree.SubElement(self.root, self.TAG_ITEM, type='pkgref')
-            item.text = '%s.xml' % p_name
+            item.text = '%s.xml' % p_id
 
     def _boolstr(self, boolean):
         return boolean and 'true' or 'false'
@@ -185,8 +186,9 @@ class PkgRef(PMDocXML):
     TAG_PACKAGE_PATH = 'packagePath'
     TAG_SCRIPTS_DIR = 'scripts-dir'
 
-    def __init__(self, package, package_path, fill=True):
+    def __init__(self, package, package_type, package_path, fill=True):
         self.package = package
+        self.package_name = package.name + package_type
         self.package_path = package_path
         if fill:
             self._fill()
@@ -208,7 +210,7 @@ class PkgRef(PMDocXML):
     def _add_config(self):
         config = etree.SubElement(self.root, self.TAG_CONFIG)
         self._subelement_text(config, self.TAG_VERSION, '1.0')
-        self._subelement_text(config, self.TAG_IDENTIFIER, self.package.name)
+        self._subelement_text(config, self.TAG_IDENTIFIER, self.package_name)
         self._subelement_text(config, self.TAG_DESCRIPTION,
                 self.package.shortdesc)
         etree.SubElement(config, self.TAG_POST_INSTALL, type="none")
@@ -229,7 +231,7 @@ class PkgRef(PMDocXML):
     def _add_contents(self):
         contents = etree.SubElement(self.root, self.TAG_CONTENTS)
         self._subelement_text(contents, self.TAG_FILE_LIST,
-                              "%s-contents.xml" % self.package.name)
+                              "%s-contents.xml" % self.package_name)
         for f in ['.DS_Store$']:
             self._subelement_text(contents, self.TAG_FILTER, f)
 
@@ -334,14 +336,16 @@ class PMDoc(object):
     '''
 
     def __init__(self, package, store, output_dir, pkgspath,
-                 emptypkgs=[], devel=False):
-        self.outdir = os.path.join(output_dir, "%s.pmdoc" % package.name)
+                 emptypkgs=[], package_type=PackageType.RUNTIME):
+        self.package_type = package_type
+        self.package_name = package.name + package_type
+        self.outdir = os.path.join(output_dir, "%s.pmdoc" % self.package_name)
         os.makedirs(self.outdir)
         self.package = package
         self.pkgspath = pkgspath
         self.emptypkgs = emptypkgs
         self.store = store
-        self.devel = devel
+        self.package_type = package_type
         self.done_packages = []
 
     def create(self):
@@ -350,20 +354,21 @@ class PMDoc(object):
             self._create_pkgref_and_contents(self.store.get_package(p_name))
 
         index = Index(self.package, self.store, self.outdir, self.emptypkgs,
-                      self.devel)
+                      self.package_type)
         index.write(os.path.join(self.outdir, "index.xml"))
         return self.outdir
 
     def _create_pkgref_and_contents(self, package):
+        package_name = package.name + self.package_type
         # package already created
-        if package.name in self.done_packages:
+        if package_name in self.done_packages:
             return
         # package is empty
-        if package.name in self.emptypkgs:
+        if package_name in self.emptypkgs:
             return
-        pkgref = PkgRef(package, self.pkgspath[package.name])
-        pkgref.write(os.path.join(self.outdir, "%s.xml" % package.name))
-        pkgcontents = PkgContents(self.pkgspath[package.name])
+        pkgref = PkgRef(package, self.package_type, self.pkgspath[package_name])
+        pkgref.write(os.path.join(self.outdir, "%s.xml" % package_name))
+        pkgcontents = PkgContents(self.pkgspath[package_name])
         pkgcontents.write(os.path.join(self.outdir, "%s-contents.xml" %
-                                       package.name))
-        self.done_packages.append(package.name)
+                                       package_name))
+        self.done_packages.append(package_name)

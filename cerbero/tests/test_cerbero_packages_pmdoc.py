@@ -22,6 +22,7 @@ import tempfile
 import shutil
 
 from cerbero.config import Platform
+from cerbero.packages import PackageType
 from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
 from cerbero.tests.test_packages_common import create_store, Package1
@@ -35,14 +36,15 @@ class IndexTest(unittest.TestCase, XMLMixin):
         self.store = create_store(self.config)
         self.package = self.store.get_package('gstreamer-runtime')
         self.outdir = '/test'
-        self.index = Index(self.package, self.store, self.outdir, [], False)
+        self.index = Index(self.package, self.store, self.outdir, [],
+                PackageType.RUNTIME, False)
 
     def testAddRoot(self):
         self.index._add_root()
         self.assertEquals(self.index.root.tag, Index.DOCUMENT_TAG)
         self.assertEquals(self.index.root.attrib['spec'], Index.SPEC_VERSION)
         self.assertEquals(len(self.index.root.getchildren()), 0)
-    
+
     def testAddProperties(self):
         self.index._add_root()
         self.index._add_properties()
@@ -119,7 +121,7 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
         self.config.target_platform = Platform.LINUX
         self.package = Package1(self.config, None)
         self.package_path = '/test/package.pkg'
-        self.pkgref = PkgRef(self.package, self.package_path)
+        self.pkgref = PkgRef(self.package, PackageType.RUNTIME, self.package_path)
 
     def testAddRoot(self):
         self.pkgref._add_root()

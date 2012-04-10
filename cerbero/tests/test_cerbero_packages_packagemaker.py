@@ -22,6 +22,7 @@ import unittest
 import tempfile
 
 from cerbero.config import Platform
+from cerbero.packages import PackageType
 from cerbero.packages.packagemaker import OSXPackage, PackageMaker
 from cerbero.utils import shell
 from cerbero.tests.test_packages_common import create_store
@@ -45,8 +46,8 @@ class PackageMakerTest(unittest.TestCase):
         p = self.store.get_package('gstreamer-test1')
         self.files = p.files_list()
         packager = OSXPackage(self.config, p, self.store)
-        packager.files = OSXPackage.files_list(packager, False)
-        tmpdest = packager._create_bundle()
+        files = OSXPackage.files_list(packager, PackageType.RUNTIME, False)
+        tmpdest = packager._create_bundle(files)
         bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')
         bundlefiles = sorted([f[2:] for f in bundlefiles])[1:]
         self.assertEquals(bundlefiles, self.files)
