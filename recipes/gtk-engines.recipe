@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     license = 'GPL'
     deps = ['gtk+']
 
+    files_etc = ['etc/gtk-2.0/gtkrc']
     files_engines_libs = [
         'lib/gtk-2.0/2.10.0/engines/libclearlooks%(mext)s',
         'lib/gtk-2.0/2.10.0/engines/libcrux-engine%(mext)s',
@@ -38,3 +39,12 @@ class Recipe(recipe.Recipe):
     ]
 
     files_devel = ['lib/pkgconfig/gtk-engines-2.pc']
+
+    def post_install(self):
+        theme = "Clearlooks"
+        if self.config.target_platform == Platform.WINDOWS:
+            theme = "MS-Windows"
+        gtkrc = 'gtk-theme-name = "%s"\n '\
+                'gtk-fallback-icon-theme = "Tango"' % theme
+        with open(os.path.join(self.config.prefix, 'etc', 'gtk-2.0' 'gtkrc'), 'w') as f:
+            f.write(gtkrc)

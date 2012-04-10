@@ -12,7 +12,6 @@ class Recipe(recipe.Recipe):
     files_bins = [
         'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immodules-2.0',
         'gtk-builder-convert']
-    files_etc = ['gtk-2.0/gtkrc']
     files_devel = [
         'lib/gtk-2.0',
         'lib/pkgconfig/gtk+-2.0.pc',
@@ -43,12 +42,3 @@ class Recipe(recipe.Recipe):
             self.configure_options += '--disable-papi --disable-cups '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--with-gdktarget=quartz '
-
-    def post_install(self):
-        theme = "Clearlooks"
-        if self.config.target_platform == Platform.WINDOWS:
-            theme = "MS-Windows"
-        gtkrc = 'gtk-theme-name = "%s"\n '\
-                'gtk-fallback-icon-theme = "Tango"' % theme
-        with open(os.path.join(self.config.prefix, 'etc', 'gtk-2.0' 'gtkrc'), 'w') as f:
-            f.write(gtkrc)
