@@ -17,16 +17,11 @@ class Recipe(recipe.Recipe):
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
         Platform.LINUX: ['libpangox-1.0'],
-        Platform.DARWIN: ['libpangox-1.0'],
     }
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
         Platform.LINUX: ['lib/pkgconfig/pangox.pc'],
-        Platform.DARWIN: ['lib/pkgconfig/pangox.pc'],
     }
-    platform_files_modules = {
-        Platform.LINUX: ['lib/pango'],
-        Platform.DARWIN: ['lib/pango']}
 
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:

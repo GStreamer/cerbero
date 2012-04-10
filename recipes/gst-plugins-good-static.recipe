@@ -102,7 +102,7 @@ class Recipe(recipe.Recipe):
              'gstreamer-static/lib/gstreamer-0.10/libgstpulse%(smext)s',
             ],
         Platform.DARWIN: [
-             'gstreamer-static/lib/gstreamer-0.10/libgstosxaudiosink%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstosxaudio%(smext)s',
              'gstreamer-static/lib/gstreamer-0.10/libgstosxvideosink%(smext)s',
             ]
     }

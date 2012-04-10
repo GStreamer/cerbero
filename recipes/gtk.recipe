@@ -24,14 +24,14 @@ class Recipe(recipe.Recipe):
     files_share_demo = ['share/gtk-2.0/demo']
     platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
-        Platform.DARWIN: ['libgtk-x11-2.0', 'libgdk-x11-2.0'],
+        Platform.DARWIN: ['libgtk-quartz-2.0', 'libgdk-quartz-2.0'],
         Platform.LINUX: ['libgtk-x11-2.0', 'libgdk-x11-2.0'],
         }
     platform_files_devel = {
         Platform.WINDOWS: [
             'lib/pkgconfig/gtk+-win32-2.0.pc', 'lib/pkgconfig/gdk-win32-2.0.pc'],
         Platform.DARWIN: [
-            'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
+            'lib/pkgconfig/gtk+-quartz-2.0.pc', 'lib/pkgconfig/gdk-quartz-2.0.pc'],
         Platform.LINUX: [
             'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
