@@ -80,10 +80,10 @@ class PackageTest(unittest.TestCase):
             'lib/libgstreamer-x11.so']
         windevfiles = devfiles + ['lib/libgstreamer-win32.a',
             'lib/libgstreamer-win32.dll.a', 'lib/libgstreamer-win32.la',
-            'lib/libgstreamer-win32.def', 'lib/libgstreamer-win32.lib',
+            'lib/libgstreamer-win32.def', 'lib/gstreamer-win32.lib',
             'lib/libtest.a', 'lib/libtest.dll.a', 'lib/libtest.la',
-            'lib/libtest.def', 'lib/libtest.lib',
-            'lib/libgstreamer-0.10.def', 'lib/libgstreamer-0.10.lib']
+            'lib/libtest.def', 'lib/test.lib',
+            'lib/libgstreamer-0.10.def', 'lib/gstreamer-0.10.lib']
 
         self.assertEquals(sorted(windevfiles), self.win32package.devel_files_list())
         self.assertEquals(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())

@@ -217,11 +217,11 @@ class FilesProvider(object):
         elif self.platform == Platform.WINDOWS:
             pattern += 'lib/%(f)s.dll.a '
             pattern += 'lib/%(f)s*.def '
-            pattern += 'lib/%(f)s.lib '
+            pattern += 'lib/%(fnolib)s.lib '
         elif self.platform == Platform.DARWIN:
             pattern += 'lib/%(f)s.dylib '
 
-        libsmatch = [pattern % {'f':x} for x in \
+        libsmatch = [pattern % {'f':x, 'fnolib': x[3:]} for x in \
                      self._get_category_files_list(self.LIBS_CAT)]
         return shell.ls_files(libsmatch, self.config.prefix)
 

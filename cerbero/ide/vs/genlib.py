@@ -45,7 +45,7 @@ class GenLib(object):
             libname = dllname.rsplit('.', 1)[0]
 
         defname = dllname.replace('.dll', '.def')
-        implib = '%s.lib' % libname
+        implib = '%s.lib' % libname[3:]
 
         # Create the import library
         shell.call(self.DLLTOOL_TPL % (defname, implib, dllname), outputdir)
