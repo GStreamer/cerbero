@@ -26,7 +26,7 @@ from cerbero.ide.xcode.xcconfig import XCConfig
 XCCONFIG = '''
 ALWAYS_SEARCH_USER_PATHS = YES
 USER_HEADER_SEARCH_PATHS = /usr/include/gstreamer-0.10\
- /usr/include/glib-2.0 /usr/lib/x86_64-linux-gnu/glib-2.0/include\
+ /usr/include/glib-2.0 /usr/lib/glib-2.0/include\
  /usr/include/libxml2
 LIBRARY_SEARCH_PATHS = 
 OTHER_LDFLAGS =  -lgstreamer-0.10 \
@@ -38,7 +38,7 @@ class TestPkgConfig(unittest.TestCase):
     def setUp(self):
         pc_path = os.path.join(os.path.dirname(__file__), 'pkgconfig')
         os.environ['PKG_CONFIG_LIBDIR'] = pc_path
-        os.environ['PKG_CONFIG_PATH'] = pc_path 
+        os.environ['PKG_CONFIG_PATH'] = pc_path
 
     def testFill(self):
         xcconfig = XCConfig('gstreamer-0.10')
@@ -46,7 +46,7 @@ class TestPkgConfig(unittest.TestCase):
             {'libs': ' -lgstreamer-0.10 -lgobject-2.0 -lgmodule-2.0 '
                      '-lxml2 -lgthread-2.0 -lrt -lglib-2.0',
              'hsp': '/usr/include/gstreamer-0.10 /usr/include/glib-2.0 '
-                    '/usr/lib/x86_64-linux-gnu/glib-2.0/include '
+                    '/usr/lib/glib-2.0/include '
                     '/usr/include/libxml2',
              'lsp': ''}
         self.assertEquals(expected, xcconfig._fill())

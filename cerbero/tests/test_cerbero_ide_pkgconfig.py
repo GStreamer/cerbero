@@ -28,18 +28,18 @@ class TestPkgConfig(unittest.TestCase):
     def setUp(self):
         pc_path = os.path.join(os.path.dirname(__file__), 'pkgconfig')
         os.environ['PKG_CONFIG_LIBDIR'] = pc_path
-        os.environ['PKG_CONFIG_PATH'] = pc_path 
+        os.environ['PKG_CONFIG_PATH'] = pc_path
         self.pkgconfig = PkgConfig('gstreamer-0.10')
         self.pkgconfig2 = PkgConfig('gstreamer-0.10', False)
 
     def testListAll(self):
         expected = ['gobject-2.0', 'gmodule-2.0', 'libxml-2.0', 'gthread-2.0',
                 'glib-2.0', 'gmodule-no-export-2.0', 'gstreamer-0.10']
-        self.assertEquals(PkgConfig.list_all(), expected)
+        self.assertEquals(sorted(PkgConfig.list_all()), sorted(expected))
 
     def testIncludeDirs(self):
         expected = ['/usr/include/gstreamer-0.10', '/usr/include/glib-2.0',
-                    '/usr/lib/x86_64-linux-gnu/glib-2.0/include',
+                    '/usr/lib/glib-2.0/include',
                     '/usr/include/libxml2']
         self.assertEquals(self.pkgconfig.include_dirs(), expected)
         expected = ['/usr/include/gstreamer-0.10']
