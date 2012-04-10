@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvideofiltersbad%(mext)s',
              'lib/gstreamer-0.10/libgstvideomeasure%(mext)s',
              'lib/gstreamer-0.10/libgstvideosignal%(mext)s',
-             'lib/libgstbasevideo-0.10%(sext)s',
+             '%(sdir)s/libgstbasevideo-0.10%(sext)s',
     ]
 
     files_codecs = [
@@ -78,7 +78,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvmnc%(mext)s',
              'lib/gstreamer-0.10/libgstvp8%(mext)s',
              'lib/gstreamer-0.10/libgsty4mdec%(mext)s',
-             'lib/libgstcodecparsers-0.10%(sext)s'
+             '%(sdir)s/libgstcodecparsers-0.10%(sext)s'
     ]
 
     files_dvd = [
