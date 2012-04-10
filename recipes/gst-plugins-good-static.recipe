@@ -98,6 +98,9 @@ class Recipe(recipe.Recipe):
     }
 
     platform_files_sys = {
+        Platform.WINDOWS: [
+             'gstreamer-static/gstreamer-0.10/libgstdirectsoundsink%(smext)s',
+            ],
         Platform.LINUX: [
              'gstreamer-static/lib/gstreamer-0.10/libgstpulse%(smext)s',
             ],

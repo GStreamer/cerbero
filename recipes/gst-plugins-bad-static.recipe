@@ -100,6 +100,11 @@ class Recipe(recipe.Recipe):
             ]
 
     platform_files_sys = {
+        Platform.WINDOWS: [
+             'gstreamer-static/lib/gstreamer-0.10/libgstd3dvideosink%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdirectdrawsink%(smext)s',
+             'gstreamer-static/lib/gstreamer-0.10/libgstdshowdecwrapper%(smext)s',
+             ],
         Platform.DARWIN: [
              'gstreamer-static/lib/gstreamer-0.10/libgstapplemedia%(smext)s',
             ]
