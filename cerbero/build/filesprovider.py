@@ -32,7 +32,6 @@ class FilesProvider(object):
     BINS_CAT = 'bins'
     PY_CAT = 'python'
     DEVEL_CAT = 'devel'
-    ETC_CAT = 'etc'
     LANG_CAT = 'lang'
 
     EXTENSIONS = {
@@ -53,7 +52,6 @@ class FilesProvider(object):
         self._searchfuncs = {self.LIBS_CAT: self._search_libraries,
                              self.BINS_CAT: self._search_binaries,
                              self.PY_CAT: self._search_pyfiles,
-                             self.ETC_CAT: self._search_etcfiles,
                              self.LANG_CAT: self._search_langfiles,
                              'default': self._search_files}
 
@@ -199,13 +197,6 @@ class FilesProvider(object):
                 pyfiles.append(f+'o')
                 pyfiles.append(f+'c')
         return pyfiles
-
-    def _search_etcfiles(self, files):
-        '''
-        Search for etc files in the prefix. This function prepends '/etc' to the
-        file name.
-        '''
-        return ['etc/%s' % f for f in files]
 
     def _search_langfiles(self, files):
         '''
