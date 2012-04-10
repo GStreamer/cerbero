@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     deps = ['pygobject', 'py2cairo', 'glib', 'atk', 'gtk+', 'pango']
 
     files_python = [
+         'site-packages/pygtk.py',
          'site-packages/gtk-2.0/atk%(mext)s',
          'site-packages/gtk-2.0/dsextras.py',
          'site-packages/gtk-2.0/pango%(mext)s',
@@ -25,3 +26,8 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(mext)s', ],
     }
     files_devel = ['include/pygtk-2.0', 'lib/pkgconfig/pygtk-2.0.pc']
+    files_demo = ['lib/pygtk/2.0/demos/',
+                  'lib/pygtk/2.0/pygtk-demo.py',
+                  'lib/pygtk/2.0/pygtk-demo.pyo',
+                  'lib/pygtk/2.0/pygtk-demo.pyc',
+    ]

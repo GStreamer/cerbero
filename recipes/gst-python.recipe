@@ -19,6 +19,7 @@ class Recipe(recipe.Recipe):
              'site-packages/gst-0.10/gst/video%(mext)s',
              'site-packages/gst-0.10/gst/extend/discoverer.py',
              'site-packages/gst-0.10/gst/extend/__init__.py',
+             'site-packages/gst-0.10/gst/extend/pygobject.py',
              'site-packages/gst-0.10/gst/extend/jukebox.py',
              'site-packages/gst-0.10/gst/extend/leveller.py',
              'site-packages/gst-0.10/gst/extend/sources.py',
