@@ -193,7 +193,11 @@ class FilesProvider(object):
         pyfiles = []
         for f in files:
             f = f % self.extensions
-            pyfiles.append('%s/%s' % (self.py_prefix, f))
+            f = '%s/%s' % (self.py_prefix, f)
+            pyfiles.append(f)
+            if f.endswith('.py'):
+                pyfiles.append(f+'o')
+                pyfiles.append(f+'c')
         return pyfiles
 
     def _search_etcfiles(self, files):

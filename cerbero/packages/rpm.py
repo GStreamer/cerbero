@@ -242,13 +242,6 @@ class RPMPackage(PackagerBase):
         if isinstance(self.package, MetaPackage):
             return ''
         files = PackagerBase.files_list(self, package_type, self.force)
-        # the files list only include python files, whithout the compiled
-        # version, so we need to fix that because they will be byte-compiled
-        # in the rpm build
-        for f in files:
-            if f.endswith('.py'):
-                files.append(f+'o')
-                files.append(f+'c')
         return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
 
