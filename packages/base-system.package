@@ -12,11 +12,12 @@ class Package(package.Package):
     uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs',
-             'gdk-pixbuf:libs:modules', 'libffi:libs', 'freetype:libs', 'glib:libs',
-             'orc:libs', 'pango:libs:modules', 'libpng:libs', 'tiff:libs',
+             'gdk-pixbuf:libs:modules:lang', 'libffi:libs', 'freetype:libs',
+             'glib:libs:lang', 'orc:libs', 'pango:libs:modules',
+             'libpng:libs', 'tiff:libs',
              'libxml2:libs', 'pixman:libs', 'zlib:libs', 'bzip2:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['gettext:libs', 'libiconv:libs'],
-        Platform.DARWIN: ['gettext:libs', 'libiconv:libs']
+        Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang'],
+        Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang']
         }
