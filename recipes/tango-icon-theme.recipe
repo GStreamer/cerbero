@@ -5,5 +5,6 @@ class Recipe(recipe.Recipe):
     version = '0.8.1'
     license = 'LGPL'
     configure_options = '--disable-icon-framing '
+    deps = ['icon-naming-utils']
 
     files_icons = ['share/icons/Tango']
