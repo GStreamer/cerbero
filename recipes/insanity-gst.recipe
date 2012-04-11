@@ -5,5 +5,5 @@ class Recipe(recipe.Recipe):
     version = '0.0.1'
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
-    remotes = {'upstream': 'git+ssh://git.keema.collabora.co.uk/git/insanity/insanity-gst.git'}
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity-gst'}
     deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'gtk-doc' ]
