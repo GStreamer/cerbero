@@ -35,6 +35,20 @@ TAR = 'tar'
 
 
 PLATFORM = system_info()[0]
+LOGFILE = None # open('/tmp/cerbero.log', 'w+')
+
+
+class StdOut:
+
+    def __init__(self, stream=sys.stdout):
+        self.stream = stream
+
+    def write(self, data):
+        self.stream.write(data)
+        self.stream.flush()
+
+    def __getattr__(self, attr):
+        return getattr(self.stream, attr)
 
 
 def _fix_mingw_cmd(path):
@@ -70,9 +84,10 @@ def call(cmd, cmd_dir='.', fail=True):
             cmd = _fix_mingw_cmd(cmd)
             # Disable shell which uses cmd.exe
             shell = False
+        stream = LOGFILE or sys.stdout
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
                                     stderr=subprocess.STDOUT,
-                                    stdout=sys.stdout, env=os.environ.copy(),
+                                    stdout=StdOut(stream), env=os.environ.copy(),
                                     shell=shell)
     except subprocess.CalledProcessError:
         if fail:
