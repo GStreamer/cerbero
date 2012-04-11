@@ -50,7 +50,8 @@ class Config (object):
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
-                   'install_dir', 'allow_parallel_build', 'num_of_cpus']
+                   'install_dir', 'allow_parallel_build', 'num_of_cpus',
+                   'use_configure_cache']
 
     def __init__(self, filename=None):
         self._check_uninstalled()
@@ -243,6 +244,7 @@ class Config (object):
             self.set_property('environ_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
         self.set_property('allow_system_libs', True)
+        self.set_property('use_configure_cache', False)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:

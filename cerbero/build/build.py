@@ -154,6 +154,7 @@ class Autotools (MakefilesBase):
                     "--libdir %(libdir)s %(options)s"
     make_check = 'make check'
     add_host_build_target = True
+    can_configure_cache = False
 
     def configure(self):
         # skip configure if we are already configured
@@ -185,6 +186,11 @@ class Autotools (MakefilesBase):
                 self.configure_tpl += ' --build=%(build)s'
             if self.config.target is not None:
                 self.configure_tpl += ' --target=%(target)s'
+
+        if self.config.use_configure_cache and self.can_configure_cache:
+            cache = os.path.join(self.config.prefix, '.configure.cache')
+            self.config_sh += ' --cache-file=%s' % cache
+
         MakefilesBase.configure(self)
 
 
