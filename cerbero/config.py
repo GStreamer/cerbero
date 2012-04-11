@@ -163,8 +163,9 @@ class Config (object):
                }
 
         if self.platform == Platform.WINDOWS:
+            # for pkg-config installed with the toolchain
+            env['ACLOCAL_FLAGS'] += ' -I %s/share/aclocal' % self.toolchain_prefix
             env['ACLOCAL'] = '%s %s' % (aclocal, env['ACLOCAL_FLAGS'])
-
 
         # set all the variables
         self.env = env
