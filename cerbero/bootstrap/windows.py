@@ -186,10 +186,6 @@ class WindowsBootstraper(BootstraperBase):
             shell.call(cmd)
 
     def fix_lib_paths(self):
-
-        def escape(s):
-            return s.replace('/', '\\/')
-
         orig_sysroot = MINGW_SYSROOT[self.version]
         if self.target_arch == Architecture.X86:
             new_sysroot = os.path.join(self.prefix, 'i686-w64-mingw32', 'lib')
@@ -199,9 +195,15 @@ class WindowsBootstraper(BootstraperBase):
 
         # Replace the old sysroot in all .la files
         for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
-            sed_cmd = SED % (escape(orig_sysroot), escape(new_sysroot),
-                             os.path.abspath(os.path.join(lib_path, path)))
-            shell.call(sed_cmd)
+            self.replace(orig_sysroot, new_sysroot,
+                         os.path.abspath(os.path.join(lib_path, path)))
+
+    def replace(self, orig, replacement, filepath):
+        with open(filepath, 'r') as f:
+            content = f.read()
+        content.replace(orig, replacement)
+        with open(filepath, 'w+') as f:
+            f.write(content)
 
 
 def register_all():
