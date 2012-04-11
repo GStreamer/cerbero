@@ -276,6 +276,7 @@ class CookBook (object):
             except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") %
                                 f)
+            if recipe is None:
                 continue
             self.recipes[recipe.name] = recipe
 
