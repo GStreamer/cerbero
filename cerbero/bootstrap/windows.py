@@ -59,6 +59,8 @@ WINDOWS_BIN_DEPS = ['http://downloads.sourceforge.net/project/win32svn/1.7.2/svn
 GL_HEADERS = ["http://cgit.freedesktop.org/mesa/mesa/plain/include/GL/gl.h",
               "http://www.opengl.org/registry/api/glext.h"]
 
+GENDEF = 'http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/mingw-w64-tools/gendef/?view=tar'
+
 SED = "sed -i 's/%s/%s/g' %s"
 
 
@@ -90,6 +92,7 @@ class WindowsBootstraper(BootstraperBase):
         self.install_gl_headers()
         self.install_python_sdk()
         self.install_pthreads()
+        self.install_gendef()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -115,6 +118,14 @@ class WindowsBootstraper(BootstraperBase):
         shell.download("%s%s" % (MINGW_DOWNLOAD_SOURCE[self.version], tarball), tarfile)
         shell.unpack(tarfile, self.prefix)
         self.fix_lib_paths()
+
+    def install_gendef(self):
+        gendeftar = os.path.join(self.prefix, 'gendef.tar.gz')
+        shell.download(GENDEF, gendeftar)
+        temp = tempfile.mkdtemp()
+        shell.unpack(gendeftar, temp)
+        shell.call('CC=gcc ./configure; make; sudo make install',
+                os.path.join(temp, 'gendef'))
 
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
