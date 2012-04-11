@@ -155,13 +155,15 @@ class RPMPackage(PackagerBase):
 
         # copy the newly created package, which should be in RPMS/$ARCH
         # to the output dir
+        paths = []
         for d in os.listdir(rpmdir):
             for f in os.listdir(os.path.join(rpmdir, d)):
                 out_path = os.path.join(output_dir, f)
                 if os.path.exists(out_path):
                     os.remove(out_path)
+                paths.append(out_path)
                 shutil.move(os.path.join(rpmdir, d, f), output_dir)
-        return output_dir
+        return paths
 
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
