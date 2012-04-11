@@ -127,6 +127,7 @@ class Config (object):
         xdgdatadir = os.path.join(self.prefix, 'share')
         xdgconfigdir = os.path.join(self.prefix, 'etc', 'xdg')
         xcursordir = os.path.join(self.prefix, 'share', 'icons')
+        aclocal = os.environ.get('ACLOCAL', 'aclocal')
         aclocaldir = os.path.join(self.prefix, 'share', 'aclocal')
         perl5lib = self._join_path(os.path.join(self.prefix, 'lib', 'perl5'),
                 os.path.join(self.prefix, 'lib', 'perl5', 'site_perl'))
@@ -152,13 +153,18 @@ class Config (object):
                'XDG_DATA_DIRS': xdgdatadir,
                'XDG_CONFIG_DIRS': xdgconfigdir,
                'XCURSOR_PATH': xcursordir,
-               #'ACLOCAL': aclocaldir,
+               'ACLOCAL_FLAGS': '-I %s' % aclocaldir,
+               'ACLOCAL': aclocal,
                'PERL5LIB': perl5lib,
                'MONO_PREFIX': self.prefix,
                'MONO_GAC_PREFIX': self.prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
                }
+
+        if self.platform == Platform.WINDOWS:
+            env['ACLOCAL'] = '%s %s' % (aclocal, env['ACLOCAL_FLAGS'])
+
 
         # set all the variables
         self.env = env
