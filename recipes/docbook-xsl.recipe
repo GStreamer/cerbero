@@ -9,7 +9,10 @@ class Recipe(recipe.Recipe):
 
     def install(self):
         import os
-        etc_catalog_path = os.path.join(self.config.prefix, 'etc', 'catalog.xml')
+        etc_path =  os.path.join(self.config.prefix, 'etc')
+        if not os.path.exists(etc_path):
+            os.makedirs(etc_path)
+        etc_catalog_path = os.path.join(etc_path, 'catalog.xml')
         new_catalog_path = os.path.join(self.build_dir, 'catalog.xml')
 
         def read_catalog(path):
