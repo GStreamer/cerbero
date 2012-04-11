@@ -61,6 +61,14 @@ GL_HEADERS = ["http://cgit.freedesktop.org/mesa/mesa/plain/include/GL/gl.h",
 
 GENDEF = 'http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/mingw-w64-tools/gendef/?view=tar'
 
+PKGCONFIG = [
+    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip',
+    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.26-1_win32.zip',
+    'http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip',
+    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
+    ]
+
+
 SED = "sed -i 's/%s/%s/g' %s"
 
 
