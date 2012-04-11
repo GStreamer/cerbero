@@ -244,6 +244,11 @@ class RPMPackage(PackagerBase):
         if isinstance(self.package, MetaPackage):
             return ''
         files = PackagerBase.files_list(self, package_type, self.force)
+        for f in [x for x in files if x.endswith('py')]:
+            if f+'c' not in files:
+                files.append(f+'c')
+            if f+'o' not in files:
+                files.append(f+'o')
         return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
 
