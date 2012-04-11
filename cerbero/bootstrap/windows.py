@@ -94,6 +94,9 @@ class WindowsBootstraper(BootstraperBase):
     def check_dirs(self):
         if not os.path.exists(self.prefix):
             os.makedirs(self.prefix)
+        etc_path = os.path.join(self.config.prefix, 'etc')
+        if not os.path.exists(etc_path):
+            os.makedirs(etc_path)
 
     def install_mingw(self):
         tarball = None
