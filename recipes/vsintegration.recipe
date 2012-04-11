@@ -1,0 +1,17 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'vsintegration'
+    version = '0.1'
+    license = 'LGPL'
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_devel = ['share/vs2010']
+
+    def install(self):
+        from cerbero.commands.genvsprops import GenVSProps
+        genvsprops = GenVSProps()
+        genvsprops.runargs(self.config, os.path.join(self.config.prefix,
+            'share', 'vs2010'))

@@ -59,6 +59,18 @@ class Build (object):
         pass
 
 
+class CustomBuild(Build):
+
+    def configure(self):
+        pass
+
+    def compile(self):
+        pass
+
+    def install(self):
+        pass
+
+
 class MakefilesBase (Build):
     '''
     Base class for makefiles build systems like autotools and cmake
@@ -208,6 +220,7 @@ class CMake (MakefilesBase):
 
 class BuildType (object):
 
+    CUSTOM = CustomBuild
     MAKEFILE = MakefilesBase
     AUTOTOOLS = Autotools
     CMAKE = CMake

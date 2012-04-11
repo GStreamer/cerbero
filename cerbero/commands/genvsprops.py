@@ -39,20 +39,23 @@ class GenVSProps(Command):
             ])
 
     def run(self, config, args):
-        if not os.path.exists(args.output_dir):
-            os.makedirs(args.output_dir)
+        self.runargs(config, args.output_dir)
+
+    def runargs(self, config, output_dir):
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         for pc in PkgConfig.list_all():
             p2v = PkgConfig2VSProps(pc, prefix=config.prefix,
                     prefix_replacement='$(%s)' % DEFAULT_PREFIX_MACRO,
                     inherit_common=True)
-            p2v.create(args.output_dir)
+            p2v.create(output_dir)
             m.action('Created %s.vsprops' % pc)
 
         common = CommonProps(config.prefix, DEFAULT_PREFIX_MACRO)
-        common.create(args.output_dir)
+        common.create(output_dir)
         m.message('Property sheets files were sucessfully created in %s' %
-                  os.path.abspath(args.output_dir))
+                  os.path.abspath(output_dir))
 
 
 register_command(GenVSProps)

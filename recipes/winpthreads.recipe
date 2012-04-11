@@ -1,0 +1,30 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'winpthreads'
+    version = '20100604'
+    license = 'LGPL'
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_libs = []
+    files_devel = ['include/pthreads.h']
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            self.libname = 'pthreadGC2-w32.dll'
+        if self.config.target_arch == Architecture.X86_64:
+            self.libname = 'pthreadGC2-w64.dll'
+        self.files_libs = [self.libname]
+
+    def install(self):
+        from cerbero.errors import FatalError
+        if self.config.target_platform != Platform.WINDOWS:
+            raise FatalError("%s can only be installed on Windows" % self.name)
+        import shutil
+        shutil.copy(os.path.join(self.config.toolchain_prefix, 'bin', self.libname),
+                os.path.join(self.config.prefix, 'bin', self.libname))
+        for f in self.files_devel:
+            shutil.copy(os.path.join(self.config.toolchain_prefix, f),
+                        os.path.join(self.config.prefix, f))

@@ -46,6 +46,15 @@ class Source (object):
         raise NotImplemented("'extrat' must be implemented by subclasses")
 
 
+class CustomSource (Source):
+
+    def fetch(self):
+        pass
+
+    def extract(self):
+        pass
+
+
 class GitCache (Source):
     '''
     Base class for source handlers using a Git repository
@@ -194,6 +203,8 @@ class GitExtractedTarball(Git):
 
 
 class SourceType (object):
+
+    CUSTOM = CustomSource
     LOCAL_TARBALL = LocalTarball
     GIT = Git
     GIT_TARBALL = GitExtractedTarball
