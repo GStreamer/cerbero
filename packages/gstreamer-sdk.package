@@ -27,6 +27,9 @@ class MetaPackage(package.MetaPackage):
                ('gtk+-2.0', False, False),
                ('gtk+-2.0-python', False, False),
               ]
+    platform_packages = {
+            Platform.WINDOWS: [('vsintegration', True, False)]}
+
     icon = "gstreamer.ico"
     install_dir = {
         Platform.WINDOWS: 'GStreamer',
