@@ -22,6 +22,7 @@ import sys
 
 ### XML Hacks ###
 
+import re
 import StringIO
 from xml.dom import minidom
 from cerbero.utils import etree
@@ -30,7 +31,9 @@ oldwrite = etree.ElementTree.write
 
 def pretify(string, pretty_print=True):
     parsed = minidom.parseString(string)
-    return parsed.toprettyxml(indent="  ")
+    # See:http://www.hoboes.com/Mimsy/hacks/geektool-taskpaper-and-xml/
+    fix = re.compile(r'((?<=>)(\n[\t]*)(?=[^<\t]))|(?<=[^>\t])(\n[\t]*)(?=<)')
+    return re.sub(fix, '', parsed.toprettyxml())
 
 
 def write(self, file_or_filename, encoding=None, xml_declaration=None,
