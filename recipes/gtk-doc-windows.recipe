@@ -1,0 +1,29 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'gtk-doc-windows'
+    version = '1.18'
+    btype = BuildType.CUSTOM
+
+    files_devel = ['bin/gtkdocize', 'share/aclocal/gtk-doc.m4',
+                   'share/gtk-doc/data/gtk-doc.make']
+
+    def prepare(self):
+        self.repo_dir = os.path.join(self.config.local_sources, 'gtk-doc')
+
+    def install(self):
+        from cerbero.utils import shell
+        import shutil
+        shutil.copy(os.path.join(self.build_dir, 'gtk-doc.m4'),
+                    os.path.join(self.config.prefix, 'share', 'aclocal',
+                                 'gtk-doc.m4'))
+        shutil.copy(os.path.join(self.build_dir, 'gtk-doc.make'),
+                    os.path.join(self.config.prefix, 'share', 'gtk-doc', 'data',
+                                 'gtk-doc.make'))
+        gtkdocize = os.path.join(self.config.prefix, 'bin', 'gtkdocize')
+        shutil.copy(os.path.join(self.build_dir, 'gtkdocize.in'), gtkdocize)
+        replacements = {'@PACKAGE@': 'gtk-doc', '@VERSION@': self.version,
+                        '@prefix@': self.config.prefix,
+                        '@datarootdir@': '${prefix}/share',
+                        '@datadir@': '${datarootdir}'} 
+        shell.replace(gtkdocize, replacements)
