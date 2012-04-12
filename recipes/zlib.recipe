@@ -7,7 +7,8 @@ class Recipe(recipe.Recipe):
     license = 'BSD-like'
     force_configure = True
     add_host_build_target = False
-    btype = BuildType.MAKEFILE
+    can_configure_cache = False
+
 
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
