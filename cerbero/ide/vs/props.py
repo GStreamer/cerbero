@@ -55,40 +55,7 @@ class PropsBase(object):
     def create(self, outdir):
         el = etree.ElementTree(self.root)
         el.write(os.path.join(outdir, '%s.props' % self.name),
-                 encoding='utf-8')
-
-
-class CommonProps(PropsBase):
-
-    def __init__(self, prefix, prefix_macro):
-        PropsBase.__init__(self, 'Common')
-        self._add_root()
-        self._add_skeleton()
-        self._add_macro(prefix_macro, prefix)
-
-
-class Props(PropsBase):
-    '''
-    Creates a MSBUILD properties sheet that imitaties a pkgconfig files to link
-    against a library from VS:
-      * inherits from others properties sheets
-      * add additional includes directories
-      * add additional libraries directories
-      * add link libraries
-    '''
-
-    def __init__(self, name, requires, include_dirs, libs_dirs, libs,
-                 inherit_common=False):
-        PropsBase.__init__(self, name)
-        if inherit_common:
-            requires.append('Common')
-        for require in requires:
-            self._import_property(require)
-        self._add_compiler_props()
-        self._add_linker_props()
-        self._add_include_dirs(include_dirs)
-        self._add_libs_dirs(libs_dirs)
-        self._add_libs(libs)
+                 encoding='utf-8', pretty_print=True)
 
     def _add_compiler_props(self):
         self.compiler = etree.SubElement(self.item_definition_group, 'ClCompile')
@@ -121,5 +88,37 @@ class Props(PropsBase):
     def _fix_path_and_quote(self, path):
         return to_winpath(path)
 
-    def _add_tool(self, name, **kwargs):
-        etree.SubElement(self.root, 'Tool', Name=name, **kwargs)
+
+class CommonProps(PropsBase):
+
+    def __init__(self, prefix, prefix_macro):
+        PropsBase.__init__(self, 'Common')
+        self._add_root()
+        self._add_skeleton()
+        self._add_macro(prefix_macro, prefix)
+        self._add_compiler_props()
+        self._add_include_dirs(['$(%s)\include' % prefix_macro])
+
+
+class Props(PropsBase):
+    '''
+    Creates a MSBUILD properties sheet that imitaties a pkgconfig files to link
+    against a library from VS:
+      * inherits from others properties sheets
+      * add additional includes directories
+      * add additional libraries directories
+      * add link libraries
+    '''
+
+    def __init__(self, name, requires, include_dirs, libs_dirs, libs,
+                 inherit_common=False):
+        PropsBase.__init__(self, name)
+        if inherit_common:
+            requires.append('Common')
+        for require in requires:
+            self._import_property(require)
+        self._add_compiler_props()
+        self._add_linker_props()
+        self._add_include_dirs(include_dirs)
+        self._add_libs_dirs(libs_dirs)
+        self._add_libs(libs)
