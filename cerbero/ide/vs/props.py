@@ -34,14 +34,15 @@ class PropsBase(object):
     def _add_skeleton(self):
         self.import_group = etree.SubElement(self.root, 'ImportGroup',
                 Label='PropertySheets')
-        self.property_group = etree.SubElement(self.root, 'PropertyGroup',
+        self.user_macros_group = etree.SubElement(self.root, 'PropertyGroup',
                 Label='UserMacros')
+        self.property_group = etree.SubElement(self.root, 'PropertyGroup')
         self.item_definition_group = etree.SubElement(self.root,
                 'ItemDefinitionGroup')
         self.item_group = etree.SubElement(self.root, 'ItemGroup')
 
     def _add_macro(self, name, value):
-        m = etree.SubElement(self.property_group, name)
+        m = etree.SubElement(self.user_macros_group, name)
         m.text = value
         bm = etree.SubElement(self.item_group, 'BuildMacro', Include=name)
         val = etree.SubElement(bm, 'Value')
@@ -50,7 +51,9 @@ class PropsBase(object):
         ev.text = 'true'
 
     def _import_property(self, name):
-        etree.SubElement(self.import_group, 'Import', Project='%s.props' % name)
+        cond = '$(%sImported)!=true' % self._format_name(name)
+        etree.SubElement(self.import_group, 'Import', Condition=cond,
+                         Project='%s.props' % name)
 
     def create(self, outdir):
         el = etree.ElementTree(self.root)
@@ -75,6 +78,11 @@ class PropsBase(object):
         self._add_var(self.linker, 'AdditionalDependencies',
             self._format_libs(libs))
 
+    def _add_imported_variable(self):
+        el = etree.SubElement(self.property_group, '%sImported' %
+                              self._format_name(self.name))
+        el.text = 'true'
+
     def _add_var(self, parent, name, content):
         el = etree.SubElement(parent, name)
         el.text = content + ';%%(%s)' % name
@@ -88,6 +96,10 @@ class PropsBase(object):
     def _fix_path_and_quote(self, path):
         return to_winpath(path)
 
+    def _format_name(self, name):
+        name = name.replace('+','_').replace('-', '_').replace('.', '_')
+        return name
+
 
 class CommonProps(PropsBase):
 
@@ -98,6 +110,7 @@ class CommonProps(PropsBase):
         self._add_macro(prefix_macro, prefix)
         self._add_compiler_props()
         self._add_include_dirs(['$(%s)\include' % prefix_macro])
+        self._add_imported_variable()
 
 
 class Props(PropsBase):
@@ -122,3 +135,4 @@ class Props(PropsBase):
         self._add_include_dirs(include_dirs)
         self._add_libs_dirs(libs_dirs)
         self._add_libs(libs)
+        self._add_imported_variable()
