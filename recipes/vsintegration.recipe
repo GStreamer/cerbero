@@ -8,10 +8,15 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 
-    files_devel = ['share/vs2010']
+    files_devel = ['share/vs/2010/libs', 'lib/libmoldname.a']
 
     def install(self):
+        import shutil
         from cerbero.commands.genvsprops import GenVSProps
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, os.path.join(self.config.prefix,
-            'share', 'vs2010'))
+                           self.files_devel[0]))
+        filename = os.path.basename(self.files_devel[1])
+        mingw_libdir = os.path.join(self.config.toolchain_prefix, 'mingw', 'lib')
+        shutil.copy(os.path.join(mingw_libdir, filename),
+                    os.path.join(self.config.prefix, 'lib', filename))
