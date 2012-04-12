@@ -141,12 +141,15 @@ class MetaPackage(PackageBase):
 
     @cvar packages: list of packages grouped in this meta package
     @type packages: list
+    @cvar platform_packages: list of platform packages
+    @type platform_packages: dict
     @cvar icon: filename of the package icon
     @type icon: str
     '''
 
     icon = None
     packages = []
+    platfrom_packages = {}
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config)
@@ -170,3 +173,17 @@ class MetaPackage(PackageBase):
         for name in self.store.get_package_deps(self.name):
             files.extend(func(self.store.get_package(name)))
         return sorted(files)
+
+    def __getattribute__(self, name):
+        if name == 'packages':
+            attr = object.__getattribute__(self, name)
+            ret = attr[:]
+            platform_attr_name = 'platform_%s' % name
+            if hasattr(self, platform_attr_name):
+                platform_attr = object.__getattribute__(self, platform_attr_name)
+                if self.config.target_platform in platform_attr:
+                    platform_list = platform_attr[self.config.target_platform]
+                    ret.extend(platform_list)
+            return ret
+        else:
+            return object.__getattribute__(self, name)
