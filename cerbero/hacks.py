@@ -61,5 +61,10 @@ class _Environ(environclass):
         return self.data.get(key, failobj)
 
 
+def join(*args):
+    return '/'.join(args)
+
+
 if sys.platform.startswith('win'):
     os.environ = _Environ(os.environ)
+    os.path.join = join

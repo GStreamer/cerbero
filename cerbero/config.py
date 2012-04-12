@@ -91,10 +91,8 @@ class Config (object):
         self._create_path(self.sources)
 
     def parse(self, filename, reset=True):
-        if reset:
-            config = {}
-        else:
-            config = {}
+        config = {'os': os}
+        if not reset:
             for prop in self._properties:
                 if hasattr(self, prop):
                     config[prop] = getattr(self, prop)
