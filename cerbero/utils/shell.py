@@ -213,3 +213,13 @@ def find_newer_files(prefix, compfile):
         prefix, True, False, False).split('\n')
     sfiles.remove('')
     return sfiles
+
+
+def replace(filepath, replacements):
+    ''' Replaces keys in the 'replacements' dict with their values in file '''
+    with open(filepath, 'r') as f:
+        content = f.read()
+    for k, v in replacements.iteritems():
+        content = content.replace(k, v)
+    with open(filepath, 'w+') as f:
+        f.write(content)

@@ -208,15 +208,8 @@ class WindowsBootstraper(BootstraperBase):
 
         # Replace the old sysroot in all .la files
         for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
-            self.replace(orig_sysroot, new_sysroot,
-                         os.path.abspath(os.path.join(lib_path, path)))
-
-    def replace(self, orig, replacement, filepath):
-        with open(filepath, 'r') as f:
-            content = f.read()
-        content.replace(orig, replacement)
-        with open(filepath, 'w+') as f:
-            f.write(content)
+            shell.replace(os.path.abspath(os.path.join(lib_path, path)),
+                          {orig_sysroot: new_sysroot})
 
 
 def register_all():
