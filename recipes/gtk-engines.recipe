@@ -47,5 +47,6 @@ class Recipe(recipe.Recipe):
             theme = "MS-Windows"
         gtkrc = 'gtk-theme-name = "%s"\n '\
                 'gtk-fallback-icon-theme = "Tango"' % theme
-        with open(os.path.join(self.config.prefix, 'etc', 'gtk-2.0' 'gtkrc'), 'w') as f:
+        gtkrc_file = os.path.join(self.config.prefix, 'etc', 'gtk-2.0', 'gtkrc')
+        with open(gtkrc_file, 'w+') as f:
             f.write(gtkrc)
