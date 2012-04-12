@@ -51,23 +51,18 @@ DIRECTX_HEADERS = \
 
 MINGWGET_DEPS = ['msys-wget']
 
-WINDOWS_BIN_DEPS = ['http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
+SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+
+WINDOWS_BIN_DEPS = [
                     'http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip',
                     'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
+                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.26-1_win32.zip',
                     'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip']
 
 GL_HEADERS = ["http://cgit.freedesktop.org/mesa/mesa/plain/include/GL/gl.h",
               "http://www.opengl.org/registry/api/glext.h"]
 
 GENDEF = 'http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/mingw-w64-tools/gendef/?view=tar'
-
-PKGCONFIG = [
-    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip',
-    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.26-1_win32.zip',
-    'http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip',
-    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
-    ]
-
 
 SED = "sed -i 's/%s/%s/g' %s"
 
@@ -132,7 +127,11 @@ class WindowsBootstraper(BootstraperBase):
         shell.download(GENDEF, gendeftar)
         temp = tempfile.mkdtemp()
         shell.unpack(gendeftar, temp)
-        shell.call('CC=gcc ./configure; make; sudo make install',
+        if self.platform != Platform.WINDOWS:
+            sudo = 'sudo'
+        else:
+            sudo = ''
+        shell.call('CC=gcc ./configure; make; %s make install' % sudo,
                 os.path.join(temp, 'gendef'))
 
     def install_pthreads(self):
@@ -182,6 +181,12 @@ class WindowsBootstraper(BootstraperBase):
             path = os.path.join(temp, 'download.zip')
             shell.download(url, path)
             shell.unpack(path, self.config.toolchain_prefix)
+        temp = tempfile.mkdtemp()
+        path = os.path.join(temp, 'download.zip')
+        shell.download(SVN, path)
+        shell.unpack(path, temp)
+        dirpath = os.path.join(temp, os.path.splitext(os.path.split(SVN)[1])[0])
+        shell.call('cp -r %s/* %s' % (dirpath, self.config.toolchain_prefix))
 
     def install_gl_headers(self):
         m.action(_("Installing OpenGL headers"))
