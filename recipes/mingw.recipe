@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'mingw'
+    version = '0.1'
+    license = 'LGPL'
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_libs = ['libgcc_s_sjlj-1']
+
+    def install(self):
+        import shutil
+        from cerbero.errors import FatalError
+        if self.config.target_platform != Platform.WINDOWS:
+            raise FatalError("%s can only be installed on Windows" % self.name)
+        for f in self.files_libs:
+            shutil.copy(os.path.join(self.config.toolchain_prefix, 'mingw',
+                                     'lib', f + '.dll'),
+                os.path.join(self.config.prefix, 'bin', f + '.dll'))
