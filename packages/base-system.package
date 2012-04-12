@@ -18,6 +18,7 @@ class Package(package.Package):
              'libxml2:libs', 'pixman:libs', 'zlib:libs', 'bzip2:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang'],
+        Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
+                           'winpthreads', 'mingw'],
         Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang']
         }
