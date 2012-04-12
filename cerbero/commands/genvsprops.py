@@ -52,7 +52,7 @@ class GenVSProps(Command):
             p2v.create(output_dir)
             m.action('Created %s.vsprops' % pc)
 
-        common = CommonProps(config.prefix, DEFAULT_PREFIX_MACRO)
+        common = CommonProps('@FIXME!!!@', DEFAULT_PREFIX_MACRO)
         common.create(output_dir)
         m.message('Property sheets files were sucessfully created in %s' %
                   os.path.abspath(output_dir))
