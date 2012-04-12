@@ -36,11 +36,11 @@ class FilesProvider(object):
 
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sext': '*.dll', 'sdir': 'bin',
-                           'mext': '.dll', 'smext': '.a'},
+            'mext': '.dll', 'smext': '.a', 'pext': '.pyd'},
         Platform.LINUX: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
-                         'mext': '.so', 'smext': '.a'},
+            'mext': '.so', 'smext': '.a', 'pext': '.so'},
         Platform.DARWIN: {'bext': '', 'sext': '.*.dylib', 'sdir': 'lib',
-                          'mext': '.so', 'smext': '.a'}}
+            'mext': '.so', 'smext': '.a', 'pext': '.so'}}
 
     def __init__(self, config):
         self.config = config

@@ -6,26 +6,21 @@ class Recipe(recipe.Recipe):
     deps = ['pygobject', 'py2cairo', 'glib', 'atk', 'gtk+', 'pango']
 
     files_python = [
-         'site-packages/pygtk.py',
-         'site-packages/gtk-2.0/atk%(mext)s',
-         'site-packages/gtk-2.0/dsextras.py',
-         'site-packages/gtk-2.0/pango%(mext)s',
-         'site-packages/gtk-2.0/pangocairo%(mext)s',
-         'site-packages/gtk-2.0/gio/_gio%(mext)s',
-         'site-packages/gtk-2.0/gio/__init__.py',
+         'site-packages/gtk-2.0/atk%(pext)s',
+         'site-packages/gtk-2.0/pango%(pext)s',
+         'site-packages/gtk-2.0/pangocairo%(pext)s',
          'site-packages/gtk-2.0/gtk/compat.py',
          'site-packages/gtk-2.0/gtk/deprecation.py',
-         'site-packages/gtk-2.0/gtk/_gtk%(mext)s',
+         'site-packages/gtk-2.0/gtk/_gtk%(pext)s',
          'site-packages/gtk-2.0/gtk/__init__.py',
          'site-packages/gtk-2.0/gtk/keysyms.py',
          'site-packages/gtk-2.0/gtk/_lazyutils.py',
     ]
     platform_files_python = {
-        Platform.WINDOWS: ['site-packages/gtk-2.0/gio/win32%(mext)s', ],
-        Platform.DARWIN: ['site-packages/gtk-2.0/gio/unix%(mext)s', ],
-        Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(mext)s', ],
+        Platform.DARWIN: ['site-packages/gtk-2.0/gio/unix%(pext)s', ],
+        Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(pext)s', ],
     }
-    files_devel = ['include/pygtk-2.0', 'lib/pkgconfig/pygtk-2.0.pc']
+    files_devel = ['include/pygtk-2.0/pygtk', 'lib/pkgconfig/pygtk-2.0.pc']
     files_demo = ['lib/pygtk/2.0/demos/',
                   'lib/pygtk/2.0/pygtk-demo.py',
                   'lib/pygtk/2.0/pygtk-demo.pyo',

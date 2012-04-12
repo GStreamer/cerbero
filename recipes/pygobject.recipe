@@ -6,11 +6,18 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection'
 
     files_libs = ['libpyglib-2.0-python']
-    files_python = ['site-packages/glib/_glib%(mext)s',
+    files_python = ['site-packages/glib/_glib%(pext)s',
                     'site-packages/glib/__init__.py',
                     'site-packages/glib/option.py',
                     'site-packages/gobject/constants.py',
-                    'site-packages/gobject/_gobject%(mext)s',
+                    'site-packages/gobject/_gobject%(pext)s',
                     'site-packages/gobject/__init__.py',
-                    'site-packages/gobject/propertyhelper.py']
-    files_devel = ['lib/pkgconfig/pygobject-2.0.pc']
+                    'site-packages/gobject/propertyhelper.py',
+                    'site-packages/gtk-2.0/dsextras.py',
+                    'site-packages/gtk-2.0/gio/_gio%(pext)s',
+                    'site-packages/gtk-2.0/gio/__init__.py',
+                    'site-packages/pygtk.py',
+    ]
+    files_devel = ['lib/pkgconfig/pygobject-2.0.pc',
+                   'include/pygtk-2.0/pyglib.h',
+                   'include/pygtk-2.0/pygobject.h']
