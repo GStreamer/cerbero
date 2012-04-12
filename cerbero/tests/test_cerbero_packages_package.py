@@ -21,8 +21,9 @@ import unittest
 import tempfile
 
 from cerbero.config import Platform
-from cerbero.tests.test_packages_common import Package1
+from cerbero.tests.test_packages_common import Package1, MetaPackage
 from cerbero.tests.test_build_common import create_cookbook, add_files
+from cerbero.tests.test_packages_common import create_store
 from cerbero.tests.test_common import DummyConfig
 
 
@@ -87,3 +88,50 @@ class PackageTest(unittest.TestCase):
 
         self.assertEquals(sorted(windevfiles), self.win32package.devel_files_list())
         self.assertEquals(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
+
+
+class TestMetaPackages(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        config = Config(self.tmp, Platform.LINUX)
+        self.store = create_store(config)
+        self.package = MetaPackage(config, self.store)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def _compareList(self, func_name):
+        list_func = getattr(self.package, func_name)
+        packages = [self.store.get_package(x) for x in \
+                    self.package.list_packages()]
+        files = []
+        for package in packages:
+            list_func = getattr(package, func_name)
+            files.extend(list_func())
+
+        list_func = getattr(self.package, func_name)
+        self.assertEquals(sorted(files), list_func())
+
+    def testListPackages(self):
+        expected = ['gstreamer-test1', 'gstreamer-test3',
+                'gstreamer-test-bindings', 'gstreamer-test2']
+        self.assertEquals(self.package.list_packages(), expected)
+
+    def testPlatfromPackages(self):
+        packages_attr = object.__getattribute__(self.package, 'packages')
+        self.assertEquals(len(packages_attr), 3)
+        platform_packages_attr = object.__getattribute__(self.package,
+                                                         'platform_packages')
+        self.assertEquals(len(platform_packages_attr), 1)
+        self.assertEquals(len(self.package.packages),
+                len(packages_attr) + len(platform_packages_attr))
+
+    def testFilesList(self):
+        self._compareList('files_list')
+
+    def testDevelFilesList(self):
+        self._compareList('devel_files_list')
+
+    def testAllFilesList(self):
+        self._compareList('all_files_list')

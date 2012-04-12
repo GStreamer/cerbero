@@ -89,6 +89,8 @@ class MetaPackage(package.MetaPackage):
                 ('gstreamer-test1', True, True),
                 ('gstreamer-test3', False, True),
                 ('gstreamer-test-bindings', False, False)]
+    platform_packages = {
+            Platform.LINUX: [('gstreamer-test2', False, False)]}
     icon = "gstreamer.ico"
 
 
