@@ -74,11 +74,6 @@ class GitCache (Source):
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
 
     def fetch(self):
-        if self.supports_non_src_build:
-            if not os.path.exists(self.repo_dir):
-                os.mkdir(self.repo_dir)
-            return
-
         if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
         for remote, url in self.remotes.iteritems():
@@ -158,6 +153,9 @@ class Git (GitCache):
             shutil.rmtree(self.build_dir)
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
+        if self.supports_non_src_build:
+            return
+
         # checkout the current version
         git.local_checkout(self.build_dir, self.repo_dir, self.commit)
         return True

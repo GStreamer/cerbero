@@ -169,6 +169,8 @@ class Autotools (MakefilesBase):
     can_configure_cache = False
 
     def configure(self):
+        if self.supports_non_src_build:
+            self.config_sh = os.path.join(self.repo_dir, self.config_sh)
         # skip configure if we are already configured
         if os.path.exists(os.path.join(self.make_dir, 'configure')) and\
                 os.path.exists(os.path.join(self.make_dir, 'Makefile')):
