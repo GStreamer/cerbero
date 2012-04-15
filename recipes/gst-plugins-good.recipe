@@ -120,4 +120,4 @@ class Recipe(recipe.Recipe):
                 # remove taglib dependency, which cannot be crosscompiled
                 self.deps.remove('taglib')
             self.configure_options += '--disable-aalib --disable-esd '\
-                '--disable-dv '
+                '--disable-dv --disable-gtk-doc'
