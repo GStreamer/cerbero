@@ -9,3 +9,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['liba52']
     files_bins = ['a52dec']
     files_devel = ['include/a52dec']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.autoreconf = True
