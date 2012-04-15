@@ -23,4 +23,4 @@ class Recipe(recipe.Recipe):
                     pref, fail=False )
         libdir = '%(prefix)s/%(host)s/lib' % pref
         archlibdir = '%(prefix)s/%(host)s/%(lib)s' % pref
-        shell.call('ln -s %s %s' % (libdir, archlibdir))
+        shell.call('ln -s %s %s' % (libdir, archlibdir), fail=False)
