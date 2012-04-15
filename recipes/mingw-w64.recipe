@@ -1,0 +1,12 @@
+class Recipe(recipe.Recipe):
+    name = 'mingw-w64'
+    version = 'v2.0.1'
+    configure_options = '--build=x86_64-pc-linux --with-sysroot=$CERBERO_PREFIX'
+    deps = ['mingw-w64-headers', 'binutils', 'gcc-core']
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            host = 'i686-w64-mingw32'
+        else:
+            host = 'x86_64-w64-mingw32'
+        self.configure_options += ' --host=%s' % host

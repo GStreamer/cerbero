@@ -1,0 +1,11 @@
+class Recipe(recipe.Recipe):
+    name = 'binutils'
+    version = '2.22'
+    configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            target = 'i686-w64-mingw32'
+        else:
+            target = 'x86_64-w64-mingw32'
+        self.configure_options += ' --target=%s' % target

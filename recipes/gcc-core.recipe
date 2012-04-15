@@ -1,0 +1,24 @@
+class Recipe(recipe.Recipe):
+    name = 'gcc-core'
+    version = '4.6.2'
+    configure_options = '--disable-multilib'
+    make = 'make all-gcc'
+    make_install = 'make install-gcc'
+    use_system_libs = True
+    supports_non_src_build = True
+    deps = ['mingw-w64-headers']
+
+    def prepare(self):
+        self.remotes = {'origin': '%s/%s' %
+                        (self.config.git_root, 'gcc')}
+        self.repo_dir = os.path.join(self.config.local_sources, 'gcc')
+        self.build_dir = os.path.join(self.config.sources, 'gcc-%s' %
+                                      self.version)
+        self.make_dir = os.path.abspath(os.path.join(self.build_dir,
+                                                     self.srcdir))
+
+        if self.config.target_arch == Architecture.X86:
+            target = 'i686-w64-mingw32'
+        else:
+            target = 'x86_64-w64-mingw32'
+        self.configure_options += ' --target=%s' % target

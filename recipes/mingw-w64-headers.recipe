@@ -1,0 +1,26 @@
+class Recipe(recipe.Recipe):
+    name = 'mingw-w64-headers'
+    version = 'v2.0.1'
+    srcdir = 'mingw-w64-headers'
+
+    def prepare(self):
+        self.remotes = {'origin': '%s/%s' %
+                                (self.config.git_root, 'mingw-w64')}
+        if self.config.target_arch == Architecture.X86:
+            self.host = 'i686-w64-mingw32'
+        else:
+            self.host = 'x86_64-w64-mingw32'
+        self.configure_options += ' --host=%s' % self.host
+
+    def post_install(self):
+        from cerbero.utils import shell
+        lib = 'lib32'
+        if self.config.target_arch == Architecture.X86_64:
+            lib = 'lib64'
+        pref = {'prefix': self.config.prefix, 'host': self.host,
+                'lib': lib}
+        shell.call('ln -s %(prefix)s/%(host)s %(prefix)s/mingw' %
+                    pref, fail=False )
+        libdir = '%(prefix)s/%(host)s/lib' % pref
+        archlibdir = '%(prefix)s/%(host)s/%(lib)s' % pref
+        shell.call('ln -s %s %s' % (libdir, archlibdir))

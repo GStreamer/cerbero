@@ -1,0 +1,9 @@
+class Recipe(recipe.Recipe):
+    name = 'gcc'
+    version = '4.6.2'
+    supports_non_src_build = True
+    stype = SourceType.CUSTOM
+    deps = ['mingw-w64']
+
+    def prepare(self):
+        self._remove_steps(['configure'])
