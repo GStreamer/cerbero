@@ -83,9 +83,10 @@ class PackagesStore (object):
         '''
         p = self.get_package(package_name)
         if isinstance(p, package.MetaPackage):
-            return sorted(x.name for x in self._list_metapackage_deps(p))
+            ret = sorted(x.name for x in self._list_metapackage_deps(p))
         else:
-            return sorted(p.deps)
+            ret = sorted(p.deps)
+        return [self.get_package(x) for x in ret]
 
     def get_package_files_list(self, name):
         '''

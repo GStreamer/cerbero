@@ -1,9 +1,6 @@
 import os
 from cerbero.config import Platform, Architecture, Distro, DistroVersion
 
-prefix=os.path.expanduser('~/cerbero/windows-x86_64')
-sources=os.path.expanduser('~/cerbero/sources/win64')
-toolchain_prefix=os.path.expanduser('~/mingw/w64')
 target_platform=Platform.WINDOWS
 target_arch=Architecture.X86_64
 target_distro=Distro.WINDOWS

@@ -350,8 +350,8 @@ class PMDoc(object):
 
     def create(self):
         packages = self.store.get_package_deps(self.package.name)
-        for p_name in packages:
-            self._create_pkgref_and_contents(self.store.get_package(p_name))
+        for p in packages:
+            self._create_pkgref_and_contents(p)
 
         index = Index(self.package, self.store, self.outdir, self.emptypkgs,
                       self.package_type)

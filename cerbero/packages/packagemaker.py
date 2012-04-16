@@ -133,19 +133,18 @@ class PMDocPackage(PackagerBase):
 
     def _create_packages(self, devel, force):
         self.empty_packages = []
-        for p_name in self.packages:
-            package = self.store.get_package(p_name)
-            m.action(_("Creating package %s ") % p_name)
-            packager = OSXPackage(self.config, package, self.store)
+        for p in self.packages:
+            m.action(_("Creating package %s ") % p)
+            packager = OSXPackage(self.config, p, self.store)
             try:
                 paths = packager.pack(self.tmp, devel, force)
             except EmptyPackageError:
-                self.empty_packages.append(p_name)
-                m.warning(_("Package %s is empty") % p_name)
+                self.empty_packages.append(p.name)
+                m.warning(_("Package %s is empty") % p)
             m.action(_("Package created sucessfully"))
-            self.packages_paths[package.name] = paths[0]
+            self.packages_paths[p.name] = paths[0]
             if devel:
-                devel_name = package.name + PackageType.DEVEL
+                devel_name = p.name + PackageType.DEVEL
                 if paths[1] is not None:
                     self.packages_paths[devel_name] = paths[1]
                 else:

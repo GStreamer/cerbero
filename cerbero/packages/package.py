@@ -74,6 +74,9 @@ class PackageBase(object):
         except:
             return self.config.install_dir
 
+    def __str__(self):
+        return self.name
+
 
 class Package(PackageBase):
     '''
@@ -170,9 +173,10 @@ class MetaPackage(PackageBase):
     def _list_files(self, func):
         # for each package, call the function that list files
         files = []
-        for name in self.store.get_package_deps(self.name):
-            files.extend(func(self.store.get_package(name)))
-        return sorted(files)
+        for package in self.store.get_package_deps(self.name):
+            files.extend(func(package))
+        files.sort()
+        return files
 
     def __getattribute__(self, name):
         if name == 'packages':

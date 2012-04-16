@@ -79,9 +79,11 @@ class PackageTest(unittest.TestCase):
 
     def testPackageDeps(self):
         package = common.Package1(self.config, None)
+        package2 = common.Package2(self.config, None)
         self.store.add_package(package)
+        self.store.add_package(package2)
         self.assertEquals(package.deps,
-            self.store.get_package_deps(package.name))
+            [x.name for x in self.store.get_package_deps(package.name)])
 
     def testMetaPackageDeps(self):
         metapackage = common.MetaPackage(self.config, None)
@@ -95,7 +97,8 @@ class PackageTest(unittest.TestCase):
             self.store.add_package(p)
         deps = ['gstreamer-test-bindings', 'gstreamer-test1',
                 'gstreamer-test2', 'gstreamer-test3']
-        self.assertEquals(deps, self.store.get_package_deps(metapackage.name))
+        self.assertEquals(deps,
+            [x.name for x in self.store.get_package_deps(metapackage.name)])
 
     def testLoadPackageFromFile(self):
         package_file = tempfile.NamedTemporaryFile()

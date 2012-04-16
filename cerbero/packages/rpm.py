@@ -167,8 +167,7 @@ class RPMPackage(PackagerBase):
 
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
-            packager = RPMPackage(self.config, self.store.get_package(p),
-                                  self.store)
+            packager = RPMPackage(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, False, tmpdir)
             except EmptyPackageError:

@@ -185,10 +185,9 @@ class Installer(WixBase):
         mergemodules = []
         packagedeps = self.store.get_package_deps(self.package)
         for p in packagedeps:
-            package = self.store.get_package(p)
-            mergemodule = MergeModule(self.config, package, self.store)
+            mergemodule = MergeModule(self.config, p, self.store)
             mergemodule.pack(output_dir)
-            mergemodules.append('%s.msm' % package.name)
+            mergemodules.append('%s.msm' % p)
 
         sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
         self.write(sources)
