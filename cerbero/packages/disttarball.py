@@ -19,7 +19,9 @@
 import os
 import tarfile
 
-from cerbero.errors import UsageError
+import cerbero.utils.messages as m
+from cerbero.utils import _
+from cerbero.errors import UsageError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 
 
@@ -35,7 +37,11 @@ class DistTarball(PackagerBase):
              package_prefix=''):
         dist_files =  self.files_list(PackageType.RUNTIME, force)
         if devel:
-            devel_files = self.files_list(PackageType.DEVEL, force)
+            try:
+                devel_files = self.files_list(PackageType.DEVEL, force)
+            except EmptyPackageError:
+                m.warning(_("The development package is empty"))
+                devel_files = []
         else:
             devel_files = []
 
@@ -47,7 +53,7 @@ class DistTarball(PackagerBase):
                                        dist_files, force, package_prefix)
         filenames.append(runtime)
 
-        if split and devel:
+        if split and devel and len(devel_files) != 0:
             devel = self._create_tarball(output_dir, PackageType.DEVEL,
                                          devel_files, force, package_prefix)
             filenames.append(devel)
