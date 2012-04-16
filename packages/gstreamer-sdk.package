@@ -18,6 +18,7 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-codecs', False, True),
                ('gstreamer-effects', False, True),
                ('gstreamer-networking', False, True),
+               ('gstreamer-system', False, True),
                ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
                ('gstreamer-clutter', False, False),
