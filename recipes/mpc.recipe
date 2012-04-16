@@ -1,0 +1,7 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'mpc'
+    configure_options = "--disable-static --enable-shared"
+    version = '0.8.2'
+    autoreconf = True
