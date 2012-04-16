@@ -9,17 +9,23 @@ class Recipe(recipe.Recipe):
                    'share/gtk-doc/data/gtk-doc.make']
 
     def prepare(self):
+        self.remotes['origin'] = '%s/%s.git' % \
+            (self.config.git_root, 'gtk-doc')
         self.repo_dir = os.path.join(self.config.local_sources, 'gtk-doc')
 
     def install(self):
         from cerbero.utils import shell
         import shutil
+        aclocal_dir = os.path.join(self.config.prefix, 'share', 'aclocal')
+        if not os.path.exists(aclocal_dir):
+            os.makedirs(aclocal_dir)
+        data_dir = os.path.join(self.config.prefix, 'share', 'gtk-doc', 'data')
+        if not os.path.exists(data_dir):
+            os.makedirs(data_dir)
         shutil.copy(os.path.join(self.build_dir, 'gtk-doc.m4'),
-                    os.path.join(self.config.prefix, 'share', 'aclocal',
-                                 'gtk-doc.m4'))
+                    os.path.join(aclocal_dir, 'gtk-doc.m4'))
         shutil.copy(os.path.join(self.build_dir, 'gtk-doc.make'),
-                    os.path.join(self.config.prefix, 'share', 'gtk-doc', 'data',
-                                 'gtk-doc.make'))
+                    os.path.join(data_dir,  'gtk-doc.make'))
         gtkdocize = os.path.join(self.config.prefix, 'bin', 'gtkdocize')
         shutil.copy(os.path.join(self.build_dir, 'gtkdocize.in'), gtkdocize)
         replacements = {'@PACKAGE@': 'gtk-doc', '@VERSION@': self.version,
