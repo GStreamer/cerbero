@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
         directx_headers = os.path.join(self.prefix, self.host, 'include', 'directx')
         if not os.path.exists(directx_headers):
             os.makedirs(directx_headers)
-        shell.call('cp mingw-w64-headers/direct-x/include/*h %s' % directx_headers,
+        shell.call('cp mingw-w64-headers/direct-x/include/* %s' % directx_headers,
                 self.build_dir)
 
     files_headers = [
