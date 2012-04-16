@@ -85,6 +85,7 @@ class MakefilesBase (Build):
     make_check = None
     make_clean = 'make clean'
     use_system_libs = False
+    allow_parallel_build = False
     srcdir = '.'
 
     def __init__(self):
@@ -92,7 +93,8 @@ class MakefilesBase (Build):
         Build.__init__(self)
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
-        if self.config.allow_parallel_build and self.config.num_of_cpus > 1:
+        if self.config.allow_parallel_build and self.allow_parallel_build \
+                and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
 
     def system_libs(func):
