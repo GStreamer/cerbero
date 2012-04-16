@@ -166,7 +166,8 @@ class Autotools (MakefilesBase):
                     "--libdir %(libdir)s %(options)s"
     make_check = 'make check'
     add_host_build_target = True
-    can_configure_cache = False
+    can_use_configure_cache = True
+    supports_cache_variables = True
 
     def configure(self):
         if self.supports_non_src_build:
@@ -185,7 +186,8 @@ class Autotools (MakefilesBase):
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
 
-        if self.config.platform == Platform.WINDOWS:
+        if self.config.platform == Platform.WINDOWS and \
+                self.supports_cache_variables:
             # On windows, environment variables are upperscase, but we still
             # need to pass things like am_cv_python_platform in lowercase for
             # configure and autogen.sh
@@ -201,7 +203,7 @@ class Autotools (MakefilesBase):
             if self.config.target is not None:
                 self.configure_tpl += ' --target=%(target)s'
 
-        if self.config.use_configure_cache and self.can_configure_cache:
+        if self.config.use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.prefix, '.configure.cache')
             self.config_sh += ' --cache-file=%s' % cache
 

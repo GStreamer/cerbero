@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     license = 'LGPLv2'
     configure_sh = 'sh autogen.sh'
     deps = ['libffi', 'zlib']
-    can_configure_cache = False
+    can_use_configure_cache = False
     platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
                      Platform.DARWIN: ['libiconv', 'gettext']}
 

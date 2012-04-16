@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm "
     add_host_build_target = False
+    supports_cache_variables = False
 
     files_libs = ['libvpx']
     files_bins = ['vpxenc', 'vpxdec']

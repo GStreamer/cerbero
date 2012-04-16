@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     license = 'BSD-like'
     force_configure = True
     add_host_build_target = False
-    can_configure_cache = False
+    can_use_configure_cache = False
 
 
     files_libs = ['libz']
