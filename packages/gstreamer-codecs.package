@@ -16,7 +16,11 @@ class Package(package.Package):
             'fribidi:libs', 'jasper:libs', 'jpeg:libs', 'libkate:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
-            'libdv:libs', 'taglib:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
             'gst-plugins-bad:codecs'
     ]
+
+    platform_files = {
+            Platform.LINUX: ['libdv:libs'],
+            Platform.DARWIN: ['libdv:libs']
+    }

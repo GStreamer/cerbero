@@ -116,8 +116,5 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            if self.config.platform == Platform.LINUX:
-                # remove taglib dependency, which cannot be crosscompiled
-                self.deps.remove('taglib')
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv --disable-gtk-doc'
