@@ -53,14 +53,17 @@ class Build(Command):
             Command.__init__(self, args)
 
     def run(self, config, args):
-        cookbook = CookBook(config)
-        recipe_name = args.recipe[0]
-        missing_files = args.missing_files
-
         if self.force is None:
             self.force = args.force
         if self.no_deps is None:
             self.no_deps = args.no_deps
+        self.runargs(config, args.recipe[0], args.missing_files, self.force,
+                     self.no_deps)
+
+    def runargs(self, config, recipe_name, missing_files=False, force=False,
+                no_deps=False, cookbook=None):
+        if cookbook is None:
+            cookbook = CookBook(config)
 
         recipe = cookbook.get_recipe(recipe_name)
 

@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.commands import Command, register_command
+from cerbero.commands import Command, register_command, build
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.errors import PackageNotFoundError
@@ -45,23 +45,38 @@ class Package(Command):
             ArgparseArgument('-d', '--no-devel', action='store_false',
                 default=True, help=_('Do not create the development version '
                     'of this package')),
+            ArgparseArgument('-s', '--skip-deps-build', action='store_true',
+                default=False, help=_('Do not build the recipes needed to '
+                    'create this package')),
             ])
 
     def run(self, config, args):
-        store = PackagesStore(config)
-        p = store.get_package(args.package[0])
+        self.store = PackagesStore(config)
+        p = self.store.get_package(args.package[0])
+
+        if not args.skip_deps_build:
+            self._build_deps(config, p)
+
         if p is None:
             raise PackageNotFoundError(args.package[0])
         if args.tarball:
-            pkg = DistTarball(config, p, store)
+            pkg = DistTarball(config, p, self.store)
         else:
-            pkg = Packager(config, p, store)
+            pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
         paths = pkg.pack(args.output_dir, args.no_devel, args.force)
         if None in paths:
             paths.remove(None)
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
+
+    def _build_deps(self, config, package):
+        cookbook = self.store.cookbook
+        for recipe in package.recipes_dependencies():
+            if not cookbook.recipe_needs_build(recipe):
+                continue
+            build_command = build.Build()
+            build_command.runargs(config, recipe, cookbook=self.store.cookbook)
 
 
 register_command(Package)

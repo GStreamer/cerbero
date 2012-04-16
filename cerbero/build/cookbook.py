@@ -219,7 +219,7 @@ class CookBook (object):
         recipe = self.get_recipe(recipe_name)
         if not recipe:
             raise FatalError(_('Recipe %s not found') % recipe_name)
-        return self._find_deps(recipe)
+        return self._find_deps(recipe, {}, [])
 
     def _cache_file(self, config):
         if config.cache_file is not None:

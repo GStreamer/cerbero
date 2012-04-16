@@ -161,6 +161,12 @@ class MetaPackage(PackageBase):
     def list_packages(self):
         return [p[0] for p in self.packages]
 
+    def recipes_dependencies(self):
+        deps = []
+        for package in self.store.get_package_deps(self.name):
+            deps.extend(package.recipes_dependencies())
+        return list(set(deps))
+
     def files_list(self):
         return self._list_files(Package.files_list)
 
