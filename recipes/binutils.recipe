@@ -3,9 +3,48 @@ class Recipe(recipe.Recipe):
     version = '2.22'
     configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
 
+    files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',
+                  'elfedit', 'gprof', 'ld', 'ld.bfd', 'nm', 'objcopy',
+                  'objdump', 'ranlib', 'readelf', 'size', 'strings', 'strip',
+                  'windmc', 'windres']
+    files_binutils = ['%(host)s/bin/ar%(bext)s',
+                      '%(host)s/bin/as%(bext)s',
+                      '%(host)s/bin/dlltool%(bext)s',
+                      '%(host)s/bin/ld%(bext)s',
+                      '%(host)s/bin/ld.bfd%(bext)s',
+                      '%(host)s/bin/nm%(bext)s',
+                      '%(host)s/bin/objcopy%(bext)s',
+                      '%(host)s/bin/objdump%(bext)s',
+                      '%(host)s/bin/ranlib%(bext)s',
+                      '%(host)s/bin/strip%(bext)s',
+                      '%(host)s/lib/ldscripts/i386pe.x',
+                      '%(host)s/lib/ldscripts/i386pe.xa',
+                      '%(host)s/lib/ldscripts/i386pe.xbn',
+                      '%(host)s/lib/ldscripts/i386pe.xn',
+                      '%(host)s/lib/ldscripts/i386pe.xr',
+                      '%(host)s/lib/ldscripts/i386pe.xu',
+                      '%(host)s/lib32/ldscripts/i386pe.x',
+                      '%(host)s/lib32/ldscripts/i386pe.xa',
+                      '%(host)s/lib32/ldscripts/i386pe.xbn',
+                      '%(host)s/lib32/ldscripts/i386pe.xn',
+                      '%(host)s/lib32/ldscripts/i386pe.xr',
+                      '%(host)s/lib32/ldscripts/i386pe.xu']
+    files_lib = ['lib/libiberty.a']
+    files_lang = ['bfd', 'binutils', 'gas', 'gprof', 'ld', 'opcodes']
+
+
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-w64-mingw32'
         else:
             target = 'x86_64-w64-mingw32'
         self.configure_options += ' --target=%s' % target
+        # Append the host prefix to the binaries
+        self.files_bins = ['%s-%s' % (target, x) for x in self.files_bins]
+        # Replace host in files
+        files = [x % {'host': target, 'bext': '%(bext)s'} for x in
+                 self.files_binutils]
+        # Add mingw symlink files
+        files.extend([x % {'host': 'mingw', 'bext': '%(bext)s'} for x in
+                      self.files_binutils])
+        self.files_binutils = files
