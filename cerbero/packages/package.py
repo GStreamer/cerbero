@@ -50,7 +50,7 @@ class PackageBase(object):
     version = 'default'
     org = 'default'
     uuid = None
-    licenses = 'GPL'
+    licenses = ['GPL']
     vendor = 'default'
     url = 'default'
 
