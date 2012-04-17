@@ -21,7 +21,6 @@ import os
 
 from cerbero.build import recipe
 from cerbero.config import Platform
-from cerbero.utils import N_
 from cerbero.tests.test_common import DummyConfig
 
 
@@ -108,9 +107,9 @@ class TestReceipt(unittest.TestCase):
         self.assertEquals(['dep1', 'dep2', 'dep4'], self.recipe.list_deps())
 
     def testRemoveSteps(self):
-        self.recipe._remove_steps('donotexits')
-        self.assertTrue((N_('Fetch'), 'fetch') in self.recipe._steps)
-        self.recipe._remove_steps(['fetch'])
-        self.assertTrue((N_('Fetch'), 'fetch') not in self.recipe._steps)
+        self.recipe._remove_steps(['donotexits'])
+        self.assertTrue(recipe.BuildSteps.FETCH in self.recipe._steps)
+        self.recipe._remove_steps([recipe.BuildSteps.FETCH])
+        self.assertTrue(recipe.BuildSteps.FETCH not in self.recipe._steps)
         r = RecipeTest(self.config)
-        self.assertTrue((N_('Fetch'), 'fetch') in r._steps)
+        self.assertTrue(recipe.BuildSteps.FETCH in r._steps)

@@ -72,7 +72,7 @@ class PackageTest(unittest.TestCase):
                 'lib/gstreamer-0.10.lib']
         self.lindevfiles = devfiles + ['lib/libgstreamer-0.10.so',
                 'lib/libgstreamer-x11.a', 'lib/libgstreamer-x11.la',
-                'lib/libgstreamer-x11.so', 'lib/libgstreamer-0.10.dll.a']
+                'lib/libgstreamer-x11.so']
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
