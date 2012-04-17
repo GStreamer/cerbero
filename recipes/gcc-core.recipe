@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
     def configure(self):
         from cerbero.utils import shell
         # Create the winsup directory
-        if self.target_platform == Platform.WINDOWS:
+        if self.config.target_platform == Platform.WINDOWS:
             winsup = os.path.join(self.build_dir, 'gcc', 'winsup', 'mingw')
             if not os.path.exists(winsup):
                 os.makedirs(winsup)
