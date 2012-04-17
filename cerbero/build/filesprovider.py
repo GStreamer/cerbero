@@ -211,12 +211,12 @@ class FilesProvider(object):
         if self.LIBS_CAT not in self.categories:
             return []
 
-        pattern = 'lib/%(f)s*.a lib/%(f)s*.la '
+        pattern = 'lib/%(f)s.a lib/%(f)s.la '
         if self.platform == Platform.LINUX:
             pattern += 'lib/%(f)s.so '
         elif self.platform == Platform.WINDOWS:
             pattern += 'lib/%(f)s.dll.a '
-            pattern += 'lib/%(f)s*.def '
+            pattern += 'lib/%(f)s.def '
             pattern += 'lib/%(fnolib)s.lib '
         elif self.platform == Platform.DARWIN:
             pattern += 'lib/%(f)s.dylib '
