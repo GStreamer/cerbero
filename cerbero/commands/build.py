@@ -30,7 +30,7 @@ class Build(Command):
 
     def __init__(self, force=None, no_deps=None):
             args = [
-                ArgparseArgument('recipe', nargs=1,
+                ArgparseArgument('recipe', nargs='*',
                     help=_('name of the recipe to build')),
                 ArgparseArgument('--missing-files', action='store_true',
                     default=False,
@@ -57,17 +57,15 @@ class Build(Command):
             self.force = args.force
         if self.no_deps is None:
             self.no_deps = args.no_deps
-        self.runargs(config, args.recipe[0], args.missing_files, self.force,
+        self.runargs(config, args.recipe, args.missing_files, self.force,
                      self.no_deps)
 
-    def runargs(self, config, recipe_name, missing_files=False, force=False,
+    def runargs(self, config, recipes, missing_files=False, force=False,
                 no_deps=False, cookbook=None):
         if cookbook is None:
             cookbook = CookBook(config)
 
-        recipe = cookbook.get_recipe(recipe_name)
-
-        oven = Oven(recipe, cookbook, force=self.force,
+        oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files)
         oven.start_cooking()
 

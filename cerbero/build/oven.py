@@ -19,6 +19,7 @@
 import tempfile
 
 from cerbero.errors import BuildStepError, FatalError
+from cerbero.build.recipe import Recipe
 from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 
@@ -41,9 +42,11 @@ class Oven (object):
 
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
-    def __init__(self, recipe, cookbook, force=False, no_deps=False,
+    def __init__(self, recipes, cookbook, force=False, no_deps=False,
                  missing_files=False):
-        self.recipe = recipe
+        if isinstance(recipes, Recipe):
+            recipes = [recipes]
+        self.recipes = recipes
         self.cookbook = cookbook
         self.force = force
         self.no_deps = no_deps
@@ -54,10 +57,14 @@ class Oven (object):
         Cooks the recipe and all its dependencies
         '''
         if self.no_deps:
-            ordered_recipes = [self.recipe]
+            ordered_recipes = self.recipes
         else:
-            ordered_recipes = \
-                self.cookbook.list_recipe_deps(self.recipe.name)
+            ordered_recipes = []
+            for recipe in self.recipes:
+                recipes = self.cookbook.list_recipe_deps(recipe)
+                # remove recipes already scheduled to be built
+                recipes = [x for x in recipes if x not in ordered_recipes]
+                ordered_recipes.extend(recipes)
 
         m.message(_("Building the following recipes: %s") %
                   ' '.join([x.name for x in ordered_recipes]))

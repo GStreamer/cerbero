@@ -71,12 +71,9 @@ class Package(Command):
                  ' '.join([os.path.abspath(x) for x in paths]))
 
     def _build_deps(self, config, package):
-        cookbook = self.store.cookbook
-        for recipe in package.recipes_dependencies():
-            if not cookbook.recipe_needs_build(recipe):
-                continue
-            build_command = build.Build()
-            build_command.runargs(config, recipe, cookbook=self.store.cookbook)
+        build_command = build.Build()
+        build_command.runargs(config, package.recipes_dependencies(),
+            cookbook=self.store.cookbook)
 
 
 register_command(Package)
