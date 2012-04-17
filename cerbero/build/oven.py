@@ -17,9 +17,10 @@
 # Boston, MA 02111-1307, USA.
 
 import tempfile
+import shutil
 
 from cerbero.errors import BuildStepError, FatalError
-from cerbero.build.recipe import Recipe
+from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 
@@ -99,8 +100,8 @@ class Oven (object):
                 stepfunc()
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
-            except FatalError, e:
-                raise BuildStepError(e.msg)
+            except FatalError:
+                self._handle_build_step_error(recipe, step)
             except Exception, ex:
                 raise FatalError(_("Error performing step %s: %s") % (step,
                                   ex))
@@ -108,6 +109,15 @@ class Oven (object):
 
         if self.missing_files:
             self._print_missing_files(recipe, tmp)
+
+    def _handle_build_step_error(self, recipe, step):
+        if step in [BuildSteps.FETCH, BuildSteps.EXTRACT]:
+            # if any of the source steps failed, wipe the directory and reset
+            # the recipe status to start from scratch next time
+            shutil.rmtree(recipe.build_dir)
+            self.cookbook.reset_recipe_status(recipe.name)
+        raise BuildStepError(recipe, step)
+
 
     def _print_missing_files(self, recipe, tmp):
         recipe_files = set(recipe.files_list())

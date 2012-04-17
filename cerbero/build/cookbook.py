@@ -195,6 +195,16 @@ class CookBook (object):
         '''
         return step in self._recipe_status(recipe_name).steps
 
+    def reset_recipe_status(self, recipe_name):
+        '''
+        Resets the build status of a recipe
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        '''
+        if recipe_name in self.status:
+            del self.status[recipe_name]
+
     def recipe_needs_build(self, recipe_name):
         '''
         Whether a recipe needs to be build or not
