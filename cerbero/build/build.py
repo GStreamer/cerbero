@@ -221,12 +221,12 @@ class CMake (MakefilesBase):
     configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '\
                     '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s %(options)s '\
                     '-DCMAKE_BUILD_TYPE=Release '\
-                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '\
-                    '-DCMAKE_C_COMPILER=$CC '
+                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
 
     def __init__(self):
         MakefilesBase.__init__(self)
         if self.config.target_platform == Platform.WINDOWS:
+            self.configure_tpl += ' -DCMAKE_C_COMPILER=$CC '
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
 
