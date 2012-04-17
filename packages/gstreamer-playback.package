@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-playback'
     shortdesc = 'GStreamer plugins for playback'
+    url = "http://www.gstreamer.com"
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'

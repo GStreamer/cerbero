@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gtk+-2.0-python'
     shortdesc = 'Gtk python bingings'
+    url = "http://www.gstreamer.com"
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'

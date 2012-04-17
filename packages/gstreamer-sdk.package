@@ -7,7 +7,7 @@ class MetaPackage(package.MetaPackage):
     shortdesc = "GStreamer SDK"
     longdesc = "GStreamer SDK"
     title = "GStreamer SDK"
-    url = "http://www.gstreamer.net"
+    url = "http://www.gstreamer.com"
     version = '1.0'
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
     vendor = "GStreamer Project"
