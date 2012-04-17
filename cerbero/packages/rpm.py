@@ -152,7 +152,7 @@ class RPMPackage(PackagerBase):
             f.write(self._spec_str)
 
         # and build the package with rpmbuild
-        self._build_rpm(spec_path)
+        self._build_rpm(tmpdir, spec_path)
 
         # copy the newly created package, which should be in RPMS/$ARCH
         # to the output dir
@@ -168,13 +168,19 @@ class RPMPackage(PackagerBase):
 
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
+            stamp_path = os.path.join(tmpdir, p.name + '-stamp')
+            if os.path.exists(stamp_path):
+                # already built, skipping
+                return
+
+            m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
             packager = RPMPackage(self.config, p, self.store)
             try:
-                packager.pack(output_dir, self.devel, force, False, tmpdir)
+                packager.pack(output_dir, self.devel, force, True, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p)
 
-    def _build_rpm(self, spec_path):
+    def _build_rpm(self, tmpdir, spec_path):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-redhat-linux'
         elif self.config.target_arch == Architecture.X86_64:
@@ -183,6 +189,8 @@ class RPMPackage(PackagerBase):
             raise FatalError(_('Architecture %s not supported') % \
                              self.config.target_arch)
         shell.call('rpmbuild -bb --target %s %s' % (target, spec_path))
+        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
+        open(stamp_path, 'w').close()
 
     def _create_rpm_tree(self, tmpdir):
         # create a tmp dir to use as topdir
