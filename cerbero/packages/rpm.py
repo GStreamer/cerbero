@@ -207,7 +207,10 @@ class RPMPackage(PackagerBase):
         args['description'] = args['summary']
         args['requires'] =  self._get_requires(PackageType.DEVEL)
         args['name'] = self.package.name
-        devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
+        try:
+            devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
+        except EmptyPackageError:
+            devel = ''
         return DEVEL_PACKAGE_TPL % args, devel
 
     def _fill_spec(self, sources, topdir):
@@ -217,7 +220,7 @@ class RPMPackage(PackagerBase):
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()
         else:
-            devel_files, devel_files = ('', '')
+            devel_package, devel_files = ('', '')
 
         if isinstance(self.package, MetaPackage):
             template = META_SPEC_TPL
