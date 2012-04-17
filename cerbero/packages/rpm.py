@@ -245,7 +245,7 @@ class RPMPackage(PackagerBase):
                 'files':  runtime_files}
 
     def _get_requires(self, package_type):
-        deps = self.store.get_package_deps(self.package.name)
+        deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
         if package_type == PackageType.DEVEL:
             deps = map(lambda x: x+'-devel', deps)
