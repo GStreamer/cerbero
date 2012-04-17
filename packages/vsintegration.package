@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'vsintegration'
     shortdesc = 'Visual Studio Integration'
+    url = "http://www.gstreamer.com"
     version = '1.0'
     licences = ['LGPL']
     vendor = 'GStreamer Project'

@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'snappy'
     shortdesc = 'Snappy media player'
+    url = "http://www.gstreamer.com"
     version = '1.0'
     licences = ['GPL']
     vendor = 'GStreamer Project'
