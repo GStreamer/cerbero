@@ -42,7 +42,9 @@ class DebianBootstraper (UnixBootstraper):
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
                 'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
-                'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev']
+                'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
+                'libxml-simple-perl', 'dpkg-dev', 'build-essential', 'devscripts',
+                'fakeroot']
 
 
 class RedHatBootstraper (UnixBootstraper):
