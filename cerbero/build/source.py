@@ -80,7 +80,7 @@ class GitCache (Source):
             git.add_remote(self.repo_dir, remote, url)
         # fetch remote branches
         git.fetch(self.repo_dir, fail=False)
-        git.get_hash(self.repo_dir, self.commit)
+        git.checkout(self.repo_dir, self.commit)
 
 
 class LocalTarball (GitCache):
