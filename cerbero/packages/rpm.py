@@ -40,9 +40,10 @@ Release:        1
 Summary:        %(summary)s
 Source:         %(source)s
 Group:          Applications/Internet
-License:	%(license)s
+License:        %(license)s
 URL:            %(url)s
 Prefix:         %(prefix)s
+Vendor:         %(vendor)s
 %(requires)s
 
 %%description
@@ -222,6 +223,7 @@ class RPMPackage(PackagerBase):
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc,
                 'license': ' '.join(self.package.licenses),
+                'vendor': self.package.vendor,
                 'url': self.package.url,
                 'requires': requires,
                 'prefix': self.install_dir,
