@@ -178,7 +178,7 @@ class DebianPackage(PackagerBase):
         self._pack(tmpdir, debdir, srcdir)
 
         # and build the package
-        self._build(tarname, tmpdir, srcdir)
+        self._build(tarname, tmpdir, debdir, srcdir)
 
         # copy the newly created package, which should be in tmpdir
         # to the output dir
@@ -202,7 +202,7 @@ class DebianPackage(PackagerBase):
             except EmptyPackageError:
                 self._empty_packages.append(p.name)
 
-    def _build(self, tarname, tmpdir, srcdir):
+    def _build(self, tarname, tmpdir, debdir, srcdir):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-redhat-linux'
         elif self.config.target_arch == Architecture.X86_64:
@@ -216,9 +216,33 @@ class DebianPackage(PackagerBase):
             tar.extractall(tmpdir)
             tar.close()
 
+        # for each dependency, copy the generated shlibs to this package debian/shlibs.local,
+        # so that dpkg-shlibdeps knows where our dependencies are without using Build-Depends:
+        package_deps = self.store.get_package_deps(self.package.name, recursive=True)
+        if package_deps:
+            shlibs_local_path = os.path.join(debdir, 'shlibs.local')
+            f = open(shlibs_local_path, 'w')
+            for p in package_deps:
+                package_shlibs_path = os.path.join(tmpdir, p.name + '-shlibs')
+                m.action(_('Copying generated shlibs file %s for dependency %s to %s') %
+                         (package_shlibs_path, p.name, shlibs_local_path))
+                shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
+            f.close()
+
         saved_path = os.getcwd()
         os.chdir(srcdir)
+
         shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b')
+
+        # we may only have a generated shlibs file if at least we have runtime files
+        if tarname:
+            # copy generated shlibs to tmpdir/$package-shlibs to be used by dependent packages
+            shlibs_path = os.path.join(debdir, self.package.name, 'DEBIAN', 'shlibs')
+            out_shlibs_path = os.path.join(tmpdir, self.package.name + '-shlibs')
+            m.action(_('Copying generated shlibs file %s to %s') % (shlibs_path, out_shlibs_path))
+            if os.path.exists(shlibs_path):
+                shutil.copy(shlibs_path, out_shlibs_path)
+
         os.chdir(saved_path)
 
     def _create_debian_tree(self, tmpdir):
