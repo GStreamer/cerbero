@@ -299,7 +299,10 @@ class DebianPackage(PackagerBase):
         args['longdesc'] = args['shortdesc']
         requires = self._get_requires(PackageType.DEVEL)
         args['requires'] = ', ' + requires if requires else ''
-        devel_files = self.files_list(PackageType.DEVEL)
+        try:
+            devel_files = self.files_list(PackageType.DEVEL)
+        except EmptyPackageError:
+            devel_files = ''
         return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
 
     def _deb_copyright(self):
@@ -325,7 +328,7 @@ class DebianPackage(PackagerBase):
         if self.devel:
             control_devel, devel_files = self._deb_control_devel_and_files()
         else:
-            control_devel, devel_files = ('', '')
+            control_devel, devel_files = '', ''
 
         copyright = self._deb_copyright()
 
@@ -339,7 +342,7 @@ class DebianPackage(PackagerBase):
         self._write_debian_file(debdir, 'rules', rules)
         self._write_debian_file(debdir, os.path.join('source', 'format'), source_format)
         self._write_debian_file(debdir, self.package.name + '.install', runtime_files)
-        if self.devel:
+        if self.devel and devel_files:
             self._write_debian_file(debdir, self.package.name + '-dev.install', devel_files)
 
     def _get_requires(self, package_type):
