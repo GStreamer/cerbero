@@ -194,11 +194,16 @@ class DebianPackage(PackagerBase):
 
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
+            stamp_path = os.path.join(tmpdir, p.name + '-stamp')
+            if os.path.exists(stamp_path):
+                # already built, skipping
+                return
+
             m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
             packager = DebianPackage(self.config, self.store.get_package(p.name),
                                      self.store)
             try:
-                packager.pack(output_dir, self.devel, force, False, tmpdir)
+                packager.pack(output_dir, self.devel, force, True, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p.name)
 
@@ -243,6 +248,8 @@ class DebianPackage(PackagerBase):
             if os.path.exists(shlibs_path):
                 shutil.copy(shlibs_path, out_shlibs_path)
 
+        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
+        open(stamp_path, 'w').close()
         os.chdir(saved_path)
 
     def _create_debian_tree(self, tmpdir):
