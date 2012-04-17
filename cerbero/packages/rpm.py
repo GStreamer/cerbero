@@ -171,7 +171,7 @@ class RPMPackage(PackagerBase):
             stamp_path = os.path.join(tmpdir, p.name + '-stamp')
             if os.path.exists(stamp_path):
                 # already built, skipping
-                return
+                continue
 
             m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
             packager = RPMPackage(self.config, p, self.store)
