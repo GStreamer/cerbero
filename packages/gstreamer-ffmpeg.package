@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer libav wrapper'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licences = ['LGPL']
+    licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = 'afce67f2-4165-411f-8287-e8f2a892f853'
     deps = ['gstreamer-core']
