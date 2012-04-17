@@ -7,6 +7,5 @@ class Recipe(recipe.Recipe):
     license = 'JPEG'
 
     files_libs = ['libjpeg']
-    files_bins = ['cjpeg', 'djpeg', 'jpegtran']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
             'include/jmorecfg.h']
