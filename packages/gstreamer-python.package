@@ -11,6 +11,6 @@ class Package(package.Package):
     licences = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '5fc36752-4165-511f-8387-e8f2a898f853'
-    deps = ['gobject-python']
+    deps = ['gstreamer-core', 'gobject-python']
 
     files = ['gst-python']
