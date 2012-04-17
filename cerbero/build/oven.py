@@ -58,7 +58,8 @@ class Oven (object):
         Cooks the recipe and all its dependencies
         '''
         if self.no_deps:
-            ordered_recipes = self.recipes
+            ordered_recipes = [self.cookbook.get_recipe(x) for x in
+                               self.recipes]
         else:
             ordered_recipes = []
             for recipe in self.recipes:
@@ -66,7 +67,6 @@ class Oven (object):
                 # remove recipes already scheduled to be built
                 recipes = [x for x in recipes if x not in ordered_recipes]
                 ordered_recipes.extend(recipes)
-
         m.message(_("Building the following recipes: %s") %
                   ' '.join([x.name for x in ordered_recipes]))
 
