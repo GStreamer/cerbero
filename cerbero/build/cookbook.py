@@ -293,7 +293,7 @@ class CookBook (object):
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'BuildType': BuildType, 'SourceType': SourceType,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'recipe': crecipe, 'os': os}
+                 'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.prepare()

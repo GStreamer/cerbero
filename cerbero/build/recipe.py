@@ -54,6 +54,27 @@ class MetaRecipe(type):
         return type.__new__(cls, name, bases, dct)
 
 
+class BuildSteps(object):
+    '''
+    Enumeration factory for build steps
+    '''
+
+    FETCH = (N_('Fetch'), 'fetch')
+    EXTRACT = (N_('Extract'), 'extract')
+    CONFIGURE = (N_('Configure'), 'configure')
+    COMPILE = (N_('Compile'), 'compile')
+    INSTALL = (N_('Install'), 'install')
+    CHECK = (N_('Check'), 'check')  # Not added by default
+    POST_INSTALL = (N_('Post Install'), 'post_install')
+    GEN_LIBFILES = (N_('Gen Library File'), 'gen_library_file')
+
+
+    def __new__(klass):
+        return [BuildSteps.FETCH, BuildSteps.EXTRACT,
+                BuildSteps.CONFIGURE, BuildSteps.COMPILE, BuildSteps.INSTALL,
+                BuildSteps.POST_INSTALL]
+
+
 class Recipe(FilesProvider):
     '''
     Base class for recipes.
@@ -86,12 +107,7 @@ class Recipe(FilesProvider):
     deps = list()
     platform_deps = {}
     force = False
-    _default_steps = [
-            (N_('Fetch'), 'fetch'), (N_('Extract'), 'extract'),
-            (N_('Configure'), 'configure'), (N_('Compile'), 'compile'),
-            (N_('Install'), 'install'),
-            (N_('Post Install'), 'post_install')]
-            # Not adding check as it's not automaticall done
+    _default_steps = BuildSteps()
 
     def __init__(self, config):
         self.config = config
@@ -115,7 +131,7 @@ class Recipe(FilesProvider):
 
         self._steps = self._default_steps[:]
         if self.config.target_platform == Platform.WINDOWS:
-            self._steps.append((N_('Gen Library File'), 'gen_library_file'))
+            self._steps.append(BuildSteps.GEN_LIBFILES)
 
     def prepare(self):
         '''
@@ -125,6 +141,9 @@ class Recipe(FilesProvider):
         pass
 
     def post_install(self):
+        '''
+        Runs a post installation steps
+        '''
         pass
 
     def list_deps(self):
@@ -149,4 +168,4 @@ class Recipe(FilesProvider):
 
 
     def _remove_steps(self, steps):
-        self._steps = [x for x in self._steps if x[1] not in steps]
+        self._steps = [x for x in self._steps if x not in steps]

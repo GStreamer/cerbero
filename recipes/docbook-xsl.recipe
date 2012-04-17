@@ -3,12 +3,10 @@
 class Recipe(recipe.Recipe):
     name = 'docbook-xsl'
     version = '1.76.1'
-
-    def prepare(self):
-        self._remove_steps(['configure', 'compile'])
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
 
     def install(self):
-        import os
         etc_path =  os.path.join(self.config.prefix, 'etc')
         if not os.path.exists(etc_path):
             os.makedirs(etc_path)
