@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
 
 
     def prepare (self):
-        self._remove_steps(BuildSteps.CONFIGURE)
+        self._remove_steps([BuildSteps.CONFIGURE])
         if self.config.target_platform == Platform.DARWIN:
             shared_makefile = 'Makefile-libbz2_dylib'
         elif self.config.target_platform == Platform.WINDOWS:

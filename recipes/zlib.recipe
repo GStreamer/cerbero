@@ -21,4 +21,4 @@ class Recipe(recipe.Recipe):
                                 'INCLUDE_PATH=%(prefix)s/include '\
                                 'LIBRARY_PATH=%(prefix)s/lib ' \
                                 'BINARY_PATH=%(prefix)s/bin ' % {'prefix':self.config.prefix}
-            self._remove_steps (BuildSteps.CONFIGURE)
+            self._remove_steps ([BuildSteps.CONFIGURE])
