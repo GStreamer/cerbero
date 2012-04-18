@@ -41,9 +41,9 @@ Summary:        %(summary)s
 Source:         %(source)s
 Group:          Applications/Internet
 License:        %(license)s
-URL:            %(url)s
 Prefix:         %(prefix)s
 Vendor:         %(vendor)s
+%(url)s
 %(requires)s
 
 %%description
@@ -87,8 +87,8 @@ Release:        1
 Summary:        %(summary)s
 Group:          Applications/Internet
 License:	%(license)s
-URL:            %(url)s
-
+Vendor:         %(vendor)s
+%(url)s
 %(requires)s
 
 %%description
@@ -109,7 +109,7 @@ rm -rf $RPM_BUILD_ROOT
 
 REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
-
+URL_TPL = 'URL: %s\n'
 
 class RPMPackage(PackagerBase):
 
@@ -232,10 +232,10 @@ class RPMPackage(PackagerBase):
                 'version': self.package.version,
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
-                'description': self.package.longdesc,
+                'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
                 'license': ' '.join(self.package.licenses),
                 'vendor': self.package.vendor,
-                'url': self.package.url,
+                'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
                 'requires': requires,
                 'prefix': self.install_dir,
                 'source': sources,
