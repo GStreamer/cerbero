@@ -221,18 +221,19 @@ class DebianPackage(PackagerBase):
             tar.extractall(tmpdir)
             tar.close()
 
-        # for each dependency, copy the generated shlibs to this package debian/shlibs.local,
-        # so that dpkg-shlibdeps knows where our dependencies are without using Build-Depends:
-        package_deps = self.store.get_package_deps(self.package.name, recursive=True)
-        if package_deps:
-            shlibs_local_path = os.path.join(debdir, 'shlibs.local')
-            f = open(shlibs_local_path, 'w')
-            for p in package_deps:
-                package_shlibs_path = os.path.join(tmpdir, p.name + '-shlibs')
-                m.action(_('Copying generated shlibs file %s for dependency %s to %s') %
-                         (package_shlibs_path, p.name, shlibs_local_path))
-                shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
-            f.close()
+        if not isinstance(self.package, MetaPackage):
+            # for each dependency, copy the generated shlibs to this package debian/shlibs.local,
+            # so that dpkg-shlibdeps knows where our dependencies are without using Build-Depends:
+            package_deps = self.store.get_package_deps(self.package.name, recursive=True)
+            if package_deps:
+                shlibs_local_path = os.path.join(debdir, 'shlibs.local')
+                f = open(shlibs_local_path, 'w')
+                for p in package_deps:
+                    package_shlibs_path = os.path.join(tmpdir, p.name + '-shlibs')
+                    m.action(_('Copying generated shlibs file %s for dependency %s to %s') %
+                             (package_shlibs_path, p.name, shlibs_local_path))
+                    shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
+                f.close()
 
         saved_path = os.getcwd()
         os.chdir(srcdir)
