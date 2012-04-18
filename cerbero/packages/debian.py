@@ -36,6 +36,7 @@ CHANGELOG_TPL = \
 '''%(name)s (%(version)s-0) unstable; urgency=low
 
   * Release %(version)s
+  %(changelog_url)s
 
  -- %(packager)s  %(datetime)s
 '''
@@ -142,6 +143,7 @@ binary: binary-indep binary-arch
 
 SOURCE_FORMAT_TPL = '''3.0 (native)'''
 
+CHANGELOG_URL_TPL = '* Full changelog can be found at %s'
 DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(name)s-dbg'
 
 class DebianPackage(PackagerBase):
@@ -282,6 +284,7 @@ class DebianPackage(PackagerBase):
         args['packager'] = 'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
         args['version'] = self.package.version
         args['datetime'] = self.datetime
+        args['changelog_url'] = CHANGELOG_URL_TPL % self.package.url if self.package.url != 'default' else ''
         return CHANGELOG_TPL % args
 
     def _deb_control_runtime_and_files(self):
