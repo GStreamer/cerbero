@@ -14,7 +14,7 @@ class Package(package.Package):
     deps = ['gstreamer-core', 'gstreamer-effects']
 
     files = ['libass:libs', 'libdca:libs', 'faad2:libs', 'flac:libs',
-            'fribidi:libs', 'jasper:libs', 'jpeg:libs', 'libkate:libs',
+            'fribidi:libs', 'jasper:libs', 'libkate:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs',
