@@ -43,6 +43,8 @@ class PackageBase(object):
     @type org: str
     @cvar url: url for this pacakge
     @type url: str
+    @cvar packager: packager for this pacakge
+    @type packager: str
     '''
     name = 'default'
     shortdesc = 'default'
@@ -53,6 +55,7 @@ class PackageBase(object):
     licenses = ['GPL']
     vendor = 'default'
     url = 'default'
+    packager = 'default'
 
     def __init__(self, config):
         self.config = config
