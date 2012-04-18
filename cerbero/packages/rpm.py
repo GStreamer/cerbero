@@ -150,7 +150,7 @@ class RPMPackage(PackagerBase):
             # metapackages only contains Requires dependencies with other packages
             tarname = None
 
-        m.action(_("Creating RPM package for %s") % self.package.name)
+        m.action(_('Creating RPM package for %s') % self.package.name)
         # fill the spec file
         self._fill_spec(tarname, tmpdir)
         spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
@@ -179,7 +179,7 @@ class RPMPackage(PackagerBase):
                 # already built, skipping
                 continue
 
-            m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
+            m.action(_('Packing dependency %s for package %s') % (p.name, self.package.name))
             packager = RPMPackage(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, True, tmpdir)

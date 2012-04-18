@@ -165,7 +165,7 @@ class DebianPackage(PackagerBase):
         self._empty_packages = []
 
         d = datetime.utcnow()
-        self.datetime = d.strftime("%a, %d %b %Y %H:%M:%S +0000")
+        self.datetime = d.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
         # Create a tmpdir for packages
         tmpdir, debdir, srcdir = self._create_debian_tree(tmpdir)
@@ -186,7 +186,7 @@ class DebianPackage(PackagerBase):
             # packages
             tarname = None
 
-        m.action(_("Creating debian package for %s") % self.package.name)
+        m.action(_('Creating debian package for %s') % self.package.name)
 
         self._pack(tmpdir, debdir, srcdir)
 
@@ -212,7 +212,7 @@ class DebianPackage(PackagerBase):
                 # already built, skipping
                 continue
 
-            m.action(_("Packing dependency %s for package %s") %
+            m.action(_('Packing dependency %s for package %s') %
                     (p.name, self.package.name))
             packager = DebianPackage(self.config, p, self.store)
             try:
@@ -222,7 +222,7 @@ class DebianPackage(PackagerBase):
 
     def _build(self, tarname, tmpdir, debdir, srcdir):
         if tarname:
-            tar = tarfile.open(tarname, "r:bz2")
+            tar = tarfile.open(tarname, 'r:bz2')
             tar.extractall(tmpdir)
             tar.close()
 
@@ -238,8 +238,8 @@ class DebianPackage(PackagerBase):
                 for p in package_deps:
                     package_shlibs_path = os.path.join(tmpdir,
                             self.package_prefix + p.name + '-shlibs')
-                    m.action(_('Copying generated shlibs file %s for " \
-                            "dependency %s to %s') %
+                    m.action(_('Copying generated shlibs file %s for ' \
+                            'dependency %s to %s') %
                             (package_shlibs_path, p.name, shlibs_local_path))
                     shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
                 f.close()
@@ -273,7 +273,7 @@ class DebianPackage(PackagerBase):
         debdir = os.path.join(srcdir, 'debian')
         os.mkdir(debdir)
         os.mkdir(os.path.join(debdir, 'source'))
-        m.action(_("Creating debian package structure at %s for package %s") %
+        m.action(_('Creating debian package structure at %s for package %s') %
                 (srcdir, self.package.name))
         return (tmpdir, debdir, srcdir)
 
