@@ -310,9 +310,9 @@ class DebianPackage(PackagerBase):
         args['requires'] = ', ' + requires if requires else ''
         try:
             devel_files = self.files_list(PackageType.DEVEL)
+            return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
         except EmptyPackageError:
-            devel_files = ''
-        return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
+            return '', ''
 
     def _deb_copyright(self):
         args = {}
@@ -343,6 +343,8 @@ class DebianPackage(PackagerBase):
         else:
             control_devel, devel_files = '', ''
 
+        self.package.has_devel_package = bool(devel_files)
+
         copyright = self._deb_copyright()
 
         rules = self._deb_rules()
@@ -362,6 +364,7 @@ class DebianPackage(PackagerBase):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
         if package_type == PackageType.DEVEL:
+            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
             deps = map(lambda x: x+'-dev', deps)
         return ', '.join(deps)
 
