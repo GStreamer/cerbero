@@ -217,14 +217,6 @@ class DebianPackage(PackagerBase):
                 self._empty_packages.append(p.name)
 
     def _build(self, tarname, tmpdir, debdir, srcdir):
-        if self.config.target_arch == Architecture.X86:
-            target = 'i686-redhat-linux'
-        elif self.config.target_arch == Architecture.X86_64:
-            target = 'x86_64-redhat-linux'
-        else:
-            raise FatalError(_('Architecture %s not supported') % \
-                             self.config.target_arch)
-
         if tarname:
             tar = tarfile.open(tarname, "r:bz2")
             tar.extractall(tmpdir)
