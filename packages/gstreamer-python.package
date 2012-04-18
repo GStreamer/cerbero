@@ -12,5 +12,8 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     uuid = '5fc36752-4165-511f-8387-e8f2a898f853'
     deps = ['gstreamer-core', 'gobject-python']
+    sys_deps = {
+            Distro.Debian: ['python'],
+            Distro.RedHat: ['python']}
 
     files = ['gst-python']

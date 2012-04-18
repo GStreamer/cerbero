@@ -45,6 +45,8 @@ class PackageBase(object):
     @type url: str
     @cvar packager: packager for this pacakge
     @type packager: str
+    @cvar sys_deps: system dependencies for this package
+    @type sys_deps: dict
     '''
     name = 'default'
     shortdesc = 'default'
@@ -56,6 +58,7 @@ class PackageBase(object):
     vendor = 'default'
     url = 'default'
     packager = 'default'
+    sys_deps = {}
 
     def __init__(self, config):
         self.config = config
@@ -76,6 +79,13 @@ class PackageBase(object):
             return self.install_dir[self.config.target_platform]
         except:
             return self.config.install_dir
+
+    def get_sys_deps(self):
+        if self.config.target_distro_version in self.sys_deps:
+            return self.sys_deps[self.config.target_distro_version]
+        if self.config.target_distro in self.sys_deps:
+            return self.sys_deps[self.config.target_distro]
+        return []
 
     def __str__(self):
         return self.name

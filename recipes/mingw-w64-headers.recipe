@@ -41,7 +41,7 @@ class Recipe(recipe.Recipe):
                 self.build_dir)
 
     files_headers = [
-    'GL/gl.h', 'GL/glaux.h', 'GL/glu.h',
+    'GL/gl.h', 'GL/glaux.h', 'GL/glu.h', 'GL/glext.h'
     '_bsd_types.h', '_dbdao.h', '_mingw.h', '_mingw_mac.h', '_mingw_off_t.h',
     '_mingw_print_pop.h', '_mingw_print_push.h', '_mingw_stat64.h',
     '_mingw_stdarg.h', '_mingw_unicode.h', '_timeval.h', 'accctrl.h', 'aclapi.h',

@@ -261,6 +261,7 @@ class RPMPackage(PackagerBase):
             deps = [x for x in deps if self.store.get_package(x).has_devel_package]
             deps = map(lambda x: x+'-devel', deps)
         deps = map(lambda x: self.package_prefix + x, deps)
+        deps.extend(self.package.get_sys_deps())
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
     def files_list(self, package_type):
