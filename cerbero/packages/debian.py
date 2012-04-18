@@ -63,7 +63,7 @@ Description: %(shortdesc)s
 
 CONTROL_DBG_PACKAGE_TPL = \
 '''Package: %(name)s-dbg
-Section: libdevel
+Section: debug
 Architecture: any
 Depends: %(name)s (= ${binary:Version})
 Description: Debug symbols for %(name)s
