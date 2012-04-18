@@ -226,8 +226,8 @@ class CMake (MakefilesBase):
     def __init__(self):
         MakefilesBase.__init__(self)
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_tpl += ' -DCMAKE_C_COMPILER=$CC '
-            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
+            self.configure_options += ' -DCMAKE_C_COMPILER=$CC '\
+                                      ' -DCMAKE_SYSTEM_NAME=Windows '
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
 
 
