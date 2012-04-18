@@ -309,9 +309,11 @@ class DebianPackage(PackagerBase):
         args['requires'] = ', ' + requires if requires else ''
         try:
             devel_files = self.files_list(PackageType.DEVEL)
-            return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
         except EmptyPackageError:
-            return '', ''
+            devel_files = ''
+        if devel_files:
+            return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
+        return '', ''
 
     def _deb_copyright(self):
         args = {}
