@@ -276,6 +276,7 @@ class DebianPackage(PackagerBase):
         path = os.path.join(debdir, filename)
         with open(path, 'w') as f:
             f.write(content)
+        return path
 
     def _deb_changelog(self):
         args = {}
@@ -358,7 +359,8 @@ class DebianPackage(PackagerBase):
         self._write_debian_file(debdir, 'compat', compat)
         self._write_debian_file(debdir, 'control', control + control_devel)
         self._write_debian_file(debdir, 'copyright', copyright)
-        self._write_debian_file(debdir, 'rules', rules)
+        rules_path = self._write_debian_file(debdir, 'rules', rules)
+        os.chmod(rules_path, 0755)
         self._write_debian_file(debdir, os.path.join('source', 'format'), source_format)
         self._write_debian_file(debdir, self.package.name + '.install', runtime_files)
         if self.devel and devel_files:
