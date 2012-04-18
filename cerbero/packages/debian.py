@@ -146,6 +146,7 @@ SOURCE_FORMAT_TPL = '''3.0 (native)'''
 CHANGELOG_URL_TPL = '* Full changelog can be found at %s'
 DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(p_prefix)s%(name)s-dbg'
 
+
 class DebianPackage(PackagerBase):
 
     def __init__(self, config, package, store):
@@ -153,7 +154,8 @@ class DebianPackage(PackagerBase):
         self.package_prefix = ''
         if self.config.packages_prefix is not None:
             self.package_prefix = '%s-' % self.config.packages_prefix
-        self.full_package_name = '%s%s-%s' % (self.package_prefix, self.package.name, self.package.version)
+        self.full_package_name = '%s%s-%s' % (self.package_prefix,
+                self.package.name, self.package.version)
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -175,12 +177,13 @@ class DebianPackage(PackagerBase):
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files
             tarball_packager = DistTarball(self.config, self.package,
-                                           self.store)
+                    self.store)
             tarball = tarball_packager.pack(tmpdir, devel, True,
                     split=False, package_prefix=self.full_package_name)[0]
             tarname = os.path.join(tmpdir, os.path.split(tarball)[1])
         else:
-            # metapackages only contains Requires dependencies with other packages
+            # metapackages only contains Requires dependencies with other
+            # packages
             tarname = None
 
         m.action(_("Creating debian package for %s") % self.package.name)
@@ -209,7 +212,8 @@ class DebianPackage(PackagerBase):
                 # already built, skipping
                 continue
 
-            m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
+            m.action(_("Packing dependency %s for package %s") %
+                    (p.name, self.package.name))
             packager = DebianPackage(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, True, tmpdir)
@@ -223,27 +227,37 @@ class DebianPackage(PackagerBase):
             tar.close()
 
         if not isinstance(self.package, MetaPackage):
-            # for each dependency, copy the generated shlibs to this package debian/shlibs.local,
-            # so that dpkg-shlibdeps knows where our dependencies are without using Build-Depends:
-            package_deps = self.store.get_package_deps(self.package.name, recursive=True)
+            # for each dependency, copy the generated shlibs to this
+            # package debian/shlibs.local, so that dpkg-shlibdeps knows where
+            # our dependencies are without using Build-Depends:
+            package_deps = self.store.get_package_deps(self.package.name,
+                    recursive=True)
             if package_deps:
                 shlibs_local_path = os.path.join(debdir, 'shlibs.local')
                 f = open(shlibs_local_path, 'w')
                 for p in package_deps:
-                    package_shlibs_path = os.path.join(tmpdir, self.package_prefix + p.name + '-shlibs')
-                    m.action(_('Copying generated shlibs file %s for dependency %s to %s') %
-                             (package_shlibs_path, p.name, shlibs_local_path))
+                    package_shlibs_path = os.path.join(tmpdir,
+                            self.package_prefix + p.name + '-shlibs')
+                    m.action(_('Copying generated shlibs file %s for " \
+                            "dependency %s to %s') %
+                            (package_shlibs_path, p.name, shlibs_local_path))
                     shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
                 f.close()
 
         shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b', srcdir)
 
-        # we may only have a generated shlibs file if at least we have runtime files
+        # we may only have a generated shlibs file if at least we have
+        # runtime files
         if tarname:
-            # copy generated shlibs to tmpdir/$package-shlibs to be used by dependent packages
-            shlibs_path = os.path.join(debdir, self.package_prefix + self.package.name, 'DEBIAN', 'shlibs')
-            out_shlibs_path = os.path.join(tmpdir, self.package_prefix + self.package.name + '-shlibs')
-            m.action(_('Copying generated shlibs file %s to %s') % (shlibs_path, out_shlibs_path))
+            # copy generated shlibs to tmpdir/$package-shlibs to be used by
+            # dependent packages
+            shlibs_path = os.path.join(debdir,
+                    self.package_prefix + self.package.name,
+                    'DEBIAN', 'shlibs')
+            out_shlibs_path = os.path.join(tmpdir,
+                    self.package_prefix + self.package.name + '-shlibs')
+            m.action(_('Copying generated shlibs file %s to %s') %
+                    (shlibs_path, out_shlibs_path))
             if os.path.exists(shlibs_path):
                 shutil.copy(shlibs_path, out_shlibs_path)
 
@@ -260,7 +274,7 @@ class DebianPackage(PackagerBase):
         os.mkdir(debdir)
         os.mkdir(os.path.join(debdir, 'source'))
         m.action(_("Creating debian package structure at %s for package %s") %
-                   (srcdir, self.package.name))
+                (srcdir, self.package.name))
         return (tmpdir, debdir, srcdir)
 
     def _write_debian_file(self, debdir, filename, content):
@@ -274,10 +288,12 @@ class DebianPackage(PackagerBase):
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
         # FIXME - use self.package.packager when available
-        args['packager'] = 'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['packager'] = \
+                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
         args['version'] = self.package.version
         args['datetime'] = self.datetime
-        args['changelog_url'] = CHANGELOG_URL_TPL % self.package.url if self.package.url != 'default' else ''
+        args['changelog_url'] = CHANGELOG_URL_TPL % self.package.url \
+                if self.package.url != 'default' else ''
         return CHANGELOG_TPL % args
 
     def _deb_control_runtime_and_files(self):
@@ -285,23 +301,28 @@ class DebianPackage(PackagerBase):
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
         # FIXME - use self.package.packager when available
-        args['packager'] = 'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
-        args['homepage'] = 'Homepage: ' + self.package.url if self.package.url != 'default' else ''
+        args['packager'] = \
+                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['homepage'] = 'Homepage: ' + self.package.url \
+                if self.package.url != 'default' else ''
         args['shortdesc'] = self.package.shortdesc
-        args['longdesc'] = self.package.longdesc if self.package.longdesc != 'default' else args['shortdesc']
+        args['longdesc'] = self.package.longdesc \
+                if self.package.longdesc != 'default' else args['shortdesc']
         requires = self._get_requires(PackageType.RUNTIME)
         args['requires'] = ', ' + requires if requires else ''
         runtime_files = self.files_list(PackageType.RUNTIME)
         if isinstance(self.package, MetaPackage):
             return CONTROL_TPL % args, runtime_files
         else:
-            return (CONTROL_TPL + CONTROL_DBG_PACKAGE_TPL) % args, runtime_files
+            return (CONTROL_TPL + CONTROL_DBG_PACKAGE_TPL) % \
+                    args, runtime_files
 
     def _deb_control_devel_and_files(self):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        args['shortdesc'] = 'Development files for %s' % self.package_prefix + self.package.name
+        args['shortdesc'] = 'Development files for %s' % \
+                self.package_prefix + self.package.name
         args['longdesc'] = args['shortdesc']
         requires = self._get_requires(PackageType.DEVEL)
         args['requires'] = ', ' + requires if requires else ''
@@ -316,10 +337,13 @@ class DebianPackage(PackagerBase):
     def _deb_copyright(self):
         args = {}
         # FIXME - use self.package.packager when available
-        args['packager'] = 'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['packager'] = \
+                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
         args['datetime'] = self.datetime
         args['licenses'] = ' '.join(self.package.licenses)
-        args['licenses_locations'] = ', '.join(['/usr/share/common-licenses/' + l for l in self.package.licenses])
+        args['licenses_locations'] = \
+                ', '.join(['/usr/share/common-licenses/' + l \
+                    for l in self.package.licenses])
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):
@@ -356,16 +380,22 @@ class DebianPackage(PackagerBase):
         self._write_debian_file(debdir, 'copyright', copyright)
         rules_path = self._write_debian_file(debdir, 'rules', rules)
         os.chmod(rules_path, 0755)
-        self._write_debian_file(debdir, os.path.join('source', 'format'), source_format)
-        self._write_debian_file(debdir, self.package_prefix + self.package.name + '.install', runtime_files)
+        self._write_debian_file(debdir, os.path.join('source', 'format'),
+                source_format)
+        self._write_debian_file(debdir,
+                self.package_prefix + self.package.name + '.install',
+                runtime_files)
         if self.devel and devel_files:
-            self._write_debian_file(debdir, self.package_prefix + self.package.name + '-dev.install', devel_files)
+            self._write_debian_file(debdir,
+                    self.package_prefix + self.package.name + '-dev.install',
+                    devel_files)
 
     def _get_requires(self, package_type):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
         if package_type == PackageType.DEVEL:
-            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
+            deps = [x for x in deps \
+                    if self.store.get_package(x).has_devel_package]
             deps = map(lambda x: x+'-dev', deps)
         deps = map(lambda x: self.package_prefix + x, deps)
         return ', '.join(deps)
