@@ -205,8 +205,7 @@ class DebianPackage(PackagerBase):
                 continue
 
             m.action(_("Packing dependency %s for package %s") % (p.name, self.package.name))
-            packager = DebianPackage(self.config, self.store.get_package(p.name),
-                                     self.store)
+            packager = DebianPackage(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, True, tmpdir)
             except EmptyPackageError:
