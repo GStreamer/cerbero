@@ -58,7 +58,10 @@ Depends: ${shlibs:Depends}, ${misc:Depends} %(requires)s
 Description: %(shortdesc)s
  %(longdesc)s
 
-Package: %(name)s-dbg
+'''
+
+CONTROL_DBG_PACKAGE_TPL = \
+'''Package: %(name)s-dbg
 Section: libdevel
 Architecture: any
 Depends: %(name)s (= ${binary:Version})
@@ -122,7 +125,7 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir -a
 	dh_testroot -a
-	dh_strip -a --dbg-package=%(name)s-dbg
+	%(dh_strip)s
 	dh_link -a
 	dh_compress -a
 	dh_fixperms -a
@@ -138,6 +141,8 @@ binary: binary-indep binary-arch
 '''
 
 SOURCE_FORMAT_TPL = '''3.0 (native)'''
+
+DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(name)s-dbg'
 
 class DebianPackage(PackagerBase):
 
@@ -291,7 +296,10 @@ class DebianPackage(PackagerBase):
         requires = self._get_requires(PackageType.RUNTIME)
         args['requires'] = ', ' + requires if requires else ''
         runtime_files = self.files_list(PackageType.RUNTIME)
-        return CONTROL_TPL % args, runtime_files
+        if isinstance(self.package, MetaPackage):
+            return CONTROL_TPL % args, runtime_files
+        else:
+            return (CONTROL_TPL + CONTROL_DBG_PACKAGE_TPL) % args, runtime_files
 
     def _deb_control_devel_and_files(self):
         args = {}
@@ -318,6 +326,10 @@ class DebianPackage(PackagerBase):
     def _deb_rules(self):
         args = {}
         args['name'] = self.package.name
+        if not isinstance(self.package, MetaPackage):
+            args['dh_strip'] = DH_STRIP_TPL % args
+        else:
+            args['dh_strip'] = ''
         return RULES_TPL % args
 
     def _pack(self, tmpdir, debdir, srcdir):
