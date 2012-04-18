@@ -236,10 +236,7 @@ class DebianPackage(PackagerBase):
                     shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
                 f.close()
 
-        saved_path = os.getcwd()
-        os.chdir(srcdir)
-
-        shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b')
+        shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b', srcdir)
 
         # we may only have a generated shlibs file if at least we have runtime files
         if tarname:
@@ -252,7 +249,6 @@ class DebianPackage(PackagerBase):
 
         stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
         open(stamp_path, 'w').close()
-        os.chdir(saved_path)
 
     def _create_debian_tree(self, tmpdir):
         # create a tmp dir to use as topdir
