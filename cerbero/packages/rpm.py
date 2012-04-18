@@ -33,7 +33,7 @@ SPEC_TPL = '''
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 
-Name:           %(name)s
+Name:           %(p_prefix)s%(name)s
 Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
@@ -73,7 +73,7 @@ DEVEL_PACKAGE_TPL = '''
 %%package devel
 %(requires)s
 Summary: %(summary)s
-Provides: %(name)s-devel
+Provides: %(p_prefix)s%(name)s-devel
 
 %%description devel
 %(description)s
@@ -83,14 +83,15 @@ META_SPEC_TPL = '''
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 
-Name:           %(name)s
+Name:           %(p_prefix)s%(name)s
 Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
 Group:          Applications/Internet
-License:	%(license)s
+License:        %(license)s
 Vendor:         %(vendor)s
 %(url)s
+
 %(requires)s
 
 %%description
@@ -117,6 +118,10 @@ class RPMPackage(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
+        self.package_prefix = ''
+        if self.config.packages_prefix is not None:
+            self.package_prefix = '%s-' % self.config.packages_prefix
+
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -208,6 +213,7 @@ class RPMPackage(PackagerBase):
         args['description'] = args['summary']
         args['requires'] =  self._get_requires(PackageType.DEVEL)
         args['name'] = self.package.name
+        args['p_prefix'] = self.package_prefix
         try:
             devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
         except EmptyPackageError:
@@ -231,7 +237,8 @@ class RPMPackage(PackagerBase):
         self.package.has_devel_package = bool(devel_files)
 
         self._spec_str = template % {
-                'name': self.package.name,
+                'name': self.package_name,
+                'p_prefix': self.package_prefix,
                 'version': self.package.version,
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,

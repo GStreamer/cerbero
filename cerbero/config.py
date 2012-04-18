@@ -51,7 +51,7 @@ class Config (object):
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
-                   'use_configure_cache']
+                   'use_configure_cache', 'packages_prefix']
 
     def __init__(self, filename=None):
         self._check_uninstalled()
@@ -240,6 +240,7 @@ class Config (object):
         self.set_property('target_distro', distro)
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
+        self.set_property('packages_prefix', None)
         self.set_property('py_prefix', 'lib/python%s.%s' %
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')

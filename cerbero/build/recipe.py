@@ -133,6 +133,9 @@ class Recipe(FilesProvider):
         if self.config.target_platform == Platform.WINDOWS:
             self._steps.append(BuildSteps.GEN_LIBFILES)
 
+    def __str__(self):
+        return self.name
+
     def prepare(self):
         '''
         Can be overriden by subclasess to modify the recipe in function of
