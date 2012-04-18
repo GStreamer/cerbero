@@ -72,7 +72,7 @@ class PackagesStore (object):
             raise PackageNotFoundError(name)
         return self._packages[name]
 
-    def get_package_deps(self, package_name):
+    def get_package_deps(self, package_name, recursive=False):
         '''
         Gets the dependencies of a package
 
@@ -83,9 +83,14 @@ class PackagesStore (object):
         '''
         p = self.get_package(package_name)
         if isinstance(p, package.MetaPackage):
-            ret = sorted(x.name for x in self._list_metapackage_deps(p))
+            ret = [d.name for d in self._list_metapackage_deps(p)]
         else:
-            ret = sorted(p.deps)
+            ret = p.deps
+        # get deps recursively
+        if recursive:
+            for name in ret:
+                ret += [d.name for d in self.get_package_deps(name, recursive)]
+        ret = sorted(set(ret))
         return [self.get_package(x) for x in ret]
 
     def get_package_files_list(self, name):

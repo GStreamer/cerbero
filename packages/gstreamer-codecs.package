@@ -11,12 +11,13 @@ class Package(package.Package):
     licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '3fde61c2-4535-411f-8287-e8f6a892f853'
-    deps = ['gstreamer-core']
+    deps = ['gstreamer-core', 'gstreamer-effects']
 
     files = ['libass:libs', 'libdca:libs', 'faad2:libs', 'flac:libs',
-            'fribidi:libs', 'jasper:libs', 'jpeg:libs', 'libkate:libs',
+            'fribidi:libs', 'jasper:libs', 'libkate:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
+            'taglib:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
             'gst-plugins-bad:codecs'
     ]

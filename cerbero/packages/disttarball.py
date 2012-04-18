@@ -32,6 +32,9 @@ class DistTarball(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
         self.package = package
         self.prefix = config.prefix
+        self.package_prefix = ''
+        if self.config.packages_prefix is not None:
+            self.package_prefix = '%s-' % self.config.packages_prefix
 
     def pack(self, output_dir, devel=True, force=False, split=True,
              package_prefix=''):
@@ -60,8 +63,8 @@ class DistTarball(PackagerBase):
         return filenames
 
     def _get_name(self, package_type):
-        return "%s-%s%s.tar.bz2" % (self.package.name, self.package.version,
-                                    package_type)
+        return "%s%s-%s%s.tar.bz2" % (self.package_prefix, self.package.name, self.package.version,
+                                      package_type)
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):

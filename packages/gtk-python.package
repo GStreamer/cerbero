@@ -11,5 +11,6 @@ class Package(package.Package):
     licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '18fe47c2-4265-411f-8287-e8fda593f853'
+    deps = ['gtk+-2.0']
 
     files = ['py2cairo', 'pygtk']

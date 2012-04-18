@@ -11,6 +11,6 @@ class Package(package.Package):
     licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '3fde61c2-4565-411f-8287-e8faa892f853'
-    deps = ['gstreamer-core']
+    deps = ['gstreamer-core', 'gtk+-2.0']
 
     files = ['cogl', 'clutter', 'clutter-gst', 'json-glib']

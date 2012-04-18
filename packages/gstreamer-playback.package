@@ -13,6 +13,5 @@ class Package(package.Package):
     uuid = '5fce6752-4165-511f-8287-e8f2a895f853'
     deps = ['gstreamer-core']
 
-    files = ['libvisual', 'gst-plugins-base:playback',
-            'gst-plugins-good:playback', 'gst-plugins-bad:playback'
-    ]
+    files = ['cdparanoia:libs', 'gst-plugins-base:playback',
+            'gst-plugins-good:playback', 'gst-plugins-bad:playback']

@@ -11,7 +11,7 @@ class Package(package.Package):
     licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '2ffe6732-4565-411f-8281-e8f1a892f853'
-    deps = ['gstreamer-core']
+    deps = ['gstreamer-core', 'gstreamer-codecs']
 
     files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:lang',
             'libgpg-error:libs:lang',

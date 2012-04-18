@@ -33,7 +33,6 @@ SPEC_TPL = '''
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 
-
 Name:           %(p_prefix)s%(name)s
 Version:        %(version)s
 Release:        1
@@ -41,9 +40,9 @@ Summary:        %(summary)s
 Source:         %(source)s
 Group:          Applications/Internet
 License:        %(license)s
-URL:            %(url)s
 Prefix:         %(prefix)s
 Vendor:         %(vendor)s
+%(url)s
 %(requires)s
 
 %%description
@@ -81,13 +80,17 @@ Provides: %(p_prefix)s%(name)s-devel
 '''
 
 META_SPEC_TPL = '''
+%%define _topdir %(topdir)s
+%%define _package_name %(package_name)s
+
 Name:           %(p_prefix)s%(name)s
 Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
 Group:          Applications/Internet
 License:        %(license)s
-URL:            %(url)s
+Vendor:         %(vendor)s
+%(url)s
 
 %(requires)s
 
@@ -99,7 +102,6 @@ URL:            %(url)s
 %%build
 
 %%install
-rm -rf $RPM_BUILD_ROOT
 
 %%clean
 rm -rf $RPM_BUILD_ROOT
@@ -109,7 +111,7 @@ rm -rf $RPM_BUILD_ROOT
 
 REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
-
+URL_TPL = 'URL: %s\n'
 
 class RPMPackage(PackagerBase):
 
@@ -148,7 +150,7 @@ class RPMPackage(PackagerBase):
             # metapackages only contains Requires dependencies with other packages
             tarname = None
 
-        m.action(_("Creating RPM package for %s") % self.package.name)
+        m.action(_('Creating RPM package for %s') % self.package.name)
         # fill the spec file
         self._fill_spec(tarname, tmpdir)
         spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
@@ -156,7 +158,7 @@ class RPMPackage(PackagerBase):
             f.write(self._spec_str)
 
         # and build the package with rpmbuild
-        self._build_rpm(spec_path)
+        self._build_rpm(tmpdir, spec_path)
 
         # copy the newly created package, which should be in RPMS/$ARCH
         # to the output dir
@@ -172,13 +174,19 @@ class RPMPackage(PackagerBase):
 
     def _pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
+            stamp_path = os.path.join(tmpdir, p.name + '-stamp')
+            if os.path.exists(stamp_path):
+                # already built, skipping
+                continue
+
+            m.action(_('Packing dependency %s for package %s') % (p.name, self.package.name))
             packager = RPMPackage(self.config, p, self.store)
             try:
-                packager.pack(output_dir, self.devel, force, False, tmpdir)
+                packager.pack(output_dir, self.devel, force, True, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p)
 
-    def _build_rpm(self, spec_path):
+    def _build_rpm(self, tmpdir, spec_path):
         if self.config.target_arch == Architecture.X86:
             target = 'i686-redhat-linux'
         elif self.config.target_arch == Architecture.X86_64:
@@ -187,6 +195,8 @@ class RPMPackage(PackagerBase):
             raise FatalError(_('Architecture %s not supported') % \
                              self.config.target_arch)
         shell.call('rpmbuild -bb --target %s %s' % (target, spec_path))
+        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
+        open(stamp_path, 'w').close()
 
     def _create_rpm_tree(self, tmpdir):
         # create a tmp dir to use as topdir
@@ -202,9 +212,12 @@ class RPMPackage(PackagerBase):
         args['summary'] = 'Development files for %s' % self.package.name
         args['description'] = args['summary']
         args['requires'] =  self._get_requires(PackageType.DEVEL)
-        args['name'] = self.package_name
+        args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
+        try:
+            devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
+        except EmptyPackageError:
+            devel = ''
         return DEVEL_PACKAGE_TPL % args, devel
 
     def _fill_spec(self, sources, topdir):
@@ -214,23 +227,25 @@ class RPMPackage(PackagerBase):
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()
         else:
-            devel_files, devel_files = ('', '')
+            devel_package, devel_files = ('', '')
 
         if isinstance(self.package, MetaPackage):
             template = META_SPEC_TPL
         else:
             template = SPEC_TPL
 
+        self.package.has_devel_package = bool(devel_files)
+
         self._spec_str = template % {
-                'name': self.package_name,
+                'name': self.package.name,
                 'p_prefix': self.package_prefix,
                 'version': self.package.version,
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
-                'description': self.package.longdesc,
+                'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
                 'license': ' '.join(self.package.licenses),
                 'vendor': self.package.vendor,
-                'url': self.package.url,
+                'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
                 'requires': requires,
                 'prefix': self.install_dir,
                 'source': sources,
@@ -240,10 +255,12 @@ class RPMPackage(PackagerBase):
                 'files':  runtime_files}
 
     def _get_requires(self, package_type):
-        deps = self.store.get_package_deps(self.package.name)
+        deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
         if package_type == PackageType.DEVEL:
+            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
             deps = map(lambda x: x+'-devel', deps)
+        deps = map(lambda x: self.package_prefix + x, deps)
         deps.extend(self.package.get_sys_deps())
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
