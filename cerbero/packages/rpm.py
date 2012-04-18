@@ -33,7 +33,6 @@ SPEC_TPL = '''
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 
-
 Name:           %(name)s
 Version:        %(version)s
 Release:        1
@@ -81,6 +80,9 @@ Provides: %(name)s-devel
 '''
 
 META_SPEC_TPL = '''
+%%define _topdir %(topdir)s
+%%define _package_name %(package_name)s
+
 Name:           %(name)s
 Version:        %(version)s
 Release:        1
@@ -99,7 +101,6 @@ Vendor:         %(vendor)s
 %%build
 
 %%install
-rm -rf $RPM_BUILD_ROOT
 
 %%clean
 rm -rf $RPM_BUILD_ROOT
