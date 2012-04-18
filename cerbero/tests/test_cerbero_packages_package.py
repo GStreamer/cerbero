@@ -20,8 +20,8 @@ import shutil
 import unittest
 import tempfile
 
-from cerbero.config import Platform
-from cerbero.tests.test_packages_common import Package1, MetaPackage
+from cerbero.config import Platform, Distro, DistroVersion
+from cerbero.tests.test_packages_common import Package1, Package4, MetaPackage
 from cerbero.tests.test_build_common import create_cookbook, add_files
 from cerbero.tests.test_packages_common import create_store
 from cerbero.tests.test_common import DummyConfig
@@ -87,6 +87,18 @@ class PackageTest(unittest.TestCase):
 
         self.assertEquals(sorted(windevfiles), self.win32package.devel_files_list())
         self.assertEquals(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
+
+    def testSystemDependencies(self):
+        config = Config(self.tmp, Platform.LINUX)
+        config.target_distro = Distro.DEBIAN
+        package = Package4(config, None)
+        self.assertEquals(package.get_sys_deps(), ['python'])
+        config.target_distro = Distro.REDHAT
+        config.target_distro_version = DistroVersion.FEDORA_16
+        package = Package4(config, None)
+        self.assertEquals(package.get_sys_deps(), ['python27'])
+
+
 
 
 class TestMetaPackages(unittest.TestCase):

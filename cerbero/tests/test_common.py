@@ -30,6 +30,8 @@ class DummyConfig(object):
     git_root = ''
     allow_parallel_build = False
     num_of_cpus = 1
+    target_version = None
+    target_distro_version = None
 
 
 class XMLMixin():
