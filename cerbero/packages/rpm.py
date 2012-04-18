@@ -237,7 +237,7 @@ class RPMPackage(PackagerBase):
         self.package.has_devel_package = bool(devel_files)
 
         self._spec_str = template % {
-                'name': self.package_name,
+                'name': self.package.name,
                 'p_prefix': self.package_prefix,
                 'version': self.package.version,
                 'package_name': self.full_package_name,
