@@ -228,6 +228,8 @@ class RPMPackage(PackagerBase):
         else:
             template = SPEC_TPL
 
+        self.package.has_devel_package = bool(devel_files)
+
         self._spec_str = template % {
                 'name': self.package.name,
                 'version': self.package.version,
@@ -249,6 +251,7 @@ class RPMPackage(PackagerBase):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
         if package_type == PackageType.DEVEL:
+            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
             deps = map(lambda x: x+'-devel', deps)
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
