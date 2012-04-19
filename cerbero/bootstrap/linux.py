@@ -52,7 +52,7 @@ class RedHatBootstraper (UnixBootstraper):
     tool = 'su -c "yum install %s"'
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool', 'gettext-devel',
                 'make', 'cmake', 'bison', 'flex', 'yasm', 'pkgconfig-0.25',
-                'gtk-doc', 'curl', 'doxygen', 'text-info', 'texlive-dvips',
+                'gtk-doc', 'curl', 'doxygen', 'texinfo', 'texinfo-tex', 'texlive-dvips',
                 'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
                 'redhat-rpm-config', 'python-devel', 'libXrender-devel',
                 'pulseaudio-libs-devel', 'libXv-devel', 'mesa-libGL-devel',
