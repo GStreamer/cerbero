@@ -21,7 +21,7 @@ import os
 
 from cerbero.build import recipe
 from cerbero.config import Platform
-from cerbero.tests.test_common import DummyConfig
+from test.test_common import DummyConfig
 
 
 class Class1(object):

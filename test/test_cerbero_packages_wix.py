@@ -23,8 +23,8 @@ from cerbero.config import Platform
 from cerbero.packages import package
 from cerbero.packages.wix import MergeModule
 from cerbero.utils import etree
-from cerbero.tests.test_build_common import create_cookbook
-from cerbero.tests.test_common import DummyConfig
+from test.test_build_common import create_cookbook
+from test.test_common import DummyConfig
 
 
 class Recipe1(recipe.Recipe):

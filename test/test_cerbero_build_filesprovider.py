@@ -22,8 +22,8 @@ import tempfile
 
 from cerbero.build import filesprovider
 from cerbero.config import Platform
-from cerbero.tests.test_build_common import add_files
-from cerbero.tests.test_common import DummyConfig
+from test.test_build_common import add_files
+from test.test_common import DummyConfig
 
 
 class Config(DummyConfig):

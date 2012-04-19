@@ -21,10 +21,10 @@ import unittest
 import tempfile
 
 from cerbero.config import Platform, Distro, DistroVersion
-from cerbero.tests.test_packages_common import Package1, Package4, MetaPackage
-from cerbero.tests.test_build_common import create_cookbook, add_files
-from cerbero.tests.test_packages_common import create_store
-from cerbero.tests.test_common import DummyConfig
+from test.test_packages_common import Package1, Package4, MetaPackage
+from test.test_build_common import create_cookbook, add_files
+from test.test_packages_common import create_store
+from test.test_common import DummyConfig
 
 
 class Config(DummyConfig):

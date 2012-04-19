@@ -23,7 +23,7 @@ from cerbero.config import Platform
 from cerbero.errors import PackageNotFoundError
 from cerbero.packages.package import Package, MetaPackage
 from cerbero.packages.packagesstore import PackagesStore
-from cerbero.tests import test_packages_common as common
+from test import test_packages_common as common
 
 
 PACKAGE = '''

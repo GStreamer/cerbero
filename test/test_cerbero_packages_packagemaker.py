@@ -25,8 +25,8 @@ from cerbero.config import Platform
 from cerbero.packages import PackageType
 from cerbero.packages.packagemaker import OSXPackage, PackageMaker
 from cerbero.utils import shell
-from cerbero.tests.test_packages_common import create_store
-from cerbero.tests.test_common import DummyConfig
+from test.test_packages_common import create_store
+from test.test_common import DummyConfig
 
 
 class PackageMakerTest(unittest.TestCase):

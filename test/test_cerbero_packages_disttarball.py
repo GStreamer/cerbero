@@ -22,9 +22,9 @@ import tarfile
 import tempfile
 
 from cerbero.packages.disttarball import DistTarball
-from cerbero.tests.test_packages_common import create_store
-from cerbero.tests.test_common import DummyConfig
-from cerbero.tests.test_build_common import add_files
+from test.test_packages_common import create_store
+from test.test_common import DummyConfig
+from test.test_build_common import add_files
 
 
 class DistTarballTest(unittest.TestCase):

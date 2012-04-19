@@ -19,7 +19,7 @@
 from cerbero.config import Platform, Distro, DistroVersion
 from cerbero.packages import package
 from cerbero.packages.packagesstore import PackagesStore
-from cerbero.tests.test_build_common import create_cookbook
+from test.test_build_common import create_cookbook
 
 
 class Package1(package.Package):

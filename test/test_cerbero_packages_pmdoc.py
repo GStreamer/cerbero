@@ -20,13 +20,14 @@ import os
 import unittest
 import tempfile
 import shutil
+import sys
 
 from cerbero.config import Platform
 from cerbero.packages import PackageType
 from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
-from cerbero.tests.test_packages_common import create_store, Package1
-from cerbero.tests.test_common import XMLMixin, DummyConfig
+from test.test_packages_common import create_store, Package1
+from test.test_common import XMLMixin, DummyConfig
 
 
 class IndexTest(unittest.TestCase, XMLMixin):
@@ -232,8 +233,9 @@ class PkgContentsTest(unittest.TestCase, XMLMixin):
             else:
                 self.assertEquals(c.attrib['n'], 'README')
 
-
 class TestPMDoc(unittest.TestCase):
+
+    #if not sys.platform.startswith('darwin'):
 
     def setUp(self):
         self.config = DummyConfig()
@@ -247,6 +249,7 @@ class TestPMDoc(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.tmp)
 
+    @unittest.skipUnless(sys.platform.startswith("darwin"), "requires OSX")
     def testAllFilesCreated(self):
         d = dict()
         packages = ['gstreamer-test1', 'gstreamer-test3',
