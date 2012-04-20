@@ -138,6 +138,7 @@ class Config (object):
         gstpluginpath = os.path.join(self.prefix, 'lib', 'gstreamer-0.10')
         gstregistry = os.path.join(os.path.expanduser('~'), '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
+        pythonpath = os.path.join(self.prefix, self.py_prefix, 'site-packages')
 
         self._create_path(aclocaldir)
 
@@ -164,6 +165,7 @@ class Config (object):
                'MONO_GAC_PREFIX': self.prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
+               'PYTHONPATH': pythonpath
                }
 
         if self.platform == Platform.WINDOWS:
