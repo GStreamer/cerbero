@@ -66,6 +66,12 @@ class PackageBase(object):
     def __init__(self, config):
         self.config = config
 
+    def prepare(self):
+        '''
+        Can be overrided by subclasses to modify conditionally the package
+        '''
+        pass
+
     def files_list(self):
         raise NotImplemented("'files_list' must be implemented by subclasses")
 

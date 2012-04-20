@@ -181,6 +181,7 @@ class PackagesStore (object):
                 p = d['MetaPackage'](self._config, self)
             else:
                 raise Exception('Package or MetaPackage class found')
+            p.prepare()
             return p
         except Exception, ex:
             import traceback
