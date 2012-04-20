@@ -242,7 +242,8 @@ class DebianPackage(PackagerBase):
                     m.action(_('Copying generated shlibs file %s for ' \
                             'dependency %s to %s') %
                             (package_shlibs_path, p.name, shlibs_local_path))
-                    shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
+                    if os.path.exists(package_shlibs_path):
+                        shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
                 f.close()
 
         shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b', srcdir)
