@@ -4,7 +4,6 @@ class Recipe(recipe.Recipe):
     name = 'docbook-xsl'
     version = '1.76.1'
     btype = BuildType.CUSTOM
-    stype = SourceType.CUSTOM
 
     def install(self):
         etc_path =  os.path.join(self.config.prefix, 'etc')
