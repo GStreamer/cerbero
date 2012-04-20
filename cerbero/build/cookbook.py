@@ -24,7 +24,7 @@ from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
         DistroVersion
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
-from cerbero.errors import FatalError, RecipeNotFoundError
+from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
 from cerbero.utils import _
 from cerbero.utils import messages as m
 from cerbero.build import recipe as crecipe
@@ -303,11 +303,14 @@ class CookBook (object):
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'BuildType': BuildType, 'SourceType': SourceType,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps}
+                 'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps,
+                 'InvalidRecipeError': InvalidRecipeError}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.prepare()
             return r
+        except InvalidRecipeError:
+            pass
         except Exception, ex:
             import traceback
             traceback.print_exc()
