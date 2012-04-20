@@ -107,7 +107,6 @@ class CommonProps(PropsBase):
         PropsBase.__init__(self, 'Common')
         self._add_root()
         self._add_skeleton()
-        self._add_macro(prefix_macro, prefix)
         self._add_compiler_props()
         self._add_include_dirs(['$(%s)\include' % prefix_macro])
         self._add_imported_variable()
