@@ -4,7 +4,7 @@
 
 class Package(package.Package):
 
-    name = 'cerbero-base-system'
+    name = 'base-system'
     shortdesc = 'Base system dependencies'
     url = "http://www.gstreamer.com"
     version = '1.0'

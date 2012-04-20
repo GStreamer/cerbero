@@ -11,7 +11,7 @@ class Package(package.Package):
     licenses = ['LGPL']
     vendor = 'GStreamer Project'
     uuid = '32fe67c2-4565-411f-8287-e8faa892f853'
-    deps = ['cerbero-base-system']
+    deps = ['base-system']
 
     files = ['gstreamer', 'gst-plugins-base:libs:effects:lang',
              'gst-plugins-bad:lang', 'gst-plugins-ugly:lang',
