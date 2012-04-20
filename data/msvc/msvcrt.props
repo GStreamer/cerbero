@@ -10,7 +10,7 @@
     </ClCompile>
     <Link>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>libmoldname.a; oldnames.lib; msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>oldnames.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>false</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
@@ -18,6 +18,9 @@
     <Link>
       <AdditionalLibraryDirectories>$(WINDOWS_DRIVER_KIT)\lib\crt\i386;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition=" '$(PlatformName)' == 'x64' ">
     <Link>
