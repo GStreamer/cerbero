@@ -119,11 +119,12 @@ class RPMPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
         self.package_prefix = ''
         if self.config.packages_prefix is not None and not\
                 package.ignore_package_prefix:
             self.package_prefix = '%s-' % self.config.packages_prefix
+        self.full_package_name = '%s%s-%s' % (self.package_prefix,
+                self.package.name, self.package.version)
         self.packager = self.config.packager
         if self.packager == DEFAULT_PACKAGER:
             m.warning(_('No packager defined, using default packager "%s"') % self.packager)
