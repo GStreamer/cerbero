@@ -272,7 +272,9 @@ class RPMPackage(PackagerBase):
                 package_prefix = '%s-' % self.config.packages_prefix
             return package_prefix + package_name
 
-        details = { x: get_dep_name(x) for x in deps }
+        details = {}
+        for x in deps:
+            details[x] = get_dep_name(x)
 
         if package_type == PackageType.DEVEL:
             deps = [x for x in deps if self.store.get_package(x).has_devel_package]
