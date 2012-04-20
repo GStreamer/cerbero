@@ -204,6 +204,7 @@ class CookBook (object):
         '''
         if recipe_name in self.status:
             del self.status[recipe_name]
+            self.save()
 
     def recipe_needs_build(self, recipe_name):
         '''
