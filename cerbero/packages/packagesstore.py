@@ -176,7 +176,7 @@ class PackagesStore (object):
                  'package': package}
             execfile(filepath, d)
             if 'Package' in d:
-                p = d['Package'](self._config, self.cookbook)
+                p = d['Package'](self._config, self, self.cookbook)
             elif 'MetaPackage' in d:
                 p = d['MetaPackage'](self._config, self)
             else:
