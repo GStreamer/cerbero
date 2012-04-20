@@ -43,8 +43,6 @@ class PackageBase(object):
     @type org: str
     @cvar url: url for this pacakge
     @type url: str
-    @cvar packager: packager for this pacakge
-    @type packager: str
     @cvar sys_deps: system dependencies for this package
     @type sys_deps: dict
     @cvar ignore_package_prefix: do not use the package prefix set in the config
@@ -59,7 +57,6 @@ class PackageBase(object):
     licenses = ['GPL']
     vendor = 'default'
     url = 'default'
-    packager = 'default'
     ignore_package_prefix = False
     sys_deps = {}
 
