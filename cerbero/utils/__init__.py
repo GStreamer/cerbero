@@ -28,6 +28,7 @@ except ImportError:
     from lxml import etree
 import gettext
 import platform as pplatform
+import re
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError
@@ -167,3 +168,9 @@ def system_info():
     num_of_cpus = determine_num_of_cpus()
 
     return platform, arch, distro, distro_version, num_of_cpus
+
+
+def validate_packager(packager):
+    # match packager in the form 'Name <email>'
+    expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
+    return bool(re.match(expr, packager))

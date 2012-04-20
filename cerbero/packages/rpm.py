@@ -20,7 +20,7 @@ import os
 import shutil
 import tempfile
 
-from cerbero.config import Architecture
+from cerbero.config import Architecture, DEFAULT_PACKAGER
 from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
@@ -41,6 +41,7 @@ Source:         %(source)s
 Group:          Applications/Internet
 License:        %(license)s
 Prefix:         %(prefix)s
+Packager:       %(packager)s
 Vendor:         %(vendor)s
 %(url)s
 %(requires)s
@@ -89,6 +90,7 @@ Release:        1
 Summary:        %(summary)s
 Group:          Applications/Internet
 License:        %(license)s
+Packager:       %(packager)s
 Vendor:         %(vendor)s
 %(url)s
 
@@ -122,7 +124,9 @@ class RPMPackage(PackagerBase):
         if self.config.packages_prefix is not None and not\
                 package.ignore_package_prefix:
             self.package_prefix = '%s-' % self.config.packages_prefix
-
+        self.packager = self.config.packager
+        if self.packager == DEFAULT_PACKAGER:
+            m.warning(_('No packager defined, using default packager "%s"') % self.packager)
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -245,6 +249,7 @@ class RPMPackage(PackagerBase):
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
                 'license': ' '.join(self.package.licenses),
+                'packager': self.packager,
                 'vendor': self.package.vendor,
                 'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
                 'requires': requires,
