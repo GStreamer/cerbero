@@ -1,0 +1,20 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'tests'
+    shortdesc = 'Tests for GStreamer'
+    url = "http://www.gstreamer.com"
+    version = '1.0'
+    licenses = ['LGPL']
+    vendor = 'GStreamer Project'
+    uuid = '5fce6752-4165-511f-8287-e8f2a895f853'
+    sys_deps = {
+        Distro.DEBIAN: ['python'],
+        Distro.REDHAT: ['python']
+    }
+    deps = ['base-system', 'gstreamer-core', 'gstreamer-codecs', 'gstreamer-visualizers',
+            'gstreamer-playback', 'gstreamer-networking', 'gtk+-2.0']
+    files = ['insanity', 'insanity-gst', 'gst-playback-test']
