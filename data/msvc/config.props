@@ -2,16 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
-    <OUTPUT_DIR>c:\gstreamer-sdk</OUTPUT_DIR>
     <WINDOWS_DRIVER_KIT>C:\WinDDK\7600.16385.1</WINDOWS_DRIVER_KIT>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
-    <BuildMacro Include="OUTPUT_DIR">
-      <Value>$(OUTPUT_DIR)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
-    </BuildMacro>
     <BuildMacro Include="WINDOWS_DRIVER_KIT">
       <Value>$(WINDOWS_DRIVER_KIT)</Value>
     </BuildMacro>
