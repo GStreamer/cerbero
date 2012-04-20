@@ -53,11 +53,14 @@ class Config (object):
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix']
 
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, load=True):
         self._check_uninstalled()
 
         for a in self._properties:
             setattr(self, a, None)
+
+        if not load:
+            return
 
         # First load the default configuration
         self.load_defaults()
