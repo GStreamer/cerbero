@@ -1,0 +1,101 @@
+***********
+Description
+***********
+
+cerbero is a multi-platform build system for Open Source projects that builds
+and creates native packages for different platforms, architectures an distribution.
+
+Projects are defined using recipes files (.recipe), which provides a description
+of the project being built such as name, version, licenses, sources and the way
+it's built. It also provide listing of files, which is later used for the packaging.
+
+Packages are defined using packages files (.package), describing the package name,
+version, license, maintainer and other fields used to create the packages. A
+package wraps a list of recipes, from which the list of files belonging to the
+package will be extracted.
+
+
+************
+Minimum Requirements
+************
+
+cerbero provides bootstrapping facilities for all platforms, but it still needs a
+minimum base to bootstrap
+
+Linux
+-----
+On linux, you will only a distribution with python >= 2.6 and python's argparse module,
+which is already included in python2.7
+
+OSX
+---
+On OSX you will to have XCode installed and macports (used to install pkg-config)
+
+Windows
+-------
+The initial setup on Windows is little bit longer, but only a few programs are required.
+  * Python2.7: http://www.python.org/getit/releases/2.7/
+  * Git: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
+  * Msys/MinGW: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
+
+cerbero must be run in the MingGW shell, which is accessible from the main menu
+The last step is making python and git available from the shell, for which you will need
+to create a .profile file.
+  $ echo "export PATH=\"\$PATH:/c/Python27:/c/Git/bin\"" > ~/.profile
+
+Note that in side the shell, / is mapped to c:\Mingw\msys\1.0\
+
+
+*****
+Usage
+*****
+
+Bootstrap
+---------
+Before using cerbero for the first time you will need to run the bootstrap command.
+This command installs the missing parts of the build system using the packages manager
+when available.
+  $ cerbero bootstrap
+
+Help
+----
+  $ cerbero --help
+
+List available recipes
+----------------------
+  $ cerbero list
+
+List available packages
+-----------------------
+  $ cerbero list-packages
+
+Build a recipe
+--------------
+  $ cerbero build gtk+
+
+Rebuild a single recipe
+-----------------------
+  $ cerbero buildone gtk+
+
+Clean a recipe
+--------------
+  $ cerbero cleanone gtk+
+
+Create a package
+----------------
+  $ cerbero package gstreamer-sdk
+
+
+*******
+Licence
+*******
+
+cerbero is released under the GNU Lesser General Public License, Version 2.1 (LGPLv2.1)
+
+
+************
+Dependencies
+************
+
+ * python >= 2.6
+ * python-argparse
