@@ -90,6 +90,8 @@ class Config (object):
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
 
+        self.validate_properties()
+
         self.setup_env()
         self._create_path(self.local_sources)
         self._create_path(self.sources)
@@ -246,8 +248,6 @@ class Config (object):
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
-        if not validate_packager(self.packager):
-            raise FatalError(_('packager "%s" must be in the format "Name <email>"') % self.packager)
         self.set_property('py_prefix', 'lib/python%s.%s' %
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
@@ -258,6 +258,10 @@ class Config (object):
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
         self.set_property('allow_system_libs', True)
         self.set_property('use_configure_cache', False)
+
+    def validate_properties(self):
+        if not validate_packager(self.packager):
+            raise FatalError(_('packager "%s" must be in the format "Name <email>"') % self.packager)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
