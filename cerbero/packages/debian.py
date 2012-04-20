@@ -152,7 +152,8 @@ class DebianPackage(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.package_prefix = ''
-        if self.config.packages_prefix is not None:
+        if self.config.packages_prefix is not None and not\
+                package.ignore_package_prefix:
             self.package_prefix = '%s-' % self.config.packages_prefix
         self.full_package_name = '%s%s-%s' % (self.package_prefix,
                 self.package.name, self.package.version)

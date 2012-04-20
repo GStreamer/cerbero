@@ -119,7 +119,8 @@ class RPMPackage(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
         self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
         self.package_prefix = ''
-        if self.config.packages_prefix is not None:
+        if self.config.packages_prefix is not None and not\
+                package.ignore_package_prefix:
             self.package_prefix = '%s-' % self.config.packages_prefix
 
 

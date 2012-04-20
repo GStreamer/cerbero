@@ -47,6 +47,8 @@ class PackageBase(object):
     @type packager: str
     @cvar sys_deps: system dependencies for this package
     @type sys_deps: dict
+    @cvar ignore_package_prefix: do not use the package prefix set in the config
+    @type ignore_package_prefix: bool
     '''
     name = 'default'
     shortdesc = 'default'
@@ -58,6 +60,7 @@ class PackageBase(object):
     vendor = 'default'
     url = 'default'
     packager = 'default'
+    ignore_package_prefix = False
     sys_deps = {}
 
     def __init__(self, config):
