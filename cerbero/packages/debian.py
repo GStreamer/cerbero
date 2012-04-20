@@ -24,7 +24,7 @@ import tempfile
 from datetime import datetime
 from fnmatch import fnmatch
 
-from cerbero.config import Architecture
+from cerbero.config import Architecture, DEFAULT_PACKAGER
 from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
@@ -157,6 +157,9 @@ class DebianPackage(PackagerBase):
             self.package_prefix = '%s-' % self.config.packages_prefix
         self.full_package_name = '%s%s-%s' % (self.package_prefix,
                 self.package.name, self.package.version)
+        self.packager = self.config.packager
+        if self.packager == DEFAULT_PACKAGER:
+            m.warning(_('No packager defined, using default packager "%s"') % self.packager)
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -289,9 +292,7 @@ class DebianPackage(PackagerBase):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        # FIXME - use self.package.packager when available
-        args['packager'] = \
-                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['packager'] = self.packager
         args['version'] = self.package.version
         args['datetime'] = self.datetime
         args['changelog_url'] = CHANGELOG_URL_TPL % self.package.url \
@@ -302,9 +303,7 @@ class DebianPackage(PackagerBase):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        # FIXME - use self.package.packager when available
-        args['packager'] = \
-                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['packager'] = self.packager
         args['homepage'] = 'Homepage: ' + self.package.url \
                 if self.package.url != 'default' else ''
         args['shortdesc'] = self.package.shortdesc
@@ -338,9 +337,7 @@ class DebianPackage(PackagerBase):
 
     def _deb_copyright(self):
         args = {}
-        # FIXME - use self.package.packager when available
-        args['packager'] = \
-                'Andre Moreira Magalhaes <andre.magalhaes@collabora.co.uk>'
+        args['packager'] = self.packager
         args['datetime'] = self.datetime
         args['licenses'] = ' '.join(self.package.licenses)
         args['licenses_locations'] = \
