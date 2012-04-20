@@ -1,5 +1,11 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import os
+
+from fnmatch import fnmatch
+
+from cerbero.build.filesprovider import FilesProvider
+
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
@@ -11,3 +17,16 @@ class Recipe(recipe.Recipe):
     files_bins = ['nettle-hash', 'nettle-lfib-stream']
     files_libs = ['libnettle', 'libhogweed']
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
+
+    def post_install(self):
+        if self.config.target_platform == Platform.LINUX:
+            # Fix the libs permissions to 0755 to make the rpm packaging happy.
+            # Setting for all linux distros as this may affect suse as well.
+            # It will not affect debian packaging as it will run dh_fixperms
+            # which does the right thing for debian.
+            libs = self.files_list_by_category(FilesProvider.LIBS_CAT)
+            for lib in libs:
+                f = os.path.join(self.config.prefix, lib)
+                if os.path.isfile(f) and not os.path.islink(f) and \
+                   fnmatch(f, '*.so.*'):
+                    os.chmod(f, 0755)
