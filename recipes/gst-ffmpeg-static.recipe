@@ -11,5 +11,8 @@ class Recipe(recipe.Recipe):
     files_codecs = ['gstreamer-static/lib/gstreamer-0.10/libgstffmpeg%(smext)s']
 
     def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += \
+                    '--with-ffmpeg-extra-configure="--enable-w32threads"'
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
