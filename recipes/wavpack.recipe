@@ -10,8 +10,3 @@ class Recipe(recipe.Recipe):
     files_libs = ['libwavpack']
     files_bins = ['wavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
-
-
-    def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.config_sh = 'export LDFLAGS="$LDFLAGS -liconv"; ./configure'
