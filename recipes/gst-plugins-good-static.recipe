@@ -4,10 +4,10 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-good-static'
     version = '0.10.31'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection --disable-examples --disable-shared --enable-static --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo '
+    configure_options = '--disable-introspection --disable-examples --disable-shared --enable-static --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
-            'speex', 'gdk-pixbuf', 'libshout', 'libsoup',
+            'speex', 'gdk-pixbuf', 'libsoup',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
