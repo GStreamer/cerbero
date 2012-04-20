@@ -109,5 +109,9 @@ class Main(object):
             sys.exit(res)
 
 
-if __name__ == "__main__":
+def main():
     Main(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    main()
