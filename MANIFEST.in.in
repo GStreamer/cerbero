@@ -1,3 +1,4 @@
 include MANIFEST.in.in
 include LICENSE.LGPL
 include Makefile
+recursive-include test/pkgconfig *

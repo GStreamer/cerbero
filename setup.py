@@ -18,7 +18,8 @@ def parse_dir(dirpath, extension=None):
         files = shell.check_call('git ls-files %s' % dirpath).split('\n')
         files.remove('')
     else:
-        files = os.listdir(dirpath)
+        files = shell.check_call('find %s -type f' % dirpath).split('\n')
+        files.remove('')
     if extension is None:
         return files
     return [f for f in files if f.endswith(extension)]
@@ -31,16 +32,17 @@ def datafiles(prefix):
     for dirname, extension in [('recipes', '.recipe'), ('packages', '.package')]:
         for f in parse_dir(dirname, extension):
             files.append((os.path.join(datadir, dirname), [f]))
-    for f in parse_dir('data'):
-        dirpath = os.path.split(f.split('/', 1)[1])[0]
-        files.append((os.path.join(datadir, dirpath), [f]))
+    for dirname in ['data', 'config']:
+        for f in parse_dir('data'):
+            dirpath = os.path.split(f.split('/', 1)[1])[0]
+            files.append((os.path.join(datadir, dirpath), [f]))
     return files
 
 
 #Fill manifest
 shutil.copy('MANIFEST.in.in', 'MANIFEST.in')
 with open('MANIFEST.in', 'a+') as f:
-    for dirname in ['recipes', 'packages', 'data']:
+    for dirname in ['recipes', 'packages', 'data', 'config']:
         f.write('\n'.join(['include %s' % x for x in parse_dir(dirname)]))
         f.write('\n')
 
