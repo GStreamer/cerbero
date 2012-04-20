@@ -13,9 +13,16 @@ class Package(package.Package):
     uuid = '2ffe6732-4565-411f-8281-e8f1a892f853'
     deps = ['gstreamer-core']
 
-    files = ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:lang',
-            'libgpg-error:libs:lang',
-            'libsoup:libs', 'libtasn1:libs', 'libmms:libs',
-            'glib-networking', 'nettle:libs',
+    files = ['libsoup:libs', 'libmms:libs',
             'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net'
     ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX or \
+           self.config.target_distro_version not in \
+                [DistroVersion.DEBIAN_WHEEZY,
+                 DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC,
+                 DistroVersion.FEDORA_16]:
+            self.files += ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:lang',
+                           'libgpg-error:libs:lang', 'libtasn1:libs',
+                           'nettle:libs', 'glib-networking']
