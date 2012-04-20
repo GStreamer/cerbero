@@ -21,7 +21,7 @@ import sys
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.utils import _, system_info
+from cerbero.utils import _, system_info, validate_packager
 from cerbero.utils import messages as m
 
 
@@ -32,6 +32,7 @@ DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git+ssh://git.keema.collabora.co.uk/git/gst-sdk/'
 DEFAULT_WIX_PREFIX = 'C:\\\\Program Files\\Windows Installer XML v3.5\\bin\\'
 DEFAULT_ALLOW_PARALLEL_BUILD = False
+DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 
 
@@ -51,7 +52,7 @@ class Config (object):
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
-                   'use_configure_cache', 'packages_prefix']
+                   'use_configure_cache', 'packages_prefix', 'packager']
 
     def __init__(self, filename=None, load=True):
         self._check_uninstalled()
@@ -244,6 +245,9 @@ class Config (object):
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)
+        self.set_property('packager', DEFAULT_PACKAGER)
+        if not validate_packager(self.packager):
+            raise FatalError(_('packager "%s" must be in the format "Name <email>"') % self.packager)
         self.set_property('py_prefix', 'lib/python%s.%s' %
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
