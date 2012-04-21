@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gnutls'
     version = '3.0.14'
     license = 'LGPLv2.1+'
-    configure_options = "--enable-local-libopts "
+    configure_options = "--enable-local-libopts --disable-guile"
     deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
 
     files_libs = ['libgnutls', 'libgnutlsxx', 'libgnutls-openssl']

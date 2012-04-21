@@ -100,10 +100,19 @@ class _Environ(environclass):
         return self.data.get(key, failobj)
 
 
+# we don't want backlashes in paths as it breaks shell commands
+
+oldexpanduser = os.path.expanduser
+
+
 def join(*args):
     return '/'.join(args)
+
+def expanduser(path):
+    return oldexpanduser(path).replace('\\', '/')
 
 
 if sys.platform.startswith('win'):
     os.environ = _Environ(os.environ)
     os.path.join = join
+    os.path.expanduser = expanduser
