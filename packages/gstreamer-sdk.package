@@ -29,7 +29,7 @@ class MetaPackage(package.MetaPackage):
                ('gtk+-2.0', False, False),
                ('gtk+-2.0-python', False, False),
                ('snappy', False, False),
-	       ('tests', False, False),
+               ('gstreamer-tests', False, False),
               ]
     platform_packages = {
             Platform.WINDOWS: [('vsintegration', True, False)]}

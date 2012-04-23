@@ -4,7 +4,7 @@
 
 class Package(package.Package):
 
-    name = 'tests'
+    name = 'gstreamer-tests'
     shortdesc = 'Tests for GStreamer'
     url = "http://www.gstreamer.com"
     version = '1.0'
