@@ -34,6 +34,8 @@ DEFAULT_WIX_PREFIX = 'C:\\\\Program Files\\Windows Installer XML v3.5\\bin\\'
 DEFAULT_ALLOW_PARALLEL_BUILD = False
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
+#FIXME change it with autotools
+DATA_DIR = os.path.join(os.path.dirname(__file__), '..',  'data')
 
 
 Platform = enums.Platform
@@ -52,7 +54,8 @@ class Config (object):
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'wix_prefix', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
-                   'use_configure_cache', 'packages_prefix', 'packager']
+                   'use_configure_cache', 'packages_prefix', 'packager',
+                   'data_dir']
 
     def __init__(self, filename=None, load=True):
         self._check_uninstalled()
@@ -257,8 +260,11 @@ class Config (object):
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
+            self.set_property('data_dir', DATA_DIR)
             self.set_property('environ_dir', os.path.join(CONFIG_DIR))
         else:
+            self.set_property('data_dir',
+                os.path.join(os.path.dirname(__file__), '..', 'data'))
             self.set_property('environ_dir',
                 os.path.join(os.path.dirname(__file__), '..', 'config'))
         self.set_property('allow_system_libs', True)
