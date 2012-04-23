@@ -392,11 +392,24 @@ class DebianPackage(PackagerBase):
     def _get_requires(self, package_type):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
+
+        def get_dep_name(package_name):
+            p = self.store.get_package(package_name)
+            package_prefix = ''
+            if self.config.packages_prefix is not None and not p.ignore_package_prefix:
+                package_prefix = '%s-' % self.config.packages_prefix
+            return package_prefix + package_name
+
+        details = {}
+        for x in deps:
+            details[x] = get_dep_name(x)
+
         if package_type == PackageType.DEVEL:
-            deps = [x for x in deps \
-                    if self.store.get_package(x).has_devel_package]
-            deps = map(lambda x: x+'-dev', deps)
-        deps = map(lambda x: self.package_prefix + x, deps)
+            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
+            deps = map(lambda x: details[x] + '-dev', deps)
+        else:
+            deps = map(lambda x: details[x], deps)
+
         deps.extend(self.package.get_sys_deps())
         return ', '.join(deps)
 

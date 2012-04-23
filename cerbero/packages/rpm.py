@@ -119,11 +119,12 @@ class RPMPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.full_package_name = '%s-%s' % (self.package.name, self.package.version)
         self.package_prefix = ''
         if self.config.packages_prefix is not None and not\
                 package.ignore_package_prefix:
             self.package_prefix = '%s-' % self.config.packages_prefix
+        self.full_package_name = '%s%s-%s' % (self.package_prefix,
+                self.package.name, self.package.version)
         self.packager = self.config.packager
         if self.packager == DEFAULT_PACKAGER:
             m.warning(_('No packager defined, using default packager "%s"') % self.packager)
@@ -263,10 +264,24 @@ class RPMPackage(PackagerBase):
     def _get_requires(self, package_type):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
+
+        def get_dep_name(package_name):
+            p = self.store.get_package(package_name)
+            package_prefix = ''
+            if self.config.packages_prefix is not None and not p.ignore_package_prefix:
+                package_prefix = '%s-' % self.config.packages_prefix
+            return package_prefix + package_name
+
+        details = {}
+        for x in deps:
+            details[x] = get_dep_name(x)
+
         if package_type == PackageType.DEVEL:
             deps = [x for x in deps if self.store.get_package(x).has_devel_package]
-            deps = map(lambda x: x+'-devel', deps)
-        deps = map(lambda x: self.package_prefix + x, deps)
+            deps = map(lambda x: details[x] + '-devel', deps)
+        else:
+            deps = map(lambda x: details[x], deps)
+
         deps.extend(self.package.get_sys_deps())
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
