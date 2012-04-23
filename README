@@ -37,6 +37,7 @@ The initial setup on Windows is little bit longer, but only a few programs are r
   * Python2.7: http://www.python.org/getit/releases/2.7/
   * Git: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
   * Msys/MinGW: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
+  * Yasm: http://yasm.tortall.net/Download.html
 
 cerbero must be run in the MingGW shell, which is accessible from the main menu
 The last step is making python and git available from the shell, for which you will need
