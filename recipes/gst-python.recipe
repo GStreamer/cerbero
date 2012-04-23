@@ -27,4 +27,6 @@ class Recipe(recipe.Recipe):
              'site-packages/pygst.py',
     ]
 
+    files_examples = ['share/gst-python/0.10/examples/']
+
     files_devel = ['lib/pkgconfig/gst-python-0.10.pc']
