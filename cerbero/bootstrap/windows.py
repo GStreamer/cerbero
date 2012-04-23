@@ -25,46 +25,23 @@ from cerbero.config import Architecture, Distro, Platform
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
+# Toolchain
+MINGW_DOWNLOAD_SOURCE = 'http://keema.collabora.co.uk'
+MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
+MINGW_SYSROOT = '/home/andoni/mingw/%s/%s/lib'
 
-MINGW_DOWNLOAD_SOURCE = {'w32':
-'''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win32/Automated%20Builds/''',
-                         'w64':
-'''http://downloads.sourceforge.net/project/mingw-w64/Toolchains%20targetting%20Win64/Automated%20Builds/'''}
-MINGW_TARBALL_TPL = "mingw-%s-bin_%s-%s_%s.%s"
-MINGW_W32_i686_LINUX = MINGW_TARBALL_TPL % ('w32', 'i686', 'linux', 20111220, 'tar.bz2')
-MINGW_W64_i686_LINUX = MINGW_TARBALL_TPL % ('w64', 'i686', 'linux', 20111220, 'tar.bz2')
-MINGW_W32_i686_WINDOWS = MINGW_TARBALL_TPL % ('w32', 'i686', 'mingw', 20111219, 'zip')
-MINGW_W64_x86_64_WINDOWS = MINGW_TARBALL_TPL % ('w64', 'i686', 'mingw', 20111220, 'zip')
-MINGW_SYSROOT = {'w64':
-'''/hdd/m64bs/linux-x86-x86_64/build/build/root/x86_64-w64-mingw32/lib/../lib''',
-                 'w32':
-'''/buildslaves/mingw-w64/linux-x86-x86/build/build/root/i686-w64-mingw32/lib/../lib'''}
-
+# Extra dependencies
+MINGWGET_DEPS = ['msys-wget']
+SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
+WINDOWS_BIN_DEPS = [
+    'glib/2.28/glib_2.28.8-1_win32.zip',
+    'intltool/0.40/intltool_0.40.4-1_win32.zip',
+    'dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
+    'dependencies/pkg-config-dev_0.26-1_win32.zip',
+    'dependencies/pkg-config_0.26-1_win32.zip']
 PTHREADS_URL = \
 '''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
-
-PYTHON_URL = \
-'''http://hg.python.org/cpython/raw-file/ccd16ad37544/Include'''
-
-DIRECTX_HEADERS = \
-"https://mingw-w64.svn.sourceforge.net/svnroot/mingw-w64/trunk/mingw-w64-headers/direct-x/include"\
-
-MINGWGET_DEPS = ['msys-wget']
-
-SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
-
-WINDOWS_BIN_DEPS = [
-                    'http://ftp.gnome.org/pub/gnome/binaries/win32/glib/2.28/glib_2.28.8-1_win32.zip',
-                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
-                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config-dev_0.26-1_win32.zip',
-                    'http://ftp.gnome.org/pub/gnome/binaries/win32/dependencies/pkg-config_0.26-1_win32.zip']
-
-GL_HEADERS = ["http://cgit.freedesktop.org/mesa/mesa/plain/include/GL/gl.h",
-              "http://www.opengl.org/registry/api/glext.h"]
-
-GENDEF = 'http://mingw-w64.svn.sourceforge.net/viewvc/mingw-w64/trunk/mingw-w64-tools/gendef/?view=tar'
-
-SED = "sed -i 's/%s/%s/g' %s"
 
 
 class WindowsBootstraper(BootstraperBase):
@@ -75,9 +52,9 @@ class WindowsBootstraper(BootstraperBase):
 
     def start(self):
         self.prefix = self.config.toolchain_prefix
-        self.target_platform = self.config.target_platform
-        self.target_arch = self.config.target_arch
-        if self.target_arch == Architecture.X86:
+        self.platform = self.config.target_platform
+        self.arch = self.config.target_arch
+        if self.arch == Architecture.X86:
             self.version = 'w32'
         else:
             self.version = 'w64'
@@ -91,11 +68,8 @@ class WindowsBootstraper(BootstraperBase):
         if self.platform == Platform.WINDOWS:
             # After mingw is beeing installed
             self.install_bin_deps()
-        self.install_directx_headers()
-        self.install_gl_headers()
         self.install_python_sdk()
         self.install_pthreads()
-        self.install_gendef()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -105,34 +79,13 @@ class WindowsBootstraper(BootstraperBase):
             os.makedirs(etc_path)
 
     def install_mingw(self):
-        tarball = None
-        if self.platform == Platform.LINUX:
-            if self.target_arch == Architecture.X86:
-                tarball = MINGW_W32_i686_LINUX
-            if self.target_arch == Architecture.X86_64:
-                tarball = MINGW_W64_i686_LINUX
-        if self.platform == Platform.WINDOWS:
-            if self.target_arch == Architecture.X86:
-                tarball = MINGW_W32_i686_WINDOWS
-            if self.target_arch == Architecture.X86_64:
-                tarball = MINGW_W64_x86_64_WINDOWS
+        tarball = MINGW_TARBALL_TPL % (self.version, self.platform,
+                self.arch)
 
         tarfile = os.path.join(self.prefix, tarball)
-        shell.download("%s%s" % (MINGW_DOWNLOAD_SOURCE[self.version], tarball), tarfile)
+        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
         shell.unpack(tarfile, self.prefix)
         self.fix_lib_paths()
-
-    def install_gendef(self):
-        gendeftar = os.path.join(self.prefix, 'gendef.tar.gz')
-        shell.download(GENDEF, gendeftar)
-        temp = tempfile.mkdtemp()
-        shell.unpack(gendeftar, temp)
-        if self.platform != Platform.WINDOWS:
-            sudo = 'sudo'
-        else:
-            sudo = ''
-        shell.call('CC=gcc ./configure; make; %s make install' % sudo,
-                os.path.join(temp, 'gendef'))
 
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
@@ -161,13 +114,6 @@ class WindowsBootstraper(BootstraperBase):
         shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
                   (temp, self.version, python_libs))
 
-    def install_directx_headers(self):
-        m.action(_("Installing DirectX headers"))
-        directx_headers = os.path.join(self.prefix, 'include', 'DirectX')
-        cmd = "svn checkout --trust-server-cert --non-interactive "\
-              "--no-auth-cache %s %s" % (DIRECTX_HEADERS, directx_headers)
-        shell.call(cmd)
-
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
             shell.call('mingw-get install %s' % dep)
@@ -181,6 +127,8 @@ class WindowsBootstraper(BootstraperBase):
             path = os.path.join(temp, 'download.zip')
             shell.download(url, path)
             shell.unpack(path, self.config.toolchain_prefix)
+        return
+        # install svn (skipped as it's not needed anymore for now)
         temp = tempfile.mkdtemp()
         path = os.path.join(temp, 'download.zip')
         shell.download(SVN, path)
@@ -188,28 +136,6 @@ class WindowsBootstraper(BootstraperBase):
         dirpath = os.path.join(temp, os.path.splitext(os.path.split(SVN)[1])[0])
         shell.call('cp -r %s/* %s' % (dirpath, self.config.toolchain_prefix))
 
-    def install_gl_headers(self):
-        m.action(_("Installing OpenGL headers"))
-        gl_path = "%s/include/GL" % (self.prefix)
-        if not os.path.exists(gl_path):
-            os.mkdir(gl_path)
-        wget = 'wget %s -O %s'
-        for h in GL_HEADERS:
-            cmd = wget % (h, "%s/%s" % (gl_path, os.path.basename(h)))
-            shell.call(cmd)
-
-    def fix_lib_paths(self):
-        orig_sysroot = MINGW_SYSROOT[self.version]
-        if self.target_arch == Architecture.X86:
-            new_sysroot = os.path.join(self.prefix, 'i686-w64-mingw32', 'lib')
-        else:
-            new_sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32', 'lib')
-        lib_path = new_sysroot
-
-        # Replace the old sysroot in all .la files
-        for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
-            shell.replace(os.path.abspath(os.path.join(lib_path, path)),
-                          {orig_sysroot: new_sysroot})
 
 
 def register_all():
