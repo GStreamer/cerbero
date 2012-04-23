@@ -85,3 +85,10 @@ class Recipe(recipe.Recipe):
             else:
                 from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
+
+    def post_install(self):
+        import shutil
+        if self.config.target_platform == Platform.WINDOWS:
+            shutil.copy(os.path.join(self.build_dir, 'glib', 'glibconfig.h.win32'),
+                        os.path.join(self.config.prefix, 'lib', 'glib-2.0',
+                                     'include', 'glibconfig.h'))
