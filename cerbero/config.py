@@ -202,7 +202,7 @@ class Config (object):
                 separator = ';'
             else:
                 separator = ':'
-            return "%s%s%s" % (path, separator, os.environ['PATH'])
+            return "%s%s%s" % (path, separator, os.environ[env])
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
