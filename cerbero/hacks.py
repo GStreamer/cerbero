@@ -103,6 +103,8 @@ class _Environ(environclass):
 # we don't want backlashes in paths as it breaks shell commands
 
 oldexpanduser = os.path.expanduser
+oldabspath = os.path.abspath
+oldrealpath = os.path.realpath
 
 
 def join(*args):
@@ -111,8 +113,15 @@ def join(*args):
 def expanduser(path):
     return oldexpanduser(path).replace('\\', '/')
 
+def abspath(path):
+    return oldabspath(path).replace('\\', '/')
+
+def realpath(path):
+    return oldrealpath(path).replace('\\', '/')
 
 if sys.platform.startswith('win'):
     os.environ = _Environ(os.environ)
     os.path.join = join
     os.path.expanduser = expanduser
+    os.path.abspath = abspath
+    os.path.realpath = realpath
