@@ -140,6 +140,9 @@ class Config (object):
                                     '.cerbero-registry-%s' % self.target_arch)
         pythonpath = os.path.join(self.prefix, self.py_prefix, 'site-packages')
 
+        if self.platform == Platform.LINUX:
+            xdgdatadir += ":/usr/share:/usr/local/share"
+
         self._create_path(aclocaldir)
 
         # Most of these variables are extracted from jhbuild
