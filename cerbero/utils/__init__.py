@@ -69,6 +69,13 @@ def to_winpath(path):
     return path.replace('/', '\\')
 
 
+def to_winepath(path):
+        path = path.replace('/', '\\\\')
+        # wine maps the filesystem root '/' to 'z:\'
+        path = 'z:\\%s' % path
+        return path
+
+
 def system_info():
     '''
     Get the sysem information.
