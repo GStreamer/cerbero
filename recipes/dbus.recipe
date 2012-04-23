@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     deps = ['expat']
     configure_options = '--disable-xml-docs --disable-doxygen-docs --disable-selinux --disable-libaudit --disable-launchd --disable-tests --disable-x11-autolaunch --disable-Werror '
 
-    files_libs = ['libdbus']
+    files_libs = ['libdbus-1']
     files_bins = ['dbus-launch', 'dbus-send', 'dbus-daemon', 'dbus-monitor']
     files_devel = ['lib/pkgconfig/dbus-1.pc', 'include/dbus-1.0',
                    'lib/dbus-1.0/include/dbus/dbus-arch-deps.h']
