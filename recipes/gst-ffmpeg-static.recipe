@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-ffmpeg-static'
     version = '0.10.13'
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-shared --enable-static --disable-examples '
+    configure_options = '--disable-shared --enable-static --enable-lgpl --disable-examples '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
