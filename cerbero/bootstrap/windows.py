@@ -119,14 +119,19 @@ class WindowsBootstraper(BootstraperBase):
             shell.call('mingw-get install %s' % dep)
 
     def install_bin_deps(self):
-        # On windows, we need to install first wget than SVN, for the DirectX headers,
-        # and pkg-config. pkg-config can't be installed otherwise because it depends
+        # On windows, we need to install first wget and pkg-config.
+        # pkg-config can't be installed otherwise because it depends
         # on glib and glib depends on pkg-config
         for url in WINDOWS_BIN_DEPS:
             temp = tempfile.mkdtemp()
             path = os.path.join(temp, 'download.zip')
-            shell.download(url, path)
+            shell.download(GNOME_FTP + url, path)
             shell.unpack(path, self.config.toolchain_prefix)
+        # replace /opt/perl/bin/perl in intltool
+        files = shell.ls_files(['bin/intltool*'], self.config.toolchain_prefix)
+        for f in files:
+            shell.replace(os.path.join(self.config.toolchain_prefix, f),
+                          {'/opt/perl/bin/perl': '/bin/perl'})
         return
         # install svn (skipped as it's not needed anymore for now)
         temp = tempfile.mkdtemp()
@@ -135,7 +140,6 @@ class WindowsBootstraper(BootstraperBase):
         shell.unpack(path, temp)
         dirpath = os.path.join(temp, os.path.splitext(os.path.split(SVN)[1])[0])
         shell.call('cp -r %s/* %s' % (dirpath, self.config.toolchain_prefix))
-
 
 
 def register_all():
