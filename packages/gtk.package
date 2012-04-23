@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gtk+-2.0'
     shortdesc = 'Gtk toolkit'
     url = "http://www.gstreamer.com"
-    version = '2.24'
+    version = '1.0'
     licenses = ['LGPL']
     vendor = 'GTK+ Project'
     uuid = '58fe67c2-4565-411f-8287-e8fda893f853'
