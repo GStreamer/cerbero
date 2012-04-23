@@ -60,8 +60,9 @@ class PackageBase(object):
     ignore_package_prefix = False
     sys_deps = {}
 
-    def __init__(self, config):
+    def __init__(self, config, store):
         self.config = config
+        self.store = store
 
     def prepare(self):
         '''
@@ -114,15 +115,19 @@ class Package(PackageBase):
     files = list()
     platform_files = dict()
 
-    def __init__(self, config, cookbook):
-        PackageBase.__init__(self, config)
+    def __init__(self, config, store, cookbook):
+        PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
         self._files = self.files + \
                 self.platform_files.get(config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):
-        return [x.split(':')[0] for x in self._files]
+        files = [x.split(':')[0] for x in self._files]
+        for name in self.deps:
+            p = self.store.get_package(name)
+            files += p.recipes_dependencies()
+        return files
 
     def files_list(self):
         files = []
@@ -174,8 +179,7 @@ class MetaPackage(PackageBase):
     platfrom_packages = {}
 
     def __init__(self, config, store):
-        PackageBase.__init__(self, config)
-        self.store = store
+        PackageBase.__init__(self, config, store)
 
     def list_packages(self):
         return [p[0] for p in self.packages]
