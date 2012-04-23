@@ -6,4 +6,17 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity-gst'}
-    deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'gtk-doc' ]
+    deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'gtk-doc', 'libsoup' ]
+
+    files_devel = ['include/insanity-gst-0.10', 'lib/pkgconfig/insanity-gst-0.10.pc']
+    files_libs = ['libinsanity-gst-0.10']
+    files_misc = [
+        'libexec/insanity-gst/tests/insanity-test-gst-discoverer%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-dvd%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-generic-pipeline%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-hls%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-http%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-play%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-seek%(bext)s',
+        'libexec/insanity-gst/tests/insanity-test-gst-stream-switch%(bext)s'
+    ]

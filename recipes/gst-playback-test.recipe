@@ -7,3 +7,4 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://git.collabora.co.uk/git/user/slomo/gst-playback-test.git'}
     deps = ['glib', 'gstreamer', 'gtk+']
 
+    files_bins = ['gst-playback-test-0.10']
