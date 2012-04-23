@@ -18,24 +18,26 @@
 
 import os
 import uuid
-import itertools
+import shutil
 
-from cerbero.packages import PackagerBase
-from cerbero.packages.package import Package
-from cerbero.utils import shell, etree
-from cerbero.config import Platform
+from cerbero.utils import etree, to_winepath, shell
+from cerbero.config import Platform, Architecture
+
+WIX_SCHEMA = "http://schemas.microsoft.com/wix/2006/wi"
 
 
-class WixBase(PackagerBase):
+class WixBase():
 
-    def __init__(self, config, package, store):
-        PackagerBase.__init__(self, config, package, store)
+    def __init__(self, config, package):
+        self.config = config
+        self.package = package
         self.platform = config.platform
         self.target_platform = config.target_platform
         self._with_wine = self.platform != Platform.WINDOWS
         self.prefix = config.prefix
-        self.wix_prefix = config.wix_prefix
         self.filled = False
+        self.id_count = 0
+        self.ids = {}
 
     def fill(self):
         if self.filled:
@@ -46,11 +48,7 @@ class WixBase(PackagerBase):
     def write(self, filepath):
         self.fill()
         tree = etree.ElementTree(self.root)
-        tree.write(filepath, encoding='utf-8')
-
-    def render_xml(self):
-        self.fill()
-        return etree.tostring(self.root)
+        tree.write(filepath, encoding='utf-8', pretty_print=True)
 
     def _format_level(self, selected):
         return selected and '1' or '2'
@@ -59,19 +57,26 @@ class WixBase(PackagerBase):
         return required and 'disallow' or 'allow'
 
     def _add_root(self):
-        self.root = etree.Element("Wix",
-                xmlns='http://schemas.microsoft.com/wix/2006/wi')
+        self.root = etree.Element("Wix", xmlns=WIX_SCHEMA)
 
-    def _to_wine_path(self, path):
-        path = path.replace('/', '\\\\')
-        # wine maps the filesystem root '/' to 'z:\'
-        path = 'z:\\%s' % path
-        return path
-
-    def _format_id(self, path, replace_dots=False):
-        ret = path.replace('/', '_').replace('-', '_').replace(' ', '_')
+    def _format_id(self, string, replace_dots=False):
+        ret = string
+        ret = ret.replace('_', '__')
+        for r in ['/', '-', ' ', '@', '+']:
+            ret = ret.replace(r, '_')
         if replace_dots:
             ret = ret.replace('.', '')
+        # For directories starting with a number
+        return '_' + ret
+
+    def _format_path_id(self, path, replace_dots=False):
+        ret = self._format_id(os.path.split(path)[1], replace_dots)
+        if ret not in self.ids:
+            self.ids[ret] = 0
+        else:
+            self.ids[ret] += 1
+        if self.ids[ret] != 0:
+            ret = '%s_%s' % (ret, self.ids[ret])
         return ret
 
     def _get_uuid(self):
@@ -86,26 +91,10 @@ class MergeModule(WixBase):
     @type pacakge: L{cerbero.packages.package.Package}
     '''
 
-    def __init__(self, config, package, store):
-        WixBase.__init__(self, config, package, store)
-        self.files_list = package.files_list()
+    def __init__(self, config, files_list, package):
+        WixBase.__init__(self, config, package)
+        self.files_list = files_list
         self._dirnodes = {}
-
-    def pack(self, output_dir, force=False):
-        output_dir = os.path.realpath(output_dir)
-        sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
-        self.write(sources)
-
-        wixobj = os.path.join(output_dir, "%s.wixobj" % self.package.name)
-
-        if self._with_wine:
-            wixobj = self._to_wine_path(wixobj)
-            sources = self._to_wine_path(sources)
-
-        candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(sources, output_dir)
-        light = Light(self.wix_prefix, self._with_wine)
-        light.compile([wixobj], self.package.name, output_dir, True)
 
     def _fill(self):
         self._add_root()
@@ -147,8 +136,8 @@ class MergeModule(WixBase):
 
         parent = self._dirnodes[parentpath]
         dirnode = etree.SubElement(parent, "Directory",
-            Id=self._format_id(dirpath),
-            Name=self._format_id(dirpath))
+            Id=self._format_path_id(dirpath),
+            Name=os.path.split(dirpath)[1])
         self._dirnodes[dirpath] = dirnode
 
     def _add_file(self, filepath):
@@ -157,17 +146,57 @@ class MergeModule(WixBase):
         dirnode = self._dirnodes[dirpath]
 
         component = etree.SubElement(dirnode, 'Component',
-            Id=self._format_id(filepath), Guid=self._get_uuid())
+            Id=self._format_path_id(filepath), Guid=self._get_uuid())
 
         filepath = os.path.join(self.prefix, filepath)
-        p_id = self._format_id(filepath, True)
+        p_id = self._format_path_id(filepath, True)
         if self._with_wine:
-            filepath = self._to_wine_path(filepath)
+            filepath = to_winepath(filepath)
         etree.SubElement(component, 'File', Id=p_id, Name=filename,
                          Source=filepath)
 
 
-class Installer(WixBase):
+class WixConfig(object):
+
+    wix_config = 'wix/Config.wxi'
+
+    def __init__(self, config, package):
+        self.config_path = os.path.join(config.data_dir, self.wix_config)
+        self.arch = config.target_arch
+        self.package = package
+
+    def write(self, output_dir):
+        config_out_path = os.path.join(output_dir,
+                os.path.basename(self.wix_config))
+        shutil.copy(self.config_path, os.path.join(output_dir,
+                    os.path.basename(self.wix_config)))
+        replacements = {
+            "@ProductID@": self.package.uuid,
+            "@UpgradeCode@": self.package.uuid,
+            "@Language@": '1033',
+            "@Manufacturer@": self.package.vendor,
+            "@Version@": self.package.version,
+            "@PackageComments@": self.package.longdesc,
+            "@Description@": self.package.shortdesc,
+            "@ProjectURL": self.package.url,
+            "@ProductName@": self.package.title,
+            "@ProgramFilesFolder@": self._program_folder(),
+            "@Platform@": self._platform()}
+        shell.replace(config_out_path, replacements)
+        return config_out_path
+
+    def _program_folder(self):
+        if self.arch == Architecture.X86:
+            return 'ProgramFilesFolder'
+        return 'ProgramFiles64Folder'
+
+    def _platform(self):
+        if self.arch == Architecture.X86_64:
+            return 'x64'
+        return 'x86'
+
+
+class MSI(WixBase):
     '''Creates an installer package from a
        L{cerbero.packages.package.MetaPackage}
 
@@ -175,56 +204,65 @@ class Installer(WixBase):
     @type package: L{cerbero.packages.package.MetaPackage}
     '''
 
-    UI_EXT = '-ext WixUIExtension'
+    wix_sources = 'wix/installer.wxs'
 
-    def __init__(self, config, package, store):
-        WixBase.__init__(self, config, package, store)
 
-    def pack(self, output_dir, force=False):
-        output_dir = os.path.realpath(output_dir)
-        mergemodules = []
-        packagedeps = self.store.get_package_deps(self.package)
-        for p in packagedeps:
-            mergemodule = MergeModule(self.config, p, self.store)
-            mergemodule.pack(output_dir)
-            mergemodules.append('%s.msm' % p)
+    def __init__(self, config, package, packages_deps, wix_config, store):
+        WixBase.__init__(self, config, package)
+        self.packages_deps = packages_deps
+        self.store = store
+        self.wix_config = wix_config
+        self._parse_sources()
+        self._add_include()
+        self.product = self.root.find(".//Product")
 
-        sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
-        self.write(sources)
+    def _parse_sources(self):
+        sources_path = os.path.join(self.config.data_dir, self.wix_sources)
+        with open(sources_path, 'r') as f:
+            self.root = etree.fromstring(f.read())
+        for element in self.root.iter():
+            element.tag = element.tag[len(WIX_SCHEMA)+2:]
+        self.root.set('xmlns', WIX_SCHEMA)
+        self.product = self.root.find('Product')
 
-        wixobjs = [os.path.join(output_dir, "%s.wixobj" % self.package.name)]
-        wixobjs.append(os.path.join(output_dir, "ui.wixobj"))
-
+    def _add_include(self):
         if self._with_wine:
-            wixobjs = [self._to_wine_path(x) for x in wixobjs]
-            sources = self._to_wine_path(sources)
-
-        candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(sources, output_dir)
-        light = Light(self.wix_prefix, self._with_wine, self.UI_EXT)
-        light.compile(wixobjs, self.package.name, output_dir)
+            self.wix_config = to_winepath(self.wix_config)
+        inc = etree.PI('include %s' % self.wix_config)
+        self.root.insert(0, inc)
 
     def _fill(self):
-        self._add_root()
-        self._add_product()
-        self._add_package()
         self._add_install_dir()
-        self._add_ui_props()
-        self._add_media()
         self._add_merge_modules()
 
-    def _add_product(self):
-        self.product = etree.SubElement(self.root, "Product",
-            Id=self.package.uuid or self._get_uuid(),
-            Version=self.package.version, UpgradeCode=self.package.uuid,
-            Language='1033', Name=self.package.name,
-            Manufacturer=self.package.vendor)
+    def _add_merge_modules(self):
+        self.main_feature = etree.SubElement(self.product, "Feature",
+            Id=self._format_id(self.package.name),
+            Title=self.package.title, Level='1', Display="expand",
+            AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
 
-    def _add_package(self):
-        self.pkg = etree.SubElement(self.product, "Package",
-            Description=self.package.shortdesc,
-            Comments=self.package.longdesc,
-            Manufacturer=self.package.vendor)
+        packages = [(self.store.get_package(x[0]), x[1], x[2]) for x in
+                    self.package.packages]
+
+        # Remove empty packages
+        packages = [x for x in packages if x[0] in self.packages_deps]
+
+        # Fill the list of required packages
+        req = [x[0] for x in packages if x[1] == True]
+        required_packages = req[:]
+        for p in req:
+            required_packages.extend(self.store.get_package_deps(p))
+
+        for package, required, selected in packages:
+            if package in self.packages_deps:
+                self._add_merge_module(package, required, selected,
+                                       required_packages)
+
+        # Add a merge module ref for all the packages
+        for package in self.packages_deps:
+            etree.SubElement(self.installdir, 'Merge',
+                Id=self._package_id(package.name), Language='1033',
+                SourceFile='%s.msm' % package.name, DiskId='1')
 
     def _add_dir(self, parent, dir_id, name):
         tdir = etree.SubElement(parent, "Directory",
@@ -239,113 +277,27 @@ class Installer(WixBase):
                                install_dir)
         self.installdir = self._add_dir(sdkdir, 'INSTALLDIR', '.')
 
-    def _add_merge_modules(self):
-        self.main_feature = etree.SubElement(self.product, "Feature",
-            Id=self._format_id(self.package.name),
-            Title=self.package.title, Level='1', Display="expand",
-            AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
-
-        # Fill the list of required packages
-        required_packages = [self.store.get_package_deps(x[0]) for x \
-                             in self.package.packages if x[1] == True]
-        required_packages = itertools.chain(*required_packages)
-
-        for p, required, selected in self.package.packages:
-            package = self.store.get_package(p)
-            self._add_merge_module(package, required, selected,
-                                   required_packages)
-
-    def _add_ui_props(self):
-        etree.SubElement(self.product, 'Property',
-            Id='WIXUI_INSTALLDIR', Value='INSTALLDIR')
-
-    def _add_media(self):
-        etree.SubElement(self.product, 'Media',
-            Id='1', Cabinet='product.cab', EmbedCab='yes')
-
     def _package_id(self, package_name):
         return self._format_id(package_name)
 
     def _add_merge_module(self, package, required, selected,
                           required_packages):
-        # Add the merge module ref for this package in the Directory element
-        etree.SubElement(self.installdir, 'Merge',
-                Id=self._package_id(package.name), Language='1033',
-                SourceFile='%s.msm' % package.name, DiskId='1')
-
         # Create a new feature for this package
         feature = etree.SubElement(self.main_feature, 'Feature',
-                Id=self._format_id(package.shortdesc), Title=package.shortdesc,
+                Id=self._format_id(package.name), Title=package.shortdesc,
                 Level=self._format_level(selected),
                 Display='expand', Absent=self._format_absent(required))
-        deps = self.store.get_package_deps(package.name)
-        # Add all the merge modules required by this package, but expluding
+        deps = self.store.get_package_deps(package)
+
+        # Add all the merge modules required by this package, but excluding
         # all the ones that are forced to be installed
-        mergerefs = list(set(deps) - set(required_packages))
-        for package_name in mergerefs:
+        if not required:
+            mergerefs = list(set(deps) - set(required_packages))
+        else:
+            mergerefs = [x for x in deps if x in required_packages]
+
+        for p in mergerefs:
             etree.SubElement(feature, "MergeRef",
-                             Id=self._package_id(package_name))
+                             Id=self._package_id(p.name))
         etree.SubElement(feature, "MergeRef",
                          Id=self._package_id(package.name))
-
-
-class Packager(object):
-
-    def __new__(klass, config, package, store):
-        if isinstance(package, Package):
-            return MergeModule(config, package, store)
-        else:
-            return Installer(config, package, store)
-
-
-class Candle(object):
-    ''' Compile WiX objects with candle '''
-
-    cmd = '%(wine)s %(q)s%(prefix)s/candle.exe%(q)s %(source)s'
-
-    def __init__(self, wix_prefix, with_wine):
-        self.options = {}
-        self.options['prefix'] = wix_prefix
-        if with_wine:
-            self.options['wine'] = 'wine'
-            self.options['q'] = '"'
-        else:
-            self.options['wine'] = ''
-            self.options['q'] = ''
-
-    def compile(self, source, output_dir):
-        self.options['source'] = source
-        shell.call(self.cmd % self.options, output_dir)
-
-
-class Light(object):
-    ''' Compile WiX objects with light'''
-
-    cmd = '%(wine)s %(q)s%(prefix)s/light.exe%(q)s %(objects)s -o '\
-          '%(msi)s.%(ext)s -sval %(extra)s'
-
-    def __init__(self, wix_prefix, with_wine, extra=''):
-        self.options = {}
-        self.options['prefix'] = wix_prefix
-        self.options['extra'] = extra
-        if with_wine:
-            self.options['wine'] = 'wine'
-            self.options['q'] = '"'
-        else:
-            self.options['wine'] = ''
-            self.options['q'] = ''
-
-    def compile(self, objects, msi_file, output_dir, merge_module=False):
-        self.options['objects'] = ' '.join(objects)
-        self.options['msi'] = msi_file
-        if merge_module:
-            self.options['ext'] = 'msm'
-        else:
-            self.options['ext'] = 'msi'
-        shell.call(self.cmd % self.options, output_dir)
-
-
-def register():
-    from cerbero.packages.packager import register_packager
-    from cerbero.config import Distro
-    register_packager(Distro.WINDOWS, Packager)

@@ -16,8 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
-
 from cerbero.errors import FatalError
 from cerbero.utils import  _
 from cerbero.utils import  messages as m
@@ -49,9 +47,9 @@ class Packager (object):
         return _packagers[d][v](config, package, store)
 
 
-from cerbero.packages import wix, packagemaker, rpm, debian
+from cerbero.packages import wix_packager, packagemaker, rpm, debian
 
-wix.register()
+wix_packager.register()
 packagemaker.register()
 rpm.register()
 debian.register()

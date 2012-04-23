@@ -1,0 +1,35 @@
+<?xml version="1.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include $(sys.CURRENTDIR)\Config.wxi?>
+	<Product Id="$(var.ProductID)" Language="$(var.Language)" Manufacturer="$(var.Manufacturer)"
+			Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)"
+			Version="$(var.Version)">
+
+		<Package Comments="$(var.PackageComments)" Compressed="yes"
+			Description="$(var.Description)" InstallPrivileges="elevated"
+			Manufacturer="$(var.Manufacturer)"/>
+
+		<Media Cabinet="product.cab" EmbedCab="yes" Id="1"/>
+
+		<!-- Add/Remove Programs -->
+		<Property Id="ARPPRODUCTICON" Value="MainIcon" />
+		<Property Id="ARPCONTACT" Value="$(var.Manufacturer)" />
+		<Property Id="ARPURLINFOABOUT" Value="$(var.WebSiteName)" />
+		<Property Id="ALLUSERS">1</Property>
+		
+		<!-- Application icon -->
+		<!--Icon Id="MainIcon" SourceFile="$(var.Icon)"/-->
+
+		<!-- UI -->
+		<CustomAction Execute="firstSequence" Id="SetWixUIInstallDir" Property="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+		<InstallUISequence>
+			<Custom Action="SetWixUIInstallDir" Before="CostInitialize"/>
+		</InstallUISequence>
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+
+		<!-- UI -->
+
+
+		<UIRef Id="WixUI_FeatureTree"/>
+	</Product>
+</Wix>

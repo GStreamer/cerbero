@@ -16,9 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import itertools
-
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.packages import PackageType
 
 
 class PackageBase(object):
@@ -63,6 +62,7 @@ class PackageBase(object):
     def __init__(self, config, store):
         self.config = config
         self.store = store
+        self.package_mode = PackageType.RUNTIME
 
     def prepare(self):
         '''
@@ -81,6 +81,9 @@ class PackageBase(object):
         raise NotImplemented("'all_files_list' must be implemented by "
                              "subclasses")
 
+    def set_mode(self, package_type):
+         self.package_mode = package_type
+
     def get_install_dir(self):
         try:
             return self.install_dir[self.config.target_platform]
@@ -96,6 +99,15 @@ class PackageBase(object):
 
     def __str__(self):
         return self.name
+
+    def __getattribute__(self, name):
+        attr = object.__getattribute__(self, name)
+        if name == 'name':
+            attr += self.package_mode
+        elif name == 'shortdesc':
+            if self.package_mode == PackageType.DEVEL:
+                attr += ' (Development Files)'
+        return attr
 
 
 class Package(PackageBase):

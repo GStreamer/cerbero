@@ -72,16 +72,19 @@ class PackagesStore (object):
             raise PackageNotFoundError(name)
         return self._packages[name]
 
-    def get_package_deps(self, package_name, recursive=False):
+    def get_package_deps(self, pkg, recursive=False):
         '''
         Gets the dependencies of a package
 
-        @param name: name of the package
-        @type name: str
+        @param package: name of the package or package instance
+        @type package: str or L{cerbero.packages.package.Package}
         @return: a list with the package dependencies
         @rtype: list
         '''
-        p = self.get_package(package_name)
+        if isinstance(pkg, package.Package):
+            p = pkg
+        else:
+            p = self.get_package(pkg)
         if isinstance(p, package.MetaPackage):
             ret = [d.name for d in self._list_metapackage_deps(p)]
         else:

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Include>
+
+<?define ProductID = "@ProductID@" ?>
+<?define UpgradeCode = "@UpgradeCode@" ?>
+<?define Language = "@Language@" ?>
+<?define Manufacturer = "@Manufacturer@" ?>
+<?define Version = "@Version@" ?>
+<?define PackageComments = "@PackageComments@" ?>
+<?define Description = "@Description@" ?>
+<?define WebSiteName = "@ProjectURL" ?>
+<?define ProductName = "@ProductName@" ?>
+<?define PlatformProgramFilesFolder = "@ProgramFilesFolder@" ?>
+<?define Platform = "@Platform@" ?>
+
+</Include>

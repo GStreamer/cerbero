@@ -21,7 +21,6 @@ import os
 import cerbero.utils.messages as m
 from cerbero.errors import EmptyPackageError, MissingPackageFilesError
 from cerbero.utils import _
-from cerbero.utils.shell import ls_files
 
 
 class PackageType(object):

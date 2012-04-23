@@ -21,6 +21,7 @@ import unittest
 import tempfile
 
 from cerbero.config import Platform, Distro, DistroVersion
+from cerbero.packages import PackageType
 from test.test_packages_common import Package1, Package4, MetaPackage
 from test.test_build_common import create_cookbook, add_files
 from test.test_packages_common import create_store
@@ -45,6 +46,15 @@ class PackageTest(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
+
+    def testPackageMode(self):
+        self.assertEquals(self.linuxpackage.name, 'gstreamer-test1')
+        self.assertEquals(self.linuxpackage.shortdesc, 'GStreamer Test')
+        self.linuxpackage.set_mode(PackageType.DEVEL)
+        self.assertEquals(self.linuxpackage.package_mode, PackageType.DEVEL)
+        self.assertEquals(self.linuxpackage.name, 'gstreamer-test1-devel')
+        self.assertEquals(self.linuxpackage.shortdesc,
+            'GStreamer Test (Development Files)')
 
     def testParseFiles(self):
         self.assertEquals(self.win32package._recipes_files['recipe1'],
