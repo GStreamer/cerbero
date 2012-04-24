@@ -161,6 +161,14 @@ class Package(PackageBase):
             files += p.recipes_dependencies()
         return files
 
+    def recipes_licenses(self):
+        licenses = []
+        deps = self.recipes_dependencies()
+        for name in deps:
+            r = self.cookbook.get_recipe(name)
+            licenses.append(r.license)
+        return licenses
+
     def files_list(self):
         files = []
         for recipe_name, categories in self._recipes_files.iteritems():
