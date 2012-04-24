@@ -153,7 +153,7 @@ class RPMPackager(LinuxPackager):
         self.package.has_devel_package = bool(devel_files)
 
         licenses = [self.package.license]
-        if not isinstance(p, MetaPackage):
+        if not isinstance(self.package, MetaPackage):
             licenses.extend(self.package.recipes_licenses())
 
         self._spec_str = template % {
