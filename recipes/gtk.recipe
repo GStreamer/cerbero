@@ -36,6 +36,10 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: [
             'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
+    platform_files_themes = {
+        Platform.WINDOWS: [
+            'share/themes/MS-Windows/gtk-2.0/gtkrc',]
+            }
     files_lang = ['gtk20', 'gtk20-properties']
 
 
