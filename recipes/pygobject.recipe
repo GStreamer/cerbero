@@ -5,6 +5,12 @@ class Recipe(recipe.Recipe):
     version = '2.28.6'
     configure_options = '--disable-introspection'
 
+    def post_install(self):
+        import shutil
+        if self.config.target_platform == Platform.WINDOWS:
+            shutil.move(os.path.join(self.config.prefix, 'lib', 'libpyglib-2.0-python.pyd'),
+                        os.path.join(self.config.prefix, 'bin', 'libpyglib-2.0-python.dll'))
+
     files_libs = ['libpyglib-2.0-python']
     files_python = ['site-packages/glib/_glib%(pext)s',
                     'site-packages/glib/__init__.py',
