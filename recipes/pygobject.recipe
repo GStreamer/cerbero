@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
         import shutil
         if self.config.target_platform == Platform.WINDOWS:
             shutil.move(os.path.join(self.config.prefix, 'lib', 'libpyglib-2.0-python.pyd'),
-                        os.path.join(self.config.prefix, 'bin', 'libpyglib-2.0-python.dll'))
+                        os.path.join(self.config.prefix, 'bin', 'libpyglib-2.0-python.pyd'))
 
     files_libs = ['libpyglib-2.0-python']
     files_python = ['site-packages/glib/_glib%(pext)s',
