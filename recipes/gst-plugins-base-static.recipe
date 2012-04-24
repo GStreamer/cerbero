@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
     files_playback_devel = [
              'lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
              'lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
-             'lib/gstreamer-0.10/libplaybin%(smext)s',
+             'lib/gstreamer-0.10/libgstplaybin%(smext)s',
             ]
 
     files_encoding_devel = [
@@ -75,4 +75,7 @@ class Recipe(recipe.Recipe):
         self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
         self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
         self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
-        self.platform_files_sys_devel = [ static_prefix + f for f in self.platform_files_sys_devel]
+        platform_files_sys_devel = {}
+        for platform, files in self.platform_files_sys_devel.iteritems():
+            platform_files_sys_devel[platform] = [ static_prefix + f for f in files ]
+        self.platform_files_sys_devel = platform_files_sys_devel

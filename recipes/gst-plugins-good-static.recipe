@@ -123,6 +123,15 @@ class Recipe(recipe.Recipe):
         self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
         self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
         self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
-        self.platform_files_capture_devel = [ static_prefix + f for f in self.platform_files_capture_devel]
-        self.platform_files_codecs_devel = [ static_prefix + f for f in self.platform_files_codecs_devel]
-        self.platform_files_sys_devel = [ static_prefix + f for f in self.platform_files_sys_devel]
+        platform_files_capture_devel = {}
+        for platform, files in self.platform_files_capture_devel.iteritems():
+            platform_files_capture_devel[platform] = [ static_prefix + f for f in files ]
+        self.platform_files_capture_devel = platform_files_capture_devel
+        platform_files_codecs_devel = {}
+        for platform, files in self.platform_files_codecs_devel.iteritems():
+            platform_files_codecs_devel[platform] = [ static_prefix + f for f in files ]
+        self.platform_files_codecs_devel = platform_files_codecs_devel
+        platform_files_sys_devel = {}
+        for platform, files in self.platform_files_sys_devel.iteritems():
+            platform_files_sys_devel[platform] = [ static_prefix + f for f in files ]
+        self.platform_files_sys_devel = platform_files_sys_devel
