@@ -175,10 +175,14 @@ class FilesProvider(object):
         if len(files) == 0:
             return []
 
+        dlls = []
+        # on windows check libfoo.dll too instead of only libfoo-x.dll
         if self.config.target_platform == Platform.WINDOWS:
-
             pattern = '%(sdir)s/%%s.dll' % self.extensions
-            dlls = [f for f in files if os.path.exists(pattern % f)]
+            for f in files:
+                path = os.path.join(self.config.prefix, pattern % f)
+                if os.path.exists(path):
+                    dlls.append(pattern % f)
             files = list(set(files) - set(dlls))
 
         pattern = '%(sdir)s/%(file)s%(sext)s'
@@ -188,7 +192,7 @@ class FilesProvider(object):
             self.extensions['file'] = f
             libsmatch.append(pattern % self.extensions)
 
-        return shell.ls_files(libsmatch, self.config.prefix)
+        return shell.ls_files(libsmatch, self.config.prefix) + dlls
 
     def _search_pyfiles(self, files):
         '''
