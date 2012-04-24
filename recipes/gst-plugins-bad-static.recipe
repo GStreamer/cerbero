@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
             'faad2', 'libkate', 'libvpx', 'libdvdnav', 'zlib',
             'schroedinger', 'libdca', 'jasper', 'libmms' ]
 
-    files_effects = [
+    files_effects_devel = [
              'lib/gstreamer-0.10/libgstautoconvert%(smext)s',
              'lib/gstreamer-0.10/libgstbayer%(smext)s',
              'lib/gstreamer-0.10/libgstcoloreffects%(smext)s',
@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvideosignal%(smext)s',
     ]
 
-    files_codecs = [
+    files_codecs_devel = [
              'lib/gstreamer-0.10/libgstadpcmdec%(smext)s',
              'lib/gstreamer-0.10/libgstadpcmenc%(smext)s',
              'lib/gstreamer-0.10/libgstaiff%(smext)s',
@@ -75,12 +75,12 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgsty4mdec%(smext)s',
     ]
 
-    files_dvd = [
+    files_dvd_devel = [
              'lib/gstreamer-0.10/libgstdvdspu%(smext)s',
              'lib/gstreamer-0.10/libresindvd%(smext)s',
     ]
 
-    files_net = [
+    files_net_devel = [
              'lib/gstreamer-0.10/libgstdataurisrc%(smext)s',
              'lib/gstreamer-0.10/libgstsdpelem%(smext)s',
              'lib/gstreamer-0.10/libgstmms%(smext)s',
@@ -88,16 +88,16 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstrtpvp8%(smext)s',
     ]
 
-    files_capture = [
+    files_capture_devel = [
              'lib/gstreamer-0.10/libgstcamerabin2%(smext)s',
              'lib/gstreamer-0.10/libgstdvb%(smext)s',
             ]
 
-    files_vis = [
+    files_vis_devel = [
              'lib/gstreamer-0.10/libgstaudiovisualizers%(smext)s',
             ]
 
-    platform_files_sys = {
+    platform_files_sys_devel = {
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstd3dvideosink%(smext)s',
              'lib/gstreamer-0.10/libgstdirectdrawsink%(smext)s',
@@ -120,10 +120,10 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-bad')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_effects = [ static_prefix + f for f in self.files_effects]
-        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
-        self.files_dvd = [ static_prefix + f for f in self.files_dvd]
-        self.files_net = [ static_prefix + f for f in self.files_net]
-        self.files_capture = [ static_prefix + f for f in self.files_capture]
-        self.files_vis = [ static_prefix + f for f in self.files_vis]
-        self.platform_files_sys = [ static_prefix + f for f in self.platform_files_sys]
+        self.files_effects_devel = [ static_prefix + f for f in self.files_effects_devel]
+        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
+        self.files_dvd_devel = [ static_prefix + f for f in self.files_dvd_devel]
+        self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
+        self.files_capture_devel = [ static_prefix + f for f in self.files_capture_devel]
+        self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
+        self.platform_files_sys_devel = [ static_prefix + f for f in self.platform_files_sys_devel]

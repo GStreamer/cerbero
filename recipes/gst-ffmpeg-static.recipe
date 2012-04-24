@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
-    files_codecs = ['lib/gstreamer-0.10/libgstffmpeg%(smext)s']
+    files_codecs_devel = ['lib/gstreamer-0.10/libgstffmpeg%(smext)s']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -16,5 +16,6 @@ class Recipe(recipe.Recipe):
                     '--with-ffmpeg-extra-configure="--enable-w32threads"'
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
+
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
+        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]

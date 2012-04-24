@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
             Platform.WINDOWS: ['gtk-doc-windows'],
     }
 
-    files_plugins = ['lib/gstreamer-0.10/libgstcoreelements%(smext)s',
+    files_plugins_devel = ['lib/gstreamer-0.10/libgstcoreelements%(smext)s',
                      'lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
 
     def prepare(self):
@@ -23,4 +23,4 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gstreamer')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_plugins = [ static_prefix + f for f in self.files_plugins]
+        self.files_plugins_devel = [ static_prefix + f for f in self.files_plugins_devel]

@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
     use_system_libs = True
 
-    files_effects = [
+    files_effects_devel = [
              'lib/gstreamer-0.10/libgstadder%(smext)s',
              'lib/gstreamer-0.10/libgstapp%(smext)s',
              'lib/gstreamer-0.10/libgstaudioconvert%(smext)s',
@@ -29,32 +29,32 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvolume%(smext)s',
     ]
 
-    files_playback = [
+    files_playback_devel = [
              'lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
              'lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
              'lib/gstreamer-0.10/libplaybin%(smext)s',
             ]
 
-    files_encoding = [
+    files_encoding_devel = [
              'lib/gstreamer-0.10/libgstencodebin%(smext)s',
              ]
 
-    files_net = [
+    files_net_devel = [
              'lib/gstreamer-0.10/libgsttcp%(smext)s',
             ]
 
-    files_codecs = [
+    files_codecs_devel = [
              'lib/gstreamer-0.10/libgstsubparse%(smext)s',
              'lib/gstreamer-0.10/libgstogg%(smext)s',
              'lib/gstreamer-0.10/libgsttheora%(smext)s',
              'lib/gstreamer-0.10/libgstvorbis%(smext)s',
             ]
 
-    files_vis = [
+    files_vis_devel = [
              'lib/gstreamer-0.10/libgstlibvisual%(smext)s',
             ]
 
-    platform_files_sys = {
+    platform_files_sys_devel = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstalsa%(smext)s',
              'lib/gstreamer-0.10/libgstximagesink%(smext)s',
@@ -69,10 +69,10 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_effects = [ static_prefix + f for f in self.files_effects]
-        self.files_playback = [ static_prefix + f for f in self.files_playback]
-        self.files_encoding = [ static_prefix + f for f in self.files_encoding]
-        self.files_net = [ static_prefix + f for f in self.files_net]
-        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
-        self.files_vis = [ static_prefix + f for f in self.files_vis]
-        self.platform_files_sys = [ static_prefix + f for f in self.platform_files_sys]
+        self.files_effects_devel = [ static_prefix + f for f in self.files_effects_devel]
+        self.files_playback_devel = [ static_prefix + f for f in self.files_playback_devel]
+        self.files_encoding_devel = [ static_prefix + f for f in self.files_encoding_devel]
+        self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
+        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
+        self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
+        self.platform_files_sys_devel = [ static_prefix + f for f in self.platform_files_sys_devel]

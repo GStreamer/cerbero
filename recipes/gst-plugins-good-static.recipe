@@ -13,12 +13,12 @@ class Recipe(recipe.Recipe):
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True
 
-    files_playback = [
+    files_playback_devel = [
              'lib/gstreamer-0.10/libgstautodetect%(smext)s',
              'lib/gstreamer-0.10/libgstvideofilter%(smext)s',
     ]
 
-    files_effects = [
+    files_effects_devel = [
              'lib/gstreamer-0.10/libgstalpha%(smext)s',
              'lib/gstreamer-0.10/libgstalphacolor%(smext)s',
              'lib/gstreamer-0.10/libgstaudiofx%(smext)s',
@@ -41,7 +41,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvideomixer%(smext)s',
     ]
 
-    files_codecs = [
+    files_codecs_devel = [
              'lib/gstreamer-0.10/libgstalaw%(smext)s',
              'lib/gstreamer-0.10/libgstannodex%(smext)s',
              'lib/gstreamer-0.10/libgstapetag%(smext)s',
@@ -67,7 +67,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgsty4menc%(smext)s',
     ]
 
-    files_net = [
+    files_net_devel = [
              'lib/gstreamer-0.10/libgstrtsp%(smext)s',
              'lib/gstreamer-0.10/libgstrtp%(smext)s',
              'lib/gstreamer-0.10/libgstrtpmanager%(smext)s',
@@ -75,19 +75,19 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstudp%(smext)s',
     ]
 
-    files_vis = [
+    files_vis_devel = [
              'lib/gstreamer-0.10/libgstgoom%(smext)s',
              'lib/gstreamer-0.10/libgstgoom2k1%(smext)s',
             ]
 
-    platform_files_capture = {
+    platform_files_capture_devel = {
         Platform.LINUX: [
               'lib/gstreamer-0.10/libgstvideo4linux2%(smext)s',
               'lib/gstreamer-0.10/libgstximagesrc%(smext)s',
              ]
     }
 
-    platform_files_codecs = {
+    platform_files_codecs_devel = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstdv%(smext)s',
             ],
@@ -96,7 +96,7 @@ class Recipe(recipe.Recipe):
             ]
     }
 
-    platform_files_sys = {
+    platform_files_sys_devel = {
         Platform.WINDOWS: [
              'gstreamer-0.10/libgstdirectsoundsink%(smext)s',
             ],
@@ -118,11 +118,11 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_playback = [ static_prefix + f for f in self.files_playback]
-        self.files_effects = [ static_prefix + f for f in self.files_effects]
-        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
-        self.files_net = [ static_prefix + f for f in self.files_net]
-        self.files_vis = [ static_prefix + f for f in self.files_vis]
-        self.platform_files_capture = [ static_prefix + f for f in self.platform_files_capture]
-        self.platform_files_codecs = [ static_prefix + f for f in self.platform_files_codecs]
-        self.platform_files_sys = [ static_prefix + f for f in self.platform_files_sys]
+        self.files_playback_devel = [ static_prefix + f for f in self.files_playback_devel]
+        self.files_effects_devel = [ static_prefix + f for f in self.files_effects_devel]
+        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
+        self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
+        self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
+        self.platform_files_capture_devel = [ static_prefix + f for f in self.platform_files_capture_devel]
+        self.platform_files_codecs_devel = [ static_prefix + f for f in self.platform_files_codecs_devel]
+        self.platform_files_sys_devel = [ static_prefix + f for f in self.platform_files_sys_devel]
