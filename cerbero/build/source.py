@@ -146,7 +146,7 @@ class Git (GitCache):
         if os.path.exists(self.build_dir):
             # fix read-only permissions
             if self.config.platform == Platform.WINDOWS:
-                shell.call('chmod -R +w .', self.build_dir)
+                shell.call('chmod -R +w .git/', self.build_dir, fail=False)
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit)
                 checkout_hash = git.get_hash(self.build_dir, 'HEAD')
