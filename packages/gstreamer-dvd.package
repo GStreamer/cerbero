@@ -15,6 +15,7 @@ class Package(package.Package):
 
     files = ['libdvdnav:libs', 'libdvdread:libs',
             'gst-plugins-good:dvd', 'gst-plugins-ugly:dvd',
-            'gst-plugins-bad:dvd',
-            'gst-plugins-good-static:dvd', 'gst-plugins-ugly-static:dvd',
-            'gst-plugins-bad-static:dvd']
+            'gst-plugins-bad:dvd']
+    files_devel = ['gst-plugins-good-static:dvd_devel',
+            'gst-plugins-ugly-static:dvd_devel',
+            'gst-plugins-bad-static:dvd_devel']
