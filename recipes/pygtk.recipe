@@ -25,4 +25,5 @@ class Recipe(recipe.Recipe):
                   'lib/pygtk/2.0/pygtk-demo.py',
                   'lib/pygtk/2.0/pygtk-demo.pyo',
                   'lib/pygtk/2.0/pygtk-demo.pyc',
+                  'bin/pygtk-demo'
     ]
