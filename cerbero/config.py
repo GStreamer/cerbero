@@ -21,7 +21,7 @@ import sys
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.utils import _, system_info, validate_packager
+from cerbero.utils import _, system_info, validate_packager, to_unixpath
 from cerbero.utils import messages as m
 
 
@@ -136,8 +136,10 @@ class Config (object):
         xcursordir = os.path.join(self.prefix, 'share', 'icons')
         aclocal = os.environ.get('ACLOCAL', 'aclocal')
         aclocaldir = os.path.join(self.prefix, 'share', 'aclocal')
-        perl5lib = self._join_path(os.path.join(self.prefix, 'lib', 'perl5'),
-                os.path.join(self.prefix, 'lib', 'perl5', 'site_perl'))
+        perl5lib = ':'.join(
+                [to_unixpath(os.path.join(self.prefix, 'lib', 'perl5')),
+                to_unixpath(os.path.join(self.prefix, 'lib', 'perl5',
+                                         'site_perl', '5.8'))])
         gstpluginpath = os.path.join(self.prefix, 'lib', 'gstreamer-0.10')
         gstregistry = os.path.join(os.path.expanduser('~'), '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
@@ -155,7 +157,7 @@ class Config (object):
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
                'DYLD_FALLBACK_LIBRARY_PATH': libdir,
-               'PATH': self._join_path('PATH', bindir),
+               'PATH': self._join_path(os.environ.get('PATH', ''), bindir),
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
                'PKG_CONFIG_PATH': '%s' % pkgconfigdatadir,
@@ -194,15 +196,12 @@ class Config (object):
             except:
                 raise FatalError(_('directory (%s) can not be created') % path)
 
-    def _join_path(self, env, path):
-        if env not in os.environ:
-            return path
+    def _join_path(self, path1, path2):
+        if self.platform == Platform.WINDOWS:
+            separator = ';'
         else:
-            if self.platform == Platform.WINDOWS:
-                separator = ';'
-            else:
-                separator = ':'
-            return "%s%s%s" % (path, separator, os.environ[env])
+            separator = ':'
+        return "%s%s%s" % (path1, separator, path2)
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %

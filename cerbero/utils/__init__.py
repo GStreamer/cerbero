@@ -69,6 +69,12 @@ def to_winpath(path):
     return path.replace('/', '\\')
 
 
+def to_unixpath(path):
+    if path[1] == ':':
+       path = '/%s%s' % (path[0], path[2:])
+    return path
+
+
 def to_winepath(path):
         path = path.replace('/', '\\\\')
         # wine maps the filesystem root '/' to 'z:\'
