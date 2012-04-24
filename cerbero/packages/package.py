@@ -119,8 +119,12 @@ class Package(PackageBase):
     @type deps: list
     @cvar files: list of files included in this package
     @type files: list
-    @cvar platform_files: list of platform files included in this package
-    @type platform_files: list
+    @cvar platform_files: dict of platform files included in this package
+    @type platform_files: dict
+    @cvar files_devel: list of devel files included in this package
+    @type files_devel: list
+    @cvar platform_files_devel: dict of platform devel files included in this package
+    @type platform_files_Devel: dict
     '''
 
     deps = list()
