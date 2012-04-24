@@ -36,6 +36,6 @@ class MetaPackage(package.MetaPackage):
 
     icon = "gstreamer.ico"
     install_dir = {
-        Platform.WINDOWS: 'GStreamer',
+        Platform.WINDOWS: 'gstreamer-sdk',
         Platform.LINUX: '/opt/gst-sdk/',
         Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/Version/1.0'}
