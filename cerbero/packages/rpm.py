@@ -152,8 +152,9 @@ class RPMPackager(LinuxPackager):
 
         self.package.has_devel_package = bool(devel_files)
 
-        # FIXME - parse recipes licenses
-        licenses = self.package.license.pretty_name
+        licenses = [self.package.license]
+        if not isinstance(p, MetaPackage):
+            licenses.extend(self.package.recipes_licenses())
 
         self._spec_str = template % {
                 'name': self.package.name,
@@ -162,7 +163,7 @@ class RPMPackager(LinuxPackager):
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
-                'licenses': licenses,
+                'licenses': ' and '.join([l.acronym for l in licenses]),
                 'packager': self.packager,
                 'vendor': self.package.vendor,
                 'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
