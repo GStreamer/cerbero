@@ -21,6 +21,7 @@ from cerbero.enums import License
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
+from cerbero.packages.package import MetaPackage
 
 
 INFO_TPL = '''
@@ -53,9 +54,11 @@ class PackageInfo(Command):
             m.message('\n'.join(store.get_package_files_list(p_name)))
         else:
             p = store.get_package(p_name)
-            # FIXME - parse recipes licenses
+            licenses = [p.license]
+            if not isinstance(p, MetaPackage):
+                licenses.extend(p.recipes_licenses())
             d = {'name': p.name, 'version': p.version, 'url': p.url,
-                 'licenses': p.license.acronym,
+                 'licenses': ' and '.join([l.acronym for l in licenses]),
                  'desc': p.shortdesc,
                  'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)])}
             m.message(INFO_TPL % d)
