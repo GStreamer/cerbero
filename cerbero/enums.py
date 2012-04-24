@@ -59,3 +59,50 @@ class DistroVersion:
     OS_X_LION = 'osx_lion'
     OS_X_SNOW_LEOPARD = 'osx_snow_leopard'
     OS_X_LEOPARD = 'osx_leopard'
+
+
+class LicenseDescription:
+
+    def __init__(self, acronym, pretty_name):
+        self.acronym = acronym
+        self.pretty_name = pretty_name
+
+
+class License:
+    ''' Enumeration of licensesversions '''
+    AFLv2_1 = LicenseDescription('AFL-2.1',
+            'Academic Free License, version 2.1')
+    Apachev2 = LicenseDescription('Apache-2.0',
+            'Apache License, version 2.0')
+    BSD = LicenseDescription('BSD',
+            'BSD License')
+    BSD_like = LicenseDescription('BSD-like',
+            'BSD-like License')
+    FreeType = LicenseDescription('FreeType',
+            'FreeType License')
+    Jasperv2 = LicenseDescription('Jasper-2.0',
+            'JasPer LicenseVersion 2.0')
+    JPEG = LicenseDescription('JPEG',
+            'JasPer LicenseVersion 2.0')
+    GFDL = LicenseDescription('GFDL',
+            'GNU Free Documentation License')
+    GPL = LicenseDescription('GPL',
+            'GNU General Public License')
+    GPLv1 = LicenseDescription('GPL-1',
+            'GNU General Public License, version 1')
+    GPLv2 = LicenseDescription('GPL-2',
+            'GNU General Public License, version 2')
+    GPLv3 = LicenseDescription('GPL-3',
+            'GNU General Public License, version 3')
+    LGPL = LicenseDescription('LGPL',
+            'GNU Lesser General Public License')
+    LGPLv2 = LicenseDescription('LGPL-2',
+            'GNU Lesser General Public License, version 2')
+    LGPLv2_1 = LicenseDescription('LGPL-2.1',
+            'GNU Lesser General Public License, version 2.1')
+    LGPLv3 = LicenseDescription('LGPL-3',
+            'GNU Lesser General Public License, version 3')
+    LibPNG = LicenseDescription('LibPNG',
+            'LibPNG License')
+    MIT = LicenseDescription('MIT',
+            'MIT License')
