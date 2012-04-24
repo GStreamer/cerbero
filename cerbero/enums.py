@@ -48,6 +48,7 @@ class DistroVersion:
     UBUNTU_LUCID = 'ubuntu_lucid'
     UBUNTU_NATTY = 'ubuntu_natty'
     UBUNTU_ONEIRIC = 'ubuntu_oneiric'
+    UBUNTU_PRECISE = 'ubuntu_precise'
     FEDORA_16 = 'fedora_16'
     REDHAT_6 = 'redhat_6'
     OPENSUSE_12_1 = 'opensuse_12_1'
