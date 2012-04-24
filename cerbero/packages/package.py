@@ -200,7 +200,7 @@ class MetaPackage(PackageBase):
 
     icon = None
     packages = []
-    platfrom_packages = {}
+    platform_packages = {}
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)
