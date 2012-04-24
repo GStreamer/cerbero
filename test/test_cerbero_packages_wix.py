@@ -51,31 +51,31 @@ class Package(package.Package):
 MERGE_MODULE = '''\
 <?xml version="1.0" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Module Id="gstreamer_test" Language="1033" Version="1.0">
+	<Module Id="_gstreamer_test" Language="1033" Version="1.0">
 		<Package Comments="test" Description="GStreamer Test" Id="1" Manufacturer="GStreamer Project"/>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Component Guid="1" Id="README">
-				<File Id="README" Name="README" Source="z:\\\\\\test\\\\README"/>
+			<Component Guid="1" Id="_README">
+				<File Id="_README_1" Name="README" Source="z:\\\\\\test\\\\README"/>
 			</Component>
-			<Directory Id="bin" Name="bin">
-				<Component Guid="1" Id="bin_test.exe">
-					<File Id="bin_testexe" Name="test.exe" Source="z:\\\\\\test\\\\bin\\\\test.exe"/>
+			<Directory Id="_bin" Name="bin">
+				<Component Guid="1" Id="_test.exe">
+					<File Id="_testexe" Name="test.exe" Source="z:\\\\\\test\\\\bin\\\\test.exe"/>
 				</Component>
-				<Component Guid="1" Id="bin_test2.exe">
-					<File Id="bin_test2exe" Name="test2.exe" Source="z:\\\\\\test\\\\bin\\\\test2.exe"/>
+				<Component Guid="1" Id="_test2.exe">
+					<File Id="_test2exe" Name="test2.exe" Source="z:\\\\\\test\\\\bin\\\\test2.exe"/>
 				</Component>
-				<Component Guid="1" Id="bin_test3.exe">
-					<File Id="bin_test3exe" Name="test3.exe" Source="z:\\\\\\test\\\\bin\\\\test3.exe"/>
+				<Component Guid="1" Id="_test3.exe">
+					<File Id="_test3exe" Name="test3.exe" Source="z:\\\\\\test\\\\bin\\\\test3.exe"/>
 				</Component>
 			</Directory>
-			<Directory Id="lib" Name="lib">
-				<Directory Id="lib_gstreamer_0.10" Name="lib_gstreamer_0.10">
-					<Component Guid="1" Id="lib_gstreamer_0.10_libgstplugins.dll">
-						<File Id="lib_gstreamer_010_libgstpluginsdll" Name="libgstplugins.dll" Source="z:\\\\\\test\\\\lib\\\\gstreamer-0.10\\\\libgstplugins.dll"/>
+			<Directory Id="_lib" Name="lib">
+				<Directory Id="_gstreamer_0.10" Name="gstreamer-0.10">
+					<Component Guid="1" Id="_libgstplugins.dll">
+						<File Id="_libgstpluginsdll" Name="libgstplugins.dll" Source="z:\\\\\\test\\\\lib\\\\gstreamer-0.10\\\\libgstplugins.dll"/>
 					</Component>
 				</Directory>
-				<Component Guid="1" Id="lib_libfoo.dll">
-					<File Id="lib_libfoodll" Name="libfoo.dll" Source="z:\\\\\\test\\\\lib\\\\libfoo.dll"/>
+				<Component Guid="1" Id="_libfoo.dll">
+					<File Id="_libfoodll" Name="libfoo.dll" Source="z:\\\\\\test\\\\lib\\\\libfoo.dll"/>
 				</Component>
 			</Directory>
 		</Directory>
@@ -106,7 +106,7 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_module()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer_test" Language="1033" Version="1.0" />'
+                '<Module Id="_gstreamer_test" Language="1033" Version="1.0" />'
             '</Wix>', etree.tostring(self.mergemodule.root))
 
     def test_add_package(self):
@@ -115,7 +115,7 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_package()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer_test" Language="1033" Version="1.0">'
+                '<Module Id="_gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
                     'Manufacturer="GStreamer Project" />'
                 '</Module>'
@@ -128,7 +128,7 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_root_dir()
         self.assertEquals(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
-                '<Module Id="gstreamer_test" Language="1033" Version="1.0">'
+                '<Module Id="_gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
                     'Manufacturer="GStreamer Project" />'
                     '<Directory Id="TARGETDIR" Name="SourceDir" />'
@@ -172,6 +172,8 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule.fill()
         tmp = StringIO.StringIO()
         self.mergemodule.write(tmp)
+        print tmp.getvalue()
+        print MERGE_MODULE
         self.assertEquals(MERGE_MODULE, tmp.getvalue())
 
 
