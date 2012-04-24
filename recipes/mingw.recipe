@@ -16,6 +16,12 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.WINDOWS:
             raise FatalError("%s can only be installed on Windows" % self.name)
         for f in self.files_libs:
-            shutil.copy(os.path.join(self.config.toolchain_prefix, 'mingw',
-                                     'lib', f + '.dll'),
+            if self.config.platform == Platform.WINDOWS:
+                # the native compiler install dll's in 'bin' and
+                # not in the cross prefix
+                mingw = 'bin'
+            else:
+                mingw = os.path.join(self.config.host, 'lib')
+            shutil.copy(os.path.join(self.config.toolchain_prefix, mingw,
+                                     f + '.dll'),
                 os.path.join(self.config.prefix, 'bin', f + '.dll'))
