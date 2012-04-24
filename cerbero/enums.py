@@ -90,18 +90,30 @@ class License:
             'GNU General Public License')
     GPLv1 = LicenseDescription('GPL-1',
             'GNU General Public License, version 1')
+    GPLv1Plus = LicenseDescription('GPL-1+',
+            'GNU General Public License, version 1 or later')
     GPLv2 = LicenseDescription('GPL-2',
             'GNU General Public License, version 2')
+    GPLv2Plus = LicenseDescription('GPL-2+',
+            'GNU General Public License, version 2 or later')
     GPLv3 = LicenseDescription('GPL-3',
             'GNU General Public License, version 3')
+    GPLv3Plus = LicenseDescription('GPL-3+',
+            'GNU General Public License, version 3 or later')
     LGPL = LicenseDescription('LGPL',
             'GNU Lesser General Public License')
     LGPLv2 = LicenseDescription('LGPL-2',
             'GNU Lesser General Public License, version 2')
+    LGPLv2Plus = LicenseDescription('LGPL-2+',
+            'GNU Lesser General Public License, version 2 or later')
     LGPLv2_1 = LicenseDescription('LGPL-2.1',
             'GNU Lesser General Public License, version 2.1')
+    LGPLv2_1Plus = LicenseDescription('LGPL-2.1+',
+            'GNU Lesser General Public License, version 2.1 or later')
     LGPLv3 = LicenseDescription('LGPL-3',
             'GNU Lesser General Public License, version 3')
+    LGPLv3Plus = LicenseDescription('LGPL-3+',
+            'GNU Lesser General Public License, version 3 or later')
     LibPNG = LicenseDescription('LibPNG',
             'LibPNG License')
     MIT = LicenseDescription('MIT',
