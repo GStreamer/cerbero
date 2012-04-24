@@ -10,20 +10,20 @@ class Recipe(recipe.Recipe):
             'libdvdread', 'libmpeg2', 'libmad']
 
     files_codecs = [
-             'gstreamer-static/lib/gstreamer-0.10/libgsta52dec%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstamrnb%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstamrwbdec%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstasf%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstdvdsub%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstmad%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstmpeg2dec%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstmpegaudioparse%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstrmdemux%(smext)s',
+             'lib/gstreamer-0.10/libgsta52dec%(smext)s',
+             'lib/gstreamer-0.10/libgstamrnb%(smext)s',
+             'lib/gstreamer-0.10/libgstamrwbdec%(smext)s',
+             'lib/gstreamer-0.10/libgstasf%(smext)s',
+             'lib/gstreamer-0.10/libgstdvdsub%(smext)s',
+             'lib/gstreamer-0.10/libgstmad%(smext)s',
+             'lib/gstreamer-0.10/libgstmpeg2dec%(smext)s',
+             'lib/gstreamer-0.10/libgstmpegaudioparse%(smext)s',
+             'lib/gstreamer-0.10/libgstrmdemux%(smext)s',
     ]
 
     files_dvd = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstdvdlpcmdec%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstdvdread%(smext)s',
+             'lib/gstreamer-0.10/libgstdvdlpcmdec%(smext)s',
+             'lib/gstreamer-0.10/libgstdvdread%(smext)s',
     ]
 
     def prepare(self):
@@ -31,3 +31,7 @@ class Recipe(recipe.Recipe):
             self.configure_options += '--disable-gtk-doc '
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-ugly')
+
+        static_prefix = "gstreamer-static/%s/" % self.config.prefix
+        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
+        self.files_dvd = [ static_prefix + f for f in self.files_dvd]

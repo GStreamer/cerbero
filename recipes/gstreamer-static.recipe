@@ -13,11 +13,14 @@ class Recipe(recipe.Recipe):
             Platform.WINDOWS: ['gtk-doc-windows'],
     }
 
-    files_plugins = ['gstreamer-static/lib/gstreamer-0.10/libgstcoreelements%(smext)s',
-                     'gstreamer-static/lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
+    files_plugins = ['lib/gstreamer-0.10/libgstcoreelements%(smext)s',
+                     'lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
 
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gstreamer')
+
+        static_prefix = "gstreamer-static/%s/" % self.config.prefix
+        self.files_plugins = [ static_prefix + f for f in self.files_plugins]

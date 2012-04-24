@@ -12,53 +12,53 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     files_effects = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstadder%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstapp%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstaudioconvert%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstaudiorate%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstaudioresample%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstaudiotestsrc%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstffmpegcolorspace%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstgdp%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstgio%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstpango%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgsttypefindfunctions%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvideorate%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvideoscale%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvideotestsrc%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvolume%(smext)s',
+             'lib/gstreamer-0.10/libgstadder%(smext)s',
+             'lib/gstreamer-0.10/libgstapp%(smext)s',
+             'lib/gstreamer-0.10/libgstaudioconvert%(smext)s',
+             'lib/gstreamer-0.10/libgstaudiorate%(smext)s',
+             'lib/gstreamer-0.10/libgstaudioresample%(smext)s',
+             'lib/gstreamer-0.10/libgstaudiotestsrc%(smext)s',
+             'lib/gstreamer-0.10/libgstffmpegcolorspace%(smext)s',
+             'lib/gstreamer-0.10/libgstgdp%(smext)s',
+             'lib/gstreamer-0.10/libgstgio%(smext)s',
+             'lib/gstreamer-0.10/libgstpango%(smext)s',
+             'lib/gstreamer-0.10/libgsttypefindfunctions%(smext)s',
+             'lib/gstreamer-0.10/libgstvideorate%(smext)s',
+             'lib/gstreamer-0.10/libgstvideoscale%(smext)s',
+             'lib/gstreamer-0.10/libgstvideotestsrc%(smext)s',
+             'lib/gstreamer-0.10/libgstvolume%(smext)s',
     ]
 
     files_playback = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libplaybin%(smext)s',
+             'lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
+             'lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
+             'lib/gstreamer-0.10/libplaybin%(smext)s',
             ]
 
     files_encoding = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstencodebin%(smext)s',
+             'lib/gstreamer-0.10/libgstencodebin%(smext)s',
              ]
 
     files_net = [
-             'gstreamer-static/lib/gstreamer-0.10/libgsttcp%(smext)s',
+             'lib/gstreamer-0.10/libgsttcp%(smext)s',
             ]
 
     files_codecs = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstsubparse%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstogg%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgsttheora%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstvorbis%(smext)s',
+             'lib/gstreamer-0.10/libgstsubparse%(smext)s',
+             'lib/gstreamer-0.10/libgstogg%(smext)s',
+             'lib/gstreamer-0.10/libgsttheora%(smext)s',
+             'lib/gstreamer-0.10/libgstvorbis%(smext)s',
             ]
 
     files_vis = [
-             'gstreamer-static/lib/gstreamer-0.10/libgstlibvisual%(smext)s',
+             'lib/gstreamer-0.10/libgstlibvisual%(smext)s',
             ]
 
     platform_files_sys = {
         Platform.LINUX: [
-             'gstreamer-static/lib/gstreamer-0.10/libgstalsa%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstximagesink%(smext)s',
-             'gstreamer-static/lib/gstreamer-0.10/libgstxvimagesink%(smext)s',
+             'lib/gstreamer-0.10/libgstalsa%(smext)s',
+             'lib/gstreamer-0.10/libgstximagesink%(smext)s',
+             'lib/gstreamer-0.10/libgstxvimagesink%(smext)s',
             ]
     }
 
@@ -67,3 +67,12 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-gtk-doc'
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')
+
+        static_prefix = "gstreamer-static/%s/" % self.config.prefix
+        self.files_effects = [ static_prefix + f for f in self.files_effects]
+        self.files_playback = [ static_prefix + f for f in self.files_playback]
+        self.files_encoding = [ static_prefix + f for f in self.files_encoding]
+        self.files_net = [ static_prefix + f for f in self.files_net]
+        self.files_codecs = [ static_prefix + f for f in self.files_codecs]
+        self.files_vis = [ static_prefix + f for f in self.files_vis]
+        self.platform_files_sys = [ static_prefix + f for f in self.platform_files_sys]
