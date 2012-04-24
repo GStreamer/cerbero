@@ -126,16 +126,21 @@ class Package(PackageBase):
     deps = list()
     files = list()
     platform_files = dict()
+    files_devel = list()
+    platform_files_devel = dict()
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
         self._files = self.files + \
                 self.platform_files.get(config.target_platform, [])
+        self._files_devel = self.files_devel + \
+                self.platform_files_devel.get(config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):
         files = [x.split(':')[0] for x in self._files]
+        files.extend([x.split(':')[0] for x in self._files_devel])
         for name in self.deps:
             p = self.store.get_package(name)
             files += p.recipes_dependencies()
@@ -155,6 +160,12 @@ class Package(PackageBase):
     def devel_files_list(self):
         files = []
         for recipe, categories in self._recipes_files.iteritems():
+            # only add development files for recipe from which used the 'libs'
+            # category
+            if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
+                rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
+                files.extend(rfiles)
+        for recipe, categories in self._recipes_files_devel.iteritems():
             rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
             files.extend(rfiles)
         return sorted(files)
@@ -169,6 +180,10 @@ class Package(PackageBase):
         for r in self._files:
             l = r.split(':')
             self._recipes_files[l[0]] = l[1:]
+        self._recipes_files_devel = {}
+        for r in self._files_devel:
+            l = r.split(':')
+            self._recipes_files_devel[l[0]] = l[1:]
 
 
 class MetaPackage(PackageBase):
