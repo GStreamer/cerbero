@@ -172,8 +172,6 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule.fill()
         tmp = StringIO.StringIO()
         self.mergemodule.write(tmp)
-        print tmp.getvalue()
-        print MERGE_MODULE
         self.assertEquals(MERGE_MODULE, tmp.getvalue())
 
 
