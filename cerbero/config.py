@@ -227,16 +227,6 @@ class Config (object):
         self.set_property('prefix', None)
         self.set_property('sources', None)
         self.set_property('local_sources', None)
-        if not self.uninstalled:
-            self.set_property('recipes_dir',
-                              os.path.join(cerbero_home, 'recipes'))
-            self.set_property('packages_dir',
-                              os.path.join(cerbero_home, 'packages'))
-        else:
-            self.set_property('recipes_dir',
-                os.path.join(os.path.dirname(__file__), '..', 'recipes'))
-            self.set_property('packages_dir',
-                os.path.join(os.path.dirname(__file__), '..', 'packages'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
         self.set_property('wix_prefix', DEFAULT_WIX_PREFIX)
@@ -259,13 +249,17 @@ class Config (object):
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
         if not self.uninstalled:
+            self.set_property('recipes_dir',
+                              os.path.join(cerbero_home, 'recipes'))
+            self.set_property('packages_dir',
+                              os.path.join(cerbero_home, 'packages'))
             self.set_property('data_dir', DATA_DIR)
             self.set_property('environ_dir', os.path.join(CONFIG_DIR))
         else:
-            self.set_property('data_dir',
-                os.path.join(os.path.dirname(__file__), '..', 'data'))
-            self.set_property('environ_dir',
-                os.path.join(os.path.dirname(__file__), '..', 'config'))
+            self.set_property('data_dir', self._relative_path('data'))
+            self.set_property('environ_dir', self._relative_path('config'))
+            self.set_property('recipes_dir', self._relative_path('recipes'))
+            self.set_property('packages_dir', self._relative_path('packages'))
         self.set_property('allow_system_libs', True)
         self.set_property('use_configure_cache', False)
 
@@ -278,3 +272,7 @@ class Config (object):
             raise ConfigurationError('Unkown key %s' % name)
         if force or getattr(self, name) is None:
             setattr(self, name, value)
+
+    def _relative_path(self, path):
+        p = os.path.join(os.path.dirname(__file__), '..', path)
+        return os.path.abspath(p)
