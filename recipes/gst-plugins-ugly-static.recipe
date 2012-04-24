@@ -33,5 +33,5 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-ugly')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
-        self.files_dvd_devel = [ static_prefix + f for f in self.files_dvd_devel]
+        self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
+        self.files_dvd_devel = [static_prefix + f for f in self.files_dvd_devel]

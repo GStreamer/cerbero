@@ -18,4 +18,4 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
+        self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]

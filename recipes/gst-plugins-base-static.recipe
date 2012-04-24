@@ -69,13 +69,13 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_effects_devel = [ static_prefix + f for f in self.files_effects_devel]
-        self.files_playback_devel = [ static_prefix + f for f in self.files_playback_devel]
-        self.files_encoding_devel = [ static_prefix + f for f in self.files_encoding_devel]
-        self.files_net_devel = [ static_prefix + f for f in self.files_net_devel]
-        self.files_codecs_devel = [ static_prefix + f for f in self.files_codecs_devel]
-        self.files_vis_devel = [ static_prefix + f for f in self.files_vis_devel]
+        self.files_effects_devel = [static_prefix + f for f in self.files_effects_devel]
+        self.files_playback_devel = [static_prefix + f for f in self.files_playback_devel]
+        self.files_encoding_devel = [static_prefix + f for f in self.files_encoding_devel]
+        self.files_net_devel = [static_prefix + f for f in self.files_net_devel]
+        self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
+        self.files_vis_devel = [static_prefix + f for f in self.files_vis_devel]
         platform_files_sys_devel = {}
         for platform, files in self.platform_files_sys_devel.iteritems():
-            platform_files_sys_devel[platform] = [ static_prefix + f for f in files ]
+            platform_files_sys_devel[platform] = [static_prefix + f for f in files]
         self.platform_files_sys_devel = platform_files_sys_devel
