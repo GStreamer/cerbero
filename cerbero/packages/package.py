@@ -107,6 +107,16 @@ class PackageBase(object):
         elif name == 'shortdesc':
             if self.package_mode == PackageType.DEVEL:
                 attr += ' (Development Files)'
+        elif name == 'uuid':
+            if self.package_mode == PackageType.DEVEL:
+                if attr is not None:
+                    # Used the change the upgrade code for the devel package
+                    uuid = list(attr)
+                    if uuid[0] != '0':
+                        uuid[0] = '0'
+                    else:
+                        uuid[0] = '1'
+                    attr = ''.join(uuid)
         return attr
 
 
