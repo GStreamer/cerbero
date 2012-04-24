@@ -333,7 +333,8 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['packager'] = self.packager
         args['datetime'] = self.datetime
-        args['licenses'] = ',\n    '.join([l.pretty_name for l in self.package.licenses])
+        # FIXME - parse recipes licenses
+        args['licenses'] = self.package.license.pretty_name
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):

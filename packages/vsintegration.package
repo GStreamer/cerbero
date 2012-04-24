@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'Visual Studio Integration'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licenses = [License.LGPL]
+    license = License.LGPL
     vendor = 'GStreamer Project'
     uuid = '533337c2-4565-413f-3287-e8faa892f853'
 

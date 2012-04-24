@@ -40,7 +40,7 @@ Release:        1
 Summary:        %(summary)s
 Source:         %(source)s
 Group:          Applications/Internet
-License:        %(license)s
+License:        %(licenses)s
 Prefix:         %(prefix)s
 Packager:       %(packager)s
 Vendor:         %(vendor)s
@@ -90,7 +90,7 @@ Version:        %(version)s
 Release:        1
 Summary:        %(summary)s
 Group:          Applications/Internet
-License:        %(license)s
+License:        %(licenses)s
 Packager:       %(packager)s
 Vendor:         %(vendor)s
 %(url)s
@@ -152,6 +152,9 @@ class RPMPackager(LinuxPackager):
 
         self.package.has_devel_package = bool(devel_files)
 
+        # FIXME - parse recipes licenses
+        licenses = self.package.license.pretty_name
+
         self._spec_str = template % {
                 'name': self.package.name,
                 'p_prefix': self.package_prefix,
@@ -159,7 +162,7 @@ class RPMPackager(LinuxPackager):
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
-                'license': ' '.join([l.acronym for l in self.package.licenses]),
+                'licenses': licenses,
                 'packager': self.packager,
                 'vendor': self.package.vendor,
                 'url': URL_TPL % self.package.url if self.package.url != 'default' else '',

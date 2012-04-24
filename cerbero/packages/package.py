@@ -35,8 +35,8 @@ class PackageBase(object):
     @type version: str
     @cvar uuid: unique id for this package
     @type uuid: str
-    @cvar license:  package license
-    @type license: str
+    @cvar license: package license
+    @type license: License
     @cvar vendor: vendor for this package
     @type vendor: str
     @cvar org: organization for this package (eg: net.foo.bar)
@@ -54,7 +54,7 @@ class PackageBase(object):
     version = 'default'
     org = 'default'
     uuid = None
-    licenses = [License.GPL]
+    license = License.GPL
     vendor = 'default'
     url = 'default'
     ignore_package_prefix = False

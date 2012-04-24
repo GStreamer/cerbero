@@ -53,8 +53,9 @@ class PackageInfo(Command):
             m.message('\n'.join(store.get_package_files_list(p_name)))
         else:
             p = store.get_package(p_name)
+            # FIXME - parse recipes licenses
             d = {'name': p.name, 'version': p.version, 'url': p.url,
-                 'licenses': ' '.join([l.acronym for l in p.licenses]),
+                 'licenses': p.license.acronym,
                  'desc': p.shortdesc,
                  'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)])}
             m.message(INFO_TPL % d)

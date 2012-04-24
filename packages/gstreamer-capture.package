@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer plugins for capture'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licenses = [License.LGPL]
+    license = License.LGPL
     vendor = 'GStreamer Project'
     uuid = '58fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core']
