@@ -120,7 +120,7 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
     def setUp(self):
         self.config = DummyConfig()
         self.config.target_platform = Platform.LINUX
-        self.package = Package1(self.config, None)
+        self.package = Package1(self.config, None, None)
         self.package_path = '/test/package.pkg'
         self.pkgref = PkgRef(self.package, PackageType.RUNTIME, self.package_path)
 

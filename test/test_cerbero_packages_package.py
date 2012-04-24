@@ -41,8 +41,10 @@ class PackageTest(unittest.TestCase):
         self.tmp = tempfile.mkdtemp()
         win32config = Config(self.tmp, Platform.WINDOWS)
         linuxconfig = Config(self.tmp, Platform.LINUX)
-        self.win32package = Package1(win32config, create_cookbook(win32config))
-        self.linuxpackage = Package1(linuxconfig, create_cookbook(linuxconfig))
+        self.win32package = Package1(win32config, create_store(win32config),
+                create_cookbook(win32config))
+        self.linuxpackage = Package1(linuxconfig, create_store(linuxconfig),
+                create_cookbook(linuxconfig))
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -62,10 +64,11 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(self.win32package._recipes_files['recipe5'], ['libs'])
 
     def testListRecipesDeps(self):
+        print self.win32package.recipes_dependencies()
         self.assertEquals(self.win32package.recipes_dependencies(),
-                          ['recipe1', 'recipe5'])
+                          ['recipe1', 'recipe5', 'recipe2'])
         self.assertEquals(self.linuxpackage.recipes_dependencies(),
-                          ['recipe1'])
+                          ['recipe1', 'recipe2'])
 
     def testFilesList(self):
         add_files(self.tmp)
@@ -101,11 +104,11 @@ class PackageTest(unittest.TestCase):
     def testSystemDependencies(self):
         config = Config(self.tmp, Platform.LINUX)
         config.target_distro = Distro.DEBIAN
-        package = Package4(config, None)
+        package = Package4(config, None, None)
         self.assertEquals(package.get_sys_deps(), ['python'])
         config.target_distro = Distro.REDHAT
         config.target_distro_version = DistroVersion.FEDORA_16
-        package = Package4(config, None)
+        package = Package4(config, None, None)
         self.assertEquals(package.get_sys_deps(), ['python27'])
 
 

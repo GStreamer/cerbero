@@ -54,14 +54,14 @@ class PackageTest(unittest.TestCase):
         self.store = PackagesStore(self.config, False)
 
     def testAddPackage(self):
-        package = common.Package1(self.config, None)
+        package = common.Package1(self.config, None, None)
         self.assertEquals(len(self.store._packages), 0)
         self.store.add_package(package)
         self.assertEquals(len(self.store._packages), 1)
         self.assertEquals(package, self.store._packages[package.name])
 
     def testGetPackage(self):
-        package = common.Package1(self.config, None)
+        package = common.Package1(self.config, None, None)
         self.store.add_package(package)
         self.assertEquals(package, self.store.get_package(package.name))
 
@@ -70,7 +70,7 @@ class PackageTest(unittest.TestCase):
             'unknown')
 
     def testPackagesList(self):
-        package = common.Package1(self.config, None)
+        package = common.Package1(self.config, None, None)
         metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(package)
         self.store.add_package(metapackage)
@@ -78,8 +78,8 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(l, self.store.get_packages_list())
 
     def testPackageDeps(self):
-        package = common.Package1(self.config, None)
-        package2 = common.Package2(self.config, None)
+        package = common.Package1(self.config, None,  None)
+        package2 = common.Package2(self.config, None, None)
         self.store.add_package(package)
         self.store.add_package(package2)
         self.assertEquals(package.deps,
@@ -92,13 +92,16 @@ class PackageTest(unittest.TestCase):
         self.failUnlessRaises(PackageNotFoundError,
             self.store.get_package_deps, metapackage.name)
         for klass in [common.Package1, common.Package2, common.Package3,
-                common.Package4, common.MetaPackage]:
+                common.Package4]:
+            p = klass(self.config, None, None)
+            self.store.add_package(p)
+        for klass in [common.MetaPackage]:
             p = klass(self.config, None)
             self.store.add_package(p)
         deps = ['gstreamer-test-bindings', 'gstreamer-test1',
                 'gstreamer-test2', 'gstreamer-test3']
-        self.assertEquals(deps,
-            [x.name for x in self.store.get_package_deps(metapackage.name)])
+        res = [x.name for x in self.store.get_package_deps(metapackage.name)]
+        self.assertEquals(sorted(deps), sorted(res))
 
     def testLoadPackageFromFile(self):
         package_file = tempfile.NamedTemporaryFile()

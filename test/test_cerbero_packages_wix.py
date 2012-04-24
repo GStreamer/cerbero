@@ -26,6 +26,7 @@ from cerbero.packages import package
 from cerbero.packages.wix import MergeModule
 from cerbero.utils import etree
 from test.test_build_common import create_cookbook
+from test.test_packages_common import create_store
 from test.test_common import DummyConfig
 
 
@@ -88,8 +89,9 @@ class MergeModuleTest(unittest.TestCase):
     def setUp(self):
         self.config = DummyConfig()
         cb =  create_cookbook(self.config)
+        store =  create_store(self.config)
         cb.add_recipe(Recipe1(self.config))
-        self.package = Package(self.config, cb)
+        self.package = Package(self.config, store, cb)
         self.mergemodule = MergeModule(self.config,
                 self.package.files_list(), self.package)
 
