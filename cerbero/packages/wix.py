@@ -247,7 +247,8 @@ class MSI(WixBase):
         # Remove empty packages
         packages = [x for x in packages if x[0] in self.packages_deps]
 
-        # Fill the list of required packages
+        # Fill the list of required packages, which are the ones installed by
+        # a package that is always installed
         req = [x[0] for x in packages if x[1] == True]
         required_packages = req[:]
         for p in req:
@@ -271,11 +272,12 @@ class MSI(WixBase):
 
     def _add_install_dir(self):
         tdir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
-        pfdir = self._add_dir(tdir, 'ProgramFilesFolder', 'PFiles')
-        install_dir = self.package.install_dir[self.target_platform]
-        sdkdir = self._add_dir(pfdir, self._format_id(install_dir),
-                               install_dir)
-        self.installdir = self._add_dir(sdkdir, 'INSTALLDIR', '.')
+        # FIXME: Add a way to install to ProgramFilesFolder
+        rootdir = self._add_dir(tdir, 'ROOTINSTALLDIR',
+                self.package.get_install_dir())
+        versiondir = self._add_dir(rootdir, "Version", self.package.version)
+        archdir = self._add_dir(versiondir, 'Architecture', self.config.target_arch)
+        self.installdir = self._add_dir(archdir, 'INSTALLDIR', '.')
 
     def _package_id(self, package_name):
         return self._format_id(package_name)
@@ -295,6 +297,9 @@ class MSI(WixBase):
             mergerefs = list(set(deps) - set(required_packages))
         else:
             mergerefs = [x for x in deps if x in required_packages]
+
+        # don't add empty packages
+        mergerefs = [x for x in mergerefs if x in self.packages_deps]
 
         for p in mergerefs:
             etree.SubElement(feature, "MergeRef",

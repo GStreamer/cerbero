@@ -36,6 +36,8 @@ class MergeModulePackager(PackagerBase):
 
     def pack(self, output_dir, devel=False, force=False):
         output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         paths = []
 
@@ -80,6 +82,8 @@ class MSIPackager(PackagerBase):
 
     def pack(self, output_dir, devel=False, force=False):
         output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         paths = []
 
@@ -96,7 +100,7 @@ class MSIPackager(PackagerBase):
     def _create_msi_installer(self, output_dir, package_type, force=False):
         self.package.set_mode(package_type)
         output_dir = os.path.realpath(output_dir)
-        self.packagedeps = self.store.get_package_deps(self.package.name)
+        self.packagedeps = self.store.get_package_deps(self.package)
         self.output_dir = output_dir
         self.force = force
         self._create_merge_modules(package_type)
