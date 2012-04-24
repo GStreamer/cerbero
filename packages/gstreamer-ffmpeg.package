@@ -14,3 +14,4 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['gst-ffmpeg:codecs']
+    files_devel = ['gst-ffmpeg-static:codecs_devel']

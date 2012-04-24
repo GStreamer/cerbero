@@ -129,23 +129,32 @@ class Package(PackageBase):
     @type deps: list
     @cvar files: list of files included in this package
     @type files: list
-    @cvar platform_files: list of platform files included in this package
-    @type platform_files: list
+    @cvar platform_files: dict of platform files included in this package
+    @type platform_files: dict
+    @cvar files_devel: list of devel files included in this package
+    @type files_devel: list
+    @cvar platform_files_devel: dict of platform devel files included in this package
+    @type platform_files_Devel: dict
     '''
 
     deps = list()
     files = list()
     platform_files = dict()
+    files_devel = list()
+    platform_files_devel = dict()
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
         self._files = self.files + \
                 self.platform_files.get(config.target_platform, [])
+        self._files_devel = self.files_devel + \
+                self.platform_files_devel.get(config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):
         files = [x.split(':')[0] for x in self._files]
+        files.extend([x.split(':')[0] for x in self._files_devel])
         for name in self.deps:
             p = self.store.get_package(name)
             files += p.recipes_dependencies()
@@ -170,6 +179,9 @@ class Package(PackageBase):
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
                 rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
                 files.extend(rfiles)
+        for recipe, categories in self._recipes_files_devel.iteritems():
+            rfiles = self.cookbook.get_recipe(recipe).files_list_by_categories(categories)
+            files.extend(rfiles)
         return sorted(files)
 
     def all_files_list(self):
@@ -182,6 +194,10 @@ class Package(PackageBase):
         for r in self._files:
             l = r.split(':')
             self._recipes_files[l[0]] = l[1:]
+        self._recipes_files_devel = {}
+        for r in self._files_devel:
+            l = r.split(':')
+            self._recipes_files_devel[l[0]] = l[1:]
 
 
 class MetaPackage(PackageBase):
@@ -198,7 +214,7 @@ class MetaPackage(PackageBase):
 
     icon = None
     packages = []
-    platfrom_packages = {}
+    platform_packages = {}
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)
@@ -208,7 +224,7 @@ class MetaPackage(PackageBase):
 
     def recipes_dependencies(self):
         deps = []
-        for package in self.store.get_package_deps(self.name):
+        for package in self.store.get_package_deps(self.name, True):
             deps.extend(package.recipes_dependencies())
         return list(set(deps))
 

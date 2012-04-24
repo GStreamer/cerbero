@@ -121,12 +121,11 @@ class FilesProvider(object):
         extensions replacement, which should be done in the search function
         '''
         files = []
-        files_attr = 'files_%s' % category
-        files_p_attr = 'platform_files_%s' % category
-        if hasattr(self, files_attr):
-            files.extend(getattr(self, files_attr))
-        if hasattr(self, files_p_attr):
-            files.extend(getattr(self, files_p_attr).get(self.platform, []))
+        for attr in dir(self):
+            if attr.startswith('files_') and attr.endswith('_' + category):
+                files.extend(getattr(self, attr))
+            if attr.startswith('platform_files_') and attr.endswith('_' + category):
+                files.extend(getattr(self, attr).get(self.platform, []))
         return files
 
     def _list_files_by_category(self, category):

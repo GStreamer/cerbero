@@ -13,5 +13,9 @@ class Package(package.Package):
     uuid = '3fdd61c2-4565-411f-8287-e1faa892f853'
     deps = ['gstreamer-core']
 
-    files = ['libdvdnav:libs', 'libdvdread:libs', 'gst-plugins-bad:dvd',
-            'gst-plugins-good:dvd', 'gst-plugins-ugly:dvd']
+    files = ['libdvdnav:libs', 'libdvdread:libs',
+            'gst-plugins-good:dvd', 'gst-plugins-ugly:dvd',
+            'gst-plugins-bad:dvd']
+    files_devel = ['gst-plugins-good-static:dvd_devel',
+            'gst-plugins-ugly-static:dvd_devel',
+            'gst-plugins-bad-static:dvd_devel']
