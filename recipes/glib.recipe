@@ -59,7 +59,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', None, True)
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC]:
+            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE]:
                 if self.config.target_arch == Architecture.X86:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', '/usr/lib/i386-linux-gnu/gio/modules')
                 elif self.config.target_arch == Architecture.X86_64:
