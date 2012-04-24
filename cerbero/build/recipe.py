@@ -82,6 +82,8 @@ class Recipe(FilesProvider):
 
     @cvar name: name of the module
     @type name: str
+    @cvar license: recipe license
+    @type license: License
     @cvar version: version of the module
     @type version: str
     @cvar sources: url of the sources
@@ -99,6 +101,7 @@ class Recipe(FilesProvider):
     __metaclass__ = MetaRecipe
 
     name = None
+    license = None
     version = None
     package_name = None
     sources = None
