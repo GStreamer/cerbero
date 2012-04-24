@@ -350,7 +350,7 @@ class DebianPackager(LinuxPackager):
         args['datetime'] = self.datetime
         args['license'] = self.package.license.pretty_name
 
-        if isinstance(self, MetaPackage):
+        if isinstance(self.package, MetaPackage):
             return COPYRIGHT_TPL_META % args
 
         args['recipes_licenses'] = ',\n    '.join(
