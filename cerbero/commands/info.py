@@ -54,7 +54,7 @@ class PackageInfo(Command):
             p = store.get_package(p_name)
             d = {'name': p.name, 'version': p.version, 'url': p.url,
                  'licenses': ' '.join(p.licenses), 'desc': p.shortdesc,
-                 'deps': ', '.join([p.name for p in store.get_package_deps(p_name)])}
+                 'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)])}
             m.message(INFO_TPL % d)
 
 register_command(PackageInfo)
