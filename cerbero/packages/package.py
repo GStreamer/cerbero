@@ -198,7 +198,7 @@ class MetaPackage(PackageBase):
 
     def recipes_dependencies(self):
         deps = []
-        for package in self.store.get_package_deps(self.name):
+        for package in self.store.get_package_deps(self.name, True):
             deps.extend(package.recipes_dependencies())
         return list(set(deps))
 
