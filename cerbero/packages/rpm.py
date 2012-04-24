@@ -24,6 +24,7 @@ from cerbero.config import Architecture, DEFAULT_PACKAGER
 from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
+from cerbero.packages.linux import LinuxPackager
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
@@ -115,96 +116,12 @@ REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
 URL_TPL = 'URL: %s\n'
 
-class RPMPackage(PackagerBase):
+class RPMPackager(LinuxPackager):
 
     def __init__(self, config, package, store):
-        PackagerBase.__init__(self, config, package, store)
-        self.package_prefix = ''
-        if self.config.packages_prefix is not None and not\
-                package.ignore_package_prefix:
-            self.package_prefix = '%s-' % self.config.packages_prefix
-        self.full_package_name = '%s%s-%s' % (self.package_prefix,
-                self.package.name, self.package.version)
-        self.packager = self.config.packager
-        if self.packager == DEFAULT_PACKAGER:
-            m.warning(_('No packager defined, using default packager "%s"') % self.packager)
+        LinuxPackager.__init__(self, config, package, store)
 
-    def pack(self, output_dir, devel=True, force=False,
-             pack_deps=True, tmpdir=None):
-        self.install_dir = self.package.get_install_dir()
-        self.devel = devel
-        self.force = force
-        self._empty_packages = []
-
-        # Create a tmpdir for packages
-        tmpdir, rpmdir, srcdir = self._create_rpm_tree(tmpdir)
-
-        # only build each package once
-        if pack_deps:
-            self._pack_deps(output_dir, tmpdir, force)
-
-        if not isinstance(self.package, MetaPackage):
-            # create a tarball with all the package's files
-            tarball_packager = DistTarball(self.config, self.package,
-                                           self.store)
-            tarball = tarball_packager.pack(output_dir, devel, True,
-                    split=False, package_prefix=self.full_package_name)[0]
-            # move the tarball to SOURCES
-            shutil.move(tarball, srcdir)
-            tarname = os.path.split(tarball)[1]
-        else:
-            # metapackages only contains Requires dependencies with other packages
-            tarname = None
-
-        m.action(_('Creating RPM package for %s') % self.package.name)
-        # fill the spec file
-        self._fill_spec(tarname, tmpdir)
-        spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
-        with open(spec_path, 'w') as f:
-            f.write(self._spec_str)
-
-        # and build the package with rpmbuild
-        self._build_rpm(tmpdir, spec_path)
-
-        # copy the newly created package, which should be in RPMS/$ARCH
-        # to the output dir
-        paths = []
-        for d in os.listdir(rpmdir):
-            for f in os.listdir(os.path.join(rpmdir, d)):
-                out_path = os.path.join(output_dir, f)
-                if os.path.exists(out_path):
-                    os.remove(out_path)
-                paths.append(out_path)
-                shutil.move(os.path.join(rpmdir, d, f), output_dir)
-        return paths
-
-    def _pack_deps(self, output_dir, tmpdir, force):
-        for p in self.store.get_package_deps(self.package.name):
-            stamp_path = os.path.join(tmpdir, p.name + '-stamp')
-            if os.path.exists(stamp_path):
-                # already built, skipping
-                continue
-
-            m.action(_('Packing dependency %s for package %s') % (p.name, self.package.name))
-            packager = RPMPackage(self.config, p, self.store)
-            try:
-                packager.pack(output_dir, self.devel, force, True, tmpdir)
-            except EmptyPackageError:
-                self._empty_packages.append(p)
-
-    def _build_rpm(self, tmpdir, spec_path):
-        if self.config.target_arch == Architecture.X86:
-            target = 'i686-redhat-linux'
-        elif self.config.target_arch == Architecture.X86_64:
-            target = 'x86_64-redhat-linux'
-        else:
-            raise FatalError(_('Architecture %s not supported') % \
-                             self.config.target_arch)
-        shell.call('rpmbuild -bb --target %s %s' % (target, spec_path))
-        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
-        open(stamp_path, 'w').close()
-
-    def _create_rpm_tree(self, tmpdir):
+    def create_tree(self, tmpdir):
         # create a tmp dir to use as topdir
         if tmpdir is None:
             tmpdir = tempfile.mkdtemp()
@@ -213,22 +130,15 @@ class RPMPackage(PackagerBase):
         return (tmpdir, os.path.join(tmpdir, 'RPMS'),
                 os.path.join(tmpdir, 'SOURCES'))
 
-    def _devel_package_and_files(self):
-        args = {}
-        args['summary'] = 'Development files for %s' % self.package.name
-        args['description'] = args['summary']
-        args['requires'] =  self._get_requires(PackageType.DEVEL)
-        args['name'] = self.package.name
-        args['p_prefix'] = self.package_prefix
-        try:
-            devel = DEVEL_TPL % self.files_list(PackageType.DEVEL)
-        except EmptyPackageError:
-            devel = ''
-        return DEVEL_PACKAGE_TPL % args, devel
+    def setup_source(self, tarball, tmpdir, packagedir, srcdir):
+        # move the tarball to SOURCES
+        shutil.move(tarball, srcdir)
+        tarname = os.path.split(tarball)[1]
+        return tarname
 
-    def _fill_spec(self, sources, topdir):
+    def prepare(self, tarname, tmpdir, packagedir, srcdir):
         requires = self._get_requires(PackageType.RUNTIME)
-        runtime_files  = self.files_list(PackageType.RUNTIME)
+        runtime_files  = self._files_list(PackageType.RUNTIME)
 
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()
@@ -255,41 +165,47 @@ class RPMPackage(PackagerBase):
                 'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
                 'requires': requires,
                 'prefix': self.install_dir,
-                'source': sources,
-                'topdir': topdir,
+                'source': tarname,
+                'topdir': tmpdir,
                 'devel_package': devel_package,
                 'devel_files': devel_files,
                 'files':  runtime_files}
 
-    def _get_requires(self, package_type):
-        deps = [p.name for p in self.store.get_package_deps(self.package.name)]
-        deps = list(set(deps) - set(self._empty_packages))
+        self.spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
+        with open(self.spec_path, 'w') as f:
+            f.write(self._spec_str)
 
-        def get_dep_name(package_name):
-            p = self.store.get_package(package_name)
-            package_prefix = ''
-            if self.config.packages_prefix is not None and not p.ignore_package_prefix:
-                package_prefix = '%s-' % self.config.packages_prefix
-            return package_prefix + package_name
-
-        details = {}
-        for x in deps:
-            details[x] = get_dep_name(x)
-
-        if package_type == PackageType.DEVEL:
-            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
-            deps = map(lambda x: details[x] + '-devel', deps)
+    def build(self, output_dir, tarname, tmpdir, packagedir, srcdir):
+        if self.config.target_arch == Architecture.X86:
+            target = 'i686-redhat-linux'
+        elif self.config.target_arch == Architecture.X86_64:
+            target = 'x86_64-redhat-linux'
         else:
-            deps = map(lambda x: details[x], deps)
+            raise FatalError(_('Architecture %s not supported') % \
+                             self.config.target_arch)
+        shell.call('rpmbuild -bb --target %s %s' % (target, self.spec_path))
 
-        deps.extend(self.package.get_sys_deps())
+        paths = []
+        for d in os.listdir(packagedir):
+            for f in os.listdir(os.path.join(packagedir, d)):
+                out_path = os.path.join(output_dir, f)
+                if os.path.exists(out_path):
+                    os.remove(out_path)
+                paths.append(out_path)
+                shutil.move(os.path.join(packagedir, d, f), output_dir)
+        return paths
+
+    def _get_requires(self, package_type):
+        devel_suffix = ''
+        if package_type == PackageType.DEVEL:
+            devel_suffix = '-devel'
+        deps = self.get_requires(package_type, devel_suffix)
         return reduce(lambda x, y: x + REQUIRE_TPL % y, deps, '')
 
-    def files_list(self, package_type):
-        # metapackages only have dependencies in other packages
+    def _files_list(self, package_type):
         if isinstance(self.package, MetaPackage):
             return ''
-        files = PackagerBase.files_list(self, package_type, self.force)
+        files = self.files_list(package_type)
         for f in [x for x in files if x.endswith('.py')]:
             if f+'c' not in files:
                 files.append(f+'c')
@@ -297,11 +213,24 @@ class RPMPackage(PackagerBase):
                 files.append(f+'o')
         return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
+    def _devel_package_and_files(self):
+        args = {}
+        args['summary'] = 'Development files for %s' % self.package.name
+        args['description'] = args['summary']
+        args['requires'] =  self._get_requires(PackageType.DEVEL)
+        args['name'] = self.package.name
+        args['p_prefix'] = self.package_prefix
+        try:
+            devel = DEVEL_TPL % self._files_list(PackageType.DEVEL)
+        except EmptyPackageError:
+            devel = ''
+        return DEVEL_PACKAGE_TPL % args, devel
+
 
 class Packager(object):
 
     def __new__(klass, config, package, store):
-        return RPMPackage(config, package, store)
+        return RPMPackager(config, package, store)
 
 
 def register():

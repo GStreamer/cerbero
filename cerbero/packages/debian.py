@@ -28,6 +28,7 @@ from cerbero.config import Architecture, DEFAULT_PACKAGER
 from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
+from cerbero.packages.linux import LinuxPackager
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
@@ -147,84 +148,66 @@ CHANGELOG_URL_TPL = '* Full changelog can be found at %s'
 DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(p_prefix)s%(name)s-dbg'
 
 
-class DebianPackage(PackagerBase):
+class DebianPackager(LinuxPackager):
 
     def __init__(self, config, package, store):
-        PackagerBase.__init__(self, config, package, store)
-        self.package_prefix = ''
-        if self.config.packages_prefix is not None and not\
-                package.ignore_package_prefix:
-            self.package_prefix = '%s-' % self.config.packages_prefix
-        self.full_package_name = '%s%s-%s' % (self.package_prefix,
-                self.package.name, self.package.version)
-        self.packager = self.config.packager
-        if self.packager == DEFAULT_PACKAGER:
-            m.warning(_('No packager defined, using default packager "%s"') % self.packager)
-
-    def pack(self, output_dir, devel=True, force=False,
-             pack_deps=True, tmpdir=None):
-        self.install_dir = self.package.get_install_dir()
-        self.devel = devel
-        self.force = force
-        self._empty_packages = []
+        LinuxPackager.__init__(self, config, package, store)
 
         d = datetime.utcnow()
         self.datetime = d.strftime('%a, %d %b %Y %H:%M:%S +0000')
 
-        # Create a tmpdir for packages
-        tmpdir, debdir, srcdir = self._create_debian_tree(tmpdir)
+    def create_tree(self, tmpdir):
+        # create a tmp dir to use as topdir
+        if tmpdir is None:
+            tmpdir = tempfile.mkdtemp()
+        srcdir = os.path.join(tmpdir, self.full_package_name)
+        os.mkdir(srcdir)
+        packagedir = os.path.join(srcdir, 'debian')
+        os.mkdir(packagedir)
+        os.mkdir(os.path.join(packagedir, 'source'))
+        m.action(_('Creating debian package structure at %s for package %s') %
+                (srcdir, self.package.name))
+        return (tmpdir, packagedir, srcdir)
 
-        # only build each package once
-        if pack_deps:
-            self._pack_deps(output_dir, tmpdir, force)
+    def setup_source(self, tarball, tmpdir, packagedir, srcdir):
+        tarname = os.path.join(tmpdir, os.path.split(tarball)[1])
+        return tarname
 
-        if not isinstance(self.package, MetaPackage):
-            # create a tarball with all the package's files
-            tarball_packager = DistTarball(self.config, self.package,
-                    self.store)
-            tarball = tarball_packager.pack(tmpdir, devel, True,
-                    split=False, package_prefix=self.full_package_name)[0]
-            tarname = os.path.join(tmpdir, os.path.split(tarball)[1])
+    def prepare(self, tarname, tmpdir, packagedir, srcdir):
+        changelog = self._deb_changelog()
+        compat = COMPAT_TPL
+
+        control, runtime_files = self._deb_control_runtime_and_files()
+
+        if self.devel:
+            control_devel, devel_files = self._deb_control_devel_and_files()
         else:
-            # metapackages only contains Requires dependencies with other
-            # packages
-            tarname = None
+            control_devel, devel_files = '', ''
 
-        m.action(_('Creating debian package for %s') % self.package.name)
+        self.package.has_devel_package = bool(devel_files)
 
-        self._pack(tmpdir, debdir, srcdir)
+        copyright = self._deb_copyright()
 
-        # and build the package
-        self._build(tarname, tmpdir, debdir, srcdir)
+        rules = self._deb_rules()
+        source_format = SOURCE_FORMAT_TPL
 
-        # copy the newly created package, which should be in tmpdir
-        # to the output dir
-        paths = []
-        for f in os.listdir(tmpdir):
-            if fnmatch(f, '*.deb'):
-                out_path = os.path.join(output_dir, f)
-                if os.path.exists(out_path):
-                    os.remove(out_path)
-                paths.append(out_path)
-                shutil.move(os.path.join(tmpdir, f), output_dir)
-        return paths
+        self._write_debian_file(packagedir, 'changelog', changelog)
+        self._write_debian_file(packagedir, 'compat', compat)
+        self._write_debian_file(packagedir, 'control', control + control_devel)
+        self._write_debian_file(packagedir, 'copyright', copyright)
+        rules_path = self._write_debian_file(packagedir, 'rules', rules)
+        os.chmod(rules_path, 0755)
+        self._write_debian_file(packagedir, os.path.join('source', 'format'),
+                source_format)
+        self._write_debian_file(packagedir,
+                self.package_prefix + self.package.name + '.install',
+                runtime_files)
+        if self.devel and devel_files:
+            self._write_debian_file(packagedir,
+                    self.package_prefix + self.package.name + '-dev.install',
+                    devel_files)
 
-    def _pack_deps(self, output_dir, tmpdir, force):
-        for p in self.store.get_package_deps(self.package.name):
-            stamp_path = os.path.join(tmpdir, p.name + '-stamp')
-            if os.path.exists(stamp_path):
-                # already built, skipping
-                continue
-
-            m.action(_('Packing dependency %s for package %s') %
-                    (p.name, self.package.name))
-            packager = DebianPackage(self.config, p, self.store)
-            try:
-                packager.pack(output_dir, self.devel, force, True, tmpdir)
-            except EmptyPackageError:
-                self._empty_packages.append(p.name)
-
-    def _build(self, tarname, tmpdir, debdir, srcdir):
+    def build(self, output_dir, tarname, tmpdir, packagedir, srcdir):
         if tarname:
             tar = tarfile.open(tarname, 'r:bz2')
             tar.extractall(tmpdir)
@@ -237,7 +220,7 @@ class DebianPackage(PackagerBase):
             package_deps = self.store.get_package_deps(self.package.name,
                     recursive=True)
             if package_deps:
-                shlibs_local_path = os.path.join(debdir, 'shlibs.local')
+                shlibs_local_path = os.path.join(packagedir, 'shlibs.local')
                 f = open(shlibs_local_path, 'w')
                 for p in package_deps:
                     package_shlibs_path = os.path.join(tmpdir,
@@ -256,7 +239,7 @@ class DebianPackage(PackagerBase):
         if tarname:
             # copy generated shlibs to tmpdir/$package-shlibs to be used by
             # dependent packages
-            shlibs_path = os.path.join(debdir,
+            shlibs_path = os.path.join(packagedir,
                     self.package_prefix + self.package.name,
                     'DEBIAN', 'shlibs')
             out_shlibs_path = os.path.join(tmpdir,
@@ -266,24 +249,35 @@ class DebianPackage(PackagerBase):
             if os.path.exists(shlibs_path):
                 shutil.copy(shlibs_path, out_shlibs_path)
 
-        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
-        open(stamp_path, 'w').close()
+        # copy the newly created package, which should be in tmpdir
+        # to the output dir
+        paths = []
+        for f in os.listdir(tmpdir):
+            if fnmatch(f, '*.deb'):
+                out_path = os.path.join(output_dir, f)
+                if os.path.exists(out_path):
+                    os.remove(out_path)
+                paths.append(out_path)
+                shutil.move(os.path.join(tmpdir, f), output_dir)
+        return paths
 
-    def _create_debian_tree(self, tmpdir):
-        # create a tmp dir to use as topdir
-        if tmpdir is None:
-            tmpdir = tempfile.mkdtemp()
-        srcdir = os.path.join(tmpdir, self.full_package_name)
-        os.mkdir(srcdir)
-        debdir = os.path.join(srcdir, 'debian')
-        os.mkdir(debdir)
-        os.mkdir(os.path.join(debdir, 'source'))
-        m.action(_('Creating debian package structure at %s for package %s') %
-                (srcdir, self.package.name))
-        return (tmpdir, debdir, srcdir)
+    def _get_requires(self, package_type):
+        devel_suffix = ''
+        if package_type == PackageType.DEVEL:
+            devel_suffix = '-dev'
+        deps = self.get_requires(package_type, devel_suffix)
+        return ', '.join(deps)
 
-    def _write_debian_file(self, debdir, filename, content):
-        path = os.path.join(debdir, filename)
+    def _files_list(self, package_type):
+        # metapackages only have dependencies in other packages
+        if isinstance(self.package, MetaPackage):
+            return ''
+        files = self.files_list(package_type)
+        return '\n'.join([f + ' ' + os.path.join(self.install_dir.lstrip('/'),
+                    os.path.dirname(f)) for f in files])
+
+    def _write_debian_file(self, packagedir, filename, content):
+        path = os.path.join(packagedir, filename)
         with open(path, 'w') as f:
             f.write(content)
         return path
@@ -311,7 +305,7 @@ class DebianPackage(PackagerBase):
                 if self.package.longdesc != 'default' else args['shortdesc']
         requires = self._get_requires(PackageType.RUNTIME)
         args['requires'] = ', ' + requires if requires else ''
-        runtime_files = self.files_list(PackageType.RUNTIME)
+        runtime_files = self._files_list(PackageType.RUNTIME)
         if isinstance(self.package, MetaPackage):
             return CONTROL_TPL % args, runtime_files
         else:
@@ -328,7 +322,7 @@ class DebianPackage(PackagerBase):
         requires = self._get_requires(PackageType.DEVEL)
         args['requires'] = ', ' + requires if requires else ''
         try:
-            devel_files = self.files_list(PackageType.DEVEL)
+            devel_files = self._files_list(PackageType.DEVEL)
         except EmptyPackageError:
             devel_files = ''
         if devel_files:
@@ -355,77 +349,11 @@ class DebianPackage(PackagerBase):
             args['dh_strip'] = ''
         return RULES_TPL % args
 
-    def _pack(self, tmpdir, debdir, srcdir):
-        changelog = self._deb_changelog()
-        compat = COMPAT_TPL
-
-        control, runtime_files = self._deb_control_runtime_and_files()
-
-        if self.devel:
-            control_devel, devel_files = self._deb_control_devel_and_files()
-        else:
-            control_devel, devel_files = '', ''
-
-        self.package.has_devel_package = bool(devel_files)
-
-        copyright = self._deb_copyright()
-
-        rules = self._deb_rules()
-        source_format = SOURCE_FORMAT_TPL
-
-        self._write_debian_file(debdir, 'changelog', changelog)
-        self._write_debian_file(debdir, 'compat', compat)
-        self._write_debian_file(debdir, 'control', control + control_devel)
-        self._write_debian_file(debdir, 'copyright', copyright)
-        rules_path = self._write_debian_file(debdir, 'rules', rules)
-        os.chmod(rules_path, 0755)
-        self._write_debian_file(debdir, os.path.join('source', 'format'),
-                source_format)
-        self._write_debian_file(debdir,
-                self.package_prefix + self.package.name + '.install',
-                runtime_files)
-        if self.devel and devel_files:
-            self._write_debian_file(debdir,
-                    self.package_prefix + self.package.name + '-dev.install',
-                    devel_files)
-
-    def _get_requires(self, package_type):
-        deps = [p.name for p in self.store.get_package_deps(self.package.name)]
-        deps = list(set(deps) - set(self._empty_packages))
-
-        def get_dep_name(package_name):
-            p = self.store.get_package(package_name)
-            package_prefix = ''
-            if self.config.packages_prefix is not None and not p.ignore_package_prefix:
-                package_prefix = '%s-' % self.config.packages_prefix
-            return package_prefix + package_name
-
-        details = {}
-        for x in deps:
-            details[x] = get_dep_name(x)
-
-        if package_type == PackageType.DEVEL:
-            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
-            deps = map(lambda x: details[x] + '-dev', deps)
-        else:
-            deps = map(lambda x: details[x], deps)
-
-        deps.extend(self.package.get_sys_deps())
-        return ', '.join(deps)
-
-    def files_list(self, package_type):
-        # metapackages only have dependencies in other packages
-        if isinstance(self.package, MetaPackage):
-            return ''
-        files = PackagerBase.files_list(self, package_type, self.force)
-        return '\n'.join([f + ' ' + os.path.join(self.install_dir.lstrip('/'),
-                          os.path.dirname(f)) for f in files])
-
 
 class Packager(object):
 
     def __new__(klass, config, package, store):
-        return DebianPackage(config, package, store)
+        return DebianPackager(config, package, store)
 
 
 def register():
