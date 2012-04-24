@@ -6,7 +6,16 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity'}
-    deps = [ 'glib', 'gtk-doc', 'dbus', 'gtk+' ]
+    deps = [ 'glib', 'dbus', 'gtk+' ]
+    platform_deps = {
+            Platform.LINUX: ['gtk-doc'],
+            Platform.DARWIN: ['gtk-doc'],
+            Platform.WINDOWS: ['gtk-doc-windows'],
+    }
+
+    def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            self.configure_options += ' --disable-gtk-doc'
 
     files_bins = ['insanity-compare', 'insanity-dbmerge', 'insanity-dumpresults',
                   'insanity-dumpresults-json', 'insanity-grouper',
