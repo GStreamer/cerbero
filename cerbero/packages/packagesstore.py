@@ -77,24 +77,21 @@ class PackagesStore (object):
         Gets the dependencies of a package
 
         @param package: name of the package or package instance
-        @type package: str or L{cerbero.packages.package.Package}
+        @type package: L{cerbero.packages.package.Package}
         @return: a list with the package dependencies
         @rtype: list
         '''
-        if isinstance(pkg, package.Package):
-            p = pkg
+        if isinstance(pkg, str):
+            pkg = self.get_package(pkg)
+        if isinstance(pkg, package.MetaPackage):
+            ret = self._list_metapackage_deps(pkg)
         else:
-            p = self.get_package(pkg)
-        if isinstance(p, package.MetaPackage):
-            ret = [d.name for d in self._list_metapackage_deps(p)]
-        else:
-            ret = p.deps
+            ret = [self.get_package(x) for x in pkg.deps]
         # get deps recursively
         if recursive:
-            for name in ret:
-                ret += [d.name for d in self.get_package_deps(name, recursive)]
-        ret = sorted(set(ret))
-        return [self.get_package(x) for x in ret]
+            for p in ret:
+                ret.extend(self.get_package_deps(p, recursive))
+        return sorted(list(set(ret)))
 
     def get_package_files_list(self, name):
         '''
