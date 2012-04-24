@@ -159,7 +159,7 @@ class RPMPackager(LinuxPackager):
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
-                'license': ' '.join(self.package.licenses),
+                'license': ' '.join([l.acronym for l in self.package.licenses]),
                 'packager': self.packager,
                 'vendor': self.package.vendor,
                 'url': URL_TPL % self.package.url if self.package.url != 'default' else '',

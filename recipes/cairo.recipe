@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'cairo'
     version = '1.10.2'
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
-    license = 'LGPLv2.1'
+    license = License.LGPLv2_1
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [

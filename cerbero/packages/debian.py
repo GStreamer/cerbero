@@ -89,8 +89,8 @@ License:
 
     %(licenses)s
 
-On Debian systems, the complete text of the license(s) can be found in
-%(licenses_locations)s.
+On Debian systems, the complete text of common license(s) can be found in
+/usr/share/common-licenses/.
 
 '''
 
@@ -333,10 +333,7 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['packager'] = self.packager
         args['datetime'] = self.datetime
-        args['licenses'] = ' '.join(self.package.licenses)
-        args['licenses_locations'] = \
-                ', '.join(['/usr/share/common-licenses/' + l \
-                    for l in self.package.licenses])
+        args['licenses'] = ',\n    '.join([l.pretty_name for l in self.package.licenses])
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):

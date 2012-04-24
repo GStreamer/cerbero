@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.18.1.1'
     srcdir = 'gettext-runtime'
     autoreconf = True
-    license = 'LGPL'
+    license = License.LGPL
 
     files_libs = ['libintl', 'libasprintf']
     files_bins = ['gettext', 'ngettext', 'envsubst']

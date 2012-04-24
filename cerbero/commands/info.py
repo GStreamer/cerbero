@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.commands import Command, register_command
+from cerbero.enums import License
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
@@ -53,7 +54,8 @@ class PackageInfo(Command):
         else:
             p = store.get_package(p_name)
             d = {'name': p.name, 'version': p.version, 'url': p.url,
-                 'licenses': ' '.join(p.licenses), 'desc': p.shortdesc,
+                 'licenses': ' '.join([l.acronym for l in p.licenses]),
+                 'desc': p.shortdesc,
                  'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)])}
             m.message(INFO_TPL % d)
 

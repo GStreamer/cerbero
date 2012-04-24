@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer visualization plugins'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licenses = ['GPL']
+    licenses = [License.GPL]
     vendor = 'GStreamer Project'
     uuid = '3fde61c2-4535-411f-8287-e8f6a892f853'
     deps = ['gstreamer-core']

@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer Clutter support'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licenses = ['LGPL']
+    licenses = [License.LGPL]
     vendor = 'GStreamer Project'
     uuid = '3fde61c2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core', 'gtk+-2.0']

@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libdca'
     version = '0.0.5'
-    license = 'GPL'
+    license = License.GPL
 
     files_libs = ['libdca']
     files_bins = ['extract_dca', 'extract_dcs', 'dcadec', 'dcsdec']

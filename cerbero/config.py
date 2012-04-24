@@ -42,6 +42,7 @@ Platform = enums.Platform
 Architecture = enums.Architecture
 Distro = enums.Distro
 DistroVersion = enums.DistroVersion
+License = enums.License
 
 
 class Config (object):

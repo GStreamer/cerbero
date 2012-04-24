@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.enums import License
 from cerbero.packages import PackageType
 
 
@@ -53,7 +54,7 @@ class PackageBase(object):
     version = 'default'
     org = 'default'
     uuid = None
-    licenses = ['GPL']
+    licenses = [License.GPL]
     vendor = 'default'
     url = 'default'
     ignore_package_prefix = False

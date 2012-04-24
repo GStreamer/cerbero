@@ -21,7 +21,7 @@ import pickle
 import time
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
-        DistroVersion
+        DistroVersion, License
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
@@ -304,6 +304,7 @@ class CookBook (object):
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'BuildType': BuildType, 'SourceType': SourceType,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
+                 'License': License,
                  'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps,
                  'InvalidRecipeError': InvalidRecipeError}
             execfile(filepath, d)

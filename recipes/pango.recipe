@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'pango'
     version = '1.28.4'
     autoreconf = True
-    license = 'LGPLv2.1'
+    license = License.LGPLv2_1
     configure_options = '--with-included-modules '
     deps = ['cairo', 'fontconfig', 'freetype']
 
