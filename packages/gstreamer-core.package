@@ -14,5 +14,6 @@ class Package(package.Package):
     deps = ['base-system']
 
     files = ['gstreamer', 'gst-plugins-base:libs:effects:lang',
-             'gst-plugins-bad:lang', 'gst-plugins-ugly:lang',
-             'gst-plugins-good:lang']
+            'gst-plugins-bad:lang', 'gst-plugins-ugly:lang',
+            'gst-plugins-good:lang',
+            'gstreamer-static', 'gst-plugins-base-static:libs:effects']

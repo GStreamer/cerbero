@@ -19,8 +19,9 @@ class Package(package.Package):
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
-            'gst-plugins-bad:codecs'
-    ]
+            'gst-plugins-bad:codecs',
+            'gst-plugins-base-static:codecs', 'gst-plugins-good-static:codecs',
+            'gst-plugins-bad-static:codecs']
 
     platform_files = {
             Platform.LINUX: ['libdv:libs'],

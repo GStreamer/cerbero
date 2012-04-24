@@ -13,4 +13,5 @@ class Package(package.Package):
     uuid = 'affe67f2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core']
 
-    files = ['gst-plugins-good:effects', 'gst-plugins-bad:effects']
+    files = ['gst-plugins-good:effects', 'gst-plugins-bad:effects',
+            'gst-plugins-good-static:effects', 'gst-plugins-bad-static:effects']

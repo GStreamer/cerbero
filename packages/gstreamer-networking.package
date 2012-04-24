@@ -15,7 +15,8 @@ class Package(package.Package):
 
     files = ['libsoup:libs', 'libmms:libs',
             'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net'
-    ]
+            'gst-plugins-base-static:net', 'gst-plugins-good-static:net',
+            'gst-plugins-bad-static:net']
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or \
