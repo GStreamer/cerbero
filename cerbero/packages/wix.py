@@ -71,6 +71,7 @@ class WixBase():
 
     def _format_path_id(self, path, replace_dots=False):
         ret = self._format_id(os.path.split(path)[1], replace_dots)
+        ret = ret.lower()
         if ret not in self.ids:
             self.ids[ret] = 0
         else:
