@@ -154,12 +154,12 @@ class Package(PackageBase):
         self._parse_files()
 
     def recipes_dependencies(self):
-        files = [x.split(':')[0] for x in self._files]
-        files.extend([x.split(':')[0] for x in self._files_devel])
+        deps = [x.split(':')[0] for x in self._files]
+        deps.extend([x.split(':')[0] for x in self._files_devel])
         for name in self.deps:
             p = self.store.get_package(name)
-            files += p.recipes_dependencies()
-        return files
+            deps += p.recipes_dependencies()
+        return deps
 
     def recipes_licenses(self):
         licenses = []
