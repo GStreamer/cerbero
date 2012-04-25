@@ -15,20 +15,20 @@ class MetaPackage(package.MetaPackage):
     ignore_package_prefix = True
     packages =[
                ('gstreamer-core', True, True),
+               ('gstreamer-system', False, True),
                ('gstreamer-playback', False, True),
                ('gstreamer-codecs', False, True),
                ('gstreamer-effects', False, True),
                ('gstreamer-networking', False, True),
-               ('gstreamer-system', False, True),
+               ('gstreamer-clutter', False, True),
+               ('gstreamer-visualizers', False, True),
+               ('gstreamer-python', False, True),
+               ('gtk+-2.0', False, True),
+               ('gtk+-2.0-python', False, True),
+               ('snappy', False, True),
+               ('gstreamer-codecs-gpl', False, False),
                ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
-               ('gstreamer-clutter', False, False),
-               ('gstreamer-visualizers', False, False),
-               ('gstreamer-codecs-gpl', False, False),
-               ('gstreamer-python', False, False),
-               ('gtk+-2.0', False, False),
-               ('gtk+-2.0-python', False, False),
-               ('snappy', False, False),
                ('gstreamer-tests', False, False),
               ]
     platform_packages = {
