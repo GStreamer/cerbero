@@ -154,7 +154,7 @@ class Recipe(FilesProvider):
 
     def list_deps(self):
         '''
-        List all dependencies including conditional depencies
+        List all dependencies including conditional dependencies
         '''
         deps = []
         deps.extend(self.deps)
