@@ -51,6 +51,10 @@ class StdOut:
         return getattr(self.stream, attr)
 
 
+def _fix_winpath(path):
+    return path.replace('\\', '/')
+
+
 def call(cmd, cmd_dir='.', fail=True):
     '''
     Run a shell command
@@ -124,6 +128,7 @@ def unpack(filepath, output_dir):
     @param output_dir: output directory
     @type output_dir: str
     '''
+    output_dir = _fix_winpath(output_dir)
     logging.info("Unpacking %s in %s" % (filepath, output_dir))
     if filepath.endswith('tar.gz') or filepath.endswith('tar.bz2'):
         tf = tarfile.open(filepath, mode='r:*')
@@ -144,6 +149,7 @@ def download(url, destination=None, recursive=False):
     @param destination: destination where the file will be saved
     @type destination: str
     '''
+    destination = _fix_winpath(destination)
     cmd = "wget %s " % url
     path = None
     if recursive:
@@ -178,6 +184,7 @@ def recursive_download(url, destination):
     Recursive download for servers that don't return a list a url's but only
     the index.html file
     '''
+    destination = _fix_winpath(destination)
     raw_list = check_call('curl %s' % url)
 
     with tempfile.NamedTemporaryFile() as f:
@@ -189,6 +196,7 @@ def recursive_download(url, destination):
 
 
 def ls_files(files, prefix):
+    prefix = _fix_winpath(prefix)
     if files == []:
         return files
     sfiles = check_call('ls %s' % ' '.join(files),
@@ -198,6 +206,7 @@ def ls_files(files, prefix):
 
 
 def find_newer_files(prefix, compfile):
+    prefix = _fix_winpath(prefix)
     sfiles = check_call('find -L * -type f -newer %s' % compfile,
         prefix, True, False, False).split('\n')
     sfiles.remove('')
