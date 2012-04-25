@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'tiff'
     version = '4.0.1'
-    license = 'BSD-like'
+    license = License.BSD_like
     deps = [ 'zlib' ]
 
 

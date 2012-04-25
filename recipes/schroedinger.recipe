@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'schroedinger'
     version = '1.0.11'
-    license = 'LGPLv2'
+    license = License.LGPLv2
 
     files_libs = ['libschroedinger-1.0']
     files_devel = ['include/schroedinger-1.0', 'lib/pkgconfig/schroedinger-1.0.pc']

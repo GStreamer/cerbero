@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.enums import License
 from cerbero.packages import PackageType
 
 
@@ -34,8 +35,8 @@ class PackageBase(object):
     @type version: str
     @cvar uuid: unique id for this package
     @type uuid: str
-    @cvar license:  package license
-    @type license: str
+    @cvar license: package license
+    @type license: License
     @cvar vendor: vendor for this package
     @type vendor: str
     @cvar org: organization for this package (eg: net.foo.bar)
@@ -53,7 +54,7 @@ class PackageBase(object):
     version = 'default'
     org = 'default'
     uuid = None
-    licenses = ['GPL']
+    license = License.GPL
     vendor = 'default'
     url = 'default'
     ignore_package_prefix = False
@@ -159,6 +160,15 @@ class Package(PackageBase):
             p = self.store.get_package(name)
             files += p.recipes_dependencies()
         return files
+
+    def recipes_licenses(self):
+        licenses = []
+        deps = self.recipes_dependencies()
+        for name in deps:
+            r = self.cookbook.get_recipe(name)
+            if r.license:
+                licenses.append(r.license)
+        return licenses
 
     def files_list(self):
         files = []

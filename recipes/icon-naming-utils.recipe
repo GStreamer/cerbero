@@ -3,5 +3,5 @@
 class Recipe(recipe.Recipe):
     name = 'icon-naming-utils'
     version = '0.8.7'
-    license = 'GPL'
+    license = License.GPL
     deps = ['XML-Simple']

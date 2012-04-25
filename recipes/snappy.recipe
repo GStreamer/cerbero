@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'snappy'
     version = '0.2+git'
-    license = 'GPLv2'
+    license = License.GPLv2
     config_sh = 'autoreconf -fiv && sh ./configure'
     deps = ['glib', 'gstreamer', 'gst-plugins-base', 'clutter', 'clutter-gst']
     platform_deps = { Platform.LINUX: ['libXtst'] }

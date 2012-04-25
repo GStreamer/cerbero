@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'gtk+'
     version = '2.24.10'
-    license = 'LGPLv2'
+    license = License.LGPLv2
     configure_options = '--with-included-immodules '
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
 

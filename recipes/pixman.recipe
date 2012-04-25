@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'pixman'
     version = '0.24.4'
-    license = 'MIT'
+    license = License.MIT
 
     files_libs = ['libpixman-1']
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']

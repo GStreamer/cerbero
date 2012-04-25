@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libexif'
     version = '0.6.20'
-    license = 'LGPLv2.1'
+    license = License.LGPLv2_1
 
     files_libs = ['libexif']
     files_devel = ['include/libexif', 'lib/pkgconfig/libexif.pc']

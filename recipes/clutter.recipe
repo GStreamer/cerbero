@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     configure_options = "--disable-introspection "
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True
-    license = 'LGPLv2.1'
+    license = License.LGPLv2_1
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',

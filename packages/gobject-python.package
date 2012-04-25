@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GLib/GObject python bingings'
     url = "http://www.gstreamer.com"
     version = '1.0'
-    licenses = ['LGPL']
+    license = License.LGPL
     uuid = '58fe67c2-4565-431f-8287-e8fba892f853'
     vendor = 'GStreamer Project'
     deps = ['base-system']

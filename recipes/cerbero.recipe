@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'cerbero'
     version = '0.1.0'
     commit = 'origin/master'
-    license = 'LGPL'
+    license = License.LGPL
     make_install = 'make install PREFIX=$CERBERO_PREFIX'
 
     files_bins = ['cerbero']
