@@ -82,6 +82,10 @@ def to_winepath(path):
         return path
 
 
+def fix_winpath(path):
+    return path.replace('\\', '/')
+
+
 def system_info():
     '''
     Get the sysem information.

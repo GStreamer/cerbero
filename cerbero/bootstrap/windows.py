@@ -22,7 +22,7 @@ import tempfile
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Architecture, Distro, Platform
-from cerbero.utils import shell, _
+from cerbero.utils import shell, _, fix_winpath
 from cerbero.utils import messages as m
 
 # Toolchain
@@ -90,7 +90,7 @@ class WindowsBootstraper(BootstraperBase):
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
         shell.download(PTHREADS_URL, pthreadszip)
-        temp = tempfile.mkdtemp()
+        temp = fix_winpath(tempfile.mkdtemp())
         # real pthreads stuff is in a zip file inside the previous zip file
         # under mingwxx/pthreads-xx.zip
         shell.unpack(pthreadszip, temp)
@@ -99,7 +99,7 @@ class WindowsBootstraper(BootstraperBase):
 
     def install_python_sdk(self):
         m.action(_("Installing Python headers"))
-        temp = tempfile.mkdtemp()
+        temp = fix_winpath(tempfile.mkdtemp())
         shell.call("git clone %s" % os.path.join(self.config.git_root,
                                                  'windows-external-sdk'),
                    temp)
@@ -123,7 +123,7 @@ class WindowsBootstraper(BootstraperBase):
         # pkg-config can't be installed otherwise because it depends
         # on glib and glib depends on pkg-config
         for url in WINDOWS_BIN_DEPS:
-            temp = tempfile.mkdtemp()
+            temp = fix_winpath(tempfile.mkdtemp())
             path = os.path.join(temp, 'download.zip')
             shell.download(GNOME_FTP + url, path)
             shell.unpack(path, self.config.toolchain_prefix)
@@ -134,7 +134,7 @@ class WindowsBootstraper(BootstraperBase):
                           {'/opt/perl/bin/perl': '/bin/perl'})
         return
         # install svn (skipped as it's not needed anymore for now)
-        temp = tempfile.mkdtemp()
+        temp = fix_winpath(tempfile.mkdtemp())
         path = os.path.join(temp, 'download.zip')
         shell.download(SVN, path)
         shell.unpack(path, temp)
