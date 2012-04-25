@@ -139,7 +139,8 @@ class MSIPackager(PackagerBase):
 
 
         wixobjs = [os.path.join(self.output_dir, "%s.wixobj" % self.package.name)]
-        wixobjs.append(os.path.join(self.output_dir, "ui.wixobj"))
+        #FIXME: Don't use our custom UI yet
+        #wixobjs.append(os.path.join(self.output_dir, "ui.wixobj"))
 
         if self._with_wine:
             wixobjs = [to_winepath(x) for x in wixobjs]

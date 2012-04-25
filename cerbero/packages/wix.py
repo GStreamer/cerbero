@@ -274,11 +274,11 @@ class MSI(WixBase):
     def _add_install_dir(self):
         tdir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
         # FIXME: Add a way to install to ProgramFilesFolder
-        rootdir = self._add_dir(tdir, 'ROOTINSTALLDIR',
+        installdir = self._add_dir(tdir, 'INSTALLDIR',
                 self.package.get_install_dir())
-        versiondir = self._add_dir(rootdir, "Version", self.package.version)
+        versiondir = self._add_dir(installdir, "Version", self.package.version)
         archdir = self._add_dir(versiondir, 'Architecture', self.config.target_arch)
-        self.installdir = self._add_dir(archdir, 'INSTALLDIR', '.')
+        self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
 
     def _package_id(self, package_name):
         return self._format_id(package_name)
