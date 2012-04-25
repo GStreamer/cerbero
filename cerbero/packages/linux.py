@@ -134,6 +134,15 @@ class LinuxPackager(PackagerBase):
         deps.extend(self.package.get_sys_deps())
         return deps
 
+    def recipes_licenses(self):
+        licenses = []
+        recipes_licenses = self.package.recipes_licenses()
+        recipes_licenses.update(self.package.devel_recipes_licenses())
+        for recipe_name, categories_licenses in recipes_licenses.iteritems():
+            for category_licenses in categories_licenses.itervalues():
+                licenses.extend(category_licenses)
+        return sorted(list(set(licenses)))
+
     def files_list(self, package_type):
         if isinstance(self.package, MetaPackage):
             return ''

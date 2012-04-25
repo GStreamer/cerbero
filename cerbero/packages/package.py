@@ -162,12 +162,19 @@ class Package(PackageBase):
         return deps
 
     def recipes_licenses(self):
-        licenses = []
-        deps = self.recipes_dependencies()
-        for name in deps:
-            r = self.cookbook.get_recipe(name)
-            if r.license:
-                licenses.append(r.license)
+        return self._list_licenses(self._recipes_files)
+
+    def devel_recipes_licenses(self):
+        licenses = self._list_licenses(self._recipes_files_devel)
+        for recipe_name, categories in self._recipes_files.iteritems():
+            # also add development licenses for recipe from which used the 'libs'
+            # category
+            if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
+                r = self.cookbook.get_recipe(recipe_name)
+                if recipe_name in licenses:
+                    licenses[recipe_name].update(r.list_licenses_by_categories(categories))
+                else:
+                    licenses[recipe_name] = r.list_licenses_by_categories(categories)
         return licenses
 
     def files_list(self):
@@ -208,6 +215,17 @@ class Package(PackageBase):
         for r in self._files_devel:
             l = r.split(':')
             self._recipes_files_devel[l[0]] = l[1:]
+
+    def _list_licenses(self, recipes_files):
+        licenses = {}
+        for recipe_name, categories in recipes_files.iteritems():
+            r = self.cookbook.get_recipe(recipe_name)
+            # Package.files|files_devel|platform_files|platform_files_devel = [recipe:category]
+            #  => licenses = {recipe_name: {category: category_licenses}}
+            # Package.files|files_devel|platform_files|platform_files_devel = [recipe]
+            #  => licenses = {recipe_name: {None: recipe_licenses}}
+            licenses[recipe_name] = r.list_licenses_by_categories(categories)
+        return licenses
 
 
 class MetaPackage(PackageBase):

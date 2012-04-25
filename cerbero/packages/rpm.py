@@ -154,7 +154,8 @@ class RPMPackager(LinuxPackager):
 
         licenses = [self.package.license]
         if not isinstance(self.package, MetaPackage):
-            licenses.extend(self.package.recipes_licenses())
+            licenses.extend(self.recipes_licenses())
+            licenses = sorted(list(set(licenses)))
 
         self._spec_str = template % {
                 'name': self.package.name,
