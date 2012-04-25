@@ -162,6 +162,30 @@ class Recipe(FilesProvider):
             deps.extend(self.platform_deps[self.config.target_platform])
         return deps
 
+    def list_licenses_by_categories(self, categories):
+        licenses = {}
+        for c in categories:
+            if c in licenses:
+                raise Exception('multiple licenses for the same category %s defined' % c)
+
+            if not c:
+                # FIXME - make license mandatory
+                if self.license:
+                    licenses[None] = [self.license]
+                continue
+
+            attr = 'files_' + c + '_licenses'
+            platform_attr = 'platform_files_' + c + '_licenses'
+            if hasattr(self, attr):
+                licenses[c] = getattr(self, attr)
+            elif hasattr(self, platform_attr):
+                licenses[c] = getattr(self, platform_attr).get(self.platform, [])
+            else:
+                # FIXME - make license mandatory
+                if self.license:
+                    licenses[c] = [self.license]
+        return licenses
+
     def gen_library_file(self, output_dir=None):
         '''
         Generates library files (.lib) for the dll's provided by this recipe
