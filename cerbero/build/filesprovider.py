@@ -25,7 +25,8 @@ from cerbero.utils import shell
 
 class FilesProvider(object):
     '''
-    List files by categories using class attributes named file_$category
+    List files by categories using class attributes named files_$category and
+    platform_files_$category
     '''
 
     LIBS_CAT = 'libs'
