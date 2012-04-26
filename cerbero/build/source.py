@@ -44,7 +44,7 @@ class Source (object):
         '''
         Extracts the sources
         '''
-        raise NotImplemented("'extrat' must be implemented by subclasses")
+        raise NotImplemented("'extract' must be implemented by subclasses")
 
 
 class CustomSource (Source):
