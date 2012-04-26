@@ -215,3 +215,12 @@ def replace(filepath, replacements):
 
 def find_files(pattern, prefix):
     return glob.glob(os.path.join(prefix, pattern))
+
+def prompt(message, options=[]):
+    ''' Prompts the user for input with the message and options '''
+    if len(options) != 0:
+        message = "%s [%s]" % (message, '/'.join(options))
+    res = raw_input(message)
+    while res not in [str(x) for x in options]:
+        res = raw_input(message)
+    return res
