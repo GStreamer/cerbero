@@ -32,8 +32,11 @@ def datafiles(prefix):
     for dirname, extension in [('recipes', '.recipe'), ('packages', '.package')]:
         for f in parse_dir(dirname, extension):
             files.append((os.path.join(datadir, dirname), [f]))
-    for dirname in ['data', 'config']:
-        for f in parse_dir('data'):
+    for dirname in ['config']:
+        for f in parse_dir(dirname):
+            files.append((os.path.join(datadir, dirname), [f]))
+    for dirname in ['data']:
+        for f in parse_dir(dirname):
             dirpath = os.path.split(f.split('/', 1)[1])[0]
             files.append((os.path.join(datadir, dirpath), [f]))
     return files
