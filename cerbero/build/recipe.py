@@ -82,8 +82,8 @@ class Recipe(FilesProvider):
 
     @cvar name: name of the module
     @type name: str
-    @cvar license: recipe license
-    @type license: License
+    @cvar licenses: recipe licenses
+    @type licenses: Licenses
     @cvar version: version of the module
     @type version: str
     @cvar sources: url of the sources
@@ -101,7 +101,7 @@ class Recipe(FilesProvider):
     __metaclass__ = MetaRecipe
 
     name = None
-    license = None
+    licenses = []
     version = None
     package_name = None
     sources = None
@@ -169,9 +169,7 @@ class Recipe(FilesProvider):
                 raise Exception('multiple licenses for the same category %s defined' % c)
 
             if not c:
-                # FIXME - make license mandatory
-                if self.license:
-                    licenses[None] = [self.license]
+                licenses[None] = self.licenses
                 continue
 
             attr = 'files_' + c + '_licenses'
@@ -181,9 +179,7 @@ class Recipe(FilesProvider):
             elif hasattr(self, platform_attr):
                 licenses[c] = getattr(self, platform_attr).get(self.platform, [])
             else:
-                # FIXME - make license mandatory
-                if self.license:
-                    licenses[c] = [self.license]
+                licenses[c] = self.licenses
         return licenses
 
     def gen_library_file(self, output_dir=None):
