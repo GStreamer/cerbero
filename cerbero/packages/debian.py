@@ -34,7 +34,7 @@ from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
 CHANGELOG_TPL = \
-'''%(p_prefix)s%(name)s (%(version)s-0) unstable; urgency=low
+'''%(p_prefix)s%(name)s (%(version)s-1) unstable; urgency=low
 
   * Release %(version)s
   %(changelog_url)s
