@@ -85,7 +85,7 @@ class MakefilesBase (Build):
     make_check = None
     make_clean = 'make clean'
     use_system_libs = False
-    allow_parallel_build = False
+    allow_parallel_build = True
     srcdir = '.'
 
     def __init__(self):
