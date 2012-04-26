@@ -28,6 +28,8 @@ class MetaPackage(package.MetaPackage):
                ('gtk+-2.0-python', False, True),
                ('snappy', False, True),
                ('gstreamer-codecs-gpl', False, False),
+               ('gstreamer-codecs-restricted', False, False),
+               ('gstreamer-networking-restricted', False, False),
                ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
                ('gstreamer-tests', False, False),

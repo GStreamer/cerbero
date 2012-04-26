@@ -4,20 +4,18 @@
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-ugly'
     version = '0.10.19'
-    # FIXME - set licenses
-    licenses = []
+    licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
 
-    files_codecs = [
+    files_codecs_restricted = [
              'lib/gstreamer-0.10/libgsta52dec%(mext)s',
              'lib/gstreamer-0.10/libgstamrnb%(mext)s',
              'lib/gstreamer-0.10/libgstamrwbdec%(mext)s',
              'lib/gstreamer-0.10/libgstasf%(mext)s',
-             'lib/gstreamer-0.10/libgstdvdsub%(mext)s',
              'lib/gstreamer-0.10/libgstmad%(mext)s',
              'lib/gstreamer-0.10/libgstmpeg2dec%(mext)s',
              'lib/gstreamer-0.10/libgstmpegaudioparse%(mext)s',

@@ -14,8 +14,11 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libdvdnav:libs', 'libdvdread:libs',
-            'gst-plugins-good:dvd', 'gst-plugins-ugly:dvd',
+            'gst-plugins-base:dvd',
+            'gst-plugins-good:dvd',
+            'gst-plugins-ugly:dvd',
             'gst-plugins-bad:dvd']
-    files_devel = ['gst-plugins-good-static:dvd_devel',
+    files_devel = ['gst-plugins-base-static:dvd_devel'
+            'gst-plugins-good-static:dvd_devel',
             'gst-plugins-ugly-static:dvd_devel',
             'gst-plugins-bad-static:dvd_devel']

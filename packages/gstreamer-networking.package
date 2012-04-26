@@ -13,10 +13,11 @@ class Package(package.Package):
     uuid = '2ffe6732-4565-411f-8281-e8f1a892f853'
     deps = ['gstreamer-core']
 
-    files = ['libsoup:libs', 'libmms:libs',
-            'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-bad:net']
+    files = ['libsoup:libs',
+            'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-ugly:net', 'gst-plugins-bad:net']
     files_devel = ['gst-plugins-base-static:net_devel',
             'gst-plugins-good-static:net_devel',
+            'gst-plugins-ugly-static:net_devel',
             'gst-plugins-bad-static:net_devel']
 
     def prepare(self):

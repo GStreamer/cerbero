@@ -14,7 +14,8 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libvisual', 'gst-plugins-base:vis', 'gst-plugins-good:vis',
-            'gst-plugins-bad:vis']
+             'gst-plugins-ugly:vis', 'gst-plugins-bad:vis']
     files_devel = ['gst-plugins-base-static:vis_devel',
             'gst-plugins-good-static:vis_devel',
+            'gst-plugins-ugly-static:vis_devel',
             'gst-plugins-bad-static:vis_devel']

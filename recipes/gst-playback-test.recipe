@@ -3,7 +3,6 @@
 class Recipe(recipe.Recipe):
     name = 'gst-playback-test'
     version = '0.0.1'
-    # TODO: check license - source files are LGPLv2+ and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh autogen.sh'
     remotes = {'upstream': 'git://git.collabora.co.uk/git/user/slomo/gst-playback-test.git'}

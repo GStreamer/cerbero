@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-good-0.10']
 
-    files_playback = [
+    files_core = [
              'lib/gstreamer-0.10/libgstautodetect%(mext)s',
              'lib/gstreamer-0.10/libgstvideofilter%(mext)s',
     ]

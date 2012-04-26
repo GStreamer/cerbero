@@ -14,7 +14,10 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['gst-plugins-base:playback',
-            'gst-plugins-good:playback', 'gst-plugins-bad:playback']
-    files_devel = ['gst-plugins-good-static:playback_devel',
-            'gst-plugins-bad-static:playback_devel']
-    platform_files = {Platform.LINUX: ['cdparanoia:libs']}
+             'gst-plugins-good:playback',
+             'gst-plugins-ugly:playback',
+             'gst-plugins-bad:playback']
+    files_devel = ['gst-plugins-base-static:playback_devel',
+                   'gst-plugins-good-static:playback_devel',
+                   'gst-plugins-ugly-static:playback_devel',
+                   'gst-plugins-bad-static:playback_devel']

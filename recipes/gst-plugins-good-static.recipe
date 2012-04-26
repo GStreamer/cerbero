@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True
 
-    files_playback_devel = [
+    files_core_devel = [
              'lib/gstreamer-0.10/libgstautodetect%(smext)s',
              'lib/gstreamer-0.10/libgstvideofilter%(smext)s',
     ]
@@ -119,7 +119,7 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_playback_devel = [static_prefix + f for f in self.files_playback_devel]
+        self.files_core_devel = [static_prefix + f for f in self.files_core_devel]
         self.files_effects_devel = [static_prefix + f for f in self.files_effects_devel]
         self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
         self.files_net_devel = [static_prefix + f for f in self.files_net_devel]
