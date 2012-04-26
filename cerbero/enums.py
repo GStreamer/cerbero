@@ -78,6 +78,8 @@ class License:
             'BSD License')
     BSD_like = LicenseDescription('BSD-like',
             'BSD-like License')
+    CC_BY_SA = LicenseDescription('CC-BY-SA',
+            'Creative Commons Attribution-ShareAlike')
     FreeType = LicenseDescription('FreeType',
             'FreeType License')
     Jasperv2 = LicenseDescription('Jasper-2.0',
