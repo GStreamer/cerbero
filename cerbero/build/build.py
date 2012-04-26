@@ -194,7 +194,7 @@ class Autotools (MakefilesBase):
             # need to pass things like am_cv_python_platform in lowercase for
             # configure and autogen.sh
             for k, v in os.environ.iteritems():
-                if k.islower():
+                if k[2:6] == '_cv_':
                     self.configure_tpl += ' %s="%s"' % (k, v)
 
         if self.add_host_build_target:
