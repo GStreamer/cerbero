@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libiconv'
     version = '1.14'
     deps = ['gettext']
+    configure_options = '--disable-nls'
 
     files_bins = ['iconv', ]
     files_libs = ['libiconv', 'libcharset', ]
