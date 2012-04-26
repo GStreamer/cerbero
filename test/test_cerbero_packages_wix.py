@@ -54,8 +54,8 @@ MERGE_MODULE = '''\
 	<Module Id="_gstreamer_test" Language="1033" Version="1.0">
 		<Package Comments="test" Description="GStreamer Test" Id="1" Manufacturer="GStreamer Project"/>
 		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Component Guid="1" Id="_README">
-				<File Id="_README_1" Name="README" Source="z:\\\\\\test\\\\README"/>
+			<Component Guid="1" Id="_readme">
+				<File Id="_readme_1" Name="README" Source="z:\\\\\\test\\\\README"/>
 			</Component>
 			<Directory Id="_bin" Name="bin">
 				<Component Guid="1" Id="_test.exe">
@@ -172,7 +172,17 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule.fill()
         tmp = StringIO.StringIO()
         self.mergemodule.write(tmp)
+        #self._compstr(tmp.getvalue(), MERGE_MODULE)
         self.assertEquals(MERGE_MODULE, tmp.getvalue())
+
+    def _compstr(self, str1, str2):
+        str1 = str1.split('\n')
+        str2 = str2.split('\n')
+        for i in range(len(str1)):
+            if str1[i] != str2[i]:
+                print str1[i]
+                print str2[i]
+                print ""
 
 
 class InstallerTest(unittest.TestCase):
