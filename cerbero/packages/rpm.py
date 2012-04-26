@@ -279,3 +279,4 @@ def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
     register_packager(Distro.REDHAT, Packager)
+    register_packager(Distro.SUSE, Packager)
