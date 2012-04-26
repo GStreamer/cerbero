@@ -34,8 +34,6 @@ DEFAULT_WIX_PREFIX = 'C:\\\\Program Files\\Windows Installer XML v3.5\\bin\\'
 DEFAULT_ALLOW_PARALLEL_BUILD = False
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
-#FIXME change it with autotools
-DATA_DIR = os.path.join(os.path.dirname(__file__), '..',  'data')
 
 
 Platform = enums.Platform
@@ -223,7 +221,6 @@ class Config (object):
                 os.path.join(cerbero_home, 'sources', 'local'))
 
     def load_defaults(self):
-        cerbero_home = os.path.expanduser('~/cerbero')
         self.set_property('cache_file', None)
         self.set_property('prefix', None)
         self.set_property('sources', None)
@@ -249,18 +246,10 @@ class Config (object):
         self.set_property('py_prefix', 'lib/python%s.%s' %
                 (sys.version_info[0], sys.version_info[1]))
         self.set_property('lib_suffix', '')
-        if not self.uninstalled:
-            self.set_property('recipes_dir',
-                              os.path.join(cerbero_home, 'recipes'))
-            self.set_property('packages_dir',
-                              os.path.join(cerbero_home, 'packages'))
-            self.set_property('data_dir', DATA_DIR)
-            self.set_property('environ_dir', os.path.join(CONFIG_DIR))
-        else:
-            self.set_property('data_dir', self._relative_path('data'))
-            self.set_property('environ_dir', self._relative_path('config'))
-            self.set_property('recipes_dir', self._relative_path('recipes'))
-            self.set_property('packages_dir', self._relative_path('packages'))
+        self.set_property('data_dir', self._find_data_dir())
+        self.set_property('environ_dir', self._relative_path('config'))
+        self.set_property('recipes_dir', self._relative_path('recipes'))
+        self.set_property('packages_dir', self._relative_path('packages'))
         self.set_property('allow_system_libs', True)
         self.set_property('use_configure_cache', False)
 
@@ -275,6 +264,25 @@ class Config (object):
         if force or getattr(self, name) is None:
             setattr(self, name, value)
 
+    def _find_data_dir(self):
+        if self.uninstalled:
+            self.data_dir = os.path.join(os.path.dirname(__file__),
+                                         '..', 'data')
+            return
+        curdir = os.path.dirname(__file__)
+        while not os.path.exists(os.path.join(curdir, 'share', 'cerbero',
+                'config')):
+            curdir = os.path.abspath(os.path.join(curdir, '..'))
+            if curdir == '/' or curdir[1:] == ':/':
+                # We reached the root without finding the data dir, which
+                # shouldn't happen
+                raise FatalError("Data dir not found")
+        self.data_dir = os.path.join(curdir, 'share', 'cerbero')
+
+
     def _relative_path(self, path):
-        p = os.path.join(os.path.dirname(__file__), '..', path)
+        if not self.uninstalled:
+            p = os.path.join(self.data_dir, path)
+        else:
+            p = os.path.join(os.path.dirname(__file__), '..', path)
         return os.path.abspath(p)
