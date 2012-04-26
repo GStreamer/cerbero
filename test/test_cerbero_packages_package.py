@@ -64,7 +64,6 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(self.win32package._recipes_files['recipe5'], ['libs'])
 
     def testListRecipesDeps(self):
-        print self.win32package.recipes_dependencies()
         self.assertEquals(self.win32package.recipes_dependencies(),
                           ['recipe1', 'recipe5', 'recipe2'])
         self.assertEquals(self.linuxpackage.recipes_dependencies(),
