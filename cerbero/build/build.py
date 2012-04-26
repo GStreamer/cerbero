@@ -228,8 +228,9 @@ class CMake (MakefilesBase):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DCMAKE_C_COMPILER=$CC '\
                                       ' -DCMAKE_CXX_COMPILER=$CXX '\
-                                      ' -G\\"Unix Makefiles\\"'\
                                       ' -DCMAKE_SYSTEM_NAME=Windows '
+        if self.config.platform == Platform.WINDOWS:
+            self.configure_options += ' -G\\"Unix Makefiles\\"'
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
 
 
