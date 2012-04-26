@@ -20,7 +20,7 @@ import unittest
 import os
 
 from cerbero.build import recipe
-from cerbero.config import Platform
+from cerbero.config import Platform, License
 from test.test_common import DummyConfig
 
 
@@ -48,9 +48,16 @@ class RecipeTest(recipe.Recipe):
 
     name = 'recipe'
     version = '0.0.0'
+    licenses = [License.LGPL]
     deps = ['dep1', 'dep2']
     platform_deps = {Platform.LINUX: ['dep3'], Platform.WINDOWS: ['dep4']}
     post_install = lambda x: 'CODEPASS'
+
+    files_libs = ['librecipe-test']
+    files_bins = ['recipe-test']
+    files_bins_licenses = [License.GPL]
+    platform_files_test = {Platform.LINUX: ['test1']}
+    platform_files_test_licenses = {Platform.LINUX: [License.BSD]}
 
 
 class TestReceiptMetaClass(unittest.TestCase):
@@ -113,3 +120,28 @@ class TestReceipt(unittest.TestCase):
         self.assertTrue(recipe.BuildSteps.FETCH not in self.recipe._steps)
         r = RecipeTest(self.config)
         self.assertTrue(recipe.BuildSteps.FETCH in r._steps)
+
+
+class TestLicenses(unittest.TestCase):
+
+    def setUp(self):
+        self.config = DummyConfig()
+        self.config.local_sources = ''
+        self.config.sources = ''
+        self.recipe = RecipeTest(self.config)
+
+    def testLicenses(self):
+        self.assertEquals(self.recipe.licenses, [License.LGPL])
+
+        licenses_libs = self.recipe.list_licenses_by_categories(['libs'])
+        self.assertEquals(licenses_libs['libs'], [License.LGPL])
+        self.assertEquals(licenses_libs.values(), [[License.LGPL]])
+        licenses_bins = self.recipe.list_licenses_by_categories(['bins'])
+        self.assertEquals(licenses_bins['bins'], [License.GPL])
+        self.assertEquals(licenses_bins.values(), [[License.GPL]])
+
+        self.recipe.platform = Platform.LINUX
+        self.recipe.config.target_platform = Platform.LINUX
+        licenses_test = self.recipe.list_licenses_by_categories(['test'])
+        self.assertEquals(licenses_test['test'], [License.BSD])
+        self.assertEquals(licenses_test.values(), [[License.BSD]])
