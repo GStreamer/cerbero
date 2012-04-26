@@ -158,7 +158,7 @@ class Config (object):
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
                'DYLD_FALLBACK_LIBRARY_PATH': libdir,
-               'PATH': self._join_path(os.environ.get('PATH', ''), bindir),
+               'PATH': self._join_path(bindir, os.environ.get('PATH', '')),
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
                'PKG_CONFIG_PATH': '%s' % pkgconfigdatadir,
