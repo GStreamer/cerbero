@@ -125,7 +125,8 @@ class FilesProvider(object):
         for attr in dir(self):
             if attr.startswith('files_') and attr.endswith('_' + category):
                 files.extend(getattr(self, attr))
-            if attr.startswith('platform_files_') and attr.endswith('_' + category):
+            if attr.startswith('platform_files_') and \
+                    attr.endswith('_' + category):
                 files.extend(getattr(self, attr).get(self.platform, []))
         return files
 
@@ -207,8 +208,9 @@ class FilesProvider(object):
             pyfiles.append(f)
             if f.endswith('.py'):
                 for e in ['o', 'c']:
-                    if os.path.exists(os.path.join(self.config.prefix, f+e)):
-                        pyfiles.append(f+e)
+                    fe = f + e
+                    if os.path.exists(os.path.join(self.config.prefix, fe)):
+                        pyfiles.append(fe)
         return pyfiles
 
     def _search_langfiles(self, files):

@@ -20,14 +20,12 @@ import os
 import shutil
 import tempfile
 
-from cerbero.config import Architecture, DEFAULT_PACKAGER
+from cerbero.config import Architecture
 from cerbero.errors import FatalError, EmptyPackageError
-from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.disttarball import DistTarball
+from cerbero.packages import PackageType
 from cerbero.packages.linux import LinuxPackager
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
-from cerbero.utils import messages as m
 
 
 SPEC_TPL = '''
@@ -116,6 +114,7 @@ REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
 URL_TPL = 'URL: %s\n'
 
+
 class RPMPackager(LinuxPackager):
 
     def __init__(self, config, package, store):
@@ -138,7 +137,7 @@ class RPMPackager(LinuxPackager):
 
     def prepare(self, tarname, tmpdir, packagedir, srcdir):
         requires = self._get_requires(PackageType.RUNTIME)
-        runtime_files  = self._files_list(PackageType.RUNTIME)
+        runtime_files = self._files_list(PackageType.RUNTIME)
 
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()
@@ -163,11 +162,13 @@ class RPMPackager(LinuxPackager):
                 'version': self.package.version,
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
-                'description': self.package.longdesc if self.package.longdesc != 'default' else self.package.shortdesc,
+                'description': self.package.longdesc != 'default' and \
+                        self.package.longdesc and self.package.shortdesc,
                 'licenses': ' and '.join([l.acronym for l in licenses]),
                 'packager': self.packager,
                 'vendor': self.package.vendor,
-                'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
+                'url': URL_TPL % self.package.url if \
+                        self.package.url != 'default' else '',
                 'requires': requires,
                 'prefix': self.install_dir,
                 'source': tarname,
@@ -212,17 +213,17 @@ class RPMPackager(LinuxPackager):
             return ''
         files = self.files_list(package_type)
         for f in [x for x in files if x.endswith('.py')]:
-            if f+'c' not in files:
-                files.append(f+'c')
-            if f+'o' not in files:
-                files.append(f+'o')
+            if f + 'c' not in files:
+                files.append(f + 'c')
+            if f + 'o' not in files:
+                files.append(f + 'o')
         return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
 
     def _devel_package_and_files(self):
         args = {}
         args['summary'] = 'Development files for %s' % self.package.name
         args['description'] = args['summary']
-        args['requires'] =  self._get_requires(PackageType.DEVEL)
+        args['requires'] = self._get_requires(PackageType.DEVEL)
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
         try:

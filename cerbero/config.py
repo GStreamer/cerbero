@@ -87,7 +87,6 @@ class Config (object):
             else:
                 raise ConfigurationError(_("Configuration file %s doesn't "
                                            "exsits") % filename)
-
         # Next, load the platform configuration
         self._load_platform_config()
 
@@ -179,7 +178,8 @@ class Config (object):
 
         if self.platform == Platform.WINDOWS:
             # for pkg-config installed with the toolchain
-            env['ACLOCAL_FLAGS'] += ' -I %s/share/aclocal' % self.toolchain_prefix
+            env['ACLOCAL_FLAGS'] += ' -I %s/share/aclocal' % \
+                    self.toolchain_prefix
             env['ACLOCAL'] = '%s %s' % (aclocal, env['ACLOCAL_FLAGS'])
 
         # set all the variables
@@ -266,7 +266,8 @@ class Config (object):
 
     def validate_properties(self):
         if not validate_packager(self.packager):
-            raise FatalError(_('packager "%s" must be in the format "Name <email>"') % self.packager)
+            raise FatalError(_('packager "%s" must be in the format '
+                               '"Name <email>"') % self.packager)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:

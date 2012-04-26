@@ -18,16 +18,15 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import shutil
-import tempfile
 
-from cerbero.config import Architecture, DEFAULT_PACKAGER
-from cerbero.errors import FatalError, EmptyPackageError
+from cerbero.config import DEFAULT_PACKAGER
+from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.disttarball import DistTarball
 from cerbero.packages.package import MetaPackage
-from cerbero.utils import shell, _
+from cerbero.utils import _
 from cerbero.utils import messages as m
+
 
 class LinuxPackager(PackagerBase):
 
@@ -41,7 +40,8 @@ class LinuxPackager(PackagerBase):
                 self.package.name, self.package.version)
         self.packager = self.config.packager
         if self.packager == DEFAULT_PACKAGER:
-            m.warning(_('No packager defined, using default packager "%s"') % self.packager)
+            m.warning(_('No packager defined, using default '
+                        'packager "%s"') % self.packager)
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -65,7 +65,8 @@ class LinuxPackager(PackagerBase):
                     split=False, package_prefix=self.full_package_name)[0]
             tarname = self.setup_source(tarball, tmpdir, packagedir, srcdir)
         else:
-            # metapackages only contains Requires dependencies with other packages
+            # metapackages only contains Requires dependencies with
+            # other packages
             tarname = None
 
         m.action(_('Creating package for %s') % self.package.name)
@@ -94,7 +95,8 @@ class LinuxPackager(PackagerBase):
                 # already built, skipping
                 continue
 
-            m.action(_('Packing dependency %s for package %s') % (p.name, self.package.name))
+            m.action(_('Packing dependency %s for package %s') %
+                     (p.name, self.package.name))
             packager = self.__class__(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, True, tmpdir)
@@ -117,7 +119,8 @@ class LinuxPackager(PackagerBase):
         def get_dep_name(package_name):
             p = self.store.get_package(package_name)
             package_prefix = ''
-            if self.config.packages_prefix is not None and not p.ignore_package_prefix:
+            if self.config.packages_prefix is not None \
+                    and not p.ignore_package_prefix:
                 package_prefix = '%s-' % self.config.packages_prefix
             return package_prefix + package_name
 
@@ -126,7 +129,8 @@ class LinuxPackager(PackagerBase):
             details[x] = get_dep_name(x)
 
         if package_type == PackageType.DEVEL:
-            deps = [x for x in deps if self.store.get_package(x).has_devel_package]
+            deps = [x for x in deps if
+                    self.store.get_package(x).has_devel_package]
             deps = map(lambda x: details[x] + devel_suffix, deps)
         else:
             deps = map(lambda x: details[x], deps)

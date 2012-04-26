@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.commands import Command, register_command
-from cerbero.enums import License
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
@@ -58,14 +57,16 @@ class PackageInfo(Command):
             if not isinstance(p, MetaPackage):
                 recipes_licenses = p.recipes_licenses()
                 recipes_licenses.update(p.devel_recipes_licenses())
-                for recipe_name, categories_licenses in recipes_licenses.iteritems():
+                for recipe_name, categories_licenses in \
+                        recipes_licenses.iteritems():
                     for category_licenses in categories_licenses.itervalues():
                         licenses.extend(category_licenses)
             licenses = sorted(list(set(licenses)))
             d = {'name': p.name, 'version': p.version, 'url': p.url,
                  'licenses': ' and '.join([l.acronym for l in licenses]),
                  'desc': p.shortdesc,
-                 'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)])}
+                 'deps': ', '.join([p.name for p in
+                                    store.get_package_deps(p_name, True)])}
             m.message(INFO_TPL % d)
 
 register_command(PackageInfo)

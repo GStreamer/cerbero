@@ -32,7 +32,8 @@ MINGW_SYSROOT = '/home/andoni/mingw/%s/%s/lib'
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
-SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/'\
+      'svn-win32-1.7.2.zip'
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
 WINDOWS_BIN_DEPS = [
     'glib/2.28/glib_2.28.8-1_win32.zip',
@@ -41,13 +42,15 @@ WINDOWS_BIN_DEPS = [
     'dependencies/pkg-config-dev_0.26-1_win32.zip',
     'dependencies/pkg-config_0.26-1_win32.zip']
 PTHREADS_URL = \
-'''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
+'''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20\
+packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
 
 
 class WindowsBootstraper(BootstraperBase):
     '''
     Bootstraper for windows builds.
-    Installs the mingw-w64 compiler toolchain and headers for Directx and Python
+    Installs the mingw-w64 compiler toolchain and headers for Directx and
+    Python
     '''
 
     def start(self):
@@ -94,8 +97,9 @@ class WindowsBootstraper(BootstraperBase):
         # real pthreads stuff is in a zip file inside the previous zip file
         # under mingwxx/pthreads-xx.zip
         shell.unpack(pthreadszip, temp)
-        shell.unpack(os.path.join(temp, 'pthreads-20100604', 'ming%s' % self.version,
-                                  'pthreads-%s.zip' % self.version), self.prefix)
+        shell.unpack(os.path.join(temp, 'pthreads-20100604',
+            'ming%s' % self.version, 'pthreads-%s.zip' % self.version),
+            self.prefix)
 
     def install_python_sdk(self):
         m.action(_("Installing Python headers"))
@@ -138,7 +142,8 @@ class WindowsBootstraper(BootstraperBase):
         path = os.path.join(temp, 'download.zip')
         shell.download(SVN, path)
         shell.unpack(path, temp)
-        dirpath = os.path.join(temp, os.path.splitext(os.path.split(SVN)[1])[0])
+        dirpath = os.path.join(temp,
+                os.path.splitext(os.path.split(SVN)[1])[0])
         shell.call('cp -r %s/* %s' % (dirpath, self.config.toolchain_prefix))
 
 

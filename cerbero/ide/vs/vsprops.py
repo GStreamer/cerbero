@@ -44,7 +44,8 @@ class CommonVSProps(VSPropsBase):
         self._add_sdk_root_macro(prefix, prefix_macro)
 
     def _add_sdk_root_macro(self, prefix, prefix_macro):
-        etree.SubElement(self.root, 'Macro', Name=prefix_macro, Value=to_winpath(prefix))
+        etree.SubElement(self.root, 'Macro', Name=prefix_macro,
+                         Value=to_winpath(prefix))
 
 
 class VSProps(VSPropsBase):
@@ -63,7 +64,8 @@ class VSProps(VSPropsBase):
         if inherit_common:
             requires.append('Common')
         self._add_root(name, requires)
-        self.root.set('InheritedPropertySheets', self._format_requires(requires))
+        self.root.set('InheritedPropertySheets',
+                      self._format_requires(requires))
         self._add_include_dirs(include_dirs)
         self._add_libs(libs, libs_dirs)
 
@@ -96,4 +98,3 @@ class VSProps(VSPropsBase):
 
     def _add_tool(self, name, **kwargs):
         etree.SubElement(self.root, 'Tool', Name=name, **kwargs)
-

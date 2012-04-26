@@ -110,11 +110,14 @@ oldrealpath = os.path.realpath
 def join(*args):
     return '/'.join(args)
 
+
 def expanduser(path):
     return oldexpanduser(path).replace('\\', '/')
 
+
 def abspath(path):
     return oldabspath(path).replace('\\', '/')
+
 
 def realpath(path):
     return oldrealpath(path).replace('\\', '/')

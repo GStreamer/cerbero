@@ -61,7 +61,8 @@ class PropsBase(object):
                  encoding='utf-8', pretty_print=True)
 
     def _add_compiler_props(self):
-        self.compiler = etree.SubElement(self.item_definition_group, 'ClCompile')
+        self.compiler = etree.SubElement(self.item_definition_group,
+                'ClCompile')
 
     def _add_linker_props(self):
         self.linker = etree.SubElement(self.item_definition_group, 'Link')
@@ -97,7 +98,7 @@ class PropsBase(object):
         return to_winpath(path)
 
     def _format_name(self, name):
-        name = name.replace('+','_').replace('-', '_').replace('.', '_')
+        name = name.replace('+', '_').replace('-', '_').replace('.', '_')
         return name
 
 

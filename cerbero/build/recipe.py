@@ -68,7 +68,6 @@ class BuildSteps(object):
     POST_INSTALL = (N_('Post Install'), 'post_install')
     GEN_LIBFILES = (N_('Gen Library File'), 'gen_library_file')
 
-
     def __new__(klass):
         return [BuildSteps.FETCH, BuildSteps.EXTRACT,
                 BuildSteps.CONFIGURE, BuildSteps.COMPILE, BuildSteps.INSTALL,
@@ -166,7 +165,8 @@ class Recipe(FilesProvider):
         licenses = {}
         for c in categories:
             if c in licenses:
-                raise Exception('multiple licenses for the same category %s defined' % c)
+                raise Exception('multiple licenses for the same category %s '
+                                'defined' % c)
 
             if not c:
                 licenses[None] = self.licenses
@@ -177,7 +177,8 @@ class Recipe(FilesProvider):
             if hasattr(self, attr):
                 licenses[c] = getattr(self, attr)
             elif hasattr(self, platform_attr):
-                licenses[c] = getattr(self, platform_attr).get(self.platform, [])
+                l = getattr(self, platform_attr)
+                licenses[c] = l.get(self.platform, [])
             else:
                 licenses[c] = self.licenses
         return licenses
@@ -191,7 +192,6 @@ class Recipe(FilesProvider):
             implib = genlib.create(os.path.join(self.config.prefix, dllpath),
                     os.path.join(self.config.prefix, 'lib'))
             logging.debug('Created %s' % implib)
-
 
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x not in steps]

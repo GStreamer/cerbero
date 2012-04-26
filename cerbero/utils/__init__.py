@@ -59,7 +59,7 @@ def determine_num_of_cpus():
     try:
         import multiprocessing
         return multiprocessing.cpu_count()
-    except (ImportError,NotImplementedError):
+    except (ImportError, NotImplementedError):
         return 1
 
 
@@ -71,7 +71,7 @@ def to_winpath(path):
 
 def to_unixpath(path):
     if path[1] == ':':
-       path = '/%s%s' % (path[0], path[2:])
+        path = '/%s%s' % (path[0], path[2:])
     return path
 
 
@@ -157,7 +157,8 @@ def system_info():
                 distro_version = DistroVersion.OPENSUSE_12_1
             else:
                 # FIXME Fill this
-                raise FatalError("Distribution OpenSuse '%s' not supported" % str(d))
+                raise FatalError("Distribution OpenSuse '%s' "
+                                 "not supported" % str(d))
         else:
             raise FatalError("Distribution '%s' not supported" % str(d))
     elif platform == Platform.WINDOWS:
@@ -191,5 +192,6 @@ def system_info():
 
 def validate_packager(packager):
     # match packager in the form 'Name <email>'
-    expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
+    expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@'\
+            '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
     return bool(re.match(expr, packager))

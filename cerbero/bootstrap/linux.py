@@ -19,8 +19,7 @@
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Distro
-from cerbero.errors import FatalError
-from cerbero.utils import shell, _, user_is_root
+from cerbero.utils import shell
 
 
 class UnixBootstraper (BootstraperBase):
@@ -43,29 +42,33 @@ class DebianBootstraper (UnixBootstraper):
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
                 'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
-                'libxml-simple-perl', 'dpkg-dev', 'debhelper', 'build-essential',
-                'devscripts', 'fakeroot']
+                'libxml-simple-perl', 'dpkg-dev', 'debhelper',
+                'build-essential', 'devscripts', 'fakeroot']
 
 
 class RedHatBootstraper (UnixBootstraper):
 
     tool = 'su -c "yum install %s"'
-    packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool', 'gettext-devel',
-                'make', 'cmake', 'bison', 'flex', 'yasm', 'pkgconfig-0.25',
-                'gtk-doc', 'curl', 'doxygen', 'texinfo', 'texinfo-tex', 'texlive-dvips',
-                'docbook-style-xsl', 'transfig', 'intltool', 'rpm-build',
-                'redhat-rpm-config', 'python-devel', 'libXrender-devel',
-                'pulseaudio-libs-devel', 'libXv-devel', 'mesa-libGL-devel',
-                'libXcomposite-devel', 'alsa-lib-devel']
+    packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
+                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm',
+                'pkgconfig-0.25', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
+                'texinfo-tex', 'texlive-dvips', 'docbook-style-xsl',
+                'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
+                'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
+                'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
+                'alsa-lib-devel']
+
 
 class OpenSuseBootstraper (UnixBootstraper):
 
     tool = 'sudo zypper install %s'
-    packages = ['intltool', 'cmake', 'gcc-c++', 'doxygen', 'gtk-doc', 'libtool',
-                'bison', 'flex', 'automake', 'autoconf', 'make', 'gcc', 'curl',
-                'gettext-tools', 'alsa-devel', 'yasm', 'docbook-xsl-stylesheets',
-                'transfig', 'xorg-x11-libXrender-devel', 'xorg-x11-libXv-devel',
-                'Mesa-devel', 'python-devel', 'devel_rpm_build']
+    packages = ['intltool', 'cmake', 'gcc-c++', 'doxygen', 'gtk-doc',
+            'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make', 'gcc',
+            'curl', 'gettext-tools', 'alsa-devel', 'yasm',
+            'docbook-xsl-stylesheets', 'transfig', 'xorg-x11-libXrender-devel',
+            'xorg-x11-libXv-devel', 'Mesa-devel', 'python-devel',
+            'devel_rpm_build']
+
 
 def register_all():
     register_bootstraper(Distro.DEBIAN, DebianBootstraper)

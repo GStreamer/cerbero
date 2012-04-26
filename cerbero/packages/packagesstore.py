@@ -19,7 +19,8 @@
 import os
 
 from cerbero.build.cookbook import CookBook
-from cerbero.config import Platform, Architecture, Distro, DistroVersion, License
+from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
+        License
 from cerbero.packages import package
 from cerbero.errors import FatalError, PackageNotFoundError
 from cerbero.utils import _

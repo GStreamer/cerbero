@@ -45,7 +45,7 @@ class PackageBase(object):
     @type url: str
     @cvar sys_deps: system dependencies for this package
     @type sys_deps: dict
-    @cvar ignore_package_prefix: do not use the package prefix set in the config
+    @cvar ignore_package_prefix: don't use the package prefix set in the config
     @type ignore_package_prefix: bool
     '''
     name = 'default'
@@ -83,7 +83,7 @@ class PackageBase(object):
                              "subclasses")
 
     def set_mode(self, package_type):
-         self.package_mode = package_type
+        self.package_mode = package_type
 
     def get_install_dir(self):
         try:
@@ -134,7 +134,8 @@ class Package(PackageBase):
     @type platform_files: dict
     @cvar files_devel: list of devel files included in this package
     @type files_devel: list
-    @cvar platform_files_devel: dict of platform devel files included in this package
+    @cvar platform_files_devel: dict of platform devel files included in
+                                this package
     @type platform_files_Devel: dict
     '''
 
@@ -167,14 +168,16 @@ class Package(PackageBase):
     def devel_recipes_licenses(self):
         licenses = self._list_licenses(self._recipes_files_devel)
         for recipe_name, categories in self._recipes_files.iteritems():
-            # also add development licenses for recipe from which used the 'libs'
-            # category
+            # also add development licenses for recipe from which used the
+            # 'libs' category
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
                 r = self.cookbook.get_recipe(recipe_name)
                 if recipe_name in licenses:
-                    licenses[recipe_name].update(r.list_licenses_by_categories(categories))
+                    licenses[recipe_name].update(
+                            r.list_licenses_by_categories(categories))
                 else:
-                    licenses[recipe_name] = r.list_licenses_by_categories(categories)
+                    licenses[recipe_name] = \
+                            r.list_licenses_by_categories(categories)
         return licenses
 
     def files_list(self):
@@ -197,7 +200,8 @@ class Package(PackageBase):
                 rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
                 files.extend(rfiles)
         for recipe, categories in self._recipes_files_devel.iteritems():
-            rfiles = self.cookbook.get_recipe(recipe).files_list_by_categories(categories)
+            recipe = self.cookbook.get_recipe(recipe)
+            rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
         return sorted(files)
 
@@ -220,9 +224,11 @@ class Package(PackageBase):
         licenses = {}
         for recipe_name, categories in recipes_files.iteritems():
             r = self.cookbook.get_recipe(recipe_name)
-            # Package.files|files_devel|platform_files|platform_files_devel = [recipe:category]
+            # Package.files|files_devel|platform_files|platform_files_devel = \
+            #        [recipe:category]
             #  => licenses = {recipe_name: {category: category_licenses}}
-            # Package.files|files_devel|platform_files|platform_files_devel = [recipe]
+            # Package.files|files_devel|platform_files|platform_files_devel = \
+            #        [recipe]
             #  => licenses = {recipe_name: {None: recipe_licenses}}
             licenses[recipe_name] = r.list_licenses_by_categories(categories)
         return licenses
@@ -279,7 +285,8 @@ class MetaPackage(PackageBase):
             ret = attr[:]
             platform_attr_name = 'platform_%s' % name
             if hasattr(self, platform_attr_name):
-                platform_attr = PackageBase.__getattribute__(self, platform_attr_name)
+                platform_attr = PackageBase.__getattribute__(self,
+                        platform_attr_name)
                 if self.config.target_platform in platform_attr:
                     platform_list = platform_attr[self.config.target_platform]
                     ret.extend(platform_list)

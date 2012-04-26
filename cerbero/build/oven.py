@@ -118,7 +118,6 @@ class Oven (object):
             self.cookbook.reset_recipe_status(recipe.name)
         raise BuildStepError(recipe, step)
 
-
     def _print_missing_files(self, recipe, tmp):
         recipe_files = set(recipe.files_list())
         installed_files = set(shell.find_newer_files(recipe.config.prefix,

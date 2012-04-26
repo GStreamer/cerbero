@@ -77,7 +77,7 @@ def get_hash(git_dir, commit):
     @param commit: the commit to log
     @type commit: str
     '''
-    return shell.check_call('%s show -s --pretty=%%H %s' % 
+    return shell.check_call('%s show -s --pretty=%%H %s' %
                             (GIT, commit), git_dir)
 
 

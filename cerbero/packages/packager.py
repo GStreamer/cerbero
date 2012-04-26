@@ -40,8 +40,8 @@ class Packager (object):
             raise FatalError(_("No packager available for the distro %s" % d))
         if v not in _packagers[d]:
             # Be tolerant with the distro version
-            m.warning(_("No specific packager available for the distro version %s, "
-                    "using generic packager for distro %s" % (v, d)))
+            m.warning(_("No specific packager available for the distro "
+                "version %s, using generic packager for distro %s" % (v, d)))
             v = None
 
         return _packagers[d][v](config, package, store)

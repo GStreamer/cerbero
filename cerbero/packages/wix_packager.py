@@ -92,7 +92,8 @@ class MSIPackager(PackagerBase):
         paths.append(p)
 
         if devel:
-            p = self._create_msi_installer(output_dir, PackageType.DEVEL, force)
+            p = self._create_msi_installer(output_dir, PackageType.DEVEL,
+                                           force)
             paths.append(p)
 
         return paths
@@ -137,8 +138,8 @@ class MSIPackager(PackagerBase):
                   self.store)
         msi.write(sources)
 
-
-        wixobjs = [os.path.join(self.output_dir, "%s.wixobj" % self.package.name)]
+        wixobjs = [os.path.join(self.output_dir, "%s.wixobj" %
+                                self.package.name)]
         #FIXME: Don't use our custom UI yet
         #wixobjs.append(os.path.join(self.output_dir, "ui.wixobj"))
 
@@ -159,6 +160,7 @@ class Packager(object):
             return MergeModulePackager(config, package, store)
         else:
             return MSIPackager(config, package, store)
+
 
 class Candle(object):
     ''' Compile WiX objects with candle '''
@@ -213,4 +215,3 @@ def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
     register_packager(Distro.WINDOWS, Packager)
-

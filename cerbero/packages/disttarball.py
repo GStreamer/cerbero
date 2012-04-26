@@ -38,7 +38,7 @@ class DistTarball(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False, split=True,
              package_prefix=''):
-        dist_files =  self.files_list(PackageType.RUNTIME, force)
+        dist_files = self.files_list(PackageType.RUNTIME, force)
         if devel:
             try:
                 devel_files = self.files_list(PackageType.DEVEL, force)
@@ -63,8 +63,8 @@ class DistTarball(PackagerBase):
         return filenames
 
     def _get_name(self, package_type):
-        return "%s%s-%s%s.tar.bz2" % (self.package_prefix, self.package.name, self.package.version,
-                                      package_type)
+        return "%s%s-%s%s.tar.bz2" % (self.package_prefix, self.package.name,
+                self.package.version, package_type)
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):

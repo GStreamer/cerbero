@@ -35,7 +35,7 @@ TAR = 'tar'
 
 
 PLATFORM = system_info()[0]
-LOGFILE = None # open('/tmp/cerbero.log', 'w+')
+LOGFILE = None  # open('/tmp/cerbero.log', 'w+')
 
 
 class StdOut:
@@ -75,9 +75,8 @@ def call(cmd, cmd_dir='.', fail=True):
             shell = False
         stream = LOGFILE or sys.stdout
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
-                                    stderr=subprocess.STDOUT,
-                                    stdout=StdOut(stream), env=os.environ.copy(),
-                                    shell=shell)
+                stderr=subprocess.STDOUT, stdout=StdOut(stream),
+                env=os.environ.copy(), shell=shell)
     except subprocess.CalledProcessError:
         if fail:
             raise FatalError(_("Error running command: %s") % cmd)

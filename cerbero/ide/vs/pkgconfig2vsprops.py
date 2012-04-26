@@ -28,7 +28,7 @@ from cerbero.utils import messages as m
 
 
 class PkgConfig2VSProps(object):
-    
+
     generators = {'vs2008': VSProps, 'vs2010': Props}
 
     def __init__(self, libname, target='vs2010', prefix=None,
@@ -57,7 +57,7 @@ class PkgConfig2VSProps(object):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description= 'Creates VS property '
+    parser = argparse.ArgumentParser(description='Creates VS property '
         'sheets with pkg-config')
     parser.add_argument('library', help='Library name')
     parser.add_argument('-o', type=str, default='.',
@@ -71,7 +71,8 @@ if __name__ == "__main__":
         p2v = PkgConfig2VSProps(args.library, args.c)
         p2v.create(args.o)
     except Exception, e:
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
         m.error(str(e))
         exit(1)
     exit(0)

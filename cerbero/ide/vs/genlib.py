@@ -25,7 +25,7 @@ class GenLib(object):
     '''
     Generates an import library that can be used in Visual Studio from a DLL,
     using 'gendef' to create a .def file and than libtool to create the import
-    library 
+    library
     '''
 
     DLLTOOL_TPL = '$DLLTOOL -d %s -l %s -D %s'

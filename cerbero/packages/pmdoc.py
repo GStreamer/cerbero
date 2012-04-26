@@ -145,7 +145,7 @@ class Index(PMDocXML):
             title=package.shortdesc, id=package_name,
             starts_selected=self._boolstr(selected),
             starts_enabled=self._boolstr(enabled), starts_hidden='false')
-        packages = [package.name] +  package.deps
+        packages = [package.name] + package.deps
         for p_name in packages:
             if p_name != package.name:
                 # Don't add twice packages that are required and selected, and
@@ -366,7 +366,8 @@ class PMDoc(object):
         # package is empty
         if package_name in self.emptypkgs:
             return
-        pkgref = PkgRef(package, self.package_type, self.pkgspath[package_name])
+        pkgref = PkgRef(package, self.package_type,
+                        self.pkgspath[package_name])
         pkgref.write(os.path.join(self.outdir, "%s.xml" % package_name))
         pkgcontents = PkgContents(self.pkgspath[package_name])
         pkgcontents.write(os.path.join(self.outdir, "%s-contents.xml" %

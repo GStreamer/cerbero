@@ -34,7 +34,8 @@ class Shell(Command):
     def run(self, config, args):
         if config.platform == Platform.WINDOWS:
             # $MINGW_PREFIX/home/username
-            msys = os.path.join(os.path.expanduser('~'), '..', '..', 'msys.bat')
+            msys = os.path.join(os.path.expanduser('~'),
+                                '..', '..', 'msys.bat')
             subprocess.check_call('%s -noxvrt' % msys)
         else:
             shell = os.environ.get('SHELL', '/bin/bash')

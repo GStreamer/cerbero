@@ -233,7 +233,6 @@ class CMake (MakefilesBase):
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
 
 
-
 class BuildType (object):
 
     CUSTOM = CustomBuild

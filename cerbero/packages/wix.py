@@ -207,7 +207,6 @@ class MSI(WixBase):
 
     wix_sources = 'wix/installer.wxs'
 
-
     def __init__(self, config, package, packages_deps, wix_config, store):
         WixBase.__init__(self, config, package)
         self.packages_deps = packages_deps
@@ -222,7 +221,7 @@ class MSI(WixBase):
         with open(sources_path, 'r') as f:
             self.root = etree.fromstring(f.read())
         for element in self.root.iter():
-            element.tag = element.tag[len(WIX_SCHEMA)+2:]
+            element.tag = element.tag[len(WIX_SCHEMA) + 2:]
         self.root.set('xmlns', WIX_SCHEMA)
         self.product = self.root.find('Product')
 
@@ -277,7 +276,8 @@ class MSI(WixBase):
         installdir = self._add_dir(tdir, 'INSTALLDIR',
                 self.package.get_install_dir())
         versiondir = self._add_dir(installdir, "Version", self.package.version)
-        archdir = self._add_dir(versiondir, 'Architecture', self.config.target_arch)
+        archdir = self._add_dir(versiondir, 'Architecture',
+                                self.config.target_arch)
         self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
 
     def _package_id(self, package_name):

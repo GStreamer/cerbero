@@ -66,8 +66,8 @@ class PackagerBase(object):
         diff = list(set(files) - set(real_files))
         if len(diff) != 0:
             if force:
-                m.warning(_("Some files required by this package are missing in "
-                           "the prefix:\n%s" % '\n'.join(diff)))
+                m.warning(_("Some files required by this package are missing "
+                            "in the prefix:\n%s" % '\n'.join(diff)))
             else:
                 raise MissingPackageFilesError(diff)
         if len(real_files) == 0:
