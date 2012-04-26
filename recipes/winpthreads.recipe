@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'winpthreads'
     version = '20100604'
-    license = License.LGPL
+    licenses = [License.LGPL]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 

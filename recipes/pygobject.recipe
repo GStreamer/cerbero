@@ -3,6 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'pygobject'
     version = '2.28.6'
+    licenses = [License.LGPLv2_1Plus]
     configure_options = '--disable-introspection'
 
     def post_install(self):

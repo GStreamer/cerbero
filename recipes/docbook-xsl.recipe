@@ -3,6 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'docbook-xsl'
     version = '1.76.1'
+    licenses = [License.BSD_like]
     btype = BuildType.CUSTOM
 
     def install(self):

@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libmpeg2'
     version = '0.5.1'
-    license = License.GPLv2
+    licenses = [License.GPLv2Plus]
     autoreconf = True
 
     files_libs = ['libmpeg2', 'libmpeg2convert']

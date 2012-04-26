@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'tango-icon-theme'
     version = '0.8.1'
-    license = License.LGPL
+    licenses = [License.CC_BY_SA]
     configure_options = '--disable-icon-framing '
     deps = ['icon-naming-utils']
 

@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'gtk-engines'
     version = '2.18.5'
-    license = License.GPL
+    licenses = [License.LGPLv2Plus]
     deps = ['gtk+']
 
     files_etc = ['etc/gtk-2.0/gtkrc']

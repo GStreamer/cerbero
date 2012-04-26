@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
     version = '2.30.2'
-    license = License.LGPLv2
+    licenses = [License.LGPLv2Plus]
     configure_options = "--without-ca-certificates"
     deps = ['glib', 'gnutls']
 

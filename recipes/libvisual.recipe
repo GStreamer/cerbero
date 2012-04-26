@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libvisual'
     version = '0.4.0'
-    license = License.LGPLv2_1
+    licenses = [License.LGPLv2_1Plus]
     autoreconf = True
 
     files_libs = ['libvisual-0.4']

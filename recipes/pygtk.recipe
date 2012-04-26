@@ -3,6 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'pygtk'
     version = '2.24.0'
+    licenses = [License.LGPLv2_1Plus]
     deps = ['pygobject', 'py2cairo', 'glib', 'atk', 'gtk+', 'pango']
 
     files_python = [

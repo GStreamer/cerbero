@@ -4,7 +4,9 @@
 class Recipe(recipe.Recipe):
     name = 'libgcrypt'
     version = '1.5.0'
-    license = License.LGPLv2_1
+    # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
+    #       and COPYING.LIB is GPLv2.1
+    licenses = [License.LGPLv2_1Plus]
     deps = ['libgpg-error']
 
     files_libs = ['libgcrypt']

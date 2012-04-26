@@ -4,12 +4,17 @@
 class Recipe(recipe.Recipe):
     name = 'gnutls'
     version = '3.0.14'
-    license = License.LGPLv2_1Plus
+    # main library is LGPLv3+ and binaries and libgnutls-openssl are
+    # GPLv3+ and defined below
+    licenses = [License.LGPLv3Plus]
     configure_options = "--enable-local-libopts --disable-guile"
     deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
 
-    files_libs = ['libgnutls', 'libgnutlsxx', 'libgnutls-openssl']
+    files_libs = ['libgnutls', 'libgnutlsxx']
+    files_libs_extra = ['libgnutls-openssl']
+    files_libs_extra_licenses = [License.GPLv3]
     files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
+    files_bins_licenses = [License.GPLv3]
     files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
     files_lang = ['gnutls']
 

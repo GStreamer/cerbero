@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libvpx'
     version = 'v1.0.0'
-    license = License.BSD
+    licenses = [License.BSD]
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm "

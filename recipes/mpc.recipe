@@ -2,6 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'mpc'
-    configure_options = "--disable-static --enable-shared"
     version = '0.8.2'
+    licenses = [License.LGPLv2_1Plus]
+    configure_options = "--disable-static --enable-shared"
     autoreconf = True

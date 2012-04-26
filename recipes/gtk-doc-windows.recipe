@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'gtk-doc-windows'
     version = '1.18'
+    # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
+    licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
 
     files_devel = ['bin/gtkdocize', 'share/aclocal/gtk-doc.m4',

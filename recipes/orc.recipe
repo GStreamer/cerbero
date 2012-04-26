@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'orc'
     version = '0.4.16'
-    license = License.BSD_like
+    licenses = [License.BSD_like]
 
     files_libs = ['liborc-0.4', 'liborc-test-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',

@@ -1,6 +1,7 @@
 class Recipe(recipe.Recipe):
     name = 'gcc-core'
     version = '4.6.2'
+    licenses = [License.GPLv3]
     configure_options = '--disable-multilib --enable-fully-dynamic-string'
     make = 'make all-gcc'
     make_install = 'make install-gcc'

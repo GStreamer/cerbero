@@ -3,5 +3,6 @@
 class Recipe(recipe.Recipe):
     name = 'XML-Simple'
     version = '2.18'
+    licenses = [License.GPLv1Plus]
     btype = BuildType.MAKEFILE
     configure_tpl = 'perl Makefile.PL PREFIX=$CERBERO_PREFIX'

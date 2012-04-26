@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'jasper'
     version = '1.900.1'
-    license = License.Jasperv2
+    licenses = [License.Jasperv2]
     config_sh = 'sh configure'
     configure_options = '--enable-shared '
 

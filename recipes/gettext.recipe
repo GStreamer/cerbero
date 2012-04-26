@@ -4,12 +4,14 @@
 class Recipe(recipe.Recipe):
     name = 'gettext'
     version = '0.18.1.1'
+    # only libraries are LGPLv2+, tools are GPLv3+ and defined below
+    licenses = [License.LGPLv2Plus]
     srcdir = 'gettext-runtime'
     autoreconf = True
-    license = License.LGPL
 
     files_libs = ['libintl', 'libasprintf']
     files_bins = ['gettext', 'ngettext', 'envsubst']
+    files_bins_licenses = [License.GPLv3Plus]
     files_devel = ['include/libintl.h', 'include/autosprintf.h']
     files_lang = ['gettext-runtime']
 

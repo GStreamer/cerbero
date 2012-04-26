@@ -3,5 +3,6 @@
 class Recipe(recipe.Recipe):
     name = 'mpfr'
     version = '3.1.0'
+    licenses = [License.LGPLv3Plus]
     configure_options = "--disable-static --enable-shared"
     deps = ['gmp']

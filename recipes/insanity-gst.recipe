@@ -3,6 +3,9 @@
 class Recipe(recipe.Recipe):
     name = 'insanity-gst'
     version = '0.0.1'
+    # TODO: check license - no LICENSE or COPYING, some files state LGPLv2+,
+    #       others LGPLv2.1+
+    licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity-gst'}

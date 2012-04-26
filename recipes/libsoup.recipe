@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libsoup'
     version = '2.36.1'
-    license = License.LGPLv2_1
+    licenses = [License.LGPLv2Plus]
     configure_options = '--without-gnome'
     deps = ['libxml2', 'glib']
 

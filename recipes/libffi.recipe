@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libffi'
     version = '3.0.10'
-    license = License.BSD_like
+    licenses = [License.BSD_like]
 
     files_libs = ['libffi']
     files_devel = ['lib/libffi-3.0.10', 'lib/pkgconfig/libffi.pc']

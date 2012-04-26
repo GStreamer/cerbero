@@ -4,6 +4,9 @@
 class Recipe(recipe.Recipe):
     name = 'gst-ffmpeg'
     version = '0.10.13'
+    # TODO - check license - plugin is certainly LGPLv2+, but need to check
+    #        the linked libs
+    licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
     configure_options = '--enable-lgpl --disable-examples '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}

@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'jpeg'
     version = '8d'
-    license = License.JPEG
+    licenses = [License.JPEG]
 
     files_libs = ['libjpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',

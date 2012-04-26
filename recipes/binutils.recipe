@@ -1,6 +1,7 @@
 class Recipe(recipe.Recipe):
     name = 'binutils'
     version = '2.22'
+    licenses = [License.GPL]
     configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
 
     files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',

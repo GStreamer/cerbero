@@ -4,9 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'tiff'
     version = '4.0.1'
-    license = License.BSD_like
+    licenses = [License.BSD_like]
     deps = [ 'zlib' ]
-
 
     files_libs = ['libtiff', 'libtiffxx']
     files_bins = ['tiffcrop', 'bmp2tiff', 'gif2tiff', 'ppm2tiff'

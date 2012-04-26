@@ -4,7 +4,8 @@
 class Recipe(recipe.Recipe):
     name = 'taglib'
     version = '1.7'
-    license = License.LGPL
+    # either LGPLv2.1 or MPLv1.1
+    licenses = [License.LGPLv2_1]
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON'
     btype = BuildType.CMAKE
 

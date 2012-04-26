@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-ugly-static'
     version = '0.10.19'
+    # FIXME - set licenses
+    licenses = []
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection --disable-examples --disable-shared --enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}

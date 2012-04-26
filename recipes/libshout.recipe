@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libshout'
     version = '2.2.2'
-    license = License.LGPLv2_1
+    licenses = [License.LGPLv2Plus]
     deps = ['libtheora', 'libogg', 'libvorbis', 'speex']
 
     files_libs = ['libshout']

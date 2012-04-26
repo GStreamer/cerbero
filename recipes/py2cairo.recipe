@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'py2cairo'
     version = '1.10.0'
+    # either LGPLv2.1 or MPLv1.1
+    licenses = [License.LGPLv2_1]
     autoreconf = True
 
     files_python = [

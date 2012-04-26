@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'clutter-gst'
     version = '1.4.6'
+    # TODO: check license - source files are LGPLv2+ and COPYING is LGPLv2.1
+    licenses = [License.LGPLv2_1Plus]
     configure_options = "--disable-introspection "
     deps = ['clutter', 'gstreamer', 'gst-plugins-base']
     use_system_libs = True

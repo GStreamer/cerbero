@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'wavpack'
     version = '4.60.1'
-    license = License.BSD_like
+    licenses = [License.BSD_like]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     files_libs = ['libwavpack']

@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'docbook-xml'
     version = '4.3'
+    # FIXME - no license defined
+    licenses = []
     btype = BuildType.CUSTOM
 
     def install(self):

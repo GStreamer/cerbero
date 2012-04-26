@@ -4,11 +4,15 @@
 class Recipe(recipe.Recipe):
     name = 'flac'
     version = '1.2.1'
-    license = License.BSD # only libraries, tools are GPL
+    # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
+    licenses = [License.BSD_like]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     files_libs = ['libFLAC', 'libFLAC++']
+
     files_bins = ['flac', 'metaflac']
+    files_bins_licenses = [License.GPLv2Plus]
+
     files_devel = [
         'lib/pkgconfig/flac.pc',
         'lib/pkgconfig/flac++.pc',

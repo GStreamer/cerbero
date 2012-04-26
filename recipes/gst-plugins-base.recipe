@@ -4,6 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-base'
     version = '0.10.36'
+    licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection --disable-examples --disable-gst_v4l --disable-gnome_vfs'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}

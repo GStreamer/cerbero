@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
     version = '2.11'
-    license = License.LGPLv2_1
+    licenses = [License.LGPLv2_1Plus]
 
     files_libs = ['libtasn1']
     files_devel = ['include/libtasn1.h', 'lib/pkgconfig/libtasn1.pc']

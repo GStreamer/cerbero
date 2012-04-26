@@ -4,6 +4,9 @@
 class Recipe(recipe.Recipe):
     name = 'gst-python'
     version = '0.10.22'
+    # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+ and
+    #       COPYING is LGPLv2.1
+    licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh autogen.sh'
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
     deps = ['gstreamer', 'gst-plugins-base', 'glib', 'pygobject']

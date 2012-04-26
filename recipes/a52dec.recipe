@@ -3,8 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'a52dec'
     version = '0.7.4'
+    licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
-    license = License.GPLv2
 
     files_libs = ['liba52']
     files_bins = ['a52dec']

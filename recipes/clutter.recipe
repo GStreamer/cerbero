@@ -3,10 +3,12 @@
 class Recipe(recipe.Recipe):
     name = 'clutter'
     version = '1.8.4'
+    # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
+    #       and COPYING is LGPLv2.1
+    licenses = [License.LGPLv2_1Plus]
     configure_options = "--disable-introspection "
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True
-    license = License.LGPLv2_1
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',
