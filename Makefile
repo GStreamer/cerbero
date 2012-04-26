@@ -15,4 +15,4 @@ dist-tarball:
 
 check:
 	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial test
-	pep8 cerbero -r
+	find cerbero ! -regex cerbero/packages/debian.py -name \*.py | sort -u | xargs pep8 --repeat
