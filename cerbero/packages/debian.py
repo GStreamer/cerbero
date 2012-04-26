@@ -89,7 +89,7 @@ License:
 
     This packaging is licensed under %(license)s, and includes files from the
     following licenses:
-    $(recipes_licenses)
+    %(recipes_licenses)s
 
 On Debian systems, the complete text of common license(s) can be found in
 /usr/share/common-licenses/.
