@@ -66,8 +66,10 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'
+
+        self.remotes['origin'] = ('%s/%s' %
+                (self.config.git_root, 'gst-plugins-base.git'))
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
         self.files_core_devel = [static_prefix + f for f in self.files_core_devel]

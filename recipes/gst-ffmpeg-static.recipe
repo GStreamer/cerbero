@@ -17,8 +17,10 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                     '--with-ffmpeg-extra-configure="--enable-w32threads"'
+
+        self.remotes['origin'] = ('%s/%s' %
+                (self.config.git_root, 'gst-ffmpeg.git'))
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
         self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
