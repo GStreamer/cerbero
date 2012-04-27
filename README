@@ -3,7 +3,7 @@ Description
 ***********
 
 cerbero is a multi-platform build system for Open Source projects that builds
-and creates native packages for different platforms, architectures an distribution.
+and creates native packages for different platforms, architectures and distributions.
 
 Projects are defined using recipes files (.recipe), which provides a description
 of the project being built such as name, version, licenses, sources and the way
