@@ -21,7 +21,9 @@ import uuid
 import shutil
 
 from cerbero.utils import etree, to_winepath, shell
+from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
+from cerbero.packages import PackageType
 
 WIX_SCHEMA = "http://schemas.microsoft.com/wix/2006/wi"
 
@@ -206,6 +208,7 @@ class MSI(WixBase):
     '''
 
     wix_sources = 'wix/installer.wxs'
+    REG_ROOT = 'HKLM'
 
     def __init__(self, config, package, packages_deps, wix_config, store):
         WixBase.__init__(self, config, package)
@@ -234,6 +237,7 @@ class MSI(WixBase):
     def _fill(self):
         self._add_install_dir()
         self._add_merge_modules()
+        self._add_registry_install_dir()
 
     def _add_merge_modules(self):
         self.main_feature = etree.SubElement(self.product, "Feature",
@@ -282,6 +286,41 @@ class MSI(WixBase):
 
     def _package_id(self, package_name):
         return self._format_id(package_name)
+
+    def _registry_key(self, name):
+        return 'Software\\%s' % name
+
+    def _add_registry_install_dir(self):
+        # Get the package name. Both devel and runtime will share the same
+        # installation folder
+        package_type = self.package.package_mode
+        self.package.set_mode(PackageType.RUNTIME)
+        name = self.package.shortdesc.replace(' ', '')
+        self.package.set_mode(package_type)
+
+        # Get INSTALLDIR from the registry key
+        installdir_prop = etree.SubElement(self.product, 'Property',
+                Id='INSTALLDIR')
+        etree.SubElement(installdir_prop, 'RegistrySearch', Id=name,
+                Type="raw", Root=self.REG_ROOT, Key=self._registry_key(name),
+                Name='InstallDir')
+
+        # Add INSTALLDIR in the registry only for the runtime package
+        if self.package.package_mode == PackageType.RUNTIME:
+            regcomponent = etree.SubElement(self.installdir, 'Component',
+                    Id='RegistryInstallDir')
+            etree.SubElement(regcomponent, 'CreateFolder')
+            regkey = etree.SubElement(regcomponent, 'RegistryKey',
+                    Id='RegistryInstallDirRoot',
+                    Action='createAndRemoveOnUninstall',
+                    Key=self._registry_key(name),
+                    Root=self.REG_ROOT)
+            regvalue = etree.SubElement(regkey, 'RegistryValue',
+                    Id='RegistryInstallDirValue',
+                    Type='string', Name='InstallDir', Value='[INSTALLDIR]')
+            etree.SubElement(self.main_feature, 'ComponentRef',
+                    Id='RegistryInstallDir')
+
 
     def _add_merge_module(self, package, required, selected,
                           required_packages):
