@@ -250,6 +250,9 @@ class MSI(WixBase):
 
         # Remove empty packages
         packages = [x for x in packages if x[0] in self.packages_deps]
+        if len(packages) == 0:
+            raise FatalError("All packages are empty: %s" %
+                    [x[0] for x in self.package.packages])
 
         # Fill the list of required packages, which are the ones installed by
         # a package that is always installed
