@@ -259,7 +259,7 @@ class MSI(WixBase):
         req = [x[0] for x in packages if x[1] == True]
         required_packages = req[:]
         for p in req:
-            required_packages.extend(self.store.get_package_deps(p))
+            required_packages.extend(self.store.get_package_deps(p, True))
 
         for package, required, selected in packages:
             if package in self.packages_deps:
@@ -332,7 +332,7 @@ class MSI(WixBase):
                 Id=self._format_id(package.name), Title=package.shortdesc,
                 Level=self._format_level(selected),
                 Display='expand', Absent=self._format_absent(required))
-        deps = self.store.get_package_deps(package)
+        deps = self.store.get_package_deps(package, True)
 
         # Add all the merge modules required by this package, but excluding
         # all the ones that are forced to be installed
