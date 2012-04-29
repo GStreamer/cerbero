@@ -15,21 +15,21 @@ package wraps a list of recipes, from which the list of files belonging to the
 package will be extracted.
 
 
-************
+********************
 Minimum Requirements
-************
+********************
 
 cerbero provides bootstrapping facilities for all platforms, but it still needs a
 minimum base to bootstrap
 
 Linux
 -----
-On linux, you will only a distribution with python >= 2.6 and python's argparse module,
+On linux, you will only need a distribution with python >= 2.6 and python's argparse module,
 which is already included in python2.7
 
 OSX
 ---
-On OSX you will to have XCode installed and macports (used to install pkg-config)
+On OSX you will need to have XCode installed and macports (used to install pkg-config)
 
 Windows
 -------
@@ -56,7 +56,7 @@ Usage
 
 Bootstrap
 ---------
-Before using cerbero for the first time you will need to run the bootstrap command.
+Before using cerbero for the first time, you will need to run the bootstrap command.
 This command installs the missing parts of the build system using the packages manager
 when available.
   $ cerbero bootstrap
@@ -91,7 +91,7 @@ Create a package
 
 
 *******
-Licence
+License
 *******
 
 cerbero is released under the GNU Lesser General Public License, Version 2.1 (LGPLv2.1)
