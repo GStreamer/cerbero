@@ -17,9 +17,6 @@
 		<Property Id="ARPURLINFOABOUT" Value="$(var.WebSiteName)" />
 		<Property Id="ALLUSERS">1</Property>
 		
-		<!-- Application icon -->
-		<!--Icon Id="MainIcon" SourceFile="$(var.Icon)"/-->
-
 		<!-- UI -->
 		<CustomAction Execute="firstSequence" Id="SetWixUIInstallDir" Property="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
 		<InstallUISequence>
