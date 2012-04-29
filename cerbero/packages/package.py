@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import License
 from cerbero.packages import PackageType
@@ -70,6 +72,24 @@ class PackageBase(object):
         Can be overrided by subclasses to modify conditionally the package
         '''
         pass
+
+    def package_dir(self):
+        '''
+        Gets the directory path where this package is stored
+
+        @return: directory path
+        @rtype: str
+        '''
+        return os.path.dirname(self.__file__)
+
+    def relative_path(self, path):
+        '''
+        Gets a path relative to the package's directory
+
+        @return: absolute path relative to the pacakge's directory
+        @rtype: str
+        '''
+        return os.path.abspath(os.path.join(self.package_dir(), path))
 
     def files_list(self):
         raise NotImplemented("'files_list' must be implemented by subclasses")

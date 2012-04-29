@@ -23,7 +23,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
         License
 from cerbero.packages import package
 from cerbero.errors import FatalError, PackageNotFoundError
-from cerbero.utils import _
+from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 
 
@@ -157,15 +157,16 @@ class PackagesStore (object):
 
     def _load_packages(self):
         self._packages = {}
-        for f in os.listdir(self._config.packages_dir):
-            if not f.endswith(self.PKG_EXT):
-                continue
-            filepath = os.path.join(self._config.packages_dir, f)
-            p = self._load_package_from_file(filepath)
+        packages = shell.find_files('*%s' % self.PKG_EXT,
+                                    self._config.packages_dir)
+        packages.extend(shell.find_files('*/*%s' % self.PKG_EXT,
+                                         self._config.packages_dir))
+        for f in packages:
+            p = self._load_package_from_file(f)
             if p is None:
-                m.warning(_("Could not found a valid package in %s") %
-                                f)
+                m.warning(_("Could not found a valid package in %s") % f)
                 continue
+            p.__file__ = os.path.abspath(f)
             self.add_package(p)
 
     def _load_package_from_file(self, filepath):

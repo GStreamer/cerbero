@@ -24,6 +24,7 @@ import os
 import tarfile
 import zipfile
 import tempfile
+import glob
 
 from cerbero.config import Platform
 from cerbero.utils import _, system_info
@@ -211,3 +212,6 @@ def replace(filepath, replacements):
         content = content.replace(k, v)
     with open(filepath, 'w+') as f:
         f.write(content)
+
+def find_files(pattern, prefix):
+    return glob.glob(os.path.join(prefix, pattern))
