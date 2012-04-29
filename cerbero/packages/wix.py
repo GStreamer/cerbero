@@ -209,6 +209,10 @@ class MSI(WixBase):
 
     wix_sources = 'wix/installer.wxs'
     REG_ROOT = 'HKLM'
+    BANNER_BMP = 'banner.bmp'
+    DIALOG_BMP = 'dialog.bmp'
+    LICENSE_RTF = 'license.rtf'
+    ICON = 'icon.ico'
 
     def __init__(self, config, package, packages_deps, wix_config, store):
         WixBase.__init__(self, config, package)
@@ -217,6 +221,7 @@ class MSI(WixBase):
         self.wix_config = wix_config
         self._parse_sources()
         self._add_include()
+        self._customize_ui()
         self.product = self.root.find(".//Product")
 
     def _parse_sources(self):
@@ -238,6 +243,7 @@ class MSI(WixBase):
         self._add_install_dir()
         self._add_merge_modules()
         self._add_registry_install_dir()
+        self._add_sdk_root_env_variable()
 
     def _add_merge_modules(self):
         self.main_feature = etree.SubElement(self.product, "Feature",
@@ -290,16 +296,52 @@ class MSI(WixBase):
     def _package_id(self, package_name):
         return self._format_id(package_name)
 
+    def _package_var(self):
+        package_type = self.package.package_mode
+        self.package.set_mode(PackageType.RUNTIME)
+        name = self.package.shortdesc
+        self.package.set_mode(package_type)
+        return name
+
     def _registry_key(self, name):
         return 'Software\\%s' % name
+
+    def _env_var(self):
+        var = self._package_var().replace(' ', '_')
+        return ('%s_ROOT_%s' % (var, self.config.target_arch)).upper()
+
+    def _customize_ui(self):
+        # Banner Dialog and License
+        for path, var in [(self.BANNER_BMP, 'BannerBmp'),
+                (self.DIALOG_BMP, 'DialogBmp'),
+                (self.LICENSE_RTF, 'LicenseRtf')]:
+            path = self.package.relative_path(path)
+            if self._with_wine:
+                path = to_winepath(path)
+            if os.path.exists(path):
+                etree.SubElement(self.product, 'WixVariable',
+                        Id='WixUI%s' % var, Value=path)
+        # Icon
+        path = self.package.relative_path(self.ICON)
+        if self._with_wine:
+            path = to_winepath(path)
+        if os.path.exists(path):
+            etree.SubElement(self.product, 'Icon',
+                Id='MainIcon', SourceFile=path)
+
+    def _add_sdk_root_env_variable(self):
+        envcomponent = etree.SubElement(self.installdir, 'Component',
+                Id='EnvironmentVariables', Guid=self._get_uuid())
+        env = etree.SubElement(envcomponent, 'Environment', Id="SdkRootEnv",
+                Action="set", Part="all", Name=self._env_var(), Permanent="no",
+                Value='[SDKROOTDIR]')
+        etree.SubElement(self.main_feature, 'ComponentRef',
+                Id='EnvironmentVariables')
 
     def _add_registry_install_dir(self):
         # Get the package name. Both devel and runtime will share the same
         # installation folder
-        package_type = self.package.package_mode
-        self.package.set_mode(PackageType.RUNTIME)
-        name = self.package.shortdesc.replace(' ', '')
-        self.package.set_mode(package_type)
+        name = self._package_var().replace(' ', '')
 
         # Get INSTALLDIR from the registry key
         installdir_prop = etree.SubElement(self.product, 'Property',
@@ -311,8 +353,7 @@ class MSI(WixBase):
         # Add INSTALLDIR in the registry only for the runtime package
         if self.package.package_mode == PackageType.RUNTIME:
             regcomponent = etree.SubElement(self.installdir, 'Component',
-                    Id='RegistryInstallDir')
-            etree.SubElement(regcomponent, 'CreateFolder')
+                    Id='RegistryInstallDir', Guid=self._get_uuid())
             regkey = etree.SubElement(regcomponent, 'RegistryKey',
                     Id='RegistryInstallDirRoot',
                     Action='createAndRemoveOnUninstall',
