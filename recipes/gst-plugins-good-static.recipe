@@ -120,11 +120,9 @@ class Recipe(recipe.Recipe):
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_core_devel = [static_prefix + f for f in self.files_core_devel]
-        self.files_effects_devel = [static_prefix + f for f in self.files_effects_devel]
-        self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
-        self.files_net_devel = [static_prefix + f for f in self.files_net_devel]
-        self.files_vis_devel = [static_prefix + f for f in self.files_vis_devel]
+        for cat in ['core', 'effects', 'codecs', 'net', 'vis']:
+            name = 'files_%s_devel' % cat
+            setattr(self, name, [static_prefix + f for f in getattr(self, name)])
         platform_files_capture_devel = {}
         for platform, files in self.platform_files_capture_devel.iteritems():
             platform_files_capture_devel[platform] = [static_prefix + f for f in files]
