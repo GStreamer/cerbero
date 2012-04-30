@@ -213,8 +213,10 @@ def replace(filepath, replacements):
     with open(filepath, 'w+') as f:
         f.write(content)
 
+
 def find_files(pattern, prefix):
     return glob.glob(os.path.join(prefix, pattern))
+
 
 def prompt(message, options=[]):
     ''' Prompts the user for input with the message and options '''

@@ -279,7 +279,6 @@ class Config (object):
                 raise FatalError("Data dir not found")
         self.data_dir = os.path.join(curdir, 'share', 'cerbero')
 
-
     def _relative_path(self, path):
         if not self.uninstalled:
             p = os.path.join(self.data_dir, path)

@@ -365,7 +365,6 @@ class MSI(WixBase):
             etree.SubElement(self.main_feature, 'ComponentRef',
                     Id='RegistryInstallDir')
 
-
     def _add_merge_module(self, package, required, selected,
                           required_packages):
         # Create a new feature for this package
