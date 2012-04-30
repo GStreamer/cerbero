@@ -34,8 +34,6 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-libav', False, False),
                ('gstreamer-tests', False, False),
               ]
-    packages =[
-               ('gstreamer-core', True, True),]
     platform_packages = {
             Platform.WINDOWS: [('vsintegration', True, False)]}
 
