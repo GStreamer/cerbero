@@ -59,6 +59,22 @@ Vendor:         %(vendor)s
 mkdir -p $RPM_BUILD_ROOT/%%{prefix}
 cp -r $RPM_BUILD_DIR/%%{_package_name}/* $RPM_BUILD_ROOT/%%{prefix}
 
+# Workaround to remove full source dir paths from debuginfo packages
+# (tested in Fedora 16).
+#
+# What happens is that rpmbuild invokes find-debuginfo.sh which in turn
+# calls debugedit passing $RPM_BUILD_DIR as the "base-dir" param (-b) value.
+# debugedit then removes the "base-dir" path from debug information.
+#
+# Normally packages are built inside $RPM_BUILD_DIR, thus resulting in proper
+# debuginfo packages, but as we are building our recipes at $sources_dir and
+# only including binaries here directly, no path would be removed and debuginfo
+# packages containing full paths to source files would be used.
+#
+# Setting RPM_BUILD_DIR to $sources_dir should do the trick, setting here and
+# hoping for the best.
+export RPM_BUILD_DIR=%(sources_dir)s
+
 %%clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -175,7 +191,8 @@ class RPMPackager(LinuxPackager):
                 'topdir': tmpdir,
                 'devel_package': devel_package,
                 'devel_files': devel_files,
-                'files':  runtime_files}
+                'files': runtime_files,
+                'sources_dir': self.config.sources}
 
         self.spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
         with open(self.spec_path, 'w') as f:
