@@ -115,41 +115,44 @@ class Config (object):
 
     def setup_env(self):
         self._create_path(self.prefix)
-
-        os.environ['CERBERO_PREFIX'] = self.prefix
+        self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
+        os.environ['CERBERO_PREFIX'] = self.prefix
 
+        self.env = self.get_env(self.prefix, libdir, self.py_prefix)
+        # set all the variables
+        for e, v in self.env.iteritems():
+            os.environ[e] = v
+
+    def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables
-        includedir = os.path.join(self.prefix, 'include')
-        bindir = os.path.join(self.prefix, 'bin')
-        manpathdir = os.path.join(self.prefix, 'share', 'man')
-        infopathdir = os.path.join(self.prefix, 'share', 'info')
-        pkgconfigdatadir = os.path.join(self.prefix, 'share', 'pkgconfig')
+        includedir = os.path.join(prefix, 'include')
+        bindir = os.path.join(prefix, 'bin')
+        manpathdir = os.path.join(prefix, 'share', 'man')
+        infopathdir = os.path.join(prefix, 'share', 'info')
+        pkgconfigdatadir = os.path.join(prefix, 'share', 'pkgconfig')
         pkgconfigdir = os.path.join(libdir, 'pkgconfig')
-        typelibpath = os.path.join(self.libdir, 'girepository-1.0')
-        xdgdatadir = os.path.join(self.prefix, 'share')
-        xdgconfigdir = os.path.join(self.prefix, 'etc', 'xdg')
-        xcursordir = os.path.join(self.prefix, 'share', 'icons')
+        typelibpath = os.path.join(libdir, 'girepository-1.0')
+        xdgdatadir = os.path.join(prefix, 'share')
+        xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
+        xcursordir = os.path.join(prefix, 'share', 'icons')
         aclocal = os.environ.get('ACLOCAL', 'aclocal')
-        aclocaldir = os.path.join(self.prefix, 'share', 'aclocal')
+        aclocaldir = os.path.join(prefix, 'share', 'aclocal')
         perl5lib = ':'.join(
-                [to_unixpath(os.path.join(self.prefix, 'lib', 'perl5')),
-                to_unixpath(os.path.join(self.prefix, 'lib', 'perl5',
+                [to_unixpath(os.path.join(libdir, 'perl5')),
+                to_unixpath(os.path.join(libdir, 'perl5',
                                          'site_perl', '5.8'))])
-        gstpluginpath = os.path.join(self.prefix, 'lib', 'gstreamer-0.10')
-        gstregistry = os.path.join(os.path.expanduser('~'), '.gstreamer-0.10',
+        gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
+        gstregistry = os.path.join('~', '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
-        pythonpath = os.path.join(self.prefix, self.py_prefix, 'site-packages')
+        pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
 
         if self.platform == Platform.LINUX:
             xdgdatadir += ":/usr/share:/usr/local/share"
 
-        self._create_path(aclocaldir)
-
         # Most of these variables are extracted from jhbuild
-        # FIXME: add python when needed
         env = {'LD_LIBRARY_PATH': libdir,
                'LDFLAGS': '-L%s %s' % (libdir,  os.environ.get('LDFLAGS', '')),
                'C_INCLUDE_PATH': includedir,
@@ -167,8 +170,8 @@ class Config (object):
                'ACLOCAL_FLAGS': '-I %s' % aclocaldir,
                'ACLOCAL': aclocal,
                'PERL5LIB': perl5lib,
-               'MONO_PREFIX': self.prefix,
-               'MONO_GAC_PREFIX': self.prefix,
+               'MONO_PREFIX': prefix,
+               'MONO_GAC_PREFIX': prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
                'PYTHONPATH': pythonpath
@@ -180,10 +183,7 @@ class Config (object):
                     self.toolchain_prefix
             env['ACLOCAL'] = '%s %s' % (aclocal, env['ACLOCAL_FLAGS'])
 
-        # set all the variables
-        self.env = env
-        for e, v in env.iteritems():
-            os.environ[e] = v
+        return env
 
     def _check_uninstalled(self):
         self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
