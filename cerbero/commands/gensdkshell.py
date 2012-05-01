@@ -24,7 +24,7 @@ from cerbero.utils import _, N_, ArgparseArgument, shell
 
 
 SCRIPT_TPL = '''\
-#!/bin/bash
+#!/usr/bin/env bash
 
 %s
 
@@ -63,7 +63,7 @@ class GenSdkShell(Command):
                 py_prefix, cmd=None):
         cmd = cmd or self.DEFAULT_CMD
         env = config.get_env(prefix, libdir, py_prefix)
-        env['PATH'] = '%s/bin:$PATH' % prefix
+        env['PATH'] = '%s/bin${PATH:+:$PATH}' % prefix
         env['LDFLAGS'] = '-L%s' % libdir
         envstr = ''
         for e, v in env.iteritems():
