@@ -182,7 +182,7 @@ class WixConfig(object):
             "@PackageComments@": self.package.longdesc,
             "@Description@": self.package.shortdesc,
             "@ProjectURL": self.package.url,
-            "@ProductName@": self.package.title,
+            "@ProductName@": self.package.shortdesc,
             "@ProgramFilesFolder@": self._program_folder(),
             "@Platform@": self._platform()}
         shell.replace(config_out_path, replacements)
