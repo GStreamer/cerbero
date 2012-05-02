@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+
 class Recipe(recipe.Recipe):
     name = 'pygobject'
     version = '2.28.6'
@@ -12,7 +13,10 @@ class Recipe(recipe.Recipe):
             shutil.move(os.path.join(self.config.prefix, 'lib', 'libpyglib-2.0-python.pyd'),
                         os.path.join(self.config.prefix, 'bin', 'libpyglib-2.0-python.pyd'))
 
-    files_libs = ['libpyglib-2.0-python']
+    # lets not use files_libs here to avoid getting the lib into the devel package,
+    # as there is only a libpyglib-2.0-python.so being generated, and _gio.so included in the
+    # runtime package depends on it
+    files_mainlib = ['lib/libpyglib-2.0-python%(pext)s']
     files_python = ['site-packages/glib/_glib%(pext)s',
                     'site-packages/glib/__init__.py',
                     'site-packages/glib/option.py',
