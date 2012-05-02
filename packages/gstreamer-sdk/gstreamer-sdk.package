@@ -44,3 +44,4 @@ class MetaPackage(package.MetaPackage):
         Platform.WINDOWS: 'gstreamer-sdk',
         Platform.LINUX: '/opt/gst-sdk/',
         Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/Version/1.0'}
+     root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'

@@ -264,10 +264,13 @@ class MetaPackage(PackageBase):
     @type platform_packages: dict
     @cvar icon: filename of the package icon
     @type icon: str
+    @cvar root_env_var: name of the environment variable with the prefix
+    @type root_env_var: str
     '''
 
     icon = None
     packages = []
+    root_env_var = 'CERBERO_SDK_ROOT'
     platform_packages = {}
 
     def __init__(self, config, store):
@@ -290,6 +293,9 @@ class MetaPackage(PackageBase):
 
     def all_files_list(self):
         return self._list_files(Package.all_files_list)
+
+    def get_root_env_var(self):
+        return (self.root_env_var % {'arch': self.config.target_arch}).upper()
 
     def _list_files(self, func):
         # for each package, call the function that list files

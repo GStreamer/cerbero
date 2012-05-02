@@ -306,10 +306,6 @@ class MSI(WixBase):
     def _registry_key(self, name):
         return 'Software\\%s' % name
 
-    def _env_var(self):
-        var = self._package_var().replace(' ', '_')
-        return ('%s_ROOT_%s' % (var, self.config.target_arch)).upper()
-
     def _customize_ui(self):
         # Banner Dialog and License
         for path, var in [(self.BANNER_BMP, 'BannerBmp'),
@@ -333,8 +329,8 @@ class MSI(WixBase):
         envcomponent = etree.SubElement(self.installdir, 'Component',
                 Id='EnvironmentVariables', Guid=self._get_uuid())
         env = etree.SubElement(envcomponent, 'Environment', Id="SdkRootEnv",
-                Action="set", Part="all", Name=self._env_var(), Permanent="no",
-                Value='[SDKROOTDIR]')
+                Action="set", Part="all", Name=self.package.get_root_env_var(),
+                Permanent="no", Value='[SDKROOTDIR]')
         etree.SubElement(self.main_feature, 'ComponentRef',
                 Id='EnvironmentVariables')
 
