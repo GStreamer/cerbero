@@ -43,7 +43,7 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-ugly')
 
     def post_install(self):
-        for cat in ['codecs', 'dvd']:
+        for cat in ['codecs_restricted', 'dvd']:
             name = 'files_%s_devel' % cat
             copy_files(self.tmp_destdir, self.config.prefix,
                     getattr(self, name), self.extensions,
