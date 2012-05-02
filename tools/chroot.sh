@@ -48,9 +48,9 @@ mkdir -p $CHROOT_PATH/home/$USER
 
 cp -f /home/$USER/.gitconfig $CHROOT_PATH/home/$USER/
 cp -rf /home/$USER/.ssh $CHROOT_PATH/home/$USER/
-chmod -R 600 $CHROOT_PATH/home/$USER/.ssh/
+chmod -R 700 $CHROOT_PATH/home/$USER/.ssh/
 cp -rf /home/$USER/.gnupg $CHROOT_PATH/home/$USER/
-chmod -R 600 $CHROOT_PATH/home/$USER/.gnupg/
+chmod -R 700 $CHROOT_PATH/home/$USER/.gnupg/
 
 echo "copying vim configuration files and installing/setting vim as default editor"
 cp -f /home/$USER/.vimrc $CHROOT_PATH/home/$USER/
@@ -64,11 +64,16 @@ chroot $CHROOT_PATH apt-get -y --force-yes install git-core
 echo "installing python and python-argparse"
 chroot $CHROOT_PATH apt-get -y --force-yes install python python-argparse
 
+echo "installing locales"
+chroot $CHROOT_PATH apt-get -y --force-yes install locales
+chroot $CHROOT_PATH locale-gen en_GB.UTF-8
+
 echo "generating cerbero tarball"
 make dist-tarball
 echo "extracting tarball at $CHROOT_PATH/home/$USER/git"
 mkdir -p $CHROOT_PATH/home/$USER/git
 tar --bzip2 -xvf dist/cerbero-0.1.0.tar.bz2 -C $CHROOT_PATH/home/$USER/git/
+cp -rf .git $CHROOT_PATH/home/$USER/git/cerbero-0.1.0/
 
 echo "generating $CHROOT_PATH/home/$USER/.cerbero/cerbero.cdc from template"
 mkdir -p $CHROOT_PATH/home/$USER/.cerbero
