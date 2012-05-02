@@ -56,7 +56,8 @@ class RedHatBootstraper (UnixBootstraper):
                 'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
                 'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
-                'alsa-lib-devel']
+                'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
+                'perl-XML-Simple']
 
 
 class OpenSuseBootstraper (UnixBootstraper):
