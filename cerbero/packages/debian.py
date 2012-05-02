@@ -57,6 +57,8 @@ Package: %(p_prefix)s%(name)s
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends} %(requires)s
+Recommends: %(recommends)s
+Suggests: %(suggests)s
 Description: %(shortdesc)s
  %(longdesc)s
 
@@ -318,12 +320,35 @@ class DebianPackager(LinuxPackager):
         args['shortdesc'] = self.package.shortdesc
         args['longdesc'] = self.package.longdesc \
                 if self.package.longdesc != 'default' else args['shortdesc']
-        requires = self._get_requires(PackageType.RUNTIME)
-        args['requires'] = ', ' + requires if requires else ''
         runtime_files = self._files_list(PackageType.RUNTIME)
         if isinstance(self.package, MetaPackage):
+            requires = []
+            suggests = []
+            recommends = []
+            for p in self.package.packages:
+                package = self.store.get_package(p[0])
+                package_name = p[0]
+                if self.config.packages_prefix is not None \
+                        and not package.ignore_package_prefix:
+                    package_name = ('%s-%s' % (self.config.packages_prefix, p[0]))
+                if p[1]:
+                    requires.append(package_name)
+                elif p[2]:
+                    recommends.append(package_name)
+                else:
+                    suggests.append(package_name)
+            requires = ', '.join(requires)
+            recommends = ', '.join(recommends)
+            suggests = ', '.join(suggests)
+            args['requires'] = ', ' + requires if requires else ''
+            args['recommends'] = recommends
+            args['suggests'] = suggests
             return CONTROL_TPL % args, runtime_files
         else:
+            requires = self._get_requires(PackageType.RUNTIME)
+            args['requires'] = ', ' + requires if requires else ''
+            args['recommends'] = ''
+            args['suggests'] = ''
             return (CONTROL_TPL + CONTROL_DBG_PACKAGE_TPL) % \
                     args, runtime_files
 
