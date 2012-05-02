@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'gstreamer', 'gst-plugins-base', 'clutter', 'clutter-gst']
     platform_deps = { Platform.LINUX: ['libXtst'] }
     use_system_libs = True
-    remotes = {'upstream': 'https://github.com/luisbg/snappy.git'}
+    remotes = {'upstream': 'git://git.gnome.org/snappy'}
 
     files_bins = ['snappy']
     files_data = ['share/snappy']
