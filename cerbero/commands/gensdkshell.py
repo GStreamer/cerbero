@@ -68,7 +68,7 @@ class GenSdkShell(Command):
         envstr = ''
         for e, v in env.iteritems():
             v = v.replace(config.prefix, prefix)
-            envstr += '%s="%s"\n' % (e, v)
+            envstr += 'export %s="%s"\n' % (e, v)
         try:
             filepath = os.path.join(output_dir, name)
             with open(filepath, 'w+') as f:
