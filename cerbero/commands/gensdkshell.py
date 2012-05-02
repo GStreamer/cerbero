@@ -24,7 +24,7 @@ from cerbero.utils import _, N_, ArgparseArgument, shell
 
 
 SCRIPT_TPL = '''\
-#!/usr/bin/env bash
+#!/usr/bin/env bash -i
 
 %s
 
@@ -62,12 +62,21 @@ class GenSdkShell(Command):
     def runargs(self, config, name, output_dir, prefix, libdir,
                 py_prefix, cmd=None):
         cmd = cmd or self.DEFAULT_CMD
-        env = config.get_env(prefix, libdir, py_prefix)
-        env['PATH'] = '%s/bin${PATH:+:$PATH}' % prefix
-        env['LDFLAGS'] = '-L%s' % libdir
+        env = {}
+        env['PATH'] = '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix
+        env['LD_LIBRARY_PATH'] = '%s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir
+        env['PKG_CONFIG_PATH'] = '%s/lib/pkgconfig:%s/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix, prefix)
+        env['XDG_DATA_DIRS'] = '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:/usr/local/share:/usr/share' % prefix
+        env['XDG_CONFIG_DIRS'] = '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix
+        env['GST_PLUGIN_SYSTEM_PATH'] = '%s/gstreamer-0.10' % libdir
+        env['GST_REGISTRY'] = '${HOME}/.gstreamer-0.10/.cerbero-registry'
+        env['GST_PLUGIN_SCANNER'] = '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix
+        env['PYTHONPATH'] = '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}' % (prefix, py_prefix)
+        env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix
+        env['CXXFLAGS'] = '-I%s/include ${CXXFLAGS}' % prefix
+        env['LDFLAGS'] = '-L%s ${LDFLAGS}' % libdir
         envstr = ''
         for e, v in env.iteritems():
-            v = v.replace(config.prefix, prefix)
             envstr += 'export %s="%s"\n' % (e, v)
         try:
             filepath = os.path.join(output_dir, name)
