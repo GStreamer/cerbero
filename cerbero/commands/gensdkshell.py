@@ -36,7 +36,7 @@ class GenSdkShell(Command):
     doc = N_('Create a script with the shell environment for the SDK')
     name = 'gensdkshell'
 
-    DEFAULT_CMD = 'exec "$@"'
+    DEFAULT_CMD = '$SHELL "$@"'
 
     def __init__(self):
         Command.__init__(self,
