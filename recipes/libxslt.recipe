@@ -1,6 +1,14 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+
 class Recipe(recipe.Recipe):
     name = 'libxslt'
     version = '1.1.26'
     licenses = [License.MIT]
+    configure_options = '--without-python --without-crypto'
+    deps = ['libxml2']
+
+    files_libs = ['libxslt', 'libexslt']
+    files_devel = ['bin/xsltproc', 'bin/xslt-config', 'include/libexslt', 'include/libxslt',
+                   'lib/xsltConf.sh',
+                   'lib/pkgconfig/libexslt.pc', 'lib/pkgconfig/libxslt.pc']

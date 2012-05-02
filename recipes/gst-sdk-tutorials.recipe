@@ -1,0 +1,56 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+import os
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-sdk-tutorials'
+    version = '0.0.1'
+
+    def configure(self):
+        pass
+
+    def compile(self):
+        pass
+
+    def install(self):
+        self.files_tutorials = [self.relpath(f, self.build_dir) for f in \
+                self.listdir_recursive(os.path.join(self.build_dir, 'gst-sdk'))]
+        if self.config.target_platform == Platform.WINDOWS:
+            self.files_tutorials.extend([self.relpath(f, self.build_dir) for f in \
+                    self.listdir_recursive(os.path.join(self.build_dir, 'vs'))])
+
+        for f in self.files_tutorials:
+            install_dir = os.path.dirname(os.path.join(self.config.prefix, 'share', f))
+            if not os.path.exists(install_dir):
+                os.makedirs(install_dir)
+            shutil.copy(os.path.join(self.build_dir, f),
+                        os.path.join(self.config.prefix, 'share', f))
+
+    def listdir_recursive(self, path):
+        if not os.path.isdir(path):
+            return []
+
+        ret = []
+        for f in os.listdir(path):
+            fpath = os.path.join(path, f)
+            if os.path.isdir(fpath):
+                ret.extend(self.listdir_recursive(fpath))
+            else:
+                ret.append(fpath)
+        return ret
+
+    def relpath(self, path, reldir):
+        """Returns 'path' relative to 'reldir'."""
+
+        # use normpath to ensure path separators are uniform
+        path = os.path.normpath(path)
+
+        # find length of reldir as prefix of path (or zero if it isn't)
+        prelen = len(os.path.commonprefix((
+            os.path.normcase(path),
+            # add a separator to get correct prefix length
+            # (normpath removes trailing separators)
+            os.path.normcase(os.path.normpath(reldir)) + os.sep
+            )))
+        return path[prelen:]

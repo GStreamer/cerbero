@@ -15,6 +15,7 @@ class MetaPackage(package.MetaPackage):
     org = "net.gstreamer"
     ignore_package_prefix = True
     packages =[
+               # (name, required, selected)
                ('gstreamer-core', True, True),
                ('gstreamer-system', False, True),
                ('gstreamer-playback', False, True),
@@ -33,6 +34,7 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
                ('gstreamer-tests', False, False),
+               ('gstreamer-tutorials', False, True),
               ]
     platform_packages = {
             Platform.WINDOWS: [('vsintegration', True, False)]}

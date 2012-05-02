@@ -129,8 +129,9 @@ class LinuxPackager(PackagerBase):
             details[x] = get_dep_name(x)
 
         if package_type == PackageType.DEVEL:
-            deps = [x for x in deps if
-                    self.store.get_package(x).has_devel_package]
+            deps = [x for x in deps \
+                    if hasattr(self.store.get_package(x), 'has_devel_package') and
+                       self.store.get_package(x).has_devel_package]
             deps = map(lambda x: details[x] + devel_suffix, deps)
         else:
             deps = map(lambda x: details[x], deps)
