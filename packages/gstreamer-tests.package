@@ -10,7 +10,7 @@ class Package(package.Package):
     version = '1.0'
     license = License.LGPL
     vendor = 'GStreamer Project'
-    uuid = '5fce6752-4165-511f-8287-e8f2a895f853'
+    uuid = '42116752-4165-511f-8287-e8f2a895f853'
     sys_deps = {
         Distro.DEBIAN: ['python'],
         Distro.REDHAT: ['python']

@@ -10,7 +10,7 @@ class Package(package.Package):
     url = "http://www.gstreamer.com"
     license = License.LGPL
     vendor = 'GStreamer Project'
-    uuid = '3fde61c2-4535-411f-8287-e8f6a892f853'
+    uuid = '3fde61c2-4535-411f-8287-e8f64445f853'
     deps = ['gstreamer-core']
 
     files = ['a52dec:libs', 'opencore-amr:libs', 'libmad:libs', 'libmpeg2:libs',
