@@ -1,4 +1,10 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+import tempfile
+
+from cerbero.utils import copy_files
+
 
 class Recipe(recipe.Recipe):
     name = 'gst-ffmpeg-static'
@@ -20,8 +26,14 @@ class Recipe(recipe.Recipe):
 
         self.remotes['origin'] = ('%s/%s' %
                 (self.config.git_root, 'gst-ffmpeg.git'))
-        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
-
-        static_prefix = "gstreamer-static/%s/" % self.config.prefix
-        self.files_codecs_devel = [static_prefix + f for f in self.files_codecs_devel]
+        self.tmp_destdir = tempfile.mkdtemp()
+        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
+
+    def post_install(self):
+        for cat in ['codecs']:
+            name = 'files_%s_devel' % cat
+            copy_files(self.tmp_destdir, self.config.prefix,
+                    getattr(self, name), self.extensions,
+                    self.config.target_platform)
+        shutil.rmtree(self.tmp_destdir)

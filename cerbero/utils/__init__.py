@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import shutil
 import sys
 try:
     import sysconfig
@@ -195,3 +196,19 @@ def validate_packager(packager):
     expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@'\
             '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
     return bool(re.match(expr, packager))
+
+
+def copy_files(origdir, destdir, files, extensions, target_platform):
+    for f in files:
+        f = f % extensions
+        install_dir = os.path.dirname(os.path.join(destdir, f))
+        if not os.path.exists(install_dir):
+            os.makedirs(install_dir)
+        if target_platform == Platform.WINDOWS:
+            relprefix = to_unixpath(destdir)[2:]
+        else:
+            relprefix = destdir[1:]
+        orig = os.path.join(origdir, relprefix, f)
+        dest = os.path.join(destdir, f)
+        print "copying %s to %s" % (orig, dest)
+        shutil.copy(orig, dest)

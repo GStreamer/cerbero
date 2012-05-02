@@ -1,4 +1,10 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+import tempfile
+
+from cerbero.utils import copy_files
+
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-good-static'
@@ -117,22 +123,22 @@ class Recipe(recipe.Recipe):
 
         self.remotes['origin'] = ('%s/%s' %
                 (self.config.git_root, 'gst-plugins-good.git'))
-        self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.tmp_destdir = tempfile.mkdtemp()
+        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')
 
-        static_prefix = "gstreamer-static/%s/" % self.config.prefix
+    def post_install(self):
         for cat in ['core', 'effects', 'codecs', 'net', 'vis']:
             name = 'files_%s_devel' % cat
-            setattr(self, name, [static_prefix + f for f in getattr(self, name)])
-        platform_files_capture_devel = {}
-        for platform, files in self.platform_files_capture_devel.iteritems():
-            platform_files_capture_devel[platform] = [static_prefix + f for f in files]
-        self.platform_files_capture_devel = platform_files_capture_devel
-        platform_files_codecs_devel = {}
-        for platform, files in self.platform_files_codecs_devel.iteritems():
-            platform_files_codecs_devel[platform] = [static_prefix + f for f in files]
-        self.platform_files_codecs_devel = platform_files_codecs_devel
-        platform_files_sys_devel = {}
-        for platform, files in self.platform_files_sys_devel.iteritems():
-            platform_files_sys_devel[platform] = [static_prefix + f for f in files]
-        self.platform_files_sys_devel = platform_files_sys_devel
+            copy_files(self.tmp_destdir, self.config.prefix,
+                    getattr(self, name), self.extensions,
+                    self.config.target_platform)
+        for platform_cat in ['capture', 'codecs', 'sys']:
+            name = 'platform_files_%s_devel' % platform_cat
+            platform_files = getattr(self, name)
+            if self.config.target_platform in platform_files:
+                copy_files(self.tmp_destdir, self.config.prefix,
+                    platform_files[self.config.target_platform],
+                    self.extensions,
+                    self.config.target_platform)
+        shutil.rmtree(self.tmp_destdir)
