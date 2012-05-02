@@ -9,5 +9,4 @@ class Recipe(recipe.Recipe):
     force_configure = True
 
     files_libs = ['libfreetype']
-    files_bin = ['freetype-config']
-    files_devel = ['lib/pkgconfig/freetype2.pc', 'include/ft2build.h', 'include/freetype2']
+    files_devel = ['bin/freetype-config%(bext)s', 'lib/pkgconfig/freetype2.pc', 'include/ft2build.h', 'include/freetype2']

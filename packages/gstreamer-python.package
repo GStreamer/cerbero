@@ -16,4 +16,5 @@ class Package(package.Package):
             Distro.DEBIAN: ['python'],
             Distro.REDHAT: ['python']}
 
-    files = ['gst-python']
+    files = ['gst-python:python']
+    files_devel = ['gst-python:examples']

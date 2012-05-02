@@ -19,7 +19,8 @@ class Recipe(recipe.Recipe):
     ]
     platform_files_python = {
         Platform.DARWIN: ['site-packages/gtk-2.0/gio/unix%(pext)s', ],
-        Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(pext)s', ],
+        Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(pext)s',
+	                 'site-packages/gtk-2.0/gtkunixprint%(pext)s'],
     }
     files_devel = ['include/pygtk-2.0/pygtk', 'lib/pkgconfig/pygtk-2.0.pc']
     files_demo = ['lib/pygtk/2.0/demos/',

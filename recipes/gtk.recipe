@@ -11,20 +11,20 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
 
     files_libs = ['libgailutil']
-    files_bins = [
-        'gtk-demo', 'gtk-update-icon-cache', 'gtk-query-immodules-2.0',
-        'gtk-builder-convert']
+    files_bins = ['gtk-update-icon-cache', 'gtk-query-immodules-2.0']
     files_devel = [
+        'bin/gtk-demo%(bext)s',
+        'bin/gtk-builder-convert%(bext)s',
         'lib/gtk-2.0/include',
         'lib/pkgconfig/gtk+-2.0.pc',
         'lib/pkgconfig/gdk-2.0.pc',
         'lib/pkgconfig/gail.pc',
         'include/gtk-2.0',
         'include/gail-1.0',
+	'share/gtk-2.0/demo',
     ]
     files_modules = ['lib/gtk-2.0/modules/libferret%(mext)s',
                      'lib/gtk-2.0/modules/libgail%(mext)s']
-    files_share_demo = ['share/gtk-2.0/demo']
     platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
         Platform.DARWIN: ['libgtk-quartz-2.0', 'libgdk-quartz-2.0'],

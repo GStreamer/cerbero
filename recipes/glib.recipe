@@ -13,12 +13,11 @@ class Recipe(recipe.Recipe):
     files_libs = [
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
         'libgthread-2.0']
-    files_bins = ['gsettings', 'gdbus', 'glib-compile-resources']
+    files_bins = ['gsettings', 'gdbus', 'gio-querymodules', 'glib-compile-schemas']
     files_gio = ['lib/gio/modules']
     files_devel = [
         'bin/glib-gettextize%(bext)s',
         'bin/glib-mkenums%(bext)s',
-        'bin/glib-compile-schemas%(bext)s',
         'bin/glib-compile-resources%(bext)s',
         'bin/glib-genmarshal%(bext)s',
         'bin/gresource%(bext)s',
