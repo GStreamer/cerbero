@@ -104,7 +104,7 @@ class PropsBase(object):
 
 class CommonProps(PropsBase):
 
-    def __init__(self, prefix, prefix_macro):
+    def __init__(self, prefix_macro):
         PropsBase.__init__(self, 'Common')
         self._add_root()
         self._add_skeleton()
