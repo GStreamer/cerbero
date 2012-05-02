@@ -40,7 +40,8 @@ class Recipe(recipe.Recipe):
         }
     platform_files_themes = {
         Platform.WINDOWS: [
-            'share/themes/MS-Windows/gtk-2.0/gtkrc',]
+            'share/themes/MS-Windows/gtk-2.0/gtkrc',
+            'lib/gtk-2.0/2.10.0/engines/libwimp.dll',]
             }
     files_lang = ['gtk20', 'gtk20-properties']
 
