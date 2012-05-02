@@ -130,6 +130,7 @@ class Recipe(recipe.Recipe):
         self.remotes['origin'] = ('%s/%s' %
                 (self.config.git_root, 'gst-plugins-bad.git'))
         self.make_install='make install DESTDIR=%s/gstreamer-static' % self.config.prefix
+        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-bad')
 
         static_prefix = "gstreamer-static/%s/" % self.config.prefix
         for cat in ['effects', 'codecs', 'codecs_gpl', 'codecs_restricted',
