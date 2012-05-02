@@ -15,7 +15,7 @@ class Package(package.Package):
 
     files = ['libmms:libs',
              'gst-plugins-ugly:net_restricted',
-	     'gst-plugins-bad:net_restricted']
+             'gst-plugins-bad:net_restricted']
     files_devel = ['gst-plugins-ugly-static:net_restricted_devel',
             'gst-plugins-bad-static:net_restricted_devel']
 

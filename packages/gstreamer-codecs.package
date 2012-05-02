@@ -23,7 +23,7 @@ class Package(package.Package):
     files_devel = ['gst-plugins-base-static:codecs_devel',
             'gst-plugins-good-static:codecs_devel',
             'gst-plugins-bad-static:codecs_devel',
-	    'gst-plugins-ugly-static:codecs_devel']
+            'gst-plugins-ugly-static:codecs_devel']
     platform_files = {
             Platform.LINUX: ['libdv:libs'],
             Platform.DARWIN: ['libdv:libs']

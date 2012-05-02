@@ -16,9 +16,9 @@ class Package(package.Package):
     files = ['libass:libs', 'fribidi:libs',
              'gst-plugins-base:codecs_gpl',
              'gst-plugins-good:codecs_gpl',
-	     'gst-plugins-bad:codecs_gpl',
-	     'gst-plugins-ugly:codecs_gpl']
+             'gst-plugins-bad:codecs_gpl',
+             'gst-plugins-ugly:codecs_gpl']
     files_devel = ['gst-plugins-base-static:codecs_gpl_devel',
              'gst-plugins-good-static:codecs_gpl_devel',
-	     'gst-plugins-bad-static:codecs_gpl_devel',
-	     'gst-plugins-ugly-static:codecs_gpl_devel']
+             'gst-plugins-bad-static:codecs_gpl_devel',
+             'gst-plugins-ugly-static:codecs_gpl_devel']
