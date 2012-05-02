@@ -33,6 +33,8 @@ debootstrap $DISTRO_VERSION $CHROOT_PATH $mirror
 cp /etc/resolv.conf $CHROOT_PATH/etc/resolv.conf
 cp /etc/hosts $CHROOT_PATH/etc/hosts
 hostname=$USER-$DISTRO-$DISTRO_VERSION-$ARCH-chroot
+# hostnames cannot contain _
+hostname=$(echo $hostname | sed s/'_'/'-'/g)
 echo $hostname > $CHROOT_PATH/etc/hostname
 chroot $CHROOT_PATH hostname $hostname
 
