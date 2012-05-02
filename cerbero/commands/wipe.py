@@ -55,7 +55,12 @@ class Wipe(Command):
     def wipe(self, paths):
         for path in paths:
             m.action(_("Removing path: %s") % path)
-            shutil.rmtree(path)
+            if not os.path.exists(path):
+                continue
+            if os.path.isfile(path):
+                os.remove(path)
+            else:
+                shutil.rmtree(path)
 
 
 register_command(Wipe)
