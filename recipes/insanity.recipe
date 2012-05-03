@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     #       others LGPLv2.1+
     licenses = [License.LGPL]
     config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection --program-prefix=\\"\\"'
+    configure_options = '--disable-introspection --program-prefix= '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity'}
     deps = [ 'glib', 'dbus', 'gtk+' ]
     platform_deps = {
