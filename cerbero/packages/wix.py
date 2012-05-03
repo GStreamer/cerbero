@@ -85,6 +85,23 @@ class WixBase():
     def _get_uuid(self):
         return "%s" % uuid.uuid1()
 
+    def _format_version(self, version):
+        # mayor and minor must be less than 256 on windows,
+        # so 2012.5 must be changed to 20.12.5
+        versions = version.split('.')
+        tversions = []
+        for version in versions:
+            i = int(version)
+            if i > 9999:
+                raise FatalError("Unsupported version number, mayor and minor "
+                        "must be less than 9999")
+            elif i > 255:
+                tversions.append(version[:-2])
+                tversions.append(version[-2:])
+            else:
+                tversions.append(version)
+        return '.'.join(tversions)
+
 
 class MergeModule(WixBase):
     '''
@@ -109,7 +126,8 @@ class MergeModule(WixBase):
     def _add_module(self):
         self.module = etree.SubElement(self.root, "Module",
             Id=self._format_id(self.package.name),
-            Version=self.package.version, Language='1033')
+            Version=self._format_version(self.package.version),
+            Language='1033')
 
     def _add_package(self):
         self.pkg = etree.SubElement(self.module, "Package",
@@ -159,7 +177,7 @@ class MergeModule(WixBase):
                          Source=filepath)
 
 
-class WixConfig(object):
+class WixConfig(WixBase):
 
     wix_config = 'wix/Config.wxi'
 
@@ -178,7 +196,7 @@ class WixConfig(object):
             "@UpgradeCode@": self.package.uuid,
             "@Language@": '1033',
             "@Manufacturer@": self.package.vendor,
-            "@Version@": self.package.version,
+            "@Version@": self._format_version(self.package.version),
             "@PackageComments@": self.package.longdesc,
             "@Description@": self.package.shortdesc,
             "@ProjectURL": self.package.url,
