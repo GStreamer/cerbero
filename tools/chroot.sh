@@ -28,15 +28,16 @@ fi
 cerbero_distro_version="$DISTRO"_"$DISTRO_VERSION"
 
 echo "bootstraping $DISTRO-$DISTRO_VERSION"
-debootstrap $DISTRO_VERSION $CHROOT_PATH $mirror
+debootstrap --arch=$ARCH $DISTRO_VERSION $CHROOT_PATH $mirror
 
 cp /etc/resolv.conf $CHROOT_PATH/etc/resolv.conf
 cp /etc/hosts $CHROOT_PATH/etc/hosts
 hostname=$USER-$DISTRO-$DISTRO_VERSION-$ARCH-chroot
 # hostnames cannot contain _
 hostname=$(echo $hostname | sed s/'_'/'-'/g)
-echo $hostname > $CHROOT_PATH/etc/hostname
-chroot $CHROOT_PATH hostname $hostname
+#echo $hostname > $CHROOT_PATH/etc/hostname
+#chroot $CHROOT_PATH hostname $hostname
+echo $hostname > $CHROOT_PATH/etc/debian_chroot
 
 userid=$(grep $USER /etc/passwd | cut -d: -f3)
 echo "$USER:x:$userid:$userid:$USER,,,:/home/$USER:/bin/bash" >> $CHROOT_PATH/etc/passwd
@@ -44,6 +45,10 @@ echo "$USER::15460::::::" >> $CHROOT_PATH/etc/shadow
 echo "$USER:x:$userid:" >> $CHROOT_PATH/etc/group
 echo "$USER ALL=NOPASSWD: ALL" >> $CHROOT_PATH/etc/sudoers
 
+echo "installing sudo"
+chroot $CHROOT_PATH apt-get -y --force-yes install sudo
+
+echo "copying user git/ssh/gpg configurations"
 mkdir -p $CHROOT_PATH/home/$USER
 
 cp -f /home/$USER/.gitconfig $CHROOT_PATH/home/$USER/
