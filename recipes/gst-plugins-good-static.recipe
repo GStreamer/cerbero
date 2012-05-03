@@ -4,6 +4,7 @@ import shutil
 import tempfile
 
 from cerbero.utils import copy_files, to_unixpath, shell
+from cerbero.build.build import system_libs
 
 
 class Recipe(recipe.Recipe):
@@ -127,6 +128,7 @@ class Recipe(recipe.Recipe):
         self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')
 
+    @system_libs
     def configure(self):
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': to_unixpath(self.config.prefix),

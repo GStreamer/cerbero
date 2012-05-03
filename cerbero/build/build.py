@@ -71,6 +71,21 @@ class CustomBuild(Build):
         pass
 
 
+def system_libs(func):
+    ''' Decorator to use system libs'''
+    def call(*args):
+        self = args[0]
+        if self.use_system_libs and self.config.allow_system_libs:
+            self._add_system_libs()
+        res = func(*args)
+        if self.use_system_libs and self.config.allow_system_libs:
+            self._restore_pkg_config_path()
+        return res
+
+    call.func_name = func.func_name
+    return call
+
+
 class MakefilesBase (Build):
     '''
     Base class for makefiles build systems like autotools and cmake
@@ -96,20 +111,6 @@ class MakefilesBase (Build):
         if self.config.allow_parallel_build and self.allow_parallel_build \
                 and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
-
-    def system_libs(func):
-        ''' Decorator to use system libs'''
-        def call(*args):
-            self = args[0]
-            if self.use_system_libs and self.config.allow_system_libs:
-                self._add_system_libs()
-            res = func(*args)
-            if self.use_system_libs and self.config.allow_system_libs:
-                self._restore_pkg_config_path()
-            return res
-
-        call.func_name = func.func_name
-        return call
 
     @system_libs
     def configure(self):
