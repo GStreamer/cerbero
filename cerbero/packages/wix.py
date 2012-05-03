@@ -182,11 +182,14 @@ class WixConfig(object):
             "@PackageComments@": self.package.longdesc,
             "@Description@": self.package.shortdesc,
             "@ProjectURL": self.package.url,
-            "@ProductName@": self.package.shortdesc,
+            "@ProductName@": self._product_name(),
             "@ProgramFilesFolder@": self._program_folder(),
             "@Platform@": self._platform()}
         shell.replace(config_out_path, replacements)
         return config_out_path
+
+    def _product_name(self):
+        return '%s (%s)' % (self.package.shortdesc, self._platform())
 
     def _program_folder(self):
         if self.arch == Architecture.X86:
