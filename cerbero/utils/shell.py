@@ -53,7 +53,7 @@ class StdOut:
 
 
 def _fix_mingw_cmd(path):
-    reserved = ['/', ' ', '\\', ')', '(']
+    reserved = ['/', ' ', '\\', ')', '(', '"']
     l_path = list(path)
     for i in range(len(path)):
         if path[i] == '\\':
