@@ -21,7 +21,7 @@ import shutil
 
 from cerbero.commands import Command, register_command
 from cerbero.config import CONFIG_DIR
-from cerbero.utils import _, N_, shell
+from cerbero.utils import _, N_, shell, ArgparseArgument
 import cerbero.utils.messages as m
 
 
@@ -30,12 +30,20 @@ class Wipe(Command):
     name = 'wipe'
 
     def __init__(self):
-        Command.__init__(self, [])
+        Command.__init__(self, [
+                ArgparseArgument('--force', action='store_true',
+                    default=False,
+                    help=_('force the deleting of everything without user '
+                           'input'))])
 
     def run(self, config, args):
         to_remove = [os.path.join(CONFIG_DIR, config.cache_file)]
         to_remove.append(config.prefix)
         to_remove.append(config.sources)
+
+        if args.force:
+            self.wipe(to_remove)
+            return
 
         options = ['yes', 'no']
         msg = _("WARNING!!!\n"
