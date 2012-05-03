@@ -25,4 +25,4 @@ class Recipe(recipe.Recipe):
         opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
         with open(opts_file, 'w+') as f:
             f.write(opts_file)
-        Recipe.configure(self)
+        recipe.Recipe.configure(self)
