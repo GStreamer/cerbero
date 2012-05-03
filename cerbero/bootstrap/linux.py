@@ -43,7 +43,7 @@ class DebianBootstraper (UnixBootstraper):
                 'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
-                'build-essential', 'devscripts', 'fakeroot']
+                'build-essential', 'devscripts', 'fakeroot', 'transfig']
 
 
 class RedHatBootstraper (UnixBootstraper):
