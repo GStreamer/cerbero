@@ -110,6 +110,8 @@ class FilesProvider(object):
         categories = []
         for name, value in inspect.getmembers(self):
             if (isinstance(value, list) or isinstance(value, dict)):
+                if name.endswith('_licenses'):
+                    continue
                 if name.startswith('files_'):
                     categories.append(name.split('files_')[1])
                 if name.startswith('platform_files_'):

@@ -21,7 +21,7 @@ import unittest
 import tempfile
 
 from cerbero.build import filesprovider
-from cerbero.config import Platform
+from cerbero.config import Platform, License
 from test.test_build_common import add_files
 from test.test_common import DummyConfig
 
@@ -39,6 +39,7 @@ class FilesProvider(filesprovider.FilesProvider):
     files_libs = ['libgstreamer-0.10']
     files_bins = ['gst-launch']
     files_devel = ['include/gstreamer.h']
+    files_devel_licenses = [License.LGPL]
     platform_files_bins = {
             Platform.WINDOWS: ['windows'],
             Platform.LINUX: ['linux']}
