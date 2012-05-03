@@ -1,0 +1,11 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform=Platform.WINDOWS
+target_distro=Distro.WINDOWS
+target_distro_version=DistroVersion.WINDOWS_7
+target_arch=Architecture.X86
+cache_file='mingw-w32-win'
+prefix=os.path.expanduser('~/mingw/windows/w32')
+sources=os.path.expanduser('~/cerbero/sources/mingw-w32-win')
+toolchain_prefix=os.path.expanduser('~/mingw/linux/w32/')
