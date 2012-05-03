@@ -8,7 +8,8 @@ class MetaPackage(package.MetaPackage):
     longdesc = "GStreamer SDK"
     title = "GStreamer SDK"
     url = "http://www.gstreamer.com"
-    version = '1.0'
+    version = '2012.5'
+    codename = 'Amazon'
     license = License.LGPL
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
     vendor = "GStreamer Project"

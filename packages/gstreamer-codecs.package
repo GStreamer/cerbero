@@ -6,7 +6,8 @@ class Package(package.Package):
 
     name = 'gstreamer-codecs'
     shortdesc = 'GStreamer codecs'
-    version = '1.0'
+    version = '2012.5'
+    codename = 'Amazon'
     url = "http://www.gstreamer.com"
     license = License.LGPL
     vendor = 'GStreamer Project'

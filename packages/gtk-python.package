@@ -7,7 +7,8 @@ class Package(package.Package):
     name = 'gtk+-2.0-python'
     shortdesc = 'Gtk python bingings'
     url = "http://www.gstreamer.com"
-    version = '1.0'
+    version = '2012.5'
+    codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
     uuid = '18fe47c2-4265-411f-8287-e8fda593f853'

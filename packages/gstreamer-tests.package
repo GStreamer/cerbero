@@ -7,7 +7,8 @@ class Package(package.Package):
     name = 'gstreamer-tests'
     shortdesc = 'Tests for GStreamer'
     url = "http://www.gstreamer.com"
-    version = '1.0'
+    version = '2012.5'
+    codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
     uuid = '42116752-4165-511f-8287-e8f2a895f853'
