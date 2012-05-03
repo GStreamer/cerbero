@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     # lets not use files_libs here to avoid getting the lib into the devel package,
     # as there is only a libpyglib-2.0-python.so being generated, and _gio.so included in the
     # runtime package depends on it
-    files_mainlib = ['lib/libpyglib-2.0-python%(pext)s']
+    files_mainlib = ['%(sdir)s/libpyglib-2.0-python%(pext)s']
     files_python = ['site-packages/glib/_glib%(pext)s',
                     'site-packages/glib/__init__.py',
                     'site-packages/glib/option.py',
