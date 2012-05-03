@@ -52,6 +52,16 @@ class StdOut:
         return getattr(self.stream, attr)
 
 
+def _fix_mingw_cmd(path):
+    reserved = ['/', ' ', '\\', ')', '(']
+    l_path = list(path)
+    for i in range(len(path)):
+        if path[i] == '\\':
+            if i+1 == len(path) or path [i+1] not in reserved:
+                l_path[i] = '/'
+    return ''.join(l_path)
+
+
 def call(cmd, cmd_dir='.', fail=True):
     '''
     Run a shell command
@@ -72,6 +82,8 @@ def call(cmd, cmd_dir='.', fail=True):
                 cmd = cmd[2:]
             # run all processes through sh.exe to get scripts working
             cmd = '%s "%s"' % ('sh -c', cmd)
+            # fix paths with backslashes
+            cmd = _fix_mingw_cmd(cmd)
             # Disable shell which uses cmd.exe
             shell = False
         stream = LOGFILE or sys.stdout
