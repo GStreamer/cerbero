@@ -120,6 +120,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstd3dvideosink%(mext)s',
              'lib/gstreamer-0.10/libgstdirectdrawsink%(mext)s',
              'lib/gstreamer-0.10/libgstdshowdecwrapper%(mext)s',
+             'lib/gstreamer-0.10/libgstdshowvideosink%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgstapplemedia%(mext)s',
