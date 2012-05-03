@@ -126,7 +126,8 @@ class MSIPackager(PackagerBase):
         config = WixConfig(self.config, self.package)
         config_path = config.write(self.output_dir)
         candle = Candle(self.wix_prefix, self._with_wine)
-        ui_path = os.path.join(self.config.data_dir, self.UI_SOURCES)
+        ui_path = os.path.join(os.path.abspath(self.config.data_dir),
+                               self.UI_SOURCES)
         if self._with_wine:
             ui_path = to_winepath(ui_path)
         candle.compile(ui_path, self.output_dir)

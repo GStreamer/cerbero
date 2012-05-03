@@ -268,6 +268,7 @@ class Config (object):
         if self.uninstalled:
             self.data_dir = os.path.join(os.path.dirname(__file__),
                                          '..', 'data')
+            self.data_dir = os.path.abspath(self.data_dir)
             return
         curdir = os.path.dirname(__file__)
         while not os.path.exists(os.path.join(curdir, 'share', 'cerbero',
