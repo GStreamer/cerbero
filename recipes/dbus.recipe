@@ -9,7 +9,14 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-xml-docs --disable-doxygen-docs --disable-selinux --disable-libaudit --disable-launchd --disable-tests --disable-x11-autolaunch --disable-Werror '
 
     files_libs = ['libdbus-1']
-    files_bins = ['dbus-launch', 'dbus-send', 'dbus-daemon', 'dbus-monitor', 'dbus-uuidgen', 'dbus-cleanup-sockets']
-    files_misc = ['libexec/dbus-daemon-launch-helper%(bext)s']
+    files_bins = ['dbus-launch', 'dbus-send', 'dbus-daemon', 'dbus-monitor']
     files_devel = ['lib/pkgconfig/dbus-1.pc', 'include/dbus-1.0',
                    'lib/dbus-1.0/include/dbus/dbus-arch-deps.h']
+    platform_files_bins = {
+            Platform.LINUX: ['dbus-uuidgen', 'dbus-cleanup-sockets'],
+            Platform.DARWIN: ['dbus-uuidgen', 'dbus-cleanup-sockets'],
+    }
+    platform_files_misc = {
+            Platform.LINUX: ['libexec/dbus-daemon-launch-helper%(bext)s'],
+            Platform.DARWIN: ['libexec/dbus-daemon-launch-helper%(bext)s'],
+    }

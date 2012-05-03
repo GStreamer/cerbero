@@ -45,10 +45,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstencodebin%(smext)s',
              ]
 
-    files_net_devel = [
-             'lib/gstreamer-0.10/libgsttcp%(smext)s',
-            ]
-
     files_codecs_devel = [
              'lib/gstreamer-0.10/libgstsubparse%(smext)s',
              'lib/gstreamer-0.10/libgstogg%(smext)s',
@@ -66,6 +62,15 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstximagesink%(smext)s',
              'lib/gstreamer-0.10/libgstxvimagesink%(smext)s',
              'lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
+            ]
+    }
+
+    platform_files_net_devel = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgsttcp%(smext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-0.10/libgsttcp%(smext)s',
             ]
     }
 

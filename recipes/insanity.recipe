@@ -20,9 +20,13 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' --disable-gtk-doc'
 
-    files_bins = ['insanity-compare', 'insanity-dbmerge', 'insanity-dumpresults',
-                  'insanity-dumpresults-json', 'insanity-grouper',
-                  'insanity-gtk', 'insanity-run']
+    files_bin = ['bin/insanity-compare',
+                 'bin/insanity-dbmerge',
+                 'bin/insanity-dumpresults',
+                 'bin/insanity-dumpresults-json',
+                 'bin/insanity-grouper',
+                 'bin/insanity-gtk',
+                 'bin/insanity-run']
     files_devel = ['include/insanity-1.0/insanity', 'lib/pkgconfig/insanity-1.0.pc']
     files_libs = ['libinsanity-1.0']
     files_python = [
