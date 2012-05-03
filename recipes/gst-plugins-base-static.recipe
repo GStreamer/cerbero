@@ -98,12 +98,12 @@ class Recipe(recipe.Recipe):
 
 
     def post_install(self):
-        for cat in ['core', 'playback', 'encoding', 'net', 'codecs', 'vis']:
+        for cat in ['core', 'playback', 'encoding', 'codecs', 'vis']:
             name = 'files_%s_devel' % cat
             copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
                     getattr(self, name), self.extensions,
                     self.config.target_platform)
-        for platform_cat in ['sys']:
+        for platform_cat in ['sys', 'net']:
             name = 'platform_files_%s_devel' % platform_cat
             platform_files = getattr(self, name)
             if self.config.target_platform in platform_files:
