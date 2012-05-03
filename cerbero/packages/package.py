@@ -35,6 +35,8 @@ class PackageBase(object):
     @type longdesc: str
     @cvar version: version of the package
     @type version: str
+    @cvar codename: codename of the release
+    @type codename: str
     @cvar uuid: unique id for this package
     @type uuid: str
     @cvar license: package license
@@ -54,6 +56,7 @@ class PackageBase(object):
     shortdesc = 'default'
     longdesc = 'default'
     version = 'default'
+    codename = None
     org = 'default'
     uuid = None
     license = License.GPL
