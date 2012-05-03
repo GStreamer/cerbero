@@ -3,7 +3,7 @@ import os
 import shutil
 import tempfile
 
-from cerbero.utils import copy_files
+from cerbero.utils import copy_files, to_unixpath, shell
 
 
 class Recipe(recipe.Recipe):
@@ -30,10 +30,20 @@ class Recipe(recipe.Recipe):
         self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
 
+    def configure(self):
+        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
+                                          'prefix': to_unixpath(self.config.prefix),
+                                          'libdir': to_unixpath(self.config.libdir),
+                                          'host': self.config.host,
+                                          'target': self.config.target,
+                                          'build': self.config.build,
+                                          'options': self.configure_options},
+                    self.make_dir)
+
     def post_install(self):
         for cat in ['codecs']:
             name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, self.config.prefix,
+            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
                     getattr(self, name), self.extensions,
                     self.config.target_platform)
         shutil.rmtree(self.tmp_destdir)
