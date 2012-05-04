@@ -64,7 +64,7 @@ class GenSdkShell(Command):
         cmd = cmd or self.DEFAULT_CMD
         env = {}
         env['PATH'] = '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix
-        env['LD_LIBRARY_PATH'] = '%s/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir
+        env['LD_LIBRARY_PATH'] = '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir
         env['PKG_CONFIG_PATH'] = '%s/lib/pkgconfig:%s/share/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix, prefix)
         env['XDG_DATA_DIRS'] = '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:/usr/local/share:/usr/share' % prefix
         env['XDG_CONFIG_DIRS'] = '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix
