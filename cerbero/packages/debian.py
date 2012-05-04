@@ -87,7 +87,28 @@ COPYRIGHT_TPL = \
 '''This package was debianized by %(packager)s on
 %(datetime)s.
 
-%(license)s
+%(license_notes)s
+
+License:
+
+    This packaging is licensed under %(license)s, and includes files from the
+    following licenses:
+    %(recipes_licenses)s
+
+On Debian systems, the complete text of common license(s) can be found in
+/usr/share/common-licenses/.
+
+'''
+
+COPYRIGHT_TPL_META = \
+'''This package was debianized by %(packager)s on
+%(datetime)s.
+
+%(license_notes)s
+
+License:
+
+    This packaging is licensed under %(license)s.
 
 On Debian systems, the complete text of common license(s) can be found in
 /usr/share/common-licenses/.
@@ -370,6 +391,15 @@ class DebianPackager(LinuxPackager):
         args['packager'] = self.packager
         args['datetime'] = self.datetime
         args['license'] = self.license
+
+        args['license_notes'] = self.license
+        args['license'] = self.package.license.pretty_name
+
+        if isinstance(self.package, MetaPackage):
+            return COPYRIGHT_TPL_META % args
+
+        args['recipes_licenses'] = ',\n    '.join(
+                [l.pretty_name for l in self.recipes_licenses()])
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):
