@@ -21,7 +21,7 @@ import os
 from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
         License
-from cerbero.packages import package
+from cerbero.packages import package, PackageType
 from cerbero.errors import FatalError, PackageNotFoundError
 from cerbero.utils import _, shell
 from cerbero.utils import messages as m
@@ -175,7 +175,8 @@ class PackagesStore (object):
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'License': License, 'package': package}
+                 'License': License, 'package': package,
+                 'PackageType': PackageType}
             execfile(filepath, d)
             if 'Package' in d:
                 p = d['Package'](self._config, self, self.cookbook)

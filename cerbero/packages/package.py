@@ -300,6 +300,11 @@ class MetaPackage(PackageBase):
     def get_root_env_var(self):
         return (self.root_env_var % {'arch': self.config.target_arch}).upper()
 
+    def get_wix_upgrade_code(self):
+        m = self.package_mode
+        p = self.config.target_arch
+        return self.wix_upgrade_code[m][p]
+
     def _list_files(self, func):
         # for each package, call the function that list files
         files = []

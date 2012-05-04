@@ -46,3 +46,13 @@ class MetaPackage(package.MetaPackage):
         Platform.LINUX: '/opt/gst-sdk/',
         Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/Version/1.0'}
     root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'
+    wix_upgrade_code = {
+        PackageType.DEVEL: {
+            Architecture.X86 : '0ffe67b2-4565-411f-8287-e8faa892f853',
+            Architecture.X86_64: '1ffe67b2-4565-411f-8287-e8faa892f853',
+            },
+        PackageType.RUNTIME: {
+            Architecture.X86 : '2ffe67b2-4565-411f-8287-e8faa892f853',
+            Architecture.X86_64: '3ffe67b2-4565-411f-8287-e8faa892f853',
+            },
+        }
