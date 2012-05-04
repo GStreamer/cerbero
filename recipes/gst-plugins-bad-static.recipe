@@ -123,7 +123,7 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstd3dvideosink%(smext)s',
              'lib/gstreamer-0.10/libgstdirectdrawsink%(smext)s',
-             'lib/gstreamer-0.10/libgstdshowdecwrapper%(smext)s',
+             #'lib/gstreamer-0.10/libgstdshowdecwrapper%(smext)s',
              ],
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgstapplemedia%(smext)s',
