@@ -201,7 +201,10 @@ class DebianPackager(LinuxPackager):
         else:
             control_devel, devel_files = '', ''
 
-        self.package.has_devel_package = bool(devel_files)
+        if len(devel_files) != 0 or isinstance(self.package, MetaPackage):
+            self.package.has_devel_package = True
+        else:
+            self.package.has_devel_package = False
 
         copyright = self._deb_copyright()
 
@@ -219,7 +222,7 @@ class DebianPackager(LinuxPackager):
         self._write_debian_file(packagedir,
                 self.package_prefix + self.package.name + '.install',
                 runtime_files)
-        if self.devel and devel_files:
+        if self.devel and self.package.has_devel_package:
             self._write_debian_file(packagedir,
                     self.package_prefix + self.package.name + '-dev.install',
                     devel_files)
@@ -322,7 +325,8 @@ class DebianPackager(LinuxPackager):
                 if self.package.longdesc != 'default' else args['shortdesc']
         runtime_files = self._files_list(PackageType.RUNTIME)
         if isinstance(self.package, MetaPackage):
-            requires, recommends, suggests = self.get_meta_requires()
+            requires, recommends, suggests = \
+                    self.get_meta_requires(PackageType.RUNTIME, '')
             requires = ', '.join(requires)
             recommends = ', '.join(recommends)
             suggests = ', '.join(suggests)
@@ -345,12 +349,25 @@ class DebianPackager(LinuxPackager):
         args['shortdesc'] = 'Development files for %s' % \
                 self.package_prefix + self.package.name
         args['longdesc'] = args['shortdesc']
-        requires = self._get_requires(PackageType.DEVEL)
-        args['requires'] = ', ' + requires if requires else ''
+
         try:
             devel_files = self._files_list(PackageType.DEVEL)
         except EmptyPackageError:
             devel_files = ''
+
+        if isinstance(self.package, MetaPackage):
+            requires, recommends, suggests = \
+                self.get_meta_requires(PackageType.DEVEL, '-dev')
+            requires = ', '.join(requires)
+            recommends = ', '.join(recommends)
+            suggests = ', '.join(suggests)
+            args['requires'] = ', ' + requires if requires else ''
+            args['recommends'] = recommends
+            args['suggests'] = suggests
+            return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
+
+        requires = self._get_requires(PackageType.DEVEL)
+        args['requires'] = ', ' + requires if requires else ''
         if devel_files:
             return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
         return '', ''
