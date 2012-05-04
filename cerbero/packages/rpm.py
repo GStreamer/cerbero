@@ -114,6 +114,8 @@ Vendor:         %(vendor)s
 %%description
 %(description)s
 
+%(devel_package)s
+
 %%prep
 
 %%build
@@ -124,6 +126,8 @@ Vendor:         %(vendor)s
 rm -rf $RPM_BUILD_ROOT
 
 %%files
+
+%(devel_files)s
 '''
 
 REQUIRE_TPL = 'Requires: %s\n'
