@@ -18,5 +18,5 @@ class Recipe(recipe.Recipe):
         py_prefix = self.config.py_prefix
         output_dir = prefix
         gensdkshell = GenSdkShell()
-        gensdkshell.runargs(self.config, name, prefix, libdir, py_prefix,
-                            output_dir)
+        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+                py_prefix)
