@@ -5,7 +5,13 @@ class Recipe(recipe.Recipe):
     version = '0.0.1'
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh autogen.sh'
+    configure_options ='--program-prefix= '
     remotes = {'upstream': 'git://git.collabora.co.uk/git/user/slomo/gst-playback-test.git'}
     deps = ['glib', 'gstreamer', 'gtk+']
 
     files_bins = ['gst-playback-test-0.10']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.config_sh = 'configure'
+            self.autoreconf = True

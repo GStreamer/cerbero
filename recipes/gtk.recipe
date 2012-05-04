@@ -21,10 +21,9 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/gail.pc',
         'include/gtk-2.0',
         'include/gail-1.0',
-	'share/gtk-2.0/demo',
+        'share/gtk-2.0/demo',
     ]
-    files_modules = ['lib/gtk-2.0/modules/libferret%(mext)s',
-                     'lib/gtk-2.0/modules/libgail%(mext)s']
+    files_modules = ['lib/gtk-2.0/modules/libgail%(mext)s']
     platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-2.0', 'libgdk-win32-2.0'],
         Platform.DARWIN: ['libgtk-quartz-2.0', 'libgdk-quartz-2.0'],
@@ -42,7 +41,13 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: [
             'share/themes/MS-Windows/gtk-2.0/gtkrc',
             'lib/gtk-2.0/2.10.0/engines/libwimp.dll',]
-            }
+        }
+    platform_files_modules = {
+        Platform.LINUX: [
+            'lib/gtk-2.0/modules/libferret%(mext)s',],
+        Platform.DARWIN: [
+            'lib/gtk-2.0/modules/libferret%(mext)s',],
+        }
     files_lang = ['gtk20', 'gtk20-properties']
 
 
