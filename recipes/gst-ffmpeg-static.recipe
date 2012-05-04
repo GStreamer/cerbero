@@ -31,11 +31,12 @@ class Recipe(recipe.Recipe):
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
 
     def configure(self):
-        opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s' %\
-            (self.config.host, self.config.target_arch)
-        opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
-        with open(opts_file, 'w+') as f:
-            f.write(opts_file)
+        if self.config.target_platform == Platform.WINDOWS:
+            opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s' %\
+                (self.config.host, self.config.target_arch)
+            opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
+            with open(opts_file, 'w+') as f:
+                f.write(opts)
 
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': to_unixpath(self.config.prefix),
