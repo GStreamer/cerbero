@@ -152,7 +152,6 @@ class RPMPackager(LinuxPackager):
         return tarname
 
     def prepare(self, tarname, tmpdir, packagedir, srcdir):
-        requires = self._get_requires(PackageType.RUNTIME)
         runtime_files = self._files_list(PackageType.RUNTIME)
 
         if self.devel:
@@ -162,10 +161,14 @@ class RPMPackager(LinuxPackager):
 
         if isinstance(self.package, MetaPackage):
             template = META_SPEC_TPL
+            requires = \
+                self._get_meta_requires(PackageType.RUNTIME)
+            self.package.has_devel_package = True
         else:
+            self.package.has_devel_package = bool(devel_files)
             template = SPEC_TPL
+            requires = self._get_requires(PackageType.RUNTIME)
 
-        self.package.has_devel_package = bool(devel_files)
 
         licenses = [self.package.license]
         if not isinstance(self.package, MetaPackage):
@@ -218,6 +221,15 @@ class RPMPackager(LinuxPackager):
                 shutil.move(os.path.join(packagedir, d, f), output_dir)
         return paths
 
+    def _get_meta_requires(self, package_type):
+        devel_suffix = ''
+        if package_type == PackageType.DEVEL:
+            devel_suffix = '-devel'
+        requires, recommends, suggests = \
+            self.get_meta_requires(package_type, devel_suffix)
+        requires = ''.join([REQUIRE_TPL % x for x in requires + recommends])
+        return requires
+
     def _get_requires(self, package_type):
         devel_suffix = ''
         if package_type == PackageType.DEVEL:
@@ -240,7 +252,10 @@ class RPMPackager(LinuxPackager):
         args = {}
         args['summary'] = 'Development files for %s' % self.package.name
         args['description'] = args['summary']
-        args['requires'] = self._get_requires(PackageType.DEVEL)
+        if isinstance(self.package, MetaPackage):
+            args['requires'] = self._get_meta_requires(PackageType.DEVEL)
+        else:
+            args['requires'] = self._get_requires(PackageType.DEVEL)
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
         try:

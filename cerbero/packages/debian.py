@@ -322,21 +322,7 @@ class DebianPackager(LinuxPackager):
                 if self.package.longdesc != 'default' else args['shortdesc']
         runtime_files = self._files_list(PackageType.RUNTIME)
         if isinstance(self.package, MetaPackage):
-            requires = []
-            suggests = []
-            recommends = []
-            for p in self.package.packages:
-                package = self.store.get_package(p[0])
-                package_name = p[0]
-                if self.config.packages_prefix is not None \
-                        and not package.ignore_package_prefix:
-                    package_name = ('%s-%s' % (self.config.packages_prefix, p[0]))
-                if p[1]:
-                    requires.append(package_name)
-                elif p[2]:
-                    recommends.append(package_name)
-                else:
-                    suggests.append(package_name)
+            requires, recommends, suggests = self.get_meta_requires()
             requires = ', '.join(requires)
             recommends = ', '.join(recommends)
             suggests = ', '.join(suggests)

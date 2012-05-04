@@ -112,6 +112,29 @@ class LinuxPackager(PackagerBase):
     def build(self, output_dir, tarname, tmpdir, packagedir, srcdir):
         pass
 
+    def get_meta_requires(self, package_type, package_suffix):
+        requires = []
+        suggests = []
+        recommends = []
+        for p in self.package.packages:
+            package = self.store.get_package(p[0])
+            if package_type == PackageType.DEVEL:
+                if hasattr(package, 'has_devel_package'):
+                    if not package.has_devel_package:
+               	        continue
+            package_name = p[0]
+	    if self.config.packages_prefix is not None \
+                    and not package.ignore_package_prefix:
+                package_name = ('%s-%s' % (self.config.packages_prefix, p[0]))
+            package_name += package_suffix
+            if p[1]:
+	        requires.append(package_name)
+            elif p[2]:
+                recommends.append(package_name)
+            else:
+                suggests.append(package_name)
+        return (requires, recommends, suggests)
+
     def get_requires(self, package_type, devel_suffix):
         deps = [p.name for p in self.store.get_package_deps(self.package.name)]
         deps = list(set(deps) - set(self._empty_packages))
