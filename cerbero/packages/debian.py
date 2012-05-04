@@ -87,24 +87,7 @@ COPYRIGHT_TPL = \
 '''This package was debianized by %(packager)s on
 %(datetime)s.
 
-License:
-
-    This packaging is licensed under %(license)s, and includes files from the
-    following licenses:
-    %(recipes_licenses)s
-
-On Debian systems, the complete text of common license(s) can be found in
-/usr/share/common-licenses/.
-
-'''
-
-COPYRIGHT_TPL_META = \
-'''This package was debianized by %(packager)s on
-%(datetime)s.
-
-License:
-
-    This packaging is licensed under %(license)s.
+%(license)s
 
 On Debian systems, the complete text of common license(s) can be found in
 /usr/share/common-licenses/.
@@ -166,12 +149,20 @@ DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(p_prefix)s%(name)s-dbg'
 
 
 class DebianPackager(LinuxPackager):
+    LICENSE_TXT = 'license.txt'
 
     def __init__(self, config, package, store):
         LinuxPackager.__init__(self, config, package, store)
 
         d = datetime.utcnow()
         self.datetime = d.strftime('%a, %d %b %Y %H:%M:%S +0000')
+
+        license_path = self.package.relative_path(self.LICENSE_TXT)
+        if os.path.exists(license_path):
+            with open(license_path, 'r') as f:
+                self.license = f.read()
+        else:
+            self.license = ''
 
     def create_tree(self, tmpdir):
         # create a tmp dir to use as topdir
@@ -378,13 +369,7 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['packager'] = self.packager
         args['datetime'] = self.datetime
-        args['license'] = self.package.license.pretty_name
-
-        if isinstance(self.package, MetaPackage):
-            return COPYRIGHT_TPL_META % args
-
-        args['recipes_licenses'] = ',\n    '.join(
-                [l.pretty_name for l in self.recipes_licenses()])
+        args['license'] = self.license
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):
