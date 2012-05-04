@@ -104,12 +104,17 @@ class Recipe(recipe.Recipe):
 
     files_capture_devel = [
              'lib/gstreamer-0.10/libgstcamerabin2%(smext)s',
-             'lib/gstreamer-0.10/libgstdvb%(smext)s',
             ]
 
     files_vis_devel = [
              'lib/gstreamer-0.10/libgstaudiovisualizers%(smext)s',
             ]
+
+    platform_files_capture_devel = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstdvb%(smext)s',
+             ],
+        }
 
     platform_files_sys_devel = {
         Platform.LINUX: [
