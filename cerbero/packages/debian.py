@@ -24,10 +24,8 @@ import tempfile
 from datetime import datetime
 from fnmatch import fnmatch
 
-from cerbero.config import Architecture, DEFAULT_PACKAGER
-from cerbero.errors import FatalError, EmptyPackageError
-from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.disttarball import DistTarball
+from cerbero.errors import EmptyPackageError
+from cerbero.packages import PackageType
 from cerbero.packages.linux import LinuxPackager
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
