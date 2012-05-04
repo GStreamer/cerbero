@@ -77,6 +77,8 @@ CONTROL_DEVEL_PACKAGE_TPL = \
 Section: libdevel
 Architecture: any
 Depends: %(p_prefix)s%(name)s (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends} %(requires)s
+Recommends: %(recommends)s
+Suggests: %(suggests)s
 Description: %(shortdesc)s
  %(longdesc)s
 '''
@@ -366,6 +368,8 @@ class DebianPackager(LinuxPackager):
 
         requires = self._get_requires(PackageType.DEVEL)
         args['requires'] = ', ' + requires if requires else ''
+        args['recommends'] = ''
+        args['suggests'] = ''
         if devel_files:
             return CONTROL_DEVEL_PACKAGE_TPL % args, devel_files
         return '', ''
