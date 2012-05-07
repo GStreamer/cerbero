@@ -128,18 +128,6 @@ class Recipe(recipe.Recipe):
         self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-good')
 
-    @system_libs
-    def configure(self):
-        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
-                                          'prefix': to_unixpath(self.config.prefix),
-                                          'libdir': to_unixpath(self.config.libdir),
-                                          'host': self.config.host,
-                                          'target': self.config.target,
-                                          'build': self.config.build,
-                                          'options': self.configure_options},
-                    self.make_dir)
-
-
     def post_install(self):
         for cat in ['core', 'effects', 'codecs', 'net', 'vis']:
             name = 'files_%s_devel' % cat

@@ -257,6 +257,7 @@ class Config (object):
         if not validate_packager(self.packager):
             raise FatalError(_('packager "%s" must be in the format '
                                '"Name <email>"') % self.packager)
+        self.prefix = to_unixpath(self.prefix)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
