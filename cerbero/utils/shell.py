@@ -172,7 +172,7 @@ def download(url, destination=None, recursive=False):
         try:
             call(cmd, path)
         except FatalError, e:
-            os.remove(tarfile)
+            os.remove(destination)
             raise e
 
 
