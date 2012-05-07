@@ -30,7 +30,7 @@ from cerbero.utils import messages as m
 MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
                         'data/packages/2012.5/windows/toolchain'
 MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
-MINGW_SYSROOT = '/home/andoni/mingw/%s/%s/lib'
+MINGW_SYSROOT = '/home/andoni/mingw/windows/%s/lib'
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
@@ -139,18 +139,14 @@ class WindowsBootstraper(BootstraperBase):
         return
 
     def fix_lib_paths(self):
-        orig_sysroot = MINGW_SYSROOT % (self.version, self.arch)
-        if self.arch == Architecture.X86:
-            new_sysroot = os.path.join(self.prefix, 'i686-w64-mingw32', 'lib')
-        else:
-            new_sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32',
-                                       'lib')
+        orig_sysroot = MINGW_SYSROOT % self.version
+        new_sysroot = os.path.join(self.prefix, 'lib')
         lib_path = new_sysroot
 
         # Replace the old sysroot in all .la files
         for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
-            shell.replace(os.path.abspath(os.path.join(lib_path, path)),
-                          {orig_sysroot: new_sysroot})
+            path = os.path.abspath(os.path.join(lib_path, path))
+            shell.replace(path, {orig_sysroot: new_sysroot})
 
 
 def register_all():
