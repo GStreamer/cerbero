@@ -18,6 +18,7 @@
 
 import os
 import tempfile
+import shutil
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
@@ -26,21 +27,15 @@ from cerbero.utils import shell, _, fix_winpath
 from cerbero.utils import messages as m
 
 # Toolchain
-MINGW_DOWNLOAD_SOURCE = 'http://keema.collabora.co.uk'
+MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
+                        'data/packages/2012.5/windows/toolchain'
 MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
 MINGW_SYSROOT = '/home/andoni/mingw/%s/%s/lib'
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
-SVN = 'http://downloads.sourceforge.net/project/win32svn/1.7.2/'\
-      'svn-win32-1.7.2.zip'
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
-WINDOWS_BIN_DEPS = [
-    'glib/2.28/glib_2.28.8-1_win32.zip',
-    'intltool/0.40/intltool_0.40.4-1_win32.zip',
-    'dependencies/gettext-runtime_0.18.1.1-2_win32.zip',
-    'dependencies/pkg-config-dev_0.26-1_win32.zip',
-    'dependencies/pkg-config_0.26-1_win32.zip']
+WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
 PTHREADS_URL = \
 '''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20\
 packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
@@ -89,6 +84,11 @@ class WindowsBootstraper(BootstraperBase):
         shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
         shell.unpack(tarfile, self.prefix)
         self.fix_lib_paths()
+        if self.arch == Architecture.X86:
+            try:
+                shutil.rmtree('/mingw/lib')
+            except Exception:
+                pass
 
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
@@ -137,14 +137,20 @@ class WindowsBootstraper(BootstraperBase):
             shell.replace(os.path.join(self.config.toolchain_prefix, f),
                           {'/opt/perl/bin/perl': '/bin/perl'})
         return
-        # install svn (skipped as it's not needed anymore for now)
-        temp = fix_winpath(tempfile.mkdtemp())
-        path = os.path.join(temp, 'download.zip')
-        shell.download(SVN, path)
-        shell.unpack(path, temp)
-        dirpath = os.path.join(temp,
-                os.path.splitext(os.path.split(SVN)[1])[0])
-        shell.call('cp -r %s/* %s' % (dirpath, self.config.toolchain_prefix))
+
+    def fix_lib_paths(self):
+        orig_sysroot = MINGW_SYSROOT % (self.version, self.arch)
+        if self.arch == Architecture.X86:
+            new_sysroot = os.path.join(self.prefix, 'i686-w64-mingw32', 'lib')
+        else:
+            new_sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32',
+                                       'lib')
+        lib_path = new_sysroot
+
+        # Replace the old sysroot in all .la files
+        for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
+            shell.replace(os.path.abspath(os.path.join(lib_path, path)),
+                          {orig_sysroot: new_sysroot})
 
 
 def register_all():
