@@ -68,7 +68,7 @@ class OpenSuseBootstraper (UnixBootstraper):
             'curl', 'gettext-tools', 'alsa-devel', 'yasm',
             'docbook-xsl-stylesheets', 'transfig', 'xorg-x11-libXrender-devel',
             'xorg-x11-libXv-devel', 'Mesa-devel', 'python-devel',
-            'devel_rpm_build']
+            'patterns-openSUSE-devel_rpm_build']
 
 
 def register_all():
