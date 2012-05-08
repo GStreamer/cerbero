@@ -68,8 +68,8 @@ class CookBook (object):
 
     @ivar recipes: dictionary with L{cerbero.recipe.Recipe} availables
     @type recipes: dict
-    @ivar recipes: dictionary with the L{cerbero.cookbook.RecipeStatus}
-    @type recipes: dict
+    @ivar status: dictionary with the L{cerbero.cookbook.RecipeStatus}
+    @type status: dict
     '''
 
     RECIPE_EXT = '.recipe'
@@ -186,7 +186,7 @@ class CookBook (object):
 
     def step_done(self, recipe_name, step):
         '''
-        Marks a step as done
+        Whether is step is done or not
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
@@ -228,8 +228,6 @@ class CookBook (object):
         @rtype: list
         '''
         recipe = self.get_recipe(recipe_name)
-        if not recipe:
-            raise FatalError(_('Recipe %s not found') % recipe_name)
         return self._find_deps(recipe, {}, [])
 
     def _cache_file(self, config):
@@ -248,9 +246,10 @@ class CookBook (object):
 
     def save(self):
         try:
-            if not os.path.exists(CONFIG_DIR):
-                os.mkdir(CONFIG_DIR)
-            with open(self._cache_file(self.get_config()), 'wb') as f:
+            cache_file = self._cache_file(self.get_config())
+            if not os.path.exists(os.path.dirname(cache_file)):
+                os.makedirs(os.path.dirname(cache_file))
+            with open(cache_file, 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
             m.warning(_("Could not cache the CookBook: %s"), ex)
@@ -262,8 +261,9 @@ class CookBook (object):
             raise FatalError(_("Dependency Cycle"))
         state[recipe] = 'in-progress'
         for recipe_name in recipe.list_deps():
-            recipedep = self.get_recipe(recipe_name)
-            if recipedep == None:
+            try:
+                recipedep = self.get_recipe(recipe_name)
+            except RecipeNotFoundError, e:
                 raise FatalError(_("Recipe %s has a unknown dependency %s"
                                  % (recipe.name, recipe_name)))
             self._find_deps(recipedep, state, ordered)
