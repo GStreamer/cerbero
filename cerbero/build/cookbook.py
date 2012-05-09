@@ -295,8 +295,7 @@ class CookBook (object):
             rmtime = os.path.getmtime(filepath)
             if recipe.name in self.status:
                 if rmtime > self.status[recipe.name].mtime:
-                    self.status[recipe.name].touch()
-                    self.status[recipe.name] = RecipeStatus()
+                    self.reset_recipe_status(recipe.name)
 
     def _load_recipe_from_file(self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
