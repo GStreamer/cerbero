@@ -23,7 +23,7 @@ import shutil
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Architecture, Distro, Platform
-from cerbero.utils import shell, _, fix_winpath
+from cerbero.utils import shell, _, fix_winpath, to_unixpath
 from cerbero.utils import messages as m
 
 # Toolchain
@@ -81,8 +81,12 @@ class WindowsBootstraper(BootstraperBase):
                 self.arch)
 
         tarfile = os.path.join(self.prefix, tarball)
+        tarfile = to_unixpath(os.path.abspath(tarfile))
         shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
-        shell.unpack(tarfile, self.prefix)
+        try:
+            shell.unpack(tarfile, self.prefix)
+        except Exception:
+            pass
         self.fix_lib_paths()
         if self.arch == Architecture.X86:
             try:
@@ -93,7 +97,7 @@ class WindowsBootstraper(BootstraperBase):
     def install_pthreads(self):
         pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
         shell.download(PTHREADS_URL, pthreadszip)
-        temp = fix_winpath(tempfile.mkdtemp())
+        temp = fix_winpath(os.path.abspath(tempfile.mkdtemp()))
         # real pthreads stuff is in a zip file inside the previous zip file
         # under mingwxx/pthreads-xx.zip
         shell.unpack(pthreadszip, temp)
@@ -103,16 +107,19 @@ class WindowsBootstraper(BootstraperBase):
 
     def install_python_sdk(self):
         m.action(_("Installing Python headers"))
-        temp = fix_winpath(tempfile.mkdtemp())
+        temp = tempfile.mkdtemp()
         shell.call("git clone %s" % os.path.join(self.config.git_root,
                                                  'windows-external-sdk'),
                    temp)
 
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
+        python_headers = to_unixpath(os.path.abspath(python_headers))
         if not os.path.exists(python_headers):
             os.makedirs(python_headers)
         python_libs = os.path.join(self.prefix, 'lib')
+        python_libs = to_unixpath(python_libs)
 
+        temp = to_unixpath(os.path.abspath(temp))
         shell.call('cp -f %s/windows-external-sdk/python27/%s/include/* %s' %
                   (temp, self.version, python_headers))
         shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
