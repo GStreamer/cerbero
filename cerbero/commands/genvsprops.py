@@ -42,7 +42,6 @@ class GenVSProps(Command):
             ])
 
     def run(self, config, args):
-        import pdb; pdb.set_trace()
         self.runargs(config, args.output_dir, args.prefix)
 
     def runargs(self, config, output_dir, prefix=DEFAULT_PREFIX_MACRO):

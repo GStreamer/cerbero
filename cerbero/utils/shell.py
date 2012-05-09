@@ -57,7 +57,7 @@ def _fix_mingw_cmd(path):
     l_path = list(path)
     for i in range(len(path)):
         if path[i] == '\\':
-            if i+1 == len(path) or path [i+1] not in reserved:
+            if i + 1 == len(path) or path[i + 1] not in reserved:
                 l_path[i] = '/'
     return ''.join(l_path)
 
