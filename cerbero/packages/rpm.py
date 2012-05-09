@@ -173,7 +173,6 @@ class RPMPackager(LinuxPackager):
             template = SPEC_TPL
             requires = self._get_requires(PackageType.RUNTIME)
 
-
         licenses = [self.package.license]
         if not isinstance(self.package, MetaPackage):
             licenses.extend(self.recipes_licenses())
