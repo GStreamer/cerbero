@@ -33,15 +33,10 @@ class LinuxPackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.package_prefix = ''
-        if self.config.packages_prefix is not None and not\
-                package.ignore_package_prefix:
-            self.package_prefix = '%s-' % self.config.packages_prefix
-        self.full_package_name = '%s%s-%s' % (self.package_prefix,
-                self.package.name, self.package.version)
+        self.package_prefix = self._package_prefix(self.package)
+        self.full_package_name = self._full_package_name()
         self.packager = self.config.packager
-        if self.packager == DEFAULT_PACKAGER:
-            m.warning(_('No packager defined, using default '
-                        'packager "%s"') % self.packager)
+        self._check_packager()
 
     def pack(self, output_dir, devel=True, force=False,
              pack_deps=True, tmpdir=None):
@@ -88,6 +83,15 @@ class LinuxPackager(PackagerBase):
     def create_tree(self, tmpdir):
         pass
 
+    def setup_source(self, tarball, tmpdir, packagedir, srcdir):
+        pass
+
+    def prepare(self, tarname, tmpdir, packagedir, srcdir):
+        pass
+
+    def build(self, output_dir, tarname, tmpdir, packagedir, srcdir):
+        pass
+
     def pack_deps(self, output_dir, tmpdir, force):
         for p in self.store.get_package_deps(self.package.name):
             stamp_path = os.path.join(tmpdir, p.name + '-stamp')
@@ -103,15 +107,6 @@ class LinuxPackager(PackagerBase):
             except EmptyPackageError:
                 self._empty_packages.append(p)
 
-    def setup_source(self, tarball, tmpdir, packagedir, srcdir):
-        pass
-
-    def prepare(self, tarname, tmpdir, packagedir, srcdir):
-        pass
-
-    def build(self, output_dir, tarname, tmpdir, packagedir, srcdir):
-        pass
-
     def get_meta_requires(self, package_type, package_suffix):
         requires = []
         suggests = []
@@ -119,16 +114,13 @@ class LinuxPackager(PackagerBase):
         for p in self.package.packages:
             package = self.store.get_package(p[0])
             if package_type == PackageType.DEVEL:
-                if hasattr(package, 'has_devel_package'):
-                    if not package.has_devel_package:
-               	        continue
-            package_name = p[0]
-	    if self.config.packages_prefix is not None \
-                    and not package.ignore_package_prefix:
-                package_name = ('%s-%s' % (self.config.packages_prefix, p[0]))
-            package_name += package_suffix
+                if not self._has_devel_package(package):
+                    continue
+            package_name = '%s%s' % (self._package_prefix(package), p[0])
+            if package_type == PackageType.DEVEL:
+                package_name += package_suffix
             if p[1]:
-	        requires.append(package_name)
+                requires.append(package_name)
             elif p[2]:
                 recommends.append(package_name)
             else:
@@ -136,31 +128,21 @@ class LinuxPackager(PackagerBase):
         return (requires, recommends, suggests)
 
     def get_requires(self, package_type, devel_suffix):
-        deps = [p.name for p in self.store.get_package_deps(self.package.name)]
+        deps = self.store.get_package_deps(self.package.name)
         deps = list(set(deps) - set(self._empty_packages))
 
-        def get_dep_name(package_name):
-            p = self.store.get_package(package_name)
-            package_prefix = ''
-            if self.config.packages_prefix is not None \
-                    and not p.ignore_package_prefix:
-                package_prefix = '%s-' % self.config.packages_prefix
-            return package_prefix + package_name
-
-        details = {}
-        for x in deps:
-            details[x] = get_dep_name(x)
+        def dep_name(p):
+            name = '%s%s' % (self._package_prefix(p), p.name)
+            if package_type == PackageType.DEVEL:
+                name += devel_suffix
+            return name
 
         if package_type == PackageType.DEVEL:
-            deps = [x for x in deps \
-                    if hasattr(self.store.get_package(x), 'has_devel_package') and
-                       self.store.get_package(x).has_devel_package]
-            deps = map(lambda x: details[x] + devel_suffix, deps)
-        else:
-            deps = map(lambda x: details[x], deps)
+            deps = [x for x in deps if self._has_devel_package(x)]
 
+        deps = [dep_name(x) for x in deps]
         deps.extend(self.package.get_sys_deps())
-        return deps
+        return sorted(deps)
 
     def recipes_licenses(self):
         licenses = []
@@ -175,3 +157,23 @@ class LinuxPackager(PackagerBase):
         if isinstance(self.package, MetaPackage):
             return ''
         return PackagerBase.files_list(self, package_type, self.force)
+
+    def _package_prefix(self, package):
+        if self.config.packages_prefix not in [None, '']:
+            if not package.ignore_package_prefix:
+                return '%s-' % self.config.packages_prefix
+        return ''
+
+    def _full_package_name(self):
+        return '%s%s-%s' % (self.package_prefix, self.package.name,
+                            self.package.version)
+
+    def _check_packager(self):
+        if self.packager == DEFAULT_PACKAGER:
+            m.warning(_('No packager defined, using default '
+                        'packager "%s"') % self.packager)
+
+    def _has_devel_package(self, package):
+        if hasattr(package, 'has_devel_package'):
+            return package.has_devel_package
+        return False

@@ -16,12 +16,13 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Platform
+from cerbero.config import Platform, Distro, DEFAULT_PACKAGER
 
 
 class DummyConfig(object):
     prefix = '/test/'
     target_platform = Platform.WINDOWS
+    target_distro = Distro.WINDOWS
     platform = None
     sources = ''
     local_sources = ''
@@ -33,6 +34,8 @@ class DummyConfig(object):
     target_version = None
     target_distro_version = None
     packages_prefix = ''
+    packager = DEFAULT_PACKAGER
+    install_dir = ''
 
 
 class XMLMixin():
