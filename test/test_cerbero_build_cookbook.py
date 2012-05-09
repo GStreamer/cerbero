@@ -99,3 +99,23 @@ class PackageTest(unittest.TestCase):
         self.cookbook.update_step_status(recipe.name, 'install')
         status = self.cookbook._recipe_status(recipe.name)
         self.assertEquals(status.steps, ['fetch', 'build', 'install'])
+        for step in ['fetch', 'build', 'install']:
+            self.assertTrue(self.cookbook.step_done(recipe.name, step))
+
+    def testBuildStatus(self):
+        recipe = Recipe1(self.config)
+        self.cookbook.add_recipe(recipe)
+        self.cookbook._restore_cache()
+        self.cookbook.update_build_status(recipe.name, True)
+        self.assertTrue(self.cookbook.status[recipe.name].needs_build)
+        self.cookbook.update_build_status(recipe.name, False)
+        self.assertFalse(self.cookbook.status[recipe.name].needs_build)
+
+    def testResetRecipeStatus(self):
+        recipe = Recipe1(self.config)
+        self.cookbook.add_recipe(recipe)
+        self.cookbook._restore_cache()
+        self.cookbook.reset_recipe_status(recipe.name)
+        status = self.cookbook._recipe_status(recipe.name)
+        self.assertEquals(status.steps, [])
+        self.assertTrue(self.cookbook.status[recipe.name].needs_build)
