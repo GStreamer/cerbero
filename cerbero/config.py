@@ -69,28 +69,19 @@ class Config (object):
         self.load_defaults()
 
         # Next parse the main configuration file
-        if os.path.exists(DEFAULT_CONFIG_FILE):
-            self.parse(DEFAULT_CONFIG_FILE)
-        else:
-            msg = _('Using default configuration because %s is missing') % \
-                    DEFAULT_CONFIG_FILE
-            m.warning(msg)
+        self._load_main_config()
 
         # Next, if a config file is provided use it to override the settings
         # from the main configuration file
-        if filename is not None:
-            if os.path.exists(filename):
-                self.parse(filename)
-                self.filename = DEFAULT_CONFIG_FILE
-            else:
-                raise ConfigurationError(_("Configuration file %s doesn't "
-                                           "exsits") % filename)
+        self._load_cmd_config(filename)
+
         # Next, load the platform configuration
         self._load_platform_config()
 
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
 
+        # And validate properties
         self.validate_properties()
 
         self.setup_env()
@@ -152,13 +143,21 @@ class Config (object):
         if self.platform == Platform.LINUX:
             xdgdatadir += ":/usr/share:/usr/local/share"
 
+        ldflags = '-L%s ' % libdir
+        if ldflags not in os.environ.get('LDFLAGS', ''):
+            ldflags += os.environ.get('LDFLAGS', '')
+
+        path = os.environ.get('PATH', '')
+        if bindir not in path:
+            path = self._join_path(bindir, path)
+
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': libdir,
-               'LDFLAGS': '-L%s %s' % (libdir,  os.environ.get('LDFLAGS', '')),
+               'LDFLAGS': ldflags,
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
                'DYLD_FALLBACK_LIBRARY_PATH': libdir,
-               'PATH': self._join_path(bindir, os.environ.get('PATH', '')),
+               'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
                'PKG_CONFIG_PATH': '%s' % pkgconfigdatadir,
@@ -202,6 +201,22 @@ class Config (object):
             separator = ':'
         return "%s%s%s" % (path1, separator, path2)
 
+    def _load_main_config(self):
+        if os.path.exists(DEFAULT_CONFIG_FILE):
+            self.parse(DEFAULT_CONFIG_FILE)
+        else:
+            msg = _('Using default configuration because %s is missing') % \
+                    DEFAULT_CONFIG_FILE
+            m.warning(msg)
+
+    def _load_cmd_config(self, filename):
+        if filename is not None:
+            if os.path.exists(filename):
+                self.parse(filename)
+                self.filename = DEFAULT_CONFIG_FILE
+            else:
+                raise ConfigurationError(_("Configuration file %s doesn't "
+                                           "exists") % filename)
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
                                        self.target_platform)
