@@ -20,10 +20,27 @@ class Recipe(recipe.Recipe):
         mingw_libdir = os.path.join(self.config.toolchain_prefix, 'mingw', 'lib')
         shutil.copy(os.path.join(mingw_libdir, filename),
                     os.path.join(self.config.prefix, 'lib', filename))
+	# Copy msvc
         propsdir = os.path.join(self.config.prefix, 'share/vs/2010/msvc')
         if not os.path.exists(propsdir):
             os.makedirs(propsdir)
         datapropsdir = os.path.join(self.config.data_dir, 'vs', 'msvc')
+        for f in os.listdir(datapropsdir):
+            path = os.path.join(datapropsdir, f)
+            shutil.copy(path, os.path.join(propsdir, f))
+	# Copy Wizard files
+        propsdir = os.path.join(self.config.prefix, 'share/vs/2010/wizard')
+        if not os.path.exists(propsdir):
+            os.makedirs(propsdir)
+        datapropsdir = os.path.join(self.config.data_dir, 'vs', 'wizard')
+        for f in os.listdir(datapropsdir):
+            path = os.path.join(datapropsdir, f)
+            shutil.copy(path, os.path.join(propsdir, f))
+	# Copy Wizard template files
+        propsdir = os.path.join(self.config.prefix, 'share/vs/2010/gst-sdk-template')
+        if not os.path.exists(propsdir):
+            os.makedirs(propsdir)
+        datapropsdir = os.path.join(self.config.data_dir, 'vs', 'gst-sdk-template')
         for f in os.listdir(datapropsdir):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
