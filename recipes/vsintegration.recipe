@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
         propsdir = os.path.join(self.config.prefix, 'share/vs/2010/msvc')
         if not os.path.exists(propsdir):
             os.makedirs(propsdir)
-        datapropsdir = os.path.join(self.config.data_dir, 'msvc')
+        datapropsdir = os.path.join(self.config.data_dir, 'vs', 'msvc')
         for f in os.listdir(datapropsdir):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
