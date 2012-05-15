@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
+        if self.config.platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'
 
     files_bin = ['bin/insanity-compare',

@@ -30,5 +30,5 @@ class Recipe(recipe.Recipe):
     files_lang = ['gst-plugins-ugly-0.10']
 
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += '--disable-gtk-doc '
