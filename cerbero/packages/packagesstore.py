@@ -108,7 +108,7 @@ class PackagesStore (object):
         if isinstance(p, package.MetaPackage):
             return sorted(self._list_metapackage_files(p))
         else:
-            return sorted(p.get_files_list())
+            return sorted(p.files_list())
 
     def add_package(self, package):
         '''
@@ -151,7 +151,7 @@ class PackagesStore (object):
     def _list_metapackage_files(self, metapackage):
         l = []
         for p in self._list_metapackage_deps(metapackage):
-            l.extend(p.get_files_list())
+            l.extend(p.files_list())
         # remove duplicates and sort
         return sorted(list(set(l)))
 
