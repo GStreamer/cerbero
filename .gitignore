@@ -1,2 +1,7 @@
 *pyc
 _trial_temp
+build
+*.swp
+cerbero.egg-info
+dist
+MANIFEST.in
