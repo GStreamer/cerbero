@@ -31,6 +31,9 @@ class Recipe(recipe.Recipe):
                          ]
     }
 
+    # Skipping because it requires a display and documented as randomly failing
+    make_check = None
+
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--without-x --enable-quartz-font --enable-quartz-image'

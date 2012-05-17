@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
     }
     files_lang = ['clutter-1.0']
 
+    # Skipping tests as they require a display
+    make_check = None
 
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:
