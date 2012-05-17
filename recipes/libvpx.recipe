@@ -16,6 +16,9 @@ class Recipe(recipe.Recipe):
     files_bins = ['vpxenc', 'vpxdec']
     files_devel = ['include/vpx', 'lib/pkgconfig/vpx.pc']
 
+    # libvpx does not have check target
+    make_check = None
+
 
     def prepare (self):
         if self.config.target_arch == Architecture.X86_64:
