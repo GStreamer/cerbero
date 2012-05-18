@@ -13,6 +13,9 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: ['share/vs/2010/tutorials']
     }
 
+    # Does not have rule for `make check`
+    make_check = None
+
     def configure(self):
         pass
 
