@@ -39,8 +39,11 @@ class OSXPackage(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
 
-    def pack(self, output_dir, devel=True, force=False):
+    def pack(self, output_dir, devel=True, force=False, version=None):
         output_dir = os.path.realpath(output_dir)
+        if version is None:
+            version = self.package.version
+        self.version = version
 
         # create the runtime package
         runtime_path = self._create_package(PackageType.RUNTIME, output_dir,
@@ -60,7 +63,8 @@ class OSXPackage(PackagerBase):
     def _create_package(self, package_type, output_dir, force):
         self.package.set_mode(package_type)
         files = self.files_list(package_type, force)
-        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
+        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
+                (self.package.name, self.version, self.config.target_arch))
         root = self._create_bundle(files)
         packagemaker = PackageMaker()
         packagemaker.create_package(root, self.package.name,
@@ -128,8 +132,8 @@ class PMDocPackage(PackagerBase):
                 self.empty_packages[package_type], package_type)
         pmdoc_path = pmdoc.create()
 
-        output_file = os.path.abspath(os.path.join(output_dir, '%s.pkg' %
-            (self.package.name)))
+        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
+            (self.package.name, self.package.version, self.config.target_arch))
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
@@ -141,7 +145,8 @@ class PMDocPackage(PackagerBase):
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
             try:
-                paths = packager.pack(self.tmp, devel, force)
+                paths = packager.pack(self.tmp, devel, force,
+                        self.package.version)
                 m.action(_("Package created sucessfully"))
                 self.packages_paths[PackageType.RUNTIME][p] = paths[0]
             except EmptyPackageError:

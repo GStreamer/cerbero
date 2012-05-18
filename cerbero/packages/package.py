@@ -63,7 +63,7 @@ class PackageBase(object):
     name = 'default'
     shortdesc = 'default'
     longdesc = 'default'
-    version = 'default'
+    version = '1.0'
     codename = None
     org = 'default'
     uuid = None
