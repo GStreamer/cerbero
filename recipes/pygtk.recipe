@@ -29,3 +29,6 @@ class Recipe(recipe.Recipe):
                   'lib/pygtk/2.0/pygtk-demo.pyc',
                   'bin/pygtk-demo'
     ]
+
+    # make check require a display and glade
+    make_check = None
