@@ -9,3 +9,6 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libcdda_paranoia', 'libcdda_interface']
     files_devel = ['include/cdda_interface.h', 'include/cdda_paranoia.h', 'include/utils.h']
+
+    # No rule check
+    make_check = None
