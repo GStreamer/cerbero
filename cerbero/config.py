@@ -21,7 +21,8 @@ import sys
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.utils import _, system_info, validate_packager, to_unixpath
+from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
+        shell
 from cerbero.utils import messages as m
 
 
@@ -134,7 +135,7 @@ class Config (object):
         perl5lib = ':'.join(
                 [to_unixpath(os.path.join(libdir, 'perl5')),
                 to_unixpath(os.path.join(libdir, 'perl5',
-                                         'site_perl', '5.8'))])
+                                         'site_perl', self._perl_version()))])
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
         gstregistry = os.path.join('~', '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
@@ -302,3 +303,11 @@ class Config (object):
         else:
             p = os.path.join(os.path.dirname(__file__), '..', path)
         return os.path.abspath(p)
+
+    def _perl_version(self):
+        version = shell.check_call("perl -e 'print \"$]\";'");
+        # FIXME: when perl's mayor is >= 10
+        mayor = version[0]
+        minor = str(int(version[2:5]))
+        revision = str(int(version[5:8]))
+        return '.'.join([mayor, minor, revision])
