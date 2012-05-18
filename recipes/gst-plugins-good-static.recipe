@@ -117,6 +117,9 @@ class Recipe(recipe.Recipe):
             ]
     }
 
+    # Static build will always fail on make check
+    make_check = None
+
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\

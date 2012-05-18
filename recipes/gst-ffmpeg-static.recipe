@@ -19,6 +19,9 @@ class Recipe(recipe.Recipe):
 
     files_codecs_devel = ['lib/gstreamer-0.10/libgstffmpeg%(smext)s']
 
+    # Static build will always fail on make check
+    make_check = None
+
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \

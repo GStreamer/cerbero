@@ -23,6 +23,9 @@ class Recipe(recipe.Recipe):
     files_plugins_devel = ['lib/gstreamer-0.10/libgstcoreelements%(smext)s',
                      'lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
 
+    # Static build will always fail on make check
+    make_check = None
+
     def prepare(self):
         if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'

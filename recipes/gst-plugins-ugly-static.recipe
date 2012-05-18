@@ -32,6 +32,9 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstdvdread%(smext)s',
     ]
 
+    # Static build will always fail on make check
+    make_check = None
+
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-gtk-doc '
