@@ -51,6 +51,14 @@ class PackageBase(object):
     @type sys_deps: dict
     @cvar ignore_package_prefix: don't use the package prefix set in the config
     @type ignore_package_prefix: bool
+    @cvar resources_license: filename of the .txt license file
+    @type resources_license: str
+    @cvar resources_license_rtf: filename of .rtf license file
+    @type resources_license_rtf: str
+    @cvar resources_icon: filename of the icon image
+    @type resources_icon: str
+    @cvar resources_backgound = filename of the background image
+    @type resources_backgound = str
     '''
     name = 'default'
     shortdesc = 'default'
@@ -64,6 +72,10 @@ class PackageBase(object):
     url = 'default'
     ignore_package_prefix = False
     sys_deps = {}
+    resources_license = 'license.txt'
+    resources_license_rtf = 'license.txt'
+    resources_icon = 'icon.ico'
+    resources_background = 'background.png'
 
     def __init__(self, config, store):
         self.config = config
@@ -126,7 +138,10 @@ class PackageBase(object):
 
     def __getattribute__(self, name):
         attr = object.__getattribute__(self, name)
-        if name == 'name':
+        # Return relative path for resources
+        if name.startswith('resources'):
+            attr = self.relative_path(attr)
+        elif name == 'name':
             attr += self.package_mode
         elif name == 'shortdesc':
             if self.package_mode == PackageType.DEVEL:
@@ -271,7 +286,6 @@ class MetaPackage(PackageBase):
     @type root_env_var: str
     '''
 
-    icon = None
     packages = []
     root_env_var = 'CERBERO_SDK_ROOT'
     platform_packages = {}
