@@ -47,7 +47,7 @@ class OSXPackage(PackagerBase):
                 force)
 
         if not devel:
-            return [runtime_path]
+            return [runtime_path, None]
 
         try:
             # create the development package
@@ -58,12 +58,12 @@ class OSXPackage(PackagerBase):
         return [runtime_path, devel_path]
 
     def _create_package(self, package_type, output_dir, force):
-        package_name = self.package.name + package_type
+        self.package.set_mode(package_type)
         files = self.files_list(package_type, force)
-        output_file = os.path.join(output_dir, '%s.pkg' % package_name)
+        output_file = os.path.join(output_dir, '%s.pkg' % self.package.name)
         root = self._create_bundle(files)
         packagemaker = PackageMaker()
-        packagemaker.create_package(root, package_name,
+        packagemaker.create_package(root, self.package.name,
             self.package.version, self.package.shortdesc, output_file,
             self.package.get_install_dir())
         return output_file
@@ -99,8 +99,9 @@ class PMDocPackage(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.packages = self.store.get_package_deps(package.name)
-        self.packages_paths = dict()
+        self.packages = self.store.get_package_deps(package)
+        self.packages_paths = {}
+        self.empty_packages = {}
 
     def pack(self, output_dir, devel=False, force=False):
         self.tmp = tempfile.mkdtemp()
@@ -120,35 +121,36 @@ class PMDocPackage(PackagerBase):
         return paths
 
     def _create_pmdoc(self, package_type, force, output_dir):
+        self.package.set_mode(package_type)
         m.action(_("Creating pmdoc for package %s " % self.package))
-        pmdoc = PMDoc(self.package, self.store, self.tmp, self.packages_paths,
-                      self.empty_packages, package_type)
+        pmdoc = PMDoc(self.package, self.store, self.tmp,
+                self.packages_paths[package_type],
+                self.empty_packages[package_type], package_type)
         pmdoc_path = pmdoc.create()
 
         output_file = os.path.abspath(os.path.join(output_dir, '%s.pkg' %
-            (self.package.name + package_type)))
+            (self.package.name)))
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
 
     def _create_packages(self, devel, force):
-        self.empty_packages = []
+        self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
+        self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
         for p in self.packages:
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
             try:
                 paths = packager.pack(self.tmp, devel, force)
+                m.action(_("Package created sucessfully"))
+                self.packages_paths[PackageType.RUNTIME][p] = paths[0]
             except EmptyPackageError:
-                self.empty_packages.append(p.name)
+                self.empty_packages[PackageType.RUNTIME].append(p)
                 m.warning(_("Package %s is empty") % p)
-            m.action(_("Package created sucessfully"))
-            self.packages_paths[p.name] = paths[0]
-            if devel:
-                devel_name = p.name + PackageType.DEVEL
-                if paths[1] is not None:
-                    self.packages_paths[devel_name] = paths[1]
-                else:
-                    self.empty_packages.append(devel_name)
+            if paths[1] is not None:
+                self.packages_paths[PackageType.DEVEL][p] = paths[1]
+            else:
+                self.empty_packages[PackageType.DEVEL].append(p)
 
 
 class PackageMaker(object):
