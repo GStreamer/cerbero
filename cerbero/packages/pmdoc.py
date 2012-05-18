@@ -62,16 +62,21 @@ class Index(PMDocXML):
     PROP_MIN_TARGET = '2'
     PROP_DOMAIN = 'true'
     ATTR_MIN_SPEC = 'min-spec'
+    ATTR_BG_SCALE = 'bg-scale'
+    ATTR_BG_ALIGN = 'bg-align'
     TAG_BUILD = 'build'
     TAG_CHOICE = 'choice'
     TAG_DISTRIBUTION = 'ditribution'
     TAG_DOMAIN = 'domain'
     TAG_ITEM = 'item'
+    TAG_LOCALE = 'locale'
     TAG_MIN_TARGET = 'min-target'
     TAG_MOD = 'mod'
     TAG_ORGANIZATION = 'organization'
     TAG_PROPERTIES = 'properties'
     TAG_PKGREF = 'pkgref'
+    TAG_RESOURCE = 'resource'
+    TAG_RESOURCES = 'resources'
     TAG_SCRIPTS = 'scripts'
     TAG_USER_SEES = 'userSees'
 
@@ -94,6 +99,7 @@ class Index(PMDocXML):
         self._add_mod()
         self._add_flags()
         self._add_contents()
+        self._add_ui_customization()
 
     def _add_root(self):
         self.root = etree.Element(self.DOCUMENT_TAG, spec=self.SPEC_VERSION)
@@ -154,6 +160,22 @@ class Index(PMDocXML):
                 item = etree.SubElement(self.root, self.TAG_ITEM, type='pkgref')
                 item.text = '%s.xml' % package.name
                 self.packagerefs.append(package)
+
+    def _add_ui_customization(self):
+        resources = etree.SubElement(self.root, self.TAG_RESOURCES)
+        resources.set(self.ATTR_BG_ALIGN, "left")
+        resources.set(self.ATTR_BG_SCALE, "none")
+        locale = etree.SubElement(resources, self.TAG_LOCALE, lang='en')
+        background = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
+                type='background')
+        path = self.package.resources_background
+        if os.path.exists(path):
+            background.text = path
+        license = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
+                type='license')
+        path = self.package.resources_license
+        if os.path.exists(path):
+            license.text = path
 
     def _boolstr(self, boolean):
         return boolean and 'true' or 'false'
