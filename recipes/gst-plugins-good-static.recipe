@@ -124,6 +124,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv --disable-gtk-doc'
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += '--disable-gtk-doc '
 
         self.remotes['origin'] = ('%s/%s' %
                 (self.config.git_root, 'gst-plugins-good.git'))
