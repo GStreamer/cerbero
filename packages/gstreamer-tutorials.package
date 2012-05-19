@@ -13,4 +13,4 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     uuid = '3fde61c2-4565-411f-8287-e8faa892f857'
 
-    files = ['gst-sdk-tutorials:tutorials']
+    files_devel = ['gst-sdk-tutorials:tutorials']
