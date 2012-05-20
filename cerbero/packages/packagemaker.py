@@ -28,6 +28,7 @@ from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
 
+
 class OSXPackage(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.packages.package.Package}
@@ -39,15 +40,19 @@ class OSXPackage(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
 
-    def pack(self, output_dir, devel=True, force=False, version=None):
+    def pack(self, output_dir, devel=True, force=False, version=None,
+             target='0.15'):
         output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
         if version is None:
             version = self.package.version
         self.version = version
 
         # create the runtime package
         runtime_path = self._create_package(PackageType.RUNTIME, output_dir,
-                force)
+                force, target)
 
         if not devel:
             return [runtime_path, None]
@@ -55,12 +60,13 @@ class OSXPackage(PackagerBase):
         try:
             # create the development package
             devel_path = self._create_package(PackageType.DEVEL, output_dir,
-                    force)
+                    force, target)
         except EmptyPackageError:
             devel_path = None
+
         return [runtime_path, devel_path]
 
-    def _create_package(self, package_type, output_dir, force):
+    def _create_package(self, package_type, output_dir, force, target):
         self.package.set_mode(package_type)
         files = self.files_list(package_type, force)
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
@@ -69,7 +75,7 @@ class OSXPackage(PackagerBase):
         packagemaker = PackageMaker()
         packagemaker.create_package(root, self.package.name,
             self.package.version, self.package.shortdesc, output_file,
-            self.package.get_install_dir())
+            self.package.get_install_dir(), target)
         return output_file
 
     def _create_bundle(self, files):
@@ -91,15 +97,17 @@ class OSXPackage(PackagerBase):
             shutil.copy(in_path, out_path)
         return tmp
 
-
 class PMDocPackage(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.package.package.MetaPackage} using
-    a packagemaker's pmdoc file
+    a packagemaker's pmdoc file.
 
     @ivar package: package with the info to build the installer package
     @type package: L{cerbero.packages.package.MetaPackage}
     '''
+
+    PKG_EXT = '.pkg'
+    DMG_EXT = '.dmg'
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
@@ -109,8 +117,7 @@ class PMDocPackage(PackagerBase):
 
     def pack(self, output_dir, devel=False, force=False):
         self.tmp = tempfile.mkdtemp()
-
-        self._create_packages(devel, force)
+        self._create_packages(output_dir, devel, force)
 
         paths = []
         # create runtime package
@@ -122,6 +129,11 @@ class PMDocPackage(PackagerBase):
             d_path = self._create_pmdoc(PackageType.DEVEL, force, output_dir)
             paths.append(d_path)
 
+        # FIXME: Figure out why PackageMaker refuses to create flat meta-packages
+        # using flat packages created by himself
+        for path in paths:
+            self._create_dmgs(paths, output_dir)
+
         return paths
 
     def _create_pmdoc(self, package_type, force, output_dir):
@@ -131,22 +143,22 @@ class PMDocPackage(PackagerBase):
                 self.packages_paths[package_type],
                 self.empty_packages[package_type], package_type)
         pmdoc_path = pmdoc.create()
-
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
             (self.package.name, self.package.version, self.config.target_arch))
+        output_file = os.path.abspath(output_file)
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
 
-    def _create_packages(self, devel, force):
+    def _create_packages(self, output_dir, devel, force):
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
         self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
         for p in self.packages:
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
             try:
-                paths = packager.pack(self.tmp, devel, force,
-                        self.package.version)
+                paths = packager.pack(output_dir, devel, force,
+                        self.package.version, target=None)
                 m.action(_("Package created sucessfully"))
                 self.packages_paths[PackageType.RUNTIME][p] = paths[0]
             except EmptyPackageError:
@@ -157,6 +169,21 @@ class PMDocPackage(PackagerBase):
             else:
                 self.empty_packages[PackageType.DEVEL].append(p)
 
+    def _create_dmgs(self, paths, output_dir):
+        for path in paths:
+            dmg_file = path.replace(self.PKG_EXT, self.DMG_EXT)
+            self._create_dmg(dmg_file, [path])
+        packages_dmg_file = os.path.join(output_dir,
+                self.package.name + '-packages.dmg')
+        self._create_dmg(packages_dmg_file,
+                self.packages_paths[PackageType.RUNTIME].values())
+
+    def _create_dmg(self, dmg_file, pkg_dirs):
+        cmd = 'hdiutil create %s -ov' % dmg_file
+        for pkg_dir in pkg_dirs:
+            cmd += ' -srcfolder %s' % pkg_dir
+        shell.call(cmd)
+
 
 class PackageMaker(object):
     ''' Wrapper for the PackageMaker application '''
@@ -166,7 +193,7 @@ class PackageMaker(object):
     CMD = './PackageMaker'
 
     def create_package(self, root, pkg_id, version, title, output_file,
-                       destination='/opt/'):
+                       destination='/opt/', target='0.15'):
         '''
         Creates an osx package, where all files are properly bundled in a
         directory that is set as the package root
@@ -186,6 +213,8 @@ class PackageMaker(object):
         '''
         args = {'r': root, 'i': pkg_id, 'n': version, 't': title,
                 'l': destination, 'o': output_file}
+        if target is not None:
+            args['g'] = target
         self._execute(self._cmd_with_args(args))
 
     def create_package_from_pmdoc(self, pmdoc_path, output_file):

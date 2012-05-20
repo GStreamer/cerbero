@@ -236,7 +236,8 @@ class PkgRef(PMDocXML):
                               relative="true", mod="true")
         etree.SubElement(config, self.TAG_PACKAGE_STORE, type="internal")
         self._add_mods(config, ['installTo.isAbsoluteType', 'installTo.path',
-            'parent', 'installTo.isRelativeType', 'installTo'])
+            'installTo.isRelativeType', 'installTo',
+            'parent', 'version', 'identifier'])
         flags = etree.SubElement(config, self.TAG_FLAGS)
         etree.SubElement(flags, self.TAG_FOLLOW_SYMLINKS)
 
@@ -256,6 +257,7 @@ class PkgRef(PMDocXML):
         extra = etree.SubElement(self.root, self.TAG_EXTRA)
         self._subelement_text(extra, self.TAG_TITLE, self.package.shortdesc)
         self._subelement_text(extra, self.TAG_PACKAGE_PATH, self.package_path)
+
 
 
 class PkgContents(PMDocXML):
