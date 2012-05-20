@@ -7,16 +7,18 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--disable-introspection'
 
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.files_mainlib = ['bin/libpyglib-2.0-python.pyd']
+            self.files_libs = []
+
     def post_install(self):
         import shutil
         if self.config.target_platform == Platform.WINDOWS:
             shutil.move(os.path.join(self.config.prefix, 'lib', 'libpyglib-2.0-python.pyd'),
                         os.path.join(self.config.prefix, 'bin', 'libpyglib-2.0-python.pyd'))
 
-    # lets not use files_libs here to avoid getting the lib into the devel package,
-    # as there is only a libpyglib-2.0-python.so being generated, and _gio.so included in the
-    # runtime package depends on it
-    files_mainlib = ['%(sdir)s/libpyglib-2.0-python%(pext)s']
+    files_libs = ['libpyglib-2.0-python']
     files_python = ['site-packages/glib/_glib%(pext)s',
                     'site-packages/glib/__init__.py',
                     'site-packages/glib/option.py',
