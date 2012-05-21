@@ -185,6 +185,8 @@ class PackagesStore (object):
             else:
                 raise Exception('Package or MetaPackage class found')
             p.prepare()
+            # reload files from package now that we called prepare that
+            # may have changed it
             p.load_files()
             return p
         except Exception, ex:
