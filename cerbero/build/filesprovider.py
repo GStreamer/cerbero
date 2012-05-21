@@ -228,22 +228,27 @@ class FilesProvider(object):
                               self.config.prefix)
 
     def _search_devel_libraries(self):
-        if self.LIBS_CAT not in self.categories:
-            return []
+        devel_libs = []
+        for category in self.categories:
+            if category != self.LIBS_CAT and \
+               not category.startswith(self.LIBS_CAT + '_') or \
+               category.endswith('_licenses'):
+                continue;
 
-        pattern = 'lib/%(f)s.a lib/%(f)s.la '
-        if self.platform == Platform.LINUX:
-            pattern += 'lib/%(f)s.so '
-        elif self.platform == Platform.WINDOWS:
-            pattern += 'lib/%(f)s.dll.a '
-            pattern += 'lib/%(f)s.def '
-            pattern += 'lib/%(fnolib)s.lib '
-        elif self.platform == Platform.DARWIN:
-            pattern += 'lib/%(f)s.dylib '
+            pattern = 'lib/%(f)s.a lib/%(f)s.la '
+            if self.platform == Platform.LINUX:
+                pattern += 'lib/%(f)s.so '
+            elif self.platform == Platform.WINDOWS:
+                pattern += 'lib/%(f)s.dll.a '
+                pattern += 'lib/%(f)s.def '
+                pattern += 'lib/%(fnolib)s.lib '
+            elif self.platform == Platform.DARWIN:
+                pattern += 'lib/%(f)s.dylib '
 
-        libsmatch = [pattern % {'f':x, 'fnolib': x[3:]} for x in \
-                     self._get_category_files_list(self.LIBS_CAT)]
-        return shell.ls_files(libsmatch, self.config.prefix)
+            libsmatch = [pattern % {'f':x, 'fnolib': x[3:]} for x in \
+                         self._get_category_files_list(category)]
+            devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
+        return devel_libs
 
     def _ls_dir(self, dirpath):
         files = []
