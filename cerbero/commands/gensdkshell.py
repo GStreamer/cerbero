@@ -82,6 +82,7 @@ class GenSdkShell(Command):
         env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix
         env['CXXFLAGS'] = '-I%s/include ${CXXFLAGS}' % prefix
         env['LDFLAGS'] = '-L%s ${LDFLAGS}' % libdir
+        env['GIO_EXTRA_MODULES'] = '%s/gio/modules' % libdir
         envstr = ''
         for e, v in env.iteritems():
             envstr += 'export %s="%s"\n' % (e, v)
