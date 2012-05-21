@@ -51,8 +51,13 @@ class OSXPackage(PackagerBase):
         self.version = version
 
         # create the runtime package
-        runtime_path = self._create_package(PackageType.RUNTIME, output_dir,
-                force, target)
+        try:
+            runtime_path = self._create_package(PackageType.RUNTIME,
+                    output_dir, force, target)
+        except EmptyPackageError, e:
+            if not devel:
+                raise e
+            runtime_path = None
 
         if not devel:
             return [runtime_path, None]
