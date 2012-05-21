@@ -165,7 +165,8 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
         self.check_text(config, PkgRef.TAG_INSTALL_TO, '.')
         self.find_one(config, PkgRef.TAG_REQ_AUTH)
         mods = ['installTo.isAbsoluteType', 'installTo.path',
-                'parent', 'installTo.isRelativeType', 'installTo']
+                'parent', 'installTo.isRelativeType', 'installTo',
+                'version', 'identifier']
         docmods = [x.text for x in config.iterfind(PkgRef.TAG_MOD)]
         self.assertEquals(sorted(mods), sorted(docmods))
         flags = self.find_one(config, PkgRef.TAG_FLAGS)
@@ -255,7 +256,9 @@ class TestPMDoc(unittest.TestCase):
         packages = ['gstreamer-test1', 'gstreamer-test3',
                     'gstreamer-test-bindings', 'gstreamer-test2']
         for name in packages:
-            d[name] =self.packages_path
+            p =self.store.get_package(name)
+            d[p] = self.packages_path
+        self.package.__file__ = ''
         pmdoc = PMDoc(self.package, self.store, self.tmp, d)
         path = pmdoc.create()
         files = os.listdir(path)

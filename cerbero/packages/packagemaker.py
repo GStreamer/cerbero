@@ -208,7 +208,7 @@ class PackageMaker(object):
     CMD = './PackageMaker'
 
     def create_package(self, root, pkg_id, version, title, output_file,
-                       destination='/opt/', target='0.15'):
+                       destination='/opt/', target='10.5'):
         '''
         Creates an osx package, where all files are properly bundled in a
         directory that is set as the package root

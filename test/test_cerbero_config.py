@@ -67,6 +67,7 @@ class LinuxPackagesTest(unittest.TestCase):
                  'prefix': None,
                  'sources': None,
                  'local_sources': None,
+                 'min_osx_sdk_version': None,
                  'lib_suffix': '',
                  'cache_file': None,
                  'toolchain_prefix': None,
