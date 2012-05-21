@@ -88,6 +88,9 @@ class PackageBase(object):
         '''
         pass
 
+    def load_files(self):
+        pass
+
     def package_dir(self):
         '''
         Gets the directory path where this package is stored
@@ -186,10 +189,12 @@ class Package(PackageBase):
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
+
+    def load_files(self):
         self._files = self.files + \
-                self.platform_files.get(config.target_platform, [])
+                self.platform_files.get(self.config.target_platform, [])
         self._files_devel = self.files_devel + \
-                self.platform_files_devel.get(config.target_platform, [])
+                self.platform_files_devel.get(self.config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self):

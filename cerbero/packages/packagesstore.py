@@ -185,6 +185,7 @@ class PackagesStore (object):
             else:
                 raise Exception('Package or MetaPackage class found')
             p.prepare()
+            p.load_files()
             return p
         except Exception, ex:
             import traceback
