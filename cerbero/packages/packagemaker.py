@@ -66,7 +66,9 @@ class OSXPackage(PackagerBase):
             # create the development package
             devel_path = self._create_package(PackageType.DEVEL, output_dir,
                     force, target)
-        except EmptyPackageError:
+        except EmptyPackageError, e:
+            if runtime_path is None:
+                raise e
             devel_path = None
 
         return [runtime_path, devel_path]
@@ -170,10 +172,13 @@ class PMDocPackage(PackagerBase):
                 paths = packager.pack(output_dir, devel, force,
                         self.package.version, target=None)
                 m.action(_("Package created sucessfully"))
-                self.packages_paths[PackageType.RUNTIME][p] = paths[0]
             except EmptyPackageError:
+                paths = [None, None]
+
+            if paths[0] is not None:
+                self.packages_paths[PackageType.RUNTIME][p] = paths[0]
+            else:
                 self.empty_packages[PackageType.RUNTIME].append(p)
-                m.warning(_("Package %s is empty") % p)
             if paths[1] is not None:
                 self.packages_paths[PackageType.DEVEL][p] = paths[1]
             else:
