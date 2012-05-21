@@ -41,7 +41,7 @@ class OSXPackage(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
 
     def pack(self, output_dir, devel=True, force=False, version=None,
-             target='0.15'):
+             target='10.5'):
         output_dir = os.path.realpath(output_dir)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
