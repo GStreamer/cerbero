@@ -55,7 +55,7 @@ class Config (object):
                    'packages_dir', 'wix_prefix', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
-                   'data_dir']
+                   'data_dir', 'min_osx_sdk_version']
 
     def __init__(self, filename=None, load=True):
         self._check_uninstalled()
