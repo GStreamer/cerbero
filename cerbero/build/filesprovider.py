@@ -133,7 +133,11 @@ class FilesProvider(object):
         return files
 
     def _list_files_by_category(self, category):
-        search = self._searchfuncs.get(category, self._searchfuncs['default'])
+        search_category = category
+        if category.startswith(self.LIBS_CAT + '_') and \
+           not category.endswith('_licenses'):
+          search_category = self.LIBS_CAT
+        search = self._searchfuncs.get(search_category, self._searchfuncs['default'])
         return search(self._get_category_files_list(category))
 
     def _search_files(self, files):
