@@ -43,7 +43,7 @@ class MetaPackage(package.MetaPackage):
     install_dir = {
         Platform.WINDOWS: 'gstreamer-sdk',
         Platform.LINUX: '/opt/gst-sdk/',
-        Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/Version/1.0'}
+        Platform.DARWIN: '/System/Library/Frameworks/GStreamer.framework/'}
     root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'
     wix_upgrade_code = {
         PackageType.DEVEL: {

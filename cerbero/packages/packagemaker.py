@@ -71,6 +71,11 @@ class OSXPackage(PackagerBase):
 
         return [runtime_path, devel_path]
 
+    def _get_install_dir(self):
+        install_dir = self.package.get_install_dir()
+        install_dir = os.path.join(install_dir, 'Version', self.package.version)
+        return install_dir
+
     def _create_package(self, package_type, output_dir, force, target):
         self.package.set_mode(package_type)
         files = self.files_list(package_type, force)
@@ -80,7 +85,7 @@ class OSXPackage(PackagerBase):
         packagemaker = PackageMaker()
         packagemaker.create_package(root, self.package.name,
             self.package.version, self.package.shortdesc, output_file,
-            self.package.get_install_dir(), target)
+            self._get_install_dir(), target)
         return output_file
 
     def _create_bundle(self, files):
