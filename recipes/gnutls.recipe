@@ -12,9 +12,9 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgnutls', 'libgnutlsxx']
     files_libs_extra = ['libgnutls-openssl']
-    files_libs_extra_licenses = [License.GPLv3]
+    licenses_libs_extra = [License.GPLv3]
     files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
-    files_bins_licenses = [License.GPLv3]
+    licenses_bins = [License.GPLv3]
     files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
     files_lang = ['gnutls']
 

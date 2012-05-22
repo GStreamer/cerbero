@@ -173,8 +173,8 @@ class Recipe(FilesProvider):
                 licenses[None] = self.licenses
                 continue
 
-            attr = 'files_' + c + '_licenses'
-            platform_attr = 'platform_files_' + c + '_licenses'
+            attr = 'licenses_' + c
+            platform_attr = 'platform_licenses_' + c
             if hasattr(self, attr):
                 licenses[c] = getattr(self, attr)
             elif hasattr(self, platform_attr):

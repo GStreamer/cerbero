@@ -110,8 +110,6 @@ class FilesProvider(object):
         categories = []
         for name, value in inspect.getmembers(self):
             if (isinstance(value, list) or isinstance(value, dict)):
-                if name.endswith('_licenses'):
-                    continue
                 if name.startswith('files_'):
                     categories.append(name.split('files_')[1])
                 if name.startswith('platform_files_'):
@@ -134,8 +132,7 @@ class FilesProvider(object):
 
     def _list_files_by_category(self, category):
         search_category = category
-        if category.startswith(self.LIBS_CAT + '_') and \
-           not category.endswith('_licenses'):
+        if category.startswith(self.LIBS_CAT + '_'):
           search_category = self.LIBS_CAT
         search = self._searchfuncs.get(search_category, self._searchfuncs['default'])
         return search(self._get_category_files_list(category))
@@ -231,8 +228,7 @@ class FilesProvider(object):
         devel_libs = []
         for category in self.categories:
             if category != self.LIBS_CAT and \
-               not category.startswith(self.LIBS_CAT + '_') or \
-               category.endswith('_licenses'):
+               not category.startswith(self.LIBS_CAT + '_'):
                 continue;
 
             pattern = 'lib/%(f)s.a lib/%(f)s.la '

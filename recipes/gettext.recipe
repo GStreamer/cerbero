@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libintl', 'libasprintf']
     files_bins = ['gettext', 'ngettext', 'envsubst']
-    files_bins_licenses = [License.GPLv3Plus]
+    licenses_bins = [License.GPLv3Plus]
     files_devel = ['include/libintl.h', 'include/autosprintf.h']
     files_lang = ['gettext-runtime']
 

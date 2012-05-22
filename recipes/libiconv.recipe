@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-nls'
 
     files_bins = ['iconv', ]
-    files_bins_licenses = [License.GPLv3Plus]
+    licenses_bins = [License.GPLv3Plus]
     files_libs = ['libiconv', 'libcharset', ]
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
