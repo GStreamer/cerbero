@@ -19,7 +19,7 @@
 import os
 
 from cerbero.config import Platform
-from cerbero.utils import shell
+from cerbero.utils import shell, to_unixpath
 
 
 class Build (object):
@@ -115,8 +115,8 @@ class MakefilesBase (Build):
     @system_libs
     def configure(self):
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
-                                          'prefix': self.config.prefix,
-                                          'libdir': self.config.libdir,
+                                          'prefix': to_unixpath(self.config.prefix),
+                                          'libdir': to_unixpath(self.config.libdir),
                                           'host': self.config.host,
                                           'target': self.config.target,
                                           'build': self.config.build,
