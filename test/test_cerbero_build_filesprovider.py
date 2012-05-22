@@ -39,7 +39,7 @@ class FilesProvider(filesprovider.FilesProvider):
     files_libs = ['libgstreamer-0.10']
     files_bins = ['gst-launch']
     files_devel = ['include/gstreamer.h']
-    files_devel_licenses = [License.LGPL]
+    licenses_devel = [License.LGPL]
     platform_files_bins = {
             Platform.WINDOWS: ['windows'],
             Platform.LINUX: ['linux']}

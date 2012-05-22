@@ -55,9 +55,9 @@ class RecipeTest(recipe.Recipe):
 
     files_libs = ['librecipe-test']
     files_bins = ['recipe-test']
-    files_bins_licenses = [License.GPL]
+    licenses_bins = [License.GPL]
     platform_files_test = {Platform.LINUX: ['test1']}
-    platform_files_test_licenses = {Platform.LINUX: [License.BSD]}
+    platform_licenses_test = {Platform.LINUX: [License.BSD]}
 
 
 class TestReceiptMetaClass(unittest.TestCase):
