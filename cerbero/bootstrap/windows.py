@@ -114,8 +114,8 @@ class WindowsBootstraper(BootstraperBase):
 
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
         python_headers = to_unixpath(os.path.abspath(python_headers))
-        if not os.path.exists(python_headers):
-            os.makedirs(python_headers)
+
+	shell.call('mkdir -p %s' % python_headers)
         python_libs = os.path.join(self.prefix, 'lib')
         python_libs = to_unixpath(python_libs)
 
