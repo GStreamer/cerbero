@@ -5,7 +5,7 @@
 class Package(package.Package):
 
     name = 'gstreamer-effects'
-    shortdesc = 'GStreamer effects and instrumentaion plugins'
+    shortdesc = 'GStreamer effects and instrumentation plugins'
     url = "http://www.gstreamer.com"
     version = '2012.5'
     codename = 'Amazon'

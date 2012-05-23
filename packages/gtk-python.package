@@ -5,7 +5,7 @@
 class Package(package.Package):
 
     name = 'gtk+-2.0-python'
-    shortdesc = 'Gtk python bingings'
+    shortdesc = 'Gtk python bindings'
     url = "http://www.gstreamer.com"
     version = '2012.5'
     codename = 'Amazon'

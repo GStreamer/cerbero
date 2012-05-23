@@ -5,7 +5,7 @@
 class Package(package.Package):
 
     name = 'gobject-python'
-    shortdesc = 'GLib/GObject python bingings'
+    shortdesc = 'GLib/GObject python bindings'
     url = "http://www.gstreamer.com"
     version = '2012.5'
     codename = 'Amazon'
