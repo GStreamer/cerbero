@@ -38,7 +38,9 @@ class MetaPackage(package.MetaPackage):
                ('gstreamer-tutorials', False, True),
               ]
     platform_packages = {
-            Platform.WINDOWS: [('vsintegration', True, False)]}
+            Platform.WINDOWS: [('vsintegration', True, False)],
+            Platform.DARWIN: [('gstreamer-xcode-integration', False, True)],
+            }
 
     install_dir = {
         Platform.WINDOWS: 'gstreamer-sdk',

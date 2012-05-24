@@ -1,0 +1,16 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-xcode-integration'
+    shortdesc = 'GStreamer XCode integration'
+    url = "http://www.gstreamer.com"
+    version = '2012.5'
+    codename = 'Amazon'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    uuid = '533337c2-4565-413f-3287-e8f44442f853'
+
+    files_devel = ['gst-xcconfig']
