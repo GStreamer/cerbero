@@ -73,7 +73,6 @@ class GenSdkShell(Command):
                 '/usr/local/share:/usr/share' % prefix
         env['XDG_CONFIG_DIRS'] = \
             '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix
-        env['GST_PLUGIN_SYSTEM_PATH'] = '%s/gstreamer-0.10' % libdir
         env['GST_REGISTRY'] = '${HOME}/.gstreamer-0.10/.cerbero-registry'
         env['GST_PLUGIN_SCANNER'] = \
                 '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix
