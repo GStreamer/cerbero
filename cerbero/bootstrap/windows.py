@@ -109,7 +109,7 @@ class WindowsBootstraper(BootstraperBase):
         m.action(_("Installing Python headers"))
         temp = tempfile.mkdtemp()
         shell.call("git clone %s" % os.path.join(self.config.git_root,
-                                                 'windows-external-sdk'),
+                                                 'windows-external-sdk.git'),
                    temp)
 
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
