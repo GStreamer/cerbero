@@ -11,8 +11,8 @@ class Recipe(recipe.Recipe):
     name = 'gst-plugins-good-static'
     version = '0.10.31'
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh autogen.sh'
-    configure_options = '--disable-introspection --disable-examples --disable-shared --enable-static --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 '
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = '--disable-introspection --disable-examples --disable-shared --enable-static --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name="GStreamer Good Plugins (GStreamer SDK)" '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
