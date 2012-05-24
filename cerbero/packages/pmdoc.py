@@ -318,7 +318,7 @@ class PkgContents(PMDocXML):
     def _add_package_root(self):
         self.proot = etree.SubElement(self.root, self.TAG_F,
             n='PackageRoot', o=self.OWNER, g=self.GROUP, pt='.', m='true',
-            t='bom')
+            t='bom', p='16877')
         for mod in ['name']:
             self._subelement_text(self.proot, self.TAG_MOD, mod)
         return self.proot
