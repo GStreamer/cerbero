@@ -33,6 +33,7 @@ import re
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError
+from cerbero.utils import messages as m
 
 _ = gettext.gettext
 N_ = lambda x: x
@@ -211,5 +212,8 @@ def copy_files(origdir, destdir, files, extensions, target_platform):
             relprefix = destdir[1:]
         orig = os.path.join(origdir, relprefix, f)
         dest = os.path.join(destdir, f)
-        print "copying %s to %s" % (orig, dest)
-        shutil.copy(orig, dest)
+        m.action("copying %s to %s" % (orig, dest))
+        try:
+            shutil.copy(orig, dest)
+        except IOError:
+            m.warning("Could not copy %s to %s" % (orig, dest))
