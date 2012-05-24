@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.1.1'
     licenses = [License.BSD]
     deps = ['libogg', 'libvorbis']
+    allow_parallel_build = False
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
