@@ -55,7 +55,8 @@ class Config (object):
                    'packages_dir', 'wix_prefix', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
-                   'data_dir', 'min_osx_sdk_version']
+                   'data_dir', 'min_osx_sdk_version', 'external_recipes',
+                   'external_packages']
 
     def __init__(self, filename=None, load=True):
         self._check_uninstalled()
@@ -274,6 +275,8 @@ class Config (object):
         self.set_property('packages_dir', self._relative_path('packages'))
         self.set_property('allow_system_libs', True)
         self.set_property('use_configure_cache', False)
+        self.set_property('external_recipes', {})
+        self.set_property('external_packages', {})
 
     def validate_properties(self):
         if not validate_packager(self.packager):
@@ -285,6 +288,18 @@ class Config (object):
             raise ConfigurationError('Unkown key %s' % name)
         if force or getattr(self, name) is None:
             setattr(self, name, value)
+
+    def get_recipes_repos(self):
+        recipes_dir = {'default': (self.recipes_dir, 0)}
+        for name, (path, priority) in self.external_recipes.iteritems():
+            recipes_dir[name] = (path, priority)
+        return recipes_dir
+
+    def get_packages_repos(self):
+        packages_dir = {'default': (self.packages_dir, 0)}
+        for name, (path, priority) in self.external_packages.iteritems():
+            packages_dir[name] = (path, priority)
+        return packages_dir
 
     def _find_data_dir(self):
         if self.uninstalled:

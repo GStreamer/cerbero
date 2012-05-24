@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+from collections import defaultdict
 import os
 import pickle
 import time
@@ -46,12 +47,15 @@ class RecipeStatus (object):
     @ivar mtime: modification time of the recipe file, used to reset the
                  state when the recipe was modified
     @type mtime: float
+    @iver filepath: recipe's file path
+    @type filepath: str
     '''
 
-    def __init__(self, steps=[], needs_build=True, mtime=time.time()):
+    def __init__(self, filepath, steps=[], needs_build=True, mtime=time.time()):
         self.steps = steps
         self.needs_build = needs_build
         self.mtime = mtime
+        self.filepath = filepath
 
     def touch(self):
         ''' Touches the recipe updating its modification time '''
@@ -272,16 +276,42 @@ class CookBook (object):
         return ordered
 
     def _recipe_status(self, recipe_name):
+        recipe = self.get_recipe(recipe_name)
         if recipe_name not in self.status:
-            self.status[recipe_name] = RecipeStatus(steps=[])
+            self.status[recipe_name] = RecipeStatus(recipe.__file__, steps=[])
         return self.status[recipe_name]
 
     def _load_recipes(self):
         self.recipes = {}
-        for f in os.listdir(self._config.recipes_dir):
+        recipes = defaultdict(dict)
+        recipes_repos = self._config.get_recipes_repos()
+        for reponame, (repodir, priority) in recipes_repos.iteritems():
+            recipes[int(priority)].update(self._load_recipes_from_dir(repodir))
+        # Add recipes by asceding pripority
+        for key in sorted(recipes.keys()):
+            self.recipes.update(recipes[key])
+
+        # Check for updates in the recipe file to reset the status
+        for recipe in self.recipes.values():
+            if recipe.name not in self.status:
+                continue
+            st = self.status[recipe.name]
+            # filepath attribute was added afterwards
+            if not hasattr(st, 'filepath'):
+                st.filepath = recipe.__file__
+            if recipe.__file__ != st.filepath:
+                self.reset_recipe_status(recipe.name)
+            else:
+                rmtime = os.path.getmtime(recipe.__file__)
+                if rmtime > st.mtime:
+                    self.reset_recipe_status(recipe.name)
+
+    def _load_recipes_from_dir(self, repo):
+        recipes = {}
+        for f in os.listdir(repo):
             if not f.endswith(self.RECIPE_EXT):
                 continue
-            filepath = os.path.join(self._config.recipes_dir, f)
+            filepath = os.path.join(repo, f)
             try:
                 recipe = self._load_recipe_from_file(filepath)
             except RecipeNotFoundError:
@@ -289,13 +319,8 @@ class CookBook (object):
                                 f)
             if recipe is None:
                 continue
-            self.recipes[recipe.name] = recipe
-
-            # Check for updates in the recipe file to reset the status
-            rmtime = os.path.getmtime(filepath)
-            if recipe.name in self.status:
-                if rmtime > self.status[recipe.name].mtime:
-                    self.reset_recipe_status(recipe.name)
+            recipes[recipe.name] = recipe
+        return recipes
 
     def _load_recipe_from_file(self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
@@ -308,6 +333,7 @@ class CookBook (object):
                  'InvalidRecipeError': InvalidRecipeError}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
+            r.__file__ = os.path.abspath(filepath)
             r.prepare()
             return r
         except InvalidRecipeError:
