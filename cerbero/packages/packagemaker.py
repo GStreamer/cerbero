@@ -41,10 +41,13 @@ class OSXPackage(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
 
     def pack(self, output_dir, devel=True, force=False, version=None,
-             target='10.5'):
+             target='10.5', install_dir=None):
         output_dir = os.path.realpath(output_dir)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
+
+        self.install_dir = install_dir or self.package.get_install_dir()
+
 
         if version is None:
             version = self.package.version
@@ -74,9 +77,8 @@ class OSXPackage(PackagerBase):
         return [runtime_path, devel_path]
 
     def _get_install_dir(self):
-        install_dir = self.package.get_install_dir()
-        install_dir = os.path.join(install_dir, 'Version', self.package.version)
-        return install_dir
+        return os.path.join(self.install_dir, 'Version',
+                self.package.version, self.config.target_arch)
 
     def _create_package(self, package_type, output_dir, force, target):
         self.package.set_mode(package_type)
@@ -148,6 +150,10 @@ class PMDocPackage(PackagerBase):
 
         return paths
 
+    def _package_name(self, suffix):
+        return '%s-%s-%s%s' % (self.package.name, self.package.version,
+                self.config.target_arch, suffix)
+
     def _create_pmdoc(self, package_type, force, output_dir):
         self.package.set_mode(package_type)
         m.action(_("Creating pmdoc for package %s " % self.package))
@@ -155,8 +161,7 @@ class PMDocPackage(PackagerBase):
                 self.packages_paths[package_type],
                 self.empty_packages[package_type], package_type)
         pmdoc_path = pmdoc.create()
-        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
-            (self.package.name, self.package.version, self.config.target_arch))
+        output_file = os.path.join(output_dir, self._package_name('.pkg'))
         output_file = os.path.abspath(output_file)
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
@@ -170,7 +175,8 @@ class PMDocPackage(PackagerBase):
             packager = OSXPackage(self.config, p, self.store)
             try:
                 paths = packager.pack(output_dir, devel, force,
-                        self.package.version, target=None)
+                        self.package.version, target=None,
+                        install_dir=self.package.get_install_dir())
                 m.action(_("Package created sucessfully"))
             except EmptyPackageError:
                 paths = [None, None]
@@ -189,7 +195,7 @@ class PMDocPackage(PackagerBase):
             dmg_file = path.replace(self.PKG_EXT, self.DMG_EXT)
             self._create_dmg(dmg_file, [path])
         packages_dmg_file = os.path.join(output_dir,
-                self.package.name + '-packages.dmg')
+                self._package_name('-packages.dmg'))
         self._create_dmg(packages_dmg_file,
                 self.packages_paths[PackageType.RUNTIME].values())
 
