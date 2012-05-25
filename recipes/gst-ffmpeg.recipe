@@ -14,14 +14,9 @@ class Recipe(recipe.Recipe):
 
     files_codecs = ['lib/gstreamer-0.10/libgstffmpeg%(mext)s']
 
-    def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += \
-                    '--with-ffmpeg-extra-configure="--enable-w32threads"'
-
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
-            opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s' %\
+            opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s --enable-w32threads' %\
                 (self.config.host, self.config.target_arch)
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
