@@ -22,7 +22,8 @@ import shutil
 
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package
+from cerbero.packages.package import Package, PackageBase
+from cerbero.packages.osx_framework_plist import FrameworkPlist
 from cerbero.packages.pmdoc import PMDoc
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
@@ -111,6 +112,72 @@ class OSXPackage(PackagerBase):
             shutil.copy(in_path, out_path)
         return tmp
 
+
+class FrameworkBundlePackager(PackagerBase):
+    ''' Creates a package with the basic structure of a framework bundle,
+    adding links for Headears, Libraries, Commands, and Current Version,
+    and the Framework info.
+    '''
+
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
+
+    def pack(self, output_dir):
+        output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        self.install_dir = self.package.get_install_dir()
+
+        path = self._create_package(output_dir, self.package.get_install_dir(),
+                self.package.version)
+        return [path, None]
+
+    def _get_install_dir(self):
+        return os.path.join(self.install_dir, 'Version',
+                self.package.version, self.config.target_arch)
+
+    def _create_package(self, output_dir, install_dir, version):
+        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
+                ('osx-framework', self.package.version,
+                 self.config.target_arch))
+        root = self._create_bundle()
+        packagemaker = PackageMaker()
+        packagemaker.create_package(root, 'osx-framework',
+            self.package.version, 'Framework Bundle', output_file,
+            install_dir, target=None)
+        return output_file
+
+    def _create_bundle(self):
+        '''
+        Creates the bundle structure
+
+        Commands -> Version/Current/bin
+        Headers -> Version/Current/include
+        Librarires -> Version/Current/lib
+        Home -> Version/Current
+        Resources -> Version/Current/Resources
+        Version/Current -> Version/$VERSION/$ARCH
+        '''
+        tmp = tempfile.mkdtemp()
+
+        vdir = 'Version/%s/%s' % (self.package.version,
+                                  self.config.target_arch)
+        rdir = '%s/Resources/' % vdir
+        shell.call ('mkdir -p %s' % rdir, tmp)
+        links = {'Version/Current': '../%s' % vdir,
+                 'Resources': 'Version/Current/Resources',
+                 'Commands': 'Version/Current/bin',
+                 'Headers': 'Version/Current/include',
+                 'Libraries': 'Version/Current/lib'}
+        framework_plist = FrameworkPlist(self.package.name,
+            self.package.org, self.package.version, self.package.shortdesc)
+        framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
+        for dest, src in links.iteritems():
+            shell.call ('ln -s %s %s' % (src, dest), tmp)
+        return tmp
+
+
 class PMDocPackage(PackagerBase):
     '''
     Creates an osx package from a L{cerbero.package.package.MetaPackage} using
@@ -131,6 +198,11 @@ class PMDocPackage(PackagerBase):
 
     def pack(self, output_dir, devel=False, force=False):
         self.tmp = tempfile.mkdtemp()
+
+        self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
+        self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
+
+        self._create_framework_bundle_package(output_dir)
         self._create_packages(output_dir, devel, force)
 
         paths = []
@@ -154,6 +226,22 @@ class PMDocPackage(PackagerBase):
         return '%s-%s-%s%s' % (self.package.name, self.package.version,
                 self.config.target_arch, suffix)
 
+    def _create_framework_bundle_package(self, output_dir):
+        m.action(_("Creating framework package"))
+        package = PackageBase(self.config, self.store)
+        package.name = 'osx-framework'
+        package.shortdesc = 'Framework Bundle'
+        package.version = self.package.version
+        package.uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
+        package.deps = []
+        self.store.add_package(package)
+        self.package.packages += [(package.name, True, True)]
+        packager = FrameworkBundlePackager(self.config, self.package,
+                self.store)
+        path = packager.pack(output_dir)[0]
+        self.packages_paths[PackageType.RUNTIME][package] = path
+        self.empty_packages[PackageType.DEVEL].append(package)
+
     def _create_pmdoc(self, package_type, force, output_dir):
         self.package.set_mode(package_type)
         m.action(_("Creating pmdoc for package %s " % self.package))
@@ -168,8 +256,6 @@ class PMDocPackage(PackagerBase):
         return output_file
 
     def _create_packages(self, output_dir, devel, force):
-        self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
-        self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
         for p in self.packages:
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
