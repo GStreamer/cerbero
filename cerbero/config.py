@@ -132,10 +132,16 @@ class Config (object):
         xcursordir = os.path.join(prefix, 'share', 'icons')
         aclocal = os.environ.get('ACLOCAL', 'aclocal')
         aclocaldir = os.path.join(prefix, 'share', 'aclocal')
+        perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
+                                       self._perl_version())
+        if not os.path.exists(perlversionpath):
+            # On windows even if perl version is 5.8.8, modules can be
+            # installed in 5.8
+	    perlversionpath = perlversionpath.rsplit('.', 1)[0]
+
         perl5lib = ':'.join(
                 [to_unixpath(os.path.join(libdir, 'perl5')),
-                to_unixpath(os.path.join(libdir, 'perl5',
-                                         'site_perl', self._perl_version()))])
+                to_unixpath(perlversionpath)])
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
         gstregistry = os.path.join('~', '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
