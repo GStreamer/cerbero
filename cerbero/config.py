@@ -138,7 +138,7 @@ class Config (object):
         if not os.path.exists(perlversionpath):
             # On windows even if perl version is 5.8.8, modules can be
             # installed in 5.8
-	    perlversionpath = perlversionpath.rsplit('.', 1)[0]
+            perlversionpath = perlversionpath.rsplit('.', 1)[0]
 
         perl5lib = ':'.join(
                 [to_unixpath(os.path.join(libdir, 'perl5')),
