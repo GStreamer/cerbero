@@ -20,7 +20,7 @@
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
-from cerbero.errors import FatalError
+from cerbero.errors import CommandError
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
@@ -38,7 +38,7 @@ class CheckPackage(Command):
 
     def run(self, config, args):
         cookbook = CookBook(config)
-        failed = False
+        failed = []
         p_name = args.package[0]
 
         store = PackagesStore(config)
@@ -48,7 +48,7 @@ class CheckPackage(Command):
 
         for recipe in ordered_recipes:
             if cookbook.recipe_needs_build(recipe.name):
-                raise FatalError(_("Recipe %s is not built yet" % recipe.name))
+                raise CommandError(_("Recipe %s is not built yet" % recipe.name))
 
         for recipe in ordered_recipes:
             # call step function
@@ -63,9 +63,10 @@ class CheckPackage(Command):
                     m.message('Running checks for recipe %s' % recipe.name)
                     stepfunc()
                 except Exception, ex:
-                    failed = True;
+                    failed.append(recipe.name)
                     m.warning(_("%s checks failed: %s") % (recipe.name, ex))
         if failed:
-            raise FatalError(_("Error running %s checks") % p_name)
+            raise CommandError(_("Error running %s checks on:\n    " +
+                        "\n    ".join(failed)) % p_name)
 
 register_command(CheckPackage)
