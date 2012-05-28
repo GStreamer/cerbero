@@ -36,14 +36,11 @@ def pretify(string, pretty_print=True):
     return re.sub(fix, '', parsed.toprettyxml())
 
 
-def write(self, file_or_filename, encoding=None, xml_declaration=None,
-          default_namespace=None, method=None, pretty_print=False):
+def write(self, file_or_filename, encoding=None, pretty_print=False):
     if not pretty_print:
-        return oldwrite(self, file_or_filename, encoding, xml_declaration,
-                default_namespace, method)
+        return oldwrite(self, file_or_filename, encoding)
     tmpfile = StringIO.StringIO()
-    oldwrite(self, tmpfile, encoding, xml_declaration, default_namespace,
-            method)
+    oldwrite(self, tmpfile, encoding)
     tmpfile.seek(0)
     if hasattr(file_or_filename, "write"):
         out_file = file_or_filename
