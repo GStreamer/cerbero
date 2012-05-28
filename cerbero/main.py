@@ -18,9 +18,15 @@
 
 from cerbero import hacks
 
+try:
+    import argparse
+except ImportError, e:
+    print "Could not import argparse. Try installing it with "\
+          "'sudo easy_install argparse"
+    raise e
+
 import sys
 import errno
-import argparse
 import logging
 import traceback
 
