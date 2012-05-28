@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import stat
 import shutil
 
 from cerbero.commands import Command, register_command
@@ -24,6 +25,13 @@ from cerbero.config import CONFIG_DIR
 from cerbero.utils import _, N_, shell, ArgparseArgument
 import cerbero.utils.messages as m
 
+
+def _onerror(func, path, exc_info):
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        raise
 
 class Wipe(Command):
     doc = N_('Wipes everything to restore the build system')
@@ -66,9 +74,11 @@ class Wipe(Command):
             if not os.path.exists(path):
                 continue
             if os.path.isfile(path):
+                if not os.access(path, os.W_OK):
+                    os.chmod(path, stat.S_IWUSR)
                 os.remove(path)
             else:
-                shutil.rmtree(path)
+                shutil.rmtree(path, onerror=_onerror)
 
 
 register_command(Wipe)
