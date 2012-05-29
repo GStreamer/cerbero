@@ -359,7 +359,7 @@ class DebianPackager(LinuxPackager):
             args['requires'] = ', ' + requires if requires else ''
             args['recommends'] = recommends
             args['suggests'] = suggests
-            return CONTROL_TPL % args, runtime_files
+            return (CONTROL_TPL + CONTROL_RUNTIME_PACKAGE_TPL) % args, runtime_files
 
         requires = self._get_requires(PackageType.RUNTIME)
         args['requires'] = ', ' + requires if requires else ''
