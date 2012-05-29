@@ -59,7 +59,7 @@ class Wipe(Command):
                 "the sources directory and the builds directory "
                 "to reset the build system to its initial state.\n"
                 "The following paths will be removed:\n%s\n"
-                "Do you want to continue? " % '\n'.join(to_remove))
+                "Do you want to continue?" % '\n'.join(to_remove))
         # Ask once
         if shell.prompt(msg, options) == options[0]:
             msg = _("Are you sure?")
