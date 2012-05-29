@@ -14,6 +14,16 @@ class Recipe(recipe.Recipe):
 
     files_codecs = ['lib/gstreamer-0.10/libgstffmpeg%(mext)s']
 
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86_64:
+                asflags = ' -arch x86_64 -m64'
+            elif self.config.target_arch == Architecture.X86:
+                asflags = ' -arch i386 -m32'
+            elif self.config.target_arch == Architecture.PPC:
+                asflags = ' -arch ppc'
+            self.configure_options += ' ASFLAGS="%s"' % asflags
+
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
             opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s --enable-w32threads' %\
