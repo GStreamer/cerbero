@@ -8,6 +8,12 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules '
     deps = ['cairo', 'fontconfig', 'freetype']
+    platform_deps = {
+        Platform.WINDOWS: ['gtk-doc-windows'],
+        Platform.LINUX: ['gtk-doc'],
+        Platform.DARWIN: ['gtk-doc'],
+    }
+
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
