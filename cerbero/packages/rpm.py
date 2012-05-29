@@ -156,7 +156,10 @@ class RPMPackager(LinuxPackager):
         return tarname
 
     def prepare(self, tarname, tmpdir, packagedir, srcdir):
-        runtime_files = self._files_list(PackageType.RUNTIME)
+        try:
+            runtime_files = self._files_list(PackageType.RUNTIME)
+        except EmptyPackageError:
+            runtime_files = ''
 
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()

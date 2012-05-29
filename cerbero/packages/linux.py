@@ -113,6 +113,9 @@ class LinuxPackager(PackagerBase):
         recommends = []
         for p in self.package.packages:
             package = self.store.get_package(p[0])
+            if package_type == PackageType.RUNTIME:
+                if not self._has_runtime_package(package):
+                    continue
             if package_type == PackageType.DEVEL:
                 if not self._has_devel_package(package):
                     continue
@@ -172,6 +175,11 @@ class LinuxPackager(PackagerBase):
         if self.packager == DEFAULT_PACKAGER:
             m.warning(_('No packager defined, using default '
                         'packager "%s"') % self.packager)
+
+    def _has_runtime_package(self, package):
+        if hasattr(package, 'has_runtime_package'):
+            return package.has_runtime_package
+        return False
 
     def _has_devel_package(self, package):
         if hasattr(package, 'has_devel_package'):
