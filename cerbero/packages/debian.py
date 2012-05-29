@@ -51,7 +51,10 @@ Standards-Version: 3.8.4
 Section: libs
 %(homepage)s
 
-Package: %(p_prefix)s%(name)s
+'''
+
+CONTROL_RUNTIME_PACKAGE_TPL = \
+'''Package: %(p_prefix)s%(name)s
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends} %(requires)s
@@ -76,7 +79,7 @@ CONTROL_DEVEL_PACKAGE_TPL = \
 '''Package: %(p_prefix)s%(name)s-dev
 Section: libdevel
 Architecture: any
-Depends: %(p_prefix)s%(name)s (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends} %(requires)s
+Depends: ${shlibs:Depends}, ${misc:Depends} %(requires)s
 Recommends: %(recommends)s
 Suggests: %(suggests)s
 Description: %(shortdesc)s
@@ -208,6 +211,11 @@ class DebianPackager(LinuxPackager):
 
         control, runtime_files = self._deb_control_runtime_and_files()
 
+        if len(runtime_files) != 0 or isinstance(self.package, MetaPackage):
+            self.package.has_runtime_package = True
+        else:
+            self.package.has_runtime_package = False
+
         if self.devel:
             control_devel, devel_files = self._deb_control_devel_and_files()
         else:
@@ -231,9 +239,10 @@ class DebianPackager(LinuxPackager):
         os.chmod(rules_path, 0755)
         self._write_debian_file(packagedir, os.path.join('source', 'format'),
                 source_format)
-        self._write_debian_file(packagedir,
-                self.package_prefix + self.package.name + '.install',
-                runtime_files)
+        if self.package.has_runtime_package:
+            self._write_debian_file(packagedir,
+                    self.package_prefix + self.package.name + '.install',
+                    runtime_files)
         if self.devel and self.package.has_devel_package:
             self._write_debian_file(packagedir,
                     self.package_prefix + self.package.name + '-dev.install',
@@ -335,7 +344,12 @@ class DebianPackager(LinuxPackager):
         args['shortdesc'] = self.package.shortdesc
         args['longdesc'] = self.package.longdesc \
                 if self.package.longdesc != 'default' else args['shortdesc']
-        runtime_files = self._files_list(PackageType.RUNTIME)
+
+        try:
+            runtime_files = self._files_list(PackageType.RUNTIME)
+        except EmptyPackageError:
+            runtime_files = ''
+
         if isinstance(self.package, MetaPackage):
             requires, recommends, suggests = \
                     self.get_meta_requires(PackageType.RUNTIME, '')
@@ -346,13 +360,15 @@ class DebianPackager(LinuxPackager):
             args['recommends'] = recommends
             args['suggests'] = suggests
             return CONTROL_TPL % args, runtime_files
-        else:
-            requires = self._get_requires(PackageType.RUNTIME)
-            args['requires'] = ', ' + requires if requires else ''
-            args['recommends'] = ''
-            args['suggests'] = ''
-            return (CONTROL_TPL + CONTROL_DBG_PACKAGE_TPL) % \
+
+        requires = self._get_requires(PackageType.RUNTIME)
+        args['requires'] = ', ' + requires if requires else ''
+        args['recommends'] = ''
+        args['suggests'] = ''
+        if runtime_files:
+            return (CONTROL_TPL + CONTROL_RUNTIME_PACKAGE_TPL + CONTROL_DBG_PACKAGE_TPL) % \
                     args, runtime_files
+        return CONTROL_TPL % args, ''
 
     def _deb_control_devel_and_files(self):
         args = {}
@@ -380,6 +396,8 @@ class DebianPackager(LinuxPackager):
 
         requires = self._get_requires(PackageType.DEVEL)
         args['requires'] = ', ' + requires if requires else ''
+        if self.package.has_runtime_package:
+            args['requires'] += (', %(p_prefix)s%(name)s (= ${binary:Version})' % args)
         args['recommends'] = ''
         args['suggests'] = ''
         if devel_files:
@@ -406,7 +424,8 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        if not isinstance(self.package, MetaPackage):
+        if not isinstance(self.package, MetaPackage) and \
+           self.package.has_runtime_package:
             args['dh_strip'] = DH_STRIP_TPL % args
         else:
             args['dh_strip'] = ''
