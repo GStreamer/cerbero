@@ -135,7 +135,7 @@ class Config (object):
         aclocaldir = os.path.join(prefix, 'share', 'aclocal')
         perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
                                        self._perl_version())
-        if not os.path.exists(perlversionpath):
+        if self.target_platform == Platform.WINDOWS:
             # On windows even if perl version is 5.8.8, modules can be
             # installed in 5.8
             perlversionpath = perlversionpath.rsplit('.', 1)[0]
