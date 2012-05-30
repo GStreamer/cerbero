@@ -10,7 +10,9 @@ class Recipe(recipe.Recipe):
 
     files_tutorials = ['share/gst-sdk/tutorials']
     platform_files_tutorials = {
-        Platform.WINDOWS: ['share/vs/2010/tutorials']
+        Platform.WINDOWS: ['share/vs/2010/tutorials'],
+        Platform.DARWIN: ['share/xcode/GStreamer Tutorials x86.xcodeproj',
+                          'share/xcode/GStreamer Tutorials x86_64.xcodeproj',]
     }
 
     # Does not have rule for `make check`

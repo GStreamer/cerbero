@@ -9,13 +9,16 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     deps = ['gstreamer', 'gst-plugins-base', 'gtk+', 'clutter']
 
-    files_devel = ['share/xcode']
+    files_devel = ['share/xcode/gstreamer-0.10.xcconfig',
+                   'share/xcode/gstreamer-0.10-all.xcconfig',
+                   'share/xcode/gstreamer-0.10-gtk+-2.0.xcconfig',
+                   'share/xcode/gstreamer-0.10-clutter-1.0.xcconfig']
 
     def install(self):
         from cerbero.commands.genxcconfig import GenXCodeConfig
         from cerbero.ide.pkgconfig import PkgConfig
 
-        outdir = os.path.join(self.config.prefix, self.files_devel[0])
+        outdir = os.path.join(self.config.prefix, 'share', 'xcode')
         pc_files = PkgConfig.list_all()
         gstreamer_all = [x for x in pc_files if x.startswith('gstreamer')]
 
