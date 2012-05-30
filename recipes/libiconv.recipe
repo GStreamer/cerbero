@@ -6,8 +6,8 @@ class Recipe(recipe.Recipe):
     version = '1.14'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
-    deps = ['gettext']
     configure_options = '--disable-nls'
+    platform_deps = {Platform.WINDOWS: ['gettext']}
 
     files_bins = ['iconv', ]
     licenses_bins = [License.GPLv3Plus]

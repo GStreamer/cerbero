@@ -8,6 +8,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     srcdir = 'gettext-runtime'
     autoreconf = True
+    platform_deps = {Platform.DARWIN:  ['libiconv'],
+                     Platform.LINUX:  ['libiconv'],}
 
     files_libs = ['libintl', 'libasprintf']
     files_bins = ['gettext', 'ngettext', 'envsubst']
