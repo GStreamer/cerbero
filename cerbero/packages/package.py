@@ -245,7 +245,10 @@ class Package(PackageBase):
                 files.extend(rfiles)
         for recipe, categories in self._recipes_files_devel.iteritems():
             recipe = self.cookbook.get_recipe(recipe)
-            rfiles = recipe.files_list_by_categories(categories)
+            if not categories:
+                rfiles = recipe.devel_files_list()
+            else:
+                rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
         return sorted(files)
 
