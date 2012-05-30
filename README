@@ -36,6 +36,7 @@ Windows
 The initial setup on Windows is little bit longer, but only a few programs are required.
   * Python2.7: http://www.python.org/getit/releases/2.7/
   * Git: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
+    IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
   * Msys/MinGW: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
     Install it with all the options enabled
   * CMake: http://www.cmake.org/cmake/resources/software.html
