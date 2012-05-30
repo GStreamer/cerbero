@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'pango'
     version = '1.28.4'
     autoreconf = True
+    autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules '
     deps = ['cairo', 'fontconfig', 'freetype']
