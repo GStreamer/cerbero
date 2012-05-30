@@ -42,23 +42,25 @@ class MergeModulePackager(PackagerBase):
         paths = []
 
         # create runtime package
-        p = self.create_merge_module(output_dir, PackageType.RUNTIME, force)
+        p = self.create_merge_module(output_dir, PackageType.RUNTIME, force,
+                                     self.package.version)
         paths.append(p)
 
         if devel:
-            p = self.create_merge_module(output_dir, PackageType.DEVEL, force)
+            p = self.create_merge_module(output_dir, PackageType.DEVEL, force,
+                                         self.package.version)
             paths.append(p)
 
         return paths
 
-    def create_merge_module(self, output_dir, package_type, force):
+    def create_merge_module(self, output_dir, package_type, force, version):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
         mergemodule = MergeModule(self.config, files_list, self.package)
-        sources = os.path.join(output_dir, "%s.wsx" % self.package.name)
+        sources = os.path.join(output_dir, "%s.wsx" % self._package_name(version))
         mergemodule.write(sources)
 
-        wixobj = os.path.join(output_dir, "%s.wixobj" % self.package.name)
+        wixobj = os.path.join(output_dir, "%s.wixobj" % self._package_name(version))
 
         if self._with_wine:
             wixobj = to_winepath(wixobj)
@@ -68,6 +70,10 @@ class MergeModulePackager(PackagerBase):
         candle.compile(sources, output_dir)
         light = Light(self.wix_prefix, self._with_wine)
         return light.compile([wixobj], self.package.name, output_dir, True)
+
+    def _package_name(self, version):
+        return "%s-%s-%s" % (self.package.name, self.config.target_arch,
+                             version)
 
 
 class MSIPackager(PackagerBase):
@@ -98,6 +104,10 @@ class MSIPackager(PackagerBase):
 
         return paths
 
+    def _package_name(self):
+        return "%s-%s-%s" % (self.package.name, self.config.target_arch,
+                             self.package.version)
+
     def _create_msi_installer(self, output_dir, package_type, force=False):
         self.package.set_mode(package_type)
         output_dir = os.path.realpath(output_dir)
@@ -109,15 +119,15 @@ class MSIPackager(PackagerBase):
         self._create_msi(config_path)
 
     def _create_merge_modules(self, package_type):
-        packagedeps = []
+        packagedeps = {}
         for package in self.packagedeps:
             package.set_mode(package_type)
             m.action("Creating Merge Module for %s" % package)
             packager = MergeModulePackager(self.config, package, self.store)
             try:
-                packager.create_merge_module(self.output_dir,
-                        package_type, self.force)
-                packagedeps.append(package)
+                path = packager.create_merge_module(self.output_dir,
+                        package_type, self.force, self.package.version)
+                packagedeps[package] = path
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
@@ -134,13 +144,13 @@ class MSIPackager(PackagerBase):
         return config_path
 
     def _create_msi(self, config_path):
-        sources = os.path.join(self.output_dir, "%s.wsx" % self.package.name)
+        sources = os.path.join(self.output_dir, "%s.wsx" % self._package_name())
         msi = MSI(self.config, self.package, self.packagedeps, config_path,
                   self.store)
         msi.write(sources)
 
         wixobjs = [os.path.join(self.output_dir, "%s.wixobj" %
-                                self.package.name)]
+                                self._package_name())]
         #FIXME: Don't use our custom UI yet
         #wixobjs.append(os.path.join(self.output_dir, "ui.wixobj"))
 

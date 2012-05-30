@@ -276,7 +276,7 @@ class MSI(WixBase):
                     self.package.packages]
 
         # Remove empty packages
-        packages = [x for x in packages if x[0] in self.packages_deps]
+        packages = [x for x in packages if x[0] in self.packages_deps.keys()]
         if len(packages) == 0:
             raise FatalError("All packages are empty: %s" %
                     [x[0] for x in self.package.packages])
@@ -294,10 +294,10 @@ class MSI(WixBase):
                                        required_packages)
 
         # Add a merge module ref for all the packages
-        for package in self.packages_deps:
+        for package, path in self.packages_deps.iteritems():
             etree.SubElement(self.installdir, 'Merge',
                 Id=self._package_id(package.name), Language='1033',
-                SourceFile='%s.msm' % package.name, DiskId='1')
+                SourceFile=path, DiskId='1')
 
     def _add_dir(self, parent, dir_id, name):
         tdir = etree.SubElement(parent, "Directory",
@@ -399,7 +399,7 @@ class MSI(WixBase):
             mergerefs = [x for x in deps if x in required_packages]
 
         # don't add empty packages
-        mergerefs = [x for x in mergerefs if x in self.packages_deps]
+        mergerefs = [x for x in mergerefs if x in self.packages_deps.keys()]
 
         for p in mergerefs:
             etree.SubElement(feature, "MergeRef",
