@@ -38,6 +38,8 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
     platform_files_themes = {
+        Platform.LINUX: [
+            'share/themes/Default/gtk-2.0-key/gtkrc'],
         Platform.WINDOWS: [
             'share/themes/MS-Windows/gtk-2.0/gtkrc',
             'lib/gtk-2.0/2.10.0/engines/libwimp.dll',]
