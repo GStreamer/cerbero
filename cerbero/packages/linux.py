@@ -27,6 +27,8 @@ from cerbero.packages.package import MetaPackage
 from cerbero.utils import _
 from cerbero.utils import messages as m
 
+import shutil
+
 
 class LinuxPackager(PackagerBase):
 
@@ -74,6 +76,9 @@ class LinuxPackager(PackagerBase):
 
         stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
         open(stamp_path, 'w').close()
+
+        m.action(_('Removing temporary dir %s') % tmpdir)
+        shutil.rmtree(tmpdir)
 
         return paths
 
