@@ -28,7 +28,8 @@ class Package(package.Package):
                  DistroVersion.UBUNTU_NATTY,
                  DistroVersion.UBUNTU_ONEIRIC,
                  DistroVersion.UBUNTU_PRECISE,
-                 DistroVersion.FEDORA_16]:
+                 DistroVersion.FEDORA_16,
+                 DistroVersion.FEDORA_17]:
             self.files += ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:libs_extra:lang',
                            'libgpg-error:libs:lang', 'libtasn1:libs',
                            'nettle:libs', 'glib-networking']

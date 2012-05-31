@@ -60,7 +60,7 @@ mkdir -p $RPM_BUILD_ROOT/%%{prefix}
 cp -r $RPM_BUILD_DIR/%%{_package_name}/* $RPM_BUILD_ROOT/%%{prefix}
 
 # Workaround to remove full source dir paths from debuginfo packages
-# (tested in Fedora 16).
+# (tested in Fedora 16/17).
 #
 # What happens is that rpmbuild invokes find-debuginfo.sh which in turn
 # calls debugedit passing $RPM_BUILD_DIR as the "base-dir" param (-b) value.

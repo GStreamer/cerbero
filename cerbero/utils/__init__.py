@@ -148,8 +148,11 @@ def system_info():
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora']:
             distro = Distro.REDHAT
-            if d[1] == '16':
-                distro_version = DistroVersion.FEDORA_16
+            if d[1] in ['16', '17']:
+                if d[1] == '16':
+                    distro_version = DistroVersion.FEDORA_16
+                elif d[1] == '17':
+                    distro_version = DistroVersion.FEDORA_17
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))

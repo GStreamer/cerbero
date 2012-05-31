@@ -84,7 +84,7 @@ class Recipe(recipe.Recipe):
                 elif self.config.target_arch == Architecture.X86_64:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/x86_64-linux-gnu/gtk-2.0', None, '/usr/share/themes')
             elif self.config.target_distro == Distro.REDHAT:
-                if self.config.target_distro_version in [DistroVersion.FEDORA_16]:
+                if self.config.target_distro_version in [DistroVersion.FEDORA_16, DistroVersion.FEDORA_17]:
                     if self.config.target_arch == Architecture.X86:
                         self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
                     elif self.config.target_arch == Architecture.X86_64:

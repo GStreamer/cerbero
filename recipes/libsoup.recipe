@@ -19,7 +19,8 @@ class Recipe(recipe.Recipe):
                  DistroVersion.UBUNTU_NATTY,
                  DistroVersion.UBUNTU_ONEIRIC,
                  DistroVersion.UBUNTU_PRECISE,
-                 DistroVersion.FEDORA_16]:
+                 DistroVersion.FEDORA_16,
+                 DistroVersion.FEDORA_17]:
             self.deps += [ 'glib-networking' ]
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' --disable-tls-check'

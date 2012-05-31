@@ -50,6 +50,7 @@ class DistroVersion:
     UBUNTU_ONEIRIC = 'ubuntu_oneiric'
     UBUNTU_PRECISE = 'ubuntu_precise'
     FEDORA_16 = 'fedora_16'
+    FEDORA_17 = 'fedora_17'
     REDHAT_6 = 'redhat_6'
     OPENSUSE_12_1 = 'opensuse_12_1'
     WINDOWS_XP = 'windows_xp'
