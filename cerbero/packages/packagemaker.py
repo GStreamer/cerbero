@@ -41,18 +41,12 @@ class OSXPackage(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
 
-    def pack(self, output_dir, devel=True, force=False, version=None,
-             target='10.5', install_dir=None):
-        output_dir = os.path.realpath(output_dir)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    def pack(self, output_dir, devel=True, force=False, keep_temp=False,
+             version=None, target='10.5', install_dir=None):
+        PackagerBase.pack(output_dir, devel, force, keep_temp)
 
         self.install_dir = install_dir or self.package.get_install_dir()
-
-
-        if version is None:
-            version = self.package.version
-        self.version = version
+        self.version = version or self.package.version
 
         # create the runtime package
         try:
@@ -260,7 +254,7 @@ class PMDocPackage(PackagerBase):
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
             try:
-                paths = packager.pack(output_dir, devel, force,
+                paths = packager.pack(output_dir, devel, force, keep_temp,
                         self.package.version, target=None,
                         install_dir=self.package.get_install_dir())
                 m.action(_("Package created sucessfully"))

@@ -48,6 +48,8 @@ class Package(Command):
             ArgparseArgument('-s', '--skip-deps-build', action='store_true',
                 default=False, help=_('Do not build the recipes needed to '
                     'create this package')),
+            ArgparseArgument('-k', '--keep-temp', action='store_true',
+                default=False, help=_('Keep temporary files for debug')),
             ])
 
     def run(self, config, args):
@@ -64,7 +66,8 @@ class Package(Command):
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
-        paths = pkg.pack(args.output_dir, args.no_devel, args.force)
+        paths = pkg.pack(args.output_dir, args.no_devel, args.force,
+                         args.keep_temp)
         if None in paths:
             paths.remove(None)
         m.action(_("Package successfully created in %s") %

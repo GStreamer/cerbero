@@ -34,33 +34,33 @@ class MergeModulePackager(PackagerBase):
         self._with_wine = config.platform != Platform.WINDOWS
         self.wix_prefix = config.wix_prefix
 
-    def pack(self, output_dir, devel=False, force=False):
-        output_dir = os.path.realpath(output_dir)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+        PackagerBase.pack(output_dir, devel, force, keep_temp)
 
         paths = []
 
         # create runtime package
         p = self.create_merge_module(output_dir, PackageType.RUNTIME, force,
-                                     self.package.version)
+                                     self.package.version, keep_temp)
         paths.append(p)
 
         if devel:
             p = self.create_merge_module(output_dir, PackageType.DEVEL, force,
-                                         self.package.version)
+                                         self.package.version, keep_temp)
             paths.append(p)
 
         return paths
 
-    def create_merge_module(self, output_dir, package_type, force, version):
+    def create_merge_module(self, output_dir, package_type, force, version,
+                            keep_temp):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
         mergemodule = MergeModule(self.config, files_list, self.package)
-        sources = os.path.join(output_dir, "%s.wsx" % self._package_name(version))
+	package_name = self._package_name(version)
+        sources = os.path.join(output_dir, "%s.wsx" % package_name)
         mergemodule.write(sources)
 
-        wixobj = os.path.join(output_dir, "%s.wixobj" % self._package_name(version))
+        wixobj = os.path.join(output_dir, "%s.wixobj" % package_name)
 
         if self._with_wine:
             wixobj = to_winepath(wixobj)
@@ -69,7 +69,15 @@ class MergeModulePackager(PackagerBase):
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(sources, output_dir)
         light = Light(self.wix_prefix, self._with_wine)
-        return light.compile([wixobj], self.package.name, output_dir, True)
+        path = light.compile([wixobj], package_name, output_dir, True)
+
+        # Clean up
+        if not keep_temp:
+            os.remove(sources)
+            os.remove(wixobj)
+            os.remove(wixobj.replace('.wixobj', '.wixpdb'))
+
+        return path
 
     def _package_name(self, version):
         return "%s-%s-%s" % (self.package.name, self.config.target_arch,
@@ -86,21 +94,28 @@ class MSIPackager(PackagerBase):
         self._with_wine = config.platform != Platform.WINDOWS
         self.wix_prefix = config.wix_prefix
 
-    def pack(self, output_dir, devel=False, force=False):
-        output_dir = os.path.realpath(output_dir)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+        self.output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        self.force = force
+        self.keep_temp = keep_temp
 
         paths = []
 
         # create runtime package
-        p = self._create_msi_installer(output_dir, PackageType.RUNTIME, force)
+        p = self._create_msi_installer(PackageType.RUNTIME)
         paths.append(p)
 
         if devel:
-            p = self._create_msi_installer(output_dir, PackageType.DEVEL,
-                                           force)
+            p = self._create_msi_installer(PackageType.DEVEL)
             paths.append(p)
+
+        if not keep_temp:
+            for _, paths in self.packagedeps:
+                for p in paths:
+                    #ios.remove(p)
+                    pass
 
         return paths
 
@@ -108,12 +123,9 @@ class MSIPackager(PackagerBase):
         return "%s-%s-%s" % (self.package.name, self.config.target_arch,
                              self.package.version)
 
-    def _create_msi_installer(self, output_dir, package_type, force=False):
+    def _create_msi_installer(self, package_type):
         self.package.set_mode(package_type)
-        output_dir = os.path.realpath(output_dir)
         self.packagedeps = self.store.get_package_deps(self.package, True)
-        self.output_dir = output_dir
-        self.force = force
         self._create_merge_modules(package_type)
         config_path = self._create_config()
         self._create_msi(config_path)
@@ -126,8 +138,9 @@ class MSIPackager(PackagerBase):
             packager = MergeModulePackager(self.config, package, self.store)
             try:
                 path = packager.create_merge_module(self.output_dir,
-                        package_type, self.force, self.package.version)
-                packagedeps[package] = path
+                        package_type, self.force, self.package.version,
+			self.keep_temp)
+                packagedeps[package] = path 
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
@@ -161,7 +174,17 @@ class MSIPackager(PackagerBase):
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(sources, self.output_dir)
         light = Light(self.wix_prefix, self._with_wine, self.UI_EXT)
-        return light.compile(wixobjs, self.package.name, self.output_dir)
+        path = light.compile(wixobjs, self._package_name(), self.output_dir)
+
+        # Clean up
+        if not self.keep_temp:
+            os.remove(sources)
+            os.remove(config_path)
+            for p in wixobjs:
+                os.remove(p)
+                os.remove(p.replace('.wixobj', '.wixpdb'))
+
+        return path
 
 
 class Packager(object):

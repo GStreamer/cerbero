@@ -38,7 +38,7 @@ class PackagerBase(object):
         self.package = package
         self.store = store
 
-    def pack(self, output_dir, devel=True, force=False):
+    def pack(self, output_dir, devel=True, force=False, keep_temp=False):
         '''
         Creates a package and puts it the the output directory
 
@@ -48,11 +48,18 @@ class PackagerBase(object):
         @type  devel: bool
         @param force: forces the creation of the package
         @type  force: bool
+        @param keep_temp: do not delete temporary files
+        @type  force: bool
 
         @return: list of filenames for the packages created
         @rtype: list
         '''
-        raise NotImplemented("'pack' must be implemented by subclasses")
+        self.output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
+        self.devel = devel
+        self.force = force
+        self.keep_temp = self.keep_temp
 
     def files_list(self, package_type, force):
         if package_type == PackageType.DEVEL:
