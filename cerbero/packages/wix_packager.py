@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+from zipfile import ZipFile
 
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
@@ -102,6 +103,7 @@ class MSIPackager(PackagerBase):
         self.keep_temp = keep_temp
 
         paths = []
+        self.merge_modules = {}
 
         # create runtime package
         p = self._create_msi_installer(PackageType.RUNTIME)
@@ -111,11 +113,17 @@ class MSIPackager(PackagerBase):
             p = self._create_msi_installer(PackageType.DEVEL)
             paths.append(p)
 
+        self.package.set_mode(PackageType.RUNTIME)
+        zipf = ZipFile(os.path.join(self.output_dir, '%s-merge-modules.zip' %
+                                    self._package_name()), 'w')
+        for p in self.merge_modules[PackageType.RUNTIME]:
+            zipf.write(p)
+        zipf.close()
+
         if not keep_temp:
-            for _, paths in self.packagedeps:
+            for paths in self.merge_modules.values():
                 for p in paths:
-                    #ios.remove(p)
-                    pass
+                    os.remove(p)
 
         return paths
 
@@ -144,6 +152,7 @@ class MSIPackager(PackagerBase):
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
+        self.merge_modules[package_type] = packagedeps.values()
 
     def _create_config(self):
         config = WixConfig(self.config, self.package)
