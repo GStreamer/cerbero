@@ -40,7 +40,7 @@ class LinuxPackager(PackagerBase):
         self.packager = self.config.packager
         self._check_packager()
 
-    def pack(self, output_dir, devel=True, force=False,
+    def pack(self, output_dir, devel=True, force=False, keep_temp=False,
              pack_deps=True, tmpdir=None):
         self.install_dir = self.package.get_install_dir()
         self.devel = devel
@@ -77,8 +77,9 @@ class LinuxPackager(PackagerBase):
         stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
         open(stamp_path, 'w').close()
 
-        m.action(_('Removing temporary dir %s') % tmpdir)
-        shutil.rmtree(tmpdir)
+        if not keep_temp:
+            m.action(_('Removing temporary dir %s') % tmpdir)
+            shutil.rmtree(tmpdir)
 
         return paths
 
@@ -108,7 +109,7 @@ class LinuxPackager(PackagerBase):
                      (p.name, self.package.name))
             packager = self.__class__(self.config, p, self.store)
             try:
-                packager.pack(output_dir, self.devel, force, True, tmpdir)
+                packager.pack(output_dir, self.devel, force, True, True, tmpdir)
             except EmptyPackageError:
                 self._empty_packages.append(p)
 
