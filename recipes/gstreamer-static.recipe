@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     version = '0.10.36'
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--disable-instrospection --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin="http://www.gstreamer.com" --with-package-name="GStreamer (GStreamer SDK)" '
+    configure_options = "--disable-instrospection --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2']
     platform_deps = {

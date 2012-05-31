@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--disable-shared --enable-static --enable-lgpl --disable-examples --with-package-origin="http://www.gstreamer.com" --with-package-name="GStreamer FFMPEG Plugins (GStreamer SDK)" '
+    configure_options = "--disable-shared --enable-static --enable-lgpl --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer FFMPEG Plugins (GStreamer SDK)' "
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
