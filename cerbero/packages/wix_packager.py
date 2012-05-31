@@ -121,8 +121,8 @@ class MSIPackager(PackagerBase):
         zipf.close()
 
         if not keep_temp:
-            for paths in self.merge_modules.values():
-                for p in paths:
+            for msms in self.merge_modules.values():
+                for p in msms:
                     os.remove(p)
 
         return paths
