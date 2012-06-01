@@ -59,7 +59,7 @@ class PackagerBase(object):
             os.makedirs(self.output_dir)
         self.devel = devel
         self.force = force
-        self.keep_temp = self.keep_temp
+        self.keep_temp = keep_temp
 
     def files_list(self, package_type, force):
         if package_type == PackageType.DEVEL:

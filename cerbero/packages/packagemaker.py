@@ -43,7 +43,7 @@ class OSXPackage(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
              version=None, target='10.5', install_dir=None):
-        PackagerBase.pack(output_dir, devel, force, keep_temp)
+        PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         self.install_dir = install_dir or self.package.get_install_dir()
         self.version = version or self.package.version
@@ -190,29 +190,34 @@ class PMDocPackage(PackagerBase):
         self.packages_paths = {}
         self.empty_packages = {}
 
-    def pack(self, output_dir, devel=False, force=False):
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+        PackagerBase.pack(self, output_dir, devel, force, keep_temp)
+
         self.tmp = tempfile.mkdtemp()
 
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
         self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
 
-        self._create_framework_bundle_package(output_dir)
-        self._create_packages(output_dir, devel, force)
+        self._create_framework_bundle_package()
+        self._create_packages()
 
         paths = []
         # create runtime package
-        r_path = self._create_pmdoc(PackageType.RUNTIME, force, output_dir)
+        r_path = self._create_pmdoc(PackageType.RUNTIME)
         paths.append(r_path)
 
         if devel:
             # create devel package
-            d_path = self._create_pmdoc(PackageType.DEVEL, force, output_dir)
+            d_path = self._create_pmdoc(PackageType.DEVEL)
             paths.append(d_path)
 
         # FIXME: Figure out why PackageMaker refuses to create flat meta-packages
         # using flat packages created by himself
         for path in paths:
-            self._create_dmgs(paths, output_dir)
+            self._create_dmgs(paths)
+
+        if not keep_temp:
+            shutil.rmtree(self.tmp)
 
         return paths
 
@@ -220,7 +225,7 @@ class PMDocPackage(PackagerBase):
         return '%s-%s-%s%s' % (self.package.name, self.package.version,
                 self.config.target_arch, suffix)
 
-    def _create_framework_bundle_package(self, output_dir):
+    def _create_framework_bundle_package(self):
         m.action(_("Creating framework package"))
         package = PackageBase(self.config, self.store)
         package.name = 'osx-framework'
@@ -232,30 +237,30 @@ class PMDocPackage(PackagerBase):
         self.package.packages += [(package.name, True, True)]
         packager = FrameworkBundlePackager(self.config, self.package,
                 self.store)
-        path = packager.pack(output_dir)[0]
+        path = packager.pack(self.output_dir)[0]
         self.packages_paths[PackageType.RUNTIME][package] = path
         self.empty_packages[PackageType.DEVEL].append(package)
 
-    def _create_pmdoc(self, package_type, force, output_dir):
+    def _create_pmdoc(self, package_type):
         self.package.set_mode(package_type)
         m.action(_("Creating pmdoc for package %s " % self.package))
         pmdoc = PMDoc(self.package, self.store, self.tmp,
                 self.packages_paths[package_type],
                 self.empty_packages[package_type], package_type)
         pmdoc_path = pmdoc.create()
-        output_file = os.path.join(output_dir, self._package_name('.pkg'))
+        output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
         output_file = os.path.abspath(output_file)
         pm = PackageMaker()
         pm.create_package_from_pmdoc(pmdoc_path, output_file)
         return output_file
 
-    def _create_packages(self, output_dir, devel, force):
+    def _create_packages(self):
         for p in self.packages:
             m.action(_("Creating package %s ") % p)
             packager = OSXPackage(self.config, p, self.store)
             try:
-                paths = packager.pack(output_dir, devel, force, keep_temp,
-                        self.package.version, target=None,
+                paths = packager.pack(self.output_dir, self.devel, self.force,
+                        self.keep_temp, self.package.version, target=None,
                         install_dir=self.package.get_install_dir())
                 m.action(_("Package created sucessfully"))
             except EmptyPackageError:
@@ -270,11 +275,11 @@ class PMDocPackage(PackagerBase):
             else:
                 self.empty_packages[PackageType.DEVEL].append(p)
 
-    def _create_dmgs(self, paths, output_dir):
+    def _create_dmgs(self, paths):
         for path in paths:
             dmg_file = path.replace(self.PKG_EXT, self.DMG_EXT)
             self._create_dmg(dmg_file, [path])
-        packages_dmg_file = os.path.join(output_dir,
+        packages_dmg_file = os.path.join(self.output_dir,
                 self._package_name('-packages.dmg'))
         self._create_dmg(packages_dmg_file,
                 self.packages_paths[PackageType.RUNTIME].values())
