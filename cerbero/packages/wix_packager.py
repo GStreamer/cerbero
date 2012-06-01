@@ -81,8 +81,8 @@ class MergeModulePackager(PackagerBase):
         return path
 
     def _package_name(self, version):
-        return "%s-%s-%s" % (self.package.name, self.config.target_arch,
-                             version)
+        return "%s-%s-%s" % (self.package.name, version,
+                             self.config.target_arch)
 
 
 class MSIPackager(PackagerBase):
