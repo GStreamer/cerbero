@@ -33,3 +33,5 @@ class Package(package.Package):
             self.files += ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:libs_extra:lang',
                            'libgpg-error:libs:lang', 'libtasn1:libs',
                            'nettle:libs', 'glib-networking']
+        elif self.config.target_platform == Platform.LINUX:
+            self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
