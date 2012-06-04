@@ -178,6 +178,8 @@ class Package(PackageBase):
     @cvar platform_files_devel: dict of platform devel files included in
                                 this package
     @type platform_files_Devel: dict
+    @cvar osx_framework_library: name and link for the Framework library
+    @type osx_framework_library: tuple
     '''
 
     deps = list()
@@ -185,6 +187,7 @@ class Package(PackageBase):
     platform_files = dict()
     files_devel = list()
     platform_files_devel = dict()
+    osx_framework_library = None
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)

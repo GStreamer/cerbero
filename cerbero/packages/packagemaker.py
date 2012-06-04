@@ -241,6 +241,10 @@ class FrameworkBundlePackager(PackagerBase):
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
         for dest, src in links.iteritems():
             shell.call ('ln -s %s %s' % (src, dest), tmp)
+        if self.package.osx_framework_library is not None:
+            name, link = self.package.osx_framework_library
+            link = os.path.join('Version', 'Current', link)
+            shell.call ('ln -s link name', tmp)
         return tmp
 
 

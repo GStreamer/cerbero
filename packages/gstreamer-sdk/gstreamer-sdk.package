@@ -57,3 +57,4 @@ class MetaPackage(package.MetaPackage):
             Architecture.X86_64: '3ffe67b2-4565-411f-8287-e8faa892f853',
             },
         }
+    osx_framework_library = ('GStreamer', 'lib/libgstreamer-0.10.dylib')
