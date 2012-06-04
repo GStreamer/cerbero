@@ -31,7 +31,7 @@ packed = []
 
 class LoggerPackager(linux.LinuxPackager):
 
-    def pack(self, output_dir, devel, force, pack_deps, tmpdir):
+    def pack(self, output_dir, devel, force, keep_temp, pack_deps, tmpdir):
         packed.append(self.package.name)
 
 
@@ -123,7 +123,10 @@ class LinuxPackagesTest(unittest.TestCase):
         expected = (['gstreamer-test1'],
                     ['gstreamer-test3'],
                     ['gstreamer-test-bindings'])
-        requires = self.packager.get_meta_requires(PackageType.RUNTIME, '-dev')
+        self.store.get_package('gstreamer-test1').has_runtime_package = True
+        self.store.get_package('gstreamer-test3').has_runtime_package = True
+        self.store.get_package('gstreamer-test-bindings').has_runtime_package = True
+        requires = self.packager.get_meta_requires(PackageType.RUNTIME, '')
         self.assertEquals(expected, requires)
 
         # test devel packages
@@ -166,14 +169,14 @@ class LinuxPackagesTest(unittest.TestCase):
     def testPack(self):
         self.packager = DummyPackager(self.config,
             self.store.get_package('gstreamer-runtime'), self.store)
-        paths = self.packager.pack('', False, True, False, None)
+        paths = self.packager.pack('', False, True, True, False, None)
         self.assertTrue(os.path.exists('gstreamer-runtime-stamp'))
         os.remove('gstreamer-runtime-stamp')
         self.assertEquals(paths, ['test'])
 
         self.packager = DummyPackager(self.config,
             self.store.get_package('gstreamer-test1'), self.store)
-        paths = self.packager.pack('', False, True, False, None)
+        paths = self.packager.pack('', False, True, True, False, None)
         self.assertTrue(os.path.exists('gstreamer-test1-stamp'))
         os.remove('gstreamer-test1-stamp')
         self.assertEquals(paths, ['test'])
