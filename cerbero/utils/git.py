@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import shutil
+
 from cerbero.utils import shell
 
 
@@ -52,6 +54,11 @@ def fetch(git_dir, fail=True):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
+    # Remove all tags in case they have been updated, because
+    # git won't fetch tags if they are already fetched
+    tags_path = os.path.join(git_dir, '.git', 'refs', 'tag')
+    if os.path.exists(tags_path):
+        shutil.rmtree(tags_path)
     return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
 
