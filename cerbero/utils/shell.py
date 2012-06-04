@@ -25,6 +25,7 @@ import tarfile
 import zipfile
 import tempfile
 import glob
+import shutil
 
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info
@@ -238,3 +239,17 @@ def prompt(message, options=[]):
     while res not in [str(x) for x in options]:
         res = raw_input(message)
     return res
+
+
+def copy_dir(src, dest):
+    if not os.path.exists(src):
+        return
+    for path in os.listdir(src):
+        s = os.path.join(src, path)
+        d = os.path.join(dest, path)
+        if not os.path.exists(os.path.dirname(d)):
+            os.makedirs(os.path.dirname(d))
+        if os.path.isfile(s):
+            shutil.copy(s, d)
+        elif os.path.isdir(s):
+            copy_dir(s, d)

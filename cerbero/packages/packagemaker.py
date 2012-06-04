@@ -20,6 +20,7 @@ import os
 import tempfile
 import shutil
 
+from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, PackageBase
@@ -42,11 +43,13 @@ class OSXPackage(PackagerBase):
         PackagerBase.__init__(self, config, package, store)
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
-             version=None, target='10.5', install_dir=None):
+             version=None, target='10.5', install_dir=None,
+             include_dirs=None):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         self.install_dir = install_dir or self.package.get_install_dir()
         self.version = version or self.package.version
+        self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
 
         # create the runtime package
         try:
@@ -80,14 +83,14 @@ class OSXPackage(PackagerBase):
         files = self.files_list(package_type, force)
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
                 (self.package.name, self.version, self.config.target_arch))
-        root = self._create_bundle(files)
+        root = self._create_bundle(files, package_type)
         packagemaker = PackageMaker()
         packagemaker.create_package(root, self.package.name,
             self.package.version, self.package.shortdesc, output_file,
             self._get_install_dir(), target)
         return output_file
 
-    def _create_bundle(self, files):
+    def _create_bundle(self, files, package_type):
         '''
         Moves all the files that are going to be package to a temporary
         directory to create the bundle
@@ -104,7 +107,76 @@ class OSXPackage(PackagerBase):
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
             shutil.copy(in_path, out_path)
+        if package_type == PackageType.DEVEL:
+            self._create_framework_headers(tmp)
         return tmp
+
+    def _create_framework_headers(self, tmp):
+        '''
+        To create a real OS X Framework we need to get rid of the versioned
+        directories for headers.
+        We should still keep the current tree in $PREFIX/include/ so that it
+        still works with pkg-config, but we will create a new $PREFIX/Headers
+        folder with links to the include directories removing the versioned
+        directories with the help of pkg-config getting something like:
+          include/gstreamer-0.10/gst/gst.h -> Headers/gst/gst.h
+          include/zlib.h -> Headers/zlib.h
+        '''
+        # Replace prefix path with the temporal directory one
+        include_dirs = [x.replace(self.config.prefix, tmp) for x in
+                        self.include_dirs]
+        # Remove trailing /
+        include_dirs = [os.path.abspath(x) for x in include_dirs]
+        # Remove 'include' dir
+        include_dirs = [x for x in include_dirs if not x.endswith('include')]
+
+        include = os.path.join(tmp, 'include/')
+        headers = os.path.join(tmp, 'Headers')
+        self._copy_unversioned_headers(include, include, headers, include_dirs)
+        self._copy_versioned_headers(headers, include_dirs)
+
+    def _copy_versioned_headers(self, headers, include_dirs):
+        # Path is listed as an includes dir by pkgconfig
+        # Copy files and directories to Headers
+        for inc_dir in include_dirs:
+            if not os.path.exists(inc_dir):
+                continue
+            for p in os.listdir(inc_dir):
+                src = os.path.join(inc_dir, p)
+                dest = os.path.join(headers, p)
+                if not os.path.exists(os.path.dirname(dest)):
+                    os.makedirs(os.path.dirname(dest))
+                # include/cairo/cairo.h -> Headers/cairo.h
+                if os.path.isfile(src):
+                    shutil.copy(src, dest)
+                # include/gstreamer-0.10/gst -> Headers/gst
+                elif os.path.isdir(src):
+                    shell.copy_dir(src, dest)
+
+    def _copy_unversioned_headers(self, dirname, include, headers,
+                                  include_dirs):
+        if not os.path.exists(dirname):
+            return
+
+        for path in os.listdir(dirname):
+            path = os.path.join(dirname, path)
+            rel_path = path.replace(include, '')
+            # include/zlib.h -> Headers/zlib.h
+            if os.path.isfile(path):
+                p = os.path.join(headers, rel_path)
+                d = os.path.dirname(p)
+                if not os.path.exists(d):
+                    os.makedirs(d)
+                shutil.copy(path, p)
+            # scan sub-directories
+            elif os.path.isdir(path):
+                if path in include_dirs:
+                    continue
+                else:
+                    # Copy the directory
+                    self._copy_unversioned_headers(path, include,
+                            headers, include_dirs)
+
 
 
 class FrameworkBundlePackager(PackagerBase):
@@ -147,7 +219,7 @@ class FrameworkBundlePackager(PackagerBase):
         Creates the bundle structure
 
         Commands -> Version/Current/bin
-        Headers -> Version/Current/include
+        Headers -> Version/Current/Headers
         Librarires -> Version/Current/lib
         Home -> Version/Current
         Resources -> Version/Current/Resources
@@ -162,7 +234,7 @@ class FrameworkBundlePackager(PackagerBase):
         links = {'Version/Current': '../%s' % vdir,
                  'Resources': 'Version/Current/Resources',
                  'Commands': 'Version/Current/bin',
-                 'Headers': 'Version/Current/include',
+                 'Headers': 'Version/Current/Headers',
                  'Libraries': 'Version/Current/lib'}
         framework_plist = FrameworkPlist(self.package.name,
             self.package.org, self.package.version, self.package.shortdesc)
@@ -193,6 +265,7 @@ class PMDocPackage(PackagerBase):
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
+        self.include_dirs = PkgConfig.list_all_include_dirs()
         self.tmp = tempfile.mkdtemp()
 
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
@@ -261,7 +334,8 @@ class PMDocPackage(PackagerBase):
             try:
                 paths = packager.pack(self.output_dir, self.devel, self.force,
                         self.keep_temp, self.package.version, target=None,
-                        install_dir=self.package.get_install_dir())
+                        install_dir=self.package.get_install_dir(),
+                        include_dirs=self.include_dirs)
                 m.action(_("Package created sucessfully"))
             except EmptyPackageError:
                 paths = [None, None]

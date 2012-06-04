@@ -72,6 +72,14 @@ class PkgConfig(object):
         res = PkgConfig._call('%s --list-all' % PkgConfig.cmd, '\n')
         return [x.split(' ', 1)[0] for x in res]
 
+    @staticmethod
+    def list_all_include_dirs():
+        include_dirs = []
+        for pc in PkgConfig.list_all():
+            pkgconfig = PkgConfig(pc)
+            include_dirs.extend(pkgconfig.include_dirs())
+        return list(set(include_dirs))
+
     def _remove_deps(self, func, all_values):
         if not self.inherit:
             deps = func(self.deps_pkgconfig)
