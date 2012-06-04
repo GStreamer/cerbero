@@ -89,9 +89,8 @@ def fetch(git_dir, fail=True):
     '''
     # Remove all tags in case they have been updated, because
     # git won't fetch tags if they are already fetched
-    tags_path = os.path.join(git_dir, '.git', 'refs', 'tag')
-    if os.path.exists(tags_path):
-        shutil.rmtree(tags_path)
+    for tagname in list_tags(git_dir, fail):
+        delete_tag(git_dir, tagname, fail)
     return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
 
