@@ -72,10 +72,10 @@ def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
     @type git_dir: str
     @param tagname: name of the tag to create
     @type tagname: str
-    @param tagname: the tag description
-    @type tagname: str
-    @param tagname: the tag commit to use
-    @type tagname: str
+    @param tagdescription: the tag description
+    @type tagdescription: str
+    @param commit: the tag commit to use
+    @type commit: str
     @param fail: raise an error if the command failed
     @type fail: false
     '''
