@@ -85,6 +85,8 @@ class LinuxPackagesTest(unittest.TestCase):
                  'allow_parallel_build': cconfig.DEFAULT_ALLOW_PARALLEL_BUILD,
                  'use_configure_cache': False,
                  'allow_system_libs': True,
+                 'external_packages': {},
+                 'external_recipes': {},
                  }
         self.assertEquals(sorted(config._properties), sorted(props.keys()))
         for p, v in props.iteritems():

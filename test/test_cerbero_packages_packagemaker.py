@@ -47,7 +47,7 @@ class PackageMakerTest(unittest.TestCase):
         self.files = p.files_list()
         packager = OSXPackage(self.config, p, self.store)
         files = OSXPackage.files_list(packager, PackageType.RUNTIME, False)
-        tmpdest = packager._create_bundle(files)
+        tmpdest = packager._create_bundle(files, PackageType.RUNTIME)
         bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')
         bundlefiles = sorted([f[2:] for f in bundlefiles])[1:]
         self.assertEquals(bundlefiles, self.files)

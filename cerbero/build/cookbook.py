@@ -278,7 +278,10 @@ class CookBook (object):
     def _recipe_status(self, recipe_name):
         recipe = self.get_recipe(recipe_name)
         if recipe_name not in self.status:
-            self.status[recipe_name] = RecipeStatus(recipe.__file__, steps=[])
+            filepath = None
+            if hasattr(recipe, '__file__'):
+                filepath = recipe.__file__
+            self.status[recipe_name] = RecipeStatus(filepath, steps=[])
         return self.status[recipe_name]
 
     def _load_recipes(self):
@@ -297,7 +300,7 @@ class CookBook (object):
                 continue
             st = self.status[recipe.name]
             # filepath attribute was added afterwards
-            if not hasattr(st, 'filepath'):
+            if not hasattr(st, 'filepath') or not getattr(st, 'filepath'):
                 st.filepath = recipe.__file__
             if recipe.__file__ != st.filepath:
                 self.reset_recipe_status(recipe.name)
