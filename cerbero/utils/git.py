@@ -64,6 +64,26 @@ def list_tags(git_dir, fail=True):
     return tags
 
 
+def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
+    '''
+    Create a tag using commit
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param tagname: name of the tag to create
+    @type tagname: str
+    @param tagname: the tag description
+    @type tagname: str
+    @param tagname: the tag commit to use
+    @type tagname: str
+    @param fail: raise an error if the command failed
+    @type fail: false
+    '''
+    shell.call('%s tag -s %s -m "%s" %s' % (GIT, tagname, tagdescription, commit),
+            git_dir, fail=fail)
+    return shell.call('%s push origin --tags' % GIT, git_dir, fail=fail)
+
+
 def delete_tag(git_dir, tagname, fail=True):
     '''
     Delete a tag
