@@ -290,6 +290,7 @@ class PMDocPackage(PackagerBase):
 
         # FIXME: Figure out why PackageMaker refuses to create flat meta-packages
         # using flat packages created by himself
+        self.package.set_mode(PackageType.RUNTIME)
         for path in paths:
             self._create_dmgs(paths)
 
