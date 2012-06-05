@@ -10,13 +10,13 @@
     </ClCompile>
     <Link>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
-      <AdditionalDependencies>oldnames.lib;msvcrt.lib;msvcrt_winxp.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <OptimizeReferences>false</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition=" '$(PlatformName)' == 'Win32' ">
     <Link>
       <AdditionalLibraryDirectories>$(WINDOWS_DRIVER_KIT)\lib\crt\i386;$(WINDOWS_DRIVER_KIT)\lib\win7\i386;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oldnames.lib;msvcrt.lib;msvcrt_winxp.obj;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ClCompile>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -25,6 +25,7 @@
   <ItemDefinitionGroup Condition=" '$(PlatformName)' == 'x64' ">
     <Link>
       <AdditionalLibraryDirectories>$(WINDOWS_DRIVER_KIT)\lib\crt\amd64;$(WINDOWS_DRIVER_KIT)\lib\win7\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oldnames.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
