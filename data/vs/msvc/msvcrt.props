@@ -27,6 +27,9 @@
       <AdditionalLibraryDirectories>$(WINDOWS_DRIVER_KIT)\lib\crt\amd64;$(WINDOWS_DRIVER_KIT)\lib\win7\amd64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>oldnames.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <ClCompile>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
