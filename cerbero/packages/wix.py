@@ -53,7 +53,7 @@ class WixBase():
         tree.write(filepath, encoding='utf-8', pretty_print=True)
 
     def _format_level(self, selected):
-        return selected and '1' or '2'
+        return selected and '1' or '4'
 
     def _format_absent(self, required):
         return required and 'disallow' or 'allow'
