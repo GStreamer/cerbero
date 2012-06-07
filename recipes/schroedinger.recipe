@@ -6,6 +6,8 @@ class Recipe(recipe.Recipe):
     version = '1.0.11'
     # either LGPLv2 or GPLv2 or MPLv1.1 or MIT
     licenses = [License.LGPLv2]
+    deps = ['orc']
+    can_use_configure_cache = False
 
     files_libs = ['libschroedinger-1.0']
     files_devel = ['include/schroedinger-1.0', 'lib/pkgconfig/schroedinger-1.0.pc']
