@@ -21,7 +21,7 @@ import os
 from cerbero.commands import Command, register_command, build
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
-from cerbero.errors import PackageNotFoundError
+from cerbero.errors import PackageNotFoundError, UsageError
 from cerbero.packages.packager import Packager
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.disttarball import DistTarball
@@ -47,7 +47,10 @@ class Package(Command):
                     'of this package')),
             ArgparseArgument('-s', '--skip-deps-build', action='store_true',
                 default=False, help=_('Do not build the recipes needed to '
-                    'create this package')),
+                    'create this package (conflicts with --only-build-deps)')),
+            ArgparseArgument('-b', '--only-build-deps', action='store_true',
+                default=False, help=_('Only build the recipes needed to '
+                    'create this package (conflicts with --skip-deps-build)')),
             ArgparseArgument('-k', '--keep-temp', action='store_true',
                 default=False, help=_('Keep temporary files for debug')),
             ])
@@ -56,8 +59,15 @@ class Package(Command):
         self.store = PackagesStore(config)
         p = self.store.get_package(args.package[0])
 
+        if args.skip_deps_build and args.only_build_deps:
+            raise UsageError(_("Cannot use --skip-deps-build together with "
+                    "--only-build-deps"))
+
         if not args.skip_deps_build:
             self._build_deps(config, p)
+
+        if args.only_build_deps:
+            return
 
         if p is None:
             raise PackageNotFoundError(args.package[0])
