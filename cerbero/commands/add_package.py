@@ -227,25 +227,31 @@ class AddPackage(Command):
             include_files = list(set(include_files))
             include_files_devel = list(set(include_files_devel))
 
-            if args.files:
+            if args.files or include_files:
                 template += FILES_TPL
-                files = args.files.split(',')
-                files.extend(include_files)
+                files = []
+                if args.files:
+                    files = args.files.split(',')
+                if include_files:
+                    files.extend(include_files)
                 template_args['files'] = files
 
-            if args.files_devel:
+            if args.files_devel or include_files_devel:
                 template += FILES_DEVEL_TPL
-                files_devel = args.files_devel.split(',')
-                files_devel.extend(include_files_devel)
+                files_devel = []
+                if args.files_devel:
+                    files_devel = args.files_devel.split(',')
+                if include_files_devel:
+                    files_devel.extend(include_files_devel)
                 template_args['files_devel'] = files_devel
 
-            if args.platform_files:
+            if args.platform_files or platform_include_files:
                 template += PLATFORM_FILES_TPL
                 platform_files = self.parse_platform_files(
                         args.platform_files, platform_include_files)
                 template_args['platform_files'] = platform_files
 
-            if args.platform_files_devel:
+            if args.platform_files_devel or platform_include_files_devel:
                 template += PLATFORM_FILES_DEVEL_TPL
                 platform_files_devel = self.parse_platform_files(
                         args.platform_files_devel,
@@ -284,20 +290,27 @@ class AddPackage(Command):
                     "invalid platform '%s'") % platform)
 
     def parse_platform_files(self, platform_files, extra_files):
-        unparsed_files = platform_files.split(',')
-        self.validate_platform_files(unparsed_files)
+        if not platform_files and not extra_files:
+            return ''
 
-        parsed_files = {}
-        for desc in unparsed_files:
-            platform_index = desc.index(':')
-            platform = desc[:platform_index]
-            files = desc[platform_index + 1:]
-            if not platform in parsed_files:
-                parsed_files[platform] = [files]
-            else:
-                parsed_files[platform].append(files)
+        if platform_files:
+            unparsed_files = platform_files.split(',')
+            self.validate_platform_files(unparsed_files)
 
-        parsed_files = self.merge_dict(parsed_files, extra_files)
+            parsed_files = {}
+            for desc in unparsed_files:
+                platform_index = desc.index(':')
+                platform = desc[:platform_index]
+                files = desc[platform_index + 1:]
+                if not platform in parsed_files:
+                    parsed_files[platform] = [files]
+                else:
+                    parsed_files[platform].append(files)
+
+            if extra_files:
+                parsed_files = self.merge_dict(parsed_files, extra_files)
+        else:
+            parsed_files = extra_files
 
         template_arg = []
         for platform, files in parsed_files.iteritems():
