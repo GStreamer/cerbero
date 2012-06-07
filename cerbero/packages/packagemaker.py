@@ -75,7 +75,7 @@ class OSXPackage(PackagerBase):
         return [runtime_path, devel_path]
 
     def _get_install_dir(self):
-        return os.path.join(self.install_dir, 'Version',
+        return os.path.join(self.install_dir, 'Versions',
                 self.package.version, self.config.target_arch)
 
     def _create_package(self, package_type, output_dir, force, target):
@@ -181,7 +181,7 @@ class OSXPackage(PackagerBase):
 
 class FrameworkBundlePackager(PackagerBase):
     ''' Creates a package with the basic structure of a framework bundle,
-    adding links for Headears, Libraries, Commands, and Current Version,
+    adding links for Headears, Libraries, Commands, and Current Versions,
     and the Framework info.
     '''
 
@@ -200,7 +200,7 @@ class FrameworkBundlePackager(PackagerBase):
         return [path, None]
 
     def _get_install_dir(self):
-        return os.path.join(self.install_dir, 'Version',
+        return os.path.join(self.install_dir, 'Versions',
                 self.package.version, self.config.target_arch)
 
     def _create_package(self, output_dir, install_dir, version):
@@ -218,24 +218,24 @@ class FrameworkBundlePackager(PackagerBase):
         '''
         Creates the bundle structure
 
-        Commands -> Version/Current/bin
-        Headers -> Version/Current/Headers
-        Librarires -> Version/Current/lib
-        Home -> Version/Current
-        Resources -> Version/Current/Resources
-        Version/Current -> Version/$VERSION/$ARCH
+        Commands -> Versions/Current/bin
+        Headers -> Versions/Current/Headers
+        Librarires -> Versions/Current/lib
+        Home -> Versions/Current
+        Resources -> Versions/Current/Resources
+        Versions/Current -> Version/$VERSION/$ARCH
         '''
         tmp = tempfile.mkdtemp()
 
-        vdir = 'Version/%s/%s' % (self.package.version,
+        vdir = 'Versions/%s/%s' % (self.package.version,
                                   self.config.target_arch)
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
-        links = {'Version/Current': '../%s' % vdir,
-                 'Resources': 'Version/Current/Resources',
-                 'Commands': 'Version/Current/bin',
-                 'Headers': 'Version/Current/Headers',
-                 'Libraries': 'Version/Current/lib'}
+        links = {'Versions/Current': '../%s' % vdir,
+                 'Resources': 'Versions/Current/Resources',
+                 'Commands': 'Versions/Current/bin',
+                 'Headers': 'Versions/Current/Headers',
+                 'Libraries': 'Versions/Current/lib'}
         framework_plist = FrameworkPlist(self.package.name,
             self.package.org, self.package.version, self.package.shortdesc)
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
@@ -243,7 +243,7 @@ class FrameworkBundlePackager(PackagerBase):
             shell.call ('ln -s %s %s' % (src, dest), tmp)
         if self.package.osx_framework_library is not None:
             name, link = self.package.osx_framework_library
-            link = os.path.join('Version', 'Current', link)
+            link = os.path.join('Versions', 'Current', link)
             shell.call ('ln -s %s %s' % (link, name), tmp)
         return tmp
 
