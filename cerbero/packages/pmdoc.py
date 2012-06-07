@@ -139,7 +139,11 @@ class Index(PMDocXML):
     def _add_contents(self):
         contents = etree.SubElement(self.root, self.TAG_CONTENTS)
 
-        for p, required, selected in set(self.package.packages):
+        choices = []
+        for p, required, selected in self.package.packages:
+            if p in choices:
+                continue
+            choices.append(p)
             package = self.store.get_package(p)
             package.set_mode(self.package_type)
             if package in self.emptypkgs:

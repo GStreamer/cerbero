@@ -312,7 +312,8 @@ class PMDocPackage(PackagerBase):
         package.uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
         package.deps = []
         self.store.add_package(package)
-        self.package.packages += [(package.name, True, True)]
+        packages = self.package.packages[:] + [(package.name, True, True)]
+        self.package.packages = packages
         packager = FrameworkBundlePackager(self.config, self.package,
                 self.store)
         path = packager.pack(self.output_dir)[0]
