@@ -24,7 +24,7 @@ import sys
 
 from cerbero.config import Platform
 from cerbero.packages import PackageType
-from cerbero.packages.pmdoc import Index, PkgRef, PkgContents, PMDoc
+from cerbero.packages.osx.pmdoc import Index, PkgRef, PkgContents, PMDoc
 from cerbero.utils import shell
 from test.test_packages_common import create_store, Package1
 from test.test_common import XMLMixin, DummyConfig

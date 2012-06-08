@@ -24,8 +24,8 @@ from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, PackageBase
-from cerbero.packages.osx_framework_plist import FrameworkPlist
-from cerbero.packages.pmdoc import PMDoc
+from cerbero.packages.osx.info_plist import FrameworkPlist
+from cerbero.packages.osx.pmdoc import PMDoc
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
