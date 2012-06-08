@@ -1,0 +1,19 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'dbus-glib'
+    version = '0.98'
+    deps = ['glib']
+
+    files_bins = ['dbus-binding-tool']
+    files_libs = ['libdbus-glib-1']
+    files_devel = [
+            'include/dbus-1.0/dbus/dbus-glib-bindings.h',
+            'include/dbus-1.0/dbus/dbus-glib-lowlevel.h',
+            'include/dbus-1.0/dbus/dbus-glib.h',
+            'include/dbus-1.0/dbus/dbus-gtype-specialized.h',
+            'include/dbus-1.0/dbus/dbus-gvalue-parse-variant.h',
+            'lib/pkgconfig/dbus-glib-1.pc',
+    ]
+    files_helper = ['libexec/dbus-bash-completion-helper']
+
