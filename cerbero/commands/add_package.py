@@ -152,112 +152,112 @@ class AddPackage(Command):
         name = args.name[0]
         version = args.version[0]
         store = PackagesStore(config)
-        try:
-            filename = os.path.join(config.packages_dir, '%s.package' % name)
-            if not args.force and os.path.exists(filename):
-                m.warning(_("Package '%s' (%s) already exists, "
-                    "use -f to replace" % (name, filename)))
-                return
+        filename = os.path.join(config.packages_dir, '%s.package' % name)
+        if not args.force and os.path.exists(filename):
+            m.warning(_("Package '%s' (%s) already exists, "
+                "use -f to replace" % (name, filename)))
+            return
 
-            template_args = {}
+        template_args = {}
 
-            template = RECEIPT_TPL
-            template_args['name'] = name
-            template_args['version'] = version
+        template = RECEIPT_TPL
+        template_args['name'] = name
+        template_args['version'] = version
 
-            if args.short_desc:
-                template_args['shortdesc'] = args.short_desc
-            else:
-                template_args['shortdesc'] = name
+        if args.short_desc:
+            template_args['shortdesc'] = args.short_desc
+        else:
+            template_args['shortdesc'] = name
 
-            if args.codename:
-                template += CODENAME_TPL
-                template_args['codename'] = args.codename
+        if args.codename:
+            template += CODENAME_TPL
+            template_args['codename'] = args.codename
 
-            if args.vendor:
-                template += VENDOR_TPL
-                template_args['vendor'] = args.vendor
+        if args.vendor:
+            template += VENDOR_TPL
+            template_args['vendor'] = args.vendor
 
-            if args.url:
-                template += URL_TPL
-                template_args['url'] = args.url
+        if args.url:
+            template += URL_TPL
+            template_args['url'] = args.url
 
-            if args.license:
-                self.validate_licenses([args.license])
-                template += LICENSE_TPL
-                template_args['license'] = \
-                    'License.' + self.supported_licenses[args.license]
+        if args.license:
+            self.validate_licenses([args.license])
+            template += LICENSE_TPL
+            template_args['license'] = \
+                'License.' + self.supported_licenses[args.license]
 
-            deps = []
-            if args.deps:
-                template += DEPS_TPL
-                deps = args.deps.split(',')
-                for dname in deps:
-                    try:
-                        package = store.get_package(dname)
-                    except Exception, ex:
-                        raise UsageError(_("Error creating package: "
-                                "dependant package %s does not exist") % dname)
-                template_args['deps'] = deps
-
-            include_files = []
-            include_files_devel = []
-            platform_include_files = {}
-            platform_include_files_devel = {}
-            if args.includes:
-                includes = args.includes.split(',')
-                if list(set(deps) & set(includes)):
+        deps = []
+        if args.deps:
+            template += DEPS_TPL
+            deps = args.deps.split(',')
+            for dname in deps:
+                try:
+                    package = store.get_package(dname)
+                except Exception, ex:
                     raise UsageError(_("Error creating package: "
-                            "param --deps intersects with --includes"))
-                for pname in includes:
-                    try:
-                        package = store.get_package(pname)
-                    except Exception, ex:
-                        raise UsageError(_("Error creating package: "
-                                "included package %s does not exist") % pname)
-                    include_files.extend(package.files)
-                    include_files_devel.extend(package.files_devel)
-                    platform_include_files = self.merge_dict(
-                            platform_include_files,
-                            package.platform_files)
-                    platform_include_files_devel = self.merge_dict(
-                            platform_include_files_devel,
-                            package.platform_files_devel)
+                            "dependant package %s does not exist") % dname)
+            template_args['deps'] = deps
 
-            include_files = list(set(include_files))
-            include_files_devel = list(set(include_files_devel))
+        include_files = []
+        include_files_devel = []
+        platform_include_files = {}
+        platform_include_files_devel = {}
+        if args.includes:
+            includes = args.includes.split(',')
+            if list(set(deps) & set(includes)):
+                raise UsageError(_("Error creating package: "
+                        "param --deps intersects with --includes"))
+            for pname in includes:
+                try:
+                    package = store.get_package(pname)
+                except Exception, ex:
+                    raise UsageError(_("Error creating package: "
+                            "included package %s does not exist") % pname)
+                include_files.extend(package.files)
+                include_files_devel.extend(package.files_devel)
+                platform_include_files = self.merge_dict(
+                        platform_include_files,
+                        package.platform_files)
+                platform_include_files_devel = self.merge_dict(
+                        platform_include_files_devel,
+                        package.platform_files_devel)
 
-            if args.files or include_files:
-                template += FILES_TPL
-                files = []
-                if args.files:
-                    files = args.files.split(',')
-                if include_files:
-                    files.extend(include_files)
-                template_args['files'] = files
+        include_files = list(set(include_files))
+        include_files_devel = list(set(include_files_devel))
 
-            if args.files_devel or include_files_devel:
-                template += FILES_DEVEL_TPL
-                files_devel = []
-                if args.files_devel:
-                    files_devel = args.files_devel.split(',')
-                if include_files_devel:
-                    files_devel.extend(include_files_devel)
-                template_args['files_devel'] = files_devel
+        if args.files or include_files:
+            template += FILES_TPL
+            files = []
+            if args.files:
+                files = args.files.split(',')
+            if include_files:
+                files.extend(include_files)
+            template_args['files'] = files
 
-            if args.platform_files or platform_include_files:
-                template += PLATFORM_FILES_TPL
-                platform_files = self.parse_platform_files(
-                        args.platform_files, platform_include_files)
-                template_args['platform_files'] = platform_files
+        if args.files_devel or include_files_devel:
+            template += FILES_DEVEL_TPL
+            files_devel = []
+            if args.files_devel:
+                files_devel = args.files_devel.split(',')
+            if include_files_devel:
+                files_devel.extend(include_files_devel)
+            template_args['files_devel'] = files_devel
 
-            if args.platform_files_devel or platform_include_files_devel:
-                template += PLATFORM_FILES_DEVEL_TPL
-                platform_files_devel = self.parse_platform_files(
-                        args.platform_files_devel,
-                        platform_include_files_devel)
-                template_args['platform_files_devel'] = platform_files_devel
+        if args.platform_files or platform_include_files:
+            template += PLATFORM_FILES_TPL
+            platform_files = self.parse_platform_files(
+                    args.platform_files, platform_include_files)
+            template_args['platform_files'] = platform_files
 
+        if args.platform_files_devel or platform_include_files_devel:
+            template += PLATFORM_FILES_DEVEL_TPL
+            platform_files_devel = self.parse_platform_files(
+                    args.platform_files_devel,
+                    platform_include_files_devel)
+            template_args['platform_files_devel'] = platform_files_devel
+
+        try:
             f = open(filename, 'w')
             f.write(template % template_args)
             f.close()

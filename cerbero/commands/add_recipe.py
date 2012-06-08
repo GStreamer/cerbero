@@ -90,47 +90,47 @@ class AddRecipe(Command):
     def run(self, config, args):
         name = args.name[0]
         version = args.version[0]
+        filename = os.path.join(config.recipes_dir, '%s.recipe' % name)
+        if not args.force and os.path.exists(filename):
+            m.warning(_("Recipe '%s' (%s) already exists, "
+                "use -f to replace" % (name, filename)))
+            return
+
+        template_args = {}
+
+        template = RECEIPT_TPL
+        template_args['name'] = name
+        template_args['version'] = version
+
+        if args.licenses:
+            licenses = args.licenses.split(',')
+            self.validate_licenses(licenses)
+            template += LICENSES_TPL
+            template_args['licenses'] = ', '.join(
+                    ['License.' + self.supported_licenses[l] \
+                        for l in licenses])
+
+        if args.commit:
+            template += COMMIT_TPL
+            template_args['commit'] = args.commit
+
+        if args.origin:
+            template += ORIGIN_TPL
+            template_args['origin'] = args.origin
+
+        if args.deps:
+            template += DEPS_TPL
+            deps = args.deps.split(',')
+            cookbook = CookBook(config)
+            for dname in deps:
+                try:
+                    recipe = cookbook.get_recipe(dname)
+                except RecipeNotFoundError, ex:
+                    raise UsageError(_("Error creating recipe: "
+                            "dependant recipe %s does not exist") % dname)
+            template_args['deps'] = deps
+
         try:
-            filename = os.path.join(config.recipes_dir, '%s.recipe' % name)
-            if not args.force and os.path.exists(filename):
-                m.warning(_("Recipe '%s' (%s) already exists, "
-                    "use -f to replace" % (name, filename)))
-                return
-
-            template_args = {}
-
-            template = RECEIPT_TPL
-            template_args['name'] = name
-            template_args['version'] = version
-
-            if args.licenses:
-                licenses = args.licenses.split(',')
-                self.validate_licenses(licenses)
-                template += LICENSES_TPL
-                template_args['licenses'] = ', '.join(
-                        ['License.' + self.supported_licenses[l] \
-                            for l in licenses])
-
-            if args.commit:
-                template += COMMIT_TPL
-                template_args['commit'] = args.commit
-
-            if args.origin:
-                template += ORIGIN_TPL
-                template_args['origin'] = args.origin
-
-            if args.deps:
-                template += DEPS_TPL
-                deps = args.deps.split(',')
-                cookbook = CookBook(config)
-                for dname in deps:
-                    try:
-                        recipe = cookbook.get_recipe(dname)
-                    except RecipeNotFoundError, ex:
-                        raise UsageError(_("Error creating recipe: "
-                                "dependant recipe %s does not exist") % dname)
-                template_args['deps'] = deps
-
             f = open(filename, 'w')
             f.write(template % template_args)
             f.close()
