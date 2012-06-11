@@ -18,4 +18,4 @@ class Package(package.Package):
     }
     deps = ['base-system', 'gstreamer-core', 'gstreamer-codecs', 'gstreamer-visualizers',
             'gstreamer-playback', 'gstreamer-networking', 'gtk+-2.0']
-    files = ['dbus', 'insanity', 'insanity-gst', 'gst-playback-test']
+    files = ['dbus', 'dbus-python', 'dbus-glib', 'insanity', 'insanity-gst', 'gst-playback-test']
