@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     #       others LGPLv2.1+, COPYING is LGPLv2 and the webpage states LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--with-included-immodules '
-    can_use_configure_cache = False
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
 
     files_libs = ['libgailutil']
@@ -72,6 +71,8 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--with-gdktarget=quartz '
         elif self.config.target_platform == Platform.LINUX:
+            # Can't change CFLAGS and use configure cache
+            self.can_use_configure_cache = False
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
             elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE]:
