@@ -95,9 +95,9 @@ class FrameworkBundlePackager(BundlePackagerBase):
         '''
         Creates the bundle structure
 
-        Commands -> Versions/Current/bin
+        Commands -> Versions/Current/Commands
         Headers -> Versions/Current/Headers
-        Librarires -> Versions/Current/lib
+        Librarires -> Versions/Current/Libraries
         Home -> Versions/Current
         Resources -> Versions/Current/Resources
         Versions/Current -> Version/$VERSION/$ARCH
@@ -110,14 +110,20 @@ class FrameworkBundlePackager(BundlePackagerBase):
         shell.call ('mkdir -p %s' % rdir, tmp)
         links = {'Versions/Current': '../%s' % vdir,
                  'Resources': 'Versions/Current/Resources',
-                 'Commands': 'Versions/Current/bin',
+                 'Commands': 'Versions/Current/Commands',
                  'Headers': 'Versions/Current/Headers',
-                 'Libraries': 'Versions/Current/lib'}
+                 'Libraries': 'Versions/Current/Libraries'}
+        inner_links = {'Commands': 'bin',
+                       'Libraries': 'lib'}
         framework_plist = FrameworkPlist(self.package.name,
             self.package.org, self.package.version, self.package.shortdesc)
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
         for dest, src in links.iteritems():
             shell.call ('ln -s %s %s' % (src, dest), tmp)
+        inner_tmp = os.path.join(tmp, vdir)
+        for dest, src in inner_links.iteritems():
+            shell.call ('ln -s %s %s' % (src, dest), inner_tmp)
+
         if self.package.osx_framework_library is not None:
             name, link = self.package.osx_framework_library
             link = os.path.join('Versions', 'Current', link)
