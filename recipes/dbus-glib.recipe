@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'dbus-glib'
     version = '0.98'
-    deps = ['glib']
+    deps = ['glib', 'dbus']
 
     files_bins = ['dbus-binding-tool']
     files_libs = ['libdbus-glib-1']
