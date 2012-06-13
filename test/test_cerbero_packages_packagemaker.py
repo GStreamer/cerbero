@@ -23,7 +23,8 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.packages import PackageType
-from cerbero.packages.osx.packagemaker import OSXPackage, PackageMaker
+from cerbero.packages.osx.packagemaker import PackageMaker
+from cerbero.packages.osx.packager import OSXPackage
 from cerbero.utils import shell
 from test.test_packages_common import create_store
 from test.test_common import DummyConfig

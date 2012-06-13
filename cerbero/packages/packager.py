@@ -48,9 +48,9 @@ class Packager (object):
 
 
 from cerbero.packages import wix_packager, rpm, debian
-from cerbero.packages.osx import packagemaker
+from cerbero.packages.osx import packager as osx_packager
 
 wix_packager.register()
-packagemaker.register()
+osx_packager.register()
 rpm.register()
 debian.register()
