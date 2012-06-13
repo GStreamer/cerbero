@@ -22,35 +22,56 @@ INFO_PLIST_TPL='''\
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-       <key>CFBundleName</key>
-       <string>%(name)s</string>
-       <key>CFBundleIdentifier</key>
-       <string>%(identifier)s</string>
-       <key>CFBundleVersion</key>
-       <string>%(version)s</string>
-       <key>CFBundleSignature</key>
-       <string>????</string>
-       <key>CFBundlePackageType</key>
-       <string>FMWK</string>
-       <key>CFBundleGetInfoString</key>
-       <string>%(info)s</string>
+%s
 </dict>
 </plist>
 '''
 
 
-class FrameworkPlist(object):
-    ''' Create a Info.plist file with the framework info '''
+class InfoPlist(object):
+    ''' Create a Info.plist file '''
 
-    def __init__(self, name, identifier, version, info):
+    package_type = ''
+
+    def __init__(self, name, identifier, version, info, icon=None):
         self.name = name
         self.identifier = identifier
         self.version = version
         self.info = info
+        self.icon = icon
+
+    def format_property(self, key, value):
+        return '<key>%s</key>\n<string>%s</string>' % (key, value)
+
+    def get_properties(self):
+        properties = {'CFBundleName': self.name,
+                'CFBundleIdentifier': self.identifier,
+                'CFBundleVersion': self.version,
+                'CFBundlePackageGetInfoString': self.info,
+                'CFBundlePackageType': self.package_type}
+        if self.icon:
+            properties['CFBundleIconFile'] = self.icon
+        return properties
+
+    def get_properties_string(self):
+        props = self.get_properties()
+        return '\n'.join([self.format_property(k, props[k]) for k in
+                          sorted(props.keys())])
 
     def save(self, filename):
-        props = {'name': self.name, 'identifier': self.identifier,
-                'version': self.version, 'info': self.info}
+        props_str = self.get_properties_string()
         with open(filename, 'w+') as f:
-            f.write(INFO_PLIST_TPL  % props)
+            f.write(INFO_PLIST_TPL  % props_str)
 
+
+class FrameworkPlist(InfoPlist):
+    ''' Create a Info.plist file for frameworks '''
+
+    package_type = 'FMWK'
+
+
+
+class ApplicationPlist(InfoPlist):
+    ''' Create a Info.plist file for applications '''
+
+    package_type = 'APPL'
