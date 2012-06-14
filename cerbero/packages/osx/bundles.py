@@ -126,8 +126,11 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         if self.package.osx_framework_library is not None:
             name, link = self.package.osx_framework_library
-            link = os.path.join('Versions', 'Current', link)
-            shell.call ('ln -s %s %s' % (link, name), tmp)
+            pre_link = os.path.join('Versions', 'Current', name)
+            version_dir = os.path.join(tmp, 'Versions', 'Current')
+
+            shell.call ('ln -s %s %s' % (pre_link, name), tmp)
+            shell.call ('ln -s %s %s' % (link, name), version_dir)
         return tmp
 
 
