@@ -56,7 +56,7 @@ class Config (object):
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
-                   'external_packages']
+                   'external_packages', 'use_ccache']
 
     def __init__(self, filename=None, load=True):
         self._check_uninstalled()
