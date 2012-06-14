@@ -207,10 +207,11 @@ class Autotools (MakefilesBase):
                 self.configure_tpl += ' --target=%(target)s'
 
 
+        use_configure_cache = self.config.use_configure_cache
         if self.use_system_libs and self.config.allow_system_libs:
-            self.config.use_configure_cache = False
+            use_configure_cache = False
 
-        if self.config.use_configure_cache and self.can_use_configure_cache:
+        if use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.prefix, '.configure.cache')
             self.config_sh += ' --cache-file=%s' % cache
 
