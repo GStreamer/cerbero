@@ -26,13 +26,14 @@ class MSBuild(object):
 
 
     def __init__(self, solution, arch=Architecture.X86, config='Release',
-                 **properties):
+                 sdk='Windows7.1SDK', **properties):
         self.properties = {}
 	if arch == Architecture.X86:
             self.properties['Platform'] = 'Win32'
 	elif arch == Architecture.X86_64:
             self.properties['Platform'] = 'x64'
         self.properties['Config'] = config
+        self.properties['PlatformToolset'] =  sdk
 	self.properties.update(properties)
         self.solution = solution
 
