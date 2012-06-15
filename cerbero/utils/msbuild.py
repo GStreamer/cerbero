@@ -28,13 +28,13 @@ class MSBuild(object):
     def __init__(self, solution, arch=Architecture.X86, config='Release',
                  sdk='Windows7.1SDK', **properties):
         self.properties = {}
-	if arch == Architecture.X86:
+        if arch == Architecture.X86:
             self.properties['Platform'] = 'Win32'
-	elif arch == Architecture.X86_64:
+        elif arch == Architecture.X86_64:
             self.properties['Platform'] = 'x64'
         self.properties['Config'] = config
-        self.properties['PlatformToolset'] =  sdk
-	self.properties.update(properties)
+        self.properties['PlatformToolset'] = sdk
+        self.properties.update(properties)
         self.solution = solution
 
     def build(self):
@@ -43,16 +43,18 @@ class MSBuild(object):
     @staticmethod
     def get_msbuild_tools_path():
         reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-        key = winreg.OpenKey(reg, r"SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0")
+        key = winreg.OpenKey(reg,
+                r"SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0")
         path = winreg.QueryValueEx(key, 'MSBuildToolsPath')[0]
         return fix_winpath(path)
 
     def _call(self, command):
         properties = self._format_properties()
         msbuildpath = self.get_msbuild_tools_path()
-	shell.call('msbuild.exe %s %s /target:%s' % (self.solution, properties, command),
-                   msbuildpath)
+        shell.call('msbuild.exe %s %s /target:%s' %
+                   (self.solution, properties, command), msbuildpath)
 
     def _format_properties(self):
-        props = ['/property:%s=%s' % (k, v) for k, v in self.properties.iteritems()]
+        props = ['/property:%s=%s' % (k, v) for k, v in
+                 self.properties.iteritems()]
         return ' '.join(props)
