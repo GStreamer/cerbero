@@ -20,8 +20,8 @@ import os
 import shutil
 
 from cerbero.config import Platform
-from cerbero.utils import git, shell, _
-from cerbero.errors import FatalError
+from cerbero.utils import git, svn, shell, _
+from cerbero.errors import FatalError, InvalidRecipeError
 import cerbero.utils.messages as m
 
 
@@ -246,6 +246,32 @@ class GitExtractedTarball(Git):
                 if path.endswith(match):
                     self._files[match].append(full_path)
 
+class Svn(Source):
+    '''
+    Source handler for svn repositories
+    '''
+
+    url = None
+    revision = 'HEAD'
+
+    def __init__(self):
+        Source.__init__(self)
+
+    def fetch(self):
+        if not os.path.exists(self.repo_dir):
+            os.makedirs(self.repo_dir)
+            svn.checkout(self.url, self.repo_dir)
+        svn.update(self.repo_dir, self.revision)
+
+    def extract(self):
+        if os.path.exists(self.build_dir):
+            shutil.rmtree(self.build_dir)
+
+        if self.supports_non_src_build:
+            return
+
+        shutil.copytree(self.build_dir, self.config.sources)
+
 
 class SourceType (object):
 
@@ -254,3 +280,4 @@ class SourceType (object):
     LOCAL_TARBALL = LocalTarball
     GIT = Git
     GIT_TARBALL = GitExtractedTarball
+    SVN = Svn
