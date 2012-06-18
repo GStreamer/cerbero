@@ -78,7 +78,7 @@ class Tarball (Source):
     def __init__(self):
         Source.__init__(self)
         if not self.url:
-            raise FatalError(_("'url' attribute is missing in the recipe"))
+            raise InvalidRecipeError(_("'url' attribute is missing in the recipe"))
         self.url = self.url % {'version': self.version, 'name': self.name}
         self.filename = os.path.basename(self.url)
         self.download_path = os.path.join(self.repo_dir, self.filename)
