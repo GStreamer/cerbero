@@ -292,12 +292,14 @@ class Config (object):
     def get_recipes_repos(self):
         recipes_dir = {'default': (self.recipes_dir, 0)}
         for name, (path, priority) in self.external_recipes.iteritems():
+            path = os.path.abspath(os.path.expanduser(path))
             recipes_dir[name] = (path, priority)
         return recipes_dir
 
     def get_packages_repos(self):
         packages_dir = {'default': (self.packages_dir, 0)}
         for name, (path, priority) in self.external_packages.iteritems():
+            path = os.path.abspath(os.path.expanduser(path))
             packages_dir[name] = (path, priority)
         return packages_dir
 
