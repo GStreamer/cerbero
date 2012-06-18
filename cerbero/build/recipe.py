@@ -194,5 +194,23 @@ class Recipe(FilesProvider):
                     os.path.join(self.config.prefix, 'lib'))
             logging.debug('Created %s' % implib)
 
+    def recipe_dir(self):
+        '''
+        Gets the directory path where this recipe is stored
+
+        @return: directory path
+        @rtype: str
+        '''
+        return os.path.dirname(self.__file__)
+
+    def relative_path(self, path):
+        '''
+        Gets a path relative to the recipe's directory
+
+        @return: absolute path relative to the pacakge's directory
+        @rtype: str
+        '''
+        return os.path.abspath(os.path.join(self.recipe_dir(), path))
+
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x not in steps]

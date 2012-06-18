@@ -22,6 +22,7 @@ import shutil
 from cerbero.config import Platform
 from cerbero.utils import git, shell, _
 from cerbero.errors import FatalError
+import cerbero.utils.messages as m
 
 
 class Source (object):
@@ -33,6 +34,8 @@ class Source (object):
     @ivar config: cerbero's configuration
     @type config: L{cerbero.config.Config}
     '''
+
+    supports_non_src_build = False
 
     def fetch(self):
         '''
@@ -56,6 +59,47 @@ class CustomSource (Source):
         pass
 
 
+class Tarball (Source):
+    '''
+    Source handler for tarballs
+
+    @cvar url: dowload URL for the tarball
+    @type url: str
+    @cvar patches: list of patches to apply
+    @type patches: list
+    @cvar strip: number passed to the --strip 'patch' option
+    @type patches: int
+    '''
+
+    url = None
+    patches = []
+    strip = 1
+
+    def __init__(self):
+        Source.__init__(self)
+        if not self.url:
+            raise FatalError(_("'url' attribute is missing in the recipe"))
+        self.url = self.url % {'version': self.version, 'name': self.name}
+        self.filename = os.path.basename(self.url)
+        self.download_path = os.path.join(self.repo_dir, self.filename)
+
+    def fetch(self):
+        m.action(_('Fetching tarball %s to %s') %
+                 (self.url, self.download_path))
+        if not os.path.exists(self.repo_dir):
+            os.makedirs(self.repo_dir)
+        shell.download(self.url, self.download_path)
+
+    def extract(self):
+        m.action(_('Extracting tarball to %s') % self.build_dir)
+        shell.unpack(self.download_path, self.config.sources)
+        for patch in self.patches:
+            if not os.path.isabs(patch):
+                patch = self.relative_path(patch)
+            shell.patch(patch, self.build_dir, self.strip)
+
+
+
 class GitCache (Source):
     '''
     Base class for source handlers using a Git repository
@@ -63,7 +107,6 @@ class GitCache (Source):
 
     remotes = None
     commit = None
-    supports_non_src_build = False
 
     def __init__(self):
         Source.__init__(self)
@@ -207,6 +250,7 @@ class GitExtractedTarball(Git):
 class SourceType (object):
 
     CUSTOM = CustomSource
+    TARBALL = Tarball
     LOCAL_TARBALL = LocalTarball
     GIT = Git
     GIT_TARBALL = GitExtractedTarball
