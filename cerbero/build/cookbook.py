@@ -20,6 +20,7 @@ from collections import defaultdict
 import os
 import pickle
 import time
+import imp
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
         DistroVersion, License
@@ -315,8 +316,18 @@ class CookBook (object):
             if not f.endswith(self.RECIPE_EXT):
                 continue
             filepath = os.path.join(repo, f)
+            # Try to load the custom.py module located in the recipes dir
+            # which can contain private classes to extend cerbero's recipes
+            # and reuse them in our private repository
             try:
-                recipe = self._load_recipe_from_file(filepath)
+                custom = None
+                m_path = os.path.join(repo, 'custom.py')
+                if os.path.exists(m_path):
+                    custom = imp.load_source('custom', m_path)
+            except:
+                custom = None
+            try:
+                recipe = self._load_recipe_from_file(filepath, custom)
             except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") %
                                 f)
@@ -325,7 +336,7 @@ class CookBook (object):
             recipes[recipe.name] = recipe
         return recipes
 
-    def _load_recipe_from_file(self, filepath):
+    def _load_recipe_from_file(self, filepath, custom=None):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
@@ -333,7 +344,7 @@ class CookBook (object):
                  'Distro': Distro, 'DistroVersion': DistroVersion,
                  'License': License,
                  'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps,
-                 'InvalidRecipeError': InvalidRecipeError}
+                 'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
             execfile(filepath, d)
             r = d['Recipe'](self._config)
             r.__file__ = os.path.abspath(filepath)
