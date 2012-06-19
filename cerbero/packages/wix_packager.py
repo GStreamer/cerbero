@@ -36,7 +36,7 @@ class MergeModulePackager(PackagerBase):
         self.wix_prefix = config.wix_prefix
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
-        PackagerBase.pack(output_dir, devel, force, keep_temp)
+        PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         paths = []
 
