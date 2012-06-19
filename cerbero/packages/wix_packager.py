@@ -57,7 +57,7 @@ class MergeModulePackager(PackagerBase):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
         mergemodule = MergeModule(self.config, files_list, self.package)
-	package_name = self._package_name(version)
+        package_name = self._package_name(version)
         sources = os.path.join(output_dir, "%s.wsx" % package_name)
         mergemodule.write(sources)
 
@@ -146,9 +146,9 @@ class MSIPackager(PackagerBase):
             packager = MergeModulePackager(self.config, package, self.store)
             try:
                 path = packager.create_merge_module(self.output_dir,
-                        package_type, self.force, self.package.version,
-			self.keep_temp)
-                packagedeps[package] = path 
+                           package_type, self.force, self.package.version,
+                           self.keep_temp)
+                packagedeps[package] = path
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
