@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+from collections import defaultdict
 
 from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
@@ -157,17 +158,28 @@ class PackagesStore (object):
 
     def _load_packages(self):
         self._packages = {}
-        packages = shell.find_files('*%s' % self.PKG_EXT,
-                                    self._config.packages_dir)
-        packages.extend(shell.find_files('*/*%s' % self.PKG_EXT,
-                                         self._config.packages_dir))
+        packages = defaultdict(dict)
+        repos = self._config.get_packages_repos()
+        for reponame, (repodir, priority) in repos.iteritems():
+            packages[int(priority)].update(
+                    self._load_packages_from_dir(repodir))
+        # Add recipes by asceding pripority
+        for key in sorted(packages.keys()):
+            self._packages.update(packages[key])
+
+    def _load_packages_from_dir(self, repo):
+        packages_dict = {}
+        packages = shell.find_files('*%s' % self.PKG_EXT, repo)
+        packages.extend(shell.find_files('*/*%s' % self.PKG_EXT, repo))
         for f in packages:
             p = self._load_package_from_file(f)
             if p is None:
                 m.warning(_("Could not found a valid package in %s") % f)
                 continue
             p.__file__ = os.path.abspath(f)
-            self.add_package(p)
+            packages_dict[p.name] = p
+        return packages_dict
+
 
     def _load_package_from_file(self, filepath):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
