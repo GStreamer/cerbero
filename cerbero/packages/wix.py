@@ -24,6 +24,7 @@ from cerbero.utils import etree, to_winepath, shell
 from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
+from cerbero.packages.package import SDKPackage
 
 WIX_SCHEMA = "http://schemas.microsoft.com/wix/2006/wi"
 
@@ -263,8 +264,10 @@ class MSI(WixBase):
     def _fill(self):
         self._add_install_dir()
         self._add_merge_modules()
-        self._add_registry_install_dir()
-        self._add_sdk_root_env_variable()
+        if isinstance(self.package, SDKPackage):
+            self._add_registry_install_dir()
+            self._add_sdk_root_env_variable()
+        self._add_get_install_dir_from_registry()
 
     def _add_merge_modules(self):
         self.main_feature = etree.SubElement(self.product, "Feature",
@@ -309,7 +312,7 @@ class MSI(WixBase):
         # FIXME: Add a way to install to ProgramFilesFolder
         installdir = self._add_dir(tdir, 'INSTALLDIR',
                 self.package.get_install_dir())
-        versiondir = self._add_dir(installdir, "Version", self.package.version)
+        versiondir = self._add_dir(installdir, "Version", self.package.sdk_version)
         archdir = self._add_dir(versiondir, 'Architecture',
                                 self.config.target_arch)
         self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
@@ -360,13 +363,6 @@ class MSI(WixBase):
         # installation folder
         name = self._package_var().replace(' ', '')
 
-        # Get INSTALLDIR from the registry key
-        installdir_prop = etree.SubElement(self.product, 'Property',
-                Id='INSTALLDIR')
-        etree.SubElement(installdir_prop, 'RegistrySearch', Id=name,
-                Type="raw", Root=self.REG_ROOT, Key=self._registry_key(name),
-                Name='InstallDir')
-
         # Add INSTALLDIR in the registry only for the runtime package
         if self.package.package_mode == PackageType.RUNTIME:
             regcomponent = etree.SubElement(self.installdir, 'Component',
@@ -381,6 +377,19 @@ class MSI(WixBase):
                     Type='string', Name='InstallDir', Value='[INSTALLDIR]')
             etree.SubElement(self.main_feature, 'ComponentRef',
                     Id='RegistryInstallDir')
+
+    def _add_get_install_dir_from_registry(self):
+        name = self._package_var().replace(' ', '')
+        if not isinstance(self.package, SDKPackage):
+            name = self.package.windows_sdk_reg or name
+
+        key = self._registry_key(name)
+
+        # Get INSTALLDIR from the registry key
+        installdir_prop = etree.SubElement(self.product, 'Property',
+                Id='INSTALLDIR')
+        etree.SubElement(installdir_prop, 'RegistrySearch', Id=name,
+                Type="raw", Root=self.REG_ROOT, Key=key, Name='InstallDir')
 
     def _add_merge_module(self, package, required, selected,
                           required_packages):

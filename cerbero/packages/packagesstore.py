@@ -192,8 +192,10 @@ class PackagesStore (object):
             execfile(filepath, d)
             if 'Package' in d:
                 p = d['Package'](self._config, self, self.cookbook)
-            elif 'MetaPackage' in d:
-                p = d['MetaPackage'](self._config, self)
+            elif 'SDKPackage' in d:
+                p = d['SDKPackage'](self._config, self)
+            elif 'InstallerPackage' in d:
+                p = d['InstallerPackage'](self._config, self)
             else:
                 raise Exception('Package or MetaPackage class found')
             p.prepare()

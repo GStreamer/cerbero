@@ -77,7 +77,7 @@ class OSXPackage(PackagerBase):
 
     def _get_install_dir(self):
         return os.path.join(self.install_dir, 'Versions',
-                self.package.version, self.config.target_arch)
+                self.package.sdk_version, self.config.target_arch)
 
     def _create_package(self, package_type, output_dir, force, target):
         self.package.set_mode(package_type)
@@ -239,7 +239,7 @@ class PMDocPackage(PackagerBase):
         package = PackageBase(self.config, self.store)
         package.name = 'osx-framework'
         package.shortdesc = 'Framework Bundle'
-        package.version = self.package.version
+        package.version = self.package.sdk_version
         package.uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
         package.deps = []
         self.store.add_package(package)
@@ -307,7 +307,7 @@ class Packager(object):
     def __new__(klass, config, package, store):
         if isinstance(package, Package):
             return OSXPackage(config, package, store)
-        else:
+        elif isinstance(package, MetaPackage):
             return PMDocPackage(config, package, store)
 
 

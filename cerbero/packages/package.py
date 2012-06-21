@@ -19,7 +19,7 @@
 import os
 
 from cerbero.build.filesprovider import FilesProvider
-from cerbero.enums import License
+from cerbero.enums import License, Platform
 from cerbero.packages import PackageType
 
 
@@ -296,11 +296,15 @@ class MetaPackage(PackageBase):
     @type icon: str
     @cvar root_env_var: name of the environment variable with the prefix
     @type root_env_var: str
+    @cvar sdk_version: SDK version. This version will be used for the SDK
+                       versionning and can defer from the installer one.
+    @type sdk_version: str
     '''
 
     packages = []
     root_env_var = 'CERBERO_SDK_ROOT'
     platform_packages = {}
+    sdk_version = '1.0'
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)
@@ -322,9 +326,6 @@ class MetaPackage(PackageBase):
 
     def all_files_list(self):
         return self._list_files(Package.all_files_list)
-
-    def get_root_env_var(self):
-        return (self.root_env_var % {'arch': self.config.target_arch}).upper()
 
     def get_wix_upgrade_code(self):
         m = self.package_mode
@@ -353,3 +354,50 @@ class MetaPackage(PackageBase):
             return ret
         else:
             return PackageBase.__getattribute__(self, name)
+
+
+class SDKPackage(MetaPackage):
+    '''
+    Creates an installer for SDK's.
+
+    On Windows the installer will add a new enviroment variable set in
+    root_env_var as well as a new key in the registry so that other installers
+    depending on the SDK could use them to set their environment easily and
+    check wether the requirements are met in the pre-installation step.
+
+    On OS X, the installer will create the tipical bundle structure used for
+    OS X Frameworks, creating the 'Versions' and 'Current' directories for
+    versionning as well as 'Headers' and 'Libraries' linking to the current
+    version of the framework.
+
+    On Linux everything just works without extra hacks ;)
+
+    @cvar root_env_var: name of the environment variable with the prefix
+    @type root_env_var: str
+    @cvar osx_framework_library: (namd, path) of the lib used for the Framework
+    @type osx_framework_library: tuple
+
+    '''
+
+    root_env_var = 'CERBERO_SDK_ROOT_%(arch)s'
+    osx_framework_library = None
+
+    def __init__(self, config, store):
+        MetaPackage.__init__(self, config, store)
+
+    def get_root_env_var(self):
+        return (self.root_env_var % {'arch': self.config.target_arch}).upper()
+
+
+class InstallerPackage(MetaPackage):
+    '''
+    Creates an installer for a target SDK to extend it.
+
+    @cvar windows_sdk_reg: name of the required SDK
+    @type windows_sdk_reg: str
+    '''
+
+    windows_sdk_reg = None
+
+    def __init__(self, config, store):
+        MetaPackage.__init__(self, config, store)

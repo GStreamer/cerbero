@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 
-class MetaPackage(package.MetaPackage):
+class SDKPackage(package.SDKPackage):
 
     name = "gstreamer-sdk"
     shortdesc = "GStreamer SDK"
@@ -9,6 +9,7 @@ class MetaPackage(package.MetaPackage):
     title = "GStreamer SDK"
     url = "http://www.gstreamer.com"
     version = '2012.5'
+    sdk_version = '0.10'
     codename = 'Amazon'
     license = License.LGPL
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
