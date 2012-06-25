@@ -92,6 +92,7 @@ def add_files(tmp):
         'README2 '
         'README3 '
         'README4 '
+        'README5 '
         'bin/gst-launch.exe '
         'bin/gst-launch '
         'bin/windows.exe '

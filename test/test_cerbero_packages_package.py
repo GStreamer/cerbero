@@ -22,7 +22,7 @@ import tempfile
 
 from cerbero.config import Platform, Distro, DistroVersion
 from cerbero.packages import PackageType
-from test.test_packages_common import Package1, Package4, MetaPackage
+from test.test_packages_common import Package1, Package4, MetaPackage, App
 from test.test_build_common import create_cookbook, add_files
 from test.test_packages_common import create_store
 from test.test_common import DummyConfig
@@ -111,8 +111,6 @@ class PackageTest(unittest.TestCase):
         self.assertEquals(package.get_sys_deps(), ['python27'])
 
 
-
-
 class TestMetaPackages(unittest.TestCase):
 
     def setUp(self):
@@ -158,3 +156,48 @@ class TestMetaPackages(unittest.TestCase):
 
     def testAllFilesList(self):
         self._compareList('all_files_list')
+
+
+class AppPackageTest(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        config = Config(self.tmp, Platform.LINUX)
+        self.store = create_store(config)
+        self.cookbook = create_cookbook(config)
+        self.app = App(config, self.store, self.cookbook)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def testListFilesWithEmbededDepsOnLinux(self):
+        self.app.embed_deps = True
+        expected = self.app._app_recipe.files_list()
+        result = self.app.files_list()
+        self.assertEquals(expected, result)
+
+    def testListFilesWithEmbededDeps(self):
+        self.app.embed_deps = True
+        self.app.config.target_platform = Platform.WINDOWS
+        files = []
+        packages_deps = [self.store.get_package(x) for x in self.app.deps]
+        for dep in self.app.deps:
+            packages_deps.extend(self.store.get_package_deps(dep))
+        packages_deps = list(set(packages_deps))
+        for package in packages_deps:
+            files.extend(package.files_list())
+        files.extend(self.app._app_recipe.files_list())
+        files = sorted(set(files))
+        self.assertEquals(files, self.app.files_list())
+
+    def testListFilesWithoutEmbededDeps(self):
+        self.app.embed_deps = False
+        expected = self.app._app_recipe.files_list()
+        result = self.app.files_list()
+        self.assertEquals(expected, result)
+
+    def testDevelFilesList(self):
+        self.assertEquals(self.app.devel_files_list(), [])
+
+    def testAllFilesList(self):
+        self.assertEquals(self.app.files_list(), self.app.all_files_list())

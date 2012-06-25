@@ -23,10 +23,12 @@ import shutil
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package, PackageBase
+from cerbero.packages.package import Package, MetaPackage, App, PackageBase
 from cerbero.packages.osx.pmdoc import PMDoc
-from cerbero.packages.osx.bundles import FrameworkBundlePackager
+from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
+    ApplicationBundlePackager
 from cerbero.packages.osx.packagemaker import PackageMaker
+from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
@@ -302,6 +304,94 @@ class PMDocPackage(PackagerBase):
         shell.call(cmd)
 
 
+class ApplicationPackage(PackagerBase):
+    '''
+    Creates an osx package from a L{cerbero.packages.package.Package}
+
+    @ivar package: package used to create the osx package
+    @type package: L{cerbero.packages.package.Package}
+    '''
+
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
+
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+        PackagerBase.pack(self, output_dir, devel, force, keep_temp)
+
+        self.tmp = tempfile.mkdtemp()
+        self.tmp = os.path.join(self.tmp, '%s.app' % self.package.app_name)
+
+        # copy files to the bundle. it needs to be done first because the app
+        # bundle will try to create links for the main executable
+        self._create_bundle()
+        self._create_app_bundle()
+        self._strip_binaries()
+        self._relocate_binaries()
+        dmg = self._create_dmg()
+
+        return [dmg, None]
+
+    def _create_bundle(self):
+        '''
+        Moves all the files that are going to be packaged to the bundle's
+        temporary directory
+        '''
+        out_dir = os.path.join(self.tmp, 'Contents', 'Home')
+        os.makedirs(out_dir)
+        for f in self.package.files_list():
+            in_path = os.path.join(self.config.prefix, f)
+            if not os.path.exists(in_path):
+                m.warning("File %s is missing and won't be added to the "
+                          "package" % in_path)
+                continue
+            out_path = os.path.join(out_dir, f)
+            odir = os.path.split(out_path)[0]
+            if not os.path.exists(odir):
+                os.makedirs(odir)
+            shutil.copy(in_path, out_path)
+
+    def _create_app_bundle(self):
+        ''' Creates the OS X Application bundle in temporary directory '''
+        packager = ApplicationBundlePackager(self.config, self.package,
+                self.store)
+        return packager.create_bundle(self.tmp)
+
+    def _strip_binaries(self):
+        pass
+
+    def _relocate_binaries(self):
+        prefix = self.config.prefix
+        if prefix[-1] == '/':
+            prefix = prefix[:-1]
+        for path in ['bin']:
+            relocator = OSXRelocator(
+                    os.path.join(self.tmp, 'Contents', 'Home', path),
+                    self.config.prefix, '@executable_path/../', True)
+            relocator.relocate()
+        for path in ['lib', 'libexec']:
+            relocator = OSXRelocator(
+                    os.path.join(self.tmp, 'Contents', 'Home', path),
+                    self.config.prefix, '@loader_path/../', True)
+            relocator.relocate()
+        relocator = OSXRelocator(
+                    os.path.join(self.tmp, 'Contents', 'MacOS', path),
+                    self.config.prefix, '@executable_path/../Home/', False)
+        relocator.relocate()
+
+    def _create_dmg(self):
+        #applications_link = os.path.join(self.tmp, 'Applications')
+        #shell.call('ln -s /Applications %s' % applications_link)
+        # Create link to /Applications
+        dmg_file = os.path.join(self.output_dir, '%s-%s-%s.dmg' % (
+            self.package.app_name, self.package.version, self.config.target_arch))
+        # Create Disk Image
+        cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
+                (dmg_file, self.package.app_name, self.tmp)
+        shell.call(cmd)
+        return dmg_file
+
+
+
 class Packager(object):
 
     def __new__(klass, config, package, store):
@@ -309,6 +399,8 @@ class Packager(object):
             return OSXPackage(config, package, store)
         elif isinstance(package, MetaPackage):
             return PMDocPackage(config, package, store)
+        elif isinstance(package, App):
+            return ApplicationPackage(config, package, store)
 
 
 def register():

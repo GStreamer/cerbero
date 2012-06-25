@@ -55,8 +55,10 @@ class PackageBase(object):
     @type resources_license: str
     @cvar resources_license_rtf: filename of .rtf license file
     @type resources_license_rtf: str
-    @cvar resources_icon: filename of the icon image
+    @cvar resources_icon: filename of the .ico icon
     @type resources_icon: str
+    @cvar resources_icon_icns: filename of the .icsn icon
+    @type resources_icon_icns: str
     @cvar resources_backgound = filename of the background image
     @type resources_backgound = str
     '''
@@ -75,6 +77,7 @@ class PackageBase(object):
     resources_license = 'license.txt'
     resources_license_rtf = 'license.txt'
     resources_icon = 'icon.ico'
+    resources_icon_icns = 'icon.icns'
     resources_background = 'background.png'
 
     def __init__(self, config, store):
@@ -292,8 +295,6 @@ class MetaPackage(PackageBase):
     @type packages: list
     @cvar platform_packages: list of platform packages
     @type platform_packages: dict
-    @cvar icon: filename of the package icon
-    @type icon: str
     @cvar root_env_var: name of the environment variable with the prefix
     @type root_env_var: str
     @cvar sdk_version: SDK version. This version will be used for the SDK
@@ -401,3 +402,102 @@ class InstallerPackage(MetaPackage):
 
     def __init__(self, config, store):
         MetaPackage.__init__(self, config, store)
+
+
+class App(PackageBase):
+    '''
+    Create packages for applications.
+    An App package will not include development files and binaries could
+    be stripped when required. The App packager will not create a development
+    version.
+    On linux it will work in the same way as a MetaPackage, creating a package
+    with the application's recipe files and adding packages dependencies to be
+    managed by the distribution's package manager.
+    On OS X and Windows, the dependencies could be embeded in the installer
+    itself, creating an Application bundle on OS X and main menu shortcuts on
+    Windows, relocating the binaries properly.
+
+    @cvar app_recipe: Name used for the application
+    @type app_recipe: str
+    @cvar app_recipe: recipe that builds the application project
+    @type app_recipe: str
+    @cvar deps: list of packages dependencies
+    @type deps: list
+    @cvar embed_deps: include dependencies in the final package
+    @type embed_deps: boolean
+    @cvar commands: a list of with the application commands. The first will be
+                    used for the main executable
+    @type command: list
+    @cvar wrapper: suffix filename for the main executable wrapper
+    @type wrapper: str
+    '''
+
+    app_name = None
+    app_recipe = None
+    embed_deps = True
+    deps = []
+    commands = []  # list of tuples ('CommandName', path/to/binary')
+    wrapper = 'app_wrapper.tpl'
+
+    def __init__(self, config, store, cookbook):
+        PackageBase.__init__(self, config, store)
+        self.cookbook = cookbook
+        self._app_recipe = self.cookbook.get_recipe(self.app_recipe)
+
+    def recipes_dependencies(self):
+        deps = []
+        for dep in self.deps:
+            for package in self.store.get_package_deps(dep, True):
+                deps.extend(package.recipes_dependencies())
+        return list(set(deps))
+
+    def files_list(self):
+        # for each package, call the function that list files
+        files = []
+        if self.embed_deps and self.config.target_platform != Platform.LINUX:
+            packages_deps = [self.store.get_package(x) for x in self.deps]
+            for package in packages_deps:
+                packages_deps.extend(self.store.get_package_deps(package))
+            packages_deps = list(set(packages_deps))
+            for package in packages_deps:
+                files.extend(package.files_list())
+        files.extend(self._app_recipe.files_list())
+        files.sort()
+        return files
+
+    def devel_files_list(self):
+        return []
+
+    def all_files_list(self):
+        return self.files_list()
+
+    def get_wix_upgrade_code(self):
+        m = self.package_mode
+        p = self.config.target_arch
+        return self.wix_upgrade_code[m][p]
+
+    def get_commands(self):
+        return self.commands
+
+    def get_wrapper(self, cmd, wrapper=None):
+        if self.config.target_platform == Platform.WINDOWS:
+            platform = 'win'
+        else:
+            platform = 'unix'
+
+        if wrapper is not None:
+            wrapper_file = self.relative_path('%s_%s' % (platform, wrapper))
+        else:
+            wrapper_file = os.path.join(self.config.data_dir, 'templates',
+                    '%s_%s' % (self.wrapper, platform))
+
+        if not os.path.exists(wrapper_file):
+            return None
+
+        with open(wrapper_file, 'r') as f:
+            content = f.read()
+            content = content % {'prefix': self.config.prefix,
+                                 'py_prefix': self.config.py_prefix,
+                                 'cmd': self.config.prefix}
+
+        return content

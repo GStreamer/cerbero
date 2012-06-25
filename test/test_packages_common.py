@@ -96,6 +96,23 @@ class MetaPackage(package.MetaPackage):
     icon = "gstreamer.ico"
 
 
+class App(package.App):
+
+    name = "gstreamer-app"
+    shortdesc = "GStreamer sample app"
+    longdesc = "GStreamer sample app"
+    title = "GStreamer sample app"
+    url = "http://www.gstreamer.net"
+    version = '1.0'
+    uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
+    vendor = "GStreamer Project"
+    org = 'net.gstreamer'
+    app_recipe = 'recipe3'
+    deps = ['gstreamer-test1']
+    icon = "share/images/gstreamer.png"
+    embed_deps = True
+
+
 class DummyConfig(object):
     pass
 
@@ -104,7 +121,7 @@ def create_store(config):
     cookbook = create_cookbook(config)
     store = PackagesStore(config, False)
 
-    for klass in [Package1, Package2, Package3, Package4]:
+    for klass in [Package1, Package2, Package3, Package4, App]:
         package = klass(config, store, cookbook)
         store.add_package(package)
     for klass in [MetaPackage]:

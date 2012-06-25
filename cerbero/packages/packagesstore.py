@@ -196,8 +196,11 @@ class PackagesStore (object):
                 p = d['SDKPackage'](self._config, self)
             elif 'InstallerPackage' in d:
                 p = d['InstallerPackage'](self._config, self)
+            elif 'App' in d:
+                p = d['App'](self._config, self, self.cookbook)
             else:
-                raise Exception('Package or MetaPackage class found')
+                raise Exception('Package, SDKPackage, InstallerPackage or App '
+                                'class not found')
             p.prepare()
             # reload files from package now that we called prepare that
             # may have changed it

@@ -1,0 +1,181 @@
+# cerbero - a multi-platform build system for Open Source software
+# Copyright (C) 2012 Andoni Morales Alastruey <ylatuya@gmail.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+import os
+import tempfile
+import shutil
+from stat import S_IXUSR, S_IXGRP, S_IXOTH
+
+from cerbero.packages import PackagerBase
+from cerbero.packages.osx.packagemaker import PackageMaker
+from cerbero.packages.osx.info_plist import FrameworkPlist, ApplicationPlist
+from cerbero.utils import shell
+
+
+class BundlePackagerBase(PackagerBase):
+    '''
+    Creates a package with the basic structure of a bundle, to be included
+    in a MetaPackage.
+    '''
+
+    name = ''
+    title = ''
+
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
+
+    def pack(self, output_dir):
+        output_dir = os.path.realpath(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        self.install_dir = self.package.get_install_dir()
+
+        path = self._create_package(output_dir, self.package.get_install_dir(),
+                self.package.version)
+        return [path, None]
+
+
+    def _create_package(self, output_dir, install_dir, version):
+        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
+                (self.name, self.package.version,
+                 self.config.target_arch))
+        root = self.create_bundle()
+        packagemaker = PackageMaker()
+        packagemaker.create_package(root, self.package_name,
+            self.package.version, self.title, output_file,
+            install_dir, target=None)
+        return output_file
+
+    def get_install_dir(self):
+        '''
+        Get the installation directory
+        '''
+        raise NotImplemented('Subclasses should implement get_install_dir')
+
+    def create_bundle(self):
+        '''
+        Creates the bundle structure
+        '''
+        raise NotImplemented('Subclasses should implement create_bundle')
+
+
+class FrameworkBundlePackager(BundlePackagerBase):
+    '''
+    Creates a package with the basic structure of a framework bundle,
+    adding links for Headears, Libraries, Commands, and Current Versions,
+    and the Framework info.
+    '''
+
+    name = 'osx-framework'
+    title = 'Framework Bundle'
+
+    def __init__(self, config, package, store):
+        BundlePackagerBase.__init__(self, config, package, store)
+
+    def get_install_dir(self):
+        return os.path.join(self.install_dir, 'Versions',
+                self.package.version, self.config.target_arch)
+
+    def create_bundle(self):
+        '''
+        Creates the bundle structure
+
+        Commands -> Versions/Current/bin
+        Headers -> Versions/Current/Headers
+        Librarires -> Versions/Current/lib
+        Home -> Versions/Current
+        Resources -> Versions/Current/Resources
+        Versions/Current -> Version/$VERSION/$ARCH
+        '''
+        tmp = tempfile.mkdtemp()
+
+        vdir = 'Versions/%s/%s' % (self.package.version,
+                                  self.config.target_arch)
+        rdir = '%s/Resources/' % vdir
+        shell.call ('mkdir -p %s' % rdir, tmp)
+        links = {'Versions/Current': '../%s' % vdir,
+                 'Resources': 'Versions/Current/Resources',
+                 'Commands': 'Versions/Current/bin',
+                 'Headers': 'Versions/Current/Headers',
+                 'Libraries': 'Versions/Current/lib'}
+        framework_plist = FrameworkPlist(self.package.name,
+            self.package.org, self.package.version, self.package.shortdesc)
+        framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
+        for dest, src in links.iteritems():
+            shell.call ('ln -s %s %s' % (src, dest), tmp)
+        if self.package.osx_framework_library is not None:
+            name, link = self.package.osx_framework_library
+            link = os.path.join('Versions', 'Current', link)
+            shell.call ('ln -s %s %s' % (link, name), tmp)
+        return tmp
+
+
+class ApplicationBundlePackager(BundlePackagerBase):
+    '''
+    Creates a package with the basic structure of an Application bundle.
+    '''
+
+    def __init__(self, config, package, store):
+        BundlePackagerBase.__init__(self, config, package, store)
+
+    def get_install_dir(self):
+        return self.install_dir
+
+    def create_bundle(self, tmp=None):
+        '''
+        Creates the Application bundle structure
+
+        Contents/MacOS/MainExectuable -> Contents/Home/bin/main-executable
+        Contents/Info.plist
+        '''
+        tmp = tmp or tempfile.mkdtemp()
+
+        contents = os.path.join(tmp, 'Contents')
+        macos = os.path.join(contents, 'MacOS')
+        resources = os.path.join(contents, 'Resources')
+        for p in [contents, macos, resources]:
+            if not os.path.exists(p):
+                os.makedirs(p)
+
+        # Create Contents/Info.plist
+        framework_plist = ApplicationPlist(self.package.name,
+            self.package.org, self.package.version, self.package.shortdesc,
+            os.path.basename(self.package.resources_icon_icns))
+        framework_plist.save(os.path.join(contents, 'Info.plist'))
+
+        # Copy app icon to Resources
+        shutil.copy(self.package.resources_icon_icns, resources)
+
+        # Link or create a wrapper for the executables in Contents/MacOS
+        for name, path, use_wrapper, wrapper in self.package.get_commands():
+            filename = os.path.join(macos, name)
+            if use_wrapper:
+                wrapper = self.package.get_wrapper(path, wrapper)
+                if not wrapper:
+                    continue
+                with open(filename, 'w') as f:
+                    f.write(wrapper)
+                shell.call('chmod +x %s' % filename)
+            else:
+                # FIXME: We need to copy the binary instead of linking, because
+                # beeing a different path, @executable_path will be different
+                # and it we will need to set a different relative path with
+                # install_name_tool
+                shutil.copy(os.path.join(contents, 'Home', path), macos)
+        return tmp
