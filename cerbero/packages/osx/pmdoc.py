@@ -170,15 +170,15 @@ class Index(PMDocXML):
         resources.set(self.ATTR_BG_ALIGN, "left")
         resources.set(self.ATTR_BG_SCALE, "none")
         locale = etree.SubElement(resources, self.TAG_LOCALE, lang='en')
-        background = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
-                type='background')
         path = self.package.resources_background
         if os.path.exists(path):
+            background = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
+                type='background')
             background.text = path
-        license = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
-                type='license')
         path = self.package.resources_license
         if os.path.exists(path):
+            license = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
+                type='license')
             license.text = path
 
     def _boolstr(self, boolean):
