@@ -171,7 +171,17 @@ class PackageBase(object):
 class Package(PackageBase):
     '''
     Describes a set of files to produce disctribution packages for the
-    different target platforms
+    different target platforms. It provides the first level of packaging
+    allowing to create modular installers by aggregating several of them.
+
+    On Windows it will create a Merge Module (.msm) that can be easilly
+    integrated in an installer (.msi).
+
+    On OS X, it will produce a Package (.pkg) that can be integrated
+    in a MetaPackager.
+
+    On Linux it will create regular distribution packages such as a .deb on
+    Debian or a .rpm on RedHat
 
     @cvar deps: list of packages dependencies
     @type deps: list
@@ -292,7 +302,17 @@ class Package(PackageBase):
 
 class MetaPackage(PackageBase):
     '''
-    Group of packages used to build an installer package
+    Group of L{cerbero.packages.package.Package} used to build a a modular
+    installer package.
+
+    On Windows it will result in a .msi installer that aggregates
+    Merge Modules created from a L{cerbero.packages.package.Package}.
+
+    On OS X it will result in a MetaPackage that aggreates .pkg packages
+    created a L{cerbero.packages.package.Package}.
+
+    On Linux it will result in in rpm and deb meta-packages, whith the packages
+    created as dependencies.
 
     @cvar packages: list of packages grouped in this meta package
     @type packages: list
