@@ -220,7 +220,7 @@ class Config (object):
     def _load_cmd_config(self, filename):
         if filename is not None:
             if os.path.exists(filename):
-                self.parse(filename)
+                self.parse(filename, reset=False)
                 self.filename = DEFAULT_CONFIG_FILE
             else:
                 raise ConfigurationError(_("Configuration file %s doesn't "
