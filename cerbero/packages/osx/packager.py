@@ -88,7 +88,7 @@ class OSXPackage(PackagerBase):
                 (self.package.name, self.version, self.config.target_arch))
         root = self._create_bundle(files, package_type)
         packagemaker = PackageMaker()
-        packagemaker.create_package(root, self.package.name,
+        packagemaker.create_package(root, self.package.identifier(),
             self.package.version, self.package.shortdesc, output_file,
             self._get_install_dir(), target)
         return output_file
@@ -274,7 +274,8 @@ class PMDocPackage(PackagerBase):
                 paths = packager.pack(self.output_dir, self.devel, self.force,
                         self.keep_temp, self.package.version, target=None,
                         install_dir=self.package.get_install_dir(),
-                        include_dirs=self.include_dirs)
+                        include_dirs=self.include_dirs,
+                        sdk_version=self.package.sdk_version)
                 m.action(_("Package created sucessfully"))
             except EmptyPackageError:
                 paths = [None, None]

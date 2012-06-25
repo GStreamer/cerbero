@@ -139,6 +139,9 @@ class PackageBase(object):
             return self.sys_deps[self.config.target_distro]
         return []
 
+    def identifier(self):
+        return '%s.%s' % (self.org, self.name)
+
     def __str__(self):
         return self.name
 

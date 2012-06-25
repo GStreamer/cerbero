@@ -159,7 +159,7 @@ class Index(PMDocXML):
         for package in packages:
             if package in self.emptypkgs:
                 continue
-            etree.SubElement(choice, self.TAG_PKGREF, id=package.name)
+            etree.SubElement(choice, self.TAG_PKGREF, id=package.identifier())
             if package not in self.packagerefs:
                 item = etree.SubElement(self.root, self.TAG_ITEM, type='pkgref')
                 item.text = '%s.xml' % package.name
@@ -231,7 +231,8 @@ class PkgRef(PMDocXML):
     def _add_config(self):
         config = etree.SubElement(self.root, self.TAG_CONFIG)
         self._subelement_text(config, self.TAG_VERSION, '1.0')
-        self._subelement_text(config, self.TAG_IDENTIFIER, self.package.name)
+        self._subelement_text(config, self.TAG_IDENTIFIER,
+                self.package.identifier())
         self._subelement_text(config, self.TAG_DESCRIPTION,
                 self.package.shortdesc)
         etree.SubElement(config, self.TAG_POST_INSTALL, type="none")
