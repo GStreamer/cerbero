@@ -23,7 +23,8 @@ import shutil
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package, MetaPackage, App, PackageBase
+from cerbero.packages.package import Package, MetaPackage, SDKPackage, App,\
+        PackageBase
 from cerbero.packages.osx.pmdoc import PMDoc
 from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
     ApplicationBundlePackager
@@ -208,7 +209,8 @@ class PMDocPackage(PackagerBase):
         self.empty_packages = {PackageType.RUNTIME: [], PackageType.DEVEL: []}
         self.packages_paths = {PackageType.RUNTIME: {}, PackageType.DEVEL: {}}
 
-        self._create_framework_bundle_package()
+        if isinstance(self.package, SDKPackage):
+            self._create_framework_bundle_package()
         self._create_packages()
 
         paths = []
