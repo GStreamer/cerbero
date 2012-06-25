@@ -270,7 +270,7 @@ class Svn(Source):
         if self.supports_non_src_build:
             return
 
-        shutil.copytree(self.build_dir, self.config.sources)
+        shutil.copytree(self.repo_dir, self.build_dir)
 
 
 class SourceType (object):

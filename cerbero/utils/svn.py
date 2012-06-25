@@ -28,7 +28,7 @@ def checkout(url, dest):
     @param dest: path where to do the checkout
     @type url: string
     '''
-    shell.call('svn co %s' % url, dest)
+    shell.call('svn co %s %s' % (url, dest))
 
 
 def update(repo, revision='HEAD'):
