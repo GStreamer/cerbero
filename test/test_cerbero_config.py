@@ -87,6 +87,7 @@ class LinuxPackagesTest(unittest.TestCase):
                  'allow_system_libs': True,
                  'external_packages': {},
                  'external_recipes': {},
+                 'use_ccache': None,
                  }
         self.assertEquals(sorted(config._properties), sorted(props.keys()))
         for p, v in props.iteritems():

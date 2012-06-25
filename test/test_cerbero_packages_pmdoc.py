@@ -106,8 +106,9 @@ class IndexTest(unittest.TestCase, XMLMixin):
             else:
                 self.fail("Incorrect choice %s" % choice)
             elpkrefs = [x.attrib['id'] for x in \
-                        choice.iterfind(Index.TAG_PKGREF)] 
-            self.assertEquals(sorted(pkrefs), sorted(elpkrefs))
+                        choice.iterfind(Index.TAG_PKGREF)]
+            self.assertEquals(sorted(["default.%s" %x for x in pkrefs]),
+                              sorted(elpkrefs))
             packages.extend(pkrefs)
 
         items = [x.text[:-4] for x in self.index.root.iterfind(Index.TAG_ITEM) if
@@ -156,7 +157,7 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
         self.pkgref._add_root()
         self.pkgref._add_config()
         config = self.find_one(self.pkgref.root, PkgRef.TAG_CONFIG)
-        self.check_text(config, PkgRef.TAG_IDENTIFIER, self.package.name)
+        self.check_text(config, PkgRef.TAG_IDENTIFIER, self.package.identifier())
         self.check_text(config, PkgRef.TAG_VERSION, self.package.version)
         self.check_text(config, PkgRef.TAG_DESCRIPTION, self.package.shortdesc)
         self.check_attrib(config, PkgRef.TAG_POST_INSTALL, 'type', 'none')

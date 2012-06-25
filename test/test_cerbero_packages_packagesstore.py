@@ -21,7 +21,8 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.errors import PackageNotFoundError
-from cerbero.packages.package import Package, MetaPackage
+from cerbero.packages.package import Package, MetaPackage, SDKPackage,\
+    InstallerPackage, App
 from cerbero.packages.packagesstore import PackagesStore
 from test import test_packages_common as common
 
@@ -38,12 +39,17 @@ class Package(package.Package):
         Architecture.X86
 '''
 
-METAPACKAGE = '''
-class MetaPackage(package.MetaPackage):
+SDKPACKAGE = '''
+class SDKPackage(package.SDKPackage):
 
     name = 'test-package'
 '''
 
+INSTALLERPACKAGE = '''
+class InstallerPackage(package.InstallerPackage):
+
+    name = 'test-package'
+'''
 
 class PackageTest(unittest.TestCase):
 
@@ -112,12 +118,15 @@ class PackageTest(unittest.TestCase):
         self.assertEquals('test-package', p.name)
 
     def testLoadMetaPackageFromFile(self):
-        package_file = tempfile.NamedTemporaryFile()
-        package_file.write(METAPACKAGE)
-        package_file.flush()
-        p = self.store._load_package_from_file(package_file.name)
-        self.assertIsInstance(p, MetaPackage)
-        self.assertEquals('test-package', p.name)
+        for x, t in [(SDKPACKAGE, SDKPackage),
+                (INSTALLERPACKAGE, InstallerPackage)]:
+            package_file = tempfile.NamedTemporaryFile()
+            package_file.write(x)
+            package_file.flush()
+            p = self.store._load_package_from_file(package_file.name)
+            print p, type(p)
+            self.assertIsInstance(p, t)
+            self.assertEquals('test-package', p.name)
 
     def testImports(self):
         package_file = tempfile.NamedTemporaryFile()
