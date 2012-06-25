@@ -109,10 +109,12 @@ class MSIPackager(PackagerBase):
         p = self._create_msi_installer(PackageType.RUNTIME)
         paths.append(p)
 
+        # create devel package
         if devel:
             p = self._create_msi_installer(PackageType.DEVEL)
             paths.append(p)
 
+        # create zip with merge modules
         self.package.set_mode(PackageType.RUNTIME)
         zipf = ZipFile(os.path.join(self.output_dir, '%s-merge-modules.zip' %
                                     self._package_name()), 'w')
