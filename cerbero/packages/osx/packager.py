@@ -48,11 +48,12 @@ class OSXPackage(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
              version=None, target='10.5', install_dir=None,
-             include_dirs=None):
+             include_dirs=None, sdk_version=None):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         self.install_dir = install_dir or self.package.get_install_dir()
         self.version = version or self.package.version
+        self.sdk_version = sdk_version or version
         self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
 
         # create the runtime package
@@ -80,7 +81,7 @@ class OSXPackage(PackagerBase):
 
     def _get_install_dir(self):
         return os.path.join(self.install_dir, 'Versions',
-                self.package.sdk_version, self.config.target_arch)
+                self.sdk_version, self.config.target_arch)
 
     def _create_package(self, package_type, output_dir, force, target):
         self.package.set_mode(package_type)
