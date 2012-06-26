@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'clutter'
-    version = '1.8.4'
+    version = '1.10.6'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
