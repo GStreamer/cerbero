@@ -27,7 +27,7 @@ from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
-from cerbero.utils import _
+from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 from cerbero.build import recipe as crecipe
 
@@ -312,10 +312,9 @@ class CookBook (object):
 
     def _load_recipes_from_dir(self, repo):
         recipes = {}
-        for f in os.listdir(repo):
-            if not f.endswith(self.RECIPE_EXT):
-                continue
-            filepath = os.path.join(repo, f)
+        recipes_files = shell.find_files('*%s' % self.RECIPE_EXT, repo)
+        recipes_files.extend(shell.find_files('*/*%s' % self.RECIPE_EXT, repo))
+        for f in recipes_files:
             # Try to load the custom.py module located in the recipes dir
             # which can contain private classes to extend cerbero's recipes
             # and reuse them in our private repository
@@ -327,7 +326,7 @@ class CookBook (object):
             except:
                 custom = None
             try:
-                recipe = self._load_recipe_from_file(filepath, custom)
+                recipe = self._load_recipe_from_file(f, custom)
             except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") %
                                 f)
