@@ -96,7 +96,7 @@ class Tarball (Source):
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
-            shell.patch(patch, self.build_dir, self.strip)
+            shell.apply_patch(patch, self.build_dir, self.strip)
 
 
 

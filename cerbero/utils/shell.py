@@ -125,7 +125,7 @@ def apply_patch(patch, directory, strip=1):
     @type strip: int
     '''
     logging.info("Applying patch %s" % (patch))
-    call('%s -p%s -f -i %s', (PATCH, strip, patch))
+    call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
 
 
 def unpack(filepath, output_dir):
