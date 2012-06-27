@@ -57,7 +57,7 @@ class BundlePackagerBase(PackagerBase):
                  self.config.target_arch))
         root = self.create_bundle()
         packagemaker = PackageMaker()
-        packagemaker.create_package(root, self.package_name,
+        packagemaker.create_package(root, self.package.identifier(),
             self.package.version, self.title, output_file,
             install_dir, target=None)
         return output_file
