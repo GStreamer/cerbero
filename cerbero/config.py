@@ -18,6 +18,7 @@
 
 import os
 import sys
+import copy
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -56,17 +57,18 @@ class Config (object):
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
-                   'external_packages', 'use_ccache', 'force_git_commit']
+                   'external_packages', 'use_ccache', 'force_git_commit',
+                   'universal_archs']
 
-    def __init__(self, filename=None, load=True):
+    def __init__(self):
         self._check_uninstalled()
 
         for a in self._properties:
             setattr(self, a, None)
 
-        if not load:
-            return
+        self.arch_config = {self.target_arch: self}
 
+    def load(self, filename=None):
         # First load the default configuration
         self.load_defaults()
 
@@ -76,6 +78,15 @@ class Config (object):
         # Next, if a config file is provided use it to override the settings
         # from the main configuration file
         self._load_cmd_config(filename)
+
+        # Create a copy of the config for each architecture in case we are
+        # building Universal binaries
+        if self.target_arch == Architecture.UNIVERSAL:
+            arch_config = {}
+            for arch in self.universal_archs:
+                arch_config[arch] = copy.deepcopy(self)
+                arch_config[arch].target_arch = arch
+            self.arch_config = arch_config
 
         # Next, load the platform configuration
         self._load_platform_config()
@@ -225,23 +236,26 @@ class Config (object):
             else:
                 raise ConfigurationError(_("Configuration file %s doesn't "
                                            "exists") % filename)
-    def _load_platform_config(self):
-        platform_config = os.path.join(self.environ_dir, '%s.config' %
-                                       self.target_platform)
-        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
-                                   (self.target_platform, self.target_arch))
 
-        for config in [platform_config, arch_config]:
-            if os.path.exists(config):
-                self.parse(config, reset=False)
+    def _load_platform_config(self):
+        for config in self.arch_config.values():
+            platform_config = os.path.join(config.environ_dir, '%s.config' %
+                                           config.target_platform)
+            arch_config = os.path.join(config.environ_dir, '%s_%s.config' %
+                                       (config.target_platform, config.target_arch))
+
+            for config_path in [platform_config, arch_config]:
+                if os.path.exists(config_path):
+                    config.parse(config_path, reset=False)
 
     def _load_last_defaults(self):
-        cerbero_home = os.path.expanduser('~/cerbero')
-        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
-        self.set_property('install_dir', self.prefix)
-        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
-        self.set_property('local_sources',
-                os.path.join(cerbero_home, 'sources', 'local'))
+        for config in self.arch_config.values() + [self]:
+            cerbero_home = os.path.expanduser('~/cerbero')
+            config.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+            config.set_property('install_dir', config.prefix)
+            config.set_property('sources', os.path.join(cerbero_home, 'sources'))
+            config.set_property('local_sources',
+                    os.path.join(cerbero_home, 'sources', 'local'))
 
     def load_defaults(self):
         self.set_property('cache_file', None)
@@ -277,6 +291,8 @@ class Config (object):
         self.set_property('use_configure_cache', False)
         self.set_property('external_recipes', {})
         self.set_property('external_packages', {})
+        self.set_property('universal_archs',
+                          [Architecture.X86, Architecture.X86_64])
 
     def validate_properties(self):
         if not validate_packager(self.packager):

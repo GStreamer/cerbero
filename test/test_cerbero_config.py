@@ -42,12 +42,12 @@ class LinuxPackagesTest(unittest.TestCase):
             self.assertEquals(getattr(config, p), 'test')
 
     def testAllPropsInitializedNone(self):
-        config = Config(load=False)
+        config = Config()
         for p in config._properties:
             self.assertIsNone(getattr(config, p))
 
     def testLoadDefaults(self):
-        config = Config(load=False)
+        config = Config()
         config.load_defaults()
         platform, arch, distro, distro_version, num_of_cpus = system_info()
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -90,13 +90,14 @@ class LinuxPackagesTest(unittest.TestCase):
                  'external_recipes': {},
                  'use_ccache': None,
                  'force_git_commit': None,
+                 'universal_archs': [cconfig.Architecture.X86, cconfig.Architecture.X86_64],
                  }
         self.assertEquals(sorted(config._properties), sorted(props.keys()))
         for p, v in props.iteritems():
             self.assertEquals(getattr(config, p), v)
 
     def testLoadMainConfig(self):
-        config = Config(load=False)
+        config = Config()
 
         tmpconfig = tempfile.NamedTemporaryFile()
         cconfig.DEFAULT_CONFIG_FILE = tmpconfig.name
@@ -110,7 +111,7 @@ class LinuxPackagesTest(unittest.TestCase):
                               tmpconfig.name, config._properties)
 
     def testLoadPlatformConfig(self):
-        config = Config(load=False)
+        config = Config()
         tmpdir = tempfile.mkdtemp()
         config.environ_dir = tmpdir
         config.load_defaults()
@@ -122,13 +123,13 @@ class LinuxPackagesTest(unittest.TestCase):
                               platform_config, config._properties)
 
     def testFindDataDir(self):
-        config = Config(load=False)
+        config = Config()
         del os.environ[cconfig.CERBERO_UNINSTALLED]
         config._check_uninstalled()
         self.failUnlessRaises(FatalError, config.load_defaults)
 
     def testCheckUninstalled(self):
-        config = Config(load=False)
+        config = Config()
         del os.environ[cconfig.CERBERO_UNINSTALLED]
         config._check_uninstalled()
         self.assertFalse(config.uninstalled)
@@ -137,7 +138,7 @@ class LinuxPackagesTest(unittest.TestCase):
         self.assertTrue(config.uninstalled)
 
     def testSetupEnv(self):
-        config = Config(load=False)
+        config = Config()
         tmpdir = tempfile.mkdtemp()
         config.prefix = tmpdir
         config.load_defaults()
@@ -148,21 +149,21 @@ class LinuxPackagesTest(unittest.TestCase):
             self.assertEquals(os.environ[k], v)
 
     def testParseBadConfigFile(self):
-        config = Config(load=False)
+        config = Config()
         tmpfile = tempfile.NamedTemporaryFile()
         with open(tmpfile.name, 'w') as f:
             f.write('nonsense line')
         self.failUnlessRaises(ConfigurationError, config.parse, tmpfile.name)
 
     def testJoinPath(self):
-        config = Config(load=False)
+        config = Config()
         config.platform = Platform.LINUX
         self.assertEquals(config._join_path('/test1', '/test2'), '/test1:/test2')
         config.platform = Platform.WINDOWS
         self.assertEquals(config._join_path('/test1', '/test2'), '/test1;/test2')
 
     def testLoadCommandConfig(self):
-        config = Config(load=False)
+        config = Config()
         config.filename = None
         config._load_cmd_config(None)
         self.assertIsNone(config.filename)
@@ -173,7 +174,7 @@ class LinuxPackagesTest(unittest.TestCase):
         self.assertEquals(config.filename, cconfig.DEFAULT_CONFIG_FILE)
 
     def testLastDefaults(self):
-        config = Config(load=False)
+        config = Config()
         config._load_last_defaults()
         cerbero_home = os.path.expanduser('~/cerbero')
         self.assertEquals(config.prefix, os.path.join(cerbero_home, 'dist'))
@@ -184,7 +185,7 @@ class LinuxPackagesTest(unittest.TestCase):
             os.path.join(cerbero_home, 'sources', 'local'))
 
     def testRecipesExternalRepositories(self):
-        config = Config(load=False)
+        config = Config()
         config.recipes_dir = 'test'
         config.external_recipes = {'test1': ('/path/to/repo', 1),
                                    'test2': ('/path/to/other/repo', 2)}
@@ -194,7 +195,7 @@ class LinuxPackagesTest(unittest.TestCase):
         self.assertEquals(config.get_recipes_repos(), expected)
 
     def testPakcagesExternalRepositories(self):
-        config = Config(load=False)
+        config = Config()
         config.packages_dir = 'test'
         config.external_packages = {'test1': ('/path/to/repo', 1),
                                    'test2': ('/path/to/other/repo', 2)}
