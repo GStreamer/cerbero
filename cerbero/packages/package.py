@@ -140,7 +140,7 @@ class PackageBase(object):
         return []
 
     def identifier(self):
-        return '%s.%s' % (self.org, self.name)
+        return '%s.%s.%s' % (self.org, self.config.target_arch, self.name)
 
     def __str__(self):
         return self.name
