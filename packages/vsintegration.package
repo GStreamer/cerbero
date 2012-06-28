@@ -11,6 +11,7 @@ class Package(package.Package):
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
     uuid = '533337c2-4565-413f-3287-e8faa892f853'
 
     files = ['vsintegration']

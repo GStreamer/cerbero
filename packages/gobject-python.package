@@ -12,6 +12,7 @@ class Package(package.Package):
     license = License.LGPL
     uuid = '58fe67c2-4565-431f-8287-e8fba892f853'
     vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
     deps = ['base-system']
 
     files = ['pygobject']

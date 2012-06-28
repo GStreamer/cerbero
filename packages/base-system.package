@@ -11,6 +11,7 @@ class Package(package.Package):
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
     uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',

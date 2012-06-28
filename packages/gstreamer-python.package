@@ -11,6 +11,7 @@ class Package(package.Package):
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
     uuid = '5fc36752-4165-511f-8387-e8f2a898f853'
     deps = ['gstreamer-core', 'gobject-python']
     sys_deps = {
