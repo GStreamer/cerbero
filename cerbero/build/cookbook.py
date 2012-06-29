@@ -123,7 +123,7 @@ class CookBook (object):
 
     def update(self):
         '''
-        Reloads the recipes list adn updates the cookbook
+        Reloads the recipes list and updates the cookbook
         '''
         self._load_recipes()
         self.save()
