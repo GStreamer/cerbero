@@ -68,7 +68,14 @@ class Config (object):
 
         self.arch_config = {self.target_arch: self}
 
+    def _restore_environment(self):
+        os.environ.clear()
+        os.environ.update(self._raw_environ)
+
     def load(self, filename=None):
+        # Store raw os.environ data
+        self._raw_environ = os.environ.copy()
+
         # First load the default configuration
         self.load_defaults()
 
@@ -127,7 +134,8 @@ class Config (object):
             if key in config:
                 self.set_property(key, config[key], True)
 
-    def setup_env(self):
+    def do_setup_env(self):
+        self._restore_environment()
         self._create_path(self.prefix)
         self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
 
@@ -139,6 +147,10 @@ class Config (object):
         # set all the variables
         for e, v in self.env.iteritems():
             os.environ[e] = v
+
+    def setup_env(self):
+        for c in self.arch_config.values():
+            c.do_setup_env()
 
     def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables

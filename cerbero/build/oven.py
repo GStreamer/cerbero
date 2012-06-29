@@ -92,6 +92,7 @@ class Oven (object):
             if self.cookbook.step_done(recipe.name, step) and not self.force:
                 m.action(_("Step done"))
                 continue
+
             try:
                 # call step function
                 stepfunc = getattr(recipe, step)

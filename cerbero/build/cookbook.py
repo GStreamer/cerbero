@@ -25,11 +25,15 @@ import imp
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
         DistroVersion, License
 from cerbero.build.build import BuildType
+from cerbero.build.filesprovider import FilesProvider
+from cerbero.build.recipe import MetaRecipe
 from cerbero.build.source import SourceType
+from cerbero.build import build, source
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
 from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 from cerbero.build import recipe as crecipe
+from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 
 
 COOKBOOK_NAME = 'cookbook'
@@ -64,6 +68,98 @@ class RecipeStatus (object):
 
     def __repr__(self):
         return "Steps: %r Needs Build: %r" % (self.steps, self.needs_build)
+
+class UniversalRecipe(FilesProvider):
+    '''Stores similar recipe objects that are going to be built together
+
+       Useful for the universal architecture, where the same recipe needs
+       to be built for different architectures before being merged. For the
+       other targets, it will likely be a unitary group
+
+    '''
+
+    def __init__(self, config):
+        self._recipes = {}
+        self._config = config
+        super(UniversalRecipe, self).__init__(config)
+
+    @property
+    def name(self):
+        if self.is_empty():
+            return None
+        return self._recipes.itervalues().next().name
+
+    @property
+    def files_libs(self):
+        if self.is_empty(): return []
+        return self._recipes.itervalues().next().files_libs
+    @property
+    def files_lang(self):
+        if self.is_empty(): return []
+        return self._recipes.itervalues().next().files_lang
+    @property
+    def files_bins(self):
+        if self.is_empty(): return []
+        return self._recipes.itervalues().next().files_bins
+
+    def add_recipe(self, configname, recipe):
+        '''Adds a new recipe to the group
+
+           The configname is the shortname for the architecture, it should
+           be one of the keys of the target_arch dict of this UniversalRecipe's
+           config
+
+        '''
+        self._recipes[configname] = recipe
+
+    def is_empty(self):
+        return len(self._recipes) == 0
+
+    def list_deps(self):
+        deps = []
+        for v in self._recipes.values():
+            deps.extend(v.list_deps())
+        return deps
+
+    @property
+    def _steps(self):
+        if self.is_empty():
+            return None
+        return self._recipes.itervalues().next()._steps
+
+    @property
+    def __file__(self):
+        if self.is_empty():
+            return None
+        return self._recipes.itervalues().next().__file__
+
+    def do_step(self, step):
+        for c,v in self._recipes.iteritems():
+            self._config.arch_config[c].do_setup_env()
+            stepfunc = getattr(v, step)
+            stepfunc()
+
+    def merge(self):
+        inputs = []
+        for c,v in self._recipes.iteritems():
+            inputs.append(self._config.arch_config[c].prefix)
+        output = self._config.prefix
+        generator = OSXUniversalGenerator(output, *inputs)
+        generator.merge()
+
+    def fetch(self):
+        self.do_step('fetch')
+    def extract(self):
+        self.do_step('extract')
+    def configure(self):
+        self.do_step('configure')
+    def compile(self):
+        self.do_step('compile')
+    def install(self):
+        self.do_step('install')
+    def post_install(self):
+        self.do_step('post_install')
+        self.merge()
 
 
 class CookBook (object):
@@ -337,22 +433,31 @@ class CookBook (object):
 
     def _load_recipe_from_file(self, filepath, custom=None):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
-        try:
-            d = {'Platform': Platform, 'Architecture': Architecture,
-                 'BuildType': BuildType, 'SourceType': SourceType,
-                 'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'License': License,
-                 'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps,
-                 'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
-            execfile(filepath, d)
-            r = d['Recipe'](self._config)
-            r.__file__ = os.path.abspath(filepath)
-            r.prepare()
-            return r
-        except InvalidRecipeError:
-            pass
-        except Exception, ex:
-            import traceback
-            traceback.print_exc()
-            m.warning("Error loading recipe %s" % ex)
+        if self._config.target_arch == Architecture.UNIVERSAL:
+            recipe = UniversalRecipe(self._config)
+        for c in self._config.arch_config.keys():
+            try:
+                d = {'Platform': Platform, 'Architecture': Architecture,
+                     'BuildType': BuildType, 'SourceType': SourceType,
+                     'Distro': Distro, 'DistroVersion': DistroVersion,
+                     'License': License, 'recipe': crecipe, 'os': os,
+                     'BuildSteps': crecipe.BuildSteps,
+                     'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
+                execfile(filepath, d)
+                r = d['Recipe'](self._config.arch_config[c])
+                r.__file__ = os.path.abspath(filepath)
+                r.prepare()
+                if self._config.target_arch == Architecture.UNIVERSAL:
+                    recipe.add_recipe(c, r)
+                else:
+                    return r
+            except InvalidRecipeError:
+                pass
+            except Exception, ex:
+                import traceback
+                traceback.print_exc()
+                m.warning("Error loading recipe %s" % ex)
+        if self._config.target_arch == Architecture.UNIVERSAL:
+            if not recipe.is_empty():
+                return recipe
         return None
