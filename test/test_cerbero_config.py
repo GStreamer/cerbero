@@ -22,7 +22,8 @@ import tempfile
 import unittest
 
 from cerbero import config as cconfig
-from cerbero.errors import FatalError
+from cerbero.enums import Platform
+from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import system_info
 Config = cconfig.Config
 
@@ -144,3 +145,59 @@ class LinuxPackagesTest(unittest.TestCase):
                              config.py_prefix)
         for k, v in env.iteritems():
             self.assertEquals(os.environ[k], v)
+
+    def testParseBadConfigFile(self):
+        config = Config(load=False)
+        tmpfile = tempfile.NamedTemporaryFile()
+        with open(tmpfile.name, 'w') as f:
+            f.write('nonsense line')
+        self.failUnlessRaises(ConfigurationError, config.parse, tmpfile.name)
+
+    def testJoinPath(self):
+        config = Config(load=False)
+        config.platform = Platform.LINUX
+        self.assertEquals(config._join_path('/test1', '/test2'), '/test1:/test2')
+        config.platform = Platform.WINDOWS
+        self.assertEquals(config._join_path('/test1', '/test2'), '/test1;/test2')
+
+    def testLoadCommandConfig(self):
+        config = Config(load=False)
+        config.filename = None
+        config._load_cmd_config(None)
+        self.assertIsNone(config.filename)
+        self.failUnlessRaises(ConfigurationError, config._load_cmd_config,
+                '/foo/bar')
+        tmpfile = tempfile.NamedTemporaryFile()
+        config._load_cmd_config(tmpfile.name)
+        self.assertEquals(config.filename, cconfig.DEFAULT_CONFIG_FILE)
+
+    def testLastDefaults(self):
+        config = Config(load=False)
+        config._load_last_defaults()
+        cerbero_home = os.path.expanduser('~/cerbero')
+        self.assertEquals(config.prefix, os.path.join(cerbero_home, 'dist'))
+        self.assertEquals(config.install_dir, config.prefix)
+        self.assertEquals(config.sources,
+            os.path.join(cerbero_home, 'sources'))
+        self.assertEquals(config.local_sources,
+            os.path.join(cerbero_home, 'sources', 'local'))
+
+    def testRecipesExternalRepositories(self):
+        config = Config(load=False)
+        config.recipes_dir = 'test'
+        config.external_recipes = {'test1': ('/path/to/repo', 1),
+                                   'test2': ('path/to/other/repo', 2)}
+        expected = {'default': ('test', 0),
+                    'test1': ('/path/to/repo', 1),
+                    'test2': ('path/to/other/repo', 2)}
+        self.assertEquals(config.get_recipes_repos(), expected)
+
+    def testPakcagesExternalRepositories(self):
+        config = Config(load=False)
+        config.packages_dir = 'test'
+        config.external_packages = {'test1': ('/path/to/repo', 1),
+                                   'test2': ('path/to/other/repo', 2)}
+        expected = {'default': ('test', 0),
+                    'test1': ('/path/to/repo', 1),
+                    'test2': ('path/to/other/repo', 2)}
+        self.assertEquals(config.get_packages_repos(), expected)
