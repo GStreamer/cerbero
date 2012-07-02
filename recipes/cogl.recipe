@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'cogl'
-    version = '1.10.2'
+    version = '1.8.2'
     # TODO: check license - source files are LGPLv2+ and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     configure_options = "--disable-introspection "
