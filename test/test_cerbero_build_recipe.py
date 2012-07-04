@@ -41,7 +41,7 @@ class Class2(object):
     fetch = lambda x: 'CODEPASS'
 
 
-class RecipeTest(recipe.Recipe):
+class Recipe(recipe.Recipe):
 
     btype = Class1
     stype = Class2
@@ -66,7 +66,7 @@ class TestReceiptMetaClass(unittest.TestCase):
         self.config = DummyConfig()
         self.config.local_sources = ''
         self.config.sources = ''
-        self.t = RecipeTest(self.config)
+        self.t = Recipe(self.config)
 
     def testReceiptBases(self):
         r = recipe.Recipe(self.config)
@@ -96,7 +96,7 @@ class TestReceipt(unittest.TestCase):
         self.config = DummyConfig()
         self.config.local_sources = 'path1'
         self.config.sources = 'path2'
-        self.recipe = RecipeTest(self.config)
+        self.recipe = Recipe(self.config)
 
     def testSources(self):
         repo_dir = os.path.join(self.config.local_sources, self.recipe.package_name)
@@ -118,7 +118,7 @@ class TestReceipt(unittest.TestCase):
         self.assertTrue(recipe.BuildSteps.FETCH in self.recipe._steps)
         self.recipe._remove_steps([recipe.BuildSteps.FETCH])
         self.assertTrue(recipe.BuildSteps.FETCH not in self.recipe._steps)
-        r = RecipeTest(self.config)
+        r = Recipe(self.config)
         self.assertTrue(recipe.BuildSteps.FETCH in r._steps)
 
 
@@ -128,7 +128,7 @@ class TestLicenses(unittest.TestCase):
         self.config = DummyConfig()
         self.config.local_sources = ''
         self.config.sources = ''
-        self.recipe = RecipeTest(self.config)
+        self.recipe = Recipe(self.config)
 
     def testLicenses(self):
         self.assertEquals(self.recipe.licenses, [License.LGPL])

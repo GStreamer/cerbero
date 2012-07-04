@@ -186,18 +186,18 @@ class LinuxPackagesTest(unittest.TestCase):
         config = Config(load=False)
         config.recipes_dir = 'test'
         config.external_recipes = {'test1': ('/path/to/repo', 1),
-                                   'test2': ('path/to/other/repo', 2)}
+                                   'test2': ('/path/to/other/repo', 2)}
         expected = {'default': ('test', 0),
                     'test1': ('/path/to/repo', 1),
-                    'test2': ('path/to/other/repo', 2)}
+                    'test2': ('/path/to/other/repo', 2)}
         self.assertEquals(config.get_recipes_repos(), expected)
 
     def testPakcagesExternalRepositories(self):
         config = Config(load=False)
         config.packages_dir = 'test'
         config.external_packages = {'test1': ('/path/to/repo', 1),
-                                   'test2': ('path/to/other/repo', 2)}
+                                   'test2': ('/path/to/other/repo', 2)}
         expected = {'default': ('test', 0),
                     'test1': ('/path/to/repo', 1),
-                    'test2': ('path/to/other/repo', 2)}
+                    'test2': ('/path/to/other/repo', 2)}
         self.assertEquals(config.get_packages_repos(), expected)

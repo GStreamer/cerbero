@@ -107,7 +107,8 @@ class IndexTest(unittest.TestCase, XMLMixin):
                 self.fail("Incorrect choice %s" % choice)
             elpkrefs = [x.attrib['id'] for x in \
                         choice.iterfind(Index.TAG_PKGREF)]
-            self.assertEquals(sorted(["default.%s" %x for x in pkrefs]),
+            self.assertEquals(sorted(["default.%s.%s" %
+                (self.config.target_arch, x) for x in pkrefs]),
                               sorted(elpkrefs))
             packages.extend(pkrefs)
 

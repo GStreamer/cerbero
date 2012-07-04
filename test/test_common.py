@@ -16,13 +16,14 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Platform, Distro, DEFAULT_PACKAGER
+from cerbero.config import Platform, Distro, Architecture, DEFAULT_PACKAGER
 
 
 class DummyConfig(object):
     prefix = '/test/'
     target_platform = Platform.WINDOWS
     target_distro = Distro.WINDOWS
+    target_arch = Architecture.X86
     platform = None
     sources = ''
     local_sources = ''
