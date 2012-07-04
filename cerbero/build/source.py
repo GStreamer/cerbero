@@ -258,9 +258,10 @@ class Svn(Source):
         Source.__init__(self)
 
     def fetch(self):
-        if not os.path.exists(self.repo_dir):
-            os.makedirs(self.repo_dir)
-            svn.checkout(self.url, self.repo_dir)
+        if os.path.exists(self.repo_dir):
+            shutil.rmtree(self.repo_dir)
+        os.makedirs(self.repo_dir)
+        svn.checkout(self.url, self.repo_dir)
         svn.update(self.repo_dir, self.revision)
 
     def extract(self):
