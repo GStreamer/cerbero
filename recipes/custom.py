@@ -44,11 +44,11 @@ class GStreamerStatic(recipe.Recipe):
             self.files_list.extend(f)
         for cat in self.platform_plugins_categories:
             name = 'platform_files_%s_devel' % cat
-            files = getattr(self, name)
-            files = files.get(self.config.target_platform, [])
+            platform_files = getattr(self, name)
+            files = platform_files.get(self.config.target_platform, [])
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
             f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
-            setattr(self, name, f)
+            platform_files[self.config.platform] = f
             self.files_list.extend(f)
 
     def configure(self):
