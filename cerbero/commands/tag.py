@@ -30,12 +30,12 @@ class Tag(Command):
 
     def __init__(self):
         args = [
-            ArgparseArgument('recipe', nargs=1,
+            ArgparseArgument('recipe',
                 help=_('name of the recipe to tag or "all" to '
                         'tag all recipes')),
-            ArgparseArgument('tagname', nargs=1,
+            ArgparseArgument('tagname',
                 help=_('name of the tag to use')),
-            ArgparseArgument('tagdescription', nargs=1,
+            ArgparseArgument('tagdescription',
                 help=_('description of the tag')),
             ArgparseArgument('-f', '--force', action='store_true',
                 default=False, help=_('Replace tag if existing'))]
@@ -46,11 +46,11 @@ class Tag(Command):
         if args.recipe == 'all':
             recipes = cookbook.get_recipes_list()
         else:
-            recipes = [cookbook.get_recipe(args.recipe[0])]
+            recipes = [cookbook.get_recipe(args.recipe)]
         if len(recipes) == 0:
             m.message(_("No recipes found"))
-        tagname = args.tagname[0]
-        tagdescription = args.tagdescription[0]
+        tagname = args.tagname
+        tagdescription = args.tagdescription
         force = args.force
         for recipe in recipes:
             if recipe.stype != SourceType.GIT and \
