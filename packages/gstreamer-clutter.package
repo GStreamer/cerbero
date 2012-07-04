@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gstreamer-clutter'
     shortdesc = 'GStreamer Clutter support'
     url = "http://www.gstreamer.com"
-    version = '2012.5'
+    version = '2012.7'
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'

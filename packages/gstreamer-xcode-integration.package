@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gstreamer-xcode-integration'
     shortdesc = 'GStreamer XCode integration'
     url = "http://www.gstreamer.com"
-    version = '2012.5'
+    version = '2012.7'
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
