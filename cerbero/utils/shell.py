@@ -28,7 +28,7 @@ import glob
 import shutil
 
 from cerbero.enums import Platform
-from cerbero.utils import _, system_info
+from cerbero.utils import _, system_info, to_unixpath
 from cerbero.errors import FatalError
 
 
@@ -142,7 +142,7 @@ def unpack(filepath, output_dir):
         tf = tarfile.open(filepath, mode='r:*')
         tf.extractall(path=output_dir)
     if filepath.endswith('tar.xz'):
-        call("%s -Jxf %s" % (TAR, filepath), output_dir)
+        call("%s -Jxf %s" % (TAR, to_unixpath(filepath)), output_dir)
     if filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
