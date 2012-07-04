@@ -1,54 +1,27 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import os
-import shutil
-import tempfile
-
-from cerbero.utils import copy_files, to_unixpath, shell
 
 
-class Recipe(recipe.Recipe):
+class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-ugly-static'
     version = '0.10.19'
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-introspection --disable-examples --disable-shared --enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Ugly Plugins (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
+    extra_configure_options = " --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264"
+    plugins_categories = ['codecs_restricted', 'dvd']
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
 
     files_codecs_restricted_devel = [
-             'lib/gstreamer-0.10/libgsta52dec%(smext)s',
-             'lib/gstreamer-0.10/libgstamrnb%(smext)s',
-             'lib/gstreamer-0.10/libgstamrwbdec%(smext)s',
-             'lib/gstreamer-0.10/libgstasf%(smext)s',
-             'lib/gstreamer-0.10/libgstmad%(smext)s',
-             'lib/gstreamer-0.10/libgstmpeg2dec%(smext)s',
-             'lib/gstreamer-0.10/libgstmpegaudioparse%(smext)s',
-             'lib/gstreamer-0.10/libgstrmdemux%(smext)s',
+             'libgsta52dec',
+             'libgstamrnb',
+             'libgstamrwbdec',
+             'libgstasf',
+             'libgstmad',
+             'libgstmpeg2dec',
+             'libgstmpegaudioparse',
+             'libgstrmdemux',
     ]
 
     files_dvd_devel = [
-             'lib/gstreamer-0.10/libgstdvdlpcmdec%(smext)s',
-             'lib/gstreamer-0.10/libgstdvdread%(smext)s',
+             'libgstdvdlpcmdec',
+             'libgstdvdread',
     ]
-
-    # Static build will always fail on make check
-    make_check = None
-
-    def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
-            self.configure_options += '--disable-gtk-doc '
-
-        self.remotes['origin'] = ('%s/%s' %
-                        (self.config.git_root, 'gst-plugins-ugly.git'))
-        self.tmp_destdir = tempfile.mkdtemp()
-        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-ugly')
-
-    def post_install(self):
-        for cat in ['codecs_restricted', 'dvd']:
-            name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    getattr(self, name), self.extensions,
-                    self.config.target_platform)
-        shutil.rmtree(self.tmp_destdir)

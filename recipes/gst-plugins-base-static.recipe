@@ -1,105 +1,69 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import os
-import shutil
-import tempfile
 
-from cerbero.utils import copy_files, to_unixpath, shell
-from cerbero.build.build import system_libs
-
-
-class Recipe(recipe.Recipe):
+class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-base-static'
     version = '0.10.36'
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-introspection --disable-examples --disable-shared --enable-static --disable-gst_v4l --disable-gnome_vfs --disable-ivorbis --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Base Plugins (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
+    extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs --disable-ivorbis"
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
     use_system_libs = True
+    plugins_categories = ['core', 'playback', 'encoding', 'codecs', 'vis']
+    platform_plugins_categories = ['sys', 'net']
 
     files_core_devel = [
-             'lib/gstreamer-0.10/libgstadder%(smext)s',
-             'lib/gstreamer-0.10/libgstapp%(smext)s',
-             'lib/gstreamer-0.10/libgstaudioconvert%(smext)s',
-             'lib/gstreamer-0.10/libgstaudiorate%(smext)s',
-             'lib/gstreamer-0.10/libgstaudioresample%(smext)s',
-             'lib/gstreamer-0.10/libgstaudiotestsrc%(smext)s',
-             'lib/gstreamer-0.10/libgstffmpegcolorspace%(smext)s',
-             'lib/gstreamer-0.10/libgstgdp%(smext)s',
-             'lib/gstreamer-0.10/libgstgio%(smext)s',
-             'lib/gstreamer-0.10/libgstpango%(smext)s',
-             'lib/gstreamer-0.10/libgsttypefindfunctions%(smext)s',
-             'lib/gstreamer-0.10/libgstvideorate%(smext)s',
-             'lib/gstreamer-0.10/libgstvideoscale%(smext)s',
-             'lib/gstreamer-0.10/libgstvideotestsrc%(smext)s',
-             'lib/gstreamer-0.10/libgstvolume%(smext)s',
+             'libgstadder',
+             'libgstapp',
+             'libgstaudioconvert',
+             'libgstaudiorate',
+             'libgstaudioresample',
+             'libgstaudiotestsrc',
+             'libgstffmpegcolorspace',
+             'libgstgdp',
+             'libgstgio',
+             'libgstpango',
+             'libgsttypefindfunctions',
+             'libgstvideorate',
+             'libgstvideoscale',
+             'libgstvideotestsrc',
+             'libgstvolume',
     ]
 
     files_playback_devel = [
-             'lib/gstreamer-0.10/libgstdecodebin2%(smext)s',
-             'lib/gstreamer-0.10/libgstplaybin%(smext)s',
+             'libgstdecodebin2',
+             'libgstplaybin',
             ]
 
     files_encoding_devel = [
-             'lib/gstreamer-0.10/libgstencodebin%(smext)s',
+             'libgstencodebin',
              ]
 
     files_codecs_devel = [
-             'lib/gstreamer-0.10/libgstsubparse%(smext)s',
-             'lib/gstreamer-0.10/libgstogg%(smext)s',
-             'lib/gstreamer-0.10/libgsttheora%(smext)s',
-             'lib/gstreamer-0.10/libgstvorbis%(smext)s',
+             'libgstsubparse',
+             'libgstogg',
+             'libgsttheora',
+             'libgstvorbis',
             ]
 
     files_vis_devel = [
-             'lib/gstreamer-0.10/libgstlibvisual%(smext)s',
+             'libgstlibvisual',
             ]
 
     platform_files_sys_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstalsa%(smext)s',
-             'lib/gstreamer-0.10/libgstximagesink%(smext)s',
-             'lib/gstreamer-0.10/libgstxvimagesink%(smext)s',
-             'lib/gstreamer-0.10/libgstcdparanoia%(smext)s',
+             'libgstalsa',
+             'libgstximagesink',
+             'libgstxvimagesink',
+             'libgstcdparanoia',
             ]
     }
 
     platform_files_net_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgsttcp%(smext)s',
+             'libgsttcp',
             ],
         Platform.DARWIN: [
-             'lib/gstreamer-0.10/libgsttcp%(smext)s',
+             'libgsttcp',
             ]
     }
-
-    # Static build will always fail on make check
-    make_check = None
-
-    def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
-            self.configure_options += ' --disable-gtk-doc'
-
-        self.remotes['origin'] = ('%s/%s' %
-                (self.config.git_root, 'gst-plugins-base.git'))
-        self.tmp_destdir = tempfile.mkdtemp()
-        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-base')
-
-    def post_install(self):
-        for cat in ['core', 'playback', 'encoding', 'codecs', 'vis']:
-            name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    getattr(self, name), self.extensions,
-                    self.config.target_platform)
-        for platform_cat in ['sys', 'net']:
-            name = 'platform_files_%s_devel' % platform_cat
-            platform_files = getattr(self, name)
-            if self.config.target_platform in platform_files:
-                copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    platform_files[self.config.target_platform],
-                    self.extensions,
-                    self.config.target_platform)
-        shutil.rmtree(self.tmp_destdir)

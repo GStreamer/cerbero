@@ -1,37 +1,23 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
-import shutil
-import tempfile
-
-from cerbero.utils import copy_files, to_unixpath, shell
 
 
-class Recipe(recipe.Recipe):
+class Recipe(custom.GStreamerStatic):
     name = 'gst-ffmpeg-static'
     version = '0.10.13'
     # TODO - check license, plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-shared --enable-static --enable-lgpl --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer FFMPEG Plugins (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
+    extra_configure_options = " --enable-lgpl --disable-examples "
+    plugins_categories = ['codecs']
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
-    files_codecs_devel = ['lib/gstreamer-0.10/libgstffmpeg%(smext)s']
-
-    # Static build will always fail on make check
-    make_check = None
+    files_codecs_devel = ['libgstffmpeg']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                     '--with-ffmpeg-extra-configure="--enable-w32threads"'
-
-        self.remotes['origin'] = ('%s/%s' %
-                (self.config.git_root, 'gst-ffmpeg.git'))
-        self.tmp_destdir = tempfile.mkdtemp()
-        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-ffmpeg')
 
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
@@ -41,6 +27,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.PPC:
                 asflags = ' -arch ppc'
             self.configure_options += ' ASFLAGS="%s"' % asflags
+        super(Recipe, self).prepare()
 
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -49,12 +36,4 @@ class Recipe(recipe.Recipe):
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
                 f.write(opts)
-        super(recipe.Recipe, self).configure()
-
-    def post_install(self):
-        for cat in ['codecs']:
-            name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    getattr(self, name), self.extensions,
-                    self.config.target_platform)
-        shutil.rmtree(self.tmp_destdir)
+        super(Recipe, self).configure()

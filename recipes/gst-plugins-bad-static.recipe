@@ -1,132 +1,128 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import os
-import shutil
-import tempfile
 
-from cerbero.utils import copy_files, to_unixpath, shell
-
-
-class Recipe(recipe.Recipe):
+class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-bad-static'
     version = '0.10.23'
     licenses = [License.LGPLv2Plus]
-    configure_options = "--disable-introspection --disable-gsm --disable-examples --disable-shared --enable-static --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar --disable-sdi --disable-cog --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Bad Plugins (GStreamer SDK)' "
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
+    extra_configure_options = " --disable-gsm --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar --disable-sdi --disable-cog "
+
+    plugins_categories = ['effects', 'codecs', 'codecs_gpl', 'codecs_restricted', 'dvd', 'net', 'net_restricted', 'capture', 'vis']
+    platform_plugins_categories = ['sys', 'capture']
+
     deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
             'faad2', 'libkate', 'libvpx', 'libdvdnav', 'zlib',
             'schroedinger', 'libdca', 'jasper', 'libmms' ]
 
     files_effects_devel = [
-             'lib/gstreamer-0.10/libgstautoconvert%(smext)s',
-             'lib/gstreamer-0.10/libgstbayer%(smext)s',
-             'lib/gstreamer-0.10/libgstcoloreffects%(smext)s',
-             'lib/gstreamer-0.10/libgstfaceoverlay%(smext)s',
-             'lib/gstreamer-0.10/libgstfieldanalysis%(smext)s',
-             'lib/gstreamer-0.10/libgstfreeverb%(smext)s',
-             'lib/gstreamer-0.10/libgstfrei0r%(smext)s',
-             'lib/gstreamer-0.10/libgstgaudieffects%(smext)s',
-             'lib/gstreamer-0.10/libgstgeometrictransform%(smext)s',
-             'lib/gstreamer-0.10/libgstinterlace%(smext)s',
-             'lib/gstreamer-0.10/libgstjp2kdecimator%(smext)s',
-             'lib/gstreamer-0.10/libgstliveadder%(smext)s',
-             'lib/gstreamer-0.10/libgstrawparse%(smext)s',
-             'lib/gstreamer-0.10/libgstremovesilence%(smext)s',
-             'lib/gstreamer-0.10/libgstscaletempoplugin%(smext)s',
-             'lib/gstreamer-0.10/libgstsegmentclip%(smext)s',
-             'lib/gstreamer-0.10/libgstsmooth%(smext)s',
-             'lib/gstreamer-0.10/libgstspeed%(smext)s',
-             'lib/gstreamer-0.10/libgststereo%(smext)s',
-             'lib/gstreamer-0.10/libgstvideofiltersbad%(smext)s',
-             'lib/gstreamer-0.10/libgstvideomeasure%(smext)s',
-             'lib/gstreamer-0.10/libgstvideosignal%(smext)s',
+             'libgstautoconvert',
+             'libgstbayer',
+             'libgstcoloreffects',
+             'libgstfaceoverlay',
+             'libgstfieldanalysis',
+             'libgstfreeverb',
+             'libgstfrei0r',
+             'libgstgaudieffects',
+             'libgstgeometrictransform',
+             'libgstinterlace',
+             'libgstjp2kdecimator',
+             'libgstliveadder',
+             'libgstrawparse',
+             'libgstremovesilence',
+             'libgstscaletempoplugin',
+             'libgstsegmentclip',
+             'libgstsmooth',
+             'libgstspeed',
+             'libgststereo',
+             'libgstvideofiltersbad',
+             'libgstvideomeasure',
+             'libgstvideosignal',
     ]
 
     files_codecs_devel = [
-             'lib/gstreamer-0.10/libgstadpcmdec%(smext)s',
-             'lib/gstreamer-0.10/libgstadpcmenc%(smext)s',
-             'lib/gstreamer-0.10/libgstaiff%(smext)s',
-             'lib/gstreamer-0.10/libgstcdxaparse%(smext)s',
-             'lib/gstreamer-0.10/libgstdccp%(smext)s',
-             'lib/gstreamer-0.10/libgstdtmf%(smext)s',
-             'lib/gstreamer-0.10/libgstdvbsuboverlay%(smext)s',
-             'lib/gstreamer-0.10/libgstdvdspu%(smext)s',
-             'lib/gstreamer-0.10/libgstfragmented%(smext)s',
-             'lib/gstreamer-0.10/libgsthdvparse%(smext)s',
-             'lib/gstreamer-0.10/libgstid3tag%(smext)s',
-             'lib/gstreamer-0.10/libgstivfparse%(smext)s',
-             'lib/gstreamer-0.10/libgstjp2k%(smext)s',
-             'lib/gstreamer-0.10/libgstkate%(smext)s',
-             'lib/gstreamer-0.10/libgstmve%(smext)s',
-             'lib/gstreamer-0.10/libgstmxf%(smext)s',
-             'lib/gstreamer-0.10/libgstnsf%(smext)s',
-             'lib/gstreamer-0.10/libgstnuvdemux%(smext)s',
-             'lib/gstreamer-0.10/libgstpcapparse%(smext)s',
-             'lib/gstreamer-0.10/libgstpnm%(smext)s',
-             'lib/gstreamer-0.10/libgstschro%(smext)s',
-             'lib/gstreamer-0.10/libgstsiren%(smext)s',
-             'lib/gstreamer-0.10/libgstsubenc%(smext)s',
-             'lib/gstreamer-0.10/libgsttta%(smext)s',
-             'lib/gstreamer-0.10/libgstvideoparsersbad%(smext)s',
-             'lib/gstreamer-0.10/libgstvmnc%(smext)s',
-             'lib/gstreamer-0.10/libgstvp8%(smext)s',
-             'lib/gstreamer-0.10/libgsty4mdec%(smext)s',
+             'libgstadpcmdec',
+             'libgstadpcmenc',
+             'libgstaiff',
+             'libgstcdxaparse',
+             'libgstdccp',
+             'libgstdtmf',
+             'libgstdvbsuboverlay',
+             'libgstdvdspu',
+             'libgstfragmented',
+             'libgsthdvparse',
+             'libgstid3tag',
+             'libgstivfparse',
+             'libgstjp2k',
+             'libgstkate',
+             'libgstmve',
+             'libgstmxf',
+             'libgstnsf',
+             'libgstnuvdemux',
+             'libgstpcapparse',
+             'libgstpnm',
+             'libgstschro',
+             'libgstsiren',
+             'libgstsubenc',
+             'libgsttta',
+             'libgstvideoparsersbad',
+             'libgstvmnc',
+             'libgstvp8',
+             'libgsty4mdec',
     ]
 
     files_codecs_gpl_devel = [
-             'lib/gstreamer-0.10/libgstassrender%(smext)s',
+             'libgstassrender',
     ]
 
     files_codecs_restricted_devel = [
-             'lib/gstreamer-0.10/libgstasfmux%(smext)s',
-             'lib/gstreamer-0.10/libgstdtsdec%(smext)s',
-             'lib/gstreamer-0.10/libgstfaad%(smext)s',
-             'lib/gstreamer-0.10/libgstmpegdemux%(smext)s',
-             'lib/gstreamer-0.10/libgstmpegpsmux%(smext)s',
-             'lib/gstreamer-0.10/libgstmpegtsdemux%(smext)s',
-             'lib/gstreamer-0.10/libgstmpegtsmux%(smext)s',
+             'libgstasfmux',
+             'libgstdtsdec',
+             'libgstfaad',
+             'libgstmpegdemux',
+             'libgstmpegpsmux',
+             'libgstmpegtsdemux',
+             'libgstmpegtsmux',
     ]
 
     files_dvd_devel = [
-             'lib/gstreamer-0.10/libresindvd%(smext)s',
+             'libresindvd',
     ]
 
     files_net_devel = [
-             'lib/gstreamer-0.10/libgstdataurisrc%(smext)s',
-             'lib/gstreamer-0.10/libgstsdpelem%(smext)s',
-             'lib/gstreamer-0.10/libgstrtpmux%(smext)s',
-             'lib/gstreamer-0.10/libgstrtpvp8%(smext)s',
+             'libgstdataurisrc',
+             'libgstsdpelem',
+             'libgstrtpmux',
+             'libgstrtpvp8',
     ]
 
     files_net_restricted_devel = [
-             'lib/gstreamer-0.10/libgstmms%(smext)s',
+             'libgstmms',
     ]
 
     files_capture_devel = [
-             'lib/gstreamer-0.10/libgstcamerabin2%(smext)s',
+             'libgstcamerabin2',
             ]
 
     files_vis_devel = [
-             'lib/gstreamer-0.10/libgstaudiovisualizers%(smext)s',
+             'libgstaudiovisualizers',
             ]
 
     platform_files_capture_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstdvb%(smext)s',
+             'libgstdvb',
              ],
         }
 
     platform_files_sys_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstvcdsrc%(smext)s',
+             'libgstvcdsrc',
              ],
         Platform.WINDOWS: [
-             'lib/gstreamer-0.10/libgstd3dvideosink%(smext)s',
-             'lib/gstreamer-0.10/libgstdirectdrawsink%(smext)s',
-             #'lib/gstreamer-0.10/libgstdshowdecwrapper%(smext)s',
+             'libgstd3dvideosink',
+             'libgstdirectdrawsink',
+             #'libgstdshowdecwrapper',
              ],
         Platform.DARWIN: [
-             'lib/gstreamer-0.10/libgstapplemedia%(smext)s',
+             'libgstapplemedia',
             ]
     }
 
@@ -136,30 +132,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
-                '--disable-cog --disable-sdl '\
-                '--disable-cdaudio --disable-gtk-doc'
-        if self.config.target_platform == Platform.DARWIN:
-            self.configure_options += ' --disable-gtk-doc'
-
-        self.remotes['origin'] = ('%s/%s' %
-                (self.config.git_root, 'gst-plugins-bad.git'))
-        self.tmp_destdir = tempfile.mkdtemp()
-        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources, 'gst-plugins-bad')
-
-    def post_install(self):
-        for cat in ['effects', 'codecs', 'codecs_gpl', 'codecs_restricted',
-                'dvd', 'net', 'net_restricted', 'capture', 'vis']:
-            name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    getattr(self, name), self.extensions,
-                    self.config.target_platform)
-        for platform_cat in ['sys', 'capture']:
-            name = 'platform_files_%s_devel' % platform_cat
-            platform_files = getattr(self, name)
-            if self.config.target_platform in platform_files:
-                copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    platform_files[self.config.target_platform],
-                    self.extensions,
-                    self.config.target_platform)
-        shutil.rmtree(self.tmp_destdir)
+                ' --disable-cog --disable-sdl '\
+                ' --disable-cdaudio '
+        super(Recipe, self).prepare()

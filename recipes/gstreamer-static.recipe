@@ -1,45 +1,17 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import os
-import shutil
-import tempfile
 
-from cerbero.utils import copy_files, to_unixpath
-
-
-class Recipe(recipe.Recipe):
+class Recipe(custom.GStreamerStatic):
     name = 'gstreamer-static'
     version = '0.10.36'
     licenses = [License.LGPLv2_1Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-instrospection --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'libxml2']
+    # Static build will always fail on make check
+    make_check = None
+    plugins_categories = ['plugins']
     platform_deps = {
             Platform.LINUX: ['gtk-doc'],
             Platform.DARWIN: ['gtk-doc'],
             Platform.WINDOWS: ['gtk-doc-windows'],
     }
 
-    files_plugins_devel = ['lib/gstreamer-0.10/libgstcoreelements%(smext)s',
-                     'lib/gstreamer-0.10/libgstcoreindexers%(smext)s']
-
-    # Static build will always fail on make check
-    make_check = None
-
-    def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
-            self.configure_options += ' --disable-gtk-doc'
-
-        self.remotes['origin'] = ('%s/%s' %
-                        (self.config.git_root, 'gstreamer.git'))
-        self.tmp_destdir = tempfile.mkdtemp()
-        self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources, 'gstreamer')
-
-    def post_install(self):
-        for cat in ['plugins']:
-            name = 'files_%s_devel' % cat
-            copy_files(self.tmp_destdir, to_unixpath(self.config.prefix),
-                    getattr(self, name), self.extensions,
-                    self.config.target_platform)
-        shutil.rmtree(self.tmp_destdir)
+    files_plugins_devel = ['libgstcoreelements', 'libgstcoreindexers']
