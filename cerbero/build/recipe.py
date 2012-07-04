@@ -39,7 +39,7 @@ class MetaRecipe(type):
         clsname = '%s.%s' % (dct['__module__'], name)
         recipeclsname = '%s.%s' % (cls.__module__, 'Recipe')
         # only modify it for Receipt's subclasses
-        if clsname != recipeclsname:
+        if clsname != recipeclsname and name == 'Recipe':
             # get the default build and source classes from Receipt
             # Receipt(DefaultSourceType, DefaultBaseType)
             basedict = {'btype': bases[0].btype, 'stype': bases[0].stype}
