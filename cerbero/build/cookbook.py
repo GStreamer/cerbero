@@ -314,17 +314,17 @@ class CookBook (object):
         recipes = {}
         recipes_files = shell.find_files('*%s' % self.RECIPE_EXT, repo)
         recipes_files.extend(shell.find_files('*/*%s' % self.RECIPE_EXT, repo))
+        try:
+            custom = None
+            m_path = os.path.join(repo, 'custom.py')
+            if os.path.exists(m_path):
+                custom = imp.load_source('custom', m_path)
+        except Exception:
+            custom = None
         for f in recipes_files:
             # Try to load the custom.py module located in the recipes dir
             # which can contain private classes to extend cerbero's recipes
             # and reuse them in our private repository
-            try:
-                custom = None
-                m_path = os.path.join(repo, 'custom.py')
-                if os.path.exists(m_path):
-                    custom = imp.load_source('custom', m_path)
-            except:
-                custom = None
             try:
                 recipe = self._load_recipe_from_file(f, custom)
             except RecipeNotFoundError:
