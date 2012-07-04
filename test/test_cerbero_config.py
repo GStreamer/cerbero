@@ -89,6 +89,7 @@ class LinuxPackagesTest(unittest.TestCase):
                  'external_packages': {},
                  'external_recipes': {},
                  'use_ccache': None,
+                 'force_git_commit': None,
                  }
         self.assertEquals(sorted(config._properties), sorted(props.keys()))
         for p, v in props.iteritems():

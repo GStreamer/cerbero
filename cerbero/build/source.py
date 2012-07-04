@@ -124,7 +124,8 @@ class GitCache (Source):
             git.add_remote(self.repo_dir, remote, url)
         # fetch remote branches
         git.fetch(self.repo_dir, fail=False)
-        git.checkout(self.repo_dir, self.commit)
+        commit = self.config.force_git_commit or self.commit
+        git.checkout(self.repo_dir, commit)
 
 
 class LocalTarball (GitCache):
