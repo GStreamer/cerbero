@@ -21,5 +21,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-threads=win32'
+            self.can_use_configure_cache = False
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-hardware-acceleration'
