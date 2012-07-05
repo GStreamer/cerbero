@@ -4,6 +4,7 @@ import shutil
 
 from cerbero.build import recipe
 from cerbero.config import Platform
+from cerbero.utils import to_unixpath
 
 
 class GStreamerStatic(recipe.Recipe):
@@ -70,5 +71,5 @@ class GStreamerStatic(recipe.Recipe):
         for f in self.files_list:
             f_no_static = f.replace('/static/', '/')
             shutil.copy(os.path.join(self.tmp_destdir,
-                self.config.prefix[1:], f_no_static),
+                to_unixpath(self.config.prefix)[1:], f_no_static),
                 os.path.join(self.config.prefix, f))
