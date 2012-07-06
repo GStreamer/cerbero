@@ -88,11 +88,11 @@ class OSXPackage(PackagerBase):
         files = self.files_list(package_type, force)
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
                 (self.package.name, self.version, self.config.target_arch))
-        root = self._create_bundle(files, package_type)
+        root, resources = self._create_bundle(files, package_type)
         packagemaker = PackageMaker()
         packagemaker.create_package(root, self.package.identifier(),
             self.package.version, self.package.shortdesc, output_file,
-            self._get_install_dir(), target)
+            self._get_install_dir(), target, scripts_path=resources)
         return output_file
 
     def _create_bundle(self, files, package_type):
@@ -101,20 +101,28 @@ class OSXPackage(PackagerBase):
         directory to create the bundle
         '''
         tmp = tempfile.mkdtemp()
+        root = os.path.join(tmp, 'Root')
+        resources = os.path.join(tmp, 'Resources')
         for f in files:
             in_path = os.path.join(self.config.prefix, f)
             if not os.path.exists(in_path):
                 m.warning("File %s is missing and won't be added to the "
                           "package" % in_path)
                 continue
-            out_path = os.path.join(tmp, f)
+            out_path = os.path.join(root, f)
             out_dir = os.path.split(out_path)[0]
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
             shutil.copy(in_path, out_path)
         if package_type == PackageType.DEVEL:
-            self._create_framework_headers(tmp)
-        return tmp
+            self._create_framework_headers(root)
+
+        # Copy scripts to the Resources directory
+        os.makedirs(resources)
+        if os.path.exists(self.package.resources_preinstall):
+            shutil.copy(os.path.join(self.package.resources_preinstall,
+                        os.path.join(resources, 'preflight')))
+        return root, resources
 
     def _create_framework_headers(self, tmp):
         '''

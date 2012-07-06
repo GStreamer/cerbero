@@ -27,7 +27,8 @@ class PackageMaker(object):
     CMD = './PackageMaker'
 
     def create_package(self, root, pkg_id, version, title, output_file,
-                       destination='/opt/', target='10.5'):
+                       destination='/opt/', target='10.5',
+                       scripts_path=None):
         '''
         Creates an osx package, where all files are properly bundled in a
         directory that is set as the package root
@@ -44,9 +45,13 @@ class PackageMaker(object):
         @type  output_file: str
         @param destination: installation path
         @type  destination: str
+        @param scripts_path: relative path for package scripts
+        @type  scripts_path: str
         '''
         args = {'r': root, 'i': pkg_id, 'n': version, 't': title,
                 'l': destination, 'o': output_file}
+        if scripts_path is not None:
+            args['s'] = scripts_path
         if target is not None:
             args['g'] = target
         self._execute(self._cmd_with_args(args))

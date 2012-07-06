@@ -61,6 +61,8 @@ class PackageBase(object):
     @type resources_icon_icns: str
     @cvar resources_backgound = filename of the background image
     @type resources_backgound = str
+    @cvar resources_preinstall = filename for the pre-installation script
+    @type resources_preinstall = str
     '''
     name = 'default'
     shortdesc = 'default'
@@ -79,6 +81,7 @@ class PackageBase(object):
     resources_icon = 'icon.ico'
     resources_icon_icns = 'icon.icns'
     resources_background = 'background.png'
+    resources_preinstall = 'preinstall'
 
     def __init__(self, config, store):
         self.config = config
