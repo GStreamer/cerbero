@@ -86,20 +86,30 @@ class Config (object):
             for arch in self.universal_archs:
                 arch_config[arch] = copy.deepcopy(self)
                 arch_config[arch].target_arch = arch
+                arch_config[arch]._raw_environ = os.environ.copy()
             self.arch_config = arch_config
 
-        # Next, load the platform configuration
         self._load_platform_config()
-
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
-
         # And validate properties
         self.validate_properties()
+        self._raw_environ = os.environ.copy()
 
+        for arch in self.arch_config.values():
+            arch._restore_environment()
+            arch._load_platform_config()
+            arch._load_last_defaults()
+            arch.validate_properties()
+            arch._raw_environ = os.environ.copy()
+
+        self._restore_environment()
         self.setup_env()
-        self._create_path(self.local_sources)
-        self._create_path(self.sources)
+
+        # Store current os.environ data
+        for c in self.arch_config.values():
+            self._create_path(c.local_sources)
+            self._create_path(c.sources)
 
     def parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
@@ -238,24 +248,22 @@ class Config (object):
                                            "exists") % filename)
 
     def _load_platform_config(self):
-        for config in self.arch_config.values():
-            platform_config = os.path.join(config.environ_dir, '%s.config' %
-                                           config.target_platform)
-            arch_config = os.path.join(config.environ_dir, '%s_%s.config' %
-                                       (config.target_platform, config.target_arch))
+        platform_config = os.path.join(self.environ_dir, '%s.config' %
+                                       self.target_platform)
+        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
+                                   (self.target_platform, self.target_arch))
 
-            for config_path in [platform_config, arch_config]:
-                if os.path.exists(config_path):
-                    config.parse(config_path, reset=False)
+        for config_path in [platform_config, arch_config]:
+            if os.path.exists(config_path):
+                self.parse(config_path, reset=False)
 
     def _load_last_defaults(self):
-        for config in self.arch_config.values() + [self]:
-            cerbero_home = os.path.expanduser('~/cerbero')
-            config.set_property('prefix', os.path.join(cerbero_home, 'dist'))
-            config.set_property('install_dir', config.prefix)
-            config.set_property('sources', os.path.join(cerbero_home, 'sources'))
-            config.set_property('local_sources',
-                    os.path.join(cerbero_home, 'sources', 'local'))
+        cerbero_home = os.path.expanduser('~/cerbero')
+        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+        self.set_property('install_dir', self.prefix)
+        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
+        self.set_property('local_sources',
+                os.path.join(cerbero_home, 'sources', 'local'))
 
     def load_defaults(self):
         self.set_property('cache_file', None)
