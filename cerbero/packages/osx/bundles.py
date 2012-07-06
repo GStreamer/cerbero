@@ -19,7 +19,6 @@
 import os
 import tempfile
 import shutil
-from stat import S_IXUSR, S_IXGRP, S_IXOTH
 
 from cerbero.packages import PackagerBase
 from cerbero.packages.osx.packagemaker import PackageMaker
