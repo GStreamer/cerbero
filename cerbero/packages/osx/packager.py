@@ -255,6 +255,7 @@ class PMDocPackage(PackagerBase):
         package.version = self.package.sdk_version
         package.uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
         package.deps = []
+        package.org = self.package.org
         self.store.add_package(package)
         packages = self.package.packages[:] + [(package.name, True, True)]
         self.package.packages = packages
