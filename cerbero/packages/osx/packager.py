@@ -249,18 +249,13 @@ class PMDocPackage(PackagerBase):
 
     def _create_framework_bundle_package(self):
         m.action(_("Creating framework package"))
-        package = PackageBase(self.config, self.store)
-        package.name = 'osx-framework'
-        package.shortdesc = 'Framework Bundle'
-        package.version = self.package.sdk_version
-        package.uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
-        package.deps = []
-        package.org = self.package.org
+        packager = FrameworkBundlePackager(self.package, 'osx-framework',
+                'Framework Bundle',
+                '3ffe67c2-4565-411f-8287-e8faa892f853')
+        package = packager.package
         self.store.add_package(package)
         packages = self.package.packages[:] + [(package.name, True, True)]
         self.package.packages = packages
-        packager = FrameworkBundlePackager(self.config, self.package,
-                self.store)
         path = packager.pack(self.output_dir)[0]
         self.packages_paths[PackageType.RUNTIME][package] = path
         self.empty_packages[PackageType.DEVEL].append(package)
@@ -365,8 +360,7 @@ class ApplicationPackage(PackagerBase):
 
     def _create_app_bundle(self):
         ''' Creates the OS X Application bundle in temporary directory '''
-        packager = ApplicationBundlePackager(self.config, self.package,
-                self.store)
+        packager = ApplicationBundlePackager(self.package)
         return packager.create_bundle(self.tmp)
 
     def _strip_binaries(self):

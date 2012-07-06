@@ -21,6 +21,7 @@ import tempfile
 import shutil
 
 from cerbero.packages import PackagerBase
+from cerbero.packages.package import Package
 from cerbero.packages.osx.packagemaker import PackageMaker
 from cerbero.packages.osx.info_plist import FrameworkPlist, ApplicationPlist
 from cerbero.utils import shell
@@ -32,18 +33,22 @@ class BundlePackagerBase(PackagerBase):
     in a MetaPackage.
     '''
 
-    name = ''
-    title = ''
-
-    def __init__(self, config, package, store):
-        PackagerBase.__init__(self, config, package, store)
+    def __init__(self, package, name, desc, uuid):
+        self.package = Package(package.config, package.store, None)
+        self.package.name = name
+        self.package.shortdesc = desc
+        self.package.version = package.version
+        self.package.sdk_version = package.sdk_version
+        self.package.uuid = uuid
+        self.package.deps = []
+        self.package.org = package.org
+        self.package.install_dir = package.install_dir
+        PackagerBase.__init__(self, package.config, self.package, package.store)
 
     def pack(self, output_dir):
         output_dir = os.path.realpath(output_dir)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-
-        self.install_dir = self.package.get_install_dir()
 
         path = self._create_package(output_dir, self.package.get_install_dir(),
                 self.package.version)
@@ -60,12 +65,6 @@ class BundlePackagerBase(PackagerBase):
             self.package.version, self.title, output_file,
             install_dir, target=None)
         return output_file
-
-    def get_install_dir(self):
-        '''
-        Get the installation directory
-        '''
-        raise NotImplemented('Subclasses should implement get_install_dir')
 
     def create_bundle(self):
         '''
@@ -84,12 +83,8 @@ class FrameworkBundlePackager(BundlePackagerBase):
     name = 'osx-framework'
     title = 'Framework Bundle'
 
-    def __init__(self, config, package, store):
-        BundlePackagerBase.__init__(self, config, package, store)
-
-    def get_install_dir(self):
-        return os.path.join(self.install_dir, 'Versions',
-                self.package.version, self.config.target_arch)
+    def __init__(self, package, name, desc, uuid):
+        BundlePackagerBase.__init__(self, package, name, desc, uuid)
 
     def create_bundle(self):
         '''
@@ -104,7 +99,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
         '''
         tmp = tempfile.mkdtemp()
 
-        vdir = 'Versions/%s/%s' % (self.package.version,
+        vdir = 'Versions/%s/%s' % (self.package.sdk_version,
                                   self.config.target_arch)
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
@@ -134,16 +129,13 @@ class FrameworkBundlePackager(BundlePackagerBase):
         return tmp
 
 
-class ApplicationBundlePackager(BundlePackagerBase):
+class ApplicationBundlePackager(object):
     '''
     Creates a package with the basic structure of an Application bundle.
     '''
 
-    def __init__(self, config, package, store):
-        BundlePackagerBase.__init__(self, config, package, store)
-
-    def get_install_dir(self):
-        return self.install_dir
+    def __init__(self, package):
+        self.package = package
 
     def create_bundle(self, tmp=None):
         '''
