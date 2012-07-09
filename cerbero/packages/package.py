@@ -55,6 +55,9 @@ class PackageBase(object):
     @type ignore_package_prefix: bool
     @cvar resources_license: filename of the .txt license file
     @type resources_license: str
+    @cvar resources_license_unwrapped: filename of the .txt license file
+                                       withouth the 80 chars wrapping
+    @type resources_license_unwrapped: str
     @cvar resources_license_rtf: filename of .rtf license file
     @type resources_license_rtf: str
     @cvar resources_icon: filename of the .ico icon
@@ -80,6 +83,7 @@ class PackageBase(object):
     sys_deps = {}
     sys_deps_devel = {}
     resources_license = 'license.txt'
+    resources_license_unwrapped = 'license_unwrapped.txt'
     resources_license_rtf = 'license.txt'
     resources_icon = 'icon.ico'
     resources_icon_icns = 'icon.icns'

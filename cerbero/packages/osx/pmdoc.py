@@ -175,7 +175,7 @@ class Index(PMDocXML):
             background = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
                 type='background')
             background.text = path
-        path = self.package.resources_license
+        path = self.package.resources_license_unwrapped
         if os.path.exists(path):
             license = etree.SubElement(locale, self.TAG_RESOURCE, mod='true',
                 type='license')
