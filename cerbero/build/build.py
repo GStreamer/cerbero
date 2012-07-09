@@ -232,8 +232,8 @@ class CMake (MakefilesBase):
     def __init__(self):
         MakefilesBase.__init__(self)
 
-        cc = os.environ['CC']
-        cxx = os.environ['CXX']
+        cc = os.environ.get('CC', 'gcc')
+        cxx = os.environ.get('CXX', 'g++')
         # FIXME: CMake doesn't support passing "ccache $CC"
         if self.config.use_ccache:
             cc = cc.replace('ccache ', '')
