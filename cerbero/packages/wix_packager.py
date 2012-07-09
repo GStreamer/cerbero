@@ -88,6 +88,7 @@ class MergeModulePackager(PackagerBase):
 class MSIPackager(PackagerBase):
 
     UI_EXT = '-ext WixUIExtension'
+    UTIL_EXT = '-ext WixUtilExtension'
     UI_SOURCES = 'wix/ui.wxs'
 
     def __init__(self, config, package, store):
@@ -184,7 +185,8 @@ class MSIPackager(PackagerBase):
 
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(sources, self.output_dir)
-        light = Light(self.wix_prefix, self._with_wine, self.UI_EXT)
+        light = Light(self.wix_prefix, self._with_wine,
+                      "%s %s" % (self.UI_EXT, self.UTIL_EXT))
         path = light.compile(wixobjs, self._package_name(), self.output_dir)
 
         # Clean up
