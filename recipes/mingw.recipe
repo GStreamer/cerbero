@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
 
     files_libs = ['libgcc_s_sjlj-1', 'libstdc++-6']
+    files_bins = ['Elevate']
+    files_headers = ['include/GL']
 
     def install(self):
         import shutil
@@ -25,3 +27,13 @@ class Recipe(recipe.Recipe):
             shutil.copy(os.path.join(self.config.toolchain_prefix, mingw,
                                      f + '.dll'),
                 os.path.join(self.config.prefix, 'bin', f + '.dll'))
+        for f in self.files_bins:
+            shutil.copy(os.path.join(self.config.toolchain_prefix, mingw,
+                                     f + '.exe'),
+                os.path.join(self.config.prefix, 'bin', f + '.exe'))
+        for f in self.files_headers:
+            src = os.path.join(self.config.toolchain_prefix, self.config.host, f)
+            dest = os.path.join(self.config.prefix, f)
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            shutil.copytree(src, dest)
