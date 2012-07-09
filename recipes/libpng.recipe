@@ -8,4 +8,5 @@ class Recipe(recipe.Recipe):
     deps = ['zlib']
 
     files_libs = ['libpng15']
-    files_devel = ['include/libpng15', 'bin/libpng15-config', 'lib/pkgconfig/libpng15.pc']
+    files_devel = ['include/libpng15', 'bin/libpng15-config',
+                   'lib/pkgconfig/libpng15.pc', 'lib/pkgconfig/libpng.pc']
