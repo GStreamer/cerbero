@@ -12,3 +12,4 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libclutter-gst-1.0']
     files_devel = ['lib/pkgconfig/clutter-gst-1.0.pc', 'include/clutter-1.0/clutter-gst']
+    files_plugins = ['lib/gstreamer-0.10/libgstclutter%(mext)s']
