@@ -266,8 +266,9 @@ class MSI(WixBase):
         self._add_install_dir()
         self._add_merge_modules()
         if isinstance(self.package, SDKPackage):
-            self._add_registry_install_dir()
-            self._add_sdk_root_env_variable()
+            if self.package.package_mode == PackageType.RUNTIME:
+                self._add_registry_install_dir()
+                self._add_sdk_root_env_variable()
         self._add_get_install_dir_from_registry()
 
     def _add_merge_modules(self):
@@ -329,7 +330,7 @@ class MSI(WixBase):
         return name
 
     def _registry_key(self, name):
-        return 'Software\\%s' % name
+        return 'Software\\%s\\%s' % (name, self.config.target_arch)
 
     def _customize_ui(self):
         # Banner Dialog and License
@@ -373,9 +374,17 @@ class MSI(WixBase):
                     Action='createAndRemoveOnUninstall',
                     Key=self._registry_key(name),
                     Root=self.REG_ROOT)
-            regvalue = etree.SubElement(regkey, 'RegistryValue',
+            etree.SubElement(regkey, 'RegistryValue',
                     Id='RegistryInstallDirValue',
                     Type='string', Name='InstallDir', Value='[INSTALLDIR]')
+            etree.SubElement(regkey, 'RegistryValue',
+                    Id='RegistryVersionValue',
+                    Type='string', Name='Version',
+                    Value=self.package.version)
+            etree.SubElement(regkey, 'RegistryValue',
+                    Id='RegistrySDKVersionValue',
+                    Type='string', Name='SdkVersion',
+                    Value=self.package.sdk_version)
             etree.SubElement(self.main_feature, 'ComponentRef',
                     Id='RegistryInstallDir')
 
