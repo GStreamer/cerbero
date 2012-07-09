@@ -11,6 +11,9 @@
 
 		<Media Cabinet="product.cab" EmbedCab="yes" Id="1"/>
 
+		<!-- Upgrades -->
+		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit"/>
+
 		<!-- Add/Remove Programs -->
 		<Property Id="ARPPRODUCTICON" Value="MainIcon" />
 		<Property Id="ARPCONTACT" Value="$(var.Manufacturer)" />

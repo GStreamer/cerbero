@@ -193,7 +193,7 @@ class WixConfig(WixBase):
         shutil.copy(self.config_path, os.path.join(output_dir,
                     os.path.basename(self.wix_config)))
         replacements = {
-            "@ProductID@": self.package.get_wix_upgrade_code(),
+            "@ProductID@": '*',
             "@UpgradeCode@": self.package.get_wix_upgrade_code(),
             "@Language@": '1033',
             "@Manufacturer@": self.package.vendor,
