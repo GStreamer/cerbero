@@ -16,6 +16,7 @@ class SDKPackage(package.SDKPackage):
     vendor = "GStreamer Project"
     org = "com.gstreamer"
     ignore_package_prefix = True
+    resources_wix_installer = 'installer.wxs'
     packages =[
                # (name, required, selected)
                ('gstreamer-core', True, True),

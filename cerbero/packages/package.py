@@ -152,7 +152,8 @@ class PackageBase(object):
         attr = object.__getattribute__(self, name)
         # Return relative path for resources
         if name.startswith('resources'):
-            attr = self.relative_path(attr)
+            if attr is not None:
+                attr = self.relative_path(attr)
         elif name == 'name':
             attr += self.package_mode
         elif name == 'shortdesc':
@@ -326,12 +327,15 @@ class MetaPackage(PackageBase):
     @cvar sdk_version: SDK version. This version will be used for the SDK
                        versionning and can defer from the installer one.
     @type sdk_version: str
+    @cvar resources_wix_installer: wix installer tmeplate file
+    @cvar resources_wix_installer: string
     '''
 
     packages = []
     root_env_var = 'CERBERO_SDK_ROOT'
     platform_packages = {}
     sdk_version = '1.0'
+    resources_wix_installer = None
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)

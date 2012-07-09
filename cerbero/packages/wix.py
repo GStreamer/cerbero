@@ -247,7 +247,8 @@ class MSI(WixBase):
         self.product = self.root.find(".//Product")
 
     def _parse_sources(self):
-        sources_path = os.path.join(self.config.data_dir, self.wix_sources)
+        sources_path = self.package.resources_wix_installer or \
+                os.path.join(self.config.data_dir, self.wix_sources)
         with open(sources_path, 'r') as f:
             self.root = etree.fromstring(f.read())
         for element in self.root.iter():
