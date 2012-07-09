@@ -130,7 +130,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
-                '--disable-assrender --disable-cog --disable-sdl '\
+                ' --disable-cog --disable-sdl '\
                 '--disable-cdaudio --disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-gtk-doc'
