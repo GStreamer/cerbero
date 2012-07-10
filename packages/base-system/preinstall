@@ -1,0 +1,28 @@
+#!/bin/bash
+
+prefix=$2
+
+old_sdk=$prefix/Versions/2012.5
+new_sdk=$prefix/Versions/0.10
+
+sudo pkgutil --regexp --forget gstreamer*
+sudo pkgutil --regexp --forget gtk*
+sudo pkgutil --regexp --forget gobject*
+sudo pkgutil --regexp --forget base-system*
+sudo pkgutil --forget osx-framework
+sudo pkgutil --forget snappy
+
+if [ -L "$old_sdk" ]; then
+  if [ -L "$old_sdk" ]; then
+    exit 0
+  else
+    sudo cp -r "$old_sdk/*" "$new_sdk"
+  fi
+fi
+
+if [ ! -d "$new_sdk" ]; then
+  mkdir "$new_sdk"
+fi
+
+sudo rm -rf "$old_dir"
+sudo ln -s "$new_sdk" "$old_sdk"

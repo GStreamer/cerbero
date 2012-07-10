@@ -20,6 +20,7 @@ class Package(package.Package):
              'libpng:libs', 'tiff:libs', 'jpeg:libs',
              'libxml2:libs', 'libxslt:libs', 'pixman:libs',
              'zlib:libs', 'bzip2:libs']
+    files = ['cairo:libs']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
