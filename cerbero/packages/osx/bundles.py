@@ -43,6 +43,7 @@ class BundlePackagerBase(PackagerBase):
         self.package.deps = []
         self.package.org = package.org
         self.package.install_dir = package.install_dir
+        self.package.osx_framework_library = package.osx_framework_library
         PackagerBase.__init__(self, package.config, self.package, package.store)
 
     def pack(self, output_dir):
@@ -96,6 +97,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
         Home -> Versions/Current
         Resources -> Versions/Current/Resources
         Versions/Current -> Version/$VERSION/$ARCH
+        Framework -> Versions/Current/Famework
         '''
         tmp = tempfile.mkdtemp()
 
@@ -103,6 +105,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
                                   self.config.target_arch)
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
+
         links = {'Versions/Current': '../%s' % vdir,
                  'Resources': 'Versions/Current/Resources',
                  'Commands': 'Versions/Current/Commands',
@@ -110,22 +113,30 @@ class FrameworkBundlePackager(BundlePackagerBase):
                  'Libraries': 'Versions/Current/Libraries'}
         inner_links = {'Commands': 'bin',
                        'Libraries': 'lib'}
+
+        # Create the frameworks Info.plist file
         framework_plist = FrameworkPlist(self.package.name,
             self.package.org, self.package.version, self.package.shortdesc)
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
+
+        # Add a link from Framework to Versions/Current/Framework
+        if self.package.osx_framework_library is not None:
+            name, link = self.package.osx_framework_library
+            # Framework -> Versions/Current/Famework
+            links[name] = 'Versions/Current/%s' % name
+
+        # Create all links
         for dest, src in links.iteritems():
             shell.call ('ln -s %s %s' % (src, dest), tmp)
         inner_tmp = os.path.join(tmp, vdir)
         for dest, src in inner_links.iteritems():
             shell.call ('ln -s %s %s' % (src, dest), inner_tmp)
 
+        # Copy the framework library to Versions/$VERSION/$ARCH/Framework
         if self.package.osx_framework_library is not None:
-            name, link = self.package.osx_framework_library
-            pre_link = os.path.join('Versions', 'Current', name)
-            version_dir = os.path.join(tmp, 'Versions', 'Current')
-
-            shell.call ('ln -s %s %s' % (pre_link, name), tmp)
-            shell.call ('ln -s %s %s' % (link, name), version_dir)
+            shell.call ('mkdir -p %s' % vdir, tmp)
+            shutil.copy(os.path.join(self.config.prefix, link),
+                        os.path.join(tmp, vdir, name))
         return tmp
 
 
