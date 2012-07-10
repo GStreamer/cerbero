@@ -16,3 +16,11 @@ class Package(package.Package):
     deps = ['gstreamer-core', 'gtk+-2.0']
 
     files = ['cogl', 'clutter', 'clutter-gst', 'json-glib']
+    sys_deps_devel = {
+            Distro.DEBIAN: ['libgl1-mesa-dev', 'libdrm-dev',
+                'libx11-dev', 'libxext-dev', 'libxfixes-dev',
+                'libxdamage-dev', 'libxcomposite-dev', 'libxi-dev'],
+            Distro.REDHAT: [
+                'libXrenderer-devel', 'libXv-devel',
+                'mesa-libGL-devel', 'libXcomposite-devel',
+                'libXi-devel']}
