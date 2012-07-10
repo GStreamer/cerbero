@@ -141,7 +141,8 @@ class OSXPackage(PackagerBase):
         # Remove trailing /
         include_dirs = [os.path.abspath(x) for x in include_dirs]
         # Remove 'include' dir
-        include_dirs = [x for x in include_dirs if not x.endswith('include')]
+        include_dirs = [x for x in include_dirs if not
+                        x.endswith(os.path.join(tmp, 'include'))]
 
         include = os.path.join(tmp, 'include/')
         headers = os.path.join(tmp, 'Headers')
