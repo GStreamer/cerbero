@@ -150,7 +150,7 @@ class LinuxPackager(PackagerBase):
             deps = [x for x in deps if self._has_devel_package(x)]
 
         deps = [dep_name(x) for x in deps]
-        deps.extend(self.package.get_sys_deps())
+        deps.extend(self.package.get_sys_deps(package_type))
         return sorted(deps)
 
     def recipes_licenses(self):

@@ -49,6 +49,8 @@ class PackageBase(object):
     @type url: str
     @cvar sys_deps: system dependencies for this package
     @type sys_deps: dict
+    @cvar sys_deps_devel: development system dependencies for this package
+    @type sys_deps_devel: dict
     @cvar ignore_package_prefix: don't use the package prefix set in the config
     @type ignore_package_prefix: bool
     @cvar resources_license: filename of the .txt license file
@@ -76,6 +78,7 @@ class PackageBase(object):
     url = 'default'
     ignore_package_prefix = False
     sys_deps = {}
+    sys_deps_devel = {}
     resources_license = 'license.txt'
     resources_license_rtf = 'license.txt'
     resources_icon = 'icon.ico'
@@ -135,10 +138,16 @@ class PackageBase(object):
         except:
             return self.config.install_dir
 
-    def get_sys_deps(self):
-        if self.config.target_distro_version in self.sys_deps:
+    def get_sys_deps(self, package_mode=None):
+        package_mode = package_mode or self.package_mode
+        if self.package_mode == PackageType.RUNTIME:
+            sys_deps = self.sys_deps
+        if self.package_mode == PackageType.DEVEL:
+            sys_deps = self.sys_deps_devel
+
+        if self.config.target_distro_version in sys_deps:
             return self.sys_deps[self.config.target_distro_version]
-        if self.config.target_distro in self.sys_deps:
+        if self.config.target_distro in sys_deps:
             return self.sys_deps[self.config.target_distro]
         return []
 
