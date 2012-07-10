@@ -53,7 +53,7 @@ class OSXPackage(PackagerBase):
 
         self.install_dir = install_dir or self.package.get_install_dir()
         self.version = version or self.package.version
-        self.sdk_version = sdk_version or version
+        self.sdk_version = sdk_version or self.version
         self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
 
         # create the runtime package
@@ -120,8 +120,8 @@ class OSXPackage(PackagerBase):
         # Copy scripts to the Resources directory
         os.makedirs(resources)
         if os.path.exists(self.package.resources_preinstall):
-            shutil.copy(os.path.join(self.package.resources_preinstall,
-                        os.path.join(resources, 'preflight')))
+            shutil.copy(os.path.join(self.package.resources_preinstall),
+                        os.path.join(resources, 'preflight'))
         return root, resources
 
     def _create_framework_headers(self, tmp):
