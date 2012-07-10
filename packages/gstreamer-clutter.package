@@ -21,6 +21,6 @@ class Package(package.Package):
                 'libx11-dev', 'libxext-dev', 'libxfixes-dev',
                 'libxdamage-dev', 'libxcomposite-dev', 'libxi-dev'],
             Distro.REDHAT: [
-                'libXrenderer-devel', 'libXv-devel',
+                'libXrender-devel', 'libXv-devel',
                 'mesa-libGL-devel', 'libXcomposite-devel',
                 'libXi-devel']}
