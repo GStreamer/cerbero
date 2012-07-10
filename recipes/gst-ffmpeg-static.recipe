@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
+from cerbero.utils import shell
 
 
 class Recipe(custom.GStreamerStatic):
@@ -37,3 +38,10 @@ class Recipe(custom.GStreamerStatic):
             with open(opts_file, 'w+') as f:
                 f.write(opts)
         super(Recipe, self).configure()
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86:
+                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
+                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
+                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
+                shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
