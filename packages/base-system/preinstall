@@ -2,8 +2,8 @@
 
 prefix=$2
 
-old_sdk=$prefix/Versions/2012.5
-new_sdk=$prefix/Versions/0.10
+old_sdk=$prefix/../../2012.5
+new_sdk=$prefix/../../0.10
 
 sudo pkgutil --regexp --forget gstreamer*
 sudo pkgutil --regexp --forget gtk*
@@ -21,8 +21,8 @@ if [ -L "$old_sdk" ]; then
 fi
 
 if [ ! -d "$new_sdk" ]; then
-  mkdir "$new_sdk"
+  sudo mkdir "$new_sdk"
 fi
 
-sudo rm -rf "$old_dir"
+sudo rm -rf "$old_sdk"
 sudo ln -s "$new_sdk" "$old_sdk"
