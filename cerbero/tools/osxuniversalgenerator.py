@@ -26,11 +26,11 @@ file_types = [
     ('ar archive', 'merge'),
     ('libtool archive', 'skip'),
     ('libtool library', 'skip'),
+    ('symbolic link', 'link'),
     ('data', 'copy'),
     ('text', 'copy'),
     ('document', 'copy'),
     ('catalog', 'copy'),
-    ('symbolic link', 'copy'),
     ('python', 'copy'),
     ('image', 'copy'),
     ('icon', 'copy'),
@@ -144,6 +144,8 @@ class OSXUniversalGenerator(object):
                 print current_file, action
                 if action == 'copy':
                     self._copy(current_file, dest_dir)
+                elif action == 'link':
+                    self._link(current_file, dest_dir, f)
                 elif action == 'merge':
                     if not os.path.exists(dest_dir):
                         os.makedirs(dest_dir)
@@ -157,6 +159,14 @@ class OSXUniversalGenerator(object):
         if not os.path.exists(dest):
             os.makedirs(dest)
         shutil.copy(src, dest)
+
+    def _link(self, src, dest, filename):
+        if not os.path.exists(dest):
+            os.makedirs(dest)
+        if os.path.lexists(os.path.join(dest, filename)):
+            return #link exists, skip it
+        target = os.readlink(src)
+        os.symlink(target, os.path.join(dest, filename))
 
     def _call(self, cmd, cwd=None):
         cmd = cmd or self.root
