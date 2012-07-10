@@ -12,7 +12,7 @@ sudo pkgutil --regexp --forget base-system*
 sudo pkgutil --forget osx-framework
 sudo pkgutil --forget snappy
 
-if [ -L "$old_sdk" ]; then
+if [ -d "$old_sdk" ]; then
   if [ -L "$old_sdk" ]; then
     exit 0
   else
@@ -21,8 +21,10 @@ if [ -L "$old_sdk" ]; then
 fi
 
 if [ ! -d "$new_sdk" ]; then
-  sudo mkdir "$new_sdk"
+  sudo mkdir -p "$new_sdk"
 fi
 
 sudo rm -rf "$old_sdk"
 sudo ln -s "$new_sdk" "$old_sdk"
+
+exit 0
