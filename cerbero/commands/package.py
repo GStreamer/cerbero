@@ -76,8 +76,8 @@ class Package(Command):
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
-        paths = pkg.pack(args.output_dir, args.no_devel, args.force,
-                         args.keep_temp)
+        paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
+                         args.force, args.keep_temp)
         if None in paths:
             paths.remove(None)
         m.action(_("Package successfully created in %s") %

@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.ide.xcode.fwlib import FrameworkLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'gstreamer-osx-framework'
+    version = '0.1'
+    licenses = [License.LGPL]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+    deps = ['gstreamer', 'gst-plugins-base']
+
+    files_library = ['lib/GStreamer']
+
+    def install(self):
+        fwlib = FrameworkLibrary()
+        install_name = os.path.join(self.config.prefix, 'lib', 'GStreamer')
+        libs = ['gstreamer-0.10', 'gstreamer-app-0.10', 'gstreamer-audio-0.10',
+                'gstreamer-base-0.10', 'gstreamer-cdda-0.10', 'gstreamer-codecparsers-0.10',
+                'gstreamer-controller-0.10', 'gstreamer-dataprotocol-0.10', 'gstreamer-fft-0.10',
+                'gstreamer-floatcast-0.10', 'gstreamer-interfaces-0.10', 'gstreamer-net-0.10',
+                'gstreamer-netbuffer-0.10', 'gstreamer-pbutils-0.10', 'gstreamer-riff-0.10',
+                'gstreamer-sdp-0.10', 'gstreamer-tag-0.10', 'gstreamer-video-0.10']
+        fwlib.create(install_name, install_name, libs, self.config.target_arch)
