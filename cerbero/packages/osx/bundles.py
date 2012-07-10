@@ -93,7 +93,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         Commands -> Versions/Current/Commands
         Headers -> Versions/Current/Headers
-        Librarires -> Versions/Current/Libraries
+        Libraries -> Versions/Current/Libraries
         Home -> Versions/Current
         Resources -> Versions/Current/Resources
         Versions/Current -> Version/$VERSION/$ARCH
