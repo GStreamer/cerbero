@@ -144,15 +144,15 @@ class PackageBase(object):
 
     def get_sys_deps(self, package_mode=None):
         package_mode = package_mode or self.package_mode
-        if self.package_mode == PackageType.RUNTIME:
+        if package_mode == PackageType.RUNTIME:
             sys_deps = self.sys_deps
-        if self.package_mode == PackageType.DEVEL:
+        if package_mode == PackageType.DEVEL:
             sys_deps = self.sys_deps_devel
 
         if self.config.target_distro_version in sys_deps:
-            return self.sys_deps[self.config.target_distro_version]
+            return sys_deps[self.config.target_distro_version]
         if self.config.target_distro in sys_deps:
-            return self.sys_deps[self.config.target_distro]
+            return sys_deps[self.config.target_distro]
         return []
 
     def identifier(self):
