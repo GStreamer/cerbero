@@ -142,10 +142,13 @@ class UniversalRecipe(FilesProvider):
     def merge(self):
         inputs = []
         for c,v in self._recipes.iteritems():
-            inputs.append(self._config.arch_config[c].prefix)
+            inputs.extend(v.files_list())
+        inputs = sorted(list(set(inputs)))
         output = self._config.prefix
-        generator = OSXUniversalGenerator(output, *inputs)
-        generator.merge()
+
+        generator = OSXUniversalGenerator(output)
+        generator.merge_files(inputs,
+                             [r.config.prefix for r in self._recipes.values()])
 
     def fetch(self):
         self.do_step('fetch')

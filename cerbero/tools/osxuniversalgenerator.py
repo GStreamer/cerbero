@@ -62,20 +62,24 @@ class OSXUniversalGenerator(object):
     LIPO_CMD = 'lipo'
     FILE_CMD = 'file'
 
-    def __init__(self, output_root, *args):
+    def __init__(self, output_root):
         '''
         @output_root: the output directory where the result will be generated
-        @args: list of input directories roots
 
         '''
         self.output_root = output_root
-        self.input_roots = args
         self.missing = []
 
-    def merge(self):
+    def merge_files(self, filelist, dirs):
+        if len(filelist) == 0:
+            return
+        for f in filelist:
+            self.do_merge(f, dirs)
+
+    def merge_dirs(self, input_roots):
         if not os.path.exists(self.output_root):
             os.mkdir(self.output_root)
-        self.parse_dirs(self.input_roots)
+        self.parse_dirs(input_roots)
 
     def create_universal_file(self, output, inputlist):
         cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
@@ -99,6 +103,9 @@ class OSXUniversalGenerator(object):
     def _detect_merge_action(self, files_list):
         actions = []
         for f in files_list:
+            if not os.path.exists(f):
+                continue #TODO what can we do here? fontconfig has
+                         #some random generated filenames it seems
             ftype = self.get_file_type(f)
             action = ''
             for ft in file_types:
@@ -108,11 +115,36 @@ class OSXUniversalGenerator(object):
             if not action:
                 raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
             actions.append(action)
+        if len(actions) == 0:
+            return 'skip' #we should skip this one, the file doesn't exist
         all_same = all(x == actions[0] for x in actions)
         if not all_same:
             raise Exception, 'Different file types found: %s : %s' \
                              % (str(ftypes), str(files_list))
         return actions[0]
+
+    def do_merge(self, filepath, dirs):
+        full_filepaths = [os.path.join(d, filepath) for d in dirs]
+        action = self._detect_merge_action(full_filepaths)
+
+        #pick the first file as the base one in case of copying/linking
+        current_file = full_filepaths[0]
+        output_file = os.path.join(self.output_root, filepath)
+        output_dir = os.path.dirname(output_file)
+
+        print current_file, action
+        if action == 'copy':
+            self._copy(current_file, output_file)
+        elif action == 'link':
+            self._link(current_file, output_file)
+        elif action == 'merge':
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            self.create_universal_file(output_file, full_filepaths)
+        elif action == 'skip':
+            pass #just pass
+        else:
+            raise Exception, 'unexpected action %s' % action
 
     def parse_dirs(self, dirs, filters=None):
         self.missing = []
@@ -129,44 +161,24 @@ class OSXUniversalGenerator(object):
                 remaining_dirpath, token = os.path.split(remaining_dirpath)
                 current_dir = os.path.join(token, current_dir)
 
-            dest_dir = os.path.join(self.output_root, current_dir)
             for f in filenames:
                 if filters is not None and os.path.splitext(f)[1] not in filters:
                     continue
-
-                current_file = os.path.join(dir_path, current_dir, f)
-                destination_file = os.path.join(dest_dir, f)
-
-                partner_files = self._get_files(current_dir, f, other_paths)
-                partner_files.insert(0, os.path.join(dirpath, f))
-                action = self._detect_merge_action(partner_files)
-
-                print current_file, action
-                if action == 'copy':
-                    self._copy(current_file, dest_dir)
-                elif action == 'link':
-                    self._link(current_file, dest_dir, f)
-                elif action == 'merge':
-                    if not os.path.exists(dest_dir):
-                        os.makedirs(dest_dir)
-                    self.create_universal_file(destination_file, partner_files)
-                elif action == 'skip':
-                    pass #just pass
-                else:
-                    raise Exception, 'unexpected action %s' % action
+                current_file = os.path.join(current_dir, f)
+                self.do_merge(current_file, dirs)
 
     def _copy(self, src, dest):
-        if not os.path.exists(dest):
-            os.makedirs(dest)
+        if not os.path.exists(os.path.dirname(dest)):
+            os.makedirs(os.path.dirname(dest))
         shutil.copy(src, dest)
 
-    def _link(self, src, dest, filename):
-        if not os.path.exists(dest):
-            os.makedirs(dest)
-        if os.path.lexists(os.path.join(dest, filename)):
+    def _link(self, src, filename):
+        if not os.path.exists(os.path.dirname(filename)):
+            os.makedirs(os.path.dirname(filename))
+        if os.path.lexists(filename):
             return #link exists, skip it
         target = os.readlink(src)
-        os.symlink(target, os.path.join(dest, filename))
+        os.symlink(target, filename)
 
     def _call(self, cmd, cwd=None):
         cmd = cmd or self.root
@@ -191,8 +203,8 @@ class Main(object):
         if len(args) < 3:
             parser.print_usage()
             exit(1)
-        generator = OSXUniversalGenerator(args[0], *args[1:])
-        generator.merge()
+        generator = OSXUniversalGenerator(args[0])
+        generator.merge_dirs(args[1:])
         exit(0)
 
 if __name__ == "__main__":
