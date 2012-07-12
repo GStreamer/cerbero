@@ -35,14 +35,14 @@ class GStreamerStatic(recipe.Recipe):
 
         # Fill the list of files with the static library and the libtool link
         # library, libgstplugin.a and libgstplugin.la
-        self.files_list = []
+        self._files_list = []
         for cat in self.plugins_categories:
             name = 'files_%s_devel' % cat
             files =getattr(self, name)
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
             f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
             setattr(self, name, f)
-            self.files_list.extend(f)
+            self._files_list.extend(f)
         for cat in self.platform_plugins_categories:
             name = 'platform_files_%s_devel' % cat
             platform_files = getattr(self, name)
@@ -50,7 +50,7 @@ class GStreamerStatic(recipe.Recipe):
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
             f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
             platform_files[self.config.platform] = f
-            self.files_list.extend(f)
+            self._files_list.extend(f)
 
     def configure(self):
         if not os.path.exists(self.tmp_destdir):
@@ -58,17 +58,17 @@ class GStreamerStatic(recipe.Recipe):
         self.btype.configure(self)
 
     def post_install(self):
-        if not self.files_list:
+        if not self._files_list:
             return
         plugins_dir = os.path.dirname(os.path.join(self.config.prefix,
-                                                   self.files_list[0]))
+                                                   self._files_list[0]))
         if not os.path.exists(plugins_dir):
             os.makedirs(plugins_dir)
         # Copy all files installed in the temporary build-static directory
         # to the prefix. Static plugins will be installed in
         # lib/gstreamer-0.10/static to avoid conflicts with the libgstplugin.la
         # generated with the shared build
-        for f in self.files_list:
+        for f in self._files_list:
             f_no_static = f.replace('/static/', '/')
             shutil.copy(os.path.join(self.tmp_destdir,
                 to_unixpath(self.config.prefix)[1:], f_no_static),
