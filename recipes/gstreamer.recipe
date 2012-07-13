@@ -16,8 +16,7 @@ class Recipe(recipe.Recipe):
     }
 
 
-    files_bins = ['gst-discoverer-0.10',
-                  'gst-inspect-0.10',
+    files_bins = ['gst-inspect-0.10',
                   'gst-typefind-0.10',
                   'gst-launch-0.10']
 

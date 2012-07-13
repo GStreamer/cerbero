@@ -13,6 +13,8 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
     use_system_libs = True
 
+    files_bins = ['gst-discoverer-0.10']
+
     files_libs = ['libgstapp-0.10', 'libgstaudio-0.10', 'libgstcdda-0.10', 'libgstfloatcast-0.10',
                  'libgstfft-0.10', 'libgstinterfaces-0.10', 'libgstnetbuffer-0.10',
                  'libgstpbutils-0.10', 'libgstriff-0.10', 'libgstrtp-0.10',
