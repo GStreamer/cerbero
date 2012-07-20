@@ -49,6 +49,12 @@ class Source (object):
         '''
         raise NotImplemented("'extract' must be implemented by subclasses")
 
+    def replace_name_and_version(self, string):
+        '''
+        Replaces name and version in strings
+        '''
+        return string % {'name': self.name, 'version': self.version}
+
 
 class CustomSource (Source):
 
@@ -74,25 +80,35 @@ class Tarball (Source):
     url = None
     patches = []
     strip = 1
+    tarball_name = None
+    tarball_dirname = None
 
     def __init__(self):
         Source.__init__(self)
         if not self.url:
             raise InvalidRecipeError(_("'url' attribute is missing in the recipe"))
-        self.url = self.url % {'version': self.version, 'name': self.name}
-        self.filename = os.path.basename(self.url)
-        self.download_path = os.path.join(self.repo_dir, self.filename)
+        self.url = self.replace_name_and_version(self.url)
+        if self.tarball_name is not None:
+            self.tarball_name = self.replace_name_and_version(self.tarball_name)
+        else:
+            self.tarball_name = os.path.basename(self.url)
+        self.download_path = os.path.join(self.repo_dir, self.tarball_name)
 
     def fetch(self):
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
         if not os.path.exists(self.repo_dir):
             os.makedirs(self.repo_dir)
-        shell.download(self.url, self.download_path)
+        shell.download(self.url, self.download_path, check_cert=False)
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
         shell.unpack(self.download_path, self.config.sources)
+        if self.tarball_dirname is not None:
+            if os.path.exists(self.build_dir):
+                shutil.rmtree(self.build_dir)
+            os.rename(os.path.join(self.config.sources, self.tarball_dirname),
+                    self.build_dir)
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
