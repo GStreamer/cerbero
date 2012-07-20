@@ -164,7 +164,7 @@ class Config (object):
                'LDFLAGS': ldflags,
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
-               'DYLD_FALLBACK_LIBRARY_PATH': libdir,
+               'DYLD_FALLBACK_LIBRARY_PATH': '%s:%s' % (libdir, '/usr/lib'),
                'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
