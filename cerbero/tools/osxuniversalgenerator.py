@@ -120,7 +120,7 @@ class OSXUniversalGenerator(object):
         all_same = all(x == actions[0] for x in actions)
         if not all_same:
             raise Exception, 'Different file types found: %s : %s' \
-                             % (str(ftypes), str(files_list))
+                             % (str(ftype), str(files_list))
         return actions[0]
 
     def do_merge(self, filepath, dirs):
