@@ -148,7 +148,7 @@ def unpack(filepath, output_dir):
         zf.extractall(path=output_dir)
 
 
-def download(url, destination=None, recursive=False):
+def download(url, destination=None, recursive=False, check_cert=True):
     '''
     Downloads a file with wget
 
@@ -165,6 +165,9 @@ def download(url, destination=None, recursive=False):
     else:
         if destination is not None:
             cmd += "-O %s " % destination
+
+    if not check_cert:
+        cmd += " --no-check-certificate"
 
     if not recursive and os.path.exists(destination):
         logging.info("File %s already downloaded." % destination)
