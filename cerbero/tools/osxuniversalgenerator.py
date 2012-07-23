@@ -122,7 +122,6 @@ class OSXUniversalGenerator(object):
         output_file = os.path.join(self.output_root, filepath)
         output_dir = os.path.dirname(output_file)
 
-        print current_file, action
         if action == 'copy':
             self._copy(current_file, output_file)
         elif action == 'link':
@@ -142,7 +141,6 @@ class OSXUniversalGenerator(object):
         dir_path = dirs[0]
         if dir_path.endswith('/'):
             dir_path = dir_path[:-1]
-        other_paths = dirs[1:]
         for dirpath, dirnames, filenames in os.walk(dir_path):
             current_dir = ''
             token = ' '
