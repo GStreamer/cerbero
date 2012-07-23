@@ -125,7 +125,7 @@ class OSXUniversalGenerator(object):
         if action == 'copy':
             self._copy(current_file, output_file)
         elif action == 'link':
-            self._link(current_file, output_file)
+            self._link(current_file, output_file, filepath)
         elif action == 'merge':
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
@@ -160,13 +160,21 @@ class OSXUniversalGenerator(object):
             os.makedirs(os.path.dirname(dest))
         shutil.copy(src, dest)
 
-    def _link(self, src, filename):
-        if not os.path.exists(os.path.dirname(filename)):
-            os.makedirs(os.path.dirname(filename))
-        if os.path.lexists(filename):
+    def _link(self, src, dest, filepath):
+        if not os.path.exists(os.path.dirname(dest)):
+            os.makedirs(os.path.dirname(dest))
+        if os.path.lexists(dest):
             return #link exists, skip it
+
+        # read the link, and extract the relative filepath
         target = os.readlink(src)
-        os.symlink(target, filename)
+        src_prefix = src.split(filepath)[0]
+        dest_prefix = dest.split(filepath)[0]
+        rel_target = os.path.relpath(target, src_prefix)
+        dest_target = os.path.join(dest_prefix, rel_target)
+        if not os.path.exists(dest_target):
+            shutil.copy(target, dest_target)
+        os.symlink(dest_target, dest)
 
     def _call(self, cmd, cwd=None):
         cmd = cmd or self.root
