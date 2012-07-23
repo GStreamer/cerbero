@@ -90,16 +90,6 @@ class OSXUniversalGenerator(object):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
         return self._call(cmd)[0:-1] #remove trailing \n
 
-    def _get_files(self, relative_dir, f, other_paths):
-        r = []
-        for p in other_paths:
-            filepath = os.path.join(p, relative_dir, f)
-            if os.path.exists(filepath):
-                r.append(filepath)
-            else:
-                self.missing.append(filepath)
-        return r
-
     def _detect_merge_action(self, files_list):
         actions = []
         for f in files_list:
