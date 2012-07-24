@@ -9,7 +9,12 @@ class Recipe(recipe.Recipe):
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     files_libs = ['libfontconfig']
-    files_etc = ['etc/fonts']
+    files_etc = [
+        'etc/fonts/conf.avail',
+        'etc/fonts/conf.d',
+        'etc/fonts/fonts.conf',
+        'etc/fonts/fints.dtd',
+        ]
     files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
 
     def prepare(self):
