@@ -67,14 +67,14 @@ class Config (object):
             setattr(self, a, None)
 
         self.arch_config = {self.target_arch: self}
+        # Store raw os.environ data
+        self._raw_environ = os.environ.copy()
 
     def _restore_environment(self):
         os.environ.clear()
         os.environ.update(self._raw_environ)
 
     def load(self, filename=None):
-        # Store raw os.environ data
-        self._raw_environ = os.environ.copy()
 
         # First load the default configuration
         self.load_defaults()
