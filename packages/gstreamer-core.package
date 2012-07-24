@@ -23,3 +23,4 @@ class Package(package.Package):
             'gst-plugins-ugly:core:lang']
     files_devel = ['gstreamer-static', 'gst-plugins-base-static:core_devel',
             'gst-plugins-good-static:core_devel', 'gst-plugins-bad-static:core_devel']
+    platform_files = {Platform.DARWIN: ['gstreamer-osx-framework']}
