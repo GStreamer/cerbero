@@ -103,12 +103,14 @@ class Config (object):
         self.validate_properties()
         self._raw_environ = os.environ.copy()
 
-        for arch in self.arch_config.values():
-            arch._restore_environment()
-            arch._load_platform_config()
-            arch._load_last_defaults()
-            arch.validate_properties()
-            arch._raw_environ = os.environ.copy()
+        for config in self.arch_config.values():
+            config._restore_environment()
+            config.sources = os.path.join(self.sources, config.target_arch)
+            config.prefix = os.path.join(self.prefix, config.target_arch)
+            config._load_platform_config()
+            config._load_last_defaults()
+            config.validate_properties()
+            config._raw_environ = os.environ.copy()
 
         self._restore_environment()
         self.setup_env()
