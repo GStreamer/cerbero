@@ -18,11 +18,11 @@ check-pep8:
 
 check:
 	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial test
-	make check pep8
+	make check-pep8
 
 coverage:
 	rm -rf _trial_temp
-	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial --coverage test cerbero
+	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial --coverage test
 	make show-coverage
 
 show-coverage:
