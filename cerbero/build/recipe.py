@@ -22,8 +22,10 @@ import logging
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.config import Platform
+from cerbero.errors import FatalError
 from cerbero.ide.vs.genlib import GenLib
-from cerbero.utils import N_
+from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
+from cerbero.utils import N_, _
 
 
 class MetaRecipe(type):
@@ -64,9 +66,12 @@ class BuildSteps(object):
     CONFIGURE = (N_('Configure'), 'configure')
     COMPILE = (N_('Compile'), 'compile')
     INSTALL = (N_('Install'), 'install')
-    CHECK = (N_('Check'), 'check')  # Not added by default
     POST_INSTALL = (N_('Post Install'), 'post_install')
+
+    # Not added by default
+    CHECK = (N_('Check'), 'check')
     GEN_LIBFILES = (N_('Gen Library File'), 'gen_library_file')
+    MERGE = (N_('Merge universal binaries'), 'merge')
 
     def __new__(klass):
         return [BuildSteps.FETCH, BuildSteps.EXTRACT,
@@ -218,3 +223,76 @@ class Recipe(FilesProvider):
 
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x not in steps]
+
+
+class MetaUniversalRecipe(type):
+    '''
+    Wraps all the build steps for the universal recipe to be called for each
+    one of the child recipes.
+    '''
+
+    def __init__(cls, name, bases, ns):
+        step_func = ns.get('_do_step')
+        for _, step in BuildSteps():
+            setattr(cls, step, lambda self, name=step: step_func(self, name))
+
+
+class UniversalRecipe(object):
+    '''
+    Stores similar recipe objects that are going to be built together
+
+    Useful for the universal architecture, where the same recipe needs
+    to be built for different architectures before being merged. For the
+    other targets, it will likely be a unitary group
+    '''
+
+    __metaclass__ = MetaUniversalRecipe
+
+    def __init__(self, config):
+        self._config = config
+        self._recipes = {}
+        self._proxy_recipe = None
+
+    def add_recipe(self, recipe):
+        '''
+        Adds a new recipe to the group
+        '''
+        if self._proxy_recipe is None:
+            self._proxy_recipe = recipe
+        else:
+            if recipe.name != self._proxy_recipe.name:
+                raise FatalError(_("Recipes must have the same name"))
+        self._recipes[recipe.config.target_arch] = recipe
+
+    def is_empty(self):
+        return len(self._recipes) == 0
+
+    def merge(self):
+        inputs = []
+        for c,v in self._recipes.iteritems():
+            inputs.extend(v.files_list())
+        inputs = sorted(list(set(inputs)))
+        output = self._config.prefix
+
+        generator = OSXUniversalGenerator(output)
+        generator.merge_files(inputs,
+                             [r.config.prefix for r in self._recipes.values()])
+
+    @property
+    def steps(self):
+        if self.is_empty():
+            return []
+        return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
+
+    def __getattr__(self, name):
+        if not self._proxy_recipe:
+            raise AttributeError(_("Attribute %s was not found in the "
+                "Universal recipe, which is empty. You might need to add a "
+                "recipe first."))
+        return getattr(self._proxy_recipe, name)
+
+    def _do_step(self, step):
+        for c, v in self._recipes.iteritems():
+            self._config.arch_config[c].do_setup_env()
+            stepfunc = getattr(v, step)
+            stepfunc()

@@ -20,8 +20,10 @@ import unittest
 import os
 
 from cerbero.build import recipe
-from cerbero.config import Platform, License
+from cerbero.config import Platform, License, Architecture
+from cerbero.errors import FatalError
 from test.test_common import DummyConfig
+from test.test_build_common import Recipe1
 
 
 class Class1(object):
@@ -58,6 +60,14 @@ class Recipe(recipe.Recipe):
     licenses_bins = [License.GPL]
     platform_files_test = {Platform.LINUX: ['test1']}
     platform_licenses_test = {Platform.LINUX: [License.BSD]}
+
+
+class Class3(object):
+
+    __metaclass__ = recipe.MetaUniversalRecipe
+
+    def do_step(self, name):
+        return name
 
 
 class TestReceiptMetaClass(unittest.TestCase):
@@ -145,3 +155,61 @@ class TestLicenses(unittest.TestCase):
         licenses_test = self.recipe.list_licenses_by_categories(['test'])
         self.assertEquals(licenses_test['test'], [License.BSD])
         self.assertEquals(licenses_test.values(), [[License.BSD]])
+
+
+class TestMetaUniveralRecipe(unittest.TestCase):
+
+    def testBuildSteps(self):
+        obj = Class3()
+        for _, step in recipe.BuildSteps():
+            self.assertTrue(hasattr(obj, step))
+            stepfunc = getattr(obj, step)
+            self.assertEquals(stepfunc(), step)
+
+
+class TestUniversalRecipe(unittest.TestCase):
+
+    def setUp(self):
+        self.config = DummyConfig()
+        self.config.target_platform = Platform.LINUX
+        self.config_x86 = DummyConfig()
+        self.config_x86.target_platform = Platform.LINUX
+        self.config_x86.target_architecture = Architecture.X86
+        self.config_x86_64 = DummyConfig()
+        self.config_x86_64.target_platform = Platform.LINUX
+        self.config_x86_64.target_architecture = Architecture.X86_64
+        self.recipe = recipe.UniversalRecipe(self.config)
+        self.recipe_x86 = Recipe1(self.config_x86)
+        self.recipe_x86_64 = Recipe1(self.config_x86_64)
+
+    def testEmpty(self):
+        self.assertTrue(self.recipe.is_empty())
+
+    def testProxyEmpty(self):
+        self.failUnlessRaises(AttributeError, getattr, self.recipe, 'name')
+
+    def testProxyRecipe(self):
+        self.recipe.add_recipe(self.recipe_x86)
+        self.assertEquals(self.recipe.name, self.recipe_x86.name)
+        self.assertEquals(self.recipe.licence, self.recipe_x86.licence)
+        self.assertEquals(self.recipe.uuid, self.recipe_x86.uuid)
+
+    def testAddRecipe(self):
+        self.recipe.add_recipe(self.recipe_x86)
+        self.assertEquals(self.recipe._recipes[Architecture.X86],
+                          self.recipe_x86)
+        self.assertEquals(self.recipe._proxy_recipe,
+                          self.recipe_x86)
+
+    def testDifferentRecipe(self):
+        self.recipe.add_recipe(self.recipe_x86)
+        recipe_test = Recipe1(self.config_x86)
+        recipe_test.name = 'noname'
+        self.failUnlessRaises(FatalError, self.recipe.add_recipe, recipe_test)
+
+    def testSteps(self):
+        self.assertEquals(self.recipe.steps, [])
+        self.recipe.add_recipe(self.recipe_x86)
+        self.recipe.add_recipe(self.recipe_x86_64)
+        self.assertEquals(self.recipe.steps,
+                recipe.BuildSteps() + [recipe.BuildSteps.MERGE])
