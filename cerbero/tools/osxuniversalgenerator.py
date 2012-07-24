@@ -167,7 +167,7 @@ class OSXUniversalGenerator(object):
             return #link exists, skip it
 
         # read the link, and extract the relative filepath
-        target = os.readlink(src)
+        target = os.path.join(os.path.dirname(src), os.readlink(src))
         src_prefix = src.split(filepath)[0]
         dest_prefix = dest.split(filepath)[0]
         rel_target = os.path.relpath(target, src_prefix)
