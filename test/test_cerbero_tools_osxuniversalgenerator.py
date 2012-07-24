@@ -158,3 +158,17 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
         self.assertTrue(os.path.exists(file1))
         self.assertTrue(os.path.exists(file2))
         self.assertEquals(os.readlink(file2), file1)
+
+    def testMergePCFiles(self):
+        for arch in [Architecture.X86, Architecture.X86_64]:
+            pc_file = os.path.join(self.tmp, arch, 'test.pc')
+            with open(pc_file, 'w') as f:
+                f.write(os.path.join(self.tmp, arch, 'lib', 'test'))
+        gen = OSXUniversalGenerator(
+                os.path.join(self.tmp, Architecture.UNIVERSAL))
+        gen.merge_files(['test.pc'],
+                [os.path.join(self.tmp, Architecture.X86),
+                 os.path.join(self.tmp, Architecture.X86_64)])
+        pc_file = os.path.join(self.tmp, Architecture.UNIVERSAL, 'test.pc')
+        self.assertEquals(open(pc_file).readline(),
+                os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))

@@ -21,6 +21,9 @@ import os
 import subprocess
 import shutil
 
+from cerbero.utils import shell
+
+
 file_types = [
     ('Mach-O', 'merge'),
     ('ar archive', 'merge'),
@@ -100,7 +103,10 @@ class OSXUniversalGenerator(object):
             action = ''
             for ft in file_types:
                 if ft[0] in ftype:
-                    action = ft[1]
+                    if ft[0] == 'text' and f.endswith('.pc'):
+                        action = 'copy-pc'
+                    else:
+                        action = ft[1]
                     break
             if not action:
                 raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
@@ -124,8 +130,8 @@ class OSXUniversalGenerator(object):
 
         if action == 'copy':
             self._copy(current_file, output_file)
-        elif action == 'copy-la':
-            self._copy_la(current_file, output_file, dirs)
+        elif action == 'copy-la' or action == 'copy-pc':
+            self._copy_and_replace_paths(current_file, output_file, dirs)
         elif action == 'link':
             self._link(current_file, output_file, filepath)
         elif action == 'merge':
@@ -162,9 +168,9 @@ class OSXUniversalGenerator(object):
             os.makedirs(os.path.dirname(dest))
         shutil.copy(src, dest)
 
-    def _copy_la(self, src, dest, dirs):
+    def _copy_and_replace_paths(self, src, dest, dirs):
         self._copy(src, dest)
-        self._replace(dest, {d:self.output_root for d in dirs})
+        shell.replace(dest, {d:self.output_root for d in dirs})
 
     def _link(self, src, dest, filepath):
         if not os.path.exists(os.path.dirname(dest)):
@@ -188,14 +194,6 @@ class OSXUniversalGenerator(object):
             stdout=subprocess.PIPE, shell=True)
         output, unused_err = process.communicate()
         return output
-
-    def _replace(self, filepath, replacements):
-        with open(filepath, 'r') as f:
-            content = f.read()
-        for k, v in replacements.iteritems():
-            content = content.replace(k, v)
-        with open(filepath, 'w+') as f:
-            f.write(content)
 
 
 class Main(object):

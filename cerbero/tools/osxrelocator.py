@@ -43,6 +43,9 @@ class OSXRelocator(object):
     def relocate(self):
         self.parse_dir(self.root)
 
+    def relocate_file(self, path):
+        self.change_libs_path(path)
+
     def change_id(self, lib_id):
         cmd = '%s -id %s' % (self.INT_CMD, self.lib_id)
         self._call(cmd)
