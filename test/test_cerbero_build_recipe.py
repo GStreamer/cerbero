@@ -66,7 +66,7 @@ class Class3(object):
 
     __metaclass__ = recipe.MetaUniversalRecipe
 
-    def do_step(self, name):
+    def _do_step(self, name):
         return name
 
 
