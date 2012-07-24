@@ -25,7 +25,7 @@ file_types = [
     ('Mach-O', 'merge'),
     ('ar archive', 'merge'),
     ('libtool archive', 'skip'),
-    ('libtool library', 'skip'),
+    ('libtool library', 'copy-la'),
     ('symbolic link', 'link'),
     ('data', 'copy'),
     ('text', 'copy'),
@@ -124,6 +124,8 @@ class OSXUniversalGenerator(object):
 
         if action == 'copy':
             self._copy(current_file, output_file)
+        elif action == 'copy-la':
+            self._copy_la(current_file, output_file, dirs)
         elif action == 'link':
             self._link(current_file, output_file, filepath)
         elif action == 'merge':
@@ -160,6 +162,10 @@ class OSXUniversalGenerator(object):
             os.makedirs(os.path.dirname(dest))
         shutil.copy(src, dest)
 
+    def _copy_la(self, src, dest, dirs):
+        self._copy(src, dest)
+        self._replace(dest, {d:self.output_root for d in dirs})
+
     def _link(self, src, dest, filepath):
         if not os.path.exists(os.path.dirname(dest)):
             os.makedirs(os.path.dirname(dest))
@@ -183,6 +189,13 @@ class OSXUniversalGenerator(object):
         output, unused_err = process.communicate()
         return output
 
+    def _replace(self, filepath, replacements):
+        with open(filepath, 'r') as f:
+            content = f.read()
+        for k, v in replacements.iteritems():
+            content = content.replace(k, v)
+        with open(filepath, 'w+') as f:
+            f.write(content)
 
 
 class Main(object):
