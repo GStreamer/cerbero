@@ -212,5 +212,9 @@ class Recipe(FilesProvider):
         '''
         return os.path.abspath(os.path.join(self.recipe_dir(), path))
 
+    @property
+    def steps(self):
+        return self._steps
+
     def _remove_steps(self, steps):
         self._steps = [x for x in self._steps if x not in steps]
