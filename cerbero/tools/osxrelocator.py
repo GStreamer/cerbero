@@ -18,7 +18,12 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import subprocess
+
+from cerbero.utils import shell
+
+
+INT_CMD = 'install_name_tool'
+OTOOL_CMD = 'otool'
 
 
 class OSXRelocator(object):
@@ -31,9 +36,6 @@ class OSXRelocator(object):
     ID if the file is a shared library.
     '''
 
-    INT_CMD = 'install_name_tool'
-    OTOOL_CMD = 'otool'
-
     def __init__(self, root, lib_prefix, new_lib_prefix, recursive):
         self.root = root
         self.lib_prefix = lib_prefix
@@ -43,32 +45,23 @@ class OSXRelocator(object):
     def relocate(self):
         self.parse_dir(self.root)
 
-    def relocate_file(self, path):
-        self.change_libs_path(path)
+    def relocate_file(self, object_file):
+        self.change_libs_path(object_file)
+        self.change_id(object_file)
 
-    def change_id(self, lib_id):
-        cmd = '%s -id %s' % (self.INT_CMD, self.lib_id)
-        self._call(cmd)
+    def change_id(self, object_file):
+        if not os.path.split(object_file)[1] in ['so', 'dylib']:
+            return
+        cmd = '%s -id %s %s' % (INT_CMD, object_file, object_file)
+        shell.call(cmd)
 
     def change_libs_path(self, object_file):
-        print "Fixing object file %s" % object_file
         for lib in self.list_shared_libraries(object_file):
             if self.lib_prefix in lib:
                 new_lib = lib.replace(self.lib_prefix, self.new_lib_prefix)
-                cmd = '%s -change %s %s %s' % (self.INT_CMD, lib, new_lib,
+                cmd = '%s -change %s %s %s' % (INT_CMD, lib, new_lib,
                                                object_file)
-                self._call(cmd)
-
-    def list_shared_libraries(self, object_file):
-        cmd = '%s -L %s' % (self.OTOOL_CMD, object_file)
-        res = self._call(cmd).split('\n')
-        # We don't use the first line
-        libs = res[1:]
-        # Remove the first character tabulation
-        libs = [x[1:] for x in libs]
-        # Remove the version info
-        libs = [x.split(' ', 1)[0] for x in libs]
-        return libs
+                shell.call(cmd)
 
     def parse_dir(self, dir_path, filters=None):
         for dirpath, dirnames, filenames in os.walk(dir_path):
@@ -79,12 +72,25 @@ class OSXRelocator(object):
             if not self.recursive:
                 break
 
-    def _call(self, cmd, cwd=None):
-        cmd = cmd or self.root
-        process = subprocess.Popen(cmd, cwd=cwd,
-            stdout=subprocess.PIPE, shell=True)
-        output, unused_err = process.communicate()
-        return output
+    @staticmethod
+    def list_shared_libraries(object_file):
+        cmd = '%s -L %s' % (OTOOL_CMD, object_file)
+        res = shell.check_call(cmd).split('\n')
+        # We don't use the first line
+        libs = res[1:]
+        # Remove the first character tabulation
+        libs = [x[1:] for x in libs]
+        # Remove the version info
+        libs = [x.split(' ', 1)[0] for x in libs]
+        return libs
+
+    @staticmethod
+    def library_id_name(object_file):
+        cmd = '%s -D %s' % (OTOOL_CMD, object_file)
+        res = shell.check_call(cmd).split('\n')[0]
+        # the library name ends with ':'
+        lib_name = res[:-1]
+        return lib_name
 
 
 
