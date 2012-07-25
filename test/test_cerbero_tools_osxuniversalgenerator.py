@@ -24,6 +24,7 @@ import os
 from cerbero.config import Architecture
 from cerbero.utils import shell
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
+from cerbero.tools.osxrelocator import OSXRelocator
 
 
 TEST_APP = '''\
@@ -172,3 +173,25 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
         pc_file = os.path.join(self.tmp, Architecture.UNIVERSAL, 'test.pc')
         self.assertEquals(open(pc_file).readline(),
                 os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))
+
+    def testMergedLibraryPaths(self):
+        def check_prefix(path):
+            if self.tmp not in path:
+                return
+            self.assertTrue(uni_prefix in path)
+            self.assertTrue(x86_prefix not in path)
+            self.assertTrue(x86_64_prefix not in path)
+
+        self._compile(Architecture.X86)
+        self._compile(Architecture.X86_64)
+        self._check_compiled_files()
+        uni_prefix = os.path.join(self.tmp, Architecture.UNIVERSAL)
+        x86_prefix = os.path.join(self.tmp, Architecture.X86)
+        x86_64_prefix = os.path.join(self.tmp, Architecture.X86_64)
+        gen = OSXUniversalGenerator(uni_prefix)
+        gen.merge_dirs([x86_prefix, x86_64_prefix])
+        libfoo = os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'libfoo.so')
+        libname = OSXRelocator.library_id_name(libfoo)
+        check_prefix(libname)
+        for p in OSXRelocator.list_shared_libraries(libfoo):
+            check_prefix(p)

@@ -22,6 +22,7 @@ import subprocess
 import shutil
 
 from cerbero.utils import shell
+from cerbero.tools.osxrelocator import OSXRelocator
 
 
 file_types = [
@@ -84,10 +85,13 @@ class OSXUniversalGenerator(object):
             os.mkdir(self.output_root)
         self.parse_dirs(input_roots)
 
-    def create_universal_file(self, output, inputlist):
+    def create_universal_file(self, output, inputlist, dirs):
         cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
                ' '.join(inputlist), output)
         self._call(cmd)
+        relocator = OSXRelocator (self.output_root, dirs[0], self.output_root,
+                                  False)
+        relocator.relocate_file(output)
 
     def get_file_type(self, filepath):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
@@ -137,7 +141,7 @@ class OSXUniversalGenerator(object):
         elif action == 'merge':
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            self.create_universal_file(output_file, full_filepaths)
+            self.create_universal_file(output_file, full_filepaths, dirs)
         elif action == 'skip':
             pass #just pass
         else:
