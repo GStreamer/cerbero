@@ -5,7 +5,7 @@
   <PropertyGroup />
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WINDOWS_DRIVER_KIT)\inc\crt\;$(WINDOWS_DRIVER_KIT)\inc\atl71\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(WINDOWS_DRIVER_KIT)\inc\crt\;$(WINDOWS_DRIVER_KIT)\inc\atl71\</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN=1;_MBCS=1;WHISTLER_DDK=1;_DLL=1;_MT=1;__NO_MINGW_LFS;__MSVCRT_VERSION__=0x0601;__MSVCRT__;_CRT_NONSTDC_FORCE_DEPRECATE;_CRT_SECURE_FORCE_DEPRECATE; _CRT_SECURE_NO_WARNINGS;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
