@@ -13,9 +13,10 @@ class Recipe(recipe.Recipe):
     def install(self):
         import shutil
         from cerbero.commands.genvsprops import GenVSProps
+        env_var = ('GSTREAMER_SDK_ROOT_%s' % self.config.arch).upper()
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, os.path.join(self.config.prefix,
-                           self.files_devel[0], 'libs'))
+                           self.files_devel[0], 'libs'), env_var)
         filename = os.path.basename(self.files_devel[1])
         mingw_libdir = os.path.join(self.config.toolchain_prefix, 'mingw', 'lib')
         shutil.copy(os.path.join(mingw_libdir, filename),
