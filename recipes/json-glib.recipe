@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'json-glib'
-    version = '0.12.6'
+    version = '0.14.2'
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
 
