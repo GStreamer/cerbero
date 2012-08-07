@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'atk'
-    version = '2.2.0'
+    version = '2.4.0'
     licenses = [License.LGPLv2Plus]
     deps = ['glib']
 
