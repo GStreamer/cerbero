@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.5.8'
+    version = '1.5.12'
     licenses = [License.LibPNG]
     deps = ['zlib']
 
