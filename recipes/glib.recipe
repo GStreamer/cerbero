@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.32.1'
+    version = '2.32.4'
     licenses = [License.LGPLv2Plus]
     configure_sh = 'sh autogen.sh'
     deps = ['libffi', 'zlib']
