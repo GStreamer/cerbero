@@ -10,6 +10,10 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgcc_s_sjlj-1', 'libstdc++-6']
     files_bins = ['Elevate']
+    files_static = ['%(host)s/lib/libmingwex.a',
+                    '%(host)s/lib/libdxerr9.a',
+                    '%(host)s/lib/libmoldname.a',
+                    '%(mingw)s/lib/gcc/%(host)s/4.6.2/libgcc.a']
     files_headers = ['include/GL']
 
     def install(self):
@@ -37,3 +41,18 @@ class Recipe(recipe.Recipe):
             if os.path.exists(dest):
                 shutil.rmtree(dest)
             shutil.copytree(src, dest)
+
+        # static build deps
+        if self.config.platform == Platform.WINDOWS:
+            # the native compiler install libraries in 'lib' and
+            # not in the cross prefix
+            mingw = '.'
+        else:
+            mingw = self.config.host
+        files_static = [f % {'mingw':mingw, 'host':self.config.host} for f in self.files_static]
+        self.files_static = []
+        for f in files_static:
+            out_file = os.path.join('lib', os.path.basename(f))
+            self.files_static.append(out_file)
+            shutil.copy(os.path.join(self.config.toolchain_prefix, f),
+                os.path.join(self.config.prefix, out_file))
