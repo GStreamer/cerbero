@@ -30,7 +30,6 @@ from cerbero.utils import messages as m
 MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
                         'data/packages/2012.5/windows/toolchain'
 MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
-MINGW_SYSROOT = '/home/andoni/mingw/windows/%s/lib'
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
@@ -115,7 +114,7 @@ class WindowsBootstraper(BootstraperBase):
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
         python_headers = to_unixpath(os.path.abspath(python_headers))
 
-	shell.call('mkdir -p %s' % python_headers)
+        shell.call('mkdir -p %s' % python_headers)
         python_libs = os.path.join(self.prefix, 'lib')
         python_libs = to_unixpath(python_libs)
 
@@ -146,7 +145,7 @@ class WindowsBootstraper(BootstraperBase):
         return
 
     def fix_lib_paths(self):
-        orig_sysroot = MINGW_SYSROOT % self.version
+        orig_sysroot = self.find_mingw_sys_root()
         new_sysroot = os.path.join(self.prefix, 'lib')
         lib_path = new_sysroot
 
@@ -154,6 +153,16 @@ class WindowsBootstraper(BootstraperBase):
         for path in [f for f in os.listdir(lib_path) if f.endswith('la')]:
             path = os.path.abspath(os.path.join(lib_path, path))
             shell.replace(path, {orig_sysroot: new_sysroot})
+
+    def find_mingw_sys_root(self):
+        with open(os.path.join(self.prefix, 'lib', 'libstdc++.la'), 'r') as f:
+            # get the "libdir=/path" line
+            libdir = [x for x in f.readlines() if x.startswith('libdir=')][0]
+            # get the path
+            libdir = libdir.split('=')[1]
+            # strip the surrounding quotes
+            print libdir
+            return libdir.strip()[1:-1]
 
 
 def register_all():
