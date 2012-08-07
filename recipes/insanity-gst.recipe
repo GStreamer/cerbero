@@ -23,12 +23,15 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/insanity-gst-0.10', 'lib/pkgconfig/insanity-gst-0.10.pc']
     files_libs = ['libinsanity-gst-0.10']
     files_misc = [
-        'libexec/insanity-gst/tests/insanity-test-gst-discoverer%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-dvd%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-generic-pipeline%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-hls%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-http%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-play%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-seek%(bext)s',
-        'libexec/insanity-gst/tests/insanity-test-gst-stream-switch%(bext)s'
+        'libexec/insanity-1.0/tests/insanity-test-gst-decoder%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-demuxer%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-discoverer%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-dvd%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-generic-pipeline%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-hls%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-http%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-play%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-seek%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-stream-switch%(bext)s',
+        'libexec/insanity-1.0/tests/insanity-test-gst-subtitles%(bext)s'
     ]
