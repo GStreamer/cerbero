@@ -21,6 +21,7 @@ import os
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import License, Platform
 from cerbero.packages import PackageType
+from cerbero.utils import remove_list_duplicates
 
 
 class PackageBase(object):
@@ -360,7 +361,8 @@ class MetaPackage(PackageBase):
         deps = []
         for package in self.store.get_package_deps(self.name, True):
             deps.extend(package.recipes_dependencies())
-        return list(set(deps))
+
+        return remove_list_duplicates(deps)
 
     def files_list(self):
         return self._list_files(Package.files_list)

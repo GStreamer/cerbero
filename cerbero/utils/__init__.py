@@ -220,3 +220,10 @@ def copy_files(origdir, destdir, files, extensions, target_platform):
             shutil.copy(orig, dest)
         except IOError:
             m.warning("Could not copy %s to %s" % (orig, dest))
+
+
+def remove_list_duplicates(seq):
+    ''' Remove list duplicates maintaining the order '''
+    seen = set()
+    seen_add = seen.add
+    return [ x for x in seq if x not in seen and not seen_add(x)]
