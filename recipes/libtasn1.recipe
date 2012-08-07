@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
-    version = '2.11'
+    version = '2.13'
     licenses = [License.LGPLv2_1Plus]
 
     files_libs = ['libtasn1']
