@@ -13,5 +13,6 @@ class Recipe(recipe.Recipe):
     files_bins = ['ges-launch-0.10']
     files_devel = ['include/gstreamer-0.10/ges', 'lib/pkgconfig/gst-editing-services-0.10.pc']
     files_libs = ['libges-0.10']
-    files_python = ['site-packages/ges%(pext)s']
+
+#    files_python = ['site-packages/ges%(pext)s']
 
