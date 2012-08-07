@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk-engines'
-    version = '2.18.5'
+    version = '2.20.2'
     licenses = [License.LGPLv2Plus]
     deps = ['gtk+']
 
