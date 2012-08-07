@@ -19,7 +19,7 @@ class Package(package.Package):
             'jasper:libs', 'libkate:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
-            'taglib:libs',
+            'taglib:libs', 'opus:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
             'gst-plugins-bad:codecs', 'gst-plugins-ugly:codecs']
     files_devel = ['gst-plugins-base-static:codecs_devel',
