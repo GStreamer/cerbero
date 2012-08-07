@@ -16,11 +16,13 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libsoup:libs',
-            'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-ugly:net', 'gst-plugins-bad:net']
+            'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-ugly:net', 'gst-plugins-bad:net',
+            'gst-rtsp-server:libs:python' ]
     files_devel = ['gst-plugins-base-static:net_devel',
             'gst-plugins-good-static:net_devel',
             'gst-plugins-ugly-static:net_devel',
-            'gst-plugins-bad-static:net_devel']
+            'gst-plugins-bad-static:net_devel',
+            'gst-rtsp-server:devel']
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or \
