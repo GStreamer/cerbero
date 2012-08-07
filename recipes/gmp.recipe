@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'gmp'
-    version = '5.0.4'
+    version = '5.0.5'
     licenses = [License.LGPLv3Plus]
 
     files_libs = ['libgmp']
