@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'dbus'
-    version = '1.4.16'
+    version = '1.6.4'
     # either AFLv2.1 or or GPLv2+
     licenses = [License.AFLv2_1]
     deps = ['expat']
