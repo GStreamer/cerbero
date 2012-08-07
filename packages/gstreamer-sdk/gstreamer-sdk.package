@@ -37,6 +37,8 @@ class SDKPackage(package.SDKPackage):
                ('gstreamer-dvd', False, False),
                ('gstreamer-libav', False, False),
                ('gstreamer-tests', False, False),
+               ('gstreamer-editing', False, False),
+               ('gstreamer-capture', False, False),
                ('gstreamer-tutorials', False, True),
               ]
     platform_packages = {
