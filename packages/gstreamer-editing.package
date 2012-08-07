@@ -1,0 +1,19 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-editing'
+    shortdesc = 'GStreamer plugins and libraries for editing'
+    url = "http://www.gstreamer.com"
+    version = '2012.7'
+    codename = 'Amazon'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = 'd53998ee-e0a5-11e1-b91e-dfaec952dab0'
+    deps = ['gstreamer-core']
+
+    files = ['gst-editing-services',
+             'gnonlin']
