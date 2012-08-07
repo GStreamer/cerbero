@@ -9,7 +9,7 @@ from cerbero.build.filesprovider import FilesProvider
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '2.4'
+    version = '2.5'
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--enable-shared'
     deps = ['gmp']
