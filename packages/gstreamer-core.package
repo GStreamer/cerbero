@@ -15,7 +15,7 @@ class Package(package.Package):
     uuid = '32fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['base-system']
 
-    files = ['gstreamer', 'gst-plugins-base:libs:core:lang',
+    files = ['gstreamer', 'gst-plugins-base:bins:libs:core:lang',
             'gst-sdk-shell',
             'gst-plugins-good:core:lang',
             'gst-plugins-bad:core:lang',
