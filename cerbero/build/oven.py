@@ -86,12 +86,13 @@ class Oven (object):
             tmp = tempfile.NamedTemporaryFile()
 
         recipe.force = self.force
-        for desc, step in recipe._steps:
+        for desc, step in recipe.steps:
             m.build_step(count, total, recipe.name, step)
             # check if the current step needs to be done
             if self.cookbook.step_done(recipe.name, step) and not self.force:
                 m.action(_("Step done"))
                 continue
+
             try:
                 # call step function
                 stepfunc = getattr(recipe, step)

@@ -29,6 +29,7 @@ class Architecture:
     X86 = 'x86'
     X86_64 = 'x86_64'
     PPC = 'ppc'
+    UNIVERSAL = 'universal'
 
 
 class Distro:

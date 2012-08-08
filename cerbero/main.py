@@ -85,7 +85,8 @@ class Main(object):
     def load_config(self):
         ''' Load the configuration '''
         try:
-            self.config = config.Config(self.args.config)
+            self.config = config.Config()
+            self.config.load(self.args.config)
         except ConfigurationError, exc:
             traceback.print_exc()
             self.log_error(exc, False)

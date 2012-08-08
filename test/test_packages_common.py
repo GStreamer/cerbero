@@ -123,8 +123,10 @@ def create_store(config):
 
     for klass in [Package1, Package2, Package3, Package4, App]:
         package = klass(config, store, cookbook)
+        package.__file__ = 'test/test_packages_common.py'
         store.add_package(package)
     for klass in [MetaPackage]:
         package = klass(config, store)
+        package.__file__ = 'test/test_packages_common.py'
         store.add_package(package)
     return store

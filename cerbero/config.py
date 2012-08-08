@@ -18,6 +18,7 @@
 
 import os
 import sys
+import copy
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -56,16 +57,24 @@ class Config (object):
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
-                   'external_packages', 'use_ccache', 'force_git_commit']
+                   'external_packages', 'use_ccache', 'force_git_commit',
+                   'universal_archs']
 
-    def __init__(self, filename=None, load=True):
+    def __init__(self):
         self._check_uninstalled()
 
         for a in self._properties:
             setattr(self, a, None)
 
-        if not load:
-            return
+        self.arch_config = {self.target_arch: self}
+        # Store raw os.environ data
+        self._raw_environ = os.environ.copy()
+
+    def _restore_environment(self):
+        os.environ.clear()
+        os.environ.update(self._raw_environ)
+
+    def load(self, filename=None):
 
         # First load the default configuration
         self.load_defaults()
@@ -77,21 +86,43 @@ class Config (object):
         # from the main configuration file
         self._load_cmd_config(filename)
 
-        # Next, load the platform configuration
-        self._load_platform_config()
+        # Create a copy of the config for each architecture in case we are
+        # building Universal binaries
+        if self.target_arch == Architecture.UNIVERSAL:
+            arch_config = {}
+            for arch in self.universal_archs:
+                arch_config[arch] = copy.deepcopy(self)
+                arch_config[arch].target_arch = arch
+                arch_config[arch]._raw_environ = os.environ.copy()
+            self.arch_config = arch_config
 
+        self._load_platform_config()
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
-
         # And validate properties
         self.validate_properties()
+        self._raw_environ = os.environ.copy()
 
+        for config in self.arch_config.values():
+            config._restore_environment()
+            if self.target_arch == Architecture.UNIVERSAL:
+                config.sources = os.path.join(self.sources, config.target_arch)
+                config.prefix = os.path.join(self.prefix, config.target_arch)
+            config._load_platform_config()
+            config._load_last_defaults()
+            config.validate_properties()
+            config._raw_environ = os.environ.copy()
+
+        self._restore_environment()
         self.setup_env()
-        self._create_path(self.local_sources)
-        self._create_path(self.sources)
+
+        # Store current os.environ data
+        for c in self.arch_config.values():
+            self._create_path(c.local_sources)
+            self._create_path(c.sources)
 
     def parse(self, filename, reset=True):
-        config = {'os': os}
+        config = {'os': os, '__file__': filename}
         if not reset:
             for prop in self._properties:
                 if hasattr(self, prop):
@@ -106,7 +137,8 @@ class Config (object):
             if key in config:
                 self.set_property(key, config[key], True)
 
-    def setup_env(self):
+    def do_setup_env(self):
+        self._restore_environment()
         self._create_path(self.prefix)
         self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
 
@@ -118,6 +150,10 @@ class Config (object):
         # set all the variables
         for e, v in self.env.iteritems():
             os.environ[e] = v
+
+    def setup_env(self):
+        for c in self.arch_config.values():
+            c.do_setup_env()
 
     def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables
@@ -164,7 +200,7 @@ class Config (object):
                'LDFLAGS': ldflags,
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
-               'DYLD_FALLBACK_LIBRARY_PATH': libdir,
+               'DYLD_FALLBACK_LIBRARY_PATH': '%s:%s' % (libdir, '/usr/lib'),
                'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
@@ -225,15 +261,16 @@ class Config (object):
             else:
                 raise ConfigurationError(_("Configuration file %s doesn't "
                                            "exists") % filename)
+
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
                                        self.target_platform)
         arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
                                    (self.target_platform, self.target_arch))
 
-        for config in [platform_config, arch_config]:
-            if os.path.exists(config):
-                self.parse(config, reset=False)
+        for config_path in [platform_config, arch_config]:
+            if os.path.exists(config_path):
+                self.parse(config_path, reset=False)
 
     def _load_last_defaults(self):
         cerbero_home = os.path.expanduser('~/cerbero')
@@ -277,6 +314,8 @@ class Config (object):
         self.set_property('use_configure_cache', False)
         self.set_property('external_recipes', {})
         self.set_property('external_packages', {})
+        self.set_property('universal_archs',
+                          [Architecture.X86, Architecture.X86_64])
 
     def validate_properties(self):
         if not validate_packager(self.packager):

@@ -337,22 +337,31 @@ class CookBook (object):
 
     def _load_recipe_from_file(self, filepath, custom=None):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
-        try:
-            d = {'Platform': Platform, 'Architecture': Architecture,
-                 'BuildType': BuildType, 'SourceType': SourceType,
-                 'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'License': License,
-                 'recipe': crecipe, 'os': os, 'BuildSteps': crecipe.BuildSteps,
-                 'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
-            execfile(filepath, d)
-            r = d['Recipe'](self._config)
-            r.__file__ = os.path.abspath(filepath)
-            r.prepare()
-            return r
-        except InvalidRecipeError:
-            pass
-        except Exception, ex:
-            import traceback
-            traceback.print_exc()
-            m.warning("Error loading recipe %s" % ex)
+        if self._config.target_arch == Architecture.UNIVERSAL:
+            recipe = crecipe.UniversalRecipe(self._config)
+        for c in self._config.arch_config.keys():
+            try:
+                d = {'Platform': Platform, 'Architecture': Architecture,
+                     'BuildType': BuildType, 'SourceType': SourceType,
+                     'Distro': Distro, 'DistroVersion': DistroVersion,
+                     'License': License, 'recipe': crecipe, 'os': os,
+                     'BuildSteps': crecipe.BuildSteps,
+                     'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
+                execfile(filepath, d)
+                r = d['Recipe'](self._config.arch_config[c])
+                r.__file__ = os.path.abspath(filepath)
+                r.prepare()
+                if self._config.target_arch == Architecture.UNIVERSAL:
+                    recipe.add_recipe(r)
+                else:
+                    return r
+            except InvalidRecipeError:
+                pass
+            except Exception, ex:
+                import traceback
+                traceback.print_exc()
+                m.warning("Error loading recipe %s" % ex)
+        if self._config.target_arch == Architecture.UNIVERSAL:
+            if not recipe.is_empty():
+                return recipe
         return None

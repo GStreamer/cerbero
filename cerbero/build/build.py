@@ -71,15 +71,17 @@ class CustomBuild(Build):
         pass
 
 
-def system_libs(func):
-    ''' Decorator to use system libs'''
+def modify_environment(func):
+    ''' Decorator to modify the build environment '''
     def call(*args):
         self = args[0]
+        append_env = self.append_env
+        new_env = {a:b for a, b in self.new_env.iteritems()}
         if self.use_system_libs and self.config.allow_system_libs:
-            self._add_system_libs()
+            self._add_system_libs(new_env)
+        old_env = self._modify_env(append_env, new_env)
         res = func(*args)
-        if self.use_system_libs and self.config.allow_system_libs:
-            self._restore_pkg_config_path()
+        self._restore_env(old_env)
         return res
 
     call.func_name = func.func_name
@@ -102,17 +104,19 @@ class MakefilesBase (Build):
     use_system_libs = False
     allow_parallel_build = True
     srcdir = '.'
+    append_env = {}
+    new_env = {}
 
     def __init__(self):
-        self._with_system_libs = False
         Build.__init__(self)
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
         if self.config.allow_parallel_build and self.allow_parallel_build \
                 and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
+        self._old_env = None
 
-    @system_libs
+    @modify_environment
     def configure(self):
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
                                           'prefix': to_unixpath(self.config.prefix),
@@ -123,38 +127,65 @@ class MakefilesBase (Build):
                                           'options': self.configure_options},
                     self.make_dir)
 
-    @system_libs
+    @modify_environment
     def compile(self):
         shell.call(self.make, self.make_dir)
 
-    @system_libs
+    @modify_environment
     def install(self):
         shell.call(self.make_install, self.make_dir)
 
-    @system_libs
+    @modify_environment
     def clean(self):
         shell.call(self.make_clean, self.make_dir)
 
-    @system_libs
+    @modify_environment
     def check(self):
         if self.make_check:
             shell.call(self.make_check, self.build_dir)
 
-    def _add_system_libs(self):
-        if self._with_system_libs:
-            # Don't mess the env too much
+    def _modify_env(self, append_env, new_env):
+        '''
+        Modifies the build environment appending the values in
+        append_env or replacing the values in new_env
+        '''
+        if self._old_env is not None:
+            return None
+
+        self._old_env = {}
+        for var in append_env.keys() + new_env.keys():
+            self._old_env[var] = os.environ[var]
+
+        for var, val in append_env.iteritems():
+            os.environ[var] += val
+
+        for var, val in new_env.iteritems():
+            if val is None:
+                del os.environ[var]
+            else:
+                os.environ[var] = val
+        return self._old_env
+
+    def _restore_env(self, old_env):
+        ''' Restores the old environment '''
+        if old_env is None:
             return
+
+        for var, val in old_env.iteritems():
+            os.environ[var] = val
+        self._old_env = None
+
+    def _add_system_libs(self, new_env):
+        '''
+        Delete PKG_CONFIG_LIBDIR, pointing to the installation prefix and
+        appends it to PKG_CONFIG_LIBDIR to allow pkg-config finding libraries
+        in the default system search path
+        '''
         self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
         self.pkgconfigpath = os.environ['PKG_CONFIG_PATH']
-        os.environ['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
+        new_env['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
                                                    self.pkgconfiglibdir)
-        del os.environ['PKG_CONFIG_LIBDIR']
-        self._with_system_libs = True
-
-    def _restore_pkg_config_path(self):
-        os.environ['PKG_CONFIG_PATH'] = self.pkgconfigpath
-        os.environ['PKG_CONFIG_LIBDIR'] = self.pkgconfiglibdir
-        self._with_system_libs = False
+        new_env['PKG_CONFIG_LIBDIR'] = None
 
 
 class Autotools (MakefilesBase):

@@ -6,10 +6,16 @@ class Recipe(recipe.Recipe):
     version = '2.10.1'
     licenses = [License.MIT]
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
-    platform_deps = { Platform.WINDOWS: ['libiconv'] }
+    platform_deps = { Platform.WINDOWS: ['libiconv'],
+                      Platform.LINUX: ['libiconv']}
 
     files_libs = ['libfontconfig']
-    files_etc = ['etc/fonts']
+    files_etc = [
+        'etc/fonts/conf.avail',
+        'etc/fonts/conf.d',
+        'etc/fonts/fonts.conf',
+        'etc/fonts/fonts.dtd',
+        ]
     files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
 
     def prepare(self):
