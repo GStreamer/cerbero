@@ -12,5 +12,5 @@ class Recipe(recipe.Recipe):
 
     files_devel = ['include/gstreamer-0.10/gst/rtsp-server', 'lib/pkgconfig/gst-rtsp-server-0.10.pc']
     files_libs = ['libgstrtspserver-0.10']
-    files_python = ['site-packages/gst-0.10/gst/rtspserver%(pext)s']
+#    files_python = ['site-packages/gst-0.10/gst/rtspserver%(pext)s']
 
