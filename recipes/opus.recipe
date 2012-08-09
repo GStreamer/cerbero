@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'opus'
     version = '0.9.14'
     licenses = [License.BSD_like]
+    autoreconf = True
 
     files_libs = ['libopus']
     files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']
