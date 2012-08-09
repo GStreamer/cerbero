@@ -20,6 +20,7 @@ import os
 import tempfile
 import shutil
 
+from cerbero.config import Architecture
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
 from cerbero.packages.osx.packagemaker import PackageMaker
@@ -101,8 +102,12 @@ class FrameworkBundlePackager(BundlePackagerBase):
         '''
         tmp = tempfile.mkdtemp()
 
-        vdir = 'Versions/%s/%s' % (self.package.sdk_version,
-                                  self.config.target_arch)
+        if self.config.target_arch == Architecture.UNIVERSAL:
+            arch_dir = ''
+        else:
+            arch_dir = self.config.target_arch
+
+        vdir = os.path.join('Versions', self.package.sdk_version, arch_dir)
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
 
