@@ -76,7 +76,7 @@ def modify_environment(func):
     def call(*args):
         self = args[0]
         append_env = self.append_env
-        new_env = {a:b for a, b in self.new_env.iteritems()}
+        new_env = self.new_env.copy()
         if self.use_system_libs and self.config.allow_system_libs:
             self._add_system_libs(new_env)
         old_env = self._modify_env(append_env, new_env)
