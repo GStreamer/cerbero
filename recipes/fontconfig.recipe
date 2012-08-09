@@ -11,10 +11,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libfontconfig']
     files_etc = [
-        'etc/fonts/conf.avail',
         'etc/fonts/conf.d',
         'etc/fonts/fonts.conf',
-        'etc/fonts/fonts.dtd',
         ]
     files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
 
