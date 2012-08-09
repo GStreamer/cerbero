@@ -142,7 +142,7 @@ class LinuxPackagesTest(unittest.TestCase):
         tmpdir = tempfile.mkdtemp()
         config.prefix = tmpdir
         config.load_defaults()
-        config.setup_env()
+        config.do_setup_env()
         env = config.get_env(tmpdir, os.path.join(tmpdir, 'lib'),
                              config.py_prefix)
         for k, v in env.iteritems():

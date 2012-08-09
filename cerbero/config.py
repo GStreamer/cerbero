@@ -113,8 +113,7 @@ class Config (object):
             config.validate_properties()
             config._raw_environ = os.environ.copy()
 
-        self._restore_environment()
-        self.setup_env()
+        self.do_setup_env()
 
         # Store current os.environ data
         for c in self.arch_config.values():
@@ -150,10 +149,6 @@ class Config (object):
         # set all the variables
         for e, v in self.env.iteritems():
             os.environ[e] = v
-
-    def setup_env(self):
-        for c in self.arch_config.values():
-            c.do_setup_env()
 
     def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables
