@@ -108,6 +108,13 @@ class Recipe(recipe.Recipe):
              '%(sdir)s/libgstphotography-0.10%(sext)s',
             ]
 
+
+    platform_files_capture = {
+        Platform.LINUX: [
+             'lib/gstreamer-0.10/libgstdvb%(mext)s',
+            ]
+    }
+
     files_vis = [
              'lib/gstreamer-0.10/libgstaudiovisualizers%(mext)s',
             ]
