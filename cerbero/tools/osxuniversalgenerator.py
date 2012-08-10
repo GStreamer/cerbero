@@ -20,6 +20,7 @@
 import os
 import subprocess
 import shutil
+import tempfile
 
 from cerbero.utils import shell
 from cerbero.tools.osxrelocator import OSXRelocator
@@ -72,6 +73,8 @@ class OSXUniversalGenerator(object):
 
         '''
         self.output_root = output_root
+        if self.output_root.endswith('/'):
+            self.output_root = self.output_root[:-1]
         self.missing = []
 
     def merge_files(self, filelist, dirs):
@@ -86,12 +89,24 @@ class OSXUniversalGenerator(object):
         self.parse_dirs(input_roots)
 
     def create_universal_file(self, output, inputlist, dirs):
+        tmp_inputs = []
+        # relocate all files with the prefix of the merged file.
+        # which must be done before merging them.
+        for f in inputlist:
+            # keep the filename in the suffix to preserve the filename extension
+            tmp = tempfile.NamedTemporaryFile(suffix=os.path.basename(f))
+            tmp_inputs.append(tmp)
+            shutil.copy(f, tmp.name)
+            prefix_to_replace = [d for d in dirs if d in f][0]
+            relocator = OSXRelocator (self.output_root, prefix_to_replace, self.output_root,
+                                      False)
+            # since we are using a temporary file, we must force the library id
+            # name to real one and not based on the filename
+            relocator.relocate_file(tmp.name,
+                    id=f.replace(prefix_to_replace, self.output_root))
         cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
-               ' '.join(inputlist), output)
+            ' '.join([f.name for f in tmp_inputs]), output)
         self._call(cmd)
-        relocator = OSXRelocator (self.output_root, dirs[0], self.output_root,
-                                  False)
-        relocator.relocate_file(output)
 
     def get_file_type(self, filepath):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
