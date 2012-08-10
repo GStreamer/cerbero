@@ -38,21 +38,23 @@ class OSXRelocator(object):
 
     def __init__(self, root, lib_prefix, new_lib_prefix, recursive):
         self.root = root
-        self.lib_prefix = lib_prefix
-        self.new_lib_prefix = new_lib_prefix
+        self.lib_prefix = self._fix_path(lib_prefix)
+        self.new_lib_prefix = self._fix_path(new_lib_prefix)
         self.recursive = recursive
 
     def relocate(self):
         self.parse_dir(self.root)
 
-    def relocate_file(self, object_file):
+    def relocate_file(self, object_file, id=None):
         self.change_libs_path(object_file)
-        self.change_id(object_file)
+        self.change_id(object_file, id)
 
-    def change_id(self, object_file):
-        if not os.path.split(object_file)[1] in ['so', 'dylib']:
+    def change_id(self, object_file, id=None):
+        id = id or object_file.replace(self.lib_prefix, self.new_lib_prefix)
+        filename = os.path.basename(object_file)
+        if not (filename.endswith('so') or filename.endswith('dylib')):
             return
-        cmd = '%s -id %s %s' % (INT_CMD, object_file, object_file)
+        cmd = '%s -id %s %s' % (INT_CMD, id, object_file)
         shell.call(cmd)
 
     def change_libs_path(self, object_file):
@@ -91,6 +93,11 @@ class OSXRelocator(object):
         # the library name ends with ':'
         lib_name = res[:-1]
         return lib_name
+
+    def _fix_path(self, path):
+        if path.endswith('/'):
+            return path[:-1]
+        return path
 
 
 
