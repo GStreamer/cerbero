@@ -189,7 +189,10 @@ class OSXUniversalGenerator(object):
 
     def _copy_and_replace_paths(self, src, dest, dirs):
         self._copy(src, dest)
-        shell.replace(dest, {d:self.output_root for d in dirs})
+        replacements = {}
+        for d in dirs:
+            replacements[d]=self.output_root
+        shell.replace(dest, replacements)
 
     def _link(self, src, dest, filepath):
         if not os.path.exists(os.path.dirname(dest)):
