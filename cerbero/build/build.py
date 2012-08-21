@@ -20,7 +20,8 @@ import os
 
 from cerbero.config import Platform
 from cerbero.utils import shell, to_unixpath
-
+from cerbero.utils import messages as m
+import shutil
 
 class Build (object):
     '''
@@ -204,6 +205,20 @@ class Autotools (MakefilesBase):
     supports_cache_variables = True
 
     def configure(self):
+        files = shell.check_call('find %s -type f -name config.guess' % self.make_dir).split('\n')
+	files.remove('')
+        for f in files:
+		o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.guess')
+	  	m.action("copying %s to %s" % (o, f))
+		shutil.copy(o, f)
+
+        files = shell.check_call('find %s -type f -name config.sub' % self.make_dir).split('\n')
+	files.remove('')
+        for f in files:
+		o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.sub')
+	  	m.action("copying %s to %s" % (o, f))
+		shutil.copy(o, f)
+
         if self.supports_non_src_build:
             self.config_sh = os.path.join(self.repo_dir, self.config_sh)
         # skip configure if we are already configured
