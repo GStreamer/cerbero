@@ -1,0 +1,11 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, Dist
+
+target_platform = Platform.ANDROID
+target_distro = Distro.ANDROID
+target_distro_version =DistroVersion.ANDROID_JELLY_BEAN
+target_arch = Platform.ARM
+
+host = "arm-linux-androideabi"
+toolchain_prefix = "/path/to/android-ndk-r8b"
+
