@@ -40,6 +40,8 @@ class FilesProvider(object):
             'mext': '.dll', 'smext': '.a', 'pext': '.pyd'},
         Platform.LINUX: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so'},
+        Platform.ANDROID: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
+            'mext': '.so', 'smext': '.a', 'pext': '.so'},
         Platform.DARWIN: {'bext': '', 'sext': '.*.dylib', 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so'}}
 
