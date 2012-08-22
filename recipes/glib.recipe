@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     can_use_configure_cache = False
     platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
                      Platform.DARWIN: ['libiconv', 'gettext'],
-                     Platform.ANDROID: ['libiconv']}
+                     Platform.ANDROID: ['libiconv', 'gettext']}
 
     files_libs = [
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
@@ -52,7 +52,10 @@ class Recipe(recipe.Recipe):
         return flags
          
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
+        if self.config.target_platform == Platform.ANDROID:
+            # Hack to fix building of the glib/tests/private test
+            self.make = '%s private_LDFLAGS=""' % self.make
+        elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
         elif self.config.target_platform == Platform.DARWIN:
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'

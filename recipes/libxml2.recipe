@@ -7,7 +7,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
-
     files_libs = ['libxml2']
     files_devel = ['include/libxml2', 'lib/xml2Conf.sh', 'bin/xml2-config',
                    'lib/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
@@ -16,3 +15,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--without-threads'
+        elif self.config.target_platform == Platform.ANDROID:
+            self.configure_options = '--with-python=no'
