@@ -187,7 +187,11 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path:
+        if self.target_arch != self.arch or self.target_platform != self.platform:
+	    path = path.replace(":" + bindir + ":", ":")
+	    path = path.replace(bindir + ":", "")
+	    path = path.replace(":" + bindir, "")
+        elif bindir not in path:
             path = self._join_path(bindir, path)
 
         # Most of these variables are extracted from jhbuild
