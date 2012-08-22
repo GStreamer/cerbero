@@ -151,6 +151,7 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
             from cerbero.utils.msbuild import MSBuild
+            from cerbero.utils import messages as m
             solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
             root = self.prefix.rsplit('/', 1)[0]
             msbuild  = MSBuild(solution, self.config.target_arch,
@@ -158,5 +159,4 @@ class Recipe(recipe.Recipe):
             try:
                 msbuild.build()
             except Exception, e:
-                m.error("The Direct Show plugins will not be built")
-                m.error(e)
+                m.error("The Direct Show plugins will not be built.")

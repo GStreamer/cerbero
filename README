@@ -33,7 +33,7 @@ On OSX you will need to have XCode installed and macports (used to install pkg-c
 
 Windows
 -------
-The initial setup on Windows is little bit longer, but only a few programs are required.
+The initial setup on Windows is a little bit longer, but only a few programs are required.
   * Python2.7: http://www.python.org/getit/releases/2.7/
   * Git: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
     IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
@@ -42,6 +42,12 @@ The initial setup on Windows is little bit longer, but only a few programs are r
   * CMake: http://www.cmake.org/cmake/resources/software.html
     Select the option "Add CMake in system path for the current user"
   * Yasm: http://yasm.tortall.net/Download.html
+
+The Direct Show plugins still needs to be built using Microsoft's compiler and their SDK,
+due to the dependency on the Direct Show base classes.
+You will to install the following software:
+  * Microsoft SDK 7.1: http://www.microsoft.com/es-es/download/details.aspx?id=27570
+  * Windows Driver Kit 7.1.0: http://msdn.microsoft.com/en-us/windows/hardware/hh852365
 
 cerbero must be run in the MingGW shell, which is accessible from the main menu
 The last step is making python and git available from the shell, for which you will need
