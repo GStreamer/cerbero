@@ -155,4 +155,8 @@ class Recipe(recipe.Recipe):
             root = self.prefix.rsplit('/', 1)[0]
             msbuild  = MSBuild(solution, self.config.target_arch,
                                GSTREAMER_SDK_ROOT=root)
-            msbuild.build()
+            try:
+                msbuild.build()
+            except Exception, e:
+                m.error("The Direct Show plugins will not be built")
+                m.error(e)
