@@ -207,6 +207,8 @@ class OSXUniversalGenerator(object):
         rel_target = os.path.relpath(target, src_prefix)
         dest_target = os.path.join(dest_prefix, rel_target)
         if not os.path.exists(dest_target):
+            if not os.path.exists(os.path.dirname(dest_target)):
+                os.makedirs(os.path.dirname(dest_target))
             shutil.copy(target, dest_target)
         os.symlink(dest_target, dest)
 
