@@ -272,19 +272,29 @@ class UniversalRecipe(object):
         return len(self._recipes) == 0
 
     def merge(self):
-        inputs = []
+        arch_inputs = {}
         for arch, recipe in self._recipes.iteritems():
             # change the prefix temporarly to the arch prefix where files are
             # actually installed
             recipe.config.prefix = os.path.join(self.config.prefix, arch)
-            inputs.extend(recipe.files_list())
+            arch_inputs[arch] = set(recipe.files_list())
             recipe.config.prefix = self._config.prefix
-        inputs = sorted(list(set(inputs)))
-        output = self._config.prefix
 
+        # merge the common files
+        inputs = reduce(lambda x, y: x & y, arch_inputs.values())
+        output = self._config.prefix
         generator = OSXUniversalGenerator(output)
-        generator.merge_files(inputs, [os.path.join(self.config.prefix, arch)
-                                       for arch in self._recipes.keys()])
+        generator.merge_files(list(inputs),
+                [os.path.join(self._config.prefix, arch) for arch in
+                 self._recipes.keys()])
+
+        # merge the architecture specific files
+        for arch in self._recipes.keys():
+            ainputs = list(inputs ^ arch_inputs[arch])
+            output = self._config.prefix
+            generator = OSXUniversalGenerator(output)
+            generator.merge_files(ainputs,
+                    [os.path.join(self._config.prefix, arch)])
 
     @property
     def steps(self):
