@@ -201,15 +201,19 @@ class OSXUniversalGenerator(object):
             return #link exists, skip it
 
         # read the link, and extract the relative filepath
-        target = os.path.join(os.path.dirname(src), os.readlink(src))
+        target = os.readlink(src)
+
+        # if it's a relative path use it directly
+        if not os.path.isabs(target):
+            os.symlink(target, dest)
+            return
+
+        # if it's an absolute path replace the prefix
+        target = os.path.join(os.path.dirname(src), target)
         src_prefix = src.split(filepath)[0]
         dest_prefix = dest.split(filepath)[0]
         rel_target = os.path.relpath(target, src_prefix)
         dest_target = os.path.join(dest_prefix, rel_target)
-        if not os.path.exists(dest_target):
-            if not os.path.exists(os.path.dirname(dest_target)):
-                os.makedirs(os.path.dirname(dest_target))
-            shutil.copy(target, dest_target)
         os.symlink(dest_target, dest)
 
     def _call(self, cmd, cwd=None):
