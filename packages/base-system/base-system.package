@@ -19,7 +19,7 @@ class Package(package.Package):
              'glib:libs:lang:bins', 'orc:libs', 'pango:libs:modules',
              'libpng:libs', 'tiff:libs', 'jpeg:libs',
              'libxml2:libs', 'libxslt:libs', 'pixman:libs',
-             'zlib:libs', 'bzip2:libs', 'libcroco:libs', librsvg:libs:loader]
+             'zlib:libs', 'bzip2:libs', 'libcroco:libs', 'librsvg:libs:loader']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
