@@ -17,9 +17,9 @@ class Package(package.Package):
 
     files = ['gst-plugins-base:capture',
              'gst-plugins-good:capture',
-	     'gst-plugins-ugly:capture',
-	     'gst-plugins-bad:capture']
+             'gst-plugins-ugly:capture',
+             'gst-plugins-bad:capture']
     files_devel = ['gst-plugins-base-static:capture_devel'
                    'gst-plugins-good-static:capture_devel',
                    'gst-plugins-ugly-static:capture_devel',
-		   'gst-plugins-bad-static:capture_devel']
+                   'gst-plugins-bad-static:capture_devel']
