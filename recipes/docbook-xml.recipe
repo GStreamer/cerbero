@@ -7,6 +7,8 @@ class Recipe(recipe.Recipe):
     licenses = []
     btype = BuildType.CUSTOM
 
+    files_catalog = ['etc/catalog.xml']
+
     def install(self):
         etc_path =  os.path.join(self.config.prefix, 'etc')
         if not os.path.exists(etc_path):
