@@ -213,9 +213,10 @@ def ls_files(files, prefix):
     return list(set(sfiles))
 
 
-def find_newer_files(prefix, compfile):
-    sfiles = check_call('find -L * -type f -newer %s' % compfile,
-        prefix, True, False, False).split('\n')
+def find_newer_files(prefix, compfile, include_link=False):
+    include_links = include_link and '-L' or ''
+    cmd = 'find %s * -type f -newer %s' % (include_links, compfile)
+    sfiles = check_call(cmd, prefix, True, False, False).split('\n')
     sfiles.remove('')
     return sfiles
 
