@@ -18,6 +18,9 @@
 
 import os
 import logging
+import shutil
+import tempfile
+import time
 
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
@@ -26,6 +29,7 @@ from cerbero.errors import FatalError
 from cerbero.ide.vs.genlib import GenLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.utils import N_, _
+from cerbero.utils import shell
 
 
 class MetaRecipe(type):
@@ -269,14 +273,18 @@ class UniversalRecipe(object):
 
     def merge(self):
         inputs = []
-        for c,v in self._recipes.iteritems():
-            inputs.extend(v.files_list())
+        for arch, recipe in self._recipes.iteritems():
+            # change the prefix temporarly to the arch prefix where files are
+            # actually installed
+            recipe.config.prefix = os.path.join(self.config.prefix, arch)
+            inputs.extend(recipe.files_list())
+            recipe.config.prefix = self._config.prefix
         inputs = sorted(list(set(inputs)))
         output = self._config.prefix
 
         generator = OSXUniversalGenerator(output)
-        generator.merge_files(inputs,
-                             [r.config.prefix for r in self._recipes.values()])
+        generator.merge_files(inputs, [os.path.join(self.config.prefix, arch)
+                                       for arch in self._recipes.keys()])
 
     @property
     def steps(self):
@@ -292,7 +300,48 @@ class UniversalRecipe(object):
         return getattr(self._proxy_recipe, name)
 
     def _do_step(self, step):
-        for c, v in self._recipes.iteritems():
-            self._config.arch_config[c].do_setup_env()
-            stepfunc = getattr(v, step)
+        # For the universal build we need to configure both architectures with
+        # with the same final prefix, but we want to install each architecture
+        # on a different path (eg: /path/to/prefix/x86).
+
+        archs_prefix = [os.path.join(self._config.prefix, a) for a in
+                        self._recipes.keys()]
+
+        for arch, recipe in self._recipes.iteritems():
+            config = self._config.arch_config[arch]
+            config.do_setup_env()
+            stepfunc = getattr(recipe, step)
+
+            # Create a stamp file to list installed files based on the
+            # modification time of this file
+            if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
+                tmp = tempfile.NamedTemporaryFile()
+                # the modification time resolution depends on the filesystem,
+                # where FAT32 has a resolution of 2 seconds and ext4 1 second
+                t = time.time() - 2
+                os.utime(tmp.name, (t, t))
+
+            # Call the step function
             stepfunc()
+
+            # Move installed files to the architecture prefix
+            if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
+                installed_files = shell.find_newer_files(self._config.prefix,
+                                                         tmp.name, True)
+                for f in installed_files:
+
+                    def in_arch_prefix(src):
+                        for p in archs_prefix:
+                            if p in src:
+                                return True
+                        return False
+
+                    src = os.path.join(self._config.prefix, f)
+                    # skip files that are installed in the arch prefix
+                    if in_arch_prefix(src):
+                        continue
+
+                    dest = os.path.join(self._config.prefix, recipe.config.target_arch, f)
+                    if not os.path.exists(os.path.dirname(dest)):
+                        os.makedirs(os.path.dirname(dest))
+                    shutil.move(src, dest)

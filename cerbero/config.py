@@ -107,7 +107,6 @@ class Config (object):
             config._restore_environment()
             if self.target_arch == Architecture.UNIVERSAL:
                 config.sources = os.path.join(self.sources, config.target_arch)
-                config.prefix = os.path.join(self.prefix, config.target_arch)
             config._load_platform_config()
             config._load_last_defaults()
             config.validate_properties()
