@@ -2,7 +2,7 @@
 
 
 class Recipe(recipe.Recipe):
-    name = 'libsrvg'
+    name = 'librsvg'
     version = '2.36.1'
     licenses = [License.LGPLv2]
     deps = ['gdk-pixbuf', 'libcroco', 'pango', 'cairo']
