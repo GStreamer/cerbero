@@ -5,3 +5,6 @@ _trial_temp
 cerbero.egg-info
 /dist
 MANIFEST.in
+*.pkg
+*.dmg
+.DS_Store
