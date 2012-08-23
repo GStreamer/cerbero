@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'libsrvg'
+    version = '2.36.1'
+    licenses = [License.LGPLv2]
+    deps = ['gdk-pixbuf', 'libcroco', 'pango', 'cairo']
+    configure_options = '--enable-introspection=no'
+
+    files_libs = ['librsvg']
+    files_bins = ['rsvg-convert']
+    files_loader = ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
+    files_devel = ['include/librsvg-2.0/librsvg',
+                   'lib/pkgconfig/librsvg-2.0.pc']
