@@ -46,7 +46,6 @@ class FilesProvider(object):
     def __init__(self, config):
         self.config = config
         self.platform = config.target_platform
-        self.prefix = config.prefix
         self.extensions = self.EXTENSIONS[self.platform]
         self.py_prefix = config.py_prefix
         self.categories = self._files_categories()
@@ -145,10 +144,10 @@ class FilesProvider(object):
         # replace extensions
         fs = [f % self.extensions for f in files]
         # fill directories
-        dirs = [x for x in fs if os.path.isdir(os.path.join(self.prefix, x))]
+        dirs = [x for x in fs if os.path.isdir(os.path.join(self.config.prefix, x))]
         for directory in dirs:
             fs.remove(directory)
-            fs.extend(self._ls_dir(os.path.join(self.prefix, directory)))
+            fs.extend(self._ls_dir(os.path.join(self.config.prefix, directory)))
         # fill paths with pattern expansion *
         paths = [x for x in fs if '*' in x]
         if len(paths) != 0:
@@ -249,7 +248,7 @@ class FilesProvider(object):
     def _ls_dir(self, dirpath):
         files = []
         for root, dirnames, filenames in os.walk(dirpath):
-            _root = root.split(self.prefix)[1]
+            _root = root.split(self.config.prefix)[1]
             if _root[0] == '/':
                 _root = _root[1:]
             files.extend([os.path.join(_root, x) for x in filenames])
