@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     def install(self):
         import shutil
         from cerbero.commands.genvsprops import GenVSProps
-        env_var = ('GSTREAMER_SDK_ROOT_%s' % self.config.arch).upper()
+        env_var = ('GSTREAMER_SDK_ROOT_%s' % self.config.target_arch).upper()
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, os.path.join(self.config.prefix,
                            self.files_devel[0], 'libs'), env_var)
