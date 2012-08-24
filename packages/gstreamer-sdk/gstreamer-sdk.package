@@ -43,7 +43,6 @@ class SDKPackage(package.SDKPackage):
               ]
     platform_packages = {
             Platform.WINDOWS: [('vsintegration', True, False)],
-            Platform.DARWIN: [('gstreamer-xcode-integration', False, True)],
             }
 
     install_dir = {
