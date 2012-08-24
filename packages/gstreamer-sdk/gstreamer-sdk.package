@@ -8,7 +8,7 @@ class SDKPackage(package.SDKPackage):
     longdesc = "GStreamer SDK"
     title = "GStreamer SDK"
     url = "http://www.gstreamer.com"
-    version = '2012.7'
+    version = '2012.9'
     sdk_version = '0.10'
     codename = 'Amazon'
     license = License.LGPL

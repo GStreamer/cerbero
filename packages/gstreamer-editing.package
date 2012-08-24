@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gstreamer-editing'
     shortdesc = 'GStreamer plugins and libraries for editing'
     url = "http://www.gstreamer.com"
-    version = '2012.7'
+    version = '2012.9'
     codename = 'Amazon'
     license = License.LGPL
     vendor = 'GStreamer Project'
