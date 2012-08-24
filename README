@@ -46,7 +46,7 @@ The initial setup on Windows is a little bit longer, but only a few programs are
 The Direct Show plugins still needs to be built using Microsoft's compiler and their SDK,
 due to the dependency on the Direct Show base classes.
 You will to install the following software:
-  * Microsoft SDK 7.1: http://www.microsoft.com/es-es/download/details.aspx?id=27570
+  * Microsoft SDK 7.1: http://www.microsoft.com/en-us/download/details.aspx?id=8279
   * Windows Driver Kit 7.1.0: http://msdn.microsoft.com/en-us/windows/hardware/hh852365
 
 cerbero must be run in the MingGW shell, which is accessible from the main menu
