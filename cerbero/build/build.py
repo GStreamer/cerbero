@@ -154,7 +154,8 @@ class MakefilesBase (Build):
 
         self._old_env = {}
         for var in append_env.keys() + new_env.keys():
-            self._old_env[var] = os.environ[var]
+            if var in os.environ:
+                self._old_env[var] = os.environ[var]
 
         for var, val in append_env.iteritems():
             os.environ[var] += val
