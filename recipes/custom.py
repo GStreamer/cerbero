@@ -70,6 +70,6 @@ class GStreamerStatic(recipe.Recipe):
         # generated with the shared build
         for f in self._files_list:
             f_no_static = f.replace('/static/', '/')
-            shutil.copy(os.path.join(self.tmp_destdir,
+            shutil.copyfile(os.path.join(self.tmp_destdir,
                 to_unixpath(self.config.prefix)[1:], f_no_static),
                 os.path.join(self.config.prefix, f))
