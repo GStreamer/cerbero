@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.36.1'
     licenses = [License.LGPLv2]
-    deps = ['gdk-pixbuf', 'libcroco', 'pango', 'cairo']
+    deps = ['gdk-pixbuf', 'libcroco', 'gtk+']
     configure_options = '--enable-introspection=no'
 
     files_libs = ['librsvg']
