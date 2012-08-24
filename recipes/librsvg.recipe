@@ -13,3 +13,7 @@ class Recipe(recipe.Recipe):
     files_loader = ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
     files_devel = ['include/librsvg-2.0/librsvg',
                    'lib/pkgconfig/librsvg-2.0.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += ' --disable-Bsymbolic'
