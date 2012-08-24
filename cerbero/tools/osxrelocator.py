@@ -71,8 +71,10 @@ class OSXRelocator(object):
                 if filters is not None and os.path.splitext(f)[1] not in filters:
                     continue
                 self.change_libs_path(os.path.join(dirpath, f))
-            if not self.recursive:
-                break
+            if self.recursive:
+                for dirname in dirnames:
+                     self.parse_dir(self, os.path.join(dir_path, dirname),
+                                   filters)
 
     @staticmethod
     def list_shared_libraries(object_file):
