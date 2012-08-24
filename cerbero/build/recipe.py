@@ -256,6 +256,7 @@ class UniversalRecipe(object):
         self._config = config
         self._recipes = {}
         self._proxy_recipe = None
+        self._stamp = None
 
     def add_recipe(self, recipe):
         '''
@@ -295,6 +296,7 @@ class UniversalRecipe(object):
             generator = OSXUniversalGenerator(output)
             generator.merge_files(ainputs,
                     [os.path.join(self._config.prefix, arch)])
+        self._stamp = None
 
     @property
     def steps(self):
@@ -317,27 +319,29 @@ class UniversalRecipe(object):
         archs_prefix = [os.path.join(self._config.prefix, a) for a in
                         self._recipes.keys()]
 
+        if self._stamp == None:
+            # Create a stamp file to list installed files based on the
+            # modification time of this file
+            self._stamp = tempfile.NamedTemporaryFile()
+            # the modification time resolution depends on the filesystem,
+            # where FAT32 has a resolution of 2 seconds and ext4 1 second
+            t = time.time() - 2
+            os.utime(self._stamp.name, (t, t))
+
         for arch, recipe in self._recipes.iteritems():
             config = self._config.arch_config[arch]
             config.do_setup_env()
             stepfunc = getattr(recipe, step)
-
-            # Create a stamp file to list installed files based on the
-            # modification time of this file
-            if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
-                tmp = tempfile.NamedTemporaryFile()
-                # the modification time resolution depends on the filesystem,
-                # where FAT32 has a resolution of 2 seconds and ext4 1 second
-                t = time.time() - 2
-                os.utime(tmp.name, (t, t))
 
             # Call the step function
             stepfunc()
 
             # Move installed files to the architecture prefix
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
+                # FIXME: gets slower when the number of files increases in the
+                # prefix.
                 installed_files = shell.find_newer_files(self._config.prefix,
-                                                         tmp.name, True)
+                                                         self._stamp.name, True)
                 for f in installed_files:
 
                     def in_arch_prefix(src):
