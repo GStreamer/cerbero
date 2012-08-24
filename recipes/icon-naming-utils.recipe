@@ -5,3 +5,7 @@ class Recipe(recipe.Recipe):
     version = '0.8.7'
     licenses = [License.GPLv2]
     deps = ['XML-Simple']
+
+    files_devel = ['libexec/icon-name-mapping', 'share/dtds/legacy-icon-mapping.dtd',
+                   'share/pkgconfig/icon-naming-utils.pc',
+                   'share/icon-naming-utils/legacy-icon-mapping.xml']
