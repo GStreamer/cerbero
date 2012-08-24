@@ -26,7 +26,8 @@ class Recipe(recipe.Recipe):
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
         'libgthread-2.0']
     files_bins = ['gsettings', 'gdbus', 'gio-querymodules', 'glib-compile-schemas']
-    files_gio = ['lib/gio/modules']
+    #FIXME: Fill it when needed
+    #files_gio = ['lib/gio/modules']
     files_devel = [
         'bin/glib-gettextize%(bext)s',
         'bin/glib-mkenums%(bext)s',
