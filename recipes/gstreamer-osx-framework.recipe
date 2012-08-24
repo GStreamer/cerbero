@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
         fwlib = FrameworkLibrary()
         install_name = os.path.join(self.config.prefix, 'lib', 'GStreamer')
         libs = ['gstreamer-0.10', 'gstreamer-app-0.10', 'gstreamer-audio-0.10',
-                'gstreamer-base-0.10', 'gstreamer-cdda-0.10', 'gstreamer-codecparsers-0.10',
+                'gstreamer-base-0.10', 'gstreamer-cdda-0.10',
                 'gstreamer-controller-0.10', 'gstreamer-dataprotocol-0.10', 'gstreamer-fft-0.10',
                 'gstreamer-floatcast-0.10', 'gstreamer-interfaces-0.10', 'gstreamer-net-0.10',
                 'gstreamer-netbuffer-0.10', 'gstreamer-pbutils-0.10', 'gstreamer-riff-0.10',
