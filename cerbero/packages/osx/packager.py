@@ -376,20 +376,11 @@ class ApplicationPackage(PackagerBase):
         prefix = self.config.prefix
         if prefix[-1] == '/':
             prefix = prefix[:-1]
-        for path in ['bin']:
+        for path in ['bin', 'lib', 'libexec']:
             relocator = OSXRelocator(
                     os.path.join(self.tmp, 'Contents', 'Home', path),
                     self.config.prefix, '@executable_path/../', True)
             relocator.relocate()
-        for path in ['lib', 'libexec']:
-            relocator = OSXRelocator(
-                    os.path.join(self.tmp, 'Contents', 'Home', path),
-                    self.config.prefix, '@loader_path/../', True)
-            relocator.relocate()
-        relocator = OSXRelocator(
-                    os.path.join(self.tmp, 'Contents', 'MacOS', path),
-                    self.config.prefix, '@executable_path/../Home/', False)
-        relocator.relocate()
 
     def _create_dmg(self):
         #applications_link = os.path.join(self.tmp, 'Applications')
