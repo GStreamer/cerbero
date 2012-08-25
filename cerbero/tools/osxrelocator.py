@@ -73,7 +73,7 @@ class OSXRelocator(object):
                 self.change_libs_path(os.path.join(dirpath, f))
             if self.recursive:
                 for dirname in dirnames:
-                     self.parse_dir(self, os.path.join(dir_path, dirname),
+                     self.parse_dir(os.path.join(dir_path, dirname),
                                    filters)
 
     @staticmethod
