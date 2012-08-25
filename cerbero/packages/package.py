@@ -492,8 +492,10 @@ class App(PackageBase):
     def recipes_dependencies(self):
         deps = []
         for dep in self.deps:
-            for package in self.store.get_package_deps(dep, True):
-                deps.extend(package.recipes_dependencies())
+            package = self.store.get_package(dep)
+            deps.extend(package.recipes_dependencies())
+        if self.app_recipe is not None:
+            deps.append(self.app_recipe)
         return list(set(deps))
 
     def files_list(self):
