@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
         shell.call('ln -s %s %s' % (libdir, archlibdir), fail=False)
 
         # Install DirectX headers
-        directx_headers = os.path.join(self.prefix, self.host, 'include', 'directx')
+        directx_headers = os.path.join(self.config.prefix, self.host, 'include', 'directx')
         if not os.path.exists(directx_headers):
             os.makedirs(directx_headers)
         shell.call('cp mingw-w64-headers/direct-x/include/* %s' % directx_headers,
