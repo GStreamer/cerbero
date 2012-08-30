@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     deps = ['gdk-pixbuf', 'libcroco', 'gtk+']
     configure_options = '--enable-introspection=no'
 
-    files_libs = ['librsvg']
+    files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
     files_loader = ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
     files_devel = ['include/librsvg-2.0/librsvg',
