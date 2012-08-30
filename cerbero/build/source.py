@@ -133,15 +133,16 @@ class GitCache (Source):
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
 
-    def fetch(self):
+    def fetch(self, checkout=True):
         if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
         for remote, url in self.remotes.iteritems():
             git.add_remote(self.repo_dir, remote, url)
         # fetch remote branches
         git.fetch(self.repo_dir, fail=False)
-        commit = self.config.force_git_commit or self.commit
-        git.checkout(self.repo_dir, commit)
+        if checkout:
+            commit = self.config.force_git_commit or self.commit
+            git.checkout(self.repo_dir, commit)
 
 
 class LocalTarball (GitCache):

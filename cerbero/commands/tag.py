@@ -59,7 +59,7 @@ class Tag(Command):
                         "skipping") % recipe.name)
                 continue
 
-            recipe.fetch()
+            recipe.fetch(checkout=False)
 
             tags = git.list_tags(recipe.repo_dir)
             exists = (tagname in tags)
