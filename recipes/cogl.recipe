@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = "--disable-introspection "
     use_system_libs = True
-    deps = [ 'gdk-pixbuf' ]
+    deps = [ 'pango', 'gdk-pixbuf' ]
 
     files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [
