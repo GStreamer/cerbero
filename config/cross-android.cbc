@@ -1,11 +1,10 @@
 import os
-from cerbero.config import Platform, Architecture, Distro, Dist
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
 
 target_platform = Platform.ANDROID
 target_distro = Distro.ANDROID
 target_distro_version =DistroVersion.ANDROID_JELLY_BEAN
-target_arch = Platform.ARM
+target_arch = Architecture.ARM
 
 host = "arm-linux-androideabi"
-toolchain_prefix = "/path/to/android-ndk-r8b"
-
+toolchain_prefix = os.path.expanduser("~/android-ndk-r8b")
