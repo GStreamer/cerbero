@@ -9,3 +9,8 @@ class Recipe(recipe.Recipe):
     files_bins = ['extract_dca', 'extract_dcs', 'dcadec', 'dcsdec']
     files_devel = ['include/dca.h', 'include/dts.h',
                    'lib/pkgconfig/libdca.pc', 'lib/pkgconfig/libdts.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True
+            self.configure_options += ' --disable-oss'

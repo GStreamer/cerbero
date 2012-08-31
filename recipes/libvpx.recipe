@@ -44,6 +44,10 @@ class Recipe(recipe.Recipe):
                 platform = 'win64'
             else:
                 platform = 'win32'
+        # FIXME:
+        elif self.config.target_platform == Platform.ANDROID:
+                arch = 'armv5te'
+                platform = 'android'
         else:
             self.configure_options += '--enable-shared '
             platform = 'linux'

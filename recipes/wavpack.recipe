@@ -1,14 +1,20 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
     version = '4.60.1'
     licenses = [License.BSD_like]
-    platform_deps = { Platform.WINDOWS: ['libiconv'],
-                      Platform.ANDROID: ['libiconv'] }
-    autoreconf = True
+    platform_deps = { Platform.WINDOWS: ['libiconv'] }
 
     files_libs = ['libwavpack']
     files_bins = ['wavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
+
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
+                {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
+        super(Recipe, self).configure()
+

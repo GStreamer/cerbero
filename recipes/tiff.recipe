@@ -15,3 +15,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/tiffvers.h', 'include/tiffio.h', 'include/tiff.h',
         'include/tiffconf.h', 'include/tiffio.hxx',
         'lib/pkgconfig/libtiff-4.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-cxx'

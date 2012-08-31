@@ -9,3 +9,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libkate', 'liboggkate']
     files_devel = ['include/kate', 'lib/pkgconfig/kate.pc', 'lib/pkgconfig/oggkate.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True

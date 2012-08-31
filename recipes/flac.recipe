@@ -27,3 +27,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
                 self.configure_options += ' --disable-asm-optimizations'
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True
+            self.configure_options += ' --disable-cpplibs'

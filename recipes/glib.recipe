@@ -55,6 +55,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             # Hack to fix building of the glib/tests/private test
             self.make = '%s private_LDFLAGS=""' % self.make
+            self.configure_options += ' --enable-static'
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
         elif self.config.target_platform == Platform.DARWIN:
