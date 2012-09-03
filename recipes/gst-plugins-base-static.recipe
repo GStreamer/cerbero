@@ -67,3 +67,9 @@ class Recipe(custom.GStreamerStatic):
              'libgsttcp',
             ]
     }
+
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-alsa'
+        custom.GStreamerStatic.prepare(self)
