@@ -30,7 +30,7 @@ LOCAL_MAKEFILE     := $(local-makefile)
 
 LOCAL_PREBUILT_PREFIX := lib
 LOCAL_PREBUILT_SUFFIX := .so
-LOCAL_EXPORT_C_INCLUDES := /home/andoni/cerbero/dist/android_arm/include/gstreamer-0.10 /home/andoni/cerbero/dist/android_arm/include/glib-2.0 /home/andoni/cerbero/dist/android_arm/lib/glib-2.0/include /home/andoni/cerbero/dist/android_arm/include/libxml2
+LOCAL_EXPORT_C_INCLUDES := $(shell  echo `pkg-config gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
 
 include $(GSTREAMER_MK_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
