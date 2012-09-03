@@ -14,7 +14,8 @@ class Recipe(recipe.Recipe):
 
     def configure(self):
         if self.config.target_platform == Platform.ANDROID:
-            shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
+            self.autoreconf = True
+            shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
                 {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
         super(Recipe, self).configure()
 
