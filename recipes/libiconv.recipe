@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.14+2012-07-01'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
-    configure_options = '--disable-nls'
+    configure_options = '--disable-nls --enable-static'
     platform_deps = {Platform.WINDOWS: ['gettext']}
     autoreconf = True
     autoreconf_sh = './autogen.sh --skip-gnulib'
