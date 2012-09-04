@@ -42,6 +42,8 @@ $(GSTREAMER_ANDROID_SO): buildsharedlibrary
 
 # Generate list of plugins links (eg: -lcoreelements -lvideoscale)
 GSTREAMER_PLUGINS_LIBS=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
+# HACK: the playback plugin names its library libgstplaybin :(
+GSTREAMER_PLUGINS_LIBS := $(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gstplayback/gstplaybin/g')
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_DECLARE($(plugin));\n)
