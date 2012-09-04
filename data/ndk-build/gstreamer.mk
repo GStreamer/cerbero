@@ -71,9 +71,11 @@ $(GSTREAMER_ANDROID_LO): genstatic
 # asking it to create an executable program so that it includes all the
 # static libraries, but passing the -shared option directly to the
 # linker with -XCClinker to end-up creating a shared library
+# -fuse-ld=gold is used to fix a bug in the default linker see:
+# (https://groups.google.com/forum/?fromgroups=#!topic/android-ndk/HaLycHImqL8)
 buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 	libtool --tag=CC --mode=link $(CC) $(CFLAGS) \
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
-		-XCClinker -shared
+		-XCClinker -shared -fuse-ld=gold
