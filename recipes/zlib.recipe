@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -22,3 +23,7 @@ class Recipe(recipe.Recipe):
                                 'LIBRARY_PATH=%(prefix)s/lib ' \
                                 'BINARY_PATH=%(prefix)s/bin ' % {'prefix':self.config.prefix}
             self._remove_steps ([BuildSteps.CONFIGURE])
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('z', 1, 2, 7, self.config.libdir)
+        libtool_la.save()
