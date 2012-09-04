@@ -40,10 +40,15 @@ $(GSTREAMER_ANDROID_SO): buildsharedlibrary
 #   and the requested plugins in GSTREAMER_PLUGINS starts here   #
 ##################################################################
 
+# Some plugins uses a different name for the module name, like the playback
+# plugin, which uses playbin for the module name: libgstplaybin.so
+fix-plugin-name = \
+	$(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gst$1/gst$2/g')
+
 # Generate list of plugins links (eg: -lcoreelements -lvideoscale)
 GSTREAMER_PLUGINS_LIBS=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
-# HACK: the playback plugin names its library libgstplaybin :(
-GSTREAMER_PLUGINS_LIBS := $(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gstplayback/gstplaybin/g')
+GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,playback,playbin)
+GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,uridecodebin,decodebin2)
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_DECLARE($(plugin));\n)
