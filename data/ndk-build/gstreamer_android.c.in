@@ -1,0 +1,16 @@
+#include <jni.h>
+#include <gst/gst.h>
+
+/* Declaration of static plugins */
+@PLUGINS_DECLARATION@
+
+/* Call this function to register static plugins */
+void gst_android_register_static_plugins(void) {
+@PLUGINS_REGISTRATION@
+}
+
+jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+  gst_init(NULL, NULL);
+  gst_android_register_static_plugins();
+  return JNI_VERSION_1_4;
+}

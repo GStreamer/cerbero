@@ -54,13 +54,9 @@ GSTREAMER_PLUGINS_REGISTER=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 
 # Generates a source files that declares and register all the required plugins
 genstatic:
-	echo "#include <gst/gst.h>\n" > $(GSTREAMER_ANDROID_LIBNAME).c
-	echo "/* Declaration of static plugins */" >> $(GSTREAMER_ANDROID_LIBNAME).c
-	echo " $(GSTREAMER_PLUGINS_DECLARE)" >> $(GSTREAMER_ANDROID_LIBNAME).c
-	echo "/* Call this function to register static plugins */" >> $(GSTREAMER_ANDROID_LIBNAME).c
-	echo "void gst_android_register_static_plugins(void) {\n" >> $(GSTREAMER_ANDROID_LIBNAME).c
-	echo "$(GSTREAMER_PLUGINS_REGISTER)" >> $(GSTREAMER_ANDROID_LIBNAME).c
-	echo "}" >> $(GSTREAMER_ANDROID_LIBNAME).c
+	cp $(GSTREAMER_MK_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_LIBNAME).c
+	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_LIBNAME).c
+	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_LIBNAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
 	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C)  -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
