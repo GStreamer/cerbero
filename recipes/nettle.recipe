@@ -1,10 +1,10 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import os
-
 from fnmatch import fnmatch
 
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -17,6 +17,13 @@ class Recipe(recipe.Recipe):
     files_bins = ['nettle-hash', 'nettle-lfib-stream']
     files_libs = ['libnettle', 'libhogweed']
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
+
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
+                {'SUBDIRS = tools testsuite examples':
+                 'SUBDIRS = tools examples'})
+        super(recipe.Recipe, self).configure()
 
     def post_install(self):
         if self.config.target_platform == Platform.LINUX:
