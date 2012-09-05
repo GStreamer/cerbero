@@ -22,17 +22,17 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := $(GSTREAMER_ANDROID_MODULE_NAME)
 LOCAL_SRC_FILES := $(GSTREAMER_ANDROID_SO)
+LOCAL_LDLIBS := -llog
 LOCAL_BUILD_SCRIPT := PREBUILT_SHARED_LIBRARY
 LOCAL_MODULE_CLASS := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE     := $(local-makefile)
-
 LOCAL_PREBUILT_PREFIX := lib
 LOCAL_PREBUILT_SUFFIX := .so
 LOCAL_EXPORT_C_INCLUDES := $(shell  echo `pkg-config gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
 
 include $(GSTREAMER_MK_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
-$(GSTREAMER_ANDROID_SO): buildsharedlibrary
+$(GSTREAMER_ANDROID_SO): deletemodule buildsharedlibrary
 
 
 ##################################################################
@@ -57,8 +57,14 @@ GSTREAMER_PLUGINS_REGISTER=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_REGISTER($(plugin));\n)
 
 
+# Delete the prebuilt module to force the Prebuilt rule that copies the generated .so
+# to the obj/ directory
+deletemodule:
+	rm -rf $(GSTREAMER_ANDROID_SO)
+	rm -rf $(call module-get-built,$(GSTREAMER_ANDROID_MODULE_NAME))
+
 # Generates a source files that declares and register all the required plugins
-genstatic:
+genstatic: deletemodule
 	cp $(GSTREAMER_MK_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
