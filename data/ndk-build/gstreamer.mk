@@ -22,7 +22,6 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 LOCAL_MODULE := $(GSTREAMER_ANDROID_MODULE_NAME)
 LOCAL_SRC_FILES := $(GSTREAMER_ANDROID_SO)
-LOCAL_LDLIBS := -llog
 LOCAL_BUILD_SCRIPT := PREBUILT_SHARED_LIBRARY
 LOCAL_MODULE_CLASS := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE     := $(local-makefile)
@@ -70,7 +69,8 @@ genstatic: deletemodule
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
-	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C)  -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
+	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C)  -o $(GSTREAMER_ANDROID_LO)\
+		`pkg-config --cflags gstreamer-0.10`
 
 # The goal is to create a shared library containing gstreamer
 # its plugins and its dependencies. We need to trick libtool,
@@ -84,4 +84,4 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
-		-XCClinker -shared -fuse-ld=gold
+		-XCClinker -shared -fuse-ld=gold -llog
