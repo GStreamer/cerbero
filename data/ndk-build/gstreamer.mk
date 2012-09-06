@@ -71,16 +71,21 @@ $(GSTREAMER_ANDROID_LO): genstatic
 	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
 
 # The goal is to create a shared library containing gstreamer
-# its plugins and its dependencies. We need to trick libtool,
-# asking it to create an executable program so that it includes all the
-# static libraries, but passing the -shared option directly to the
+# its plugins and its dependencies.
+# * First, we need to trick libtool, asking it to create an
+# executable program so that it includes all the static libraries,
+# but passing the -shared option directly to the
 # linker with -XCClinker to end-up creating a shared library
-# -fuse-ld=gold is used to fix a bug in the default linker see:
+#
+# * -fuse-ld=gold is used to fix a bug in the default linker see:
 # (https://groups.google.com/forum/?fromgroups=#!topic/android-ndk/HaLycHImqL8)
+#
+# * libz is not listed as dependency in libxml2.la and even adding it doesn't help
+# libtool (although it should :/), so we explicitly link -lz at the very end.
 buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
-	libtool --tag=CC --mode=link $(CC) $(CFLAGS) \
+	libtool --tag=CC --mode=link $(CC) $(LDFLAGS) \
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
 		$(GIO_MODULES_PATH) $(GIO_MODULES_LIBS) \
-		-XCClinker -shared -fuse-ld=gold -llog
+		-XCClinker -shared -fuse-ld=gold -llog -lz
