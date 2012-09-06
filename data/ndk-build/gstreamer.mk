@@ -68,7 +68,7 @@ genstatic:
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
-	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C)  -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
+	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
 
 # The goal is to create a shared library containing gstreamer
 # its plugins and its dependencies. We need to trick libtool,
