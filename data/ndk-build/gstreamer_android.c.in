@@ -64,7 +64,10 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
 
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
-  g_setenv("GST_DEBUG", "3", TRUE);
+  /* Disable this for releases if performance is important
+   * or increase the threshold to get more information */
+  gst_debug_set_active(TRUE);
+  gst_debug_set_default_threshold(GST_LEVEL_INFO);
   gst_debug_remove_log_function(gst_debug_log_default);
   gst_debug_add_log_function((GstLogFunction)gst_debug_logcat, NULL);
   /* get time we started for debugging messages */
