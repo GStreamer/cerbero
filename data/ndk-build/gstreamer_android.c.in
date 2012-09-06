@@ -1,5 +1,17 @@
 #include <jni.h>
 #include <gst/gst.h>
+#include <android/log.h>
+
+#if defined (GLIB_SIZEOF_VOID_P) && GLIB_SIZEOF_VOID_P == 8
+#define PTR_FMT "%14p"
+#else
+#define PTR_FMT "%10p"
+#endif
+#define PID_FMT "%5d"
+#define CAT_FMT "%20s %s:%d:%s:%s"
+
+static GstClockTime _priv_gst_info_start_time;
+
 
 /* Declaration of static plugins */
 @PLUGINS_DECLARATION@
@@ -9,7 +21,55 @@ void gst_android_register_static_plugins(void) {
 @PLUGINS_REGISTRATION@
 }
 
+
+void
+gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
+    const gchar * file, const gchar * function, gint line,
+    GObject * object, GstDebugMessage * message, gpointer unused)
+{
+  GstClockTime elapsed;
+  gint android_log_level;
+
+  if (level > gst_debug_category_get_threshold (category))
+    return;
+
+  elapsed = GST_CLOCK_DIFF (_priv_gst_info_start_time,
+      gst_util_get_timestamp ());
+
+  switch (level) {
+    case GST_LEVEL_ERROR:
+      android_log_level = ANDROID_LOG_ERROR;
+      break;
+    case GST_LEVEL_WARNING:
+      android_log_level = ANDROID_LOG_WARN;
+      break;
+    case GST_LEVEL_INFO:
+      android_log_level = ANDROID_LOG_INFO;
+      break;
+    case GST_LEVEL_DEBUG:
+      android_log_level = ANDROID_LOG_DEBUG;
+      break;
+    default:
+      android_log_level = ANDROID_LOG_VERBOSE;
+      break;
+  }
+
+#define PRINT_FMT " "PTR_FMT" "CAT_FMT" %s\n"
+  __android_log_print(android_log_level, "GStreamer",
+      "%" GST_TIME_FORMAT PRINT_FMT, GST_TIME_ARGS (elapsed),
+      g_thread_self (), gst_debug_category_get_name (category),
+      file, line, function, "", gst_debug_message_get (message));
+#undef PRINT_FMT
+}
+
+
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+  g_setenv("GST_DEBUG", "3", TRUE);
+  gst_debug_remove_log_function(gst_debug_log_default);
+  gst_debug_add_log_function((GstLogFunction)gst_debug_logcat, NULL);
+  /* get time we started for debugging messages */
+  _priv_gst_info_start_time = gst_util_get_timestamp ();
+
   gst_init(NULL, NULL);
   gst_android_register_static_plugins();
   return JNI_VERSION_1_4;
