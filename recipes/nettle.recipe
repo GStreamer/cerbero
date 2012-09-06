@@ -5,6 +5,7 @@ from fnmatch import fnmatch
 
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -26,6 +27,12 @@ class Recipe(recipe.Recipe):
         super(recipe.Recipe, self).configure()
 
     def post_install(self):
+        # Create libtool libraries (.la)
+        libtool_la = LibtoolLibrary('nettle', 4, 4, 0, self.config.libdir)
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('hogweed', 2, 2, 0, self.config.libdir)
+        libtool_la.save()
+
         if self.config.target_platform == Platform.LINUX:
             # Fix the libs permissions to 0755 to make the rpm packaging happy.
             # Setting for all linux distros as this may affect suse as well.
