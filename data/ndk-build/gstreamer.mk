@@ -49,12 +49,16 @@ fix-plugin-name = \
 GSTREAMER_PLUGINS_LIBS=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,uridecodebin,decodebin2)
+GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,encoding,encodebin)
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_DECLARE($(plugin));\n)
 # Generate the plugins' registration strings
 GSTREAMER_PLUGINS_REGISTER=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_REGISTER($(plugin));\n)
+# Generate list of gio modules
+GIO_MODULES_PATH := $(foreach path, $(GIO_MODULES_PATH), -L$(path))
+GIO_MODULES_LIBS := $(foreach plugin, $(GIO_MODULES), -lgio$(plugin))
 
 
 # Generates a source files that declares and register all the required plugins
@@ -78,4 +82,5 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
+		$(GIO_MODULES_PATH) $(GIO_MODULES_LIBS) \
 		-XCClinker -shared -fuse-ld=gold -llog
