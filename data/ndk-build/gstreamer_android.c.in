@@ -2,13 +2,7 @@
 #include <gst/gst.h>
 #include <android/log.h>
 
-#if defined (GLIB_SIZEOF_VOID_P) && GLIB_SIZEOF_VOID_P == 8
-#define PTR_FMT "%14p"
-#else
-#define PTR_FMT "%10p"
-#endif
-#define PID_FMT "%5d"
-#define CAT_FMT "%20s %s:%d:%s:%s"
+#define CAT_FMT "%s:%d:%s"
 
 static GstClockTime _priv_gst_info_start_time;
 
@@ -29,6 +23,7 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
 {
   GstClockTime elapsed;
   gint android_log_level;
+  gchar *tag;
 
   if (level > gst_debug_category_get_threshold (category))
     return;
@@ -54,12 +49,12 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
       break;
   }
 
-#define PRINT_FMT " "PTR_FMT" "CAT_FMT" %s\n"
-  __android_log_print (android_log_level, "GStreamer",
-      "%" GST_TIME_FORMAT PRINT_FMT, GST_TIME_ARGS (elapsed),
-      g_thread_self (), gst_debug_category_get_name (category),
-      file, line, function, "", gst_debug_message_get (message));
-#undef PRINT_FMT
+  tag = g_strdup_printf("GStreamer:%s",
+      gst_debug_category_get_name(category));
+  __android_log_print (android_log_level, tag,
+      "%" GST_TIME_FORMAT " " CAT_FMT " %s\n", GST_TIME_ARGS (elapsed),
+      file, line, function, gst_debug_message_get (message));
+  g_free(tag);
 }
 
 jint
