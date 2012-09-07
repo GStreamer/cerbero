@@ -48,6 +48,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.ANDROID:
                 arch = 'armv5te'
                 platform = 'android'
+                self.config_sh = 'LD=$CC ./configure'
         else:
             self.configure_options += '--enable-shared '
             platform = 'linux'
