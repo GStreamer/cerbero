@@ -13,3 +13,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.autoreconf = True
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-oss'
