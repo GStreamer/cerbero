@@ -12,5 +12,6 @@ class Recipe(recipe.Recipe):
                    'lib/pkgconfig/libmpeg2convert.pc']
 
     def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN,
+                Platform.ANDROID]:
             self.configure_options = ' --disable-sdl'
