@@ -25,9 +25,3 @@ class Recipe(custom.GStreamerStatic):
              'libgstdvdlpcmdec',
              'libgstdvdread',
     ]
-
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.deps.remove('libmad')
-            self.files_codecs_restricted_devel.remove('libgstmad')
-        custom.GStreamerStatic.prepare(self)
