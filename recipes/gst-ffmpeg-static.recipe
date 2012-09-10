@@ -45,3 +45,11 @@ class Recipe(custom.GStreamerStatic):
                                 'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
                 shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+
+        # log2 and log2f are not provided by bionic, but they are not checked
+        # properly
+        if self.config.target_platform == Platform.ANDROID:
+                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
+                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
+                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
