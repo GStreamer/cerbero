@@ -257,6 +257,9 @@ class Autotools (MakefilesBase):
         if self.use_system_libs and self.config.allow_system_libs:
             use_configure_cache = False
 
+        if self.new_env is not None or self.append_env is not None:
+            use_configure_cache = False
+
         if use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.prefix, '.configure.cache')
             self.config_sh += ' --cache-file=%s' % cache
