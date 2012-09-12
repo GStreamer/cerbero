@@ -55,19 +55,32 @@ class LibtoolLibrary(object):
         self.libdir = libdir
         self.laname = '%s.la' % libname
         dlname_base = '%s.so' % (libname)
-        dlname = '%s.%s' % (dlname_base, major)
-        dlname_all = '%s.%s.%s' % (dlname, minor, micro)
+        dlname = dlname_base
+        dlname_all = dlname_base
+        major_str = ''
+        minor_str = ''
+        micro_str = ''
+
+        if major is not None:
+            dlname = '%s.%s' % (dlname_base, major)
+            major_str = major
+            if minor is not None:
+                dlname_all = '%s.%s' % (dlname, minor)
+                minor_str = major
+                if micro is not None:
+                    dlname_all = '%s.%s' % (dlname, micro)
+                    micro_str
         old_library = '%s.a' %  libname
         self.header = self.LIBTOOL_HEADER % self.laname
-        self._change_value('dlname', dlname)
-        self._change_value('library_name', '%s %s %s' % (dlname_all, dlname,
+        self.change_value('dlname', dlname)
+        self.change_value('library_name', '%s %s %s' % (dlname_all, dlname,
             dlname_base))
-        self._change_value('old_library', old_library)
-        self._change_value('current', major)
-        self._change_value('age', minor)
-        self._change_value('micro', micro)
-        self._change_value('libdir', libdir)
-        self._change_value('dependency_libs', deps)
+        self.change_value('old_library', old_library)
+        self.change_value('current', major_str)
+        self.change_value('age', minor_str)
+        self.change_value('micro', micro_str)
+        self.change_value('libdir', libdir)
+        self.change_value('dependency_libs', deps)
 
     def save(self):
         path = os.path.join(self.libdir, self.laname)
@@ -77,5 +90,5 @@ class LibtoolLibrary(object):
             for k, v in self.LIBTOOL_LA.iteritems():
                 f.write("%s='%s'\n" % (k, v))
 
-    def _change_value(self, key, val):
+    def change_value(self, key, val):
         self.LIBTOOL_LA[key] = val
