@@ -105,11 +105,13 @@ class MakefilesBase (Build):
     use_system_libs = False
     allow_parallel_build = True
     srcdir = '.'
-    append_env = {}
-    new_env = {}
+    append_env = None
+    new_env = None
 
     def __init__(self):
         Build.__init__(self)
+        self.append_env = {}
+        self.new_env = {}
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
         if self.config.allow_parallel_build and self.allow_parallel_build \
