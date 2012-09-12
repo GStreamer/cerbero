@@ -7,10 +7,14 @@ class Recipe(custom.GStreamerStatic):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     extra_configure_options = "--disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Android MediaCodec Plugin (GStreamer SDK)' "
-    remotes = {'origin': 'git://git.collabora.co.uk/git/user/slomo/gst-amc.git'}
     commit = 'origin/master'
     deps = ['gstreamer', 'gst-plugins-base' ]
     plugins_categories = ['amc']
 
     files_amc_devel = ['libgstamc']
 
+    def prepare(self):
+        custom.GStreamerStatic.prepare(self)
+        #FIXME: remove when gst-amc is in fdo
+        self.remotes['origin'] = 'git://git.collabora.co.uk/git/user/slomo/gst-amc.git'
+        self.remotes['upstream'] = self.remotes['origin']
