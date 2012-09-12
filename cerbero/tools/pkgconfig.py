@@ -25,7 +25,7 @@ class PkgConfigWritter(object):
     VARIABLES_TPL = '''\
 prefix=%(prefix)s
 exec_prefix=${prefix}
-libdir=$[prefix}/%(rel_libdir)s
+libdir=${prefix}/%(rel_libdir)s
 includedir=${prefix}/%(rel_incldir)s
 datarootdir=${prefix}/%(rel_sharedir)s
 datadir=${datarootdir}
