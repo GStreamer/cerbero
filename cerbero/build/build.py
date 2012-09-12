@@ -280,11 +280,12 @@ class CMake (MakefilesBase):
                     '-DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
 
-    def __init__(self):
-        MakefilesBase.__init__(self)
-
+    @modify_environment
+    def configure(self):
         cc = os.environ.get('CC', 'gcc')
         cxx = os.environ.get('CXX', 'g++')
+        cflags = os.environ.get('CFLAGS', '')
+        cxxflags = os.environ.get('CXXFLAGS', '')
         # FIXME: CMake doesn't support passing "ccache $CC"
         if self.config.use_ccache:
             cc = cc.replace('ccache ', '')
@@ -297,7 +298,10 @@ class CMake (MakefilesBase):
                                       % (cc, cxx)
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' -G\\"Unix Makefiles\\"'
+        self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
+        self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        MakefilesBase.configure(self)
 
 
 class BuildType (object):
