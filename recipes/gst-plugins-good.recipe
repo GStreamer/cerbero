@@ -120,7 +120,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
         if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += '--disable-libdv --disable-taglib --disable-pulse'
-            self.deps.remove('taglib')
+            self.configure_options += '--disable-libdv --disable-pulse'
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True

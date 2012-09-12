@@ -115,9 +115,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv'
         if self.config.target_platform == Platform.ANDROID:
-            self.deps.remove('taglib')
-            self.files_codecs_devel.remove('libgsttaglib')
-            self.configure_options += '--disable-libdv --disable-taglib'
+            self.configure_options += '--disable-libdv '
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
         super(Recipe, self).prepare()
