@@ -124,6 +124,9 @@ class Recipe(custom.GStreamerStatic):
              ],
         Platform.DARWIN: [
              'libgstapplemedia',
+            ],
+        Platform.ANDROID: [
+             'libgsteglglessink',
             ]
     }
 

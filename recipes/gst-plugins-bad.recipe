@@ -137,6 +137,9 @@ class Recipe(recipe.Recipe):
             ],
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgstapplemedia%(mext)s',
+            ],
+        Platform.ANDROID: [
+             'lib/gstreamer-0.10/libgsteglglessink%(mext)s',
             ]
     }
 
