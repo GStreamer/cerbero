@@ -1,0 +1,42 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.pkgconfig import PkgConfigWritter
+
+class Recipe(recipe.Recipe):
+    name = 'stlport'
+    version = '0.1'
+    licenses = [License.LGPLv2_1]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    files_stlport = [
+            'lib/pkg-config/stlport.pc',
+            'lib/stlport.la',
+            ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.ANDROID:
+            raise InvalidRecipeError()
+
+    def install(self):
+        stlport_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
+                'cxx-stl', 'stlport')
+        stlport_libdir = os.path.join(stlport_prefix, 'libs', 'armeabi')
+
+        # Create a libtool library for stlport (libstlport.la)
+        lib = LibtoolLibrary('stlport', None, None, None, stlport_libdir)
+        lib.change_value('dlname', 'libstlport_shared.so')
+        lib.change_value('old_library', 'libstlport_static.a')
+        lib.change_value('library_name', 'libstlport_shared.so')
+        lib.libdir = os.path.join(self.config.prefix, 'lib')
+        lib.save()
+
+        # Create pkg-config file (stlport.pc)
+        stlport_pc = PkgConfigWritter('stlport', 'stlport', '1.0',
+                '', '-L${libdir} -lstlport_shared',
+                '-I{includedir} -fno-exceptions', stlport_prefix)
+        stlport_pc.libs_priv = '${libdir}/armeabi/libstlport_static.a'
+        stlport_pc.rel_incldir = 'stlport'
+        stlport_pc.rel_libdir = 'armeabi/libs'
+        stlport_pc.save('stlport', os.path.join(self.config.prefix, 'lib',
+            'pkgconfig'))
