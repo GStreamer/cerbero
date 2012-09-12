@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1]
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON'
     btype = BuildType.CMAKE
+    platform_deps = {Platform.ANDROID: ['stlport']}
 
     files_libs = ['libtag', 'libtag_c']
     files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']
@@ -15,3 +16,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DWIN32=1'
+        if self.config.target_platform == Platform.ANDROID:
+            # configure for android
+            self.configure_options += ' -DANDROID_NDK=1 '
