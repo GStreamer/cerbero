@@ -1,0 +1,20 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gst-android'
+    version = '0.1'
+    licenses = [License.LGPLv2_1]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    files_shared = [
+            'share/gst-android/ndk-build/gstreamer_android.c.in',
+            'share/gst-android/ndk-build/gstreamer.mk',
+            'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
+            ]
+
+    def install(self):
+        shell.copy_dir(os.path.join(self.config.data_dir, 'ndk-build'),
+            os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build'))
+
