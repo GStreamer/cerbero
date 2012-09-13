@@ -50,6 +50,7 @@ GSTREAMER_PLUGINS_LIBS=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,uridecodebin,decodebin2)
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,encoding,encodebin)
+GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,soup,souphttpsrc)
 GSTREAMER_PLUGINS_LIBS := $(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gstgnonlin/gnl/g')
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE=$(foreach plugin, $(GSTREAMER_PLUGINS), \
