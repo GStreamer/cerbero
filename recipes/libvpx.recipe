@@ -46,11 +46,15 @@ class Recipe(recipe.Recipe):
                 platform = 'win32'
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
-                arch = 'armv5te'
-                platform = 'android'
-                self.config_sh = 'LD=$CC ./configure'
+            arch = 'armv5te'
+            platform = 'android'
+            self.config_sh = 'LD=$CC ./configure'
+            self.configure_options.replace('--as=yasm', '')
+            self.configure_options += ' --disable-runtime-cpu-detect --sdk-path=%s ' % self.config.toolchain_prefix
+            # Fix compiler error with -mthumb
+            self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
         else:
             self.configure_options += '--enable-shared '
             platform = 'linux'
 
-        self.configure_options += '--target=%s-%s-gcc ' % (arch, platform)
+        self.configure_options += ' --target=%s-%s-gcc ' % (arch, platform)
