@@ -58,7 +58,7 @@ class Config (object):
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
                    'external_packages', 'use_ccache', 'force_git_commit',
-                   'universal_archs']
+                   'universal_archs', 'osx_target_sdk_version']
 
     def __init__(self):
         self._check_uninstalled()
