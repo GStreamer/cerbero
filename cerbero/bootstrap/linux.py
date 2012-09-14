@@ -43,7 +43,8 @@ class DebianBootstraper (UnixBootstraper):
                 'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
-                'build-essential', 'devscripts', 'fakeroot', 'transfig']
+                'build-essential', 'devscripts', 'fakeroot', 'transfig',
+                'gperf']
 
 
 class RedHatBootstraper (UnixBootstraper):
@@ -57,7 +58,7 @@ class RedHatBootstraper (UnixBootstraper):
                 'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
-                'perl-XML-Simple']
+                'perl-XML-Simple', 'gperf']
 
 
 class OpenSuseBootstraper (UnixBootstraper):
@@ -65,7 +66,7 @@ class OpenSuseBootstraper (UnixBootstraper):
     tool = 'sudo zypper install %s'
     packages = ['intltool', 'cmake', 'gcc-c++', 'doxygen', 'gtk-doc',
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make', 'gcc',
-            'curl', 'gettext-tools', 'alsa-devel', 'yasm',
+            'curl', 'gettext-tools', 'alsa-devel', 'yasm', 'gperf',
             'docbook-xsl-stylesheets', 'transfig', 'xorg-x11-libXrender-devel',
             'xorg-x11-libXv-devel', 'Mesa-devel', 'python-devel',
             'patterns-openSUSE-devel_rpm_build']
