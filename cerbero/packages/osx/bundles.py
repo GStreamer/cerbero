@@ -193,5 +193,5 @@ class ApplicationBundlePackager(object):
                 # beeing a different path, @executable_path will be different
                 # and it we will need to set a different relative path with
                 # install_name_tool
-                shutil.copy(os.path.join(contents, 'Home', path), macos)
+                shutil.copy(os.path.join(contents, 'Home', path), filename)
         return tmp

@@ -333,7 +333,7 @@ class ApplicationPackage(PackagerBase):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         self.tmp = tempfile.mkdtemp()
-        self.tmp = os.path.join(self.tmp, '%s.app' % self.package.app_name)
+        self.appdir = os.path.join(self.tmp, '%s.app' % self.package.app_name)
 
         # copy files to the bundle. it needs to be done first because the app
         # bundle will try to create links for the main executable
@@ -341,6 +341,7 @@ class ApplicationPackage(PackagerBase):
         self._create_app_bundle()
         self._strip_binaries()
         self._relocate_binaries()
+        self._add_applications_link()
         dmg = self._create_dmg()
 
         return [dmg, None]
@@ -350,7 +351,7 @@ class ApplicationPackage(PackagerBase):
         Moves all the files that are going to be packaged to the bundle's
         temporary directory
         '''
-        out_dir = os.path.join(self.tmp, 'Contents', 'Home')
+        out_dir = os.path.join(self.appdir, 'Contents', 'Home')
         os.makedirs(out_dir)
         for f in self.package.files_list():
             in_path = os.path.join(self.config.prefix, f)
@@ -367,7 +368,7 @@ class ApplicationPackage(PackagerBase):
     def _create_app_bundle(self):
         ''' Creates the OS X Application bundle in temporary directory '''
         packager = ApplicationBundlePackager(self.package)
-        return packager.create_bundle(self.tmp)
+        return packager.create_bundle(self.appdir)
 
     def _strip_binaries(self):
         pass
@@ -378,14 +379,16 @@ class ApplicationPackage(PackagerBase):
             prefix = prefix[:-1]
         for path in ['bin', 'lib', 'libexec']:
             relocator = OSXRelocator(
-                    os.path.join(self.tmp, 'Contents', 'Home', path),
+                    os.path.join(self.appdir, 'Contents', 'Home', path),
                     self.config.prefix, '@executable_path/../', True)
             relocator.relocate()
 
-    def _create_dmg(self):
-        #applications_link = os.path.join(self.tmp, 'Applications')
-        #shell.call('ln -s /Applications %s' % applications_link)
+    def _add_applications_link(self):
         # Create link to /Applications
+        applications_link = os.path.join(self.tmp, 'Applications')
+        shell.call('ln -s /Applications %s' % applications_link)
+
+    def _create_dmg(self):
         dmg_file = os.path.join(self.output_dir, '%s-%s-%s.dmg' % (
             self.package.app_name, self.package.version, self.config.target_arch))
         # Create Disk Image
