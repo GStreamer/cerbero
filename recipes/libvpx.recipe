@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -47,3 +48,9 @@ class Recipe(recipe.Recipe):
             platform = 'linux'
 
         self.configure_options += '--target=%s-%s-gcc ' % (arch, platform)
+
+    def install(self):
+        if self.config.target_platform == Platform.DARWIN:
+            for f in ['vpxenc', 'vpxdec', 'libvpx.a']:
+                shell.touch(os.path.join(self.build_dir, f))
+        super(Recipe, self).install()
