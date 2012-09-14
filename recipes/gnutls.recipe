@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     # GPLv3+ and defined below
     licenses = [License.LGPLv3Plus]
     configure_options = "--enable-local-libopts --disable-guile"
-    deps = ['zlib', 'nettle', 'libgcrypt', 'libtasn1']
+    deps = ['zlib', 'nettle', 'libtasn1']
 
     files_libs = ['libgnutls', 'libgnutlsxx']
     files_libs_extra = ['libgnutls-openssl']
@@ -26,5 +26,3 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-hardware-acceleration'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-cxx'
-            # Use internal libgcrypt which seems to build fine
-            self.deps.remove('libgcrypt')

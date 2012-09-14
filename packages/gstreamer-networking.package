@@ -16,13 +16,27 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libsoup:libs',
-            'gst-plugins-base:net', 'gst-plugins-good:net', 'gst-plugins-ugly:net', 'gst-plugins-bad:net',
-            'gst-rtsp-server:libs:python' ]
+            'gst-plugins-base:net', 'gst-plugins-good:net',
+            'gst-plugins-ugly:net', 'gst-plugins-bad:net']
     files_devel = ['gst-plugins-base-static:net_devel',
             'gst-plugins-good-static:net_devel',
             'gst-plugins-ugly-static:net_devel',
             'gst-plugins-bad-static:net_devel',
-            'gst-rtsp-server:devel']
+            ]
+
+    platform_files = {
+        Platform.WINDOWS: [],
+        Platform.DARWIN: ['gst-rtsp-server:libs:python'],
+        Platform.LINUX: ['gst-rtsp-server:libs:python'],
+        Platform.ANDROID: [],
+        }
+
+    platform_files_devel = {
+        Platform.WINDOWS: [],
+        Platform.DARWIN: ['gst-rtsp-server:devel'],
+        Platform.LINUX: ['gst-rtsp-server:devel'],
+        Platform.ANDROID: [],
+        }
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or \
@@ -33,8 +47,7 @@ class Package(package.Package):
                  DistroVersion.UBUNTU_PRECISE,
                  DistroVersion.FEDORA_16,
                  DistroVersion.FEDORA_17]:
-            self.files += ['libgcrypt:libs', 'gmp:libs', 'gnutls:libs:libs_extra:lang',
-                           'libgpg-error:libs:lang', 'libtasn1:libs',
-                           'nettle:libs', 'glib-networking']
+            self.files += ['gmp:libs', 'gnutls:libs:libs_extra:lang',
+                           'libtasn1:libs', 'nettle:libs', 'glib-networking']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
