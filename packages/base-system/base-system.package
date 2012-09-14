@@ -15,8 +15,8 @@ class Package(package.Package):
     uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
-             'gdk-pixbuf:libs:modules:lang', 'libffi:libs', 'freetype:libs',
-             'glib:libs:lang:bins', 'orc:libs', 'pango:libs:modules',
+             'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
+             'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
              'libpng:libs', 'tiff:libs', 'jpeg:libs',
              'libxml2:libs', 'libxslt:libs', 'pixman:libs',
              'zlib:libs', 'bzip2:libs', 'libcroco:libs', 'librsvg:libs:loader']
