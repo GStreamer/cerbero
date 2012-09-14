@@ -308,6 +308,12 @@ class UniversalRecipe(object):
                 "recipe first."))
         return getattr(self._proxy_recipe, name)
 
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name not in ['_config', '_recipes', '_proxy_recipe']:
+            for o in self._recipes.values():
+                setattr(o, name, value)
+
     def _do_step(self, step):
         # For the universal build we need to configure both architectures with
         # with the same final prefix, but we want to install each architecture
