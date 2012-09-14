@@ -24,6 +24,7 @@ import os
 import tarfile
 import zipfile
 import tempfile
+import time
 import glob
 import shutil
 
@@ -257,3 +258,14 @@ def copy_dir(src, dest):
             shutil.copy(s, d)
         elif os.path.isdir(s):
             copy_dir(s, d)
+
+
+def touch(path, create_if_not_exists=False):
+    if not os.path.exists(path):
+        if create_if_not_exists:
+            open(path).close()
+        else:
+            return
+    t = time.time()
+    os.utime(path, (t, t))
+
