@@ -32,7 +32,7 @@ LOCAL_EXPORT_C_INCLUDES := $(shell  echo `pkg-config gstreamer-0.10 --cflags-onl
 
 include $(GSTREAMER_MK_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
-$(GSTREAMER_ANDROID_SO): buildsharedlibrary
+$(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 
 
 ##################################################################
@@ -91,3 +91,7 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
 		$(GIO_MODULES_PATH) $(GIO_MODULES_LIBS) \
 		-XCClinker -shared -fuse-ld=gold -llog -lz
+
+copyjavasource:
+	@mkdir -p src/com/gst_sdk
+	@cp $(GSTREAMER_MK_PATH)/GStreamer.java src/com/gst_sdk
