@@ -28,10 +28,9 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         # Create libtool libraries (.la)
-        deps = ['iconv', 'gmp', 'intl', '-lc']
-        libtool_la = LibtoolLibrary('nettle', 4, 4, 0, self.config.libdir, deps)
+        libtool_la = LibtoolLibrary('nettle', 4, 4, 0, self.config.libdir)
         libtool_la.save()
-        deps.append('nettle')
+        deps = ['nettle', 'iconv', 'gmp', 'intl', '-lc']
         libtool_la = LibtoolLibrary('hogweed', 2, 2, 0, self.config.libdir, deps)
         libtool_la.save()
 
