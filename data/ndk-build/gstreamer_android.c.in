@@ -157,6 +157,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
   gchar *cache_dir;
   gchar *files_dir;
   gchar *registry;
+  GError *error = NULL;
 
   if (gst_is_initialized ()) {
     __android_log_print (ANDROID_LOG_INFO, "GStreamer",
@@ -195,7 +196,12 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
   /* get time we started for debugging messages */
   _priv_gst_info_start_time = gst_util_get_timestamp ();
 
-  gst_init (NULL, NULL);
+  if (!gst_init_check (NULL, NULL, &error)) {
+    gchar *message = g_strdup_printf ("GStreamer initialization failed: %s", error->message);
+    (*env)->ThrowNew (env, klass, message);
+    g_free (message);
+    return;
+  }
   gst_android_register_static_plugins ();
   gst_android_load_gio_modules();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer",
