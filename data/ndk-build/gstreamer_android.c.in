@@ -191,7 +191,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
 }
 
 static JNINativeMethod native_methods[] = {
-  {"Init", "(Landroid/content/Context;)V", (void *) gst_android_init}
+  {"init", "(Landroid/content/Context;)V", (void *) gst_android_init}
 };
 
 jint
