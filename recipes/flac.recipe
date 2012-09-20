@@ -7,17 +7,16 @@ class Recipe(recipe.Recipe):
     # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
     licenses = [License.BSD_like]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
+    configure_options = ' --disable-cpplibs'
 
-    files_libs = ['libFLAC', 'libFLAC++']
+    files_libs = ['libFLAC']
 
     files_bins = ['flac', 'metaflac']
     licenses_bins = [License.GPLv2Plus]
 
     files_devel = [
         'lib/pkgconfig/flac.pc',
-        'lib/pkgconfig/flac++.pc',
         'include/FLAC',
-        'include/FLAC++',
     ]
 
     # Skipping because it takes too long
@@ -29,4 +28,3 @@ class Recipe(recipe.Recipe):
                 self.configure_options += ' --disable-asm-optimizations'
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
-            self.configure_options += ' --disable-cpplibs'
