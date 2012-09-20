@@ -14,8 +14,7 @@ class Recipe(custom.GStreamerStatic):
     plugins_categories = ['codecs']
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
-    files_codecs_devel = ['libgstffmpeg', 'libavcodec', 'libavformat',
-                          'libavutil']
+    files_codecs_devel = ['libgstffmpeg']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -31,6 +30,9 @@ class Recipe(custom.GStreamerStatic):
                 asflags = ' -arch ppc'
             self.configure_options += ' ASFLAGS="%s"' % asflags
         super(Recipe, self).prepare()
+        for f in ['libavcodec.a', 'libavformat.a', 'libavutil.a']:
+            path = os.path.join(self.config.prefix, 'lib', 'gstreamer-0.10', 'static', f)
+            self.files_codecs_devel.append(path)
 
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -65,4 +67,4 @@ class Recipe(custom.GStreamerStatic):
                         name, lib)
                 shutil.copy(path, os.path.join(self.config.prefix, 'lib',
                     'gstreamer-0.10', 'static'))
-
+        custom.GStreamerStatic.post_install(self)
