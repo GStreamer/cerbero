@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-amc'
@@ -11,5 +10,6 @@ class Recipe(recipe.Recipe):
     commit = 'origin/master'
     deps = ['gstreamer', 'gst-plugins-base' ]
 
-    files_amc = ['lib/gstreamer-0.10/libgstamc%(mext)s']
-
+    platform_files_sys = {
+        Platform.ANDROID: ['lib/gstreamer-0.10/libgstamc%(mext)s'],
+            }

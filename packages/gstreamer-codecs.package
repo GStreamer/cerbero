@@ -21,12 +21,17 @@ class Package(package.Package):
             'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
-            'gst-plugins-bad:codecs', 'gst-plugins-ugly:codecs']
+            'gst-plugins-bad:codecs', 'gst-plugins-ugly:codecs',
+            ]
     files_devel = ['gst-plugins-base-static:codecs_devel',
             'gst-plugins-good-static:codecs_devel',
             'gst-plugins-bad-static:codecs_devel',
             'gst-plugins-ugly-static:codecs_devel']
     platform_files = {
             Platform.LINUX: ['libdv:libs'],
-            Platform.DARWIN: ['libdv:libs']
+            Platform.DARWIN: ['libdv:libs'],
+            Platform.ANDROID: ['gst-amc:sys']
+    }
+    platform_files_devel = {
+            Platform.ANDROID: ['gst-amc-static:sys_devel']
     }

@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
 
 class Recipe(custom.GStreamerStatic):
     name = 'gst-amc-static'
@@ -9,9 +8,11 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = "--disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Android MediaCodec Plugin (GStreamer SDK)' "
     commit = 'origin/master'
     deps = ['gstreamer', 'gst-plugins-base' ]
-    plugins_categories = ['amc']
+    platform_plugins_categories = ['sys']
 
-    files_amc_devel = ['libgstamc']
+    platform_files_sys_devel = {
+            Platform.ANDROID: ['libgstamc']
+            }
 
     def prepare(self):
         custom.GStreamerStatic.prepare(self)
