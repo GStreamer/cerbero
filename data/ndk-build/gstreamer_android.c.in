@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <gst/gst.h>
+#include <gio/gio.h>
 #include <android/log.h>
 
 #define CAT_FMT "%s:%d:%s"
@@ -9,11 +10,21 @@ static GstClockTime _priv_gst_info_start_time;
 /* Declaration of static plugins */
 @PLUGINS_DECLARATION@
 
+/* Declaration of static gio modules */
+@G_IO_MODULES_DECLARE@
+
 /* Call this function to register static plugins */
 void
 gst_android_register_static_plugins (void)
 {
   @PLUGINS_REGISTRATION@
+}
+
+/* Call this function to load GIO modules */
+void
+gst_android_load_gio_modules (void)
+{
+  @G_IO_MODULES_LOAD@
 }
 
 void
@@ -186,6 +197,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
 
   gst_init (NULL, NULL);
   gst_android_register_static_plugins ();
+  gst_android_load_gio_modules();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer",
       "GStreamer initialization complete");
 }

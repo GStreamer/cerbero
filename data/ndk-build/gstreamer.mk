@@ -59,8 +59,12 @@ GSTREAMER_PLUGINS_DECLARE=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 GSTREAMER_PLUGINS_REGISTER=$(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_REGISTER($(plugin));\n)
 # Generate list of gio modules
-GIO_MODULES_PATH := $(foreach path, $(GIO_MODULES_PATH), -L$(path))
-GIO_MODULES_LIBS := $(foreach plugin, $(GIO_MODULES), -lgio$(plugin))
+G_IO_MODULES_PATH := $(foreach path, $(G_IO_MODULES_PATH), -L$(path))
+G_IO_MODULES_LIBS := $(foreach module, $(G_IO_MODULES), -lgio$(module))
+G_IO_MODULES_DECLARE := $(foreach module, $(G_IO_MODULES), \
+			G_IO_MODULE_DECLARE(gnutls);\n)
+G_IO_MODULES_LOAD := $(foreach module, $(G_IO_MODULES), \
+			G_IO_MODULE_LOAD(gnutls);\n)
 
 
 # Generates a source files that declares and register all the required plugins
@@ -68,6 +72,8 @@ genstatic:
 	cp $(GSTREAMER_MK_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@sed -i 's/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@sed -i 's/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
 	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
