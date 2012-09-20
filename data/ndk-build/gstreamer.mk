@@ -1,9 +1,16 @@
-$(call assert-defined, GSTREAMER_PLUGINS GSTREAMER_MK_PATH)
+$(call assert-defined, GSTREAMER_SDK_PREFIX GSTREAMER_PLUGINS)
 
 # Setup variable variables
 ifndef GSTREAMER_STATIC_PLUGINS_PATH
-GSTREAMER_STATIC_PLUGINS_PATH=/usr/lib/gstreamer-0.10
+GSTREAMER_STATIC_PLUGINS_PATH := lib/gstreamer-0.10
 endif
+GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_SDK_PREFIX)/lib/gstreamer-0.10/static
+
+ifndef GSTREAMER_NDK_BUILD_PATH
+GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_SDK_PREFIX)/share/gst-android/ndk-build
+endif
+
+G_IO_MODULES_PATH := $(GSTREAMER_SDK_PREFIX)/lib/gio/modules
 
 GSTREAMER_ANDROID_MODULE_NAME=gstreamer_android
 GSTREAMER_ANDROID_LO=$(GSTREAMER_ANDROID_MODULE_NAME).lo
@@ -30,7 +37,7 @@ LOCAL_PREBUILT_PREFIX := lib
 LOCAL_PREBUILT_SUFFIX := .so
 LOCAL_EXPORT_C_INCLUDES := $(shell  echo `pkg-config gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
 
-include $(GSTREAMER_MK_PATH)/gstreamer_prebuilt.mk
+include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
 $(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 
@@ -69,7 +76,7 @@ G_IO_MODULES_LOAD := $(foreach module, $(G_IO_MODULES), \
 
 # Generates a source files that declares and register all the required plugins
 genstatic:
-	cp $(GSTREAMER_MK_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
+	cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
@@ -95,9 +102,9 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
-		$(GIO_MODULES_PATH) $(GIO_MODULES_LIBS) \
+		$(G_IO_MODULES_PATH) $(G_IO_MODULES_LIBS) \
 		-XCClinker -shared -fuse-ld=gold -llog -lz
 
 copyjavasource:
 	@mkdir -p src/com/gst_sdk
-	@cp $(GSTREAMER_MK_PATH)/GStreamer.java src/com/gst_sdk
+	@cp $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java src/com/gst_sdk
