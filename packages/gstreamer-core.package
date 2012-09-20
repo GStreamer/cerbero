@@ -17,6 +17,7 @@ class Package(package.Package):
 
     files = ['gstreamer', 'gst-plugins-base:bins:libs:core:lang',
             'gst-sdk-shell',
+            'gst-android',
             'gst-plugins-good:core:lang',
             'gst-plugins-bad:core:lang',
             'gst-plugins-bad:core:lang',
