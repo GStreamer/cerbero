@@ -52,6 +52,9 @@ $(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 fix-plugin-name = \
 	$(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gst$1/gst$2/g')
 
+fix-deps = \
+	$(shell echo $(GSTREAMER_ADNROID_LIBS) | sed 's/$1/$1 $2/g')
+
 # Generate list of plugins links (eg: -lcoreelements -lvideoscale)
 GSTREAMER_PLUGINS_LIBS=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
 GSTREAMER_PLUGINS_LIBS := $(call fix-plugin-name,playback,playbin)
@@ -72,6 +75,10 @@ G_IO_MODULES_DECLARE := $(foreach module, $(G_IO_MODULES), \
 			G_IO_MODULE_DECLARE(gnutls);\n)
 G_IO_MODULES_LOAD := $(foreach module, $(G_IO_MODULES), \
 			G_IO_MODULE_LOAD(gnutls);\n)
+# Get the full list of libraries
+GSTREAMER_ADNROID_LIBS := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
+# Fix deps for giognutls
+GSTREAMER_ADNROID_LIBS :=  $(call fix-deps,-lgiognutls, -lhogweed)
 
 
 # Generates a source files that declares and register all the required plugins
@@ -101,9 +108,9 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 	libtool --tag=CC --mode=link $(CC) $(LDFLAGS) \
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
-		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(GSTREAMER_PLUGINS_LIBS) \
-		$(G_IO_MODULES_PATH) $(G_IO_MODULES_LIBS) \
-		-XCClinker -shared -fuse-ld=gold -llog -lz
+		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+		$(GSTREAMER_ADNROID_LIBS) \
+		-XCClinker -shared -fuse-ld=gold
 
 copyjavasource:
 	@mkdir -p src/com/gst_sdk
