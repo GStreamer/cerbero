@@ -59,6 +59,15 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
 
 static void
 gst_android_init (JNIEnv *env, jclass klass, jobject context) {
+  /* Disable this for releases if performance is important
+   * or increase the threshold to get more information */
+  gst_debug_set_active (TRUE);
+  gst_debug_set_default_threshold (GST_LEVEL_WARNING);
+  gst_debug_remove_log_function (gst_debug_log_default);
+  gst_debug_add_log_function ((GstLogFunction) gst_debug_logcat, NULL);
+  /* get time we started for debugging messages */
+  _priv_gst_info_start_time = gst_util_get_timestamp ();
+
   gst_init (NULL, NULL);
   gst_android_register_static_plugins ();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer", "GStreamer initialization complete");
@@ -72,15 +81,6 @@ jint
 JNI_OnLoad (JavaVM * vm, void *reserved)
 {
   JNIEnv *env = NULL;
-
-  /* Disable this for releases if performance is important
-   * or increase the threshold to get more information */
-  gst_debug_set_active (TRUE);
-  gst_debug_set_default_threshold (GST_LEVEL_WARNING);
-  gst_debug_remove_log_function (gst_debug_log_default);
-  gst_debug_add_log_function ((GstLogFunction) gst_debug_logcat, NULL);
-  /* get time we started for debugging messages */
-  _priv_gst_info_start_time = gst_util_get_timestamp ();
 
   if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_4) != JNI_OK) {
     __android_log_print (ANDROID_LOG_ERROR, "GStreamer", "Could not retrieve JNIEnv");
