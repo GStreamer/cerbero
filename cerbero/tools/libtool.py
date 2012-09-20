@@ -80,7 +80,7 @@ class LibtoolLibrary(object):
         self.change_value('age', minor_str)
         self.change_value('micro', micro_str)
         self.change_value('libdir', libdir)
-        self.change_value('dependency_libs', deps)
+        self.change_value('dependency_libs', self._parse_deps(deps))
 
     def save(self):
         path = os.path.join(self.libdir, self.laname)
@@ -92,3 +92,12 @@ class LibtoolLibrary(object):
 
     def change_value(self, key, val):
         self.LIBTOOL_LA[key] = val
+
+    def _parse_deps(self, deps):
+        deps_str = ''
+        libtool_deps = [x for x in deps if not x.startswith('-l')]
+        lib_deps = [x for x in deps if x.startswith('-l')]
+        for d in libtool_deps:
+            deps_str += ' %s/lib%s.la ' % (self.libdir, d)
+        deps_str += ' '.join(lib_deps)
+        return deps_str
