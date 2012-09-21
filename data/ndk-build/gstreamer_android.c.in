@@ -60,7 +60,7 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
       break;
   }
 
-  tag = g_strdup_printf ("GStreamer:%s",
+  tag = g_strdup_printf ("GStreamer+%s",
       gst_debug_category_get_name (category));
   __android_log_print (android_log_level, tag,
       "%" GST_TIME_FORMAT " " CAT_FMT " %s\n", GST_TIME_ARGS (elapsed),
