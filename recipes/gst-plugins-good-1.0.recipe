@@ -1,0 +1,123 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-good-1.0'
+    version = '0.11.x'
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = '--disable-introspection --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name=\'GStreamer Good Plugins (GStreamer SDK)\' '
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
+    commit = 'upstream/master'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
+            'speex', 'gdk-pixbuf', 'libsoup',
+            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
+    platform_deps = {Platform.LINUX: ['libdv'],
+                     Platform.DARWIN: ['libdv']}
+    use_system_libs = True
+
+
+    files_lang = ['gst-plugins-good-1.0']
+
+    files_core = [
+             'lib/gstreamer-1.0/libgstautodetect%(mext)s',
+             'lib/gstreamer-1.0/libgstvideofilter%(mext)s',
+    ]
+
+    files_effects = [
+             'lib/gstreamer-1.0/libgstalpha%(mext)s',
+             'lib/gstreamer-1.0/libgstalphacolor%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiofx%(mext)s',
+             'lib/gstreamer-1.0/libgstcutter%(mext)s',
+             'lib/gstreamer-1.0/libgstdebug%(mext)s',
+             'lib/gstreamer-1.0/libgstdeinterlace%(mext)s',
+             'lib/gstreamer-1.0/libgsteffectv%(mext)s',
+             'lib/gstreamer-1.0/libgstequalizer%(mext)s',
+             'lib/gstreamer-1.0/libgstgdkpixbuf%(mext)s',
+             'lib/gstreamer-1.0/libgstimagefreeze%(mext)s',
+             'lib/gstreamer-1.0/libgstinterleave%(mext)s',
+             'lib/gstreamer-1.0/libgstlevel%(mext)s',
+             'lib/gstreamer-1.0/libgstmultifile%(mext)s',
+             'lib/gstreamer-1.0/libgstreplaygain%(mext)s',
+             'lib/gstreamer-1.0/libgstshapewipe%(mext)s',
+             'lib/gstreamer-1.0/libgstsmpte%(mext)s',
+             'lib/gstreamer-1.0/libgstspectrum%(mext)s',
+             'lib/gstreamer-1.0/libgstvideobox%(mext)s',
+             'lib/gstreamer-1.0/libgstvideocrop%(mext)s',
+             'lib/gstreamer-1.0/libgstvideomixer%(mext)s',
+    ]
+
+    files_codecs = [
+             'lib/gstreamer-1.0/libgstalaw%(mext)s',
+             'lib/gstreamer-1.0/libgstannodex%(mext)s',
+             'lib/gstreamer-1.0/libgstapetag%(mext)s',
+             'lib/gstreamer-1.0/libgstaudioparsers%(mext)s',
+             'lib/gstreamer-1.0/libgstauparse%(mext)s',
+             'lib/gstreamer-1.0/libgstavi%(mext)s',
+             'lib/gstreamer-1.0/libgstflac%(mext)s',
+             'lib/gstreamer-1.0/libgstflv%(mext)s',
+             'lib/gstreamer-1.0/libgstflxdec%(mext)s',
+             'lib/gstreamer-1.0/libgsticydemux%(mext)s',
+             'lib/gstreamer-1.0/libgstid3demux%(mext)s',
+             'lib/gstreamer-1.0/libgstisomp4%(mext)s',
+             'lib/gstreamer-1.0/libgstjpeg%(mext)s',
+             'lib/gstreamer-1.0/libgstmatroska%(mext)s',
+             'lib/gstreamer-1.0/libgstmulaw%(mext)s',
+             'lib/gstreamer-1.0/libgstmultipart%(mext)s',
+             'lib/gstreamer-1.0/libgstpng%(mext)s',
+             'lib/gstreamer-1.0/libgstspeex%(mext)s',
+             'lib/gstreamer-1.0/libgsttaglib%(mext)s',
+             'lib/gstreamer-1.0/libgstwavenc%(mext)s',
+             'lib/gstreamer-1.0/libgstwavpack%(mext)s',
+             'lib/gstreamer-1.0/libgstwavparse%(mext)s',
+             'lib/gstreamer-1.0/libgsty4menc%(mext)s',
+    ]
+
+    files_net = [
+             'lib/gstreamer-1.0/libgstrtsp%(mext)s',
+             'lib/gstreamer-1.0/libgstrtp%(mext)s',
+             'lib/gstreamer-1.0/libgstrtpmanager%(mext)s',
+             'lib/gstreamer-1.0/libgstsouphttpsrc%(mext)s',
+             'lib/gstreamer-1.0/libgstudp%(mext)s',
+    ]
+
+    files_vis = [
+             'lib/gstreamer-1.0/libgstgoom%(mext)s',
+             'lib/gstreamer-1.0/libgstgoom2k1%(mext)s',
+            ]
+
+    platform_files_capture = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstvideo4linux2%(mext)s',
+             'lib/gstreamer-1.0/libgstximagesrc%(mext)s',
+            ]
+    }
+
+    platform_files_codecs = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstdv%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-1.0/libgstdv%(mext)s',
+            ]
+    }
+
+    platform_files_sys = {
+        Platform.WINDOWS: [
+             'lib/gstreamer-1.0/libgstdirectsoundsink%(mext)s',
+            ],
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstpulse%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-1.0/libgstosxaudio%(mext)s',
+             'lib/gstreamer-1.0/libgstosxvideosink%(mext)s',
+            ]
+    }
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += '--disable-aalib --disable-esd '\
+                '--disable-dv --disable-gtk-doc'
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += '--disable-gtk-doc'

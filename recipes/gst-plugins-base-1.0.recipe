@@ -1,0 +1,111 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-base-1.0'
+    version = '0.11.x'
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = "--disable-introspection --disable-examples --disable-gst_v4l --disable-gnome_vfs --disable-ivorbis --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Base Plugins (GStreamer SDK)' "
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
+    commit = 'upstream/master'
+    deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora', 'libvisual',
+            'libvorbis', 'zlib', 'orc']
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
+    use_system_libs = True
+
+    files_bins = ['gst-discoverer-1.0', 'gst-visualize-1.0']
+
+    files_libs = ['libgstapp-1.0', 'libgstaudio-1.0', 'libgstcdda-1.0', 'libgstfloatcast-1.0',
+                 'libgstfft-1.0', 'libgstinterfaces-1.0', 'libgstnetbuffer-1.0',
+                 'libgstpbutils-1.0', 'libgstriff-1.0', 'libgstrtp-1.0',
+                 'libgstrtsp-1.0', 'libgstsdp-1.0', 'libgsttag-1.0',
+                 'libgstvideo-1.0',]
+
+    files_core = [
+             'lib/gstreamer-1.0/libgstadder%(mext)s',
+             'lib/gstreamer-1.0/libgstapp%(mext)s',
+             'lib/gstreamer-1.0/libgstaudioconvert%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiorate%(mext)s',
+             'lib/gstreamer-1.0/libgstaudioresample%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiotestsrc%(mext)s',
+             'lib/gstreamer-1.0/libgstffmpegcolorspace%(mext)s',
+             'lib/gstreamer-1.0/libgstgdp%(mext)s',
+             'lib/gstreamer-1.0/libgstgio%(mext)s',
+             'lib/gstreamer-1.0/libgstpango%(mext)s',
+             'lib/gstreamer-1.0/libgsttypefindfunctions%(mext)s',
+             'lib/gstreamer-1.0/libgstvideoconvert%(mext)s',
+             'lib/gstreamer-1.0/libgstvideorate%(mext)s',
+             'lib/gstreamer-1.0/libgstvideoscale%(mext)s',
+             'lib/gstreamer-1.0/libgstvideotestsrc%(mext)s',
+             'lib/gstreamer-1.0/libgstvolume%(mext)s',
+    ]
+
+    files_playback = [
+             'lib/gstreamer-1.0/libgstplayback%(mext)s',
+            ]
+
+    # Not used currently
+    files_encoding = [
+             'lib/gstreamer-1.0/libgstencodebin%(mext)s',
+            ]
+
+    files_codecs = [
+             'lib/gstreamer-1.0/libgstsubparse%(mext)s',
+             'lib/gstreamer-1.0/libgstogg%(mext)s',
+             'lib/gstreamer-1.0/libgsttheora%(mext)s',
+             'lib/gstreamer-1.0/libgstvorbis%(mext)s',
+            ]
+
+    files_vis = [
+             'lib/gstreamer-1.0/libgstlibvisual%(mext)s',
+            ]
+
+    files_devel = [
+            'include/gstreamer-1.0/gst/app',
+            'include/gstreamer-1.0/gst/audio',
+            'include/gstreamer-1.0/gst/fft',
+            'include/gstreamer-1.0/gst/pbutils',
+            'include/gstreamer-1.0/gst/riff',
+            'include/gstreamer-1.0/gst/rtp',
+            'include/gstreamer-1.0/gst/rtsp',
+            'include/gstreamer-1.0/gst/sdp',
+            'include/gstreamer-1.0/gst/tag',
+            'include/gstreamer-1.0/gst/video',
+            'lib/pkgconfig/gstreamer-app-1.0.pc',
+            'lib/pkgconfig/gstreamer-audio-1.0.pc',
+            'lib/pkgconfig/gstreamer-fft-1.0.pc',
+            'lib/pkgconfig/gstreamer-pbutils-1.0.pc',
+            'lib/pkgconfig/gstreamer-riff-1.0.pc',
+            'lib/pkgconfig/gstreamer-rtp-1.0.pc',
+            'lib/pkgconfig/gstreamer-rtsp-1.0.pc',
+            'lib/pkgconfig/gstreamer-sdp-1.0.pc',
+            'lib/pkgconfig/gstreamer-tag-1.0.pc',
+            'lib/pkgconfig/gstreamer-video-1.0.pc',
+            'lib/pkgconfig/gstreamer-plugins-base-1.0.pc',
+    ]
+
+    platform_files_sys = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstalsa%(mext)s',
+             'lib/gstreamer-1.0/libgstximagesink%(mext)s',
+             'lib/gstreamer-1.0/libgstxvimagesink%(mext)s',
+             'lib/gstreamer-1.0/libgstcdparanoia%(mext)s',
+            ]
+    }
+
+    platform_files_net = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgsttcp%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-1.0/libgsttcp%(mext)s',
+            ]
+    }
+
+    files_lang = ['gst-plugins-base-1.0']
+
+
+    def prepare(self):
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
+            self.configure_options += ' --disable-gtk-doc'
