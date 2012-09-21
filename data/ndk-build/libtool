@@ -1780,6 +1780,10 @@ func_source ()
 func_resolve_sysroot ()
 {
   func_resolve_sysroot_result=$1
+
+  old_prefix=`$ECHO $LT_OLD_PREFIX | $SED -e 's/\//\\\\\//g'`
+  new_prefix=`$ECHO $LT_NEW_PREFIX | $SED -e 's/\//\\\\\//g'`
+  func_resolve_sysroot_result=`$ECHO "$1" | $SED -e "s/$old_prefix/$new_prefix/g"`
   case $func_resolve_sysroot_result in
   =*)
     func_stripname '=' '' "$func_resolve_sysroot_result"

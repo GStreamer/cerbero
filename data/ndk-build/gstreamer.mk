@@ -16,11 +16,17 @@ GSTREAMER_ANDROID_MODULE_NAME=gstreamer_android
 GSTREAMER_ANDROID_LO=$(GSTREAMER_ANDROID_MODULE_NAME).lo
 GSTREAMER_ANDROID_SO=lib$(GSTREAMER_ANDROID_MODULE_NAME).so
 GSTREAMER_ANDROID_C=$(GSTREAMER_ANDROID_MODULE_NAME).c
-# Make .pc files relocatables overriding the prefix and libdir variables
-# and set PKG_CONFIG_LIBDIR with respect of the prefix
-PKG_CONFIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
 
-LIBTOOL := $(GSTREAMER_NDK_BUILD_PATH)/libtool
+# Make pkg-config and libtool relocatables
+# * pkg-config:
+# set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
+PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
+PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
+# * libtool:
+# Use the nev variables LT_OLD_PREFIX and LT_NEW_PREFIX which replaces
+# the build prefix with the installation one
+BUILD_PREFIX := $(shell $(PKG_CONFIG_ORIG) --variable=prefix glib-2.0)
+LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool
 
 
 # Declare a prebuilt library module, a shared library including
