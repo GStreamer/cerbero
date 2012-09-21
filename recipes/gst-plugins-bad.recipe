@@ -140,6 +140,7 @@ class Recipe(recipe.Recipe):
             ],
         Platform.ANDROID: [
              'lib/gstreamer-0.10/libgsteglglessink%(mext)s',
+             'lib/gstreamer-0.10/libgstopensles%(mext)s',
             ]
     }
 

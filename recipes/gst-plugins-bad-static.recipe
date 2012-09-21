@@ -127,6 +127,7 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.ANDROID: [
              'libgsteglglessink',
+             'libgstopensles',
             ]
     }
 
