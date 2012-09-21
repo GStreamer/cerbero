@@ -47,6 +47,7 @@ LOCAL_MAKEFILE     := $(local-makefile)
 LOCAL_PREBUILT_PREFIX := lib
 LOCAL_PREBUILT_SUFFIX := .so
 LOCAL_EXPORT_C_INCLUDES := $(shell  echo `$(PKG_CONFIG) gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
+LOCAL_EXPORT_C_INCLUDES := $(LOCAL_EXPORT_C_INCLUDES) $(GSTREAMER_SDK_ROOT)/include
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
