@@ -16,6 +16,7 @@ GSTREAMER_ANDROID_MODULE_NAME=gstreamer_android
 GSTREAMER_ANDROID_LO=$(GSTREAMER_ANDROID_MODULE_NAME).lo
 GSTREAMER_ANDROID_SO=lib$(GSTREAMER_ANDROID_MODULE_NAME).so
 GSTREAMER_ANDROID_C=$(GSTREAMER_ANDROID_MODULE_NAME).c
+PKG_CONFIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
 
 
 # Declare a prebuilt library module, a shared library including
@@ -35,7 +36,7 @@ LOCAL_MAKEFILE     := $(local-makefile)
 
 LOCAL_PREBUILT_PREFIX := lib
 LOCAL_PREBUILT_SUFFIX := .so
-LOCAL_EXPORT_C_INCLUDES := $(shell  echo `pkg-config gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
+LOCAL_EXPORT_C_INCLUDES := $(shell  echo `$(PKG_CONFIG) gstreamer-0.10 --cflags-only-I` | sed 's/-I//g')
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
 # This trigger the build of our library using our custom rules
@@ -79,6 +80,7 @@ G_IO_MODULES_LOAD := $(foreach module, $(G_IO_MODULES), \
 GSTREAMER_ADNROID_LIBS := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
 # Fix deps for giognutls
 GSTREAMER_ADNROID_LIBS :=  $(call fix-deps,-lgiognutls, -lhogweed)
+GSTREAMER_ANDROID_CFLAGS := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -I$(GSTREAMER_SDK_ROOT)/include
 
 
 # Generates a source files that declares and register all the required plugins
@@ -90,7 +92,7 @@ genstatic:
 	@sed -i 's/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
-	libtool --tag=CC --mode=compile  $(CC) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) `pkg-config --cflags gstreamer-0.10`
+	libtool --tag=CC --mode=compile $(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) $(GSTREAMER_ANDROID_CFLAGS)
 
 # The goal is to create a shared library containing gstreamer
 # its plugins and its dependencies.
@@ -105,7 +107,7 @@ $(GSTREAMER_ANDROID_LO): genstatic
 # * libz is not listed as dependency in libxml2.la and even adding it doesn't help
 # libtool (although it should :/), so we explicitly link -lz at the very end.
 buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
-	libtool --tag=CC --mode=link $(CC) $(LDFLAGS) \
+	libtool --tag=CC --mode=link $(_CC) $(LDFLAGS) --sysroot=$(SYSROOT) \
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
