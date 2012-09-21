@@ -16,7 +16,9 @@ GSTREAMER_ANDROID_MODULE_NAME=gstreamer_android
 GSTREAMER_ANDROID_LO=$(GSTREAMER_ANDROID_MODULE_NAME).lo
 GSTREAMER_ANDROID_SO=lib$(GSTREAMER_ANDROID_MODULE_NAME).so
 GSTREAMER_ANDROID_C=$(GSTREAMER_ANDROID_MODULE_NAME).c
-PKG_CONFIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
+# Make .pc files relocatables overriding the prefix and libdir variables
+# and set PKG_CONFIG_LIBDIR with respect of the prefix
+PKG_CONFIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
 
 LIBTOOL := $(GSTREAMER_NDK_BUILD_PATH)/libtool
 
