@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 
-    files_libs = ['libgcc_s_sjlj-1', 'libstdc++-6']
+    files_libs = ['libgcc_s_sjlj-1', 'libstdc++-6', 'libssp-0']
     files_satic = []
     files_headers = ['include/GL']
 
