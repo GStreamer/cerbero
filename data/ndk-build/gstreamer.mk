@@ -26,7 +26,7 @@ PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) 
 # Use the nev variables LT_OLD_PREFIX and LT_NEW_PREFIX which replaces
 # the build prefix with the installation one
 BUILD_PREFIX := $(shell $(PKG_CONFIG_ORIG) --variable=prefix glib-2.0)
-LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool
+LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool --no-warn --silent
 
 
 # Declare a prebuilt library module, a shared library including
@@ -96,14 +96,16 @@ GSTREAMER_ANDROID_CFLAGS := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -I$(G
 
 # Generates a source files that declares and register all the required plugins
 genstatic:
-	cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_MODULE_NAME).c"
+	@cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@sed -i 's/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 $(GSTREAMER_ANDROID_LO): genstatic
-	$(LIBTOOL) --tag=CC --mode=compile $(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) $(GSTREAMER_ANDROID_CFLAGS)
+	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_LO)"
+	@$(LIBTOOL) --tag=CC --mode=compile $(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) $(GSTREAMER_ANDROID_CFLAGS)
 
 # The goal is to create a shared library containing gstreamer
 # its plugins and its dependencies.
@@ -118,7 +120,8 @@ $(GSTREAMER_ANDROID_LO): genstatic
 # * libz is not listed as dependency in libxml2.la and even adding it doesn't help
 # libtool (although it should :/), so we explicitly link -lz at the very end.
 buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
-	$(LIBTOOL) --tag=CC --mode=link $(_CC) $(LDFLAGS) --sysroot=$(SYSROOT) \
+	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
+	@$(LIBTOOL) --tag=CC --mode=link $(_CC) $(LDFLAGS) --sysroot=$(SYSROOT) \
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
