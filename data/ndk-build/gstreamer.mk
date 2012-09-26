@@ -34,7 +34,7 @@ GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_SDK_ROOT)/share/gst-android/ndk-build
 endif
 
 # Path for the static GIO modules
-G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules
+G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules/static
 
 GSTREAMER_ANDROID_MODULE_NAME := gstreamer_android
 GSTREAMER_ANDROID_LO          := $(GSTREAMER_ANDROID_MODULE_NAME).lo

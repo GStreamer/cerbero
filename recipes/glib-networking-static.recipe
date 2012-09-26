@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+from cerbero.utils import to_unixpath
 
 
 class Recipe(recipe.Recipe):
@@ -8,9 +11,18 @@ class Recipe(recipe.Recipe):
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static"
     deps = ['glib', 'gnutls', 'glib-networking']
 
-    files_misc = ['lib/gio/modules/libgiognutls.a']
-    files_lang = ['glib-networking']
+    files_devel = ['lib/gio/modules/static/libgiognutls.a',
+                   'lib/gio/modules/static/libgiognutls.la']
 
     def prepare(self):
         self.remotes['origin'] = self.remotes['origin'].replace('-static', '')
         self.repo_dir = self.repo_dir.replace('-static', '')
+        self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
+
+    def install(self):
+        plugins_dir = os.path.dirname(os.path.join(self.config.prefix,
+                                                   self.files_devel[0]))
+        shutil.copy(os.path.join(self.build_dir, 'tls', 'gnutls', '.libs',
+            'libgiognutls.a'), plugins_dir)
+        shutil.copy(os.path.join(self.build_dir, 'tls', 'gnutls', '.libs',
+            'libgiognutls.la'), plugins_dir)
