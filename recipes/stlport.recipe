@@ -1,4 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.tools.pkgconfig import PkgConfigWritter
 
@@ -10,8 +12,10 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
 
     files_stlport = [
-            'lib/pkg-config/stlport.pc',
-            'lib/stlport.la',
+            'lib/libstlport_shared.so']
+    files_devel_stlport = [
+            'lib/pkgconfig/stlport.pc',
+            'lib/libstlport.la',
             ]
 
     def prepare(self):
@@ -22,13 +26,19 @@ class Recipe(recipe.Recipe):
         stlport_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
                 'cxx-stl', 'stlport')
         stlport_libdir = os.path.join(stlport_prefix, 'libs', 'armeabi')
+        libdir = os.path.join(self.config.prefix, 'lib')
+
+        # Required at runtime
+        shutil.copy(os.path.join(stlport_libdir, 'libstlport_shared.so'),
+                    libdir)
+
 
         # Create a libtool library for stlport (libstlport.la)
         lib = LibtoolLibrary('stlport', None, None, None, stlport_libdir)
         lib.change_value('dlname', 'libstlport_shared.so')
         lib.change_value('old_library', 'libstlport_static.a')
         lib.change_value('library_name', 'libstlport_shared.so')
-        lib.libdir = os.path.join(self.config.prefix, 'lib')
+        lib.libdir = libdir
         lib.save()
 
         # Create pkg-config file (stlport.pc)

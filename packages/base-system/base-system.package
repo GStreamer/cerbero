@@ -27,5 +27,5 @@ class Package(package.Package):
         Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang',
             'libxslt:libs'],
         Platform.LINUX: ['libxslt:libs'],
-        Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang']
+        Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'stlport']
         }
