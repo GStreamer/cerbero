@@ -20,8 +20,10 @@ class Recipe(recipe.Recipe):
         self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
 
     def install(self):
-        plugins_dir = os.path.dirname(os.path.join(self.config.prefix,
-                                                   self.files_devel[0]))
+        plugins_dir = os.path.join(self.config.prefix,
+                                    os.path.dirname(self.files_devel[0]))
+        if not os.path.exists(plugins_dir):
+            os.makedirs(plugins_dir)
         shutil.copy(os.path.join(self.build_dir, 'tls', 'gnutls', '.libs',
             'libgiognutls.a'), plugins_dir)
         shutil.copy(os.path.join(self.build_dir, 'tls', 'gnutls', '.libs',
