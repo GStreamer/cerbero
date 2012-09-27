@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
 
-    files_devel_shared = [
+    files_devel = [
             'share/gst-android/ndk-build/gstreamer_android.c.in',
             'share/gst-android/ndk-build/gstreamer.mk',
             'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
