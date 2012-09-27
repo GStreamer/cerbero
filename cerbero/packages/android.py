@@ -20,6 +20,7 @@ import os
 import tarfile
 import zipfile
 
+from cerbero.packages import PackageType
 from cerbero.packages.disttarball import DistTarball
 from cerbero.errors import UsageError
 
@@ -68,6 +69,16 @@ class AndroidPackager(DistTarball):
         filenames.append(filename)
 
         return  ' '.join(filenames)
+
+    def _get_name(self, package_type, ext='tar.bz2'):
+        if package_type == PackageType.DEVEL:
+            package_type = ''
+        elif package_type == PackageType.RUNTIME:
+            package_type = '-runtime'
+
+        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name,
+                self.config.target_platform, self.config.target_arch,
+                self.package.version, package_type, ext)
 
 
 def register():
