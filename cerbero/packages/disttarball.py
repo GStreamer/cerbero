@@ -72,7 +72,8 @@ class DistTarball(PackagerBase):
         return filenames
 
     def _get_name(self, package_type, ext='tar.bz2'):
-        return "%s%s-%s%s.%s" % (self.package_prefix, self.package.name,
+        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name,
+                self.config.target_platform, self.config.target_arch,
                 self.package.version, package_type, ext)
 
     def _create_tarball(self, output_dir, package_type, files, force,
