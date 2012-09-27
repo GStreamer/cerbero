@@ -78,7 +78,7 @@ LOCAL_MODULE_CLASS      := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE          := $(local-makefile)
 LOCAL_PREBUILT_PREFIX   := lib
 LOCAL_PREBUILT_SUFFIX   := .so
-LOCAL_EXPORT_C_INCLUDES := $(shell  echo `$(PKG_CONFIG) gstreamer-0.10 --cflags-only-I` | sed 's/-I//g') $(LOCAL_EXPORT_C_INCLUDES) $(GSTREAMER_SDK_ROOT)/include
+LOCAL_EXPORT_C_INCLUDES := $(shell  $(HOST_ECHO) `$(PKG_CONFIG) gstreamer-0.10 --cflags-only-I` | $(HOST_SED) 's/-I//g') $(LOCAL_EXPORT_C_INCLUDES) $(GSTREAMER_SDK_ROOT)/include
 
 
 ##################################################################
@@ -94,18 +94,19 @@ $(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 # Some plugins uses a different name for the module name, like the playback
 # plugin, which uses playbin for the module name: libgstplaybin.so
 fix-plugin-name = \
-	$(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gst$1/gst$2/g')
+	$(subst gst$1,gst$2,$(GSTREAMER_PLUGINS_LIBS))
 
 fix-deps = \
-	$(shell echo $(GSTREAMER_ADNROID_LIBS) | sed 's/$1/$1 $2/g')
+	$(subst $1,$1 $2,$(GSTREAMER_ANDROID_LIBS))
+
 
 # Generate list of plugins links (eg: -lcoreelements -lvideoscale)
-GSTREAMER_PLUGINS_LIBS       :=$(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
+GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,uridecodebin,decodebin2)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,encoding,encodebin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,soup,souphttpsrc)
-GSTREAMER_PLUGINS_LIBS       := $(shell echo $(GSTREAMER_PLUGINS_LIBS) | sed 's/gstgnonlin/gnl/g')
+GSTREAMER_PLUGINS_LIBS       := $(subst gstgnonlin,gnl,$(GSTREAMER_PLUGINS_LIBS))
 
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE    := $(foreach plugin, $(GSTREAMER_PLUGINS), \
@@ -132,11 +133,11 @@ GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -
 # Generates a source file that declares and register all the required plugins
 genstatic:
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_MODULE_NAME).c"
-	@cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@sed -i 's/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@sed -i 's/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@sed -i 's/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@sed -i 's/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g' $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(call host-cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c)
+	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
 
 # Compile the source file
 $(GSTREAMER_ANDROID_LO): genstatic
