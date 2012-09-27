@@ -31,7 +31,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' ASFLAGS="%s"' % asflags
         super(Recipe, self).prepare()
         for f in ['libavcodec.a', 'libavformat.a', 'libavutil.a']:
-            path = os.path.join(self.config.prefix, 'lib', 'gstreamer-0.10', 'static', f)
+            path = os.path.join('lib', 'gstreamer-0.10', 'static', f)
             self.files_codecs_devel.append(path)
 
     def configure(self):
@@ -59,12 +59,11 @@ class Recipe(custom.GStreamerStatic):
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
 
     def post_install(self):
-        if self.config.target_platform == Platform.ANDROID:
-            for n in ['avutil', 'avcodec', 'avformat']:
-                name = 'lib%s' % n
-                lib = '%s.a' % name
-                path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav',
-                        name, lib)
-                shutil.copy(path, os.path.join(self.config.prefix, 'lib',
-                    'gstreamer-0.10', 'static'))
+        for n in ['avutil', 'avcodec', 'avformat']:
+            name = 'lib%s' % n
+            lib = '%s.a' % name
+            path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav',
+                    name, lib)
+            shutil.copy(path, os.path.join(self.config.prefix, 'lib',
+                'gstreamer-0.10', 'static'))
         custom.GStreamerStatic.post_install(self)
