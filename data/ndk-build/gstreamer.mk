@@ -133,7 +133,7 @@ GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -
 # Generates a source file that declares and register all the required plugins
 genstatic:
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_MODULE_NAME).c"
-	@$(call host-cp $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in $(GSTREAMER_ANDROID_MODULE_NAME).c)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in,$(GSTREAMER_ANDROID_MODULE_NAME).c)
 	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
 	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
