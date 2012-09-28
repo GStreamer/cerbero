@@ -32,6 +32,7 @@ pkg-config-get-prefix = \
 # Usage    : $(call libtool-link,<lib>)
 # -----------------------------------------------------------------------------
 libtool-link = \
+  $(call libtool-clear-vars)\
   $(eval __libtool.link.command := $1)\
   $(call __libtool_log, original link command = $(__libtool.link.command))\
   $(eval __libtool.link.Lpath := $(call libtool-get-search-paths,$1))\
@@ -41,24 +42,53 @@ libtool-link = \
   $(foreach library,$(__libtool.link.libs),$(call libtool-parse-lib,$(library)))\
   $(call libtool-gen-link-command)
 
-__libtool_log = \
-  $(if $(strip $(LIBTOOL_DEBUG)),\
-    $(call __libtool_info,$1),\
-  )
 
-__libtool_info = $(info LIBTOOL: $1)
+###############################################################################
+#                                                                             #
+#            This functions are private, don't use them directly              #
+#                                                                             #
+###############################################################################
 
 # -----------------------------------------------------------------------------
-# Function : libtool-read-deps
+# Function : libtool-parse-library
 # Arguments: 1: library name
-# Returns  : a string with the contents of 'dependency-libs'
-# Usage    : $(call libtool-read-deps,<lib>)
+# Returns  : ""
+# Usage    : $(call libtool-parse-library,<libname>)
+# Note     : Tries to find a libtool library for this name in the libraries search
+#            path and parses it as well as its dependencies
+# -----------------------------------------------------------------------------
+libtool-parse-lib = \
+  $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
+  $(if $(__tmpvar), \
+    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
+    $(call __libtool_log, libtool file not found for "$1")\
+  )
+
+# -----------------------------------------------------------------------------
+# Function : libtool-parse-file
+# Arguments: 1: libtool file
+#            2: library name
+# Returns  : ""
+# Usage    : $(call libtool-parse-file,<file>,<libname>)
+# Note     :
+#            Parses a libtool library and its dependencies recursively
+#
+#            For each library it sets the following variables:
+#            __libtool_libs.libname.LIBS              -> non-libtool libraries linked with -lfoo
+#            __libtool_libs.libname.STATIC_LIB        -> link statically this library
+#            __libtool_libs.libname.DYN_LIB           -> link dynamically this library
+#            __libtool_libs.libname.LIBS_SEARCH_PATH  -> libraries search path
+#
+#            Processed libraries are stored in __libtool_libs.processed, and
+#            the list of libraries ordered by dependencies are stored in
+#            __libtool_lbs.ordered
 # -----------------------------------------------------------------------------
 libtool-parse-file = \
   $(call __libtool_log, parsing file $1)\
   $(if $(call libtool-lib-processed,$2),\
       $(call __libtool_log, library $2 already parsed),\
     $(eval __libtool_libs.$2.STATIC_LIB := $(patsubst %.la,%.a,$1))\
+    $(eval __libtool_libs.$2.DYN_LIB := -l$2)\
     $(eval __tmpvar.$2.dep_libs := $(call libtool-get-dependency-libs,$1))\
     $(eval __tmpvar.$2.dep_libs := $(call libtool-replace-prefixes,$(__tmpvar.$2.dep_libs)))\
     $(eval __libtool_libs.$2.LIBS := $(call libtool-get-libs,$(__tmpvar.$2.dep_libs)))\
@@ -73,6 +103,26 @@ libtool-parse-file = \
     $(eval __libtool_libs.ordered += $2)\
     $(call __libtool_log, ordered list of libraries: $(__libtool_libs.ordered))\
   )
+
+__libtool_log = \
+  $(if $(strip $(LIBTOOL_DEBUG)),\
+    $(call __libtool_info,$1),\
+  )
+
+__libtool_info = $(info LIBTOOL: $1)
+
+libtool-clear-vars = \
+  $(foreach lib,$(__libtool_libs.processed),\
+    $(eval __libtool_libs.$(lib).LIBS := $(empty))\
+    $(eval __libtool_libs.$(lib).STATIC_LIB := $(empty))\
+    $(eval __libtool_libs.$(lib).DYN_LIB := $(empty))\
+    $(eval __libtool_libs.$(lib).LIBS_SEARCH_PATH := $(empty))\
+  )\
+  $(eval __libtool_libs.ordered := $(empty))\
+  $(eval __libtool_libs.processed := $(empty))\
+  $(eval __libtool.link.Lpath := $(empty))\
+  $(eval __libtool.link.command := $(empty))\
+  $(eval __libtool.link.libs := $(empty))
 
 libtool-lib-processed = \
   $(findstring ___$1___, $(foreach lib,$(__libtool_libs.processed), ___$(lib)___))
@@ -112,13 +162,6 @@ libtool-get-all-libs = \
     $(eval __tmpvar.static_libs := $(path) $(__tmpvar.static_libs))\
   )\
   $(strip -Wl,--start-group $(__tmpvar.static_libs) -Wl,--end-group $(__tmpvar.libs))
-
-libtool-parse-lib = \
-  $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
-  $(if $(__tmpvar), \
-    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
-    $(call __libtool_log, libtool file not found for "$1")\
-  )
 
 libtool-find-lib = \
   $(eval __tmpvar := $(empty))\

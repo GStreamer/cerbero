@@ -156,18 +156,7 @@ $(GSTREAMER_ANDROID_O): genstatic
 	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_C)"
 	@$(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 
-# The goal is to create a shared library containing gstreamer
-# its plugins and its dependencies.
-# * First, we need to trick libtool, asking it to create an
-# executable program so that it includes all the static libraries,
-# but passing the -shared option directly to the
-# linker with -XCClinker to end-up creating a shared library
-#
-# * -fuse-ld=gold is used to fix a bug in the default linker see:
-# (https://groups.google.com/forum/?fromgroups=#!topic/android-ndk/HaLycHImqL8)
-#
-# * libz is not listed as dependency in libxml2.la and even adding it doesn't help
-# libtool (although it should :/), so we explicitly link -lz at the very end.
+# Creates a shared library including gstreamer, it's plugins and all the dependencie
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
 	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
