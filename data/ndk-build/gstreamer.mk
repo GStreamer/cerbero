@@ -170,7 +170,7 @@ $(GSTREAMER_ANDROID_O): genstatic
 # libtool (although it should :/), so we explicitly link -lz at the very end.
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
+	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
 		-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 		-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
 		$(GSTREAMER_ANDROID_LIBS))
