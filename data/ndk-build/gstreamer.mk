@@ -17,6 +17,10 @@
 # Boston, MA 02111-1307, USA.
 
 $(call assert-defined, GSTREAMER_SDK_ROOT GSTREAMER_PLUGINS)
+$(if $(wildcard $(GSTREAMER_SDK_ROOT)),,\
+  $(error "The directory GSTREAMER_SDK_ROOT=$(GSTREAMER_SDK_ROOT) does not exists")\
+)
+
 #####################
 #  Setup variables  #
 #####################
