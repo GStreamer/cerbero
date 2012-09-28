@@ -172,5 +172,5 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 		$(GSTREAMER_ANDROID_LIBS))
 
 copyjavasource:
-	@mkdir -p src/com/gst_sdk
-	@cp $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java src/com/gst_sdk
+	@$(call host-mkdir,src/com/gst_sdk)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/com/gst_sdk)
