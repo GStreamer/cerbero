@@ -1,0 +1,162 @@
+# cerbero - a multi-platform build system for Open Source software
+# Copyright (C) 2012 Andoni Morales Alastruey <ylatuya@gmail.com>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+# Boston, MA 02111-1307, USA.
+
+# -----------------------------------------------------------------------------
+# Function : pkg-config-get-prefix
+# Arguments: 1: package
+# Returns  : a string with the prefix variable
+# Usage    : $(call pkg-config-get-prefix,<package>)
+# -----------------------------------------------------------------------------
+pkg-config-get-prefix = \
+  $(shell $(HOST_SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_SDK_ROOT)/lib/pkgconfig/$1.pc)
+
+# -----------------------------------------------------------------------------
+# Function : libtool-link
+# Arguments: 1: link command
+# Returns  : a link command with all the dependencies resolved as done by libtool
+# Usage    : $(call libtool-link,<lib>)
+# -----------------------------------------------------------------------------
+libtool-link = \
+  $(eval __libtool.link.command := $1)\
+  $(call __libtool_log, original link command = $(__libtool.link.command))\
+  $(eval __libtool.link.Lpath := $(call libtool-get-search-paths,$1))\
+  $(call __libtool_log, Library Search Paths = $(__libtool.link.Lpath))\
+  $(eval __libtool.link.libs := $(call libtool-get-libs,$1))\
+  $(call __libtool_log, Libraries = $(__libtool.link.libs))\
+  $(foreach library,$(__libtool.link.libs),$(call libtool-parse-lib,$(library)))\
+  $(call libtool-gen-link-command)
+
+__libtool_log = \
+  $(if $(strip $(LIBTOOL_DEBUG)),\
+    $(call __libtool_info,$1),\
+  )
+
+__libtool_info = $(info LIBTOOL: $1)
+
+# -----------------------------------------------------------------------------
+# Function : libtool-read-deps
+# Arguments: 1: library name
+# Returns  : a string with the contents of 'dependency-libs'
+# Usage    : $(call libtool-read-deps,<lib>)
+# -----------------------------------------------------------------------------
+libtool-parse-file = \
+  $(call __libtool_log, parsing file $1)\
+  $(if $(call libtool-lib-processed,$2),\
+      $(call __libtool_log, library $2 already parsed),\
+    $(eval __libtool_libs.$2.STATIC_LIB := $(patsubst %.la,%.a,$1))\
+    $(eval __tmpvar.$2.dep_libs := $(call libtool-get-dependency-libs,$1))\
+    $(eval __tmpvar.$2.dep_libs := $(call libtool-replace-prefixes,$(__tmpvar.$2.dep_libs)))\
+    $(eval __libtool_libs.$2.LIBS := $(call libtool-get-libs,$(__tmpvar.$2.dep_libs)))\
+    $(eval __libtool_libs.$2.LIBS_SEARCH_PATH := $(call libtool-get-search-paths,$(__tmpvar.$2.dep_libs)))\
+    $(call __libtool_log, $2.libs = $(__libtool_libs.$2.LIBS))\
+    $(eval __tmpvar.$2.file_deps := $(call libtool-get-libtool-deps,$(__tmpvar.$2.dep_libs)))\
+    $(eval __libtool_libs.$2.DEPS := $(foreach path,$(__tmpvar.$2.file_deps), $(call libtool-name-from-filepath,$(path))))\
+    $(call __libtool_log, $2.deps = $(__libtool_libs.$2.DEPS)) \
+    $(eval __libtool_libs.processed += $2) \
+    $(call __libtool_log, parsed libraries: $(__libtool_libs.processed))\
+    $(foreach library,$(__libtool_libs.$2.DEPS), $(call libtool-parse-lib,$(library)))\
+    $(eval __libtool_libs.ordered += $2)\
+    $(call __libtool_log, ordered list of libraries: $(__libtool_libs.ordered))\
+  )
+
+libtool-lib-processed = \
+  $(findstring ___$1___, $(foreach lib,$(__libtool_libs.processed), ___$(lib)___))
+
+libtool-gen-link-command = \
+  $(eval __tmpvar.cmd := $(filter-out -L%,$(__libtool.link.command)))\
+  $(eval __tmpvar.cmd := $(filter-out -l%,$(__tmpvar.cmd)))\
+  $(eval __tmpvar.cmd += $(call libtool-get-libs-search-paths))\
+  $(eval __tmpvar.cmd += $(call libtool-get-all-libs))\
+  $(__tmpvar.cmd)
+
+libtool-get-libs-search-paths = \
+  $(eval __tmpvar.paths := $(empty))\
+  $(foreach library,$(__libtool_libs.ordered),\
+    $(foreach path,$(__libtool_libs.$(library).LIBS_SEARCH_PATH),\
+      $(if $(findstring $(path), $(__tmpvar.paths)), ,\
+        $(eval __tmpvar.paths += $(path))\
+      )\
+    )\
+  )\
+  $(call __libtool_log, search paths $(__tmpvar.paths))\
+  $(strip $(__tmpvar.paths))
+
+libtool-get-all-libs = \
+  $(eval __tmpvar.static_libs_reverse := $(empty))\
+  $(eval __tmpvar.static_libs := $(empty))\
+  $(eval __tmpvar.libs := $(empty))\
+  $(foreach library,$(__libtool_libs.ordered),\
+    $(eval __tmpvar.static_libs_reverse += $(__libtool_libs.$(library).STATIC_LIB))\
+    $(foreach dylib,$(__libtool_libs.$(library).LIBS),\
+      $(if $(findstring $(dylib), $(__tmpvar.libs)), ,\
+        $(eval __tmpvar.libs += $(dylib))\
+      )\
+    )\
+  )\
+  $(foreach path,$(__tmpvar.static_libs_reverse),\
+    $(eval __tmpvar.static_libs := $(path) $(__tmpvar.static_libs))\
+  )\
+  $(strip -Wl,--start-group $(__tmpvar.static_libs) -Wl,--end-group $(__tmpvar.libs))
+
+libtool-parse-lib = \
+  $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
+  $(if $(__tmpvar), \
+    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
+    $(call __libtool_log, libtool file not found for "$1")\
+  )
+
+libtool-find-lib = \
+  $(eval __tmpvar := $(empty))\
+  $(foreach path,$(__libtool.link.Lpath),\
+    $(eval __tmpvar += $(wildcard $(patsubst -L%,%,$(path))/lib$1.la))\
+  ) \
+  $(firstword $(__tmpvar))
+
+libtool-clear-vars = \
+  $(eval __libtool.link.command := $(empty))
+  $(eval __libtool.link.Lpath := $(empty))
+
+libtool-get-static-lib = \
+  $(GSTREAMER_SDK_ROOT)/lib/lib$1.a
+
+libtool-filepath-from-name = \
+  $(GSTREAMER_SDK_ROOT)/lib/lib$1.la
+
+libtool-name-from-filepath = \
+  $(patsubst lib%.la,%,$(notdir $1))
+
+libtool-get-libtool-deps = \
+  $(filter %.la,$1)
+
+libtool-get-deps = \
+  $(filter %.la,$1)
+
+libtool-get-libs = \
+  $(filter -l%,$1)
+
+libtool-get-search-paths = \
+  $(filter -L%,$1)
+
+libtool-get-dependency-libs = \
+  $(shell $(HOST_SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
+
+libtool-replace-prefixes = \
+  $(subst $(BUILD_PREFIX),$(GSTREAMER_SDK_ROOT),$1)
+
+libtool-get-static-library = \
+  $(shell $(HOST_SED) -n "s/^old_library='\(.*\)'/\1/p" $1)

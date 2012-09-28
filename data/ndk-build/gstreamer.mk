@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 $(call assert-defined, GSTREAMER_SDK_ROOT GSTREAMER_PLUGINS)
-
 #####################
 #  Setup variables  #
 #####################
@@ -33,29 +32,37 @@ ifndef GSTREAMER_NDK_BUILD_PATH
 GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_SDK_ROOT)/share/gst-android/ndk-build
 endif
 
+# Include tools
+include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
+
 # Path for the static GIO modules
 G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules/static
 
 GSTREAMER_ANDROID_MODULE_NAME := gstreamer_android
-GSTREAMER_ANDROID_LO          := $(GSTREAMER_ANDROID_MODULE_NAME).lo
-GSTREAMER_ANDROID_SO          := lib$(GSTREAMER_ANDROID_MODULE_NAME).so
-GSTREAMER_ANDROID_C           := $(GSTREAMER_ANDROID_MODULE_NAME).c
+GSTREAMER_BUILD_DIR           := gst-build
+GSTREAMER_ANDROID_O           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).o
+GSTREAMER_ANDROID_SO          := $(GSTREAMER_BUILD_DIR)/lib$(GSTREAMER_ANDROID_MODULE_NAME).so
+GSTREAMER_ANDROID_C           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).c
+GSTREAMER_ANDROID_C_IN        := $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in
+GSTREAMER_INCLUDES            := include include/glib-2.0 lib/glib-2.0/include include/libxml2 include/gstreamer-0.10
+ifeq ($(HOST_OS),windows)
+    HOST_SED := $(GSTREAMER_SDK_ROOT)/bin/sed
+    HOST_SH  := $(GSTREAMER_SDK_ROOT)/bin/sh
+endif
 
 
 ##############################################
 #  Make pkg-config and libtool relocatables  #
 ##############################################
 
-# pkg-config:
-# set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
-PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
-PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
-
 # libtool:
 # Use the nev variables LT_OLD_PREFIX and LT_NEW_PREFIX which replaces
 # the build prefix with the installation one
-BUILD_PREFIX := $(shell $(PKG_CONFIG_ORIG) --variable=prefix glib-2.0)
-LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool --no-warn --silent
+BUILD_PREFIX := $(call pkg-config-get-prefix,glib-2.0)
+LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool #--no-warn --silent
+ifeq ($(HOST_OS),windows)
+    LIBTOOL := $(HOST_SH) -c "$(LIBTOOL)"
+endif
 
 
 ################################
@@ -78,7 +85,7 @@ LOCAL_MODULE_CLASS      := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE          := $(local-makefile)
 LOCAL_PREBUILT_PREFIX   := lib
 LOCAL_PREBUILT_SUFFIX   := .so
-LOCAL_EXPORT_C_INCLUDES := $(shell  $(HOST_ECHO) `$(PKG_CONFIG) gstreamer-0.10 --cflags-only-I` | $(HOST_SED) 's/-I//g') $(LOCAL_EXPORT_C_INCLUDES) $(GSTREAMER_SDK_ROOT)/include
+LOCAL_EXPORT_C_INCLUDES := $(foreach incl, $(GSTREAMER_INCLUDES), $(GSTREAMER_SDK_ROOT)/$(incl)) $(LOCAL_EXPORT_C_INCLUDES)
 
 
 ##################################################################
@@ -126,23 +133,24 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 # Get the full list of libraries
 GSTREAMER_ANDROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
 # Fix deps for giognutls
-GSTREAMER_ANDROID_LIBS       :=  $(call fix-deps,-lgiognutls, -lhogweed)
-GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -I$(GSTREAMER_SDK_ROOT)/include
+GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
+GSTREAMER_ANDROID_CFLAGS     := $(foreach incl, $(GSTREAMER_INCLUDES), -I$(GSTREAMER_SDK_ROOT)/$(incl))
 
 
 # Generates a source file that declares and register all the required plugins
 genstatic:
-	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_MODULE_NAME).c"
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in,$(GSTREAMER_ANDROID_MODULE_NAME).c)
-	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
-	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g" $(GSTREAMER_ANDROID_MODULE_NAME).c
+	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_C)"
+	@$(call host-mkdir,$(GSTREAMER_BUILD_DIR))
+	@$(call host-cp,$(GSTREAMER_ANDROID_C_IN),$(GSTREAMER_ANDROID_C))
+	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(GSTREAMER_ANDROID_C)
+	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(GSTREAMER_ANDROID_C)
+	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(GSTREAMER_ANDROID_C)
+	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g" $(GSTREAMER_ANDROID_C)
 
 # Compile the source file
-$(GSTREAMER_ANDROID_LO): genstatic
-	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_LO)"
-	@$(LIBTOOL) --tag=CC --mode=compile $(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_LO) $(GSTREAMER_ANDROID_CFLAGS)
+$(GSTREAMER_ANDROID_O): genstatic
+	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_C)"
+	@$(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 
 # The goal is to create a shared library containing gstreamer
 # its plugins and its dependencies.
@@ -156,14 +164,12 @@ $(GSTREAMER_ANDROID_LO): genstatic
 #
 # * libz is not listed as dependency in libxml2.la and even adding it doesn't help
 # libtool (although it should :/), so we explicitly link -lz at the very end.
-buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
+buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	@$(LIBTOOL) --tag=CC --mode=link $(_CC) $(LDFLAGS) --sysroot=$(SYSROOT) \
-		-static-libtool-libs \
-		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
-		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
-		$(GSTREAMER_ANDROID_LIBS) \
-		-XCClinker -shared -fuse-ld=gold
+	$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
+		-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
+		-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+		$(GSTREAMER_ANDROID_LIBS))
 
 copyjavasource:
 	@mkdir -p src/com/gst_sdk

@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/gstreamer_android.c.in',
             'share/gst-android/ndk-build/gstreamer.mk',
             'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
-            'share/gst-android/ndk-build/libtool',
+            'share/gst-android/ndk-build/tools.mk',
             'share/gst-android/ndk-build/GStreamer.java',
             ]
 
