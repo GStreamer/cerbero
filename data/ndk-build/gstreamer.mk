@@ -124,9 +124,9 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 			G_IO_MODULE_LOAD(gnutls);\n)
 
 # Get the full list of libraries
-GSTREAMER_ADNROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
+GSTREAMER_ANDROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
 # Fix deps for giognutls
-GSTREAMER_ADNROID_LIBS       :=  $(call fix-deps,-lgiognutls, -lhogweed)
+GSTREAMER_ANDROID_LIBS       :=  $(call fix-deps,-lgiognutls, -lhogweed)
 GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags gstreamer-0.10) -I$(GSTREAMER_SDK_ROOT)/include
 
 
@@ -162,7 +162,7 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_LO)
 		-static-libtool-libs \
 		-o $(GSTREAMER_ANDROID_SO)  $(GSTREAMER_ANDROID_LO) \
 		-L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
-		$(GSTREAMER_ADNROID_LIBS) \
+		$(GSTREAMER_ANDROID_LIBS) \
 		-XCClinker -shared -fuse-ld=gold
 
 copyjavasource:
