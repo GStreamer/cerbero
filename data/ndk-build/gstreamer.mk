@@ -173,7 +173,7 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
 		-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 		-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
-		$(GSTREAMER_ANDROID_LIBS))
+		$(GSTREAMER_ANDROID_LIBS)) -Wc,fuse-ld=gold
 
 copyjavasource:
 	@$(call host-mkdir,src/com/gst_sdk)
