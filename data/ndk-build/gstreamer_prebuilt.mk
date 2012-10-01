@@ -62,7 +62,7 @@ LOCAL_SRC_FILES    :=
 $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS)
 
 delsharedlib:
-	@rm $(prebuilt)
+	@$(call host-rm,$(prebuilt))
 
 include $(BUILD_SYSTEM)/build-module.mk
 
