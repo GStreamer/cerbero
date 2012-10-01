@@ -35,9 +35,10 @@ class AndroidPackager(DistTarball):
                         package_prefix):
         filenames = []
 
-        # Filter out some unwanted directories
-        for filt in ['bin/', 'share/aclocal']:
-            files = [x for x in files if not x.startswith(filt)]
+        # Filter out some unwanted directories for the development package
+        if package_type == PackageType.DEVEL:
+            for filt in ['bin/', 'share/aclocal']:
+                files = [x for x in files if not x.startswith(filt)]
 
         # Create the bz2 file first
         filename = os.path.join(output_dir, self._get_name(package_type))
