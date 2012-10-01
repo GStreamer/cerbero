@@ -57,16 +57,12 @@ libtool-link = \
 # Note     : Tries to find a libtool library for this name in the libraries search
 #            path and parses it as well as its dependencies
 # -----------------------------------------------------------------------------
-NO_LIBTOOL_LIBS := -llog -landroid
 libtool-parse-lib = \
-  $(if $(findstring $1, $(NO_LIBTOOL_LIBS)),\
-    $(eval __libtool_libs.log.LIBS := $1)\
-    $(eval __libtool_libs.ordered += $(patsubst -l%,%,$1)),\
-    $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
-    $(if $(__tmpvar), \
-      $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
-      $(call __libtool_log, libtool file not found for "$1")\
-    )\
+  $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
+  $(if $(__tmpvar), \
+    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
+    $(eval __libtool.link.shared_libs += $1)\
+    $(call __libtool_log, libtool file not found for "$1" and will be added to the shared libs)\
   )
 
 # -----------------------------------------------------------------------------
@@ -127,7 +123,8 @@ libtool-clear-vars = \
   $(eval __libtool_libs.processed := $(empty))\
   $(eval __libtool.link.Lpath := $(empty))\
   $(eval __libtool.link.command := $(empty))\
-  $(eval __libtool.link.libs := $(empty))
+  $(eval __libtool.link.libs := $(empty))\
+  $(eval __libtool.link.shared_libs := $(empty))
 
 libtool-lib-processed = \
   $(findstring ___$1___, $(foreach lib,$(__libtool_libs.processed), ___$(lib)___))
@@ -137,6 +134,8 @@ libtool-gen-link-command = \
   $(eval __tmpvar.cmd := $(filter-out -l%,$(__tmpvar.cmd)))\
   $(eval __tmpvar.cmd += $(call libtool-get-libs-search-paths))\
   $(eval __tmpvar.cmd += $(call libtool-get-all-libs))\
+  $(eval __tmpvar.cmd += $(__libtool.link.shared_libs))\
+  $(call __libtool_log, "Link Command:" $(__tmpvar.cmd))\
   $(__tmpvar.cmd)
 
 libtool-get-libs-search-paths = \
