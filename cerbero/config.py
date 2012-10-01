@@ -216,7 +216,8 @@ class Config (object):
                'MONO_GAC_PREFIX': prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
-               'PYTHONPATH': pythonpath
+               'PYTHONPATH': pythonpath,
+               'GSTREAMER_SDK_ROOT': prefix
                }
 
         if self.platform == Platform.WINDOWS:
