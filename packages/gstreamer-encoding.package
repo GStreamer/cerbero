@@ -1,0 +1,26 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-encoding'
+    shortdesc = 'GStreamer plugins for playback'
+    url = "http://www.gstreamer.com"
+    version = '2012.9'
+    codename = 'Amazon'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '0edb7068-0510-4cbb-a9bb-884e05839648'
+    deps = ['gstreamer-core', 'gstreamer-playback']
+
+    files = ['gst-plugins-base:encoding',
+             'gst-plugins-good:encoding',
+             'gst-plugins-ugly:encoding',
+             'gst-plugins-bad:encoding']
+    files_devel = ['gst-plugins-base-static:encoding_devel',
+                   'gst-plugins-good-static:encoding_devel',
+                   'gst-plugins-ugly-static:encoding_devel',
+                   'gst-plugins-bad-static:encoding_devel']
+

@@ -13,7 +13,7 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
     uuid = '58fe67c2-4565-411f-8287-e8faa892f853'
-    deps = ['gstreamer-core']
+    deps = ['gstreamer-core', 'gstreamer-encoding']
 
     files = ['gst-plugins-base:capture',
              'gst-plugins-good:capture',
