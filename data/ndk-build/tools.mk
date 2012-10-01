@@ -57,11 +57,16 @@ libtool-link = \
 # Note     : Tries to find a libtool library for this name in the libraries search
 #            path and parses it as well as its dependencies
 # -----------------------------------------------------------------------------
+NO_LIBTOOL_LIBS := -llog -landroid
 libtool-parse-lib = \
-  $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
-  $(if $(__tmpvar), \
-    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
-    $(call __libtool_log, libtool file not found for "$1")\
+  $(if $(findstring $1, $(NO_LIBTOOL_LIBS)),\
+    $(eval __libtool_libs.log.LIBS := "$1")\
+    $(eval __libtool_libs.ordered += $(patsubst -l%,%,$1)),\
+    $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
+    $(if $(__tmpvar), \
+      $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
+      $(call __libtool_log, libtool file not found for "$1")\
+    )\
   )
 
 # -----------------------------------------------------------------------------
