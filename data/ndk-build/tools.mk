@@ -132,6 +132,7 @@ libtool-lib-processed = \
 libtool-gen-link-command = \
   $(eval __tmpvar.cmd := $(filter-out -L%,$(__libtool.link.command)))\
   $(eval __tmpvar.cmd := $(filter-out -l%,$(__tmpvar.cmd)))\
+  $(eval __tmpvar.cmd += $(__libtool.link.Lpath))\
   $(eval __tmpvar.cmd += $(call libtool-get-libs-search-paths))\
   $(eval __tmpvar.cmd += $(call libtool-get-all-libs))\
   $(eval __tmpvar.cmd += $(__libtool.link.shared_libs))\
