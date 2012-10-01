@@ -55,12 +55,12 @@ ifeq ($(HOST_OS),windows)
 endif
 
 
-##############################################
-#  Make pkg-config and libtool relocatables  #
-##############################################
+#############################################
+#  Make pkg-config and libtool relocatable  #
+#############################################
 
 # libtool:
-# Use the nev variables LT_OLD_PREFIX and LT_NEW_PREFIX which replaces
+# Use the env variables LT_OLD_PREFIX and LT_NEW_PREFIX which replace
 # the build prefix with the installation one
 BUILD_PREFIX := $(call pkg-config-get-prefix,glib-2.0)
 LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool #--no-warn --silent
@@ -98,11 +98,11 @@ LOCAL_EXPORT_C_INCLUDES := $(foreach incl, $(GSTREAMER_INCLUDES), $(GSTREAMER_SD
 ##################################################################
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
-# This trigger the build of our library using our custom rules
+# This triggers the build of our library using our custom rules
 $(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 
 
-# Some plugins uses a different name for the module name, like the playback
+# Some plugins use a different name for the module name, like the playback
 # plugin, which uses playbin for the module name: libgstplaybin.so
 fix-plugin-name = \
 	$(subst gst$1,gst$2,$(GSTREAMER_PLUGINS_LIBS))
@@ -111,7 +111,7 @@ fix-deps = \
 	$(subst $1,$1 $2,$(GSTREAMER_ANDROID_LIBS))
 
 
-# Generate list of plugins links (eg: -lcoreelements -lvideoscale)
+# Generate list of plugin links (eg: -lcoreelements -lvideoscale)
 GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,uridecodebin,decodebin2)
@@ -141,7 +141,7 @@ GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
 GSTREAMER_ANDROID_CFLAGS     := $(foreach incl, $(GSTREAMER_INCLUDES), -I$(GSTREAMER_SDK_ROOT)/$(incl))
 
 
-# Generates a source file that declares and register all the required plugins
+# Generates a source file that declares and registers all the required plugins
 genstatic:
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_C)"
 	@$(call host-mkdir,$(GSTREAMER_BUILD_DIR))
@@ -156,7 +156,7 @@ $(GSTREAMER_ANDROID_O): genstatic
 	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_C)"
 	@$(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 
-# Creates a shared library including gstreamer, it's plugins and all the dependencie
+# Creates a shared library including gstreamer, its plugins and all the dependencies
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
 	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
