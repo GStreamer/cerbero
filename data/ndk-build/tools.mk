@@ -60,7 +60,7 @@ libtool-link = \
 NO_LIBTOOL_LIBS := -llog -landroid
 libtool-parse-lib = \
   $(if $(findstring $1, $(NO_LIBTOOL_LIBS)),\
-    $(eval __libtool_libs.log.LIBS := "$1")\
+    $(eval __libtool_libs.log.LIBS := $1)\
     $(eval __libtool_libs.ordered += $(patsubst -l%,%,$1)),\
     $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
     $(if $(__tmpvar), \
