@@ -179,12 +179,6 @@ libtool-clear-vars = \
   $(eval __libtool.link.command := $(empty))
   $(eval __libtool.link.Lpath := $(empty))
 
-libtool-get-static-lib = \
-  $(GSTREAMER_SDK_ROOT)/lib/lib$1.a
-
-libtool-filepath-from-name = \
-  $(GSTREAMER_SDK_ROOT)/lib/lib$1.la
-
 libtool-name-from-filepath = \
   $(patsubst lib%.la,%,$(notdir $1))
 
