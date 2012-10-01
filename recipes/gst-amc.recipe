@@ -13,3 +13,7 @@ class Recipe(recipe.Recipe):
     platform_files_sys = {
         Platform.ANDROID: ['lib/gstreamer-0.10/libgstamc%(mext)s'],
             }
+
+    def prepare(self):
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'

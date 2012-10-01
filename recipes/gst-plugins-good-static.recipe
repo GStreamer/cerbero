@@ -118,4 +118,6 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += '--disable-libdv '
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()

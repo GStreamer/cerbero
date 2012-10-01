@@ -145,4 +145,6 @@ class Recipe(custom.GStreamerStatic):
                 self.deps.remove(d)
             self.files_codecs_devel.remove('libgstdccp')
             self.files_dvd_devel.remove('libresindvd')
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()

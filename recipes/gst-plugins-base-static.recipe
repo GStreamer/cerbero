@@ -72,4 +72,6 @@ class Recipe(custom.GStreamerStatic):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-alsa'
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         custom.GStreamerStatic.prepare(self)

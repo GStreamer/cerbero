@@ -25,3 +25,8 @@ class Recipe(custom.GStreamerStatic):
              'libgstdvdlpcmdec',
              'libgstdvdread',
     ]
+
+    def prepare(self):
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
+        super(Recipe, self).prepare()

@@ -15,6 +15,8 @@ class Recipe(custom.GStreamerStatic):
             }
 
     def prepare(self):
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         custom.GStreamerStatic.prepare(self)
         #FIXME: remove when gst-amc is in fdo
         self.remotes['origin'] = 'git://git.collabora.co.uk/git/user/slomo/gst-amc.git'

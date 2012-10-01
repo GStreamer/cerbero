@@ -156,6 +156,8 @@ class Recipe(recipe.Recipe):
             self.files_codecs.remove('lib/gstreamer-0.10/libgstdccp%(mext)s')
             for d in ['libdvdnav']:
                 self.deps.remove(d)
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
 
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
