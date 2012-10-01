@@ -50,7 +50,7 @@ GSTREAMER_ANDROID_C           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODU
 GSTREAMER_ANDROID_C_IN        := $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in
 GSTREAMER_INCLUDES            := include include/glib-2.0 lib/glib-2.0/include include/libxml2 include/gstreamer-0.10
 ifeq ($(HOST_OS),windows)
-    HOST_SED := $(GSTREAMER_SDK_ROOT)/bin/sed
+    HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
     HOST_SH  := $(GSTREAMER_SDK_ROOT)/bin/sh
 endif
 

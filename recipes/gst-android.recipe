@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
             'share/gst-android/ndk-build/tools.mk',
             'share/gst-android/ndk-build/GStreamer.java',
+            'share/gst-android/ndk-build/tools/windows',
             ]
 
     def install(self):
