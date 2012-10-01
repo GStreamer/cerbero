@@ -51,7 +51,9 @@ GSTREAMER_ANDROID_C_IN        := $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c
 GSTREAMER_INCLUDES            := include include/glib-2.0 lib/glib-2.0/include include/libxml2 include/gstreamer-0.10
 ifeq ($(HOST_OS),windows)
     HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
-    HOST_SH  := $(GSTREAMER_SDK_ROOT)/bin/sh
+    GSTREAMER_LD :=
+else
+    GSTREAMER_LD := -fuse-ld=gold
 endif
 
 
@@ -162,7 +164,7 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
 		-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 		-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
-		$(GSTREAMER_ANDROID_LIBS)) -fuse-ld=gold
+		$(GSTREAMER_ANDROID_LIBS)) $(GSTREAMER_LD)
 
 copyjavasource:
 	@$(call host-mkdir,src/com/gst_sdk)
