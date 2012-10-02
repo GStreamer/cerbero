@@ -107,7 +107,7 @@ $(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
 # Some plugins use a different name for the module name, like the playback
 # plugin, which uses playbin for the module name: libgstplaybin.so
 fix-plugin-name = \
-	$(subst gst$1,gst$2,$(GSTREAMER_PLUGINS_LIBS))
+	$(subst gst$1 ,gst$2 ,$(GSTREAMER_PLUGINS_LIBS))
 
 fix-deps = \
 	$(subst $1,$1 $2,$(GSTREAMER_ANDROID_LIBS))
