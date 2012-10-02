@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-ffmpeg'}
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
-    files_codecs = ['lib/gstreamer-0.10/libgstffmpeg%(mext)s']
+    files_codecs_restricted = ['lib/gstreamer-0.10/libgstffmpeg%(mext)s']
 
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:
