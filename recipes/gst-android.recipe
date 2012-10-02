@@ -36,6 +36,8 @@ class Recipe(recipe.Recipe):
                 # files_category
                 if hasattr(r, 'files_%s' % c):
                     for e in getattr(r, 'files_%s' % c):
+                        if not e.startswith('lib/gstreamer-'):
+                          continue
                         plugins.append(e[25:-8])
                 # platform_files_category[target_platform]
                 if hasattr(r, 'platform_files_%s' % c):
