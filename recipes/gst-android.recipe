@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.utils import shell
+from cerbero.build.cookbook import CookBook
 
 class Recipe(recipe.Recipe):
     name = 'gst-android'
@@ -13,11 +14,34 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/gstreamer.mk',
             'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
             'share/gst-android/ndk-build/tools.mk',
+            'share/gst-android/ndk-build/plugins.mk',
             'share/gst-android/ndk-build/GStreamer.java',
             'share/gst-android/ndk-build/tools/windows',
             ]
 
     def install(self):
+        ndk_build_dir = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
         shell.copy_dir(os.path.join(self.config.data_dir, 'ndk-build'),
-            os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build'))
+                ndk_build_dir)
+
+        # Create a plugins.mk file with lists of plugins grouped by categories
+        cookbook = CookBook(self.config)
+        f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
+        for c in ['core', 'playback', 'codecs', 'vis', 'effects', 'net',
+                  'codecs_gpl', 'codecs_restricted', 'net_restricted', 'sys']:
+            plugins = []
+            for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
+                      'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg', 'gst-amc']:
+                r = cookbook.get_recipe(r)
+                # files_category
+                if hasattr(r, 'files_%s' % c):
+                    for e in getattr(r, 'files_%s' % c):
+                        plugins.append(e[25:-8])
+                # platform_files_category[target_platform]
+                if hasattr(r, 'platform_files_%s' % c):
+                    for e in getattr(r, 'platform_files_%s' % c).get(self.config.target_platform, []):
+                        plugins.append(e[25:-8])
+            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), ' '.join(plugins)))
+        f.close()
+
 
