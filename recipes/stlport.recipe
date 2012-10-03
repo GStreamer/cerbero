@@ -12,10 +12,11 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
 
     files_stlport = [
-            'lib/libstlport_shared.so']
+            'lib/libstlport.so']
     files_devel= [
             'lib/pkgconfig/stlport.pc',
             'lib/libstlport.la',
+            'lib/libstlport.a',
             ]
 
     def prepare(self):
