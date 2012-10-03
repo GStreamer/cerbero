@@ -66,4 +66,4 @@ class Recipe(custom.GStreamerStatic):
                     name, lib)
             shutil.copy(path, os.path.join(self.config.prefix, 'lib',
                 'gstreamer-0.10', 'static'))
-        custom.GStreamerStatic.post_install(self)
+        super(Recipe, self).post_install()
