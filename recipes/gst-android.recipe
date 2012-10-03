@@ -26,6 +26,11 @@ class Recipe(recipe.Recipe):
 
         # Create a plugins.mk file with lists of plugins grouped by categories
         cookbook = CookBook(self.config)
+        # For plugins named differently
+        replacements = {'decodebin2': 'uridecodebin', 'playbin': 'playback',
+                        'encodebin': 'encoding', 'souphttpsrc': 'soup',
+                        'siren': 'gstsiren', 'sdpelem': 'sdp',
+                        'rtpmanager': 'gstrtpmanager'}
         f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
         for c in ['core', 'playback', 'codecs', 'vis', 'effects', 'net',
                   'codecs_gpl', 'codecs_restricted', 'net_restricted', 'sys']:
@@ -43,7 +48,10 @@ class Recipe(recipe.Recipe):
                 if hasattr(r, 'platform_files_%s' % c):
                     for e in getattr(r, 'platform_files_%s' % c).get(self.config.target_platform, []):
                         plugins.append(e[25:-8])
-            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), ' '.join(plugins)))
+            plugins = ' '.join(plugins)
+            for k,v in replacements.iteritems():
+                plugins = plugins.replace(k, v)
+            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), plugins))
         f.close()
 
 

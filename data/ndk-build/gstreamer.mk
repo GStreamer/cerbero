@@ -119,6 +119,9 @@ GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,uridecodebin,decodebin2)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,encoding,encodebin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,soup,souphttpsrc)
+GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,gstsiren,siren)
+GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,sdp,sdpelem)
+GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,gstrtpmanager,rtpmanager)
 GSTREAMER_PLUGINS_LIBS       := $(subst gstgnonlin,gnl,$(GSTREAMER_PLUGINS_LIBS))
 
 # Generate the plugins' declaration strings
