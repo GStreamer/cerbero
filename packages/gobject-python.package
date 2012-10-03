@@ -7,8 +7,8 @@ class Package(package.Package):
     name = 'gobject-python'
     shortdesc = 'GLib/GObject python bindings'
     url = "http://www.gstreamer.com"
-    version = '2012.7'
-    codename = 'Amazon'
+    version = '2012.10'
+    codename = 'Brahmaputra'
     license = License.LGPL
     uuid = '58fe67c2-4565-431f-8287-e8fba892f853'
     vendor = 'GStreamer Project'
