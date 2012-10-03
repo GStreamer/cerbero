@@ -37,11 +37,12 @@ class Recipe(recipe.Recipe):
 
         # Create a libtool library for stlport (libstlport.la)
         lib = LibtoolLibrary('stlport', None, None, None, libdir)
+        lib.change_value('dependency_libs', ' -lstdc++')
         lib.save()
 
         # Create pkg-config file (stlport.pc)
         stlport_pc = PkgConfigWritter('stlport', 'stlport', '1.0',
-                '', '-L${libdir} -lstlport ',
+                '', '-L${libdir} -lstlport -lstdc++ ',
                 '-I%s/stlport -fno-exceptions' % stlport_prefix, self.config.prefix)
         stlport_pc.libs_priv = '${libdir}/libstlport.a'
         stlport_pc.rel_incldir = 'stlport'
