@@ -148,3 +148,8 @@ class Recipe(custom.GStreamerStatic):
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()
+        self.files_codecs_devel += [
+             'lib/libgstcodecparsers-0.10.la',
+             'lib/libgstbasevideo-0.10.la',
+             'lib/libgstcodecparsers-0.10.a',
+             'lib/libgstbasevideo-0.10.a']
