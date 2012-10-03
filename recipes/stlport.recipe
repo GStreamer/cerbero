@@ -28,25 +28,22 @@ class Recipe(recipe.Recipe):
         stlport_libdir = os.path.join(stlport_prefix, 'libs', 'armeabi')
         libdir = os.path.join(self.config.prefix, 'lib')
 
-        # Required at runtime
+        # Copies libraries to the prefix
         shutil.copy(os.path.join(stlport_libdir, 'libstlport_shared.so'),
-                    libdir)
+                    os.path.join(libdir, 'libstlport.so'))
+        shutil.copy(os.path.join(stlport_libdir, 'libstlport_static.a'),
+                    os.path.join(libdir, 'libstlport.a'))
 
 
         # Create a libtool library for stlport (libstlport.la)
-        lib = LibtoolLibrary('stlport', None, None, None, stlport_libdir)
-        lib.change_value('dlname', 'libstlport_shared.so')
-        lib.change_value('old_library', 'libstlport_static.a')
-        lib.change_value('library_name', 'libstlport_shared.so')
-        lib.libdir = libdir
+        lib = LibtoolLibrary('stlport', None, None, None, libdir)
         lib.save()
 
         # Create pkg-config file (stlport.pc)
         stlport_pc = PkgConfigWritter('stlport', 'stlport', '1.0',
-                '', '-L${libdir} -lstlport_shared',
-                '-I${includedir} -fno-exceptions', stlport_prefix)
-        stlport_pc.libs_priv = '${libdir}/libstlport_static.a'
+                '', '-L${libdir} -lstlport ',
+                '-I%s/stlport -fno-exceptions' % stlport_prefix, self.config.prefix)
+        stlport_pc.libs_priv = '${libdir}/libstlport.a'
         stlport_pc.rel_incldir = 'stlport'
-        stlport_pc.rel_libdir = 'libs/armeabi'
         stlport_pc.save('stlport', os.path.join(self.config.prefix, 'lib',
             'pkgconfig'))
