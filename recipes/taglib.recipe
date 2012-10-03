@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 
 from cerbero.tools.libtool import LibtoolLibrary
 
@@ -27,3 +28,6 @@ class Recipe(recipe.Recipe):
             deps.append('stlport')
         libtool_la = LibtoolLibrary('tag', 1, 7, None, self.config.libdir, deps)
         libtool_la.save()
+        shutil.move(
+                os.path.join(self.config.prefix, 'lib', 'libtag_static.a'),
+                os.path.join(self.config.prefix, 'lib', 'libtag.a'))
