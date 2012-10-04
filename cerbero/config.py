@@ -195,6 +195,7 @@ class Config (object):
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
         gstregistry = os.path.join('~', '.gstreamer-0.10',
                                     '.cerbero-registry-%s' % self.target_arch)
+        gstregistry = os.path.expanduser(gstregistry)
         pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
 
         if self.platform == Platform.LINUX:
