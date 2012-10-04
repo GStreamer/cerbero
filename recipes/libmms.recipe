@@ -8,3 +8,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libmms']
     files_devel = ['include/libmms', 'lib/pkgconfig/libmms.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True
+            self.append_env = {'LDFLAGS': '-liconv'}

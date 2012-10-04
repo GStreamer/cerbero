@@ -7,8 +7,8 @@ class Package(package.Package):
     name = 'gstreamer-core'
     shortdesc = 'GStreamer core'
     url = "http://www.gstreamer.com"
-    version = '2012.9'
-    codename = 'Amazon'
+    version = '2012.10'
+    codename = 'Brahmaputra'
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
@@ -23,4 +23,7 @@ class Package(package.Package):
             'gst-plugins-ugly:core:lang']
     files_devel = ['gstreamer-static', 'gst-plugins-base-static:core_devel',
             'gst-plugins-good-static:core_devel', 'gst-plugins-bad-static:core_devel']
-    platform_files = {Platform.DARWIN: ['gstreamer-osx-framework']}
+    platform_files = {
+            Platform.DARWIN: ['gstreamer-osx-framework'],
+            Platform.ANDROID: ['gst-android'],
+            }

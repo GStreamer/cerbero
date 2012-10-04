@@ -11,3 +11,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libschroedinger-1.0']
     files_devel = ['include/schroedinger-1.0', 'lib/pkgconfig/schroedinger-1.0.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options = ' --with-thread=gthread'

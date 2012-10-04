@@ -124,6 +124,10 @@ class Recipe(custom.GStreamerStatic):
              ],
         Platform.DARWIN: [
              'libgstapplemedia',
+            ],
+        Platform.ANDROID: [
+             'libgsteglglessink',
+             'libgstopensles',
             ]
     }
 
@@ -135,4 +139,17 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += \
                 ' --disable-cog --disable-sdl '\
                 ' --disable-cdaudio '
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-dccp'
+            for d in ['libdvdnav']:
+                self.deps.remove(d)
+            self.files_codecs_devel.remove('libgstdccp')
+            self.files_dvd_devel.remove('libresindvd')
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()
+        self.files_codecs_devel += [
+             'lib/libgstcodecparsers-0.10.la',
+             'lib/libgstbasevideo-0.10.la',
+             'lib/libgstcodecparsers-0.10.a',
+             'lib/libgstbasevideo-0.10.a']

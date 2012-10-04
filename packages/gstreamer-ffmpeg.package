@@ -7,13 +7,13 @@ class Package(package.Package):
     name = 'gstreamer-libav'
     shortdesc = 'GStreamer libav wrapper'
     url = "http://www.gstreamer.com"
-    version = '2012.9'
-    codename = 'Amazon'
+    version = '2012.10'
+    codename = 'Brahmaputra'
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
     uuid = 'afce67f2-4165-411f-8287-e8f2a892f853'
     deps = ['gstreamer-core']
 
-    files = ['gst-ffmpeg:codecs']
-    files_devel = ['gst-ffmpeg-static:codecs_devel']
+    files = ['gst-ffmpeg:codecs_restricted']
+    files_devel = ['gst-ffmpeg-static:codecs_restricted_devel']

@@ -1,10 +1,33 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import messages as m
+import shutil
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
     version = '0.26.2'
     licenses = [License.MIT]
+    autoreconf = True
 
     files_libs = ['libpixman-1']
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            # FIXME: Fails to link because of undefined __builtin_* symbols
+            self.configure_options = '--disable-arm-iwmmxt'
+            # Prevent symbol conflicts
+            self.make = '%s CFLAGS+="-Dandroid_getCpuFamily=pixman_android_getCpuFamily -Dandroid_getCpuFeatures=pixman_android_getCpuFeatures -Dandroid_getCpuCount=pixman_android_getCpuCount"' % self.make
+
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            cpufeatures_path = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
+            o = os.path.join(cpufeatures_path, 'cpu-features.h')
+            f = os.path.join(self.make_dir, 'pixman')
+            m.action("copying %s to %s" % (o, f))
+            shutil.copy(o, f)
+            o = os.path.join(cpufeatures_path, 'cpu-features.c')
+            f = os.path.join(self.make_dir, 'pixman')
+            m.action("copying %s to %s" % (o, f))
+            shutil.copy(o, f)
+        super(recipe.Recipe, self).configure()

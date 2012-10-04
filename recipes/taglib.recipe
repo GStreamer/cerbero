@@ -1,13 +1,16 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'taglib'
     version = '1.7.2'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
-    configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON'
+    configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DENABLE_STATIC=1'
     btype = BuildType.CMAKE
+    platform_deps = {Platform.ANDROID: ['stlport']}
 
     files_libs = ['libtag', 'libtag_c']
     files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']
@@ -15,3 +18,16 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DWIN32=1'
+        if self.config.target_platform == Platform.ANDROID:
+            # configure for android
+            self.configure_options += ' -DANDROID_NDK=1 '
+
+    def post_install(self):
+        deps = ['z']
+        if self.config.target_platform == Platform.ANDROID:
+            deps.append('stlport')
+        libtool_la = LibtoolLibrary('tag', 1, 7, None, self.config.libdir, deps)
+        libtool_la.save()
+        shutil.move(
+                os.path.join(self.config.prefix, 'lib', 'libtag_static.a'),
+                os.path.join(self.config.prefix, 'lib', 'libtag.a'))

@@ -6,8 +6,8 @@ class Package(package.Package):
 
     name = 'gstreamer-codecs-restricted'
     shortdesc = 'GStreamer restricted codecs with potential patent issues in some countries'
-    version = '2012.9'
-    codename = 'Amazon'
+    version = '2012.10'
+    codename = 'Brahmaputra'
     url = "http://www.gstreamer.com"
     license = License.LGPL
     vendor = 'GStreamer Project'

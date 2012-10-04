@@ -1,0 +1,23 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-amc-static'
+    version = '0.10.0'
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    extra_configure_options = "--disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Android MediaCodec Plugin (GStreamer SDK)' "
+    commit = 'origin/master'
+    deps = ['gstreamer', 'gst-plugins-base' ]
+    platform_plugins_categories = ['sys']
+
+    platform_files_sys_devel = {
+            Platform.ANDROID: ['libgstamc']
+            }
+
+    def prepare(self):
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
+        custom.GStreamerStatic.prepare(self)
+        #FIXME: remove when gst-amc is in fdo
+        self.remotes['origin'] = 'git://git.collabora.co.uk/git/user/slomo/gst-amc.git'
+        self.remotes['upstream'] = self.remotes['origin']

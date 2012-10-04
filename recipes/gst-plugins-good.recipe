@@ -9,11 +9,10 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-introspection --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name=\'GStreamer Good Plugins (GStreamer SDK)\' '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
-            'speex', 'gdk-pixbuf', 'libsoup',
-            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
+            'speex', 'gdk-pixbuf', 'libsoup','taglib',
+            'orc', 'wavpack', 'flac', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
-    use_system_libs = True
 
 
     files_lang = ['gst-plugins-good-0.10']
@@ -120,3 +119,9 @@ class Recipe(recipe.Recipe):
                 '--disable-dv --disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += '--disable-libdv --disable-pulse'
+        if self.config.target_platform == Platform.LINUX:
+            self.use_system_libs = True
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'

@@ -1,10 +1,11 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import os
-
 from fnmatch import fnmatch
 
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -18,7 +19,21 @@ class Recipe(recipe.Recipe):
     files_libs = ['libnettle', 'libhogweed']
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
 
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
+                {'SUBDIRS = tools testsuite examples':
+                 'SUBDIRS = tools examples'})
+        super(recipe.Recipe, self).configure()
+
     def post_install(self):
+        # Create libtool libraries (.la)
+        libtool_la = LibtoolLibrary('nettle', 4, 4, 0, self.config.libdir)
+        libtool_la.save()
+        deps = ['nettle', 'iconv', 'gmp', 'intl', '-lc']
+        libtool_la = LibtoolLibrary('hogweed', 2, 2, 0, self.config.libdir, deps)
+        libtool_la.save()
+
         if self.config.target_platform == Platform.LINUX:
             # Fix the libs permissions to 0755 to make the rpm packaging happy.
             # Setting for all linux distros as this may affect suse as well.

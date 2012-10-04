@@ -114,5 +114,9 @@ class Recipe(recipe.Recipe):
 
 
     def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
-            self.configure_options += ' --disable-gtk-doc'
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN, Platform.ANDROID]:
+            self.configure_options += ' --disable-gtk-doc' 
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-alsa'
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'

@@ -8,3 +8,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libfribidi']
     files_bins = ['fribidi']
     files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True

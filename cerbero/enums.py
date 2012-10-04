@@ -22,6 +22,7 @@ class Platform:
     LINUX = 'linux'
     WINDOWS = 'windows'
     DARWIN = 'darwin'
+    ANDROID = 'android'
 
 
 class Architecture:
@@ -30,6 +31,7 @@ class Architecture:
     X86_64 = 'x86_64'
     PPC = 'ppc'
     UNIVERSAL = 'universal'
+    ARM = 'arm'
 
 
 class Distro:
@@ -39,6 +41,7 @@ class Distro:
     SUSE = 'suse'
     WINDOWS = 'windows'
     OS_X = 'osx'
+    ANDROID = 'android'
 
 
 class DistroVersion:
@@ -61,6 +64,9 @@ class DistroVersion:
     OS_X_LION = 'osx_lion'
     OS_X_SNOW_LEOPARD = 'osx_snow_leopard'
     OS_X_LEOPARD = 'osx_leopard'
+    ANDROID_GINGERBREAD = 'android_gingerbread' # API Level 9
+    ANDROID_ICE_CREAM_SANDWICH = 'android_ice_cream_sandwich' # API Level 14
+    ANDROID_JELLY_BEAN = 'android_jelly_bean' # API Level 16
 
 
 class LicenseDescription:

@@ -36,8 +36,8 @@ class DistTarball(PackagerBase):
         if self.config.packages_prefix is not None:
             self.package_prefix = '%s-' % self.config.packages_prefix
 
-    def pack(self, output_dir, devel=True, force=False, split=True,
-             package_prefix=''):
+    def pack(self, output_dir, devel=True, force=False, keep_temp=False,
+             split=True, package_prefix=''):
         try:
             dist_files = self.files_list(PackageType.RUNTIME, force)
         except EmptyPackageError:
@@ -71,9 +71,10 @@ class DistTarball(PackagerBase):
             filenames.append(devel)
         return filenames
 
-    def _get_name(self, package_type):
-        return "%s%s-%s%s.tar.bz2" % (self.package_prefix, self.package.name,
-                self.package.version, package_type)
+    def _get_name(self, package_type, ext='tar.bz2'):
+        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name,
+                self.config.target_platform, self.config.target_arch,
+                self.package.version, package_type, ext)
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):

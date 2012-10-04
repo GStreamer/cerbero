@@ -63,26 +63,29 @@ class GenSdkShell(Command):
                 py_prefix, cmd=None):
         cmd = cmd or self.DEFAULT_CMD
         env = {}
+        prefix_env_name = 'GSTREAMER_SDK_ROOT'
+        prefix_env = '${%s}' % prefix_env_name
+        libdir = libdir.replace(prefix, prefix_env)
         env['PATH'] = \
-            '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix
+            '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix_env
         env['LD_LIBRARY_PATH'] = \
             '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir
         env['PKG_CONFIG_PATH'] = '%s/lib/pkgconfig:%s/share/pkgconfig'\
-             '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix, prefix)
+             '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix_env, prefix_env)
         env['XDG_DATA_DIRS'] = '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:'\
-                '/usr/local/share:/usr/share' % prefix
+                '/usr/local/share:/usr/share' % prefix_env
         env['XDG_CONFIG_DIRS'] = \
-            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix
+            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env
         env['GST_REGISTRY'] = '${HOME}/.gstreamer-0.10/gstreamer-sdk-registry'
         env['GST_PLUGIN_SCANNER'] = \
-                '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix
+                '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env
         env['PYTHONPATH'] = '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'\
-                % (prefix, py_prefix)
-        env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix
-        env['CXXFLAGS'] = '-I%s/include ${CXXFLAGS}' % prefix
+                % (prefix_env, py_prefix)
+        env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix_env
+        env['CXXFLAGS'] = '-I%s/include ${CXXFLAGS}' % prefix_env
         env['LDFLAGS'] = '-L%s ${LDFLAGS}' % libdir
         env['GIO_EXTRA_MODULES'] = '%s/gio/modules' % libdir
-        envstr = ''
+        envstr = 'export %s="%s"\n' % (prefix_env_name, prefix)
         for e, v in env.iteritems():
             envstr += 'export %s="%s"\n' % (e, v)
         try:

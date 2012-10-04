@@ -7,8 +7,8 @@ class Package(package.Package):
     name = 'base-system'
     shortdesc = 'Base system dependencies'
     url = "http://www.gstreamer.com"
-    version = '2012.9'
-    codename = 'Amazon'
+    version = '2012.10'
+    codename = 'Brahmaputra'
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
@@ -18,11 +18,14 @@ class Package(package.Package):
              'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
              'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
              'libpng:libs', 'tiff:libs', 'jpeg:libs',
-             'libxml2:libs', 'libxslt:libs', 'pixman:libs',
+             'libxml2:libs', 'pixman:libs',
              'zlib:libs', 'bzip2:libs', 'libcroco:libs', 'librsvg:libs:loader']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
-                           'winpthreads', 'mingw'],
-        Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang']
+            'winpthreads', 'mingw', 'libxslt:libs'],
+        Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang',
+            'libxslt:libs'],
+        Platform.LINUX: ['libxslt:libs'],
+        Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'stlport']
         }

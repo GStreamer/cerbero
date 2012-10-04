@@ -10,7 +10,7 @@ from cerbero.utils import to_unixpath
 class GStreamerStatic(recipe.Recipe):
 
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-instrospection --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
+    configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
     extra_configure_options = ''
     plugins_categories = []
     platform_plugins_categories = []
@@ -28,6 +28,7 @@ class GStreamerStatic(recipe.Recipe):
 
         self.remotes['origin'] = ('%s/%s.git' %
                 (self.config.git_root, self.project_name))
+
         self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
         self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
         self.repo_dir = os.path.join(self.config.local_sources,
@@ -49,7 +50,7 @@ class GStreamerStatic(recipe.Recipe):
             files = platform_files.get(self.config.target_platform, [])
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
             f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
-            platform_files[self.config.platform] = f
+            platform_files[self.config.target_platform] = f
             self._files_list.extend(f)
 
     def configure(self):

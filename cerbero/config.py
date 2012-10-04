@@ -45,6 +45,23 @@ DistroVersion = enums.DistroVersion
 License = enums.License
 
 
+class Variants(object):
+
+    __variants = ['nodebug']
+
+    def __init__(self, variants):
+        for v in self.__variants:
+            setattr(self, v, False)
+        for v in variants:
+            setattr(self, v, True)
+
+    def __getattr__(self, name):
+        if name not in self.__variants:
+            raise AttributeError("%s is not a known variant" % name)
+        else:
+            return object.__getattr__(name)
+
+
 class Config (object):
 
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',
@@ -58,7 +75,7 @@ class Config (object):
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
                    'external_packages', 'use_ccache', 'force_git_commit',
-                   'universal_archs', 'osx_target_sdk_version']
+                   'universal_archs', 'osx_target_sdk_version', 'variants']
 
     def __init__(self):
         self._check_uninstalled()
@@ -118,6 +135,8 @@ class Config (object):
         for c in self.arch_config.values():
             self._create_path(c.local_sources)
             self._create_path(c.sources)
+
+        self.variants = Variants(self.variants)
 
     def parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
@@ -186,7 +205,11 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path:
+        if self.target_arch != self.arch or self.target_platform != self.platform:
+	    path = path.replace(":" + bindir + ":", ":")
+	    path = path.replace(bindir + ":", "")
+	    path = path.replace(":" + bindir, "")
+        elif bindir not in path:
             path = self._join_path(bindir, path)
 
         # Most of these variables are extracted from jhbuild
@@ -211,7 +234,8 @@ class Config (object):
                'MONO_GAC_PREFIX': prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
-               'PYTHONPATH': pythonpath
+               'PYTHONPATH': pythonpath,
+               'GSTREAMER_SDK_ROOT': prefix
                }
 
         if self.platform == Platform.WINDOWS:
@@ -310,6 +334,7 @@ class Config (object):
         self.set_property('external_packages', {})
         self.set_property('universal_archs',
                           [Architecture.X86, Architecture.X86_64])
+        self.set_property('variants', [])
 
     def validate_properties(self):
         if not validate_packager(self.packager):

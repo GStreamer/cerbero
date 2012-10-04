@@ -13,7 +13,6 @@ class Recipe(custom.GStreamerStatic):
                      Platform.DARWIN: ['libdv']}
     plugins_categories = ['core', 'effects', 'codecs', 'net', 'vis']
     platform_plugins_categories = ['capture', 'codecs', 'sys']
-    use_system_libs = True
 
     files_core_devel = [
              'libgstautodetect',
@@ -115,4 +114,10 @@ class Recipe(custom.GStreamerStatic):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += '--disable-libdv '
+        if self.config.target_platform == Platform.LINUX:
+            self.use_system_libs = True
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()

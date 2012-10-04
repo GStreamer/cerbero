@@ -10,3 +10,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libjasper']
     files_bins = ['jasper']
     files_devel = ['include/jasper']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True

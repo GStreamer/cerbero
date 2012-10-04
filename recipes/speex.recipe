@@ -11,3 +11,7 @@ class Recipe(recipe.Recipe):
     files_bins = ['speexdec', 'speexenc']
     files_devel = ['include/speex', 'lib/pkgconfig/speex.pc',
         'lib/pkgconfig/speexdsp.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True

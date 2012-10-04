@@ -20,7 +20,8 @@ import os
 
 from cerbero.config import Platform
 from cerbero.utils import shell, to_unixpath
-
+from cerbero.utils import messages as m
+import shutil
 
 class Build (object):
     '''
@@ -104,11 +105,15 @@ class MakefilesBase (Build):
     use_system_libs = False
     allow_parallel_build = True
     srcdir = '.'
-    append_env = {}
-    new_env = {}
+    append_env = None
+    new_env = None
 
     def __init__(self):
         Build.__init__(self)
+        if self.append_env is None:
+            self.append_env = {}
+        if self.new_env is None:
+            self.new_env = {}
         self.make_dir = os.path.abspath(os.path.join(self.build_dir,
                                                      self.srcdir))
         if self.config.allow_parallel_build and self.allow_parallel_build \
@@ -205,6 +210,20 @@ class Autotools (MakefilesBase):
     supports_cache_variables = True
 
     def configure(self):
+        files = shell.check_call('find %s -type f -name config.guess' % self.make_dir).split('\n')
+        files.remove('')
+        for f in files:
+            o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.guess')
+            m.action("copying %s to %s" % (o, f))
+            shutil.copy(o, f)
+
+        files = shell.check_call('find %s -type f -name config.sub' % self.make_dir).split('\n')
+        files.remove('')
+        for f in files:
+            o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.sub')
+            m.action("copying %s to %s" % (o, f))
+            shutil.copy(o, f)
+
         if self.supports_non_src_build:
             self.config_sh = os.path.join(self.repo_dir, self.config_sh)
         # skip configure if we are already configured
@@ -243,6 +262,9 @@ class Autotools (MakefilesBase):
         if self.use_system_libs and self.config.allow_system_libs:
             use_configure_cache = False
 
+        if self.new_env is not None or self.append_env is not None:
+            use_configure_cache = False
+
         if use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.prefix, '.configure.cache')
             self.config_sh += ' --cache-file=%s' % cache
@@ -261,11 +283,12 @@ class CMake (MakefilesBase):
                     '-DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
 
-    def __init__(self):
-        MakefilesBase.__init__(self)
-
+    @modify_environment
+    def configure(self):
         cc = os.environ.get('CC', 'gcc')
         cxx = os.environ.get('CXX', 'g++')
+        cflags = os.environ.get('CFLAGS', '')
+        cxxflags = os.environ.get('CXXFLAGS', '')
         # FIXME: CMake doesn't support passing "ccache $CC"
         if self.config.use_ccache:
             cc = cc.replace('ccache ', '')
@@ -278,7 +301,10 @@ class CMake (MakefilesBase):
                                       % (cc, cxx)
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' -G\\"Unix Makefiles\\"'
+        self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
+        self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        MakefilesBase.configure(self)
 
 
 class BuildType (object):
