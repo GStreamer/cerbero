@@ -30,7 +30,9 @@ class Recipe(recipe.Recipe):
         # Create libtool libraries (.la)
         libtool_la = LibtoolLibrary('nettle', 4, 4, 0, self.config.libdir)
         libtool_la.save()
-        deps = ['nettle', 'iconv', 'gmp', 'intl', '-lc']
+        deps = ['nettle', 'gmp', '-lc']
+        if self.config.target_platform != Platform.LINUX:
+            deps += ['iconv', 'intl']
         libtool_la = LibtoolLibrary('hogweed', 2, 2, 0, self.config.libdir, deps)
         libtool_la.save()
 
