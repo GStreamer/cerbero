@@ -3,8 +3,6 @@
 #include <gio/gio.h>
 #include <android/log.h>
 
-#define CAT_FMT "%s:%d:%s"
-
 static GstClockTime _priv_gst_info_start_time;
 
 /* Declaration of static plugins */
@@ -62,9 +60,32 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
 
   tag = g_strdup_printf ("GStreamer+%s",
       gst_debug_category_get_name (category));
-  __android_log_print (android_log_level, tag,
-      "%" GST_TIME_FORMAT " " CAT_FMT " %s\n", GST_TIME_ARGS (elapsed),
-      file, line, function, gst_debug_message_get (message));
+
+  if (object) {
+    gchar *obj;
+
+    if (GST_IS_PAD (object) && GST_OBJECT_NAME (object)) {
+      obj = g_strdup_printf ("<%s:%s>", GST_DEBUG_PAD_NAME (object));
+    } else if (GST_IS_OBJECT (object) && GST_OBJECT_NAME (object)) {
+      obj = g_strdup_printf ("<%s>", GST_OBJECT_NAME (object));
+    } else if (G_IS_OBJECT (object)) {
+      obj = g_strdup_printf ("<%s@%p>", G_OBJECT_TYPE_NAME (object), object);
+    } else {
+      obj = g_strdup_printf ("<%p>", object);
+    }
+
+    __android_log_print (android_log_level, tag,
+        "%" GST_TIME_FORMAT " %p %s:%d:%s:%s %s\n",
+        GST_TIME_ARGS (elapsed), g_thread_self (),
+        file, line, function, obj, gst_debug_message_get (message));
+
+    g_free (obj);
+  } else {
+    __android_log_print (android_log_level, tag,
+        "%" GST_TIME_FORMAT " %p %s:%d:%s %s\n",
+        GST_TIME_ARGS (elapsed), g_thread_self (),
+        file, line, function, gst_debug_message_get (message));
+ }
   g_free (tag);
 }
 
