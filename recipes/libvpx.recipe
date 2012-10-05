@@ -30,6 +30,8 @@ class Recipe(recipe.Recipe):
             arch = 'ppc32'
         elif self.config.target_arch == Architecture.ARM:
             arch = 'arm'
+        elif self.config.target_arch == Architecture.ARMv7:
+            arch = 'arm'
 
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_distro_version in [DistroVersion.OS_X_MOUNTAIN_LION, DistroVersion.OS_X_LION] and arch != 'x86':

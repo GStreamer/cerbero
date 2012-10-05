@@ -32,6 +32,7 @@ class Architecture:
     PPC = 'ppc'
     UNIVERSAL = 'universal'
     ARM = 'arm'
+    ARMv7 = 'armv7'
 
 
 class Distro:
