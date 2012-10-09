@@ -4,10 +4,10 @@ class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-base-static'
     version = '0.10.36'
     licenses = [License.LGPLv2Plus]
-    extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs --disable-ivorbis"
+    extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs"
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
     use_system_libs = True
     plugins_categories = ['core', 'playback', 'encoding', 'codecs', 'vis']
     platform_plugins_categories = ['sys', 'net']
@@ -49,6 +49,12 @@ class Recipe(custom.GStreamerStatic):
     files_vis_devel = [
              'libgstlibvisual',
             ]
+
+    platform_files_codecs_devel = {
+        Platform.ANDROID: [
+             'libgstivorbisdec',
+            ]
+    }
 
     platform_files_sys_devel = {
         Platform.LINUX: [

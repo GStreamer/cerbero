@@ -6,11 +6,11 @@ class Recipe(recipe.Recipe):
     version = '0.10.36'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-introspection --disable-examples --disable-gst_v4l --disable-gnome_vfs --disable-ivorbis --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Base Plugins (GStreamer SDK)' "
+    configure_options = "--disable-introspection --disable-examples --disable-gst_v4l --disable-gnome_vfs --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Base Plugins (GStreamer SDK)' "
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ]} #, Platform.DARWIN: [ 'cdparanoia' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
     use_system_libs = True
 
     files_bins = ['gst-discoverer-0.10']
@@ -91,6 +91,12 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gstreamer-video-0.10.pc',
             'lib/pkgconfig/gstreamer-plugins-base-0.10.pc',
     ]
+
+    platform_files_codecs = {
+        Platform.ANDROID: [
+             'lib/gstreamer-0.10/libgstivorbisdec%(mext)s',
+            ]
+    }
 
     platform_files_sys = {
         Platform.LINUX: [
