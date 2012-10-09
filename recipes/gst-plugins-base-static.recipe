@@ -10,7 +10,7 @@ class Recipe(custom.GStreamerStatic):
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
     use_system_libs = True
     plugins_categories = ['core', 'playback', 'encoding', 'codecs', 'vis']
-    platform_plugins_categories = ['sys', 'net']
+    platform_plugins_categories = ['sys', 'net', 'codecs']
 
     files_core_devel = [
              'libgstadder',
