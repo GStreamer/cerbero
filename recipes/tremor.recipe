@@ -1,0 +1,20 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'tremor'
+    version = '1.2.1+r18641'
+    licenses = [License.BSD_like]
+    deps = ['libogg']
+    remotes = {'origin': 'git://git.collabora.co.uk/git/user/slomo/tremor.git'}
+    commit = 'origin/master'
+    config_sh = 'sh autogen.sh'
+
+    files_libs = ['libvorbisidec']
+    files_devel = [
+        'include/tremor', 'lib/pkgconfig/vorbisidec.pc']
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
+            self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wa,-mimplicit-it=thumb "
+
