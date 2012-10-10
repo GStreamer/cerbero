@@ -26,6 +26,150 @@ gst_android_load_gio_modules (void)
 }
 
 void
+glib_print_handler (const gchar * string)
+{
+  __android_log_print (ANDROID_LOG_INFO, "GLib+stdout", "%s", string);
+}
+
+void
+glib_printerr_handler (const gchar * string)
+{
+  __android_log_print (ANDROID_LOG_ERROR, "GLib+stderr", "%s", string);
+}
+
+
+/* Based on GLib's default handler */
+#define CHAR_IS_SAFE(wc) (!((wc < 0x20 && wc != '\t' && wc != '\n' && wc != '\r') || \
+			    (wc == 0x7f) || \
+			    (wc >= 0x80 && wc < 0xa0)))
+#define FORMAT_UNSIGNED_BUFSIZE ((GLIB_SIZEOF_LONG * 3) + 3)
+#define	STRING_BUFFER_SIZE	(FORMAT_UNSIGNED_BUFSIZE + 32)
+#define	ALERT_LEVELS		(G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING)
+#define DEFAULT_LEVELS (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL | G_LOG_LEVEL_WARNING | G_LOG_LEVEL_MESSAGE)
+#define INFO_LEVELS (G_LOG_LEVEL_INFO | G_LOG_LEVEL_DEBUG)
+
+static void
+escape_string (GString * string)
+{
+  const char *p = string->str;
+  gunichar wc;
+
+  while (p < string->str + string->len) {
+    gboolean safe;
+
+    wc = g_utf8_get_char_validated (p, -1);
+    if (wc == (gunichar) - 1 || wc == (gunichar) - 2) {
+      gchar *tmp;
+      guint pos;
+
+      pos = p - string->str;
+
+      /* Emit invalid UTF-8 as hex escapes 
+       */
+      tmp = g_strdup_printf ("\\x%02x", (guint) (guchar) * p);
+      g_string_erase (string, pos, 1);
+      g_string_insert (string, pos, tmp);
+
+      p = string->str + (pos + 4);      /* Skip over escape sequence */
+
+      g_free (tmp);
+      continue;
+    }
+    if (wc == '\r') {
+      safe = *(p + 1) == '\n';
+    } else {
+      safe = CHAR_IS_SAFE (wc);
+    }
+
+    if (!safe) {
+      gchar *tmp;
+      guint pos;
+
+      pos = p - string->str;
+
+      /* Largest char we escape is 0x0a, so we don't have to worry
+       * about 8-digit \Uxxxxyyyy
+       */
+      tmp = g_strdup_printf ("\\u%04x", wc);
+      g_string_erase (string, pos, g_utf8_next_char (p) - p);
+      g_string_insert (string, pos, tmp);
+      g_free (tmp);
+
+      p = string->str + (pos + 6);      /* Skip over escape sequence */
+    } else
+      p = g_utf8_next_char (p);
+  }
+}
+
+void
+glib_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
+    const gchar * message, gpointer user_data)
+{
+  gchar *string;
+  GString *gstring;
+  const gchar *domains;
+  gint android_log_level;
+  gchar *tag;
+
+  if ((log_level & DEFAULT_LEVELS) || (log_level >> G_LOG_LEVEL_USER_SHIFT))
+    goto emit;
+
+  domains = g_getenv ("G_MESSAGES_DEBUG");
+  if (((log_level & INFO_LEVELS) == 0) ||
+      domains == NULL ||
+      (strcmp (domains, "all") != 0 && (!log_domain
+              || !strstr (domains, log_domain))))
+    return;
+
+emit:
+
+  if (log_domain)
+    tag = g_strdup_printf ("GLib+%s", log_domain);
+  else
+    tag = g_strdup ("GLib");
+
+  switch (log_level & G_LOG_LEVEL_MASK) {
+    case G_LOG_LEVEL_ERROR:
+      android_log_level = ANDROID_LOG_ERROR;
+      break;
+    case G_LOG_LEVEL_CRITICAL:
+      android_log_level = ANDROID_LOG_ERROR;
+      break;
+    case G_LOG_LEVEL_WARNING:
+      android_log_level = ANDROID_LOG_WARN;
+      break;
+    case G_LOG_LEVEL_MESSAGE:
+      android_log_level = ANDROID_LOG_INFO;
+      break;
+    case G_LOG_LEVEL_INFO:
+      android_log_level = ANDROID_LOG_INFO;
+      break;
+    case G_LOG_LEVEL_DEBUG:
+      android_log_level = ANDROID_LOG_DEBUG;
+      break;
+    default:
+      android_log_level = ANDROID_LOG_INFO;
+      break;
+  }
+
+  gstring = g_string_new (NULL);
+  if (!message) {
+    g_string_append (gstring, "(NULL) message");
+  } else {
+    GString * msg = g_string_new (message);
+    escape_string (msg);
+    g_string_append (gstring, msg->str);
+    g_string_free (msg, TRUE);
+  }
+  string = g_string_free (gstring, FALSE);
+
+  __android_log_print (android_log_level, tag, "%s", string);
+
+  g_free (string);
+  g_free (tag);
+}
+
+void
 gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line,
     GObject * object, GstDebugMessage * message, gpointer unused)
@@ -85,7 +229,7 @@ gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
         "%" GST_TIME_FORMAT " %p %s:%d:%s %s\n",
         GST_TIME_ARGS (elapsed), g_thread_self (),
         file, line, function, gst_debug_message_get (message));
- }
+  }
   g_free (tag);
 }
 
@@ -208,12 +352,18 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
   g_free (cache_dir);
   g_free (files_dir);
 
+  /* Set GLib print handlers */
+  g_set_print_handler (glib_print_handler);
+  g_set_printerr_handler (glib_printerr_handler);
+  g_log_set_default_handler (glib_log_handler, NULL);
+
   /* Disable this for releases if performance is important
    * or increase the threshold to get more information */
   gst_debug_set_active (TRUE);
   gst_debug_set_default_threshold (GST_LEVEL_WARNING);
   gst_debug_remove_log_function (gst_debug_log_default);
   gst_debug_add_log_function ((GstLogFunction) gst_debug_logcat, NULL);
+
   /* get time we started for debugging messages */
   _priv_gst_info_start_time = gst_util_get_timestamp ();
 
@@ -227,7 +377,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
     return;
   }
   gst_android_register_static_plugins ();
-  gst_android_load_gio_modules();
+  gst_android_load_gio_modules ();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer",
       "GStreamer initialization complete");
 }
