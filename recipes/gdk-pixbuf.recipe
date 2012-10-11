@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
     version = '2.26.2'
     licenses = [License.LGPLv2Plus]
-    configure_options = '--with-included-loaders '
+    configure_options = '--with-included-loaders --enable-static '
     deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
 
     files_libs = ['libgdk_pixbuf-2.0']
