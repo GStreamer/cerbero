@@ -15,6 +15,8 @@ class Recipe(recipe.Recipe):
         'include/tremor', 'lib/pkgconfig/vorbisidec.pc']
 
     def prepare(self):
-        if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
+        if self.config.target_arch == Architecture.ARMv7:
             self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wa,-mimplicit-it=thumb "
+        elif self.config.target_arch == Architecture.ARM:
+            self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
 
