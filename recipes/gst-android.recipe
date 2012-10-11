@@ -30,7 +30,7 @@ class Recipe(recipe.Recipe):
         replacements = {'decodebin2': 'uridecodebin', 'playbin': 'playback',
                         'encodebin': 'encoding', 'souphttpsrc': 'soup',
                         'siren': 'gstsiren', 'sdpelem': 'sdp',
-                        'rtpmanager': 'gstrtpmanager'}
+                        'rtpmanager': 'gstrtpmanager', 'scaletempoplugin' : 'scaletempo'}
         f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
         for c in ['core', 'playback', 'codecs', 'vis', 'effects', 'net',
                   'codecs_gpl', 'codecs_restricted', 'net_restricted', 'sys']:
