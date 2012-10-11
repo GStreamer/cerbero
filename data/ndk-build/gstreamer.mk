@@ -16,14 +16,19 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-$(call assert-defined, GSTREAMER_SDK_ROOT GSTREAMER_PLUGINS)
+$(call assert-defined, GSTREAMER_SDK_ROOT)
 $(if $(wildcard $(GSTREAMER_SDK_ROOT)),,\
   $(error "The directory GSTREAMER_SDK_ROOT=$(GSTREAMER_SDK_ROOT) does not exists")\
 )
 
+
 #####################
 #  Setup variables  #
 #####################
+
+ifndef GSTREAMER_PLUGINS
+  $(info "The list of GSTREAMER_PLUGINS is empty")
+endif
 
 # Path for GStreamer static plugins
 ifndef GSTREAMER_STATIC_PLUGINS_PATH
@@ -140,7 +145,8 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 			G_IO_MODULE_LOAD(gnutls);\n)
 
 # Get the full list of libraries
-GSTREAMER_ANDROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
+# link at least to gstreamer-0.10 in case the plugins list is empty
+GSTREAMER_ANDROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz -lgstreamer-0.10
 # Fix deps for giognutls
 GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
 GSTREAMER_ANDROID_CFLAGS     := $(foreach incl, $(GSTREAMER_INCLUDES), -I$(GSTREAMER_SDK_ROOT)/$(incl))
