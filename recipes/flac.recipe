@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.2.1'
     # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
     licenses = [License.BSD_like]
+    deps = [ 'libogg' ]
     platform_deps = { Platform.WINDOWS: ['libiconv'] }
     configure_options = ' --disable-cpplibs'
 
