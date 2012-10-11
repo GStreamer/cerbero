@@ -166,7 +166,7 @@ libtool-get-all-libs = \
   $(foreach path,$(__tmpvar.static_libs_reverse),\
     $(eval __tmpvar.static_libs := $(path) $(__tmpvar.static_libs))\
   )\
-  $(strip -Wl,--start-group $(__tmpvar.static_libs) -Wl,--end-group $(__tmpvar.libs))
+  $(strip -Wl,--start-group $(__tmpvar.static_libs) $(__tmpvar.libs) -Wl,--end-group )
 
 libtool-find-lib = \
   $(eval __tmpvar := $(empty))\
