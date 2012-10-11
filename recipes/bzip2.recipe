@@ -28,3 +28,7 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir)
         libtool_la.save()
+        if self.config.target_platform != Platform.WINDOWS:
+            libdir = os.path.join(self.config.prefix, 'lib')
+            os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'),
+                       os.path.join(libdir, 'libbz2.so'))
