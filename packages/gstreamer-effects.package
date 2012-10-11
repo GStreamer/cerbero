@@ -16,12 +16,12 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['soundtouch:libs',
-             'gst-plugins-base:effects',
-             'gst-plugins-good:effects',
-             'gst-plugins-ugly:effects',
-             'gst-plugins-bad:effects']
-    files_devel = ['soundtouch:devel',
-            'gst-plugins-base-static:effects_devel',
-            'gst-plugins-good-static:effects_devel',
-	    'gst-plugins-ugly-static:effects_devel',
-            'gst-plugins-bad-static:effects_devel']
+             'gst-plugins-base:plugins_effects',
+             'gst-plugins-good:plugins_effects',
+             'gst-plugins-ugly:plugins_effects',
+             'gst-plugins-bad:plugins_effects']
+    files_devel = [
+            'gst-plugins-base-static:plugins_effects_devel',
+            'gst-plugins-good-static:plugins_effects_devel',
+            'gst-plugins-ugly-static:plugins_effects_devel',
+            'gst-plugins-bad-static:plugins_effects_devel']

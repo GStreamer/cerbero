@@ -7,14 +7,13 @@ class Recipe(custom.GStreamerStatic):
     deps = ['glib', 'libxml2']
     # Static build will always fail on make check
     make_check = None
-    plugins_categories = ['plugins']
     platform_deps = {
             Platform.LINUX: ['gtk-doc'],
             Platform.DARWIN: ['gtk-doc'],
             Platform.WINDOWS: ['gtk-doc-windows'],
     }
 
-    files_plugins_devel = ['libgstcoreelements', 'libgstcoreindexers']
+    files_plugins_core_devel = ['libgstcoreelements', 'libgstcoreindexers']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:

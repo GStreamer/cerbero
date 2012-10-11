@@ -18,12 +18,12 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-good-0.10']
 
-    files_core = [
+    files_plugins_core = [
              'lib/gstreamer-0.10/libgstautodetect%(mext)s',
              'lib/gstreamer-0.10/libgstvideofilter%(mext)s',
     ]
 
-    files_effects = [
+    files_plugins_effects = [
              'lib/gstreamer-0.10/libgstalpha%(mext)s',
              'lib/gstreamer-0.10/libgstalphacolor%(mext)s',
              'lib/gstreamer-0.10/libgstaudiofx%(mext)s',
@@ -47,7 +47,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvideomixer%(mext)s',
     ]
 
-    files_codecs = [
+    files_plugins_codecs = [
              'lib/gstreamer-0.10/libgstalaw%(mext)s',
              'lib/gstreamer-0.10/libgstannodex%(mext)s',
              'lib/gstreamer-0.10/libgstapetag%(mext)s',
@@ -73,7 +73,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgsty4menc%(mext)s',
     ]
 
-    files_net = [
+    files_plugins_net = [
              'lib/gstreamer-0.10/libgstrtsp%(mext)s',
              'lib/gstreamer-0.10/libgstrtp%(mext)s',
              'lib/gstreamer-0.10/libgstrtpmanager%(mext)s',
@@ -81,19 +81,19 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstudp%(mext)s',
     ]
 
-    files_vis = [
+    files_plugins_vis = [
              'lib/gstreamer-0.10/libgstgoom%(mext)s',
              'lib/gstreamer-0.10/libgstgoom2k1%(mext)s',
             ]
 
-    platform_files_capture = {
+    platform_files_plugins_capture = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstvideo4linux2%(mext)s',
              'lib/gstreamer-0.10/libgstximagesrc%(mext)s',
             ]
     }
 
-    platform_files_codecs = {
+    platform_files_plugins_codecs = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstdv%(mext)s',
             ],
@@ -102,7 +102,7 @@ class Recipe(recipe.Recipe):
             ]
     }
 
-    platform_files_sys = {
+    platform_files_plugins_sys = {
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstdirectsoundsink%(mext)s',
             ],

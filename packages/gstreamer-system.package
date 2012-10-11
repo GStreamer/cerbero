@@ -15,11 +15,11 @@ class Package(package.Package):
     uuid = '3fde61c2-4535-411f-8287-e8f6a892f853'
     deps = ['gstreamer-core']
 
-    files = ['gst-plugins-base:sys', 'gst-plugins-good:sys',
-            'gst-plugins-ugly:sys', 'gst-plugins-bad:sys']
-    files_devel = ['gst-plugins-base-static:sys_devel',
-            'gst-plugins-good-static:sys_devel',
-            'gst-plugins-ugly-static:sys_devel',
-            'gst-plugins-bad-static:sys_devel']
+    files = ['gst-plugins-base:plugins_sys', 'gst-plugins-good:plugins_sys',
+            'gst-plugins-ugly:plugins_sys', 'gst-plugins-bad:plugins_sys']
+    files_devel = ['gst-plugins-base-static:plugins_sys_devel',
+            'gst-plugins-good-static:plugins_sys_devel',
+            'gst-plugins-ugly-static:plugins_sys_devel',
+            'gst-plugins-bad-static:plugins_sys_devel']
 
     platform_files = {Platform.LINUX: ['cdparanoia:libs']}

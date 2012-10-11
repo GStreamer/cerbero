@@ -11,10 +11,9 @@ class Recipe(custom.GStreamerStatic):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     extra_configure_options = " --enable-lgpl --disable-examples "
-    plugins_categories = ['codecs_restricted']
     deps = ['gstreamer', 'gst-plugins-base', 'bzip2', 'zlib' ]
 
-    files_codecs_restricted_devel = ['libgstffmpeg']
+    files_plugins_codecs_restricted_devel = ['libgstffmpeg']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -32,7 +31,7 @@ class Recipe(custom.GStreamerStatic):
         super(Recipe, self).prepare()
         for f in ['libavcodec.a', 'libavformat.a', 'libavutil.a']:
             path = os.path.join('lib', 'gstreamer-0.10', 'static', f)
-            self.files_codecs_restricted_devel.append(path)
+            self.files_plugins_codecs_restricted_devel.append(path)
 
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:

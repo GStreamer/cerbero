@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from collections import defaultdict
 from cerbero.utils import shell
 from cerbero.build.cookbook import CookBook
 
@@ -32,26 +33,29 @@ class Recipe(recipe.Recipe):
                         'siren': 'gstsiren', 'sdpelem': 'sdp',
                         'rtpmanager': 'gstrtpmanager', 'scaletempoplugin' : 'scaletempo'}
         f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
-        for c in ['core', 'playback', 'codecs', 'vis', 'effects', 'net',
-                  'codecs_gpl', 'codecs_restricted', 'net_restricted', 'sys']:
-            plugins = []
-            for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
-                      'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg']:
-                r = cookbook.get_recipe(r)
-                # files_category
-                if hasattr(r, 'files_%s' % c):
-                    for e in getattr(r, 'files_%s' % c):
-                        if not e.startswith('lib/gstreamer-'):
-                          continue
-                        plugins.append(e[25:-8])
-                # platform_files_category[target_platform]
-                if hasattr(r, 'platform_files_%s' % c):
-                    for e in getattr(r, 'platform_files_%s' % c).get(self.config.target_platform, []):
-                        plugins.append(e[25:-8])
-            plugins = ' '.join(plugins)
+        plugins = defaultdict(list)
+        for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
+                  'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg']:
+            r = cookbook.get_recipe(r)
+            for attr_name in dir(r):
+                if attr_name.startswith('files_plugins_'):
+                    cat_name = attr_name[len('files_plugins_'):]
+                    plugins_list = getattr(r, attr_name)
+                elif attr_name.startswith('platform_files_plugins_'):
+                    cat_name = attr_name[len('platform_files_plugins_'):]
+                    plugins_dict = getattr(r, attr_name)
+                    plugins_list = plugins_dict.get(self.config.target_platform, [])
+                else:
+                    continue
+                for e in plugins_list:
+                    if not e.startswith('lib/gstreamer-'):
+                        continue
+                    plugins[cat_name].append(e[25:-8])
+        for c, p in plugins.iteritems():
+            p = ' '.join(p)
             for k,v in replacements.iteritems():
-                plugins = plugins.replace(k, v)
-            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), plugins))
+                p = p.replace(k, v)
+            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), p))
         f.close()
 
 

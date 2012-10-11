@@ -15,11 +15,11 @@ class Package(package.Package):
     uuid = '58fe67c2-4565-411f-8287-e8faa892f853'
     deps = ['gstreamer-core', 'gstreamer-encoding']
 
-    files = ['gst-plugins-base:capture',
-             'gst-plugins-good:capture',
-             'gst-plugins-ugly:capture',
-             'gst-plugins-bad:capture']
-    files_devel = ['gst-plugins-base-static:capture_devel'
-                   'gst-plugins-good-static:capture_devel',
-                   'gst-plugins-ugly-static:capture_devel',
-                   'gst-plugins-bad-static:capture_devel']
+    files = ['gst-plugins-base:plugins_capture',
+             'gst-plugins-good:plugins_capture',
+             'gst-plugins-ugly:plugins_capture',
+             'gst-plugins-bad:plugins_capture']
+    files_devel = ['gst-plugins-base-static:plugins_capture_devel'
+                   'gst-plugins-good-static:plugins_capture_devel',
+                   'gst-plugins-ugly-static:plugins_capture_devel',
+                   'gst-plugins-bad-static:plugins_capture_devel']

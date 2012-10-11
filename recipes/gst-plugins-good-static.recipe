@@ -11,15 +11,13 @@ class Recipe(custom.GStreamerStatic):
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
-    plugins_categories = ['core', 'effects', 'codecs', 'net', 'vis']
-    platform_plugins_categories = ['capture', 'codecs', 'sys']
 
-    files_core_devel = [
+    files_plugins_core_devel = [
              'libgstautodetect',
              'libgstvideofilter',
     ]
 
-    files_effects_devel = [
+    files_plugins_effects_devel = [
              'libgstalpha',
              'libgstalphacolor',
              'libgstaudiofx',
@@ -43,7 +41,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstvideomixer',
     ]
 
-    files_codecs_devel = [
+    files_plugins_codecs_devel = [
              'libgstalaw',
              'libgstannodex',
              'libgstapetag',
@@ -69,7 +67,7 @@ class Recipe(custom.GStreamerStatic):
              'libgsty4menc',
     ]
 
-    files_net_devel = [
+    files_plugins_net_devel = [
              'libgstrtsp',
              'libgstrtp',
              'libgstrtpmanager',
@@ -77,19 +75,19 @@ class Recipe(custom.GStreamerStatic):
              'libgstudp',
     ]
 
-    files_vis_devel = [
+    files_plugins_vis_devel = [
              'libgstgoom',
              'libgstgoom2k1',
             ]
 
-    platform_files_capture_devel = {
+    platform_files_plugins_capture_devel = {
         Platform.LINUX: [
               'libgstvideo4linux2',
               'libgstximagesrc',
              ]
     }
 
-    platform_files_codecs_devel = {
+    platform_files_plugins_codecs_devel = {
         Platform.LINUX: [
              'libgstdv',
             ],
@@ -98,7 +96,7 @@ class Recipe(custom.GStreamerStatic):
             ]
     }
 
-    platform_files_sys_devel = {
+    platform_files_plugins_sys_devel = {
         Platform.WINDOWS: [
              'libgstdirectsoundsink',
             ],

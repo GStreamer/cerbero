@@ -24,7 +24,7 @@ class Recipe(recipe.Recipe):
                   'libgstdataprotocol-0.10', 'libgstnet-0.10',
                   'libgstreamer-0.10']
 
-    files_core = ['lib/gstreamer-0.10/libgstcoreelements%(mext)s',
+    files_plugins_core = ['lib/gstreamer-0.10/libgstcoreelements%(mext)s',
                      'lib/gstreamer-0.10/libgstcoreindexers%(mext)s']
 
     files_misc = ['libexec/gstreamer-0.10/gst-plugin-scanner%(bext)s']

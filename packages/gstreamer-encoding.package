@@ -15,12 +15,12 @@ class Package(package.Package):
     uuid = '0edb7068-0510-4cbb-a9bb-884e05839648'
     deps = ['gstreamer-core', 'gstreamer-playback']
 
-    files = ['gst-plugins-base:encoding',
-             'gst-plugins-good:encoding',
-             'gst-plugins-ugly:encoding',
-             'gst-plugins-bad:encoding']
-    files_devel = ['gst-plugins-base-static:encoding_devel',
-                   'gst-plugins-good-static:encoding_devel',
-                   'gst-plugins-ugly-static:encoding_devel',
-                   'gst-plugins-bad-static:encoding_devel']
+    files = ['gst-plugins-base:plugins_encoding',
+             'gst-plugins-good:plugins_encoding',
+             'gst-plugins-ugly:plugins_encoding',
+             'gst-plugins-bad:plugins_encoding']
+    files_devel = ['gst-plugins-base-static:plugins_encoding_devel',
+                   'gst-plugins-good-static:plugins_encoding_devel',
+                   'gst-plugins-ugly-static:plugins_encoding_devel',
+                   'gst-plugins-bad-static:plugins_encoding_devel']
 

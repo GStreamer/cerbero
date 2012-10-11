@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
 
-    files_codecs_restricted = [
+    files_plugins_codecs_restricted = [
              'lib/gstreamer-0.10/libgsta52dec%(mext)s',
              'lib/gstreamer-0.10/libgstamrnb%(mext)s',
              'lib/gstreamer-0.10/libgstamrwbdec%(mext)s',
@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstrmdemux%(mext)s',
     ]
 
-    files_dvd = [
+    files_plugins_dvd = [
              'lib/gstreamer-0.10/libgstdvdlpcmdec%(mext)s',
              'lib/gstreamer-0.10/libgstdvdread%(mext)s',
     ]

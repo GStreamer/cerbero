@@ -16,8 +16,8 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['libmms:libs',
-             'gst-plugins-ugly:net_restricted',
-             'gst-plugins-bad:net_restricted']
-    files_devel = ['gst-plugins-ugly-static:net_restricted_devel',
-            'gst-plugins-bad-static:net_restricted_devel']
+             'gst-plugins-ugly:plugins_net_restricted',
+             'gst-plugins-bad:plugins_net_restricted']
+    files_devel = ['gst-plugins-ugly-static:plugins_net_restricted_devel',
+            'gst-plugins-bad-static:plugins_net_restricted_devel']
 

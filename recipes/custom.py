@@ -12,8 +12,6 @@ class GStreamerStatic(recipe.Recipe):
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
     extra_configure_options = ''
-    plugins_categories = []
-    platform_plugins_categories = []
     # Static build will always fail on make check
     make_check = None
 
@@ -36,16 +34,18 @@ class GStreamerStatic(recipe.Recipe):
 
         # Fill the list of files with the static library and the libtool link
         # library, libgstplugin.a and libgstplugin.la
+        self.plugins_categories = [x for x in dir(self) if
+                x.startswith('files_plugins')]
+        self.platform_plugins_categories = [x for x in dir(self) if
+                x.startswith('platform_files_plugins')]
         self._files_list = []
-        for cat in self.plugins_categories:
-            name = 'files_%s_devel' % cat
+        for name in self.plugins_categories:
             files =getattr(self, name)
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
             f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
             setattr(self, name, f)
             self._files_list.extend(f)
-        for cat in self.platform_plugins_categories:
-            name = 'platform_files_%s_devel' % cat
+        for name in self.platform_plugins_categories:
             platform_files = getattr(self, name)
             files = platform_files.get(self.config.target_platform, [])
             f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]

@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
                  'libgstrtsp-0.10', 'libgstsdp-0.10', 'libgsttag-0.10',
                  'libgstvideo-0.10',]
 
-    files_core = [
+    files_plugins_core = [
              'lib/gstreamer-0.10/libgstadder%(mext)s',
              'lib/gstreamer-0.10/libgstapp%(mext)s',
              'lib/gstreamer-0.10/libgstaudioconvert%(mext)s',
@@ -39,24 +39,24 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstvolume%(mext)s',
     ]
 
-    files_playback = [
+    files_plugins_playback = [
              'lib/gstreamer-0.10/libgstdecodebin2%(mext)s',
              'lib/gstreamer-0.10/libgstplaybin%(mext)s',
             ]
 
     # Not used currently
-    files_encoding = [
+    files_plugins_encoding = [
              'lib/gstreamer-0.10/libgstencodebin%(mext)s',
             ]
 
-    files_codecs = [
+    files_plugins_codecs = [
              'lib/gstreamer-0.10/libgstsubparse%(mext)s',
              'lib/gstreamer-0.10/libgstogg%(mext)s',
              'lib/gstreamer-0.10/libgsttheora%(mext)s',
              'lib/gstreamer-0.10/libgstvorbis%(mext)s',
             ]
 
-    files_vis = [
+    files_plugins_vis = [
              'lib/gstreamer-0.10/libgstlibvisual%(mext)s',
             ]
 
@@ -92,13 +92,13 @@ class Recipe(recipe.Recipe):
             'lib/pkgconfig/gstreamer-plugins-base-0.10.pc',
     ]
 
-    platform_files_codecs = {
+    platform_files_plugins_codecs = {
         Platform.ANDROID: [
              'lib/gstreamer-0.10/libgstivorbisdec%(mext)s',
             ]
     }
 
-    platform_files_sys = {
+    platform_files_plugins_sys = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstalsa%(mext)s',
              'lib/gstreamer-0.10/libgstximagesink%(mext)s',
@@ -107,7 +107,7 @@ class Recipe(recipe.Recipe):
             ]
     }
 
-    platform_files_net = {
+    platform_files_plugins_net = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgsttcp%(mext)s',
             ],
