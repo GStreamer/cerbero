@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -23,3 +24,7 @@ class Recipe(recipe.Recipe):
         self.make = 'make -f %s; make' % shared_makefile
         self.make_install = 'make -f %s install PREFIX=%s; make install EXT=%s PREFIX=%s' % \
                 (shared_makefile, self.config.prefix, extension, self.config.prefix)
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('bz2', None, None, None, self.config.libdir)
+        libtool_la.save()
