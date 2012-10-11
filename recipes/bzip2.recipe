@@ -26,5 +26,5 @@ class Recipe(recipe.Recipe):
                 (shared_makefile, self.config.prefix, extension, self.config.prefix)
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('bz2', None, None, None, self.config.libdir)
+        libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir)
         libtool_la.save()
