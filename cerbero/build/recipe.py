@@ -345,16 +345,16 @@ class UniversalRecipe(object):
                                                          tmp.name, True)
                 for f in installed_files:
 
-                    def in_arch_prefix(src):
-                        for p in archs_prefix:
-                            if p in src:
+                    def not_in_prefix(src):
+                        for p in archs_prefix + ['Libraries']:
+                            if src.startswith(p):
                                 return True
                         return False
 
-                    src = os.path.join(self._config.prefix, f)
                     # skip files that are installed in the arch prefix
-                    if in_arch_prefix(src):
+                    if not_in_prefix(f):
                         continue
+                    src = os.path.join(self._config.prefix, f)
 
                     dest = os.path.join(self._config.prefix, recipe.config.target_arch, f)
                     if not os.path.exists(os.path.dirname(dest)):
