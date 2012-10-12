@@ -335,6 +335,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
 
   if (cache_dir) {
     g_setenv ("TMP", cache_dir, TRUE);
+    g_setenv ("TEMP", cache_dir, TRUE);
     g_setenv ("TMPDIR", cache_dir, TRUE);
     g_setenv ("XDG_RUNTIME_DIR", cache_dir, TRUE);
     g_setenv ("XDG_CACHE_DIR", cache_dir, TRUE);
