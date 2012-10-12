@@ -141,13 +141,14 @@ class OSXPackage(PackagerBase):
           include/zlib.h -> Headers/zlib.h
         '''
         # Replace prefix path with the temporal directory one
-        include_dirs = [x.replace(self.config.prefix, tmp) for x in
-                        self.include_dirs]
+        include_dirs = [x.replace(os.path.abspath(self.config.prefix), tmp)
+                        for x in self.include_dirs]
         # Remove trailing /
         include_dirs = [os.path.abspath(x) for x in include_dirs]
         # Remove 'include' dir
         include_dirs = [x for x in include_dirs if not
                         x.endswith(os.path.join(tmp, 'include'))]
+        include_dirs = [x for x in include_dirs if os.path.isdir(x)]
 
         include = os.path.join(tmp, 'include/')
         headers = os.path.join(tmp, 'Headers')
