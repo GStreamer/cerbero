@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
                   'codecs_gpl', 'codecs_restricted', 'net_restricted', 'sys']:
             plugins = []
             for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
-                      'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg', 'gst-amc']:
+                      'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg']:
                 r = cookbook.get_recipe(r)
                 # files_category
                 if hasattr(r, 'files_%s' % c):
