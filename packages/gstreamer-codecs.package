@@ -29,9 +29,5 @@ class Package(package.Package):
             'gst-plugins-ugly-static:codecs_devel']
     platform_files = {
             Platform.LINUX: ['libdv:libs'],
-            Platform.DARWIN: ['libdv:libs'],
-            Platform.ANDROID: ['gst-amc:sys']
-    }
-    platform_files_devel = {
-            Platform.ANDROID: ['gst-amc-static:sys_devel']
+            Platform.DARWIN: ['libdv:libs']
     }
