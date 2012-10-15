@@ -73,6 +73,12 @@ class Recipe(recipe.Recipe):
              '%(sdir)s/libgstbasevideo-0.10%(sext)s',
     ]
 
+    platform_files_codecs = {
+        Platform.ANDROID: [
+             'lib/gstreamer-0.10/libgstandroidmedia%(mext)s',
+            ]
+    }
+
     files_codecs_gpl = [
              'lib/gstreamer-0.10/libgstassrender%(mext)s',
     ]
