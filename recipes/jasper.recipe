@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.Jasperv2]
     config_sh = 'sh configure'
     configure_options = '--enable-shared '
+    deps = ['jpeg']
 
     files_libs = ['libjasper']
     files_bins = ['jasper']
