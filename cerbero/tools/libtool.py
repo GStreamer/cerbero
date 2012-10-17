@@ -18,6 +18,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+from cerbero.config import Platform
 
 
 class LibtoolLibrary(object):
@@ -69,7 +70,7 @@ dlpreopen=''
 libdir='%(libdir)s'
 '''
 
-    def __init__(self, libname, major, minor, micro, libdir, deps=None):
+    def __init__(self, libname, major, minor, micro, libdir, platform, deps=None):
         self.libtool_vars = {
             'libname': '',
             'dlname': '',
@@ -81,14 +82,26 @@ libdir='%(libdir)s'
             'revision': '',
             'libdir': ''}
 
+        if platform == Platform.WINDOWS:
+            shared_ext = 'dll'
+        elif platform == Platform.DARWIN:
+            shared_ext = 'dylib'
+        else:
+            shared_ext = 'so'
+        if platform == Platform.WINDOWS:
+            shareddir = os.path.join(libdir, '..', 'bin')
+        else:
+            shareddir = libdir
+
         if not libname.startswith('lib'):
             libname = 'lib%s' % libname
         if deps is None:
             deps = ''
         self.libname = libname
         self.libdir = libdir
+        self.shareddir = shareddir
         self.laname = '%s.la' % libname
-        dlname_base = '%s.so' % (libname)
+        dlname_base = '%s.%s' % (libname, shared_ext)
         dlname = dlname_base
         dlname_all = dlname_base
         major_str = ''
@@ -113,7 +126,7 @@ libdir='%(libdir)s'
         self.change_value('current', minor_str)
         self.change_value('age', minor_str)
         self.change_value('revision', micro_str)
-        self.change_value('libdir', libdir)
+        self.change_value('libdir', shareddir)
         self.change_value('dependency_libs', self._parse_deps(deps))
 
     def save(self):

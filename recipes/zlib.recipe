@@ -25,5 +25,6 @@ class Recipe(recipe.Recipe):
             self._remove_steps ([BuildSteps.CONFIGURE])
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('z', 1, 2, 7, self.config.libdir)
+        libtool_la = LibtoolLibrary('z', 1, 2, 7, self.config.libdir,
+                self.config.target_platform)
         libtool_la.save()

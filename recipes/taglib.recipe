@@ -26,7 +26,8 @@ class Recipe(recipe.Recipe):
         deps = ['z']
         if self.config.target_platform == Platform.ANDROID:
             deps.append('stlport')
-        libtool_la = LibtoolLibrary('tag', 1, 7, None, self.config.libdir, deps)
+        libtool_la = LibtoolLibrary('tag', 1, 7, None, self.config.libdir,
+                self.config.target_platform, deps)
         libtool_la.save()
         shutil.move(
                 os.path.join(self.config.prefix, 'lib', 'libtag_static.a'),
