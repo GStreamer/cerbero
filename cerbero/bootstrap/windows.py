@@ -123,6 +123,8 @@ class WindowsBootstraper(BootstraperBase):
                   (temp, self.version, python_headers))
         shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
                   (temp, self.version, python_libs))
+        shell.call('ln -s %s/lib/pyton27.dll %s/lib/python.dll' %
+                  (temp, self.prefix))
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
