@@ -146,7 +146,10 @@ class WindowsBootstraper(BootstraperBase):
 
     def fix_lib_paths(self):
         orig_sysroot = self.find_mingw_sys_root()
-        new_sysroot = os.path.join(self.prefix, 'lib')
+        if self.config.platform != Platform.WINDOWS:
+            new_sysroot = os.path.join(self.prefix, 'mingw', 'lib')
+        else:
+            new_sysroot = os.path.join(self.prefix, 'lib')
         lib_path = new_sysroot
 
         # Replace the old sysroot in all .la files
@@ -155,7 +158,11 @@ class WindowsBootstraper(BootstraperBase):
             shell.replace(path, {orig_sysroot: new_sysroot})
 
     def find_mingw_sys_root(self):
-        with open(os.path.join(self.prefix, 'lib', 'libstdc++.la'), 'r') as f:
+        if self.config.platform != Platform.WINDOWS:
+            f = os.path.join(self.prefix, 'mingw', 'lib', 'libstdc++.la')
+        else:
+            f = os.path.join(self.prefix, 'lib', 'libstdc++.la')
+        with open(f, 'r') as f:
             # get the "libdir=/path" line
             libdir = [x for x in f.readlines() if x.startswith('libdir=')][0]
             # get the path
