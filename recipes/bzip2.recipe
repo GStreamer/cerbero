@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
             extension = '.exe'
         else:
             shared_makefile = 'Makefile-libbz2_so'
-        self.make = 'make -f %s; make' % shared_makefile
+        self.make = 'make -f %s; make EXT=%s' % (shared_makefile, extension)
         self.make_install = 'make -f %s install PREFIX=%s; make install EXT=%s PREFIX=%s' % \
                 (shared_makefile, self.config.prefix, extension, self.config.prefix)
 
