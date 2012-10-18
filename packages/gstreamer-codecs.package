@@ -18,7 +18,7 @@ class Package(package.Package):
     files = ['flac:libs',
             'jasper:libs', 'libkate:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
-            'libtheora:libs', 'libvorbis:libs', 'wavpack:libs', 'libvpx:libs',
+            'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs',
             'gst-plugins-base:codecs', 'gst-plugins-good:codecs',
             'gst-plugins-bad:codecs', 'gst-plugins-ugly:codecs',
@@ -28,6 +28,8 @@ class Package(package.Package):
             'gst-plugins-bad-static:codecs_devel',
             'gst-plugins-ugly-static:codecs_devel']
     platform_files = {
-            Platform.LINUX: ['libdv:libs'],
-            Platform.DARWIN: ['libdv:libs']
+            Platform.LINUX: ['libdv:libs', 'libvorbis:libs'],
+            Platform.DARWIN: ['libdv:libs', 'libvorbis:libs'],
+            Platform.WINDOWS: ['libvorbis:libs'],
+            Platform.ANDROID: ['tremor:libs']
     }
