@@ -11,7 +11,8 @@ class Recipe(recipe.Recipe):
     commit = 'upstream/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
-            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
+            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
+            'libvpx']
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
     use_system_libs = True
@@ -67,6 +68,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstpng%(mext)s',
              'lib/gstreamer-1.0/libgstspeex%(mext)s',
              'lib/gstreamer-1.0/libgsttaglib%(mext)s',
+             'lib/gstreamer-1.0/libgstvpx%(mext)s',
              'lib/gstreamer-1.0/libgstwavenc%(mext)s',
              'lib/gstreamer-1.0/libgstwavpack%(mext)s',
              'lib/gstreamer-1.0/libgstwavparse%(mext)s',
