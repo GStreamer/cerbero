@@ -7,7 +7,9 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     config_sh = 'sh autogen.sh'
     deps = ['libdvdread']
+    configure_options = '--with-dvdread-config=$CERBERO_PREFIX/bin/dvdread-config'
 
     files_libs = ['libdvdnav', 'libdvdnavmini']
     files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc',
                    'lib/pkgconfig/dvdnavmini.pc', 'bin/dvdnav-config']
+
