@@ -83,15 +83,11 @@ libdir='%(libdir)s'
             'libdir': ''}
 
         if platform == Platform.WINDOWS:
-            shared_ext = 'dll'
+            shared_ext = 'dll.a'
         elif platform == Platform.DARWIN:
             shared_ext = 'dylib'
         else:
             shared_ext = 'so'
-        if platform == Platform.WINDOWS:
-            shareddir = os.path.join(libdir, '..', 'bin')
-        else:
-            shareddir = libdir
 
         if not libname.startswith('lib'):
             libname = 'lib%s' % libname
@@ -99,7 +95,6 @@ libdir='%(libdir)s'
             deps = ''
         self.libname = libname
         self.libdir = libdir
-        self.shareddir = shareddir
         self.laname = '%s.la' % libname
         dlname_base = '%s.%s' % (libname, shared_ext)
         dlname = dlname_base
@@ -126,7 +121,7 @@ libdir='%(libdir)s'
         self.change_value('current', minor_str)
         self.change_value('age', minor_str)
         self.change_value('revision', micro_str)
-        self.change_value('libdir', shareddir)
+        self.change_value('libdir', libdir)
         self.change_value('dependency_libs', self._parse_deps(deps))
 
     def save(self):
