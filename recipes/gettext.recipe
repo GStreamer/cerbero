@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     srcdir = 'gettext-runtime'
     autoreconf = True
-    autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
     platform_deps = {Platform.DARWIN:  ['libiconv'],
                      Platform.LINUX:  ['libiconv'],}
 
