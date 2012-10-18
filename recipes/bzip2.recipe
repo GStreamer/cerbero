@@ -31,5 +31,7 @@ class Recipe(recipe.Recipe):
         libtool_la.save()
         if self.config.target_platform != Platform.WINDOWS:
             libdir = os.path.join(self.config.prefix, 'lib')
-            os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'),
-                       os.path.join(libdir, 'libbz2.so'))
+            libbz2 = os.path.join(libdir, 'libbz2.so')
+            if os.path.exists (libbz2):
+                os.remove (libbz2)
+            os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'), libbz2)
