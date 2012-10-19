@@ -6,23 +6,23 @@
 static GstClockTime _priv_gst_info_start_time;
 
 /* Declaration of static plugins */
-@PLUGINS_DECLARATION@
+ @PLUGINS_DECLARATION@
 
 /* Declaration of static gio modules */
-@G_IO_MODULES_DECLARE@
+ @G_IO_MODULES_DECLARE@
 
 /* Call this function to register static plugins */
 void
 gst_android_register_static_plugins (void)
 {
-  @PLUGINS_REGISTRATION@
+ @PLUGINS_REGISTRATION@
 }
 
 /* Call this function to load GIO modules */
 void
 gst_android_load_gio_modules (void)
 {
-  @G_IO_MODULES_LOAD@
+ @G_IO_MODULES_LOAD@
 }
 
 void
