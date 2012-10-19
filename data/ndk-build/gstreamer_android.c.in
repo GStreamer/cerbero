@@ -397,16 +397,16 @@ JNI_OnLoad (JavaVM * vm, void *reserved)
         "Could not retrieve JNIEnv");
     return 0;
   }
-  jclass klass = (*env)->FindClass (env, "com/gst_sdk/GStreamer");
+  jclass klass = (*env)->FindClass (env, "com/gstreamer/GStreamer");
   if (!klass) {
     __android_log_print (ANDROID_LOG_ERROR, "GStreamer",
-        "Could not retrieve class com.gst_sdk.GStreamer");
+        "Could not retrieve class com.gstreamer.GStreamer");
     return 0;
   }
   if ((*env)->RegisterNatives (env, klass, native_methods,
           G_N_ELEMENTS (native_methods))) {
     __android_log_print (ANDROID_LOG_ERROR, "GStreamer",
-        "Could not register native methods for com.gst_sdk_GStreamer");
+        "Could not register native methods for com.gstreamer.GStreamer");
     return 0;
   }
 

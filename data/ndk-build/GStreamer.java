@@ -1,4 +1,4 @@
-package com.gst_sdk;
+package com.gstreamer;
 
 import android.content.Context;
 
