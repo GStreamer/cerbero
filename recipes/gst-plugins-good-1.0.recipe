@@ -15,7 +15,6 @@ class Recipe(recipe.Recipe):
             'libvpx']
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
-    use_system_libs = True
 
 
     files_lang = ['gst-plugins-good-1.0']
@@ -124,5 +123,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv --disable-gtk-doc'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += '--disable-libdv --disable-pulse'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
+        if self.config.target_platform == Platform.LINUX:
+            self.use_system_libs = True
