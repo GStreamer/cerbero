@@ -1,0 +1,37 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-ugly-1.0'
+    version = '0.11.x'
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = "--disable-introspection --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Ugly Plugins (GStreamer SDK)' "
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
+    commit = 'upstream/master'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
+            'libdvdread', 'libmpeg2', 'libmad']
+
+    files_codecs_restricted = [
+             'lib/gstreamer-1.0/libgsta52dec%(mext)s',
+             'lib/gstreamer-1.0/libgstamrnb%(mext)s',
+             'lib/gstreamer-1.0/libgstamrwbdec%(mext)s',
+             'lib/gstreamer-1.0/libgstasf%(mext)s',
+             'lib/gstreamer-1.0/libgstmad%(mext)s',
+             'lib/gstreamer-1.0/libgstmpeg2dec%(mext)s',
+             'lib/gstreamer-1.0/libgstxingmux%(mext)s',
+             'lib/gstreamer-1.0/libgstrmdemux%(mext)s',
+    ]
+
+    files_dvd = [
+             'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
+             'lib/gstreamer-1.0/libgstdvdread%(mext)s',
+    ]
+
+    files_lang = ['gst-plugins-ugly-1.0']
+
+    def prepare(self):
+        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
+            self.configure_options += '--disable-gtk-doc '
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
