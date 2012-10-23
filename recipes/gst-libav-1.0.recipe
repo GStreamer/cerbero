@@ -1,0 +1,56 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gst-libav-1.0'
+    version = '0.11.x'
+    # TODO - check license - plugin is certainly LGPLv2+, but need to check
+    #        the linked libs
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = "--enable-lgpl --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer libav Plugins (GStreamer SDK)' "
+    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
+    commit = 'upstream/master'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
+
+    files_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86_64:
+                asflags = ' -arch x86_64 -m64'
+            elif self.config.target_arch == Architecture.X86:
+                asflags = ' -arch i386 -m32'
+            elif self.config.target_arch == Architecture.PPC:
+                asflags = ' -arch ppc'
+            self.configure_options += ' ASFLAGS="%s"' % asflags
+
+    def configure(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s --enable-w32threads' %\
+                (self.config.host, self.config.target_arch)
+            opts_file = os.path.join(self.build_dir, 'libav_extra_configure_options')
+            with open(opts_file, 'w+') as f:
+                f.write(opts)
+        if self.config.target_platform == Platform.ANDROID:
+            opts = '--target-os=linux'
+            opts_file = os.path.join(self.build_dir, 'libav_extra_configure_options')
+            with open(opts_file, 'w+') as f:
+                f.write(opts)
+        super(recipe.Recipe, self).configure()
+
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86:
+                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
+                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
+                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
+                shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+
+        # log2 and log2f are not provided by bionic, but they are not checked
+        # properly
+        if self.config.target_platform == Platform.ANDROID:
+                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
+                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
+                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
