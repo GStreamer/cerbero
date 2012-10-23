@@ -117,9 +117,9 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
-        self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wno-error "
-        self.new_env['CXXFLAGS'] = os.environ['CXXFLAGS'] + " -Wno-error "
-        self.new_env['CPPFLAGS'] = os.environ['CPPFLAGS'] + " -Wno-error "
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
                 '--disable-dv --disable-gtk-doc'
