@@ -159,11 +159,10 @@ class MakefilesBase (Build):
 
         self._old_env = {}
         for var in append_env.keys() + new_env.keys():
-            if var in os.environ:
-                self._old_env[var] = os.environ[var]
+            self._old_env[var] = os.environ.get(var, None)
 
         for var, val in append_env.iteritems():
-            os.environ[var] += val
+            os.environ[var] = os.environ.get(var, '') + val
 
         for var, val in new_env.iteritems():
             if val is None:
@@ -178,7 +177,10 @@ class MakefilesBase (Build):
             return
 
         for var, val in old_env.iteritems():
-            os.environ[var] = val
+            if val is None:
+                del os.environ[var]
+            else:
+                os.environ[var] = val
         self._old_env = None
 
     def _add_system_libs(self, new_env):
