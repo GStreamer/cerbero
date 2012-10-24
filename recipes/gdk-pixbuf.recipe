@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -14,6 +15,7 @@ class Recipe(recipe.Recipe):
     files_lang = ['gdk-pixbuf']
     platform_files_modules = {
         Platform.LINUX: ['lib/gdk-pixbuf-2.0'],
+        Platform.WINDOWS: ['lib/gdk-pixbuf-2.0'],
         Platform.DARWIN: ['lib/gdk-pixbuf-2.0']}
 
     def prepare(self):
@@ -23,3 +25,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             self.autoreconf = True
             self.configure_options += '--without-x11 '
+
+    def post_install (self):
+        if self.config.target_platform == Platform.WINDOWS:
+            cache = os.path.join(self.config.prefix, 'lib', 'gdk-pixbuf-2.0',
+                '2.10.0', 'loaders.cache')
+            shell.replace(cache, {self.config.prefix: '../'})
