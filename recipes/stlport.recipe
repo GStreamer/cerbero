@@ -37,7 +37,8 @@ class Recipe(recipe.Recipe):
 
 
         # Create a libtool library for stlport (libstlport.la)
-        lib = LibtoolLibrary('stlport', None, None, None, libdir)
+        lib = LibtoolLibrary('stlport', None, None, None, libdir,
+                self.config.target_platform)
         lib.change_value('dependency_libs', ' -lstdc++')
         lib.save()
 
