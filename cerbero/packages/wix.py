@@ -272,6 +272,8 @@ class MSI(WixBase):
             if self.package.package_mode == PackageType.RUNTIME:
                 self._add_registry_install_dir()
                 self._add_sdk_root_env_variable()
+        if isinstance(self.package, App):
+            self._add_start_menu_shortcuts()
         self._add_get_install_dir_from_registry()
 
     def _add_application_merge_module(self):
@@ -446,3 +448,26 @@ class MSI(WixBase):
                              Id=self._package_id(p.name))
         etree.SubElement(feature, "MergeRef",
                          Id=self._package_id(package.name))
+
+    def _add_start_menu_shortcuts(self, package):
+        # Create a folder with the application name in the Start Menu folder
+        programs = etree.SubElement(self.target_dir, 'Directory', Id='ProgramMenuFolder')
+        etree.subElement(programs, 'Directory', Id='ApplicationProgramsFolder',
+                Name='$(var.ProductName')
+        # Add the shortcut to the installer package
+        appf = etree.SubElement(self.root, 'DirectoryRef', Id='ApplicationProgramsFolder')
+        apps = etree.SubElement(appf, 'Component', Id='ApplicationShortcut', Guid=self._get_uuid())
+        for desc, path in package.commands:
+            etree.SubElement(apps, 'Shortcut', Id='ApplicationStartMenuShortcut',
+                    Name=desc, Description=desc, Target='[SDKROOTDIR]' + path,
+                    WorkingDirectory='[SDKROOTDIR]' + os.path.dirname(path),
+                    Icon='MainIcon')
+        etree.SubElement(apps, 'Removefolder', Id='ApplicationProgramsFolder',
+                On='uninstall')
+        etree.SubElement(apps, 'RegistryValue', Root='HKCU',
+                Key='Software\Microsoft\%s' % self.package.name,
+                Name='installed', Type='integer', Value='1', KeyPath='yes')
+        # Ref it in the main feature
+        etree.SubElement(self.main_feature, 'ComponentRef',
+                Id='ApplicationShortcut')
+
