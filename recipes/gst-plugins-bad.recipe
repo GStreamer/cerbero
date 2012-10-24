@@ -125,12 +125,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstaudiovisualizers%(mext)s',
             ]
 
-    platform_files_capture = {
-        Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstdvb%(mext)s',
-            ],
-    }
-
     platform_files_sys = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstvcdsrc%(mext)s',
