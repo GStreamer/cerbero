@@ -548,3 +548,18 @@ class App(PackageBase):
                                  'cmd': self.config.prefix}
 
         return content
+
+    def __getattribute__(self, name):
+        if name == 'deps':
+            attr = PackageBase.__getattribute__(self, name)
+            ret = attr[:]
+            platform_attr_name = 'platform_%s' % name
+            if hasattr(self, platform_attr_name):
+                platform_attr = PackageBase.__getattribute__(self,
+                        platform_attr_name)
+                if self.config.target_platform in platform_attr:
+                    platform_list = platform_attr[self.config.target_platform]
+                    ret.extend(platform_list)
+            return ret
+        else:
+            return PackageBase.__getattribute__(self, name)
