@@ -119,7 +119,7 @@ fix-deps = \
 
 
 # Generate list of plugin links (eg: -lcoreelements -lvideoscale)
-GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin))
+GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin) )
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,playback,playbin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,uridecodebin,decodebin2)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,encoding,encodebin)
