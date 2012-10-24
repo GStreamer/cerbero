@@ -21,7 +21,7 @@ from zipfile import ZipFile
 
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package
+from cerbero.packages.package import Package, App
 from cerbero.utils import messages as m
 from cerbero.utils import shell, to_winepath
 from cerbero.packages.wix import MergeModule, MSI, WixConfig
@@ -137,6 +137,8 @@ class MSIPackager(PackagerBase):
     def _create_msi_installer(self, package_type):
         self.package.set_mode(package_type)
         self.packagedeps = self.store.get_package_deps(self.package, True)
+        if isinstance(self.package, App):
+            self.packagedeps = [self.package]
         self._create_merge_modules(package_type)
         config_path = self._create_config()
         self._create_msi(config_path)

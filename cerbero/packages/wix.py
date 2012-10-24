@@ -24,7 +24,7 @@ from cerbero.utils import etree, to_winepath, shell
 from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
-from cerbero.packages.package import SDKPackage
+from cerbero.packages.package import SDKPackage, App, InstallerPackage
 
 WIX_SCHEMA = "http://schemas.microsoft.com/wix/2006/wi"
 
@@ -264,12 +264,27 @@ class MSI(WixBase):
 
     def _fill(self):
         self._add_install_dir()
-        self._add_merge_modules()
+        if isinstance(self.package, App):
+            self._add_application_merge_module ()
+        else:
+            self._add_merge_modules()
         if isinstance(self.package, SDKPackage):
             if self.package.package_mode == PackageType.RUNTIME:
                 self._add_registry_install_dir()
                 self._add_sdk_root_env_variable()
         self._add_get_install_dir_from_registry()
+
+    def _add_application_merge_module(self):
+        self.main_feature = etree.SubElement(self.product, "Feature",
+            Id=self._format_id(self.package.name + '_app'),
+            Title=self.package.title, Level='1', Display="expand",
+            AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
+
+        self._add_merge_module(self.package, True, True, [])
+
+        etree.SubElement(self.installdir, 'Merge',
+            Id=self._package_id(self.package.name), Language='1033',
+            SourceFile=self.packages_deps[self.package], DiskId='1')
 
     def _add_merge_modules(self):
         self.main_feature = etree.SubElement(self.product, "Feature",
@@ -310,14 +325,20 @@ class MSI(WixBase):
         return tdir
 
     def _add_install_dir(self):
-        tdir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
+        self.target_dir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
         # FIXME: Add a way to install to ProgramFilesFolder
-        installdir = self._add_dir(tdir, 'INSTALLDIR',
-                self.package.get_install_dir())
-        versiondir = self._add_dir(installdir, "Version", self.package.sdk_version)
-        archdir = self._add_dir(versiondir, 'Architecture',
-                                self.config.target_arch)
-        self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
+        if isinstance(self.package, App):
+            installdir = self._add_dir(self.target_dir,
+                    '$(var.PlatformProgramFilesFolder)', 'ProgramFilesFolder')
+            self.installdir = self._add_dir(installdir, 'INSTALLDIR',
+                    '$(var.ProductName)')
+        else:
+            installdir = self._add_dir(self.target_dir, 'INSTALLDIR',
+                    self.package.get_install_dir())
+            versiondir = self._add_dir(installdir, "Version", self.package.sdk_version)
+            archdir = self._add_dir(versiondir, 'Architecture',
+                                    self.config.target_arch)
+            self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
 
     def _package_id(self, package_name):
         return self._format_id(package_name)
@@ -390,7 +411,7 @@ class MSI(WixBase):
 
     def _add_get_install_dir_from_registry(self):
         name = self._package_var().replace(' ', '')
-        if not isinstance(self.package, SDKPackage):
+        if isinstance(self.package, InstallerPackage):
             name = self.package.windows_sdk_reg or name
 
         key = self._registry_key(name)

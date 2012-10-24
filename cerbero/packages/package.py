@@ -483,11 +483,13 @@ class App(PackageBase):
     deps = []
     commands = []  # list of tuples ('CommandName', path/to/binary')
     wrapper = 'app_wrapper.tpl'
+    resources_wix_installer = None
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
         self._app_recipe = self.cookbook.get_recipe(self.app_recipe)
+        self.title = self.name
 
     def recipes_dependencies(self):
         deps = []
