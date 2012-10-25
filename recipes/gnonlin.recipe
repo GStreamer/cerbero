@@ -10,5 +10,4 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gnonlin'}
     deps = ['gstreamer', 'gst-plugins-base' ]
 
-    files_gnl = ['lib/gstreamer-0.10/libgnl%(mext)s']
-
+    files_plugins_gnl = ['lib/gstreamer-0.10/libgnl%(mext)s']

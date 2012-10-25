@@ -10,7 +10,5 @@ class Recipe(custom.GStreamerStatic):
     make_check = None
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gnonlin'}
     deps = ['gstreamer', 'gst-plugins-base' ]
-    plugins_categories = ['gnl']
 
-    files_gnl_devel = ['libgnl']
-
+    files_plugins_gnl_devel = ['libgnl']
