@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+
+class Recipe(recipe.Recipe):
+    name = 'soundtouch'
+    version = '1.7.0'
+    remotes = {'slomo-ccu': 'git://git.collabora.co.uk/git/user/slomo/soundtouch.git'}
+    commit = 'slomo-ccu/sdk-1.7.0'
+    licenses = [License.LGPLv2_1Plus]
+    autoreconf_sh = './bootstrap'
+    autoreconf = True
+    platform_deps = {Platform.ANDROID: ['stlport']}
+
+    files_libs = ['libSoundTouch']
+    files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']
+
+    def prepare (self):
+      if self.config.target_platform == Platform.ANDROID:
+        self.configure_options += ' --with-stlport '
+        self.append_env['CXXFLAGS'] = ' -DST_NO_EXCEPTION_HANDLING=1 '
