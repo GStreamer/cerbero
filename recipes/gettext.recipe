@@ -21,3 +21,5 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--enable-threads=win32'
             self.autoreconf = False
+        elif self.config.target_platform == Platform.ANDROID:
+            self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
