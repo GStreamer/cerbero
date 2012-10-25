@@ -29,6 +29,7 @@ from cerbero.utils import messages as m
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
+DEFAULT_HOME = os.path.expanduser('~/cerbero')
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git://anongit.freedesktop.org/gstreamer-sdk'
@@ -75,7 +76,8 @@ class Config (object):
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
                    'external_packages', 'use_ccache', 'force_git_commit',
-                   'universal_archs', 'osx_target_sdk_version', 'variants']
+                   'universal_archs', 'osx_target_sdk_version', 'variants',
+                   'build_tools_prefix']
 
     def __init__(self):
         self._check_uninstalled()
@@ -292,12 +294,14 @@ class Config (object):
                 self.parse(config_path, reset=False)
 
     def _load_last_defaults(self):
-        cerbero_home = os.path.expanduser('~/cerbero')
+        cerbero_home = DEFAULT_HOME
         self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
         self.set_property('install_dir', self.prefix)
         self.set_property('sources', os.path.join(cerbero_home, 'sources'))
         self.set_property('local_sources',
                 os.path.join(cerbero_home, 'sources', 'local'))
+        self.set_property('build_tools_prefix',
+                os.path.join(cerbero_home, 'build-tools'))
 
     def load_defaults(self):
         self.set_property('cache_file', None)
@@ -336,6 +340,7 @@ class Config (object):
         self.set_property('universal_archs',
                           [Architecture.X86, Architecture.X86_64])
         self.set_property('variants', [])
+        self.set_property('build_tools_prefix', None)
 
     def validate_properties(self):
         if not validate_packager(self.packager):
