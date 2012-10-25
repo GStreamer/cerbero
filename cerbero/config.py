@@ -214,6 +214,8 @@ class Config (object):
             path = path.replace(":" + bindir, "")
         elif bindir not in path:
             path = self._join_path(bindir, path)
+        path = self._join_path(
+                os.path.join(self.build_tools_prefix, 'bin'), path)
 
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': libdir,
