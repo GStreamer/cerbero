@@ -9,12 +9,8 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     configure_options = '--disable-introspection --program-prefix= '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/insanity-gst'}
-    deps = [ 'insanity', 'gstreamer', 'gst-plugins-base', 'libsoup' ]
-    platform_deps = {
-            Platform.LINUX: ['gtk-doc'],
-            Platform.DARWIN: ['gtk-doc'],
-            Platform.WINDOWS: ['gtk-doc-windows'],
-    }
+    deps = ['insanity', 'gstreamer', 'gst-plugins-base', 'libsoup',
+            'gtk-doc-lite']
 
     def prepare(self):
         if self.config.platform in [Platform.WINDOWS, Platform.DARWIN]:

@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 class Recipe(recipe.Recipe):
-    name = 'gtk-doc-windows'
+    name = 'gtk-doc-lite'
     version = '1.18'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
@@ -33,5 +33,5 @@ class Recipe(recipe.Recipe):
         replacements = {'@PACKAGE@': 'gtk-doc', '@VERSION@': self.version,
                         '@prefix@': self.config.prefix,
                         '@datarootdir@': '${prefix}/share',
-                        '@datadir@': '${datarootdir}'} 
+                        '@datadir@': '${datarootdir}'}
         shell.replace(gtkdocize, replacements)

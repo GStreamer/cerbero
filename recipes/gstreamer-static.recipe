@@ -4,14 +4,9 @@ class Recipe(custom.GStreamerStatic):
     name = 'gstreamer-static'
     version = '0.10.36'
     licenses = [License.LGPLv2_1Plus]
-    deps = ['glib', 'libxml2']
+    deps = ['glib', 'libxml2', 'gtk-doc-lite']
     # Static build will always fail on make check
     make_check = None
-    platform_deps = {
-            Platform.LINUX: ['gtk-doc'],
-            Platform.DARWIN: ['gtk-doc'],
-            Platform.WINDOWS: ['gtk-doc-windows'],
-    }
 
     files_plugins_core_devel = ['libgstcoreelements', 'libgstcoreindexers']
 

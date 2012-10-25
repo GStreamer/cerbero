@@ -8,13 +8,7 @@ class Recipe(recipe.Recipe):
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules --enable-static'
-    deps = ['cairo', 'fontconfig', 'freetype']
-    platform_deps = {
-        Platform.WINDOWS: ['gtk-doc-windows'],
-        Platform.LINUX: ['gtk-doc'],
-        Platform.DARWIN: ['gtk-doc'],
-    }
-
+    deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
