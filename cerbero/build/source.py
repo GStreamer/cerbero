@@ -246,12 +246,14 @@ class GitExtractedTarball(Git):
         for match in self.matches:
             self._files[match] = []
         self._find_files(self.build_dir)
+        self._files['.in'] = [x for x in self._files['.in'] if
+                os.path.join(self.build_dir, 'm4') not in x]
         self._fix_ts()
 
     def _fix_ts(self):
         for match in self.matches:
             for path in self._files[match]:
-                shell.call('touch %s' % path)
+                shell.touch(path)
 
     def _find_files(self, directory):
         for path in os.listdir(directory):

@@ -260,12 +260,11 @@ def copy_dir(src, dest):
             copy_dir(s, d)
 
 
-def touch(path, create_if_not_exists=False):
+def touch(path, create_if_not_exists=False, offset=0):
     if not os.path.exists(path):
         if create_if_not_exists:
             open(path).close()
         else:
             return
-    t = time.time()
+    t = time.time() + offset
     os.utime(path, (t, t))
-
