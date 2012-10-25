@@ -155,7 +155,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform == Platform.ANDROID:
-            self.append_env['CXXFLAGS'] = ' -DST_NO_EXCEPTION_HANDLING=1 '
             self.configure_options += ' --disable-dccp'
             self.files_codecs.remove('lib/gstreamer-0.10/libgstdccp%(mext)s')
             for d in ['libdvdnav']:
