@@ -16,6 +16,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']
 
     def prepare (self):
+      self.configure_options += ' --enable-static '
       if self.config.target_platform == Platform.ANDROID:
         self.configure_options += ' --with-stlport '
         self.append_env['CXXFLAGS'] = ' -DST_NO_EXCEPTION_HANDLING=1 '
