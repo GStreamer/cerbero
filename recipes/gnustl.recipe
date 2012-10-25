@@ -1,0 +1,55 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.pkgconfig import PkgConfigWritter
+
+class Recipe(recipe.Recipe):
+    name = 'gnustl'
+    version = '0.1'
+    licenses = [License.LGPLv2_1]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    files_stl = [
+            'lib/libgnustl.so']
+    files_devel= [
+            'lib/pkgconfig/gnustl.pc',
+            'lib/libgnustl.la',
+            'lib/libgnustl.a',
+            'lib/libsupc++.a',
+            ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.ANDROID:
+            raise InvalidRecipeError()
+
+    def install(self):
+        stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
+                'cxx-stl', 'gnu-libstdc++', '4.6')
+        stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
+        libdir = os.path.join(self.config.prefix, 'lib')
+
+        # Copies libraries to the prefix
+        shutil.copy(os.path.join(stl_libdir, 'libgnustl_shared.so'),
+                    os.path.join(libdir, 'libgnustl.so'))
+        shutil.copy(os.path.join(stl_libdir, 'libgnustl_static.a'),
+                    os.path.join(libdir, 'libgnustl.a'))
+        shutil.copy(os.path.join(stl_libdir, 'libsupc++.a'),
+                    os.path.join(libdir, 'libsupc++.a'))
+
+
+        # Create a libtool library for gnustl (libgnustl.la)
+        lib = LibtoolLibrary('gnustl', None, None, None, libdir,
+                self.config.target_platform)
+        lib.change_value('dependency_libs', ' -lstdc++')
+        lib.save()
+
+        # Create pkg-config file (gnustl.pc)
+        stl_pc = PkgConfigWritter('gnustl', 'gnustl', '1.0',
+                '', '-L${libdir} -lgnustl -lsupc++ -lstdc++ ',
+                '-I%s/include -I%s/libs/armeabi/include' % (stl_prefix, stl_prefix), self.config.prefix)
+        stl_pc.libs_priv = '${libdir}/libgnustl.a ${libdir}/libsupc++.a'
+        stl_pc.rel_incldir = 'include'
+        stl_pc.save('gnustl', os.path.join(self.config.prefix, 'lib',
+            'pkgconfig'))
