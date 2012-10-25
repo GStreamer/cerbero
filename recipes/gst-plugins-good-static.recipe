@@ -5,9 +5,9 @@ class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-good-static'
     version = '0.10.31'
     licenses = [License.LGPLv2Plus]
-    extra_configure_options = ' --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2'
+    extra_configure_options = ' --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-shout2'
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
-            'speex', 'gdk-pixbuf', 'libsoup',
+            'speex', 'gdk-pixbuf', 'libsoup', 'cairo',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
@@ -23,6 +23,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstalpha',
              'libgstalphacolor',
              'libgstaudiofx',
+             'libgstcairo',
              'libgstcutter',
              'libgstdebug',
              'libgstdeinterlace',
