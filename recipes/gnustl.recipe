@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
                 'cxx-stl', 'gnu-libstdc++', '4.6')
         stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
         libdir = os.path.join(self.config.prefix, 'lib')
+        if not os.path.exists(libdir):
+            os.makedirs(libdir)
 
         # Copies libraries to the prefix
         shutil.copy(os.path.join(stl_libdir, 'libgnustl_shared.so'),
