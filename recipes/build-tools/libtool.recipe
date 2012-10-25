@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'libtool'
+    version = '2.4.2'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.2.tar.gz'
+
+    files_bin = ['bin/libtool', 'bin/libtoolize']
+    files_libs = ['libltdl']
+    files_share = ['share/libtool']
+    files_aclocal = [
+        'share/aclocal/argz.m4',
+        'share/aclocal/libtool.m4',
+        'share/aclocal/ltdl.m4',
+        'share/aclocal/ltoptions.m4',
+        'share/aclocal/ltsugar.m4',
+        'share/aclocal/ltversion.m4',
+        'share/aclocal/lt~obsolete.m4']
