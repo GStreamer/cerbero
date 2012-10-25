@@ -39,3 +39,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--without-x --enable-quartz-font --enable-quartz-image'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += '--without-x '
