@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'automake'
+    version = '1.12.4'
+    licenses = [License.GPLv2]
+
+    files_bin = ['bin/automake', 'bin/aclocal',
+                 'bin/automake-1.12', 'bin/aclocal-1.12']
+    files_share = ['share/aclocal-1.12', 'share/automake-1.12']

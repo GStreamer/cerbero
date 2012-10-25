@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'pkg-config'
+    version = '0.27'
+    licenses = [License.GPLv2]
+    configure_options = '--with-internal-glib'
+
+    files_bins = ['pkg-config']
+    files_share = ['share/aclocal/pkg.m4']

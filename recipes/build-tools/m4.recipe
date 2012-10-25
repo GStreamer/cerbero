@@ -1,0 +1,9 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'm4'
+    version = '1.4.16'
+    licenses = [License.GPLv2]
+
+    files_bins = ['m4']
