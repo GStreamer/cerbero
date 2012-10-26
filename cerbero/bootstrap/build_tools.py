@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Config, DEFAULT_HOME
+from cerbero.config import Config, DEFAULT_HOME, Platform
 from cerbero.bootstrap import BootstraperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
@@ -28,6 +28,10 @@ class BuildTools (BootstraperBase):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
                    'orc', 'gettext-m4']
+    PLAT_BUILD_TOOLS = {
+            Platform.DARWIN: ['intltool'],
+            Platform.WINDOWS: ['intltool'],
+            }
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
@@ -47,6 +51,8 @@ class BuildTools (BootstraperBase):
 
         config.do_setup_env()
         cookbook = CookBook(config)
-        oven = Oven(self.BUILD_TOOLS, cookbook)
+        recipes = self.BUILD_TOOLS
+        recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
+        oven = Oven(recipes, cookbook)
         oven.start_cooking()
         self.config.do_setup_env()
