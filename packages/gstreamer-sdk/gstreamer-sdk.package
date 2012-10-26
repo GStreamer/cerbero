@@ -67,5 +67,5 @@ class SDKPackage(package.SDKPackage):
         if self.config.target_platform == Platform.ANDROID:
             p = ['gstreamer-clutter', 'gstreamer-python', 'gtk+-2.0',
                  'gtk+-2.0-python', 'snappy', 'gstreamer-dvd',
-                 'gstreamer-editing', 'gstreamer-tests']
+                 'gstreamer-tests']
             self.packages = [ x for x in self.packages if x[0] not in p]
