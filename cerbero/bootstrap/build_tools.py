@@ -27,7 +27,7 @@ from cerbero.build.cookbook import CookBook
 class BuildTools (BootstraperBase):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
-                   'orc', 'gettext']
+                   'orc', 'gettext-m4']
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations

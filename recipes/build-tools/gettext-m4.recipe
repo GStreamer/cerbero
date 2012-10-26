@@ -2,7 +2,7 @@
 import shutil
 
 class Recipe(recipe.Recipe):
-    name = 'gettext'
+    name = 'gettext-m4'
     version = '0.18.1.1+2012-01-26'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
@@ -43,7 +43,11 @@ class Recipe(recipe.Recipe):
             'share/aclocal/xsize.m4',
             ]
 
-    def post_install (self):
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s.git' %
+                (self.config.git_root, 'gettext'))
+
+    def post_install(self):
         m4dir = os.path.join(self.build_dir, 'gettext-runtime', 'm4')
         for f in [x for x in os.listdir(m4dir) if x.endswith('.m4')]:
             shutil.copy(os.path.join(m4dir, f),
