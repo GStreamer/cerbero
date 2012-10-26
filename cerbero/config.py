@@ -88,6 +88,7 @@ class Config (object):
         self.arch_config = {self.target_arch: self}
         # Store raw os.environ data
         self._raw_environ = os.environ.copy()
+        self._pre_environ = os.environ.copy()
 
     def _restore_environment(self):
         os.environ.clear()

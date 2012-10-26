@@ -33,6 +33,8 @@ class BuildTools (BootstraperBase):
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
         config = Config()
+        os.environ.clear()
+        os.environ.update(self.config._pre_environ)
         config.load()
         config.prefix = config.build_tools_prefix
         config.sources = os.path.join(DEFAULT_HOME, 'sources', 'buid-tools')
