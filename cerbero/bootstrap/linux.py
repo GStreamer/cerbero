@@ -18,7 +18,7 @@
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
-from cerbero.config import Distro
+from cerbero.config import Distro, DistroVersion
 from cerbero.utils import shell
 
 
@@ -26,8 +26,12 @@ class UnixBootstraper (BootstraperBase):
 
     tool = ''
     packages = []
+    distro_packages = {}
 
     def start(self):
+        packages = self.packages
+        if self.config.distro_version in self.distro_packages:
+            packages += self.distro_packages[self.config.distro_version]
         shell.call(self.tool % ' '.join(self.packages))
 
 
@@ -44,7 +48,16 @@ class DebianBootstraper (UnixBootstraper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf', 'libgdk-pixbuf2.0-dev']
+                'gperf']
+    distro_packages = {
+            DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
+            DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
+            DistroVersion.UBUNTU_LUCID: ['libgtk2.0-dev'],
+            DistroVersion.UBUNTU_NATTY: ['libgtk2.0-dev'],
+            DistroVersion.DEBIAN_SQUEEZE: ['libgdk-pixbuf2.0-dev'],
+            DistroVersion.UBUNTU_ONEIRIC: ['libgdk-pixbuf2.0-dev'],
+            DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
+            }
 
 
 class RedHatBootstraper (UnixBootstraper):
