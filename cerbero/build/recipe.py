@@ -30,6 +30,7 @@ from cerbero.ide.vs.genlib import GenLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.utils import N_, _
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 
 class MetaRecipe(type):
@@ -198,9 +199,12 @@ class Recipe(FilesProvider):
         '''
         genlib = GenLib()
         for dllpath in self.libraries():
-            implib = genlib.create(os.path.join(self.config.prefix, dllpath),
-                    os.path.join(self.config.prefix, 'lib'))
-            logging.debug('Created %s' % implib)
+            try:
+                implib = genlib.create(os.path.join(self.config.prefix, dllpath),
+                        os.path.join(self.config.prefix, 'lib'))
+                logging.debug('Created %s' % implib)
+            except:
+                m.warning("Could not create .lib, gendef might be missing")
 
     def recipe_dir(self):
         '''
