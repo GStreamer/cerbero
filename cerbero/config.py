@@ -182,8 +182,8 @@ class Config (object):
         xdgdatadir = os.path.join(prefix, 'share')
         xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
         xcursordir = os.path.join(prefix, 'share', 'icons')
-        aclocal = os.environ.get('ACLOCAL', 'aclocal')
         aclocaldir = os.path.join(prefix, 'share', 'aclocal')
+        aclocal = "%s -I%s" % ('aclocal', aclocaldir)
         perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
                                        self._perl_version())
         if self.target_platform == Platform.WINDOWS:
@@ -242,13 +242,6 @@ class Config (object):
                'PYTHONPATH': pythonpath,
                'GSTREAMER_SDK_ROOT': prefix
                }
-
-        if self.platform == Platform.WINDOWS:
-            # for pkg-config installed with the toolchain
-            env['ACLOCAL_FLAGS'] += ' -I %s/share/aclocal' % \
-                    self.toolchain_prefix
-            env['ACLOCAL'] = '%s %s' % (aclocal, env['ACLOCAL_FLAGS'])
-
         return env
 
     def _check_uninstalled(self):
