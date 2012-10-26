@@ -67,7 +67,8 @@ class Bootstraper (object):
 
         return bs
 
-from cerbero.bootstrap import linux, windows
+from cerbero.bootstrap import linux, windows, android
 
 linux.register_all()
 windows.register_all()
+android.register_all()

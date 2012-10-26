@@ -7,5 +7,4 @@ target_distro_version = DistroVersion.ANDROID_GINGERBREAD
 target_arch = Architecture.ARM
 
 host = "arm-linux-androideabi"
-toolchain_prefix = os.path.expanduser("~/android-ndk-r8b")
 #variants = ['nodebug']
