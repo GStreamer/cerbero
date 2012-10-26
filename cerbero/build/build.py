@@ -192,7 +192,7 @@ class MakefilesBase (Build):
         if arch == Architecture.X86:
             arch = 'i386'
         search_paths = [os.environ['PKG_CONFIG_LIBDIR'], '/usr/lib/pkgconfig',
-                '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
+            '/usr/share/pkgconfig', '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
         new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
 
