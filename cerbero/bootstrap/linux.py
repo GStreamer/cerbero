@@ -44,7 +44,7 @@ class DebianBootstraper (UnixBootstraper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf']
+                'gperf', 'libgdk-pixbuf2.0-dev']
 
 
 class RedHatBootstraper (UnixBootstraper):
@@ -58,7 +58,7 @@ class RedHatBootstraper (UnixBootstraper):
                 'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
-                'perl-XML-Simple', 'gperf']
+                'perl-XML-Simple', 'gperf', 'libgdk-pixbuf2-devel']
 
 
 class OpenSuseBootstraper (UnixBootstraper):
