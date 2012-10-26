@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gettext'
@@ -23,3 +23,13 @@ class Recipe(recipe.Recipe):
             self.autoreconf = False
         elif self.config.target_platform == Platform.ANDROID:
             self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
+
+    def post_install (self):
+        m4dir = os.path.join(self.build_dir, 'gettext-runtime', 'm4')
+        for f in [x for x in os.listdir(m4dir) if x.endswith('.m4')]:
+            shutil.copy(os.path.join(m4dir, f),
+                    os.path.join(self.config.prefix, 'share', 'aclocal'))
+        m4dir = os.path.join(self.build_dir, 'gettext-runtime', 'gnulib-m4')
+        for f in ['lib-ld.m4', 'lib-prefix.m4', 'lib-link.m4']:
+            shutil.copy(os.path.join(m4dir, f),
+                    os.path.join(self.config.prefix, 'share', 'aclocal'))
