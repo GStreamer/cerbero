@@ -6,6 +6,10 @@ class Recipe(recipe.Recipe):
     version = '0.27'
     licenses = [License.GPLv2]
     configure_options = '--with-internal-glib'
+    platform_deps = {
+        Platform.DARWIN: ['libiconv'],
+        Platform.WINDOWS: ['libiconv'],
+        }
 
     files_bins = ['pkg-config']
     files_share = ['share/aclocal/pkg.m4']
