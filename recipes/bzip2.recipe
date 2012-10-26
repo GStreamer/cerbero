@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
-        if self.config.target_platform != Platform.WINDOWS:
+        if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             libdir = os.path.join(self.config.prefix, 'lib')
             libbz2 = os.path.join(libdir, 'libbz2.so')
             if os.path.exists (libbz2):
