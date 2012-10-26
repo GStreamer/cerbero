@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Platform
+from cerbero.config import Platform, Architecture
 from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
 import shutil
@@ -185,15 +185,15 @@ class MakefilesBase (Build):
 
     def _add_system_libs(self, new_env):
         '''
-        Delete PKG_CONFIG_LIBDIR, pointing to the installation prefix and
-        appends it to PKG_CONFIG_LIBDIR to allow pkg-config finding libraries
-        in the default system search path
+        Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
+        can be found.
         '''
-        self.pkgconfiglibdir = os.environ['PKG_CONFIG_LIBDIR']
-        self.pkgconfigpath = os.environ['PKG_CONFIG_PATH']
-        new_env['PKG_CONFIG_PATH'] = '%s:%s' % (self.pkgconfigpath,
-                                                   self.pkgconfiglibdir)
-        new_env['PKG_CONFIG_LIBDIR'] = None
+        arch = self.config.target_arch
+        if arch == Architecture.X86:
+            arch = 'i386'
+        search_paths = [os.environ['PKG_CONFIG_LIBDIR'], '/usr/lib/pkgconfig',
+                '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
+        new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
 
 class Autotools (MakefilesBase):
