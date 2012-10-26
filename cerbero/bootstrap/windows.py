@@ -123,6 +123,9 @@ class WindowsBootstraper(BootstraperBase):
                   (temp, self.version, python_headers))
         shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
                   (temp, self.version, python_libs))
+        pydll = '%s/lib/python.dll' % self.prefix
+        if os.path.exists(pydll):
+            os.remove(pydll)
         shell.call('ln -s %s/lib/pyton27.dll %s/lib/python.dll' %
                   (temp, self.prefix))
 
