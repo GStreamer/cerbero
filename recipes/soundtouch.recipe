@@ -5,8 +5,6 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
     version = '1.7.0'
-    remotes = {'slomo-ccu': 'git://git.collabora.co.uk/git/user/slomo/soundtouch.git'}
-    commit = 'slomo-ccu/sdk-1.7.0'
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
     autoreconf = True
