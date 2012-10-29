@@ -227,3 +227,11 @@ def remove_list_duplicates(seq):
     seen = set()
     seen_add = seen.add
     return [ x for x in seq if x not in seen and not seen_add(x)]
+
+
+def parse_file(filename, dict):
+    try:
+        execfile(filename, dict)
+    except Exception, ex:
+        import traceback; traceback.print_exc()
+        raise ex

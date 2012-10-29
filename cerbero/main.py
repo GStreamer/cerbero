@@ -88,7 +88,6 @@ class Main(object):
             self.config = config.Config()
             self.config.load(self.args.config)
         except ConfigurationError, exc:
-            traceback.print_exc()
             self.log_error(exc, False)
 
     def run_command(self):

@@ -23,7 +23,7 @@ import copy
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
-        shell
+        shell, parse_file
 from cerbero.utils import messages as m
 
 
@@ -149,7 +149,7 @@ class Config (object):
                     config[prop] = getattr(self, prop)
 
         try:
-            execfile(filename, config)
+            parse_file(filename, config)
         except:
             raise ConfigurationError(_('Could not include config file (%s)') %
                              filename)

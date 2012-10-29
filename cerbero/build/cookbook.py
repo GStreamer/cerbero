@@ -27,7 +27,7 @@ from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
-from cerbero.utils import _, shell
+from cerbero.utils import _, shell, parse_file
 from cerbero.utils import messages as m
 from cerbero.build import recipe as crecipe
 
@@ -347,7 +347,7 @@ class CookBook (object):
                      'License': License, 'recipe': crecipe, 'os': os,
                      'BuildSteps': crecipe.BuildSteps,
                      'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
-                execfile(filepath, d)
+                parse_file (filepath, d)
                 r = d['Recipe'](self._config.arch_config[c])
                 r.__file__ = os.path.abspath(filepath)
                 r.prepare()
@@ -358,8 +358,6 @@ class CookBook (object):
             except InvalidRecipeError:
                 pass
             except Exception, ex:
-                import traceback
-                traceback.print_exc()
                 m.warning("Error loading recipe %s" % ex)
         if self._config.target_arch == Architecture.UNIVERSAL:
             if not recipe.is_empty():
