@@ -74,7 +74,7 @@ class Recipe(recipe.Recipe):
              '%(sdir)s/libgstbasevideo-0.10%(sext)s',
     ]
 
-    platform_plugins_files_codecs = {
+    platform_files_plugins_codecs = {
         Platform.ANDROID: [
              'lib/gstreamer-0.10/libgstandroidmedia%(mext)s',
             ]

@@ -68,7 +68,7 @@ class Recipe(custom.GStreamerStatic):
              'libgsty4mdec',
     ]
 
-    platform_plugins_files_codecs_devel = {
+    platform_files_plugins_codecs_devel = {
         Platform.ANDROID: [
              'libgstandroidmedia',
             ]
