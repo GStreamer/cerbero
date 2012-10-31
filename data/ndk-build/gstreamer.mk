@@ -61,21 +61,6 @@ else
     GSTREAMER_LD := -fuse-ld=gold
 endif
 
-
-#############################################
-#  Make pkg-config and libtool relocatable  #
-#############################################
-
-# libtool:
-# Use the env variables LT_OLD_PREFIX and LT_NEW_PREFIX which replace
-# the build prefix with the installation one
-BUILD_PREFIX := $(call pkg-config-get-prefix,glib-2.0)
-LIBTOOL := LT_OLD_PREFIX=$(BUILD_PREFIX) LT_NEW_PREFIX=$(GSTREAMER_SDK_ROOT) $(GSTREAMER_NDK_BUILD_PATH)/libtool #--no-warn --silent
-ifeq ($(HOST_OS),windows)
-    LIBTOOL := $(HOST_SH) -c "$(LIBTOOL)"
-endif
-
-
 ################################
 #  NDK Build Prebuilt library  #
 ################################
