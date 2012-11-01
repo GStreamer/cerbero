@@ -35,8 +35,8 @@ class Recipe(recipe.Recipe):
     #FIXME: Fill it when needed
     #files_gio = ['lib/gio/modules']
     files_devel = [
-        'bin/glib-gettextize%(bext)s',
-        'bin/glib-mkenums%(bext)s',
+        'bin/glib-gettextize',
+        'bin/glib-mkenums',
         'bin/glib-compile-resources%(bext)s',
         'bin/glib-genmarshal%(bext)s',
         'bin/gresource%(bext)s',
