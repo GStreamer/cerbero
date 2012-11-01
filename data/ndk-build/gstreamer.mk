@@ -47,19 +47,32 @@ include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 # Path for the static GIO modules
 G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules/static
 
+# Host tools
+ifeq ($(HOST_OS),windows)
+    HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
+    HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
+    GSTREAMER_LD :=
+else
+    HOST_PKG_CONFIG := pkg-config
+endif
+
+#################################
+#  Make pkg-config relocatable  #
+#################################
+#pkg-config:
+# set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
+PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
+PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
+
+
 GSTREAMER_ANDROID_MODULE_NAME := gstreamer_android
 GSTREAMER_BUILD_DIR           := gst-build
 GSTREAMER_ANDROID_O           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).o
 GSTREAMER_ANDROID_SO          := $(GSTREAMER_BUILD_DIR)/lib$(GSTREAMER_ANDROID_MODULE_NAME).so
 GSTREAMER_ANDROID_C           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).c
 GSTREAMER_ANDROID_C_IN        := $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android.c.in
-GSTREAMER_INCLUDES            := include include/glib-2.0 lib/glib-2.0/include include/libxml2 include/gstreamer-0.10
-ifeq ($(HOST_OS),windows)
-    HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
-    GSTREAMER_LD :=
-else
-    GSTREAMER_LD := -fuse-ld=gold
-endif
+GSTREAMER_DEPS                := $(GSTREAMER_EXTRA_DEPS) gstreamer-0.10
+GSTREAMER_LD                  := -fuse-ld=gold
 
 ################################
 #  NDK Build Prebuilt library  #
@@ -81,7 +94,8 @@ LOCAL_MODULE_CLASS      := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE          := $(local-makefile)
 LOCAL_PREBUILT_PREFIX   := lib
 LOCAL_PREBUILT_SUFFIX   := .so
-LOCAL_EXPORT_C_INCLUDES := $(foreach incl, $(GSTREAMER_INCLUDES), $(GSTREAMER_SDK_ROOT)/$(incl)) $(LOCAL_EXPORT_C_INCLUDES)
+LOCAL_EXPORT_C_INCLUDES := $(subst -I$1, $1, $(shell $(PKG_CONFIG) --cflags-only-I $(GSTREAMER_DEPS)))
+LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_SDK_ROOT)/include
 
 
 ##################################################################
@@ -132,10 +146,11 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 
 # Get the full list of libraries
 # link at least to gstreamer-0.10 in case the plugins list is empty
-GSTREAMER_ANDROID_LIBS       := $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz -lgstreamer-0.10
+GSTREAMER_ANDROID_LIBS       := $(shell $(PKG_CONFIG) --libs-only-l $(GSTREAMER_DEPS))
+GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
 # Fix deps for giognutls
 GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
-GSTREAMER_ANDROID_CFLAGS     := $(foreach incl, $(GSTREAMER_INCLUDES), -I$(GSTREAMER_SDK_ROOT)/$(incl))
+GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags-only-I $(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
 
 
 # Generates a source file that declares and registers all the required plugins
