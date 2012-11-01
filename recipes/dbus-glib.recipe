@@ -18,3 +18,8 @@ class Recipe(recipe.Recipe):
     ]
     files_helper = ['libexec/dbus-bash-completion-helper']
 
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS and\
+                self.config.platform != Platform.WINDOWS:
+            self.configure_options += \
+                "--with-dbus-binding-tool=/usr/bin/dbus-binding-tool"

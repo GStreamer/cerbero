@@ -48,7 +48,7 @@ class DebianBootstraper (UnixBootstraper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf']
+                'gperf', 'libdbus-glib-1-dev']
     distro_packages = {
             DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
             DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
