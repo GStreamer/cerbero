@@ -236,11 +236,11 @@ class Config (object):
                'ACLOCAL_FLAGS': '-I %s' % aclocaldir,
                'ACLOCAL': aclocal,
                'PERL5LIB': perl5lib,
-               'MONO_PREFIX': prefix,
-               'MONO_GAC_PREFIX': prefix,
                'GST_PLUGIN_PATH': gstpluginpath,
                'GST_REGISTRY': gstregistry,
                'PYTHONPATH': pythonpath,
+               'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
+               'MONO_GAC_PREFIX': prefix,
                'GSTREAMER_SDK_ROOT': prefix
                }
         return env
