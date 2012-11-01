@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
             'include/dbus-1.0/dbus/dbus-gvalue-parse-variant.h',
             'lib/pkgconfig/dbus-glib-1.pc',
     ]
-    files_helper = ['libexec/dbus-bash-completion-helper']
+    files_helper = ['libexec/dbus-bash-completion-helper%(bext)s']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS and\
