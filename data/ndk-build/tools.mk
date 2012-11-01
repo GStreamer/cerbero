@@ -198,7 +198,7 @@ libtool-get-dependency-libs = \
   $(shell $(HOST_SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
 
 libtool-replace-prefixes = \
-  $(subst $(BUILD_PREFIX),$(GSTREAMER_SDK_ROOT),$1)
+  $(subst $(BUILD_PREFIX),$(GSTREAMER_SDK_ROOT),$1 )
 
 libtool-get-static-library = \
   $(shell $(HOST_SED) -n "s/^old_library='\(.*\)'/\1/p" $1)
