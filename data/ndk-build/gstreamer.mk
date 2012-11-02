@@ -125,6 +125,7 @@ GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,gstsiren,siren)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,sdp,sdpelem)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,gstrtpmanager,rtpmanager)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,scaletempo,scaletempoplugin)
+GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,mpegdemux2,mpegdemux)
 GSTREAMER_PLUGINS_LIBS       := $(subst gstgnonlin,gnl,$(GSTREAMER_PLUGINS_LIBS))
 
 # Generate the plugins' declaration strings

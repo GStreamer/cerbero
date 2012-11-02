@@ -31,7 +31,8 @@ class Recipe(recipe.Recipe):
         replacements = {'decodebin2': 'uridecodebin', 'playbin': 'playback',
                         'encodebin': 'encoding', 'souphttpsrc': 'soup',
                         'siren': 'gstsiren', 'sdpelem': 'sdp',
-                        'rtpmanager': 'gstrtpmanager', 'scaletempoplugin' : 'scaletempo'}
+                        'rtpmanager': 'gstrtpmanager', 'scaletempoplugin' : 'scaletempo',
+                        'mpegdemux': 'mpegdemux2'}
         f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
         plugins = defaultdict(list)
         for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
