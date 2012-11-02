@@ -50,10 +50,8 @@ G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules/static
 # Host tools
 ifeq ($(HOST_OS),windows)
     HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
-    HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
     GSTREAMER_LD :=
 else
-    HOST_PKG_CONFIG := pkg-config
 endif
 
 #################################
@@ -94,7 +92,7 @@ LOCAL_MODULE_CLASS      := PREBUILT_SHARED_LIBRARY
 LOCAL_MAKEFILE          := $(local-makefile)
 LOCAL_PREBUILT_PREFIX   := lib
 LOCAL_PREBUILT_SUFFIX   := .so
-LOCAL_EXPORT_C_INCLUDES := $(subst -I$1, $1, $(shell $(PKG_CONFIG) --cflags-only-I $(GSTREAMER_DEPS)))
+LOCAL_EXPORT_C_INCLUDES := $(subst -I$1, $1, $(call pkg-config-get-includes,$(GSTREAMER_DEPS)))
 LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_SDK_ROOT)/include
 
 
@@ -146,11 +144,19 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 
 # Get the full list of libraries
 # link at least to gstreamer-0.10 in case the plugins list is empty
-GSTREAMER_ANDROID_LIBS       := $(shell $(PKG_CONFIG) --libs-only-l $(GSTREAMER_DEPS))
+GSTREAMER_ANDROID_LIBS       := $(call pkg-config-get-libs,$(GSTREAMER_DEPS))
 GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
+GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS))
 # Fix deps for giognutls
 GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
-GSTREAMER_ANDROID_CFLAGS     := $(shell $(PKG_CONFIG) --cflags-only-I $(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
+GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
+
+# Create the link command
+GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
+	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
+	-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
+GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
 
 # Generates a source file that declares and registers all the required plugins
@@ -171,10 +177,7 @@ $(GSTREAMER_ANDROID_O): genstatic
 # Creates a shared library including gstreamer, its plugins and all the dependencies
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	@$(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
-		-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
-		-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
-		$(GSTREAMER_ANDROID_LIBS)) -Wl,-no-undefined $(GSTREAMER_LD)
+	@$(_CC) $(GSTREAMER_ANDROID_CMD)
 
 copyjavasource:
 	@$(call host-mkdir,src/com/gstreamer)

@@ -16,6 +16,50 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+################
+#  pkg-config  #
+################
+# Host tools
+ifeq ($(HOST_OS),windows)
+    HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
+else
+    HOST_PKG_CONFIG := pkg-config
+endif
+# Make pkg-config relocatable
+# set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
+PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
+PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
+
+# -----------------------------------------------------------------------------
+# Function : pkg-config-get-includes
+# Arguments: 1: package or list of packages
+# Returns  : list of includes
+# Usage    : $(call pkg-config-get-includes,<package>)
+# -----------------------------------------------------------------------------
+pkg-config-get-includes = \
+  $(shell $(PKG_CONFIG) --cflags-only-I $1)
+
+# -----------------------------------------------------------------------------
+# Function : pkg-config-get-libs
+# Arguments: 1: package or list of packages
+# Returns  : list of libraries to link this package
+# Usage    : $(call pkg-config-get-libs,<package>)
+# -----------------------------------------------------------------------------
+pkg-config-get-libs = \
+  $(shell $(PKG_CONFIG) --libs-only-l $1)
+
+# -----------------------------------------------------------------------------
+# Function : pkg-config-get-libs-no-deps
+# Arguments: 1: package or list of packages
+# Returns  : list of -lfoo libraries for this packages without the deps
+# Usage    : $(call pkg-config-get-libs,<package>)
+# -----------------------------------------------------------------------------
+pkg-config-get-libs-no-deps = \
+  $(eval __tmpvar.libs := ) \
+  $(foreach package,$1,\
+    $(eval __tmpvar.libs += $(shell $(HOST_SED) -n 's/^Libs: \(.*\)/\1/p' $(GSTREAMER_SDK_ROOT)/lib/pkgconfig/$(package).pc)))\
+  $(filter -l%, $(__tmpvar.libs))
+
 # -----------------------------------------------------------------------------
 # Function : pkg-config-get-prefix
 # Arguments: 1: package
@@ -24,6 +68,26 @@
 # -----------------------------------------------------------------------------
 pkg-config-get-prefix = \
   $(shell $(HOST_SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_SDK_ROOT)/lib/pkgconfig/$1.pc)
+
+# -----------------------------------------------------------------------------
+# Function : libtool-whole-archive
+# Arguments: 1: link command
+#            2: list of libraries for which we want to include the whole archive
+# Returns  : the fixed link command
+# Usage    : $(call libtool-link,<cmd>,<libs>)
+# -----------------------------------------------------------------------------
+WHOLE_ARCHIVE = -Wl,--whole-archive
+NO_WHOLE_ARCHIVE = -Wl,--no-whole-archive
+libtool-whole-archive = \
+  $(eval __tmpvar.archives_paths := ) \
+  $(foreach lib,$2, \
+    $(eval __tmpvar.archives_paths += $(patsubst %.la,%.a,$(call libtool-find-lib,$(patsubst -l%,%,$(lib)))))) \
+  $(eval __tmpvar.cmd := $1) \
+  $(foreach ar,$(__tmpvar.archives_paths), \
+    $(eval __tmpvar.cmd := $(patsubst %$(ar),$(WHOLE_ARCHIVE) %$(ar) $(NO_WHOLE_ARCHIVE),$(__tmpvar.cmd)))\
+  )\
+  $(call __libtool_log, "Link Command with whole archives:" $(__tmpvar.cmd))\
+  $(__tmpvar.cmd)
 
 # -----------------------------------------------------------------------------
 # Function : libtool-link
@@ -166,7 +230,7 @@ libtool-get-all-libs = \
   $(foreach path,$(__tmpvar.static_libs_reverse),\
     $(eval __tmpvar.static_libs := $(path) $(__tmpvar.static_libs))\
   )\
-  $(strip -Wl,--start-group $(__tmpvar.static_libs) $(__tmpvar.libs) -Wl,--end-group )
+  $(strip $(__tmpvar.static_libs) $(__tmpvar.libs) )
 
 libtool-find-lib = \
   $(eval __tmpvar := $(empty))\
