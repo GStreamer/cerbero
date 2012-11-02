@@ -1,0 +1,16 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gstreamer-sharp'
+    version = '0.9.1-git'
+    licenses = [License.LGPLv2_1Plus]
+    configure_options = "--disable-instrospection --disable-examples "\
+            " --with-package-origin='http://www.gstreamer.com' "\
+            " --with-package-name='GStreamer C# Bindings (GStreamer SDK)'"
+    remotes = {'upstream':
+            'git://anongit.freedesktop.org/gstreamer/gstreamer-sharp'}
+    autoreconf = True
+    autoreconf_sh = 'sh autogen.sh'
+    commit = 'upstream/master'
+    deps = ['glib', 'gstreamer', 'gst-plugins-base', 'mono', 'gtk-sharp']
