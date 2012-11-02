@@ -2,6 +2,7 @@
 import shutil
 
 from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(custom.GStreamerStatic):
@@ -63,6 +64,16 @@ class Recipe(custom.GStreamerStatic):
             lib = '%s.a' % name
             path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav',
                     name, lib)
-            shutil.copy(path, os.path.join(self.config.prefix, 'lib',
-                'gstreamer-0.10', 'static'))
+            shutil.copy(path, self.config.libdir)
+            deps = ['z', 'bz2']
+            if n == 'avcodec':
+                deps += ['avutil']
+            if n == 'avformat':
+                deps += ['avutil', 'avcodec']
+            libtool_la = LibtoolLibrary(n, None, None, None, self.config.libdir,
+                self.config.target_platform, deps)
+            libtool_la.change_value ('dlname', '')
+            libtool_la.change_value ('library_names', '')
+            libtool_la.save()
+
         super(Recipe, self).post_install()
