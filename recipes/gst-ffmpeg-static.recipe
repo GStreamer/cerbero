@@ -31,7 +31,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' ASFLAGS="%s"' % asflags
         super(Recipe, self).prepare()
         for f in ['libavcodec.a', 'libavformat.a', 'libavutil.a']:
-            path = os.path.join('lib', 'gstreamer-0.10', 'static', f)
+            path = os.path.join('lib', f)
             self.files_plugins_codecs_restricted_devel.append(path)
 
     def configure(self):
