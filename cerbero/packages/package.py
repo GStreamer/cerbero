@@ -524,7 +524,7 @@ class App(PackageBase):
         return self.wix_upgrade_code[m][p]
 
     def get_commands(self):
-        return self.commands
+        return self.commands.get(self.config.target_platform, [])
 
     def get_wrapper(self, cmd, wrapper=None):
         if self.config.target_platform == Platform.WINDOWS:
