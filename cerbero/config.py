@@ -106,6 +106,9 @@ class Config (object):
         # from the main configuration file
         self._load_cmd_config(filename)
 
+        # Build variants before copying any config
+        self.variants = Variants(self.variants)
+
         # Create a copy of the config for each architecture in case we are
         # building Universal binaries
         if self.target_arch == Architecture.UNIVERSAL:
@@ -139,7 +142,6 @@ class Config (object):
             self._create_path(c.local_sources)
             self._create_path(c.sources)
 
-        self.variants = Variants(self.variants)
 
     def parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
