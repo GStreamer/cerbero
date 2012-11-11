@@ -5,6 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'automake'
     version = '1.12.4'
     licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/gnu/automake/automake-1.12.4.tar.xz'
     deps = ['autoconf']
 
     files_bin = ['bin/automake', 'bin/aclocal',
