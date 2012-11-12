@@ -37,6 +37,7 @@ DEFAULT_WIX_PREFIX = 'C:/Program\ Files\ \(x86\)/Windows\ Installer\ XML\ v3.5/b
 DEFAULT_ALLOW_PARALLEL_BUILD = False
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
+CERBERO_PREFIX = 'CERBERO_PREFIX'
 
 
 Platform = enums.Platform
@@ -145,7 +146,7 @@ class Config (object):
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
-        os.environ['CERBERO_PREFIX'] = self.prefix
+        os.environ[CERBERO_PREFIX] = self.prefix
 
         self.env = self.get_env(self.prefix, libdir, self.py_prefix)
         # set all the variables

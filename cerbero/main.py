@@ -29,6 +29,7 @@ import sys
 import errno
 import logging
 import traceback
+import os
 
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
@@ -46,12 +47,18 @@ class Main(object):
         if user_is_root():
             raise FatalError(_("cerbero can't be run as root"))
 
+        self.check_in_cerbero_shell()
         self.init_logging()
         self.create_parser()
         self.load_commands()
         self.parse_arguments(args)
         self.load_config()
         self.run_command()
+
+    def check_in_cerbero_shell(self):
+        if os.environ.get('CERBERO_PREFIX', '') != '':
+            self.log_error(_("ERROR: cerbero can't be run "
+                             "from a cerbero shell"))
 
     def log_error(self, msg, print_usage=False, command=None):
         ''' Log an error and exit '''
