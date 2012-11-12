@@ -6,7 +6,7 @@ class Recipe(custom.GStreamerStatic):
     licenses = [License.LGPLv2Plus]
     extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs"
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
-            'libvorbis', 'zlib', 'orc']
+            'libvorbis', 'zlib']
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
     use_system_libs = True
 

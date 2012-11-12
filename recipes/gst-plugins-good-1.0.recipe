@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
-            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
+            'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
             'libvpx']
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
