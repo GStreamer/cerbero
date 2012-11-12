@@ -54,15 +54,6 @@ ifeq ($(HOST_OS),windows)
 else
 endif
 
-#################################
-#  Make pkg-config relocatable  #
-#################################
-#pkg-config:
-# set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
-PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
-PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
-
-
 GSTREAMER_ANDROID_MODULE_NAME := gstreamer_android
 GSTREAMER_BUILD_DIR           := gst-build
 GSTREAMER_ANDROID_O           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).o

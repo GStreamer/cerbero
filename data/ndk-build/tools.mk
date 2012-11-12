@@ -20,14 +20,18 @@
 #  pkg-config  #
 ################
 # Host tools
-ifeq ($(HOST_OS),windows)
-    HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
-else
-    HOST_PKG_CONFIG := pkg-config
-endif
 # Make pkg-config relocatable
 # set PKG_CONFIG_LIBDIR and override the prefix and libdir variables
-PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig pkg-config
+ifeq ($(HOST_OS),windows)
+    HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
+    # No space before the &&, or it will be added to PKG_CONFIG_LIBDIR
+    PKG_CONFIG_ORIG := set PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig&& $(HOST_PKG_CONFIG)
+    GSTREAMER_SDK_ROOT := $(subst \,/,$(GSTREAMER_SDK_ROOT))
+else
+    HOST_PKG_CONFIG := pkg-config
+    PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig $(HOST_PKG_CONFIG)
+endif
+
 PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
 
 # -----------------------------------------------------------------------------
