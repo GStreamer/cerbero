@@ -27,7 +27,7 @@ from cerbero.build.cookbook import CookBook
 class BuildTools (BootstraperBase):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
-                   'orc', 'gettext-m4']
+                   'orc-tool', 'gettext-m4']
     PLAT_BUILD_TOOLS = {
             Platform.DARWIN: ['intltool'],
             Platform.WINDOWS: ['intltool'],

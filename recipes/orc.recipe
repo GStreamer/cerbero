@@ -2,11 +2,10 @@
 
 
 class Recipe(recipe.Recipe):
-    name = 'orc-tool'
+    name = 'orc'
     version = '0.4.16'
     licenses = [License.BSD_like]
     autoreconf = True
-    deps = ['autoconf', 'automake', 'libtool']
 
     files_libs = ['liborc-0.4', 'liborc-test-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
