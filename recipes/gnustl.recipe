@@ -48,10 +48,12 @@ class Recipe(recipe.Recipe):
         lib.save()
 
         # Create pkg-config file (gnustl.pc)
+        pkgdir = os.path.join(self.config.prefix, 'lib', 'pkgconfig')
+        if not os.path.exists(pkgdir):
+            os.makedirs(pkgdir)
         stl_pc = PkgConfigWritter('gnustl', 'gnustl', '1.0',
                 '', '-L${libdir} -lgnustl -lsupc++ -lstdc++ ',
                 '-I%s/include -I%s/libs/armeabi/include' % (stl_prefix, stl_prefix), self.config.prefix)
         stl_pc.libs_priv = '${libdir}/libgnustl.a ${libdir}/libsupc++.a'
         stl_pc.rel_incldir = 'include'
-        stl_pc.save('gnustl', os.path.join(self.config.prefix, 'lib',
-            'pkgconfig'))
+        stl_pc.save('gnustl', pkgdir)
