@@ -8,7 +8,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = ' --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-shout2'
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'cairo',
-            'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
+            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
     platform_deps = {Platform.LINUX: ['libdv'],
                      Platform.DARWIN: ['libdv']}
 
