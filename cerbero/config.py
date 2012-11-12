@@ -90,10 +90,6 @@ class Config (object):
         self._raw_environ = os.environ.copy()
         self._pre_environ = os.environ.copy()
 
-    def _restore_environment(self):
-        os.environ.clear()
-        os.environ.update(self._raw_environ)
-
     def load(self, filename=None):
 
         # First load the default configuration
@@ -123,7 +119,7 @@ class Config (object):
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
         # And validate properties
-        self.validate_properties()
+        self._validate_properties()
         self._raw_environ = os.environ.copy()
 
         for config in self.arch_config.values():
@@ -132,7 +128,7 @@ class Config (object):
                 config.sources = os.path.join(self.sources, config.target_arch)
             config._load_platform_config()
             config._load_last_defaults()
-            config.validate_properties()
+            config._validate_properties()
             config._raw_environ = os.environ.copy()
 
         self.do_setup_env()
@@ -141,23 +137,6 @@ class Config (object):
         for c in self.arch_config.values():
             self._create_path(c.local_sources)
             self._create_path(c.sources)
-
-
-    def parse(self, filename, reset=True):
-        config = {'os': os, '__file__': filename}
-        if not reset:
-            for prop in self._properties:
-                if hasattr(self, prop):
-                    config[prop] = getattr(self, prop)
-
-        try:
-            parse_file(filename, config)
-        except:
-            raise ConfigurationError(_('Could not include config file (%s)') %
-                             filename)
-        for key in self._properties:
-            if key in config:
-                self.set_property(key, config[key], True)
 
     def do_setup_env(self):
         self._restore_environment()
@@ -247,60 +226,6 @@ class Config (object):
                }
         return env
 
-    def _check_uninstalled(self):
-        self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
-
-    def _create_path(self, path):
-        if not os.path.exists(path):
-            try:
-                os.makedirs(path)
-            except:
-                raise FatalError(_('directory (%s) can not be created') % path)
-
-    def _join_path(self, path1, path2):
-        if self.platform == Platform.WINDOWS:
-            separator = ';'
-        else:
-            separator = ':'
-        return "%s%s%s" % (path1, separator, path2)
-
-    def _load_main_config(self):
-        if os.path.exists(DEFAULT_CONFIG_FILE):
-            self.parse(DEFAULT_CONFIG_FILE)
-        else:
-            msg = _('Using default configuration because %s is missing') % \
-                    DEFAULT_CONFIG_FILE
-            m.warning(msg)
-
-    def _load_cmd_config(self, filename):
-        if filename is not None:
-            if os.path.exists(filename):
-                self.parse(filename, reset=False)
-                self.filename = DEFAULT_CONFIG_FILE
-            else:
-                raise ConfigurationError(_("Configuration file %s doesn't "
-                                           "exists") % filename)
-
-    def _load_platform_config(self):
-        platform_config = os.path.join(self.environ_dir, '%s.config' %
-                                       self.target_platform)
-        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
-                                   (self.target_platform, self.target_arch))
-
-        for config_path in [platform_config, arch_config]:
-            if os.path.exists(config_path):
-                self.parse(config_path, reset=False)
-
-    def _load_last_defaults(self):
-        cerbero_home = DEFAULT_HOME
-        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
-        self.set_property('install_dir', self.prefix)
-        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
-        self.set_property('local_sources',
-                os.path.join(cerbero_home, 'sources', 'local'))
-        self.set_property('build_tools_prefix',
-                os.path.join(cerbero_home, 'build-tools'))
-
     def load_defaults(self):
         self.set_property('cache_file', None)
         self.set_property('prefix', None)
@@ -340,11 +265,6 @@ class Config (object):
         self.set_property('variants', [])
         self.set_property('build_tools_prefix', None)
 
-    def validate_properties(self):
-        if not validate_packager(self.packager):
-            raise FatalError(_('packager "%s" must be in the format '
-                               '"Name <email>"') % self.packager)
-
     def set_property(self, name, value, force=False):
         if name not in self._properties:
             raise ConfigurationError('Unkown key %s' % name)
@@ -364,6 +284,85 @@ class Config (object):
             path = os.path.abspath(os.path.expanduser(path))
             packages_dir[name] = (path, priority)
         return packages_dir
+
+    def _parse(self, filename, reset=True):
+        config = {'os': os, '__file__': filename}
+        if not reset:
+            for prop in self._properties:
+                if hasattr(self, prop):
+                    config[prop] = getattr(self, prop)
+
+        try:
+            parse_file(filename, config)
+        except:
+            raise ConfigurationError(_('Could not include config file (%s)') %
+                             filename)
+        for key in self._properties:
+            if key in config:
+                self.set_property(key, config[key], True)
+
+    def _restore_environment(self):
+        os.environ.clear()
+        os.environ.update(self._raw_environ)
+
+    def _validate_properties(self):
+        if not validate_packager(self.packager):
+            raise FatalError(_('packager "%s" must be in the format '
+                               '"Name <email>"') % self.packager)
+
+    def _check_uninstalled(self):
+        self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
+
+    def _create_path(self, path):
+        if not os.path.exists(path):
+            try:
+                os.makedirs(path)
+            except:
+                raise FatalError(_('directory (%s) can not be created') % path)
+
+    def _join_path(self, path1, path2):
+        if self.platform == Platform.WINDOWS:
+            separator = ';'
+        else:
+            separator = ':'
+        return "%s%s%s" % (path1, separator, path2)
+
+    def _load_main_config(self):
+        if os.path.exists(DEFAULT_CONFIG_FILE):
+            self._parse(DEFAULT_CONFIG_FILE)
+        else:
+            msg = _('Using default configuration because %s is missing') % \
+                    DEFAULT_CONFIG_FILE
+            m.warning(msg)
+
+    def _load_cmd_config(self, filename):
+        if filename is not None:
+            if os.path.exists(filename):
+                self._parse(filename, reset=False)
+                self.filename = DEFAULT_CONFIG_FILE
+            else:
+                raise ConfigurationError(_("Configuration file %s doesn't "
+                                           "exists") % filename)
+
+    def _load_platform_config(self):
+        platform_config = os.path.join(self.environ_dir, '%s.config' %
+                                       self.target_platform)
+        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
+                                   (self.target_platform, self.target_arch))
+
+        for config_path in [platform_config, arch_config]:
+            if os.path.exists(config_path):
+                self._parse(config_path, reset=False)
+
+    def _load_last_defaults(self):
+        cerbero_home = DEFAULT_HOME
+        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+        self.set_property('install_dir', self.prefix)
+        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
+        self.set_property('local_sources',
+                os.path.join(cerbero_home, 'sources', 'local'))
+        self.set_property('build_tools_prefix',
+                os.path.join(cerbero_home, 'build-tools'))
 
     def _find_data_dir(self):
         if self.uninstalled:
