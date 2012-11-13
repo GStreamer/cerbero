@@ -11,10 +11,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup','taglib',
             'orc', 'wavpack', 'flac', 'bzip2', 'zlib',
-            'cairo']
-    platform_deps = {Platform.LINUX: ['libdv'],
-                     Platform.DARWIN: ['libdv']}
-
+            'cairo', 'libdv']
 
     files_lang = ['gst-plugins-good-0.10']
 
@@ -54,6 +51,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-0.10/libgstaudioparsers%(mext)s',
              'lib/gstreamer-0.10/libgstauparse%(mext)s',
              'lib/gstreamer-0.10/libgstavi%(mext)s',
+             'lib/gstreamer-0.10/libgstdv%(mext)s',
              'lib/gstreamer-0.10/libgstflac%(mext)s',
              'lib/gstreamer-0.10/libgstflv%(mext)s',
              'lib/gstreamer-0.10/libgstflxdec%(mext)s',
@@ -93,15 +91,6 @@ class Recipe(recipe.Recipe):
             ]
     }
 
-    platform_files_plugins_codecs = {
-        Platform.LINUX: [
-             'lib/gstreamer-0.10/libgstdv%(mext)s',
-            ],
-        Platform.DARWIN: [
-             'lib/gstreamer-0.10/libgstdv%(mext)s',
-            ]
-    }
-
     platform_files_plugins_sys = {
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstdirectsoundsink%(mext)s',
@@ -118,11 +107,11 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
-                '--disable-dv --disable-gtk-doc'
+                '--disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
         if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += '--disable-libdv --disable-pulse'
+            self.configure_options += '--disable-pulse'
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
         if self.config.variants.nodebug:

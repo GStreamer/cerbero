@@ -8,9 +8,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = ' --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-shout2'
     deps = ['gstreamer', 'gst-plugins-base', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'cairo',
-            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib' ]
-    platform_deps = {Platform.LINUX: ['libdv'],
-                     Platform.DARWIN: ['libdv']}
+            'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib', 'libdv' ]
 
     files_plugins_core_devel = [
              'libgstautodetect',
@@ -48,6 +46,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstaudioparsers',
              'libgstauparse',
              'libgstavi',
+             'libgstdv',
              'libgstflac',
              'libgstflv',
              'libgstflxdec',
@@ -87,15 +86,6 @@ class Recipe(custom.GStreamerStatic):
              ]
     }
 
-    platform_files_plugins_codecs_devel = {
-        Platform.LINUX: [
-             'libgstdv',
-            ],
-        Platform.DARWIN: [
-             'libgstdv',
-            ]
-    }
-
     platform_files_plugins_sys_devel = {
         Platform.WINDOWS: [
              'libgstdirectsoundsink',
@@ -111,10 +101,7 @@ class Recipe(custom.GStreamerStatic):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--disable-aalib --disable-esd '\
-                '--disable-dv'
-        if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += '--disable-libdv '
+            self.configure_options += '--disable-aalib --disable-esd '
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
         if self.config.variants.nodebug:

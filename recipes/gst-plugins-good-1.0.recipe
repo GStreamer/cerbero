@@ -12,9 +12,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
-            'libvpx']
-    platform_deps = {Platform.LINUX: ['libdv'],
-                     Platform.DARWIN: ['libdv']}
+            'libvpx', 'libdv']
 
 
     files_lang = ['gst-plugins-good-1.0']
@@ -54,6 +52,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstaudioparsers%(mext)s',
              'lib/gstreamer-1.0/libgstauparse%(mext)s',
              'lib/gstreamer-1.0/libgstavi%(mext)s',
+             'lib/gstreamer-1.0/libgstdv%(mext)s',
              'lib/gstreamer-1.0/libgstflac%(mext)s',
              'lib/gstreamer-1.0/libgstflv%(mext)s',
              'lib/gstreamer-1.0/libgstflxdec%(mext)s',
@@ -94,15 +93,6 @@ class Recipe(recipe.Recipe):
             ]
     }
 
-    platform_files_codecs = {
-        Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstdv%(mext)s',
-            ],
-        Platform.DARWIN: [
-             'lib/gstreamer-1.0/libgstdv%(mext)s',
-            ]
-    }
-
     platform_files_sys = {
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstdirectsoundsink%(mext)s',
@@ -122,9 +112,9 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '\
-                '--disable-dv --disable-gtk-doc'
+                '--disable-gtk-doc'
         if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += '--disable-libdv --disable-pulse'
+            self.configure_options += '--disable-pulse'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
         if self.config.target_platform == Platform.LINUX:
