@@ -13,3 +13,5 @@ class Recipe(recipe.Recipe):
         'bin/orc-bugreport%(bext)s', 'share/aclocal/orc.m4',
         'bin/orcc%(bext)s']
 
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, 'orc'))
