@@ -128,7 +128,7 @@ class WindowsBootstraper(BootstraperBase):
             os.remove(pydll)
         except:
             pass
-        shell.call('ln -s %s/lib/pyton27.dll %s' % (temp, pydll))
+        shell.call('ln -s python27.dll %s' % (pydll))
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
