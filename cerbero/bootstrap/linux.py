@@ -18,7 +18,7 @@
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
-from cerbero.config import Distro, DistroVersion
+from cerbero.config import Architecture, Distro, DistroVersion
 from cerbero.utils import shell
 
 
@@ -48,7 +48,7 @@ class DebianBootstraper (UnixBootstraper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf', 'libdbus-glib-1-dev', 'ia32-libs']
+                'gperf', 'libdbus-glib-1-dev']
     distro_packages = {
             DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
             DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
@@ -58,6 +58,12 @@ class DebianBootstraper (UnixBootstraper):
             DistroVersion.UBUNTU_ONEIRIC: ['libgdk-pixbuf2.0-dev'],
             DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
             }
+
+    def __init__(self, config):
+        UnixBootstraper.__init__(self, config)
+        if self.config.arch == Architecture.X86_64:
+            self.packages.append('ia32-libs')
+
 
 
 class RedHatBootstraper (UnixBootstraper):
