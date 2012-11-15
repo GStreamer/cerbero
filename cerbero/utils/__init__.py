@@ -171,7 +171,8 @@ def system_info():
         win32_ver = pplatform.win32_ver()[0]
         dmap = {'xp': DistroVersion.WINDOWS_XP,
                 'vista': DistroVersion.WINDOWS_VISTA,
-                '7': DistroVersion.WINDOWS_7}
+                '7': DistroVersion.WINDOWS_7,
+                'post2008Server': DistroVersion.WINDOWS_8}
         if win32_ver in dmap:
             distro_version = dmap[win32_ver]
         else:

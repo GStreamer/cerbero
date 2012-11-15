@@ -61,6 +61,7 @@ class DistroVersion:
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
+    WINDOWS_8 = 'windows_8'
     OS_X_MOUNTAIN_LION = 'osx_mountain_lion'
     OS_X_LION = 'osx_lion'
     OS_X_SNOW_LEOPARD = 'osx_snow_leopard'
