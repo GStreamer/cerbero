@@ -54,6 +54,7 @@ class DistroVersion:
     UBUNTU_NATTY = 'ubuntu_natty'
     UBUNTU_ONEIRIC = 'ubuntu_oneiric'
     UBUNTU_PRECISE = 'ubuntu_precise'
+    UBUNTU_QUANTAL = 'ubuntu_quantal'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     REDHAT_6 = 'redhat_6'
