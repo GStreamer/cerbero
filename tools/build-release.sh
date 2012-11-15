@@ -21,8 +21,25 @@ die() {
 
 sh $BASEDIR/bootstrap-$DISTRO_FAMILY.sh $CHROOT_PREFIX $DISTRO $DISTRO_VERSION $ARCH $USER
 
-cerbero_distro=`echo $DISTRO_FAMILY | awk '{print toupper($0)}'`
-cerbero_distro_version=`echo "$DISTRO"_"$DISTRO_VERSION" | awk '{print toupper($0)}'`
+if test $DISTRO_FAMILY = "redhat"; then
+    CHROOT_PATH=$CHROOT_PATH/root
+fi
+
+cerbero_distro=Distro.`echo $DISTRO_FAMILY | awk '{print toupper($0)}'`
+cerbero_distro_version=DistroVersion.`echo "$DISTRO"_"$DISTRO_VERSION" | awk '{print toupper($0)}'`
+
+if test $ARCH = "i386" || test $ARCH = "x86"; then
+    cerbero_arch=X86
+elif test $ARCH = "x86_64"; then
+    cerbero_arch=X86_64
+else
+    die "Architecture $ARCH not supported"
+fi
+
+cerbero_arch=Architecture.$cerbero_arch
+cerbero_target_arch=$cerbero_arch
+cerbero_host=$ARCH-pc-linux-gnu
+cerbero_build=$ARCH-pc-linux-gnu
 
 cp /etc/resolv.conf $CHROOT_PATH/etc/resolv.conf
 cp /etc/hosts $CHROOT_PATH/etc/hosts
@@ -62,8 +79,13 @@ cp -rf .git $CHROOT_PATH/home/$USER/git/cerbero-0.1.0/
 echo "generating $CHROOT_PATH/home/$USER/.cerbero/cerbero.cdc from template"
 mkdir -p $CHROOT_PATH/home/$USER/.cerbero
 cp -f tools/cerbero.cbc.template $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
-echo "distro = Distro.$cerbero_distro" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
-echo "distro_version = DistroVersion.$cerbero_distro_version" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "distro = $cerbero_distro" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "distro_version = $cerbero_distro_version" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "arch = $cerbero_arch" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "target_arch = $cerbero_target_arch" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "host = \"$cerbero_host\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+echo "build = \"$cerbero_build\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+
 sudo mkdir -p $CHROOT_PATH/opt/gstreamer-sdk
 
 echo "fixing permissions"
