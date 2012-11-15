@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Platform, Architecture
+from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
 import shutil
@@ -189,10 +189,15 @@ class MakefilesBase (Build):
         can be found.
         '''
         arch = self.config.target_arch
+        libdir = 'lib'
         if arch == Architecture.X86:
             arch = 'i386'
-        search_paths = [os.environ['PKG_CONFIG_LIBDIR'], '/usr/lib/pkgconfig',
-            '/usr/share/pkgconfig', '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
+        else:
+            if self.config.distro == Distro.REDHAT:
+                libdir = 'lib64'
+        search_paths = [os.environ['PKG_CONFIG_LIBDIR'],
+            '/usr/%s/pkgconfig' % libdir, '/usr/share/pkgconfig',
+            '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
         new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
 
