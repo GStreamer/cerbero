@@ -96,6 +96,9 @@ echo "mounting /proc and /sys"
 mount -o bind /proc $CHROOT_PATH/proc
 mount -o bind /sys $CHROOT_PATH/sys
 
+echo "reset root password"
+chroot $CHROOT_PATH sed -i  's/root:\*/root:/g' /etc/shadow
+
 echo "chroot created"
 
 echo "starting the build"

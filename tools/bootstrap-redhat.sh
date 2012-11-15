@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# Requires rpm >= 4.10.0 see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=683759
+# $ sudo dpkg --force-all -i rpm-common_4.10.0-5_amd64.deb  librpm3_4.10.0-5_amd64.deb \
+# librpmio3_4.10.0-5_amd64.deb  librpmsign1_4.10.0-5_amd64.deb librpmbuild3_4.10.0-5_amd64.deb \
+# rpm_4.10.0-5_amd64.deb rpm2cpio_4.10.0-5_amd64.deb  liblzma5_5.1.1alpha+20120614-1_amd64.deb \
+# python-rpm_4.10.0-5_amd64.deb
+
 set -e
 set -x
 
