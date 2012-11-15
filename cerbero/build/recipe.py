@@ -323,8 +323,7 @@ class UniversalRecipe(object):
         # with the same final prefix, but we want to install each architecture
         # on a different path (eg: /path/to/prefix/x86).
 
-        archs_prefix = [os.path.join(self._config.prefix, a) for a in
-                        self._recipes.keys()]
+        archs_prefix = self._recipes.keys()
 
         for arch, recipe in self._recipes.iteritems():
             config = self._config.arch_config[arch]
