@@ -33,9 +33,8 @@ cd mock
 ./configure
 make
 make install
+echo "config_opts['basedir'] = '$CHROOT_PREFIX'" > /usr/local/etc/mock/site-defaults.cfg
 mock -r $DISTRO-$DISTRO_VERSION-$ARCH --init --resultdir=~/mock
-rm -f $CHROOT_PATH
-ln -s /var/lib/mock/$DISTRO-$DISTRO_VERSION-$ARCH/root $CHROOT_PATH
 
 echo "installing yum git and vim"
 mock -r $DISTRO-$DISTRO_VERSION-$ARCH install git yum vim --resultdir=~/mock
