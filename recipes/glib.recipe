@@ -48,7 +48,9 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/gmodule-no-export-2.0.pc',
         'lib/pkgconfig/gobject-2.0.pc',
         'lib/pkgconfig/gthread-2.0.pc',
-        'include/glib-2.0']
+        'include/glib-2.0',
+        'share/aclocal/glib-2.0.m4'
+        ]
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
         Platform.LINUX: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
