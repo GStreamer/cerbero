@@ -48,7 +48,7 @@ class DebianBootstraper (UnixBootstraper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf', 'libdbus-glib-1-dev']
+                'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking']
     distro_packages = {
             DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
             DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
@@ -77,7 +77,8 @@ class RedHatBootstraper (UnixBootstraper):
                 'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
-                'perl-XML-Simple', 'gperf', 'libgdk-pixbuf2-devel']
+                'perl-XML-Simple', 'gperf', 'libgdk-pixbuf2-devel', 'wget',
+                'docbook-utils-pdf', 'glib-networking']
 
 
 class OpenSuseBootstraper (UnixBootstraper):
@@ -88,7 +89,7 @@ class OpenSuseBootstraper (UnixBootstraper):
             'curl', 'gettext-tools', 'alsa-devel', 'yasm', 'gperf',
             'docbook-xsl-stylesheets', 'transfig', 'xorg-x11-libXrender-devel',
             'xorg-x11-libXv-devel', 'Mesa-devel', 'python-devel',
-            'patterns-openSUSE-devel_rpm_build']
+            'patterns-openSUSE-devel_rpm_build', 'wget', 'glib-networking']
 
 
 def register_all():
