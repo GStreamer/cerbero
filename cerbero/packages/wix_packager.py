@@ -111,7 +111,7 @@ class MSIPackager(PackagerBase):
         paths.append(p)
 
         # create devel package
-        if devel:
+        if devel and not isinstance(self.package, App):
             p = self._create_msi_installer(PackageType.DEVEL)
             paths.append(p)
 

@@ -27,6 +27,6 @@
 		</InstallUISequence>
 		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
 
-		<UIRef Id="WixUI_Mondo"/>
+		<UIRef Id="$(var.UIType)"/>
 	</Product>
 </Wix>

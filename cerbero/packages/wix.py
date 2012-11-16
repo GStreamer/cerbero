@@ -186,6 +186,10 @@ class WixConfig(WixBase):
         self.config_path = os.path.join(config.data_dir, self.wix_config)
         self.arch = config.target_arch
         self.package = package
+        if isinstance(self.package, App):
+            self.ui_type = 'WixUI_InstallDir'
+        else:
+            self.ui_type = 'WixUI_Mondo'
 
     def write(self, output_dir):
         config_out_path = os.path.join(output_dir,
@@ -203,7 +207,9 @@ class WixConfig(WixBase):
             "@ProjectURL": self.package.url,
             "@ProductName@": self._product_name(),
             "@ProgramFilesFolder@": self._program_folder(),
-            "@Platform@": self._platform()}
+            "@Platform@": self._platform(),
+            "@UIType@": self.ui_type
+            }
         shell.replace(config_out_path, replacements)
         return config_out_path
 
@@ -334,6 +340,7 @@ class MSI(WixBase):
                     '$(var.PlatformProgramFilesFolder)', 'ProgramFilesFolder')
             self.installdir = self._add_dir(installdir, 'INSTALLDIR',
                     '$(var.ProductName)')
+            self.bindir = self._add_dir(self.installdir, 'INSTALLBINDIR', 'bin')
         else:
             installdir = self._add_dir(self.target_dir, 'INSTALLDIR',
                     self.package.get_install_dir())
@@ -449,20 +456,24 @@ class MSI(WixBase):
         etree.SubElement(feature, "MergeRef",
                          Id=self._package_id(package.name))
 
-    def _add_start_menu_shortcuts(self, package):
+    def _add_start_menu_shortcuts(self):
         # Create a folder with the application name in the Start Menu folder
-        programs = etree.SubElement(self.target_dir, 'Directory', Id='ProgramMenuFolder')
-        etree.subElement(programs, 'Directory', Id='ApplicationProgramsFolder',
-                Name='$(var.ProductName')
+        programs = etree.SubElement(self.target_dir, 'Directory',
+                Id='ProgramMenuFolder')
+        etree.SubElement(programs, 'Directory', Id='ApplicationProgramsFolder',
+                Name='$(var.ProductName)')
         # Add the shortcut to the installer package
-        appf = etree.SubElement(self.root, 'DirectoryRef', Id='ApplicationProgramsFolder')
-        apps = etree.SubElement(appf, 'Component', Id='ApplicationShortcut', Guid=self._get_uuid())
-        for desc, path in package.commands:
-            etree.SubElement(apps, 'Shortcut', Id='ApplicationStartMenuShortcut',
-                    Name=desc, Description=desc, Target='[SDKROOTDIR]' + path,
-                    WorkingDirectory='[SDKROOTDIR]' + os.path.dirname(path),
+        appf = etree.SubElement(self.product, 'DirectoryRef',
+                Id='ApplicationProgramsFolder')
+        apps = etree.SubElement(appf, 'Component', Id='ApplicationShortcut',
+                Guid=self._get_uuid())
+        for desc, path, _, _ in self.package.commands[self.config.target_platform]:
+            etree.SubElement(apps, 'Shortcut',
+                    Id='ApplicationStartMenuShortcut', Name=desc,
+                    Description=desc, Target='[INSTALLBINDIR]' + path,
+                    WorkingDirectory='INSTALLBINDIR',
                     Icon='MainIcon')
-        etree.SubElement(apps, 'Removefolder', Id='ApplicationProgramsFolder',
+        etree.SubElement(apps, 'RemoveFolder', Id='ApplicationProgramsFolder',
                 On='uninstall')
         etree.SubElement(apps, 'RegistryValue', Root='HKCU',
                 Key='Software\Microsoft\%s' % self.package.name,
