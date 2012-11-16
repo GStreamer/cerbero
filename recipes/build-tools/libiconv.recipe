@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     configure_options = '--disable-nls --enable-static'
     platform_deps = {Platform.WINDOWS: ['gettext']}
-    autoreconf = True
     autoreconf_sh = './autogen.sh --skip-gnulib'
     deps=['gperf']
 
@@ -21,3 +20,5 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, 'libiconv'))
+        if self.config.target_platform == Platform.ANDROID:
+            self.autoreconf = True
