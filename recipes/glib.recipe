@@ -14,7 +14,7 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.32.4'
+    version = '2.34.2'
     licenses = [License.LGPLv2Plus]
     configure_sh = 'sh autogen.sh'
     configure_options = ' --enable-static'

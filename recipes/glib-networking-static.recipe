@@ -4,7 +4,7 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking-static'
-    version = '2.32.3'
+    version = '2.34.2'
     licenses = [License.LGPLv2Plus]
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static"
     deps = ['glib', 'gnutls', 'glib-networking']
