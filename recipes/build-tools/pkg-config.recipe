@@ -7,8 +7,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     configure_options = '--with-internal-glib'
     platform_deps = {
-        Platform.DARWIN: ['libiconv'],
-        Platform.WINDOWS: ['libiconv'],
+        Platform.DARWIN: ['libiconv-tool'],
+        Platform.WINDOWS: ['libiconv-tool'],
         }
 
     files_bins = ['pkg-config']

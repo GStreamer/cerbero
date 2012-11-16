@@ -1,0 +1,23 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'libiconv-tool'
+    version = '1.14+2012-07-01'
+    # only libraries are LGPLv2+, tools are GPLv3+ and defined below
+    licenses = [License.LGPLv2Plus]
+    configure_options = '--disable-nls --enable-static'
+    platform_deps = {Platform.WINDOWS: ['gettext']}
+    autoreconf = True
+    autoreconf_sh = './autogen.sh --skip-gnulib'
+    deps=['gperf']
+
+    files_bins = ['iconv', ]
+    licenses_bins = [License.GPLv3Plus]
+    files_libs = ['libiconv', 'libcharset', ]
+    files_devel = ['include/iconv.h', 'include/libcharset.h',
+                   'include/localcharset.h' ]
+    files_lang = ['libiconv']
+
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, 'libiconv'))

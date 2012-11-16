@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gperf'
+    version = '3.0.4'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/pub/gnu/gperf/gperf-3.0.4.tar.gz'
+
+    files_bins = ['gperf']

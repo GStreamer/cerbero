@@ -33,6 +33,14 @@ class BuildTools (BootstraperBase):
             Platform.WINDOWS: ['intltool'],
             }
 
+    def __init__(self, config):
+        BootstraperBase.__init__(self, config)
+        if self.config.platform == Platform.WINDOWS:
+            self.BUILD_TOOLS.remove('m4')
+            self.BUILD_TOOLS.append('gperf')
+        if self.config.platform == Platform.DARWIN:
+            self.BUILD_TOOLS.append('gperf')
+
     def start(self):
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
