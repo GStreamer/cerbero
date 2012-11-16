@@ -16,3 +16,7 @@ class Recipe(recipe.Recipe):
         'bin/ifnames']
 
     files_share = ['share/autoconf']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.deps.remove('m4')
