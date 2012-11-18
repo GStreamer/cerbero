@@ -191,11 +191,7 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if self.target_arch != self.arch or self.target_platform != self.platform:
-            path = path.replace(":" + bindir + ":", ":")
-            path = path.replace(bindir + ":", "")
-            path = path.replace(":" + bindir, "")
-        elif bindir not in path:
+        if bindir not in path and self._prefix_is_executable():
             path = self._join_path(bindir, path)
         path = self._join_path(
                 os.path.join(self.build_tools_prefix, 'bin'), path)
@@ -327,6 +323,16 @@ class Config (object):
         else:
             separator = ':'
         return "%s%s%s" % (path1, separator, path2)
+
+    def _prefix_is_executable(self):
+        if self.target_platform != self.platform:
+            return False
+        if self.target_arch != self.arch:
+            if self.target_arch == Architecture.X86 and \
+                    self.arch == Architecture.X86_64:
+                return True
+            return False
+        return True
 
     def _load_main_config(self):
         if os.path.exists(DEFAULT_CONFIG_FILE):
