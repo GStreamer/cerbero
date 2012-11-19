@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.10.1'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Editing Services (GStreamer SDK)' "
+    configure_options = "--program-prefix= --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Editing Services (GStreamer SDK)' "
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
     deps = ['gstreamer', 'gst-plugins-base' ]
 
