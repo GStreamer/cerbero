@@ -19,6 +19,7 @@
 import os
 import shutil
 
+from cerbero.config import Platform
 from cerbero.utils import shell
 
 
@@ -173,3 +174,21 @@ def add_remote(git_dir, name, url):
     '''
     shell.call('%s remote add -f %s %s' % (GIT, name, url), git_dir,
                fail=False)
+
+def check_line_endings(platform):
+    '''
+    Checks if on windows we don't use the automatic line endings conversion
+    as it breaks everything
+
+    @param platform: the host platform
+    @type platform: L{cerbero.config.Platform}
+    @return: true if git config is core.autorlf=false
+    @rtype: bool
+    '''
+    if platform != Platform.WINDOWS:
+        return True
+    val = shell.check_call('git config --get core.autocrlf')
+    if ('false' in val.lower()):
+        return True
+    return False
+

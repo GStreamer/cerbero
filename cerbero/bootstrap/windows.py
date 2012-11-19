@@ -23,7 +23,8 @@ import shutil
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
 from cerbero.config import Architecture, Distro, Platform
-from cerbero.utils import shell, _, fix_winpath, to_unixpath
+from cerbero.errors import ConfigurationError
+from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
 from cerbero.utils import messages as m
 
 # Toolchain
@@ -48,6 +49,10 @@ class WindowsBootstraper(BootstraperBase):
     '''
 
     def start(self):
+        if not git.check_line_endings(self.config.platform):
+            raise ConfigurationError ("git is configured to use automatic line endings"
+                    " conversion. You can fix it running:\n"
+                    "$git config core.autocrlf false")
         self.prefix = self.config.toolchain_prefix
         self.platform = self.config.target_platform
         self.arch = self.config.target_arch
