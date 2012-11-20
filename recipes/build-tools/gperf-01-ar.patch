@@ -1,0 +1,12 @@
+--- gperf-3.0.4/lib/Makefile.in.old	2012-11-20 12:25:49.204422155 +0100
++++ gperf-3.0.4/lib/Makefile.in	2012-11-20 12:25:51.216422185 +0100
+@@ -41,7 +41,9 @@
+ # Both C and C++ compiler
+ OBJEXT = @OBJEXT@
+ # Other
++ifndef AR
+ AR = ar
++endif
+ AR_FLAGS = rc
+ RANLIB = @RANLIB@
+ MV = mv
