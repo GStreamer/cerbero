@@ -346,9 +346,17 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
     /* TODO: Should probably also set GST_PLUGIN_SCANNER and GST_PLUGIN_SYSTEM_PATH */
   }
   if (files_dir) {
+    gchar *fontconfig;
+
     g_setenv ("HOME", files_dir, TRUE);
     g_setenv ("XDG_DATA_DIRS", files_dir, TRUE);
     g_setenv ("XDG_CONFIG_DIRS", files_dir, TRUE);
+    g_setenv ("XDG_CONFIG_HOME", files_dir, TRUE);
+    g_setenv ("XDG_DATA_HOME", files_dir, TRUE);
+
+    fontconfig = g_strdup_printf ("%s/fontconfig", files_dir);
+    g_setenv ("FONTCONFIG_PATH", fontconfig, TRUE);
+    g_free (fontconfig);
   }
   g_free (cache_dir);
   g_free (files_dir);
@@ -384,7 +392,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
 }
 
 static JNINativeMethod native_methods[] = {
-  {"init", "(Landroid/content/Context;)V", (void *) gst_android_init}
+  {"nativeInit", "(Landroid/content/Context;)V", (void *) gst_android_init}
 };
 
 jint

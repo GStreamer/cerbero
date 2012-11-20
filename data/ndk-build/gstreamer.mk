@@ -94,7 +94,7 @@ LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_SDK_ROOT)/include
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
 # This triggers the build of our library using our custom rules
-$(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource
+$(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource copyfontsres
 
 
 # Some plugins use a different name for the module name, like the playback
@@ -175,3 +175,9 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 copyjavasource:
 	@$(call host-mkdir,src/com/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/com/gstreamer)
+
+copyfontsres:
+	@$(call host-mkdir,assets/fontconfig)
+	@$(call host-mkdir,assets/fontconfig/fonts/truetype/)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,assets/fontconfig)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/verdana.ttf,assets/fontconfig/fonts/truetype)
