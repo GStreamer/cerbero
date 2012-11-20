@@ -257,7 +257,7 @@ class CookBook (object):
             with open(cache_file, 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError, ex:
-            m.warning(_("Could not cache the CookBook: %s"), ex)
+            m.warning(_("Could not cache the CookBook: %s") % ex)
 
     def _find_deps(self, recipe, state={}, ordered=[]):
         if state.get(recipe, 'clean') == 'processed':
