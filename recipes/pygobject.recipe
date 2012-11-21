@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
     configure_options = '--disable-introspection'
+    make_check = None  # disabled until we fix the checks
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
