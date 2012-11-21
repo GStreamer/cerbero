@@ -7,8 +7,7 @@ class Recipe(recipe.Recipe):
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     srcdir = 'gettext-runtime'
-    platform_deps = {Platform.DARWIN:  ['libiconv'],
-                     Platform.LINUX:  ['libiconv'],}
+    platform_deps = {Platform.DARWIN:  ['libiconv']}
 
     files_libs = ['libintl']
     files_devel = ['include/libintl.h']
