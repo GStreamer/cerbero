@@ -354,7 +354,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
     g_setenv ("XDG_CONFIG_HOME", files_dir, TRUE);
     g_setenv ("XDG_DATA_HOME", files_dir, TRUE);
 
-    fontconfig = g_strdup_printf ("%s/fontconfig", files_dir);
+    fontconfig = g_build_filename (files_dir, "fontconfig", NULL);
     g_setenv ("FONTCONFIG_PATH", fontconfig, TRUE);
     g_free (fontconfig);
   }
