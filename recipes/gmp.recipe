@@ -16,4 +16,4 @@ class Recipe(recipe.Recipe):
         # On windows this project cannot build a static and a shared library at
         # the same time, so we need to force the build of shared libraries
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--enable-cxx --build=x86_64-pc-linux --disable-static --enable-shared'
+            self.configure_options += '--enable-cxx --disable-static --enable-shared'
