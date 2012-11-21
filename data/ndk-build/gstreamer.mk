@@ -180,4 +180,4 @@ copyfontsres:
 	@$(call host-mkdir,assets/fontconfig)
 	@$(call host-mkdir,assets/fontconfig/fonts/truetype/)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,assets/fontconfig)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/verdana.ttf,assets/fontconfig/fonts/truetype)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,assets/fontconfig/fonts/truetype)
