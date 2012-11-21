@@ -173,8 +173,12 @@ class Recipe(recipe.Recipe):
             from cerbero.utils import messages as m
             solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
             root = self.config.prefix.rsplit('/', 1)[0]
-            msbuild  = MSBuild(solution, self.config.target_arch,
-                               GSTREAMER_SDK_ROOT=root)
+            if self.config.target_arch == Architecture.X86_64:
+                msbuild  = MSBuild(solution, self.config.target_arch,
+                                   GSTREAMER_SDK_ROOT_x86_64=root)
+            else:
+                msbuild  = MSBuild(solution, self.config.target_arch,
+                                   GSTREAMER_SDK_ROOT_x86=root)
             try:
                 msbuild.build()
             except Exception, e:
