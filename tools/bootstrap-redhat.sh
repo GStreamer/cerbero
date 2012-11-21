@@ -7,7 +7,6 @@
 # python-rpm_4.10.0-5_amd64.deb
 
 set -e
-set -x
 
 CHROOT_PREFIX=$1
 DISTRO=$2
