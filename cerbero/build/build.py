@@ -228,7 +228,7 @@ class Autotools (MakefilesBase):
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.make_dir, 'configure.in')) or\
                 os.path.exists(os.path.join(self.make_dir, 'configure.ac')):
-            self.configure_tpl += " --disable-maintainer-mode"
+            self.configure_tpl += " --disable-maintainer-mode --disable-silent-rules "
 
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
