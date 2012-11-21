@@ -179,10 +179,10 @@ class Recipe(recipe.Recipe):
             root = self.config.prefix.rsplit('/', 1)[0]
             if self.config.target_arch == Architecture.X86_64:
                 msbuild  = MSBuild(solution, self.config.target_arch,
-                                   GSTREAMER_SDK_ROOT_x86_64=root)
+                                   GSTREAMER_SDK_ROOT_X86_64=root)
             else:
                 msbuild  = MSBuild(solution, self.config.target_arch,
-                                   GSTREAMER_SDK_ROOT_x86=root)
+                                   GSTREAMER_SDK_ROOT_X86=root)
             try:
                 msbuild.build()
             except Exception, e:
