@@ -102,5 +102,9 @@ chroot $CHROOT_PATH sed -i  's/root:\*/root:/g' /etc/shadow
 echo "chroot created"
 
 echo "starting the build"
-echo "cd ~/git/cerbero-0.1.0 && ./cerbero-uninstalled bootstrap && ./cerbero-uninstalled package gstreamer-sdk" > $CHROOT_PATH/home/$USER/run_package
+echo "cd ~/git/cerbero-0.1.0
+./cerbero-uninstalled bootstrap
+./cerbero-uninstalled wipe --force
+./cerbero-uninstalled package gstreamer-sdk" > $CHROOT_PATH/home/$USER/run_package
+
 chroot $CHROOT_PATH  su $USER /home/$USER/run_package
