@@ -14,9 +14,15 @@ class Recipe(recipe.Recipe):
                   'gst-typefind-0.10',
                   'gst-launch-0.10']
 
-    files_libs = ['libgstbase-0.10', 'libgstcheck-0.10', 'libgstcontroller-0.10',
+    files_libs = ['libgstbase-0.10', 'libgstcontroller-0.10',
                   'libgstdataprotocol-0.10', 'libgstnet-0.10',
                   'libgstreamer-0.10']
+
+    platform_files_libs = {
+        Platform.LINUX: ['libgstcheck-0.10'],
+        Platform.ANDROID: ['libgstcheck-0.10'],
+        Platform.DARWIN: ['libgstcheck-0.10'],
+    }
 
     files_plugins_core = ['lib/gstreamer-0.10/libgstcoreelements%(mext)s',
                      'lib/gstreamer-0.10/libgstcoreindexers%(mext)s']
@@ -26,17 +32,22 @@ class Recipe(recipe.Recipe):
     files_devel = [
             'include/gstreamer-0.10/gst/*.h',
             'include/gstreamer-0.10/gst/base',
-            'include/gstreamer-0.10/gst/check',
             'include/gstreamer-0.10/gst/controller',
             'include/gstreamer-0.10/gst/dataprotocol',
             'include/gstreamer-0.10/gst/net',
             'lib/pkgconfig/gstreamer-0.10.pc',
             'lib/pkgconfig/gstreamer-base-0.10.pc',
-            'lib/pkgconfig/gstreamer-check-0.10.pc',
             'lib/pkgconfig/gstreamer-controller-0.10.pc',
             'lib/pkgconfig/gstreamer-dataprotocol-0.10.pc',
             'lib/pkgconfig/gstreamer-net-0.10.pc',
     ]
+
+    platform_files_devel = {
+        Platform.LINUX: ['include/gstreamer-0.10/gst/check', 'lib/pkgconfig/gstreamer-check-0.10.pc'],
+        Platform.ANDROID: ['include/gstreamer-0.10/gst/check', 'lib/pkgconfig/gstreamer-check-0.10.pc'],
+        Platform.DARWIN: ['include/gstreamer-0.10/gst/check', 'lib/pkgconfig/gstreamer-check-0.10.pc'],
+    }
+
     files_lang = ['gstreamer-0.10']
 
     def prepare(self):
