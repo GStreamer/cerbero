@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gstreamer-capture'
     shortdesc = 'GStreamer plugins for capture'
     url = "http://www.gstreamer.com"
-    version = '2012.10'
+    version = '2012.11'
     codename = 'Brahmaputra'
     license = License.LGPL
     vendor = 'GStreamer Project'
