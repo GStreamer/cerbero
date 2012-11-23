@@ -1,7 +1,7 @@
 #!/bin/sh
 # usage:
-# $ sudo sh tools/build-release.sh ~/cerbero/roots redhat fedora 16 x86_64 username
-# $ sudo sh tools/build-release.sh ~/cerbero/roots debian debian squeeze i386 username
+# $ sudo sh tools/build-release.sh ~/cerbero/roots redhat fedora 16 x86_64 username sdk-release-sdk-2012.11
+# $ sudo sh tools/build-release.sh ~/cerbero/roots debian debian squeeze i386 username sdk-release-sdk-2012.11
 set -e
 
 CHROOT_PREFIX=$1
@@ -10,6 +10,7 @@ DISTRO=$3
 DISTRO_VERSION=$4
 ARCH=$5
 USER=$6
+TAG=$7
 
 CHROOT_PATH=$CHROOT_PREFIX/$DISTRO-$DISTRO_VERSION-$ARCH
 BASEDIR=$(dirname $0)
@@ -85,6 +86,9 @@ echo "arch = $cerbero_arch" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
 echo "target_arch = $cerbero_target_arch" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
 echo "host = \"$cerbero_host\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
 echo "build = \"$cerbero_build\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+if test $TAG != ""; then
+    echo "force_git_commit = \"$TAG\"" >> $CHROOT_PATH/home/$USER/.cerbero/cerbero.cbc
+fi
 
 sudo mkdir -p $CHROOT_PATH/opt/gstreamer-sdk
 
