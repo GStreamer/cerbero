@@ -24,10 +24,11 @@ class Recipe(recipe.Recipe):
         if self.config.target_arch == Architecture.X86_64:
             lib = 'lib64'
 
-        hostdir = os.path.join(self.config.prefix, self.host)
-        mingwdir = os.path.join(self.config.prefix, 'mingw')
+        hostdir = os.path.join(self.host)
+        mingwdir = os.path.join('mingw')
         if not os.path.exists(mingwdir):
-            shell.call('ln -s %s %s' % (hostdir, mingwdir), fail=False)
+            shell.call('ln -s %s %s' % (hostdir, mingwdir),
+                    cmd_dir=self.config.prefix, fail=False, )
 
         # Create link lib32 -> lib
         libdir = os.path.join(hostdir, lib)
