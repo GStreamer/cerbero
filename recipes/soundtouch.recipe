@@ -8,7 +8,10 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
     autoreconf = True
-    platform_deps = {Platform.ANDROID: ['gnustl']}
+    platform_deps = {
+        Platform.ANDROID: ['gnustl'],
+        Platform.WINDOWS: ['mingw'], # for libstdc++
+        }
 
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']

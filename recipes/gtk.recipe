@@ -9,6 +9,9 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--with-included-immodules '
     deps = ['glib', 'atk', 'pango', 'gdk-pixbuf', 'cairo']
+    platform_deps = {
+        Platform.WINDOWS: ['libstdc++'],
+        }
 
     files_libs = ['libgailutil']
     files_bins = ['gtk-update-icon-cache', 'gtk-query-immodules-2.0']

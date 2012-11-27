@@ -23,7 +23,8 @@ class Package(package.Package):
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
-            'winpthreads', 'mingw', 'libcroco:libs', 'librsvg:libs:loader'],
+            'winpthreads', 'mingw', 'libcroco:libs', 'librsvg:libs:loader',
+            'libstdc++'],
         Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang',
             'libcroco:libs', 'librsvg:libs:loader'],
         Platform.LINUX: ['libcroco:libs', 'librsvg:libs:loader'],

@@ -8,6 +8,9 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = "--disable-introspection "
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
+    platform_deps = {
+        Platform.WINDOWS: ['libstdc++'],
+        }
     use_system_libs = True
 
     files_devel = [

@@ -1,0 +1,49 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from cerbero.errors import InvalidRecipeError
+
+
+class Recipe(recipe.Recipe):
+    name = 'libstdc++'
+    version = '0.1'
+    licenses = [License.LGPL]
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_libs = ['libstdc++']
+
+    def prepare(self):
+        if self.config.target_platform != Platform.WINDOWS:
+            raise InvalidRecipeError()
+
+    def install(self):
+        # Copy libstd++ to the prefix and update the .la files with the
+        # the prefix path.
+        if self.config.platform == Platform.WINDOWS:
+            # the native compiler install dll's in 'bin' and
+            # not in the cross prefix
+            binmingw = 'bin'
+            libmingw = 'lib'
+        else:
+            binmingw = os.path.join(self.config.host, 'lib')
+            libmingw = os.path.join(self.config.host, 'bin')
+        # copy the dll
+        for f in ['libstdc++-6']:
+            shutil.copy(
+                os.path.join(self.config.toolchain_prefix, binmingw, f + '.dll'),
+                os.path.join(self.config.prefix, 'bin', f + '.dll'))
+        # update the .la
+        for f in ['libstdc++']:
+            # Copy the dll.la
+            shutil.copy(
+                os.path.join(self.config.toolchain_prefix, libmingw, f + '.dll.a'),
+                os.path.join(self.config.prefix, 'lib', f + '.dll.a'))
+            src = os.path.join(self.config.toolchain_prefix, libmingw, f + '.la')
+            dest = os.path.join(self.config.prefix, 'lib', f + '.la')
+            if os.path.exists(dest):
+                os.remove(dest)
+            with open(src, 'r') as f:
+                content = f.readlines()[:-1]
+                content.append("libdir='%s'" % os.path.join(self.config.prefix, 'lib'))
+                with open(dest, 'w+') as d:
+                    d.writelines(content)

@@ -6,6 +6,9 @@ class Recipe(recipe.Recipe):
     version = '2.36.1'
     licenses = [License.LGPLv2]
     deps = ['gdk-pixbuf', 'libcroco', 'gtk+']
+    platform_deps = {
+        Platform.WINDOWS: ['libstdc++'],
+        }
     configure_options = '--enable-introspection=no'
 
     files_libs = ['librsvg-2']
