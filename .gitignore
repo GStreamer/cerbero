@@ -8,3 +8,9 @@ MANIFEST.in
 *.pkg
 *.dmg
 .DS_Store
+*.msm
+*.msi
+*.zip
+*~
+*.wsx
+*.wixobj
