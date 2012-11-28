@@ -1,3 +1,5 @@
+import shutil
+
 class Recipe(recipe.Recipe):
     name = 'gcc'
     version = '4.6.2'
@@ -55,17 +57,25 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self._remove_steps([BuildSteps.CONFIGURE])
         if self.config.target_arch == Architecture.X86:
-            host = 'i686-w64-mingw32'
+            self._host = 'i686-w64-mingw32'
         else:
-            host = 'x86_64-w64-mingw32'
+            self._host = 'x86_64-w64-mingw32'
         # Append the host prefix to the binaries
-        self.files_bins = ['%s-%s' % (host, x) for x in self.files_bins]
+        self.files_bins = ['%s-%s' % (self._host, x) for x in self.files_bins]
         # Replace host in files
-        files = [x % {'host': host, 'bext': '%(bext)s'} for x in self.files_gcc]
+        files = [x % {'host': self._host, 'bext': '%(bext)s'} for x in self.files_gcc]
         # Add mingw symlink files
         files.extend([x % {'host': 'mingw', 'bext': '%(bext)s'} for x in self.files_gcc])
         self.files_gcc = files
         # Replace host in lib/gcc and libexec/gcc
-        self.files_lib_gcc = [x % {'host': host} for x in self.files_lib_gcc]
+        self.files_lib_gcc = [x % {'host': self._host} for x in self.files_lib_gcc]
         # Add mingw symlink files
         self.files_lib_gcc.extend([x % {'host': 'mingw'} for x in self.files_lib_gcc])
+
+    def post_install(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            cpp = os.path.join(self.config.prefix, 'bin', 'cpp.exe')
+            prefixed_cpp = os.path.join(self.config.prefix, 'bin', '%s-cpp.exe' % self._host)
+            if os.path.exists(prefixed_cpp):
+                os.remove(prefixed_cpp)
+            shutil.move(cpp, prefixed_cpp)

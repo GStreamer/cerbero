@@ -161,6 +161,11 @@ class RPMPackager(LinuxPackager):
         except EmptyPackageError:
             runtime_files = ''
 
+        if runtime_files or isinstance(self.package, MetaPackage):
+            self.package.has_runtime_package = True
+        else:
+            self.package.has_runtime_package = False
+
         if self.devel:
             devel_package, devel_files = self._devel_package_and_files()
         else:

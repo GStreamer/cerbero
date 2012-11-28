@@ -182,6 +182,13 @@ class WindowsBootstraper(BootstraperBase):
             print libdir
             return libdir.strip()[1:-1]
 
+    def remove_mingw_cpp(self):
+        # Fixes glib's checks in configure, where cpp -v is called
+        # to get some include dirs (which doesn't like like a good idea).
+        # If we only have the host-prefixed cpp, this problem is gone.
+        if os.path.exists('/mingw/bin/cpp.exe'):
+            shutil.move('/mingw/bin/cpp.exe', '/mingw/bin/cpp.exe.bck')
+
 
 def register_all():
     register_bootstraper(Distro.WINDOWS, WindowsBootstraper)

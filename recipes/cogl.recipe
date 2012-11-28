@@ -8,6 +8,9 @@ class Recipe(recipe.Recipe):
     configure_options = "--disable-introspection "
     use_system_libs = True
     deps = [ 'pango', 'gdk-pixbuf' ]
+    platform_deps = {
+        Platform.WINDOWS: ['libstdc++'],
+        }
 
     files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [

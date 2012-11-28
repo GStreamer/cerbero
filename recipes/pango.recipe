@@ -9,6 +9,9 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules --enable-static'
     deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite']
+    platform_deps = {
+        Platform.WINDOWS: ['libstdc++'],
+        }
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
