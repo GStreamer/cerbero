@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/plugins.mk',
             'share/gst-android/ndk-build/GStreamer.java',
             'share/gst-android/ndk-build/tools/windows',
+            'share/gst-android/ndk-build/fontconfig',
             ]
 
     def install(self):
