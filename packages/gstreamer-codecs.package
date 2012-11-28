@@ -16,7 +16,7 @@ class Package(package.Package):
     deps = ['gstreamer-core']
 
     files = ['flac:libs',
-            'jasper:libs', 'libkate:libs',
+            'jasper:libs', 'libkate:libs', 'libdv:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs', 'libvorbis:libs',
@@ -28,7 +28,5 @@ class Package(package.Package):
             'gst-plugins-bad-static:plugins_codecs_devel',
             'gst-plugins-ugly-static:plugins_codecs_devel']
     platform_files = {
-            Platform.LINUX: ['libdv:libs'],
-            Platform.DARWIN: ['libdv:libs'],
             Platform.ANDROID: ['tremor:libs']
     }
