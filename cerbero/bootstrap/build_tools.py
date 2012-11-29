@@ -50,7 +50,7 @@ class BuildTools (BootstraperBase):
         config.load()
         config.prefix = config.build_tools_prefix
         config.sources = config.build_tools_sources
-        config.cache_file = 'build_tools'
+        config.cache_file = config.build_tools_cache
 
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
