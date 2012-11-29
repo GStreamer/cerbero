@@ -49,7 +49,7 @@ class BuildTools (BootstraperBase):
         os.environ.update(self.config._pre_environ)
         config.load()
         config.prefix = config.build_tools_prefix
-        config.sources = os.path.join(DEFAULT_HOME, 'sources', 'build-tools')
+        config.sources = config.build_tools_sources
         config.cache_file = 'build_tools'
 
         if not os.path.exists(config.prefix):

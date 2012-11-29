@@ -78,7 +78,7 @@ class Config (object):
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
                    'external_packages', 'use_ccache', 'force_git_commit',
                    'universal_archs', 'osx_target_sdk_version', 'variants',
-                   'build_tools_prefix']
+                   'build_tools_prefix', 'build_tools_sources']
 
     def __init__(self):
         self._check_uninstalled()
@@ -261,6 +261,7 @@ class Config (object):
                           [Architecture.X86, Architecture.X86_64])
         self.set_property('variants', [])
         self.set_property('build_tools_prefix', None)
+        self.set_property('build_tools_sources', None)
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
@@ -370,6 +371,8 @@ class Config (object):
                 os.path.join(cerbero_home, 'sources', 'local'))
         self.set_property('build_tools_prefix',
                 os.path.join(cerbero_home, 'build-tools'))
+        self.set_property('build_tools_sources',
+                os.path.join(self.sources, 'build-tools'))
 
     def _find_data_dir(self):
         if self.uninstalled:
