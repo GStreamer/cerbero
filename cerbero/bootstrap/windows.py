@@ -67,6 +67,8 @@ class WindowsBootstraper(BootstraperBase):
             # For wget
             self.install_mingwget_deps()
         self.install_mingw()
+        self.remove_mingw_cpp()
+        self.add_non_prefixed_strings()
         if self.platform == Platform.WINDOWS:
             # After mingw is beeing installed
             self.install_bin_deps()
@@ -140,9 +142,7 @@ class WindowsBootstraper(BootstraperBase):
             shell.call('mingw-get install %s' % dep)
 
     def install_bin_deps(self):
-        # On windows, we need to install first wget and pkg-config.
-        # pkg-config can't be installed otherwise because it depends
-        # on glib and glib depends on pkg-config
+        # FIXME: build intltool as part of the build tools bootstrap
         for url in WINDOWS_BIN_DEPS:
             temp = fix_winpath(tempfile.mkdtemp())
             path = os.path.join(temp, 'download.zip')
@@ -184,10 +184,28 @@ class WindowsBootstraper(BootstraperBase):
 
     def remove_mingw_cpp(self):
         # Fixes glib's checks in configure, where cpp -v is called
-        # to get some include dirs (which doesn't like like a good idea).
+        # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
         if os.path.exists('/mingw/bin/cpp.exe'):
             shutil.move('/mingw/bin/cpp.exe', '/mingw/bin/cpp.exe.bck')
+
+    def add_non_prefixed_strings(self):
+        # libtool m4 macros uses non-prefixed 'strings' command. We need to
+        # create a copy here
+        if self.config.platform == Platform.WINDOWS:
+            ext = '.exe'
+        else:
+            ext = ''
+        if self.config.target_arch == Architecture.X86:
+            host = 'i686-w64-mingw32'
+        else:
+            host = 'x86_64-w64-mingw32'
+        bindir = os.path.join(self.config.toolchain_prefix, 'bin')
+        p_strings = os.path.join(bindir, '%s-strings%s' % (host, ext))
+        strings = os.path.join(bindir, 'strings%s' % ext)
+        if os.path.exists(strings):
+            os.remove(strings)
+        shutil.copy(p_strings, strings)
 
 
 def register_all():
