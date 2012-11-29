@@ -79,7 +79,7 @@ class Config (object):
                    'external_packages', 'use_ccache', 'force_git_commit',
                    'universal_archs', 'osx_target_sdk_version', 'variants',
                    'build_tools_prefix', 'build_tools_sources',
-                   'build_tools_cache']
+                   'build_tools_cache', 'home_dir']
 
     def __init__(self):
         self._check_uninstalled()
@@ -226,6 +226,7 @@ class Config (object):
 
     def load_defaults(self):
         self.set_property('cache_file', None)
+        self.set_property('home_dir', None)
         self.set_property('prefix', None)
         self.set_property('sources', None)
         self.set_property('local_sources', None)
@@ -365,14 +366,14 @@ class Config (object):
                 self._parse(config_path, reset=False)
 
     def _load_last_defaults(self):
-        cerbero_home = DEFAULT_HOME
-        self.set_property('prefix', os.path.join(cerbero_home, 'dist'))
+        self.set_property('home_dir', DEFAULT_HOME)
+        self.set_property('prefix', os.path.join(self.home_dir, 'dist'))
         self.set_property('install_dir', self.prefix)
-        self.set_property('sources', os.path.join(cerbero_home, 'sources'))
+        self.set_property('sources', os.path.join(self.home_dir, 'sources'))
         self.set_property('local_sources',
-                os.path.join(cerbero_home, 'sources', 'local'))
+                os.path.join(self.home_dir, 'sources', 'local'))
         self.set_property('build_tools_prefix',
-                os.path.join(cerbero_home, 'build-tools'))
+                os.path.join(self.home_dir, 'build-tools'))
         self.set_property('build_tools_sources',
                 os.path.join(self.sources, 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools')
