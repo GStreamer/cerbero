@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
             binmingw = 'bin'
             libmingw = 'lib'
         else:
-            binmingw = os.path.join(self.config.host, 'bin')
+            binmingw = os.path.join(self.config.host, 'lib')
             libmingw = os.path.join(self.config.host, 'lib')
         # copy the dll
         for f in ['libstdc++-6']:
