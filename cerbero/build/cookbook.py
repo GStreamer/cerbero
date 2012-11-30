@@ -358,7 +358,7 @@ class CookBook (object):
             except InvalidRecipeError:
                 pass
             except Exception, ex:
-                m.warning("Error loading recipe %s" % ex)
+                m.warning("Error loading recipe in file %s %s" % (filepath, ex))
         if self._config.target_arch == Architecture.UNIVERSAL:
             if not recipe.is_empty():
                 return recipe
