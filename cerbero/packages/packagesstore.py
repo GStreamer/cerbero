@@ -24,7 +24,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
         License
 from cerbero.packages import package, PackageType
 from cerbero.errors import FatalError, PackageNotFoundError
-from cerbero.utils import _, shell
+from cerbero.utils import _, shell, remove_list_duplicates
 from cerbero.utils import messages as m
 
 
@@ -93,7 +93,7 @@ class PackagesStore (object):
         if recursive:
             for p in ret:
                 ret.extend(self.get_package_deps(p, recursive))
-        return sorted(list(set(ret)))
+        return remove_list_duplicates(ret)
 
     def get_package_files_list(self, name):
         '''
@@ -147,7 +147,7 @@ class PackagesStore (object):
         deps = []
         for p in metapackage.list_packages():
             deps.extend(get_package_deps(p, [], []))
-        return list(set(deps))
+        return remove_list_duplicates(deps)
 
     def _list_metapackage_files(self, metapackage):
         l = []
