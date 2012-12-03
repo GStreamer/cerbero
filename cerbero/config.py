@@ -226,7 +226,7 @@ class Config (object):
 
     def load_defaults(self):
         self.set_property('cache_file', None)
-        self.set_property('home_dir', None)
+        self.set_property('home_dir', DEFAULT_HOME)
         self.set_property('prefix', None)
         self.set_property('sources', None)
         self.set_property('local_sources', None)
@@ -366,10 +366,13 @@ class Config (object):
                 self._parse(config_path, reset=False)
 
     def _load_last_defaults(self):
-        self.set_property('home_dir', DEFAULT_HOME)
-        self.set_property('prefix', os.path.join(self.home_dir, 'dist'))
+        self.set_property('prefix', os.path.join(self.home_dir, "dist",
+            "%s_%s" % (self.target_platform, self.target_arch)))
+        self.set_property('sources', os.path.join(self.home_dir, "sources",
+            "%s_%s" % (self.target_platform, self.target_arch)))
+        self.set_property('cache_file',
+                "%s_%s" % (self.target_platform, self.target_arch))
         self.set_property('install_dir', self.prefix)
-        self.set_property('sources', os.path.join(self.home_dir, 'sources'))
         self.set_property('local_sources',
                 os.path.join(self.home_dir, 'sources', 'local'))
         self.set_property('build_tools_prefix',
