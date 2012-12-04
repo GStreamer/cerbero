@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import _winreg as winreg
+import os
 
 from cerbero.config import Architecture
 from cerbero.utils import fix_winpath, shell
