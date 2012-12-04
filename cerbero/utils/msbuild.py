@@ -55,8 +55,9 @@ class MSBuild(object):
         key = winreg.OpenKey(reg,
                 r"SOFTWARE\Microsoft\VisualStudio\SxS\VC7")
         path = winreg.QueryValueEx(key, '10.0')[0]
-        path = path.rsplit('\\', 1)[0] + '\\Common7\\IDE'
-        return str(path)
+        path = str(path)
+        path = path.replace('\\VC', '\\Common7\\IDE')
+        return path
 
     def _call(self, command):
         properties = self._format_properties()
