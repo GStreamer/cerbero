@@ -52,10 +52,10 @@ class MSBuild(object):
     def get_vs_path():
         reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
         key = winreg.OpenKey(reg,
-                r"SOFTWARE\Microsoft\VisualStudio\SxS\VS7")
+                r"SOFTWARE\Microsoft\VisualStudio\SxS\VC7")
         path = winreg.QueryValueEx(key, '10.0')[0]
         path = path.rsplit('\\', 1)[0] + '\\Common7\\IDE'
-        return fix_winpath(path)
+        return path
 
     def _call(self, command):
         properties = self._format_properties()
