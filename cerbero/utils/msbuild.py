@@ -48,11 +48,27 @@ class MSBuild(object):
         path = winreg.QueryValueEx(key, 'MSBuildToolsPath')[0]
         return fix_winpath(path)
 
+    @staticmethod
+    def get_vs_path():
+        reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        key = winreg.OpenKey(reg,
+                r"SOFTWARE\Microsoft\VisualStudio\SxS\VS7")
+        path = winreg.QueryValueEx(key, '10.0')[0]
+        path = path.rsplit('\\', 1)[0] + '\\Common7\\IDE'
+        return fix_winpath(path)
+
     def _call(self, command):
         properties = self._format_properties()
         msbuildpath = self.get_msbuild_tools_path()
-        shell.call('msbuild.exe %s %s /target:%s' %
-                   (self.solution, properties, command), msbuildpath)
+        vs_path = self.get_vs_path()
+        old_path = os.environ['PATH']
+        if self.properties['Platform'] == 'Win32':
+            os.environ['PATH'] = os.environ['PATH'] + ':' + vs_path
+        try:
+            shell.call('msbuild.exe %s %s /target:%s' %
+                       (self.solution, properties, command), msbuildpath)
+        finally:
+            os.environ['PATH'] = old_path
 
     def _format_properties(self):
         props = ['/property:%s=%s' % (k, v) for k, v in
