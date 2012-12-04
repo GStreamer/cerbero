@@ -63,7 +63,7 @@ class MSBuild(object):
         vs_path = self.get_vs_path()
         old_path = os.environ['PATH']
         if self.properties['Platform'] == 'Win32':
-            os.environ['PATH'] = os.environ['PATH'] + ':' + vs_path
+            os.environ['PATH'] = '%s;%s' % (os.environ['PATH'], vs_path)
         try:
             shell.call('msbuild.exe %s %s /target:%s' %
                        (self.solution, properties, command), msbuildpath)
