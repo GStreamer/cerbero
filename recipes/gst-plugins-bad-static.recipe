@@ -114,6 +114,9 @@ class Recipe(custom.GStreamerStatic):
         Platform.LINUX: [
              'libgstdvb',
              ],
+        Platform.WINDOWS: [
+             'libgstwinscreencap',
+             ]
         }
 
     platform_files_plugins_sys_devel = {

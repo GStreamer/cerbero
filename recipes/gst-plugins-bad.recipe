@@ -127,6 +127,9 @@ class Recipe(recipe.Recipe):
     platform_files_plugins_capture = {
         Platform.LINUX: [
              'lib/gstreamer-0.10/libgstdvb%(mext)s',
+            ],
+        Platform.WINDOWS: [
+             'lib/gstreamer-0.10/libgstwinscreencap%(mext)s',
             ]
     }
 
