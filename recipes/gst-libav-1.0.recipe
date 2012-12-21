@@ -26,17 +26,6 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' ASFLAGS="%s"' % asflags
 
     def configure(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s --enable-w32threads' %\
-                (self.config.host, self.config.target_arch)
-            opts_file = os.path.join(self.build_dir, 'libav_extra_configure_options')
-            with open(opts_file, 'w+') as f:
-                f.write(opts)
-        if self.config.target_platform == Platform.ANDROID:
-            opts = '--target-os=linux'
-            opts_file = os.path.join(self.build_dir, 'libav_extra_configure_options')
-            with open(opts_file, 'w+') as f:
-                f.write(opts)
         super(recipe.Recipe, self).configure()
 
         if self.config.target_platform == Platform.DARWIN:
