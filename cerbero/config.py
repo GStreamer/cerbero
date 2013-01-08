@@ -378,7 +378,7 @@ class Config (object):
         self.set_property('build_tools_prefix',
                 os.path.join(self.home_dir, 'build-tools'))
         self.set_property('build_tools_sources',
-                os.path.join(self.sources, 'build-tools'))
+                os.path.join(self.home_dir, 'sources', 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools')
 
     def _find_data_dir(self):
