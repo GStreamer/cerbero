@@ -41,13 +41,20 @@ class Wipe(Command):
         Command.__init__(self, [
                 ArgparseArgument('--force', action='store_true',
                     default=False,
-                    help=_('force the deleting of everything without user '
-                           'input'))])
+                    help=_('force the deletion of everything without user '
+                           'input')),
+                ArgparseArgument('--build-tools', action='store_true',
+                    default=False,
+                    help=_('wipe the build tools too'))])
 
     def run(self, config, args):
         to_remove = [os.path.join(CONFIG_DIR, config.cache_file)]
         to_remove.append(config.prefix)
         to_remove.append(config.sources)
+        if (args.build_tools):
+            to_remove.append(os.path.join(CONFIG_DIR, config.build_tools_cache))
+            to_remove.append(config.build_tools_prefix)
+            to_remove.append(config.build_tools_sources)
 
         if args.force:
             self.wipe(to_remove)
