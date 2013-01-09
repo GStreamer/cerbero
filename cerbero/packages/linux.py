@@ -134,6 +134,9 @@ class LinuxPackager(PackagerBase):
                 recommends.append(package_name)
             else:
                 suggests.append(package_name)
+        # Development packages should depend on the runtime package
+        if package_type == PackageType.DEVEL:
+            requires.append(self.package.name)
         return (requires, recommends, suggests)
 
     def get_requires(self, package_type, devel_suffix):
@@ -150,6 +153,12 @@ class LinuxPackager(PackagerBase):
             deps = [x for x in deps if self._has_devel_package(x)]
 
         deps = [dep_name(x) for x in deps]
+
+        # Development packages should depend on the runtime package
+        if package_type == PackageType.DEVEL:
+            if self._has_runtime_package(self.package):
+                deps.append(self.package.name)
+
         deps.extend(self.package.get_sys_deps(package_type))
         return sorted(deps)
 
