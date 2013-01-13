@@ -30,9 +30,10 @@ class Recipe(custom.GStreamerStatic):
                 asflags = ' -arch ppc'
             self.configure_options += ' ASFLAGS="%s"' % asflags
         super(Recipe, self).prepare()
-        for f in ['libavcodec.a', 'libavformat.a', 'libavutil.a']:
-            path = os.path.join('lib', f)
-            self.files_plugins_codecs_restricted_devel.append(path)
+        for f in ['libavcodec', 'libavformat', 'libavutil']:
+            for ext in ['.a', '.la']:
+                path = os.path.join('lib', f + ext)
+                self.files_plugins_codecs_restricted_devel.append(path)
 
     def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
