@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -29,3 +30,13 @@ class Recipe(recipe.Recipe):
                 self.configure_options += ' --disable-asm-optimizations'
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
+
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.X86:
+                # for missing sys/ucontext.h
+                shell.replace(os.path.join(self.build_dir, 'src', 'libFLAC',
+                    'cpu.c'),
+                    {'#  undef USE_OBSOLETE_SIGCONTEXT_FLAVOR':
+                     '#define USE_OBSOLETE_SIGCONTEXT_FLAVOR'})
+        super(Recipe, self).configure()

@@ -9,7 +9,10 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/mad.h']
 
     def prepare(self):
-        if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
+        if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
-            # Disable thumb mode to get the optimizations compiled properly
-            self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
+            if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
+                # Disable thumb mode to get the optimizations compiled properly
+                self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
+            if self.config.target_arch == Architecture.X86:
+                self.new_env['CFLAGS'] = os.environ['CFLAGS'] + ' -fno-stack-protector'

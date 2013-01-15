@@ -25,9 +25,14 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' ASFLAGS="%s"' % asflags
 
     def configure(self):
+        opts = None
         if self.config.target_platform == Platform.WINDOWS:
             opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s --enable-w32threads' %\
                 (self.config.host, self.config.target_arch)
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.X86:
+                opts = '--extra-cflags=-mincoming-stack-boundary=4'
+        if opts:
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
                 f.write(opts)

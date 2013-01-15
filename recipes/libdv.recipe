@@ -17,4 +17,6 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-asm --disable-xv --without-x'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options = ' --disable-xv --without-x'
+            if self.config.target_arch == Architecture.X86:
+                self.configure_options += ' --disable-asm'
             self.autoreconf = True

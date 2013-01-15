@@ -36,9 +36,14 @@ class Recipe(custom.GStreamerStatic):
                 self.files_plugins_codecs_restricted_devel.append(path)
 
     def configure(self):
+        opts = None
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.X86:
+                opts = '--extra-cflags=-mincoming-stack-boundary=4'
         if self.config.target_platform == Platform.WINDOWS:
             opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s' %\
                 (self.config.host, self.config.target_arch)
+        if opts:
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
                 f.write(opts)

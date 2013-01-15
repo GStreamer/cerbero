@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.errors import FatalError
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 import shutil
@@ -50,17 +51,20 @@ class Recipe(recipe.Recipe):
                 platform = 'win32'
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
+            platform = 'android'
+            self.append_env['CFLAGS'] = " -Dandroid_getCpuFamily=vpx_android_getCpuFamily "\
+                "-Dandroid_getCpuFeatures=vpx_android_getCpuFeatures "\
+                "-Dandroid_getCpuCount=vpx_android_getCpuCount "
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv5te'
                 # Fix compiler error with -mthumb
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
-                self.new_env['CFLAGS'] = self.new_env['CFLAGS'] + " -Dandroid_getCpuFamily=vpx_android_getCpuFamily -Dandroid_getCpuFeatures=vpx_android_getCpuFeatures -Dandroid_getCpuCount=vpx_android_getCpuCount "
             elif self.config.target_arch == Architecture.ARMv7:
                 arch = 'armv7'
-                self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Dandroid_getCpuFamily=vpx_android_getCpuFamily -Dandroid_getCpuFeatures=vpx_android_getCpuFeatures -Dandroid_getCpuCount=vpx_android_getCpuCount "
+            elif self.config.target_arch == Architecture.X86:
+                pass
             else:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
-            platform = 'android'
             self.config_sh = 'LD=$CC ./configure'
             self.configure_options.replace('--as=yasm', '')
             self.configure_options += ' --sdk-path=%s ' % self.config.toolchain_prefix

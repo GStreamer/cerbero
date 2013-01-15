@@ -27,7 +27,12 @@ class Recipe(recipe.Recipe):
     def install(self):
         stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
                 'cxx-stl', 'gnu-libstdc++', '4.6')
-        stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
+        if self.config.target_arch == Architecture.X86:
+            stl_libdir = os.path.join(stl_prefix, 'libs', 'x86')
+        elif self.config.target_arch == Architecture.ARMv7:
+            stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi-v7a')
+        else:
+            stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)
