@@ -197,8 +197,13 @@ class Config (object):
         path = self._join_path(
                 os.path.join(self.build_tools_prefix, 'bin'), path)
 
+        if self._prefix_is_executable():
+            ld_library_path = libdir
+        else:
+            ld_library_path = ""
+
         # Most of these variables are extracted from jhbuild
-        env = {'LD_LIBRARY_PATH': libdir,
+        env = {'LD_LIBRARY_PATH': ld_library_path,
                'LDFLAGS': ldflags,
                'C_INCLUDE_PATH': includedir,
                'CPLUS_INCLUDE_PATH': includedir,
