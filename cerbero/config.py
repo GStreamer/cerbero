@@ -270,6 +270,7 @@ class Config (object):
         self.set_property('build_tools_prefix', None)
         self.set_property('build_tools_sources', None)
         self.set_property('build_tools_cache', None)
+        self.set_property('recipes_commits', {})
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
