@@ -141,7 +141,7 @@ class GitCache (Source):
         # fetch remote branches
         git.fetch(self.repo_dir, fail=False)
         if checkout:
-            commit = self.config.force_git_commit or self.commit
+            commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
 
 
@@ -202,6 +202,8 @@ class Git (GitCache):
         GitCache.__init__(self)
         if self.commit is None:
             self.commit = 'origin/sdk-%s' % self.version
+        # For forced commits in the config
+        self.commit = self.config.recipe_commit(self.name) or self.commit
 
     def extract(self):
         if os.path.exists(self.build_dir):

@@ -79,7 +79,7 @@ class Config (object):
                    'external_packages', 'use_ccache', 'force_git_commit',
                    'universal_archs', 'osx_target_sdk_version', 'variants',
                    'build_tools_prefix', 'build_tools_sources',
-                   'build_tools_cache', 'home_dir']
+                   'build_tools_cache', 'home_dir', 'recipes_commits']
 
     def __init__(self):
         self._check_uninstalled()
@@ -290,6 +290,13 @@ class Config (object):
             path = os.path.abspath(os.path.expanduser(path))
             packages_dir[name] = (path, priority)
         return packages_dir
+
+    def recipe_commit(self, recipe_name):
+        if self.force_git_commit:
+            return self.force_git_commit
+        if recipe_name in self.recipes_commits:
+            return self.recipes_commits[recipe_name]
+        return None
 
     def _parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
