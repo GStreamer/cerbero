@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'yasm'
+    version = '1.2.0'
+    licenses = [License.GPLv3]
+    stype = SourceType.TARBALL
+    url = 'http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz'
+
+    files_bins = ['yasm']
