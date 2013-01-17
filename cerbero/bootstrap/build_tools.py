@@ -43,6 +43,7 @@ class BuildTools (BootstraperBase):
             # We need tar with support for .xz in Snow Leopard
             if self.config.distro_version in [DistroVersion.OS_X_SNOW_LEOPARD]:
                 self.BUILD_TOOLS.insert(0, 'tar')
+                self.BUILD_TOOLS.append('xz')
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations

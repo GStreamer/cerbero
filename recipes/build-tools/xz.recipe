@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'xz'
+    version = '5.0.4'
+    licenses = [License.GPLv3]
+    stype = SourceType.TARBALL
+    url = 'http://tukaani.org/xz/xz-5.0.4.tar.bz2'
+
+    files_bins = ['xz']
