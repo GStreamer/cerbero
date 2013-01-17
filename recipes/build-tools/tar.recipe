@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'tar'
+    version = '1.26'
+    licenses = [License.GPLv3]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/gnu/tar/tar-1.26.tar.bz2'
+
+    files_bins = ['tar']
