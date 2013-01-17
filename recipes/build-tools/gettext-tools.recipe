@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gettext-tools'
+    version = '0.18.1.1+2012-01-26'
+    licenses = [License.GPLv3]
+    srcdir = 'gettext-tools'
+    platform_deps = {Platform.DARWIN:  ['libiconv']}
+    configure_options = ' --disable-java --disable-csharp --disable-native-java'
+
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s.git' %
+                (self.config.git_root, 'gettext'))
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += '--enable-threads=win32'
+
+    def configure(self):
+        super(Recipe, self).configure()
+        shell.touch(os.path.join(self.build_dir, 'gettext-tools', 'misc',
+            'archive.dir.tar'), True)
