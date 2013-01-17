@@ -295,7 +295,7 @@ def copy_dir(src, dest):
 def touch(path, create_if_not_exists=False, offset=0):
     if not os.path.exists(path):
         if create_if_not_exists:
-            open(path).close()
+            open(path, 'w').close()
         else:
             return
     t = time.time() + offset
