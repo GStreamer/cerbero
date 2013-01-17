@@ -125,3 +125,13 @@ if sys.platform.startswith('win'):
     os.path.expanduser = expanduser
     os.path.abspath = abspath
     os.path.realpath = realpath
+
+
+### OS X Hacks ###
+
+# use cURL to download instead of wget
+
+if sys.platform.startswith('darwin'):
+    import cerbero.utils.shell as cshell
+    del cshell.download
+    cshell.download = cshell.download_curl

@@ -181,6 +181,38 @@ def download(url, destination=None, recursive=False, check_cert=True):
             raise e
 
 
+def download_curl (url, destination=None, recursive=False, check_cert=True):
+    '''
+    Downloads a file with cURL
+
+    @param url: url to download
+    @type: str
+    @param destination: destination where the file will be saved
+    @type destination: str
+    '''
+    path = None
+    if recursive:
+        raise FatalError(_("cURL doesn't support recursive downloads"))
+
+    cmd = "curl -L "
+    if not check_cert:
+        cmd += " -k "
+    if destination is not None:
+        cmd += "%s -o %s " % (url, destination)
+    else:
+        cmd += "-O %s " % url
+
+    if os.path.exists(destination):
+        logging.info("File %s already downloaded." % destination)
+    else:
+        logging.info("Downloading %s", url)
+        try:
+            call(cmd, path)
+        except FatalError, e:
+            os.remove(destination)
+            raise e
+
+
 def _splitter(string, base_url):
     lines = string.split('\n')
     for line in lines:
