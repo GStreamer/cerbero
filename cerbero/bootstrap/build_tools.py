@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Config, DEFAULT_HOME, Platform, Distro
+from cerbero.config import Config, DEFAULT_HOME, Platform, DistroVersion
 from cerbero.bootstrap import BootstraperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
@@ -41,7 +41,7 @@ class BuildTools (BootstraperBase):
         if self.config.platform == Platform.DARWIN:
             self.BUILD_TOOLS.append('gperf')
             # We need tar with support for .xz in Snow Leopard
-            if self.config.distro in [Distro.OS_X_SNOW_LEOPARD]:
+            if self.config.distro_version in [DistroVersion.OS_X_SNOW_LEOPARD]:
                 self.BUILD_TOOLS.insert(0, 'tar')
 
     def start(self):
