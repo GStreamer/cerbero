@@ -28,3 +28,10 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('z', 1, 2, 7, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        # FIXME This is to workaround a build issue trying to ld to libz.so
+        if self.config.target_platform == Platform.IOS:
+            try:
+                os.symlink(os.path.join (self.config.prefix, 'lib', 'libz.dylib'),
+                        os.path.join (self.config.prefix, 'lib', 'libz.so'))
+            except OSError:
+                pass

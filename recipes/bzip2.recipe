@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     def prepare (self):
         self._remove_steps([BuildSteps.CONFIGURE])
         extension = ''
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             shared_makefile = 'Makefile-libbz2_dylib'
         elif self.config.target_platform == Platform.WINDOWS:
             shared_makefile = 'Makefile-libbz2_dll'
@@ -35,3 +35,10 @@ class Recipe(recipe.Recipe):
             if os.path.exists (libbz2):
                 os.remove (libbz2)
             os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'), libbz2)
+        elif self.config.target_platform == Platform.IOS:
+            # FIXME This is to workaround a build issue, trying to ld ti libbz2.so
+            try:
+                os.symlink(os.path.join (self.config.prefix, 'lib', 'libbz2.dylib'),
+                        os.path.join (self.config.prefix, 'lib', 'libbz2.so'))
+            except OSError:
+                pass

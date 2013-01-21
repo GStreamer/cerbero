@@ -12,3 +12,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
+        elif self.config.target_platform == Platform.IOS:
+            self.autoreconf = True

@@ -20,3 +20,5 @@ class Recipe(recipe.Recipe):
       self.configure_options += ' --enable-static '
       if self.config.target_platform == Platform.ANDROID:
         self.configure_options += ' --with-gnustl '
+      elif self.config.target_platform == Platform.IOS:
+        self.autoreconf = True

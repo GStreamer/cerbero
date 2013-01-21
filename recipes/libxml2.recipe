@@ -20,3 +20,5 @@ class Recipe(recipe.Recipe):
             self.configure_options = '--without-threads'
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options = '--with-python=no'
+        elif self.config.target_platform == Platform.IOS:
+            self.configure_options = '--with-python=no'

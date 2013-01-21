@@ -8,3 +8,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libogg']
     files_devel = ['include/ogg', 'lib/pkgconfig/ogg.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.IOS:
+            self.autoreconf = True

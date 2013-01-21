@@ -22,6 +22,7 @@ class Recipe(recipe.Recipe):
     can_use_configure_cache = False
     platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
                      Platform.DARWIN: ['libiconv', 'gettext'],
+                     Platform.IOS: ['libiconv', 'gettext'],
                      Platform.ANDROID: ['libiconv', 'gettext']}
 
     files_libs = [
@@ -31,6 +32,7 @@ class Recipe(recipe.Recipe):
     platform_files_schemas = {
         Platform.WINDOWS: ['share/glib-2.0/schemas'],
         Platform.DARWIN: ['share/glib-2.0/schemas'],
+        Platform.IOS: ['share/glib-2.0/schemas'],
     }
     #FIXME: Fill it when needed
     #files_gio = ['lib/gio/modules']
@@ -55,6 +57,7 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
         Platform.LINUX: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
         Platform.DARWIN: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.IOS: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
     }
 
     files_lang = ['glib20']
@@ -77,13 +80,16 @@ class Recipe(recipe.Recipe):
             self.make = '%s private_LDFLAGS=""' % self.make
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
-        elif self.config.target_platform == Platform.DARWIN:
+        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            self.files_devel.append(
-                os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
+            self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
+            if self.config.target_platform == Platform.IOS:
+                self.autoreconf = True
+                # Disable mac OS X specifics
+                self.configure_options += ' --disable-carbon --enable-dtrace=no --disable-modular-tests --disable-cocoa'
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', None, True)
@@ -113,6 +119,21 @@ class Recipe(recipe.Recipe):
             else:
                 from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
+
+    def configure(self):
+        if self.config.target_platform == Platform.IOS:
+            # Use a cache file specific to the GLib to make cross compilation possible
+            cache = os.path.join(self.build_dir, ".glib.configure.cache")
+            if not os.path.exists(cache):
+                writer = open(cache, 'w')
+                writer.write("glib_cv_stack_grows=no\n"
+                             "glib_cv_uscore=yes\n"
+                             "ac_cv_func_posix_getpwuid_r=yes\n"
+                             "ac_cv_func_posix_getgrgid_r=yes\n"
+                             "gt_cv_c_wchar_t=no")
+                writer.close()
+            self.configure_options += ' --cache-file=%s' % cache
+        super(recipe.Recipe, self).configure()
 
     def post_install(self):
         import shutil

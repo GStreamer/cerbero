@@ -11,13 +11,16 @@ class Recipe(recipe.Recipe):
     files_devel = ['lib/libffi-3.0.11', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
+            self.autoreconf = False
             if self.config.target_arch == Architecture.X86_64:
                 dir = 'x86_64-apple-darwin*'
             elif self.config.target_arch == Architecture.X86:
                 dir = 'i386-apple-darwin*'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
+            elif self.config.target_arch == Architecture.ARMv7:
+                dir = 'arm-apple-darwin*'
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir

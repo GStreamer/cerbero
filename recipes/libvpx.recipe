@@ -42,7 +42,12 @@ class Recipe(recipe.Recipe):
                 platform = 'darwin10'
             if self.config.target_arch == Architecture.PPC:
                 platform = 'darwin9'
-
+        elif self.config.target_platform == Platform.IOS:
+            platform = 'darwin'
+            if self.config.target_arch == Architecture.ARM:
+                arch = 'armv6'
+            elif self.config.target_arch == Architecture.ARMv7:
+                arch = 'armv7'
         elif self.config.target_platform == Platform.WINDOWS:
             self.config_sh = 'LD=$CC ./configure'
             if self.config.target_arch == Architecture.X86_64:
