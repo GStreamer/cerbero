@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gstreamer-sharp'
     version = '0.9.1-git'
     licenses = [License.LGPLv2_1Plus]
-    configure_options = "--disable-instrospection --disable-examples "\
+    configure_options = "--disable-introspection --disable-examples "\
             " --with-package-origin='http://www.gstreamer.com' "\
             " --with-package-name='GStreamer C# Bindings (GStreamer SDK)'"
     remotes = {'upstream':
