@@ -265,12 +265,11 @@ class Autotools (MakefilesBase):
             if self.config.target is not None:
                 self.configure_tpl += ' --target=%(target)s'
 
-
         use_configure_cache = self.config.use_configure_cache
         if self.use_system_libs and self.config.allow_system_libs:
             use_configure_cache = False
 
-        if self.new_env is not None or self.append_env is not None:
+        if self.new_env or self.append_env:
             use_configure_cache = False
 
         if use_configure_cache and self.can_use_configure_cache:
