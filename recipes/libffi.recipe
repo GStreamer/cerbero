@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.0.10'
+    version = '3.0.11'
     licenses = [License.BSD_like]
     autoreconf = True
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.0.10', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.0.11', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.DARWIN:
