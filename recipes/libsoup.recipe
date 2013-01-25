@@ -21,7 +21,8 @@ class Recipe(recipe.Recipe):
                  DistroVersion.UBUNTU_PRECISE,
                  DistroVersion.UBUNTU_QUANTAL,
                  DistroVersion.FEDORA_16,
-                 DistroVersion.FEDORA_17]:
+                 DistroVersion.FEDORA_17,
+                 DistroVersion.FEDORA_18]:
             self.deps += [ 'glib-networking' ]
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' --disable-tls-check'

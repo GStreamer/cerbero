@@ -57,6 +57,7 @@ class DistroVersion:
     UBUNTU_QUANTAL = 'ubuntu_quantal'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
+    FEDORA_18 = 'fedora_18'
     REDHAT_6 = 'redhat_6'
     OPENSUSE_12_1 = 'opensuse_12_1'
     WINDOWS_XP = 'windows_xp'
