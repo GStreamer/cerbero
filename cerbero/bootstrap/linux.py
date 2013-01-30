@@ -66,6 +66,8 @@ class DebianBootstraper (UnixBootstraper):
         if self.config.distro_version in [DistroVersion.DEBIAN_SQUEEZE,
                 DistroVersion.UBUNTU_MAVERICK, DistroVersion.UBUNTU_LUCID]:
             self.packages.remove('glib-networking')
+        if self.config.distro_version in [DistroVersion.UBUNTU_LUCID]:
+            self.packages.remove('autopoint')
 
 
 
