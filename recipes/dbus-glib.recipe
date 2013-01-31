@@ -23,3 +23,8 @@ class Recipe(recipe.Recipe):
                 self.config.platform != Platform.WINDOWS:
             self.configure_options += \
                 "--with-dbus-binding-tool=/usr/bin/dbus-binding-tool"
+        if self.config.target_platform == Platform.ANDROID and\
+                self.config.platform != Platform.ANDROID:
+            self.configure_options += \
+                "--with-dbus-binding-tool=/usr/bin/dbus-binding-tool"
+
