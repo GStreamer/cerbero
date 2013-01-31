@@ -41,9 +41,9 @@ class BuildTools (BootstraperBase):
         if self.config.platform == Platform.DARWIN:
             self.BUILD_TOOLS.append('gperf')
             # We need tar with support for .xz in Snow Leopard
-            if self.config.distro_version in [DistroVersion.OS_X_SNOW_LEOPARD]:
+            if self.config.distro_version in [DistroVersion.OS_X_LION, DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LEOPARD]:
+                self.BUILD_TOOLS.insert(0, 'xz')
                 self.BUILD_TOOLS.insert(0, 'tar')
-                self.BUILD_TOOLS.append('xz')
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
