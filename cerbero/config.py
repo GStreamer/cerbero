@@ -79,7 +79,8 @@ class Config (object):
                    'external_packages', 'use_ccache', 'force_git_commit',
                    'universal_archs', 'osx_target_sdk_version', 'variants',
                    'build_tools_prefix', 'build_tools_sources',
-                   'build_tools_cache', 'home_dir', 'recipes_commits']
+                   'build_tools_cache', 'home_dir', 'recipes_commits',
+                   'ios_platform']
 
     def __init__(self):
         self._check_uninstalled()
