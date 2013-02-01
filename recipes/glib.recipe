@@ -120,21 +120,6 @@ class Recipe(recipe.Recipe):
                 from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
 
-    def configure(self):
-        if self.config.target_platform == Platform.IOS:
-            # Use a cache file specific to the GLib to make cross compilation possible
-            cache = os.path.join(self.build_dir, ".glib.configure.cache")
-            if not os.path.exists(cache):
-                writer = open(cache, 'w')
-                writer.write("glib_cv_stack_grows=no\n"
-                             "glib_cv_uscore=yes\n"
-                             "ac_cv_func_posix_getpwuid_r=yes\n"
-                             "ac_cv_func_posix_getgrgid_r=yes\n"
-                             "gt_cv_c_wchar_t=no")
-                writer.close()
-            self.configure_options += ' --cache-file=%s' % cache
-        super(recipe.Recipe, self).configure()
-
     def post_install(self):
         import shutil
         if self.config.target_platform == Platform.WINDOWS:
