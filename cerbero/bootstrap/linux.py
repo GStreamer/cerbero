@@ -89,12 +89,16 @@ class RedHatBootstraper (UnixBootstraper):
 class OpenSuseBootstraper (UnixBootstraper):
 
     tool = 'sudo zypper install %s'
-    packages = ['intltool', 'cmake', 'gcc-c++', 'doxygen', 'gtk-doc',
-            'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make', 'gcc',
-            'curl', 'gettext-tools', 'alsa-devel', 'yasm', 'gperf',
-            'docbook-xsl-stylesheets', 'transfig', 'xorg-x11-libXrender-devel',
-            'xorg-x11-libXv-devel', 'Mesa-devel', 'python-devel',
-            'patterns-openSUSE-devel_rpm_build', 'wget', 'glib-networking']
+    packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
+            'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'yasm',
+            'gtk-doc', 'curl', 'doxygen', 'texinfo',
+            'texlive', 'docbook-xsl-stylesheets',
+            'transfig', 'intltool', 'patterns-openSUSE-devel_rpm_build',
+            'python-devel', 'xorg-x11-libXrender-devel', 'libpulse-devel',
+            'xorg-x11-libXv-devel', 'Mesa-libGL-devel', 'libXcomposite-devel',
+            'alsa-devel', 'libXi-devel', 'Mesa-devel',
+            'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
+            'docbook-utils', 'glib-networking']
 
 
 def register_all():
