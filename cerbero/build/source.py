@@ -92,6 +92,9 @@ class Tarball (Source):
             self.tarball_name = self.replace_name_and_version(self.tarball_name)
         else:
             self.tarball_name = os.path.basename(self.url)
+        if self.tarball_dirname is not None:
+            self.tarball_dirname = \
+                self.replace_name_and_version(self.tarball_dirname)
         self.download_path = os.path.join(self.repo_dir, self.tarball_name)
 
     def fetch(self):
