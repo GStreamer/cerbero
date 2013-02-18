@@ -81,5 +81,11 @@ class Recipe(custom.GStreamerStatic):
             libtool_la.change_value ('dlname', '')
             libtool_la.change_value ('library_names', '')
             libtool_la.save()
+        gstffmpeglib = os.path.join(self.config.prefix, 'lib', 'gstreamer-0.10',
+                'static', 'libgstffmpeg.la')
+        shell.replace (gstffmpeglib,
+                {'-lavformat': os.path.join(self.config.libdir, 'libavformat.la'),
+                '-lavcodec': os.path.join(self.config.libdir, 'libavcodec.la'),
+                '-lavutil': os.path.join(self.config.libdir, 'libavutil.la')})
 
         super(Recipe, self).post_install()
