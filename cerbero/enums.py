@@ -60,6 +60,7 @@ class DistroVersion:
     FEDORA_18 = 'fedora_18'
     REDHAT_6 = 'redhat_6'
     OPENSUSE_12_1 = 'opensuse_12_1'
+    OPENSUSE_12_2 = 'opensuse_12_2'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
