@@ -111,4 +111,5 @@ class Recipe(custom.GStreamerStatic):
             self.use_system_libs = True
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
+        custom.GStreamerStatic.prepare(self)
 
