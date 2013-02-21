@@ -44,6 +44,8 @@ class BuildTools (BootstraperBase):
             if self.config.distro_version in [DistroVersion.OS_X_LION, DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LEOPARD]:
                 self.BUILD_TOOLS.insert(0, 'xz')
                 self.BUILD_TOOLS.insert(0, 'tar')
+        if self.config.target_platform == Platform.IOS:
+            self.BUILD_TOOLS.append('gas-preprocessor')
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
