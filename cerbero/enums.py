@@ -72,6 +72,7 @@ class DistroVersion:
     OS_X_SNOW_LEOPARD = 'osx_snow_leopard'
     OS_X_LEOPARD = 'osx_leopard'
     IOS_6_0 = 'ios_6_0'
+    IOS_6_1 = 'ios_6_1'
     ANDROID_GINGERBREAD = 'android_gingerbread' # API Level 9
     ANDROID_ICE_CREAM_SANDWICH = 'android_ice_cream_sandwich' # API Level 14
     ANDROID_JELLY_BEAN = 'android_jelly_bean' # API Level 16
