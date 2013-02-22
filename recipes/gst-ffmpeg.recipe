@@ -32,24 +32,26 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:
                 opts = '--extra-cflags=-mincoming-stack-boundary=4'
+        if self.config.target_platform == Platform.IOS:
+            opts = "--enable-cross-compile --target-os=darwin --cross-prefix='' --arch=%s "\
+                   "--cc='$CC' --as='$GAS' --ar='$AR' --nm='$NM' --extra-cflags='$CFLAGS'" % self.config.target_arch
         if opts:
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
                 f.write(opts)
         super(recipe.Recipe, self).configure()
 
-        if self.config.target_platform == Platform.DARWIN:
+        libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
+        replacements = {}
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
-                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
-                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
-                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
-                shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-
+                replacements['HAVE_EBX_AVAILABLE=yes'] = 'HAVE_EBX_AVAILABLE=no'
+                replacements['HAVE_EBX_AVAILABLE 1'] = 'HAVE_EBX_AVAILABLE 0'
         # log2 and log2f are not provided by bionic, but they are not checked
         # properly
         if self.config.target_platform == Platform.ANDROID:
-                libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
-                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
-                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+                replacements['HAVE_LOG2 1'] = 'HAVE_LOG2 0'
+                replacements['HAVE_LOG2F 1'] = 'HAVE_LOG2F 0'
+        if replacements:
+            shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
+            shell.replace(os.path.join(libav_path, 'config.h'), replacements)
