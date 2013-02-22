@@ -1,0 +1,9 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'sed'
+    version = '4.2'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/gnu/sed/sed-4.2.tar.gz'
