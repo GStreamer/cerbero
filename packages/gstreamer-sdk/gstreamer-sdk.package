@@ -64,7 +64,7 @@ class SDKPackage(package.SDKPackage):
 
 
     def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             p = ['gstreamer-clutter', 'gstreamer-python', 'gtk+-2.0',
                  'gtk+-2.0-python', 'snappy', 'gstreamer-dvd',
                  'gstreamer-tests']

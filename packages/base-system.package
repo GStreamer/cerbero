@@ -28,5 +28,6 @@ class Package(package.Package):
         Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang',
             'libcroco:libs', 'librsvg:libs:loader'],
         Platform.LINUX: ['libcroco:libs', 'librsvg:libs:loader'],
-        Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'gnustl']
+        Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'gnustl'],
+        Platform.IOS: ['gettext:libs:lang', 'libiconv:libs:lang']
         }

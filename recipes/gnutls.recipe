@@ -29,3 +29,5 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-hardware-acceleration'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-cxx'
+        if self.config.target_platform == Platform.IOS:
+            self.configure_options += ' --disable-cxx'
