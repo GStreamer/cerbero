@@ -20,3 +20,7 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86:
                 self.configure_options += ' --disable-asm'
             self.autoreconf = True
+        if self.config.target_platform == Platform.IOS:
+            self.configure_options = ' --disable-xv --without-x'
+            if self.config.target_arch == Architecture.X86:
+                self.configure_options += ' --disable-asm'

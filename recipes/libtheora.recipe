@@ -20,3 +20,5 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options = ' --disable-spec --disable-doc'
             self.config_sh = 'sh autogen.sh'
+        elif self.config.target_platform == Platform.IOS:
+            self.configure_options = ' --disable-spec --disable-doc'
