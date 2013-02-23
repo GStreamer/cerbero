@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.11.x'
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-introspection --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK) '"
+    configure_options = "--program-prefix= --disable-instrospection --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK) '"
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     commit = 'upstream/1.0'
     deps = ['glib', 'libxml2', 'gtk-doc-lite']
