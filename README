@@ -29,7 +29,9 @@ which is already included in python2.7
 
 OSX
 ---
-On OSX you will need to have XCode installed and macports (used to install pkg-config)
+On OSX you will need to have install the following software:
+  * XCode
+  * CMake: http://www.cmake.org/files/v2.8/cmake-2.8.10.2-Darwin64-universal.dmg
 
 Windows
 -------
