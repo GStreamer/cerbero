@@ -157,12 +157,12 @@ class Recipe(recipe.Recipe):
         self.append_env['CFLAGS'] = " -Wno-error "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                 ' --disable-cog --disable-sdl '\
-                '--disable-cdaudio --disable-gtk-doc'
-        if self.config.target_platform == Platform.DARWIN:
-            self.configure_options += ' --disable-gtk-doc'
+                '--disable-cdaudio'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-dccp'
             self.files_codecs.remove('lib/gstreamer-1.0/libgstdccp%(mext)s')

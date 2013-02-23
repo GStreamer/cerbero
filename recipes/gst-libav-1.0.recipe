@@ -16,6 +16,9 @@ class Recipe(recipe.Recipe):
     files_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
 
     def prepare(self):
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc'
+
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
                 asflags = ' -arch x86_64 -m64'

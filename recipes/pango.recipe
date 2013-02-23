@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]
-    configure_options = '--with-included-modules --enable-static'
+    configure_options = '--with-included-modules --enable-static --disable-gtk-doc'
     deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite']
     platform_deps = {
         Platform.WINDOWS: ['libstdc++'],
@@ -28,5 +28,7 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform in [Platform.DARWIN, Platform.ANDROID, Platform.IOS]:
             self.configure_options += ' --without-x '

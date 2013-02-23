@@ -69,6 +69,8 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-papi --disable-cups '
         elif self.config.target_platform == Platform.DARWIN:

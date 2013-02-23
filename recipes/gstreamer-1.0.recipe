@@ -43,5 +43,5 @@ class Recipe(recipe.Recipe):
         self.append_env['CFLAGS'] = " -Wno-error "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
-            self.configure_options += ' --disable-gtk-doc'
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc --disable-docbook'
