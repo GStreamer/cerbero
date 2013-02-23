@@ -5,14 +5,12 @@ class Recipe(recipe.Recipe):
     name = 'libffi'
     version = '3.0.11'
     licenses = [License.BSD_like]
-    autoreconf = True
 
     files_libs = ['libffi']
     files_devel = ['lib/libffi-3.0.11', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
-            self.autoreconf = False
             if self.config.target_arch == Architecture.X86_64:
                 dir = 'x86_64-apple-darwin*'
             elif self.config.target_arch == Architecture.X86:
@@ -24,5 +22,3 @@ class Recipe(recipe.Recipe):
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
-        if self.config.target_platform == Platform.WINDOWS:
-            self.autoreconf = True
