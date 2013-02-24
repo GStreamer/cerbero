@@ -33,6 +33,7 @@ from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
 from cerbero.packages.osx.buildtools import PackageBuild, ProductBuild
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import shell, _
+from cerbero.tools import strip
 from cerbero.utils import messages as m
 
 
@@ -392,7 +393,12 @@ class ApplicationPackage(PackagerBase):
         return packager.create_bundle(self.appdir)
 
     def _strip_binaries(self):
-        pass
+        if self.package.strip:
+            bin_dir = os.path.join(self.appdir, 'Contents', 'Home', 'bin')
+            lib_dir = os.path.join(self.appdir, 'Contents', 'Home', 'lib')
+            s = strip.Strip(self.config)
+            s.strip_dir(bin_dir)
+            s.strip_dir(lib_dir)
 
     def _relocate_binaries(self):
         prefix = self.config.prefix
