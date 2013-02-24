@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
         self.make = 'cd %s && make' % intl_path
         self.make_install = 'cd %s && make PACKAGE=gettext-tools install' % intl_path
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--enable-threads=win32'
+            self.configure_options += ' --enable-threads=win32'
         elif self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
             self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
