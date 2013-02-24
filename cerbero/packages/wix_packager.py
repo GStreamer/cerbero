@@ -17,6 +17,8 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import tempfile
+import shutil
 from zipfile import ZipFile
 
 from cerbero.errors import EmptyPackageError
@@ -24,6 +26,7 @@ from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
 from cerbero.utils import messages as m
 from cerbero.utils import shell, to_winepath, get_wix_prefix
+from cerbero.tools import strip
 from cerbero.packages.wix import MergeModule, VSMergeModule, MSI, WixConfig
 from cerbero.packages.wix import VSTemplatePackage
 from cerbero.config import Platform
@@ -61,6 +64,25 @@ class MergeModulePackager(PackagerBase):
             mergemodule = VSMergeModule(self.config, files_list, self.package)
         else:
             mergemodule = MergeModule(self.config, files_list, self.package)
+        tmpdir = None
+        # For application packages that requires stripping object files, we need
+        # to copy all the files to a new tree and strip them there:
+        if isinstance(self.package, App) and self.package.strip:
+            tmpdir = tempfile.mkdtemp()
+            for f in files_list:
+                src = os.path.join(self.config.prefix, f)
+                dst = os.path.join(tmpdir, f)
+                if not os.path.exists(os.path.dirname(dst)):
+                    os.makedirs(os.path.dirname(dst))
+                shutil.copy(src, dst)
+            s = strip.Strip(self.config)
+            s.strip_dir(os.path.join(tmpdir, 'bin'))
+            s.strip_dir(os.path.join(tmpdir, 'lib'))
+
+
+        mergemodule = MergeModule(self.config, files_list, self.package)
+        if tmpdir:
+            mergemodule.prefix = tmpdir
         package_name = self._package_name(version)
         sources = [os.path.join(output_dir, "%s.wxs" % package_name)]
         mergemodule.write(sources[0])
@@ -89,6 +111,8 @@ class MergeModulePackager(PackagerBase):
                     os.remove(f.replace('.wixobj', '.wixpdb'))
                 except:
                     pass
+        if tmpdir:
+            shutil.rmtree(tmpdir)
 
         return path
 
