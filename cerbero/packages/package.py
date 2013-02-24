@@ -480,6 +480,8 @@ class App(PackageBase):
     @type command: list
     @cvar wrapper: suffix filename for the main executable wrapper
     @type wrapper: str
+    @cvar strip: strip binaries for this package
+    @type strip: bool
     '''
 
     app_name = None
@@ -489,6 +491,7 @@ class App(PackageBase):
     commands = []  # list of tuples ('CommandName', path/to/binary')
     wrapper = 'app_wrapper.tpl'
     resources_wix_installer = None
+    strip = False
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
