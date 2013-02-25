@@ -195,12 +195,12 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path and self._prefix_is_executable():
+        if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
         path = self._join_path(
                 os.path.join(self.build_tools_prefix, 'bin'), path)
 
-        if self._prefix_is_executable():
+        if self.prefix_is_executable():
             ld_library_path = libdir
         else:
             ld_library_path = ""
@@ -302,6 +302,16 @@ class Config (object):
             return self.recipes_commits[recipe_name]
         return None
 
+    def prefix_is_executable(self):
+        if self.target_platform != self.platform:
+            return False
+        if self.target_arch != self.arch:
+            if self.target_arch == Architecture.X86 and \
+                    self.arch == Architecture.X86_64:
+                return True
+            return False
+        return True
+
     def _parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
         if not reset:
@@ -343,16 +353,6 @@ class Config (object):
         else:
             separator = ':'
         return "%s%s%s" % (path1, separator, path2)
-
-    def _prefix_is_executable(self):
-        if self.target_platform != self.platform:
-            return False
-        if self.target_arch != self.arch:
-            if self.target_arch == Architecture.X86 and \
-                    self.arch == Architecture.X86_64:
-                return True
-            return False
-        return True
 
     def _load_main_config(self):
         if os.path.exists(DEFAULT_CONFIG_FILE):
