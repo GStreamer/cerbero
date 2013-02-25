@@ -8,8 +8,6 @@ class Recipe(recipe.Recipe):
     configure_options = ' --enable-static'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
-    make = 'make -C glib && make -C gthread && make -C gobject'
-    make_install = 'make -C glib  install && make -C gthread install && make -C gobject install'
     platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
                      Platform.DARWIN: ['libiconv', 'gettext'],
                      Platform.IOS: ['libiconv', 'gettext'],
