@@ -5,4 +5,3 @@ target_arch=Architecture.X86
 target_distro=Distro.IOS
 target_distro_version=DistroVersion.IOS_6_1
 host='i386-apple-darwin'
-ios_platform='iPhoneSimulator'
