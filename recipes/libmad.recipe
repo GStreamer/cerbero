@@ -9,6 +9,10 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/mad.h']
 
     def prepare(self):
+        if self.config.target_platform == Platform.IOS:
+            self.autoreconf = True
+            self.configure_options += ' --enable-fpm=default '
+            self.new_env = {'CCAS': os.environ['GAS']}
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
             if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
