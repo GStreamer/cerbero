@@ -29,8 +29,8 @@ class BuildTools (BootstraperBase):
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
                    'orc-tool', 'gettext-m4', 'gettext-tools']
     PLAT_BUILD_TOOLS = {
-            Platform.DARWIN: ['intltool', 'yasm'],
-            Platform.WINDOWS: ['intltool', 'yasm'],
+            Platform.DARWIN: ['intltool', 'yasm', 'cmake'],
+            Platform.WINDOWS: ['intltool', 'yasm', 'cmake'],
             }
 
     def __init__(self, config):

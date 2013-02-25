@@ -1,0 +1,17 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'cmake'
+    version = '2.8.10.2'
+    licenses = [License.BSD_like]
+    stype = SourceType.TARBALL
+    url = 'http://www.cmake.org/files/v2.8/cmake-2.8.10.2.tar.gz'
+    deps = ['autoconf']
+
+    add_host_build_target = False
+    config_sh = './bootstrap'
+    configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
+
+    files_bin = ['bin/cmake', 'bin/ccmake']
+
