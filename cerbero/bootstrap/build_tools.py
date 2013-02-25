@@ -46,6 +46,10 @@ class BuildTools (BootstraperBase):
                 self.BUILD_TOOLS.insert(0, 'tar')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
+        if self.config.platform != Platform.LINUX and\
+                not self.config.prefix_is_executable():
+            # For glib-mkenums and glib-genmarshal
+            self.BUILD_TOOLS.append('glib-tools')
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
