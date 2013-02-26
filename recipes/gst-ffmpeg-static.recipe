@@ -43,6 +43,13 @@ class Recipe(custom.GStreamerStatic):
         if self.config.target_platform == Platform.WINDOWS:
             opts = '--cross-prefix=%s- --target-os=mingw32 --arch=%s' %\
                 (self.config.host, self.config.target_arch)
+        if self.config.target_platform == Platform.IOS:
+            opts = "--enable-cross-compile --target-os=darwin --cross-prefix='' --arch=%s "\
+                   "--cc='$CC' --ar='$AR' --nm='$NM' --extra-cflags='$CFLAGS'" % self.config.target_arch
+            if self.config.target_arch == Architecture.X86:
+                opts += ' --as=$AS'
+            else:
+                opts += " --as='$GAS'"
         if opts:
             opts_file = os.path.join(self.build_dir, 'ffmpeg_extra_configure_options')
             with open(opts_file, 'w+') as f:
