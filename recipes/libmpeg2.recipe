@@ -26,13 +26,9 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 arm_f = os.path.join(self.build_dir, 'libmpeg2', 'motion_comp_arm_s.S')
                 shell.replace(arm_f,
-                    {'.global MC_put_o_16_arm': '.global _MC_put_o_16_arm',
-                     'MC_put_o_16_arm:': '_MC_put_o_16_arm:',
-                     '.global MC_put_o_8_arm': '.global _MC_put_o_8_arm',
-                     'MC_put_o_8_arm:': '_MC_put_o_8_arm:',
-                     '.global MC_put_x_16_arm': '.global _MC_put_x_16_arm',
-                     'MC_put_x_16_arm:': '_MC_put_x_16_arm:',
-                     '.global MC_put_x_8_arm': '.global _MC_put_x_8_arm',
-                     'MC_put_x_8_arm:': '_MC_put_x_8_arm:',
+                    {'.global MC_put_o_16_arm\nMC_put_o_16_arm:': '.global _MC_put_o_16_arm\n_MC_put_o_16_arm:',
+                     '.global MC_put_o_8_arm\nMC_put_o_8_arm:': '.global _MC_put_o_8_arm\n_MC_put_o_8_arm:',
+                     '.global MC_put_x_16_arm\nMC_put_x_16_arm:': '.global _MC_put_x_16_arm\n_MC_put_x_16_arm:',
+                     '.global MC_put_x_8_arm\nMC_put_x_8_arm:': '.global _MC_put_x_8_arm\n_MC_put_x_8_arm:',
                     })
         super(recipe.Recipe, self).compile()
