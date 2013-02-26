@@ -28,3 +28,9 @@ class Recipe(recipe.Recipe):
             self.configure_options += \
                 "--with-dbus-binding-tool=/usr/bin/dbus-binding-tool"
 
+    def compile(self):
+        if self.config.target_platform != Platform.WINDOWS:
+            dgb = os.path.join(self.build_dir, 'tools', 'dbus-glib-bindings.h')
+            if os.path.exists(dgb):
+                os.remove(dgb)
+        super(recipe.Recipe, self).compile()
