@@ -105,7 +105,7 @@ class Recipe(custom.GStreamerStatic):
                 '--disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--disable-gtk-doc'
-        if self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.configure_options += '--disable-pulse --disable-x'
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True

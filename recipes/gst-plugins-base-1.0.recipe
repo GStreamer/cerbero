@@ -118,5 +118,5 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
-        if self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.configure_options += ' --disable-alsa'
