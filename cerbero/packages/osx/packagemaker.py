@@ -16,14 +16,26 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+
 from cerbero.utils import shell
+
+PACKAGE_MAKER_PATHS = [
+        '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/',
+        '/Applications/PackageMaker.app/Contents/MacOS/'
+        ]
+
+def get_package_maker_path():
+    for p in PACKAGE_MAKER_PATHS:
+        if os.path.exists(p):
+            return p
+    return None
 
 
 class PackageMaker(object):
     ''' Wrapper for the PackageMaker application '''
 
-    PACKAGE_MAKER_PATH = \
-        '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/'
+    PACKAGE_MAKER_PATH = get_package_maker_path()
     CMD = './PackageMaker'
 
     def create_package(self, root, pkg_id, version, title, output_file,
