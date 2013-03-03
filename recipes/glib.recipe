@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     name = 'glib'
     version = '2.34.2'
     licenses = [License.LGPLv2Plus]
-    configure_sh = 'sh autogen.sh'
+    config_sh = 'sh autogen.sh'
     configure_options = ' --enable-static'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
@@ -89,7 +89,6 @@ class Recipe(recipe.Recipe):
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
             if self.config.target_platform == Platform.IOS:
-                self.autoreconf = True
                 # Disable mac OS X specifics
                 self.configure_options += ' --disable-carbon --enable-dtrace=no --disable-modular-tests --disable-cocoa'
         elif self.config.target_platform == Platform.LINUX:
