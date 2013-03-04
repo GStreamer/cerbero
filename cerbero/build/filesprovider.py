@@ -241,7 +241,7 @@ class FilesProvider(object):
                 pattern += 'lib/%(f)s.dll.a '
                 pattern += 'lib/%(f)s.def '
                 pattern += 'lib/%(fnolib)s.lib '
-            elif self.platform == Platform.DARWIN:
+            elif self.platform in [Platform.DARWIN, Platform.IOS]:
                 pattern += 'lib/%(f)s.dylib '
 
             libsmatch = [pattern % {'f':x, 'fnolib': x[3:]} for x in \
