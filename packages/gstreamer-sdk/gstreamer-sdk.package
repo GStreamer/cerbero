@@ -61,6 +61,7 @@ class SDKPackage(package.SDKPackage):
             },
         }
     osx_framework_library = ('GStreamer', 'lib/GStreamer')
+    ios_framework_library = ('GStreamer', 'lib/GStreamer')
 
 
     def prepare(self):

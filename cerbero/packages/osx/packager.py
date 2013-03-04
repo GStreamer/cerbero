@@ -22,6 +22,7 @@ import shutil
 
 from cerbero.config import Architecture
 from cerbero.ide.pkgconfig import PkgConfig
+from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, MetaPackage, SDKPackage, App,\
@@ -398,6 +399,78 @@ class ApplicationPackage(PackagerBase):
         shell.call(cmd)
         return dmg_file
 
+class IOSFrameworkPackage(PackagerBase):
+    def __init__(self, config, package, store):
+        PackagerBase.__init__(self, config, package, store)
+        self.packages = self.store.get_package_deps(package)
+
+    def pack(self, output_dir, devel=False, force=False, keep_temp=False):
+        PackagerBase.pack(self, output_dir, devel, force, keep_temp)
+
+        framework_name = self.package.ios_framework_library[0]
+
+        self.include_dirs = PkgConfig.list_all_include_dirs()
+        self.tmp = tempfile.mkdtemp()
+        out_dir = self.fw_path = os.path.join(self.tmp, "%s.framework" % framework_name)
+        shell.call ('mkdir -p %s' % self.fw_path, self.tmp)
+        self._create_framework_bundle_package()
+
+        root_dir = os.path.join(self.fw_path, "Versions", "Current")
+
+        static_libs = []
+
+        for p in self.packages:
+            m.action(_("Creating package %s ") % p)
+            packager = OSXPackage(self.config, p, self.store)
+            try:
+                files = packager.files_list(PackageType.DEVEL, force)
+            except EmptyPackageError, e:
+                files = []
+            for f in files:
+                #TODO merge together into common file copy routine
+                in_path = os.path.join(self.config.prefix, f)
+                if not os.path.exists(in_path):
+                    m.warning("File %s is missing and won't be added to the "
+                              "package" % in_path)
+                    continue
+
+                if os.path.splitext(f)[-1] == '.a':
+                    static_libs.append(in_path) #libs are merged together later
+
+                out_path = os.path.join(root_dir, f)
+                odir = os.path.split(out_path)[0]
+                if not os.path.exists(odir):
+                    os.makedirs(odir)
+                shutil.copy(in_path, out_path)
+
+        install_name = os.path.join(root_dir, 'lib', framework_name)
+        self._create_merged_lib(install_name, static_libs)
+
+        #create <framework>/Versions/Current/<framework> file
+        shell.call('cp %s %s' % (install_name, root_dir))
+
+        return [None, self._create_dmg()]
+
+    def _create_merged_lib (self, install_name, libs_list):
+        fwlib = StaticFrameworkLibrary()
+        fwlib.create(install_name, install_name, libs_list, self.config.target_arch, False)
+
+    def _create_dmg(self):
+        dmg_file = os.path.join(self.output_dir, '%s-%s-ios-%s.dmg' % (
+           self.package.name, self.package.version, self.config.target_arch))
+        # Create Disk Image
+        cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
+                (dmg_file, self.package.name, self.tmp)
+        shell.call(cmd)
+        return dmg_file
+
+    def _create_framework_bundle_package(self):
+        m.action(_("Creating framework package"))
+        packager = FrameworkBundlePackager(self.package, 'ios-framework',
+                'Framework Bundle',
+                'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+        path = packager.create_bundle(self.fw_path)
+        return path
 
 
 class Packager(object):
@@ -415,4 +488,5 @@ def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
     register_packager(Distro.OS_X, Packager)
+    register_packager(Distro.IOS, IOSFrameworkPackage)
 

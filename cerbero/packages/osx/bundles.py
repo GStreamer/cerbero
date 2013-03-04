@@ -68,7 +68,7 @@ class BundlePackagerBase(PackagerBase):
             install_dir, target=None)
         return output_file
 
-    def create_bundle(self):
+    def create_bundle(self, target_dir=None):
         '''
         Creates the bundle structure
         '''
@@ -88,7 +88,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
     def __init__(self, package, name, desc, uuid):
         BundlePackagerBase.__init__(self, package, name, desc, uuid)
 
-    def create_bundle(self):
+    def create_bundle(self, target_dir=None):
         '''
         Creates the bundle structure
 
@@ -100,7 +100,10 @@ class FrameworkBundlePackager(BundlePackagerBase):
         Versions/Current -> Version/$VERSION/$ARCH
         Framework -> Versions/Current/Famework
         '''
-        tmp = tempfile.mkdtemp()
+        if target_dir:
+            tmp = target_dir
+        else:
+            tmp = tempfile.mkdtemp()
 
         if self.config.target_arch == Architecture.UNIVERSAL:
             arch_dir = ''

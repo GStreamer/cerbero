@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'gstreamer-ios-framework'
+    version = '0.1'
+    licenses = [License.LGPL]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+    deps = ['gstreamer-static', 'gst-plugins-base-static',
+            'gst-plugins-good-static', 'gst-plugins-ugly-static',
+            'gst-plugins-bad-static', 'gst-ffmpeg-static']
+
+    files_library = ['lib/GStreamer']
