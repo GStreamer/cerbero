@@ -260,6 +260,11 @@ class UniversalRecipe(object):
         self._recipes = {}
         self._proxy_recipe = None
 
+    def __str__(self):
+        if self._recipes.values():
+            return str(self._recipes.values()[0])
+        return super(UniversalRecipe, self).__str__()
+
     def add_recipe(self, recipe):
         '''
         Adds a new recipe to the group
