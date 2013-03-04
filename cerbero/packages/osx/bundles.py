@@ -141,7 +141,8 @@ class FrameworkBundlePackager(BundlePackagerBase):
             shell.call ('ln -s %s %s' % (src, dest), inner_tmp)
 
         # Copy the framework library to Versions/$VERSION/$ARCH/Framework
-        if self.package.osx_framework_library is not None:
+        if self.package.osx_framework_library is not None \
+                and os.path.exists(os.path.join(self.config.prefix, link)):
             shell.call ('mkdir -p %s' % vdir, tmp)
             shutil.copy(os.path.join(self.config.prefix, link),
                         os.path.join(tmp, vdir, name))
