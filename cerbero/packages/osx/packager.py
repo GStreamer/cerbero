@@ -35,6 +35,73 @@ from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
+def _create_framework_headers(prefix, include_dirs, tmp):
+    '''
+    To create a real OS X Framework we need to get rid of the versioned
+    directories for headers.
+    We should still keep the current tree in $PREFIX/include/ so that it
+    still works with pkg-config, but we will create a new $PREFIX/Headers
+    folder with links to the include directories removing the versioned
+    directories with the help of pkg-config getting something like:
+      include/gstreamer-0.10/gst/gst.h -> Headers/gst/gst.h
+      include/zlib.h -> Headers/zlib.h
+    '''
+    # Replace prefix path with the temporal directory one
+    include_dirs = [x.replace(os.path.abspath(prefix), tmp)
+                    for x in include_dirs]
+    # Remove trailing /
+    include_dirs = [os.path.abspath(x) for x in include_dirs]
+    # Remove 'include' dir
+    include_dirs = [x for x in include_dirs if not
+                    x.endswith(os.path.join(tmp, 'include'))]
+    include_dirs = [x for x in include_dirs if os.path.isdir(x)]
+
+    include = os.path.join(tmp, 'include/')
+    headers = os.path.join(tmp, 'Headers')
+    _copy_unversioned_headers(include, include, headers, include_dirs)
+    _copy_versioned_headers(headers, include_dirs)
+
+def _copy_versioned_headers(headers, include_dirs):
+    # Path is listed as an includes dir by pkgconfig
+    # Copy files and directories to Headers
+    for inc_dir in include_dirs:
+        if not os.path.exists(inc_dir):
+            continue
+        for p in os.listdir(inc_dir):
+            src = os.path.join(inc_dir, p)
+            dest = os.path.join(headers, p)
+            if not os.path.exists(os.path.dirname(dest)):
+                os.makedirs(os.path.dirname(dest))
+            # include/cairo/cairo.h -> Headers/cairo.h
+            if os.path.isfile(src):
+                shutil.copy(src, dest)
+            # include/gstreamer-0.10/gst -> Headers/gst
+            elif os.path.isdir(src):
+                shell.copy_dir(src, dest)
+
+def _copy_unversioned_headers(dirname, include, headers,
+                              include_dirs):
+    if not os.path.exists(dirname):
+        return
+
+    for path in os.listdir(dirname):
+        path = os.path.join(dirname, path)
+        rel_path = path.replace(include, '')
+        # include/zlib.h -> Headers/zlib.h
+        if os.path.isfile(path):
+            p = os.path.join(headers, rel_path)
+            d = os.path.dirname(p)
+            if not os.path.exists(d):
+                os.makedirs(d)
+            shutil.copy(path, p)
+        # scan sub-directories
+        elif os.path.isdir(path):
+            if path in include_dirs:
+                continue
+            else:
+                # Copy the directory
+                _copy_unversioned_headers(path, include,
+                        headers, include_dirs)
 
 
 class OSXPackage(PackagerBase):
@@ -121,7 +188,7 @@ class OSXPackage(PackagerBase):
                 os.makedirs(out_dir)
             shutil.copy(in_path, out_path)
         if package_type == PackageType.DEVEL:
-            self._create_framework_headers(root)
+            _create_framework_headers(self.config.prefix, self.include_dirs, root)
 
         # Copy scripts to the Resources directory
         os.makedirs(resources)
@@ -129,74 +196,6 @@ class OSXPackage(PackagerBase):
             shutil.copy(os.path.join(self.package.resources_preinstall),
                         os.path.join(resources, 'preflight'))
         return root, resources
-
-    def _create_framework_headers(self, tmp):
-        '''
-        To create a real OS X Framework we need to get rid of the versioned
-        directories for headers.
-        We should still keep the current tree in $PREFIX/include/ so that it
-        still works with pkg-config, but we will create a new $PREFIX/Headers
-        folder with links to the include directories removing the versioned
-        directories with the help of pkg-config getting something like:
-          include/gstreamer-0.10/gst/gst.h -> Headers/gst/gst.h
-          include/zlib.h -> Headers/zlib.h
-        '''
-        # Replace prefix path with the temporal directory one
-        include_dirs = [x.replace(os.path.abspath(self.config.prefix), tmp)
-                        for x in self.include_dirs]
-        # Remove trailing /
-        include_dirs = [os.path.abspath(x) for x in include_dirs]
-        # Remove 'include' dir
-        include_dirs = [x for x in include_dirs if not
-                        x.endswith(os.path.join(tmp, 'include'))]
-        include_dirs = [x for x in include_dirs if os.path.isdir(x)]
-
-        include = os.path.join(tmp, 'include/')
-        headers = os.path.join(tmp, 'Headers')
-        self._copy_unversioned_headers(include, include, headers, include_dirs)
-        self._copy_versioned_headers(headers, include_dirs)
-
-    def _copy_versioned_headers(self, headers, include_dirs):
-        # Path is listed as an includes dir by pkgconfig
-        # Copy files and directories to Headers
-        for inc_dir in include_dirs:
-            if not os.path.exists(inc_dir):
-                continue
-            for p in os.listdir(inc_dir):
-                src = os.path.join(inc_dir, p)
-                dest = os.path.join(headers, p)
-                if not os.path.exists(os.path.dirname(dest)):
-                    os.makedirs(os.path.dirname(dest))
-                # include/cairo/cairo.h -> Headers/cairo.h
-                if os.path.isfile(src):
-                    shutil.copy(src, dest)
-                # include/gstreamer-0.10/gst -> Headers/gst
-                elif os.path.isdir(src):
-                    shell.copy_dir(src, dest)
-
-    def _copy_unversioned_headers(self, dirname, include, headers,
-                                  include_dirs):
-        if not os.path.exists(dirname):
-            return
-
-        for path in os.listdir(dirname):
-            path = os.path.join(dirname, path)
-            rel_path = path.replace(include, '')
-            # include/zlib.h -> Headers/zlib.h
-            if os.path.isfile(path):
-                p = os.path.join(headers, rel_path)
-                d = os.path.dirname(p)
-                if not os.path.exists(d):
-                    os.makedirs(d)
-                shutil.copy(path, p)
-            # scan sub-directories
-            elif os.path.isdir(path):
-                if path in include_dirs:
-                    continue
-                else:
-                    # Copy the directory
-                    self._copy_unversioned_headers(path, include,
-                            headers, include_dirs)
 
 
 class PMDocPackage(PackagerBase):
@@ -448,6 +447,8 @@ class IOSFrameworkPackage(PackagerBase):
 
         #create <framework>/Versions/Current/<framework> file
         shell.call('cp %s %s' % (install_name, root_dir))
+
+        _create_framework_headers(self.config.prefix, self.include_dirs, root_dir)
 
         return [None, self._create_dmg()]
 
