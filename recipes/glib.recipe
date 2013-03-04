@@ -7,6 +7,8 @@ GLIB_CONFIG_UNVERSAL='''\
 #include "ppc/glibconfig.h"
 #elif defined(__x86_64__)
 #include "x86_64/glibconfig.h"
+#elif defined(__arm__)
+#include "arm/glibconfig.h"
 #else
 #error "Unsupported Architecture"
 #endif
@@ -129,11 +131,13 @@ class Recipe(recipe.Recipe):
                                      'include', 'glibconfig.h'))
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # For the universal build we need to ship glibconfig.h of both
-            # architectures ina subfolder and include the correct one depending
+            # architectures in a subfolder and include the correct one depending
             # on the compiler architecture
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
+            if arch in [Architecture.ARM, Architecture.ARMv7]:
+                arch = 'arm'
 
             arch_dir = os.path.join(self.config.prefix, 'lib', 'glib-2.0',
                                      'include', arch)
