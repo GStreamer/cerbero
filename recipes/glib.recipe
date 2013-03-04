@@ -127,7 +127,7 @@ class Recipe(recipe.Recipe):
             shutil.copy(os.path.join(self.build_dir, 'glib', 'glibconfig.h.win32'),
                         os.path.join(self.config.prefix, 'lib', 'glib-2.0',
                                      'include', 'glibconfig.h'))
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # For the universal build we need to ship glibconfig.h of both
             # architectures ina subfolder and include the correct one depending
             # on the compiler architecture
