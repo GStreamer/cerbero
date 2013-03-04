@@ -18,6 +18,8 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import tempfile
+import shutil
 
 from cerbero.config import Architecture
 from cerbero.ide.pkgconfig import PkgConfig
@@ -47,7 +49,7 @@ class FrameworkLibrary(object):
         libspaths = []
         for lib in libs:
             for libdir in libdirs:
-                libpath = os.path.join(libdir, 'lib%s.dylib' % lib)
+                libpath = os.path.join(libdir, self._get_lib_file_name (lib))
                 if not os.path.exists(libpath):
                     continue
                 libspaths.append(os.path.realpath(libpath))
@@ -55,8 +57,40 @@ class FrameworkLibrary(object):
         return libspaths
 
     def _create_framework_library(self, libname, install_name, libraries, arch):
+        raise NotImplemented
+
+    def _get_lib_file_name(self, lib):
+        return lib
+
+
+class DynamicFrameworkLibrary(FrameworkLibrary):
+    def _create_framework_library(self, libname, install_name, libraries, arch):
+        extra_options = self._get_create_framework_options (libname)
         libraries = ' '.join(['-Wl,-reexport_library %s' % x for x in libraries])
         shell.call('gcc -dynamiclib -o %s -arch %s -install_name %s %s' %
                    (libname, arch, install_name, libraries))
 
+    def _get_lib_file_name(self, lib):
+        return 'lib%s.dylib' % lib
+
+class StaticFrameworkLibrary(FrameworkLibrary):
+    def _get_lib_file_name(self, lib):
+        return 'lib%s.a' % lib
+
+    def _create_framework_library(self, libname, install_name, libraries, arch):
+        tmpdir = tempfile.mkdtemp()
+
+        for lib in libraries:
+            libprefix = os.path.split(lib)[-1].replace('.', '_')
+            lib_tmpdir = tempfile.mkdtemp()
+            shutil.copy(lib, lib_tmpdir)
+
+            tmplib = os.path.join(lib_tmpdir, os.path.basename(lib))
+            shell.call('ar -x %s' % tmplib, lib_tmpdir)
+
+            obj_files = shell.ls_files(['*.o'], lib_tmpdir)
+            for obj_f in obj_files:
+                shell.call('cp %s %s' % (os.path.join(lib_tmpdir, obj_f), '%s-%s' % (libprefix, obj_f)), tmpdir)
+                shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir)
+        shell.call('ar -s %s' % (libname), tmpdir)
 
