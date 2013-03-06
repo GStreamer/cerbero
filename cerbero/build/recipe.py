@@ -333,6 +333,10 @@ class UniversalRecipe(object):
             # Create a stamp file to list installed files based on the
             # modification time of this file
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
+                time.sleep(2) #wait 2 seconds to make sure new files get the
+                              #proper time difference, this fixes an issue of
+                              #the next recipe to be built listing the previous
+                              #recipe files as their own
                 tmp = tempfile.NamedTemporaryFile()
                 # the modification time resolution depends on the filesystem,
                 # where FAT32 has a resolution of 2 seconds and ext4 1 second
