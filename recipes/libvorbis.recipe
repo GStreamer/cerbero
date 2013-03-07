@@ -19,5 +19,5 @@ class Recipe(recipe.Recipe):
                 # These optimizations make the linker think the object file is not
                 # for the arm architecture
                 shell.replace (os.path.join(self.build_dir, 'configure'),
-                               {'-O4': '-O2'})
+                               {'-O4': '-O2', '-force_cpusubtype_ALL': ' '})
         super(recipe.Recipe, self).configure()
