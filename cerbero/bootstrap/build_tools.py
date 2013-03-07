@@ -29,9 +29,9 @@ class BuildTools (BootstraperBase):
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
                    'orc-tool', 'gettext-m4', 'gettext-tools']
     PLAT_BUILD_TOOLS = {
-            Platform.DARWIN: ['intltool', 'yasm', 'cmake'],
-            Platform.WINDOWS: ['intltool', 'yasm', 'cmake'],
-            }
+        Platform.DARWIN: ['intltool', 'yasm', 'cmake'],
+        Platform.WINDOWS: ['intltool', 'yasm', 'cmake'],
+    }
 
     def __init__(self, config):
         BootstraperBase.__init__(self, config)
@@ -41,7 +41,9 @@ class BuildTools (BootstraperBase):
         if self.config.platform == Platform.DARWIN:
             self.BUILD_TOOLS.append('gperf')
             # We need tar with support for .xz in Snow Leopard
-            if self.config.distro_version in [DistroVersion.OS_X_LION, DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LEOPARD]:
+            if self.config.distro_version in [DistroVersion.OS_X_LION,
+                                              DistroVersion.OS_X_SNOW_LEOPARD,
+                                              DistroVersion.OS_X_LEOPARD]:
                 self.BUILD_TOOLS.insert(0, 'tar')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')

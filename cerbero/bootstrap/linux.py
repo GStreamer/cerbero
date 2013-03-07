@@ -50,14 +50,14 @@ class DebianBootstraper (UnixBootstraper):
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking']
     distro_packages = {
-            DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
-            DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
-            DistroVersion.UBUNTU_LUCID: ['libgtk2.0-dev'],
-            DistroVersion.UBUNTU_NATTY: ['libgtk2.0-dev'],
-            DistroVersion.DEBIAN_WHEEZY: ['libgdk-pixbuf2.0-dev'],
-            DistroVersion.UBUNTU_ONEIRIC: ['libgdk-pixbuf2.0-dev'],
-            DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
-            }
+        DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
+        DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
+        DistroVersion.UBUNTU_LUCID: ['libgtk2.0-dev'],
+        DistroVersion.UBUNTU_NATTY: ['libgtk2.0-dev'],
+        DistroVersion.DEBIAN_WHEEZY: ['libgdk-pixbuf2.0-dev'],
+        DistroVersion.UBUNTU_ONEIRIC: ['libgdk-pixbuf2.0-dev'],
+        DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
+    }
 
     def __init__(self, config):
         UnixBootstraper.__init__(self, config)
@@ -68,7 +68,6 @@ class DebianBootstraper (UnixBootstraper):
             self.packages.remove('glib-networking')
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID]:
             self.packages.remove('autopoint')
-
 
 
 class RedHatBootstraper (UnixBootstraper):

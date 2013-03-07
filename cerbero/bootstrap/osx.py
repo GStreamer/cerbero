@@ -28,11 +28,12 @@ from cerbero.utils import shell
 
 class OSXBootstraper (BootstraperBase):
 
-    GCC_BASE_URL='https://github.com/downloads/kennethreitz/osx-gcc-installer/'
+    GCC_BASE_URL = 'https://github.com/downloads/kennethreitz/'\
+                   'osx-gcc-installer/'
     GCC_TAR = {
-            DistroVersion.OS_X_MOUNTAIN_LION: 'GCC-10.7-v2.pkg',
-            DistroVersion.OS_X_LION: 'GCC-10.7-v2.pkg',
-            DistroVersion.OS_X_SNOW_LEOPARD: 'GCC-10.6.pkg'}
+        DistroVersion.OS_X_MOUNTAIN_LION: 'GCC-10.7-v2.pkg',
+        DistroVersion.OS_X_LION: 'GCC-10.7-v2.pkg',
+        DistroVersion.OS_X_SNOW_LEOPARD: 'GCC-10.6.pkg'}
 
     def start(self):
         # FIXME: enable it when buildbots are properly configured

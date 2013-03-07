@@ -3,7 +3,7 @@
 #       ios.py
 #
 # Copyright (C) 2013 Thibault Saunier <thibaul.saunier@collabora.com>
-# 
+#
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
 # License as published by the Free Software Foundation; either
@@ -29,6 +29,7 @@ from cerbero.config import Distro
 
 
 class IOSBootstraper (BootstraperBase):
+
     def start(self):
         # FIXME: enable it when buildbots are properly configured
         return
