@@ -200,8 +200,9 @@ class Recipe(FilesProvider):
         genlib = GenLib()
         for dllpath in self.libraries():
             try:
-                implib = genlib.create(os.path.join(self.config.prefix, dllpath),
-                        os.path.join(self.config.prefix, 'lib'))
+                implib = genlib.create(
+                    os.path.join(self.config.prefix, dllpath),
+                    os.path.join(self.config.prefix, 'lib'))
                 logging.debug('Created %s' % implib)
             except:
                 m.warning("Could not create .lib, gendef might be missing")
@@ -368,7 +369,8 @@ class UniversalRecipe(object):
                         continue
                     src = os.path.join(self._config.prefix, f)
 
-                    dest = os.path.join(self._config.prefix, recipe.config.target_arch, f)
+                    dest = os.path.join(self._config.prefix,
+                                        recipe.config.target_arch, f)
                     if not os.path.exists(os.path.dirname(dest)):
                         os.makedirs(os.path.dirname(dest))
                     shutil.move(src, dest)

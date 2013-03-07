@@ -23,7 +23,7 @@ import time
 import imp
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
-        DistroVersion, License
+    DistroVersion, License
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
@@ -52,7 +52,8 @@ class RecipeStatus (object):
     @type filepath: str
     '''
 
-    def __init__(self, filepath, steps=[], needs_build=True, mtime=time.time()):
+    def __init__(self, filepath, steps=[], needs_build=True,
+                 mtime=time.time()):
         self.steps = steps
         self.needs_build = needs_build
         self.mtime = mtime
@@ -328,8 +329,7 @@ class CookBook (object):
             try:
                 recipe = self._load_recipe_from_file(f, custom)
             except RecipeNotFoundError:
-                m.warning(_("Could not found a valid recipe in %s") %
-                                f)
+                m.warning(_("Could not found a valid recipe in %s") % f)
             if recipe is None:
                 continue
             recipes[recipe.name] = recipe
@@ -346,8 +346,9 @@ class CookBook (object):
                      'Distro': Distro, 'DistroVersion': DistroVersion,
                      'License': License, 'recipe': crecipe, 'os': os,
                      'BuildSteps': crecipe.BuildSteps,
-                     'InvalidRecipeError': InvalidRecipeError, 'custom': custom}
-                parse_file (filepath, d)
+                     'InvalidRecipeError': InvalidRecipeError,
+                     'custom': custom}
+                parse_file(filepath, d)
                 r = d['Recipe'](self._config.arch_config[c])
                 r.__file__ = os.path.abspath(filepath)
                 r.prepare()
@@ -358,7 +359,8 @@ class CookBook (object):
             except InvalidRecipeError:
                 pass
             except Exception, ex:
-                m.warning("Error loading recipe in file %s %s" % (filepath, ex))
+                m.warning("Error loading recipe in file %s %s" %
+                          (filepath, ex))
         if self._config.target_arch == Architecture.UNIVERSAL:
             if not recipe.is_empty():
                 return recipe

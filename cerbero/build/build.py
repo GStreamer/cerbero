@@ -23,6 +23,7 @@ from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
 import shutil
 
+
 class Build (object):
     '''
     Base class for build handlers
@@ -124,13 +125,13 @@ class MakefilesBase (Build):
     @modify_environment
     def configure(self):
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
-                                          'prefix': to_unixpath(self.config.prefix),
-                                          'libdir': to_unixpath(self.config.libdir),
-                                          'host': self.config.host,
-                                          'target': self.config.target,
-                                          'build': self.config.build,
-                                          'options': self.configure_options},
-                    self.make_dir)
+            'prefix': to_unixpath(self.config.prefix),
+            'libdir': to_unixpath(self.config.libdir),
+            'host': self.config.host,
+            'target': self.config.target,
+            'build': self.config.build,
+            'options': self.configure_options},
+            self.make_dir)
 
     @modify_environment
     def compile(self):
@@ -228,25 +229,29 @@ class Autotools (MakefilesBase):
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.make_dir, 'configure.in')) or\
                 os.path.exists(os.path.join(self.make_dir, 'configure.ac')):
-            self.configure_tpl += " --disable-maintainer-mode --disable-silent-rules "
+            self.configure_tpl += " --disable-maintainer-mode "
+            self.configure_tpl += " --disable-silent-rules "
 
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
 
-        files = shell.check_call('find %s -type f -name config.guess' % self.make_dir).split('\n')
+        files = shell.check_call('find %s -type f -name config.guess' %
+                                 self.make_dir).split('\n')
         files.remove('')
         for f in files:
-            o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.guess')
+            o = os.path.join(self.config._relative_path('data'), 'autotools',
+                             'config.guess')
             m.action("copying %s to %s" % (o, f))
             shutil.copy(o, f)
 
-        files = shell.check_call('find %s -type f -name config.sub' % self.make_dir).split('\n')
+        files = shell.check_call('find %s -type f -name config.sub' %
+                                 self.make_dir).split('\n')
         files.remove('')
         for f in files:
-            o = os.path.join(self.config._relative_path ('data'), 'autotools', 'config.sub')
+            o = os.path.join(self.config._relative_path('data'), 'autotools',
+                             'config.sub')
             m.action("copying %s to %s" % (o, f))
             shutil.copy(o, f)
-
 
         if self.config.platform == Platform.WINDOWS and \
                 self.supports_cache_variables:

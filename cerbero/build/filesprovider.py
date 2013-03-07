@@ -76,8 +76,8 @@ class FilesProvider(object):
         tarball, which include all files except the development files
         '''
 
-        return self.files_list_by_categories([x for x in self.categories \
-                if x != self.DEVEL_CAT])
+        return self.files_list_by_categories(
+            [x for x in self.categories if x != self.DEVEL_CAT])
 
     def files_list(self):
         '''
@@ -136,8 +136,9 @@ class FilesProvider(object):
     def _list_files_by_category(self, category):
         search_category = category
         if category.startswith(self.LIBS_CAT + '_'):
-          search_category = self.LIBS_CAT
-        search = self._searchfuncs.get(search_category, self._searchfuncs['default'])
+            search_category = self.LIBS_CAT
+        search = self._searchfuncs.get(search_category,
+                                       self._searchfuncs['default'])
         return search(self._get_category_files_list(category))
 
     def _search_files(self, files):
@@ -148,10 +149,12 @@ class FilesProvider(object):
         # replace extensions
         fs = [f % self.extensions for f in files]
         # fill directories
-        dirs = [x for x in fs if os.path.isdir(os.path.join(self.config.prefix, x))]
+        dirs = [x for x in fs if
+                os.path.isdir(os.path.join(self.config.prefix, x))]
         for directory in dirs:
             fs.remove(directory)
-            fs.extend(self._ls_dir(os.path.join(self.config.prefix, directory)))
+            fs.extend(self._ls_dir(os.path.join(self.config.prefix,
+                                                directory)))
         # fill paths with pattern expansion *
         paths = [x for x in fs if '*' in x]
         if len(paths) != 0:
@@ -232,7 +235,7 @@ class FilesProvider(object):
         for category in self.categories:
             if category != self.LIBS_CAT and \
                not category.startswith(self.LIBS_CAT + '_'):
-                continue;
+                continue
 
             pattern = 'lib/%(f)s.a lib/%(f)s.la '
             if self.platform == Platform.LINUX:
@@ -244,7 +247,7 @@ class FilesProvider(object):
             elif self.platform in [Platform.DARWIN, Platform.IOS]:
                 pattern += 'lib/%(f)s.dylib '
 
-            libsmatch = [pattern % {'f':x, 'fnolib': x[3:]} for x in \
+            libsmatch = [pattern % {'f': x, 'fnolib': x[3:]} for x in
                          self._get_category_files_list(category)]
             devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
         return devel_libs

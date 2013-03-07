@@ -86,10 +86,12 @@ class Tarball (Source):
     def __init__(self):
         Source.__init__(self)
         if not self.url:
-            raise InvalidRecipeError(_("'url' attribute is missing in the recipe"))
+            raise InvalidRecipeError(
+                _("'url' attribute is missing in the recipe"))
         self.url = self.replace_name_and_version(self.url)
         if self.tarball_name is not None:
-            self.tarball_name = self.replace_name_and_version(self.tarball_name)
+            self.tarball_name = \
+                self.replace_name_and_version(self.tarball_name)
         else:
             self.tarball_name = os.path.basename(self.url)
         if self.tarball_dirname is not None:
@@ -116,7 +118,6 @@ class Tarball (Source):
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
             shell.apply_patch(patch, self.build_dir, self.strip)
-
 
 
 class GitCache (Source):
@@ -180,7 +181,7 @@ class LocalTarball (GitCache):
                    x.startswith(self.package_name)]
         if len(tarball) != 1:
             raise FatalError(_("The local repository %s do not have a "
-                                "valid tarball") % self.repo_dir)
+                             "valid tarball") % self.repo_dir)
         self.tarball_path = os.path.join(self.repo_dir, tarball[0])
 
     def _apply_patches(self, patches_dir):
@@ -270,6 +271,7 @@ class GitExtractedTarball(Git):
             for match in self.matches:
                 if path.endswith(match):
                     self._files[match].append(full_path)
+
 
 class Svn(Source):
     '''
