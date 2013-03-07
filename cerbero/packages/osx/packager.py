@@ -453,8 +453,12 @@ class IOSFrameworkPackage(PackagerBase):
         return [None, self._create_dmg()]
 
     def _create_merged_lib (self, install_name, libs_list):
-        fwlib = StaticFrameworkLibrary()
-        fwlib.create(install_name, install_name, libs_list, self.config.target_arch, False)
+        fwlib = StaticFrameworkLibrary(install_name, install_name, libs_list, self.config.target_arch)
+        fwlib.use_pkgconfig = False
+        if self.config.target_arch == Architecture.UNIVERSAL:
+            fwlib.universal_archs = self.config.universal_archs
+
+        fwlib.create()
 
     def _create_dmg(self):
         dmg_file = os.path.join(self.output_dir, '%s-%s-ios-%s.dmg' % (

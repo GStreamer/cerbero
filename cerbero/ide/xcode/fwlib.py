@@ -34,13 +34,23 @@ class FrameworkLibrary(object):
     but full paths can be used too with use_pkgconfig=False
     '''
 
-    def create(self, libname, install_name, libraries, arch,
-            use_pkgconfig=True):
-        if arch == Architecture.X86:
-            arch = 'i386'
-        if use_pkgconfig:
-            libraries = self._libraries_paths(libraries)
-        self._create_framework_library(libname, install_name, libraries, arch)
+    def __init__(self, libname, install_name, libraries, arch):
+        self.libname = libname
+        self.install_name = install_name
+        self.libraries = libraries
+        self.arch = arch
+        self.use_pkgconfig = True
+        self.universal_archs = None
+
+    def create(self):
+        if self.arch == Architecture.X86:
+            self.arch = 'i386'
+        if self.use_pkgconfig:
+            libraries = self._libraries_paths(self.libraries)
+        else:
+            libraries = self.libraries
+
+        self._create_framework_library(libraries)
 
     def _libraries_paths(self, libraries):
         pkgconfig = PkgConfig(libraries)
@@ -56,7 +66,7 @@ class FrameworkLibrary(object):
                 break
         return libspaths
 
-    def _create_framework_library(self, libname, install_name, libraries, arch):
+    def _create_framework_library(self, libraries):
         raise NotImplemented
 
     def _get_lib_file_name(self, lib):
@@ -64,11 +74,10 @@ class FrameworkLibrary(object):
 
 
 class DynamicFrameworkLibrary(FrameworkLibrary):
-    def _create_framework_library(self, libname, install_name, libraries, arch):
-        extra_options = self._get_create_framework_options (libname)
+    def _create_framework_library(self, libraries):
         libraries = ' '.join(['-Wl,-reexport_library %s' % x for x in libraries])
         shell.call('gcc -dynamiclib -o %s -arch %s -install_name %s %s' %
-                   (libname, arch, install_name, libraries))
+                   (self.libname, self.arch, self.install_name, libraries))
 
     def _get_lib_file_name(self, lib):
         return 'lib%s.dylib' % lib
@@ -100,15 +109,15 @@ class StaticFrameworkLibrary(FrameworkLibrary):
         shell.call('ar -x %s' % tmplib, lib_tmpdir)
         return lib_tmpdir
 
-    def _create_framework_library(self, libname, install_name, libraries, arch):
+    def _create_framework_library(self, libraries):
         tmpdir = tempfile.mkdtemp()
 
-        libname = os.path.basename (libname) # just to make sure
+        libname = os.path.basename (self.libname) # just to make sure
 
-        if arch == Architecture.UNIVERSAL:
-            archs = [Architecture.X86, Architecture.ARMv7] #TODO
+        if self.arch == Architecture.UNIVERSAL:
+            archs = self.universal_archs
         else:
-            archs = [arch]
+            archs = [self.arch]
 
         archs = [a if a != Architecture.X86 else 'i386' for a in archs]
 
@@ -133,7 +142,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
         if len(archs) > 1:
             #merge the final libs into a fat file again
-            shell.call('lipo %s -create -output %s' % (' '.join([os.path.join(tmpdir, arch, libname) for arch in archs]), install_name), tmpdir)
+            shell.call('lipo %s -create -output %s' % (' '.join([os.path.join(tmpdir, arch, libname) for arch in archs]), self.install_name), tmpdir)
         else:
-            shell.call('cp %s %s' % (os.path.join(tmpdir, arch, libname), install_name), tmpdir)
+            shell.call('cp %s %s' % (os.path.join(tmpdir, self.arch, libname), self.install_name), tmpdir)
 
