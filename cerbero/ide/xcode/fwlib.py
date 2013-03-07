@@ -77,20 +77,63 @@ class StaticFrameworkLibrary(FrameworkLibrary):
     def _get_lib_file_name(self, lib):
         return 'lib%s.a' % lib
 
+    def _split_static_lib(self, lib, thin_arch=None):
+        '''Splits the static lib @lib into its object files
+
+           Splits the static lib @lib into its object files and returns
+           a new temporary directory where the .o files should be found.
+
+           if @thin_arch was provided, it considers the @lib to be a fat
+           binary and takes its thin version for the @thin_arch specified
+           before retrieving the object files.
+        '''
+        lib_tmpdir = tempfile.mkdtemp()
+        shutil.copy(lib, lib_tmpdir)
+        tmplib = os.path.join(lib_tmpdir, os.path.basename(lib))
+
+        if thin_arch: #should be a fat file, split only to the arch we want
+            newname = '%s_%s' % (thin_arch, os.path.basename(lib))
+            shell.call('lipo %s -thin %s -output %s' % (tmplib,
+                           thin_arch, newname), lib_tmpdir)
+            tmplib = os.path.join (lib_tmpdir, newname)
+
+        shell.call('ar -x %s' % tmplib, lib_tmpdir)
+        return lib_tmpdir
+
     def _create_framework_library(self, libname, install_name, libraries, arch):
         tmpdir = tempfile.mkdtemp()
 
-        for lib in libraries:
-            libprefix = os.path.split(lib)[-1].replace('.', '_')
-            lib_tmpdir = tempfile.mkdtemp()
-            shutil.copy(lib, lib_tmpdir)
+        libname = os.path.basename (libname) # just to make sure
 
-            tmplib = os.path.join(lib_tmpdir, os.path.basename(lib))
-            shell.call('ar -x %s' % tmplib, lib_tmpdir)
+        if arch == Architecture.UNIVERSAL:
+            archs = [Architecture.X86, Architecture.ARMv7] #TODO
+        else:
+            archs = [arch]
 
-            obj_files = shell.ls_files(['*.o'], lib_tmpdir)
-            for obj_f in obj_files:
-                shell.call('cp %s %s' % (os.path.join(lib_tmpdir, obj_f), '%s-%s' % (libprefix, obj_f)), tmpdir)
-                shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir)
-        shell.call('ar -s %s' % (libname), tmpdir)
+        archs = [a if a != Architecture.X86 else 'i386' for a in archs]
+
+        for thin_arch in archs:
+            shell.call ('mkdir -p %s' % thin_arch, tmpdir)
+            tmpdir_thinarch = os.path.join(tmpdir, thin_arch)
+
+            for lib in libraries:
+                libprefix = os.path.split(lib)[-1].replace('.', '_')
+
+                if len(archs) > 1: #should be a fat file, split only to the arch we want
+                    libprefix += '_%s_' % thin_arch
+                    lib_tmpdir = self._split_static_lib(lib, thin_arch)
+                else:
+                    lib_tmpdir = self._split_static_lib(lib)
+
+                obj_files = shell.ls_files(['*.o'], lib_tmpdir)
+                for obj_f in obj_files:
+                    shell.call('cp %s %s' % (os.path.join(lib_tmpdir, obj_f), '%s-%s' % (libprefix, obj_f)), tmpdir_thinarch)
+                    shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir_thinarch)
+            shell.call('ar -s %s' % (libname), tmpdir_thinarch)
+
+        if len(archs) > 1:
+            #merge the final libs into a fat file again
+            shell.call('lipo %s -create -output %s' % (' '.join([os.path.join(tmpdir, arch, libname) for arch in archs]), install_name), tmpdir)
+        else:
+            shell.call('cp %s %s' % (os.path.join(tmpdir, arch, libname), install_name), tmpdir)
 
