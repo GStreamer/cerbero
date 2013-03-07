@@ -14,7 +14,7 @@ dist-tarball:
 	python setup.py sdist --formats=bztar
 
 check-pep8:
-	find cerbero ! -regex cerbero/packages/debian.py -name \*.py | sort -u | xargs pep8 --repeat
+	find cerbero ! -regex cerbero/packages/debian.py -name \*.py | sort -u | xargs pep8 --ignore=E128 --repeat
 
 check:
 	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial test
