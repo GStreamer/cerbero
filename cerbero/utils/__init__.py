@@ -204,7 +204,7 @@ def system_info():
 def validate_packager(packager):
     # match packager in the form 'Name <email>'
     expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@'\
-            '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
+        '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
     return bool(re.match(expr, packager))
 
 
@@ -232,12 +232,13 @@ def remove_list_duplicates(seq):
     ''' Remove list duplicates maintaining the order '''
     seen = set()
     seen_add = seen.add
-    return [ x for x in seq if x not in seen and not seen_add(x)]
+    return [x for x in seq if x not in seen and not seen_add(x)]
 
 
 def parse_file(filename, dict):
     try:
         execfile(filename, dict)
     except Exception, ex:
-        import traceback; traceback.print_exc()
+        import traceback
+        traceback.print_exc()
         raise ex

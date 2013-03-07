@@ -70,7 +70,8 @@ dlpreopen=''
 libdir='%(libdir)s'
 '''
 
-    def __init__(self, libname, major, minor, micro, libdir, platform, deps=None):
+    def __init__(self, libname, major, minor, micro, libdir, platform,
+            deps=None):
         self.libtool_vars = {
             'libname': '',
             'dlname': '',
@@ -112,7 +113,7 @@ libdir='%(libdir)s'
                 if micro is not None:
                     dlname_all = '%s.%s' % (dlname, micro)
                     micro_str = micro
-        old_library = '%s.a' %  libname
+        old_library = '%s.a' % libname
         self.change_value('libname', self.laname)
         self.change_value('dlname', dlname)
         self.change_value('library_names', '%s %s %s' % (dlname_all, dlname,

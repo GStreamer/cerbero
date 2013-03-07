@@ -23,7 +23,7 @@ import copy
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
-        shell, parse_file
+    shell, parse_file
 from cerbero.utils import messages as m
 
 
@@ -33,7 +33,8 @@ DEFAULT_HOME = os.path.expanduser('~/cerbero')
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git://anongit.freedesktop.org/gstreamer-sdk'
-DEFAULT_WIX_PREFIX = 'C:/Program\ Files\ \(x86\)/Windows\ Installer\ XML\ v3.5/bin'
+DEFAULT_WIX_PREFIX = \
+    'C:/Program\ Files\ \(x86\)/Windows\ Installer\ XML\ v3.5/bin'
 DEFAULT_ALLOW_PARALLEL_BUILD = False
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
@@ -180,11 +181,11 @@ class Config (object):
             perlversionpath = perlversionpath.rsplit('.', 1)[0]
 
         perl5lib = ':'.join(
-                [to_unixpath(os.path.join(libdir, 'perl5')),
-                to_unixpath(perlversionpath)])
+            [to_unixpath(os.path.join(libdir, 'perl5')),
+            to_unixpath(perlversionpath)])
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
         gstregistry = os.path.join('~', '.gstreamer-0.10',
-                                    '.cerbero-registry-%s' % self.target_arch)
+                                   '.cerbero-registry-%s' % self.target_arch)
         gstregistry = os.path.expanduser(gstregistry)
         pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
 
@@ -199,7 +200,7 @@ class Config (object):
         if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
         path = self._join_path(
-                os.path.join(self.build_tools_prefix, 'bin'), path)
+            os.path.join(self.build_tools_prefix, 'bin'), path)
 
         if self.prefix_is_executable():
             ld_library_path = libdir
@@ -360,7 +361,7 @@ class Config (object):
             self._parse(DEFAULT_CONFIG_FILE)
         else:
             msg = _('Using default configuration because %s is missing') % \
-                    DEFAULT_CONFIG_FILE
+                DEFAULT_CONFIG_FILE
             m.warning(msg)
 
     def _load_cmd_config(self, filename):
@@ -422,7 +423,7 @@ class Config (object):
         return os.path.abspath(p)
 
     def _perl_version(self):
-        version = shell.check_call("perl -e 'print \"$]\";'");
+        version = shell.check_call("perl -e 'print \"$]\";'")
         # FIXME: when perl's mayor is >= 10
         mayor = version[0]
         minor = str(int(version[2:5]))

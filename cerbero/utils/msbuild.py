@@ -25,7 +25,6 @@ from cerbero.utils import fix_winpath, shell
 
 class MSBuild(object):
 
-
     def __init__(self, solution, arch=Architecture.X86, config='Release',
                  sdk='Windows7.1SDK', **properties):
         self.properties = {}

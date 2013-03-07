@@ -68,7 +68,8 @@ class OSXRelocator(object):
     def parse_dir(self, dir_path, filters=None):
         for dirpath, dirnames, filenames in os.walk(dir_path):
             for f in filenames:
-                if filters is not None and os.path.splitext(f)[1] not in filters:
+                if filters is not None and \
+                        os.path.splitext(f)[1] not in filters:
                     continue
                 self.change_libs_path(os.path.join(dirpath, f))
             if not self.recursive:
@@ -100,16 +101,16 @@ class OSXRelocator(object):
         return path
 
 
-
 class Main(object):
 
     def run(self):
-        # We use OptionParser instead of ArgumentsParse because this script might
-        # be run in OS X 10.6 or older, which do not provide the argparse module
+        # We use OptionParser instead of ArgumentsParse because this script
+        # might be run in OS X 10.6 or older, which do not provide the argparse
+        # module
         import optparse
         usage = "usage: %prog [options] directory old_prefix new_prefix"
-        description='Rellocates object files changing the dependant dynamic '\
-                    'libraries location path with a new one'
+        description = 'Rellocates object files changing the dependant '\
+                      ' dynamic libraries location path with a new one'
         parser = optparse.OptionParser(usage=usage, description=description)
         parser.add_option('-r', '--recursive', action='store_true',
                 default=False, dest='recursive',

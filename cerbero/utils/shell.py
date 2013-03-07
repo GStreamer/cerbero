@@ -90,8 +90,9 @@ def call(cmd, cmd_dir='.', fail=True):
             shell = False
         stream = LOGFILE or sys.stdout
         ret = subprocess.check_call(cmd, cwd=cmd_dir,
-                stderr=subprocess.STDOUT, stdout=StdOut(stream),
-                env=os.environ.copy(), shell=shell)
+                                    stderr=subprocess.STDOUT,
+                                    stdout=StdOut(stream),
+                                    env=os.environ.copy(), shell=shell)
     except subprocess.CalledProcessError:
         if fail:
             raise FatalError(_("Error running command: %s") % cmd)
@@ -105,7 +106,8 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
         if split:
             cmd = shlex.split(cmd)
         process = subprocess.Popen(cmd, cwd=cmd_dir,
-            stdout=subprocess.PIPE, stderr=open(os.devnull), shell=shell)
+                                   stdout=subprocess.PIPE,
+                                   stderr=open(os.devnull), shell=shell)
         output, unused_err = process.communicate()
         if process.poll() and fail:
             raise Exception()
@@ -125,6 +127,7 @@ def apply_patch(patch, directory, strip=1):
     @param strip: strip
     @type strip: int
     '''
+
     logging.info("Applying patch %s" % (patch))
     call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
 
@@ -181,7 +184,7 @@ def download(url, destination=None, recursive=False, check_cert=True):
             raise e
 
 
-def download_curl (url, destination=None, recursive=False, check_cert=True):
+def download_curl(url, destination=None, recursive=False, check_cert=True):
     '''
     Downloads a file with cURL
 
@@ -241,7 +244,7 @@ def ls_files(files, prefix):
     if files == []:
         return files
     sfiles = check_call('ls %s' % ' '.join(files),
-        prefix, True, False, False).split('\n')
+                        prefix, True, False, False).split('\n')
     sfiles.remove('')
     return list(set(sfiles))
 

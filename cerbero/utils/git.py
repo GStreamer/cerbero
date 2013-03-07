@@ -80,8 +80,9 @@ def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    shell.call('%s tag -s %s -m "%s" %s' % (GIT, tagname, tagdescription, commit),
-            git_dir, fail=fail)
+
+    shell.call('%s tag -s %s -m "%s" %s' %
+               (GIT, tagname, tagdescription, commit), git_dir, fail=fail)
     return shell.call('%s push origin --tags' % GIT, git_dir, fail=fail)
 
 
@@ -175,6 +176,7 @@ def add_remote(git_dir, name, url):
     shell.call('%s remote add -f %s %s' % (GIT, name, url), git_dir,
                fail=False)
 
+
 def check_line_endings(platform):
     '''
     Checks if on windows we don't use the automatic line endings conversion
@@ -191,4 +193,3 @@ def check_line_endings(platform):
     if ('false' in val.lower()):
         return True
     return False
-

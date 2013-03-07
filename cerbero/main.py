@@ -37,7 +37,7 @@ from cerbero.errors import UsageError, FatalError, BuildStepError, \
 from cerbero.utils import _, N_, user_is_root
 from cerbero.utils import messages as m
 
-description = N_('Build and package a set of modules to distribute them in '\
+description = N_('Build and package a set of modules to distribute them in '
                  'a SDK')
 
 

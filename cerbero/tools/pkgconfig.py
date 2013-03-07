@@ -21,7 +21,6 @@ import os
 
 class PkgConfigWritter(object):
 
-
     VARIABLES_TPL = '''\
 prefix=%(prefix)s
 exec_prefix=${prefix}
@@ -66,18 +65,18 @@ Cflags: %(cflags)s
 
     def _get_variables(self):
         return self.VARIABLES_TPL % {
-                'prefix': self.prefix,
-                'rel_libdir': self.rel_libdir,
-                'rel_incldir': self.rel_incldir,
-                'rel_sharedir': self.rel_sharedir}
+            'prefix': self.prefix,
+            'rel_libdir': self.rel_libdir,
+            'rel_incldir': self.rel_incldir,
+            'rel_sharedir': self.rel_sharedir}
 
     def _get_body(self):
         return self.BODY_TPL % {
-                'name': self.name,
-                'desc': self.desc,
-                'version': self.version,
-                'req': self.req,
-                'req_priv': self.req_priv,
-                'libs': self.libs,
-                'libs_priv': self.libs_priv,
-                'cflags': self.cflags}
+            'name': self.name,
+            'desc': self.desc,
+            'version': self.version,
+            'req': self.req,
+            'req_priv': self.req_priv,
+            'libs': self.libs,
+            'libs_priv': self.libs_priv,
+            'cflags': self.cflags}

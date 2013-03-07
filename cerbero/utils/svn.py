@@ -53,4 +53,3 @@ def checkout_file(url, out_path):
     @type revision: str
     '''
     shell.call('svn export --force %s %s' % (url, out_path))
-
