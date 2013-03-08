@@ -473,7 +473,7 @@ class IOSFrameworkPackage(PackagerBase):
         m.action(_("Creating framework package"))
         packager = FrameworkBundlePackager(self.package, 'ios-framework',
                 'Framework Bundle',
-                'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa')
+                '8E018220-CA82-4DFE-B409-248F8C841494')
         path = packager.create_bundle(self.fw_path)
         return path
 
