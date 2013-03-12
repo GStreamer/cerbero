@@ -28,5 +28,6 @@ class Package(package.Package):
             'gst-plugins-bad-static:plugins_codecs_devel',
             'gst-plugins-ugly-static:plugins_codecs_devel']
     platform_files = {
-            Platform.ANDROID: ['tremor:libs']
+            Platform.ANDROID: ['tremor:libs'],
+            Platform.IOS: ['tremor:libs']
     }

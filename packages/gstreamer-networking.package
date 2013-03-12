@@ -29,6 +29,7 @@ class Package(package.Package):
         Platform.DARWIN: ['gst-rtsp-server:libs:python'],
         Platform.LINUX: ['gst-rtsp-server:libs:python'],
         Platform.ANDROID: [],
+        Platform.IOS: [],
         }
 
     platform_files_devel = {
@@ -36,6 +37,7 @@ class Package(package.Package):
         Platform.DARWIN: ['gst-rtsp-server:devel'],
         Platform.LINUX: ['gst-rtsp-server:devel'],
         Platform.ANDROID: [],
+        Platform.IOS: [],
         }
 
     def prepare(self):
