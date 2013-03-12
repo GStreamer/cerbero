@@ -12,3 +12,7 @@ class Recipe(custom.GStreamerStatic):
     deps = ['gstreamer', 'gst-plugins-base' ]
 
     files_plugins_gnl_devel = ['libgnl']
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc'
