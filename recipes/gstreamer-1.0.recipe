@@ -45,3 +45,12 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc --disable-docbook'
+
+        if self.config.target_platform == Platform.IOS:
+            # iOS only supports static builds so plugins must be linked
+            # and registered statically.
+            self.configure_options += ' --disable-registry '
+
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
+

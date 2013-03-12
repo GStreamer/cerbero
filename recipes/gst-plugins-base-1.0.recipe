@@ -119,4 +119,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.configure_options += ' --disable-alsa'
+            self.configure_options += ' --disable-alsa --disable-x'
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'

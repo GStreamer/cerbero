@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'opus',
-            'schroedinger', 'libdca', 'jasper', 'libmms', 'libdvdnav' ]
+            'schroedinger', 'libdca', 'jasper', 'libmms', 'libdvdnav', 'soundtouch' ]
 
     files_lang = ['gst-plugins-bad-1.0']
 
@@ -168,19 +168,21 @@ class Recipe(recipe.Recipe):
             self.files_codecs.remove('lib/gstreamer-1.0/libgstdccp%(mext)s')
             for d in ['libdvdnav']:
                 self.deps.remove(d)
+        if self.config.target_platform == Platform.IOS:
+            self.configure_options += ' --disable-apple_media'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
-    def post_install(self):
-        if self.config.platform == Platform.WINDOWS and\
-                self.config.target_platform == Platform.WINDOWS:
-            from cerbero.utils.msbuild import MSBuild
-            from cerbero.utils import messages as m
-            solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
-            root = self.config.prefix.rsplit('/', 1)[0]
-            msbuild  = MSBuild(solution, self.config.target_arch,
-                               GSTREAMER_SDK_ROOT=root)
-            try:
-                msbuild.build()
-            except Exception, e:
-                m.error("The Direct Show plugins will not be built.")
+#    def post_install(self):
+#        if self.config.platform == Platform.WINDOWS and\
+#                self.config.target_platform == Platform.WINDOWS:
+#            from cerbero.utils.msbuild import MSBuild
+#            from cerbero.utils import messages as m
+#            solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
+#            root = self.config.prefix.rsplit('/', 1)[0]
+#            msbuild  = MSBuild(solution, self.config.target_arch,
+#                               GSTREAMER_SDK_ROOT=root)
+#            try:
+#                msbuild.build()
+#            except Exception, e:
+#                m.error("The Direct Show plugins will not be built.")

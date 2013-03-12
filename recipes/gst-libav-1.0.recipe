@@ -18,7 +18,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
-
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
                 asflags = ' -arch x86_64 -m64'
@@ -31,7 +30,7 @@ class Recipe(recipe.Recipe):
     def configure(self):
         super(recipe.Recipe, self).configure()
 
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
                 libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
                 replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
