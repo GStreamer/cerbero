@@ -96,6 +96,9 @@ class Recipe(custom.GStreamerStatic):
         Platform.DARWIN: [
              'libgstosxaudio',
              'libgstosxvideosink',
+            ],
+        Platform.IOS: [
+             'libgstosxaudio',
             ]
     }
 

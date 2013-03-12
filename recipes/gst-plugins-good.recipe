@@ -101,6 +101,9 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgstosxaudio%(mext)s',
              'lib/gstreamer-0.10/libgstosxvideosink%(mext)s',
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-0.10/libgstosxaudio%(mext)s',
             ]
     }
 
