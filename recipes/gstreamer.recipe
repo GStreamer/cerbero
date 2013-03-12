@@ -57,5 +57,10 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             self.make = '%s libcheckinternal_la_LIBADD=""' % self.make
 
+        if self.config.target_platform == Platform.IOS:
+            # iOS only supports static builds so plugins must be linked
+            # and registered statically.
+            self.configure_options += ' --disable-registry '
+
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
