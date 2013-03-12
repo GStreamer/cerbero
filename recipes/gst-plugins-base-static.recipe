@@ -54,6 +54,7 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.IOS: [
              'libgstivorbisdec',
+            ]
     }
 
     platform_files_plugins_sys_devel = {
