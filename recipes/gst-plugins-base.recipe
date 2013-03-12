@@ -116,6 +116,9 @@ class Recipe(recipe.Recipe):
             ],
         Platform.DARWIN: [
              'lib/gstreamer-0.10/libgsttcp%(mext)s',
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-0.10/libgsttcp%(mext)s',
             ]
     }
 

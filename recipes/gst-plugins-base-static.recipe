@@ -72,6 +72,9 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.DARWIN: [
              'libgsttcp',
+            ],
+        Platform.IOS: [
+             'libgsttcp',
             ]
     }
 
