@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
     files_bins = ['gst-discoverer-0.10']
@@ -94,6 +94,9 @@ class Recipe(recipe.Recipe):
 
     platform_files_plugins_codecs = {
         Platform.ANDROID: [
+             'lib/gstreamer-0.10/libgstivorbisdec%(mext)s',
+            ],
+        Platform.IOS: [
              'lib/gstreamer-0.10/libgstivorbisdec%(mext)s',
             ]
     }

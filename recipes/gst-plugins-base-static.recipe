@@ -7,7 +7,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs"
     deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
     files_plugins_core_devel = [
@@ -51,7 +51,9 @@ class Recipe(custom.GStreamerStatic):
     platform_files_plugins_codecs_devel = {
         Platform.ANDROID: [
              'libgstivorbisdec',
-            ]
+            ],
+        Platform.IOS: [
+             'libgstivorbisdec',
     }
 
     platform_files_plugins_sys_devel = {

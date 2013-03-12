@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     commit = 'upstream/1.0'
     deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora', 'libvisual',
             'libvorbis', 'zlib', 'orc']
-    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ] }
+    platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
     files_bins = ['gst-discoverer-1.0', 'gst-visualize-1.0']
@@ -87,6 +87,9 @@ class Recipe(recipe.Recipe):
 
     platform_files_codecs = {
         Platform.ANDROID: [
+             'lib/gstreamer-1.0/libgstivorbisdec%(mext)s',
+            ],
+        Platform.IOS: [
              'lib/gstreamer-1.0/libgstivorbisdec%(mext)s',
             ]
     }
