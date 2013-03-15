@@ -145,7 +145,7 @@ GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
 GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
 
 # Create the link command
-GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
+GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 	-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
@@ -165,12 +165,12 @@ genstatic:
 # Compile the source file
 $(GSTREAMER_ANDROID_O): genstatic
 	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_C)"
-	@$(_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
+	@$(TARGET_CC) --sysroot=$(SYSROOT) $(CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 
 # Creates a shared library including gstreamer, its plugins and all the dependencies
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	@$(_CC) $(GSTREAMER_ANDROID_CMD)
+	@$(TARGET_CC) $(GSTREAMER_ANDROID_CMD)
 
 copyjavasource:
 	@$(call host-mkdir,src/com/gstreamer)
