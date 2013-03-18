@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Identifier</key>
+	<string>com.gstreamersdk.ios.templates.base</string>
+	<key>Kind</key>
+	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
+
+<key>Definitions</key>
+	<dict>
+		<key>gst_ios_backend.c</key>
+		<dict>
+			<key>Group</key>
+				<string>Supporting Files</string>
+			<key>Path</key>
+				<string>gst_ios_backend.c</string>
+		</dict>
+		<key>gst_ios_backend.h</key>
+		<dict>
+			<key>Group</key>
+				<string>Supporting Files</string>
+			<key>Path</key>
+				<string>gst_ios_backend.h</string>
+		</dict>
+		<key>gst_ios_plugins.h</key>
+		<dict>
+			<key>Group</key>
+				<string>Supporting Files</string>
+			<key>Path</key>
+				<string>gst_ios_plugins.h</string>
+		</dict>
+		<key>gst_ios_plugins.c</key>
+		<dict>
+			<key>Group</key>
+				<string>Supporting Files</string>
+			<key>Path</key>
+				<string>gst_ios_plugins.c</string>
+		</dict>
+	</dict>
+<!-- Definitions End -->
+
+<!-- Nodes Begin -->
+<key>Nodes</key>
+    <array>
+        <string>gst_ios_backend.c</string>
+        <string>gst_ios_backend.h</string>
+        <string>gst_ios_plugins.c</string>
+        <string>gst_ios_plugins.h</string>
+    </array>
+<!-- Nodes End -->
+
+<key>Targets</key>
+	<array>
+		<dict>
+			<key>Frameworks</key>
+				<array>
+				<string>GStreamer</string>
+				<string>CoreAudio</string>
+				</array>
+			<key>SharedSettings</key>
+			<dict>
+				<key>FRAMEWORK_SEARCH_PATHS</key>
+				<string>"~/Library/Developer/GStreamer/iPhone.sdk"</string>
+				<key>HEADER_SEARCH_PATHS</key>
+				<string>"~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers"</string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>
