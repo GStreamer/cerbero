@@ -170,7 +170,7 @@ $(GSTREAMER_ANDROID_O): genstatic
 # Creates a shared library including gstreamer, its plugins and all the dependencies
 buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	@$(TARGET_CC) $(GSTREAMER_ANDROID_CMD)
+	@$(GSTREAMER_ANDROID_CMD)
 
 copyjavasource:
 	@$(call host-mkdir,src/com/gstreamer)
