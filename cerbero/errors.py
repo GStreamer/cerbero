@@ -47,9 +47,9 @@ class CommandError(CerberoException):
 
 class BuildStepError(CerberoException):
 
-    def __init__(self, recipe, step):
+    def __init__(self, recipe, step, trace=''):
         CerberoException.__init__(self, _("Recipe '%s' failed at the build "
-            "step '%s'") % (recipe, step))
+            "step '%s'\n%s") % (recipe, step, trace))
 
 
 class RecipeNotFoundError(CerberoException):

@@ -18,6 +18,7 @@
 
 import tempfile
 import shutil
+import traceback
 
 from cerbero.errors import BuildStepError, FatalError
 from cerbero.build.recipe import Recipe, BuildSteps
@@ -103,9 +104,8 @@ class Oven (object):
                 self.cookbook.update_step_status(recipe.name, step)
             except FatalError:
                 self._handle_build_step_error(recipe, step)
-            except Exception, ex:
-                raise FatalError(_("Error performing step %s: %s") % (step,
-                                  ex))
+            except Exception:
+                raise BuildStepError(recipe, step, traceback.format_exc())
         self.cookbook.update_build_status(recipe.name, False)
 
         if self.missing_files:
