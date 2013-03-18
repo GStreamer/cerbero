@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'tremor'
@@ -14,7 +14,12 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_arch == Architecture.ARMv7:
-            self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wa,-mimplicit-it=thumb "
+            if self.config.target_platform != Platform.IOS:
+                self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wa,-mimplicit-it=thumb "
         elif self.config.target_arch == Architecture.ARM:
             self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
 
+    def configure(self):
+        if self.config.target_platform == Platform.IOS:
+            shell.replace(os.path.join(self.build_dir, 'configure.in'), {'-D_ARM_ASSEM_':''})
+        super(recipe.Recipe, self).configure()
