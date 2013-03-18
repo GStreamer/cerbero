@@ -20,7 +20,7 @@ class GStreamerStatic(recipe.Recipe):
         self.remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/%s'
                         % self.project_name}
 
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN]:
+        if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         self.configure_options += ' ' + self.extra_configure_options
 

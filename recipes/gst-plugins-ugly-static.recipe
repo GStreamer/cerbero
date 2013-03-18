@@ -26,8 +26,6 @@ class Recipe(custom.GStreamerStatic):
     ]
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
         super(Recipe, self).prepare()

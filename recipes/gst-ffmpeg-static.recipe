@@ -17,8 +17,6 @@ class Recipe(custom.GStreamerStatic):
     files_plugins_codecs_restricted_devel = ['libgstffmpeg']
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                     '--with-ffmpeg-extra-configure="--enable-w32threads"'
