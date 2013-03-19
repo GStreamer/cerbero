@@ -9,3 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'http://www.tortall.net/projects/yasm/releases/yasm-1.2.0.tar.gz'
 
     files_bins = ['yasm']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.append_env['LDFLAGS'] = '-lintl'
