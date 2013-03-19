@@ -40,20 +40,14 @@ class BuildTools (BootstraperBase):
             self.BUILD_TOOLS.append('gperf')
         if self.config.platform == Platform.DARWIN:
             self.BUILD_TOOLS.append('gperf')
-            # We need tar with support for .xz in Snow Leopard
-            if self.config.distro_version in [DistroVersion.OS_X_LION,
-                                              DistroVersion.OS_X_SNOW_LEOPARD,
-                                              DistroVersion.OS_X_LEOPARD]:
-                self.BUILD_TOOLS.insert(0, 'tar')
+            self.BUILD_TOOLS.insert(0, 'tar')
+            self.BUILD_TOOLS.insert(0, 'xz')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.platform != Platform.LINUX and\
                 not self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
-        # We need xz on all non-Linux platforms
-        if self.config.platform != Platform.LINUX:
-            self.BUILD_TOOLS.insert(0, 'xz')
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
