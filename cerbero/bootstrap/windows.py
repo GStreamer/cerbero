@@ -37,8 +37,8 @@ MINGWGET_DEPS = ['msys-wget']
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
 WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
 PTHREADS_URL = \
-    '''http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20\
-    packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'''
+    'http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20'\
+    'packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'
 
 
 class WindowsBootstraper(BootstraperBase):
