@@ -41,9 +41,6 @@ The initial setup on Windows is a little bit longer, but only a few programs are
     IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
   * Msys/MinGW: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
     Install it with all the options enabled
-  * CMake: http://www.cmake.org/cmake/resources/software.html
-    Select the option "Add CMake in system path for the current user"
-  * Yasm: http://yasm.tortall.net/Download.html
 
 The Direct Show plugins still needs to be built using Microsoft's compiler and their SDK,
 due to the dependency on the Direct Show base classes.
