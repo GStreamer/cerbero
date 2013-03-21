@@ -21,16 +21,46 @@ INFO_PLIST_TPL='''\
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
 %s
-</dict>
+%s
+%s
 </plist>
 '''
 
 
-class InfoPlist(object):
+class Plist(object):
+    ''' Base class for creating .plist files '''
+
+    BEGIN = '<array>\n<dict>\n'
+    END = '</dict>\n</array>\n'
+
+    def save(self, filename):
+        props_str = self._get_properties_string()
+        with open(filename, 'w+') as f:
+            f.write(INFO_PLIST_TPL  % (self.BEGIN, props_str, self.END))
+
+    def _format_property(self, key, value):
+        if isinstance(value, str):
+            return '<key>%s</key>\n<string>%s</string>' % (key, value)
+        elif isinstance(value, bool):
+            return '<key>%s</key>\n<%s/>' % (key, str(value).lower())
+        else:
+            raise Exception ("Invalid type for value %r", value)
+
+    def _get_properties(self):
+        raise NotImplementedError("get_properties not implemented")
+
+    def _get_properties_string(self):
+        props = self._get_properties()
+        return '\n'.join([self._format_property(k, props[k]) for k in
+                          sorted(props.keys())])
+
+
+class InfoPlist(Plist):
     ''' Create a Info.plist file '''
 
+    BEGIN = '<dict>\n'
+    END = '</dict>\n'
     package_type = ''
 
     def __init__(self, name, identifier, version, info, icon=None):
@@ -40,10 +70,7 @@ class InfoPlist(object):
         self.info = info
         self.icon = icon
 
-    def format_property(self, key, value):
-        return '<key>%s</key>\n<string>%s</string>' % (key, value)
-
-    def get_properties(self):
+    def _get_properties(self):
         properties = {'CFBundleName': self.name,
                 'CFBundleIdentifier': self.identifier,
                 'CFBundleVersion': self.version,
@@ -52,16 +79,6 @@ class InfoPlist(object):
         if self.icon:
             properties['CFBundleIconFile'] = self.icon
         return properties
-
-    def get_properties_string(self):
-        props = self.get_properties()
-        return '\n'.join([self.format_property(k, props[k]) for k in
-                          sorted(props.keys())])
-
-    def save(self, filename):
-        props_str = self.get_properties_string()
-        with open(filename, 'w+') as f:
-            f.write(INFO_PLIST_TPL  % props_str)
 
 
 class FrameworkPlist(InfoPlist):
@@ -75,3 +92,17 @@ class ApplicationPlist(InfoPlist):
     ''' Create a Info.plist file for applications '''
 
     package_type = 'APPL'
+
+
+class ComponentPropertyPlist(Plist):
+    ''' Create a component property list to be used with pkgbuild '''
+
+    def __init__(self, description, rel_path):
+        self.desc = description
+        self.rel_path = rel_path
+
+    def _get_properties(self):
+        return {'BundlerIsVersionChecked': True,
+                'BundleOverwriteAction': 'upgrade',
+                'RootRelativeBundlePath': self.rel_path,
+                'Key': self.desc}

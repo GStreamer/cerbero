@@ -23,7 +23,7 @@ import shutil
 from cerbero.config import Architecture
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
-from cerbero.packages.osx.packagemaker import PackageMaker
+from cerbero.packages.osx.buildtools import PackageBuild
 from cerbero.packages.osx.info_plist import FrameworkPlist, ApplicationPlist
 from cerbero.utils import shell
 
@@ -47,25 +47,25 @@ class BundlePackagerBase(PackagerBase):
         self.package.osx_framework_library = package.osx_framework_library
         PackagerBase.__init__(self, package.config, self.package, package.store)
 
-    def pack(self, output_dir):
+    def pack(self, output_dir, root=None):
         output_dir = os.path.realpath(output_dir)
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         path = self._create_package(output_dir, self.package.get_install_dir(),
-                self.package.version)
+                self.package.version, root)
         return [path, None]
 
 
-    def _create_package(self, output_dir, install_dir, version):
+    def _create_package(self, output_dir, install_dir, version, root):
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
                 (self.name, self.package.version,
                  self.config.target_arch))
-        root = self.create_bundle()
-        packagemaker = PackageMaker()
-        packagemaker.create_package(root, self.package.identifier(),
-            self.package.version, self.title, output_file,
-            install_dir, target=None)
+        if not root:
+            root = self.create_bundle()
+        packagebuild = PackageBuild()
+        packagebuild.create_package(root, self.package.identifier(),
+            self.package.version, self.title, output_file, install_dir)
         return output_file
 
     def create_bundle(self, target_dir=None):

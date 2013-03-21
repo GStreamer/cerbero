@@ -42,34 +42,34 @@ class InfoPlistTest(unittest.TestCase):
 
     def testFormatProperty(self):
         self.assertEquals('<key>Key</key>\n<string>Value</string>',
-                self.info_plist.format_property('Key', 'Value'))
+                self.info_plist._format_property('Key', 'Value'))
 
     def testGetPropertiesString(self):
-        result = self.info_plist.get_properties_string()
+        result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'icon': '', 'ptype': ''}
         self.assertEquals(result, expected)
 
     def testFrameworkPackageType(self):
         self.info_plist = FrameworkPlist('test', 'test.org', '1.0',
                                          'Test package')
-        result = self.info_plist.get_properties_string()
+        result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'FMWK', 'icon': ''}
         self.assertEquals(result, expected)
 
     def testApplicationPackageType(self):
         self.info_plist = ApplicationPlist('test', 'test.org', '1.0',
                                            'Test package')
-        result = self.info_plist.get_properties_string()
+        result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'APPL', 'icon': ''}
         self.assertEquals(result, expected)
 
     def testGetPropertiesStringWithIcon(self):
         self.info_plist.icon = 'test.ico'
-        result = self.info_plist.get_properties_string()
+        result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': '', 'icon':
-            self.info_plist.format_property('CFBundleIconFile', 'test.ico') +
+            self.info_plist._format_property('CFBundleIconFile', 'test.ico') +
             '\n'}
-        self.info_plist.icon = None 
+        self.info_plist.icon = None
         self.assertEquals(result, expected)
 
     def testSave(self):
@@ -77,5 +77,7 @@ class InfoPlistTest(unittest.TestCase):
         self.info_plist.save(tmp.name)
         with open(tmp.name, 'r') as f:
             result = f.read()
-        expected = INFO_PLIST_TPL % self.info_plist.get_properties_string()
+        expected = INFO_PLIST_TPL % (self.info_plist.BEGIN,
+                                     self.info_plist._get_properties_string(),
+                                     self.info_plist.END)
         self.assertEquals(result, expected)

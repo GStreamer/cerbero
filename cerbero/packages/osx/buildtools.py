@@ -17,32 +17,21 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import tempfile
 
+from cerbero.packages.osx.info_plist import ComponentPropertyPlist
 from cerbero.utils import shell
 
-PACKAGE_MAKER_PATHS = [
-        '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/',
-        '/Applications/PackageMaker.app/Contents/MacOS/'
-        ]
 
-def get_package_maker_path():
-    for p in PACKAGE_MAKER_PATHS:
-        if os.path.exists(p):
-            return p
-    return None
+class PackageBuild(object):
+    ''' Wrapper for the packagebuild application '''
 
-
-class PackageMaker(object):
-    ''' Wrapper for the PackageMaker application '''
-
-    PACKAGE_MAKER_PATH = get_package_maker_path()
-    CMD = './PackageMaker'
+    CMD = 'pkgbuild'
 
     def create_package(self, root, pkg_id, version, title, output_file,
-                       destination='/opt/', target='10.5',
-                       scripts_path=None):
+                       destination='/opt/', scripts_path=None):
         '''
-        Creates an osx package, where all files are properly bundled in a
+        Creates an osx flat package, where all files are properly bundled in a
         directory that is set as the package root
 
         @param root: root path
@@ -60,26 +49,27 @@ class PackageMaker(object):
         @param scripts_path: relative path for package scripts
         @type  scripts_path: str
         '''
-        args = {'r': root, 'i': pkg_id, 'n': version, 't': title,
-                'l': destination, 'o': output_file}
+        args = {'root': root, 'identifier': pkg_id, 'version': version,
+                'install-location': destination}
         if scripts_path is not None:
-            args['s'] = scripts_path
-        if target is not None:
-            args['g'] = target
-        self._execute(self._cmd_with_args(args))
+            args['scripts'] = scripts_path
+        #plist = tempfile.NamedTemporaryFile()
+        #cpl = ComponentPropertyPlist(title, os.path.basename(output_file))
+        #cpl.save(plist.name)
+        #args['component-plist'] = plist.name
+        shell.call(self._cmd_with_args(args, output_file))
 
-    def create_package_from_pmdoc(self, pmdoc_path, output_file):
-        '''
-        Creates an osx package from a pmdoc configuration files
-        '''
-        args = {'d': pmdoc_path, 'o': output_file}
-        self._execute(self._cmd_with_args(args))
-
-    def _cmd_with_args(self, args):
+    def _cmd_with_args(self, args, output):
         args_str = ''
         for k, v in args.iteritems():
-            args_str += " -%s '%s'" % (k, v)
-        return '%s %s' % (self.CMD, args_str)
+            args_str += " --%s '%s'" % (k, v)
+        return '%s %s %s' % (self.CMD, args_str, output)
 
-    def _execute(self, cmd):
-        shell.call(cmd, self.PACKAGE_MAKER_PATH)
+
+class ProductBuild (object):
+    ''' Wrapper for the packagebuild application '''
+
+    CMD = 'productbuild'
+
+    def create_package(self, distribution, output):
+        shell.call("%s --distribution %s %s" % (self.CMD, distribution, output))
