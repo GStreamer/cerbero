@@ -24,7 +24,7 @@ gst_backend_register_plugins (void)
 
 
 class Recipe(recipe.Recipe):
-    name = 'gst-ios'
+    name = 'gstreamer-ios-templates'
     version = '0.1'
     licenses = [License.LGPLv2_1]
     stype = SourceType.CUSTOM
