@@ -75,7 +75,6 @@ class BundlePackagerBase(PackagerBase):
             shutil.copy(os.path.join(self.package.resources_postinstall),
                         os.path.join(resources, 'postinstall'))
         packagebuild = PackageBuild()
-        import pdb; pdb.set_trace()
         packagebuild.create_package(root, self.package.identifier(),
             self.package.version, self.title, output_file, install_dir,
             resources)

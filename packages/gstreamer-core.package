@@ -25,6 +25,6 @@ class Package(package.Package):
             'gst-plugins-good-static:plugins_core_devel', 'gst-plugins-bad-static:plugins_core_devel']
     platform_files = {
             Platform.DARWIN: ['gstreamer-osx-framework'],
-            Platform.IOS: ['gstreamer-ios-framework'],
+            Platform.IOS: ['gstreamer-ios-templates'],
             Platform.ANDROID: ['gst-android'],
             }
