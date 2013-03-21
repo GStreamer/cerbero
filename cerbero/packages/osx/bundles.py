@@ -45,6 +45,9 @@ class BundlePackagerBase(PackagerBase):
         self.package.org = package.org
         self.package.install_dir = package.install_dir
         self.package.osx_framework_library = package.osx_framework_library
+        self.package.resources_preinstall = package.resources_preinstall
+        self.package.resources_postinstall = package.resources_postinstall
+        self.package.__file__ = package.__file__
         PackagerBase.__init__(self, package.config, self.package, package.store)
 
     def pack(self, output_dir, root=None):
@@ -63,9 +66,20 @@ class BundlePackagerBase(PackagerBase):
                  self.config.target_arch))
         if not root:
             root = self.create_bundle()
+
+        resources = tempfile.mkdtemp()
+        if os.path.exists(self.package.resources_preinstall):
+            shutil.copy(os.path.join(self.package.resources_preinstall),
+                        os.path.join(resources, 'preinstall'))
+        if os.path.exists(self.package.resources_postinstall):
+            shutil.copy(os.path.join(self.package.resources_postinstall),
+                        os.path.join(resources, 'postinstall'))
         packagebuild = PackageBuild()
+        import pdb; pdb.set_trace()
         packagebuild.create_package(root, self.package.identifier(),
-            self.package.version, self.title, output_file, install_dir)
+            self.package.version, self.title, output_file, install_dir,
+            resources)
+        shutil.rmtree(resources)
         return output_file
 
     def create_bundle(self, target_dir=None):
