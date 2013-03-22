@@ -90,7 +90,7 @@ class DistributionXML(object):
             arch = 'x86_64'
         else:
             arch = 'i386'
-        options.set(self.ATTR_HOST_ARCHS, arch)
+        #options.set(self.ATTR_HOST_ARCHS, arch)
 
     def _add_customization(self):
         # Background
