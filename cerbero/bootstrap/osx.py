@@ -34,8 +34,10 @@ class OSXBootstraper (BootstraperBase):
         DistroVersion.OS_X_MOUNTAIN_LION: 'GCC-10.7-v2.pkg',
         DistroVersion.OS_X_LION: 'GCC-10.7-v2.pkg',
         DistroVersion.OS_X_SNOW_LEOPARD: 'GCC-10.6.pkg'}
+    CPANM_URL = 'https://raw.github.com/miyagawa/cpanminus/master/cpanm'
 
     def start(self):
+        self._install_perl_deps()
         # FIXME: enable it when buildbots are properly configured
         return
         tar = self.GCC_TAR[self.config.distro_version]
@@ -43,6 +45,15 @@ class OSXBootstraper (BootstraperBase):
         pkg = os.path.join(self.config.local_sources, tar)
         shell.download(url, pkg, check_cert=False)
         shell.call('sudo installer -pkg %s -target /' % pkg)
+
+    def _install_perl_deps(self):
+        # Install cpan-minus, a zero-conf CPAN wrapper
+        cpanm_installer = tempfile.NamedTemporaryFile().name
+        shell.download(self.CPANM_URL, cpanm_installer)
+        shell.call('chmod +x %s' % cpanm_installer)
+        # Install XML::Parser, required for intltool
+        shell.call("%s XML::Parser" % cpanm_installer)
+
 
 
 def register_all():
