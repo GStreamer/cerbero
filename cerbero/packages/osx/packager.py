@@ -215,6 +215,7 @@ class ProductPackage(PackagerBase):
     '''
 
     PKG_EXT = '.pkg'
+    home_folder = False
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
@@ -293,7 +294,7 @@ class ProductPackage(PackagerBase):
         distro = DistributionXML(self.package, self.store, self.tmp,
             self.packages_paths[package_type],
             self.empty_packages[package_type], package_type,
-            self.config.target_arch, home_folder=True)
+            self.config.target_arch, home_folder=self.home_folder)
         distro_path = tempfile.NamedTemporaryFile().name
         distro.write(distro_path)
         output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
@@ -418,6 +419,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     the 'Headers' directory of the framework bundle.
     The product package will only contain the ios-framework package
     '''
+
+    home_folder = True
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
