@@ -36,7 +36,7 @@ from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
 
-class FrameworkrHeadersMixin(object):
+class FrameworkHeadersMixin(object):
 
     def _create_framework_headers(self, prefix, include_dirs, tmp):
         '''
@@ -107,7 +107,7 @@ class FrameworkrHeadersMixin(object):
                         headers, include_dirs)
 
 
-class OSXPackage(PackagerBase, FrameworkrHeadersMixin):
+class OSXPackage(PackagerBase, FrameworkHeadersMixin):
     '''
     Creates an osx package from a L{cerbero.packages.package.Package}
 
@@ -406,7 +406,7 @@ class ApplicationPackage(PackagerBase):
         return dmg_file
 
 
-class IOSPackage(ProductPackage, FrameworkrHeadersMixin):
+class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     '''
     Creates an ios Framework package from a
     L{cerbero.package.package.MetaPackage} using productbuild.
