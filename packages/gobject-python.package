@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gobject-python'
     shortdesc = 'GLib/GObject python bindings'
+    longdesc = 'GLib/GObject python bindings'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

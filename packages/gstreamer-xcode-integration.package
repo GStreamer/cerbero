@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-xcode-integration'
     shortdesc = 'GStreamer XCode integration'
+    longdesc = 'GStreamer XCode integration'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-codecs'
     shortdesc = 'GStreamer codecs'
+    longdesc = 'GStreamer codecs'
     version = '2012.11'
     codename = 'Brahmaputra'
     url = "http://www.gstreamer.com"

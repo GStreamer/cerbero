@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'vsintegration'
     shortdesc = 'Visual Studio Integration'
+    longdesc = 'Visual Studio Integration'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

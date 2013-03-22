@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-libav'
     shortdesc = 'GStreamer libav wrapper'
+    longdesc = 'GStreamer libav wrapper'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

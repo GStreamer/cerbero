@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'snappy'
     shortdesc = 'Snappy media player'
+    longdesc = 'Snappy media player'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gtk+-2.0'
     shortdesc = 'Gtk toolkit'
+    longdesc = 'Gtk toolkit'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

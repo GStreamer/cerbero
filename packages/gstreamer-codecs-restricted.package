@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-codecs-restricted'
     shortdesc = 'GStreamer restricted codecs with potential patent issues in some countries'
+    longdesc = 'GStreamer restricted codecs with potential patent issues in some countries'
     version = '2012.11'
     codename = 'Brahmaputra'
     url = "http://www.gstreamer.com"

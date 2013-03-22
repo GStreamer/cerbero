@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-system'
     shortdesc = 'GStreamer system plugins'
+    longdesc = 'GStreamer system plugins'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

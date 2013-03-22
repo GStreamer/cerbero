@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-dvd'
     shortdesc = 'GStreamer DVD support'
+    longdesc = 'GStreamer DVD support'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'

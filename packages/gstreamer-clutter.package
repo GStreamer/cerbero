@@ -6,6 +6,7 @@ class Package(package.Package):
 
     name = 'gstreamer-clutter'
     shortdesc = 'GStreamer Clutter support'
+    longdesc = 'GStreamer Clutter support'
     url = "http://www.gstreamer.com"
     version = '2012.11'
     codename = 'Brahmaputra'
