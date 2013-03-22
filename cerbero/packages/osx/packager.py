@@ -500,6 +500,10 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
             fwlib.universal_archs = self.config.universal_archs
         fwlib.create()
 
+    def _package_name(self, suffix):
+        return '%s-%s-%s-%s%s' % (self.package.name, self.package.version,
+                self.config.target_platform, self.config.target_arch, suffix)
+
 
 class Packager(object):
 
