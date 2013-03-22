@@ -131,9 +131,11 @@ class DistributionXML(object):
     def _add_choice(self, package, enabled, selected):
         choice = etree.SubElement(self.root, self.TAG_CHOICE,
             id=package.identifier(), title=package.shortdesc,
-            description=package.longdesc,
-            starts_selected=self._boolstr(selected),
-            starts_enabled=self._boolstr(enabled))
+            description=package.longdesc)
+        if not selected:
+            choice.set('start_selected', 'false')
+        if not enabled:
+            choice.set('start_enabled', 'false')
 
         packages = [package] + self.store.get_package_deps(package)
         for package in packages:
