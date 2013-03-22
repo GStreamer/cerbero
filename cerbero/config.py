@@ -149,6 +149,8 @@ class Config (object):
         self._restore_environment()
         self._create_path(self.prefix)
         self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+        self._create_path(os.path.join(
+            self.build_tools_prefix, 'share', 'aclocal'))
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
