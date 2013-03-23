@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: ['site-packages/gtk-2.0/gio/unix%(pext)s',
 	                 'site-packages/gtk-2.0/gtkunixprint%(pext)s'],
     }
-    files_devel = ['include/pygtk-2.0/pygtk', 'lib/pkgconfig/pygtk-2.0.pc']
+    files_devel = ['bin/pygobject-codegen-2.0', 'include/pygtk-2.0/pygtk', 'lib/pkgconfig/pygtk-2.0.pc']
     files_demo = ['lib/pygtk/2.0/demos/',
                   'lib/pygtk/2.0/pygtk-demo.py',
                   'bin/pygtk-demo'
