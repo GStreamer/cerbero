@@ -156,6 +156,9 @@ class Recipe(recipe.Recipe):
         Platform.ANDROID: [
              'lib/gstreamer-0.10/libgsteglglessink%(mext)s',
              'lib/gstreamer-0.10/libgstopensles%(mext)s',
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-0.10/libgstapplemedia%(mext)s',
             ]
     }
 
@@ -171,8 +174,6 @@ class Recipe(recipe.Recipe):
             self.files_plugins_codecs.remove('lib/gstreamer-0.10/libgstdccp%(mext)s')
             for d in ['libdvdnav']:
                 self.deps.remove(d)
-        if self.config.target_platform == Platform.IOS:
-            self.configure_options += ' --disable-apple_media'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
