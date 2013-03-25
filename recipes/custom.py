@@ -1,8 +1,10 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
 import shutil
+from collections import defaultdict
 
 from cerbero.build import recipe
+from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform
 from cerbero.utils import to_unixpath
 
@@ -74,3 +76,32 @@ class GStreamerStatic(recipe.Recipe):
             shutil.copyfile(os.path.join(self.tmp_destdir,
                 to_unixpath(self.config.prefix)[1:], f_no_static),
                 os.path.join(self.config.prefix, f))
+
+
+def  list_gstreamer_plugins_by_category(config):
+        cookbook = CookBook(config)
+        # For plugins named differently
+        replacements = {'decodebin2': 'uridecodebin', 'playbin': 'playback',
+                        'encodebin': 'encoding', 'souphttpsrc': 'soup',
+                        'siren': 'gstsiren', 'sdpelem': 'sdp',
+                        'rtpmanager': 'gstrtpmanager', 'scaletempoplugin' : 'scaletempo',
+                        'mpegdemux': 'mpegdemux2', 'rmdemux': 'realmedia'}
+        plugins = defaultdict(list)
+        for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
+                  'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg']:
+            r = cookbook.get_recipe(r)
+            for attr_name in dir(r):
+                if attr_name.startswith('files_plugins_'):
+                    cat_name = attr_name[len('files_plugins_'):]
+                    plugins_list = getattr(r, attr_name)
+                elif attr_name.startswith('platform_files_plugins_'):
+                    cat_name = attr_name[len('platform_files_plugins_'):]
+                    plugins_dict = getattr(r, attr_name)
+                    plugins_list = plugins_dict.get(config.target_platform, [])
+                else:
+                    continue
+                for e in plugins_list:
+                    if not e.startswith('lib/gstreamer-'):
+                        continue
+                    plugins[cat_name].append(e[25:-8])
+        return plugins, replacements
