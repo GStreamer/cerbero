@@ -144,6 +144,13 @@ GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_D
 GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
 GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
 
+# In newer NDK, SYSROOT is replaced by SYSROOT_INC and SYSROOT_LINK, which
+# now points to the root directory. But this will probably change in the future from:
+# https://android.googlesource.com/platform/ndk/+/fa8c1b4338c1bef2813ecee0ee298e9498a1aaa7
+ifndef SYSROOT
+    SYSROOT := $(NDK_PLATFORMS_ROOT)/$(TARGET_PLATFORM)/arch-$(TARGET_ARCH)
+endif
+
 # Create the link command
 GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(LDFLAGS) -shared --sysroot=$(SYSROOT) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
