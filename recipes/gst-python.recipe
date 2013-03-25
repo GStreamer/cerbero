@@ -34,4 +34,4 @@ class Recipe(recipe.Recipe):
 
     files_examples = ['share/gst-python/0.10/examples/']
 
-    files_devel = ['lib/pkgconfig/gst-python-0.10.pc']
+    files_devel = ['lib/pkgconfig/gst-python-0.10.pc', 'include/gstreamer-0.10/gst/pygst.h']
