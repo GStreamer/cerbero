@@ -12,6 +12,7 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: ['libstdc++'],
         }
     use_system_libs = True
+    autoreconf=True
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',
@@ -34,7 +35,3 @@ class Recipe(recipe.Recipe):
 
     # Skipping tests as they require a display
     make_check = None
-
-    def prepare(self):
-        if self.config.target_platform == Platform.DARWIN:
-            self.autoreconf=True
