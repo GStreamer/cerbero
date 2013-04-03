@@ -157,7 +157,7 @@ class LinuxPackager(PackagerBase):
         # Development packages should depend on the runtime package
         if package_type == PackageType.DEVEL:
             if self._has_runtime_package(self.package):
-                deps.append(self.package.name)
+                deps.append("%s%s" % (self._package_prefix(self.package), self.package.name))
 
         deps.extend(self.package.get_sys_deps(package_type))
         return sorted(deps)
