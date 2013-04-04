@@ -16,3 +16,20 @@ class Recipe(recipe.Recipe):
     can_use_configure_cache = False
 
     files_bin = ['bin/cmake', 'bin/ccmake']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86_64:
+                # Setting SYSTEM_NAME sets CMAKE_CROSSCOMPILING and the
+                # binutils such as ar and ranlib are prefixed correctly
+                self.configure_tpl += ' -- -DCMAKE_SYSTEM_NAME="Windows"'
+
+    def configure(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86_64:
+                # Bootstrap needs to be run twice for some dark reason
+                try:
+                    super(recipe.Recipe, self).configure()
+                except:
+                    pass
+        super(recipe.Recipe, self).configure()
