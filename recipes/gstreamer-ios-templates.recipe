@@ -13,6 +13,9 @@ DEFINES_TPL = '''\
 #endif'''
 GST_IOS_PLUGINS_C_TPL = '''
 
+#include <gst/gst.h>
+#include "gst_ios_plugins.h"
+
 %s
 
 void
@@ -51,9 +54,9 @@ class Recipe(recipe.Recipe):
             for p in ps:
                 if p in replacements:
                     p = replacements[p]
-                p = p.upper()
-                decls.append(DEFINES_TPL % (p, c, DECLARE_PLUGIN_TPL % p))
-                regs.append(DEFINES_TPL % (p, c, REGISTER_PLUGIN_TPL % p))
+                p_up = p.upper()
+                decls.append(DEFINES_TPL % (p_up, c, DECLARE_PLUGIN_TPL % p))
+                regs.append(DEFINES_TPL % (p_up, c, REGISTER_PLUGIN_TPL % p))
         plugins_h.write(REGISTER_TPL)
         plugins_h.close()
         plugins_c = open(os.path.join(share_dir, 'GStreamer Base.xctemplate',
