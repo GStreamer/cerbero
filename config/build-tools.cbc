@@ -1,0 +1,5 @@
+import os
+
+prefix = os.path.expanduser('~/cerbero/build-tools')
+sources = os.path.expanduser('~/cerbero/sources/build-tools')
+cache_file = 'build-tools'
