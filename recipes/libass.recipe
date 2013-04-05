@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
     make_check = None
+    autoreconf = True
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']

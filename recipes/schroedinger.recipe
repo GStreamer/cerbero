@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: ['mingw'], # for libstdc++
         }
     can_use_configure_cache = False
+    autoreconf = True
 
     files_libs = ['libschroedinger-1.0']
     files_devel = ['include/schroedinger-1.0', 'lib/pkgconfig/schroedinger-1.0.pc']
