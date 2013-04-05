@@ -1,0 +1,18 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'intltool-m4'
+    version = '0.40.6'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    btype = BuildType.CUSTOM
+    url = 'http://ftp.gnome.org/pub/gnome/sources/intltool/0.40/intltool-0.40.6.tar.gz'
+
+    files_devel = [
+            'share/aclocal/intltool.m4',
+            ]
+
+    def install(self):
+        m4 = os.path.join(self.build_dir.replace('-m4', ''), 'intltool.m4')
+        shutil.copy(m4, os.path.join(self.config.prefix, 'share', 'aclocal', 'intltool.m4'))

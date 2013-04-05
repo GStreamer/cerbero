@@ -31,6 +31,7 @@ class BuildTools (BootstraperBase):
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'yasm', 'cmake'],
         Platform.WINDOWS: ['intltool', 'yasm', 'cmake'],
+        Platform.LINUX: ['intltool-m4'],
     }
 
     def __init__(self, config):
