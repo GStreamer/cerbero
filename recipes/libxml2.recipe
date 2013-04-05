@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '2.8.0'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
+    autoreconf = True
     platform_deps = {
             Platform.WINDOWS: ['libiconv'],
             Platform.ANDROID: ['libiconv'],
