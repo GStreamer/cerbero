@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     platform_deps = {
         Platform.WINDOWS: ['libstdc++'],
         }
+    autoreconf = True
 
     files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [
