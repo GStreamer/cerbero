@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libdv'
     version = '1.0.0'
     licenses = [License.LGPLv2_1Plus]
+    autoreconf = True
 
     files_libs = ['libdv']
     files_devel = ['include/libdv', 'lib/pkgconfig/libdv.pc']
