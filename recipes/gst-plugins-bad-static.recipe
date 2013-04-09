@@ -132,6 +132,11 @@ class Recipe(custom.GStreamerStatic):
              ],
         Platform.DARWIN: [
              'libgstapplemedia',
+             'libgstapplemedia_nonpublic',
+            ],
+        Platform.IOS: [
+             'libgstapplemedia',
+             'libgstapplemedia_nonpublic',
             ],
         Platform.ANDROID: [
              'libgsteglglessink',
