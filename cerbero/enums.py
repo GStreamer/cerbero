@@ -137,3 +137,5 @@ class License:
             'LibPNG License')
     MIT = LicenseDescription('MIT',
             'MIT License')
+    Proprietary = LicenseDescription('Proprietary',
+            'Proprietary License')
