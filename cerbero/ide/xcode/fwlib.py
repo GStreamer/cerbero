@@ -20,6 +20,7 @@
 import os
 import tempfile
 import shutil
+from collections import defaultdict
 
 from cerbero.config import Architecture
 from cerbero.ide.pkgconfig import PkgConfig
@@ -107,6 +108,32 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             tmplib = os.path.join (lib_tmpdir, newname)
 
         shell.call('ar -x %s' % tmplib, lib_tmpdir)
+
+        # object files with the same name in an archive are overwritten
+        # when they are extracted. osx's ar does not support the N count
+        # modifier so after extracting all the files we remove them from
+        # the archive to extract those with duplicated names.
+        # eg:
+        # ar t libavcodec.a -> mlpdsp.o mlpdsp.o (2 objects with the same name)
+        # ar d libavcodec.a mlpdsp.o (we remove the first one)
+        # ar t libavcodec.a -> mlpdsp.o (we only the second one now)
+        files = shell.check_call('ar -t %s' % tmplib, lib_tmpdir).split('\n')
+        # FIXME: We should use collections.Count but it's only available in
+        # python 2.7+
+        dups = defaultdict(int)
+        for f in files:
+            dups[f] += 1
+        for f in dups:
+            if dups[f] <= 1:
+                continue
+            for x in range(dups[f]):
+                path = os.path.join(lib_tmpdir, f)
+                new_path = os.path.join(lib_tmpdir, 'dup%d_' % x + f)
+                # The duplicated overwrote the first one, so extract it again
+                shell.call('ar -x %s %s' % (tmplib, f), lib_tmpdir)
+                shutil.move (path, new_path)
+                shell.call('ar -d %s %s' % (tmplib, f), lib_tmpdir)
+
         return lib_tmpdir
 
     def _create_framework_library(self, libraries):
