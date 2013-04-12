@@ -56,7 +56,6 @@
 			<key>Frameworks</key>
 				<array>
 				<string>GStreamer</string>
-				<string>CoreAudio</string>
 				</array>
 			<key>SharedSettings</key>
 			<dict>
@@ -64,6 +63,8 @@
 				<string>"~/Library/Developer/GStreamer/iPhone.sdk"</string>
 				<key>HEADER_SEARCH_PATHS</key>
 				<string>"~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers"</string>
+				<key>OTHER_LDFLAGS</key>
+				<string>-lresolv -lstdc++ -framework CoreFoundation -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreAudio -framework AudioToolbox</string>
 			</dict>
 		</dict>
 	</array>
