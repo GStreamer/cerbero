@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import os
 
 class Recipe(recipe.Recipe):
     name = 'gst-sdk-shell'
@@ -8,7 +9,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 
-    files_shell = ['bin/gst-sdk-shell']
+    files_shell = ['bin/gst-sdk-shell', 'share/gst-sdk/gst-sdk-env']
 
     def install(self):
         from cerbero.commands.gensdkshell import GenSdkShell
@@ -20,3 +21,6 @@ class Recipe(recipe.Recipe):
         gensdkshell = GenSdkShell()
         gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
                 py_prefix)
+        name = self.files_shell[1]
+        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+                py_prefix, cmd='')

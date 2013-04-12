@@ -61,7 +61,8 @@ class GenSdkShell(Command):
 
     def runargs(self, config, name, output_dir, prefix, libdir,
                 py_prefix, cmd=None):
-        cmd = cmd or self.DEFAULT_CMD
+        if cmd == None:
+            cmd = self.DEFAULT_CMD
         env = {}
         prefix_env_name = 'GSTREAMER_SDK_ROOT'
         prefix_env = '${%s}' % prefix_env_name
@@ -90,6 +91,10 @@ class GenSdkShell(Command):
             envstr += 'export %s="%s"\n' % (e, v)
         try:
             filepath = os.path.join(output_dir, name)
+
+            if not os.path.exists(os.path.dirname(filepath)):
+              os.mkdir(os.path.dirname(filepath))
+
             with open(filepath, 'w+') as f:
                 f.write(SCRIPT_TPL % (envstr, cmd))
             shell.call("chmod +x %s" % filepath)
