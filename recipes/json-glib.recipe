@@ -9,3 +9,4 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libjson-glib-1.0']
     files_devel  = ['include/json-glib-1.0', 'lib/pkgconfig/json-glib-1.0.pc']
+    autoreconf = True
