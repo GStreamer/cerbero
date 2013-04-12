@@ -37,6 +37,13 @@
 			<key>Path</key>
 				<string>gst_ios_plugins.c</string>
 		</dict>
+		<key>main.m</key>
+		<dict>
+			<key>Group</key>
+				<string>Supporting Files</string>
+			<key>Path</key>
+				<string>main.m</string>
+		</dict>
 	</dict>
 <!-- Definitions End -->
 
@@ -47,6 +54,7 @@
         <string>gst_ios_backend.h</string>
         <string>gst_ios_plugins.c</string>
         <string>gst_ios_plugins.h</string>
+        <string>main.m</string>
     </array>
 <!-- Nodes End -->
 
