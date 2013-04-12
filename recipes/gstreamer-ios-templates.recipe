@@ -3,8 +3,8 @@ from collections import defaultdict
 from cerbero.utils import shell
 from custom import list_gstreamer_plugins_by_category
 
-DECLARE_PLUGIN_TPL = 'GST_PLUGIN_STATIC_DECLARE(%s)'
-REGISTER_PLUGIN_TPL = 'GST_PLUGIN_STATIC_REGISTER(%s)'
+DECLARE_PLUGIN_TPL = 'GST_PLUGIN_STATIC_DECLARE(%s);'
+REGISTER_PLUGIN_TPL = '    GST_PLUGIN_STATIC_REGISTER(%s);'
 DEFINE_TPL = '/* #define GST_IOS_PLUGINS_%s */\n'
 REGISTER_TPL = 'void gst_backend_register_plugins (void);'
 DEFINES_TPL = '''\
