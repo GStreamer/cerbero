@@ -78,8 +78,11 @@ class GenSdkShell(Command):
         env['XDG_CONFIG_DIRS'] = \
             '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env
         env['GST_REGISTRY'] = '${HOME}/.gstreamer-0.10/gstreamer-sdk-registry'
+        env['GST_REGISTRY_1_0'] = '${HOME}/.cache/gstreamer-1.0/gstreamer-sdk-registry'
         env['GST_PLUGIN_SCANNER'] = \
                 '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env
+        env['GST_PLUGIN_SCANNER_1_0'] = \
+                '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env
         env['PYTHONPATH'] = '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'\
                 % (prefix_env, py_prefix)
         env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix_env

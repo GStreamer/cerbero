@@ -187,8 +187,11 @@ class Config (object):
             [to_unixpath(os.path.join(libdir, 'perl5')),
             to_unixpath(perlversionpath)])
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
+        gstpluginpath10 = os.path.join(libdir, 'gstreamer-1.0')
         gstregistry = os.path.join('~', '.gstreamer-0.10',
-                                   '.cerbero-registry-%s' % self.target_arch)
+                                   'cerbero-registry-%s' % self.target_arch)
+        gstregistry10 = os.path.join('~', '.cache', 'gstreamer-1.0',
+                                   'cerbero-registry-%s' % self.target_arch)
         gstregistry = os.path.expanduser(gstregistry)
         pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
 
@@ -229,7 +232,9 @@ class Config (object):
                'ACLOCAL': aclocal,
                'PERL5LIB': perl5lib,
                'GST_PLUGIN_PATH': gstpluginpath,
+               'GST_PLUGIN_PATH_1_0': gstpluginpath10,
                'GST_REGISTRY': gstregistry,
+               'GST_REGISTRY_1_0': gstregistry10,
                'PYTHONPATH': pythonpath,
                'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
                'MONO_GAC_PREFIX': prefix,
