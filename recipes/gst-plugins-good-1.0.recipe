@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-good-1.0'
-    version = '0.11.x'
+    version = '1.0'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--disable-introspection --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-esd --disable-gconf --disable-hal --disable-jack --disable-cairo --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name=\'GStreamer Good Plugins (GStreamer SDK)\' '
+    configure_options = '--disable-introspection --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name=\'GStreamer Good Plugins (GStreamer SDK)\' '
     remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
@@ -17,15 +17,16 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-good-1.0']
 
-    files_core = [
+    files_plugins_core = [
              'lib/gstreamer-1.0/libgstautodetect%(mext)s',
              'lib/gstreamer-1.0/libgstvideofilter%(mext)s',
     ]
 
-    files_effects = [
+    files_plugins_effects = [
              'lib/gstreamer-1.0/libgstalpha%(mext)s',
              'lib/gstreamer-1.0/libgstalphacolor%(mext)s',
              'lib/gstreamer-1.0/libgstaudiofx%(mext)s',
+             'lib/gstreamer-1.0/libgstcairo%(mext)s',
              'lib/gstreamer-1.0/libgstcutter%(mext)s',
              'lib/gstreamer-1.0/libgstdebug%(mext)s',
              'lib/gstreamer-1.0/libgstdeinterlace%(mext)s',
@@ -45,9 +46,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstvideomixer%(mext)s',
     ]
 
-    files_codecs = [
+    files_plugins_codecs = [
              'lib/gstreamer-1.0/libgstalaw%(mext)s',
-             'lib/gstreamer-1.0/libgstannodex%(mext)s',
              'lib/gstreamer-1.0/libgstapetag%(mext)s',
              'lib/gstreamer-1.0/libgstaudioparsers%(mext)s',
              'lib/gstreamer-1.0/libgstauparse%(mext)s',
@@ -73,7 +73,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgsty4menc%(mext)s',
     ]
 
-    files_net = [
+    files_plugins_net = [
              'lib/gstreamer-1.0/libgstrtsp%(mext)s',
              'lib/gstreamer-1.0/libgstrtp%(mext)s',
              'lib/gstreamer-1.0/libgstrtpmanager%(mext)s',
@@ -81,19 +81,19 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstudp%(mext)s',
     ]
 
-    files_vis = [
+    files_plugins_vis = [
              'lib/gstreamer-1.0/libgstgoom%(mext)s',
              'lib/gstreamer-1.0/libgstgoom2k1%(mext)s',
             ]
 
-    platform_files_capture = {
+    platform_files_plugins_capture = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstvideo4linux2%(mext)s',
              'lib/gstreamer-1.0/libgstximagesrc%(mext)s',
             ]
     }
 
-    platform_files_sys = {
+    platform_files_plugins_sys = {
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstdirectsoundsink%(mext)s',
             ],
@@ -103,7 +103,10 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio%(mext)s',
              'lib/gstreamer-1.0/libgstosxvideosink%(mext)s',
-            ]
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-1.0/libgstosxaudio%(mext)s'
+        ]
     }
 
     def prepare(self):

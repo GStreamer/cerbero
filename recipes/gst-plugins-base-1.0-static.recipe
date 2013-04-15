@@ -1,13 +1,15 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+
 class Recipe(custom.GStreamerStatic):
-    name = 'gst-plugins-base-static'
-    version = '0.10.36'
-    gstreamer_version = '0.10'
+    name = 'gst-plugins-base-1.0-static'
+    version = '1.0'
+    gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
-    extra_configure_options = "--disable-gst_v4l --disable-gnome_vfs"
-    deps = ['glib', 'gstreamer', 'libogg', 'pango', 'libtheora', 'libvisual',
-            'libvorbis', 'zlib', 'orc']
+    extra_configure_options = "--enable-static"
+    commit = 'upstream/1.0'
+    deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
+            'libvisual', 'libvorbis', 'zlib', 'orc']
     platform_deps = { Platform.LINUX: [ 'cdparanoia' ], Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
@@ -18,11 +20,10 @@ class Recipe(custom.GStreamerStatic):
              'libgstaudiorate',
              'libgstaudioresample',
              'libgstaudiotestsrc',
-             'libgstffmpegcolorspace',
-             'libgstgdp',
              'libgstgio',
              'libgstpango',
              'libgsttypefindfunctions',
+             'libgstvideoconvert',
              'libgstvideorate',
              'libgstvideoscale',
              'libgstvideotestsrc',
@@ -30,13 +31,13 @@ class Recipe(custom.GStreamerStatic):
     ]
 
     files_plugins_playback_devel = [
-             'libgstdecodebin2',
-             'libgstplaybin',
+             'libgstplayback',
             ]
 
+    # Not used currently
     files_plugins_encoding_devel = [
              'libgstencodebin',
-             ]
+            ]
 
     files_plugins_codecs_devel = [
              'libgstsubparse',
@@ -48,6 +49,10 @@ class Recipe(custom.GStreamerStatic):
     files_plugins_vis_devel = [
              'libgstlibvisual',
             ]
+
+    files_plugins_net_devel = [
+            'libgsttcp',
+    ]
 
     platform_files_plugins_codecs_devel = {
         Platform.ANDROID: [
@@ -67,25 +72,15 @@ class Recipe(custom.GStreamerStatic):
             ]
     }
 
-    platform_files_plugins_net_devel = {
-        Platform.LINUX: [
-             'libgsttcp',
-            ],
-        Platform.ANDROID: [
-             'libgsttcp',
-            ],
-        Platform.DARWIN: [
-             'libgsttcp',
-            ],
-        Platform.IOS: [
-             'libgsttcp',
-            ]
-    }
-
-
     def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.configure_options += ' --disable-alsa --disable-x'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
+
         custom.GStreamerStatic.prepare(self)

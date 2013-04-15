@@ -1,71 +1,50 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-class Recipe(custom.GStreamerStatic):
-    name = 'gst-plugins-bad-static'
-    version = '0.10.23'
-    gstreamer_version = '0.10'
-    licenses = [License.LGPLv2Plus]
-    extra_configure_options = " --disable-gsm --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar --disable-sdi --disable-cog "
 
-    deps = ['gstreamer', 'gst-plugins-base', 'libass', 'bzip2',
-            'faad2', 'libkate', 'libvpx', 'libdvdnav', 'zlib',
-            'schroedinger', 'libdca', 'jasper', 'libmms', 'opus', 'soundtouch' ]
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-plugins-bad-1.0-static'
+    version = '1.0'
+    gstreamer_version = '1.0'
+    licenses = [License.LGPLv2Plus]
+    extra_configure_options = "--enable-static --disable-gsm --disable-examples --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar --disable-sdi --disable-cog"
+    commit = 'upstream/1.0'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
+            'faad2', 'libkate', 'zlib', 'opus',
+            'schroedinger', 'libdca', 'jasper', 'libmms', 'libdvdnav', 'soundtouch' ]
 
     files_plugins_effects_devel = [
              'libgstautoconvert',
              'libgstbayer',
              'libgstcoloreffects',
-             'libgstfaceoverlay',
              'libgstfieldanalysis',
-             'libgstfreeverb',
              'libgstfrei0r',
              'libgstgaudieffects',
              'libgstgeometrictransform',
              'libgstinterlace',
-             'libgstjp2kdecimator',
              'libgstliveadder',
              'libgstrawparse',
              'libgstremovesilence',
              'libgstscaletempoplugin',
              'libgstsegmentclip',
              'libgstsmooth',
-             'libgstsoundtouch',
              'libgstspeed',
-             'libgststereo',
-             'libgstvideofiltersbad',
-             'libgstvideomeasure',
-             'libgstvideosignal',
     ]
 
     files_plugins_codecs_devel = [
              'libgstadpcmdec',
              'libgstadpcmenc',
-             'libgstaiff',
-             'libgstcdxaparse',
-             'libgstdccp',
              'libgstdtmf',
              'libgstdvbsuboverlay',
              'libgstdvdspu',
              'libgstfragmented',
-             'libgsthdvparse',
              'libgstid3tag',
-             'libgstivfparse',
-             'libgstjp2k',
-             'libgstkate',
-             'libgstmve',
-             'libgstmxf',
-             'libgstnsf',
-             'libgstnuvdemux',
              'libgstopus',
              'libgstpcapparse',
              'libgstpnm',
              'libgstschro',
              'libgstsiren',
              'libgstsubenc',
-             'libgsttta',
              'libgstvideoparsersbad',
-             'libgstvmnc',
-             'libgstvp8',
              'libgsty4mdec',
     ]
 
@@ -74,6 +53,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstandroidmedia',
             ]
     }
+
     files_plugins_codecs_gpl_devel = [
              'libgstassrender',
     ]
@@ -82,21 +62,19 @@ class Recipe(custom.GStreamerStatic):
              'libgstasfmux',
              'libgstdtsdec',
              'libgstfaad',
-             'libgstmpegdemux',
+             'libgstmpegpsdemux',
              'libgstmpegpsmux',
              'libgstmpegtsdemux',
              'libgstmpegtsmux',
     ]
 
     files_plugins_dvd_devel = [
-             'libresindvd',
+             'libgstresindvd',
     ]
 
     files_plugins_net_devel = [
              'libgstdataurisrc',
              'libgstsdpelem',
-             'libgstrtpmux',
-             'libgstrtpvp8',
     ]
 
     files_plugins_net_restricted_devel = [
@@ -107,30 +85,29 @@ class Recipe(custom.GStreamerStatic):
              'libgstcamerabin2',
             ]
 
-    files_plugins_vis_devel = [
-             'libgstaudiovisualizers',
-            ]
 
     platform_files_plugins_capture_devel = {
         Platform.LINUX: [
              'libgstdvb',
-             ],
+            ],
         Platform.WINDOWS: [
              'libgstwinscreencap',
-             ]
-        }
+            ]
+    }
+
+    files_plugins_vis_devel = [
+             'libgstaudiovisualizers',
+            ]
 
     platform_files_plugins_sys_devel = {
         Platform.LINUX: [
-             'libgstvcdsrc',
-             ],
+            ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
              'libgstdirectdrawsink',
              'libgstwinks',
              'libgstwasapi',
-             #'libgstdshowdecwrapper',
-             ],
+            ],
         Platform.DARWIN: [
              'libgstapplemedia',
              'libgstapplemedia_nonpublic',
@@ -146,29 +123,42 @@ class Recipe(custom.GStreamerStatic):
             ]
     }
 
-    # Static build will always fail on make check
-    make_check = None
-
     def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += \
                 ' --disable-cog --disable-sdl '\
-                ' --disable-cdaudio '
+                '--disable-cdaudio'
         if self.config.target_platform == Platform.ANDROID:
-            self.append_env['CXXFLAGS'] = ' -DST_NO_EXCEPTION_HANDLING=1 '
-            self.configure_options += ' --disable-dccp'
             for d in ['libdvdnav']:
                 self.deps.remove(d)
-            self.files_plugins_codecs_devel.remove('libgstdccp')
-            self.files_plugins_dvd_devel.remove('libresindvd')
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
-        if self.config.target_platform == Platform.IOS:
-            self.configure_options += '--with-egl-window-system=ios'
+
         super(Recipe, self).prepare()
-        if self.config.target_platform == Platform.ANDROID:
-            self.files_plugins_codecs_devel += [
-                'lib/libgstcodecparsers-0.10.la',
-                'lib/libgstbasevideo-0.10.la',
-                'lib/libgstcodecparsers-0.10.a',
-                'lib/libgstbasevideo-0.10.a']
+
+        self.files_plugins_codecs_devel += [
+            'lib/libgstcodecparsers-1.0.la',
+            'lib/libgstcodecparsers-1.0.a',
+            'lib/libgstbasecamerabinsrc-1.0.la',
+            'lib/libgstbasecamerabinsrc-1.0.a',
+            'lib/libgstphotography-1.0.la',
+            'lib/libgstphotography-1.0.a']
+
+#    def post_install(self):
+#        if self.config.platform == Platform.WINDOWS and\
+#                self.config.target_platform == Platform.WINDOWS:
+#            from cerbero.utils.msbuild import MSBuild
+#            from cerbero.utils import messages as m
+#            solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
+#            root = self.config.prefix.rsplit('/', 1)[0]
+#            msbuild  = MSBuild(solution, self.config.target_arch,
+#                               GSTREAMER_SDK_ROOT=root)
+#            try:
+#                msbuild.build()
+#            except Exception, e:
+#                m.error("The Direct Show plugins will not be built.")

@@ -41,17 +41,18 @@ class GStreamerStatic(recipe.Recipe):
         self.platform_plugins_categories = [x for x in dir(self) if
                 x.startswith('platform_files_plugins')]
         self._files_list = []
+        plugin_path = 'lib/gstreamer-%s/static' % self.gstreamer_version
         for name in self.plugins_categories:
-            files =getattr(self, name)
-            f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
-            f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
+            files = getattr(self, name)
+            f = ['%s/%s.a' % (plugin_path, x) for x in files]
+            f.extend(['%s/%s.la' % (plugin_path, x) for x in files])
             setattr(self, name, f)
             self._files_list.extend(f)
         for name in self.platform_plugins_categories:
             platform_files = getattr(self, name)
             files = platform_files.get(self.config.target_platform, [])
-            f = ['lib/gstreamer-0.10/static/%s.a' % x for x in files]
-            f.extend(['lib/gstreamer-0.10/static/%s.la' % x for x in files])
+            f = ['%s/%s.a' % (plugin_path, x) for x in files]
+            f.extend(['%s/%s.la' % (plugin_path, x) for x in files])
             platform_files[self.config.target_platform] = f
             self._files_list.extend(f)
 

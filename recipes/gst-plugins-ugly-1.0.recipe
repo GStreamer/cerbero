@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-ugly-1.0'
-    version = '0.11.x'
+    version = '1.0'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--disable-introspection --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264 --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer Ugly Plugins (GStreamer SDK)' "
@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad']
 
-    files_codecs_restricted = [
+    files_plugins_codecs_restricted = [
              'lib/gstreamer-1.0/libgsta52dec%(mext)s',
              'lib/gstreamer-1.0/libgstamrnb%(mext)s',
              'lib/gstreamer-1.0/libgstamrwbdec%(mext)s',
@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstrmdemux%(mext)s',
     ]
 
-    files_dvd = [
+    files_plugins_dvd = [
              'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstdvdread%(mext)s',
     ]

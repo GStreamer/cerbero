@@ -8,6 +8,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(custom.GStreamerStatic):
     name = 'gst-ffmpeg-static'
     version = '0.10.13'
+    gstreamer_version = '0.10'
     # TODO - check license, plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]

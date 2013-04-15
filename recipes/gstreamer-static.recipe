@@ -3,6 +3,7 @@
 class Recipe(custom.GStreamerStatic):
     name = 'gstreamer-static'
     version = '0.10.36'
+    gstreamer_version = '0.10'
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib', 'libxml2', 'gtk-doc-lite']
     # Static build will always fail on make check

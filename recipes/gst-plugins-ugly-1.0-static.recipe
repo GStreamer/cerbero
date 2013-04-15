@@ -1,0 +1,39 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-plugins-ugly-1.0-static'
+    version = '1.0'
+    gstreamer_version = '1.0'
+    licenses = [License.LGPLv2Plus]
+    extra_configure_options = "--enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264"
+    commit = 'upstream/1.0'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
+            'libdvdread', 'libmpeg2', 'libmad']
+
+    files_plugins_codecs_restricted_devel = [
+             'libgsta52dec',
+             'libgstamrnb',
+             'libgstamrwbdec',
+             'libgstasf',
+             'libgstmad',
+             'libgstmpeg2dec',
+             'libgstxingmux',
+             'libgstrmdemux',
+    ]
+
+    files_plugins_dvd_devel = [
+             'libgstdvdlpcmdec',
+             'libgstdvdread',
+    ]
+
+    def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc'
+        if self.config.variants.nodebug:
+            self.configure_options += ' --disable-gst-debug'
+
+        custom.GStreamerStatic.prepare(self)

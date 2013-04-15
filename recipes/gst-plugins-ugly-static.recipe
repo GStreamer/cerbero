@@ -4,6 +4,7 @@
 class Recipe(custom.GStreamerStatic):
     name = 'gst-plugins-ugly-static'
     version = '0.10.19'
+    gstreamer_version = '0.10'
     licenses = [License.LGPLv2Plus]
     extra_configure_options = " --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264"
     deps = ['gstreamer', 'gst-plugins-base', 'a52dec', 'opencore-amr',

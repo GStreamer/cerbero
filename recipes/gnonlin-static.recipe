@@ -4,6 +4,7 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamerStatic):
     name = 'gnonlin-static'
     version = '0.10.17'
+    gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     extra_configure_options = "--disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer GNonLin (GStreamer SDK)' "

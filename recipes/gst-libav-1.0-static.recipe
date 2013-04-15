@@ -1,19 +1,22 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
 
-class Recipe(recipe.Recipe):
-    name = 'gst-libav-1.0'
+import shutil
+
+from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-libav-1.0-static'
     version = '1.0'
+    gstreamer_version = '1.0'
     # TODO - check license - plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-lgpl --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer libav Plugins (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
+    extra_configure_options = "--enable-static --enable-lgpl --disable-example"
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
-    files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
+    files_plugins_codecs_restricted_devel = ['libgstlibav']
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
@@ -26,6 +29,12 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.PPC:
                 asflags = ' -arch ppc'
             self.configure_options += ' ASFLAGS="%s"' % asflags
+
+        super(Recipe, self).prepare()
+        for f in ['libavcodec', 'libavformat', 'libavutil']:
+            for ext in ['.a', '.la']:
+                path = os.path.join('lib', f + ext)
+                self.files_plugins_codecs_restricted_devel.append(path)
 
     def configure(self):
         super(recipe.Recipe, self).configure()
@@ -45,3 +54,29 @@ class Recipe(recipe.Recipe):
                 replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
                                 'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+
+    def post_install(self):
+        for n in ['avutil', 'avcodec', 'avformat']:
+            name = 'lib%s' % n
+            lib = '%s.a' % name
+            path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav',
+                    name, lib)
+            shutil.copy(path, self.config.libdir)
+            deps = ['z', 'bz2']
+            if n == 'avcodec':
+                deps += ['avutil']
+            if n == 'avformat':
+                deps += ['avutil', 'avcodec']
+            libtool_la = LibtoolLibrary(n, None, None, None, self.config.libdir,
+                self.config.target_platform, deps)
+            libtool_la.change_value ('dlname', '')
+            libtool_la.change_value ('library_names', '')
+            libtool_la.save()
+        super(Recipe, self).post_install()
+        gstlibavlib = os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',
+                'static', 'libgstlibav.la')
+        shell.replace (gstlibavlib,
+                {'-lavformat': os.path.join(self.config.libdir, 'libavformat.la'),
+                '-lavcodec': os.path.join(self.config.libdir, 'libavcodec.la'),
+                '-lavutil': os.path.join(self.config.libdir, 'libavutil.la')})
+
