@@ -1,0 +1,27 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-encoding'
+    shortdesc = 'GStreamer 1.0 plugins for playback'
+    longdesc = 'GStreamer 1.0 plugins for playback'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '0c91cd49-7dd2-4b48-aa7a-3f71d17c09b4'
+    deps = ['gstreamer-1.0-core', 'gstreamer-1.0-playback']
+
+    files = ['gst-plugins-base-1.0:plugins_encoding',
+             'gst-plugins-good-1.0:plugins_encoding',
+             'gst-plugins-ugly-1.0:plugins_encoding',
+             'gst-plugins-bad-1.0:plugins_encoding']
+    files_devel = ['gst-plugins-base-1.0-static:plugins_encoding_devel',
+                   'gst-plugins-good-1.0-static:plugins_encoding_devel',
+                   'gst-plugins-ugly-1.0-static:plugins_encoding_devel',
+                   'gst-plugins-bad-1.0-static:plugins_encoding_devel']
+

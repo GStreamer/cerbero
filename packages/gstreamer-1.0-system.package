@@ -1,0 +1,26 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-system'
+    shortdesc = 'GStreamer 1.0 system plugins'
+    longdesc = 'GStreamer 1.0 system plugins'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = 'fe9b6b9e-0817-4a2f-9838-44e1d9377435'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gst-plugins-base-1.0:plugins_sys', 'gst-plugins-good-1.0:plugins_sys',
+            'gst-plugins-ugly-1.0:plugins_sys', 'gst-plugins-bad-1.0:plugins_sys']
+    files_devel = ['gst-plugins-base-1.0-static:plugins_sys_devel',
+            'gst-plugins-good-1.0-static:plugins_sys_devel',
+            'gst-plugins-ugly-1.0-static:plugins_sys_devel',
+            'gst-plugins-bad-1.0-static:plugins_sys_devel']
+
+    platform_files = {Platform.LINUX: ['cdparanoia:libs']}

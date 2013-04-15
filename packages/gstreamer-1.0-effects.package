@@ -1,0 +1,28 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-effects'
+    shortdesc = 'GStreamer 1.0 effects and instrumentation plugins'
+    longdesc = 'GStreamer 1.0 effects and instrumentation plugins'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '4be3f88b-b552-4cd7-aecd-cf935fe270f7'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['soundtouch:libs',
+             'gst-plugins-base-1.0:plugins_effects',
+             'gst-plugins-good-1.0:plugins_effects',
+             'gst-plugins-ugly-1.0:plugins_effects',
+             'gst-plugins-bad-1.0:plugins_effects']
+    files_devel = [
+            'gst-plugins-base-1.0-static:plugins_effects_devel',
+            'gst-plugins-good-1.0-static:plugins_effects_devel',
+            'gst-plugins-ugly-1.0-static:plugins_effects_devel',
+            'gst-plugins-bad-1.0-static:plugins_effects_devel']

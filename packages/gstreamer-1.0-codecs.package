@@ -1,0 +1,34 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-codecs'
+    shortdesc = 'GStreamer 1.0 codecs'
+    longdesc = 'GStreamer 1.0 codecs'
+    version = '2013.04'
+    codename = 'Congo'
+    url = "http://www.gstreamer.com"
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = 'a2e545d5-7819-4636-9e86-3660542f08e5'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['flac:libs',
+            'jasper:libs', 'libkate:libs', 'libdv:libs',
+            'libogg:libs', 'schroedinger:libs', 'speex:libs',
+            'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
+            'taglib:libs', 'opus:libs', 'libvorbis:libs',
+            'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
+            'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
+            ]
+    files_devel = ['gst-plugins-base-1.0-static:plugins_codecs_devel',
+            'gst-plugins-good-1.0-static:plugins_codecs_devel',
+            'gst-plugins-bad-1.0-static:plugins_codecs_devel',
+            'gst-plugins-ugly-1.0-static:plugins_codecs_devel']
+    platform_files = {
+            Platform.ANDROID: ['tremor:libs'],
+            Platform.IOS: ['tremor:libs']
+    }

@@ -1,0 +1,24 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-networking-restricted'
+    shortdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
+    longdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '8cf57a89-3ba3-4db0-8b66-15e79b541ffe'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['libmms:libs',
+             'gst-plugins-ugly-1.0:plugins_net_restricted',
+             'gst-plugins-bad-1.0:plugins_net_restricted']
+    files_devel = ['gst-plugins-ugly-1.0-static:plugins_net_restricted_devel',
+            'gst-plugins-bad-1.0-static:plugins_net_restricted_devel']
+

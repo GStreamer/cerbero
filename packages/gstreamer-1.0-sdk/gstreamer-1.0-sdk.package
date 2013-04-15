@@ -1,0 +1,67 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class SDKPackage(package.SDKPackage):
+
+    name = "gstreamer-1.0-sdk"
+    shortdesc = "GStreamer 1.0 SDK"
+    longdesc = "GStreamer 1.0 SDK"
+    title = "GStreamer 1.0 SDK"
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    sdk_version = '1.0'
+    codename = 'Congo'
+    license = License.LGPL
+    uuid = 'b1b4b712-0d09-4a34-8117-8a69b6deecc2'
+    vendor = "GStreamer Project"
+    org = "com.gstreamer"
+    ignore_package_prefix = True
+    resources_wix_installer = 'installer.wxs'
+    packages =[
+               # (name, required, selected)
+               ('gstreamer-1.0-core', True, True),
+               ('gstreamer-1.0-system', False, True),
+               ('gstreamer-1.0-playback', False, True),
+               ('gstreamer-1.0-codecs', False, True),
+               ('gstreamer-1.0-effects', False, True),
+               ('gstreamer-1.0-networking', False, True),
+               ('gstreamer-1.0-visualizers', False, True),
+               ('gstreamer-1.0-codecs-gpl', False, False),
+               ('gstreamer-1.0-codecs-restricted', False, False),
+               ('gstreamer-1.0-networking-restricted', False, False),
+               ('gstreamer-1.0-dvd', False, False),
+               ('gstreamer-1.0-libav', False, False),
+               ('gstreamer-1.0-encoding', False, False),
+               ('gstreamer-1.0-capture', False, False),
+              ]
+    #platform_packages = {
+    #        Platform.WINDOWS: [('vsintegration', True, False)],
+    #        }
+
+    install_dir = {
+        Platform.WINDOWS: 'gstreamer-1.0-sdk',
+        Platform.LINUX: '/opt/gstreamer-1.0-sdk/',
+        Platform.DARWIN: '/Library/Frameworks/GStreamer-1.0.framework/',
+        Platform.IOS: '/Library/Developer/GStreamer-1.0/iPhone.sdk'}
+
+    root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'
+    wix_upgrade_code = {
+        PackageType.DEVEL: {
+            Architecture.X86 : 'c0c6126d-1f4a-4577-9598-e900f594fd06',
+            Architecture.X86_64: '49c4a3aa-249f-453c-b82e-ecd05fac0693',
+            },
+        PackageType.RUNTIME: {
+            Architecture.X86 : 'ebe0c791-d84e-4f7e-a4eb-18012a0e319d',
+            Architecture.X86_64: 'c20a66dc-b249-4e6d-a68a-d0f836b2b3cf',
+            },
+        }
+    osx_framework_library = ('GStreamer-1.0', 'lib/GStreamer-1.0')
+    ios_framework_library = ('GStreamer-1.0', 'lib/GStreamer-1.0')
+
+
+    def prepare(self):
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
+            p = ['gstreamer-dvd']
+            self.packages = [ x for x in self.packages if x[0] not in p]
+        if self.config.target_platform == Platform.IOS:
+            self.resources_postinstall = 'post_install_ios'

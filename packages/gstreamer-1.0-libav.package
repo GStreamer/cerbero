@@ -1,0 +1,20 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-libav'
+    shortdesc = 'GStreamer 1.0 libav wrapper'
+    longdesc = 'GStreamer 1.0 libav wrapper'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '5581acc2-d38c-491b-83c9-14b7011c3c06'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gst-libav-1.0:plugins_codecs_restricted']
+    files_devel = ['gst-libav-1.0-static:plugins_codecs_restricted_devel']

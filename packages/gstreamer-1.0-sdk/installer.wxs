@@ -1,0 +1,47 @@
+<?xml version="1.0" ?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include $(sys.CURRENTDIR)\Config.wxi?>
+	<Product Id="$(var.ProductID)" Language="$(var.Language)" Manufacturer="$(var.Manufacturer)"
+			Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)"
+			Version="$(var.Version)">
+
+		<Package Comments="$(var.PackageComments)" Compressed="yes"
+			Description="$(var.Description)" InstallPrivileges="elevated"
+			Manufacturer="$(var.Manufacturer)"/>
+
+		<Media Cabinet="product.cab" EmbedCab="yes" Id="1"/>
+
+		<!-- Upgrades -->
+		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit"/>
+
+		<!-- Add/Remove Programs -->
+		<Property Id="ARPPRODUCTICON" Value="MainIcon" />
+		<Property Id="ARPCONTACT" Value="$(var.Manufacturer)" />
+		<Property Id="ARPURLINFOABOUT" Value="$(var.WebSiteName)" />
+		<Property Id="ALLUSERS">1</Property>
+		
+		<!-- UI -->
+		<CustomAction Execute="firstSequence" Id="SetWixUIInstallDir" Property="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+		<InstallUISequence>
+			<Custom Action="SetWixUIInstallDir" Before="CostInitialize"/>
+		</InstallUISequence>
+		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
+		
+		<!-- Delete [INSTALLDIR]/2012.5 -->
+		<CustomAction Id="del_cmdline" Property="del_exec" Value='"[SystemFolder]cmd.exe" /c rmdir /Q /S "[INSTALLDIR]\2012.5"' />
+		<CustomAction Id="del_exec" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Impersonate="no" Return="ignore" />
+		<!-- Create link from [INSTALLDIR]/2012.5 to [INSTALLDIR]/0.10 -->
+		<CustomAction Id="link_cmdline" Property="link_exec" Value='"[SDKROOTDIR]bin\Elevate.exe" cmd.exe /c mklink /D "[INSTALLDIR]2012.5" "[INSTALLDIR]0.10"' />
+		<CustomAction Id="link_exec" BinaryKey="WixCA" DllEntry="CAQuietExec" Execute="deferred" Impersonate="yes" Return="ignore" />
+
+		<InstallExecuteSequence>
+			<Custom Action="del_cmdline" After="CostInitialize"/>
+			<Custom Action="link_cmdline" After="del_cmdline"/>
+			<Custom Action="del_exec" Before="InstallFinalize"/>
+			<Custom Action="link_exec" After="del_exec"/>
+		</InstallExecuteSequence>
+		
+
+		<UIRef Id="WixUI_Mondo"/>
+	</Product>
+</Wix>

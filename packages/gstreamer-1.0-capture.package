@@ -1,0 +1,26 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-capture'
+    shortdesc = 'GStreamer 1.0 plugins for capture'
+    longdesc = 'GStreamer 1.0 plugins for capture'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '1c85344d-5968-4e50-959e-5cf4379e0a40'
+    deps = ['gstreamer-1.0-core', 'gstreamer-1.0-encoding']
+
+    files = ['gst-plugins-base-1.0:plugins_capture',
+             'gst-plugins-good-1.0:plugins_capture',
+             'gst-plugins-ugly-1.0:plugins_capture',
+             'gst-plugins-bad-1.0:plugins_capture']
+    files_devel = ['gst-plugins-base-1.0-static:plugins_capture_devel'
+                   'gst-plugins-good-1.0-static:plugins_capture_devel',
+                   'gst-plugins-ugly-1.0-static:plugins_capture_devel',
+                   'gst-plugins-bad-1.0-static:plugins_capture_devel']

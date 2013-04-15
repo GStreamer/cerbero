@@ -1,0 +1,59 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-networking'
+    shortdesc = 'GStreamer 1.0 plugins for network protocols'
+    longdesc = 'GStreamer 1.0 plugins for network protocols'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '2f9ca3f5-3b3b-4b4d-8cc9-6c08f21af807'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['libsoup:libs',
+            'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
+            'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net']
+    files_devel = ['gst-plugins-base-1.0-static:plugins_net_devel',
+            'gst-plugins-good-1.0-static:plugins_net_devel',
+            'gst-plugins-ugly-1.0-static:plugins_net_devel',
+            'gst-plugins-bad-1.0-static:plugins_net_devel',
+            ]
+
+    platform_files = {
+        Platform.WINDOWS: [],
+        #Platform.DARWIN: ['gst-rtsp-server:libs:python'],
+        #Platform.LINUX: ['gst-rtsp-server:libs:python'],
+        Platform.ANDROID: [],
+        Platform.IOS: [],
+        }
+
+    platform_files_devel = {
+        Platform.WINDOWS: [],
+        #Platform.DARWIN: ['gst-rtsp-server:devel'],
+        #Platform.LINUX: ['gst-rtsp-server:devel'],
+        Platform.ANDROID: [],
+        Platform.IOS: [],
+        }
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX or \
+           self.config.target_distro_version not in \
+                [DistroVersion.DEBIAN_WHEEZY,
+                 DistroVersion.UBUNTU_NATTY,
+                 DistroVersion.UBUNTU_ONEIRIC,
+                 DistroVersion.UBUNTU_PRECISE,
+                 DistroVersion.UBUNTU_QUANTAL,
+                 DistroVersion.FEDORA_16,
+                 DistroVersion.FEDORA_17]:
+            self.files += ['gmp:libs', 'gnutls:libs:libs_extra:lang',
+                           'libtasn1:libs', 'nettle:libs',
+                           'glib-networking', 'glib-networking-static'
+                           ]
+        elif self.config.target_platform == Platform.LINUX:
+            self.sys_deps = {self.config.target_distro_version: ['glib-networking']}

@@ -8,8 +8,8 @@ class Package(package.Package):
     shortdesc = 'Base system dependencies'
     longdesc = 'Base system dependencies'
     url = "http://www.gstreamer.com"
-    version = '2012.11'
-    codename = 'Brahmaputra'
+    version = '2013.04'
+    codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
