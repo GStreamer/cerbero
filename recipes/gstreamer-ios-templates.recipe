@@ -50,7 +50,11 @@ class Recipe(recipe.Recipe):
         regs = []
         for c, ps in plugins.iteritems():
             c = c.upper()
-            plugins_h.write(DEFINE_TPL % c)
+            define = DEFINE_TPL % c
+            # By default enable only the core plugins
+            if c != 'CORE':
+              define = '//%s' % define
+            plugins_h.write(define)
             for p in ps:
                 if p in replacements:
                     p = replacements[p]
