@@ -18,7 +18,7 @@
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
-from cerbero.config import Architecture, Distro, DistroVersion
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
 from cerbero.utils import shell
 
 
@@ -61,8 +61,9 @@ class DebianBootstraper (UnixBootstraper):
 
     def __init__(self, config):
         UnixBootstraper.__init__(self, config)
-        if self.config.arch == Architecture.X86_64:
-            self.packages.append('ia32-libs')
+        if self.target_platform == Platform.WINDOWS:
+            if self.config.arch == Architecture.X86_64:
+                self.packages.append('ia32-libs')
         if self.config.distro_version in [DistroVersion.DEBIAN_SQUEEZE,
                 DistroVersion.UBUNTU_MAVERICK, DistroVersion.UBUNTU_LUCID]:
             self.packages.remove('glib-networking')
