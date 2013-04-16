@@ -136,6 +136,7 @@ class Recipe(custom.GStreamerStatic):
         if self.config.target_platform == Platform.ANDROID:
             for d in ['libdvdnav']:
                 self.deps.remove(d)
+            self.files_plugins_dvd_devel.remove('libgstresindvd')
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 

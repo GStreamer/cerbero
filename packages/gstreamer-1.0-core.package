@@ -27,5 +27,5 @@ class Package(package.Package):
     platform_files = {
             Platform.DARWIN: ['gstreamer-1.0-osx-framework'],
             Platform.IOS: ['gstreamer-1.0-ios-templates'],
-            Platform.ANDROID: ['gst-1.0-android'],
+            Platform.ANDROID: ['gst-android-1.0'],
             }

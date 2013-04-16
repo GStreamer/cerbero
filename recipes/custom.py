@@ -79,7 +79,7 @@ class GStreamerStatic(recipe.Recipe):
                 os.path.join(self.config.prefix, f))
 
 
-def  list_gstreamer_plugins_by_category(config):
+def list_gstreamer_plugins_by_category(config):
         cookbook = CookBook(config)
         # For plugins named differently
         replacements = {'decodebin2': 'uridecodebin', 'playbin': 'playback',
@@ -105,4 +105,32 @@ def  list_gstreamer_plugins_by_category(config):
                     if not e.startswith('lib/gstreamer-'):
                         continue
                     plugins[cat_name].append(e[25:-8])
+        return plugins, replacements
+
+def list_gstreamer_1_0_plugins_by_category(config):
+        cookbook = CookBook(config)
+        # For plugins named differently
+        replacements = {'decodebin': 'playback', 'playbin': 'playback',
+                        'uridecodebin': 'playback', 'sdpelem': 'sdp',
+                        'encodebin': 'encoding', 'souphttpsrc': 'soup',
+                        'siren': 'gstsiren', 'scaletempoplugin' : 'scaletempo',
+                        'rmdemux': 'realmedia', 'camerabin2': 'camerabin'}
+        plugins = defaultdict(list)
+        for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
+                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'gst-libav-1.0']:
+            r = cookbook.get_recipe(r)
+            for attr_name in dir(r):
+                if attr_name.startswith('files_plugins_'):
+                    cat_name = attr_name[len('files_plugins_'):]
+                    plugins_list = getattr(r, attr_name)
+                elif attr_name.startswith('platform_files_plugins_'):
+                    cat_name = attr_name[len('platform_files_plugins_'):]
+                    plugins_dict = getattr(r, attr_name)
+                    plugins_list = plugins_dict.get(config.target_platform, [])
+                else:
+                    continue
+                for e in plugins_list:
+                    if not e.startswith('lib/gstreamer-'):
+                        continue
+                    plugins[cat_name].append(e[24:-8])
         return plugins, replacements
