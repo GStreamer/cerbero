@@ -61,7 +61,7 @@ class DebianBootstraper (UnixBootstraper):
 
     def __init__(self, config):
         UnixBootstraper.__init__(self, config)
-        if self.target_platform == Platform.WINDOWS:
+        if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('ia32-libs')
         if self.config.distro_version in [DistroVersion.DEBIAN_SQUEEZE,
