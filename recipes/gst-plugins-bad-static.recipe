@@ -162,6 +162,8 @@ class Recipe(custom.GStreamerStatic):
             self.files_plugins_dvd_devel.remove('libresindvd')
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
+        if self.config.target_platform == Platform.IOS:
+            self.configure_options += '--with-egl-window-system=ios'
         super(Recipe, self).prepare()
         if self.config.target_platform == Platform.ANDROID:
             self.files_plugins_codecs_devel += [

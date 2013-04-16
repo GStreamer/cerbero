@@ -176,6 +176,8 @@ class Recipe(recipe.Recipe):
             self.files_plugins_codecs.remove('lib/gstreamer-0.10/libgstdccp%(mext)s')
             for d in ['libdvdnav']:
                 self.deps.remove(d)
+        if self.config.target_platform == Platform.IOS:
+            self.configure_options += '--with-egl-window-system=ios'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
