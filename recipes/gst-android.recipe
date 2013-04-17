@@ -1,4 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
 from cerbero.utils import shell
 from custom import list_gstreamer_plugins_by_category
 
@@ -16,17 +18,26 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/tools.mk',
             'share/gst-android/ndk-build/plugins.mk',
             'share/gst-android/ndk-build/GStreamer.java',
-            'share/gst-android/ndk-build/tools/windows',
+            'share/gst-android/ndk-build/tools',
             'share/gst-android/ndk-build/fontconfig',
             ]
 
     def install(self):
-        ndk_build_dir = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
-        shell.copy_dir(os.path.join(self.config.data_dir, 'ndk-build'),
-                ndk_build_dir)
+        ndk_build_dir_dst = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
+        if not os.path.exists(ndk_build_dir_dst):
+            os.makedirs(ndk_build_dir_dst)
+        ndk_build_dir_src = os.path.join(self.config.data_dir, 'ndk-build')
+        for f in self.files_devel:
+            fname = os.path.basename(f)
+            s = os.path.join(ndk_build_dir_src, fname)
+            d = os.path.join(ndk_build_dir_dst, fname)
+            if os.path.isfile(s):
+                shutil.copy(s, d)
+            else:
+                shell.copy_dir(s, d)
 
         plugins, replacements = list_gstreamer_plugins_by_category(self.config)
-        f = open(os.path.join(ndk_build_dir, 'plugins.mk'), 'w')
+        f = open(os.path.join(ndk_build_dir_dst, 'plugins.mk'), 'w')
         for c, p in plugins.iteritems():
             p = ' '.join(p)
             for k,v in replacements.iteritems():
