@@ -16,7 +16,6 @@ class SDKPackage(package.SDKPackage):
     vendor = "GStreamer Project"
     org = "com.gstreamer"
     ignore_package_prefix = True
-    resources_wix_installer = 'installer.wxs'
     packages =[
                # (name, required, selected)
                ('gstreamer-1.0-core', True, True),
@@ -39,10 +38,10 @@ class SDKPackage(package.SDKPackage):
     #        }
 
     install_dir = {
-        Platform.WINDOWS: 'gstreamer-1.0-sdk',
+        Platform.WINDOWS: 'gstreamer-sdk',
         Platform.LINUX: '/opt/gstreamer-1.0-sdk/',
-        Platform.DARWIN: '/Library/Frameworks/GStreamer-1.0.framework/',
-        Platform.IOS: '/Library/Developer/GStreamer-1.0/iPhone.sdk'}
+        Platform.DARWIN: '/Library/Frameworks/GStreamer.framework/',
+        Platform.IOS: '/Library/Developer/GStreamer/iPhone.sdk'}
 
     root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'
     wix_upgrade_code = {
@@ -55,8 +54,8 @@ class SDKPackage(package.SDKPackage):
             Architecture.X86_64: 'c20a66dc-b249-4e6d-a68a-d0f836b2b3cf',
             },
         }
-    osx_framework_library = ('GStreamer-1.0', 'lib/GStreamer-1.0')
-    ios_framework_library = ('GStreamer-1.0', 'lib/GStreamer-1.0')
+    osx_framework_library = ('GStreamer', 'lib/GStreamer')
+    ios_framework_library = ('GStreamer', 'lib/GStreamer')
 
 
     def prepare(self):
