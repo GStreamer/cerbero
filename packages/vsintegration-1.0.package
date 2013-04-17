@@ -1,0 +1,18 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'vsintegration-1.0'
+    shortdesc = 'Visual Studio Integration'
+    longdesc = 'Visual Studio Integration'
+    url = "http://www.gstreamer.com"
+    version = '2013.04'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '0d032a12-05b0-42a3-9b79-6b31d070dfca'
+
+    files = ['vsintegration-1.0']

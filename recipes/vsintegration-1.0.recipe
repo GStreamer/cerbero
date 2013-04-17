@@ -1,0 +1,49 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'vsintegration-1.0'
+    version = '0.1'
+    licenses = [License.LGPL]
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_devel = ['share/vs/2010', 'lib/libmoldname.a']
+
+    def install(self):
+        import shutil
+        from cerbero.commands.genvsprops import GenVSProps
+        env_var = ('GSTREAMER_1_0_SDK_ROOT_%s' % self.config.target_arch).upper()
+        vspropsdir =  os.path.join(self.config.prefix, self.files_devel[0], 'libs')
+        if not os.path.exists(vspropsdir):
+            os.makedirs(vspropsdir)
+        genvsprops = GenVSProps()
+        genvsprops.runargs(self.config, vspropsdir, env_var)
+        filename = os.path.basename(self.files_devel[1])
+        mingw_libdir = os.path.join(self.config.toolchain_prefix, 'mingw', 'lib')
+        if not os.path.exists(mingw_libdir):
+            os.makedirs(mingw_libdir)
+        shutil.copy(os.path.join(mingw_libdir, filename),
+                    os.path.join(self.config.prefix, 'lib', filename))
+	# Copy msvc
+        propsdir = os.path.join(self.config.prefix, 'share/vs/2010/msvc')
+        if not os.path.exists(propsdir):
+            os.makedirs(propsdir)
+        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'msvc')
+        for f in os.listdir(datapropsdir):
+            path = os.path.join(datapropsdir, f)
+            shutil.copy(path, os.path.join(propsdir, f))
+	# Copy Wizard files
+        propsdir = os.path.join(self.config.prefix, 'share/vs/2010/wizard')
+        if not os.path.exists(propsdir):
+            os.makedirs(propsdir)
+        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'wizard')
+        for f in os.listdir(datapropsdir):
+            path = os.path.join(datapropsdir, f)
+            shutil.copy(path, os.path.join(propsdir, f))
+	# Copy Wizard template files
+        propsdir = os.path.join(self.config.prefix, 'share/vs/2010/gst-sdk-template')
+        if os.path.exists(propsdir):
+            shutil.rmtree(propsdir)
+        datapropsdir = os.path.join(self.config.data_dir, 'vs-1.0', 'gst-sdk-template')
+        shutil.copytree(datapropsdir, propsdir)

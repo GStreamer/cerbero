@@ -33,9 +33,9 @@ class SDKPackage(package.SDKPackage):
                ('gstreamer-1.0-encoding', False, False),
                ('gstreamer-1.0-capture', False, False),
               ]
-    #platform_packages = {
-    #        Platform.WINDOWS: [('vsintegration', True, False)],
-    #        }
+    platform_packages = {
+            Platform.WINDOWS: [('vsintegration-1.0', True, False)],
+            }
 
     install_dir = {
         Platform.WINDOWS: 'gstreamer-sdk',
@@ -43,7 +43,7 @@ class SDKPackage(package.SDKPackage):
         Platform.DARWIN: '/Library/Frameworks/GStreamer.framework/',
         Platform.IOS: '/Library/Developer/GStreamer/iPhone.sdk'}
 
-    root_env_var = 'GSTREAMER_SDK_ROOT_%(arch)s'
+    root_env_var = 'GSTREAMER_1_0_SDK_ROOT_%(arch)s'
     wix_upgrade_code = {
         PackageType.DEVEL: {
             Architecture.X86 : 'c0c6126d-1f4a-4577-9598-e900f594fd06',
