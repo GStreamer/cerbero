@@ -35,6 +35,13 @@ class Recipe(recipe.Recipe):
             if os.path.exists (libbz2):
                 os.remove (libbz2)
             os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'), libbz2)
+        elif self.config.target_platform == Platform.DARWIN:
+            libdir = os.path.join(self.config.prefix, 'lib')
+            libbz2 = os.path.join(libdir, 'libbz2.dylib')
+            try:
+                os.symlink(os.path.join(libdir, 'libbz2.1.0.6.dylib'), libbz2)
+            except OSError:
+                pass
         elif self.config.target_platform == Platform.IOS:
             # FIXME This is to workaround a build issue, trying to ld ti libbz2.so
             try:
