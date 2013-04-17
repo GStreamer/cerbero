@@ -97,7 +97,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstdvb%(mext)s',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstwinscreencap%(mext)s',
             ]
     }
 
@@ -110,9 +109,6 @@ class Recipe(recipe.Recipe):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
-             'lib/gstreamer-1.0/libgstdirectdrawsink%(mext)s',
-             'lib/gstreamer-1.0/libgstwinks%(mext)s',
-             'lib/gstreamer-1.0/libgstwasapi%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',

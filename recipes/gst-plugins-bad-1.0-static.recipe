@@ -91,7 +91,6 @@ class Recipe(custom.GStreamerStatic):
              'libgstdvb',
             ],
         Platform.WINDOWS: [
-             'libgstwinscreencap',
             ]
     }
 
@@ -104,9 +103,6 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
-             'libgstdirectdrawsink',
-             'libgstwinks',
-             'libgstwasapi',
             ],
         Platform.DARWIN: [
              'libgstapplemedia',
