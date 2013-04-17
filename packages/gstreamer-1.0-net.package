@@ -4,7 +4,7 @@
 
 class Package(package.Package):
 
-    name = 'gstreamer-1.0-networking'
+    name = 'gstreamer-1.0-net'
     shortdesc = 'GStreamer 1.0 plugins for network protocols'
     longdesc = 'GStreamer 1.0 plugins for network protocols'
     url = "http://www.gstreamer.com"
