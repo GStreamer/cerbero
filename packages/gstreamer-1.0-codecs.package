@@ -16,8 +16,7 @@ class Package(package.Package):
     uuid = 'a2e545d5-7819-4636-9e86-3660542f08e5'
     deps = ['gstreamer-1.0-core']
 
-    files = ['flac:libs',
-            'jasper:libs', 'libkate:libs', 'libdv:libs',
+    files = ['flac:libs', 'libkate:libs', 'libdv:libs',
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs', 'libvorbis:libs',
