@@ -14,7 +14,7 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
     uuid = 'd9626750-e8b7-4e40-944d-98b67ed0c6bf'
-    deps = ['base-system']
+    deps = ['base-system-1.0']
 
     files = ['gstreamer-1.0', 'gst-plugins-base-1.0:bins:libs:core:lang',
             'gst-sdk-shell',

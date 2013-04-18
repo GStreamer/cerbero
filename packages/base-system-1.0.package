@@ -4,16 +4,16 @@
 
 class Package(package.Package):
 
-    name = 'base-system'
+    name = 'base-system-1.0'
     shortdesc = 'Base system dependencies'
     longdesc = 'Base system dependencies'
     url = "http://www.gstreamer.com"
-    version = '2012.11'
-    codename = 'Brahmaputra'
+    version = '2013.04'
+    codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'com.gstreamer'
-    uuid = '3ffe67c2-4565-411f-8287-e8faa892f853'
+    uuid = 'fae6046d-5a39-4d54-93ee-3770d2f316f5'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
              'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
@@ -24,11 +24,9 @@ class Package(package.Package):
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
-            'winpthreads', 'mingw', 'libcroco:libs', 'librsvg:libs:loader',
-            'libstdc++'],
-        Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang',
-            'libcroco:libs', 'librsvg:libs:loader'],
-        Platform.LINUX: ['libcroco:libs', 'librsvg:libs:loader'],
+            'winpthreads', 'mingw', 'libstdc++'],
+        Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang'],
+        Platform.LINUX: [],
         Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'gnustl'],
         Platform.IOS: ['gettext:libs:lang', 'libiconv:libs:lang']
         }
