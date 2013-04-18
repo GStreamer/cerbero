@@ -1,0 +1,23 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.ide.xcode.fwlib import DynamicFrameworkLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'gstreamer-1.0-osx-framework'
+    version = '0.1'
+    licenses = [License.LGPL]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
+
+    files_library = ['lib/GStreamer']
+
+    def install(self):
+        install_name = os.path.join(self.config.prefix, 'lib', 'GStreamer')
+        libs = ['gstreamer-1.0', 'gstreamer-app-1.0', 'gstreamer-audio-1.0',
+                'gstreamer-base-1.0', 'gstreamer-controller-1.0', 'gstreamer-fft-1.0',
+                'gstreamer-net-1.0', 'gstreamer-pbutils-1.0', 'gstreamer-riff-1.0',
+                'gstreamer-rtp-1.0', 'gstreamer-rtsp-1.0',
+                'gstreamer-sdp-1.0', 'gstreamer-tag-1.0', 'gstreamer-video-1.0']
+        fwlib = DynamicFrameworkLibrary(install_name, install_name, libs, self.config.target_arch)
+        fwlib.create()
