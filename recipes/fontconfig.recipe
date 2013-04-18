@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import os
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
@@ -23,3 +24,15 @@ class Recipe(recipe.Recipe):
                 self.configure_options = '--with-arch=x86_64'
             else:
                 self.configure_options = '--with-arch=i686'
+
+    def post_install(self):
+        # Create relative symlinks to prevent breakage during packaging
+        if self.config.target_platform != Platform.WINDOWS:
+            confddir = os.path.join(self.config.prefix, 'etc', 'fonts', 'conf.d')
+            linksrc = os.path.join('..', '..', '..', 'share', 'fontconfig', 'conf.avail')
+            for f in os.listdir(confddir):
+                if not f.endswith('.conf'):
+                    continue
+                os.remove(os.path.join(confddir, f))
+                os.symlink(os.path.join(linksrc, f), os.path.join(confddir, f))
+        
