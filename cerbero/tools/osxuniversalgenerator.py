@@ -208,12 +208,9 @@ class OSXUniversalGenerator(object):
             os.symlink(target, dest)
             return
 
-        # if it's an absolute path replace the prefix
-        target = os.path.join(os.path.dirname(src), target)
-        src_prefix = src.split(filepath)[0]
-        dest_prefix = dest.split(filepath)[0]
-        rel_target = os.path.relpath(target, src_prefix)
-        dest_target = os.path.join(dest_prefix, rel_target)
+        # if it's an absolute path, make it relative for sanity
+        rel_path = os.path.relpath(os.path.dirname(target), os.path.dirname(dest))
+        dest_target = os.path.join(rel_path, os.path.basename(target))
         os.symlink(dest_target, dest)
 
     def _call(self, cmd, cwd=None):
