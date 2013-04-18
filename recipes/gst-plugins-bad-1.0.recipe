@@ -112,7 +112,6 @@ class Recipe(recipe.Recipe):
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
-             'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
