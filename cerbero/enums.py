@@ -63,6 +63,7 @@ class DistroVersion:
     REDHAT_6 = 'redhat_6'
     OPENSUSE_12_1 = 'opensuse_12_1'
     OPENSUSE_12_2 = 'opensuse_12_2'
+    OPENSUSE_12_3 = 'opensuse_12_3'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
