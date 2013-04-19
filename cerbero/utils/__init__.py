@@ -156,6 +156,8 @@ def system_info():
                 distro_version = DistroVersion.FEDORA_17
             elif d[1] == '18':
                 distro_version = DistroVersion.FEDORA_18
+            elif d[1] == '19':
+                distro_version = DistroVersion.FEDORA_19
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))
