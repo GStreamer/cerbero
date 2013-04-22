@@ -6,10 +6,10 @@ class Recipe(custom.GStreamerStatic):
     version = '1.0'
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
-    extra_configure_options = "--enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame --disable-x264"
+    extra_configure_options = "--enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame"
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
-            'libdvdread', 'libmpeg2', 'libmad']
+            'libdvdread', 'libmpeg2', 'libmad', 'x264']
 
     files_plugins_codecs_restricted_devel = [
              'libgsta52dec',
@@ -20,6 +20,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstmpeg2dec',
              'libgstxingmux',
              'libgstrmdemux',
+             'libgstx264enc',
     ]
 
     files_plugins_dvd_devel = [
