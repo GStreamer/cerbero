@@ -27,3 +27,5 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.ARM:
                 self.configure_options += ' --disable-asm'
+        if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+            self.new_env = {'AS': os.environ.get('GAS', '')}
