@@ -19,7 +19,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstmpeg2dec',
              'libgstmpegaudioparse',
              'libgstrmdemux',
-             'libgstx264enc',
+             'libgstx264',
     ]
 
     files_plugins_dvd_devel = [

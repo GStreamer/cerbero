@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstmpeg2dec%(mext)s',
              'lib/gstreamer-1.0/libgstxingmux%(mext)s',
              'lib/gstreamer-1.0/libgstrmdemux%(mext)s',
-             'lib/gstreamer-1.0/libgstx264enc%(mext)s',
+             'lib/gstreamer-1.0/libgstx264%(mext)s',
     ]
 
     files_plugins_dvd = [
