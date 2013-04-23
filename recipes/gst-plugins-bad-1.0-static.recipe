@@ -137,6 +137,9 @@ class Recipe(custom.GStreamerStatic):
 
         super(Recipe, self).prepare()
 
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-bad'))
+        self.remotes['upstream'] = self.remotes['origin']
+
         self.files_plugins_codecs_devel += [
             'lib/libgstcodecparsers-1.0.la',
             'lib/libgstcodecparsers-1.0.a',

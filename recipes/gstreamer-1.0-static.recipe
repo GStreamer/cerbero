@@ -18,6 +18,7 @@ class Recipe(custom.GStreamerStatic):
         self.append_env['CFLAGS'] = " -Wno-error "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
+
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc --disable-docbook'
 
@@ -30,3 +31,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' --disable-gst-debug'
 
         custom.GStreamerStatic.prepare(self)
+
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gstreamer'))
+        self.remotes['upstream'] = self.remotes['origin']
+

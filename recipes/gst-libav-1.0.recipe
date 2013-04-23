@@ -9,13 +9,15 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-lgpl --disable-examples --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer libav Plugins (GStreamer SDK)' "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
     files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
 
     def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-libav'))
+        self.remotes['upstream'] = self.remotes['origin']
+
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:

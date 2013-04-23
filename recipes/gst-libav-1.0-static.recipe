@@ -31,6 +31,10 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' ASFLAGS="%s"' % asflags
 
         super(Recipe, self).prepare()
+
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-libav'))
+        self.remotes['upstream'] = self.remotes['origin']
+
         for f in ['libavcodec', 'libavformat', 'libavutil', 'libswscale']:
             for ext in ['.a', '.la']:
                 path = os.path.join('lib', f + ext)

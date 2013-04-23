@@ -122,3 +122,6 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' --disable-gst-debug'
 
         custom.GStreamerStatic.prepare(self)
+
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-good'))
+        self.remotes['upstream'] = self.remotes['origin']

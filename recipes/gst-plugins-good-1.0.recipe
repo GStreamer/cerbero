@@ -7,7 +7,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--disable-introspection --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 --with-package-origin="http://www.gstreamer.com" --with-package-name=\'GStreamer Good Plugins (GStreamer SDK)\' '
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     commit = 'upstream/1.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
@@ -110,6 +109,9 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-good'))
+        self.remotes['upstream'] = self.remotes['origin']
+
         self.append_env['CFLAGS'] = " -Wno-error "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
