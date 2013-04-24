@@ -20,10 +20,13 @@ class Recipe(recipe.Recipe):
                    'include/x264_config.h']
 
     def prepare(self):
+        arch = self.config.target_arch
+        if self.config.target_arch == Architecture.X86:
+            arch = 'i686'
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
                 self.new_env = {'AS': 'yasm -O2 -f macho -DPREFIX'}
-        self.configure_options += ' --host=%s-pc-%s' % (self.config.target_arch, self.config.target_platform)
+        self.configure_options += ' --host=%s-pc-%s' % (arch, self.config.target_platform)
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.ARM:
                 self.configure_options += ' --disable-asm'
