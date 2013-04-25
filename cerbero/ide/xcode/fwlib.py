@@ -25,6 +25,7 @@ from collections import defaultdict
 from cerbero.config import Architecture
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 
 class FrameworkLibrary(object):
@@ -136,6 +137,23 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
         return lib_tmpdir
 
+    def _check_duplicated_symbols(self, files, tmpdir):
+        for f in files:
+            dups = defaultdict(list)
+            symbols = shell.check_call('nm -UA %s' % f, tmpdir).split('\n')
+            # nm output is: test.o: 00000000 T _gzwrite
+            # (filename, address, symbol type, symbols_name)
+            for s in symbols:
+                s = s.split(' ')
+                if len(s) == 4 and s[2] == 'T':
+                    dups[s[3]].append(s)
+            dups = {k:v for k,v in dups.iteritems() if len(v) > 1}
+            m.warning ("The static library contains duplicated symbols")
+            for k, v in dups.iteritems():
+                m.message (k)  # symbol name
+                for l in v:
+                    m.message ("     %s" % l[0])  # file
+
     def _create_framework_library(self, libraries):
         tmpdir = tempfile.mkdtemp()
 
@@ -174,6 +192,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             shell.call('ar -s %s' % (libname), tmpdir_thinarch)
 
         files = [os.path.join(tmpdir, arch, libname) for arch in archs]
+        self._check_duplicated_symbols(files, tmpdir)
         if len(archs) > 1:
             #merge the final libs into a fat file again
             shell.call('lipo %s -create -output %s' % (' '.join(files), self.install_name), tmpdir)
