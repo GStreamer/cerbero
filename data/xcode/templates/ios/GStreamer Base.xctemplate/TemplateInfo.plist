@@ -71,10 +71,6 @@
 				<string>"~/Library/Developer/GStreamer/iPhone.sdk"</string>
 				<key>HEADER_SEARCH_PATHS</key>
 				<string>"~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers"</string>
-				<key>GCC_VERSION</key>
-				<string>com.apple.compilers.llvmgcc42</string>
-				<key>IPHONEOS_DEPLOYMENT_TARGET</key>
-				<string>5.2</string>
 				<key>OTHER_LDFLAGS</key>
 				<string>-lresolv -lstdc++ -framework CoreFoundation -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreAudio -framework AudioToolbox -framework OpenGLES -framework AssetsLibrary -framework QuartzCore -framework AssetsLibrary</string>
 			</dict>
