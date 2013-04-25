@@ -193,6 +193,7 @@ class Config (object):
         gstregistry10 = os.path.join('~', '.cache', 'gstreamer-1.0',
                                    'cerbero-registry-%s' % self.target_arch)
         gstregistry = os.path.expanduser(gstregistry)
+        gstregistry10 = os.path.expanduser(gstregistry10)
         pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
 
         if self.platform == Platform.LINUX:
