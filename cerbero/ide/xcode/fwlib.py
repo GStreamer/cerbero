@@ -149,6 +149,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
         archs = [a if a != Architecture.X86 else 'i386' for a in archs]
 
         for thin_arch in archs:
+            object_files_md5 = []
             shell.call ('mkdir -p %s' % thin_arch, tmpdir)
             tmpdir_thinarch = os.path.join(tmpdir, thin_arch)
 
@@ -163,13 +164,19 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
                 obj_files = shell.ls_files(['*.o'], lib_tmpdir)
                 for obj_f in obj_files:
-                    shell.call('cp %s %s' % (os.path.join(lib_tmpdir, obj_f), '%s-%s' % (libprefix, obj_f)), tmpdir_thinarch)
-                    shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir_thinarch)
+                    obj_path = os.path.join(lib_tmpdir, obj_f)
+                    md5 = shell.check_call('md5 -q %s' % obj_path).split('\n')[0]
+                    md5 = '%s-%s' % (md5, os.path.getsize(obj_path))
+                    if md5 not in object_files_md5:
+                        shell.call('cp %s %s' % (obj_path, '%s-%s' % (libprefix, obj_f)), tmpdir_thinarch)
+                        shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir_thinarch)
+                        object_files_md5.append(md5)
             shell.call('ar -s %s' % (libname), tmpdir_thinarch)
 
+        files = [os.path.join(tmpdir, arch, libname) for arch in archs]
         if len(archs) > 1:
             #merge the final libs into a fat file again
-            shell.call('lipo %s -create -output %s' % (' '.join([os.path.join(tmpdir, arch, libname) for arch in archs]), self.install_name), tmpdir)
+            shell.call('lipo %s -create -output %s' % (' '.join(files), self.install_name), tmpdir)
         else:
             shell.call('cp %s %s' % (os.path.join(tmpdir, self.arch, libname), self.install_name), tmpdir)
 
