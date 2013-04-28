@@ -167,7 +167,8 @@ class MakefilesBase (Build):
 
         for var, val in new_env.iteritems():
             if val is None:
-                del os.environ[var]
+                if var in os.environ:
+                    del os.environ[var]
             else:
                 os.environ[var] = val
         return self._old_env
@@ -179,7 +180,8 @@ class MakefilesBase (Build):
 
         for var, val in old_env.iteritems():
             if val is None:
-                del os.environ[var]
+                if var in os.environ:
+                    del os.environ[var]
             else:
                 os.environ[var] = val
         self._old_env = None
