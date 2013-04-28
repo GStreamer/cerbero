@@ -1,9 +1,9 @@
 class Recipe(recipe.Recipe):
-    name = 'winpthreads'
+    name = 'gendef'
     version = 'v2.0.8'
     licenses = [License.LGPL]
-    srcdir = 'mingw-w64-libraries/winpthreads'
-    configure_options = '--enable-shared --enable-static '
+    srcdir = 'mingw-w64-tools/gendef'
+    files_bins = ['gendef']
 
 
     def prepare(self):

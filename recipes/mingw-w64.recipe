@@ -1,8 +1,8 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64'
-    version = 'v2.0.2'
+    version = 'v2.0.8'
     licenses = [License.LGPL]
-    configure_options = '--without-headers --with-tools=gendef '\
+    configure_options = '--without-headers '\
                         '--with-sysroot=$CERBERO_PREFIX '
     add_host_build_target = False
     deps = ['mingw-w64-headers', 'binutils', 'gcc-core']

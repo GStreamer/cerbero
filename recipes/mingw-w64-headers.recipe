@@ -1,6 +1,6 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-headers'
-    version = 'v2.0.2'
+    version = 'v2.0.8'
     licenses = [License.LGPL]
     srcdir = 'mingw-w64-headers'
     add_host_build_target = True
