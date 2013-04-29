@@ -10,8 +10,10 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
             host = 'i686-w64-mingw32'
+            self.configure_options += ' --disable-lib64 '
         else:
             host = 'x86_64-w64-mingw32'
+            self.configure_options += ' --disable-lib32 '
         self.configure_options += ' --host=%s' % host
         files = ['%s/lib/%s' % (host, x) for x in self.files_crt]
         files.extend(['%s/lib/%s' % ('mingw', x) for x in self.files_crt])
