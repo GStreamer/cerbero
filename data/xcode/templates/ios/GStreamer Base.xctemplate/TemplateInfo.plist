@@ -67,6 +67,10 @@
 				</array>
 			<key>SharedSettings</key>
 			<dict>
+				<key>ARCHS</key>
+				<array>
+					<string>armv7</string>
+				</array>
 				<key>FRAMEWORK_SEARCH_PATHS</key>
 				<string>"~/Library/Developer/GStreamer/iPhone.sdk"</string>
 				<key>HEADER_SEARCH_PATHS</key>
