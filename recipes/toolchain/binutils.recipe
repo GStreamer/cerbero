@@ -3,6 +3,7 @@ class Recipe(recipe.Recipe):
     version = '2.22'
     licenses = [License.GPL]
     configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
+    add_host_build_target = False
 
     files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',
                   'elfedit', 'gprof', 'ld', 'ld.bfd', 'nm', 'objcopy',
