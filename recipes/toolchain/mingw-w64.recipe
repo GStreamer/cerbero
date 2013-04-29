@@ -17,7 +17,6 @@ class Recipe(recipe.Recipe):
         files.extend(['%s/lib/%s' % ('mingw', x) for x in self.files_crt])
         self.files_crt = files
 
-    files_gendef = ['bin/gendef.exe']
     files_crt = [
     'CRT_fp10.o', 'CRT_fp8.o', 'CRT_glob.o', 'CRT_noglob.o', 'binmode.o', 'crt1.o',
     'crt1u.o', 'crt2.o', 'crt2u.o', 'crtbegin.o', 'crtend.o', 'dllcrt1.o',

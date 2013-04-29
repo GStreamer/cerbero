@@ -4,6 +4,20 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPL]
     srcdir = 'mingw-w64-libraries/winpthreads'
     configure_options = '--enable-shared --enable-static '
+    files_all = [
+            'bin/libwinpthread-1.dll',
+            'lib/libpthread.a',
+            'lib/libpthread.dll.a',
+            'lib/libwinpthread.a',
+            'lib/libwinpthread.dll.a',
+            'lib/libwinpthread.la',
+            'include/pthread.h',
+            'include/pthread_compat.h',
+            'include/pthread_time.h',
+            'include/pthread_unistd.h',
+            'include/sched.h',
+            'include/semaphore.h',
+            ]
 
 
     def prepare(self):

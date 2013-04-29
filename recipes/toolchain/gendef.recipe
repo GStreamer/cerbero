@@ -3,7 +3,7 @@ class Recipe(recipe.Recipe):
     version = 'v2.0.8'
     licenses = [License.LGPL]
     srcdir = 'mingw-w64-tools/gendef'
-    files_bins = ['gendef']
+    files_bin = ['bin/gendef.exe']
 
 
     def prepare(self):
