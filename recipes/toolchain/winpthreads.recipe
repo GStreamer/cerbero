@@ -4,6 +4,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPL]
     srcdir = 'mingw-w64-libraries/winpthreads'
     configure_options = '--enable-shared --enable-static '
+    add_host_build_target = False
+    autoreconf = True
     files_all = [
             'bin/libwinpthread-1.dll',
             'lib/libpthread.a',

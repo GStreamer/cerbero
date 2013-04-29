@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
     make_install = 'make install-gcc'
     use_system_libs = True
     supports_non_src_build = True
+    add_host_build_target = False
     deps = ['mingw-w64-headers', 'gmp', 'mpfr', 'mpc']
     new_env = {'CPP': None}
 

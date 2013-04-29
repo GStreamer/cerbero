@@ -3,7 +3,7 @@ class Recipe(recipe.Recipe):
     version = 'v2.0.8'
     licenses = [License.LGPL]
     srcdir = 'mingw-w64-headers'
-    add_host_build_target = True
+    add_host_build_target = False
 
     def prepare(self):
         self.remotes = {'origin': '%s/%s' %
@@ -26,14 +26,9 @@ class Recipe(recipe.Recipe):
 
         hostdir = os.path.join(self.host)
         mingwdir = os.path.join('mingw')
-        if not os.path.exists(mingwdir):
+        if not os.path.exists(os.path.join(self.config.prefix, mingwdir)):
             shell.call('ln -s %s %s' % (hostdir, mingwdir),
                     cmd_dir=self.config.prefix, fail=False, )
-
-        # Create link lib32 -> lib
-        libdir = os.path.join(hostdir, lib)
-        archlibdir = os.path.join(hostdir, lib)
-        shell.call('ln -s %s %s' % (libdir, archlibdir), fail=False)
 
         # Install DirectX headers
         directx_headers = os.path.join(self.config.prefix, self.host, 'include', 'directx')
