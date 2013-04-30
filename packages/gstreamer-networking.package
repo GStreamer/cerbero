@@ -49,6 +49,7 @@ class Package(package.Package):
                  DistroVersion.UBUNTU_ONEIRIC,
                  DistroVersion.UBUNTU_PRECISE,
                  DistroVersion.UBUNTU_QUANTAL,
+                 DistroVersion.UBUNTU_RARING,
                  DistroVersion.FEDORA_16,
                  DistroVersion.FEDORA_17]:
             self.files += ['gmp:libs', 'gnutls:libs:libs_extra:lang',
