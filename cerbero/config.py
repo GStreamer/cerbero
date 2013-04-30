@@ -213,6 +213,12 @@ class Config (object):
             ld_library_path = libdir
         else:
             ld_library_path = ""
+        if self.toolchain_prefix is not None:
+            ld_library_path = self._join_path(ld_library_path,
+                os.path.join(self.toolchain_prefix, 'lib'))
+            includedir = self._join_path(includedir,
+                os.path.join(self.toolchain_prefix, 'include'))
+
 
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': ld_library_path,
