@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-shared --enable-static '
     add_host_build_target = False
     autoreconf = True
+    allow_parallel_build = False
     files_all = [
             'bin/libwinpthread-1.dll',
             'lib/libpthread.a',
