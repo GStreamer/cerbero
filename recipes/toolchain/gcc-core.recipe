@@ -33,6 +33,8 @@ class Recipe(recipe.Recipe):
         else:
             self._target = 'x86_64-w64-mingw32'
         self.configure_options += ' --target=%s' % self._target
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' --host=%s' % self._target
         self.configure_options += ' --oldincludedir=%s/%s/include ' % \
                 (self.config.prefix, self._target)
         if self.config.target_platform == Platform.WINDOWS:
