@@ -139,15 +139,18 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
     def _check_duplicated_symbols(self, files, tmpdir):
         for f in files:
-            dups = defaultdict(list)
+            syms = defaultdict(list)
             symbols = shell.check_call('nm -UA %s' % f, tmpdir).split('\n')
             # nm output is: test.o: 00000000 T _gzwrite
             # (filename, address, symbol type, symbols_name)
             for s in symbols:
                 s = s.split(' ')
                 if len(s) == 4 and s[2] == 'T':
-                    dups[s[3]].append(s)
-            dups = {k:v for k,v in dups.iteritems() if len(v) > 1}
+                    syms[s[3]].append(s)
+            dups = {}
+            for k,v in syms.iteritems():
+                if len(v) > 1:
+                    dups[k] = v
             m.warning ("The static library contains duplicated symbols")
             for k, v in dups.iteritems():
                 m.message (k)  # symbol name
