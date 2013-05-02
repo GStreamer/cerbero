@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
                         '--enable-threads=posix ' \
                         '--enable-languages=c,c++ ' \
                         '--enable-sjlj-exceptions ' \
-                        '--disable-dw2-exceptions '
+                        '--without-dwarf2 '
     make = 'make all-gcc'
     make_install = 'make install-gcc'
     use_system_libs = True
