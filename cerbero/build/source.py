@@ -283,6 +283,8 @@ class Svn(Source):
 
     def __init__(self):
         Source.__init__(self)
+        # For forced revision in the config
+        self.revision = self.config.recipe_commit(self.name) or self.revision
 
     def fetch(self):
         if os.path.exists(self.repo_dir):
