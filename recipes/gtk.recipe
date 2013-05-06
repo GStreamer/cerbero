@@ -80,7 +80,9 @@ class Recipe(recipe.Recipe):
             self.can_use_configure_cache = False
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY, DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE, DistroVersion.UBUNTU_QUANTAL]:
+            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY,
+                    DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE,
+                    DistroVersion.UBUNTU_QUANTAL, DistroVersion.UBUNTU_RARING]:
                 if self.config.target_arch == Architecture.X86:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', '/usr/lib/i386-linux-gnu/gtk-2.0', '/usr/share/themes')
                 elif self.config.target_arch == Architecture.X86_64:

@@ -57,6 +57,7 @@ class DistroVersion:
     UBUNTU_ONEIRIC = 'ubuntu_oneiric'
     UBUNTU_PRECISE = 'ubuntu_precise'
     UBUNTU_QUANTAL = 'ubuntu_quantal'
+    UBUNTU_RARING = 'ubuntu_raring'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'
