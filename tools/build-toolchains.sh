@@ -26,9 +26,12 @@ do
     else
         PLAT=linux
     fi
-    echo "Creating tarball mingw-$a-gcc-4.7.2-$PLAT-$ARCH.tar.xz"
+    TC=mingw-$a-gcc-4.7.2-$PLAT-$ARCH.tar.xz
+    echo "Creating tarball $TC"
     cd  ~/mingw/$PLAT/$a
-    XZ_OPT=-9 tar cJf $CURDIR/mingw-$a-gcc-4.7.2-$PLAT-$ARCH.tar.xz *
+    XZ_OPT=-9 tar cJf $CURDIR/$TC *
     cd $CURDIR
+    md5sum  $TC | awk '{print $1}' > $TC.md5
+    sha1sum $TC | awk '{print $1}' > $TC.sha1
   done
 done
