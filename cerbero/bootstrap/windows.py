@@ -28,9 +28,10 @@ from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
 from cerbero.utils import messages as m
 
 # Toolchain
+GCC_VERSION = '4.7.2'
 MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
                         'data/packages/2012.5/windows/toolchain'
-MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
+MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
@@ -79,8 +80,8 @@ class WindowsBootstraper(BootstraperBase):
             os.makedirs(etc_path)
 
     def install_mingw(self):
-        tarball = MINGW_TARBALL_TPL % (self.version, self.platform,
-                self.arch)
+        tarball = MINGW_TARBALL_TPL % (self.version, GCC_VERSION,
+                self.platform, self.arch)
 
         tarfile = os.path.join(self.prefix, tarball)
         tarfile = to_unixpath(os.path.abspath(tarfile))
