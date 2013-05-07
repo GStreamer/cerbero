@@ -1,13 +1,21 @@
+from cerbero.utils import shell
+
+
 class Recipe(recipe.Recipe):
     name = 'gcc-core'
-    version = '4.6.2'
+    version = '4.7.2'
     licenses = [License.GPLv3]
-    configure_options = '--disable-multilib --enable-fully-dynamic-string '\
-                        '--with-sysroot=$CERBERO_PREFIX --enable-languages=c,c++'
+    configure_options = '--disable-multilib --enable-fully-dynamic-string ' \
+                        '--with-sysroot=$CERBERO_PREFIX ' \
+                        '--enable-threads=posix ' \
+                        '--enable-languages=c,c++ ' \
+                        '--enable-sjlj-exceptions ' \
+                        '--without-dwarf2 '
     make = 'make all-gcc'
     make_install = 'make install-gcc'
     use_system_libs = True
     supports_non_src_build = True
+    add_host_build_target = False
     deps = ['mingw-w64-headers', 'gmp', 'mpfr', 'mpc']
     new_env = {'CPP': None}
 
@@ -25,13 +33,14 @@ class Recipe(recipe.Recipe):
         else:
             self._target = 'x86_64-w64-mingw32'
         self.configure_options += ' --target=%s' % self._target
-        self.configure_options += '--oldincludedir=%s/%s/include ' % \
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' --host=%s' % self._target
+        self.configure_options += ' --oldincludedir=%s/%s/include ' % \
                 (self.config.prefix, self._target)
         if self.config.target_platform == Platform.WINDOWS:
             self.allow_parallel_build = False
 
     def configure(self):
-        from cerbero.utils import shell
         # Create the winsup directory
         if self.config.target_platform == Platform.WINDOWS:
             winsup = os.path.join(self.build_dir, 'gcc', 'winsup', 'mingw')

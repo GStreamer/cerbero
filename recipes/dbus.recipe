@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
     version = '1.6.4'
     # either AFLv2.1 or or GPLv2+
     licenses = [License.AFLv2_1]
+    autoreconf = True
     deps = ['expat']
     configure_options = '--disable-xml-docs --disable-doxygen-docs ' \
                         '--disable-selinux --disable-libaudit ' \

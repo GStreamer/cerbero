@@ -3,6 +3,7 @@ class Recipe(recipe.Recipe):
     version = '2.22'
     licenses = [License.GPL]
     configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
+    add_host_build_target = False
 
     files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',
                   'elfedit', 'gprof', 'ld', 'ld.bfd', 'nm', 'objcopy',
@@ -40,6 +41,8 @@ class Recipe(recipe.Recipe):
         else:
             self.target = 'x86_64-w64-mingw32'
         self.configure_options += ' --target=%s' % self.target
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' --host=%s' % self.target
 
         # Append the host prefix to the binaries
         self.files_bins = ['%s-%s' % (self.target, x) for x in self.files_bins]

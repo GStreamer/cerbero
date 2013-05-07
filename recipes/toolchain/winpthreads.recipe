@@ -1,0 +1,34 @@
+class Recipe(recipe.Recipe):
+    name = 'winpthreads'
+    version = 'v2.0.8'
+    licenses = [License.LGPL]
+    srcdir = 'mingw-w64-libraries/winpthreads'
+    configure_options = '--enable-shared --enable-static '
+    add_host_build_target = False
+    autoreconf = True
+    allow_parallel_build = False
+    files_all = [
+            'bin/libwinpthread-1.dll',
+            'lib/libpthread.a',
+            'lib/libpthread.dll.a',
+            'lib/libwinpthread.a',
+            'lib/libwinpthread.dll.a',
+            'lib/libwinpthread.la',
+            'include/pthread.h',
+            'include/pthread_compat.h',
+            'include/pthread_time.h',
+            'include/pthread_unistd.h',
+            'include/sched.h',
+            'include/semaphore.h',
+            ]
+
+
+    def prepare(self):
+        self.repo_dir = os.path.join(self.config.local_sources, 'mingw-w64')
+        self.remotes = {'origin': '%s/%s' %
+                                (self.config.git_root, 'mingw-w64')}
+        if self.config.target_arch == Architecture.X86:
+            self.host = 'i686-w64-mingw32'
+        else:
+            self.host = 'x86_64-w64-mingw32'
+        self.configure_options += ' --host=%s' % self.host

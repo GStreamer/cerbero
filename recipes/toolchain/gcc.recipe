@@ -2,14 +2,14 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gcc'
-    version = '4.6.2'
+    version = '4.7.2'
     licenses = [License.GPLv3]
     supports_non_src_build = True
     stype = SourceType.CUSTOM
-    deps = ['mingw-w64']
+    deps = ['mingw-w64', 'winpthreads']
 
     files_bins = ['gcc', 'cpp', 'gcov', 'jcf-dump', 'c++', 'gcj', 'g++',
-                 'gcc-4.6.2', 'gfortran']
+                 'gcc-4.7.2', 'gfortran']
     files_gcc = ['%(host)s/include/c++',
                  '%(host)s/bin/c++%(bext)s',
                  '%(host)s/bin/g++%(bext)s',
@@ -45,8 +45,8 @@ class Recipe(recipe.Recipe):
                  '%(host)s/lib/libsupc++.la',
                  'lib/libiberty.a',
             ]
-    files_lib_gcc = ['lib/gcc/%(host)s/4.6.2',
-                     'libexec/gcc/%(host)s/4.6.2']
+    files_lib_gcc = ['lib/gcc/%(host)s/4.7.2',
+                     'libexec/gcc/%(host)s/4.7.2']
     files_lang = ['gcc', 'cpplib']
 
     def configure(self):

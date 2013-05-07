@@ -1,8 +1,8 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64'
-    version = 'v2.0.2'
+    version = 'v2.0.8'
     licenses = [License.LGPL]
-    configure_options = '--without-headers --with-tools=gendef '\
+    configure_options = '--without-headers '\
                         '--with-sysroot=$CERBERO_PREFIX '
     add_host_build_target = False
     deps = ['mingw-w64-headers', 'binutils', 'gcc-core']
@@ -10,14 +10,15 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
             host = 'i686-w64-mingw32'
+            self.configure_options += ' --disable-lib64 '
         else:
             host = 'x86_64-w64-mingw32'
+            self.configure_options += ' --disable-lib32 '
         self.configure_options += ' --host=%s' % host
         files = ['%s/lib/%s' % (host, x) for x in self.files_crt]
         files.extend(['%s/lib/%s' % ('mingw', x) for x in self.files_crt])
         self.files_crt = files
 
-    files_gendef = ['bin/gendef.exe']
     files_crt = [
     'CRT_fp10.o', 'CRT_fp8.o', 'CRT_glob.o', 'CRT_noglob.o', 'binmode.o', 'crt1.o',
     'crt1u.o', 'crt2.o', 'crt2u.o', 'crtbegin.o', 'crtend.o', 'dllcrt1.o',

@@ -1,0 +1,17 @@
+class Recipe(recipe.Recipe):
+    name = 'gendef'
+    version = 'v2.0.8'
+    licenses = [License.LGPL]
+    srcdir = 'mingw-w64-tools/gendef'
+    files_bin = ['bin/gendef.exe']
+
+
+    def prepare(self):
+        self.repo_dir = os.path.join(self.config.local_sources, 'mingw-w64')
+        self.remotes = {'origin': '%s/%s' %
+                                (self.config.git_root, 'mingw-w64')}
+        if self.config.target_arch == Architecture.X86:
+            self.host = 'i686-w64-mingw32'
+        else:
+            self.host = 'x86_64-w64-mingw32'
+        self.configure_options += ' --host=%s' % self.host

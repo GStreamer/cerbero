@@ -28,17 +28,15 @@ from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
 from cerbero.utils import messages as m
 
 # Toolchain
+GCC_VERSION = '4.7.2'
 MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
                         'data/packages/2012.5/windows/toolchain'
-MINGW_TARBALL_TPL = "mingw-%s-%s-%s.tar.xz"
+MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
 
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget']
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
 WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
-PTHREADS_URL = \
-    'http://downloads.sourceforge.net/project/mingw-w64/External%20binary%20'\
-    'packages%20%28Win64%20hosted%29/pthreads/pthreads-20100604.zip'
 
 
 class WindowsBootstraper(BootstraperBase):
@@ -73,7 +71,6 @@ class WindowsBootstraper(BootstraperBase):
             # After mingw is beeing installed
             self.install_bin_deps()
         self.install_python_sdk()
-        self.install_pthreads()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -83,8 +80,8 @@ class WindowsBootstraper(BootstraperBase):
             os.makedirs(etc_path)
 
     def install_mingw(self):
-        tarball = MINGW_TARBALL_TPL % (self.version, self.platform,
-                self.arch)
+        tarball = MINGW_TARBALL_TPL % (self.version, GCC_VERSION,
+                self.platform, self.arch)
 
         tarfile = os.path.join(self.prefix, tarball)
         tarfile = to_unixpath(os.path.abspath(tarfile))
@@ -99,17 +96,6 @@ class WindowsBootstraper(BootstraperBase):
                 shutil.rmtree('/mingw/lib')
             except Exception:
                 pass
-
-    def install_pthreads(self):
-        pthreadszip = os.path.join(self.prefix, 'pthreads.zip')
-        shell.download(PTHREADS_URL, pthreadszip)
-        temp = fix_winpath(os.path.abspath(tempfile.mkdtemp()))
-        # real pthreads stuff is in a zip file inside the previous zip file
-        # under mingwxx/pthreads-xx.zip
-        shell.unpack(pthreadszip, temp)
-        shell.unpack(os.path.join(temp, 'pthreads-20100604',
-            'ming%s' % self.version, 'pthreads-%s.zip' % self.version),
-            self.prefix)
 
     def install_python_sdk(self):
         m.action(_("Installing Python headers"))
