@@ -28,7 +28,7 @@ from cerbero.utils import shell
 class AndroidBootstraper (BootstraperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r8b-linux-x86.tar.bz2'
+    NDK_TAR = 'android-ndk-r8e-linux-x86.tar.bz2'
 
     def start(self):
         dest = self.config.toolchain_prefix
@@ -39,7 +39,7 @@ class AndroidBootstraper (BootstraperBase):
         shell.download("%s/%s" % (self.NDK_BASE_URL, self.NDK_TAR), tar)
         try:
             shell.unpack(tar, os.path.join(dest))
-            shell.call('mv android-ndk-r8b/* .', dest)
+            shell.call('mv android-ndk-r8e/* .', dest)
         except Exception:
             pass
 
