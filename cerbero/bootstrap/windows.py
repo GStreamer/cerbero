@@ -84,7 +84,7 @@ class WindowsBootstraper(BootstraperBase):
                 self.platform, self.arch)
 
         tarfile = os.path.join(self.prefix, tarball)
-        tarfile = to_unixpath(os.path.abspath(tarfile))
+        tarfile = os.path.abspath(tarfile)
         shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
         try:
             shell.unpack(tarfile, self.prefix)
