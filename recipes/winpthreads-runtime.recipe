@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from cerbero.errors import FatalError
+
+
+class Recipe(recipe.Recipe):
+    name = 'winpthreads-runtime'
+    version = '0.1'
+    licenses = [License.LGPL]
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_libs = ['libwinpthread']
+
+    def install(self):
+        if self.config.platform == Platform.WINDOWS:
+            binmingw = 'bin'
+        else:
+            binmingw = os.path.join(self.config.host, 'lib')
+        # copy the  dll's required at runtime
+        for f in ['libwinpthread-1']:
+            shutil.copy(
+                os.path.join(self.config.toolchain_prefix, binmingw, f + '.dll'),
+                os.path.join(self.config.prefix, 'bin', f + '.dll'))
