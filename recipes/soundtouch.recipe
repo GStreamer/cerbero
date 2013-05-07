@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     platform_deps = {
         Platform.ANDROID: ['gnustl'],
-        Platform.WINDOWS: ['mingw'], # for libstdc++
+        Platform.WINDOWS: ['libstdc++'],
         }
 
     files_libs = ['libSoundTouch']
