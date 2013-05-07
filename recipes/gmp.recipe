@@ -11,12 +11,3 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
-
-    def prepare(self):
-        # --enable-cxx must be set to enable a proper detection of the link system
-        # that needs to be used (configure.in is to messy to fix it and this
-        # flags solves the problem)
-        # On windows this project cannot build a static and a shared library at
-        # the same time, so we need to force the build of shared libraries
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--enable-cxx --disable-static --enable-shared'
