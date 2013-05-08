@@ -33,12 +33,19 @@ DEFAULT_HOME = os.path.expanduser('~/cerbero')
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git://anongit.freedesktop.org/gstreamer-sdk'
-DEFAULT_WIX_PREFIX = \
-    'C:/Program\ Files\ \(x86\)/Windows\ Installer\ XML\ v3.5/bin'
 DEFAULT_ALLOW_PARALLEL_BUILD = False
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 CERBERO_PREFIX = 'CERBERO_PREFIX'
+
+DEFAULT_WIX_PREFIX = \
+    'C:/Program\ Files%s/Windows\ Installer\ XML\ v3.5/bin'
+def get_wix_prefix(arch):
+    if arch == Architecture.X86:
+        path = ''
+    else:
+        path = ' x(86)'
+    return DEFAULT_WIX_PREFIX % path
 
 
 Platform = enums.Platform
@@ -257,7 +264,6 @@ class Config (object):
         self.set_property('local_sources', None)
         self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
-        self.set_property('wix_prefix', DEFAULT_WIX_PREFIX)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)
@@ -271,6 +277,7 @@ class Config (object):
         self.set_property('target_distro', distro)
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
+        self.set_property('wix_prefix', get_wix_prefix(self.arch))
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
         self.set_property('py_prefix', 'lib/python%s.%s' %
