@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     supports_non_src_build = True
     stype = SourceType.CUSTOM
     deps = ['mingw-w64', 'winpthreads']
+    make_install = 'make install-strip'
 
     files_bins = ['gcc', 'cpp', 'gcov', 'jcf-dump', 'c++', 'gcj', 'g++',
                  'gcc-4.7.3', 'gfortran']
