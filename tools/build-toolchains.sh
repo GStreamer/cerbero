@@ -26,7 +26,7 @@ do
     else
         PLAT=linux
     fi
-    TC=mingw-$a-gcc-4.7.2-$PLAT-$ARCH.tar.xz
+    TC=mingw-$a-gcc-4.7.3-$PLAT-$ARCH.tar.xz
     echo "Creating tarball $TC"
     cd  ~/mingw/$PLAT/$a
     XZ_OPT=-9 tar cJf $CURDIR/$TC *
