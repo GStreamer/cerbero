@@ -9,4 +9,5 @@ cache_file='mingw-w64-win'
 prefix=os.path.expanduser('~/mingw/windows/w64')
 sources=os.path.expanduser('~/cerbero/sources/mingw-w64-win')
 toolchain_prefix=os.path.expanduser('~/mingw/linux/w64/')
+recipes_dir = os.path.join(recipes_dir, 'toolchain')
 build='x86_64-pc-linux-gnu'
