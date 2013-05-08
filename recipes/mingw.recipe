@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
                                    '%(host)s/lib/libdxerr9.a',
                                    '%(host)s/lib/libmoldname.a']
         if self.config.platform == Platform.WINDOWS:
-            self.mingw_static_files += ['%(mingw)s/lib/gcc/%(host)s/4.7.2/libgcc.a']
+            self.mingw_static_files += ['%(mingw)s/lib/gcc/%(host)s/4.7.3/libgcc.a']
         # static build deps
         if self.config.platform == Platform.WINDOWS:
             # the native compiler install libraries in 'lib' and

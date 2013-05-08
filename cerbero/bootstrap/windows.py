@@ -28,7 +28,7 @@ from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
 from cerbero.utils import messages as m
 
 # Toolchain
-GCC_VERSION = '4.7.2'
+GCC_VERSION = '4.7.3'
 MINGW_DOWNLOAD_SOURCE = 'http://www.freedesktop.org/software/gstreamer-sdk/'\
                         'data/packages/2012.5/windows/toolchain'
 MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
