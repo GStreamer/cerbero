@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPL]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
-    platform_deps = {Platform.WINDOWS: ['mingw']}
+    platform_deps = {Platform.WINDOWS: ['mingw', 'winpthreads-runtime']}
 
     files_libs = ['libstdc++']
 
