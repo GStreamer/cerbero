@@ -1,0 +1,26 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import os
+
+class Recipe(recipe.Recipe):
+    name = 'gst-shell'
+    version = '0.1'
+    licenses = [License.LGPL]
+    btype = BuildType.CUSTOM
+    stype = SourceType.CUSTOM
+
+    files_shell = ['bin/gst-shell', 'share/gstreamer/gst-env']
+
+    def install(self):
+        from cerbero.commands.gensdkshell import GenSdkShell
+        name = self.files_shell[0]
+        prefix = self.config.prefix
+        libdir = os.path.join(prefix, 'lib')
+        py_prefix = self.config.py_prefix
+        output_dir = prefix
+        gensdkshell = GenSdkShell()
+        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+                py_prefix)
+        name = self.files_shell[1]
+        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+                py_prefix, cmd='')

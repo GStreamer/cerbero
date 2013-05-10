@@ -252,7 +252,7 @@ class Config (object):
                'PYTHONPATH': pythonpath,
                'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
                'MONO_GAC_PREFIX': prefix,
-               'GSTREAMER_SDK_ROOT': prefix
+               'GSTREAMER_ROOT': prefix
                }
         return env
 

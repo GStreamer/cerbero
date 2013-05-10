@@ -25,14 +25,14 @@
 ifeq ($(HOST_OS),windows)
     HOST_PKG_CONFIG := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/pkg-config
     # No space before the &&, or it will be added to PKG_CONFIG_LIBDIR
-    PKG_CONFIG_ORIG := set PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig&& $(HOST_PKG_CONFIG)
-    GSTREAMER_SDK_ROOT := $(subst \,/,$(GSTREAMER_SDK_ROOT))
+    PKG_CONFIG_ORIG := set PKG_CONFIG_LIBDIR=$(GSTREAMER_ROOT)/lib/pkgconfig&& $(HOST_PKG_CONFIG)
+    GSTREAMER_ROOT := $(subst \,/,$(GSTREAMER_ROOT))
 else
     HOST_PKG_CONFIG := pkg-config
-    PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_SDK_ROOT)/lib/pkgconfig $(HOST_PKG_CONFIG)
+    PKG_CONFIG_ORIG := PKG_CONFIG_LIBDIR=$(GSTREAMER_ROOT)/lib/pkgconfig $(HOST_PKG_CONFIG)
 endif
 
-PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_SDK_ROOT) --define-variable=libdir=$(GSTREAMER_SDK_ROOT)/lib
+PKG_CONFIG := $(PKG_CONFIG_ORIG) --define-variable=prefix=$(GSTREAMER_ROOT) --define-variable=libdir=$(GSTREAMER_ROOT)/lib
 
 # -----------------------------------------------------------------------------
 # Function : pkg-config-get-includes
@@ -61,7 +61,7 @@ pkg-config-get-libs = \
 pkg-config-get-libs-no-deps = \
   $(eval __tmpvar.libs := ) \
   $(foreach package,$1,\
-    $(eval __tmpvar.libs += $(shell $(HOST_SED) -n 's/^Libs: \(.*\)/\1/p' $(GSTREAMER_SDK_ROOT)/lib/pkgconfig/$(package).pc)))\
+    $(eval __tmpvar.libs += $(shell $(HOST_SED) -n 's/^Libs: \(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$(package).pc)))\
   $(filter -l%, $(__tmpvar.libs))
 
 # -----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ pkg-config-get-libs-no-deps = \
 # Usage    : $(call pkg-config-get-prefix,<package>)
 # -----------------------------------------------------------------------------
 pkg-config-get-prefix = \
-  $(shell $(HOST_SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_SDK_ROOT)/lib/pkgconfig/$1.pc)
+  $(shell $(HOST_SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$1.pc)
 
 # -----------------------------------------------------------------------------
 # Function : libtool-whole-archive
@@ -266,7 +266,7 @@ libtool-get-dependency-libs = \
   $(shell $(HOST_SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
 
 libtool-replace-prefixes = \
-  $(subst $(BUILD_PREFIX),$(GSTREAMER_SDK_ROOT),$1 )
+  $(subst $(BUILD_PREFIX),$(GSTREAMER_ROOT),$1 )
 
 libtool-get-static-library = \
   $(shell $(HOST_SED) -n "s/^old_library='\(.*\)'/\1/p" $1)

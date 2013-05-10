@@ -7,17 +7,17 @@ class Package(package.Package):
     name = 'gstreamer-1.0-core'
     shortdesc = 'GStreamer 1.0 core'
     longdesc = 'GStreamer 1.0 core'
-    url = "http://www.gstreamer.com"
-    version = '2013.04'
+    url = "http://gstreamer.freedesktop.org"
+    version = '1.0.7'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
-    org = 'com.gstreamer'
+    org = 'org.freedesktop.gstreamer'
     uuid = 'd9626750-e8b7-4e40-944d-98b67ed0c6bf'
     deps = ['base-system-1.0']
 
     files = ['gstreamer-1.0', 'gst-plugins-base-1.0:bins:libs:core:lang',
-            'gst-sdk-shell',
+            'gst-shell',
             'gst-plugins-good-1.0:plugins_core:lang',
             'gst-plugins-bad-1.0:plugins_core:lang',
             'gst-plugins-bad-1.0:plugins_core:lang',

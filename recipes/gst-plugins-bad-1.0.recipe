@@ -143,16 +143,3 @@ class Recipe(recipe.Recipe):
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
-#    def post_install(self):
-#        if self.config.platform == Platform.WINDOWS and\
-#                self.config.target_platform == Platform.WINDOWS:
-#            from cerbero.utils.msbuild import MSBuild
-#            from cerbero.utils import messages as m
-#            solution = os.path.join(self.build_dir, 'win32', 'vs10', 'gst-plugins-bad.sln')
-#            root = self.config.prefix.rsplit('/', 1)[0]
-#            msbuild  = MSBuild(solution, self.config.target_arch,
-#                               GSTREAMER_SDK_ROOT=root)
-#            try:
-#                msbuild.build()
-#            except Exception, e:
-#                m.error("The Direct Show plugins will not be built.")

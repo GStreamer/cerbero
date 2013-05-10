@@ -64,7 +64,7 @@ class GenSdkShell(Command):
         if cmd == None:
             cmd = self.DEFAULT_CMD
         env = {}
-        prefix_env_name = 'GSTREAMER_SDK_ROOT'
+        prefix_env_name = 'GSTREAMER_ROOT'
         prefix_env = '${%s}' % prefix_env_name
         libdir = libdir.replace(prefix, prefix_env)
         env['PATH'] = \

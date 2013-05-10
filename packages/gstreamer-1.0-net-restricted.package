@@ -7,12 +7,12 @@ class Package(package.Package):
     name = 'gstreamer-1.0-net-restricted'
     shortdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
     longdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
-    url = "http://www.gstreamer.com"
-    version = '2013.04'
+    url = "http://gstreamer.freedesktop.org"
+    version = '1.0.7'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
-    org = 'com.gstreamer'
+    org = 'org.freedesktop.gstreamer'
     uuid = '8cf57a89-3ba3-4db0-8b66-15e79b541ffe'
     deps = ['gstreamer-1.0-core']
 

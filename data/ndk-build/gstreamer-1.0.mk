@@ -16,9 +16,9 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-$(call assert-defined, GSTREAMER_SDK_ROOT)
-$(if $(wildcard $(GSTREAMER_SDK_ROOT)),,\
-  $(error "The directory GSTREAMER_SDK_ROOT=$(GSTREAMER_SDK_ROOT) does not exists")\
+$(call assert-defined, GSTREAMER_ROOT)
+$(if $(wildcard $(GSTREAMER_ROOT)),,\
+  $(error "The directory GSTREAMER_ROOT=$(GSTREAMER_ROOT) does not exists")\
 )
 
 
@@ -34,18 +34,18 @@ endif
 ifndef GSTREAMER_STATIC_PLUGINS_PATH
 GSTREAMER_STATIC_PLUGINS_PATH := lib/gstreamer-1.0
 endif
-GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_SDK_ROOT)/lib/gstreamer-1.0/static
+GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_ROOT)/lib/gstreamer-1.0/static
 
 # Path for the NDK integration makefiles
 ifndef GSTREAMER_NDK_BUILD_PATH
-GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_SDK_ROOT)/share/gst-android/ndk-build
+GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_ROOT)/share/gst-android/ndk-build
 endif
 
 # Include tools
 include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 
 # Path for the static GIO modules
-G_IO_MODULES_PATH := $(GSTREAMER_SDK_ROOT)/lib/gio/modules/static
+G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules/static
 
 # Host tools
 ifeq ($(HOST_OS),windows)
@@ -84,7 +84,7 @@ LOCAL_MAKEFILE          := $(local-makefile)
 LOCAL_PREBUILT_PREFIX   := lib
 LOCAL_PREBUILT_SUFFIX   := .so
 LOCAL_EXPORT_C_INCLUDES := $(subst -I$1, $1, $(call pkg-config-get-includes,$(GSTREAMER_DEPS)))
-LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_SDK_ROOT)/include
+LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_ROOT)/include
 
 
 ##################################################################
@@ -139,7 +139,7 @@ GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -
 GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS))
 # Fix deps for giognutls
 GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
-GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_SDK_ROOT)/include
+GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_ROOT)/include
 
 # In newer NDK, SYSROOT is replaced by SYSROOT_INC and SYSROOT_LINK, which
 # now points to the root directory. But this will probably change in the future from:
@@ -151,7 +151,7 @@ endif
 # Create the link command
 GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
-	-L$(GSTREAMER_SDK_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
 GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
