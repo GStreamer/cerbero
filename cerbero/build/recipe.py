@@ -202,6 +202,7 @@ class Recipe(FilesProvider):
             try:
                 implib = genlib.create(
                     os.path.join(self.config.prefix, dllpath),
+                    self.config.target_arch,
                     os.path.join(self.config.prefix, 'lib'))
                 logging.debug('Created %s' % implib)
             except:

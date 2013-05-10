@@ -18,7 +18,8 @@
 
 import os
 
-from cerbero.utils import shell
+from cerbero.config import Architecture
+from cerbero.utils import shell, to_unixpath
 
 
 class GenLib(object):
@@ -29,8 +30,9 @@ class GenLib(object):
     '''
 
     DLLTOOL_TPL = '$DLLTOOL -d %s -l %s -D %s'
+    LIB_TPL = '%s /DEF:%s /OUT:%s /MACHINE:%s'
 
-    def create(self, dllpath, outputdir=None):
+    def create(self, dllpath, arch, outputdir=None):
         bindir, dllname = os.path.split(dllpath)
         if outputdir is None:
             outputdir = bindir
@@ -48,5 +50,29 @@ class GenLib(object):
         implib = '%s.lib' % libname[3:]
 
         # Create the import library
-        shell.call(self.DLLTOOL_TPL % (defname, implib, dllname), outputdir)
+        vc_path = self._get_vc_tools_path()
+
+        # Prefer LIB.exe over dlltool:
+        # http://sourceware.org/bugzilla/show_bug.cgi?id=12633
+        if vc_path is not None:
+            # Spaces msys and shell are a beautiful combination
+            lib_path = to_unixpath(os.path.join(vc_path, 'lib.exe'))
+            lib_path = lib_path.replace('\\', '/')
+            lib_path = lib_path.replace('(', '\\\(').replace(')', '\\\)')
+            lib_path = lib_path.replace(' ', '\\\\ ')
+            if arch == Architecture.X86:
+                arch = 'x86'
+            else:
+                arch = 'x64'
+            shell.call(self.LIB_TPL % (lib_path, defname, implib, arch), outputdir)
+        else:
+            shell.call(self.DLLTOOL_TPL % (defname, implib, dllname), outputdir)
         return os.path.join(outputdir, implib)
+
+    def _get_vc_tools_path(self):
+        if 'VS100COMNTOOLS' in os.environ:
+            path = os.path.join(os.environ['VS100COMNTOOLS'], '..', '..',
+                'VC', 'bin', 'amd64')
+            if os.path.exists (path):
+                return path
+        return None
