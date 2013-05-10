@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX or \
            self.config.target_distro_version not in \
                 [DistroVersion.DEBIAN_WHEEZY,
-                 DistroVersion.DEBIAN_JESSY,
+                 DistroVersion.DEBIAN_JESSIE,
                  DistroVersion.UBUNTU_NATTY,
                  DistroVersion.UBUNTU_ONEIRIC,
                  DistroVersion.UBUNTU_PRECISE,
