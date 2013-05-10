@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import shutil
 
 from cerbero.bootstrap import BootstraperBase
 from cerbero.bootstrap.bootstraper import register_bootstraper
@@ -28,17 +27,19 @@ from cerbero.utils import shell
 class AndroidBootstraper (BootstraperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r8e-linux-x86.tar.bz2'
+    NDK_TAR = 'android-ndk-r8e-linux-%s.tar.bz2'
 
     def start(self):
         dest = self.config.toolchain_prefix
-        tar = os.path.join(dest, self.NDK_TAR)
-        if os.path.exists(dest):
-            shutil.rmtree(dest)
-        os.makedirs(dest)
-        shell.download("%s/%s" % (self.NDK_BASE_URL, self.NDK_TAR), tar)
+        ndk_tar = self.NDK_TAR % self.config.arch
+        tar = os.path.join(dest, ndk_tar)
         try:
-            shell.unpack(tar, os.path.join(dest))
+            os.makedirs(dest)
+        except:
+            pass
+        shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
+        try:
+            shell.unpack(tar, dest)
             shell.call('mv android-ndk-r8e/* .', dest)
         except Exception:
             pass
