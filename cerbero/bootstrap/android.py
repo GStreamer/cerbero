@@ -39,7 +39,7 @@ class AndroidBootstraper (BootstraperBase):
             pass
         shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
         try:
-            shell.unpack(tar, dest)
+            shell.call('tar -xvjf %s' % ndk_tar, dest)
             shell.call('mv android-ndk-r8e/* .', dest)
         except Exception:
             pass
