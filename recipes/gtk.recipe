@@ -87,7 +87,7 @@ class Recipe(recipe.Recipe):
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', '/usr/lib/i386-linux-gnu/gtk-2.0', '/usr/share/themes')
                 elif self.config.target_arch == Architecture.X86_64:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', '/usr/lib/x86_64-linux-gnu/gtk-2.0', '/usr/share/themes')
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY]:
+            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY, DistroVersion.DEBIAN_JESSY]:
                 if self.config.target_arch == Architecture.X86:
                     self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/i386-linux-gnu/gtk-2.0', None, '/usr/share/themes')
                 elif self.config.target_arch == Architecture.X86_64:

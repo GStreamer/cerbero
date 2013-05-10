@@ -45,6 +45,7 @@ class Package(package.Package):
         if self.config.target_platform != Platform.LINUX or \
            self.config.target_distro_version not in \
                 [DistroVersion.DEBIAN_WHEEZY,
+                 DistroVersion.DEBIAN_JESSY,
                  DistroVersion.UBUNTU_NATTY,
                  DistroVersion.UBUNTU_ONEIRIC,
                  DistroVersion.UBUNTU_PRECISE,

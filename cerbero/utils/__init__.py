@@ -148,6 +148,8 @@ def system_info():
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
             elif d[1].startswith('7.') or d[1].startswith('wheezy'):
                 distro_version = DistroVersion.DEBIAN_WHEEZY
+            elif d[1].startswith('jessy'):
+                distro_version = DistroVersion.DEBIAN_JESSY
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora']:

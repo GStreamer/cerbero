@@ -51,6 +51,7 @@ class DistroVersion:
     ''' Enumeration of supported distribution versions '''
     DEBIAN_SQUEEZE = 'debian_squeeze'
     DEBIAN_WHEEZY = 'debian_wheezy'
+    DEBIAN_JESSY = 'debian_jessy'
     UBUNTU_MAVERICK = 'ubuntu_maverick'
     UBUNTU_LUCID = 'ubuntu_lucid'
     UBUNTU_NATTY = 'ubuntu_natty'
