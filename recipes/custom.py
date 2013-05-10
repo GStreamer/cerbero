@@ -12,7 +12,7 @@ from cerbero.utils import to_unixpath
 class GStreamerStatic(recipe.Recipe):
 
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static --with-package-origin='http://www.gstreamer.com' --with-package-name='GStreamer (GStreamer SDK)' "
+    configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static "
     extra_configure_options = ''
     # Static build will always fail on make check
     make_check = None
