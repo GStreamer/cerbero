@@ -9,33 +9,19 @@
 
 <key>Definitions</key>
 	<dict>
-		<key>gst_ios_backend.c</key>
+		<key>gst_ios_init.c</key>
 		<dict>
 			<key>Group</key>
 				<string>Supporting Files</string>
 			<key>Path</key>
-				<string>gst_ios_backend.c</string>
+				<string>gst_ios_init.c</string>
 		</dict>
-		<key>gst_ios_backend.h</key>
+		<key>gst_ios_init.h</key>
 		<dict>
 			<key>Group</key>
 				<string>Supporting Files</string>
 			<key>Path</key>
-				<string>gst_ios_backend.h</string>
-		</dict>
-		<key>gst_ios_plugins.h</key>
-		<dict>
-			<key>Group</key>
-				<string>Supporting Files</string>
-			<key>Path</key>
-				<string>gst_ios_plugins.h</string>
-		</dict>
-		<key>gst_ios_plugins.c</key>
-		<dict>
-			<key>Group</key>
-				<string>Supporting Files</string>
-			<key>Path</key>
-				<string>gst_ios_plugins.c</string>
+				<string>gst_ios_init.h</string>
 		</dict>
 		<key>main.m</key>
 		<dict>
@@ -50,10 +36,8 @@
 <!-- Nodes Begin -->
 <key>Nodes</key>
     <array>
-        <string>gst_ios_backend.c</string>
-        <string>gst_ios_backend.h</string>
-        <string>gst_ios_plugins.c</string>
-        <string>gst_ios_plugins.h</string>
+        <string>gst_ios_init.c</string>
+        <string>gst_ios_init.h</string>
         <string>main.m</string>
     </array>
 <!-- Nodes End -->

@@ -6,25 +6,10 @@ from custom import list_gstreamer_plugins_by_category
 DECLARE_PLUGIN_TPL = 'GST_PLUGIN_STATIC_DECLARE(%s);'
 REGISTER_PLUGIN_TPL = '    GST_PLUGIN_STATIC_REGISTER(%s);'
 DEFINE_TPL = '#define GST_IOS_PLUGINS_%s\n'
-REGISTER_TPL = 'void gst_backend_register_plugins (void);'
 DEFINES_TPL = '''\
 #if defined(GST_IOS_PLUGIN_%s) || defined(GST_IOS_PLUGINS_%s)
 %s
 #endif'''
-GST_IOS_PLUGINS_C_TPL = '''
-
-#include <gst/gst.h>
-#include "gst_ios_plugins.h"
-
-%s
-
-void
-gst_backend_register_plugins (void)
-{
-%s
-}
-'''
-
 
 class Recipe(recipe.Recipe):
     name = 'gstreamer-ios-templates'
@@ -44,26 +29,27 @@ class Recipe(recipe.Recipe):
                                     'templates', 'ios'), share_dir)
 
         plugins, replacements = list_gstreamer_plugins_by_category(self.config)
-        plugins_h = open(os.path.join(share_dir, 'GStreamer Base.xctemplate',
-                                      'gst_ios_plugins.h'), 'w')
+
         decls = []
         regs = []
+        categories = ''
         for c, ps in plugins.iteritems():
             c = c.upper()
             define = DEFINE_TPL % c
             # By default enable only the core plugins
             if c != 'CORE':
               define = '//%s' % define
-            plugins_h.write(define)
+            categories += define
             for p in ps:
                 if p in replacements:
                     p = replacements[p]
                 p_up = p.upper()
                 decls.append(DEFINES_TPL % (p_up, c, DECLARE_PLUGIN_TPL % p))
                 regs.append(DEFINES_TPL % (p_up, c, REGISTER_PLUGIN_TPL % p))
-        plugins_h.write(REGISTER_TPL)
-        plugins_h.close()
-        plugins_c = open(os.path.join(share_dir, 'GStreamer Base.xctemplate',
-                                      'gst_ios_plugins.c'), 'w')
-        plugins_c.write(GST_IOS_PLUGINS_C_TPL % ('\n'.join(decls), '\n'.join(regs)))
-        plugins_c.close()
+        tpl_dir = os.path.join(share_dir, 'GStreamer Base.xctemplate')
+        iosinit_c = os.path.join(tpl_dir, 'gst_ios_init.c')
+        iosinit_h = os.path.join(tpl_dir, 'gst_ios_init.h')
+        shell.replace (iosinit_h, {'@GST_IOS_PLUGINS_CATEGORIES@': categories})
+        shell.replace (iosinit_c, {
+            '@GST_IOS_PLUGINS_DECLARE@': '\n'.join(decls),
+            '@GST_IOS_PLUGINS_REGISTER@': '\n'.join(regs)})
