@@ -105,6 +105,8 @@ class Recipe(FilesProvider):
     @type deps: list
     @cvar platform_deps: platform conditional depencies
     @type platform_deps: dict
+    @cvar runtime_dep: runtime dep common to all recipes
+    @type runtime_dep: bool
     '''
 
     __metaclass__ = MetaRecipe
@@ -119,6 +121,7 @@ class Recipe(FilesProvider):
     deps = list()
     platform_deps = {}
     force = False
+    runtime_dep = False
     _default_steps = BuildSteps()
 
     def __init__(self, config):

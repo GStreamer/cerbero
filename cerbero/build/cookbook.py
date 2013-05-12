@@ -236,6 +236,9 @@ class CookBook (object):
         recipe = self.get_recipe(recipe_name)
         return self._find_deps(recipe, {}, [])
 
+    def _runtime_deps (self):
+        return [x.name for x in self.recipes.values() if x.runtime_dep]
+
     def _cache_file(self, config):
         if config.cache_file is not None:
             return os.path.join(CONFIG_DIR, config.cache_file)
@@ -266,7 +269,10 @@ class CookBook (object):
         if state.get(recipe, 'clean') == 'in-progress':
             raise FatalError(_("Dependency Cycle"))
         state[recipe] = 'in-progress'
-        for recipe_name in recipe.list_deps():
+        recipe_deps = recipe.list_deps()
+        if not recipe.runtime_dep:
+            recipe_deps = self._runtime_deps () + recipe_deps
+        for recipe_name in recipe_deps:
             try:
                 recipedep = self.get_recipe(recipe_name)
             except RecipeNotFoundError, e:
