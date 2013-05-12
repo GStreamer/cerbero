@@ -21,3 +21,5 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
             self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
+        if self.config.target_platform != Platform.LINUX:
+            self.runtime_dep = True

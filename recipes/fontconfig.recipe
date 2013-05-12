@@ -8,8 +8,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
-    platform_deps = { Platform.WINDOWS: ['libiconv'],
-                      Platform.DARWIN: ['libiconv']}
 
     files_libs = ['libfontconfig']
     files_etc = [
@@ -36,4 +34,3 @@ class Recipe(recipe.Recipe):
                     continue
                 os.remove(os.path.join(confddir, f))
                 os.symlink(os.path.join(linksrc, f), os.path.join(confddir, f))
-        

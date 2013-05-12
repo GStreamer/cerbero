@@ -21,10 +21,6 @@ class Recipe(recipe.Recipe):
     config_sh = 'sh autogen.sh'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
-    platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
-                     Platform.DARWIN: ['libiconv', 'gettext'],
-                     Platform.IOS: ['libiconv', 'gettext'],
-                     Platform.ANDROID: ['libiconv', 'gettext']}
 
     files_libs = [
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',

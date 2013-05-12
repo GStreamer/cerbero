@@ -7,9 +7,6 @@ class Recipe(recipe.Recipe):
     # either LGPLv2 or GPLv2 or MPLv1.1 or MIT
     licenses = [License.LGPLv2]
     deps = ['orc', 'glib']
-    platform_deps = {
-        Platform.WINDOWS: ['mingw'], # for libstdc++
-        }
     can_use_configure_cache = False
     autoreconf = True
 

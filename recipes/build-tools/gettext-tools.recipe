@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.2.tar.gz'
     platform_deps = {
             Platform.DARWIN:  ['libiconv', 'sed'],
-            Platform.WINDOWS: ['libiconv', 'libstdc++', 'mingw', 'winpthreads-runtime'],}
+            Platform.WINDOWS: ['libiconv', 'mingw-runtime'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
 
     def prepare(self):
