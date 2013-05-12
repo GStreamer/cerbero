@@ -44,7 +44,7 @@ def get_wix_prefix(arch):
     if arch == Architecture.X86:
         path = ''
     else:
-        path = ' x(86)'
+        path = ' (x86)'
     return DEFAULT_WIX_PREFIX % path
 
 
