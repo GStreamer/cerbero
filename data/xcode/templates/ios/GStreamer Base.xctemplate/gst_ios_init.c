@@ -21,5 +21,5 @@ gst_ios_init (void)
     gst_plugin_feature_set_rank(plugin, GST_RANK_SECONDARY);
   plugin = gst_registry_lookup_feature(reg, "giosrc");
   if (plugin)
-    gst_plugin_feature_set_rank(plugin, GST_RANK_SECONDARY);
+    gst_plugin_feature_set_rank(plugin, GST_RANK_SECONDARY-1);
 }
