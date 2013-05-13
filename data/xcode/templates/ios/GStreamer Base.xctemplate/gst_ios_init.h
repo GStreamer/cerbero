@@ -7,7 +7,7 @@ G_BEGIN_DECLS
 
 /* Uncomment each line to enable the plugin categories that your application needs.
  * You can also enable individual plugins. See gst_ios_init.c to see their names
- **/
+ */
 
 @GST_IOS_PLUGINS_CATEGORIES@
 
