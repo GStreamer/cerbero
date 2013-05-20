@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'fontconfig'
     version = '2.10.1'
     licenses = [License.MIT]
+    configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
     platform_deps = { Platform.WINDOWS: ['libiconv'],
                       Platform.DARWIN: ['libiconv']}
