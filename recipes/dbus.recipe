@@ -58,6 +58,7 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
+        self.new_env['LIBS'] = '-lrt'
         if self.config.target_platform == Platform.LINUX:
             self.configure_options += ' --with-system-socket=/var/run/dbus/system_bus_socket'
         if self.config.target_platform == Platform.DARWIN:
