@@ -6,49 +6,59 @@
 	<string>com.gstreamersdk.ios.templates.base</string>
 	<key>Kind</key>
 	<string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
-
-<key>Definitions</key>
+	<key>Definitions</key>
 	<dict>
-		<key>gst_ios_init.c</key>
+		<key>Ubuntu-R.ttf</key>
+		<dict>
+			<key>Path</key>
+			<string>fontconfig/fonts/Ubuntu-R.ttf</string>
+			<key>Group</key>
+			<string>Supporting Files</string>
+		</dict>
+		<key>fonts.conf</key>
 		<dict>
 			<key>Group</key>
-				<string>Supporting Files</string>
+			<string>Supporting Files</string>
 			<key>Path</key>
-				<string>gst_ios_init.c</string>
+			<string>fontconfig/fonts.conf</string>
+		</dict>
+		<key>gst_ios_init.m</key>
+		<dict>
+			<key>Group</key>
+			<string>Supporting Files</string>
+			<key>Path</key>
+			<string>gst_ios_init.m</string>
 		</dict>
 		<key>gst_ios_init.h</key>
 		<dict>
 			<key>Group</key>
-				<string>Supporting Files</string>
+			<string>Supporting Files</string>
 			<key>Path</key>
-				<string>gst_ios_init.h</string>
+			<string>gst_ios_init.h</string>
 		</dict>
 		<key>main.m</key>
 		<dict>
 			<key>Group</key>
-				<string>Supporting Files</string>
+			<string>Supporting Files</string>
 			<key>Path</key>
-				<string>main.m</string>
+			<string>main.m</string>
 		</dict>
 	</dict>
-<!-- Definitions End -->
-
-<!-- Nodes Begin -->
-<key>Nodes</key>
-    <array>
-        <string>gst_ios_init.c</string>
-        <string>gst_ios_init.h</string>
-        <string>main.m</string>
-    </array>
-<!-- Nodes End -->
-
-<key>Targets</key>
+	<key>Nodes</key>
+	<array>
+		<string>fonts.conf</string>
+		<string>Ubuntu-R.ttf</string>
+		<string>gst_ios_init.m</string>
+		<string>gst_ios_init.h</string>
+		<string>main.m</string>
+	</array>
+	<key>Targets</key>
 	<array>
 		<dict>
 			<key>Frameworks</key>
-				<array>
+			<array>
 				<string>GStreamer</string>
-				</array>
+			</array>
 			<key>SharedSettings</key>
 			<dict>
 				<key>ARCHS</key>
@@ -56,9 +66,9 @@
 					<string>armv7</string>
 				</array>
 				<key>FRAMEWORK_SEARCH_PATHS</key>
-				<string>"~/Library/Developer/GStreamer/iPhone.sdk"</string>
+				<string>&quot;~/Library/Developer/GStreamer/iPhone.sdk&quot;</string>
 				<key>HEADER_SEARCH_PATHS</key>
-				<string>"~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers"</string>
+				<string>&quot;~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers&quot;</string>
 				<key>OTHER_LDFLAGS</key>
 				<string>-lresolv -lstdc++ -framework CoreFoundation -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreAudio -framework AudioToolbox -framework OpenGLES -framework AssetsLibrary -framework QuartzCore -framework AssetsLibrary</string>
 			</dict>

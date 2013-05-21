@@ -47,9 +47,9 @@ class Recipe(recipe.Recipe):
                 decls.append(DEFINES_TPL % (p_up, c, DECLARE_PLUGIN_TPL % p))
                 regs.append(DEFINES_TPL % (p_up, c, REGISTER_PLUGIN_TPL % p))
         tpl_dir = os.path.join(share_dir, 'GStreamer Base.xctemplate')
-        iosinit_c = os.path.join(tpl_dir, 'gst_ios_init.c')
+        iosinit_m = os.path.join(tpl_dir, 'gst_ios_init.m')
         iosinit_h = os.path.join(tpl_dir, 'gst_ios_init.h')
         shell.replace (iosinit_h, {'@GST_IOS_PLUGINS_CATEGORIES@': categories})
-        shell.replace (iosinit_c, {
+        shell.replace (iosinit_m, {
             '@GST_IOS_PLUGINS_DECLARE@': '\n'.join(decls),
             '@GST_IOS_PLUGINS_REGISTER@': '\n'.join(regs)})
