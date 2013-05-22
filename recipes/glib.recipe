@@ -90,10 +90,13 @@ class Recipe(recipe.Recipe):
             if arch == Architecture.X86:
                 arch = 'i386'
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
-            self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP" ./configure'
+            extra_flags = ''
             if self.config.target_platform == Platform.IOS:
                 # Disable mac OS X specifics
+                extra_flags = '-DGST_SDK_IOS=1'
                 self.configure_options += ' --disable-carbon --enable-dtrace=no --disable-modular-tests --disable-cocoa'
+
+            self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP %s" ./configure' % extra_flags
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
                 self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', None, True)
