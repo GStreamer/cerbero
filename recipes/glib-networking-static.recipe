@@ -22,15 +22,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
           # For the universal build we need to use the right gio-querymodules
           arch = self.config.target_arch
-
           querymodule_path = os.path.join(self.config.prefix, arch, 'bin', 'gio-querymodules')
-          if not os.path.exists(querymodule_path):
-            querymodule_path = None
-      
-        if not querymodule_path:
+        else:
           querymodule_path = os.path.join(self.config.prefix, 'bin', 'gio-querymodules')
-          if not os.path.exists(querymodule_path):
-            raise FatalError("Could not find gio-querymodules")
 
         if not self.config.prefix_is_executable():
           querymodule_path = 'true'
