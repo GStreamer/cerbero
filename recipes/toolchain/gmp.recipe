@@ -2,7 +2,7 @@
 
 
 class Recipe(recipe.Recipe):
-    name = 'gmp'
+    name = 'gmp-toolchain'
     version = '5.0.5'
     licenses = [License.LGPLv3Plus]
     configure_options = "--disable-shared --enable-static"

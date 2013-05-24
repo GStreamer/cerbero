@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
     supports_non_src_build = True
     add_host_build_target = False
-    deps = ['mingw-w64-headers', 'gmp', 'mpfr', 'mpc', 'cloog']
+    deps = ['mingw-w64-headers', 'gmp-toolchain', 'mpfr', 'mpc', 'cloog']
     new_env = {'CPP': None}
 
     def prepare(self):

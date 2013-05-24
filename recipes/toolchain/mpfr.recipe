@@ -5,4 +5,4 @@ class Recipe(recipe.Recipe):
     version = '3.1.0'
     licenses = [License.LGPLv3Plus]
     configure_options = "--disable-shared --enable-static"
-    deps = ['gmp']
+    deps = ['gmp-toolchain']
