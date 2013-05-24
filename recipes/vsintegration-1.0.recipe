@@ -20,7 +20,10 @@ class Recipe(recipe.Recipe):
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, vspropsdir, env_var)
         filename = os.path.basename(self.files_devel[1])
-        mingw_libdir = os.path.join(self.config.toolchain_prefix, 'mingw', 'lib')
+        if self.config.target_arch == Architecture.X86:
+          mingw_libdir = os.path.join(self.config.toolchain_prefix, 'i686-w64-mingw32', 'lib')
+        elif self.config.target_arch == Architecture.X86_64:
+          mingw_libdir = os.path.join(self.config.toolchain_prefix, 'x86_64-w64-mingw32', 'lib')
         if not os.path.exists(mingw_libdir):
             os.makedirs(mingw_libdir)
         shutil.copy(os.path.join(mingw_libdir, filename),
