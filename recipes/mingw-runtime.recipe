@@ -46,6 +46,10 @@ class Recipe(recipe.Recipe):
             binmingw = os.path.join(self.config.host, 'lib')
             libmingw = os.path.join(self.config.host, 'lib')
         # copy the dll
+        if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
+            os.makedirs(os.path.join(self.config.prefix, 'bin'))
+        if not os.path.exists(os.path.join(self.config.prefix, 'lib')):
+            os.makedirs(os.path.join(self.config.prefix, 'lib'))
         for f in ['libstdc++-6', 'libgomp-1']:
             shutil.copy(
                 os.path.join(self.config.toolchain_prefix, binmingw, f + '.dll'),
