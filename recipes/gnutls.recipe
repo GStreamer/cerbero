@@ -9,9 +9,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv3Plus]
     configure_options = "--enable-local-libopts --disable-guile"
     deps = ['zlib', 'nettle', 'libtasn1']
-    platform_deps = {
-        Platform.WINDOWS: ['libstdc++'],
-        }
 
     files_libs = ['libgnutls', 'libgnutlsxx']
     files_libs_extra = ['libgnutls-openssl']
