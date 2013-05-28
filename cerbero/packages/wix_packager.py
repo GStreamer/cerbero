@@ -23,7 +23,7 @@ from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
 from cerbero.utils import messages as m
-from cerbero.utils import shell, to_winepath
+from cerbero.utils import shell, to_winepath, get_wix_prefix
 from cerbero.packages.wix import MergeModule, MSI, WixConfig
 from cerbero.config import Platform
 
@@ -33,7 +33,7 @@ class MergeModulePackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = config.wix_prefix
+        self.wix_prefix = get_wix_prefix()
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -94,7 +94,7 @@ class MSIPackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = config.wix_prefix
+        self.wix_prefix = get_wix_prefix()
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         self.output_dir = os.path.realpath(output_dir)
