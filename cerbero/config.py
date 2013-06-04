@@ -66,10 +66,10 @@ class Variants(object):
             setattr(self, v, True)
 
     def __getattr__(self, name):
-        if name not in self.__variants:
-            raise AttributeError("%s is not a known variant" % name)
-        else:
+        try:
             return object.__getattr__(name)
+        except:
+            raise AttributeError("%s is not a known variant" % name)
 
 
 class Config (object):
