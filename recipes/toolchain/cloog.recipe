@@ -1,0 +1,13 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'cloog'
+    version = '0.18.0'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'ftp://gcc.gnu.org/pub/gcc/infrastructure/cloog-0.18.0.tar.gz'
+    configure_options = '--with-bits=gmp ' \
+                        '--disable-shared ' \
+                        '--enable-static'
+    deps = ['gmp']
