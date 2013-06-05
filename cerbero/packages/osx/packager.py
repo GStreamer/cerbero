@@ -421,6 +421,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     '''
 
     home_folder = True
+    user_resources = []
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -449,6 +450,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self._create_framework_bundle_package(packager)
 
         paths = [self._create_product(PackageType.DEVEL)]
+        if self.package.user_resources:
+            paths = [self._create_dmg (paths[0])]
         if not keep_temp:
             shutil.rmtree(self.tmp)
         return paths
@@ -504,6 +507,22 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         return '%s-%s-%s-%s%s' % (self.package.name, self.package.version,
                 self.config.target_platform, self.config.target_arch, suffix)
 
+    def _create_dmg(self, pkg_path):
+        dmg_file = pkg_path.replace('.pkg', '.dmg')
+        # Create a new folder with the pkg and the user resources
+        dmg_dir = os.path.join(self.tmp, 'dmg')
+        os.makedirs(dmg_dir)
+        for r in self.package.user_resources:
+            r = os.path.join(self.config.prefix, r)
+            r_dir = os.path.split(r)[1]
+            shell.copy_dir (r, os.path.join(dmg_dir, r_dir))
+        shutil.move(pkg_path, dmg_dir)
+
+        # Create Disk Image
+        cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
+            (dmg_file, self.package.name, dmg_dir)
+        shell.call(cmd)
+        return dmg_file
 
 class Packager(object):
 
