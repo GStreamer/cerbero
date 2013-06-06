@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer python bindings'
     longdesc = 'GStreamer python bindings'
     url = "http://www.gstreamer.com"
-    version = '2013.05'
+    version = '2013.6'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
