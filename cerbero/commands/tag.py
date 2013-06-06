@@ -53,26 +53,29 @@ class Tag(Command):
         tagdescription = args.tagdescription
         force = args.force
         for recipe in recipes:
-            if recipe.stype != SourceType.GIT and \
-               recipe.stype != SourceType.GIT_TARBALL:
-                m.message(_("Recipe '%s' has a custom source repository, "
-                        "skipping") % recipe.name)
-                continue
-
-            recipe.fetch(checkout=False)
-
-            tags = git.list_tags(recipe.repo_dir)
-            exists = (tagname in tags)
-            if exists:
-                if not force:
-                    m.warning(_("Recipe '%s' tag '%s' already exists, "
-                            "not updating" % (recipe.name, tagname)))
+            try:
+                if recipe.stype != SourceType.GIT and \
+                   recipe.stype != SourceType.GIT_TARBALL:
+                    m.message(_("Recipe '%s' has a custom source repository, "
+                            "skipping") % recipe.name)
                     continue
-                git.delete_tag(recipe.repo_dir, tagname)
 
-            commit = 'origin/sdk-%s' % recipe.version
-            git.create_tag(recipe.repo_dir, tagname, tagdescription,
-                    commit)
+                recipe.fetch(checkout=False)
+
+                tags = git.list_tags(recipe.repo_dir)
+                exists = (tagname in tags)
+                if exists:
+                    if not force:
+                        m.warning(_("Recipe '%s' tag '%s' already exists, "
+                                "not updating" % (recipe.name, tagname)))
+                        continue
+                    git.delete_tag(recipe.repo_dir, tagname)
+
+                commit = 'origin/sdk-%s' % recipe.version
+                git.create_tag(recipe.repo_dir, tagname, tagdescription,
+                        commit)
+            except:
+                m.warning(_("Error tagging recipe %s" % recipe.name))
 
 
 register_command(Tag)
