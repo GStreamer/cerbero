@@ -30,7 +30,10 @@ class Recipe(recipe.Recipe):
                         continue
                 if self.config.target_platform != Platform.DARWIN:
                     path = os.path.join('gst-sdk', 'tutorials', 'xcode')
-                    if dirname == path or dirname.startswith(path + '/'):
+                    if dirname == path or dirname.startswith(path):
+                        continue
+                if self.config.target_platform != Platform.IOS:
+                    if dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'xcode iOS')):
                         continue
             for f in filenames:
                 files_tutorials.append(os.path.join(dirname, f))
