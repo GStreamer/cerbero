@@ -61,13 +61,13 @@ class BuildTools (BootstraperBase):
         config = Config()
         os.environ.clear()
         os.environ.update(self.config._pre_environ)
+        config.load()
         config.prefix = self.config.build_tools_prefix
         config.build_tools_prefix = self.config.build_tools_prefix
         config.sources = self.config.build_tools_sources
         config.build_tools_sources = self.config.build_tools_sources
         config.cache_file = self.config.build_tools_cache
         config.build_tools_cache = self.config.build_tools_cache
-        config.load()
 
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
