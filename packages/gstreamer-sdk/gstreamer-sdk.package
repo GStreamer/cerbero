@@ -16,7 +16,6 @@ class SDKPackage(package.SDKPackage):
     vendor = "GStreamer Project"
     org = "com.gstreamer"
     ignore_package_prefix = True
-    resources_wix_installer = 'installer.wxs'
     packages =[
                # (name, required, selected)
                ('gstreamer-core', True, True),
@@ -42,7 +41,10 @@ class SDKPackage(package.SDKPackage):
                ('gstreamer-tutorials', False, True),
               ]
     platform_packages = {
-            Platform.WINDOWS: [('vsintegration', True, False)],
+            Platform.WINDOWS: [
+                ('vsintegration', True, False),
+                ('gstreamer-vs-templates', True, False),
+                ],
             }
 
     install_dir = {

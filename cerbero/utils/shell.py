@@ -249,6 +249,16 @@ def ls_files(files, prefix):
     return list(set(sfiles))
 
 
+def ls_dir(dirpath, prefix):
+    files = []
+    for root, dirnames, filenames in os.walk(dirpath):
+        _root = root.split(prefix)[1]
+        if _root[0] == '/':
+            _root = _root[1:]
+        files.extend([os.path.join(_root, x) for x in filenames])
+    return files
+
+
 def find_newer_files(prefix, compfile, include_link=False):
     include_links = include_link and '-L' or ''
     cmd = 'find %s * -type f -newer %s' % (include_links, compfile)

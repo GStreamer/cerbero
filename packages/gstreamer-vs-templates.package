@@ -1,0 +1,20 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+from cerbero.packages.wix import VSTemplatePackage
+
+
+class Package(VSTemplatePackage):
+
+    name = 'gstreamer-vs-templates'
+    shortdesc = 'GStreamer VS templates'
+    longdesc = 'GStreamer Visual Studio templates'
+    url = "http://www.gstreamer.com"
+    version = '2013.6'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'com.gstreamer'
+    uuid = '32fe67c2-4565-411f-6531-e8faa892f853'
+    vs_template_dir = 'share/vs/2010/gst-sdk-template'
+    vs_wizard_dir = 'share/vs/2010/wizard'
+    vs_template_name = 'GStreamer'
