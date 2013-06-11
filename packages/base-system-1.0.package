@@ -24,7 +24,7 @@ class Package(package.Package):
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
-            'winpthreads-runtime', 'mingw', 'libstdc++'],
+            'mingw-runtime'],
         Platform.DARWIN: ['gettext:libs:lang', 'libiconv:libs:lang'],
         Platform.LINUX: [],
         Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'gnustl'],

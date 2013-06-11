@@ -5,9 +5,6 @@ class Recipe(recipe.Recipe):
     name = 'gmp'
     version = '5.0.5'
     licenses = [License.LGPLv3Plus]
-    platform_deps = {
-        Platform.WINDOWS: ['libstdc++'],
-        }
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']

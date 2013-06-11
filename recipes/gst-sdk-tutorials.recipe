@@ -18,12 +18,23 @@ class Recipe(recipe.Recipe):
         files_tutorials = []
         for dirname, dirnames, filenames in os.walk(os.path.join(self.build_dir, 'gst-sdk')):
             dirname = dirname.replace(os.path.abspath(self.build_dir) + '/', '')
-            if self.config.target_platform != Platform.WINDOWS:
-                if dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'vs2010')):
+            if self.config.target_platform == Platform.IOS:
+                if not dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'xcode iOS')):
                     continue
-            if self.config.target_platform != Platform.DARWIN:
-                if dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'xcode')):
+            elif self.config.target_platform == Platform.ANDROID:
+                if not dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'android')):
                     continue
+            else:
+                if self.config.target_platform != Platform.WINDOWS:
+                    if dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'vs2010')):
+                        continue
+                if self.config.target_platform != Platform.DARWIN:
+                    path = os.path.join('gst-sdk', 'tutorials', 'xcode')
+                    if dirname == path or dirname.startswith(path):
+                        continue
+                if self.config.target_platform != Platform.IOS:
+                    if dirname.startswith(os.path.join('gst-sdk', 'tutorials', 'xcode iOS')):
+                        continue
             for f in filenames:
                 files_tutorials.append(os.path.join(dirname, f))
         for f in files_tutorials:

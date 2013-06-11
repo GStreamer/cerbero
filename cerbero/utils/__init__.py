@@ -250,3 +250,22 @@ def parse_file(filename, dict):
         import traceback
         traceback.print_exc()
         raise ex
+
+
+def escape_path(path):
+    path = path.replace('\\', '/')
+    path = path.replace('(', '\\\(').replace(')', '\\\)')
+    path = path.replace(' ', '\\\\ ')
+    return path
+
+
+def get_wix_prefix():
+    if 'WIX' in os.environ:
+        wix_prefix = os.path.join(os.environ['WIX'], 'bin')
+    else:
+        wix_prefix = 'C:/Program Files%s/Windows Installer XML v3.5/bin'
+        if not os.path.exists(wix_prefix):
+            wix_prefix = wix_prefix % ' (x86)'
+    if not os.path.exists(wix_prefix):
+        raise FatalError("The required packaging tool 'WiX' was not found")
+    return escape_path(to_unixpath(wix_prefix))

@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
 import os
 
 class Recipe(recipe.Recipe):
@@ -13,19 +12,14 @@ class Recipe(recipe.Recipe):
     files_lang = ['glib-networking']
 
     def prepare(self):
-        querymodule_path = None
+        querymodule_path = os.path.join(self.config.prefix, 'bin', 'gio-querymodules')
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
           # For the universal build we need to use the right gio-querymodules
           arch = self.config.target_arch
-
-          querymodule_path = os.path.join(self.config.prefix, arch, 'bin', 'gio-querymodules')
-          if not os.path.exists(querymodule_path):
-            querymodule_path = None
-
-        if not querymodule_path:
-          querymodule_path = os.path.join(self.config.prefix, 'bin', 'gio-querymodules')
-          if not os.path.exists(querymodule_path):
-            raise FatalError("Could not find gio-querymodules")
+          arch_path = os.path.join(self.config.prefix, arch, 'bin', 'gio-querymodules')
+          # Only for the universal builds
+          if os.path.exists(arch_path):
+              querymodule_path = arch_path
 
         if not self.config.prefix_is_executable():
           querymodule_path = 'true'

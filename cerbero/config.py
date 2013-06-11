@@ -38,15 +38,6 @@ DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 CERBERO_PREFIX = 'CERBERO_PREFIX'
 
-DEFAULT_WIX_PREFIX = \
-    'C:/Program\ Files%s/Windows\ Installer\ XML\ v3.5/bin'
-def get_wix_prefix(arch):
-    if arch == Architecture.X86:
-        path = ''
-    else:
-        path = '\ \(x86\)'
-    return DEFAULT_WIX_PREFIX % path
-
 
 Platform = enums.Platform
 Architecture = enums.Architecture
@@ -66,10 +57,10 @@ class Variants(object):
             setattr(self, v, True)
 
     def __getattr__(self, name):
-        if name not in self.__variants:
-            raise AttributeError("%s is not a known variant" % name)
-        else:
+        try:
             return object.__getattr__(name)
+        except:
+            raise AttributeError("%s is not a known variant" % name)
 
 
 class Config (object):
@@ -80,7 +71,7 @@ class Config (object):
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
-                   'packages_dir', 'wix_prefix', 'py_prefix',
+                   'packages_dir', 'py_prefix',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
@@ -277,7 +268,6 @@ class Config (object):
         self.set_property('target_distro', distro)
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
-        self.set_property('wix_prefix', get_wix_prefix(self.arch))
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
         self.set_property('py_prefix', 'lib/python%s.%s' %

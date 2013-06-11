@@ -31,7 +31,8 @@ cerbero_distro_version=DistroVersion.`echo "$DISTRO"_"$DISTRO_VERSION" | awk '{p
 
 if test $ARCH = "i386" || test $ARCH = "x86"; then
     cerbero_arch=X86
-elif test $ARCH = "x86_64"; then
+elif test $ARCH = "amd64" || test $ARCH = "x86_64"; then
+    ARCH=x86_64
     cerbero_arch=X86_64
 else
     die "Architecture $ARCH not supported"

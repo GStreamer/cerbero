@@ -83,7 +83,7 @@ def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
 
     shell.call('%s tag -s %s -m "%s" %s' %
                (GIT, tagname, tagdescription, commit), git_dir, fail=fail)
-    return shell.call('%s push origin --tags' % GIT, git_dir, fail=fail)
+    return shell.call('%s push origin %s' % (GIT, tagname), git_dir, fail=fail)
 
 
 def delete_tag(git_dir, tagname, fail=True):

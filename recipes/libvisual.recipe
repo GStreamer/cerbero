@@ -7,9 +7,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     configure_options = ' --enable-static'
-    platform_deps = {Platform.WINDOWS: ['libiconv', 'gettext'],
-                     Platform.DARWIN: ['libiconv', 'gettext'],
-                     Platform.ANDROID: ['libiconv', 'gettext']}
 
     files_libs = ['libvisual-0.4']
     files_devel = ['include/libvisual-0.4', 'lib/pkgconfig/libvisual-0.4.pc']

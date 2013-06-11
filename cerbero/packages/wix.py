@@ -24,9 +24,37 @@ from cerbero.utils import etree, to_winepath, shell
 from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
-from cerbero.packages.package import SDKPackage, App, InstallerPackage
+from cerbero.packages.package import Package, SDKPackage, App, InstallerPackage
 
 WIX_SCHEMA = "http://schemas.microsoft.com/wix/2006/wi"
+
+
+class VSTemplatePackage(Package):
+    '''
+    A Package for Visual Studio templates
+
+    @cvar: vs_template_name: name of the template
+    @type vs_template_name: string
+    @cvar vs_template_dir: directory of the template files
+    @type vs_template_dir: string
+    @cvar: vs_wizard_dir: directory of the wizard files
+    @type vs_wizard_dir: string
+    '''
+
+    vs_template_dir = None
+    vs_wizard_dir = None
+    vs_template_name = None
+
+    def __init__(self, config, store, cookbook):
+        Package.__init__(self, config, store, cookbook)
+
+    def files_list(self):
+    #def devel_files_list(self):
+        files = []
+        for f in [self.vs_template_dir, self.vs_wizard_dir]:
+            files  += shell.ls_dir (os.path.join(self.config.prefix,f),
+                self.config.prefix)
+        return files
 
 
 class WixBase():
@@ -178,6 +206,49 @@ class MergeModule(WixBase):
                          Source=filepath)
 
 
+class VSMergeModule(MergeModule):
+    '''
+    Creates a Merge Module for Visual Studio templates
+
+    @ivar package: package with the info to build the merge package
+    @type pacakge: L{cerbero.packages.package.Package}
+    '''
+
+    def __init__(self, config, files_list, package):
+        MergeModule.__init__(self, config, files_list, package)
+
+    def _add_root_dir(self):
+        MergeModule._add_root_dir(self)
+        self._add_vs_templates()
+
+    def _add_vs_templates(self):
+        etree.SubElement(self.module, 'PropertyRef',
+            Id='VS_PROJECTTEMPLATES_DIR')
+        etree.SubElement(self.module, 'PropertyRef',
+            Id='VS_WIZARDS_DIR')
+        etree.SubElement(self.module, 'CustomActionRef',
+            Id='VS2010InstallVSTemplates')
+        etree.SubElement(self.module, 'CustomActionRef',
+            Id='VC2010InstallVSTemplates')
+        prop = etree.SubElement(self.module, 'SetProperty',
+            Id="VSPROJECTTEMPLATESDIR", After="AppSearch",
+            Value="[VS_PROJECTTEMPLATES_DIR]\\%s" % \
+                self.package.vs_template_name or "")
+        prop.text = "VS_PROJECTTEMPLATES_DIR"
+        prop = etree.SubElement(self.module, 'SetProperty',
+            Id="VSWIZARDSDIR", After="AppSearch",
+            Value="[VS_WIZARDS_DIR]\\%s" % \
+                os.path.split(self.package.vs_template_dir)[1])
+        prop.text = "VS_WIZARDS_DIR"
+
+        self._wizard_dir = etree.SubElement(self.rdir, 'Directory',
+            Id='VSPROJECTTEMPLATESDIR')
+        self._tpl_dir = etree.SubElement(self.rdir, 'Directory',
+            Id='VSWIZARDSDIR')
+        self._dirnodes[self.package.vs_template_dir] = self._tpl_dir
+        self._dirnodes[self.package.vs_wizard_dir] = self._wizard_dir
+
+
 class WixConfig(WixBase):
 
     wix_config = 'wix/Config.wxi'
@@ -251,6 +322,7 @@ class MSI(WixBase):
         self._add_include()
         self._customize_ui()
         self.product = self.root.find(".//Product")
+        self._add_vs_properties()
 
     def _parse_sources(self):
         sources_path = self.package.resources_wix_installer or \
@@ -455,6 +527,9 @@ class MSI(WixBase):
                              Id=self._package_id(p.name))
         etree.SubElement(feature, "MergeRef",
                          Id=self._package_id(package.name))
+        if isinstance(package, VSTemplatePackage):
+            c = etree.SubElement(feature, "Condition", Level="0")
+            c.text = "NOT VS2010DEVENV AND NOT VC2010EXPRESS_IDE"
 
     def _add_start_menu_shortcuts(self):
         # Create a folder with the application name in the Start Menu folder
@@ -482,3 +557,6 @@ class MSI(WixBase):
         etree.SubElement(self.main_feature, 'ComponentRef',
                 Id='ApplicationShortcut')
 
+    def _add_vs_properties(self):
+        etree.SubElement(self.product, 'PropertyRef', Id='VS2010DEVENV')
+        etree.SubElement(self.product, 'PropertyRef', Id='VC2010EXPRESS_IDE')

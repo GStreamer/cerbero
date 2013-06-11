@@ -9,3 +9,6 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
+
+    def prepare(self):
+        self.remotes = {'origin': '%s/%s' % (self.config.git_root, 'gmp')}

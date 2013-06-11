@@ -26,13 +26,6 @@ from cerbero.utils import _, N_, shell, ArgparseArgument
 import cerbero.utils.messages as m
 
 
-def _onerror(func, path, exc_info):
-    if not os.access(path, os.W_OK):
-        os.chmod(path, stat.S_IWUSR)
-        func(path)
-    else:
-        raise
-
 class Wipe(Command):
     doc = N_('Wipes everything to restore the build system')
     name = 'wipe'
@@ -76,6 +69,17 @@ class Wipe(Command):
                 self.wipe(to_remove)
 
     def wipe(self, paths):
+
+        def _onerror(func, path, exc_info):
+            if not os.access(path, os.W_OK):
+                os.chmod(path, stat.S_IWUSR)
+                func(path)
+            # Handle "Directory is not empty" errors
+            elif exc_info[1][0] == 145:
+                shutil.rmtree(path, onerror=_onerror)
+            else:
+                raise
+
         for path in paths:
             m.action(_("Removing path: %s") % path)
             if not os.path.exists(path):

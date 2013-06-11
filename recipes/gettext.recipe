@@ -7,7 +7,10 @@ class Recipe(recipe.Recipe):
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     srcdir = 'gettext-runtime'
-    platform_deps = {Platform.DARWIN:  ['libiconv']}
+    platform_deps = {
+        Platform.DARWIN:  ['libiconv'],
+        Platform.WINDOWS:  ['mingw-runtime'],
+            }
 
     files_libs = ['libintl']
     files_devel = ['include/libintl.h']
@@ -21,3 +24,5 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
             self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
+        if self.config.target_platform != Platform.LINUX:
+            self.runtime_dep = True

@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
+    runtime_dep = True
 
     files_stl = [
             'lib/libgnustl.so']

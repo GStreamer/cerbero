@@ -23,8 +23,9 @@ from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
 from cerbero.utils import messages as m
-from cerbero.utils import shell, to_winepath
-from cerbero.packages.wix import MergeModule, MSI, WixConfig
+from cerbero.utils import shell, to_winepath, get_wix_prefix
+from cerbero.packages.wix import MergeModule, VSMergeModule, MSI, WixConfig
+from cerbero.packages.wix import VSTemplatePackage
 from cerbero.config import Platform
 
 
@@ -33,7 +34,7 @@ class MergeModulePackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = config.wix_prefix
+        self.wix_prefix = get_wix_prefix()
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -56,27 +57,38 @@ class MergeModulePackager(PackagerBase):
                             keep_temp):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
-        mergemodule = MergeModule(self.config, files_list, self.package)
+        if isinstance(self.package, VSTemplatePackage):
+            mergemodule = VSMergeModule(self.config, files_list, self.package)
+        else:
+            mergemodule = MergeModule(self.config, files_list, self.package)
         package_name = self._package_name(version)
-        sources = os.path.join(output_dir, "%s.wsx" % package_name)
-        mergemodule.write(sources)
+        sources = [os.path.join(output_dir, "%s.wxs" % package_name)]
+        mergemodule.write(sources[0])
+        wixobjs = [os.path.join(output_dir, "%s.wixobj" % package_name)]
 
-        wixobj = os.path.join(output_dir, "%s.wixobj" % package_name)
+        for x in ['utils']:
+            wixobjs.append(os.path.join(output_dir, "%s.wixobj" % x))
+            sources.append(os.path.join(os.path.abspath(self.config.data_dir),
+                           'wix/%s.wxs' % x))
 
         if self._with_wine:
-            wixobj = to_winepath(wixobj)
-            sources = to_winepath(sources)
+            wixobjs = [to_winepath(x) for x in wixobjs]
+            sources = [to_winepath(x) for x in sources]
 
         candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(sources, output_dir)
+        candle.compile(' '.join(sources), output_dir)
         light = Light(self.wix_prefix, self._with_wine)
-        path = light.compile([wixobj], package_name, output_dir, True)
+        path = light.compile(wixobjs, package_name, output_dir, True)
 
         # Clean up
         if not keep_temp:
-            os.remove(sources)
-            os.remove(wixobj)
-            os.remove(wixobj.replace('.wixobj', '.wixpdb'))
+            os.remove(sources[0])
+            for f in wixobjs:
+                os.remove(f)
+                try:
+                    os.remove(f.replace('.wixobj', '.wixpdb'))
+                except:
+                    pass
 
         return path
 
@@ -89,12 +101,11 @@ class MSIPackager(PackagerBase):
 
     UI_EXT = '-ext WixUIExtension'
     UTIL_EXT = '-ext WixUtilExtension'
-    UI_SOURCES = 'wix/ui.wxs'
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = config.wix_prefix
+        self.wix_prefix = get_wix_prefix()
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         self.output_dir = os.path.realpath(output_dir)
@@ -162,42 +173,42 @@ class MSIPackager(PackagerBase):
     def _create_config(self):
         config = WixConfig(self.config, self.package)
         config_path = config.write(self.output_dir)
-        candle = Candle(self.wix_prefix, self._with_wine)
-        ui_path = os.path.join(os.path.abspath(self.config.data_dir),
-                               self.UI_SOURCES)
-        if self._with_wine:
-            ui_path = to_winepath(ui_path)
-        candle.compile(ui_path, self.output_dir)
         return config_path
 
     def _create_msi(self, config_path):
-        sources = os.path.join(self.output_dir, "%s.wsx" % self._package_name())
+        sources = [os.path.join(self.output_dir, "%s.wxs" %
+                   self._package_name())]
         msi = MSI(self.config, self.package, self.packagedeps, config_path,
                   self.store)
-        msi.write(sources)
+        msi.write(sources[0])
 
         wixobjs = [os.path.join(self.output_dir, "%s.wixobj" %
                                 self._package_name())]
-        #FIXME: Don't use our custom UI yet
-        #wixobjs.append(os.path.join(self.output_dir, "ui.wixobj"))
+        for x in ['utils']:
+            wixobjs.append(os.path.join(self.output_dir, "%s.wixobj" % x))
+            sources.append(os.path.join(os.path.abspath(self.config.data_dir),
+                           'wix/%s.wxs' % x))
 
         if self._with_wine:
             wixobjs = [to_winepath(x) for x in wixobjs]
-            sources = to_winepath(sources)
+            sources = [to_winepath(x) for x in sources]
 
         candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(sources, self.output_dir)
+        candle.compile(' '.join(sources), self.output_dir)
         light = Light(self.wix_prefix, self._with_wine,
                       "%s %s" % (self.UI_EXT, self.UTIL_EXT))
         path = light.compile(wixobjs, self._package_name(), self.output_dir)
 
         # Clean up
         if not self.keep_temp:
-            os.remove(sources)
+            os.remove(sources[0])
+            for f in wixobjs:
+                os.remove(f)
+                try:
+                    os.remove(f.replace('.wixobj', '.wixpdb'))
+                except:
+                    pass
             os.remove(config_path)
-            for p in wixobjs:
-                os.remove(p)
-                os.remove(p.replace('.wixobj', '.wixpdb'))
 
         return path
 

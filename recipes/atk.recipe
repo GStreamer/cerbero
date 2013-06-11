@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '2.4.0'
     licenses = [License.LGPLv2Plus]
     deps = ['glib']
+    autoreconf = True
 
     files_libs = ['libatk-1.0']
     files_devel = ['lib/pkgconfig/atk.pc', 'include/atk-1.0']
