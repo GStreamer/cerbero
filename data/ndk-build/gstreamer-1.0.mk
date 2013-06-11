@@ -30,6 +30,9 @@ ifndef GSTREAMER_PLUGINS
   $(info "The list of GSTREAMER_PLUGINS is empty")
 endif
 
+# Expand home directory (~/)
+GSTREAMER_ROOT := $(wildcard $(GSTREAMER_ROOT))
+
 # Path for GStreamer static plugins
 ifndef GSTREAMER_STATIC_PLUGINS_PATH
 GSTREAMER_STATIC_PLUGINS_PATH := lib/gstreamer-1.0

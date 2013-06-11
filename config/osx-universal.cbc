@@ -1,5 +1,5 @@
 from cerbero.config import Architecture
 
 target_arch=Architecture.UNIVERSAL
-prefix='/Library/Frameworks/GStreamer.framework/Versions/0.10'
+prefix='/Library/Frameworks/GStreamer.framework/Versions/1.0'
 
