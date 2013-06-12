@@ -245,6 +245,7 @@ class ProductPackage(PackagerBase):
             paths.append(d_path)
 
         self.package.set_mode(PackageType.RUNTIME)
+        self._create_packages_dmg()
 
         if not keep_temp:
             shutil.rmtree(self.tmp)
@@ -325,6 +326,17 @@ class ProductPackage(PackagerBase):
                 self.packages_paths[PackageType.DEVEL][p] = paths[1]
             else:
                 self.empty_packages[PackageType.DEVEL].append(p)
+
+    def _create_packages_dmg(self):
+        paths = self.packages_paths[PackageType.RUNTIME].values()
+        dmg_file = os.path.join(self.output_dir,
+            self._package_name('-packages.dmg'))
+
+        # Create Disk Image
+        cmd = 'hdiutil create %s -ov' % dmg_file
+        for p in paths:
+            cmd += ' -srcfolder %s' % p
+        shell.call(cmd)
 
 
 class ApplicationPackage(PackagerBase):
