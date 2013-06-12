@@ -48,8 +48,7 @@ class VSTemplatePackage(Package):
     def __init__(self, config, store, cookbook):
         Package.__init__(self, config, store, cookbook)
 
-    def files_list(self):
-    #def devel_files_list(self):
+    def devel_files_list(self):
         files = []
         for f in [self.vs_template_dir, self.vs_wizard_dir]:
             files  += shell.ls_dir (os.path.join(self.config.prefix,f),
