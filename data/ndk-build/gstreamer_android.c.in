@@ -4,6 +4,7 @@
 #include <android/log.h>
 
 static GstClockTime _priv_gst_info_start_time;
+static bool _priv_gst_initialized = FALSE;
 
 /* Declaration of static plugins */
  @PLUGINS_DECLARATION@
@@ -324,7 +325,7 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
   gchar *registry;
   GError *error = NULL;
 
-  if (gst_is_initialized ()) {
+  if (_priv_gst_initialized) {
     __android_log_print (ANDROID_LOG_INFO, "GStreamer",
         "GStreamer already initialized");
     return;
@@ -376,19 +377,22 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
   /* get time we started for debugging messages */
   _priv_gst_info_start_time = gst_util_get_timestamp ();
 
-  if (!gst_init_check (NULL, NULL, &error)) {
-    gchar *message = g_strdup_printf ("GStreamer initialization failed: %s",
-        error && error->message ? error->message : "(no message)");
-    jclass exception_class = (*env)->FindClass (env, "java/lang/Exception");
-    __android_log_print (ANDROID_LOG_ERROR, "GStreamer", message);
-    (*env)->ThrowNew (env, exception_class, message);
-    g_free (message);
-    return;
+  if (!gst_is_initialized ()) {
+    if (!gst_init_check (NULL, NULL, &error)) {
+      gchar *message = g_strdup_printf ("GStreamer initialization failed: %s",
+          error && error->message ? error->message : "(no message)");
+      jclass exception_class = (*env)->FindClass (env, "java/lang/Exception");
+      __android_log_print (ANDROID_LOG_ERROR, "GStreamer", message);
+      (*env)->ThrowNew (env, exception_class, message);
+      g_free (message);
+      return;
+    }
   }
   gst_android_register_static_plugins ();
   gst_android_load_gio_modules ();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer",
       "GStreamer initialization complete");
+  _priv_gst_initialized = TRUE;
 }
 
 static JNINativeMethod native_methods[] = {
