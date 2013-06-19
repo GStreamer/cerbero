@@ -25,7 +25,7 @@ from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
 from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package, MetaPackage, SDKPackage, App,\
+from cerbero.packages.package import Package, MetaPackage, App,\
         PackageBase
 from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
@@ -228,7 +228,7 @@ class ProductPackage(PackagerBase):
 
         self._prepare_pack()
 
-        if isinstance(self.package, SDKPackage):
+        if isinstance(self.package, MetaPackage):
             packager = self._create_framework_bundle_packager()
             self._create_framework_bundle_layout(packager)
             self._create_framework_bundle_package(packager)
