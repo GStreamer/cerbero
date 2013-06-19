@@ -454,8 +454,10 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self._copy_headers(files, version_dir)
         self._create_framework_headers(self.config.prefix,
                                        self.include_dirs, version_dir)
-        shutil.rmtree(os.path.join(version_dir, 'include'))
-        shutil.rmtree(os.path.join(version_dir, 'lib'))
+        if os.path.exists(os.path.join(version_dir, 'include')):
+            shutil.rmtree(os.path.join(version_dir, 'include'))
+        if os.path.exists(os.path.join(version_dir, 'lib')):
+            shutil.rmtree(os.path.join(version_dir, 'lib'))
         self._create_merged_lib(libname, files)
         self.package.packages = []
         self.fw_path = self.tmp
