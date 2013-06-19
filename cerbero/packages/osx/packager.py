@@ -438,7 +438,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
-        framework_name = self.package.ios_framework_library[0]
+        framework_name = self.package.osx_framework_library[0]
         self._prepare_pack()
         self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
         os.mkdir(self.fw_path)
