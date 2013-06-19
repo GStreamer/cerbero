@@ -23,7 +23,7 @@ import shutil
 from cerbero.config import Architecture, Platform
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
-from cerbero.errors import EmptyPackageError
+from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, MetaPackage, SDKPackage, App,\
         PackageBase
