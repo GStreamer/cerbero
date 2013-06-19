@@ -343,8 +343,10 @@ class MetaPackage(PackageBase):
     @cvar sdk_version: SDK version. This version will be used for the SDK
                        versionning and can defer from the installer one.
     @type sdk_version: str
-    @cvar resources_wix_installer: wix installer tmeplate file
-    @cvar resources_wix_installer: string
+    @cvar resources_wix_installer: wix installer template file
+    @type resources_wix_installer: string
+    @cvar user_resources: folders included in the .dmg for iOS packages
+    @type user_resources: list
     '''
 
     packages = []
@@ -352,6 +354,7 @@ class MetaPackage(PackageBase):
     platform_packages = {}
     sdk_version = '1.0'
     resources_wix_installer = None
+    user_resources = []
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)
