@@ -229,7 +229,6 @@ class Package(PackageBase):
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
-        self.load_files()
 
     def load_files(self):
         self._files = self.files + \
