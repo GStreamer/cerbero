@@ -425,7 +425,7 @@ class SDKPackage(MetaPackage):
 
     @cvar root_env_var: name of the environment variable with the prefix
     @type root_env_var: str
-    @cvar osx_framework_library: (namd, path) of the lib used for the Framework
+    @cvar osx_framework_library: (name, path) of the lib used for the Framework
     @type osx_framework_library: tuple
 
     '''
