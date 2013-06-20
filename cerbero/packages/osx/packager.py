@@ -493,10 +493,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def _copy_headers(self, files, version_dir):
         # Get the list of headers
         incl_dir = os.path.join(self.config.prefix, 'include')
-        include_files = [os.path.join(incl_dir, x) for x in
-                         os.listdir(incl_dir) if x.endswith('.h')]
-        for d in self.include_dirs:
-            include_files += [x for x in files if d in x]
+        include_files = [x for x in files if incl_dir in x]
         self._copy_files (include_files, version_dir)
 
     def _create_framework_bundle_packager(self):
