@@ -4,7 +4,7 @@
 #include <android/log.h>
 
 static GstClockTime _priv_gst_info_start_time;
-static bool _priv_gst_initialized = FALSE;
+static gboolean _priv_gst_initialized = FALSE;
 
 /* Declaration of static plugins */
  @PLUGINS_DECLARATION@
