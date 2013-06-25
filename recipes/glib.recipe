@@ -139,7 +139,7 @@ class Recipe(recipe.Recipe):
                     path1 = '/usr/lib64/gio/modules/'
             else:
                 raise FatalError(_("Add specific for other Linux distributions here"))
-            self._set_gio_flags(path1, path1, use_old_uri_scheme)
+            self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
