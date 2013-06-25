@@ -48,6 +48,8 @@ class BuildTools (BootstraperBase):
                 self.config.distro_version == DistroVersion.DEBIAN_SQUEEZE:
                 # x264 requires yasm >= 1.0
                 self.BUILD_TOOLS.append('yasm')
+            if self.config.distro_version in [DistroVersion.REDHAT_6]:
+                self.BUILD_TOOLS.append('cmake')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.platform != Platform.LINUX and\
