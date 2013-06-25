@@ -53,6 +53,10 @@ class Recipe(recipe.Recipe):
     files_lang = ['gtk20', 'gtk20-properties']
 
 
+    def _set_flags(self, module_path1=None, module_path2=None, theme_path=None):
+        self.config_sh = 'CFLAGS="%s" ./configure' % \
+                    self._gtk_flags(module_path1, module_path2, theme_path)
+
     def _gtk_flags(self, module_path1=None, module_path2=None, theme_path=None):
         flags = ''
         def escape(path):
@@ -75,33 +79,41 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.LINUX:
             # Can't change CFLAGS and use configure cache
             self.can_use_configure_cache = False
-            if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
-                self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY,
-                    DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE,
-                    DistroVersion.UBUNTU_QUANTAL, DistroVersion.UBUNTU_RARING]:
+            mod_path1 = '/usr/lib/gtk-2.0'
+            mod_path2 = None
+            themes_path = '/usr/share/themes'
+            # Old Debian/Ubuntu
+            if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE,
+                                                     DistroVersion.UBUNTU_LUCID,
+                                                     DistroVersion.UBUNTU_MAVERICK]:
+                pass
+            # Ubuntu
+            elif self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY,
+                                                       DistroVersion.UBUNTU_ONEIRIC,
+                                                       DistroVersion.UBUNTU_PRECISE,
+                                                       DistroVersion.UBUNTU_QUANTAL,
+                                                       DistroVersion.UBUNTU_RARING]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', '/usr/lib/i386-linux-gnu/gtk-2.0', '/usr/share/themes')
+                    mod_path2 = '/usr/lib/i386-linux-gnu/gtk-2.0'
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', '/usr/lib/x86_64-linux-gnu/gtk-2.0', '/usr/share/themes')
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY, DistroVersion.DEBIAN_JESSIE]:
+                    mod_path2 = '/usr/lib/x86_64-linux-gnu/gtk-2.0'
+            # Debian 
+            elif self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY,
+                                                       DistroVersion.DEBIAN_JESSIE]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/i386-linux-gnu/gtk-2.0', None, '/usr/share/themes')
+                    mod_path1 = '/usr/lib/i386-linux-gnu/gtk-2.0'
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/x86_64-linux-gnu/gtk-2.0', None, '/usr/share/themes')
-            elif self.config.target_distro == Distro.REDHAT:
-                if self.config.target_distro_version in [DistroVersion.FEDORA_16, DistroVersion.FEDORA_17, DistroVersion.FEDORA_18, DistroVersion.FEDORA_19]:
-                    if self.config.target_arch == Architecture.X86:
-                        self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
-                    elif self.config.target_arch == Architecture.X86_64:
-                        self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib64/gtk-2.0', None, '/usr/share/themes')
-                else:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
+                    mod_path1 = '/usr/lib/x86_64-linux-gnu/gtk-2.0'
+            # RedHat
+            elif self.config.target_distro_version in [DistroVersion.FEDORA_16,
+                                                       DistroVersion.FEDORA_17,
+                                                       DistroVersion.FEDORA_18,
+                                                       DistroVersion.FEDORA_19,
+                    if self.config.target_arch == Architecture.X86_64:
+                        mod_path1 = '/usr/lib64/gtk-2.0'
             elif self.config.target_distro == Distro.SUSE:
-                if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib/gtk-2.0', None, '/usr/share/themes')
-                elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gtk_flags('/usr/lib64/gtk-2.0', None, '/usr/share/themes')
+                if self.config.target_arch == Architecture.X86_64:
+                    mod_path1 = '/usr/lib64/gtk-2.0'
             else:
-                from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
+            self._set_flags(mod_path1, mod_path2, themes_path)
