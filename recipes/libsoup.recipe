@@ -28,7 +28,9 @@ class Recipe(recipe.Recipe):
                  DistroVersion.FEDORA_16,
                  DistroVersion.FEDORA_17,
                  DistroVersion.FEDORA_18,
-                 DistroVersion.FEDORA_19]:
+                 DistroVersion.FEDORA_19,
+                 DistroVersion.REDHAT_6,
+                 ]:
             self.deps += [ 'glib-networking' ]
         if self.config.target_platform in [Platform.WINDOWS, Platform.IOS]:
             self.configure_options += ' --disable-tls-check'

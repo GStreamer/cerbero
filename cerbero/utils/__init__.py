@@ -152,7 +152,7 @@ def system_info():
                 distro_version = DistroVersion.DEBIAN_JESSIE
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['RedHat', 'Fedora']:
+        elif d[0] in ['RedHat', 'Fedora', 'CentOS']:
             distro = Distro.REDHAT
             if d[1] == '16':
                 distro_version = DistroVersion.FEDORA_16
@@ -162,6 +162,8 @@ def system_info():
                 distro_version = DistroVersion.FEDORA_18
             elif d[1] == '19':
                 distro_version = DistroVersion.FEDORA_19
+            elif d[1].startswith('6.'):
+                distro_version = DistroVersion.REDHAT_6
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))

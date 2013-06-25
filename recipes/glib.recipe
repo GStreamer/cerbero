@@ -128,7 +128,9 @@ class Recipe(recipe.Recipe):
             elif self.config.target_distro_version in [DistroVersion.FEDORA_16,
                                                        DistroVersion.FEDORA_17,
                                                        DistroVersion.FEDORA_18,
-                                                       DistroVersion.FEDORA_19]:
+                                                       DistroVersion.FEDORA_19,
+                                                       DistroVersion.REDHAT_6,
+                                                       ]:
                     if self.config.target_arch == Architecture.X86_64:
                         path1 = '/usr/lib64/gio/modules/'
             # Suse
