@@ -8,4 +8,4 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'sh autogen.sh'
     commit = 'RELEASE-0_15_2'
-    deps = ['gnome-doc-utils']
+    deps = ['gnome-doc-utils', 'pygoocanvas', 'pygtk', 'gst-python', 'pyxdg', 'glade']
