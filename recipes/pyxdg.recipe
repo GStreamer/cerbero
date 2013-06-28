@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
 
     files_python = [
-            'site-packages/pyxdg-0.25-py2.7.egg-info',
             'site-packages/xdg/BaseDirectory.pyc',
             'site-packages/xdg/Config.pyc',
             'site-packages/xdg/DesktopEntry.pyc',
