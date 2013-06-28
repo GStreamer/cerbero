@@ -36,3 +36,7 @@ class Recipe(recipe.Recipe):
         'include/dbus-1.0/dbus/dbus-python.h',
         'lib/pkgconfig/dbus-python.pc'
         ]
+
+    def prepare(self):
+        if self.config.target_distro_version == DistroVersion.REDHAT_6:
+            self.append_env = {'CFLAGS': ' -D_GNU_SOURCE=1'}
