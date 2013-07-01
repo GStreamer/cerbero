@@ -261,7 +261,7 @@ def ls_dir(dirpath, prefix):
 
 def find_newer_files(prefix, compfile, include_link=False):
     include_links = include_link and '-L' or ''
-    cmd = 'find %s * -type f -newer %s' % (include_links, compfile)
+    cmd = 'find %s * -type f -cnewer %s' % (include_links, compfile)
     sfiles = check_call(cmd, prefix, True, False, False).split('\n')
     sfiles.remove('')
     return sfiles

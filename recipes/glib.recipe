@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 
 GLIB_CONFIG_UNVERSAL='''\
 #ifdef __i386__
@@ -59,6 +60,10 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['glib20']
 
+    def _set_gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
+        self.config_sh = 'CFLAGS="%s" ./configure' % \
+            self._gio_flags(path1, path2, use_old_uri_scheme)
+
     def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
         flags = ''
         def escape(path):
@@ -94,39 +99,49 @@ class Recipe(recipe.Recipe):
 
             self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP %s" ./configure' % extra_flags
         elif self.config.target_platform == Platform.LINUX:
-            if self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.UBUNTU_LUCID, DistroVersion.UBUNTU_MAVERICK]:
-                self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', None, True)
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY,
-                    DistroVersion.UBUNTU_ONEIRIC, DistroVersion.UBUNTU_PRECISE,
-                    DistroVersion.UBUNTU_QUANTAL, DistroVersion.UBUNTU_RARING]:
+            path1 = '/usr/lib/gio/modules'
+            path2 = None
+            use_old_uri_scheme = False
+            # Old Debian/Ubuntu
+            if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE,
+                                                     DistroVersion.UBUNTU_LUCID,
+                                                     DistroVersion.UBUNTU_MAVERICK]:
+                use_old_uri_scheme = True
+            # Ubuntu
+            elif self.config.target_distro_version in [DistroVersion.UBUNTU_NATTY,
+                                                       DistroVersion.UBUNTU_ONEIRIC,
+                                                       DistroVersion.UBUNTU_PRECISE,
+                                                       DistroVersion.UBUNTU_QUANTAL,
+                                                       DistroVersion.UBUNTU_RARING]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', '/usr/lib/i386-linux-gnu/gio/modules')
+                    path2 = '/usr/lib/i386-linux-gnu/gio/modules'
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/', '/usr/lib/x86_64-linux-gnu/gio/modules')
-            elif self.config.target_distro == Distro.DEBIAN and self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY, DistroVersion.DEBIAN_JESSIE]:
+                    path2 = '/usr/lib/x86_64-linux-gnu/gio/modules'
+            # Debian
+            elif self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY,
+                                                       DistroVersion.DEBIAN_JESSIE]:
                 if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/i386-linux-gnu/gio/modules')
+                    path1 = '/usr/lib/i386-linux-gnu/gio/modules'
                 elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/x86_64-linux-gnu/gio/modules')
-            elif self.config.target_distro == Distro.REDHAT:
-                if self.config.target_distro_version in [DistroVersion.FEDORA_16, DistroVersion.FEDORA_17, DistroVersion.FEDORA_18, DistroVersion.FEDORA_19]:
-                    if self.config.target_arch == Architecture.X86:
-                        self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules')
-                    elif self.config.target_arch == Architecture.X86_64:
-                        self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib64/gio/modules/')
-                else:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules/')
+                    path1 = '/usr/lib/x86_64-linux-gnu/gio/modules'
+            # RedHat
+            elif self.config.target_distro_version in [DistroVersion.FEDORA_16,
+                                                       DistroVersion.FEDORA_17,
+                                                       DistroVersion.FEDORA_18,
+                                                       DistroVersion.FEDORA_19,
+                                                       DistroVersion.REDHAT_6,
+                                                       ]:
+                    if self.config.target_arch == Architecture.X86_64:
+                        path1 = '/usr/lib64/gio/modules/'
+            # Suse
             elif self.config.target_distro == Distro.SUSE:
-                if self.config.target_arch == Architecture.X86:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib/gio/modules')
-                elif self.config.target_arch == Architecture.X86_64:
-                    self.config_sh = 'CFLAGS="%s" ./configure' % self._gio_flags('/usr/lib64/gio/modules')
+                if self.config.target_arch == Architecture.X86_64:
+                    path1 = '/usr/lib64/gio/modules/'
             else:
-                from cerbero.errors import FatalError
                 raise FatalError(_("Add specific for other Linux distributions here"))
+            self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
     def post_install(self):
-        import shutil
         if self.config.target_platform == Platform.WINDOWS:
             shutil.copy(os.path.join(self.build_dir, 'glib', 'glibconfig.h.win32'),
                         os.path.join(self.config.prefix, 'lib', 'glib-2.0',

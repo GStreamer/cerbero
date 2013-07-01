@@ -229,7 +229,6 @@ class Package(PackageBase):
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
-        self.load_files()
 
     def load_files(self):
         self._files = self.files + \
@@ -344,8 +343,10 @@ class MetaPackage(PackageBase):
     @cvar sdk_version: SDK version. This version will be used for the SDK
                        versionning and can defer from the installer one.
     @type sdk_version: str
-    @cvar resources_wix_installer: wix installer tmeplate file
-    @cvar resources_wix_installer: string
+    @cvar resources_wix_installer: wix installer template file
+    @type resources_wix_installer: string
+    @cvar user_resources: folders included in the .dmg for iOS packages
+    @type user_resources: list
     '''
 
     packages = []
@@ -353,6 +354,7 @@ class MetaPackage(PackageBase):
     platform_packages = {}
     sdk_version = '1.0'
     resources_wix_installer = None
+    user_resources = []
 
     def __init__(self, config, store):
         PackageBase.__init__(self, config, store)
@@ -423,7 +425,7 @@ class SDKPackage(MetaPackage):
 
     @cvar root_env_var: name of the environment variable with the prefix
     @type root_env_var: str
-    @cvar osx_framework_library: (namd, path) of the lib used for the Framework
+    @cvar osx_framework_library: (name, path) of the lib used for the Framework
     @type osx_framework_library: tuple
 
     '''

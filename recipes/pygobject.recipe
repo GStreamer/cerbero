@@ -13,6 +13,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.files_mainlib = ['bin/libpyglib-2.0-python.pyd']
             self.files_libs = []
+        if self.config.target_distro_version == DistroVersion.REDHAT_6:
+            self.append_env = {'CFLAGS': ' -D_GNU_SOURCE=1'}
 
     def post_install(self):
         import shutil

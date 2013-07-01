@@ -353,7 +353,8 @@ class CookBook (object):
                      'License': License, 'recipe': crecipe, 'os': os,
                      'BuildSteps': crecipe.BuildSteps,
                      'InvalidRecipeError': InvalidRecipeError,
-                     'custom': custom}
+                     'FatalError': FatalError,
+                     'custom': custom, '_': _, 'shell': shell}
                 parse_file(filepath, d)
                 r = d['Recipe'](self._config.arch_config[c])
                 r.__file__ = os.path.abspath(filepath)

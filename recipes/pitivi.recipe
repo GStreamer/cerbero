@@ -1,0 +1,16 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'pitivi'
+    version = '0.15.2'
+    licenses = [License.GPLv2Plus]
+    remotes = {'origin': 'git://git.gnome.org/pitivi'}
+    autoreconf = True
+    autoreconf_sh = 'sh autogen.sh'
+    commit = 'RELEASE-0_15_2'
+    deps = ['gnome-doc-utils', 'pygoocanvas', 'pygtk',
+            'gst-python', 'pyxdg', 'glade', 'gnonlin',
+            'frei0r-plugins']
+
+    files_lang = ['pitivi']
+    files_pitivi = ['lib/python/pitivi', 'share/pitivi', 'share/applications/pitivi.desktop']    

@@ -151,7 +151,8 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             for k,v in syms.iteritems():
                 if len(v) > 1:
                     dups[k] = v
-            m.warning ("The static library contains duplicated symbols")
+            if dups:
+                m.warning ("The static library contains duplicated symbols")
             for k, v in dups.iteritems():
                 m.message (k)  # symbol name
                 for l in v:

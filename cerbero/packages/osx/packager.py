@@ -23,9 +23,9 @@ import shutil
 from cerbero.config import Architecture, Platform
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
-from cerbero.errors import EmptyPackageError
+from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package, MetaPackage, SDKPackage, App,\
+from cerbero.packages.package import Package, MetaPackage, App,\
         PackageBase
 from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
@@ -228,7 +228,7 @@ class ProductPackage(PackagerBase):
 
         self._prepare_pack()
 
-        if isinstance(self.package, SDKPackage):
+        if isinstance(self.package, MetaPackage):
             packager = self._create_framework_bundle_packager()
             self._create_framework_bundle_layout(packager)
             self._create_framework_bundle_package(packager)
@@ -245,6 +245,7 @@ class ProductPackage(PackagerBase):
             paths.append(d_path)
 
         self.package.set_mode(PackageType.RUNTIME)
+        self._create_packages_dmg()
 
         if not keep_temp:
             shutil.rmtree(self.tmp)
@@ -325,6 +326,17 @@ class ProductPackage(PackagerBase):
                 self.packages_paths[PackageType.DEVEL][p] = paths[1]
             else:
                 self.empty_packages[PackageType.DEVEL].append(p)
+
+    def _create_packages_dmg(self):
+        paths = self.packages_paths[PackageType.RUNTIME].values()
+        dmg_file = os.path.join(self.output_dir,
+            self._package_name('-packages.dmg'))
+
+        # Create Disk Image
+        cmd = 'hdiutil create %s -ov' % dmg_file
+        for p in paths:
+            cmd += ' -srcfolder %s' % p
+        shell.call(cmd)
 
 
 class ApplicationPackage(PackagerBase):
@@ -426,7 +438,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
-        framework_name = self.package.ios_framework_library[0]
+        framework_name = self.package.osx_framework_library[0]
         self._prepare_pack()
         self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
         os.mkdir(self.fw_path)
@@ -442,8 +454,10 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self._copy_headers(files, version_dir)
         self._create_framework_headers(self.config.prefix,
                                        self.include_dirs, version_dir)
-        shutil.rmtree(os.path.join(version_dir, 'include'))
-        shutil.rmtree(os.path.join(version_dir, 'lib'))
+        if os.path.exists(os.path.join(version_dir, 'include')):
+            shutil.rmtree(os.path.join(version_dir, 'include'))
+        if os.path.exists(os.path.join(version_dir, 'lib')):
+            shutil.rmtree(os.path.join(version_dir, 'lib'))
         self._create_merged_lib(libname, files)
         self.package.packages = []
         self.fw_path = self.tmp
@@ -479,10 +493,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def _copy_headers(self, files, version_dir):
         # Get the list of headers
         incl_dir = os.path.join(self.config.prefix, 'include')
-        include_files = [os.path.join(incl_dir, x) for x in
-                         os.listdir(incl_dir) if x.endswith('.h')]
-        for d in self.include_dirs:
-            include_files += [x for x in files if d in x]
+        include_files = [x for x in files if incl_dir in x]
         self._copy_files (include_files, version_dir)
 
     def _create_framework_bundle_packager(self):

@@ -1,0 +1,16 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+
+class Recipe(recipe.Recipe):
+    name = 'frei0r-plugins'
+    version = '1.4'
+    licenses = [License.LGPL]
+    stype = SourceType.TARBALL
+    url = 'http://files.dyne.org/frei0r/releases/frei0r-plugins-1.4.tar.gz'
+
+    files_plugins = ['lib/frei0r-1']
+    files_devel = [
+            'lib/pkgconfig/frei0r.pc',
+            'include/frei0r.h',
+            ]
