@@ -7,7 +7,7 @@ class Recipe(custom.GStreamerStatic):
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
     extra_configure_options = '--enable-static --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2'
-    commit = 'upstream/1.0'
+    commit = 'upstream/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'jpeg', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',

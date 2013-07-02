@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --program-prefix= --disable-instrospection --disable-examples "
-    commit = 'upstream/1.0'
+    commit = 'upstream/master'
     deps = ['glib', 'gtk-doc-lite']
 
     files_bins = ['gst-inspect-1.0',
