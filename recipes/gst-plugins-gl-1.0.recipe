@@ -1,0 +1,32 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-gl-1.0'
+    version = '1.0'
+    licenses = [License.LGPLv2Plus]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = "--disable-examples "
+    commit = 'upstream/master'
+    deps = ['gstreamer', 'gst-plugins-base' ]
+
+    files_libs = ['libgstgl-1.0']
+
+    files_devel = ['include/gstreamer-1.0/gst/gl',
+                   'lib/pkgconfig/gstreamer-gl-1.0.pc']
+
+    files_lang = ['gst-plugins-gl-1.0']
+
+    files_plugins_gl = ['lib/gstreamer-1.0/libgstopengl%(mext)s']
+
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-gl'))
+        self.remotes['upstream'] = self.remotes['origin']
+
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += '--disable-gtk-doc '
+
