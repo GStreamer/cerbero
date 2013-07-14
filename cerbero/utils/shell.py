@@ -30,6 +30,7 @@ import shutil
 
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
+from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
 
@@ -39,6 +40,7 @@ TAR = 'tar'
 
 PLATFORM = system_info()[0]
 LOGFILE = None  # open('/tmp/cerbero.log', 'w+')
+DRY_RUN = False
 
 
 class StdOut:
@@ -76,7 +78,7 @@ def call(cmd, cmd_dir='.', fail=True):
     @type fail: bool
     '''
     try:
-        logging.info("Running command '%s'" % cmd)
+        m.message("Running command '%s'" % cmd)
         shell = True
         if PLATFORM == Platform.WINDOWS:
             # windows do not understand ./
@@ -89,10 +91,15 @@ def call(cmd, cmd_dir='.', fail=True):
             # Disable shell which uses cmd.exe
             shell = False
         stream = LOGFILE or sys.stdout
-        ret = subprocess.check_call(cmd, cwd=cmd_dir,
-                                    stderr=subprocess.STDOUT,
-                                    stdout=StdOut(stream),
-                                    env=os.environ.copy(), shell=shell)
+        if DRY_RUN:
+            # write to sdterr so it's filtered more easilly
+            m.error ("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+            ret = 0
+        else:
+            ret = subprocess.check_call(cmd, cwd=cmd_dir,
+                                       stderr=subprocess.STDOUT,
+                                       stdout=StdOut(stream),
+                                       env=os.environ.copy(), shell=shell)
     except subprocess.CalledProcessError:
         if fail:
             raise FatalError(_("Error running command: %s") % cmd)

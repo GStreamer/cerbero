@@ -45,7 +45,7 @@ class Oven (object):
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False):
+                 missing_files=False, dry_run=False):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -53,6 +53,7 @@ class Oven (object):
         self.force = force
         self.no_deps = no_deps
         self.missing_files = missing_files
+        shell.DRY_RUN = dry_run
 
     def start_cooking(self):
         '''
