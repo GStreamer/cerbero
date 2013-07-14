@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
 
     files_devel = ['bin/gtkdocize', 'share/aclocal/gtk-doc.m4',
-                   'share/gtk-doc/data/gtk-doc.make']
+                   'share/gtk-doc/data/gtk-doc.make',
+                   'share/gtk-doc/data/gtk-doc.notmpl.make']
 
     def prepare(self):
         self.remotes['origin'] = '%s/%s.git' % \
@@ -28,6 +29,8 @@ class Recipe(recipe.Recipe):
                     os.path.join(aclocal_dir, 'gtk-doc.m4'))
         shutil.copy(os.path.join(self.build_dir, 'gtk-doc.make'),
                     os.path.join(data_dir,  'gtk-doc.make'))
+        shutil.copy(os.path.join(self.build_dir, 'gtk-doc.notmpl.make'),
+                    os.path.join(data_dir,  'gtk-doc.notmpl.make'))
         gtkdocize = os.path.join(self.config.prefix, 'bin', 'gtkdocize')
         shutil.copy(os.path.join(self.build_dir, 'gtkdocize.in'), gtkdocize)
         replacements = {'@PACKAGE@': 'gtk-doc', '@VERSION@': self.version,
