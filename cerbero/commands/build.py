@@ -35,7 +35,10 @@ class Build(Command):
                 ArgparseArgument('--missing-files', action='store_true',
                     default=False,
                     help=_('prints a list of files installed that are '
-                           'listed in the recipe'))]
+                           'listed in the recipe')),
+                ArgparseArgument('--dry-run', action='store_true',
+                    default=False,
+                    help=_('only print commands instead of running them '))]
             if force is None:
                 args.append(
                     ArgparseArgument('--force', action='store_true',
@@ -58,15 +61,16 @@ class Build(Command):
         if self.no_deps is None:
             self.no_deps = args.no_deps
         self.runargs(config, args.recipe, args.missing_files, self.force,
-                     self.no_deps)
+                     self.no_deps, dry_run=args.dry_run)
 
     def runargs(self, config, recipes, missing_files=False, force=False,
-                no_deps=False, cookbook=None):
+                no_deps=False, cookbook=None, dry_run=False):
         if cookbook is None:
             cookbook = CookBook(config)
 
         oven = Oven(recipes, cookbook, force=self.force,
-                    no_deps=self.no_deps, missing_files=missing_files)
+                    no_deps=self.no_deps, missing_files=missing_files,
+                    dry_run=dry_run)
         oven.start_cooking()
 
 
