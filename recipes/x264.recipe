@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -32,3 +33,8 @@ class Recipe(recipe.Recipe):
                 self.configure_options += ' --disable-asm'
         if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
             self.new_env = {'AS': os.environ.get('GAS', '')}
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('x264', 125, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()

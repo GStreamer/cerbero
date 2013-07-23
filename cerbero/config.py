@@ -79,7 +79,7 @@ class Config (object):
                    'universal_archs', 'osx_target_sdk_version', 'variants',
                    'build_tools_prefix', 'build_tools_sources',
                    'build_tools_cache', 'home_dir', 'recipes_commits',
-                   'ios_platform']
+                   'ios_platform', 'extra_build_tools']
 
     def __init__(self):
         self._check_uninstalled()
@@ -288,6 +288,7 @@ class Config (object):
         self.set_property('build_tools_sources', None)
         self.set_property('build_tools_cache', None)
         self.set_property('recipes_commits', {})
+        self.set_property('extra_build_tools', {})
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
