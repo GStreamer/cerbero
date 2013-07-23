@@ -26,7 +26,7 @@ from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
 from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, MetaPackage, App,\
-        PackageBase
+        PackageBase, SDKPackage
 from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
     ApplicationBundlePackager
@@ -462,13 +462,20 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self.package.packages = []
         self.fw_path = self.tmp
         self._create_framework_bundle_package(packager)
+        self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
 
-        paths = [self._create_product(PackageType.DEVEL)]
-        if self.package.user_resources:
-            paths = [self._create_dmg (paths[0])]
+        if isinstance(self.package, SDKPackage):
+            pkg_path = [self._create_product(PackageType.DEVEL)]
+            if self.package.user_resources:
+                pkg_path = self._create_dmg (pkg_path,
+                    pkg_path.replace('.pkg', '.dmg'))
+        else:
+            pkg_path = self._create_dmg (self.fw_path,
+                os.path.join(output_dir, self._package_name('.dmg')))
+
         if not keep_temp:
             shutil.rmtree(self.tmp)
-        return paths
+        return [pkg_path]
 
     def _copy_files (self, files, root):
         for f in files:
@@ -518,8 +525,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         return '%s-%s-%s-%s%s' % (self.package.name, self.package.version,
                 self.config.target_platform, self.config.target_arch, suffix)
 
-    def _create_dmg(self, pkg_path):
-        dmg_file = pkg_path.replace('.pkg', '.dmg')
+    def _create_dmg(self, pkg_path, dmg_file):
         # Create a new folder with the pkg and the user resources
         dmg_dir = os.path.join(self.tmp, 'dmg')
         os.makedirs(dmg_dir)

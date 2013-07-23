@@ -56,6 +56,7 @@ class BuildTools (BootstraperBase):
                 not self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
+        self.BUILD_TOOLS += self.config.extra_build_tools
 
     def start(self):
         # Use a common prefix for the build tools for all the configurations
@@ -70,6 +71,7 @@ class BuildTools (BootstraperBase):
         config.build_tools_sources = self.config.build_tools_sources
         config.cache_file = self.config.build_tools_cache
         config.build_tools_cache = self.config.build_tools_cache
+        config.external_recipes = self.config.external_recipes
 
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
