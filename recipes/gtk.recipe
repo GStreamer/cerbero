@@ -54,13 +54,12 @@ class Recipe(recipe.Recipe):
 
 
     def _set_flags(self, module_path1=None, module_path2=None, theme_path=None):
-        self.config_sh = 'CFLAGS="%s" ./configure' % \
-                    self._gtk_flags(module_path1, module_path2, theme_path)
+        self.append_env['CFLAGS'] = self._gtk_flags(module_path1, module_path2, theme_path)
 
     def _gtk_flags(self, module_path1=None, module_path2=None, theme_path=None):
         flags = ''
         def escape(path):
-            return '\\\\\\\"%s\\\\\\\"' % path
+            return '\\"%s\\"' % path
         if module_path1 is not None:
             flags += ' -DGST_SDK_GTK_DISTRO_GTK_MODULE_PATH=%s' % escape(module_path1)
         if module_path2 is not None:
