@@ -8,10 +8,12 @@ class Recipe(recipe.Recipe):
     version = '0.0.0'
     licenses = [License.GPLv2]
     btype = BuildType.CUSTOM
-    remotes = {'origin': 'git://github.com/yuvi/gas-preprocessor.git'}
-    commit = 'f4a42dc077144c5b481ec4534a4c99d0808a9b2f'
+    remotes = {'origin': 'git://github.com/ylatuya/gas-preprocessor.git'}
+    commit = 'master'
 
     def install(self):
+        if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
+            os.makedirs(os.path.join(self.config.prefix, 'bin'))
         shutil.copy (os.path.join(self.build_dir, 'gas-preprocessor.pl'),
                      os.path.join(self.config.prefix, 'bin'))
         shell.call ('chmod +x %s' %
