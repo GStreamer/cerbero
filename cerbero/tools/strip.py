@@ -24,12 +24,17 @@ from cerbero.utils import shell
 class Strip(object):
     '''Wrapper for the strip tool'''
 
-    STRIP_CMD = 'strip'
+    STRIP_CMD = '$STRIP'
+    excludes = None
 
-    def __init__(self, config):
+    def __init__(self, config, excludes):
         self.config = config
+        self.excludes = excludes
 
     def strip_file(self, path):
+        for f in self.excludes:
+            if f in path:
+                return
         try:
             shell.call("%s %s". self._strip_cmd(), path)
         except:

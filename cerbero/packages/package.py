@@ -482,6 +482,10 @@ class App(PackageBase):
     @type wrapper: str
     @cvar strip: strip binaries for this package
     @type strip: bool
+    @cvar strip_dirs: directories to strip
+    @type strip: list
+    @cvar strip_excludes: files that won't be stripped
+    @type strip_excludes: list
     '''
 
     app_name = None
@@ -492,6 +496,8 @@ class App(PackageBase):
     wrapper = 'app_wrapper.tpl'
     resources_wix_installer = None
     strip = False
+    strip_dirs = ['bin']
+    strip_excludes = []
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)

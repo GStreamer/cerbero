@@ -75,9 +75,9 @@ class MergeModulePackager(PackagerBase):
                 if not os.path.exists(os.path.dirname(dst)):
                     os.makedirs(os.path.dirname(dst))
                 shutil.copy(src, dst)
-            s = strip.Strip(self.config)
-            s.strip_dir(os.path.join(tmpdir, 'bin'))
-            s.strip_dir(os.path.join(tmpdir, 'lib'))
+            s = strip.Strip(self.config, self.package.strip_excludes)
+            for p in self.package.strip_dirs:
+                s.strip_dir(os.path.join(tmpdir, p))
 
 
         mergemodule = MergeModule(self.config, files_list, self.package)

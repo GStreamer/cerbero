@@ -394,11 +394,10 @@ class ApplicationPackage(PackagerBase):
 
     def _strip_binaries(self):
         if self.package.strip:
-            bin_dir = os.path.join(self.appdir, 'Contents', 'Home', 'bin')
-            lib_dir = os.path.join(self.appdir, 'Contents', 'Home', 'lib')
-            s = strip.Strip(self.config)
-            s.strip_dir(bin_dir)
-            s.strip_dir(lib_dir)
+            for f in self.package.strip_dirs:
+                s_dir = os.path.join(self.appdir, 'Contents', 'Home', f)
+                s = strip.Strip(self.config, self.excludes)
+                s.strip_dir(s_dir)
 
     def _relocate_binaries(self):
         prefix = self.config.prefix
