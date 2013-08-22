@@ -36,7 +36,7 @@ class Strip(object):
             if f in path:
                 return
         try:
-            shell.call("%s %s". self._strip_cmd(), path)
+            shell.call("%s %s" % (self._strip_cmd(), path))
         except:
             pass
 
