@@ -61,13 +61,12 @@ class Recipe(recipe.Recipe):
     files_lang = ['glib20']
 
     def _set_gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
-        self.config_sh = 'CFLAGS="%s" ./configure' % \
-            self._gio_flags(path1, path2, use_old_uri_scheme)
+        self.append_env['CFLAGS'] = self._gio_flags(path1, path2, use_old_uri_scheme)
 
     def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
         flags = ''
         def escape(path):
-            return '\\\\\\\"%s\\\\\\\"' % path
+            return '\\"%s\\"' % path
         if path1 is not None:
             flags += ' -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=%s' % escape(path1)
         if path2 is not None:
