@@ -27,6 +27,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstcutter',
              'libgstdebug',
              'libgstdeinterlace',
+             'libgstdtmf',
              'libgsteffectv',
              'libgstequalizer',
              'libgstgdkpixbuf',

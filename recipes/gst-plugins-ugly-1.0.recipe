@@ -16,6 +16,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstamrnb%(mext)s',
              'lib/gstreamer-1.0/libgstamrwbdec%(mext)s',
              'lib/gstreamer-1.0/libgstasf%(mext)s',
+             'lib/gstreamer-1.0/libgstdvdsub%(mext)s',
+             'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstmad%(mext)s',
              'lib/gstreamer-1.0/libgstmpeg2dec%(mext)s',
              'lib/gstreamer-1.0/libgstxingmux%(mext)s',
@@ -24,7 +26,6 @@ class Recipe(recipe.Recipe):
     ]
 
     files_plugins_dvd = [
-             'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstdvdread%(mext)s',
     ]
 

@@ -16,6 +16,8 @@ class Recipe(custom.GStreamerStatic):
              'libgstamrnb',
              'libgstamrwbdec',
              'libgstasf',
+             'libgstdvdsub',
+             'libgstdvdlpcmdec',
              'libgstmad',
              'libgstmpeg2dec',
              'libgstxingmux',
@@ -24,7 +26,6 @@ class Recipe(custom.GStreamerStatic):
     ]
 
     files_plugins_dvd_devel = [
-             'libgstdvdlpcmdec',
              'libgstdvdread',
     ]
 

@@ -15,40 +15,55 @@ class Recipe(recipe.Recipe):
     files_lang = ['gst-plugins-bad-1.0']
 
     files_plugins_effects = [
+             'lib/gstreamer-1.0/libgstaccurip%(mext)s',
+             'lib/gstreamer-1.0/libgstaiff%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiofxbad%(mext)s',
              'lib/gstreamer-1.0/libgstautoconvert%(mext)s',
              'lib/gstreamer-1.0/libgstbayer%(mext)s',
              'lib/gstreamer-1.0/libgstcoloreffects%(mext)s',
+             'lib/gstreamer-1.0/libgstdebugutilsbad%(mext)s',
              'lib/gstreamer-1.0/libgstfieldanalysis%(mext)s',
+             'lib/gstreamer-1.0/libgstfreeverb%(mext)s',
              'lib/gstreamer-1.0/libgstfrei0r%(mext)s',
              'lib/gstreamer-1.0/libgstgaudieffects%(mext)s',
              'lib/gstreamer-1.0/libgstgeometrictransform%(mext)s',
              'lib/gstreamer-1.0/libgstinterlace%(mext)s',
+             'lib/gstreamer-1.0/libgstivtc%(mext)s',
              'lib/gstreamer-1.0/libgstliveadder%(mext)s',
              'lib/gstreamer-1.0/libgstrawparse%(mext)s',
              'lib/gstreamer-1.0/libgstremovesilence%(mext)s',
              'lib/gstreamer-1.0/libgstsegmentclip%(mext)s',
              'lib/gstreamer-1.0/libgstsmooth%(mext)s',
              'lib/gstreamer-1.0/libgstspeed%(mext)s',
+             'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
+             'lib/gstreamer-1.0/libgstyadif%(mext)s',
     ]
 
     files_plugins_codecs = [
              'lib/gstreamer-1.0/libgstadpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstadpcmenc%(mext)s',
-             'lib/gstreamer-1.0/libgstdtmf%(mext)s',
+             'lib/gstreamer-1.0/libgstdashdemux%(mext)s',
              'lib/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
              'lib/gstreamer-1.0/libgstdvdspu%(mext)s',
              'lib/gstreamer-1.0/libgstfragmented%(mext)s',
              'lib/gstreamer-1.0/libgstid3tag%(mext)s',
+             'lib/gstreamer-1.0/libgstkate%(mext)s',
+             'lib/gstreamer-1.0/libgstmidi%(mext)s',
+             'lib/gstreamer-1.0/libgstmxf%(mext)s',
              'lib/gstreamer-1.0/libgstopus%(mext)s',
              'lib/gstreamer-1.0/libgstpcapparse%(mext)s',
              'lib/gstreamer-1.0/libgstpnm%(mext)s',
+             'lib/gstreamer-1.0/libgstrfbsrc%(mext)s',
              'lib/gstreamer-1.0/libgstschro%(mext)s',
              'lib/gstreamer-1.0/libgstsiren%(mext)s',
+             'lib/gstreamer-1.0/libgstsmoothstreaming%(mext)s',
              'lib/gstreamer-1.0/libgstsubenc%(mext)s',
              'lib/gstreamer-1.0/libgstvideoparsersbad%(mext)s',
              'lib/gstreamer-1.0/libgsty4mdec%(mext)s',
              'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
              '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
+             '%(sdir)s/libgsturidownloader-1.0%(sext)s',
+             '%(sdir)s/libgstmpegts-1.0%(sext)s',
     ]
 
     platform_files_plugins_codecs = {
@@ -96,6 +111,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstdvb%(mext)s',
             ],
         Platform.WINDOWS: [
+             'lib/gstreamer-1.0/libgstwinscreencap%(mext)s',
             ]
     }
 
@@ -108,6 +124,7 @@ class Recipe(recipe.Recipe):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
+             'lib/gstreamer-1.0/libgstwasapi%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
@@ -117,12 +134,12 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
              'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
-             '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
+             '%(sdir)s/libgstegl-1.0%(sext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
              'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
-             '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
+             '%(sdir)s/libgstegl-1.0%(sext)s',
             ]
     }
 

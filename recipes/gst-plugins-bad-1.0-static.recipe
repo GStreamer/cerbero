@@ -13,34 +13,48 @@ class Recipe(custom.GStreamerStatic):
             'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch' ]
 
     files_plugins_effects_devel = [
+             'libgstaccurip',
+             'libgstaiff',
+             'libgstaudiofxbad',
              'libgstautoconvert',
              'libgstbayer',
              'libgstcoloreffects',
+             'libgstdebugutilsbad',
              'libgstfieldanalysis',
+             'libgstfreeverb',
              'libgstfrei0r',
              'libgstgaudieffects',
              'libgstgeometrictransform',
              'libgstinterlace',
+             'libgstivtc',
              'libgstliveadder',
              'libgstrawparse',
              'libgstremovesilence',
              'libgstsegmentclip',
              'libgstsmooth',
              'libgstspeed',
+             'libgstvideofiltersbad',
+             'libgstyadif',
     ]
 
     files_plugins_codecs_devel = [
              'libgstadpcmdec',
              'libgstadpcmenc',
+             'libgstdashdemux',
              'libgstdvbsuboverlay',
              'libgstdvdspu',
              'libgstfragmented',
              'libgstid3tag',
+             'libgstkate',
+             'libgstmidi',
+             'libgstmxf',
              'libgstopus',
              'libgstpcapparse',
              'libgstpnm',
+             'libgstrfbsrc',
              'libgstschro',
              'libgstsiren',
+             'libgstsmoothstreaming',
              'libgstsubenc',
              'libgstvideoparsersbad',
              'libgsty4mdec',
@@ -90,6 +104,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstdvb',
             ],
         Platform.WINDOWS: [
+             'libgstwinscreencap',
             ]
     }
 
@@ -102,6 +117,7 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
+             'libgstwasapi',
             ],
         Platform.DARWIN: [
              'libgstapplemedia',
