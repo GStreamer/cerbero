@@ -118,7 +118,10 @@ class Recipe(custom.GStreamerStatic):
              ],
         Platform.WINDOWS: [
              'libgstwinscreencap',
-             ]
+             ],
+        Platform.DARWIN: [
+             'libgstosxvideosrc',
+            ]
         }
 
     platform_files_plugins_sys_devel = {
