@@ -131,6 +131,9 @@ class Recipe(recipe.Recipe):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-0.10/libgstwinscreencap%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-0.10/libgstosxvideosrc%(mext)s',
             ]
     }
 
