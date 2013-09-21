@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'glib-networking'
     version = '2.34.2'
     licenses = [License.LGPLv2Plus]
-    configure_options = "--without-ca-certificates"
+    configure_options = "--without-ca-certificates --enable-more-warnings"
     deps = ['glib', 'gnutls']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
