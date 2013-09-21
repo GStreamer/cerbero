@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gnonlin-1.0'
+    version = '1.1.90'
+    licenses = [License.LGPLv2Plus]
+    commit = 'upstream/master'
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = "--disable-examples "
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
+
+    files_plugins_gnl = ['lib/gstreamer-1.0/libgnl%(mext)s']
+
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gnonlin'))
+        self.remotes['upstream'] = self.remotes['origin']
+
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc --disable-docbook'
+
