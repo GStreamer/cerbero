@@ -128,7 +128,10 @@ class OSXUniversalGenerator(object):
                         action = ft[1]
                     break
             if not action:
-                raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
+                if ftype.startswith('ERROR') and f.endswith('.h'):
+                    action = 'copy'
+                else:
+                    raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
             actions.append(action)
         if len(actions) == 0:
             return 'skip' #we should skip this one, the file doesn't exist
