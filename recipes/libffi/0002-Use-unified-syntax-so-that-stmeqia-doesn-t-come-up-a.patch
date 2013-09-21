@@ -1,0 +1,43 @@
+From db3226466abceea317e6692300c0ddbf881e4bb5 Mon Sep 17 00:00:00 2001
+From: Zachary Waldowski <zwaldowski@gmail.com>
+Date: Fri, 27 Apr 2012 11:00:28 -0400
+Subject: [PATCH 2/5] Use unified syntax so that 'stmeqia' doesn't come up as
+ undefined on some newer assemblers.
+
+---
+ src/arm/sysv.S | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/src/arm/sysv.S b/src/arm/sysv.S
+index fb38cd6..6326836 100644
+--- a/src/arm/sysv.S
++++ b/src/arm/sysv.S
+@@ -109,6 +109,7 @@
+ #define UNWIND @
+ #endif	
+ 
++.syntax unified
+ 	
+ #if defined(__thumb__) && !defined(__THUMB_INTERWORK__)
+ .macro	ARM_FUNC_START name
+@@ -228,7 +229,7 @@ ARM_FUNC_START ffi_call_SYSV
+ #if defined(__SOFTFP__) || defined(__ARM_EABI__)
+ 	cmpne	r3, #FFI_TYPE_DOUBLE
+ #endif
+-	stmeqia	r2, {r0, r1}
++	stmiaeq	r2, {r0, r1}
+ 
+ #if !defined(__SOFTFP__) && !defined(__ARM_EABI__)
+ 	beq	LSYM(Lepilogue)
+@@ -410,7 +411,7 @@ LSYM(Lbase_args):
+ 	beq	LSYM(Lepilogue_vfp)
+ 
+ 	cmp	r3, #FFI_TYPE_SINT64
+-	stmeqia	r2, {r0, r1}
++	stmiaeq	r2, {r0, r1}
+ 	beq	LSYM(Lepilogue_vfp)
+ 
+ 	cmp	r3, #FFI_TYPE_FLOAT
+-- 
+1.8.4
+

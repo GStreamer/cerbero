@@ -1,0 +1,35 @@
+From 249c079ebaa53ae9b5ff1521a9af7b055de3eead Mon Sep 17 00:00:00 2001
+From: Zachary Waldowski <zwaldowski@gmail.com>
+Date: Fri, 27 Apr 2012 11:01:38 -0400
+Subject: [PATCH 3/5] Force 4-byte alignment for ARM functions so that LLVM's
+ assembler doesn't complain.
+
+---
+ src/arm/sysv.S | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/arm/sysv.S b/src/arm/sysv.S
+index 6326836..62cffaa 100644
+--- a/src/arm/sysv.S
++++ b/src/arm/sysv.S
+@@ -114,7 +114,7 @@
+ #if defined(__thumb__) && !defined(__THUMB_INTERWORK__)
+ .macro	ARM_FUNC_START name
+ 	.text
+-	.align 0
++	.align 4
+ 	.thumb
+ 	.thumb_func
+ #ifdef __APPLE__
+@@ -137,7 +137,7 @@ _L__\name:
+ #else
+ .macro	ARM_FUNC_START name
+ 	.text
+-	.align 0
++	.align 4
+ 	.arm
+ #ifdef __APPLE__
+ 	ENTRY($0)
+-- 
+1.8.4
+
