@@ -37,7 +37,7 @@ gst_ios_init (void)
 
   /* Lower the ranks of filesrc and giosrc so iosavassetsrc is
    * tried first in gst_element_make_from_uri() for file:// */
-  reg = gst_registry_get_default();
+  reg = gst_registry_get();
   plugin = gst_registry_lookup_feature(reg, "filesrc");
   if (plugin)
     gst_plugin_feature_set_rank(plugin, GST_RANK_SECONDARY);
