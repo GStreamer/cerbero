@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
             self.autoreconf = True
             self.configure_options += ' --enable-fpm=default '
             self.new_env = {'CCAS': os.environ['GAS']}
+            self.new_env['CCAS'] += ' -no-integrated-as '
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
             if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
