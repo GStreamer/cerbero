@@ -5,15 +5,12 @@ class Recipe(recipe.Recipe):
     version = '0.7.4'
     licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
+    autoreconf = True
 
     files_libs = ['liba52']
     files_bins = ['a52dec']
     files_devel = ['include/a52dec']
 
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.autoreconf = True
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
-        if self.config.target_platform == Platform.IOS:
-            self.autoreconf = True
