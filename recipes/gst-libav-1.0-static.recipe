@@ -19,6 +19,10 @@ class Recipe(custom.GStreamerStatic):
     files_plugins_codecs_restricted_devel = ['libgstlibav']
 
     def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         if self.config.target_platform == Platform.DARWIN:
