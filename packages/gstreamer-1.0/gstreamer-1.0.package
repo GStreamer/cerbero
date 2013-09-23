@@ -67,4 +67,4 @@ class SDKPackage(package.SDKPackage):
             self.packages = [ x for x in self.packages if x[0] not in p]
         if self.config.target_platform == Platform.IOS:
             self.resources_postinstall = 'post_install_ios'
-            self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']
+            #self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']
