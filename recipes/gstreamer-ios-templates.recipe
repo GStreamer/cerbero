@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from collections import defaultdict
 from cerbero.utils import shell
-from custom import list_gstreamer_plugins_by_category
+from custom import list_gstreamer_1_0_plugins_by_category
 
 DECLARE_PLUGIN_TPL = 'GST_PLUGIN_STATIC_DECLARE(%s);'
 REGISTER_PLUGIN_TPL = '    GST_PLUGIN_STATIC_REGISTER(%s);'
@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
         shell.copy_dir(os.path.join(self.config.data_dir, 'xcode',
                                     'templates', 'ios'), share_dir)
 
-        plugins, replacements = list_gstreamer_plugins_by_category(self.config)
+        plugins, replacements = list_gstreamer_1_0_plugins_by_category(self.config)
 
         decls = []
         regs = []
