@@ -10,7 +10,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = "--disable-examples "
     make_check = None
     commit = 'upstream/master'
-    deps = ['gstreamer', 'gst-plugins-base' ]
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
     files_plugins_devel = ['libgstopengl']
 

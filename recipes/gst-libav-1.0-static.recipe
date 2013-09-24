@@ -13,7 +13,7 @@ class Recipe(custom.GStreamerStatic):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     extra_configure_options = "--enable-static --enable-lgpl --disable-example"
-    commit = 'upstream/master'
+    commit = 'origin/1.2'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
     files_plugins_codecs_restricted_devel = ['libgstlibav']
