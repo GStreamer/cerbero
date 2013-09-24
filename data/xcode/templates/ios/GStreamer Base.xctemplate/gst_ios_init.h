@@ -11,6 +11,8 @@ G_BEGIN_DECLS
 
 @GST_IOS_PLUGINS_CATEGORIES@
 
+//#define GST_IOS_GIO_MODULE_GNUTLS
+
 void gst_ios_init ();
 
 G_END_DECLS
