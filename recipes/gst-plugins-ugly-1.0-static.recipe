@@ -38,6 +38,11 @@ class Recipe(custom.GStreamerStatic):
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
+        if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
+            for d in ['libdvdread']:
+                self.deps.remove(d)
+            self.files_plugins_dvd_devel.remove('libgstdvdread')
+
         custom.GStreamerStatic.prepare(self)
 
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-ugly'))

@@ -40,5 +40,11 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
+
+        if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
+            for d in ['libdvdread']:
+                self.deps.remove(d)
+            self.files_plugins_dvd.remove('lib/gstreamer-1.0/libgstdvdread%(mext)s')
+
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
