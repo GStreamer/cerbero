@@ -143,7 +143,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += \
                 ' --disable-cog --disable-sdl '\
                 '--disable-cdaudio'
-        if self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
             for d in ['libdvdnav']:
                 self.deps.remove(d)
             self.files_plugins_dvd_devel.remove('libgstresindvd')
@@ -170,5 +170,8 @@ class Recipe(custom.GStreamerStatic):
             'lib/libgstphotography-1.0.a']
 
         self.platform_files_plugins_sys_devel[Platform.ANDROID] += [
+            'lib/libgstegl-1.0.la',
+            'lib/libgstegl-1.0.a']
+        self.platform_files_plugins_sys_devel[Platform.IOS] += [
             'lib/libgstegl-1.0.la',
             'lib/libgstegl-1.0.a']
