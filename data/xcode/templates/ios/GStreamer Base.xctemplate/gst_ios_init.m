@@ -2,6 +2,11 @@
 
 @GST_IOS_PLUGINS_DECLARE@
 
+#if defined(GST_IOS_GIO_MODULE_GNUTLS)
+  #include <gio/gio.h>
+  G_IO_MODULE_DECLARE(gnutls);
+#endif
+
 void
 gst_ios_init (void)
 {
@@ -34,6 +39,9 @@ gst_ios_init (void)
 
   @GST_IOS_PLUGINS_REGISTER@
 
+#if defined(GST_IOS_GIO_MODULE_GNUTLS)
+  G_IO_MODULE_LOAD(gnutls);
+#endif
 
   /* Lower the ranks of filesrc and giosrc so iosavassetsrc is
    * tried first in gst_element_make_from_uri() for file:// */
