@@ -25,10 +25,8 @@ class Recipe(recipe.Recipe):
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
 
-       # From https://github.com/zwaldowski/libffi to fix compilation with iOS SDK 7.0
         if self.config.target_platform == Platform.IOS:
-            self.patches = ['libffi/0002-Use-unified-syntax-so-that-stmeqia-doesn-t-come-up-a.patch',
-                            'libffi/0003-Force-4-byte-alignment-for-ARM-functions-so-that-LLV.patch',
-                            'libffi/0004-Some-modern-unified-syntax-assemblers-don-t-like-mac.patch',
-                            'libffi/0005-Use-a-define-macro-for-ARM_FUNC_START-due-to-changes.patch',
-                           ]
+            self.new_env = {'CC': os.environ['CC']}
+            self.new_env['CC'] += ' -no-integrated-as '
+            self.new_env = {'CCAS': os.environ['CC']}
+            self.new_env['CCAS'] += ' -no-integrated-as '
