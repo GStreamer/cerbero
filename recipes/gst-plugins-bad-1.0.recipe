@@ -131,7 +131,7 @@ class Recipe(recipe.Recipe):
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
-             'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
+             #'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
              'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
              '%(sdir)s/libgstegl-1.0%(sext)s',
             ],
