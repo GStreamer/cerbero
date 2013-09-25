@@ -22,6 +22,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
     licenses = [License.BSD_like]
+    patches = []
 
     files_libs = ['libffi']
     files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']
@@ -53,6 +54,7 @@ class Recipe(recipe.Recipe):
             self.new_env['CC'] += ' -no-integrated-as '
             self.new_env = {'CCAS': os.environ['CC']}
             self.new_env['CCAS'] += ' -no-integrated-as '
+            self.patches += ['libffi/01-arm-ios-alignment.patch']
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
