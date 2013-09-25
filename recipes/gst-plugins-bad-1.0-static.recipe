@@ -172,6 +172,3 @@ class Recipe(custom.GStreamerStatic):
         self.platform_files_plugins_sys_devel[Platform.ANDROID] += [
             'lib/libgstegl-1.0.la',
             'lib/libgstegl-1.0.a']
-        self.platform_files_plugins_sys_devel[Platform.IOS] += [
-            'lib/libgstegl-1.0.la',
-            'lib/libgstegl-1.0.a']
