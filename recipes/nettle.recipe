@@ -10,7 +10,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '2.5'
+    version = '2.7.1'
+    stype = SourceType.TARBALL
+    url = 'http://www.lysator.liu.se/~nisse/archive/nettle-2.7.1.tar.gz'
+
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--enable-shared'
     deps = ['gmp']
