@@ -17,4 +17,4 @@ class Package(package.Package):
 
     files = ['gst-editing-services-1.0',
              'gnonlin-1.0']
-    files_devel = ['gnonlin-static-1.0']
+    files_devel = ['gnonlin-1.0-static']
