@@ -158,8 +158,17 @@ class Recipe(custom.GStreamerStatic):
         self.files_plugins_codecs_devel += [
             'lib/libgstcodecparsers-1.0.la',
             'lib/libgstcodecparsers-1.0.a',
+            'lib/libgsturidownloader-1.0.la',
+            'lib/libgsturidownloader-1.0.a']
+        self.files_plugins_codecs_restricted_devel += [
+            'lib/libgstmpegts-1.0.la',
+            'lib/libgstmpegts-1.0.a']
+        self.files_plugins_capture_devel += [
             'lib/libgstbasecamerabinsrc-1.0.la',
             'lib/libgstbasecamerabinsrc-1.0.a',
             'lib/libgstphotography-1.0.la',
             'lib/libgstphotography-1.0.a']
 
+        self.platform_files_plugins_sys_devel[Platform.ANDROID] += [
+            'lib/libgstegl-1.0.la',
+            'lib/libgstegl-1.0.a']

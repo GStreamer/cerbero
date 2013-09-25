@@ -62,7 +62,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
              '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
              '%(sdir)s/libgsturidownloader-1.0%(sext)s',
-             '%(sdir)s/libgstmpegts-1.0%(sext)s',
     ]
 
     platform_files_plugins_codecs = {
@@ -83,6 +82,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstmpegpsmux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegtsmux%(mext)s',
+             '%(sdir)s/libgstmpegts-1.0%(sext)s',
     ]
 
     files_plugins_dvd = [
