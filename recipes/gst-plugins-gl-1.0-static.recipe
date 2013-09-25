@@ -9,7 +9,7 @@ class Recipe(custom.GStreamerStatic):
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     extra_configure_options = "--disable-examples "
     make_check = None
-    commit = 'upstream/master'
+    commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
     files_plugins_devel = ['libgstopengl']
