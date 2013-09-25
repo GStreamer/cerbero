@@ -90,6 +90,8 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
+            elif arch in [Architecture.ARM, Architecture.ARMv7]:
+                arch = 'arm'
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
             extra_flags = ''
             if self.config.target_platform == Platform.IOS:
