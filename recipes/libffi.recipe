@@ -1,5 +1,20 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+import glob
 
+FFI_H_UNVERSAL='''\
+#ifdef __i386__
+#include "i386/ffi.h"
+#elif defined(__ppc__)
+#include "ppc/ffi.h"
+#elif defined(__x86_64__)
+#include "x86_64/ffi.h"
+#elif defined(__arm__)
+#include "arm/ffi.h"
+#else
+#error "Unsupported Architecture"
+#endif
+'''
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
@@ -9,24 +24,66 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.0.13', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
+            arch = self.config.target_arch
             if self.config.target_arch == Architecture.X86_64:
                 dir = 'x86_64-apple-darwin*'
             elif self.config.target_arch == Architecture.X86:
                 dir = 'i386-apple-darwin*'
+                arch = 'i386'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
             elif self.config.target_arch == Architecture.ARMv7:
                 dir = 'arm-apple-darwin*'
+                arch = 'arm'
+
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', arch, 'ffi.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', arch, 'ffitarget.h'))
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
+        else:
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', 'ffitarget.h'))
 
         if self.config.target_platform == Platform.IOS:
             self.new_env = {'CC': os.environ['CC']}
             self.new_env['CC'] += ' -no-integrated-as '
             self.new_env = {'CCAS': os.environ['CC']}
             self.new_env['CCAS'] += ' -no-integrated-as '
+
+    def post_install(self):
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            # For the universal build we need to ship ffi.h of both
+            # architectures in a subfolder and include the correct one depending
+            # on the compiler architecture
+            arch = self.config.target_arch
+            if self.config.target_arch == Architecture.X86_64:
+                dir = 'x86_64-apple-darwin*'
+            elif self.config.target_arch == Architecture.X86:
+                dir = 'i386-apple-darwin*'
+                arch = 'i386'
+            elif self.config.target_arch == Architecture.PPC:
+                dir = 'powerpc-apple-darwin*'
+            elif self.config.target_arch == Architecture.ARMv7:
+                dir = 'arm-apple-darwin*'
+                arch = 'arm'
+
+            arch_dir = os.path.join(self.config.prefix, 'lib', 'libffi-3.0.13',
+                                     'include', arch)
+            if not os.path.exists(arch_dir):
+                os.makedirs(arch_dir)
+
+
+            replacements = {'#include <ffitarget.h>': '#include "ffitarget.h"'}
+            shell.replace(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffi.h'))[0], replacements)
+
+            shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffi.h'))[0],
+                        os.path.join(arch_dir, 'ffi.h'))
+            shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffitarget.h'))[0],
+                        os.path.join(arch_dir, 'ffitarget.h'))
+            with open(os.path.join(self.config.prefix, 'lib', 'libffi-3.0.13',
+                                   'include', 'ffi.h'), 'w+') as f:
+                f.write(FFI_H_UNVERSAL)
