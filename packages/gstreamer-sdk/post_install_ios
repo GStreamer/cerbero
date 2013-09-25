@@ -1,4 +1,0 @@
-#!/bin/sh
-
-mkdir -p ~/Library/Developer/Xcode/Templates/
-cp -r ~/Library/Developer/GStreamer/iPhone.sdk/Templates/* ~/Library/Developer/Xcode/Templates/
