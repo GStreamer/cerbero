@@ -87,12 +87,13 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --with-libiconv=gnu'
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
+
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
             elif arch in [Architecture.ARM, Architecture.ARMv7]:
                 arch = 'arm'
-            self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', arch, 'glibconfig.h'))
             extra_flags = ''
             if self.config.target_platform == Platform.IOS:
                 # Disable mac OS X specifics
