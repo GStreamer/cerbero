@@ -524,6 +524,11 @@ class App(PackageBase):
             packages_deps = list(set(packages_deps))
             for package in packages_deps:
                 files.extend(package.files_list())
+            # Also include all the libraries provided by the recipes we depend
+            # on.
+            for recipe in self.cookbook.list_recipe_deps(self.app_recipe):
+                files.extend(recipe.libraries())
+
         files.extend(self._app_recipe.files_list())
         files.sort()
         return files
