@@ -21,7 +21,7 @@ gst_ios_init (void)
   g_setenv ("TEMP", tmp_dir, TRUE);
   g_setenv ("TMPDIR", tmp_dir, TRUE);
   g_setenv ("XDG_RUNTIME_DIR", resources_dir, TRUE);
-  g_setenv ("XDG_CACHE_DIR", cache_dir, TRUE);
+  g_setenv ("XDG_CACHE_HOME", cache_dir, TRUE);
     
   g_setenv ("HOME", docs_dir, TRUE);
   g_setenv ("XDG_DATA_DIRS", resources_dir, TRUE);
