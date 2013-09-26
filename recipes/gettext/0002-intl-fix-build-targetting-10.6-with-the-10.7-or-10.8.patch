@@ -1,0 +1,37 @@
+From 30ce36dc44e069812bf389e561ec3765399c1457 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 7 May 2013 13:20:14 +0200
+Subject: [PATCH] intl: fix build targetting 10.6 with the 10.7 or 10.8 SDK
+
+10.7 and 10.8 defines unconditionally PTHREAD_RECURSIVE_MUTEX_INITIALIZER
+and PTHREAD_ERRORCHECK_MUTEX_INITIALIZER which where not defined in 10.6.
+Targetting 10.6 with -mmacosx-version-min=10.6 with the newer SDK leads
+to an abort in nl_load_domain
+references:
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=51906
+https://trac.adium.im/ticket/15996#comment:16
+---
+ gettext-runtime/intl/lock.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/gettext-runtime/intl/lock.h b/gettext-runtime/intl/lock.h
+index 5fcb984..658a7b4 100644
+--- a/gettext-runtime/intl/lock.h
++++ b/gettext-runtime/intl/lock.h
+@@ -89,6 +89,13 @@
+ 
+ # include <pthread.h>
+ 
++#ifdef __APPLE__
++#if MAC_OS_X_VERSION_MIN_REQUIRED <= MAC_OS_X_VERSION_10_6
++#undef PTHREAD_RECURSIVE_MUTEX_INITIALIZER
++#undef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER
++#endif
++#endif
++
+ # ifdef __cplusplus
+ extern "C" {
+ # endif
+-- 
+1.8.4
+

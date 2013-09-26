@@ -3,10 +3,14 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gettext'
-    version = '0.18.1.1+2012-01-26'
+    version = '0.18.3.1'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.3.1.tar.gz'
     srcdir = 'gettext-runtime'
+    patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
+               'gettext/0002-intl-fix-build-targetting-10.6-with-the-10.7-or-10.8.patch']
     platform_deps = {
         Platform.DARWIN:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
@@ -21,8 +25,5 @@ class Recipe(recipe.Recipe):
         self.make_install = 'cd %s && make PACKAGE=gettext-tools install' % intl_path
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-threads=win32'
-        elif self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
-            self.autoreconf_sh = 'cd .. && ./autogen.sh --quick --skip-gnulib'
         if self.config.target_platform != Platform.LINUX:
             self.runtime_dep = True
