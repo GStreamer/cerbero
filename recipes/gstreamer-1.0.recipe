@@ -84,8 +84,7 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             elif arch in [Architecture.ARM, Architecture.ARMv7]:
                 arch = 'arm'
-            self.files_devel.append(os.path.join('include', 'gstreamer-1.0', 'gst', arch, 'gstconfig.h'))
-
+            self.files_devel.append(os.path.join('include', 'gstreamer-1.0', 'gst', '*', 'gstconfig.h'))
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:

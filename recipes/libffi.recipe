@@ -41,8 +41,8 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', arch, 'ffi.h'))
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', arch, 'ffitarget.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', '*', 'ffi.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', '*', 'ffitarget.h'))
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
