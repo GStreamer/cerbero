@@ -1,0 +1,31 @@
+From 1e3c93f9fcf473eaaf772a352c4db0e59b9f1ea4 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 15 Jan 2013 11:41:52 +0100
+Subject: [PATCH] stdint: fix build with Android's Bionic fox x86
+
+* lib/stdint.in.h: fix check to test if included-fixed/sys/types.h
+was already included as _SSIZE_T_DEFINED_ might also be defined
+in include/machine/_types.h, which is included by stdio.h
+
+Signed-off-by: Eric Blake <eblake@redhat.com>
+---
+ ChangeLog       | 7 +++++++
+ lib/stdint.in.h | 2 +-
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/srclib/stdint.in.h b/srclib/stdint.in.h
+index e1108c5..1896015 100644
+--- a/srclib/stdint.in.h
++++ b/srclib/stdint.in.h
+@@ -39,7 +39,7 @@
+    Ideally we should test __BIONIC__ here, but it is only defined after
+    <sys/cdefs.h> has been included; hence test __ANDROID__ instead.  */
+ #if defined __ANDROID__ \
+-    && defined _SYS_TYPES_H_ && !defined _SSIZE_T_DEFINED_
++    && defined _SYS_TYPES_H_ && !defined __need_size_t
+ # @INCLUDE_NEXT@ @NEXT_STDINT_H@
+ #else
+ 
+-- 
+1.8.4
+

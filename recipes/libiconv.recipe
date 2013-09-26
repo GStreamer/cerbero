@@ -3,9 +3,17 @@
 
 class Recipe(recipe.Recipe):
     name = 'libiconv'
-    version = '1.14+2012-07-01'
+    version = '1.14'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz'
+    patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
+               'libiconv/0002-stdint-Add-support-for-Android.patch',
+               'libiconv/0004-stdint-Improve-support-for-Android.patch',
+               'libiconv/0005-stdint-fix-build-with-Android-s-Bionic-fox-x86.patch',]
+               
+
     configure_options = '--disable-nls --enable-static'
     platform_deps = {Platform.WINDOWS: ['gettext']}
     autoreconf_sh = './autogen.sh --skip-gnulib && autoreconf -fiv'
