@@ -396,7 +396,7 @@ class ApplicationPackage(PackagerBase):
         if self.package.strip:
             for f in self.package.strip_dirs:
                 s_dir = os.path.join(self.appdir, 'Contents', 'Home', f)
-                s = strip.Strip(self.config, self.excludes)
+                s = strip.Strip(self.config, self.package.strip_excludes)
                 s.strip_dir(s_dir)
 
     def _relocate_binaries(self):
