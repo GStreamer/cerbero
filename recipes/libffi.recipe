@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libffi'
     version = '3.0.13'
     stype = SourceType.TARBALL
-    url = 'ftp://sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
+    url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']
