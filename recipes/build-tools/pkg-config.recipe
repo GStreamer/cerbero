@@ -3,8 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'pkg-config'
-    version = '0.27'
+    version = '0.28'
     licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url='http://pkgconfig.freedesktop.org/releases/pkg-config-0.28.tar.gz'
     configure_options = '--with-internal-glib'
 
     files_bins = ['pkg-config']
