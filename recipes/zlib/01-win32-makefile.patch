@@ -1,0 +1,25 @@
+diff --git a/win32/Makefile.gcc b/win32/Makefile.gcc
+index 6d1ded6..d2aa544 100644
+--- a/win32/Makefile.gcc
++++ b/win32/Makefile.gcc
+@@ -30,18 +30,17 @@
+ # the DLL name should be changed from "zlib1.dll".
+ 
+ STATICLIB = libz.a
+-SHAREDLIB = zlib1.dll
++SHAREDLIB = libz.dll
+ IMPLIB    = libz.dll.a
+ 
+ #
+ # Set to 1 if shared object needs to be installed
+ #
+-SHARED_MODE=0
++SHARED_MODE=1
+ 
+ #LOC = -DASMV
+ #LOC = -DDEBUG -g
+ 
+-PREFIX =
+ CC = $(PREFIX)gcc
+ CFLAGS = $(LOC) -O3 -Wall
+ 

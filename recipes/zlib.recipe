@@ -4,12 +4,14 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'zlib'
-    version = '1.2.7'
+    version = '1.2.8'
+    stype = SourceType.TARBALL
+    url = 'http://zlib.net/zlib-1.2.8.tar.xz'
     licenses = [License.BSD_like]
     force_configure = True
     add_host_build_target = False
     can_use_configure_cache = False
-
+    patches = ['zlib/01-win32-makefile.patch']
 
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
@@ -25,7 +27,7 @@ class Recipe(recipe.Recipe):
             self._remove_steps ([BuildSteps.CONFIGURE])
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('z', 1, 2, 7, self.config.libdir,
+        libtool_la = LibtoolLibrary('z', 1, 2, 8, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
         # FIXME This is to workaround a build issue trying to ld to libz.so
