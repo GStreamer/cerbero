@@ -16,6 +16,16 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+ifeq ($(TARGET_ARCH_ABI), armeabi)
+GSTREAMER_ROOT := $(GSTREAMER_ROOT_ARM)
+else ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
+GSTREAMER_ROOT := $(GSTREAMER_ROOT_ARMV7)
+else ifeq ($(TARGET_ARCH_ABI), x86)
+GSTREAMER_ROOT := $(GSTREAMER_ROOT_X86)
+else
+  $(error "Unsupported ABI $(TARGET_ARCH_ABI)")
+endif
+
 $(call assert-defined, GSTREAMER_ROOT)
 $(if $(wildcard $(GSTREAMER_ROOT)),,\
   $(error "The directory GSTREAMER_ROOT=$(GSTREAMER_ROOT) does not exists")\
@@ -58,7 +68,7 @@ else
 endif
 
 GSTREAMER_ANDROID_MODULE_NAME := gstreamer_android
-GSTREAMER_BUILD_DIR           := gst-build
+GSTREAMER_BUILD_DIR           := gst-build-$(TARGET_ARCH_ABI)
 GSTREAMER_ANDROID_O           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).o
 GSTREAMER_ANDROID_SO          := $(GSTREAMER_BUILD_DIR)/lib$(GSTREAMER_ANDROID_MODULE_NAME).so
 GSTREAMER_ANDROID_C           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODULE_NAME).c
@@ -96,9 +106,6 @@ LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_ROOT)/include
 ##################################################################
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
-# This triggers the build of our library using our custom rules
-$(GSTREAMER_ANDROID_SO): buildsharedlibrary copyjavasource copyfontsres
-
 
 # Some plugins use a different name for the module name, like the playback
 # plugin, which uses playbin for the module name: libgstplaybin.so
@@ -158,32 +165,51 @@ GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAG
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
 GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
+# This triggers the build of our library using our custom rules
+$(GSTREAMER_ANDROID_SO): buildsharedlibrary_$(TARGET_ARCH_ABI)
+$(GSTREAMER_ANDROID_SO): copyjavasource_$(TARGET_ARCH_ABI)
+$(GSTREAMER_ANDROID_SO): copyfontsres_$(TARGET_ARCH_ABI)
+
+delsharedlib_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
+delsharedlib_$(TARGET_ARCH_ABI):
+	@$(call host-rm,$(prebuilt))
+	@$(foreach path,$(wildcard $(PRIV_B_DIR)/sed*), $(call host-rm,$(path)))
+$(LOCAL_INSTALLED): delsharedlib_$(TARGET_ARCH_ABI)
 
 # Generates a source file that declares and registers all the required plugins
-genstatic:
-	@$(HOST_ECHO) "GStreamer      : [GEN] => $(GSTREAMER_ANDROID_C)"
-	@$(call host-mkdir,$(GSTREAMER_BUILD_DIR))
-	@$(call host-cp,$(GSTREAMER_ANDROID_C_IN),$(GSTREAMER_ANDROID_C))
-	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(GSTREAMER_ANDROID_C)
-	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(GSTREAMER_ANDROID_C)
-	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(GSTREAMER_ANDROID_C)
-	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g" $(GSTREAMER_ANDROID_C)
+genstatic_$(TARGET_ARCH_ABI): PRIV_C := $(GSTREAMER_ANDROID_C)
+genstatic_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
+genstatic_$(TARGET_ARCH_ABI): PRIV_C_IN := $(GSTREAMER_ANDROID_C_IN)
+genstatic_$(TARGET_ARCH_ABI):
+	@$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
+	@$(call host-mkdir,$(PRIV_B_DIR))
+	@$(call host-cp,$(PRIV_C_IN),$(PRIV_C))
+	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(GSTREAMER_PLUGINS_DECLARE)/g" $(PRIV_C)
+	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(GSTREAMER_PLUGINS_REGISTER)/g" $(PRIV_C)
+	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(G_IO_MODULES_LOAD)/g" $(PRIV_C)
+	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(G_IO_MODULES_DECLARE)/g" $(PRIV_C)
 
 # Compile the source file
-$(GSTREAMER_ANDROID_O): genstatic
-	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(GSTREAMER_ANDROID_C)"
-	@$(TARGET_CC) --sysroot=$(SYSROOT) $(TARGET_CFLAGS) -c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
+$(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
+$(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT) $(TARGET_CFLAGS) \
+	-c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
+$(GSTREAMER_ANDROID_O): PRIV_GST_CFLAGS := $(GSTREAMER_ANDROID_CFLAGS) $(TARGET_CFLAGS)
+$(GSTREAMER_ANDROID_O): genstatic_$(TARGET_ARCH_ABI)
+	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(PRIV_C)"
+	@$(PRIV_CC_CMD)
 
 # Creates a shared library including gstreamer, its plugins and all the dependencies
-buildsharedlibrary: $(GSTREAMER_ANDROID_O)
-	@$(HOST_ECHO) "GStreamer      : [LINK] => $(GSTREAMER_ANDROID_SO)"
-	@$(GSTREAMER_ANDROID_CMD)
+buildsharedlibrary_$(TARGET_ARCH_ABI): PRIV_CMD := $(GSTREAMER_ANDROID_CMD)
+buildsharedlibrary_$(TARGET_ARCH_ABI): PRIV_SO := $(GSTREAMER_ANDROID_SO)
+buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
+	@$(HOST_ECHO) "GStreamer      : [LINK] => $(PRIV_SO)"
+	@$(PRIV_CMD)
 
-copyjavasource:
+copyjavasource_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,src/com/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/com/gstreamer)
 
-copyfontsres:
+copyfontsres_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,assets/fontconfig)
 	@$(call host-mkdir,assets/fontconfig/fonts/truetype/)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,assets/fontconfig)

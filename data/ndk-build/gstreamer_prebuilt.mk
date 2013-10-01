@@ -61,10 +61,4 @@ LOCAL_SRC_FILES    :=
 
 $(LOCAL_BUILT_MODULE): $(LOCAL_OBJECTS)
 
-delsharedlib:
-	@$(call host-rm,$(prebuilt))
-	@$(foreach path,$(wildcard $(GSTREAMER_BUILD_DIR)/sed*), $(call host-rm,$(path)))
-
 include $(BUILD_SYSTEM)/build-module.mk
-
-$(LOCAL_INSTALLED): delsharedlib
