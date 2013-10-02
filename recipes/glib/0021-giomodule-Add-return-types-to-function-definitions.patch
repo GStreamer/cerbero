@@ -1,0 +1,27 @@
+From ceffbf78b17b4b4203d7808374b6315148d204eb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <slomo@circular-chaos.org>
+Date: Sat, 21 Sep 2013 17:29:13 +0200
+Subject: [PATCH 21/22] giomodule: Add return types to function definitions
+
+---
+ gio/giomodule.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gio/giomodule.h b/gio/giomodule.h
+index 61080f5..a54bf6f 100644
+--- a/gio/giomodule.h
++++ b/gio/giomodule.h
+@@ -190,8 +190,8 @@ G_END_DECLS
+ #else
+ #define G_IO_MODULE_DEFINE(name) \
+ G_BEGIN_DECLS \
+-g_io_module_load(GIOModule *module) { _g_io_module_load(module);} \
+-g_io_module_unload(GIOModule *module) { _g_io_module_unload(module);} \
++void g_io_module_load(GIOModule *module) { _g_io_module_load(module);} \
++void g_io_module_unload(GIOModule *module) { _g_io_module_unload(module);} \
+ gchar ** g_io_module_query(void) {return _g_io_module_query();} \
+ G_END_DECLS
+ #endif
+-- 
+1.8.4
+

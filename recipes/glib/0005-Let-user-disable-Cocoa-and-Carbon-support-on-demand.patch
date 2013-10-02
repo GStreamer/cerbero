@@ -1,0 +1,116 @@
+From ea41c323feba252f1052fbf0d967e0dfc95a16c7 Mon Sep 17 00:00:00 2001
+From: Thibault Saunier <thibault.saunier@collabora.com>
+Date: Fri, 25 Jan 2013 12:37:43 -0300
+Subject: [PATCH 05/22] Let user disable Cocoa and Carbon support on demand
+
+Conflicts:
+	configure.ac
+---
+ configure.ac | 79 +++++++++++++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 54 insertions(+), 25 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index cf2e3e2..04d5190 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -179,32 +179,10 @@ AC_MSG_RESULT([$glib_native_android])
+ 
+ AC_SUBST(LIB_EXE_MACHINE_FLAG)
+ 
+-glib_have_carbon=no
+-AC_MSG_CHECKING([for Mac OS X Carbon support])
+-AC_TRY_CPP([
+-#include <Carbon/Carbon.h>
+-#include <CoreServices/CoreServices.h>
+-], glib_have_carbon=yes)
+-
+-AC_MSG_RESULT([$glib_have_carbon])
+-
+-glib_have_cocoa=no
+-AC_MSG_CHECKING([for Mac OS X Cocoa support])
+-AC_TRY_CPP([
+-#include <Cocoa/Cocoa.h>
+-#ifdef GNUSTEP_BASE_VERSION
+-#error "Detected GNUstep, not Cocoa"
+-#endif
+-], glib_have_cocoa=yes)
+-
+-AC_MSG_RESULT([$glib_have_cocoa])
+-
+ AM_CONDITIONAL(OS_WIN32, [test "$glib_native_win32" = "yes"])
+ AM_CONDITIONAL(OS_WIN32_X64, [test "$LIB_EXE_MACHINE_FLAG" = "X64"])
+ AM_CONDITIONAL(OS_UNIX, [test "$glib_native_win32" != "yes"])
+ AM_CONDITIONAL(OS_LINUX, [test "$glib_os_linux" = "yes"])
+-AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
+-AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
+ 
+ AS_IF([test "$glib_native_win32" = "yes"], [
+   AC_CHECK_TOOL(WINDRES, windres, no)
+@@ -221,10 +199,61 @@ AS_IF([test "$glib_native_win32" = "yes"], [
+ ])
+ AM_CONDITIONAL(MS_LIB_AVAILABLE, [test x$ms_librarian = xyes])
+ 
+-AS_IF([test "x$glib_have_carbon" = "xyes"], [
++if test "$glib_native_win32" != yes; then
++    # libtool option to control which symbols are exported
++    # right now, symbols starting with _ are not exported
++    LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^g.*"'
++else
++    # We currently use .def files on Windows
++    LIBTOOL_EXPORT_OPTIONS=
++fi
++AC_SUBST(LIBTOOL_EXPORT_OPTIONS)
++
++AC_ARG_ENABLE(carbon,
++              [AC_HELP_STRING([--disable-carbon],
++                              [disable Max OS X Carbon support])],,
++              [enable_carbon=yes])
++
++glib_have_carbon=no
++if test "x${enable_carbon}" = "xyes"; then
++  AC_MSG_RESULT([yes])
++  AC_MSG_CHECKING([for Mac OS X Carbon support])
++  AC_TRY_CPP([
++#include <Carbon/Carbon.h>
++#include <CoreServices/CoreServices.h>
++  ], glib_have_carbon=yes)
++  AC_MSG_RESULT([$glib_have_carbon])
++else
++  AC_MSG_RESULT([no])
++fi
++AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
++
++if test "x$glib_have_carbon" = "xyes"; then
+   AC_DEFINE(HAVE_CARBON, 1, [define to 1 if Carbon is available])
+-  LDFLAGS="$LDFLAGS -Wl,-framework,Carbon"
+-])
++  LDFLAGS="$LDFLAGS -Wl,-framework Carbon"
++fi
++
++dnl Check cocoa
++AC_ARG_ENABLE(cocoa,
++              [AC_HELP_STRING([--disable-cocoa],
++                              [disable Max OS X Cocoa support])],,
++              [enable_cocoa=yes])
++
++glib_have_cocoa=no
++if test "x${enable_cocoa}" = "xyes"; then
++  AC_MSG_RESULT([yes])
++  AC_MSG_CHECKING([for Mac OS X Carbon support])
++  AC_TRY_CPP([
++#include <Cocoa/Cocoa.h>
++#ifdef GNUSTEP_BASE_VERSION
++#error "Detected GNUstep, not Cocoa"
++#endif
++  ], glib_have_cocoa=yes)
++  AC_MSG_RESULT([$glib_have_cocoa])
++else
++  AC_MSG_RESULT([no])
++fi
++AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
+ 
+ if test "x$glib_have_cocoa" = "xyes"; then
+   AC_DEFINE(HAVE_COCOA, 1, [define to 1 if Cocoa is available])
+-- 
+1.8.4
+
