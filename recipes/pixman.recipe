@@ -17,7 +17,10 @@ class Recipe(recipe.Recipe):
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.configure_options = '--disable-arm-iwmmxt'
             # Prevent symbol conflicts
-            self.make = '%s CFLAGS+="-Dandroid_getCpuFamily=pixman_android_getCpuFamily -Dandroid_getCpuFeatures=pixman_android_getCpuFeatures -Dandroid_getCpuCount=pixman_android_getCpuCount"' % self.make
+            self.append_env['CFLAGS']= '-Dandroid_getCpuFamily=pixman_android_getCpuFamily \
+                    -Dandroid_getCpuFeatures=pixman_android_getCpuFeatures \
+                    -Dandroid_getCpuCount=pixman_android_getCpuCount \
+                    -Dandroid_setCpu=pixman_android_setCpu'
 
     def configure(self):
         if self.config.target_platform == Platform.ANDROID:
