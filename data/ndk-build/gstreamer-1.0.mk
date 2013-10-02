@@ -16,16 +16,6 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-ifeq ($(TARGET_ARCH_ABI), armeabi)
-GSTREAMER_ROOT := $(GSTREAMER_ROOT_ARM)
-else ifeq ($(TARGET_ARCH_ABI), armeabi-v7a)
-GSTREAMER_ROOT := $(GSTREAMER_ROOT_ARMV7)
-else ifeq ($(TARGET_ARCH_ABI), x86)
-GSTREAMER_ROOT := $(GSTREAMER_ROOT_X86)
-else
-  $(error "Unsupported ABI $(TARGET_ARCH_ABI)")
-endif
-
 $(call assert-defined, GSTREAMER_ROOT)
 $(if $(wildcard $(GSTREAMER_ROOT)),,\
   $(error "The directory GSTREAMER_ROOT=$(GSTREAMER_ROOT) does not exists")\
