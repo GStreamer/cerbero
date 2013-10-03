@@ -17,19 +17,10 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-gtk-doc'
 
         if self.config.target_platform != Platform.LINUX or \
-           self.config.target_distro_version not in \
-                [DistroVersion.DEBIAN_WHEEZY,
-                 DistroVersion.DEBIAN_JESSIE,
-                 DistroVersion.UBUNTU_NATTY,
-                 DistroVersion.UBUNTU_ONEIRIC,
-                 DistroVersion.UBUNTU_PRECISE,
-                 DistroVersion.UBUNTU_QUANTAL,
-                 DistroVersion.UBUNTU_RARING,
-                 DistroVersion.FEDORA_16,
-                 DistroVersion.FEDORA_17,
-                 DistroVersion.FEDORA_18,
-                 DistroVersion.FEDORA_19,
-                 ]:
+           self.config.target_distro_version in \
+                [DistroVersion.DEBIAN_SQUEEZE,
+                 DistroVersion.UBUNTU_MAVERICK,
+                 DistroVersion.UBUNTU_LUCID]:
             self.deps += [ 'glib-networking' ]
         if self.config.target_platform in [Platform.WINDOWS, Platform.IOS]:
             self.configure_options += ' --disable-tls-check'
