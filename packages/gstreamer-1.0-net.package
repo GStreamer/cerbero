@@ -43,18 +43,11 @@ class Package(package.Package):
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or \
-           self.config.target_distro_version not in \
-                [DistroVersion.DEBIAN_WHEEZY,
-                 DistroVersion.DEBIAN_JESSIE,
-                 DistroVersion.UBUNTU_NATTY,
-                 DistroVersion.UBUNTU_ONEIRIC,
-                 DistroVersion.UBUNTU_PRECISE,
-                 DistroVersion.UBUNTU_QUANTAL,
-                 DistroVersion.FEDORA_16,
-                 DistroVersion.FEDORA_17]:
-            self.files += ['gmp:libs', 'gnutls:libs:libs_extra:lang',
-                           'libtasn1:libs', 'nettle:libs',
-                           'glib-networking', 'glib-networking-static'
-                           ]
+           self.config.target_distro_version  in \
+                [DistroVersion.DEBIAN_SQUEEZE,
+                 DistroVersion.UBUNTU_MAVERICK,
+                 DistroVersion.UBUNTU_LUCID]:
+            self.files += ['glib-networking', 'glib-networking-static']
+            self.deps += ['base-crypto']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
