@@ -1,0 +1,11 @@
+--- libffi-3.0.13/Makefile.in.old	2013-03-17 23:36:21.000000000 +0100
++++ libffi-3.0.13/Makefile.in	2013-10-03 12:17:37.246272868 +0200
+@@ -461,7 +461,7 @@
+ target_os = @target_os@
+ target_vendor = @target_vendor@
+ toolexecdir = @toolexecdir@
+-toolexeclibdir = @toolexeclibdir@
++toolexeclibdir = $(libdir)
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
