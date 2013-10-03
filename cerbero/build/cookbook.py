@@ -236,6 +236,18 @@ class CookBook (object):
         recipe = self.get_recipe(recipe_name)
         return self._find_deps(recipe, {}, [])
 
+    def list_recipe_reverse_deps(self, recipe_name):
+        '''
+        List the dependencies that depends on this recipe
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @return: list of reverse dependencies L{cerbero.recipe.Recipe}
+        @rtype: list
+        '''
+        recipe = self.get_recipe(recipe_name)
+        return [r for r in self.recipes.values() if recipe.name in r.deps]
+
     def _runtime_deps (self):
         return [x.name for x in self.recipes.values() if x.runtime_dep]
 
