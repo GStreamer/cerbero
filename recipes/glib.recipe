@@ -93,9 +93,9 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --enable-static'
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
-           # Disable valgrind code on non-Linux, in the best case it just
-           # gives us compiler errors :)
-           self.new_env['CFLAGS'] = os.environ['CFLAGS'] + ' -DNVALGRIND=1 '
+            # Disable valgrind code on non-Linux, in the best case it just
+            # gives us compiler errors :)
+            self.new_env['CFLAGS'] = os.environ['CFLAGS'] + ' -DNVALGRIND=1 '
         if self.config.target_platform == Platform.ANDROID:
             # Hack to fix building of the glib/tests/private test
             self.make = '%s private_LDFLAGS=""' % self.make
