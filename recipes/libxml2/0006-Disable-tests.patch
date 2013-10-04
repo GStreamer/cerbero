@@ -1,0 +1,18 @@
+--- a/Makefile.am.old	2013-10-04 10:44:20.820448892 +0200
++++ b/Makefile.am	2013-10-04 10:44:40.444494099 +0200
+@@ -10,10 +10,11 @@
+ 
+ AM_CFLAGS = $(THREAD_CFLAGS) $(Z_CFLAGS) $(LZMA_CFLAGS)
+ 
+-noinst_PROGRAMS=testSchemas testRelax testSAX testHTML testXPath testURI \
+-                testThreads testC14N testAutomata testRegexp \
+-                testReader testapi testModule runtest runsuite testchar \
+-		testdict runxmlconf testrecurse testlimits
++noinst_PROGRAMS=
++#noinst_PROGRAMS=testSchemas testRelax testSAX testHTML testXPath testURI \
++#                testThreads testC14N testAutomata testRegexp \
++#                testReader testapi testModule runtest runsuite testchar \
++#		testdict runxmlconf testrecurse testlimits
+ 
+ bin_PROGRAMS = xmllint xmlcatalog
+ 
