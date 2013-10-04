@@ -50,7 +50,7 @@ index fdbe239..f8a0820 100644
  case "$host" in
   *-*-mingw*)
   CPPFLAGS="$CPPFLAGS -DWIN32"
-@@ -1500,7 +1517,12 @@
+@@ -1500,7 +1501,8 @@
   AC_DEFINE([_WINSOCKAPI_],1,[Using the Win32 Socket implementation])
   if test "${PYTHON}" != ""
   then
