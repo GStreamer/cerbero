@@ -3,14 +3,18 @@
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.8.0'
+    version = '2.9.1'
+    stype = SourceType.TARBALL
+    url = 'http://xmlsoft.org/sources/libxml2-2.9.1.tar.gz'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     autoreconf = True
+    patches = ['libxml2/0003-Enable-windows-cross-compilation.patch',
+               'libxml2/0006-Disable-tests.patch']
+
     files_libs = ['libxml2']
     files_devel = ['include/libxml2', 'lib/xml2Conf.sh', 'bin/xml2-config',
                    'lib/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
-
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

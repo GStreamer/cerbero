@@ -1,0 +1,86 @@
+From befc374b209c75d0d301b4ab6852664b02bdd23f Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Fri, 9 Mar 2012 18:18:48 +0100
+Subject: [PATCH 3/7] Enable windows cross-compilation
+
+---
+ configure.in       | 25 ++++++++++++++++++++++++-
+ python/Makefile.am |  1 +
+ 2 files changed, 25 insertions(+), 1 deletion(-)
+
+diff --git a/configure.in b/configure.in
+index fdbe239..f8a0820 100644
+--- a/configure.in
++++ b/configure.in
+@@ -742,6 +742,21 @@
+ dnl check for python
+ dnl
+ 
++case "$host" in
++  *-*-mingw*|*-*-cygwin*)
++    platform_win32=yes
++    ;;
++  *)
++    platform_win32=no
++    ;;
++esac
++
++if test "x$cross_compiling" = "xyes" -a "x$platform_win32" = "xyes" ; then
++AM_CONDITIONAL(WITH_PYTHON, test "$PYTHON_INCLUDES" != "")
++pythondir=$am_cv_python_pythondir
++PYTHON_SUBDIR=python
++PYTHON=`which python`
++else
+ PYTHON_VERSION=
+ PYTHON_INCLUDES=
+ PYTHON_SITE_PACKAGES=
+@@ -832,6 +847,7 @@
+ else
+     PYTHON_SUBDIR=
+ fi
++fi
+ AC_SUBST(pythondir)
+ AC_SUBST(PYTHON_SUBDIR)
+ AC_SUBST(PYTHON_LIBS)
+@@ -1492,6 +1508,7 @@
+ CYGWIN_EXTRA_LDFLAGS=
+ CYGWIN_EXTRA_PYTHON_LIBADD=
+ WIN32_EXTRA_PYTHON_LIBADD=
++WIN32_EXTRA_PYTHON_CFLAGS=
+ case "$host" in
+  *-*-mingw*)
+  CPPFLAGS="$CPPFLAGS -DWIN32"
+@@ -1500,7 +1517,12 @@
+  AC_DEFINE([_WINSOCKAPI_],1,[Using the Win32 Socket implementation])
+  if test "${PYTHON}" != ""
+  then
+-   WIN32_EXTRA_PYTHON_LIBADD="-L${pythondir}/../../libs -lpython$(echo ${PYTHON_VERSION} | tr -d .)"
++   if test "x$cross_compiling" != "xyes"; then
++     WIN32_EXTRA_PYTHON_LIBADD="-L${pythondir}/../../libs -lpython$(echo ${PYTHON_VERSION} | tr -d .)"
++   else
++     WIN32_EXTRA_PYTHON_LIBADD="${PYTHON_LIBS}"
++     WIN32_EXTRA_PYTHON_CFLAGS="${PYTHON_INCLUDES}"
++   fi
+  fi
+  ;;
+  *-*-cygwin*)
+@@ -1514,6 +1536,7 @@
+ AC_SUBST(WIN32_EXTRA_LIBADD)
+ AC_SUBST(WIN32_EXTRA_LDFLAGS)
+ AC_SUBST(WIN32_EXTRA_PYTHON_LIBADD)
++AC_SUBST(WIN32_EXTRA_PYTHON_CFLAGS)
+ AC_SUBST(CYGWIN_EXTRA_LDFLAGS)
+ AC_SUBST(CYGWIN_EXTRA_PYTHON_LIBADD)
+ 
+diff --git a/python/Makefile.am b/python/Makefile.am
+index d2a2253..c3ddca7 100644
+--- a/python/Makefile.am
++++ b/python/Makefile.am
+@@ -24,6 +24,7 @@
+ python_LTLIBRARIES = libxml2mod.la
+ 
+ libxml2mod_la_SOURCES = libxml.c libxml_wrap.h libxml2-py.h libxml2-py.c types.c
++libxml2mod_la_CFLAGS = $(WIN32_EXTRA_PYTHON_CFLAGS)
+ libxml2mod_la_LDFLAGS = $(CYGWIN_EXTRA_LDFLAGS) $(WIN32_EXTRA_LDFLAGS) -module -avoid-version \
+         $(top_builddir)/libxml2.la $(CYGWIN_EXTRA_PYTHON_LIBADD) $(WIN32_EXTRA_PYTHON_LIBADD) $(PYTHON_LIBS)
+ 
