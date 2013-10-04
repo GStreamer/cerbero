@@ -55,14 +55,14 @@ class ModifyEnvTest(unittest.TestCase):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, self.val1 + self.val2)
+        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
 
     def testAppendNonExistentEnv(self):
         if self.var in os.environ:
             del os.environ[self.var]
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, self.val2)
+        self.assertEquals(val, ' %s' % self.val2)
 
     def testNewEnv(self):
         os.environ[self.var] = self.val1
@@ -91,6 +91,6 @@ class ModifyEnvTest(unittest.TestCase):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, self.val1 + self.val2)
+        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
         val = self.mk.get_env_var_nested(self.var)
-        self.assertEquals(val, self.val1 + self.val2)
+        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
