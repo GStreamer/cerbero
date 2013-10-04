@@ -83,9 +83,10 @@ class ModifyEnvTest(unittest.TestCase):
         self.mk.config.allow_system_libs = True
         self.mk.use_system_libs = True
         val = self.mk.get_env_var('PKG_CONFIG_PATH')
-        self.assertEquals(val, '/path/1:/path/2')
+        self.assertEquals(val,'/path/2:/usr/lib/pkgconfig:'
+            '/usr/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig')
         val = self.mk.get_env_var('PKG_CONFIG_LIBDIR')
-        self.assertIsNone(val)
+        self.assertEquals(val,'/path/2')
 
     def testNestedModif(self):
         os.environ[self.var] = self.val1
