@@ -9,8 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.3.1.tar.gz'
     srcdir = 'gettext-runtime'
-    patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
-               'gettext/0002-intl-fix-build-targetting-10.6-with-the-10.7-or-10.8.patch']
+    patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch']
     platform_deps = {
         Platform.DARWIN:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
