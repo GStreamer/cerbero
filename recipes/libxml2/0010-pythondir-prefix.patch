@@ -1,0 +1,11 @@
+--- a/configure.in.orig	2013-10-07 08:30:52.305052041 +0200
++++ b/configure.in	2013-10-07 08:45:16.038417021 +0200
+@@ -820,7 +820,7 @@
+ 	    fi
+ 	fi
+     fi
+-    pythondir='$(PYTHON_SITE_PACKAGES)'
++    pythondir='$(prefix)/lib/python$(PYTHON_VERSION)/site-packages'
+     PYTHON_LIBS=`python$PYTHON_VERSION-config --ldflags`
+ else
+     PYTHON=

@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     deps = [ 'zlib' ]
     autoreconf = True
     patches = ['libxml2/0003-Enable-windows-cross-compilation.patch',
-               'libxml2/0006-Disable-tests.patch']
+               'libxml2/0006-Disable-tests.patch',
+               'libxml2/0010-pythondir-prefix.patch']
 
     files_libs = ['libxml2']
     files_devel = ['include/libxml2', 'lib/xml2Conf.sh', 'bin/xml2-config',
