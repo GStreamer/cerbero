@@ -1,0 +1,25 @@
+From 2eae9ff285d041e9200b9136279c497d1c6ad6eb Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Fri, 20 Apr 2012 06:03:56 +0200
+Subject: [PATCH 06/14] Remove tests from the all target
+
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index dac6c72..f692a3e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -41,7 +41,7 @@ OBJS= blocksort.o  \
+       decompress.o \
+       bzlib.o
+ 
+-all: libbz2.a bzip2 bzip2recover test
++all: libbz2.a bzip2 bzip2recover
+ 
+ bzip2: libbz2.a bzip2.o
+ 	$(CC) $(CFLAGS) $(LDFLAGS) -o bzip2 bzip2.o -L. -lbz2
+-- 
+1.8.3.1
+
