@@ -5,9 +5,13 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
-    version = '0.26.2'
+    version = '0.30.2'
+    stype = SourceType.TARBALL
+    url = 'http://cairographics.org/releases/pixman-0.30.2.tar.gz'
     licenses = [License.MIT]
     autoreconf = True
+    patches = ['pixman/0001-Fix-build-on-Android.patch',
+               'pixman/0002-Enable-CPU-detection-on-Android.patch']
 
     files_libs = ['libpixman-1']
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']

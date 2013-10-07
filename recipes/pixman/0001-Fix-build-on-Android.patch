@@ -1,0 +1,37 @@
+From 358308a7c01037a909dfe604d0eee4d6ffbf58ec Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
+Date: Wed, 22 Aug 2012 14:57:50 +0200
+Subject: [PATCH 1/2] Fix build on Android
+
+---
+ configure.ac          | 1 +
+ pixman/pixman-utils.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index d76fddd..7eaa0d6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -933,6 +933,7 @@ if test $ac_cv_tls = none ; then
+     PIXMAN_CHECK_PTHREAD([CFLAGS="-D_REENTRANT"; LIBS="-lpthread"])
+     PIXMAN_CHECK_PTHREAD([CFLAGS="-pthread"; LDFLAGS="-pthread"])
+     PIXMAN_CHECK_PTHREAD([CFLAGS="-D_REENTRANT"; LDFLAGS="-lroot"])
++    PIXMAN_CHECK_PTHREAD([CFLAGS=""; LDFLAGS="-lc"])
+     
+     if test $support_for_pthread_setspecific = yes; then
+ 	CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
+diff --git a/pixman/pixman-utils.c b/pixman/pixman-utils.c
+index 2ec2594..de05c0e 100644
+--- a/pixman/pixman-utils.c
++++ b/pixman/pixman-utils.c
+@@ -27,6 +27,7 @@
+ #endif
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <limits.h>
+ 
+ #include "pixman-private.h"
+ 
+-- 
+1.8.4
+
