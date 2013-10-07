@@ -149,14 +149,17 @@ def unpack(filepath, output_dir):
     @type output_dir: str
     '''
     logging.info("Unpacking %s in %s" % (filepath, output_dir))
-    if filepath.endswith('tar.gz') or filepath.endswith('tar.bz2'):
+    if filepath.endswith('tar.gz') or filepath.endswith('tar.bz2') \
+       or filepath.endswith('tbz2') or filepath.endswith('tgz'):
         tf = tarfile.open(filepath, mode='r:*')
         tf.extractall(path=output_dir)
-    if filepath.endswith('tar.xz'):
+    elif filepath.endswith('tar.xz'):
         call("%s -Jxf %s" % (TAR, to_unixpath(filepath)), output_dir)
-    if filepath.endswith('.zip'):
+    elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
+    else:
+        raise FatalError("Unknown tarball format %s" % filepath)
 
 
 def download(url, destination=None, recursive=False, check_cert=True):
