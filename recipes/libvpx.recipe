@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     url = 'http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2'
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
-    configure_options = "--enable-pic --as=yasm "
+    configure_options = "--enable-pic --as=yasm --disable-unit-tests "
     add_host_build_target = False
     supports_cache_variables = False
     can_use_configure_cache = False
