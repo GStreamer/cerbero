@@ -1,0 +1,27 @@
+From 4eb55670cefcc86a2e1ae30b6cbd1f9741c6f4c5 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 23 Apr 2013 19:00:38 +0200
+Subject: [PATCH 14/14] dylib: install symlinks with relative paths
+
+---
+ Makefile-libbz2_dylib | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile-libbz2_dylib b/Makefile-libbz2_dylib
+index 135a816..cd77e3a 100644
+--- a/Makefile-libbz2_dylib
++++ b/Makefile-libbz2_dylib
+@@ -59,8 +59,8 @@ install:
+ 	cp -f libbz2.1.0.6.dylib $(PREFIX)/lib
+ 	rm -f $(PREFIX)/lib/libbz2.1.0.dylib
+ 	rm -f $(PREFIX)/lib/libbz2.dylib
+-	ln -s $(PREFIX)/lib/libbz2.1.0.6.dylib $(PREFIX)/lib/libbz2.1.0.dylib
+-	ln -s $(PREFIX)/lib/libbz2.1.0.6.dylib $(PREFIX)/lib/libbz2.dylib
++	cp -R libbz2.1.0.dylib $(PREFIX)/lib/
++	cp -R libbz2.dylib $(PREFIX)/lib/
+ 
+ blocksort.o: blocksort.c
+ 	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
+-- 
+1.8.3.1
+

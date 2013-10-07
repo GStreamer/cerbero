@@ -1,0 +1,25 @@
+From 63fd5079aa2b04363b5bfd58d3be7226c9d96fc1 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Sun, 15 Apr 2012 23:34:26 +0200
+Subject: [PATCH 04/14] Fix path separator
+
+---
+ bzip2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bzip2.c b/bzip2.c
+index 6de9d1d..dc626a4 100644
+--- a/bzip2.c
++++ b/bzip2.c
+@@ -128,7 +128,7 @@
+ #if BZ_LCCWIN32
+ #   include <io.h>
+ #   include <fcntl.h>
+-#   include <sys\stat.h>
++#   include <sys/stat.h>
+ 
+ #   define NORETURN       /**/
+ #   define PATH_SEP       '\\'
+-- 
+1.8.3.1
+

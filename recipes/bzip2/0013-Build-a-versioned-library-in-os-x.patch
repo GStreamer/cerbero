@@ -1,0 +1,41 @@
+From 0b80d660d61ebf5d15418edcb313b121ccbcd310 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Sat, 13 Apr 2013 23:33:50 +0200
+Subject: [PATCH 13/14] Build a versioned library in os x
+
+---
+ Makefile-libbz2_dylib | 14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile-libbz2_dylib b/Makefile-libbz2_dylib
+index 9fec33d..135a816 100644
+--- a/Makefile-libbz2_dylib
++++ b/Makefile-libbz2_dylib
+@@ -46,13 +46,21 @@ OBJS= blocksort.o  \
+       bzlib.o
+ 
+ all: $(OBJS)
+-	$(CC) -shared -o libbz2.dylib $(OBJS) $(BZIP2_LDFLAGS)
++	$(CC) $(BZIP2_LDFLAGS) -shared -Wl,-install_name -Wl,libbz2.1.0.dylib -o libbz2.1.0.6.dylib $(OBJS)
++	rm -f libbz2.1.0.dylib
++	rm -f libbz2.dylib
++	ln -s libbz2.1.0.6.dylib libbz2.1.0.dylib
++	ln -s libbz2.1.0.6.dylib libbz2.dylib
+ 
+ clean: 
+-	rm -f $(OBJS) libbz2.dylib
++	rm -f $(OBJS) libbz2.1.0.6.dylib libbz2.1.0.dylib libbz2.dylib
+ 
+ install:
+-	cp -f libbz2.dylib $(PREFIX)/lib
++	cp -f libbz2.1.0.6.dylib $(PREFIX)/lib
++	rm -f $(PREFIX)/lib/libbz2.1.0.dylib
++	rm -f $(PREFIX)/lib/libbz2.dylib
++	ln -s $(PREFIX)/lib/libbz2.1.0.6.dylib $(PREFIX)/lib/libbz2.1.0.dylib
++	ln -s $(PREFIX)/lib/libbz2.1.0.6.dylib $(PREFIX)/lib/libbz2.dylib
+ 
+ blocksort.o: blocksort.c
+ 	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
+-- 
+1.8.3.1
+

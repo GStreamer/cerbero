@@ -1,0 +1,25 @@
+From f7cd2ec69e523e309be57a8975630d775b705fe5 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Wed, 14 Mar 2012 17:29:18 +0100
+Subject: [PATCH 02/14] Fix windows build
+
+---
+ Makefile-libbz2_dll | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile-libbz2_dll b/Makefile-libbz2_dll
+index c753f42..1707a90 100644
+--- a/Makefile-libbz2_dll
++++ b/Makefile-libbz2_dll
+@@ -35,7 +35,7 @@ OBJS= blocksort.o  \
+       bzlib.o
+ 
+ all: $(OBJS)
+-	$(CC) -shared -no-undefined -o libbz2.dll $(OBJS)
++	$(CC) -shared -o libbz2.dll $(OBJS)
+ 
+ clean: 
+ 	rm -f $(OBJS) libbz2.dll
+-- 
+1.8.3.1
+
