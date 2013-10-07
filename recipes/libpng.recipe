@@ -3,10 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.5.12'
+    version = '1.6.6'
+    stype = SourceType.TARBALL
+    url = 'http://download.sourceforge.net/libpng/libpng-1.6.6.tar.xz'
     licenses = [License.LibPNG]
     deps = ['zlib']
 
-    files_libs = ['libpng15']
-    files_devel = ['include/libpng15', 'bin/libpng15-config',
-                   'lib/pkgconfig/libpng15.pc', 'lib/pkgconfig/libpng.pc']
+    files_libs = ['libpng16']
+    files_devel = ['include/libpng16', 'bin/libpng16-config',
+                   'lib/pkgconfig/libpng16.pc', 'lib/pkgconfig/libpng.pc']
