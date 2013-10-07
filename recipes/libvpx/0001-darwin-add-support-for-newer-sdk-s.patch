@@ -1,0 +1,29 @@
+From 319473aa27238833860a66c1899e21a713ca24e9 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 21 May 2012 10:27:36 +0200
+Subject: [PATCH 1/5] darwin: add support for newer sdk's
+
+---
+ build/make/configure.sh | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index c99a01c..f83bfa9 100755
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -714,6 +714,12 @@ process_common_toolchain() {
+         add_cflags  "-isysroot ${osx_sdk_dir}"
+         add_ldflags "-isysroot ${osx_sdk_dir}"
+     fi
++    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk" ]; then
++        osx_sdk_dir="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk"
++    fi
++    if [ -d "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk" ]; then
++        osx_sdk_dir="/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
++    fi
+ 
+     case ${toolchain} in
+         *-darwin8-*)
+-- 
+1.8.3.1
+

@@ -1,0 +1,38 @@
+From 794354f1eb9f1bb0b157746671b9770c74055f29 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 14 Jan 2013 12:25:52 +0100
+Subject: [PATCH 3/5] configure: add support for android x86
+
+---
+ build/make/configure.sh | 2 +-
+ configure               | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index f83bfa9..d4ab231 100755
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -1081,7 +1081,7 @@ EOF
+                 add_asflags -f x64
+                 enabled debug && add_asflags -g cv8
+             ;;
+-            linux*|solaris*)
++            linux*|solaris*|android*)
+                 add_asflags -f elf${bits}
+                 enabled debug && [ "${AS}" = yasm ] && add_asflags -g dwarf2
+                 enabled debug && [ "${AS}" = nasm ] && add_asflags -g
+diff --git a/configure b/configure
+index be36e56..f5cc9bc 100755
+--- a/configure
++++ b/configure
+@@ -105,6 +105,7 @@ all_platforms="${all_platforms} ppc64-darwin8-gcc"
+ all_platforms="${all_platforms} ppc64-darwin9-gcc"
+ all_platforms="${all_platforms} ppc64-linux-gcc"
+ all_platforms="${all_platforms} sparc-solaris-gcc"
++all_platforms="${all_platforms} x86-android-gcc"
+ all_platforms="${all_platforms} x86-darwin8-gcc"
+ all_platforms="${all_platforms} x86-darwin8-icc"
+ all_platforms="${all_platforms} x86-darwin9-gcc"
+-- 
+1.8.3.1
+
