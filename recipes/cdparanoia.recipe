@@ -9,11 +9,16 @@ from cerbero.build.filesprovider import FilesProvider
 
 class Recipe(recipe.Recipe):
     name = 'cdparanoia'
-    version = '10.3'
+    version = '10.2'
+    stype = SourceType.TARBALL
+    url = 'http://downloads.xiph.org/releases/cdparanoia/cdparanoia-III-10.2.src.tgz'
+    tarball_dirname = 'cdparanoia-III-%(version)s'
+    autoreconf = True
     # binaries are GPL
     licenses = [License.LGPLv2_1Plus]
     allow_parallel_build = False
     config_sh = 'CFLAGS="$CFLAGS -fPIC" ./configure'
+    patches = ['cdparanoia/0001-configure.in-Always-use-AC_PROG_CC.patch']
 
     files_libs = ['libcdda_paranoia', 'libcdda_interface']
     files_devel = ['include/cdda_interface.h', 'include/cdda_paranoia.h', 'include/utils.h']
