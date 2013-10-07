@@ -1,0 +1,25 @@
+From 46775ca626f2c462b17d0978d6c36ea73dbca705 Mon Sep 17 00:00:00 2001
+From: Thibault Saunier <thibault.saunier@collabora.com>
+Date: Fri, 25 Jan 2013 14:38:05 -0300
+Subject: [PATCH] Fix iOS build
+
+---
+ src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index b207e78..98073da 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -9,7 +9,7 @@ libogg_la_LDFLAGS = -no-undefined -version-info @LIB_CURRENT@:@LIB_REVISION@:@LI
+ 
+ # build and run the self tests on 'make check'
+ 
+-noinst_PROGRAMS = test_bitwise test_framing
++check_PROGRAMS = test_bitwise test_framing
+ 
+ test_bitwise_SOURCES = bitwise.c
+ test_bitwise_CFLAGS = -D_V_SELFTEST
+-- 
+1.8.4
+
