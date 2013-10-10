@@ -243,10 +243,6 @@ libtool-find-lib = \
   ) \
   $(firstword $(__tmpvar))
 
-libtool-clear-vars = \
-  $(eval __libtool.link.command := $(empty))
-  $(eval __libtool.link.Lpath := $(empty))
-
 libtool-name-from-filepath = \
   $(patsubst lib%.la,%,$(notdir $1))
 
