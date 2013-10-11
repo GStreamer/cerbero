@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20120827-2245-stable.tar.bz2'
     tarball_dirname= 'x264-snapshot-20120827-2245-stable'
     new_env = {'AS': 'yasm'}
+    patches = [ 'x264/0001-binutils-fix.patch' ]
 
     files_libs = ['libx264']
     files_bins = ['x264']
