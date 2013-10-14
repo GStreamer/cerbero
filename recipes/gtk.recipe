@@ -110,6 +110,7 @@ class Recipe(recipe.Recipe):
                                                        DistroVersion.FEDORA_17,
                                                        DistroVersion.FEDORA_18,
                                                        DistroVersion.FEDORA_19,
+                                                       DistroVersion.FEDORA_20,
                                                        DistroVersion.REDHAT_6,
                                                       ]:
                     if self.config.target_arch == Architecture.X86_64:
