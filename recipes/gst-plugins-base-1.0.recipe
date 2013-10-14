@@ -118,7 +118,8 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS,
+                Platform.WINDOWS]:
             self.configure_options += ' --disable-alsa --disable-x'
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
