@@ -284,7 +284,7 @@ class WixConfig(WixBase):
         return config_out_path
 
     def _product_name(self):
-        return '%s (%s)' % (self.package.shortdesc, self._platform())
+        return '%s' % self.package.shortdesc
 
     def _program_folder(self):
         if self.arch == Architecture.X86:
