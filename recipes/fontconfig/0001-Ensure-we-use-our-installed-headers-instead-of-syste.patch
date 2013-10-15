@@ -1,0 +1,23 @@
+From a6c80bd06bd4a011988e2f766d106b22164cdbef Mon Sep 17 00:00:00 2001
+From: Josep Torra <n770galaxy@gmail.com>
+Date: Mon, 12 Mar 2012 11:14:48 +0100
+Subject: [PATCH 1/2] Ensure we use our installed headers instead of system one
+ when building other stuff that depends on fontconfig.
+
+---
+ fontconfig.pc.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/fontconfig.pc.in b/fontconfig.pc.in
+index db55f6e..fd01dab 100644
+--- a/fontconfig.pc.in
++++ b/fontconfig.pc.in
+@@ -8,4 +8,4 @@ Description: Font configuration and customization library
+ Version: @VERSION@
+ Libs: -L${libdir} -lfontconfig
+ Libs.private: @LIBXML2_LIBS@ @EXPAT_LIBS@ @FREETYPE_LIBS@ @ICONV_LIBS@
+-Cflags: -I${includedir}
++Cflags: -I${includedir}/fontconfig
+-- 
+1.8.4
+
