@@ -3,12 +3,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'cairo'
-    version = '1.10.2'
+    version = '1.12.16'
+    stype = SourceType.TARBALL
+    url = 'http://cairographics.org/releases/cairo-1.12.16.tar.xz'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     autoreconf = True
     autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
+    patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch']
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [

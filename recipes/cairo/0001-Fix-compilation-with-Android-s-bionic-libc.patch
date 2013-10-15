@@ -1,0 +1,131 @@
+From 890b6f4f62f4c00ed6755bb2b8b0abd0dbeec3dd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 15 Oct 2013 13:05:27 +0200
+Subject: [PATCH] Fix compilation with Android's bionic libc
+
+It does not properly implement localeconv() and
+the decimal point in struct lconv.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=70492
+---
+ src/cairo-cff-subset.c    | 7 +++++++
+ src/cairo-output-stream.c | 7 +++++++
+ src/cairo-type1-subset.c  | 7 +++++++
+ util/cairo-trace/trace.c  | 7 +++++++
+ 4 files changed, 28 insertions(+)
+
+diff --git a/src/cairo-cff-subset.c b/src/cairo-cff-subset.c
+index c420bd4..f86299f 100644
+--- a/src/cairo-cff-subset.c
++++ b/src/cairo-cff-subset.c
+@@ -295,7 +295,9 @@ decode_nibble (int n, char *buf)
+ static unsigned char *
+ decode_real (unsigned char *p, double *real)
+ {
++#ifndef __BIONIC__
+     struct lconv *locale_data;
++#endif
+     const char *decimal_point;
+     int decimal_point_len;
+     int n;
+@@ -305,9 +307,14 @@ decode_real (unsigned char *p, double *real)
+     char *buf = buffer;
+     char *buf_end = buffer + sizeof (buffer);
+ 
++#ifndef __BIONIC__
+     locale_data = localeconv ();
+     decimal_point = locale_data->decimal_point;
+     decimal_point_len = strlen (decimal_point);
++#else
++    decimal_point = ".";
++    decimal_point_len = 1;
++#endif
+ 
+     assert (decimal_point_len != 0);
+     assert (sizeof(buffer) + decimal_point_len < sizeof(buffer2));
+diff --git a/src/cairo-output-stream.c b/src/cairo-output-stream.c
+index cc7e300..1aa1966 100644
+--- a/src/cairo-output-stream.c
++++ b/src/cairo-output-stream.c
+@@ -303,7 +303,9 @@ _cairo_output_stream_write_hex_string (cairo_output_stream_t *stream,
+ static void
+ _cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precision)
+ {
++#ifndef __BIONIC__
+     struct lconv *locale_data;
++#endif
+     const char *decimal_point;
+     int decimal_point_len;
+     char *p;
+@@ -314,9 +316,14 @@ _cairo_dtostr (char *buffer, size_t size, double d, cairo_bool_t limited_precisi
+     if (d == 0.0)
+ 	d = 0.0;
+ 
++#ifndef __BIONIC__
+     locale_data = localeconv ();
+     decimal_point = locale_data->decimal_point;
+     decimal_point_len = strlen (decimal_point);
++#else
++    decimal_point = ".";
++    decimal_point_len = 1;
++#endif
+ 
+     assert (decimal_point_len != 0);
+ 
+diff --git a/src/cairo-type1-subset.c b/src/cairo-type1-subset.c
+index 99830b4..f1cfbfc 100644
+--- a/src/cairo-type1-subset.c
++++ b/src/cairo-type1-subset.c
+@@ -309,13 +309,20 @@ cairo_type1_font_subset_get_matrix (cairo_type1_font_subset_t *font,
+     const char *start, *end, *segment_end;
+     int ret, s_max, i, j;
+     char *s;
++#ifndef __BIONIC__
+     struct lconv *locale_data;
++#endif
+     const char *decimal_point;
+     int decimal_point_len;
+ 
++#ifndef __BIONIC__
+     locale_data = localeconv ();
+     decimal_point = locale_data->decimal_point;
+     decimal_point_len = strlen (decimal_point);
++#else
++    decimal_point = ".";
++    decimal_point_len = 1;
++#endif
+ 
+     assert (decimal_point_len != 0);
+ 
+diff --git a/util/cairo-trace/trace.c b/util/cairo-trace/trace.c
+index 0188d77..76fc976 100644
+--- a/util/cairo-trace/trace.c
++++ b/util/cairo-trace/trace.c
+@@ -526,7 +526,9 @@ _fini_trace (void)
+ static void
+ _trace_dtostr (char *buffer, size_t size, double d)
+ {
++#ifndef __BIONIC__
+     struct lconv *locale_data;
++#endif
+     const char *decimal_point;
+     int decimal_point_len;
+     char *p;
+@@ -537,9 +539,14 @@ _trace_dtostr (char *buffer, size_t size, double d)
+     if (d == 0.0)
+ 	d = 0.0;
+ 
++#ifndef __BIONIC__
+     locale_data = localeconv ();
+     decimal_point = locale_data->decimal_point;
+     decimal_point_len = strlen (decimal_point);
++#else
++    decimal_point = ".";
++    decimal_point_len = 1;
++#endif
+ 
+     /* Using "%f" to print numbers less than 0.1 will result in
+      * reduced precision due to the default 6 digits after the
+-- 
+1.8.4
+
