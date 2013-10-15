@@ -4,10 +4,14 @@ import os
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
-    version = '2.10.1'
+    version = '2.10.2'
+    stype = SourceType.TARBALL
+    url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.2.tar.bz2'
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
+    patches = ['fontconfig/0001-Ensure-we-use-our-installed-headers-instead-of-syste.patch',
+               'fontconfig/0002-Port-to-Android.patch']
 
     files_libs = ['libfontconfig']
     files_etc = [
