@@ -5,7 +5,6 @@ class Recipe(recipe.Recipe):
     version = '2.34.2'
     licenses = [License.LGPLv2Plus]
     configure_sh = 'sh autogen.sh'
-    configure_options = ' --enable-static'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
 
