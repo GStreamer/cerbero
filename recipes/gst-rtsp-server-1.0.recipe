@@ -14,3 +14,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/gstreamer-1.0/gst/rtsp-server', 'lib/pkgconfig/gstreamer-rtsp-server-1.0.pc']
     files_libs = ['libgstrtspserver-1.0']
 
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-rtsp-server'))
+        self.remotes['upstream'] = self.remotes['origin']
+
