@@ -358,6 +358,7 @@ class CookBook (object):
                 parse_file(filepath, d)
                 r = d['Recipe'](self._config.arch_config[c])
                 r.__file__ = os.path.abspath(filepath)
+                self._config.arch_config[c].do_setup_env()
                 r.prepare()
                 if self._config.target_arch == Architecture.UNIVERSAL:
                     recipe.add_recipe(r)
