@@ -95,7 +95,7 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-gtk-doc'
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)
-            self.new_env['CFLAGS'] = os.environ['CFLAGS'] + ' -DNVALGRIND=1 '
+            self.append_env['CFLAGS'] = ' -DNVALGRIND=1 '
         if self.config.target_platform == Platform.ANDROID:
             # Hack to fix building of the glib/tests/private test
             self.make = '%s private_LDFLAGS=""' % self.make
@@ -115,7 +115,8 @@ class Recipe(recipe.Recipe):
                 extra_flags = '-DGST_SDK_IOS=1'
                 self.configure_options += ' --disable-carbon --enable-dtrace=no --disable-modular-tests --disable-cocoa'
 
-            self.config_sh = 'CFLAGS="$CFLAGS -DHAVE_STRNDUP %s" ./configure' % extra_flags
+            self.append_env['CFLAGS']="-DHAVE_STRNDUP %s" % extra_flags
+
         elif self.config.target_platform == Platform.LINUX:
             path1 = '/usr/lib/gio/modules'
             path2 = None
