@@ -37,7 +37,8 @@ class Recipe(recipe.Recipe):
             arch = 'armv7'
 
         if self.config.target_platform == Platform.DARWIN:
-            if self.config.target_distro_version in [DistroVersion.OS_X_MOUNTAIN_LION, DistroVersion.OS_X_LION] and arch != 'x86':
+            if self.config.target_distro_version in [DistroVersion.OS_X_MOUNTAIN_LION,
+                    DistroVersion.OS_X_LION, DistroVersion.OS_X_MAVERICKS] and arch != 'x86':
                 platform = 'darwin11'
             else:
                 platform = 'darwin10'

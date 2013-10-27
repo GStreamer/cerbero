@@ -195,7 +195,9 @@ def system_info():
     elif platform == Platform.DARWIN:
         distro = Distro.OS_X
         ver = pplatform.mac_ver()[0]
-        if ver.startswith('10.8'):
+        if ver.startswith('10.9'):
+            distro_version = DistroVersion.OS_X_MAVERICKS
+        elif ver.startswith('10.8'):
             distro_version = DistroVersion.OS_X_MOUNTAIN_LION
         elif ver.startswith('10.7'):
             distro_version = DistroVersion.OS_X_LION
