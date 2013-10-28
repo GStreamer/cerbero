@@ -1,0 +1,25 @@
+From 7fd83fb1b5709f7f6745bf7576cca4a47e47e587 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 28 Oct 2013 12:19:00 +0100
+Subject: [PATCH] configure: fix link with Carbon framework
+
+---
+ configure.ac |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 5187032..fbb1147 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -230,7 +230,7 @@ AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
+ 
+ if test "x$glib_have_carbon" = "xyes"; then
+   AC_DEFINE(HAVE_CARBON, 1, [define to 1 if Carbon is available])
+-  LDFLAGS="$LDFLAGS -Wl,-framework Carbon"
++  LDFLAGS="$LDFLAGS -Wl,-framework,Carbon"
+ fi
+ 
+ dnl Check cocoa
+-- 
+1.7.4.4
+

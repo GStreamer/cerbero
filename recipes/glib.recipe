@@ -33,6 +33,7 @@ class Recipe(recipe.Recipe):
                'glib/0014-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
                'glib/0021-giomodule-Add-return-types-to-function-definitions.patch',
                'glib/0022-gio-Fix-Werror-format-string-errors-from-mismatched-.patch',
+               'glib/0001-configure-fix-link-with-Carbon-framework.patch',
     ]
 
     files_libs = [
