@@ -8,20 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz'
-    patches = ['bzip2/0001-Add-makefiles-for-all-platforms-with-install-step.patch',
-               'bzip2/0002-Fix-windows-build.patch',
-               'bzip2/0003-Use-env-tools-if-they-are-set.patch',
-               'bzip2/0004-Fix-path-separator.patch',
-               'bzip2/0005-Install-dll-in-the-bin-dir.patch',
-               'bzip2/0006-Remove-tests-from-the-all-target.patch',
-               'bzip2/0007-Add-variable-for-executable-extansions-on-Windows.patch',
-               'bzip2/0008-Add-extension-to-binaries-too.patch',
-               'bzip2/0009-Fix-build-on-OSX.patch',
-               'bzip2/0010-Use-the-environment-CC.patch',
-               'bzip2/0011-create-libbz2.dll.a-for-linking-on-windows.patch',
-               'bzip2/0012-Do-not-hardcode-CC-so-it-can-be-cross-compiled-for-i.patch',
-               'bzip2/0013-Build-a-versioned-library-in-os-x.patch',
-               'bzip2/0014-dylib-install-symlinks-with-relative-paths.patch']
+    patches = ['bzip2/0001-Fix-Makefiles-and-add-support-for-Windows-and-OS-X.patch']
 
     files_libs = ['libbz2']
     files_devel = ['include/bzlib.h']

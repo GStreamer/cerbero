@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     force_configure = True
     add_host_build_target = False
     can_use_configure_cache = False
-    patches = ['zlib/01-win32-makefile.patch']
+    patches = ['zlib/0001-win32-fix-dll-name.patch']
 
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']

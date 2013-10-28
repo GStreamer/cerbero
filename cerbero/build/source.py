@@ -108,16 +108,20 @@ class Tarball (Source):
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
+        if os.path.exists(self.build_dir):
+            shutil.rmtree(self.build_dir)
         shell.unpack(self.download_path, self.config.sources)
         if self.tarball_dirname is not None:
-            if os.path.exists(self.build_dir):
-                shutil.rmtree(self.build_dir)
             os.rename(os.path.join(self.config.sources, self.tarball_dirname),
                     self.build_dir)
+        git.init_directory(self.build_dir)
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
-            shell.apply_patch(patch, self.build_dir, self.strip)
+            if self.strip == 1:
+                git.apply_patch(patch, self.build_dir)
+            else:
+                shell.apply_patch(patch, self.build_dir, self.strip)
 
 
 class GitCache (Source):

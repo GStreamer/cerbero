@@ -193,3 +193,29 @@ def check_line_endings(platform):
     if ('false' in val.lower()):
         return True
     return False
+
+
+def init_directory(git_dir):
+    '''
+    Initialize a git repository with the contents
+    of a directory
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    '''
+    init(git_dir)
+    shell.call('%s add *' % GIT, git_dir)
+    shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT, git_dir)
+
+
+def apply_patch(patch, git_dir):
+    '''
+    Applies a commit patch usign 'git am'
+    of a directory
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param patch: path of the patch file
+    @type patch: str
+    '''
+    shell.call('%s am %s' % (GIT, patch), git_dir)
