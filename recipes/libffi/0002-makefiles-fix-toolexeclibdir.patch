@@ -1,0 +1,25 @@
+From 851b2d49ef00fdaf7b5da32cc2034d6b8e5bf5aa Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 28 Oct 2013 17:46:40 +0100
+Subject: [PATCH 2/2] makefiles: fix toolexeclibdir
+
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 4b6abe5..418760e 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -461,7 +461,7 @@ target_cpu = @target_cpu@
+ target_os = @target_os@
+ target_vendor = @target_vendor@
+ toolexecdir = @toolexecdir@
+-toolexeclibdir = @toolexeclibdir@
++toolexeclibdir = $(libdir)
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-- 
+1.8.1.2
+

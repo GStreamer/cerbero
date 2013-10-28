@@ -1,0 +1,366 @@
+From f0063f7e3c8178eb1cfb5d913b3fbec3262295d5 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Sat, 10 Mar 2012 19:00:14 +0100
+Subject: [PATCH] Fix Makefiles and add support for Windows and OS X
+
+---
+ Makefile              | 64 +++++++++++++++++++++++++-----------------
+ Makefile-libbz2_dll   | 68 ++++++++++++++++++++++++++++++++++++++++++++
+ Makefile-libbz2_dylib | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ Makefile-libbz2_so    | 37 +++++++++++++++++-------
+ bzip2.c               |  2 +-
+ 5 files changed, 213 insertions(+), 36 deletions(-)
+ create mode 100644 Makefile-libbz2_dll
+ create mode 100644 Makefile-libbz2_dylib
+
+diff --git a/Makefile b/Makefile
+index 9754ddf..72dad60 100644
+--- a/Makefile
++++ b/Makefile
+@@ -15,13 +15,27 @@
+ SHELL=/bin/sh
+ 
+ # To assist in cross-compiling
+-CC=gcc
+-AR=ar
+-RANLIB=ranlib
+-LDFLAGS=
++ifndef CC
++  CC=gcc
++endif
++ifndef RANLIB
++  RANLIB=ranlib
++endif
++ifndef AR
++  AR=ar
++endif
++BZIP2_LDFLAGS=
+ 
+ BIGFILES=-D_FILE_OFFSET_BITS=64
+-CFLAGS=-Wall -Winline -O2 -g $(BIGFILES)
++BZIP2_CFLAGS=-Wall -Winline -O2 -g $(BIGFILES)
++
++ifdef CFLAGS
++BZIP2_CFLAGS+=$(CFLAGS)
++endif
++
++ifdef LDFLAGS
++BZIP2_LDFLAGS+=$(LDFLAGS)
++endif
+ 
+ # Where you want it installed when you do 'make install'
+ PREFIX=/usr/local
+@@ -35,13 +49,13 @@ OBJS= blocksort.o  \
+       decompress.o \
+       bzlib.o
+ 
+-all: libbz2.a bzip2 bzip2recover test
++all: libbz2.a bzip2 bzip2recover
+ 
+ bzip2: libbz2.a bzip2.o
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o bzip2 bzip2.o -L. -lbz2
++	$(CC) $(BZIP2_CFLAGS) $(BZIP2_LDFLAGS) -o bzip2$(EXT) bzip2.o -L. -lbz2
+ 
+ bzip2recover: bzip2recover.o
+-	$(CC) $(CFLAGS) $(LDFLAGS) -o bzip2recover bzip2recover.o
++	$(CC) $(BZIP2_CFLAGS) $(BZIP2_LDFLAGS) -o bzip2recover$(EXT) bzip2recover.o
+ 
+ libbz2.a: $(OBJS)
+ 	rm -f libbz2.a
+@@ -75,14 +89,14 @@ install: bzip2 bzip2recover
+ 	if ( test ! -d $(PREFIX)/man ) ; then mkdir -p $(PREFIX)/man ; fi
+ 	if ( test ! -d $(PREFIX)/man/man1 ) ; then mkdir -p $(PREFIX)/man/man1 ; fi
+ 	if ( test ! -d $(PREFIX)/include ) ; then mkdir -p $(PREFIX)/include ; fi
+-	cp -f bzip2 $(PREFIX)/bin/bzip2
+-	cp -f bzip2 $(PREFIX)/bin/bunzip2
+-	cp -f bzip2 $(PREFIX)/bin/bzcat
+-	cp -f bzip2recover $(PREFIX)/bin/bzip2recover
+-	chmod a+x $(PREFIX)/bin/bzip2
+-	chmod a+x $(PREFIX)/bin/bunzip2
+-	chmod a+x $(PREFIX)/bin/bzcat
+-	chmod a+x $(PREFIX)/bin/bzip2recover
++	cp -f bzip2$(EXT) $(PREFIX)/bin/bzip2$(EXT)
++	cp -f bzip2$(EXT) $(PREFIX)/bin/bunzip2$(EXT)
++	cp -f bzip2$(EXT) $(PREFIX)/bin/bzcat$(EXT)
++	cp -f bzip2recover$(EXT) $(PREFIX)/bin/bzip2recover$(EXT)
++	chmod a+x $(PREFIX)/bin/bzip2$(EXT)
++	chmod a+x $(PREFIX)/bin/bunzip2$(EXT)
++	chmod a+x $(PREFIX)/bin/bzcat$(EXT)
++	chmod a+x $(PREFIX)/bin/bzip2recover$(EXT)
+ 	cp -f bzip2.1 $(PREFIX)/man/man1
+ 	chmod a+r $(PREFIX)/man/man1/bzip2.1
+ 	cp -f bzlib.h $(PREFIX)/include
+@@ -115,23 +129,23 @@ clean:
+ 
+ blocksort.o: blocksort.c
+ 	@cat words0
+-	$(CC) $(CFLAGS) -c blocksort.c
++	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
+ huffman.o: huffman.c
+-	$(CC) $(CFLAGS) -c huffman.c
++	$(CC) $(BZIP2_CFLAGS) -c huffman.c
+ crctable.o: crctable.c
+-	$(CC) $(CFLAGS) -c crctable.c
++	$(CC) $(BZIP2_CFLAGS) -c crctable.c
+ randtable.o: randtable.c
+-	$(CC) $(CFLAGS) -c randtable.c
++	$(CC) $(BZIP2_CFLAGS) -c randtable.c
+ compress.o: compress.c
+-	$(CC) $(CFLAGS) -c compress.c
++	$(CC) $(BZIP2_CFLAGS) -c compress.c
+ decompress.o: decompress.c
+-	$(CC) $(CFLAGS) -c decompress.c
++	$(CC) $(BZIP2_CFLAGS) -c decompress.c
+ bzlib.o: bzlib.c
+-	$(CC) $(CFLAGS) -c bzlib.c
++	$(CC) $(BZIP2_CFLAGS) -c bzlib.c
+ bzip2.o: bzip2.c
+-	$(CC) $(CFLAGS) -c bzip2.c
++	$(CC) $(BZIP2_CFLAGS) -c bzip2.c
+ bzip2recover.o: bzip2recover.c
+-	$(CC) $(CFLAGS) -c bzip2recover.c
++	$(CC) $(BZIP2_CFLAGS) -c bzip2recover.c
+ 
+ 
+ distclean: clean
+diff --git a/Makefile-libbz2_dll b/Makefile-libbz2_dll
+new file mode 100644
+index 0000000..e021d31
+--- /dev/null
++++ b/Makefile-libbz2_dll
+@@ -0,0 +1,68 @@
++
++# This Makefile builds a shared version of the library, 
++# libbz2.so.1.0.6, with soname libbz2.so.1.0,
++# at least on x86-Linux (RedHat 7.2), 
++# with gcc-2.96 20000731 (Red Hat Linux 7.1 2.96-98).  
++# Please see the README file for some important info 
++# about building the library like this.
++
++# ------------------------------------------------------------------
++# This file is part of bzip2/libbzip2, a program and library for
++# lossless, block-sorting data compression.
++#
++# bzip2/libbzip2 version 1.0.6 of 6 September 2010
++# Copyright (C) 1996-2010 Julian Seward <jseward@bzip.org>
++#
++# Please read the WARNING, DISCLAIMER and PATENTS sections in the 
++# README file.
++#
++# This program is released under the terms of the license contained
++# in the file LICENSE.
++# ------------------------------------------------------------------
++
++
++SHELL=/bin/sh
++BIGFILES=-D_FILE_OFFSET_BITS=64
++BZIP2_CFLAGS=-fpic -fPIC -Wall -Winline -O2 -g $(BIGFILES)
++BZIP2_LDFLAGS=
++
++ifdef CFLAGS
++BZIP2_CFLAGS+=$(CFLAGS)
++endif
++
++ifdef LDFLAGS
++BZIP2_LDFLAGS+=$(LDFLAGS)
++endif
++
++OBJS= blocksort.o  \
++      huffman.o    \
++      crctable.o   \
++      randtable.o  \
++      compress.o   \
++      decompress.o \
++      bzlib.o
++
++all: $(OBJS)
++	$(CC) $(BZIP2_LDFLAGS) -shared -o libbz2.dll -Wl,--out-implib,libbz2.dll.a $(OBJS)
++
++clean: 
++	rm -f $(OBJS) libbz2.dll
++
++install:
++	cp -f libbz2.dll $(PREFIX)/bin
++	cp -f libbz2.dll.a $(PREFIX)/lib
++
++blocksort.o: blocksort.c
++	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
++huffman.o: huffman.c
++	$(CC) $(BZIP2_CFLAGS) -c huffman.c
++crctable.o: crctable.c
++	$(CC) $(BZIP2_CFLAGS) -c crctable.c
++randtable.o: randtable.c
++	$(CC) $(BZIP2_CFLAGS) -c randtable.c
++compress.o: compress.c
++	$(CC) $(BZIP2_CFLAGS) -c compress.c
++decompress.o: decompress.c
++	$(CC) $(BZIP2_CFLAGS) -c decompress.c
++bzlib.o: bzlib.c
++	$(CC) $(BZIP2_CFLAGS) -c bzlib.c
+diff --git a/Makefile-libbz2_dylib b/Makefile-libbz2_dylib
+new file mode 100644
+index 0000000..cd77e3a
+--- /dev/null
++++ b/Makefile-libbz2_dylib
+@@ -0,0 +1,78 @@
++
++# This Makefile builds a shared version of the library, 
++# libbz2.so.1.0.6, with soname libbz2.so.1.0,
++# at least on x86-Linux (RedHat 7.2), 
++# with gcc-2.96 20000731 (Red Hat Linux 7.1 2.96-98).  
++# Please see the README file for some important info 
++# about building the library like this.
++
++# ------------------------------------------------------------------
++# This file is part of bzip2/libbzip2, a program and library for
++# lossless, block-sorting data compression.
++#
++# bzip2/libbzip2 version 1.0.6 of 6 September 2010
++# Copyright (C) 1996-2010 Julian Seward <jseward@bzip.org>
++#
++# Please read the WARNING, DISCLAIMER and PATENTS sections in the 
++# README file.
++#
++# This program is released under the terms of the license contained
++# in the file LICENSE.
++# ------------------------------------------------------------------
++
++
++SHELL=/bin/sh
++ifndef CC
++CC=gcc
++endif
++BIGFILES=-D_FILE_OFFSET_BITS=64
++BZIP2_CFLAGS=-fpic -fPIC -Wall -Winline -O2 -g $(BIGFILES)
++BZIP2_LDFLAGS=
++
++ifdef CFLAGS
++BZIP2_CFLAGS+=$(CFLAGS)
++endif
++
++ifdef LDFLAGS
++BZIP2_LDFLAGS+=$(LDFLAGS)
++endif
++
++OBJS= blocksort.o  \
++      huffman.o    \
++      crctable.o   \
++      randtable.o  \
++      compress.o   \
++      decompress.o \
++      bzlib.o
++
++all: $(OBJS)
++	$(CC) $(BZIP2_LDFLAGS) -shared -Wl,-install_name -Wl,libbz2.1.0.dylib -o libbz2.1.0.6.dylib $(OBJS)
++	rm -f libbz2.1.0.dylib
++	rm -f libbz2.dylib
++	ln -s libbz2.1.0.6.dylib libbz2.1.0.dylib
++	ln -s libbz2.1.0.6.dylib libbz2.dylib
++
++clean: 
++	rm -f $(OBJS) libbz2.1.0.6.dylib libbz2.1.0.dylib libbz2.dylib
++
++install:
++	cp -f libbz2.1.0.6.dylib $(PREFIX)/lib
++	rm -f $(PREFIX)/lib/libbz2.1.0.dylib
++	rm -f $(PREFIX)/lib/libbz2.dylib
++	cp -R libbz2.1.0.dylib $(PREFIX)/lib/
++	cp -R libbz2.dylib $(PREFIX)/lib/
++
++blocksort.o: blocksort.c
++	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
++huffman.o: huffman.c
++	$(CC) $(BZIP2_CFLAGS) -c huffman.c
++crctable.o: crctable.c
++	$(CC) $(BZIP2_CFLAGS) -c crctable.c
++randtable.o: randtable.c
++	$(CC) $(BZIP2_CFLAGS) -c randtable.c
++compress.o: compress.c
++	$(CC) $(BZIP2_CFLAGS) -c compress.c
++decompress.o: decompress.c
++	$(CC) $(BZIP2_CFLAGS) -c decompress.c
++bzlib.o: bzlib.c
++	$(CC) $(BZIP2_CFLAGS) -c bzlib.c
+diff --git a/Makefile-libbz2_so b/Makefile-libbz2_so
+index e58791b..78e5291 100644
+--- a/Makefile-libbz2_so
++++ b/Makefile-libbz2_so
+@@ -22,9 +22,22 @@
+ 
+ 
+ SHELL=/bin/sh
++
++ifndef CC
+ CC=gcc
++endif
++
+ BIGFILES=-D_FILE_OFFSET_BITS=64
+-CFLAGS=-fpic -fPIC -Wall -Winline -O2 -g $(BIGFILES)
++BZIP2_CFLAGS=-fpic -fPIC -Wall -Winline -O2 -g $(BIGFILES)
++BZIP2_LDFLAGS=
++
++ifdef CFLAGS
++BZIP2_CFLAGS+=$(CFLAGS)
++endif
++
++ifdef LDFLAGS
++BZIP2_LDFLAGS+=$(CFLAGS)
++endif
+ 
+ OBJS= blocksort.o  \
+       huffman.o    \
+@@ -35,25 +48,29 @@ OBJS= blocksort.o  \
+       bzlib.o
+ 
+ all: $(OBJS)
+-	$(CC) -shared -Wl,-soname -Wl,libbz2.so.1.0 -o libbz2.so.1.0.6 $(OBJS)
+-	$(CC) $(CFLAGS) -o bzip2-shared bzip2.c libbz2.so.1.0.6
++	$(CC) $(BZIP2_LDFLAGS) -shared -Wl,-soname -Wl,libbz2.so.1.0 -o libbz2.so.1.0.6 $(OBJS)
++	$(CC) $(BZIP2_CFLAGS) $(BZIP2_LDFLAGS) -o bzip2-shared bzip2.c libbz2.so.1.0.6
+ 	rm -f libbz2.so.1.0
+ 	ln -s libbz2.so.1.0.6 libbz2.so.1.0
+ 
+ clean: 
+ 	rm -f $(OBJS) bzip2.o libbz2.so.1.0.6 libbz2.so.1.0 bzip2-shared
+ 
++install:
++	cp -f libbz2.so.1.0.6 $(PREFIX)/lib
++	ln -s $(PREFIX)/lib/libbz2.so.1.0.6 $(PREFIX)/lib/libbz2.so.1.0
++
+ blocksort.o: blocksort.c
+-	$(CC) $(CFLAGS) -c blocksort.c
++	$(CC) $(BZIP2_CFLAGS) -c blocksort.c
+ huffman.o: huffman.c
+-	$(CC) $(CFLAGS) -c huffman.c
++	$(CC) $(BZIP2_CFLAGS) -c huffman.c
+ crctable.o: crctable.c
+-	$(CC) $(CFLAGS) -c crctable.c
++	$(CC) $(BZIP2_CFLAGS) -c crctable.c
+ randtable.o: randtable.c
+-	$(CC) $(CFLAGS) -c randtable.c
++	$(CC) $(BZIP2_CFLAGS) -c randtable.c
+ compress.o: compress.c
+-	$(CC) $(CFLAGS) -c compress.c
++	$(CC) $(BZIP2_CFLAGS) -c compress.c
+ decompress.o: decompress.c
+-	$(CC) $(CFLAGS) -c decompress.c
++	$(CC) $(BZIP2_CFLAGS) -c decompress.c
+ bzlib.o: bzlib.c
+-	$(CC) $(CFLAGS) -c bzlib.c
++	$(CC) $(BZIP2_CFLAGS) -c bzlib.c
+diff --git a/bzip2.c b/bzip2.c
+index 6de9d1d..dc626a4 100644
+--- a/bzip2.c
++++ b/bzip2.c
+@@ -128,7 +128,7 @@
+ #if BZ_LCCWIN32
+ #   include <io.h>
+ #   include <fcntl.h>
+-#   include <sys\stat.h>
++#   include <sys/stat.h>
+ 
+ #   define NORETURN       /**/
+ #   define PATH_SEP       '\\'
+-- 
+1.8.1.2
+
