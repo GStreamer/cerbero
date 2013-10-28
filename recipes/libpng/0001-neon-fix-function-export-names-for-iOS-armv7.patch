@@ -1,0 +1,52 @@
+From efeee8d042eaacb8694296da17b7a069baadd07b Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 28 Oct 2013 13:26:35 +0100
+Subject: [PATCH] neon: fix function export names for iOS armv7
+
+---
+ arm/filter_neon.S |   16 +++++++++++-----
+ 1 files changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/arm/filter_neon.S b/arm/filter_neon.S
+index b8aef10..8794f0d 100644
+--- a/arm/filter_neon.S
++++ b/arm/filter_neon.S
+@@ -20,6 +20,12 @@
+ .section .note.GNU-stack,"",%progbits /* mark stack as non-executable */
+ #endif
+ 
++#if defined(__APPLE__)
++#define FUNC_PREFIX _
++#else
++#define FUNC_PREFIX
++#endif
++
+ #ifdef PNG_READ_SUPPORTED
+ #if PNG_ARM_NEON_OPT > 0
+ 
+@@ -34,17 +40,17 @@
+ 
+ .macro  func    name, export=0
+     .macro endfunc
+-ELF     .size   \name, . - \name
++ELF     .size   FUNC_PREFIX\name, . - FUNC_PREFIX\name
+         .endfunc
+         .purgem endfunc
+     .endm
+         .text
+     .if \export
+-        .global \name
++        .global FUNC_PREFIX\name
+     .endif
+-ELF     .type   \name, STT_FUNC
+-        .func   \name
+-\name:
++ELF     .type   FUNC_PREFIX\name, STT_FUNC
++        .func   FUNC_PREFIX\name
++FUNC_PREFIX\name:
+ .endm
+ 
+ func    png_read_filter_row_sub4_neon, export=1
+-- 
+1.7.4.4
+
