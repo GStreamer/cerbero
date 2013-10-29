@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/pub/gnu/gperf/gperf-3.0.4.tar.gz'
-    patches = ['gperf-01-ar.patch']
+    patches = ['gperf-0001-Don-t-override-environment-AR.patch']
 
     files_bins = ['gperf']
 
