@@ -17,9 +17,6 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']
 
     def prepare(self):
-        if self.config.target_platform == Platform.IOS:
-            if self.config.target_arch == Architecture.ARMv7:
-                self.append_env['CFLAGS'] = ' -DPIXMAN_NO_TLS'
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.configure_options = '--disable-arm-iwmmxt'
