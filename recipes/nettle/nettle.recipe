@@ -17,6 +17,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--enable-shared'
     deps = ['gmp']
+    patches = ['0001-ios-fix-build-using-.word-for-assembly-constants.patch']
 
     files_bins = ['nettle-hash', 'nettle-lfib-stream']
     files_libs = ['libnettle', 'libhogweed']
