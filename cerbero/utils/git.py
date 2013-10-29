@@ -204,8 +204,12 @@ def init_directory(git_dir):
     @type git_dir: str
     '''
     init(git_dir)
-    shell.call('%s add *' % GIT, git_dir)
-    shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT, git_dir)
+    try:
+        shell.call('%s add *' % GIT, git_dir)
+        shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT,
+            git_dir)
+    except:
+        pass
 
 
 def apply_patch(patch, git_dir):
