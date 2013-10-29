@@ -1,0 +1,39 @@
+From 9a20774d34736e9c5b7464ff9105001cf929c720 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 29 Oct 2013 01:41:43 +0100
+Subject: [PATCH 2/3] Add support for Android
+
+---
+ srclib/stdint.in.h | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/srclib/stdint.in.h b/srclib/stdint.in.h
+index b6d08c7..bd62bea 100644
+--- a/srclib/stdint.in.h
++++ b/srclib/stdint.in.h
+@@ -34,6 +34,16 @@
+    <inttypes.h>.  */
+ #define _GL_JUST_INCLUDE_SYSTEM_INTTYPES_H
+ 
++/* On Android (Bionic libc), <sys/types.h> includes this file before
++   having defined 'time_t'.  Therefore in this case avoid including
++   other system header files; just include the system's <stdint.h>.
++   Ideally we should test __BIONIC__ here, but it is only defined after
++   <sys/cdefs.h> has been included; hence test __ANDROID__ instead.  */
++#if defined __ANDROID__ \
++    && defined _SYS_TYPES_H_ && !defined _SSIZE_T_DEFINED_
++# @INCLUDE_NEXT@ @NEXT_STDINT_H@
++#else
++
+ /* Get those types that are already defined in other system include
+    files, so that we can "#define int8_t signed char" below without
+    worrying about a later system include file containing a "typedef
+@@ -603,4 +613,5 @@ typedef int _verify_intmax_size[sizeof (intmax_t) == sizeof (uintmax_t)
+ #endif /* !defined __cplusplus || defined __STDC_CONSTANT_MACROS */
+ 
+ #endif /* _@GUARD_PREFIX@_STDINT_H */
++#endif /* !(defined __ANDROID__ && ...) */
+ #endif /* !defined _@GUARD_PREFIX@_STDINT_H && !defined _GL_JUST_INCLUDE_SYSTEM_STDINT_H */
+-- 
+1.8.1.2
+

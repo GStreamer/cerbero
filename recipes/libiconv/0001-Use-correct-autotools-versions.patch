@@ -1,4 +1,4 @@
-From de6c08eedac8e0ed7bd7f8099ecb94cbee5d3e58 Mon Sep 17 00:00:00 2001
+From 14da1c1216fcbdecf4956d73e8be3278d0caaab4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Tue, 21 Aug 2012 13:37:42 +0200
 Subject: [PATCH 1/3] Use correct autotools versions
@@ -61,5 +61,5 @@ index 544059a..c8ac0a8 100644
  RM = rm -f
  
 -- 
-1.8.4
+1.8.1.2
 
