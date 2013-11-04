@@ -91,7 +91,8 @@ class Recipe(recipe.Recipe):
                                                        DistroVersion.UBUNTU_ONEIRIC,
                                                        DistroVersion.UBUNTU_PRECISE,
                                                        DistroVersion.UBUNTU_QUANTAL,
-                                                       DistroVersion.UBUNTU_RARING]:
+                                                       DistroVersion.UBUNTU_RARING,
+                                                       DistroVersion.UBUNTU_SAUCY]:
                 if self.config.target_arch == Architecture.X86:
                     mod_path2 = '/usr/lib/i386-linux-gnu/gtk-2.0'
                 elif self.config.target_arch == Architecture.X86_64:
