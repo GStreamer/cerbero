@@ -3,5 +3,4 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 target_platform=Platform.IOS
 target_arch=Architecture.UNIVERSAL
 target_distro=Distro.IOS
-target_distro_version=DistroVersion.IOS_7_0
 universal_archs=[Architecture.ARMv7, Architecture.X86]
