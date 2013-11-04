@@ -10,4 +10,4 @@ class Recipe(recipe.Recipe):
     files_bins = ['m4']
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error,-Wcast-align "
+        self.append_env['CFLAGS'] = " -Wno-error=cast-align "
