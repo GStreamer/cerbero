@@ -22,6 +22,7 @@ from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
 import shutil
+import re
 
 
 class Build (object):
@@ -315,6 +316,13 @@ class CMake (MakefilesBase):
                                       % (cc, cxx)
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' -G\\"Unix Makefiles\\"'
+
+        # FIXME: Maybe export the sysroot properly instead of doing regexp magic
+        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
+            r = re.compile(r".*-isysroot ([^ ]+) .*")
+            sysroot = r.match(cflags).group(1)
+            self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
+
         self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
         self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
