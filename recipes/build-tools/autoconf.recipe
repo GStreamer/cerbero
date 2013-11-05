@@ -18,5 +18,8 @@ class Recipe(recipe.Recipe):
     files_share = ['share/autoconf']
 
     def prepare(self):
+        # The m4 release we build is buggy in windows so we use the
+        # default one provided with mingw/msys
         if self.config.target_platform == Platform.WINDOWS:
             self.deps.remove('m4')
+            self.append_env['M4'] = '/bin/m4'
