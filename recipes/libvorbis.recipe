@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
                'libvorbis/0003-Link-the-other-libs-with-lm-too.patch',
                'libvorbis/0004-configure-check-for-endianness.patch',
                'libvorbis/0005-darwin-do-not-build-for-a-generic-arm-architecture.patch',
+               'libvorbis/0006-Use-our-version-of-automake-instead-of-some-random-o.patch'
               ]
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']
