@@ -6,7 +6,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
     autoreconf = True
-    config_sh = 'CFLAGS="$CFLAGS -fPIC" ./configure'
 
     files_libs = ['liba52']
     files_bins = ['a52dec']
@@ -15,3 +14,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
+
+        self.append_env['CFLAGS'] = " -fPIC "
