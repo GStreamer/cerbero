@@ -1,5 +1,5 @@
 From 593e8cc0b374aa7b20d3d961c57feb9bab508979 Mon Sep 17 00:00:00 2001
-From: =?utf8?q?Bernhard=20Rosenkr=C3=A4nzer?=
+From: =?UTF-8?q?Bernhard=20Rosenkr=C3=A4nzer?=
  <bernhard.rosenkranzer@linaro.org>
 Date: Sun, 30 Dec 2012 12:18:00 -0800
 Subject: [PATCH] Fix build on ARM with binutils >= 2.23.51.0.6 GAS doesn't
