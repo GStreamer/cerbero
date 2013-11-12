@@ -24,9 +24,9 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86_64:
-                self.configure_options = '--with-arch=x86_64'
+                self.configure_options += ' --with-arch=x86_64 '
             else:
-                self.configure_options = '--with-arch=i686'
+                self.configure_options += ' --with-arch=i686 '
 
     def post_install(self):
         # Create relative symlinks to prevent breakage during packaging
