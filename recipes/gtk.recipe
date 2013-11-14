@@ -37,6 +37,7 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: [
             'lib/pkgconfig/gtk+-x11-2.0.pc', 'lib/pkgconfig/gdk-x11-2.0.pc'],
         }
+    files_themes = ['lib/gtk-2.0/2.10.0/engines/libpixmap%(mext)s']
     platform_files_themes = {
         Platform.LINUX: [
             'share/themes/Default/gtk-2.0-key/gtkrc'],
