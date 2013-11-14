@@ -55,6 +55,10 @@ class GStreamerStatic(recipe.Recipe):
             f.extend(['%s/%s.la' % (plugin_path, x) for x in files])
             platform_files[self.config.target_platform] = f
             self._files_list.extend(f)
+        self.append_env ['CFLAGS'] = "%s %s" % (self.append_env.get('CFLAGS',
+            ''), '-fPIC -DPIC')
+        self.append_env ['CXXFLAGS'] = "%s %s" % (self.append_env.get('CFLAGS',
+            ''), '-fPIC -DPIC')
 
     def configure(self):
         if not os.path.exists(self.tmp_destdir):
