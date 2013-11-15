@@ -57,7 +57,7 @@ class GStreamerStatic(recipe.Recipe):
             self._files_list.extend(f)
         self.append_env ['CFLAGS'] = "%s %s" % (self.append_env.get('CFLAGS',
             ''), '-fPIC -DPIC')
-        self.append_env ['CXXFLAGS'] = "%s %s" % (self.append_env.get('CFLAGS',
+        self.append_env ['CXXFLAGS'] = "%s %s" % (self.append_env.get('CXXFLAGS',
             ''), '-fPIC -DPIC')
 
     def configure(self):
