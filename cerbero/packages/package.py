@@ -71,6 +71,8 @@ class PackageBase(object):
     @type resources_preinstall = str
     @cvar resources_postinstall = filename for the post-installation script
     @type resources_postinstall = str
+    @cvar resources_postremove = filename for the post-remove script
+    @type resources_postremove = str
     '''
     name = 'default'
     shortdesc = 'default'
@@ -93,6 +95,7 @@ class PackageBase(object):
     resources_background = 'background.png'
     resources_preinstall = 'preinstall'
     resources_postinstall = 'postinstall'
+    resources_postremove = 'postremove'
 
     def __init__(self, config, store):
         self.config = config
