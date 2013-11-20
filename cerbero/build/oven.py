@@ -100,12 +100,16 @@ class Oven (object):
                 stepfunc = getattr(recipe, step)
                 if not stepfunc:
                     raise FatalError(_('Step %s not found') % step)
+                shell.set_logfile_output("%s/%s-%s.log" % (recipe.config.logs, recipe, step))
                 stepfunc()
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
+                shell.close_logfile_output()
             except FatalError:
+                shell.close_logfile_output(dump=True)
                 self._handle_build_step_error(recipe, step)
             except Exception:
+                shell.close_logfile_output(dump=True)
                 raise BuildStepError(recipe, step, traceback.format_exc())
         self.cookbook.update_build_status(recipe.name, False)
 

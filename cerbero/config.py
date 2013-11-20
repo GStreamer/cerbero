@@ -71,7 +71,7 @@ class Config (object):
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
                    'toolchain_prefix', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
-                   'packages_dir', 'py_prefix',
+                   'packages_dir', 'py_prefix', 'logs',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
                    'use_configure_cache', 'packages_prefix', 'packager',
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
@@ -142,6 +142,7 @@ class Config (object):
         for c in self.arch_config.values():
             self._create_path(c.local_sources)
             self._create_path(c.sources)
+            self._create_path(c.logs)
 
     def do_setup_env(self):
         self._restore_environment()
@@ -400,6 +401,8 @@ class Config (object):
         self.set_property('prefix', os.path.join(self.home_dir, "dist",
             "%s_%s" % (self.target_platform, self.target_arch)))
         self.set_property('sources', os.path.join(self.home_dir, "sources",
+            "%s_%s" % (self.target_platform, self.target_arch)))
+        self.set_property('logs', os.path.join(self.home_dir, "logs",
             "%s_%s" % (self.target_platform, self.target_arch)))
         self.set_property('cache_file',
                 "%s_%s" % (self.target_platform, self.target_arch))
