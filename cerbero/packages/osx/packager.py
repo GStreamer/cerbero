@@ -355,7 +355,8 @@ class ApplicationPackage(PackagerBase):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
 
         self.tmp = tempfile.mkdtemp()
-        self.appdir = os.path.join(self.tmp, '%s.app' % self.package.app_name)
+        self.approot = os.path.join(self.tmp, 'app')
+        self.appdir = os.path.join(self.approot, '%s.app' % self.package.app_name)
 
         # copy files to the bundle. it needs to be done first because the app
         # bundle will try to create links for the main executable
@@ -363,10 +364,11 @@ class ApplicationPackage(PackagerBase):
         self._create_app_bundle()
         self._strip_binaries()
         self._relocate_binaries()
+        pkg = self._create_product()
         self._add_applications_link()
         dmg = self._create_dmg()
 
-        return [dmg, None]
+        return [dmg, pkg]
 
     def _create_bundle(self):
         '''
@@ -413,6 +415,30 @@ class ApplicationPackage(PackagerBase):
         # Create link to /Applications
         applications_link = os.path.join(self.tmp, 'Applications')
         shell.call('ln -s /Applications %s' % applications_link)
+
+    def _package_name(self, suffix):
+        return '%s-%s-%s%s' % (self.package.name, self.package.version,
+                self.config.target_arch, suffix)
+
+    def _create_product(self):
+        packagebuild = PackageBuild()
+        app_pkg_name = self._package_name('.pkg')
+        app_pkg = os.path.join(self.tmp, app_pkg_name)
+        packagebuild.create_package(self.approot, self.package.identifier(),
+            self.package.version, self.package.shortdesc, app_pkg,
+            '/Applications') #, scripts_path=resources)
+        self.package.packages = [(self.package.name, True, True)]
+        m.action(_("Creating Distribution.xml for package %s " % self.package))
+        distro = DistributionXML(self.package, self.store, self.tmp,
+            {self.package: app_pkg_name}, [], PackageType.RUNTIME,
+            self.config.target_arch, home_folder=False)
+        distro_path = tempfile.NamedTemporaryFile().name
+        distro.write(distro_path)
+        output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
+        output_file = os.path.abspath(output_file)
+        pb = ProductBuild()
+        pb.create_package(distro_path, output_file, self.tmp)
+        return output_file
 
     def _create_dmg(self):
         dmg_file = os.path.join(self.output_dir, '%s-%s-%s.dmg' % (

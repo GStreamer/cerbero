@@ -16,12 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-
 from cerbero.config import Architecture
-from cerbero.utils import etree, shell
-from cerbero.errors import FatalError
-from cerbero.packages import PackageType
+from cerbero.utils import etree
 
 
 class DistributionXML(object):
