@@ -140,6 +140,9 @@ class PackageBase(object):
         raise NotImplemented("'all_files_list' must be implemented by "
                              "subclasses")
 
+    def post_install(self, paths):
+        pass
+
     def set_mode(self, package_type):
         self.package_mode = package_type
 
