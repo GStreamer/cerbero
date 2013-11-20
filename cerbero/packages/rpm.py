@@ -78,6 +78,8 @@ export RPM_BUILD_DIR=%(sources_dir)s
 %%clean
 rm -rf $RPM_BUILD_ROOT
 
+%(scripts)s
+
 %%files
 %(files)s
 
@@ -133,6 +135,9 @@ rm -rf $RPM_BUILD_ROOT
 REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
 URL_TPL = 'URL: %s\n'
+PRE_TPL = '%%pre\n%s\n'
+POST_TPL = '%%post\n%s\n'
+POSTUN_TPL = '%%postun\n%s\n'
 
 
 class RPMPackager(LinuxPackager):
@@ -186,6 +191,14 @@ class RPMPackager(LinuxPackager):
             licenses.extend(self.recipes_licenses())
             licenses = sorted(list(set(licenses)))
 
+        scripts = ''
+        if os.path.exists(self.package.resources_postinstall):
+            scripts += POST_TPL % \
+                open(self.package.resources_postinstall).read()
+        if os.path.exists(self.package.resources_postremove):
+            scripts += POSTUN_TPL % \
+                open(self.package.resources_postremove).read()
+
         self._spec_str = template % {
                 'name': self.package.name,
                 'p_prefix': self.package_prefix,
@@ -206,7 +219,8 @@ class RPMPackager(LinuxPackager):
                 'devel_package': devel_package,
                 'devel_files': devel_files,
                 'files': runtime_files,
-                'sources_dir': self.config.sources}
+                'sources_dir': self.config.sources,
+                'scripts': scripts}
 
         self.spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
         with open(self.spec_path, 'w') as f:
