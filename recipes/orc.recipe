@@ -4,6 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'orc'
     version = '0.4.18'
+    commit = 'orc-0.4.18'
     licenses = [License.BSD_like]
     autoreconf = True
 
@@ -12,3 +13,6 @@ class Recipe(recipe.Recipe):
         'bin/orc-bugreport%(bext)s', 'share/aclocal/orc.m4',
         'bin/orcc%(bext)s']
 
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'orc'))
+        self.remotes['upstream'] = self.remotes['origin']
