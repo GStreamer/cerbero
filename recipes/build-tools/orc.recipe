@@ -3,7 +3,8 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
-    version = '0.4.16'
+    version = '0.4.18'
+    commit = 'orc-0.4.18'
     licenses = [License.BSD_like]
     autoreconf = True
     deps = ['autoconf', 'automake', 'libtool']
@@ -14,4 +15,5 @@ class Recipe(recipe.Recipe):
         'bin/orcc%(bext)s']
 
     def prepare(self):
-        self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, 'orc'))
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'orc'))
+        self.remotes['upstream'] = self.remotes['origin']
