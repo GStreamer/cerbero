@@ -32,7 +32,7 @@ class MSBuild(object):
             self.properties['Platform'] = 'Win32'
         elif arch == Architecture.X86_64:
             self.properties['Platform'] = 'x64'
-        self.properties['Config'] = config
+        self.properties['Configuration'] = config
         self.properties['PlatformToolset'] = sdk
         self.properties.update(properties)
         self.solution = solution
