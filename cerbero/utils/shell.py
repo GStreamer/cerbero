@@ -42,13 +42,29 @@ PLATFORM = system_info()[0]
 LOGFILE = None  # open('/tmp/cerbero.log', 'w+')
 DRY_RUN = False
 
+
 def set_logfile_output(location):
+    '''
+    Sets a file to log
+
+    @param location: path for the log file
+    @type location: str
+    '''
+
     global LOGFILE
     if not LOGFILE is None:
-        raise Exception("Logfile was already open. Forgot to call close_logfile_output() ?")
+        raise Exception("Logfile was already open. Forgot to call "
+                        "close_logfile_output() ?")
     LOGFILE = open(location, "w+")
 
+
 def close_logfile_output(dump=False):
+    '''
+    Close the current log file
+
+    @param dump: dump the log file to stdout
+    @type dump: bool
+    '''
     global LOGFILE
     if LOGFILE is None:
         raise Exception("No logfile was open")
@@ -121,7 +137,7 @@ def call(cmd, cmd_dir='.', fail=True):
         stream = LOGFILE or sys.stdout
         if DRY_RUN:
             # write to sdterr so it's filtered more easilly
-            m.error ("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+            m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
             ret = 0
         else:
             ret = subprocess.check_call(cmd, cwd=cmd_dir,
