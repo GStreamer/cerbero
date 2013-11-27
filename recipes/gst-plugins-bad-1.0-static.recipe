@@ -58,6 +58,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstvideoparsersbad',
              'libgsty4mdec',
              'libgstjpegformat',
+             'libgstgdp',
     ]
 
     platform_files_plugins_codecs_devel = {

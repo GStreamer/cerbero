@@ -60,6 +60,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstvideoparsersbad%(mext)s',
              'lib/gstreamer-1.0/libgsty4mdec%(mext)s',
              'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
+             'lib/gstreamer-1.0/libgstgdp%(mext)s',
              '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
              '%(sdir)s/libgsturidownloader-1.0%(sext)s',
     ]
