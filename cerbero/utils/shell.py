@@ -216,7 +216,7 @@ def download(url, destination=None, recursive=False, check_cert=True):
             logging.info("File %s already downloaded." % destination)
     else:
         if LOGFILE:
-            LOGFILE.write("Downloading %s\n", url)
+            LOGFILE.write("Downloading %s\n" % url)
         else:
             logging.info("Downloading %s", url)
         try:
