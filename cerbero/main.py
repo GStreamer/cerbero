@@ -40,7 +40,6 @@ from cerbero.utils import messages as m
 description = N_('Build and package a set of modules to distribute them in '
                  'a SDK')
 
-
 class Main(object):
 
     def __init__(self, args):
@@ -82,6 +81,9 @@ class Main(object):
 
     def parse_arguments(self, args):
         ''' Parse the command line arguments '''
+        # If no commands, make it show the help by default
+        if len(args) == 0:
+            args = ["-h"]
         self.args = self.parser.parse_args(args)
 
     def load_commands(self):
