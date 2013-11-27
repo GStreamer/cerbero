@@ -29,10 +29,11 @@ class UnixBootstraper (BootstraperBase):
     distro_packages = {}
 
     def start(self):
-        packages = self.packages
-        if self.config.distro_version in self.distro_packages:
-            packages += self.distro_packages[self.config.distro_version]
-        shell.call(self.tool % ' '.join(self.packages))
+        if self.config.distro_packages_install:
+            packages = self.packages
+            if self.config.distro_version in self.distro_packages:
+                packages += self.distro_packages[self.config.distro_version]
+            shell.call(self.tool % ' '.join(self.packages))
 
 
 class DebianBootstraper (UnixBootstraper):
