@@ -38,11 +38,12 @@ class AndroidBootstraper (BootstraperBase):
         except:
             pass
         shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
-        try:
-            shell.call('tar -xvjf %s' % ndk_tar, dest)
-            shell.call('mv android-ndk-r9c/* .', dest)
-        except Exception:
-            pass
+        if not os.path.exists(os.path.join(dest, "README.TXT")):
+            try:
+                shell.call('tar -xvjf %s' % ndk_tar, dest)
+                shell.call('mv android-ndk-r9c/* .', dest)
+            except Exception:
+                pass
 
 
 def register_all():
