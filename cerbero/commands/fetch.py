@@ -19,36 +19,27 @@
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
+from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates
 from cerbero.utils import messages as m
 
 
 class Fetch(Command):
-    doc = N_('Fetch the recipes sources')
-    name = 'fetch'
 
-    def __init__(self):
-            args = [
-                ArgparseArgument('recipes', nargs='*',
-                    help=_('list of the recipes to fetch (fetch all if none '
-                           'is passed)')),
-                ArgparseArgument('--no-deps', action='store_true',
-                    default=False, help=_('do not fetch dependencies')),
-                ArgparseArgument('--reset-rdeps', action='store_true',
+    def __init__(self, args=[]):
+        args.append(ArgparseArgument('--reset-rdeps', action='store_true',
                     default=False, help=_('reset the status of reverse '
-                    'dependencies too')),
-                ]
-            Command.__init__(self, args)
+                    'dependencies too')))
+        Command.__init__(self, args)
 
-    def run(self, config, args):
-        cookbook = CookBook(config)
+    def fetch(self, cookbook, recipes, no_deps, reset_rdeps):
         fetch_recipes = []
-        if not args.recipes:
+        if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
-        elif args.no_deps:
-            fetch_recipes = [cookbook.get_recipe(x) for x in args.recipes]
+        elif no_deps:
+            fetch_recipes = [cookbook.get_recipe(x) for x in recipes]
         else:
-            for recipe in args.recipes:
+            for recipe in recipes:
                 fetch_recipes += cookbook.list_recipe_deps(recipe)
             fetch_recipes = remove_list_duplicates (fetch_recipes)
         m.message(_("Fetching the following recipes: %s") %
@@ -60,11 +51,10 @@ class Fetch(Command):
             recipe.fetch()
             bv = cookbook.recipe_built_version(recipe.name)
             cv = recipe.built_version()
-            print bv, cv
             if not cookbook.recipe_needs_build(recipe.name) and bv != cv:
                 to_rebuild.append(recipe)
                 cookbook.reset_recipe_status(recipe.name)
-                if args.reset_rdeps:
+                if reset_rdeps:
                      for r in cookbook.list_recipe_reverse_deps(recipe.name):
                         to_rebuild.append(r)
                         cookbook.reset_recipe_status(r.name)
@@ -75,4 +65,43 @@ class Fetch(Command):
                         '\n'.join([x.name for x in to_rebuild]))
 
 
-register_command(Fetch)
+class FetchRecipes(Fetch):
+    doc = N_('Fetch the recipes sources')
+    name = 'fetch'
+
+    def __init__(self):
+        args = [
+                ArgparseArgument('recipes', nargs='*',
+                    help=_('list of the recipes to fetch (fetch all if none '
+                           'is passed)')),
+                ArgparseArgument('--no-deps', action='store_true',
+                    default=False, help=_('do not fetch dependencies')),
+                ]
+        Fetch.__init__(self, args)
+
+    def run(self, config, args):
+        cookbook = CookBook(config)
+        return self.fetch(cookbook, args.recipes, args.no_deps,
+                args.reset_rdeps)
+
+
+class FetchPackage(Fetch):
+    doc = N_('Fetch the recipes sources from a package')
+    name = 'fetch-package'
+
+    def __init__(self):
+        args = [
+                ArgparseArgument('package', nargs=1,
+                    help=_('package to fetch')),
+                ]
+        Fetch.__init__(self, args)
+
+    def run(self, config, args):
+        store = PackagesStore(config)
+        package = store.get_package(args.package[0])
+        return self.fetch(store.cookbook, package.recipes_dependencies(),
+                True, args.reset_rdeps)
+
+
+register_command(FetchRecipes)
+register_command(FetchPackage)
