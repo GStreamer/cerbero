@@ -109,10 +109,6 @@ def fetch(git_dir, fail=True):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    # Remove all tags in case they have been updated, because
-    # git won't fetch tags if they are already fetched
-    for tagname in list_tags(git_dir, fail):
-        delete_tag(git_dir, tagname, fail)
     return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
 
