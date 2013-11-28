@@ -106,10 +106,12 @@ class PackageTest(unittest.TestCase):
         recipe = Recipe1(self.config)
         self.cookbook.add_recipe(recipe)
         self.cookbook._restore_cache()
-        self.cookbook.update_build_status(recipe.name, True)
+        self.cookbook.update_build_status(recipe.name, '1.0')
         self.assertTrue(self.cookbook.status[recipe.name].needs_build)
-        self.cookbook.update_build_status(recipe.name, False)
+        self.assertEquals(self.cookbook.status[recipe.name].built_version, '1.0')
+        self.cookbook.update_build_status(recipe.name, None)
         self.assertFalse(self.cookbook.status[recipe.name].needs_build)
+        self.assertEquals(self.cookbook.status[recipe.name].built_version, None)
 
     def testResetRecipeStatus(self):
         recipe = Recipe1(self.config)

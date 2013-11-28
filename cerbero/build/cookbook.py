@@ -48,16 +48,19 @@ class RecipeStatus (object):
     @ivar mtime: modification time of the recipe file, used to reset the
                  state when the recipe was modified
     @type mtime: float
-    @iver filepath: recipe's file path
+    @ivar filepath: recipe's file path
     @type filepath: str
+    @ivar built_version: string with the last version built
+    @type built_version: str
     '''
 
     def __init__(self, filepath, steps=[], needs_build=True,
-                 mtime=time.time()):
+                 mtime=time.time(), built_version=None):
         self.steps = steps
         self.needs_build = needs_build
         self.mtime = mtime
         self.filepath = filepath
+        self.built_version = built_version
 
     def touch(self):
         ''' Touches the recipe updating its modification time '''
@@ -175,20 +178,33 @@ class CookBook (object):
         self.status[recipe_name] = status
         self.save()
 
-    def update_build_status(self, recipe_name, needs_build):
+    def update_build_status(self, recipe_name, built_version):
         '''
         Updates the recipe's build status
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
-        @param needs_build: wheter it's already built or not
-        @type needs_build: str
+        @param built_version: built version ir None to reset it
+        @type built_version: str
         '''
         status = self._recipe_status(recipe_name)
-        status.needs_build = needs_build
+        status.needs_build = built_version == None
+        status.built_version = built_version
         status.touch()
         self.status[recipe_name] = status
         self.save()
+
+    def recipe_built_version (self, recipe_name):
+        '''
+        Get the las built version of a recipe from the build status
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        '''
+        try:
+            return self._recipe_status(recipe_name).built_version
+        except:
+            return None
 
     def step_done(self, recipe_name, step):
         '''

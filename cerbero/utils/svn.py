@@ -53,3 +53,16 @@ def checkout_file(url, out_path):
     @type revision: str
     '''
     shell.call('svn export --force %s %s' % (url, out_path))
+
+
+def revision(repo):
+    '''
+    Get the current revision of a repository with svnversion
+
+    @param repo: the path to the repository
+    @type  repo: str
+    '''
+    rev = shell.check_call('svnversion', repo).split('\n')[0]
+    if rev[-1] == 'M':
+        rev = rev[:-1]
+    return rev

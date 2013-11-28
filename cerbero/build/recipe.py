@@ -164,6 +164,17 @@ class Recipe(FilesProvider):
         '''
         pass
 
+    def built_version(self):
+        '''
+        Gets the current built version of the recipe.
+        Sources can override it to provide extended info in the version
+        such as the commit hash for recipes using git and building against
+        master: eg (1.2.0~git+2345435)
+        '''
+        if hasattr(self.stype, 'built_version'):
+            return self.stype.built_version(self)
+        return self.version
+
     def list_deps(self):
         '''
         List all dependencies including conditional dependencies

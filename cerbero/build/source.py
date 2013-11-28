@@ -152,6 +152,9 @@ class GitCache (Source):
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
 
+    def built_version(self):
+        return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit))
+
 
 class LocalTarball (GitCache):
     '''
@@ -305,6 +308,9 @@ class Svn(Source):
             return
 
         shutil.copytree(self.repo_dir, self.build_dir)
+
+    def built_version(self):
+        return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))
 
 
 class SourceType (object):
