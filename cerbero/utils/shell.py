@@ -27,6 +27,7 @@ import tempfile
 import time
 import glob
 import shutil
+import hashlib
 
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
@@ -371,3 +372,10 @@ def touch(path, create_if_not_exists=False, offset=0):
             return
     t = time.time() + offset
     os.utime(path, (t, t))
+
+
+def file_hash(path):
+    '''
+    Get the file md5 hash
+    '''
+    return hashlib.md5(open(path, 'rb').read()).digest()

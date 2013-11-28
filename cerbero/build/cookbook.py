@@ -52,15 +52,18 @@ class RecipeStatus (object):
     @type filepath: str
     @ivar built_version: string with the last version built
     @type built_version: str
+    @ivar file_hash: hash of the file with the recipe description
+    @type file_hash: int
     '''
 
     def __init__(self, filepath, steps=[], needs_build=True,
-                 mtime=time.time(), built_version=None):
+                 mtime=time.time(), built_version=None, file_hash=0):
         self.steps = steps
         self.needs_build = needs_build
         self.mtime = mtime
         self.filepath = filepath
         self.built_version = built_version
+        self.file_hash = file_hash
 
     def touch(self):
         ''' Touches the recipe updating its modification time '''
@@ -317,7 +320,8 @@ class CookBook (object):
             filepath = None
             if hasattr(recipe, '__file__'):
                 filepath = recipe.__file__
-            self.status[recipe_name] = RecipeStatus(filepath, steps=[])
+            self.status[recipe_name] = RecipeStatus(filepath, steps=[],
+                    file_hash=shell.file_hash(filepath))
         return self.status[recipe_name]
 
     def _load_recipes(self):
@@ -343,7 +347,15 @@ class CookBook (object):
             else:
                 rmtime = os.path.getmtime(recipe.__file__)
                 if rmtime > st.mtime:
-                    self.reset_recipe_status(recipe.name)
+                    # The mtime is different, check the file hash now
+                    # Use getattr as file_hash we added later
+                    saved_hash = getattr(st, 'file_hash', 0)
+                    current_hash = shell.file_hash(st.filepath)
+                    if saved_hash == current_hash:
+                        # Update the status with the mtime
+                        st.touch()
+                    else:
+                        self.reset_recipe_status(recipe.name)
 
     def _load_recipes_from_dir(self, repo):
         recipes = {}
