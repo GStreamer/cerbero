@@ -4,5 +4,5 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 target_arch=Architecture.X86
 cache_file='mingw-w32-lin'
 prefix=os.path.expanduser('~/mingw/linux/w32')
-sources=os.path.expanduser('~/cerbero/sources/mingw-w32-lin')
+sources=os.path.join(home_dir, 'sources', 'mingw-w32-lin')
 recipes_dir = os.path.join(recipes_dir, 'toolchain')

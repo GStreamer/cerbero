@@ -1,5 +1,5 @@
 import os
 
-prefix = os.path.expanduser('~/cerbero/build-tools')
-sources = os.path.expanduser('~/cerbero/sources/build-tools')
+prefix = os.path.join(home_dir, 'build-tools')
+sources = os.path.join(home_dir, 'sources', 'build-tools')
 cache_file = 'build-tools'
