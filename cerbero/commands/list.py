@@ -54,6 +54,17 @@ class ListPackages(Command):
         for p in packages:
             m.message("%s - %s" % (p.name, p.version))
 
+class ShowConfig(Command):
+    doc = N_('Show configuration settings')
+    name = 'show-config'
+
+    def __init__(self):
+        Command.__init__(self, [])
+
+    def run(self, config, args):
+        for n in config._properties:
+            print "%25s : %s" % (n, getattr(config, n))
 
 register_command(List)
 register_command(ListPackages)
+register_command(ShowConfig)
