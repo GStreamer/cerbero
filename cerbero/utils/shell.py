@@ -350,6 +350,17 @@ def prompt(message, options=[]):
     return res
 
 
+def prompt_multiple(message, options):
+    ''' Prompts the user for input with using a list of string options'''
+    output = message + '\n'
+    for i in range(len(options)):
+        output += "[%s] %s\n" % (i, options[i])
+    res = raw_input(output)
+    while res not in [str(x) for x in range(len(options))]:
+        res = raw_input(output)
+    return options[int(res)]
+
+
 def copy_dir(src, dest):
     if not os.path.exists(src):
         return

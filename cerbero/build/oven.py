@@ -20,10 +20,27 @@ import tempfile
 import shutil
 import traceback
 
-from cerbero.errors import BuildStepError, FatalError
+from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
-from cerbero.utils import _, shell
+from cerbero.utils import _, N_, shell
 from cerbero.utils import messages as m
+
+
+class RecoveryActions(object):
+    '''
+    Enumeration factory for recovery actions after an error
+    '''
+
+    SHELL = N_("Enter the shell")
+    RETRY_ALL = N_("Rebuild the recipe from scratch")
+    RETRY_STEP = N_("Rebuild starting from the failed step")
+    SKIP = N_("Skip recipe")
+    ABORT = N_("Abort")
+
+    def __new__(klass):
+        return [RecoveryActions.SHELL, RecoveryActions.RETRY_ALL,
+                RecoveryActions.RETRY_STEP, RecoveryActions.SKIP,
+                RecoveryActions.ABORT]
 
 
 class Oven (object):
@@ -53,6 +70,8 @@ class Oven (object):
         self.force = force
         self.no_deps = no_deps
         self.missing_files = missing_files
+        self.config = cookbook.get_config()
+        self.interactive = self.config.interactive
         shell.DRY_RUN = dry_run
 
     def start_cooking(self):
@@ -74,7 +93,27 @@ class Oven (object):
 
         i = 1
         for recipe in ordered_recipes:
-            self._cook_recipe(recipe, i, len(ordered_recipes))
+            try:
+                self._cook_recipe(recipe, i, len(ordered_recipes))
+            except BuildStepError, be:
+                if not self.interactive:
+                    raise be
+                msg = be.msg
+                msg += _("Select an action to proceed:")
+                action = shell.prompt_multiple(msg, RecoveryActions())
+                if action == RecoveryActions.SHELL:
+                    shell.enter_build_environment()
+                    break
+                elif action == RecoveryActions.RETRY_ALL:
+                    shutil.rmtree(recipe.build_dir)
+                    self.cookbook.reset_recipe_status(recipe.name)
+                    self._cook_recipe(recipe, i, len(ordered_recipes))
+                elif action == RecoveryActions.RETRY_STEP:
+                    self._cook_recipe(recipe, i, len(ordered_recipes))
+                elif action == RecoveryActions.SKIP:
+                    continue
+                elif action == RecoveryActions.ABORT:
+                    raise AbortedError()
             i += 1
 
     def _cook_recipe(self, recipe, count, total):
@@ -94,7 +133,6 @@ class Oven (object):
             if self.cookbook.step_done(recipe.name, step) and not self.force:
                 m.action(_("Step done"))
                 continue
-
             try:
                 # call step function
                 stepfunc = getattr(recipe, step)

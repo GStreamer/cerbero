@@ -33,7 +33,7 @@ import os
 
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
-    ConfigurationError, CerberoException
+    ConfigurationError, CerberoException, AbortedError
 from cerbero.utils import _, N_, user_is_root
 from cerbero.utils import messages as m
 
@@ -111,6 +111,8 @@ class Main(object):
             self.log_error(exc, True, command)
         except BuildStepError, exc:
             self.log_error(exc.msg, False, command)
+        except AbortedError, exc:
+            self.log_error('', False, command)
         except CerberoException, exc:
             self.log_error(exc, False, command)
         except KeyboardInterrupt:
