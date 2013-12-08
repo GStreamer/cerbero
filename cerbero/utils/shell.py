@@ -379,3 +379,17 @@ def file_hash(path):
     Get the file md5 hash
     '''
     return hashlib.md5(open(path, 'rb').read()).digest()
+
+
+def enter_build_environment():
+    '''
+    Enters to a new shell with the build environment
+    '''
+    if PLATFORM == Platform.WINDOWS:
+        # $MINGW_PREFIX/home/username
+        msys = os.path.join(os.path.expanduser('~'),
+                            '..', '..', 'msys.bat')
+        subprocess.check_call('%s -noxvrt' % msys)
+    else:
+        shell = os.environ.get('SHELL', '/bin/bash')
+        os.execlp(shell, shell)

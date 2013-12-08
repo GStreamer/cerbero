@@ -16,12 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-import subprocess
-
-from cerbero.config import Platform
 from cerbero.commands import Command, register_command
-from cerbero.utils import N_
+from cerbero.utils import N_, shell
 
 
 class Shell(Command):
@@ -32,13 +28,7 @@ class Shell(Command):
         Command.__init__(self, [])
 
     def run(self, config, args):
-        if config.platform == Platform.WINDOWS:
-            # $MINGW_PREFIX/home/username
-            msys = os.path.join(os.path.expanduser('~'),
-                                '..', '..', 'msys.bat')
-            subprocess.check_call('%s -noxvrt' % msys)
-        else:
-            shell = os.environ.get('SHELL', '/bin/bash')
-            os.execlp(shell, shell)
+        shell.enter_build_environment()
+
 
 register_command(Shell)
