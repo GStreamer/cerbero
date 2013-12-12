@@ -392,10 +392,21 @@ def file_hash(path):
     return hashlib.md5(open(path, 'rb').read()).digest()
 
 
-def enter_build_environment():
+def enter_build_environment(platform, arch):
     '''
     Enters to a new shell with the build environment
     '''
+    BASHRC =  '''
+if [ -e ~/.bashrc ]; then
+source ~/.bashrc
+fi
+PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+'''
+
+    bashrc = tempfile.NamedTemporaryFile()
+    bashrc.write(BASHRC % (platform, arch))
+    bashrc.flush()
+
     if PLATFORM == Platform.WINDOWS:
         # $MINGW_PREFIX/home/username
         msys = os.path.join(os.path.expanduser('~'),
@@ -403,4 +414,4 @@ def enter_build_environment():
         subprocess.check_call('%s -noxvrt' % msys)
     else:
         shell = os.environ.get('SHELL', '/bin/bash')
-        os.execlp(shell, shell)
+        os.execlp(shell, shell, '--rcfile', bashrc.name)

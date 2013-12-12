@@ -28,7 +28,8 @@ class Shell(Command):
         Command.__init__(self, [])
 
     def run(self, config, args):
-        shell.enter_build_environment()
+        shell.enter_build_environment(config.target_platform,
+                config.target_arch)
 
 
 register_command(Shell)

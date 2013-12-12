@@ -102,7 +102,8 @@ class Oven (object):
                 msg += _("Select an action to proceed:")
                 action = shell.prompt_multiple(msg, RecoveryActions())
                 if action == RecoveryActions.SHELL:
-                    shell.enter_build_environment()
+                    shell.enter_build_environment(self.config.target_platform,
+                            self.config.target_arch)
                     break
                 elif action == RecoveryActions.RETRY_ALL:
                     shutil.rmtree(recipe.build_dir)
