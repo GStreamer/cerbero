@@ -392,7 +392,7 @@ def file_hash(path):
     return hashlib.md5(open(path, 'rb').read()).digest()
 
 
-def enter_build_environment(platform, arch):
+def enter_build_environment(platform, arch, sourcedir=None):
     '''
     Enters to a new shell with the build environment
     '''
@@ -406,6 +406,9 @@ PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ 
     bashrc = tempfile.NamedTemporaryFile()
     bashrc.write(BASHRC % (platform, arch))
     bashrc.flush()
+
+    if sourcedir:
+        os.chdir(sourcedir)
 
     if PLATFORM == Platform.WINDOWS:
         # $MINGW_PREFIX/home/username
