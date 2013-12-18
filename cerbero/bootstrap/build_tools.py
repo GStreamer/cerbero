@@ -65,6 +65,7 @@ class BuildTools (BootstraperBase):
         os.environ.clear()
         os.environ.update(self.config._pre_environ)
         config.prefix = self.config.build_tools_prefix
+        config.home_dir = self.config.home_dir
         config.load()
         config.build_tools_prefix = self.config.build_tools_prefix
         config.sources = self.config.build_tools_sources

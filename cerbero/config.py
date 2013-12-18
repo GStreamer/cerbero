@@ -406,7 +406,7 @@ class Config (object):
         self.set_property('logs', os.path.join(self.home_dir, "logs",
             "%s_%s" % (self.target_platform, self.target_arch)))
         self.set_property('cache_file',
-                "%s_%s" % (self.target_platform, self.target_arch))
+                "%s_%s.cache" % (self.target_platform, self.target_arch))
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources',
                 os.path.join(self.home_dir, 'sources', 'local'))
@@ -414,7 +414,7 @@ class Config (object):
                 os.path.join(self.home_dir, 'build-tools'))
         self.set_property('build_tools_sources',
                 os.path.join(self.home_dir, 'sources', 'build-tools'))
-        self.set_property('build_tools_cache', 'build-tools')
+        self.set_property('build_tools_cache', 'build-tools.cache')
 
     def _find_data_dir(self):
         if self.uninstalled:
