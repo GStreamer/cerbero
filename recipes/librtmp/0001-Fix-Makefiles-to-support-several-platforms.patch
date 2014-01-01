@@ -1,0 +1,137 @@
+From b5d245366a0c18004cec1294962dda6f3494954f Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Wed, 1 Jan 2014 20:51:19 +0100
+Subject: [PATCH] Fix Makefiles to support several platforms
+
+---
+ librtmp/Makefile | 82 +++++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 48 insertions(+), 34 deletions(-)
+
+diff --git a/librtmp/Makefile b/librtmp/Makefile
+index 6774db7..d864d6b 100644
+--- a/librtmp/Makefile
++++ b/librtmp/Makefile
+@@ -1,13 +1,26 @@
+ VERSION=v2.3
+ 
++ifndef prefix
+ prefix=/usr/local
+-
+-CC=$(CROSS_COMPILE)gcc
+-LD=$(CROSS_COMPILE)ld
+-AR=$(CROSS_COMPILE)ar
+-
++endif
++
++ifndef CC
++CC=gcc
++endif
++ifndef LD
++LD=ld
++endif
++ifndef AR
++AR=ar
++endif
++
++ifndef SYS
+ SYS=posix
++endif
++
++ifndef CRYPTO
+ CRYPTO=OPENSSL
++endif
+ #CRYPTO=GNUTLS
+ DEF_POLARSSL=-DUSE_POLARSSL
+ DEF_OPENSSL=-DUSE_OPENSSL
+@@ -25,21 +38,29 @@ CRYPTO_LIB=$(LIB_$(CRYPTO)) $(LIBS_$(SYS))
+ CRYPTO_REQ=$(REQ_$(CRYPTO))
+ CRYPTO_DEF=$(DEF_$(CRYPTO))
+ 
+-SO_posix=so.0
+-SO_mingw=dll
+-SO_EXT=$(SO_$(SYS))
+-
+-SHARED=yes
+-SODEF_yes=-fPIC
+-SOLIB_yes=librtmp.$(SO_EXT)
+-SOINST_yes=install_$(SO_EXT)
+-SO_DEF=$(SODEF_$(SHARED))
+-SO_LIB=$(SOLIB_$(SHARED))
+-SO_INST=$(SOINST_$(SHARED))
+-
+-DEF=-DRTMPDUMP_VERSION=\"$(VERSION)\" $(CRYPTO_DEF) $(XDEF)
+-OPT=-O2
+-CFLAGS=-Wall $(XCFLAGS) $(INC) $(DEF) $(OPT) $(SO_DEF)
++ifeq ($(SYS),posix)
++LIBRTMP=librtmp.so.0
++LIBRTMP_L=librtmp.so
++EXTRA_LDFLAGS=-Wl,-soname,$(LIBRTMP)
++CREATE_L=ln -sf $(LIBRTMP) $(LIBRTMP_L)
++INSTALL_LIB=cp $(LIBRTMP) $(LIBDIR)
++endif
++ifeq ($(SYS),mingw)
++LIBRTMP=librtmp.dll
++LIBRTMP_L=librtmp.dll.a
++EXTRA_LDFLAGS=-Wl,--out-implib,$(LIBRTMP_L)
++CREATE_L=
++INSTALL_LIB=cp $(LIBRTMP) $(BINDIR)
++endif
++ifeq ($(SYS),darwin)
++LIBRTMP=librtmp.0.dylib
++LIBRTMP_L=librtmp.dylib
++CREATE_L=ln -sf $(LIBRTMP) $(LIBRTMP_L)
++INSTALL_LIB=cp $(LIBRTMP) $(LIBDIR)
++endif
++INSTALL_L=cp $(LIBRTMP_L) $(LIBDIR)
++
++CFLAGS:=$(CFLAGS) -fPIC -DRTMPDUMP_VERSION=\"$(VERSION)\" $(CRYPTO_DEF)
+ 
+ incdir=$(prefix)/include/librtmp
+ bindir=$(prefix)/bin
+@@ -52,7 +73,7 @@ MANDIR=$(DESTDIR)$(mandir)
+ 
+ OBJS=rtmp.o log.o amf.o hashswf.o parseurl.o
+ 
+-all:	librtmp.a $(SO_LIB)
++all:	librtmp.a $(LIBRTMP)
+ 
+ clean:
+ 	rm -f *.o *.a *.so *.$(SO_EXT)
+@@ -60,9 +81,9 @@ clean:
+ librtmp.a: $(OBJS)
+ 	$(AR) rs $@ $?
+ 
+-librtmp.$(SO_EXT): $(OBJS)
+-	$(CC) -shared -Wl,-soname,$@ $(LDFLAGS) -o $@ $^ $> $(CRYPTO_LIB)
+-	ln -sf $@ librtmp.so
++$(LIBRTMP): $(OBJS)
++	$(CC) -shared $(EXTRA_LDFLAGS) $(LDFLAGS) -o $@ $^ $> $(CRYPTO_LIB)
++	$(CREATE_L)
+ 
+ log.o: log.c log.h Makefile
+ rtmp.o: rtmp.c rtmp.h rtmp_sys.h handshake.h dh.h log.h amf.h Makefile
+@@ -74,18 +95,11 @@ librtmp.pc: librtmp.pc.in Makefile
+ 	sed -e "s;@prefix@;$(prefix);" -e "s;@VERSION@;$(VERSION);" \
+ 		-e "s;@CRYPTO_REQ@;$(CRYPTO_REQ);" librtmp.pc.in > $@
+ 
+-install:	install_base $(SO_INST)
+-
+-install_base:	librtmp.a librtmp.pc
++install: librtmp.a librtmp.pc
+ 	-mkdir -p $(INCDIR) $(LIBDIR)/pkgconfig $(MANDIR)/man3
+ 	cp amf.h http.h log.h rtmp.h $(INCDIR)
+ 	cp librtmp.a $(LIBDIR)
+ 	cp librtmp.pc $(LIBDIR)/pkgconfig
+ 	cp librtmp.3 $(MANDIR)/man3
+-
+-install_so.0:	librtmp.so.0
+-	cp librtmp.so.0 $(LIBDIR)
+-	cd $(LIBDIR); ln -sf librtmp.so.0 librtmp.so
+-
+-install_dll:	librtmp.dll
+-	cp librtmp.dll $(BINDIR)
++	$(INSTALL_LIB)
++	$(INSTALL_L)
+-- 
+1.8.3.2
+
