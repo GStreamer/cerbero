@@ -3,8 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libgpg-error'
-    version = '1.10'
+    version = '1.12'
     licenses = [License.LGPLv2_1Plus]
+    stype = SourceType.TARBALL
+    url = 'ftp://ftp.gnupg.org/gcrypt/libgpg-error/libgpg-error-%(version)s.tar.bz2'
 
     files_libs = ['libgpg-error']
     files_bins = ['gpg-error']
