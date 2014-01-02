@@ -3,11 +3,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'libgcrypt'
-    version = '1.5.0'
+    version = '1.6.0'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING.LIB is GPLv2.1
     licenses = [License.LGPLv2_1Plus]
+    stype = SourceType.TARBALL
+    url = 'ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%(version)s.tar.bz2'
     autoreconf = True
+    configure_options = ' --with-gpg-error-prefix=$CERBERO_PREFIX'
+    patches = ['0001-Add-missing-file-in-distribution-tarball.patch']
     deps = ['libgpg-error']
 
     files_libs = ['libgcrypt']
@@ -18,5 +22,6 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86_64:
                 self.configure_options += ' --disable-asm'
             self.can_use_configure_cache = False
-        elif self.config.target_platform == Platform.DARWIN:
-            self.configure_options += ' --disable-docs'
+        elif self.config.target_platform in [Platform.DARWIN]:
+            if self.config.target_arch == Architecture.X86_64:
+                self.configure_options += ' --disable-asm'
