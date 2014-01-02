@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://zlib.net/zlib-1.2.8.tar.xz'
     licenses = [License.BSD_like]
-    force_configure = True
     add_host_build_target = False
     can_use_configure_cache = False
     patches = ['zlib/0001-win32-fix-dll-name.patch']

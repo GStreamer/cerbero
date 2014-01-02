@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     url = 'http://download.savannah.gnu.org/releases/freetype/freetype-2.4.12.tar.bz2'
     licenses = [License.FreeType]
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s --libdir=%(libdir)s"
-    force_configure = True
     deps = ['zlib', 'bzip2']
 
     files_libs = ['libfreetype']

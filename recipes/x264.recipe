@@ -10,7 +10,6 @@ class Recipe(recipe.Recipe):
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = '--enable-shared --enable-static --enable-pic --disable-strip'
-    force_configure = True
     url = 'http://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20120827-2245-stable.tar.bz2'
     tarball_dirname= 'x264-snapshot-20120827-2245-stable'
     new_env = {'AS': 'yasm'}
