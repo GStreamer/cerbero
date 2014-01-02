@@ -99,7 +99,6 @@ class MakefilesBase (Build):
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
-    force_configure = False
     make = 'make'
     make_install = 'make install'
     make_check = None
@@ -223,11 +222,6 @@ class Autotools (MakefilesBase):
     def configure(self):
         if self.supports_non_src_build:
             self.config_sh = os.path.join(self.repo_dir, self.config_sh)
-        # skip configure if we are already configured
-        if os.path.exists(os.path.join(self.make_dir, 'configure')) and\
-                os.path.exists(os.path.join(self.make_dir, 'Makefile')):
-            if not self.force_configure and not self.force:
-                return
 
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.make_dir, 'configure.in')) or\
