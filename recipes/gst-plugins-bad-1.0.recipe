@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     configure_options = "--enable-static --disable-introspection --disable-gsm --disable-examples --disable-camerabin --disable-festival --disable-freeze --disable-h264parse --disable-inter --disable-legacyresample --disable-mpegvideoparse --disable-videomaxrate --disable-bz2 --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink --disable-celt --disable-curl --disable-dc1394 --disable-directfb --disable-dirac --disable-divx --disable-faac --disable-flite --disable-gme --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug --disable-mpeg2enc --disable-mplex --disable-musepack --disable-musicbrainz --disable-mythtv --disable-nas --disable-neon --disable-ofa --disable-openal --disable-opencv --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch --disable-spandsp --disable-swfdec --disable-teletextdec --disable-timidity --disable-vdpau --disable-voaacenc --disable-voamrwbenc --disable-wildmidi --disable-xvid --disable-zbar --disable-sdi --disable-cog "
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'faad2', 'libkate', 'zlib', 'opus', 'gnutls',
+            'faad2', 'libkate', 'zlib', 'opus', 'gnutls', 'librtmp',
             'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch' ]
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -93,6 +93,7 @@ class Recipe(recipe.Recipe):
 
     files_plugins_net = [
              'lib/gstreamer-1.0/libgstdataurisrc%(mext)s',
+             'lib/gstreamer-1.0/libgstrtmp%(mext)s',
              'lib/gstreamer-1.0/libgstsdpelem%(mext)s',
     ]
 
