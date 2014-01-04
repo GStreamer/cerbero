@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     url = 'http://rtmpdump.mplayerhq.hu/download/rtmpdump-2.3.tgz'
-    licenses = [License.GPLv2]
+    licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
     patches = ['0001-Fix-Makefiles-to-support-several-platforms.patch']
