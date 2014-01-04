@@ -17,4 +17,5 @@ class Package(package.Package):
     deps = ['base-system-1.0']
 
     files = ['gmp:libs', 'gnutls:libs:libs_extra:lang',
-             'libtasn1:libs', 'nettle:libs']
+             'libtasn1:libs', 'nettle:libs', 'libgpg-error:libs',
+             'libgcrypt:libs']
