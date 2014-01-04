@@ -14,7 +14,7 @@ class Package(package.Package):
     vendor = 'GStreamer Project'
     org = 'org.freedesktop.gstreamer'
     uuid = '2f9ca3f5-3b3b-4b4d-8cc9-6c08f21af807'
-    deps = ['gstreamer-1.0-core']
+    deps = ['gstreamer-1.0-core', 'base-crypto']
 
     files = ['libsoup:libs', 'librtmp:libs'
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
@@ -48,6 +48,5 @@ class Package(package.Package):
                  DistroVersion.UBUNTU_MAVERICK,
                  DistroVersion.UBUNTU_LUCID]:
             self.files += ['glib-networking', 'glib-networking-static']
-            self.deps += ['base-crypto']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
