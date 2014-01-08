@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%(version)s.tar.bz2'
     autoreconf = True
     configure_options = ' --with-gpg-error-prefix=$CERBERO_PREFIX'
-    patches = ['0001-Add-missing-file-in-distribution-tarball.patch']
+    patches = ['0001-Add-missing-file-in-distribution-tarball.patch', '0002-add-other-missing-file.patch']
     deps = ['libgpg-error']
 
     files_libs = ['libgcrypt']
