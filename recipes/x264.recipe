@@ -39,6 +39,8 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 self.new_env = {'AS': os.environ.get('GAS', '')}
                 self.new_env['AS'] += ' -no-integrated-as '
+        if self.config.target_platform == Platform.LINUX:
+                self.new_env = {'AS': os.environ['CC']}
 
     def post_install(self):
         libtool_la = LibtoolLibrary('x264', 125, None, None, self.config.libdir,
