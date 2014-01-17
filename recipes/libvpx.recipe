@@ -44,6 +44,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_arch == Architecture.ARMv7:
             arch = 'armv7'
 
+        self.new_env['LD'] = os.environ.get('CC', 'gcc')
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_distro_version in [DistroVersion.OS_X_MOUNTAIN_LION,
                     DistroVersion.OS_X_LION, DistroVersion.OS_X_MAVERICKS] and arch != 'x86':
@@ -59,9 +60,9 @@ class Recipe(recipe.Recipe):
                 platform = 'ios6'
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv6'
-            self.config_sh = 'LD=$CC ./configure'
+            self.config_sh = './configure'
         elif self.config.target_platform == Platform.WINDOWS:
-            self.config_sh = 'LD=$CC ./configure'
+            self.config_sh = './configure'
             if self.config.target_arch == Architecture.X86_64:
                 platform = 'win64'
             else:
