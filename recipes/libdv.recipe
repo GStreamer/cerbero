@@ -11,17 +11,17 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/libdv', 'lib/pkgconfig/libdv.pc']
 
     def prepare(self):
+        if self.config.variants.nox11:
+            self.configure_options += ' --disable-xv --without-x'
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options = ' --disable-asm --disable-xv --without-x'
+            self.configure_options += ' --disable-asm'
             self.append_env = {'LDFLAGS': '-lpthread'}
-        if self.config.target_platform == Platform.DARWIN:
-            self.configure_options += ' --disable-asm --disable-xv --without-x'
-        if self.config.target_platform == Platform.ANDROID:
-            self.configure_options = ' --disable-xv --without-x'
+        elif self.config.target_platform == Platform.DARWIN:
+            self.configure_options += ' --disable-asm'
+        elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:
                 self.configure_options += ' --disable-asm'
             self.autoreconf = True
-        if self.config.target_platform == Platform.IOS:
-            self.configure_options = ' --disable-xv --without-x'
+        elif self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.X86:
                 self.configure_options += ' --disable-asm'

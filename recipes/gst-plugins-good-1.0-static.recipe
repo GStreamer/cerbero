@@ -84,19 +84,13 @@ class Recipe(custom.GStreamerStatic):
              'libgstgoom2k1',
             ]
 
-    platform_files_plugins_capture_devel = {
-        Platform.LINUX: [
-             'libgstvideo4linux2',
-             'libgstximagesrc',
-            ]
-    }
+    files_plugins_capture_devel = []
+
+    files_plugins_sys_devel = []
 
     platform_files_plugins_sys_devel = {
         Platform.WINDOWS: [
              'libgstdirectsoundsink',
-            ],
-        Platform.LINUX: [
-             'libgstpulse',
             ],
         Platform.DARWIN: [
              'libgstosxaudio',
@@ -115,10 +109,21 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += '--disable-aalib --disable-esd '
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.configure_options += '--disable-pulse --disable-x'
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
+        if self.config.variants.v4l2:
+            self.files_plugins_capture_devel += ['libgstvideo4linux2']
+        else:
+            self.configure_options += ' --disable-gst_v4l2 '
+        if self.config.variants.x11:
+            self.files_plugins_capture_devel += ['libgstximagesrc']
+        else:
+            self.configure_options += '--disable-x'
+        if self.config.variants.pulse:
+            self.files_plugins_sys_devel += ['libgstpulse']
+        else:
+            self.configure_options += '--disable-pulse'
+
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 

@@ -86,19 +86,13 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstgoom2k1%(mext)s',
             ]
 
-    platform_files_plugins_capture = {
-        Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstvideo4linux2%(mext)s',
-             'lib/gstreamer-1.0/libgstximagesrc%(mext)s',
-            ]
-    }
+    files_plugins_capture = []
+
+    files_plugins_sys = []
 
     platform_files_plugins_sys = {
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstdirectsoundsink%(mext)s',
-            ],
-        Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstpulse%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio%(mext)s',
@@ -117,12 +111,24 @@ class Recipe(recipe.Recipe):
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
-            self.configure_options += '--disable-gtk-doc '
+            self.configure_options += ' --disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--disable-aalib --disable-esd '
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.configure_options += '--disable-pulse --disable-x'
+            self.configure_options += ' --disable-aalib --disable-esd '
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
+        if self.config.variants.v4l2:
+            self.files_plugins_capture += ['lib/gstreamer-1.0/libgstvideo4linux2%(mext)s']
+        else:
+            self.configure_options += ' --disable-gst_v4l2'
+        if self.config.variants.x11:
+            self.files_plugins_capture += ['lib/gstreamer-1.0/libgstximagesrc%(mext)s']
+        else:
+            self.configure_options += ' --disable-x --disable-xvideo'
+
+        if self.config.variants.pulse:
+            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstpulse%(mext)s']
+        else:
+            self.configure_options += ' --disable-pulse'
+
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'

@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-rtsp-server-1.0'
@@ -17,4 +16,3 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-rtsp-server'))
         self.remotes['upstream'] = self.remotes['origin']
-

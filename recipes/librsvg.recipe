@@ -5,15 +5,20 @@ class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.36.1'
     licenses = [License.LGPLv2]
-    deps = ['gdk-pixbuf', 'libcroco', 'gtk+']
+    deps = ['libcroco']
     configure_options = '--enable-introspection=no'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
-    files_loader = ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
+    files_loader = []
     files_devel = ['include/librsvg-2.0/librsvg',
                    'lib/pkgconfig/librsvg-2.0.pc']
 
     def prepare(self):
+        if self.config.variants.gtk:
+            self.deps += ['gdk-pixbuf', 'gtk+']
+            self.files_loader += ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
+        else:
+            self.configure_options += ' --disable-pixbuf-loader --disable-gtk-theme '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-Bsymbolic'

@@ -4,3 +4,5 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 target_platform = Platform.LINUX
 target_distro = Distro.DEBIAN
 target_arch = Architecture.ARMv7
+variants = ['noalsa', 'nox11', 'nopulse', 'nocdparanoia', 'nosdl',
+            'nogtk', 'noclutter', 'nov4l2', 'notestspackage', 'nopython']

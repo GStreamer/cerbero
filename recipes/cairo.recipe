@@ -28,19 +28,19 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: [ 'lib/pkgconfig/cairo-win32-font.pc',
                             'lib/pkgconfig/cairo-win32.pc'],
-        Platform.LINUX: ['lib/pkgconfig/cairo-xlib-xrender.pc',
-                         'lib/pkgconfig/cairo-xlib.pc'],
         Platform.DARWIN: ['lib/pkgconfig/cairo-quartz-font.pc',
                          'lib/pkgconfig/cairo-quartz-image.pc',
-                         'lib/pkgconfig/cairo-quartz.pc',
-                         ]
+                         'lib/pkgconfig/cairo-quartz.pc']
     }
 
     # Skipping because it requires a display and documented as randomly failing
     make_check = None
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
+        if self.config.variants.x11:
+            self.files_devel += ['lib/pkgconfig/cairo-xlib-xrender.pc',
+                                 'lib/pkgconfig/cairo-xlib.pc']
+        else:
             self.configure_options += '--without-x '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --enable-quartz-font --enable-quartz-image'

@@ -13,9 +13,10 @@ class Recipe(recipe.Recipe):
                    'lib/pkgconfig/libmpeg2convert.pc']
 
     def prepare(self):
-        if self.config.target_platform in [Platform.WINDOWS, Platform.DARWIN,
-                Platform.ANDROID, Platform.IOS]:
-            self.configure_options = ' --disable-sdl --without-x'
+        if self.config.variants.nox11:
+            self.configure_options += ' --without-x '
+        if self.config.variants.nosdl:
+            self.configure_options += ' --disable-sdl '
         if self.config.target_platform == Platform.IOS:
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 self.new_env = {'CCAS': os.environ['GAS']}

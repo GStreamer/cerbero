@@ -48,7 +48,8 @@ License = enums.License
 
 class Variants(object):
 
-    __enabled_variants = ['debug']
+    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl']
+    __enabled_variants = ['debug', 'gtk', 'clutter', 'python', 'testspackage']
 
     def __init__(self, variants):
         for v in self.__enabled_variants:

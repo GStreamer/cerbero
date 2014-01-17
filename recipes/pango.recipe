@@ -19,15 +19,14 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/pangocairo.pc']
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
-        Platform.LINUX: ['libpangox-1.0'],
     }
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
-        Platform.LINUX: ['lib/pkgconfig/pangox.pc'],
     }
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
-        if self.config.target_platform in [Platform.DARWIN, Platform.ANDROID, Platform.IOS]:
+        if self.config.variants.x11:
+            self.files_libs += ['libpangox-1.0']
+            self.files_devel += ['lib/pkgconfig/pangox.pc']
+        else:
             self.configure_options += ' --without-x '
