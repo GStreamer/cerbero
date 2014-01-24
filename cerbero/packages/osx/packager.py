@@ -404,6 +404,8 @@ class ApplicationPackage(PackagerBase):
                 s.strip_dir(s_dir)
 
     def _relocate_binaries(self):
+        if not self.package.relocate_osx_binaries:
+            return
         prefix = self.config.prefix
         if prefix[-1] == '/':
             prefix = prefix[:-1]
