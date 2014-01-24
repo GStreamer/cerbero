@@ -176,7 +176,7 @@ class MSIPackager(PackagerBase):
             self.packagedeps = [self.package]
         self._create_merge_modules(package_type)
         config_path = self._create_config()
-        self._create_msi(config_path)
+        return self._create_msi(config_path)
 
     def _create_merge_modules(self, package_type):
         packagedeps = {}
