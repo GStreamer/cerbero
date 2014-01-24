@@ -169,7 +169,7 @@ binary: binary-indep binary-arch
 SOURCE_FORMAT_TPL = '''3.0 (native)'''
 
 CHANGELOG_URL_TPL = '* Full changelog can be found at %s'
-DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(p_prefix)s%(name)s-dbg'
+DH_STRIP_TPL = 'dh_strip -a --dbg-package=%(p_prefix)s%(name)s-dbg %(excl)s'
 
 
 class DebianPackager(LinuxPackager):
@@ -430,6 +430,8 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
+        args['excl'] =  ' '.join(['-X%s' % x for x in
+            self.package.strip_excludes])
         if not isinstance(self.package, MetaPackage) and \
            self.package.has_runtime_package:
             args['dh_strip'] = DH_STRIP_TPL % args
