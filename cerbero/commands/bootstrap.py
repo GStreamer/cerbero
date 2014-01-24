@@ -18,7 +18,7 @@
 
 
 from cerbero.commands import Command, register_command
-from cerbero.utils import N_
+from cerbero.utils import N_, _, ArgparseArgument
 from cerbero.bootstrap.bootstraper import Bootstraper
 
 
@@ -27,10 +27,13 @@ class Bootstrap(Command):
     name = 'bootstrap'
 
     def __init__(self):
-        Command.__init__(self, [])
+        args = [
+            ArgparseArgument('--build-tools-only', action='store_true',
+                default=False, help=_('only bootstrap the build tools'))]
+        Command.__init__(self, args)
 
     def run(self, config, args):
-        bootstrapers = Bootstraper(config)
+        bootstrapers = Bootstraper(config, args.build_tools_only)
         for bootstraper in bootstrapers:
             bootstraper.start()
 
