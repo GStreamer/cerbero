@@ -25,18 +25,22 @@ class Strip(object):
     '''Wrapper for the strip tool'''
 
     STRIP_CMD = '$STRIP'
-    excludes = None
 
-    def __init__(self, config, excludes):
+    def __init__(self, config, excludes=None, keep_symbols=None):
         self.config = config
-        self.excludes = excludes
+        self.excludes = excludes or []
+        self.keep_symbols = keep_symbols or []
 
     def strip_file(self, path):
         for f in self.excludes:
             if f in path:
                 return
         try:
-            shell.call("%s %s" % (self._strip_cmd(), path))
+            if self.config.target_platform == Platform.DARWIN:
+                shell.call("%s -x %s" % (self.STRIP_CMD, path))
+            else:
+                shell.call("%s %s --strip-unneeded %s" % (self.STRIP_CMD,
+                    ' '.join(['-K %s' % x for x in self.keep_symbols]), path))
         except:
             pass
 
@@ -44,8 +48,3 @@ class Strip(object):
         for dirpath, dirnames, filenames in os.walk(dir_path):
             for f in filenames:
                 self.strip_file(os.path.join(dirpath, f))
-
-    def _strip_cmd(self):
-        if self.config.target_platform == Platform.DARWIN:
-            return '%s -x' % self.STRIP_CMD
-        return '%s --strip-unneeded' % self.STRIP_CMD

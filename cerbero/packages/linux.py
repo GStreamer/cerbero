@@ -51,9 +51,10 @@ class LinuxPackager(PackagerBase):
         tmpdir, packagedir, srcdir = self.create_tree(tmpdir)
 
         # only build each package once
-        if not isinstance(self.package, App) and not self.package.embed_deps:
-            if pack_deps:
-                self.pack_deps(output_dir, tmpdir, force)
+        if isinstance(self.package, App) and self.package.embed_deps:
+            pass
+        elif pack_deps:
+            self.pack_deps(output_dir, tmpdir, force)
 
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files

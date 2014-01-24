@@ -27,7 +27,7 @@ from fnmatch import fnmatch
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackageType
 from cerbero.packages.linux import LinuxPackager
-from cerbero.packages.package import MetaPackage
+from cerbero.packages.package import MetaPackage, App
 from cerbero.utils import shell, _
 from cerbero.utils import messages as m
 
@@ -430,8 +430,10 @@ class DebianPackager(LinuxPackager):
         args = {}
         args['name'] = self.package.name
         args['p_prefix'] = self.package_prefix
-        args['excl'] =  ' '.join(['-X%s' % x for x in
-            self.package.strip_excludes])
+        args['excl'] = ''
+        if isinstance(self.package, App):
+            args['excl'] =  ' '.join(['-X%s' % x for x in
+                self.package.strip_excludes])
         if not isinstance(self.package, MetaPackage) and \
            self.package.has_runtime_package:
             args['dh_strip'] = DH_STRIP_TPL % args
