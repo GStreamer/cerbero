@@ -557,6 +557,14 @@ class App(PackageBase):
     def all_files_list(self):
         return self.files_list()
 
+    def recipes_licenses(self):
+        # FIXME
+        return {}
+
+    def devel_recipes_licenses(self):
+        # FIXME
+        return {}
+
     def get_wix_upgrade_code(self):
         m = self.package_mode
         p = self.config.target_arch
