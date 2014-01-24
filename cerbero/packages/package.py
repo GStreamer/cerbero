@@ -535,7 +535,7 @@ class App(PackageBase):
     def files_list(self):
         # for each package, call the function that list files
         files = []
-        if self.embed_deps and self.config.target_platform != Platform.LINUX:
+        if self.embed_deps:
             packages_deps = [self.store.get_package(x) for x in self.deps]
             for package in packages_deps:
                 packages_deps.extend(self.store.get_package_deps(package))
