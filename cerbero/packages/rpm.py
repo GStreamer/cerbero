@@ -206,7 +206,7 @@ class RPMPackager(LinuxPackager):
                 'package_name': self.full_package_name,
                 'summary': self.package.shortdesc,
                 'description': self.package.longdesc != 'default' and \
-                        self.package.longdesc and self.package.shortdesc,
+                        self.package.longdesc or self.package.shortdesc,
                 'licenses': ' and '.join([l.acronym for l in licenses]),
                 'packager': self.packager,
                 'vendor': self.package.vendor,
