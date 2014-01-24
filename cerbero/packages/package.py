@@ -351,6 +351,8 @@ class MetaPackage(PackageBase):
     @type sdk_version: str
     @cvar resources_wix_installer: wix installer template file
     @type resources_wix_installer: string
+    @cvar resources_distribution: Distribution XML template file
+    @type resources_distribution: string
     @cvar user_resources: folders included in the .dmg for iOS packages
     @type user_resources: list
     '''
@@ -360,6 +362,7 @@ class MetaPackage(PackageBase):
     platform_packages = {}
     sdk_version = '1.0'
     resources_wix_installer = None
+    resources_distribution = None
     user_resources = []
 
     def __init__(self, config, store):
@@ -492,6 +495,10 @@ class App(PackageBase):
     @type strip: list
     @cvar strip_excludes: files that won't be stripped
     @type strip_excludes: list
+    @cvar resources_info_plist: Info.plist template file
+    @type resources_info_plist: string
+    @cvar resources_distribution: Distribution XML template file
+    @type resources_distribution: Distribution XML template file
     '''
 
     app_name = None
@@ -504,6 +511,8 @@ class App(PackageBase):
     strip = False
     strip_dirs = ['bin']
     strip_excludes = []
+    resources_info_plist = 'Info.plist'
+    resources_distribution = 'distribution.xml'
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)

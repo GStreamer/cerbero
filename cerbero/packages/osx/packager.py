@@ -304,7 +304,7 @@ class ProductPackage(PackagerBase):
         output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
         output_file = os.path.abspath(output_file)
         pb = ProductBuild()
-        pb.create_package(distro_path, output_file)
+        pb.create_package(distro_path, output_file, [self.package.relative_path('.')])
         return output_file
 
     def _create_packages(self):
@@ -432,14 +432,17 @@ class ApplicationPackage(PackagerBase):
         self.package.packages = [(self.package.name, True, True)]
         m.action(_("Creating Distribution.xml for package %s " % self.package))
         distro = DistributionXML(self.package, self.store, self.tmp,
-            {self.package: app_pkg_name}, [], PackageType.RUNTIME,
+            {self.package: app_pkg_name},
+            self.store.get_package_deps(self.package),
+            PackageType.RUNTIME,
             self.config.target_arch, home_folder=False)
         distro_path = tempfile.NamedTemporaryFile().name
         distro.write(distro_path)
         output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
         output_file = os.path.abspath(output_file)
         pb = ProductBuild()
-        pb.create_package(distro_path, output_file, self.tmp)
+        pb.create_package(distro_path, output_file,
+            [self.package.relative_path('.'), self.tmp])
         return output_file
 
     def _create_dmg(self):

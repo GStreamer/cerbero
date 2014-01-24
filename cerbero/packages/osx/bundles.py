@@ -187,9 +187,14 @@ class ApplicationBundlePackager(object):
                 os.makedirs(p)
 
         # Create Contents/Info.plist
-        framework_plist = ApplicationPlist(self.package.name,
+        # Use the template if provided in the package
+        plist_tpl = None
+        if os.path.exists(self.package.resources_info_plist):
+            plist_tpl = open(self.package.resources_info_plist).read()
+        framework_plist = ApplicationPlist(self.package.app_name,
             self.package.org, self.package.version, self.package.shortdesc,
-            os.path.basename(self.package.resources_icon_icns))
+            os.path.basename(self.package.resources_icon_icns),
+            plist_tpl)
         framework_plist.save(os.path.join(contents, 'Info.plist'))
 
         # Copy app icon to Resources

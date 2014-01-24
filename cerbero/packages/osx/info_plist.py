@@ -21,63 +21,49 @@ INFO_PLIST_TPL='''\
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-%s
-%s
-%s
+<dict>
+<key>CFBundleIdentifier</key>
+<string>%(id)s</string>
+<key>CFBundleName</key>
+<string>%(name)s</string>
+<key>CFBundlePackageGetInfoString</key>
+<string>%(desc)s</string>
+<key>CFBundlePackageType</key>
+<string>%(ptype)s</string>
+<key>CFBundleVersion</key>
+<string>%(version)s</string>
+%(extra)s
+</dict>
 </plist>
 '''
 
 
-class Plist(object):
-    ''' Base class for creating .plist files '''
-
-    BEGIN = '<array>\n<dict>\n'
-    END = '</dict>\n</array>\n'
-
-    def save(self, filename):
-        props_str = self._get_properties_string()
-        with open(filename, 'w+') as f:
-            f.write(INFO_PLIST_TPL  % (self.BEGIN, props_str, self.END))
-
-    def _format_property(self, key, value):
-        if isinstance(value, str):
-            return '<key>%s</key>\n<string>%s</string>' % (key, value)
-        elif isinstance(value, bool):
-            return '<key>%s</key>\n<%s/>' % (key, str(value).lower())
-        else:
-            raise Exception ("Invalid type for value %r", value)
-
-    def _get_properties(self):
-        raise NotImplementedError("get_properties not implemented")
-
-    def _get_properties_string(self):
-        props = self._get_properties()
-        return '\n'.join([self._format_property(k, props[k]) for k in
-                          sorted(props.keys())])
-
-
-class InfoPlist(Plist):
+class InfoPlist(object):
     ''' Create a Info.plist file '''
 
-    BEGIN = '<dict>\n'
-    END = '</dict>\n'
     package_type = ''
 
-    def __init__(self, name, identifier, version, info, icon=None):
+    def __init__(self, name, identifier, version, info, icon=None,
+            plist_tpl=None):
         self.name = name
         self.identifier = identifier
         self.version = version
         self.info = info
         self.icon = icon
+        self.plist_tpl = plist_tpl or INFO_PLIST_TPL
+
+    def save(self, filename):
+        with open(filename, 'w+') as f:
+            f.write(self.plist_tpl % self._get_properties())
 
     def _get_properties(self):
-        properties = {'CFBundleName': self.name,
-                'CFBundleIdentifier': self.identifier,
-                'CFBundleVersion': self.version,
-                'CFBundlePackageGetInfoString': self.info,
-                'CFBundlePackageType': self.package_type}
+        properties = {'id': self.identifier, 'name': self.name,
+                'desc': self.info, 'ptype': self.package_type,
+                'version': self.version, 'icon': self.icon,
+                'extra':''}
         if self.icon:
-            properties['CFBundleIconFile'] = self.icon
+            properties['extra'] = '<key>CFBundleIconFile</key>\n' \
+                '<string>%s</string>' % self.icon
         return properties
 
 
@@ -94,15 +80,31 @@ class ApplicationPlist(InfoPlist):
     package_type = 'APPL'
 
 
-class ComponentPropertyPlist(Plist):
+class ComponentPropertyPlist():
     ''' Create a component property list to be used with pkgbuild '''
 
+    COMPONENT_TPL='''\
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<array>
+<dict>
+<key>BundlerIsVersionChecked</key>
+<string>True<string>
+<key>BundleOverwriteAction</key>
+<string>upgrade<string>
+<key>RootRelativeBundlePath</key>
+<string>%s<string>
+<key>Key</key>
+<string>%s<string>
+</dict>
+</array>
+</plist>
+'''
     def __init__(self, description, rel_path):
         self.desc = description
         self.rel_path = rel_path
 
-    def _get_properties(self):
-        return {'BundlerIsVersionChecked': True,
-                'BundleOverwriteAction': 'upgrade',
-                'RootRelativeBundlePath': self.rel_path,
-                'Key': self.desc}
+    def save(self, filename):
+        with open(filename, 'w+') as f:
+            f.write(INFO_PLIST_TPL  % (self.rel_path, self.key))

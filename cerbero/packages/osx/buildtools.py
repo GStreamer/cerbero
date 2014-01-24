@@ -77,6 +77,6 @@ class ProductBuild (object):
 
     def create_package(self, distribution, output, package_path=None):
         cmd = "%s --distribution %s %s" % (self.CMD, distribution, output)
-        if package_path is not None:
-            cmd += ' --package-path %s' % package_path
+        for p in package_path:
+            cmd += ' --package-path %s' % p
         shell.call(cmd)
