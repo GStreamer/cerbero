@@ -234,7 +234,8 @@ class RPMPackager(LinuxPackager):
         else:
             raise FatalError(_('Architecture %s not supported') % \
                              self.config.target_arch)
-        shell.call('rpmbuild -bb --target %s %s' % (target, self.spec_path))
+        shell.call('rpmbuild -bb --buildroot %s/buildroot --target %s %s' % (tmpdir,
+            target, self.spec_path))
 
         paths = []
         for d in os.listdir(packagedir):
