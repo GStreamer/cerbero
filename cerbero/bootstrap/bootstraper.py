@@ -34,8 +34,13 @@ def register_bootstraper(distro, klass, distro_version=None):
 
 
 class Bootstraper (object):
-    def __new__(klass, config):
+    def __new__(klass, config, build_tools_only):
         bs = []
+
+        bs.append(BuildTools(config))
+        if build_tools_only:
+            return bs
+
         target_distro = config.target_distro
         distro = config.distro
         target_distro_version = config.target_distro_version
@@ -61,8 +66,7 @@ class Bootstraper (object):
                 m.warning(_("No bootstrapper for the distro version %s" % v))
                 v = None
 
-            bs.append(bootstrapers[d][v](config))
-        bs.append(BuildTools(config))
+            bs.insert(0, bootstrapers[d][v](config))
 
         return bs
 
