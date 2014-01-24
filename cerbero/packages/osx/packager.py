@@ -417,20 +417,33 @@ class ApplicationPackage(PackagerBase):
 
     def _add_applications_link(self):
         # Create link to /Applications
-        applications_link = os.path.join(self.tmp, 'Applications')
+        applications_link = os.path.join(self.approot, 'Applications')
         shell.call('ln -s /Applications %s' % applications_link)
 
     def _package_name(self, suffix):
         return '%s-%s-%s%s' % (self.package.name, self.package.version,
                 self.config.target_arch, suffix)
 
+    def _copy_scripts(self):
+        resources = os.path.join(self.tmp, 'Resources')
+        # Copy scripts to the Resources directory
+        os.makedirs(resources)
+        if os.path.exists(self.package.resources_preinstall):
+            shutil.copy(os.path.join(self.package.resources_preinstall),
+                        os.path.join(resources, 'preinstall'))
+        if os.path.exists(self.package.resources_postinstall):
+            shutil.copy(os.path.join(self.package.resources_postinstall),
+                        os.path.join(resources, 'postinstall'))
+        return resources
+
     def _create_product(self):
         packagebuild = PackageBuild()
+        resources = self._copy_scripts()
         app_pkg_name = self._package_name('.pkg')
         app_pkg = os.path.join(self.tmp, app_pkg_name)
         packagebuild.create_package(self.approot, self.package.identifier(),
             self.package.version, self.package.shortdesc, app_pkg,
-            '/Applications') #, scripts_path=resources)
+            '/Applications', scripts_path=resources)
         self.package.packages = [(self.package.name, True, True)]
         m.action(_("Creating Distribution.xml for package %s " % self.package))
         distro = DistributionXML(self.package, self.store, self.tmp,
@@ -452,7 +465,7 @@ class ApplicationPackage(PackagerBase):
             self.package.app_name, self.package.version, self.config.target_arch))
         # Create Disk Image
         cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
-                (dmg_file, self.package.app_name, self.tmp)
+                (dmg_file, self.package.app_name, self.approot)
         shell.call(cmd)
         return dmg_file
 
@@ -503,7 +516,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
 
         if isinstance(self.package, SDKPackage):
-            pkg_path = self._create_product(PackageType.DEVEL)
+            pkg_path = [self._create_product(PackageType.DEVEL)]
             if self.package.user_resources:
                 pkg_path = self._create_dmg (pkg_path,
                     pkg_path.replace('.pkg', '.dmg'))
