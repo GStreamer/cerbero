@@ -1,0 +1,43 @@
+ # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+
+    name = 'gobject-introspection'
+    version = '1.40'
+    remotes = {'origin': 'git://git.gnome.org/gobject-introspection'}
+    commit = 'GOBJECT_INTROSPECTION_1_40_0'
+    licenses = [License.GPLv2Plus]
+    config_sh = 'sh ./autogen.sh'
+    deps = ['glib']
+
+    files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate']
+    files_libs = ['libgirepository-1.0']
+    files_typelibs = ['cairo-1.0',
+        'DBus-1.0',
+        'DBusGLib-1.0',
+        'fontconfig-2.0',
+        'freetype2-2.0',
+        'Gio-2.0',
+        'GIRepository-2.0',
+        'GL-1.0',
+        'GLib-2.0',
+        'GModule-2.0',
+        'GObject-2.0',
+        'libxml2-2.0',
+        'win32-1.0',
+        'xfixes-4.0',
+        'xft-2.0',
+        'xrandr-1.3',
+        'xlib-2.0']
+    files_devel = ['include/gobject-introspection-1.0']
+    platform_files_devel = {
+        Platform.LINUX: [
+            'lib/pkgconfig/gobject-introspection-1.0.pc',
+            'lib/pkgconfig/gobject-introspection-no-export-1.0.pc',
+            'share/gobject-introspection-1.0'
+        ]
+    }
+
+    # TODO: catch the share/man stuff like man1/g-ir* ?
+
