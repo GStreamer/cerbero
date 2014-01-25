@@ -48,7 +48,8 @@ License = enums.License
 
 class Variants(object):
 
-    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl']
+    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
+                           'gi']
     __enabled_variants = ['debug', 'gtk', 'clutter', 'python', 'testspackage']
 
     def __init__(self, variants):
@@ -146,6 +147,10 @@ class Config (object):
 
         # Build variants before copying any config
         self.variants = Variants(self.variants)
+        if self.cross_compiling() and self.variants.gi:
+            m.warning(_("gobject introspection is not supported "
+                        "cross-compiling, 'gi' variant will be removed"))
+            self.variants.gi = False
         for c in self.arch_config.values():
             c.variants = self.variants
 
@@ -334,6 +339,10 @@ class Config (object):
         if recipe_name in self.recipes_commits:
             return self.recipes_commits[recipe_name]
         return None
+
+    def cross_compiling(self):
+        return self.target_platform != self.platform or \
+                self.target_arch != self.arch
 
     def prefix_is_executable(self):
         if self.target_platform != self.platform:
