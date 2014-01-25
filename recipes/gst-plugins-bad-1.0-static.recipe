@@ -114,6 +114,7 @@ class Recipe(custom.GStreamerStatic):
 
     platform_files_plugins_sys_devel = {
         Platform.LINUX: [
+             'libgstshm',
             ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
@@ -122,11 +123,13 @@ class Recipe(custom.GStreamerStatic):
         Platform.DARWIN: [
              'libgstapplemedia',
              'libgstapplemedia_nonpublic',
+             'libgstshm',
             ],
         Platform.IOS: [
              'libgstapplemedia',
              #'libgstapplemedia_nonpublic',
              'libgsteglglessink',
+             'libgstshm',
             ],
         Platform.ANDROID: [
              'libgstopensles',
