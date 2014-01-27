@@ -48,18 +48,26 @@ License = enums.License
 
 class Variants(object):
 
-    __variants = ['nodebug']
+    __enabled_variants = ['debug']
 
     def __init__(self, variants):
-        for v in self.__variants:
+        for v in self.__enabled_variants:
+            setattr(self, v, True)
+        for v in self.__disabled_variants:
             setattr(self, v, False)
         for v in variants:
-            setattr(self, v, True)
+            if v.startswith('no'):
+                setattr(self, v[2:], False)
+            else:
+                setattr(self, v, True)
 
     def __getattr__(self, name):
         try:
-            return object.__getattr__(name)
-        except:
+            if name.startswith('no'):
+                return not object.__getattribute__(self, name[2:])
+            else:
+                return object.__getattribute__(self, name)
+        except Exception:
             raise AttributeError("%s is not a known variant" % name)
 
 
@@ -104,9 +112,6 @@ class Config (object):
         # from the main configuration file
         self._load_cmd_config(filename)
 
-        # Build variants before copying any config
-        self.variants = Variants(self.variants)
-
         # Create a copy of the config for each architecture in case we are
         # building Universal binaries
         if self.target_arch == Architecture.UNIVERSAL:
@@ -135,6 +140,11 @@ class Config (object):
             config._load_last_defaults()
             config._validate_properties()
             config._raw_environ = os.environ.copy()
+
+        # Build variants before copying any config
+        self.variants = Variants(self.variants)
+        for c in self.arch_config.values():
+            c.variants = self.variants
 
         self.do_setup_env()
 
