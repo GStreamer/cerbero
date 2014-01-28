@@ -295,6 +295,50 @@ class UniversalRecipe(object):
     def is_empty(self):
         return len(self._recipes) == 0
 
+    @property
+    def steps(self):
+        if self.is_empty():
+            return []
+        return self._proxy_recipe.steps[:]
+
+    def __getattr__(self, name):
+        if not self._proxy_recipe:
+            raise AttributeError(_("Attribute %s was not found in the "
+                "Universal recipe, which is empty. You might need to add a "
+                "recipe first."))
+        return getattr(self._proxy_recipe, name)
+
+    def __setattr__(self, name, value):
+        object.__setattr__(self, name, value)
+        if name not in ['_config', '_recipes', '_proxy_recipe']:
+            for o in self._recipes.values():
+                setattr(o, name, value)
+
+    def _do_step(self, step):
+        for arch, recipe in self._recipes.iteritems():
+            config = self._config.arch_config[arch]
+            config.do_setup_env()
+            stepfunc = getattr(recipe, step)
+
+            # Call the step function
+            stepfunc()
+
+
+class UniversalFlatRecipe(UniversalRecipe):
+    '''
+    Unversal recipe for iOS and OS X creating flat libraries
+    in the target prefix instead of subdirs for each architecture
+    '''
+
+    def __init__(self, config):
+        UniversalRecipe.__init__(self, config)
+
+    @property
+    def steps(self):
+        if self.is_empty():
+            return []
+        return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
+
     def merge(self):
         arch_inputs = {}
         for arch, recipe in self._recipes.iteritems():
@@ -319,25 +363,6 @@ class UniversalRecipe(object):
             generator = OSXUniversalGenerator(output)
             generator.merge_files(ainputs,
                     [os.path.join(self._config.prefix, arch)])
-
-    @property
-    def steps(self):
-        if self.is_empty():
-            return []
-        return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
-
-    def __getattr__(self, name):
-        if not self._proxy_recipe:
-            raise AttributeError(_("Attribute %s was not found in the "
-                "Universal recipe, which is empty. You might need to add a "
-                "recipe first."))
-        return getattr(self._proxy_recipe, name)
-
-    def __setattr__(self, name, value):
-        object.__setattr__(self, name, value)
-        if name not in ['_config', '_recipes', '_proxy_recipe']:
-            for o in self._recipes.values():
-                setattr(o, name, value)
 
     def _do_step(self, step):
         # For the universal build we need to configure both architectures with

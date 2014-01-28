@@ -384,7 +384,10 @@ class CookBook (object):
     def _load_recipe_from_file(self, filepath, custom=None):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
         if self._config.target_arch == Architecture.UNIVERSAL:
-            recipe = crecipe.UniversalRecipe(self._config)
+            if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
+                recipe = crecipe.UniversalFlatRecipe(self._config)
+            else:
+                recipe = crecipe.UniversalRecipe(self._config)
         for c in self._config.arch_config.keys():
             try:
                 d = {'Platform': Platform, 'Architecture': Architecture,
@@ -396,7 +399,12 @@ class CookBook (object):
                      'FatalError': FatalError,
                      'custom': custom, '_': _, 'shell': shell}
                 parse_file(filepath, d)
-                r = d['Recipe'](self._config.arch_config[c])
+                conf = self._config.arch_config[c]
+                if self._config.target_arch == Architecture.UNIVERSAL:
+                    if self._config.target_platform not in [Platform.IOS,
+                            Platform.DARWIN]:
+                        conf.prefix = os.path.join(self._config.prefix, c)
+                r = d['Recipe'](conf)
                 r.__file__ = os.path.abspath(filepath)
                 self._config.arch_config[c].do_setup_env()
                 r.prepare()
