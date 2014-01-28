@@ -128,6 +128,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         self.version = version or self.package.version
         self.sdk_version = sdk_version or self.version
         self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
+        self.tmpdir = tempfile.mkdtemp()
 
         # create the runtime package
         try:
@@ -135,10 +136,12 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
                     output_dir, force)
         except EmptyPackageError, e:
             if not devel:
+                self._delete_tmp(keep_temp)
                 raise e
             runtime_path = None
 
         if not devel:
+            self._delete_tmp(keep_temp)
             return [runtime_path, None]
 
         try:
@@ -147,10 +150,17 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
                     force)
         except EmptyPackageError, e:
             if runtime_path is None:
+                self._delete_tmp(keep_temp)
                 raise e
             devel_path = None
 
+        self._delete_tmp(keep_temp)
         return [runtime_path, devel_path]
+
+    def _delete_tmp(self, keep_temp):
+        if not keep_temp:
+            m.action(_('Removing temporary dir %s') % self.tmpdir)
+            shutil.rmtree(self.tmpdir)
 
     def _get_install_dir(self):
         if self.config.target_arch != Architecture.UNIVERSAL:
@@ -177,9 +187,8 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         Moves all the files that are going to be packaged to a temporary
         directory to create the bundle
         '''
-        tmp = tempfile.mkdtemp()
-        root = os.path.join(tmp, 'Root')
-        resources = os.path.join(tmp, 'Resources')
+        root = os.path.join(self.tmpdir, 'Root')
+        resources = os.path.join(self.tmpdir, 'Resources')
         for f in files:
             in_path = os.path.join(self.config.prefix, f)
             if not os.path.exists(in_path):
@@ -236,20 +245,21 @@ class ProductPackage(PackagerBase):
         self._create_packages()
 
         paths = []
-        # create runtime package
-        r_path = self._create_product(PackageType.RUNTIME)
-        paths.append(r_path)
+        try:
+            # create runtime package
+            r_path = self._create_product(PackageType.RUNTIME)
+            paths.append(r_path)
 
-        if devel:
-            # create devel package
-            d_path = self._create_product(PackageType.DEVEL)
-            paths.append(d_path)
+            if devel:
+                # create devel package
+                d_path = self._create_product(PackageType.DEVEL)
+                paths.append(d_path)
 
-        self.package.set_mode(PackageType.RUNTIME)
-        self._create_packages_dmg()
-
-        if not keep_temp:
-            shutil.rmtree(self.tmp)
+            self.package.set_mode(PackageType.RUNTIME)
+            self._create_packages_dmg()
+        finally:
+            if not keep_temp:
+                shutil.rmtree(self.tmp)
 
         return paths
 
