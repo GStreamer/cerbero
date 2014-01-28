@@ -68,18 +68,19 @@ class LinuxPackager(PackagerBase):
 
         m.action(_('Creating package for %s') % self.package.name)
 
-        # do the preparations, fill spec file, write debian files, etc
-        self.prepare(tarname, tmpdir, packagedir, srcdir)
+        try:
+            # do the preparations, fill spec file, write debian files, etc
+            self.prepare(tarname, tmpdir, packagedir, srcdir)
 
-        # and build the package
-        paths = self.build(output_dir, tarname, tmpdir, packagedir, srcdir)
+            # and build the package
+            paths = self.build(output_dir, tarname, tmpdir, packagedir, srcdir)
 
-        stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
-        open(stamp_path, 'w').close()
-
-        if not keep_temp:
-            m.action(_('Removing temporary dir %s') % tmpdir)
-            shutil.rmtree(tmpdir)
+            stamp_path = os.path.join(tmpdir, self.package.name + '-stamp')
+            open(stamp_path, 'w').close()
+        finally:
+            if not keep_temp:
+                m.action(_('Removing temporary dir %s') % tmpdir)
+                shutil.rmtree(tmpdir)
 
         return paths
 
