@@ -37,6 +37,9 @@ class OSXBootstraper (BootstraperBase):
     CPANM_URL = 'https://raw.github.com/miyagawa/cpanminus/master/cpanm'
 
     def start(self):
+        # skip system package install if not needed
+        if not self.config.distro_packages_install:
+            return
         self._install_perl_deps()
         # FIXME: enable it when buildbots are properly configured
         return
