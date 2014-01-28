@@ -128,7 +128,6 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         self.version = version or self.package.version
         self.sdk_version = sdk_version or self.version
         self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
-        self.tmpdir = tempfile.mkdtemp()
 
         # create the runtime package
         try:
@@ -136,12 +135,10 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
                     output_dir, force)
         except EmptyPackageError, e:
             if not devel:
-                self._delete_tmp(keep_temp)
                 raise e
             runtime_path = None
 
         if not devel:
-            self._delete_tmp(keep_temp)
             return [runtime_path, None]
 
         try:
@@ -150,17 +147,10 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
                     force)
         except EmptyPackageError, e:
             if runtime_path is None:
-                self._delete_tmp(keep_temp)
                 raise e
             devel_path = None
 
-        self._delete_tmp(keep_temp)
         return [runtime_path, devel_path]
-
-    def _delete_tmp(self, keep_temp):
-        if not keep_temp:
-            m.action(_('Removing temporary dir %s') % self.tmpdir)
-            shutil.rmtree(self.tmpdir)
 
     def _get_install_dir(self):
         if self.config.target_arch != Architecture.UNIVERSAL:
@@ -175,11 +165,12 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         files = self.files_list(package_type, force)
         output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
                 (self.package.name, self.version, self.config.target_arch))
-        root, resources = self._create_bundle(files, package_type)
+        tmp, root, resources = self._create_bundle(files, package_type)
         packagebuild = PackageBuild()
         packagebuild.create_package(root, self.package.identifier(),
             self.package.version, self.package.shortdesc, output_file,
             self._get_install_dir(), scripts_path=resources)
+        shutil.rmtree(tmp)
         return output_file
 
     def _create_bundle(self, files, package_type):
@@ -187,8 +178,9 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         Moves all the files that are going to be packaged to a temporary
         directory to create the bundle
         '''
-        root = os.path.join(self.tmpdir, 'Root')
-        resources = os.path.join(self.tmpdir, 'Resources')
+        tmp = tempfile.mkdtemp()
+        root = os.path.join(tmp, 'Root')
+        resources = os.path.join(tmp, 'Resources')
         for f in files:
             in_path = os.path.join(self.config.prefix, f)
             if not os.path.exists(in_path):
@@ -211,7 +203,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         if os.path.exists(self.package.resources_postinstall):
             shutil.copy(os.path.join(self.package.resources_postinstall),
                         os.path.join(resources, 'postinstall'))
-        return root, resources
+        return tmp, root, resources
 
 
 
