@@ -41,13 +41,13 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', '*', 'ffi.h'))
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', '*', 'ffitarget.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', '*', 'ffi.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', '*', 'ffitarget.h'))
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
         else:
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.13', 'include', 'ffitarget.h'))
+            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', 'ffitarget.h'))
 
         if self.config.target_platform == Platform.IOS:
             self.new_env = {'CC': os.environ['CC']}
@@ -73,7 +73,7 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.config.prefix, 'lib', 'libffi-3.0.13',
+            arch_dir = os.path.join(self.config.prefix, 'lib', 'libffi-3.0.11',
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
@@ -86,6 +86,6 @@ class Recipe(recipe.Recipe):
                         os.path.join(arch_dir, 'ffi.h'))
             shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffitarget.h'))[0],
                         os.path.join(arch_dir, 'ffitarget.h'))
-            with open(os.path.join(self.config.prefix, 'lib', 'libffi-3.0.13',
+            with open(os.path.join(self.config.prefix, 'lib', 'libffi-3.0.11',
                                    'include', 'ffi.h'), 'w+') as f:
                 f.write(FFI_H_UNVERSAL)
