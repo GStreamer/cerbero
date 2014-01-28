@@ -14,10 +14,6 @@ class Recipe(recipe.Recipe):
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
     files_devel = ['lib/pkgconfig/gdk-pixbuf-2.0.pc', 'include/gdk-pixbuf-2.0']
     files_lang = ['gdk-pixbuf']
-    platform_files_modules = {
-        Platform.LINUX: ['lib/gdk-pixbuf-2.0'],
-        Platform.WINDOWS: ['lib/gdk-pixbuf-2.0'],
-        Platform.DARWIN: ['lib/gdk-pixbuf-2.0']}
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
