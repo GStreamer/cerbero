@@ -28,6 +28,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
+        self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch
             if self.config.target_arch == Architecture.X86_64:
@@ -41,13 +42,13 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', '*', 'ffi.h'))
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', '*', 'ffitarget.h'))
+            self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffi.h'))
+            self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffitarget.h'))
 
             self.make = 'make -C %s' % dir
             self.make_install = 'make -C %s install' % dir
         else:
-            self.files_devel.append(os.path.join('lib', 'libffi-3.0.11', 'include', 'ffitarget.h'))
+            self.files_devel.append(os.path.join(self.libffidir, 'include', 'ffitarget.h'))
 
         if self.config.target_platform == Platform.IOS:
             self.new_env = {'CC': os.environ['CC']}
@@ -73,8 +74,7 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.config.prefix, 'lib', 'libffi-3.0.11',
-                                     'include', arch)
+            arch_dir = os.path.join(self.libffidir, 'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
 
