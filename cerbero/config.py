@@ -165,6 +165,7 @@ class Config (object):
         bindir = os.path.join(prefix, 'bin')
         manpathdir = os.path.join(prefix, 'share', 'man')
         infopathdir = os.path.join(prefix, 'share', 'info')
+        pkgconfigbin = os.path.join(self.build_tools_prefix, 'bin', 'pkg-config')
         pkgconfigdatadir = os.path.join(prefix, 'share', 'pkgconfig')
         pkgconfigdir = os.path.join(libdir, 'pkgconfig')
         typelibpath = os.path.join(libdir, 'girepository-1.0')
@@ -227,6 +228,7 @@ class Config (object):
                'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
+               'PKG_CONFIG': pkgconfigbin,
                'PKG_CONFIG_PATH': '%s' % pkgconfigdatadir,
                'PKG_CONFIG_LIBDIR': '%s' % pkgconfigdir,
                'GI_TYPELIB_PATH': typelibpath,
