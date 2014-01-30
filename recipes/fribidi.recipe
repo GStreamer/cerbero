@@ -4,13 +4,8 @@ class Recipe(recipe.Recipe):
     name = 'fribidi'
     version = '0.19.2'
     licenses = [License.LGPLv2_1Plus]
+    autoreconf = True
 
     files_libs = ['libfribidi']
     files_bins = ['fribidi']
     files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']
-
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
-        elif self.config.target_platform == Platform.IOS:
-            self.autoreconf = True
