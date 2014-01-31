@@ -29,7 +29,7 @@ class BuildTools (BootstraperBase):
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
                    'orc-tool', 'gettext-m4', 'gettext-tools']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'yasm', 'cmake'],
+        Platform.DARWIN: ['intltool', 'yasm', 'cmake', 'bison'],
         Platform.WINDOWS: ['intltool', 'yasm', 'cmake'],
         Platform.LINUX: ['intltool-m4'],
     }
