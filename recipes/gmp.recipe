@@ -8,3 +8,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options = ' --enable-shared --disable-static'
