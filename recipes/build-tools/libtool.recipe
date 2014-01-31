@@ -2,23 +2,13 @@
 import shutil
 
 class Recipe(recipe.Recipe):
-    name = 'libtool'
-    version = '2.4.2'
+    name = 'bison'
+    version = '3.0.2'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.2.tar.gz'
+    url = 'http://ftpmirror.gnu.org/bison/bison-3.0.2.tar.gz'
 
-    files_bin = ['bin/libtool', 'bin/libtoolize']
-    files_libs = ['libltdl']
-    files_share = ['share/libtool']
-    files_aclocal = [
-        'share/aclocal/argz.m4',
-        'share/aclocal/libtool.m4',
-        'share/aclocal/ltdl.m4',
-        'share/aclocal/ltoptions.m4',
-        'share/aclocal/ltsugar.m4',
-        'share/aclocal/ltversion.m4',
-        'share/aclocal/lt~obsolete.m4']
+    files_bin = ['bin/bison']
 
     def extract(self):
         if os.path.exists(self.build_dir):
