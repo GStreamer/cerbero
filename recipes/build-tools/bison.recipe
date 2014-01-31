@@ -1,0 +1,16 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'bison'
+    version = '3.0.2'
+    licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://ftpmirror.gnu.org/bison/bison-3.0.2.tar.gz'
+
+    files_bin = ['bin/bison']
+
+    def extract(self):
+        if os.path.exists(self.build_dir):
+            shutil.rmtree(self.build_dir)
+        super(recipe.Recipe, self).extract()
