@@ -74,7 +74,7 @@ class Recipe(recipe.Recipe):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.libffidir, 'include', arch)
+            arch_dir = os.path.join(self.config.prefix, self.libffidir, 'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
 
@@ -86,5 +86,5 @@ class Recipe(recipe.Recipe):
                         os.path.join(arch_dir, 'ffi.h'))
             shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffitarget.h'))[0],
                         os.path.join(arch_dir, 'ffitarget.h'))
-            with open(os.path.join(self.libffidir, 'include', 'ffi.h'), 'w+') as f:
+            with open(os.path.join(self.config.prefix, self.libffidir, 'include', 'ffi.h'), 'w+') as f:
                 f.write(FFI_H_UNVERSAL)
