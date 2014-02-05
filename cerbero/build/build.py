@@ -304,10 +304,7 @@ class CMake (MakefilesBase):
             cxx = cxx.replace('ccache ', '')
 
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' -DCMAKE_C_COMPILER=%s '\
-                                      ' -DCMAKE_CXX_COMPILER=%s '\
-                                      ' -DCMAKE_SYSTEM_NAME=Windows '\
-                                      % (cc, cxx)
+            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' -G\\"Unix Makefiles\\"'
 
@@ -317,6 +314,8 @@ class CMake (MakefilesBase):
             sysroot = r.match(cflags).group(1)
             self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
 
+        self.configure_options += ' -DCMAKE_C_COMPILER=%s ' % cc
+        self.configure_options += ' -DCMAKE_CXX_COMPILER=%s ' % cxx
         self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
         self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
