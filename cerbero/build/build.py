@@ -300,8 +300,8 @@ class CMake (MakefilesBase):
         cxxflags = os.environ.get('CXXFLAGS', '')
         # FIXME: CMake doesn't support passing "ccache $CC"
         if self.config.use_ccache:
-            cc = cc.replace('ccache ', '')
-            cxx = cxx.replace('ccache ', '')
+            cc = cc.replace('ccache', '').strip()
+            cxx = cxx.replace('ccache', '').strip()
 
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
