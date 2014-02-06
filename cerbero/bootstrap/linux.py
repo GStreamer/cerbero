@@ -87,6 +87,11 @@ class RedHatBootstraper (UnixBootstraper):
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
                 'docbook-utils-pdf', 'glib-networking', 'help2man']
 
+    def __init__(self, config):
+        UnixBootstraper.__init__(self, config)
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.arch == Architecture.X86_64:
+                self.packages.append('glibc.i686')
 
 class OpenSuseBootstraper (UnixBootstraper):
 
