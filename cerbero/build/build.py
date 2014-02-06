@@ -302,6 +302,8 @@ class CMake (MakefilesBase):
         if self.config.use_ccache:
             cc = cc.replace('ccache', '').strip()
             cxx = cxx.replace('ccache', '').strip()
+        cc = cc.split(' ')[0]
+        cxx = cxx.split(' ')[0]
 
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
