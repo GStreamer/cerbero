@@ -85,7 +85,7 @@ class RedHatBootstraper (UnixBootstraper):
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
-                'docbook-utils-pdf', 'glib-networking', 'help2man']
+                'docbook-utils-pdf', 'glib-networking', 'help2man','glib2-devel']
 
     def __init__(self, config):
         UnixBootstraper.__init__(self, config)
