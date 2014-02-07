@@ -68,6 +68,7 @@ class FilesProvider(object):
         .la and .so from the 'libs' category
         '''
         devfiles = self.files_list_by_category(self.DEVEL_CAT)
+        devfiles.extend(self.files_list_by_category(self.TYPELIB_CAT))
         devfiles.extend(self._search_devel_libraries())
 
         return sorted(list(set(devfiles)))
@@ -109,6 +110,9 @@ class FilesProvider(object):
         Return a list of the libraries
         '''
         return self.files_list_by_category(self.LIBS_CAT)
+
+    def use_gobject_introspection(self):
+        return self.TYPELIB_CAT in self._files_categories()
 
     def _files_categories(self):
         ''' Get the list of categories available '''
@@ -233,10 +237,12 @@ class FilesProvider(object):
                               self.config.prefix)
 
     def _search_typelibfiles(self, files):
-	'''
-	Search for typelibs in lib/girepository-1.0/
-	'''
-	pattern = 'lib/girepository-1.0/%s.typelib'
+        '''
+        Search for typelibs in lib/girepository-1.0/
+        '''
+        if not self.config.variants.gi:
+            return []
+        pattern = 'lib/girepository-1.0/%s.typelib'
         return shell.ls_files([pattern % x for x in files],
                               self.config.prefix)
 

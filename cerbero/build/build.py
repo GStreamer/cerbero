@@ -229,6 +229,11 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-maintainer-mode "
             self.configure_tpl += " --disable-silent-rules "
 
+        if self.config.variants.gi:
+            self.configure_tpl += " --enable-introspection "
+        else:
+            self.configure_tpl += " --disable-introspection "
+
         if self.autoreconf:
             shell.call(self.autoreconf_sh, self.make_dir)
 
