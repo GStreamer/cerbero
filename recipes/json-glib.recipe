@@ -6,7 +6,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
     configure_options = '--enable-static'
+    autoreconf = True
 
     files_libs = ['libjson-glib-1.0']
     files_devel  = ['include/json-glib-1.0', 'lib/pkgconfig/json-glib-1.0.pc']
-    autoreconf = True
+    files_typelibs = ['Json-1.0']

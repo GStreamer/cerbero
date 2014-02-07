@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.3'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-static --program-prefix= --disable-introspection --disable-examples "
+    configure_options = "--enable-static --program-prefix= --disable-examples "
     commit = 'origin/master'
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc']
@@ -101,6 +101,18 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-base-1.0']
 
+    files_typelibs = [
+        'GstAllocators-1.0',
+        'GstApp-1.0',
+        'GstFft-1.0',
+        'GstPbutils-1.0',
+        'GstRiff-1.0',
+        'GstRtp-1.0',
+        'GstRtsp-1.0',
+        'GstSdp-1.0',
+        'GstTag-1.0',
+        'GstVideo-1.0'
+        ]
 
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-base'))

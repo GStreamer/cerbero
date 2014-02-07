@@ -157,6 +157,10 @@ class Recipe(recipe.Recipe):
              '%(sdir)s/libgstgl-1.0%(sext)s',
             ]
     }
+    files_typelibs = [
+        'GstInsertBin-1.0',
+        'GstMpegts-1.0'
+        ]
 
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-bad'))

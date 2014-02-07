@@ -6,7 +6,6 @@ class Recipe(recipe.Recipe):
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
-    configure_options = "--disable-introspection "
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True
     autoreconf=True
@@ -29,6 +28,11 @@ class Recipe(recipe.Recipe):
                          'lib/pkgconfig/clutter-x11-1.0.pc'],
     }
     files_lang = ['clutter-1.0']
+    files_typelibs = ['Cally-1.0', 'Clutter-1.0',]
+    platform_files_typelibs = {
+        Platform.LINUX: ['ClutterX11-1.0']
+    }
+
 
     # Skipping tests as they require a display
     make_check = None

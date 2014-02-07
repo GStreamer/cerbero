@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libatk-1.0']
     files_devel = ['lib/pkgconfig/atk.pc', 'include/atk-1.0']
     files_lang = ['atk10']
+    files_typelibs = ['Atk-1.0']
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:

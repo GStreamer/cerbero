@@ -23,6 +23,11 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
     }
+    files_typelibs = [
+        'Pango-1.0',
+        'PangoCairo-1.0',
+        'PangoFT2-1.0'
+        ]
 
     def prepare(self):
         if self.config.variants.x11:

@@ -52,6 +52,13 @@ class Recipe(recipe.Recipe):
             'lib/gtk-2.0/modules/libferret%(mext)s',],
         }
     files_lang = ['gtk20', 'gtk20-properties']
+    files_typelibs = [
+        'Gdk-2.0',
+        'Gtk-2.0'
+        ]
+    platform_files_typelibs = {
+        Platform.LINUX: ['GdkX11-2.0']
+        }
 
 
     def _set_flags(self, module_path1=None, module_path2=None, theme_path=None):

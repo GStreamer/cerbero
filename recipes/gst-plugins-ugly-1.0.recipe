@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.3'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-introspection --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame "
+    configure_options = "--disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-lame --disable-sidplay --disable-twolame "
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad', 'x264']
