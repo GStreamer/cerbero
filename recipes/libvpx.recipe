@@ -9,8 +9,9 @@ class Recipe(recipe.Recipe):
     version = 'v1.2.0'
     licenses = [License.BSD]
     stype = SourceType.TARBALL
+    btype = BuildType.MAKEFILE
     url = 'http://webm.googlecode.com/files/libvpx-v1.2.0.tar.bz2'
-    configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
+    configure_tpl = "./configure --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm --disable-unit-tests "
     add_host_build_target = False
