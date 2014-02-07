@@ -6,10 +6,13 @@ class Recipe(recipe.Recipe):
     name = 'zlib'
     version = '1.2.8'
     stype = SourceType.TARBALL
+    btype = BuildType.MAKEFILE
     url = 'http://zlib.net/zlib-1.2.8.tar.xz'
     licenses = [License.BSD_like]
     add_host_build_target = False
     can_use_configure_cache = False
+    configure_tpl = "./configure --prefix %(prefix)s "\
+                    "--libdir %(libdir)s %(options)s"
     patches = ['zlib/0001-win32-fix-dll-name.patch']
 
     files_libs = ['libz']
