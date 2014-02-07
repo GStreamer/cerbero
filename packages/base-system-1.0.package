@@ -30,3 +30,7 @@ class Package(package.Package):
         Platform.ANDROID: ['gettext:libs:lang', 'libiconv:libs:lang', 'gnustl'],
         Platform.IOS: ['gettext:libs:lang', 'libiconv:libs:lang']
         }
+
+    def prepare(self):
+        if self.config.variants.gi:
+            self.files.append('gobject-introspection:libs')
