@@ -516,7 +516,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         self.fw_path = os.path.join(self.tmp, '%s.framework' % framework_name)
 
         if isinstance(self.package, SDKPackage):
-            pkg_path = [self._create_product(PackageType.DEVEL)]
+            pkg_path = self._create_product(PackageType.DEVEL)
             if self.package.user_resources:
                 pkg_path = self._create_dmg (pkg_path,
                     pkg_path.replace('.pkg', '.dmg'))
