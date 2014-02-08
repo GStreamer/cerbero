@@ -1,0 +1,60 @@
+From 45b43528dd44f55b418def2ff39c744f4d2fe039 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sat, 8 Feb 2014 17:31:32 +0100
+Subject: [PATCH] fribidi.def: Include all required symbols
+
+The charset symbols were previously not included for Windows
+and failed the build.
+---
+ lib/fribidi.def | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/lib/fribidi.def b/lib/fribidi.def
+index 5dc44fb..22581d7 100644
+--- a/lib/fribidi.def
++++ b/lib/fribidi.def
+@@ -1,3 +1,11 @@
++fribidi_cap_rtl_to_unicode
++fribidi_char_set_desc
++fribidi_char_set_desc_cap_rtl
++fribidi_char_set_name
++fribidi_char_set_title
++fribidi_charset_to_unicode
++fribidi_cp1255_to_unicode_c
++fribidi_cp1256_to_unicode_c
+ fribidi_debug_status
+ fribidi_get_bidi_type
+ fribidi_get_bidi_type_name
+@@ -10,10 +18,13 @@ fribidi_get_par_direction
+ fribidi_get_par_embedding_levels
+ fribidi_get_type
+ fribidi_get_type_internal
++fribidi_iso8859_6_to_unicode_c
++fribidi_iso8859_8_to_unicode_c
+ fribidi_join_arabic
+ fribidi_log2vis
+ fribidi_log2vis_get_embedding_levels
+ fribidi_mirroring_status
++fribidi_parse_charset
+ fribidi_remove_bidi_marks
+ fribidi_reorder_line
+ fribidi_reorder_nsm_status
+@@ -21,6 +32,15 @@ fribidi_set_debug
+ fribidi_set_mirroring
+ fribidi_set_reorder_nsm
+ fribidi_shape
++fribidi_shape_arabic
+ fribidi_shape_mirroring
++fribidi_unicode_to_cap_rtl
++fribidi_unicode_to_charset
++fribidi_unicode_to_cp1255_c
++fribidi_unicode_to_cp1256_c
++fribidi_unicode_to_iso8859_6_c
++fribidi_unicode_to_iso8859_8_c
++fribidi_unicode_to_utf8
+ fribidi_unicode_version
++fribidi_utf8_to_unicode
+ fribidi_version_info
+-- 
+1.9.rc1
+
