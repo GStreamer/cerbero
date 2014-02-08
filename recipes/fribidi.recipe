@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     deps = ['glib']
-    patches = ['fribidi/0001-fribidi.def-Include-all-required-symbols.patch']
+    patches = ['fribidi/0001-fribidi.def-Include-all-required-symbols.patch',
+               'fribidi/0002-doc-Fix-build-on-Windows-some-more.patch']
 
     files_libs = ['libfribidi']
     files_bins = ['fribidi']

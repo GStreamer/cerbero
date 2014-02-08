@@ -1,0 +1,28 @@
+From 6128f5208f38f60179e32bc1f1cfed8de25c7ea8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sat, 8 Feb 2014 19:49:01 +0100
+Subject: [PATCH 2/2] doc: Fix build on Windows some more
+
+---
+ doc/Makefile.am | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/doc/Makefile.am b/doc/Makefile.am
+index 7fe8d37..f2a30ee 100644
+--- a/doc/Makefile.am
++++ b/doc/Makefile.am
+@@ -16,11 +16,6 @@ include $(top_srcdir)/charset/Headers.mk
+ headers += $(libfribidi_char_sets_la_headers)
+ includepath += -I$(top_srcdir)/charset
+ includevpath += :$(top_srcdir)/charset
+-if FRIBIDI_CHARSETS
+-inst_symbols += $(libfribidi_char_sets_la_symbols)
+-else # !FRIBIDI_CHARSETS
+-noinst_symbols += $(libfribidi_char_sets_la_symbols)
+-endif # !FRIBIDI_CHARSETS
+ 
+ # The lib/Headers.mk stuff should come after all optional stuff.
+ include $(top_srcdir)/lib/Headers.mk
+-- 
+1.9.rc1
+
