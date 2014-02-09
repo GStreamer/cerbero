@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%(version)s.tar.bz2'
     autoreconf = True
-    configure_options = ' --with-gpg-error-prefix=$CERBERO_PREFIX'
+    configure_options = ' --enable-static --enable-shared --with-gpg-error-prefix=$CERBERO_PREFIX'
     patches = ['0001-Add-missing-file-in-distribution-tarball.patch', '0002-add-other-missing-file.patch', '0003-rndhw-Don-t-use-__LP64__-it-does-not-work-on-Windows.patch']
     deps = ['libgpg-error']
 
