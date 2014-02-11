@@ -18,11 +18,11 @@ class Recipe(recipe.Recipe):
 
 
     def prepare (self):
-        if self.config.platform == Platform.WINDOWS:
+        if self.config.target_platform == Platform.WINDOWS:
             system = 'mingw'
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             system = 'darwin'
-        if self.config.platform in [Platform.LINUX, Platform.ANDROID]:
+        if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             system = 'posix'
         self.make = 'make SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS' % (system)
         self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS' % (system)
