@@ -1,0 +1,25 @@
+From 19370f83af476b8f1fd57225a6bdd7c66290a0b2 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 11 Feb 2014 13:46:25 +0100
+Subject: [PATCH] fribidi: disable docs
+
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 35d7721..899f270 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -9,7 +9,7 @@
+ ##############################################################################
+ 
+ ## The order of subdirs is important, don't change without a reason.
+-SUBDIRS = gen.tab charset lib bin doc test
++SUBDIRS = gen.tab charset lib bin test
+ 
+ EXTRA_DIST = bootstrap ChangeLog.old
+ 
+-- 
+1.8.3.2
+
