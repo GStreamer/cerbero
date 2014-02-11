@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
 
 
 class Recipe(recipe.Recipe):
@@ -12,3 +13,15 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = ' --enable-shared --disable-static'
+
+    def post_install(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            src = os.path.join(self.config.prefix, 'lib', 'libgmp-10.dll')
+            dll = os.path.join(self.config.prefix, 'bin', 'libgmp-10.dll')
+            dll_a = os.path.join(self.config.prefix, 'lib', 'libgmp.dll.a')
+            if os.path.exists(dll_a):
+                os.remove(dll_a)
+            shutil.copy(src, dll)
+            shutil.copy(src, dll_a)
+            gmp_la = os.path.join(self.config.prefix, 'lib', 'libgmp.la')
+            shell.replace(gmp_la, {'libgmp.lib': 'libgmp.dll.a'})
