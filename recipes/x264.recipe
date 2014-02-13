@@ -3,7 +3,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
-    version = '20120827-2245'
+    version = '20140212-2245'
     name = 'x264'
     licenses = [License.GPL]
     stype = SourceType.TARBALL
@@ -11,10 +11,9 @@ class Recipe(recipe.Recipe):
                     "--libdir=%(libdir)s %(options)s"
     configure_options = '--enable-shared --enable-static --enable-pic ' \
                         '--disable-strip --disable-lavf'
-    url = 'http://ftp.videolan.org/pub/x264/snapshots/x264-snapshot-20120827-2245-stable.tar.bz2'
-    tarball_dirname= 'x264-snapshot-20120827-2245-stable'
+    url = 'http://download.videolan.org/pub/x264/snapshots/x264-snapshot-20140212-2245-stable.tar.bz2'
+    tarball_dirname= 'x264-snapshot-20140212-2245-stable'
     new_env = {'AS': 'yasm'}
-    patches = [ 'x264/0001-binutils-fix.patch' ]
 
     files_libs = ['libx264']
     files_bins = ['x264']
