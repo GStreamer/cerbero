@@ -201,7 +201,7 @@ def init_directory(git_dir):
     '''
     init(git_dir)
     try:
-        shell.call('%s add *' % GIT, git_dir)
+        shell.call('%s add --force -A .' % GIT, git_dir)
         shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT,
             git_dir)
     except:
