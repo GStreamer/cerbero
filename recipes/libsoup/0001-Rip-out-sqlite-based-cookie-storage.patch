@@ -1,0 +1,136 @@
+From 53f8178880ecb1b4fae22c4eb67091c0f92edc46 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Fri, 14 Feb 2014 15:05:18 +0100
+Subject: [PATCH] Rip out sqlite-based cookie storage
+
+We don't need that and it will increase the binary size for no good reason.
+---
+ configure.ac                  |  4 ----
+ libsoup/Makefile.am           | 10 ++--------
+ libsoup/libsoup-2.4.sym       |  2 --
+ libsoup/libsoup-gnome-2.4.sym |  2 --
+ libsoup/soup-gnome.h          |  1 -
+ libsoup/soup.h                |  1 -
+ 6 files changed, 2 insertions(+), 18 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 4db8cd2..e761406 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -92,10 +92,6 @@ PKG_CHECK_MODULES(XML, libxml-2.0)
+ AC_SUBST(XML_CFLAGS)
+ AC_SUBST(XML_LIBS)
+ 
+-PKG_CHECK_MODULES(SQLITE, sqlite3)
+-AC_SUBST(SQLITE_CFLAGS)
+-AC_SUBST(SQLITE_LIBS)
+-
+ dnl ***********************
+ dnl *** Check for Win32 ***
+ dnl ***********************
+diff --git a/libsoup/Makefile.am b/libsoup/Makefile.am
+index 60920bd..24fc9f5 100644
+--- a/libsoup/Makefile.am
++++ b/libsoup/Makefile.am
+@@ -15,8 +15,7 @@ AM_CPPFLAGS = 				\
+ 	-I$(top_builddir)		\
+ 	$(SOUP_DEBUG_FLAGS)		\
+ 	$(GLIB_CFLAGS)			\
+-	$(XML_CFLAGS)			\
+-	$(SQLITE_CFLAGS)
++	$(XML_CFLAGS)
+ 
+ libsoupincludedir = $(includedir)/libsoup-2.4/libsoup
+ 
+@@ -33,7 +32,6 @@ soup_headers =			\
+ 	soup-content-sniffer.h	\
+ 	soup-cookie.h		\
+ 	soup-cookie-jar.h	\
+-	soup-cookie-jar-db.h	\
+ 	soup-cookie-jar-text.h	\
+ 	soup-date.h		\
+ 	soup-form.h		\
+@@ -88,8 +86,7 @@ EXTRA_DIST += libsoup-2.4.sym
+ libsoup_2_4_la_LIBADD =			\
+ 	$(GLIB_LIBS)			\
+ 	$(LIBWS2_32)			\
+-	$(XML_LIBS)			\
+-	$(SQLITE_LIBS)
++	$(XML_LIBS)
+ 
+ libsoup_2_4_la_SOURCES =		\
+ 	soup-address.c			\
+@@ -128,7 +125,6 @@ libsoup_2_4_la_SOURCES =		\
+ 	soup-converter-wrapper.c	\
+ 	soup-cookie.c			\
+ 	soup-cookie-jar.c		\
+-	soup-cookie-jar-db.c		\
+ 	soup-cookie-jar-text.c		\
+ 	soup-date.c			\
+ 	soup-directory-input-stream.h	\
+@@ -197,7 +193,6 @@ if BUILD_LIBSOUP_GNOME
+ libsoupgnomeincludedir = $(includedir)/libsoup-gnome-2.4/libsoup
+ 
+ libsoupgnomeinclude_HEADERS =	\
+-	soup-cookie-jar-sqlite.h\
+ 	soup-gnome.h		\
+ 	soup-gnome-features.h
+ 
+@@ -215,7 +210,6 @@ libsoup_gnome_2_4_la_LIBADD =		\
+ 	$(GLIB_LIBS)
+ 
+ libsoup_gnome_2_4_la_SOURCES =		\
+-	soup-cookie-jar-sqlite.c	\
+ 	soup-gnome-features.c		\
+ 	soup-proxy-resolver-gnome.h	\
+ 	soup-proxy-resolver-gnome.c	\
+diff --git a/libsoup/libsoup-2.4.sym b/libsoup/libsoup-2.4.sym
+index be4cd7f..1de6408 100644
+--- a/libsoup/libsoup-2.4.sym
++++ b/libsoup/libsoup-2.4.sym
+@@ -113,8 +113,6 @@ soup_cookie_jar_accept_policy_get_type
+ soup_cookie_jar_add_cookie
+ soup_cookie_jar_add_cookie_with_first_party
+ soup_cookie_jar_all_cookies
+-soup_cookie_jar_db_get_type
+-soup_cookie_jar_db_new
+ soup_cookie_jar_delete_cookie
+ soup_cookie_jar_get_accept_policy
+ soup_cookie_jar_get_cookie_list
+diff --git a/libsoup/libsoup-gnome-2.4.sym b/libsoup/libsoup-gnome-2.4.sym
+index 67f62de..8e12248 100644
+--- a/libsoup/libsoup-gnome-2.4.sym
++++ b/libsoup/libsoup-gnome-2.4.sym
+@@ -1,5 +1,3 @@
+-soup_cookie_jar_sqlite_get_type
+-soup_cookie_jar_sqlite_new
+ soup_gnome_features_2_26_get_type
+ soup_password_manager_gnome_get_type
+ soup_proxy_resolver_gnome_get_type
+diff --git a/libsoup/soup-gnome.h b/libsoup/soup-gnome.h
+index a2134a4..6747f3a 100644
+--- a/libsoup/soup-gnome.h
++++ b/libsoup/soup-gnome.h
+@@ -8,7 +8,6 @@
+ 
+ #include <libsoup/soup.h>
+ 
+-#include <libsoup/soup-cookie-jar-sqlite.h>
+ #include <libsoup/soup-gnome-features.h>
+ 
+ #endif /* SOUP_GNOME_H */
+diff --git a/libsoup/soup.h b/libsoup/soup.h
+index 82a2632..6b15a2c 100644
+--- a/libsoup/soup.h
++++ b/libsoup/soup.h
+@@ -21,7 +21,6 @@ extern "C" {
+ #include <libsoup/soup-content-sniffer.h>
+ #include <libsoup/soup-cookie.h>
+ #include <libsoup/soup-cookie-jar.h>
+-#include <libsoup/soup-cookie-jar-db.h>
+ #include <libsoup/soup-cookie-jar-text.h>
+ #include <libsoup/soup-date.h>
+ #include <libsoup/soup-enum-types.h>
+-- 
+1.9.0.rc3
+

@@ -3,10 +3,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'libsoup'
-    version = '2.38.1'
+    version = '2.44.2'
     licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'http://download.gnome.org/sources/libsoup/2.44/libsoup-2.44.2.tar.xz'
+    autoreconf = True
     configure_options = '--without-gnome --disable-more-warnings'
     deps = ['libxml2', 'glib']
+    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
+               'libsoup/0002-Don-t-build-tests.patch']
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
