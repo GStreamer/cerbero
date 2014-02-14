@@ -87,12 +87,12 @@ class Recipe(custom.GStreamerStatic):
 
     files_plugins_net_devel = [
              'libgstdataurisrc',
-             'libgstrtmp',
              'libgstsdpelem',
     ]
 
     files_plugins_net_restricted_devel = [
              'libgstmms',
+             'libgstrtmp',
     ]
 
     files_plugins_capture_devel = [

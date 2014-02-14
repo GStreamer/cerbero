@@ -16,7 +16,7 @@ class Package(package.Package):
     uuid = '8cf57a89-3ba3-4db0-8b66-15e79b541ffe'
     deps = ['gstreamer-1.0-core']
 
-    files = ['libmms:libs',
+    files = ['libmms:libs', 'librtmp:libs',
              'gst-plugins-ugly-1.0:plugins_net_restricted',
              'gst-plugins-bad-1.0:plugins_net_restricted']
     files_devel = ['gst-plugins-ugly-1.0-static:plugins_net_restricted_devel',

@@ -93,12 +93,12 @@ class Recipe(recipe.Recipe):
 
     files_plugins_net = [
              'lib/gstreamer-1.0/libgstdataurisrc%(mext)s',
-             'lib/gstreamer-1.0/libgstrtmp%(mext)s',
              'lib/gstreamer-1.0/libgstsdpelem%(mext)s',
     ]
 
     files_plugins_net_restricted = [
              'lib/gstreamer-1.0/libgstmms%(mext)s',
+             'lib/gstreamer-1.0/libgstrtmp%(mext)s',
     ]
 
     files_plugins_capture = [
