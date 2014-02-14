@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '2.44.2'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://download.gnome.org/sources/libsoup/2.44/libsoup-2.44.2.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/libsoup/2.44/libsoup-2.44.2.tar.xz'
     autoreconf = True
     configure_options = '--without-gnome --disable-more-warnings'
     deps = ['libxml2', 'glib']
