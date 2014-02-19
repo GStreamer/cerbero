@@ -10,7 +10,8 @@ class Recipe(custom.GStreamerStatic):
     commit = 'origin/1.2'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'opus', 'gnutls',
-            'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch' ]
+            'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch',
+            'vo-aacenc']
 
     files_plugins_effects_devel = [
              'libgstaccurip',
