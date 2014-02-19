@@ -1,0 +1,14 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'vo-aacenc'
+    version = '0.1.3'
+    licenses = [License.Apachev2]
+    stype = SourceType.TARBALL
+    url = 'http://downloads.sourceforge.net/project/opencore-amr/vo-aacenc/vo-aacenc-0.1.3.tar.gz'
+    autoreconf = True
+
+    files_libs = ['libvo-aacenc']
+    files_devel = ['include/vo-aacenc',
+        'lib/pkgconfig/vo-aacenc.pc']
