@@ -78,7 +78,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstmpegpsmux',
              'libgstmpegtsdemux',
              'libgstmpegtsmux',
-	     'libgstvoaacenc'
+             'libgstvoaacenc'
     ]
 
     files_plugins_dvd_devel = [
