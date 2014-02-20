@@ -94,7 +94,7 @@ class DistributionXML(object):
     def _add_choice(self, package, enabled, selected):
         self.choices_desc += '<choice description="default" id="%s" start_enabled="%s"'\
                              ' title="%s">\n' % \
-            (package.identifier(), package.shortdesc, package.longdesc)
+            (package.identifier(), enabled, package.longdesc)
 
         packages = [package] + self.store.get_package_deps(package)
         for package in packages:
