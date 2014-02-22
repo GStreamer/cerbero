@@ -22,7 +22,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
     licenses = [License.BSD_like]
-    patches = ['libffi/0002-makefiles-fix-toolexeclibdir.patch']
+    patches = ['libffi/0002-makefiles-fix-toolexeclibdir.patch',
+               'libffi/0003-osx-fix-check-to-use-malloc-in-OSX-10.7.patch']
 
     files_libs = ['libffi']
     files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']

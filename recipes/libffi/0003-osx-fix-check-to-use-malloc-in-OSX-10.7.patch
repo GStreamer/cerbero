@@ -1,0 +1,64 @@
+From 5917b8b893be7bfe83c78d5c9bcaec692bbf4427 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 17 Feb 2014 12:08:57 +0100
+Subject: [PATCH] osx: fix check to use malloc in OSX >= 10.7
+
+The host triplet in configure is not enough to determine
+whether malloc can't be used or not, as it should be disabled
+whenever we target OS X >= 10.7
+---
+ configure.ac   | 2 +-
+ src/closures.c | 7 +++++++
+ src/dlmalloc.c | 5 +++++
+ 3 files changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 0d768c6..004c260 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -450,7 +450,7 @@ case "$target" in
+                  [Cannot use PROT_EXEC on this target, so, we revert to
+                    alternative means])
+      ;;
+-     *-apple-darwin1* | *-*-freebsd* | *-*-kfreebsd* | *-*-openbsd* | *-pc-solaris*)
++     *-*-freebsd* | *-*-kfreebsd* | *-*-openbsd* | *-pc-solaris*)
+        AC_DEFINE(FFI_MMAP_EXEC_WRIT, 1,
+                  [Cannot use malloc on this target, so, we revert to
+                    alternative means])
+diff --git a/src/closures.c b/src/closures.c
+index 4d0a0b6..69924b7 100644
+--- a/src/closures.c
++++ b/src/closures.c
+@@ -51,6 +51,13 @@
+    executable memory. */
+ #  define FFI_MMAP_EXEC_WRIT 1
+ # endif
++# if defined(__APPLE__)
++/* For OS X >= 10.7 malloc can't be used */
++#  include <AvailabilityMacros.h>
++#  if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
++#   define FFI_MMAP_EXEC_WRIT 1
++#  endif
++# endif
+ #endif
+ 
+ #if FFI_MMAP_EXEC_WRIT && !defined FFI_MMAP_EXEC_SELINUX
+diff --git a/src/dlmalloc.c b/src/dlmalloc.c
+index 3e2ea6f..6d20ff5 100644
+--- a/src/dlmalloc.c
++++ b/src/dlmalloc.c
+@@ -473,6 +473,11 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
+ #define HAVE_MORECORE 0
+ #define HAVE_MMAP 1
+ #endif  /* HAVE_MORECORE */
++#include <AvailabilityMacros.h>
++/* For OS X >= 10.7 malloc can't be used */
++#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1070
++#define FFI_MMAP_EXEC_WRIT 1
++#endif
+ #endif  /* DARWIN */
+ 
+ #ifndef LACKS_SYS_TYPES_H
+-- 
+1.8.3.2
+
