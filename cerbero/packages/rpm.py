@@ -148,7 +148,7 @@ class RPMPackager(LinuxPackager):
     def create_tree(self, tmpdir):
         # create a tmp dir to use as topdir
         if tmpdir is None:
-            tmpdir = tempfile.mkdtemp()
+            tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
             for d in ['BUILD', 'SOURCES', 'RPMS', 'SRPMS', 'SPECS']:
                 os.mkdir(os.path.join(tmpdir, d))
         return (tmpdir, os.path.join(tmpdir, 'RPMS'),

@@ -191,7 +191,7 @@ class DebianPackager(LinuxPackager):
     def create_tree(self, tmpdir):
         # create a tmp dir to use as topdir
         if tmpdir is None:
-            tmpdir = tempfile.mkdtemp()
+            tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
         srcdir = os.path.join(tmpdir, self.full_package_name)
         os.mkdir(srcdir)
         packagedir = os.path.join(srcdir, 'debian')
