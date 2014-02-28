@@ -5,17 +5,20 @@ from cerbero.errors import FatalError
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking-static'
-    version = '2.34.2'
+    version = '2.38.2'
     licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.38/glib-networking-2.38.2.tar.xz'
+    tarball_dirname = 'glib-networking-%(version)s'
+    autoreconf = True
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static --enable-more-warnings"
     deps = ['glib', 'gnutls', 'glib-networking']
+    patches = ['glib-networking/0001-gnutls-add-initial-support-for-static-builds.patch']
 
     files_devel = ['lib/gio/modules/static/libgiognutls.a',
                    'lib/gio/modules/static/libgiognutls.la']
 
     def prepare(self):
-        self.remotes['origin'] = self.remotes['origin'].replace('-static', '')
-        self.repo_dir = self.repo_dir.replace('-static', '')
         self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
 
         querymodule_path = None

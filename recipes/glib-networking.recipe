@@ -3,10 +3,14 @@ import os
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.34.2'
+    version = '2.38.2'
     licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.38/glib-networking-2.38.2.tar.xz'
+    autoreconf = True
     configure_options = "--without-ca-certificates --enable-more-warnings"
     deps = ['glib', 'gnutls']
+    patches = ['glib-networking/0001-gnutls-add-initial-support-for-static-builds.patch']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
