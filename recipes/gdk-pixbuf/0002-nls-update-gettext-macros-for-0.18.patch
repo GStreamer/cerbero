@@ -1,0 +1,25 @@
+From a6c6e5082dd693730c80e563007c8a874293f05f Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Fri, 22 Mar 2013 21:27:53 +0100
+Subject: [PATCH] nls: update gettext macros for 0.18
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 8007451..b12fb5d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -329,7 +329,7 @@ if test "$gtk_ok" = "yes"; then
+ fi
+ 
+ # i18n stuff
+-AM_GNU_GETTEXT_VERSION([0.17])
++AM_GNU_GETTEXT_VERSION([0.18])
+ AM_GNU_GETTEXT([external])
+ 
+ GETTEXT_PACKAGE="$PACKAGE"
+-- 
+1.9.0
+
