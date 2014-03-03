@@ -311,7 +311,7 @@ class CMake (MakefilesBase):
             self.configure_options += ' -G\\"Unix Makefiles\\"'
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             r = re.compile(r".*-isysroot ([^ ]+) .*")
             sysroot = r.match(cflags).group(1)
             self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
