@@ -307,6 +307,8 @@ class CMake (MakefilesBase):
 
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
+        elif self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Linux '
         if self.config.platform == Platform.WINDOWS:
             self.configure_options += ' -G\\"Unix Makefiles\\"'
 
