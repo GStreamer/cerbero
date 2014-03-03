@@ -4,9 +4,12 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
-    version = '2.26.2'
+    version = '2.30.4'
     licenses = [License.LGPLv2Plus]
-    configure_options = '--with-included-loaders --enable-static '
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.30/gdk-pixbuf-2.30.4.tar.xz'
+    patches = ['gdk-pixbuf/0002-nls-update-gettext-macros-for-0.18.patch']
+    configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
     deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
     autoreconf = True
 
