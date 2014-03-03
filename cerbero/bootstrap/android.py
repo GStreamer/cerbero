@@ -27,11 +27,11 @@ from cerbero.utils import shell
 class AndroidBootstraper (BootstraperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r9c-linux-%s.tar.bz2'
+    NDK_TAR = 'android-ndk-r9c-%s-%s.tar.bz2'
 
     def start(self):
         dest = self.config.toolchain_prefix
-        ndk_tar = self.NDK_TAR % self.config.arch
+        ndk_tar = self.NDK_TAR % (self.config.platform, self.config.arch)
         tar = os.path.join(dest, ndk_tar)
         try:
             os.makedirs(dest)
