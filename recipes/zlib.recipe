@@ -24,6 +24,11 @@ class Recipe(recipe.Recipe):
                                 'LIBRARY_PATH=%(prefix)s/lib ' \
                                 'BINARY_PATH=%(prefix)s/bin ' % {'prefix':self.config.prefix}
             self._remove_steps ([BuildSteps.CONFIGURE])
+        elif self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.X86:
+                self.configure_options += " --uname=i686-linux-android "
+            else:
+                self.configure_options += " --uname=arm-linux-androideabi "
 
     def post_install(self):
         libtool_la = LibtoolLibrary('z', 1, 2, 8, self.config.libdir,
