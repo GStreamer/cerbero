@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.40.1'
+    version = '2.40.2'
     licenses = [License.LGPLv2]
-    deps = ['gdk-pixbuf', 'libcroco', 'gtk+3']
+    deps = ['libcroco']
 
     stype = SourceType.TARBALL
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-2.40.1.tar.xz'
@@ -15,10 +15,13 @@ class Recipe(recipe.Recipe):
     files_loader = []
     files_devel = ['include/librsvg-2.0/librsvg',
                    'lib/pkgconfig/librsvg-2.0.pc']
+    files_typelibs = ['Rsvg-2.0']
+
+    patches = ['librsvg/0001-Add-an-implementation-of-realpath-for-windows-to-mak.patch']
 
     def prepare(self):
         if self.config.variants.gtk:
-            self.deps += ['gdk-pixbuf', 'gtk+']
+            self.deps += ['gdk-pixbuf', 'gtk+3']
             self.files_loader += ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
         else:
             self.configure_options += ' --disable-pixbuf-loader --disable-gtk-theme '
