@@ -20,7 +20,7 @@ class Package(package.Package):
              'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
              'libpng:libs', 'tiff:libs', 'jpeg:libs',
              'libxml2:libs', 'pixman:libs',
-             'zlib:libs', 'bzip2:libs', ]
+             'zlib:libs', 'bzip2:libs', 'harfbuzz:libs']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',

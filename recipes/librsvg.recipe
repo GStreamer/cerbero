@@ -3,10 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.36.1'
+    version = '2.40.1'
     licenses = [License.LGPLv2]
-    deps = ['libcroco']
-    configure_options = '--enable-introspection=no'
+    deps = ['gdk-pixbuf', 'libcroco', 'gtk+3']
+
+    stype = SourceType.TARBALL
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-2.40.1.tar.xz'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']

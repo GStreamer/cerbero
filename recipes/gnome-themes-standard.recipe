@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'gnome-themes-standard'
+    version = '3.10.0'
+    licenses = [License.LGPLv2_1]
+
+    use_system_libs = True # Needs acces to X11 for gdk3
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/gnome-themes-standard/3.10/gnome-themes-standard-3.10.0.tar.xz'
+    deps = ['gtk+3', 'librsvg']
+    configure_options = '--disable-gtk2-engine'
+
+    files_misc = ['lib/gtk-3.0/3.0.0/theming-engines/libadwaita%(pext)s',
+                  'share/gnome-background-properties/adwaita.xml',
+                  'share/icons/Adwaita',
+                  'share/icons/HighContrast',
+                  'share/themes/Adwaita',
+                  'share/themes/HighContrast',
+                  ]
+

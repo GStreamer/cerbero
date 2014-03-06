@@ -3,14 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.30.1'
+    version = '1.36.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/pango/1.30/pango-1.30.1.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/pango/1.36/pango-1.36.1.tar.xz'
     autoreconf = True
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules --enable-static --disable-gtk-doc'
-    deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite']
+    deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite', 'harfbuzz']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
@@ -19,9 +19,11 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/pangocairo.pc']
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
+        Platform.LINUX: ['libpango-1.0'],
     }
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
+        Platform.LINUX: ['lib/pkgconfig/pango.pc'],
     }
     files_typelibs = [
         'Pango-1.0',
