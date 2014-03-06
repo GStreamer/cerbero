@@ -2,13 +2,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'clutter'
-    version = '1.8.4'
+    version = '1.16.2'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     deps = ['json-glib', 'cairo', 'atk', 'pango', 'cogl']
     use_system_libs = True
-    autoreconf=True
+
+    stype = SourceType.TARBALL
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/clutter/1.16/clutter-1.16.2.tar.xz'
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',
@@ -24,7 +26,8 @@ class Recipe(recipe.Recipe):
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/clutter-win32-1.0.pc'],
         Platform.DARWIN: ['lib/pkgconfig/clutter-osx-1.0.pc'],
-        Platform.LINUX: ['lib/pkgconfig/clutter-cogl-1.0.pc', 'lib/pkgconfig/clutter-glx-1.0.pc',
+        Platform.LINUX: ['lib/pkgconfig/clutter-cogl-1.0.pc',
+                         'lib/pkgconfig/clutter-glx-1.0.pc',
                          'lib/pkgconfig/clutter-x11-1.0.pc'],
     }
     files_lang = ['clutter-1.0']

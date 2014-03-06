@@ -2,14 +2,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'cogl'
-    version = '1.8.2'
+    version = '1.16.0'
     # TODO: check license - source files are LGPLv2+ and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
-    autoreconf = True
-    configure_options = "--disable-introspection "
     use_system_libs = True
     deps = [ 'pango', 'gdk-pixbuf' ]
-    autoreconf = True
+
+    stype = SourceType.TARBALL
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/cogl/1.16/cogl-1.16.0.tar.xz'
 
     files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [
@@ -19,3 +19,4 @@ class Recipe(recipe.Recipe):
         'include/cogl',
         ]
     files_lang = ['cogl']
+    files_typelibs = ['Cogl-1.0', 'CoglPango-1.0']
