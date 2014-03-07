@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-more-warnings"
     deps = ['glib', 'gnutls']
-    patches = ['glib-networking/0001-gnutls-add-initial-support-for-static-builds.patch']
+    patches = ['glib-networking/0001-Add-support-for-static-modules.patch']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']

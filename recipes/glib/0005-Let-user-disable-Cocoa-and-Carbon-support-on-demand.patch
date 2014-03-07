@@ -54,7 +54,7 @@ index cf2e3e2..04d5190 100644
 +if test "$glib_native_win32" != yes; then
 +    # libtool option to control which symbols are exported
 +    # right now, symbols starting with _ are not exported
-+    LIBTOOL_EXPORT_OPTIONS='-export-symbols-regex "^g.*"'
++    LIBTOOL_EXPORT_OPTIONS="-export-symbols-regex \^[_]?g.*"
 +else
 +    # We currently use .def files on Windows
 +    LIBTOOL_EXPORT_OPTIONS=

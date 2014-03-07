@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static --enable-more-warnings"
     deps = ['glib', 'gnutls', 'glib-networking']
-    patches = ['glib-networking/0001-gnutls-add-initial-support-for-static-builds.patch']
+    patches = ['glib-networking/0001-Add-support-for-static-modules.patch']
 
     files_devel = ['lib/gio/modules/static/libgiognutls.a',
                    'lib/gio/modules/static/libgiognutls.la']
