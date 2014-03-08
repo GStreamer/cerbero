@@ -89,7 +89,8 @@ class Config (object):
                    'build_tools_prefix', 'build_tools_sources',
                    'build_tools_cache', 'home_dir', 'recipes_commits',
                    'ios_platform', 'extra_build_tools',
-                   'distro_packages_install', 'interactive', 'target_arch_flags']
+                   'distro_packages_install', 'interactive',
+                   'target_arch_flags', 'sysroot', 'isysroot']
 
     def __init__(self):
         self._check_uninstalled()
