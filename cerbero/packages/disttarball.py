@@ -93,3 +93,16 @@ class DistTarball(PackagerBase):
         tar.close()
 
         return filename
+
+
+class Packager(object):
+
+    def __new__(klass, config, package, store):
+        return DistTarball(config, package, store)
+
+
+
+def register():
+    from cerbero.packages.packager import register_packager
+    from cerbero.config import Distro
+    register_packager(Distro.NONE, Packager)

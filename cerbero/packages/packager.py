@@ -48,7 +48,7 @@ class Packager (object):
         return _packagers[d][v](config, package, store)
 
 
-from cerbero.packages import wix_packager, rpm, debian, android
+from cerbero.packages import wix_packager, rpm, debian, android, disttarball
 from cerbero.packages.osx import packager as osx_packager
 
 wix_packager.register()
@@ -56,3 +56,4 @@ osx_packager.register()
 rpm.register()
 debian.register()
 android.register()
+disttarball.register()
