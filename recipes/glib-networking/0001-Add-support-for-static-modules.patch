@@ -1,4 +1,4 @@
-From b1152f5589669e5f45656b8c14e894be405fcc83 Mon Sep 17 00:00:00 2001
+From 473e7284fa4b70c27db67522eda70ee5e86da466 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 7 Mar 2014 12:50:24 +0100
 Subject: [PATCH] Add support for static modules
@@ -11,9 +11,9 @@ Also does not require any GLib changes.
  configure.ac                    | 20 ++++++++++++++++++++
  glib-networking.mk              |  5 ++++-
  tls/gnutls/gnutls-module.c      | 12 +++++++++++-
- tls/gnutls/gtlsbackend-gnutls.c | 24 +++++++++++++++++++-----
+ tls/gnutls/gtlsbackend-gnutls.c | 27 ++++++++++++++++++++++-----
  tls/gnutls/gtlsbackend-gnutls.h |  7 ++++++-
- 5 files changed, 60 insertions(+), 8 deletions(-)
+ 5 files changed, 63 insertions(+), 8 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
 index 4234209..918ff81 100644
@@ -89,7 +89,7 @@ index a725f9b..8da3c2b 100644
  }
 +#endif
 diff --git a/tls/gnutls/gtlsbackend-gnutls.c b/tls/gnutls/gtlsbackend-gnutls.c
-index 55ec1a5..216df7f 100644
+index 55ec1a5..277fff2 100644
 --- a/tls/gnutls/gtlsbackend-gnutls.c
 +++ b/tls/gnutls/gtlsbackend-gnutls.c
 @@ -39,10 +39,22 @@ struct _GTlsBackendGnutlsPrivate
@@ -115,7 +115,19 @@ index 55ec1a5..216df7f 100644
  #ifdef GTLS_GNUTLS_DEBUG
  static void
  gtls_log_func (int level, const char *msg)
-@@ -116,11 +128,6 @@ g_tls_backend_gnutls_class_init (GTlsBackendGnutlsClass *backend_class)
+@@ -61,8 +73,11 @@ gtls_gnutls_init (gpointer data)
+   gnutls_global_set_log_level (9);
+ #endif
+ 
++#ifndef G_IO_MODULE_BUILD_STATIC
+   /* Leak the module to keep it from being unloaded. */
+   g_type_plugin_use (g_type_get_plugin (G_TYPE_TLS_BACKEND_GNUTLS));
++#endif
++
+   return NULL;
+ }
+ 
+@@ -116,11 +131,6 @@ g_tls_backend_gnutls_class_init (GTlsBackendGnutlsClass *backend_class)
    g_type_class_add_private (backend_class, sizeof (GTlsBackendGnutlsPrivate));
  }
  
@@ -127,7 +139,7 @@ index 55ec1a5..216df7f 100644
  static GTlsDatabase*
  g_tls_backend_gnutls_get_default_database (GTlsBackend *backend)
  {
-@@ -303,10 +310,17 @@ g_tls_backend_gnutls_lookup_session (unsigned int             type,
+@@ -303,10 +313,17 @@ g_tls_backend_gnutls_lookup_session (unsigned int             type,
    return session_data;
  }
  
