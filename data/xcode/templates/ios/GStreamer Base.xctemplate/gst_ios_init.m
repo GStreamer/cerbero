@@ -4,7 +4,7 @@
 
 #if defined(GST_IOS_GIO_MODULE_GNUTLS)
   #include <gio/gio.h>
-  G_IO_MODULE_DECLARE(gnutls);
+  GST_G_IO_MODULE_DECLARE(gnutls);
 #endif
 
 void
@@ -40,7 +40,7 @@ gst_ios_init (void)
   @GST_IOS_PLUGINS_REGISTER@
 
 #if defined(GST_IOS_GIO_MODULE_GNUTLS)
-  G_IO_MODULE_LOAD(gnutls);
+  GST_G_IO_MODULE_LOAD(gnutls);
 #endif
 
   /* Lower the ranks of filesrc and giosrc so iosavassetsrc is

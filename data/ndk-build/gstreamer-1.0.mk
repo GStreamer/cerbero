@@ -130,9 +130,9 @@ GSTREAMER_PLUGINS_REGISTER   := $(foreach plugin, $(GSTREAMER_PLUGINS), \
 G_IO_MODULES_PATH            := $(foreach path, $(G_IO_MODULES_PATH), -L$(path))
 G_IO_MODULES_LIBS            := $(foreach module, $(G_IO_MODULES), -lgio$(module))
 G_IO_MODULES_DECLARE         := $(foreach module, $(G_IO_MODULES), \
-			G_IO_MODULE_DECLARE(gnutls);\n)
+			GST_G_IO_MODULE_DECLARE($(module));\n)
 G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
-			G_IO_MODULE_LOAD(gnutls);\n)
+			GST_G_IO_MODULE_LOAD($(module));\n)
 
 # Get the full list of libraries
 # link at least to gstreamer-1.0 in case the plugins list is empty

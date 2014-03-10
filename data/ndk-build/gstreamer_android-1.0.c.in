@@ -5,15 +5,11 @@
 
 static GstClockTime _priv_gst_info_start_time;
 
-#ifndef G_IO_MODULE_DECLARE
-#define G_IO_MODULE_DECLARE(name) \
+#define GST_G_IO_MODULE_DECLARE(name) \
 extern void G_PASTE(g_io_module_, G_PASTE(name, _load_static)) (void)
-#endif
 
-#ifndef G_IO_MODULE_LOAD
-#define G_IO_MODULE_LOAD(name) \
+#define GST_G_IO_MODULE_LOAD(name) \
 G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
-#endif
 
 /* Declaration of static plugins */
  @PLUGINS_DECLARATION@
