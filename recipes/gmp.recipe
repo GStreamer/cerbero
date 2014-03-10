@@ -4,8 +4,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gmp'
-    version = '5.0.5'
+    version = '5.1.3'
+    url = 'http://gmplib.org/download/gmp/gmp-5.1.3.tar.xz'
+    stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
+    patches = ['gmp/0001-Use-results-from-configure-script-for-read-only-data.patch']
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
