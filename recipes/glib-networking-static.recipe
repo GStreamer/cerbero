@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static --enable-more-warnings"
     deps = ['glib', 'gnutls', 'glib-networking']
-    patches = ['glib-networking/0001-Add-support-for-static-modules.patch']
+    patches = ['glib-networking/0001-Add-support-for-static-modules.patch',
+               'glib-networking/0002-Get-the-CA-certificate-path-from-the-environment-var.patch']
 
     files_devel = ['lib/gio/modules/static/libgiognutls.a',
                    'lib/gio/modules/static/libgiognutls.la']
@@ -31,6 +32,9 @@ class Recipe(recipe.Recipe):
 
         if not self.config.prefix_is_executable():
           querymodule_path = 'true'
+
+        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
+          self.append_env['CFLAGS'] = ' -DGST_CA_CERTIFICATES_FROM_ENV'
 
         self.config_sh = 'GIO_QUERYMODULES=%s %s' % (querymodule_path, self.config_sh)
 

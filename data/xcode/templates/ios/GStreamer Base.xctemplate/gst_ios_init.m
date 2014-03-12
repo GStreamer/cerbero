@@ -21,6 +21,7 @@ gst_ios_init (void)
   const gchar *tmp_dir = [tmp UTF8String];
   const gchar *cache_dir = [cache UTF8String];
   const gchar *docs_dir = [docs UTF8String];
+  gchar *ca_certificates;
     
   g_setenv ("TMP", tmp_dir, TRUE);
   g_setenv ("TEMP", tmp_dir, TRUE);
@@ -34,6 +35,10 @@ gst_ios_init (void)
   g_setenv ("XDG_CONFIG_HOME", cache_dir, TRUE);
   g_setenv ("XDG_DATA_HOME", resources_dir, TRUE);
   g_setenv ("FONTCONFIG_PATH", resources_dir, TRUE);
+
+  ca_certificates = g_build_filename (resources_dir, "ssl", "certs", "ca-certifcates.crt", NULL);
+  g_setenv ("CA_CERTIFICATES", ca_certificates, TRUE);
+  g_free (ca_cacertificates);
     
   gst_init (NULL, NULL);
 

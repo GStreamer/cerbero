@@ -1,0 +1,27 @@
+From 6a9b52196ce35b96441c8a247c396797ce375ce2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 12 Mar 2014 14:27:36 +0100
+Subject: [PATCH] Get the CA certificate path from the environment variables on
+ Android and iOS
+
+---
+ tls/gnutls/gtlsbackend-gnutls.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tls/gnutls/gtlsbackend-gnutls.c b/tls/gnutls/gtlsbackend-gnutls.c
+index 277fff2..fdc9054 100644
+--- a/tls/gnutls/gtlsbackend-gnutls.c
++++ b/tls/gnutls/gtlsbackend-gnutls.c
+@@ -119,6 +119,9 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
+ #ifdef GTLS_SYSTEM_CA_FILE
+   anchor_file = GTLS_SYSTEM_CA_FILE;
+ #endif
++#ifdef GST_CA_CERTIFICATES_FROM_ENV
++  anchor_file = g_getenv ("CA_CERTIFICATES");
++#endif
+   return g_tls_file_database_new (anchor_file, error);
+ }
+ 
+-- 
+1.9.0
+

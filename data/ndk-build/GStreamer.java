@@ -15,6 +15,7 @@ public class GStreamer {
     public static void init(Context context) throws Exception {
         nativeInit(context);
 @INCLUDE_FONTS@        copyFonts(context);
+@INCLUDE_CA_CERTIFICATES@        copyCaCertificates(context);
     }
 
 @INCLUDE_FONTS@    private static void copyFonts(Context context) {
@@ -39,6 +40,23 @@ public class GStreamer {
 @INCLUDE_FONTS@        }
 @INCLUDE_FONTS@    }
 
+@INCLUDE_CA_CERTIFICATES@    private static void copyCaCertificates(Context context) {
+@INCLUDE_CA_CERTIFICATES@        AssetManager assetManager = context.getAssets();
+@INCLUDE_CA_CERTIFICATES@        File filesDir = context.getFilesDir();
+@INCLUDE_CA_CERTIFICATES@        File sslDir = new File (filesDir, "ssl");
+@INCLUDE_CA_CERTIFICATES@        File certsDir = new File (sslDir, "certs");
+@INCLUDE_CA_CERTIFICATES@        File certs = new File (certsDir, "ca-certificates.crt");
+@INCLUDE_CA_CERTIFICATES@
+@INCLUDE_CA_CERTIFICATES@        certsDir.mkdirs();
+@INCLUDE_CA_CERTIFICATES@
+@INCLUDE_CA_CERTIFICATES@        try {
+@INCLUDE_CA_CERTIFICATES@            /* Copy the certificates file */
+@INCLUDE_CA_CERTIFICATES@            copyFile (assetManager, "ssl/certs/ca-certificates.crt", certs);
+@INCLUDE_CA_CERTIFICATES@        } catch (IOException e) {
+@INCLUDE_CA_CERTIFICATES@            e.printStackTrace();
+@INCLUDE_CA_CERTIFICATES@        }
+@INCLUDE_CA_CERTIFICATES@    }
+
 @INCLUDE_COPY_FILE@    private static void copyFile(AssetManager assetManager, String assetPath, File outFile) throws IOException {
 @INCLUDE_COPY_FILE@        InputStream in;
 @INCLUDE_COPY_FILE@        OutputStream out;
@@ -46,7 +64,7 @@ public class GStreamer {
 @INCLUDE_COPY_FILE@        int read;
 @INCLUDE_COPY_FILE@
 @INCLUDE_COPY_FILE@        if (outFile.exists())
-@INCLUDE_COPY_FILE@            return;
+@INCLUDE_COPY_FILE@            outFile.delete();
 @INCLUDE_COPY_FILE@
 @INCLUDE_COPY_FILE@        in = assetManager.open(assetPath);
 @INCLUDE_COPY_FILE@        out = new FileOutputStream (outFile);

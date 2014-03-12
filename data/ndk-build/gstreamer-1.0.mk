@@ -48,6 +48,10 @@ ifndef GSTREAMER_INCLUDE_FONTS
 GSTREAMER_INCLUDE_FONTS := yes
 endif
 
+ifndef GSTREAMER_INCLUDE_CA_CERTIFICATES
+GSTREAMER_INCLUDE_CA_CERTIFICATES := yes
+endif
+
 # Include tools
 include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 
@@ -169,6 +173,9 @@ $(GSTREAMER_ANDROID_SO): copyjavasource_$(TARGET_ARCH_ABI)
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 $(GSTREAMER_ANDROID_SO): copyfontsres_$(TARGET_ARCH_ABI)
 endif
+ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
+$(GSTREAMER_ANDROID_SO): copycacertificatesres_$(TARGET_ARCH_ABI)
+endif
 
 delsharedlib_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
 delsharedlib_$(TARGET_ARCH_ABI):
@@ -212,11 +219,19 @@ buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
 copyjavasource_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,src/org/freedesktop/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/org/freedesktop/gstreamer)
-ifeq ($(GSTREAMER_INCLUDE_FONTS), yes)
+ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" src/org/freedesktop/gstreamer/GStreamer.java
-	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" src/org/freedesktop/gstreamer/GStreamer.java
 else
 	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
+endif
+ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
+	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;;g" src/org/freedesktop/gstreamer/GStreamer.java
+else
+	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
+endif
+ifneq (,$(findstring yes,$(GSTREAMER_INCLUDE_FONTS)$(GSTREAMER_INCLUDE_CA_CERTIFICATES)))
+	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" src/org/freedesktop/gstreamer/GStreamer.java
+else
 	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
 endif
 
@@ -225,3 +240,7 @@ copyfontsres_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,assets/fontconfig/fonts/truetype/)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,assets/fontconfig)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,assets/fontconfig/fonts/truetype)
+copycacertificatesres_$(TARGET_ARCH_ABI):
+	@$(call host-mkdir,assets/ssl/certs)
+	@$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,assets/ssl/certs)
+

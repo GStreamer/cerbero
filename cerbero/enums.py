@@ -144,6 +144,8 @@ class License:
             'GNU Lesser General Public License, version 3')
     LGPLv3Plus = LicenseDescription('LGPL-3+',
             'GNU Lesser General Public License, version 3 or later')
+    MPLv2 = LicenseDescription('MPL-2',
+            'Mozilla Public License Version 2.0')
     LibPNG = LicenseDescription('LibPNG',
             'LibPNG License')
     MIT = LicenseDescription('MIT',

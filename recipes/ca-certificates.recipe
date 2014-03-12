@@ -1,0 +1,33 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+from cerbero.utils import shell
+
+# Created with tools/certdata2pem on the Mozilla CA list
+# https://mxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt
+
+class Recipe(recipe.Recipe):
+    name = 'ca-certificates'
+    version = '0.1'
+    licenses = [License.MPLv2]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    files_etc = [
+            'etc/ssl/certs/ca-certificates.crt',
+            ]
+
+    def install(self):
+        dst_dir = os.path.join(self.config.prefix, 'etc', 'ssl', 'certs')
+        if not os.path.exists(dst_dir):
+            os.makedirs(dst_dir)
+        src_dir = os.path.join(self.config.recipes_dir, 'ca-certificates')
+        for f in self.files_etc:
+            fname = os.path.basename(f)
+            s = os.path.join(src_dir, fname)
+            d = os.path.join(dst_dir, fname)
+            if os.path.isfile(s):
+                shutil.copy(s, d)
+            else:
+                shell.copy_dir(s, d)
+
