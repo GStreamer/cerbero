@@ -1,4 +1,4 @@
-package com.gstreamer;
+package org.freedesktop.gstreamer;
 
 import java.io.File;
 import java.io.FileOutputStream;

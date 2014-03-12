@@ -185,8 +185,8 @@ buildsharedlibrary: $(GSTREAMER_ANDROID_O)
 	@$(GSTREAMER_ANDROID_CMD)
 
 copyjavasource:
-	@$(call host-mkdir,src/com/gstreamer)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/com/gstreamer)
+	@$(call host-mkdir,src/org/freedesktop/gstreamer)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/org/freedesktop/gstreamer)
 
 copyfontsres:
 	@$(call host-mkdir,assets/fontconfig)
