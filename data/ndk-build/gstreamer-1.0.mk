@@ -44,6 +44,10 @@ ifndef GSTREAMER_NDK_BUILD_PATH
 GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_ROOT)/share/gst-android/ndk-build
 endif
 
+ifndef GSTREAMER_INCLUDE_FONTS
+GSTREAMER_INCLUDE_FONTS := yes
+endif
+
 # Include tools
 include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 
@@ -162,7 +166,9 @@ GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID
 # This triggers the build of our library using our custom rules
 $(GSTREAMER_ANDROID_SO): buildsharedlibrary_$(TARGET_ARCH_ABI)
 $(GSTREAMER_ANDROID_SO): copyjavasource_$(TARGET_ARCH_ABI)
+ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 $(GSTREAMER_ANDROID_SO): copyfontsres_$(TARGET_ARCH_ABI)
+endif
 
 delsharedlib_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
 delsharedlib_$(TARGET_ARCH_ABI):
@@ -206,6 +212,13 @@ buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
 copyjavasource_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,src/com/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/com/gstreamer)
+ifeq ($(GSTREAMER_INCLUDE_FONTS), yes)
+	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" src/com/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" src/com/gstreamer/GStreamer.java
+else
+	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;//;g" src/com/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;//;g" src/com/gstreamer/GStreamer.java
+endif
 
 copyfontsres_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,assets/fontconfig)
