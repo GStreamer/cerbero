@@ -52,6 +52,10 @@ ifndef GSTREAMER_INCLUDE_CA_CERTIFICATES
 GSTREAMER_INCLUDE_CA_CERTIFICATES := yes
 endif
 
+ifndef GSTREAMER_JAVA_SRC_DIR
+GSTREAMER_JAVA_SRC_DIR := src
+endif
+
 # Include tools
 include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 
@@ -217,22 +221,22 @@ buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
 	@$(PRIV_CMD)
 
 copyjavasource_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,src/org/freedesktop/gstreamer)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,src/org/freedesktop/gstreamer)
+	@$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
-	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
-	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 ifneq (,$(findstring yes,$(GSTREAMER_INCLUDE_FONTS)$(GSTREAMER_INCLUDE_CA_CERTIFICATES)))
-	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;//;g" src/org/freedesktop/gstreamer/GStreamer.java
+	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 
 copyfontsres_$(TARGET_ARCH_ABI):
