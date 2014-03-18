@@ -30,9 +30,11 @@ class Fetch(Command):
         args.append(ArgparseArgument('--reset-rdeps', action='store_true',
                     default=False, help=_('reset the status of reverse '
                     'dependencies too')))
+        args.append(ArgparseArgument('--full-reset', action='store_true',
+                    default=False, help=_('reset to extract step if rebuild is needed')))
         Command.__init__(self, args)
 
-    def fetch(self, cookbook, recipes, no_deps, reset_rdeps):
+    def fetch(self, cookbook, recipes, no_deps, reset_rdeps, full_reset):
         fetch_recipes = []
         if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
@@ -51,13 +53,17 @@ class Fetch(Command):
             recipe.fetch()
             bv = cookbook.recipe_built_version(recipe.name)
             cv = recipe.built_version()
-            if not cookbook.recipe_needs_build(recipe.name) and bv != cv:
-                to_rebuild.append(recipe)
-                cookbook.reset_recipe_status(recipe.name)
-                if reset_rdeps:
-                     for r in cookbook.list_recipe_reverse_deps(recipe.name):
-                        to_rebuild.append(r)
-                        cookbook.reset_recipe_status(r.name)
+            if bv != cv:
+                # On different versions, only reset recipe if:
+                #  * forced
+                #  * OR it was fully built already
+                if full_reset or not cookbook.recipe_needs_build(recipe.name):
+                    to_rebuild.append(recipe)
+                    cookbook.reset_recipe_status(recipe.name)
+                    if reset_rdeps:
+                        for r in cookbook.list_recipe_reverse_deps(recipe.name):
+                            to_rebuild.append(r)
+                            cookbook.reset_recipe_status(r.name)
 
         if to_rebuild:
             m.message(_("These recipes have been updated and will "
@@ -82,7 +88,7 @@ class FetchRecipes(Fetch):
     def run(self, config, args):
         cookbook = CookBook(config)
         return self.fetch(cookbook, args.recipes, args.no_deps,
-                args.reset_rdeps)
+                          args.reset_rdeps, args.full_reset)
 
 
 class FetchPackage(Fetch):
@@ -100,7 +106,7 @@ class FetchPackage(Fetch):
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
         return self.fetch(store.cookbook, package.recipes_dependencies(),
-                True, args.reset_rdeps)
+                          True, args.reset_rdeps, args.full_reset)
 
 
 register_command(FetchRecipes)
