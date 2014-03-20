@@ -38,7 +38,8 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
-            elif self.config.target_arch == Architecture.ARMv7:
+            elif self.config.target_arch == Architecture.ARMv7 or \
+                 self.config.target_arch == Architecture.ARMv7S:
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 
@@ -70,7 +71,8 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
-            elif self.config.target_arch == Architecture.ARMv7:
+            elif self.config.target_arch == Architecture.ARMv7 or \
+                 self.config.target_arch == Architecture.ARMv7S:
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
 

@@ -27,5 +27,5 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = '--with-python=no'
         elif self.config.target_platform == Platform.LINUX:
-            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.ARMv7S]:
                 self.configure_options = '--with-python=no'

@@ -108,7 +108,7 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            elif arch in [Architecture.ARM, Architecture.ARMv7]:
+            elif arch in [Architecture.ARM, Architecture.ARMv7, Architecture.ARMv7S]:
                 arch = 'arm'
             extra_flags = ''
             if self.config.target_platform == Platform.IOS:
@@ -178,7 +178,7 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            if arch in [Architecture.ARM, Architecture.ARMv7]:
+            if arch in [Architecture.ARM, Architecture.ARMv7, Architecture.ARMv7S]:
                 arch = 'arm'
 
             arch_dir = os.path.join(self.config.prefix, 'lib', 'glib-2.0',

@@ -34,6 +34,7 @@ class Architecture:
     UNIVERSAL = 'universal'
     ARM = 'arm'
     ARMv7 = 'armv7'
+    ARMv7S = 'armv7s'
 
 
 class Distro:
