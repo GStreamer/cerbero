@@ -28,7 +28,7 @@ class Build(Command):
     doc = N_('Build a recipe')
     name = 'build'
 
-    def __init__(self, force=None, no_deps=None):
+    def __init__(self, force=None, no_deps=None, wanted_steps=[]):
             args = [
                 ArgparseArgument('recipe', nargs='*',
                     help=_('name of the recipe to build')),
@@ -51,7 +51,15 @@ class Build(Command):
                         default=False,
                         help=_('do not build dependencies')))
 
+            if not wanted_steps:
+                args.append(
+                    ArgparseArgument('--wanted-steps', default='',
+                        help=_('Steps to force execution when building even if stated as'
+                               'done in the current cached state. Its is a list'
+                               'of step name separated by ;')))
+
             self.force = force
+            self.wanted_steps = wanted_steps
             self.no_deps = no_deps
             Command.__init__(self, args)
 
@@ -60,17 +68,19 @@ class Build(Command):
             self.force = args.force
         if self.no_deps is None:
             self.no_deps = args.no_deps
+        if not self.wanted_steps:
+            self.wanted_steps = args.wanted_steps.split(':')
         self.runargs(config, args.recipe, args.missing_files, self.force,
-                     self.no_deps, dry_run=args.dry_run)
+                     self.no_deps, dry_run=args.dry_run, wanted_steps=self.wanted_steps)
 
     def runargs(self, config, recipes, missing_files=False, force=False,
-                no_deps=False, cookbook=None, dry_run=False):
+                no_deps=False, cookbook=None, dry_run=False, wanted_steps=[]):
         if cookbook is None:
             cookbook = CookBook(config)
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,
-                    dry_run=dry_run)
+                    dry_run=dry_run, wanted_steps=wanted_steps)
         oven.start_cooking()
 
 
