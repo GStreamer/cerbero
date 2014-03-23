@@ -23,6 +23,9 @@ class Recipe(recipe.Recipe):
         data_dir = os.path.join(self.config.prefix, 'share', 'gtk-doc', 'data')
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
+        bin_dir = os.path.join(self.config.prefix, 'bin')
+        if not os.path.exists(bin_dir):
+            os.makedirs(bin_dir)
         shutil.copy(os.path.join(self.build_dir, 'gtk-doc.m4'),
                     os.path.join(aclocal_dir, 'gtk-doc.m4'))
         shutil.copy(os.path.join(self.build_dir, 'gtk-doc.make'),
