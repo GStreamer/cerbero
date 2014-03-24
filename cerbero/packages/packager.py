@@ -39,6 +39,7 @@ class Packager (object):
 
         if d not in _packagers:
             raise FatalError(_("No packager available for the distro %s" % d))
+
         if v not in _packagers[d]:
             # Be tolerant with the distro version
             m.warning(_("No specific packager available for the distro "

@@ -49,7 +49,8 @@ class DebianBootstrapper (UnixBootstrapper):
                 'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking']
+                'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
+                'chrpath', 'libfuse-dev']
     distro_packages = {
         DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
         DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
@@ -85,7 +86,8 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
-                'docbook-utils-pdf', 'glib-networking', 'help2man','glib2-devel']
+                'docbook-utils-pdf', 'glib-networking', 'help2man','glib2-devel',
+                'chrpath', 'fuse-devel']
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
