@@ -1,0 +1,28 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'gst-validate'
+    version = '1.0'
+    licenses = [License.LGPLv2Plus]
+    commit = 'origin/master'
+    srcdir = 'validate'
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure --program-transform-name= '
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
+
+    files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0']
+    files_libs = ['libgstvalidate-1.0']
+    files_devel = ["include/gstreamer-1.0/gst/validate/*.h"
+                   "lib/pkgconfig/gst-validate-1.0.pc"]
+
+    files_validate = ["lib/gst-validate-launcher/",
+                      'bin/gst-validate-launcher',
+                      "share/gstreamer-1.0/validate-scenario/*.scenario"
+    ]
+
+    def prepare(self):
+        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-devtools'))
+        self.remotes['upstream'] = self.remotes['origin']
+        if self.config.target_platform == Platform.LINUX:
+            self.files_libs.extend(["libgstvalidate-preload-1.0",
+                    "libgstvalidate-default-overrides-1.0"])
