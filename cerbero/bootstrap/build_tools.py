@@ -56,6 +56,7 @@ class BuildTools (BootstrapperBase):
                 self.BUILD_TOOLS.append('yasm')
             if self.config.distro_version in [DistroVersion.REDHAT_6]:
                 self.BUILD_TOOLS.append('cmake')
+            self.BUILD_TOOLS.append('app-image-kit')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID,
