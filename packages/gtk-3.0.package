@@ -1,0 +1,26 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+    name = 'gtk-3.0'
+    shortdesc = 'Gtk3'
+    longdesc = 'Gtk3 and dependencies'
+    url = "http://gstreamer.freedesktop.org"
+    version = '1.3.0'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'Gtk Project'
+    org = 'org.gnome.gtk'
+
+    files = ['gtk+3',
+             'atk',
+             'pango',
+             'gdk-pixbuf',
+             'cairo',
+             'hicolor-icon-theme',
+             'gnome-themes-standard',
+             'gnome-icon-theme',
+             'gnome-icon-theme-symbolic',
+             'librsvg',
+             ]

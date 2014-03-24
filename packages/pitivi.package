@@ -1,0 +1,31 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.App):
+    name = 'pitivi'
+    app_name = 'Pitivi'
+    app_recipe = 'pitivi'
+    version = '0.93-beta'
+    shortdesc = 'Pitivi video editor'
+    longdesc = 'An open source full featured video editing application'
+    url = "http://www.pitivi.org"
+    license = License.LGPL
+    vendor = 'Pitivi project'
+    org = 'org.pitivi'
+    uuid = 'd9626750-e8b7-4e40-944d-98b67ed0c6bf'
+
+    deps = ['gstreamer-1.0', 'gtk-3.0', 'python3']
+    files = ['shared-mime-info']
+
+    # Needed to bundle for linux
+    desktop_file='share/applications/pitivi.desktop'
+    commands=[('pitivi', 'bin/pitivi')]
+
+    default_gtk_theme='Adwaita'
+
+    def prepare(self):
+        if self.config.variants.python3 is False:
+            raise ConfigurationError("Pitivi needs python3. You should set "
+                    "\"variants = ['python3']\" in your ~/.cerbero/cerbero.cbc "
+                    "configuration file to build it.")
