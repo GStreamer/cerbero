@@ -366,9 +366,15 @@ class ApplicationPackage(PackagerBase):
         self._create_app_bundle()
         self._strip_binaries()
         self._relocate_binaries()
-        pkg = self._create_product()
-        self._add_applications_link()
-        dmg = self._create_dmg()
+        if self.package.osx_create_pkg:
+            pkg = self._create_product()
+            self._add_applications_link()
+        else:
+            pkg = ''
+        if self.package.osx_create_dmg:
+            dmg = self._create_dmg()
+        else:
+            dmg = ''
 
         return [dmg, pkg]
 

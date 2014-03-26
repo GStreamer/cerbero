@@ -502,6 +502,10 @@ class App(PackageBase):
     @type resources_info_plist: string
     @cvar resources_distribution: Distribution XML template file
     @type resources_distribution: Distribution XML template file
+    @cvar osx_create_dmg: Packages the app in a dmg
+    @type osx_create_dmg: bool
+    @cvar osx_create_pkg: Packages the app in a pkg
+    @type osx_create_pkg: bool
     '''
 
     app_name = None
@@ -516,6 +520,8 @@ class App(PackageBase):
     strip_excludes = []
     resources_info_plist = 'Info.plist'
     resources_distribution = 'distribution.xml'
+    osx_create_dmg = True
+    osx_create_pkg = True
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
