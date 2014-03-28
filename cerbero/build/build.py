@@ -323,6 +323,12 @@ class CMake (MakefilesBase):
         self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
         self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
         self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        cmake_cache = os.path.join(self.build_dir, 'CMakeCache.txt')
+        cmake_files = os.path.join(self.build_dir, 'CMakeFiles')
+        if os.path.exists(cmake_cache):
+            os.remove(cmake_cache)
+        if os.path.exists(cmake_files):
+            shutil.rmtree(cmake_files)
         MakefilesBase.configure(self)
 
 
