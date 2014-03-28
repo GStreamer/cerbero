@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     deps = ['libcroco']
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-2.40.1.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-%(version)s.tar.xz'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']

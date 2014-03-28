@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     deps = [ 'pango', 'gdk-pixbuf' ]
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/cogl/1.16/cogl-1.16.0.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/cogl/1.16/cogl-%(version)s.tar.xz'
 
     files_libs = ['libcogl', 'libcogl-pango']
     files_devel = [

@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/clutter/1.16/clutter-1.16.2.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/clutter/1.16/clutter-%(version)s.tar.xz'
 
     files_devel = [
         'lib/pkgconfig/clutter-1.0.pc',

@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
 
     use_system_libs = True # Needs acces to X11 for gdk3
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/gnome-themes-standard/3.10/gnome-themes-standard-3.10.0.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/gnome-themes-standard/3.10/gnome-themes-standard-%(version)s.tar.xz'
     deps = ['gtk+3', 'librsvg']
     configure_options = '--disable-gtk2-engine'
 

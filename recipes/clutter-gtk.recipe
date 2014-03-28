@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/clutter-gtk/1.4/clutter-gtk-1.4.4.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/clutter-gtk/1.4/clutter-gtk-%(version)s.tar.xz'
 
     files_libs = ['libclutter-gtk-1.0']
     files_devel = ['include/clutter-gtk-1.0', 'lib/pkgconfig/clutter-gtk-1.0.pc']

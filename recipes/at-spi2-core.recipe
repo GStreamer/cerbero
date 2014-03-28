@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     deps = []
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/at-spi2-core/2.10/at-spi2-core-2.10.2.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/at-spi2-core/2.10/at-spi2-core-%(version)s.tar.xz'
     use_system_libs = True
 
     files_libs = ['libatspi']

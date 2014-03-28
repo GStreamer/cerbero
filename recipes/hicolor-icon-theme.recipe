@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1]
 
     stype = SourceType.TARBALL
-    url = 'http://icon-theme.freedesktop.org/releases/hicolor-icon-theme-0.11.tar.gz'
+    url = 'http://icon-theme.freedesktop.org/releases/hicolor-icon-theme-%(version)s.tar.gz'
     deps = ['glib']
 
     files_themes = [

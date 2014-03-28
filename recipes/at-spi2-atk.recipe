@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/at-spi2-atk/2.10/at-spi2-atk-2.10.2.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/at-spi2-atk/2.10/at-spi2-atk-%(version)s.tar.xz'
 
     files_libs = ['libatk-bridge-2.0']
     files_misc = ['lib/gnome-settings-daemon-3.0/gtk-modules/at-spi2-atk.desktop']
