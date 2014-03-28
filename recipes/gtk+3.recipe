@@ -64,10 +64,8 @@ class Recipe(recipe.Recipe):
     files_lang = ['gtk30', 'gtk30-properties']
     files_typelibs = ['Gdk-3.0', 'Gtk-3.0']
 
-    platform_files_gi = {
-        Platform.LINUX: ['lib/girepository-1.0/GdkX11-3.0.typelib',
-                         'share/gir-1.0/GdkX11-3.0.gir'
-        ]
+    platform_files_typelibs = {
+        Platform.LINUX: ['GdkX11-3.0']
     }
 
     def _set_flags(self, module_path1=None, module_path2=None, theme_path=None):
