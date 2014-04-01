@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'opus', 'nettle', 'librtmp',
             'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch',
-            'vo-aacenc' ]
+            'vo-aacenc','librsvg']
 
     files_lang = ['gst-plugins-bad-1.0']
 
@@ -62,6 +62,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgsty4mdec%(mext)s',
              'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
              'lib/gstreamer-1.0/libgstgdp%(mext)s',
+             'lib/gstreamer-1.0/libgstrsvg%(mext)s',
              '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
              '%(sdir)s/libgstmpegts-1.0%(sext)s',
              '%(sdir)s/libgsturidownloader-1.0%(sext)s',
