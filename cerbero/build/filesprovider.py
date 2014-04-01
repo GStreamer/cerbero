@@ -211,6 +211,36 @@ class FilesProvider(object):
 
         return shell.ls_files(libsmatch, self.config.prefix) + dlls
 
+    def _pyfile_get_name(self, f):
+        if os.path.exists(os.path.join(self.config.prefix, f)):
+            return f
+        else:
+            pydir = os.path.basename(os.path.normpath(self.config.py_prefix))
+            pyversioname = re.sub("python|\.", '', pydir)
+            cpythonname = "cpython-" + pyversioname
+
+            splitedext = os.path.splitext(f)
+            for ex in ['', 'm']:
+                f = splitedext[0] + '.' + cpythonname + ex + splitedext[1]
+                if os.path.exists(os.path.join(self.config.prefix, f)):
+                    return f
+        return None
+
+    def _pyfile_get_cached(self, f):
+        pyfiles = []
+        pycachedir = os.path.join(os.path.dirname(f), "__pycache__")
+        for e in ['o', 'c']:
+            fe = self._pyfile_get_name(f + e)
+            if fe:
+                pyfiles.append(fe)
+            else:
+                cached = os.path.join(pycachedir, os.path.basename(f))
+                fe = self._pyfile_get_name(os.path.join(self.config.prefix, cached))
+                if fe:
+                    pyfiles.append(fe)
+
+        return pyfiles
+
     def _search_pyfiles(self, files):
         '''
         Search for python files in the prefix. This function doesn't do any
@@ -221,12 +251,15 @@ class FilesProvider(object):
         for f in files:
             f = f % self.extensions
             f = '%s/%s' % (self.py_prefix, f)
-            pyfiles.append(f)
+            real_name = self._pyfile_get_name(f)
+            if real_name:
+                pyfiles.append(real_name)
+            else:
+                # Adding it so we notice there is a problem in the recipe
+                pyfiles.append(f)
             if f.endswith('.py'):
-                for e in ['o', 'c']:
-                    fe = f + e
-                    if os.path.exists(os.path.join(self.config.prefix, fe)):
-                        pyfiles.append(fe)
+                cached_files = self._pyfile_get_cached(f)
+                pyfiles.extend(cached_files)
         return pyfiles
 
     def _search_langfiles(self, files):

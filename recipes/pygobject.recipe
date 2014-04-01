@@ -7,9 +7,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.12/pygobject-%(version)s.tar.xz'
     licenses = [License.LGPLv2_1Plus]
-    deps = ['glib', 'py2cairo']
+    deps = ['glib']
     make_check = None  # disabled until we fix the checks
-
     files_python = [
                     'site-packages/gi/_gi%(pext)s',
                     'site-packages/gi/_gi_cairo%(pext)s',
@@ -41,3 +40,12 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pygobject-3.0/pygobject.h',
                    'lib/pkgconfig/pygobject-3.0.pc',
                   ]
+
+    def prepare(self):
+        if self.config.variants.python3:
+            self.deps.append("Python")
+            self.deps.append('pycairo')
+            self.configure_options = '--with-python=python3'
+        else:
+            self.deps.append('py2cairo')
+            self.configure_options = '--with-python=python2'

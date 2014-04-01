@@ -1,4 +1,5 @@
  # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import sys
 
 
 class Recipe(recipe.Recipe):
@@ -69,8 +70,14 @@ class Recipe(recipe.Recipe):
         'share/gobject-introspection-1.0'
     ]
 
-    # TODO: catch the share/man stuff like man1/g-ir* ?
+    def prepare(self):
+        if self.config.variants.python3:
+            # cerbero is python2 only, same as gobject-introspection,
+            # make sure gobject-introspection is built against the same interpretter
+            # as we are
+            self.config_sh = "PYTHON=%s %s" %(sys.executable, self.config_sh)
 
+    # TODO: catch the share/man stuff like man1/g-ir* ?
     def configure(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             if Architecture.is_arm(self.config.target_arch):
@@ -86,4 +93,3 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --with-typelib-dir=$CERBERO_PREFIX/lib/%s ' % arch
             self.configure_options += ' --with-gir-dir=$CERBERO_PREFIX/share/gir-1.0/%s ' % arch
         super(Recipe, self).configure()
-

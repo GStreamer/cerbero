@@ -92,6 +92,9 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
+        if self.config.variants.python3 is True:
+            self.deps.append("Python")
+
         if self.config.target_platform != Platform.WINDOWS:
             self.configure_options += ' --enable-static'
         if self.config.target_platform != Platform.LINUX:

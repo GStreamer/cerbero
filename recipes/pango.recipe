@@ -19,7 +19,6 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/pangocairo.pc']
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
-        Platform.LINUX: ['libpango-1.0'],
     }
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
