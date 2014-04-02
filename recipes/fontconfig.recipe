@@ -10,9 +10,12 @@ class Recipe(recipe.Recipe):
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
+    autoreconf = True
     patches = ['fontconfig/0001-Ensure-we-use-our-installed-headers-instead-of-syste.patch',
                'fontconfig/0002-Port-to-Android.patch',
-               'fontconfig/0003-configure-Allow-static-build.patch']
+               'fontconfig/0003-configure-Allow-static-build.patch',
+               'fontconfig/0001-Do-not-build-tests-on-windows.patch',
+               ]
 
     files_libs = ['libfontconfig']
     files_etc = [
