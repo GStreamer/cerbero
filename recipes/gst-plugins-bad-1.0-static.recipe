@@ -119,15 +119,18 @@ class Recipe(custom.GStreamerStatic):
     platform_files_plugins_sys_devel = {
         Platform.LINUX: [
              'libgstshm',
+             'libgstopengl',
             ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
              'libgstwasapi',
+             'libgstopengl',
             ],
         Platform.DARWIN: [
              'libgstapplemedia',
              'libgstapplemedia_nonpublic',
              'libgstshm',
+             'libgstopengl',
             ],
         Platform.IOS: [
              'libgstapplemedia',
@@ -138,6 +141,7 @@ class Recipe(custom.GStreamerStatic):
         Platform.ANDROID: [
              'libgstopensles',
              'libgsteglglessink',
+             'libgstopengl',
             ]
     }
 
@@ -189,4 +193,18 @@ class Recipe(custom.GStreamerStatic):
 
         self.platform_files_plugins_sys_devel[Platform.ANDROID] += [
             'lib/libgstegl-1.0.la',
-            'lib/libgstegl-1.0.a']
+            'lib/libgstegl-1.0.a',
+            'lib/libgstgl-1.0.la',
+            'lib/libgstgl-1.0.a']
+
+        self.platform_files_plugins_sys_devel[Platform.WINDOWS] += [
+            'lib/libgstgl-1.0.la',
+            'lib/libgstgl-1.0.a']
+
+        self.platform_files_plugins_sys_devel[Platform.DARWIN] += [
+            'lib/libgstgl-1.0.la',
+            'lib/libgstgl-1.0.a']
+
+        self.platform_files_plugins_sys_devel[Platform.LINUX] += [
+            'lib/libgstgl-1.0.la',
+            'lib/libgstgl-1.0.a']
