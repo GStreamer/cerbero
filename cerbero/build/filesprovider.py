@@ -179,10 +179,8 @@ class FilesProvider(object):
         '''
         Search libraries in the prefix. Unfortunately the filename might vary
         depending on the platform and we need to match the library name and
-        it's extension. There is a corner case on windows where a library might
-        be named libfoo.dll or libfoo-1.dll, and another one on Darwin where the
-        library might be named libfoo.dylib or (more conventionally)
-        libfoo.[0-9]+.dylib.
+        it's extension. There is a corner case on windows where a libray might
+        be named libfoo.dll or libfoo-1.dll
         '''
         if len(files) == 0:
             return []
@@ -197,16 +195,6 @@ class FilesProvider(object):
                     dlls.append(pattern % f)
             files = list(set(files) - set(dlls))
 
-        dylibs = []
-        # On Darwin check libfoo.dylib as well as libfoo.[0-9]+.dylib
-        if self.config.target_platform == Platform.DARWIN:
-            pattern = '%(sdir)s/%%s.dylib' % self.extensions
-            for f in files:
-                path = os.path.join(self.config.prefix, pattern % f)
-                if os.path.exists(path):
-                    dylibs.append(pattern % f)
-            files = list(set(files) - set(dylibs))
-
         pattern = '%(sdir)s/%(file)s%(sext)s'
 
         libsmatch = []
@@ -214,7 +202,7 @@ class FilesProvider(object):
             self.extensions['file'] = f
             libsmatch.append(pattern % self.extensions)
 
-        return shell.ls_files(libsmatch, self.config.prefix) + dlls + dylibs
+        return shell.ls_files(libsmatch, self.config.prefix) + dlls
 
     def _search_pyfiles(self, files):
         '''
