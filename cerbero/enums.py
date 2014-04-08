@@ -36,6 +36,11 @@ class Architecture:
     ARMv7 = 'armv7'
     ARMv7S = 'armv7s'
 
+    @staticmethod
+    def is_arm(arch):
+        return arch in [Architecture.ARM, Architecture.ARMv7,
+                Architecture.ARMv7S]
+
 
 class Distro:
     ''' Enumeration of supported distributions '''

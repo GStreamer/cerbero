@@ -18,14 +18,14 @@ class Recipe(recipe.Recipe):
         if self.config.variants.nosdl:
             self.configure_options += ' --disable-sdl '
         if self.config.target_platform == Platform.IOS:
-            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+            if Architecture.is_arm(self.config.target_arch):
                 self.new_env = {'CCAS': os.environ['GAS']}
                 self.new_env['CCAS'] += ' -no-integrated-as '
                 self.append_env = {'LDFLAGS': ' -Wl,-read_only_relocs,suppress'}
 
     def compile(self):
         if self.config.target_platform == Platform.IOS:
-            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+            if Architecture.is_arm(self.config.target_arch):
                 arm_f = os.path.join(self.build_dir, 'libmpeg2', 'motion_comp_arm_s.S')
                 shell.replace(arm_f,
                     {'.global MC_put_o_16_arm\nMC_put_o_16_arm:': '.global _MC_put_o_16_arm\n_MC_put_o_16_arm:',

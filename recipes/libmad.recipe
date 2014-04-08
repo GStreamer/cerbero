@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
             self.new_env['CCAS'] += ' -no-integrated-as '
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
-            if self.config.target_arch == Architecture.ARM or self.config.target_arch == Architecture.ARMv7:
+            if Architecture.is_arm(self.config.target_arch):
                 # Disable thumb mode to get the optimizations compiled properly
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
             if self.config.target_arch == Architecture.X86:

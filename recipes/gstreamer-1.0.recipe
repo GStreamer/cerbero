@@ -82,7 +82,7 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            elif arch in [Architecture.ARM, Architecture.ARMv7]:
+            elif Architecture.is_arm(arch):
                 arch = 'arm'
             self.files_devel.append(os.path.join('include', 'gstreamer-1.0', 'gst', '*', 'gstconfig.h'))
 
@@ -94,7 +94,7 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            elif arch in [Architecture.ARM, Architecture.ARMv7]:
+            elif Architecture.is_arm(arch):
                 arch = 'arm'
 
             arch_dir = os.path.join(self.config.prefix, 'include', 'gstreamer-1.0',
