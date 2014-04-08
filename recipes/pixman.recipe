@@ -22,14 +22,14 @@ class Recipe(recipe.Recipe):
             self.configure_options = '--disable-arm-iwmmxt'
             # Prevent symbol conflicts
             self.append_env['CFLAGS'] = \
-                "-Dandroid_getCpuFamily=vpx_android_getCpuFamily "\
-                "-Dandroid_getCpuFeatures=vpx_android_getCpuFeatures "\
-                "-Dandroid_getCpuCount=vpx_android_getCpuCount " \
-                "-Dandroid_cpuInit=vpx_android_cpuInit " \
-                "-Dandroid_cpuInitDummy=vpx_android_cpuInitDummy " \
-                "-Dandroid_getCpuIdArm=vpx_android_getCpuIdArm " \
-                "-Dandroid_setCpu=vpx_android_setCpu " \
-                "-Dandroid_setCpuArm=vpx_android_setCpuArm "
+                "-Dandroid_getCpuFamily=pixman_android_getCpuFamily "\
+                "-Dandroid_getCpuFeatures=pixman_android_getCpuFeatures "\
+                "-Dandroid_getCpuCount=pixman_android_getCpuCount " \
+                "-Dandroid_cpuInit=pixman_android_cpuInit " \
+                "-Dandroid_cpuInitDummy=pixman_android_cpuInitDummy " \
+                "-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm " \
+                "-Dandroid_setCpu=pixman_android_setCpu " \
+                "-Dandroid_setCpuArm=pixman_android_setCpuArm "
 
     def configure(self):
         if self.config.target_platform == Platform.ANDROID:
