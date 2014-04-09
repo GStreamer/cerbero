@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     config_sh = 'sh ./autogen.sh'
     deps = ['glib']
+    patches = ['0001-config-add-support-to-set-typelib-and-gir-installati.patch']
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate']
     files_libs = ['libgirepository-1.0']
@@ -40,4 +41,20 @@ class Recipe(recipe.Recipe):
     }
 
     # TODO: catch the share/man stuff like man1/g-ir* ?
+
+    def configure(self):
+        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
+            if Architecture.is_arm(self.config.target_arch):
+                arch = 'arm'
+            elif self.config.target_arch == Architecture.X86:
+                arch = 'i386'
+            else:
+                arch = self.config.target_arch
+            makefileam = os.path.join (self.build_dir, 'Makefile-gir.am')
+            replacements = {'glib-2.0/include/glibconfig.h':
+                    'glib-2.0/include/%s/glibconfig.h' % arch}
+            shell.replace(makefileam, replacements)
+            self.configure_options += ' --with-typelib-dir=$CERBERO_PREFIX/lib/%s ' % arch
+            self.configure_options += ' --with-gir-dir=$CERBERO_PREFIX/share/gir-1.0/%s ' % arch
+        super(Recipe, self).configure()
 

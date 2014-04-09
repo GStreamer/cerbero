@@ -242,7 +242,8 @@ class FilesProvider(object):
         '''
         if not self.config.variants.gi:
             return []
-        pattern = 'lib/girepository-1.0/%s.typelib'
+        # Use a * for the arch in universal builds
+        pattern = 'lib/*/girepository-1.0/%s.typelib'
         return shell.ls_files([pattern % x for x in files],
                               self.config.prefix)
 
