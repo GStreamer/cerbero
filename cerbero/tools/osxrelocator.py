@@ -71,7 +71,11 @@ class OSXRelocator(object):
                 if filters is not None and \
                         os.path.splitext(f)[1] not in filters:
                     continue
-                self.change_libs_path(os.path.join(dirpath, f))
+                lib = os.path.join(dirpath, f)
+                id = self.library_id_name(lib).replace(
+                        self.lib_prefix, self.new_lib_prefix)
+                self.change_libs_path(lib)
+                self.change_id(lib, id)
             if not self.recursive:
                 break
 
