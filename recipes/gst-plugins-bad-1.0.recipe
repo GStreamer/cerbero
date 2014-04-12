@@ -147,14 +147,13 @@ class Recipe(recipe.Recipe):
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              #'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
-             'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+             '%(sdir)s/libgstgl-1.0%(sext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
-             'lib/gstreamer-1.0/libgsteglglessink%(mext)s',
              'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstegl-1.0%(sext)s',
              '%(sdir)s/libgstgl-1.0%(sext)s',
             ]
     }

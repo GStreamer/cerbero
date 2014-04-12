@@ -135,12 +135,11 @@ class Recipe(custom.GStreamerStatic):
         Platform.IOS: [
              'libgstapplemedia',
              #'libgstapplemedia_nonpublic',
-             'libgsteglglessink',
+             'libgstopengl',
              'libgstshm',
             ],
         Platform.ANDROID: [
              'libgstopensles',
-             'libgsteglglessink',
              'libgstopengl',
             ]
     }
@@ -192,8 +191,6 @@ class Recipe(custom.GStreamerStatic):
             'lib/libgstphotography-1.0.a']
 
         self.platform_files_plugins_sys_devel[Platform.ANDROID] += [
-            'lib/libgstegl-1.0.la',
-            'lib/libgstegl-1.0.a',
             'lib/libgstgl-1.0.la',
             'lib/libgstgl-1.0.a']
 
@@ -202,6 +199,10 @@ class Recipe(custom.GStreamerStatic):
             'lib/libgstgl-1.0.a']
 
         self.platform_files_plugins_sys_devel[Platform.DARWIN] += [
+            'lib/libgstgl-1.0.la',
+            'lib/libgstgl-1.0.a']
+
+        self.platform_files_plugins_sys_devel[Platform.IOS] += [
             'lib/libgstgl-1.0.la',
             'lib/libgstgl-1.0.a']
 
