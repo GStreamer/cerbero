@@ -5,8 +5,8 @@
 class Package(package.Package):
 
     name = 'gstreamer-1.0-encoding'
-    shortdesc = 'GStreamer 1.0 plugins for playback'
-    longdesc = 'GStreamer 1.0 plugins for playback'
+    shortdesc = 'GStreamer 1.0 plugins for encoding'
+    longdesc = 'GStreamer 1.0 plugins for encoding'
     url = "http://gstreamer.freedesktop.org"
     version = '1.2.3'
     codename = 'Congo'
