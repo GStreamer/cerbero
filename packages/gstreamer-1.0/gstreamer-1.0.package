@@ -30,8 +30,9 @@ class SDKPackage(package.SDKPackage):
                ('gstreamer-1.0-net-restricted', False, False),
                ('gstreamer-1.0-dvd', False, False),
                ('gstreamer-1.0-libav', False, False),
-               #('gstreamer-1.0-encoding', False, False),
+               ('gstreamer-1.0-encoding', False, False),
                ('gstreamer-1.0-capture', False, False),
+               ('gstreamer-1.0-editing', False, False),
               ]
     platform_packages = {
             Platform.WINDOWS: [
