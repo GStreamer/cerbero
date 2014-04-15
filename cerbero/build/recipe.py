@@ -315,6 +315,12 @@ class UniversalRecipe(object):
                 setattr(o, name, value)
 
     def _do_step(self, step):
+        if step in BuildSteps.FETCH:
+            # No, really, let's not download a million times...
+            stepfunc = getattr(self._recipes.values()[0], step)
+            stepfunc()
+            return
+
         for arch, recipe in self._recipes.iteritems():
             config = self._config.arch_config[arch]
             config.do_setup_env()
@@ -365,6 +371,12 @@ class UniversalFlatRecipe(UniversalRecipe):
                     [os.path.join(self._config.prefix, arch)])
 
     def _do_step(self, step):
+        if step in BuildSteps.FETCH:
+            # No, really, let's not download a million times...
+            stepfunc = getattr(self._recipes.values()[0], step)
+            stepfunc()
+            return
+
         # For the universal build we need to configure both architectures with
         # with the same final prefix, but we want to install each architecture
         # on a different path (eg: /path/to/prefix/x86).
