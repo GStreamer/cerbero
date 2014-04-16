@@ -22,7 +22,8 @@ class Recipe(recipe.Recipe):
                'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
                'libvpx/0003-configure-add-support-for-android-x86.patch',
                'libvpx/0004-configure-add-support-for-iOS-6.patch',
-               'libvpx/0005-Add-support-for-iOS-7.0-toolchain.patch']
+               'libvpx/0005-Add-support-for-iOS-7.0-toolchain.patch',
+               'libvpx/0006-Add-armv7s-ios-support.patch']
 
     files_libs = ['libvpx']
     files_bins = ['vpxenc', 'vpxdec']
@@ -43,6 +44,8 @@ class Recipe(recipe.Recipe):
             arch = 'arm'
         elif self.config.target_arch == Architecture.ARMv7:
             arch = 'armv7'
+        elif self.config.target_arch == Architecture.ARMv7S:
+            arch = 'armv7s'
 
         self.new_env['LD'] = os.environ.get('CC', 'gcc')
         if self.config.target_platform == Platform.DARWIN:
