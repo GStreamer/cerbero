@@ -6,7 +6,7 @@ class Recipe(custom.GStreamerStatic):
     version = '1.2'
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
-    commit = 'origin/master'
+    commit = 'origin/1.2'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     extra_configure_options = "--disable-examples "
     make_check = None
