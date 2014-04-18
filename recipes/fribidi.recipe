@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     deps = ['glib']
     patches = ['fribidi/0001-fribidi.def-Include-all-required-symbols.patch',
                'fribidi/0002-fribidi-disable-docs.patch']
+    configure_options = '--enable-shared --enable-static'
 
     files_libs = ['libfribidi']
     files_bins = ['fribidi']
