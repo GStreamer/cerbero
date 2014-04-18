@@ -18,13 +18,13 @@
 
 import os
 
-from cerbero.bootstrap import BootstraperBase
-from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.bootstrap import BootstrapperBase
+from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Distro
 from cerbero.utils import shell
 
 
-class AndroidBootstraper (BootstraperBase):
+class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
     NDK_TAR = 'android-ndk-r9d-%s-%s.tar.bz2'
@@ -47,4 +47,4 @@ class AndroidBootstraper (BootstraperBase):
 
 
 def register_all():
-    register_bootstraper(Distro.ANDROID, AndroidBootstraper)
+    register_bootstrapper(Distro.ANDROID, AndroidBootstrapper)

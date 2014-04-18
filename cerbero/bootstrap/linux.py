@@ -16,13 +16,13 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.bootstrap import BootstraperBase
-from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.bootstrap import BootstrapperBase
+from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Platform, Architecture, Distro, DistroVersion
 from cerbero.utils import shell
 
 
-class UnixBootstraper (BootstraperBase):
+class UnixBootstrapper (BootstrapperBase):
 
     tool = ''
     packages = []
@@ -36,7 +36,7 @@ class UnixBootstraper (BootstraperBase):
             shell.call(self.tool % ' '.join(self.packages))
 
 
-class DebianBootstraper (UnixBootstraper):
+class DebianBootstrapper (UnixBootstrapper):
 
     tool = 'sudo apt-get install %s'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
@@ -62,7 +62,7 @@ class DebianBootstraper (UnixBootstraper):
     }
 
     def __init__(self, config):
-        UnixBootstraper.__init__(self, config)
+        UnixBootstrapper.__init__(self, config)
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
@@ -73,7 +73,7 @@ class DebianBootstraper (UnixBootstraper):
             self.packages.remove('autopoint')
 
 
-class RedHatBootstraper (UnixBootstraper):
+class RedHatBootstrapper (UnixBootstrapper):
 
     tool = 'su -c "yum install %s"'
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
@@ -88,12 +88,12 @@ class RedHatBootstraper (UnixBootstraper):
                 'docbook-utils-pdf', 'glib-networking', 'help2man','glib2-devel']
 
     def __init__(self, config):
-        UnixBootstraper.__init__(self, config)
+        UnixBootstrapper.__init__(self, config)
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
 
-class OpenSuseBootstraper (UnixBootstraper):
+class OpenSuseBootstrapper (UnixBootstrapper):
 
     tool = 'sudo zypper install %s'
     packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
@@ -109,6 +109,6 @@ class OpenSuseBootstraper (UnixBootstraper):
 
 
 def register_all():
-    register_bootstraper(Distro.DEBIAN, DebianBootstraper)
-    register_bootstraper(Distro.REDHAT, RedHatBootstraper)
-    register_bootstraper(Distro.SUSE, OpenSuseBootstraper)
+    register_bootstrapper(Distro.DEBIAN, DebianBootstrapper)
+    register_bootstrapper(Distro.REDHAT, RedHatBootstrapper)
+    register_bootstrapper(Distro.SUSE, OpenSuseBootstrapper)

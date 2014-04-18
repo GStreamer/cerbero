@@ -19,7 +19,7 @@
 
 from cerbero.commands import Command, register_command
 from cerbero.utils import N_, _, ArgparseArgument
-from cerbero.bootstrap.bootstraper import Bootstraper
+from cerbero.bootstrap.bootstrapper import Bootstrapper
 
 
 class Bootstrap(Command):
@@ -33,8 +33,8 @@ class Bootstrap(Command):
         Command.__init__(self, args)
 
     def run(self, config, args):
-        bootstrapers = Bootstraper(config, args.build_tools_only)
-        for bootstraper in bootstrapers:
-            bootstraper.start()
+        bootstrappers = Bootstrapper(config, args.build_tools_only)
+        for bootstrapper in bootstrappers:
+            bootstrapper.start()
 
 register_command(Bootstrap)

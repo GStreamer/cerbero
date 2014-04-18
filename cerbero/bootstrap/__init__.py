@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 
-class BootstraperBase (object):
+class BootstrapperBase (object):
 
     def __init__(self, config):
         self.config = config

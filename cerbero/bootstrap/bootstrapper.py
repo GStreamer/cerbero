@@ -24,16 +24,16 @@ from cerbero.utils import messages as m
 from cerbero.bootstrap.build_tools import BuildTools
 
 
-bootstrapers = {}
+bootstrappers = {}
 
 
-def register_bootstraper(distro, klass, distro_version=None):
-    if not distro in bootstrapers:
-        bootstrapers[distro] = {}
-    bootstrapers[distro][distro_version] = klass
+def register_bootstrapper(distro, klass, distro_version=None):
+    if not distro in bootstrappers:
+        bootstrappers[distro] = {}
+    bootstrappers[distro][distro_version] = klass
 
 
-class Bootstraper (object):
+class Bootstrapper (object):
     def __new__(klass, config, build_tools_only):
         bs = []
 
@@ -46,7 +46,7 @@ class Bootstraper (object):
         target_distro_version = config.target_distro_version
         distro_version = config.distro_version
 
-        # Try to find a bootstraper for the distro-distro_version combination,
+        # Try to find a bootstrapper for the distro-distro_version combination,
         # both for the target host and the build one. For instance, when
         # bootstraping to cross-compile for windows we also need to bootstrap
         # the build host.
@@ -59,14 +59,14 @@ class Bootstraper (object):
             blist = [target, build]
 
         for d, v in blist:
-            if d not in bootstrapers:
+            if d not in bootstrappers:
                 raise FatalError(_("No bootstrapper for the distro %s" % d))
-            if v not in bootstrapers[d]:
+            if v not in bootstrappers[d]:
                 # Be tolerant with the distro version
                 m.warning(_("No bootstrapper for the distro version %s" % v))
                 v = None
 
-            bs.insert(0, bootstrapers[d][v](config))
+            bs.insert(0, bootstrappers[d][v](config))
 
         return bs
 

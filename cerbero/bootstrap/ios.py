@@ -23,12 +23,12 @@
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 
-from cerbero.bootstrap import BootstraperBase
-from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.bootstrap import BootstrapperBase
+from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Distro
 
 
-class IOSBootstraper (BootstraperBase):
+class IOSBootstrapper (BootstrapperBase):
 
     def start(self):
         # FIXME: enable it when buildbots are properly configured
@@ -36,4 +36,4 @@ class IOSBootstraper (BootstraperBase):
 
 
 def register_all():
-    register_bootstraper(Distro.IOS, IOSBootstraper)
+    register_bootstrapper(Distro.IOS, IOSBootstrapper)

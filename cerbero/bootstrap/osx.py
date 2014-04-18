@@ -20,13 +20,13 @@ import os
 import tempfile
 import shutil
 
-from cerbero.bootstrap import BootstraperBase
-from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.bootstrap import BootstrapperBase
+from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Distro, DistroVersion
 from cerbero.utils import shell
 
 
-class OSXBootstraper (BootstraperBase):
+class OSXBootstrapper (BootstrapperBase):
 
     GCC_BASE_URL = 'https://github.com/downloads/kennethreitz/'\
                    'osx-gcc-installer/'
@@ -60,4 +60,4 @@ class OSXBootstraper (BootstraperBase):
 
 
 def register_all():
-    register_bootstraper(Distro.OS_X, OSXBootstraper)
+    register_bootstrapper(Distro.OS_X, OSXBootstrapper)

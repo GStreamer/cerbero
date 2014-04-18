@@ -20,8 +20,8 @@ import os
 import tempfile
 import shutil
 
-from cerbero.bootstrap import BootstraperBase
-from cerbero.bootstrap.bootstraper import register_bootstraper
+from cerbero.bootstrap import BootstrapperBase
+from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Architecture, Distro, Platform
 from cerbero.errors import ConfigurationError
 from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
@@ -39,9 +39,9 @@ GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
 WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
 
 
-class WindowsBootstraper(BootstraperBase):
+class WindowsBootstrapper(BootstrapperBase):
     '''
-    Bootstraper for windows builds.
+    Bootstrapper for windows builds.
     Installs the mingw-w64 compiler toolchain and headers for Directx and
     Python
     '''
@@ -195,4 +195,4 @@ class WindowsBootstraper(BootstraperBase):
 
 
 def register_all():
-    register_bootstraper(Distro.WINDOWS, WindowsBootstraper)
+    register_bootstrapper(Distro.WINDOWS, WindowsBootstrapper)

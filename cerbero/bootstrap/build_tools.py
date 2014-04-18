@@ -19,12 +19,12 @@
 import os
 
 from cerbero.config import Config, DEFAULT_HOME, Platform, DistroVersion
-from cerbero.bootstrap import BootstraperBase
+from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
 
 
-class BuildTools (BootstraperBase):
+class BuildTools (BootstrapperBase):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
                    'orc-tool', 'gettext-m4', 'gettext-tools']
@@ -35,7 +35,7 @@ class BuildTools (BootstraperBase):
     }
 
     def __init__(self, config):
-        BootstraperBase.__init__(self, config)
+        BootstrapperBase.__init__(self, config)
         if self.config.platform == Platform.WINDOWS:
             self.BUILD_TOOLS.remove('m4')
             self.BUILD_TOOLS.append('gperf')
