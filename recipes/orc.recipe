@@ -3,8 +3,8 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.18'
-    commit = 'orc-0.4.18'
+    version = '0.4.19'
+    commit = 'orc-0.4.19'
     licenses = [License.BSD_like]
     autoreconf = True
 
