@@ -20,24 +20,35 @@ class Recipe(recipe.Recipe):
                    'include/x264_config.h']
 
     def prepare(self):
+        # clang x86-32 fails at generating proper asm PIC code
+        # See bug https://bugzilla.gnome.org/show_bug.cgi?id=727079
+        enable_asm = True
+
         arch = self.config.target_arch
         if self.config.target_arch == Architecture.X86:
             arch = 'i686'
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
                 self.new_env = {'AS': 'yasm -O2 -f macho -DPREFIX'}
+                enable_asm = False
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-win32thread'
         self.configure_options += ' --host=%s-pc-%s' % (arch, self.config.target_platform)
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.ARM:
-                self.configure_options += ' --disable-asm'
+                # FIXME : Is disabling asm on ARM (< v7) still needed ?
+                enable_asm = False
             if self.config.target_arch == Architecture.ARMv7:
                 self.new_env = {'AS': os.environ.get('CC', '')}
         if self.config.target_platform == Platform.IOS:
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 self.new_env = {'AS': os.environ.get('GAS', '')}
                 self.new_env['AS'] += ' -no-integrated-as '
+            elif self.config.target_arch == Architecture.X86:
+                enable_asm = False
+
+        if enable_asm is False:
+            self.configure_options += ' --disable-asm '
 
     def post_install(self):
         libtool_la = LibtoolLibrary('x264', 125, None, None, self.config.libdir,
