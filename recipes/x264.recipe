@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
-    configure_options = '--enable-shared --enable-static ' \
+    configure_options = '--enable-shared --enable-static --enable-pic ' \
                         '--disable-strip --disable-lavf'
     url = 'http://download.videolan.org/pub/x264/snapshots/x264-snapshot-20140212-2245-stable.tar.bz2'
     tarball_dirname= 'x264-snapshot-20140212-2245-stable'
@@ -21,15 +21,12 @@ class Recipe(recipe.Recipe):
                    'include/x264_config.h']
 
     def prepare(self):
-        # enable PIC code except for platforms that don't support it
-        enable_pic = True
         arch = self.config.target_arch
         if self.config.target_arch == Architecture.X86:
             arch = 'i686'
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
                 self.new_env = {'AS': 'yasm -O2 -f macho -DPREFIX'}
-                enable_pic = False
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-win32thread'
         self.configure_options += ' --host=%s-pc-%s' % (arch, self.config.target_platform)
@@ -42,11 +39,6 @@ class Recipe(recipe.Recipe):
             if Architecture.is_arm(self.config.target_arch):
                 self.new_env = {'AS': os.environ.get('GAS', '')}
                 self.new_env['AS'] += ' -no-integrated-as '
-            elif self.config.target_arch == Architecture.X86:
-                enable_pic = False
-
-        if enable_pic:
-            self.configure_options += ' --enable-pic '
 
     def post_install(self):
         libtool_la = LibtoolLibrary('x264', 125, None, None, self.config.libdir,
