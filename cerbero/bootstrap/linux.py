@@ -92,9 +92,9 @@ class RedHatBootstrapper (UnixBootstrapper):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
-	# Use sudo to gain root access on everything except RHEL
+        # Use sudo to gain root access on everything except RHEL
         if self.config.distro_version != DistroVersion.REDHAT_6:
-		self.tool = 'sudo ' + self.tool
+            self.tool = 'sudo ' + self.tool
 
 class OpenSuseBootstrapper (UnixBootstrapper):
 
