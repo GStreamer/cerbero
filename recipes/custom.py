@@ -19,8 +19,8 @@ class GStreamerStatic(recipe.Recipe):
 
     def prepare(self):
         self.project_name = self.name.replace('-static', '')
-        self.remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/%s'
-                        % self.project_name}
+        self.remotes['upstream'] = 'git://anongit.freedesktop.org/gstreamer/%s' \
+                        % self.project_name
 
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
