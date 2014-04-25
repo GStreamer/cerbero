@@ -12,7 +12,7 @@ class Recipe(custom.GStreamerStatic):
     make_check = None
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
-    files_plugins_gnl_devel = ['libgnl']
+    files_plugins_editing_devel = ['libgnl']
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "
