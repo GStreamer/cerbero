@@ -118,7 +118,8 @@ def list_gstreamer_1_0_plugins_by_category(config):
                         'uridecodebin': 'playback', 'sdpelem': 'sdp',
                         'encodebin': 'encoding', 'souphttpsrc': 'soup',
                         'siren': 'gstsiren', 'scaletempoplugin' : 'scaletempo',
-                        'rmdemux': 'realmedia', 'camerabin2': 'camerabin'}
+                        'rmdemux': 'realmedia', 'camerabin2': 'camerabin',
+                        'gnl': 'gnonlin'}
         plugins = defaultdict(list)
         for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
                   'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0',
