@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     configure_options = "--disable-examples "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
-    files_plugins_gnl = ['lib/gstreamer-1.0/libgnl%(mext)s']
+    files_plugins_editing = ['lib/gstreamer-1.0/libgnl%(mext)s']
 
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gnonlin'))
