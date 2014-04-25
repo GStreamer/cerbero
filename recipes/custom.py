@@ -133,5 +133,13 @@ def list_gstreamer_1_0_plugins_by_category(config):
                 for e in plugins_list:
                     if not e.startswith('lib/gstreamer-'):
                         continue
-                    plugins[cat_name].append(e[24:-8])
+                    c = e.split('/')
+                    if len(c) != 3:
+                        continue
+                    e = c[2]
+                    if e.startswith('libgst'):
+                        e = e[6:-8]
+                    else:
+                        e = e[3:-8]
+                    plugins[cat_name].append(e)
         return plugins, replacements
