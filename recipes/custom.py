@@ -121,7 +121,8 @@ def list_gstreamer_1_0_plugins_by_category(config):
                         'rmdemux': 'realmedia', 'camerabin2': 'camerabin'}
         plugins = defaultdict(list)
         for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
-                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'gst-libav-1.0']:
+                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0',
+                  'gst-libav-1.0', 'gnonlin-1.0']:
             r = cookbook.get_recipe(r)
             for attr_name in dir(r):
                 if attr_name.startswith('files_plugins_'):
