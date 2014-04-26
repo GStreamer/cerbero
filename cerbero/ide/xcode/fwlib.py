@@ -78,7 +78,7 @@ class FrameworkLibrary(object):
 class DynamicFrameworkLibrary(FrameworkLibrary):
     def _create_framework_library(self, libraries):
         libraries = ' '.join(['-Wl,-reexport_library %s' % x for x in libraries])
-        shell.call('gcc -dynamiclib -o %s -arch %s -install_name %s %s' %
+        shell.call('clang -dynamiclib -o %s -arch %s -install_name %s %s' %
                    (self.libname, self.arch, self.install_name, libraries))
 
     def _get_lib_file_name(self, lib):
