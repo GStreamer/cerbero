@@ -95,5 +95,5 @@ class TestPackageMaker(unittest.TestCase):
         pm.create_package('root', 'pkg_id', 'version', 'title',
                           'output_file', 'destination')
         self.assertEquals(pm.cmd,
-            "./PackageMaker  -g '10.5' -i 'pkg_id' -l 'destination' -o 'output_file' "
+            "./PackageMaker  -g '10.6' -i 'pkg_id' -l 'destination' -o 'output_file' "
             "-n 'version' -r 'root' -t 'title'")

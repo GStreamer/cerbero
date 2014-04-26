@@ -162,7 +162,7 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += ' --disable-gst-debug'
 
         if self.config.target_platform == Platform.DARWIN and \
-           self.config.target_distro_version in [ DistroVersion.OS_X_LEOPARD, DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LION ]:
+           self.config.target_distro_version in [ DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LION ]:
             # we won't build applemedia plugin because we don't have videotoolbox
             self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia')
             self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia_nonpublic')
