@@ -6,47 +6,12 @@ Subject: [PATCH] Don't leak GTasks when calling
 
 Based on 14872d29298b841260a2b5a481e07b0213d506f8 and
 1e8c4d2a6e302dde5d8441d5873f4def4f4eb629 from upstream GIT,
-and https://bugzilla.gnome.org/show_bug.cgi?id=729796
 backported to 2.38.2.
 ---
- gio/ginputstream.c  |  5 ++++-
- gio/goutputstream.c |  5 ++++-
  gio/gsocketclient.c |  5 ++++-
  gio/gunixmount.c    | 15 ++++++++++++---
  4 files changed, 24 insertions(+), 6 deletions(-)
 
-diff --git a/gio/ginputstream.c b/gio/ginputstream.c
-index 6c7cd60..51559a0 100644
---- a/gio/ginputstream.c
-+++ b/gio/ginputstream.c
-@@ -1102,7 +1102,10 @@ read_async_pollable (GPollableInputStream *stream,
-   gssize nread;
- 
-   if (g_task_return_error_if_cancelled (task))
--    return;
-+    {
-+      g_object_unref (task);
-+      return;
-+    }
- 
-   nread = G_POLLABLE_INPUT_STREAM_GET_INTERFACE (stream)->
-     read_nonblocking (stream, op->buffer, op->count, &error);
-diff --git a/gio/goutputstream.c b/gio/goutputstream.c
-index 69397e2..eb053e3 100644
---- a/gio/goutputstream.c
-+++ b/gio/goutputstream.c
-@@ -1412,7 +1412,10 @@ write_async_pollable (GPollableOutputStream *stream,
-   gssize count_written;
- 
-   if (g_task_return_error_if_cancelled (task))
--    return;
-+    {
-+      g_object_unref (task);
-+      return;
-+    }
- 
-   count_written = G_POLLABLE_OUTPUT_STREAM_GET_INTERFACE (stream)->
-     write_nonblocking (stream, op->buffer, op->count_requested, &error);
 diff --git a/gio/gsocketclient.c b/gio/gsocketclient.c
 index cf71364..6969428 100644
 --- a/gio/gsocketclient.c
