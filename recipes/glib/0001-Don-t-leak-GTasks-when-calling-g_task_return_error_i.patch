@@ -1,0 +1,108 @@
+From 8d56dc7e0e22581a147b480ded046cb6182f689f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Thu, 8 May 2014 10:01:11 +0200
+Subject: [PATCH] Don't leak GTasks when calling
+ g_task_return_error_if_cancelled()
+
+Based on 14872d29298b841260a2b5a481e07b0213d506f8 and
+1e8c4d2a6e302dde5d8441d5873f4def4f4eb629 from upstream GIT,
+and https://bugzilla.gnome.org/show_bug.cgi?id=729796
+backported to 2.38.2.
+---
+ gio/ginputstream.c  |  5 ++++-
+ gio/goutputstream.c |  5 ++++-
+ gio/gsocketclient.c |  5 ++++-
+ gio/gunixmount.c    | 15 ++++++++++++---
+ 4 files changed, 24 insertions(+), 6 deletions(-)
+
+diff --git a/gio/ginputstream.c b/gio/ginputstream.c
+index 6c7cd60..51559a0 100644
+--- a/gio/ginputstream.c
++++ b/gio/ginputstream.c
+@@ -1102,7 +1102,10 @@ read_async_pollable (GPollableInputStream *stream,
+   gssize nread;
+ 
+   if (g_task_return_error_if_cancelled (task))
+-    return;
++    {
++      g_object_unref (task);
++      return;
++    }
+ 
+   nread = G_POLLABLE_INPUT_STREAM_GET_INTERFACE (stream)->
+     read_nonblocking (stream, op->buffer, op->count, &error);
+diff --git a/gio/goutputstream.c b/gio/goutputstream.c
+index 69397e2..eb053e3 100644
+--- a/gio/goutputstream.c
++++ b/gio/goutputstream.c
+@@ -1412,7 +1412,10 @@ write_async_pollable (GPollableOutputStream *stream,
+   gssize count_written;
+ 
+   if (g_task_return_error_if_cancelled (task))
+-    return;
++    {
++      g_object_unref (task);
++      return;
++    }
+ 
+   count_written = G_POLLABLE_OUTPUT_STREAM_GET_INTERFACE (stream)->
+     write_nonblocking (stream, op->buffer, op->count_requested, &error);
+diff --git a/gio/gsocketclient.c b/gio/gsocketclient.c
+index cf71364..6969428 100644
+--- a/gio/gsocketclient.c
++++ b/gio/gsocketclient.c
+@@ -1611,7 +1611,10 @@ g_socket_client_enumerator_callback (GObject      *object,
+   GError *error = NULL;
+ 
+   if (g_task_return_error_if_cancelled (data->task))
+-    return;
++    {
++      g_object_unref (data->task);
++      return;
++    }
+ 
+   address = g_socket_address_enumerator_next_finish (data->enumerator,
+ 						     result, &error);
+diff --git a/gio/gunixmount.c b/gio/gunixmount.c
+index 3f79714..9b3595a 100644
+--- a/gio/gunixmount.c
++++ b/gio/gunixmount.c
+@@ -274,7 +274,10 @@ eject_unmount_cb (GPid pid, gint status, gpointer user_data)
+   UnmountEjectOp *data = g_task_get_task_data (task);
+   
+   if (g_task_return_error_if_cancelled (task))
+-    return;
++    {
++      g_object_unref (task);
++      return;
++    }
+ 
+   g_spawn_close_pid (pid);
+ 
+@@ -302,7 +305,10 @@ eject_unmount_read_error (GIOChannel *channel,
+   GIOStatus status;
+ 
+   if (g_task_return_error_if_cancelled (task))
+-    return FALSE;
++    {
++      g_object_unref (task);
++      return FALSE;
++    }
+ 
+   error = NULL;
+ read:
+@@ -344,7 +350,10 @@ eject_unmount_do_cb (gpointer user_data)
+   GError *error = NULL;
+ 
+   if (g_task_return_error_if_cancelled (task))
+-    return G_SOURCE_REMOVE;
++    {
++      g_object_unref (task);
++      return G_SOURCE_REMOVE;
++    }
+ 
+   if (!g_spawn_async_with_pipes (NULL,         /* working dir */
+                                  data->argv,
+-- 
+2.0.0.rc2
+

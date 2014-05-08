@@ -1,0 +1,58 @@
+From 77849024a2379bfb03f7d0e47dfb7d1162568ac1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 7 May 2014 19:33:43 +0200
+Subject: [PATCH] Pop the thread default main context not from the callback but
+ from where it was pushed
+
+Based on a patch by Dmitry Shatrov <shatrov@gmail.com>, see
+http://mail.gnome.org/archives/libsoup-list/2011-November/msg00000.html
+---
+ libsoup/soup-socket.c | 11 +++++------
+ 1 file changed, 5 insertions(+), 6 deletions(-)
+
+diff --git a/libsoup/soup-socket.c b/libsoup/soup-socket.c
+index baa9290..2784e9c 100644
+--- a/libsoup/soup-socket.c
++++ b/libsoup/soup-socket.c
+@@ -746,9 +746,6 @@ async_connected (GObject *client, GAsyncResult *result, gpointer data)
+ 	GSocketConnection *conn;
+ 	guint status;
+ 
+-	if (priv->async_context && !priv->use_thread_context)
+-		g_main_context_pop_thread_default (priv->async_context);
+-
+ 	conn = g_socket_client_connect_finish (G_SOCKET_CLIENT (client),
+ 					       result, &error);
+ 	status = socket_connected (sacd->sock, conn, error);
+@@ -801,6 +798,9 @@ soup_socket_connect_async (SoupSocket *sock, GCancellable *cancellable,
+ 				       priv->connect_cancel,
+ 				       async_connected, sacd);
+ 	g_object_unref (client);
++
++	if (priv->async_context && !priv->use_thread_context)
++		g_main_context_pop_thread_default (priv->async_context);
+ }
+ 
+ /**
+@@ -1163,9 +1163,6 @@ handshake_async_ready (GObject *source, GAsyncResult *result, gpointer user_data
+ 	GError *error = NULL;
+ 	guint status;
+ 
+-	if (priv->async_context && !priv->use_thread_context)
+-		g_main_context_pop_thread_default (priv->async_context);
+-
+ 	if (g_tls_connection_handshake_finish (G_TLS_CONNECTION (source),
+ 					       result, &error))
+ 		status = SOUP_STATUS_OK;
+@@ -1203,6 +1200,8 @@ soup_socket_handshake_async (SoupSocket         *sock,
+ 					  G_PRIORITY_DEFAULT,
+ 					  cancellable, handshake_async_ready,
+ 					  data);
++	if (priv->async_context && !priv->use_thread_context)
++		g_main_context_pop_thread_default (priv->async_context);
+ }
+ 
+ /**
+-- 
+2.0.0.rc2
+
