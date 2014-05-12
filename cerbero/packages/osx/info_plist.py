@@ -32,6 +32,12 @@ INFO_PLIST_TPL='''\
 <string>%(ptype)s</string>
 <key>CFBundleVersion</key>
 <string>%(version)s</string>
+<key>CFBundleShortVersionString</key>
+<string>%(version_str)s</string>
+<key>LSMinimumSystemVersion</key>
+<string>%(minosxversion)s</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
 %(extra)s
 </dict>
 </plist>
@@ -43,11 +49,12 @@ class InfoPlist(object):
 
     package_type = ''
 
-    def __init__(self, name, identifier, version, info, icon=None,
-            plist_tpl=None):
+    def __init__(self, name, identifier, version, info, minosxversion,
+            icon=None, plist_tpl=None):
         self.name = name
         self.identifier = identifier
         self.version = version
+        self.minosxversion = minosxversion
         self.info = info
         self.icon = icon
         self.plist_tpl = plist_tpl or INFO_PLIST_TPL
@@ -59,8 +66,9 @@ class InfoPlist(object):
     def _get_properties(self):
         properties = {'id': self.identifier, 'name': self.name,
                 'desc': self.info, 'ptype': self.package_type,
-                'version': self.version, 'icon': self.icon,
-                'extra':''}
+                'icon': self.icon, 'version_str': self.version,
+                'version': self.version.replace('.', ''),
+                'minosxversion': self.minosxversion, 'extra':''}
         if self.icon:
             properties['extra'] = '<key>CFBundleIconFile</key>\n' \
                 '<string>%s</string>' % self.icon

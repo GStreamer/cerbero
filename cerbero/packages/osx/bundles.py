@@ -137,7 +137,8 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         # Create the frameworks Info.plist file
         framework_plist = FrameworkPlist(self.package.name,
-            self.package.org, self.package.version, self.package.shortdesc)
+            self.package.org, self.package.version, self.package.shortdesc,
+            self.package.config.min_osx_sdk_version)
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
 
         # Add a link from Framework to Versions/Current/Framework
@@ -193,6 +194,7 @@ class ApplicationBundlePackager(object):
             plist_tpl = open(self.package.resources_info_plist).read()
         framework_plist = ApplicationPlist(self.package.app_name,
             self.package.org, self.package.version, self.package.shortdesc,
+            self.package.config.min_osx_sdk_version,
             os.path.basename(self.package.resources_icon_icns),
             plist_tpl)
         framework_plist.save(os.path.join(contents, 'Info.plist'))
