@@ -1,7 +1,7 @@
-From 473e7284fa4b70c27db67522eda70ee5e86da466 Mon Sep 17 00:00:00 2001
+From b09cd11cc3339fe89fbb944e253e6bba70f7b5fd Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 7 Mar 2014 12:50:24 +0100
-Subject: [PATCH] Add support for static modules
+Subject: [PATCH 1/2] Add support for static modules
 
 Other than the previous approach this now doesn't go via
 dlopen() and stuff but just registers the module directly.
@@ -16,7 +16,7 @@ Also does not require any GLib changes.
  5 files changed, 63 insertions(+), 8 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 4234209..918ff81 100644
+index 84ceb68..a5521a0 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -233,6 +233,26 @@ if test "$GCC" = "yes" -a "$set_more_warnings" != "no"; then
