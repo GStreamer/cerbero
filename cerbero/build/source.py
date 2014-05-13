@@ -33,9 +33,15 @@ class Source (object):
     @type recipe: L{cerbero.recipe.Recipe}
     @ivar config: cerbero's configuration
     @type config: L{cerbero.config.Config}
+    @cvar patches: list of patches to apply
+    @type patches: list
+    @cvar strip: number passed to the --strip 'patch' option
+    @type patches: int
     '''
 
     supports_non_src_build = False
+    patches = []
+    strip = 1
 
     def fetch(self):
         '''
@@ -71,15 +77,9 @@ class Tarball (Source):
 
     @cvar url: dowload URL for the tarball
     @type url: str
-    @cvar patches: list of patches to apply
-    @type patches: list
-    @cvar strip: number passed to the --strip 'patch' option
-    @type patches: int
     '''
 
     url = None
-    patches = []
-    strip = 1
     tarball_name = None
     tarball_dirname = None
 
@@ -224,7 +224,7 @@ class Git (GitCache):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit)
                 checkout_hash = git.get_hash(self.build_dir, 'HEAD')
-                if commit_hash == checkout_hash:
+                if commit_hash == checkout_hash and not self.patches:
                     return False
             except Exception:
                 pass
@@ -236,6 +236,16 @@ class Git (GitCache):
 
         # checkout the current version
         git.local_checkout(self.build_dir, self.repo_dir, self.commit)
+
+        for patch in self.patches:
+            if not os.path.isabs(patch):
+                patch = self.relative_path(patch)
+
+            if self.strip == 1:
+                git.apply_patch(patch, self.build_dir)
+            else:
+                shell.apply_patch(patch, self.build_dir, self.strip)
+
         return True
 
 
