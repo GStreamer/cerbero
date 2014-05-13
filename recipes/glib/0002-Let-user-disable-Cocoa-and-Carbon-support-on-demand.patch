@@ -1,7 +1,7 @@
-From ea41c323feba252f1052fbf0d967e0dfc95a16c7 Mon Sep 17 00:00:00 2001
+From a1a15efce96ee7107aecee2cdb850b9e189bfe43 Mon Sep 17 00:00:00 2001
 From: Thibault Saunier <thibault.saunier@collabora.com>
 Date: Fri, 25 Jan 2013 12:37:43 -0300
-Subject: [PATCH 05/22] Let user disable Cocoa and Carbon support on demand
+Subject: [PATCH 02/10] Let user disable Cocoa and Carbon support on demand
 
 Conflicts:
 	configure.ac
@@ -10,10 +10,10 @@ Conflicts:
  1 file changed, 54 insertions(+), 25 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index cf2e3e2..04d5190 100644
+index a01e58d..579d713 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -179,32 +179,10 @@ AC_MSG_RESULT([$glib_native_android])
+@@ -169,32 +169,10 @@ AC_MSG_RESULT([$glib_native_android])
  
  AC_SUBST(LIB_EXE_MACHINE_FLAG)
  
@@ -46,7 +46,7 @@ index cf2e3e2..04d5190 100644
  
  AS_IF([test "$glib_native_win32" = "yes"], [
    AC_CHECK_TOOL(WINDRES, windres, no)
-@@ -221,10 +199,61 @@ AS_IF([test "$glib_native_win32" = "yes"], [
+@@ -211,10 +189,61 @@ AS_IF([test "$glib_native_win32" = "yes"], [
  ])
  AM_CONDITIONAL(MS_LIB_AVAILABLE, [test x$ms_librarian = xyes])
  
@@ -112,5 +112,5 @@ index cf2e3e2..04d5190 100644
  if test "x$glib_have_cocoa" = "xyes"; then
    AC_DEFINE(HAVE_COCOA, 1, [define to 1 if Cocoa is available])
 -- 
-1.8.4
+1.9.0
 
