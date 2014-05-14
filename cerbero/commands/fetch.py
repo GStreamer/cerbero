@@ -66,6 +66,7 @@ class Fetch(Command):
                             cookbook.reset_recipe_status(r.name)
 
         if to_rebuild:
+            to_rebuild = list(set(to_rebuild))
             m.message(_("These recipes have been updated and will "
                         "be rebuilt:\n%s") %
                         '\n'.join([x.name for x in to_rebuild]))
