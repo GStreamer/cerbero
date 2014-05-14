@@ -36,6 +36,12 @@ class BuildTools (BootstrapperBase):
 
     def __init__(self, config):
         BootstrapperBase.__init__(self, config)
+
+        # if cross-compiling or not on linux, make sure we have gtk-doc
+        if self.config.target_platform != Platform.LINUX or\
+           not self.config.prefix_is_executable():
+            self.BUILD_TOOLS.append('gtk-doc-lite')
+
         if self.config.platform == Platform.WINDOWS:
             self.BUILD_TOOLS.remove('m4')
             self.BUILD_TOOLS.append('gperf')
