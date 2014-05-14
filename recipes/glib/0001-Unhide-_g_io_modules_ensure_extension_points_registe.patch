@@ -1,7 +1,7 @@
 From 1e910a5abb72b296370478f4a3cc392c4072ae1d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 7 Mar 2014 13:59:22 +0100
-Subject: [PATCH 01/10] Unhide _g_io_modules_ensure_extension_points_registered
+Subject: [PATCH 01/11] Unhide _g_io_modules_ensure_extension_points_registered
  for calling by gio modules
 
 ---

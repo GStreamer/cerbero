@@ -1,7 +1,7 @@
 From 20041dde79ec5346e4edf7d40e779d9c8f5d9c5d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Mon, 12 Mar 2012 14:30:02 +0100
-Subject: [PATCH 06/10] Blacklist the bamf GIO module
+Subject: [PATCH 06/11] Blacklist the bamf GIO module
 
 I uses Ubuntu specific GLib API on Ubuntu... and thus crashes
 everything that ever tries to use GIO.

@@ -1,7 +1,7 @@
 From a1a15efce96ee7107aecee2cdb850b9e189bfe43 Mon Sep 17 00:00:00 2001
 From: Thibault Saunier <thibault.saunier@collabora.com>
 Date: Fri, 25 Jan 2013 12:37:43 -0300
-Subject: [PATCH 02/10] Let user disable Cocoa and Carbon support on demand
+Subject: [PATCH 02/11] Let user disable Cocoa and Carbon support on demand
 
 Conflicts:
 	configure.ac

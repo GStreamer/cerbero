@@ -1,7 +1,7 @@
 From c43c2c8e98a2335241cdeeb88ae375bb30fc8234 Mon Sep 17 00:00:00 2001
 From: Thiago Santos <thiago.sousa.santos@collabora.com>
 Date: Wed, 22 May 2013 15:00:34 -0300
-Subject: [PATCH 07/10] giomodule: do not try to load modules from
+Subject: [PATCH 07/11] giomodule: do not try to load modules from
  gio-module-dir in IOS
 
 There is no gio-module-dir for ios. When it tries to load on a real

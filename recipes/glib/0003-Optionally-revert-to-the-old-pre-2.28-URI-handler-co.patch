@@ -1,7 +1,7 @@
 From 6059729c739662573bda47dc04fbb698400b05d9 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Fri, 9 Mar 2012 08:44:13 +0100
-Subject: [PATCH 03/10] Optionally revert to the old (pre-2.28) URI handler
+Subject: [PATCH 03/11] Optionally revert to the old (pre-2.28) URI handler
  code
 
 This is required to work with the GVfs distributed on Linux distributions

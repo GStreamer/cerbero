@@ -33,7 +33,8 @@ class Recipe(recipe.Recipe):
                'glib/0007-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
                'glib/0008-configure-fix-link-with-Carbon-framework.patch',
                'glib/0009-socketclient-Fix-leak.patch',
-               'glib/0010-gio-fix-two-more-g_task_return_error_if_cancelled-le.patch'
+               'glib/0010-gio-fix-two-more-g_task_return_error_if_cancelled-le.patch',
+               'glib/0011-networkmonitornetlink-IN6_IS_ADDR_MC_LINKLOCAL-is-on.patch'
            ]
 
     files_libs = [

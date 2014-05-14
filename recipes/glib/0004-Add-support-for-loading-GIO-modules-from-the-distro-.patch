@@ -1,7 +1,7 @@
 From 7eededaa8606187ce0fcbe32fd8a3e4bd76168d5 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Fri, 9 Mar 2012 08:51:12 +0100
-Subject: [PATCH 04/10] Add support for loading GIO modules from the distro's
+Subject: [PATCH 04/11] Add support for loading GIO modules from the distro's
  GIO module path
 
 This is needed to e.g. load GVfs from the distro. Without this elements

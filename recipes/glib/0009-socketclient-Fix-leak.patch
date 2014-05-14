@@ -1,7 +1,7 @@
 From 14bb9538ca0274eb93b08bcd945e91e930cd7a30 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Mon, 17 Mar 2014 23:50:30 -0400
-Subject: [PATCH 09/10] socketclient: Fix leak
+Subject: [PATCH 09/11] socketclient: Fix leak
 
 https://bugzilla.gnome.org/show_bug.cgi?id=726611
 ---

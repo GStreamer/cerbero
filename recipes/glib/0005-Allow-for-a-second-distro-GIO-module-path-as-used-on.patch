@@ -1,7 +1,7 @@
 From 3499b675a04e519b942bcfd6c660439f8e390e84 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Mon, 12 Mar 2012 13:04:41 +0100
-Subject: [PATCH 05/10] Allow for a second distro GIO module path as used on
+Subject: [PATCH 05/11] Allow for a second distro GIO module path as used on
  Ubuntu
 
 ...because apparently only half of their packages are multi-arch
