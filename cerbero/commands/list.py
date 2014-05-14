@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+from cerbero.config import Variants
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.utils import _, N_
@@ -63,7 +64,14 @@ class ShowConfig(Command):
 
     def run(self, config, args):
         for n in config._properties:
-            print "%25s : %s" % (n, getattr(config, n))
+            if n == "variants":
+                print "%25s :" % (n)
+                variants = getattr(config, n).__dict__
+                for v in variants:
+                    print "%30s : %s" % (v, variants[v])
+            else:
+                print "%25s : %s" % (n, getattr(config, n))
+
 
 register_command(List)
 register_command(ListPackages)
