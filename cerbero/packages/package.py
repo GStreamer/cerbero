@@ -466,7 +466,7 @@ class InstallerPackage(MetaPackage):
         MetaPackage.__init__(self, config, store)
 
 
-class App(PackageBase):
+class App(Package):
     '''
     Create packages for applications.
     An App package will not include development files and binaries could
@@ -524,8 +524,7 @@ class App(PackageBase):
     osx_create_pkg = True
 
     def __init__(self, config, store, cookbook):
-        PackageBase.__init__(self, config, store)
-        self.cookbook = cookbook
+        Package.__init__(self, config, store, cookbook)
         self._app_recipe = self.cookbook.get_recipe(self.app_recipe)
         self.title = self.name
 
@@ -540,7 +539,7 @@ class App(PackageBase):
 
     def files_list(self):
         # for each package, call the function that list files
-        files = []
+        files = Package.files_list(self)
         if self.embed_deps:
             packages_deps = [self.store.get_package(x) for x in self.deps]
             for package in packages_deps:
