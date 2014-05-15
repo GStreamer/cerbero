@@ -13,6 +13,7 @@
 <?define WebSiteName = "@ProjectURL@" ?>
 <?define Platform = "@Platform@" ?>
 <?define PlatformProgramFilesFolder = "@ProgramFilesFolder@" ?>
+<?define CerberoPackageDir = "@CerberoPackageDir@" ?>
 
 <?if $(var.Platform) = "x64" ?>
   <?define ProductName = "@ProductName@ (x64)" ?>
