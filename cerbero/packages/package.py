@@ -551,6 +551,8 @@ class App(Package):
             # on.
             for recipe in self.cookbook.list_recipe_deps(self.app_recipe):
                 files.extend(recipe.libraries())
+                files.extend(recipe.files_list_by_category(FilesProvider.PY_CAT))
+                files.extend(recipe.files_list_by_category(FilesProvider.TYPELIB_CAT))
 
         files.extend(self._app_recipe.files_list())
         files.sort()
