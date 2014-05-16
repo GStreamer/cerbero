@@ -68,7 +68,7 @@ class FilesProvider(object):
         .la and .so from the 'libs' category
         '''
         devfiles = self.files_list_by_category(self.DEVEL_CAT)
-        devfiles.extend(self.files_list_by_category(self.TYPELIB_CAT))
+        devfiles.extend(self._search_girfiles())
         devfiles.extend(self._search_devel_libraries())
 
         return sorted(list(set(devfiles)))
@@ -242,10 +242,43 @@ class FilesProvider(object):
         '''
         if not self.config.variants.gi:
             return []
+
+        pattern = 'lib/girepository-1.0/%s.typelib'
+        typelibs = shell.ls_files([pattern % x for x in files],
+                                  self.config.prefix)
+        if not typelibs:
+            # Add the architecture for universal builds
+            pattern = 'lib/%s/girepository-1.0/%%s.typelib' % \
+                self.config.target_arch
+            typelibs = shell.ls_files([pattern % x for x in files],
+                                      self.config.prefix)
+        return typelibs
+
+    def _search_girfiles(self):
+        '''
+        Search for typelibs in lib/girepository-1.0/
+        '''
+        if not self.config.variants.gi:
+            return []
+
+        girs = []
+        if hasattr(self, 'files_' + self.TYPELIB_CAT):
+            girs += getattr(self, 'files_' + self.TYPELIB_CAT)
+        if hasattr(self, 'platform_files_' + self.TYPELIB_CAT):
+            d = getattr(self, 'platform_files_' + self.TYPELIB_CAT)
+            girs += d.get(self.config.target_platform, [])
+
         # Use a * for the arch in universal builds
-        pattern = 'lib/*/girepository-1.0/%s.typelib'
-        return shell.ls_files([pattern % x for x in files],
+        pattern = 'share/gir-1.0/%s.gir'
+        files = shell.ls_files([pattern % x for x in girs],
                               self.config.prefix)
+        if not girs:
+            # Add the architecture for universal builds
+            pattern = 'share/gir-1.0/%s/%%s.gir' % \
+                self.config.target_arch
+            files = shell.ls_files([pattern % x for x in girs],
+                                      self.config.prefix)
+        return files
 
     def _search_devel_libraries(self):
         devel_libs = []
