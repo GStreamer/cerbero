@@ -1,0 +1,18 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python
+# -*- Mode: Python -*-
+
+
+class Package(package.Package):
+
+    name = 'gstreamer-1.0-devtools'
+    shortdesc = 'GStreamer 1.0 devtools'
+    longdesc = 'GStreamer 1.0 devtools'
+    url = "http://gstreamer.freedesktop.org"
+    version = '1.3.0'
+    codename = 'Congo'
+    license = License.LGPL
+    vendor = 'GStreamer Project'
+    org = 'org.freedesktop.gstreamer'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gst-validate']

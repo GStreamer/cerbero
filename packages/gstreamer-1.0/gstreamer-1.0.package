@@ -33,6 +33,7 @@ class SDKPackage(package.SDKPackage):
                ('gstreamer-1.0-encoding', False, False),
                ('gstreamer-1.0-capture', False, False),
                ('gstreamer-1.0-editing', False, False),
+               ('gstreamer-1.0-devtools', False, False),
               ]
     platform_packages = {
             Platform.WINDOWS: [
