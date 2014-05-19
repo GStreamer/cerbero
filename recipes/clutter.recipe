@@ -39,3 +39,8 @@ class Recipe(recipe.Recipe):
 
     # Skipping tests as they require a display
     make_check = None
+
+    def prepare(self):
+        if self.config.variants.gtk:
+            self.deps.append('gtk+3')
+            self.files_typelibs.append('ClutterGdk-1.0')
