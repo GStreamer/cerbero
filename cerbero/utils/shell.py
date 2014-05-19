@@ -51,7 +51,9 @@ def set_logfile_output(location):
     @param location: path for the log file
     @type location: str
     '''
-
+    if PLATFORM == Platform.WINDOWS:
+        # silently return.
+        return
     global LOGFILE
     if not LOGFILE is None:
         raise Exception("Logfile was already open. Forgot to call "
@@ -66,6 +68,9 @@ def close_logfile_output(dump=False):
     @param dump: dump the log file to stdout
     @type dump: bool
     '''
+    if PLATFORM == Platform.WINDOWS:
+        # silently return.
+        return
     global LOGFILE
     if LOGFILE is None:
         raise Exception("No logfile was open")
