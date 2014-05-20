@@ -158,6 +158,9 @@ class Config (object):
                         "cross-compiling, 'gi' variant will be removed"))
             self.variants.gi = False
 
+        if config.target_platform != Platform.LINUX:
+            self.variants.gtk = False
+
         for c in self.arch_config.values():
             c.variants = self.variants
 
