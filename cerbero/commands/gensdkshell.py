@@ -59,36 +59,46 @@ class GenSdkShell(Command):
         cmd = args.cmd
         self.runargs(config, name, output_dir, prefix, libdir, py_prefix, cmd)
 
+    def _putvar(self, var, value, append_separator=":"):
+        if var in self._env:
+            if append_separator is not None:
+                self._env[var] = self._env[var] + append_separator + value
+        else:
+            self._env[var] = value
+
     def runargs(self, config, name, output_dir, prefix, libdir,
-                py_prefix, cmd=None):
+                py_prefix, cmd=None, env={}, prefix_env_name='GSTREAMER_ROOT'):
         if cmd == None:
             cmd = self.DEFAULT_CMD
-        env = {}
-        prefix_env_name = 'GSTREAMER_ROOT'
+        self._env = env
         prefix_env = '${%s}' % prefix_env_name
         libdir = libdir.replace(prefix, prefix_env)
-        env['PATH'] = \
-            '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix_env
-        env['LD_LIBRARY_PATH'] = \
-            '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir
-        env['PKG_CONFIG_PATH'] = '%s/lib/pkgconfig:%s/share/pkgconfig'\
-             '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix_env, prefix_env)
-        env['XDG_DATA_DIRS'] = '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:'\
-                '/usr/local/share:/usr/share' % prefix_env
-        env['XDG_CONFIG_DIRS'] = \
-            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env
-        env['GST_REGISTRY'] = '${HOME}/.gstreamer-0.10/gstreamer-sdk-registry'
-        env['GST_REGISTRY_1_0'] = '${HOME}/.cache/gstreamer-1.0/gstreamer-sdk-registry'
-        env['GST_PLUGIN_SCANNER'] = \
-                '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env
-        env['GST_PLUGIN_SCANNER_1_0'] = \
-                '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env
-        env['PYTHONPATH'] = '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'\
-                % (prefix_env, py_prefix)
-        env['CFLAGS'] = '-I%s/include ${CFLAGS}' % prefix_env
-        env['CXXFLAGS'] = '-I%s/include ${CXXFLAGS}' % prefix_env
-        env['LDFLAGS'] = '-L%s ${LDFLAGS}' % libdir
-        env['GIO_EXTRA_MODULES'] = '%s/gio/modules' % libdir
+        self._putvar('PATH',
+            '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix_env)
+        self._putvar('LD_LIBRARY_PATH',
+            '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir)
+        self._putvar('PKG_CONFIG_PATH',  '%s/lib/pkgconfig:%s/share/pkgconfig'
+             '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix_env, prefix_env))
+        self._putvar('XDG_DATA_DIRS',  '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:'
+                '/usr/local/share:/usr/share' % prefix_env)
+        self._putvar('XDG_CONFIG_DIRS',
+            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env)
+        self._putvar('GST_REGISTRY', '${HOME}/.gstreamer-0.10/gstreamer-sdk-registry', None)
+        self._putvar('GST_REGISTRY_1_0', '${HOME}/.cache/gstreamer-1.0/gstreamer-sdk-registry',
+                     None)
+        self._putvar('GST_PLUGIN_SCANNER',
+                '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env)
+        self._putvar('GST_PLUGIN_SCANNER_1_0',
+                '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env)
+        self._putvar('PYTHONPATH',  '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'
+                % (prefix_env, py_prefix))
+        self._putvar('CFLAGS',  '-I%s/include ${CFLAGS}' % prefix_env, " ")
+        self._putvar('CXXFLAGS',  '-I%s/include ${CXXFLAGS}' % prefix_env, " ")
+        self._putvar('CPPFLAGS',  '-I%s/include ${CPPFLAGS}' % prefix_env, " ")
+        self._putvar('LDFLAGS',  '-L%s ${LDFLAGS}' % libdir, " ")
+        self._putvar('GIO_EXTRA_MODULES',  '%s/gio/modules' % libdir)
+        self._putvar('GI_TYPELIB_PATH',  '%s/girepository-1.0' % libdir)
+
         envstr = 'export %s="%s"\n' % (prefix_env_name, prefix)
         for e, v in env.iteritems():
             envstr += 'export %s="%s"\n' % (e, v)
