@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     commit = 'origin/master'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--program-prefix= --disable-examples --enable-static "
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gnonlin-1.0',
+            'gst-plugins-good-1.0', 'gst-validate']
 
     files_bins = ['ges-launch-1.0']
     files_devel = ['include/gstreamer-1.0/ges', 'lib/pkgconfig/gst-editing-services-1.0.pc']

@@ -16,5 +16,6 @@ class Package(package.Package):
     deps = ['gstreamer-1.0-core']
 
     files = ['gst-editing-services-1.0',
-             'gnonlin-1.0']
+             'gnonlin-1.0',
+             'gst-validate:libs']
     files_devel = ['gnonlin-1.0-static']
