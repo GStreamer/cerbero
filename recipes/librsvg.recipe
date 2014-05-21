@@ -13,17 +13,14 @@ class Recipe(recipe.Recipe):
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
     files_loader = []
-    files_devel = ['include/librsvg-2.0/librsvg',
-                   'lib/pkgconfig/librsvg-2.0.pc']
+    files_devel = ['include/librsvg-2.0/librsvg/*.h',
+                   'lib/pkgconfig/librsvg-2.0.pc',
+                   'lib/librsvg-2.a', 'lib/librsvg-2.la']
     files_typelibs = ['Rsvg-2.0']
+    configure_options = ' --disable-pixbuf-loader --disable-gtk-theme '
 
     patches = ['librsvg/0001-Add-an-implementation-of-realpath-for-windows-to-mak.patch']
 
     def prepare(self):
-        if self.config.variants.gtk:
-            self.deps += ['gdk-pixbuf', 'gtk+3']
-            self.files_loader += ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
-        else:
-            self.configure_options += ' --disable-pixbuf-loader --disable-gtk-theme '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-Bsymbolic'
