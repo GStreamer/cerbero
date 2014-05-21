@@ -26,6 +26,8 @@ INFO_PLIST_TPL='''\
 <string>%(id)s</string>
 <key>CFBundleName</key>
 <string>%(name)s</string>
+<key>CFBundleExecutable</key>
+<string>%(name)s</string>
 <key>CFBundlePackageGetInfoString</key>
 <string>%(desc)s</string>
 <key>CFBundlePackageType</key>
