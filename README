@@ -31,16 +31,18 @@ OSX
 ---
 On OSX you will need to have install the following software:
   * XCode
-  * CMake: http://www.cmake.org/files/v2.8/cmake-2.8.10.2-Darwin64-universal.dmg
+  * CMake: http://www.cmake.org/cmake/resources/software.html
 
 Windows
 -------
 The initial setup on Windows is a little bit longer, but only a few programs are required.
-  * Python2.7: http://www.python.org/getit/releases/2.7/
-  * Git: http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git
-    IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
-  * Msys/MinGW: https://sourceforge.net/projects/mingw/files/Installer/mingw-get-inst/
-    Install it with all the options enabled
+  * Python2.7: https://www.python.org/downloads/
+     IMPORTANT : Chose the 2.7 version. The 3.x versions are *not* supported
+  * CMake: http://www.cmake.org/cmake/resources/software.html
+  * Git: http://git-scm.com/download/win
+     IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
+  * Msys/MinGW: http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
+     Install it with all the options enabled
 
 The Direct Show plugins still needs to be built using Microsoft's compiler and their SDK,
 due to the dependency on the Direct Show base classes.
