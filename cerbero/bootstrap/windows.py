@@ -70,6 +70,8 @@ class WindowsBootstrapper(BootstrapperBase):
         if self.platform == Platform.WINDOWS:
             # After mingw is beeing installed
             self.install_bin_deps()
+        if self.config.platform != Platform.WINDOWS:
+            self.install_gl_headers()
         self.install_python_sdk()
 
     def check_dirs(self):
@@ -126,6 +128,15 @@ class WindowsBootstrapper(BootstrapperBase):
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
             shell.call('mingw-get install %s' % dep)
+
+    def install_gl_headers(self):
+        m.action("Installing wglext.h")
+        if self.arch == Architecture.X86:
+            inst_path = os.path.join(self.prefix, 'i686-w64-mingw32/include/GL/wglext.h')
+        else:
+            inst_path = os.path.join(self.prefix, 'x86_64-w64-mingw32/include/GL/wglext.h')
+        gl_header = 'http://www.opengl.org/registry/api/GL/wglext.h'
+        shell.download(gl_header, inst_path)
 
     def install_bin_deps(self):
         # FIXME: build intltool as part of the build tools bootstrap
