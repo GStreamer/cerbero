@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-shared'
     deps = ['gmp']
     patches = ['0001-ios-fix-build-using-.word-for-assembly-constants.patch']
+    allow_parallel_build = False
 
     files_bins = ['nettle-hash', 'nettle-lfib-stream']
     files_libs = ['libnettle', 'libhogweed']
