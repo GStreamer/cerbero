@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
-            raise InvalidRecipeError("Invalid platform")
+            raise InvalidRecipeError(self, "Invalid platform")
         # mingw's static libraries
         self.mingw_static_files = ['%(host)s/lib/libmingwex.a',
                                    '%(host)s/lib/libdxerr9.a',
