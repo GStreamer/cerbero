@@ -276,8 +276,6 @@ class Config (object):
 
         if self.variants.python3:
            env['PYTHON'] = "python3"
-        elif self.variants.python:
-           env['PYTHON'] = "python2"
 
         return env
 
