@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
-from cerbero.errors import InvalidRecipeError
 
 
 class Recipe(recipe.Recipe):
@@ -17,7 +16,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
-            raise InvalidRecipeError()
+            raise InvalidRecipeError("Invalid platform")
         # mingw's static libraries
         self.mingw_static_files = ['%(host)s/lib/libmingwex.a',
                                    '%(host)s/lib/libdxerr9.a',

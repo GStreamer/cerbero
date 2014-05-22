@@ -82,7 +82,10 @@ class MissingPackageFilesError(CerberoException):
 
 
 class InvalidRecipeError(CerberoException):
-    pass
+
+    def __init__(self, recipe, message=''):
+        CerberoException.__init__(self,
+                _("Recipe %s is invalid:\n%s") % (recipe, message))
 
 
 class AbortedError(Exception):

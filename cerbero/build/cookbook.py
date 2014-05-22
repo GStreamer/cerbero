@@ -89,6 +89,7 @@ class CookBook (object):
     def __init__(self, config, load=True):
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
+        self._invalid_recipes = {} # recipe -> error
         self._mtimes = {}
 
         if not load:
@@ -162,6 +163,8 @@ class CookBook (object):
         @param name: name of the recipe
         @type name: str
         '''
+        if name in self._invalid_recipes:
+            raise self._invalid_recipes[name]
         if name not in self.recipes:
             raise RecipeNotFoundError(name)
         return self.recipes[name]
@@ -412,8 +415,8 @@ class CookBook (object):
                     recipe.add_recipe(r)
                 else:
                     return r
-            except InvalidRecipeError:
-                pass
+            except InvalidRecipeError, e:
+                self._invalid_recipes[r.name] = e
             except Exception, ex:
                 m.warning("Error loading recipe in file %s %s" %
                           (filepath, ex))
