@@ -50,7 +50,7 @@ class DebianBootstrapper (UnixBootstrapper):
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
-                'libxtst-dev', 'libxrandr-dev', 'libbonobo2-dev', 'chrpath', 'libfuse-dev']
+                'libxtst-dev', 'libxrandr-dev', 'libbonobo2-dev']
     distro_packages = {
         DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
         DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
@@ -67,6 +67,9 @@ class DebianBootstrapper (UnixBootstrapper):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
+        if self.config.target_platform == Platform.LINUX:
+            self.packages.append('chrpath')
+            self.packages.append('libfuse-dev')
         if self.config.distro_version in [DistroVersion.DEBIAN_SQUEEZE,
                 DistroVersion.UBUNTU_MAVERICK, DistroVersion.UBUNTU_LUCID]:
             self.packages.remove('glib-networking')
@@ -88,13 +91,16 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
                 'docbook-utils-pdf', 'glib-networking', 'help2man',
                 'dbus-devel', 'glib2-devel', 'libXrandr-devel',
-                'libXtst-devel', 'libbonobo-devel', 'chrpath', 'fuse-devel']
+                'libXtst-devel', 'libbonobo-devel']
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
+        if self.config.target_platform == Platform.LINUX:
+            self.packages.append('chrpath')
+            self.packages.append('libfuse-dev')
         # Use sudo to gain root access on everything except RHEL
         if self.config.distro_version != DistroVersion.REDHAT_6:
             self.tool = 'sudo ' + self.tool
