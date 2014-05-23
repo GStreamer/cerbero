@@ -1,4 +1,4 @@
-From 4b31c44b296dc2561e17efbe2466ed357e3ecd53 Mon Sep 17 00:00:00 2001
+From 83364dec2aa93d1a416c06b97de98c11d997bd37 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Wed, 22 Aug 2012 15:29:52 +0200
 Subject: [PATCH 2/2] Port to Android
@@ -8,10 +8,10 @@ Subject: [PATCH 2/2] Port to Android
  1 file changed, 4 insertions(+)
 
 diff --git a/src/fcxml.c b/src/fcxml.c
-index a146068..84feaeb 100644
+index 91d166f..7776fa6 100644
 --- a/src/fcxml.c
 +++ b/src/fcxml.c
-@@ -1212,7 +1212,9 @@ FcParseInt (FcConfigParse *parse)
+@@ -1314,7 +1314,9 @@ FcParseInt (FcConfigParse *parse)
  static double
  FcStrtod (char *s, char **end)
  {
@@ -21,7 +21,7 @@ index a146068..84feaeb 100644
      char	    *dot;
      double	    v;
  
-@@ -1220,6 +1222,7 @@ FcStrtod (char *s, char **end)
+@@ -1322,6 +1324,7 @@ FcStrtod (char *s, char **end)
       * Have to swap the decimal point to match the current locale
       * if that locale doesn't use 0x2e
       */
@@ -29,7 +29,7 @@ index a146068..84feaeb 100644
      if ((dot = strchr (s, 0x2e)) &&
  	(locale_data = localeconv ()) &&
  	(locale_data->decimal_point[0] != 0x2e ||
-@@ -1256,6 +1259,7 @@ FcStrtod (char *s, char **end)
+@@ -1358,6 +1361,7 @@ FcStrtod (char *s, char **end)
  	}
      }
      else
@@ -38,5 +38,5 @@ index a146068..84feaeb 100644
      return v;
  }
 -- 
-1.8.4
+1.9.0
 

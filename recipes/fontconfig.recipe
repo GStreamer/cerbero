@@ -4,9 +4,9 @@ import os
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
-    version = '2.10.2'
+    version = '2.11.1'
     stype = SourceType.TARBALL
-    url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.10.2.tar.bz2'
+    url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-2.11.1.tar.bz2'
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
