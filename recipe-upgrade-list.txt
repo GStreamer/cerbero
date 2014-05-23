@@ -9,7 +9,7 @@ autoconf		|  2.69		|
 automake		|  1.14		| 
 libtool			|  2.4.2	| 
 pkg-config		|  0.28		| 
-gettext-{m4,tools}	|  0.18.3.1	| 0.18.3.2 (2013-07-13)
+gettext-{m4,tools}	|  0.18.3.2	|
 intltool-m4		|  0.40.6	| 
 libiconv		|  1.14		|
 gnustl			| ????
