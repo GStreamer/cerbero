@@ -23,7 +23,9 @@ class Recipe(recipe.Recipe):
                'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
                'libvpx/0004-configure-add-support-for-iOS-6.patch',
                'libvpx/0005-Add-support-for-iOS-7.0-toolchain.patch',
-               'libvpx/0006-Add-armv7s-ios-support.patch']
+               'libvpx/0006-Add-armv7s-ios-support.patch',
+               'libvpx/0007-configure-quote-local-variables-correctly.patch',
+               ]
 
     files_libs = ['libvpx']
     files_bins = ['vpxenc', 'vpxdec']
