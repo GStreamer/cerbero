@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'freetype'
-    version = '2.4.12'
+    version = '2.5.3'
     stype = SourceType.TARBALL
-    url = 'http://download.savannah.gnu.org/releases/freetype/freetype-2.4.12.tar.bz2'
+    url = 'http://download.savannah.gnu.org/releases/freetype/freetype-2.5.3.tar.bz2'
     licenses = [License.FreeType]
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s --libdir=%(libdir)s"
     deps = ['zlib', 'bzip2']
@@ -13,6 +13,5 @@ class Recipe(recipe.Recipe):
     files_libs = ['libfreetype']
     files_devel = ['bin/freetype-config',
                    'lib/pkgconfig/freetype2.pc',
-                   'include/ft2build.h',
                    'include/freetype2',
                    'share/aclocal/freetype2.m4']
