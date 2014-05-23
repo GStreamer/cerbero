@@ -41,6 +41,6 @@ class Recipe(recipe.Recipe):
     make_check = None
 
     def prepare(self):
-        if self.config.variants.gtk:
+        if self.config.variants.gtk3:
             self.deps.append('gtk+3')
             self.files_typelibs.append('ClutterGdk-1.0')

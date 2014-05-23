@@ -101,7 +101,7 @@ class GenSdkShell(Command):
         if config.variants.python3:
             self._putvar('PYTHONHOME', prefix_env)
             self._putvar('PYTHON', "python3", None)
-        if config.variants.gtk:
+        if config.variants.gtk3:
             self._putvar('GTK_PATH', '%s/gtk-3.0' % libdir, None)
             self._putvar('GTK_DATA_PREFIX', prefix_env, None)
 
