@@ -1,17 +1,17 @@
-From efeee8d042eaacb8694296da17b7a069baadd07b Mon Sep 17 00:00:00 2001
+From 18f113d934c736953f915d6accddc90cb91db6d1 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 13:26:35 +0100
 Subject: [PATCH] neon: fix function export names for iOS armv7
 
 ---
- arm/filter_neon.S |   16 +++++++++++-----
- 1 files changed, 11 insertions(+), 5 deletions(-)
+ arm/filter_neon.S | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
 
 diff --git a/arm/filter_neon.S b/arm/filter_neon.S
-index b8aef10..8794f0d 100644
+index 40d9777..a252488 100644
 --- a/arm/filter_neon.S
 +++ b/arm/filter_neon.S
-@@ -20,6 +20,12 @@
+@@ -21,6 +21,12 @@
  .section .note.GNU-stack,"",%progbits /* mark stack as non-executable */
  #endif
  
@@ -21,10 +21,10 @@ index b8aef10..8794f0d 100644
 +#define FUNC_PREFIX
 +#endif
 +
- #ifdef PNG_READ_SUPPORTED
- #if PNG_ARM_NEON_OPT > 0
- 
-@@ -34,17 +40,17 @@
+ /* Assembler NEON support - only works for 32-bit ARM (i.e. it does not work for
+  * ARM64).  The code in arm/filter_neon_intrinsics.c supports ARM64, however it
+  * only works if -mfpu=neon is specified on the GCC command line.  See pngpriv.h
+@@ -42,17 +48,17 @@
  
  .macro  func    name, export=0
      .macro endfunc
@@ -48,5 +48,5 @@ index b8aef10..8794f0d 100644
  
  func    png_read_filter_row_sub4_neon, export=1
 -- 
-1.7.4.4
+1.9.0
 
