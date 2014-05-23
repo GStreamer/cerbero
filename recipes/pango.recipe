@@ -31,8 +31,5 @@ class Recipe(recipe.Recipe):
         ]
 
     def prepare(self):
-        if self.config.variants.x11:
-            self.files_libs += ['libpangox-1.0']
-            self.files_devel += ['lib/pkgconfig/pangox.pc']
-        else:
+        if not self.config.variants.x11:
             self.configure_options += ' --without-x '
