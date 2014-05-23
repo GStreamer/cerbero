@@ -12,9 +12,9 @@ diff --git a/build/make/configure.sh b/build/make/configure.sh
 index d4ab231..3bd5618 100755
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -641,6 +641,9 @@ process_common_toolchain() {
-                 tgt_isa=x86_64
-                 tgt_os=darwin12
+@@ -661,6 +661,9 @@
+             x86_64*mingw32*)
+                 tgt_os=win64
                  ;;
 +            *ios6*)
 +                tgt_os=ios6
@@ -22,7 +22,7 @@ index d4ab231..3bd5618 100755
              *mingw32*|*cygwin*)
                  [ -z "$tgt_isa" ] && tgt_isa=x86
                  tgt_os=win32
-@@ -707,19 +710,40 @@ process_common_toolchain() {
+@@ -727,19 +730,40 @@
                      fi
                  done
              fi
@@ -69,9 +69,9 @@ index d4ab231..3bd5618 100755
  
      case ${toolchain} in
          *-darwin8-*)
-@@ -742,6 +766,10 @@ process_common_toolchain() {
-             add_cflags  "-mmacosx-version-min=10.8"
-             add_ldflags "-mmacosx-version-min=10.8"
+@@ -766,6 +790,10 @@
+             add_cflags  "-mmacosx-version-min=10.9"
+             add_ldflags "-mmacosx-version-min=10.9"
              ;;
 +        *-ios6-*)
 +            add_cflags  "-miphoneos-version-min=6.0"
@@ -80,7 +80,7 @@ index d4ab231..3bd5618 100755
      esac
  
      # Handle Solaris variants. Solaris 10 needs -lposix4
-@@ -931,6 +959,26 @@ process_common_toolchain() {
+@@ -959,6 +987,26 @@
  
              asm_conversion_cmd="${source_path}/build/make/ads2gas_apple.pl"
           ;;
@@ -106,8 +106,8 @@ index d4ab231..3bd5618 100755
 +         ;;
  
          linux*)
-             enable linux
-@@ -1087,7 +1135,7 @@ EOF
+             enable_feature linux
+@@ -1148,7 +1196,7 @@
                  enabled debug && [ "${AS}" = nasm ] && add_asflags -g
                  [ "${AS##*/}" = nasm ] && check_asm_align
              ;;
@@ -120,7 +120,7 @@ diff --git a/configure b/configure
 index f5cc9bc..d219584 100755
 --- a/configure
 +++ b/configure
-@@ -92,11 +92,13 @@ all_platforms="${all_platforms} armv6-darwin-gcc"
+@@ -94,11 +94,13 @@
  all_platforms="${all_platforms} armv6-linux-rvct"
  all_platforms="${all_platforms} armv6-linux-gcc"
  all_platforms="${all_platforms} armv6-none-rvct"
@@ -131,13 +131,13 @@ index f5cc9bc..d219584 100755
  all_platforms="${all_platforms} armv7-linux-gcc"     #neon Cortex-A8
  all_platforms="${all_platforms} armv7-none-rvct"     #neon Cortex-A8
 +all_platforms="${all_platforms} armv7-ios6-gcc"      #neon Cortex-A8
+ all_platforms="${all_platforms} armv7-win32-vs11"
+ all_platforms="${all_platforms} armv7-win32-vs12"
  all_platforms="${all_platforms} mips32-linux-gcc"
- all_platforms="${all_platforms} ppc32-darwin8-gcc"
- all_platforms="${all_platforms} ppc32-darwin9-gcc"
-@@ -113,6 +115,7 @@ all_platforms="${all_platforms} x86-darwin9-icc"
- all_platforms="${all_platforms} x86-darwin10-gcc"
+@@ -118,6 +120,7 @@
  all_platforms="${all_platforms} x86-darwin11-gcc"
  all_platforms="${all_platforms} x86-darwin12-gcc"
+ all_platforms="${all_platforms} x86-darwin13-gcc"
 +all_platforms="${all_platforms} x86-ios6-gcc"
  all_platforms="${all_platforms} x86-linux-gcc"
  all_platforms="${all_platforms} x86-linux-icc"

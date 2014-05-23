@@ -11,15 +11,15 @@ diff --git a/vpx_ports/arm_cpudetect.c b/vpx_ports/arm_cpudetect.c
 index 8ff95a1..94b7a79 100644
 --- a/vpx_ports/arm_cpudetect.c
 +++ b/vpx_ports/arm_cpudetect.c
-@@ -125,7 +125,7 @@ int arm_cpu_caps(void)
+@@ -107,7 +107,7 @@
  }
  
  #elif defined(__ANDROID__) /* end _MSC_VER */
 -#include <cpu-features.h>
 +#include <cpu-features.c>
  
- int arm_cpu_caps(void)
- {
+ int arm_cpu_caps(void) {
+   int flags;
 -- 
 1.8.3.1
 

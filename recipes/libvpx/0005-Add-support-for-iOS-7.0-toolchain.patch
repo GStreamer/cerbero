@@ -12,7 +12,7 @@ diff --git a/build/make/configure.sh b/build/make/configure.sh
 index 3bd5618..294efce 100755
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -644,6 +644,9 @@ process_common_toolchain() {
+@@ -664,6 +664,9 @@
              *ios6*)
                  tgt_os=ios6
                  ;;
@@ -22,7 +22,7 @@ index 3bd5618..294efce 100755
              *mingw32*|*cygwin*)
                  [ -z "$tgt_isa" ] && tgt_isa=x86
                  tgt_os=win32
-@@ -732,7 +735,7 @@ process_common_toolchain() {
+@@ -752,7 +755,7 @@
                  SDK_PATH=${sdk_path}
              fi
              IOS_SDK_ROOT="${SDK_PATH}/SDKs"
@@ -31,9 +31,9 @@ index 3bd5618..294efce 100755
              for v in ${IOS_SDK_VERSIONS}; do
                  if [ -d "${IOS_SDK_ROOT}/${IOS_PLATFORM}${v}.sdk" ]; then
                      osx_sdk_dir="${IOS_SDK_ROOT}/${IOS_PLATFORM}${v}.sdk"
-@@ -766,9 +769,9 @@ process_common_toolchain() {
-             add_cflags  "-mmacosx-version-min=10.8"
-             add_ldflags "-mmacosx-version-min=10.8"
+@@ -790,9 +793,9 @@
+             add_cflags  "-mmacosx-version-min=10.9"
+             add_ldflags "-mmacosx-version-min=10.9"
              ;;
 -        *-ios6-*)
 -            add_cflags  "-miphoneos-version-min=6.0"
@@ -44,18 +44,18 @@ index 3bd5618..294efce 100755
              ;;
      esac
  
-@@ -961,9 +964,14 @@ process_common_toolchain() {
+@@ -989,9 +992,14 @@
           ;;
          ios*)
              TOOLCHAIN_PATH=${SDK_PATH}/usr/bin
 -            CC=${TOOLCHAIN_PATH}/llvm-gcc-4.2
-+	    if test "x$tgt_os" = "xios7"; then
-+              CC=clang
-+	      LD=clang
-+	    else
-+              CC=${TOOLCHAIN_PATH}/llvm-gcc-4.2
-+              LD=${TOOLCHAIN_PATH}/llvm-gcc-4.2
-+	    fi
++            if test "x$tgt_os" = "xios7"; then
++                CC=clang
++                LD=clang
++            else
++                CC=${TOOLCHAIN_PATH}/llvm-gcc-4.2
++                LD=${TOOLCHAIN_PATH}/llvm-gcc-4.2
++            fi
              AR=${TOOLCHAIN_PATH}/ar
 -            LD=${TOOLCHAIN_PATH}/llvm-gcc-4.2
              AS=${TOOLCHAIN_PATH}/as
@@ -65,7 +65,7 @@ diff --git a/configure b/configure
 index d219584..cdf4a69 100755
 --- a/configure
 +++ b/configure
-@@ -93,12 +93,14 @@ all_platforms="${all_platforms} armv6-linux-rvct"
+@@ -95,12 +95,14 @@
  all_platforms="${all_platforms} armv6-linux-gcc"
  all_platforms="${all_platforms} armv6-none-rvct"
  all_platforms="${all_platforms} armv6-ios6-gcc"
@@ -77,12 +77,12 @@ index d219584..cdf4a69 100755
  all_platforms="${all_platforms} armv7-none-rvct"     #neon Cortex-A8
  all_platforms="${all_platforms} armv7-ios6-gcc"      #neon Cortex-A8
 +all_platforms="${all_platforms} armv7-ios7-gcc"      #neon Cortex-A8
+ all_platforms="${all_platforms} armv7-win32-vs11"
+ all_platforms="${all_platforms} armv7-win32-vs12"
  all_platforms="${all_platforms} mips32-linux-gcc"
- all_platforms="${all_platforms} ppc32-darwin8-gcc"
- all_platforms="${all_platforms} ppc32-darwin9-gcc"
-@@ -116,6 +118,7 @@ all_platforms="${all_platforms} x86-darwin10-gcc"
- all_platforms="${all_platforms} x86-darwin11-gcc"
+@@ -121,6 +123,7 @@
  all_platforms="${all_platforms} x86-darwin12-gcc"
+ all_platforms="${all_platforms} x86-darwin13-gcc"
  all_platforms="${all_platforms} x86-ios6-gcc"
 +all_platforms="${all_platforms} x86-ios7-gcc"
  all_platforms="${all_platforms} x86-linux-gcc"
