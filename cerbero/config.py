@@ -159,7 +159,7 @@ class Config (object):
             self.variants.gi = False
 
         if config.target_platform != Platform.LINUX:
-            self.variants.gtk = False
+            self.variants.gtk3 = False
 
         for c in self.arch_config.values():
             c.variants = self.variants
