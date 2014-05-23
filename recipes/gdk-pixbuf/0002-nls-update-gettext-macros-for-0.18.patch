@@ -1,4 +1,4 @@
-From a6c6e5082dd693730c80e563007c8a874293f05f Mon Sep 17 00:00:00 2001
+From 711465ad9d5be8c566af839a5ef4de4ac25abfe4 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Fri, 22 Mar 2013 21:27:53 +0100
 Subject: [PATCH] nls: update gettext macros for 0.18
@@ -8,10 +8,10 @@ Subject: [PATCH] nls: update gettext macros for 0.18
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
-index 8007451..b12fb5d 100644
+index 626e9e9..57fdad8 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -329,7 +329,7 @@ if test "$gtk_ok" = "yes"; then
+@@ -335,7 +335,7 @@ if test "$gtk_ok" = "yes"; then
  fi
  
  # i18n stuff
