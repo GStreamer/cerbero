@@ -264,29 +264,51 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
       (*env)->GetMethodID (env, context_class, "getFilesDir",
       "()Ljava/io/File;");
   if (!get_cache_dir_id || !get_files_dir_id) {
+    (*env)->DeleteLocalRef (env, context_class);
     return FALSE;
   }
 
   file_class = (*env)->FindClass (env, "java/io/File");
+  if (!file_class) {
+    (*env)->DeleteLocalRef (env, context_class);
+    return FALSE;
+  }
   get_absolute_path_id =
       (*env)->GetMethodID (env, file_class, "getAbsolutePath",
       "()Ljava/lang/String;");
   if (!get_absolute_path_id) {
+    (*env)->DeleteLocalRef (env, context_class);
+    (*env)->DeleteLocalRef (env, file_class);
     return FALSE;
   }
 
   dir = (*env)->CallObjectMethod (env, context, get_cache_dir_id);
   if ((*env)->ExceptionCheck (env)) {
+    (*env)->ExceptionDescribe (env);
+    (*env)->ExceptionClear (env);
+    (*env)->DeleteLocalRef (env, context_class);
+    (*env)->DeleteLocalRef (env, file_class);
     return FALSE;
   }
 
   if (dir) {
     abs_path = (*env)->CallObjectMethod (env, dir, get_absolute_path_id);
     if ((*env)->ExceptionCheck (env)) {
+      (*env)->ExceptionDescribe (env);
+      (*env)->ExceptionClear (env);
+      (*env)->DeleteLocalRef (env, dir);
+      (*env)->DeleteLocalRef (env, context_class);
+      (*env)->DeleteLocalRef (env, file_class);
       return FALSE;
     }
     abs_path_str = (*env)->GetStringUTFChars (env, abs_path, NULL);
     if ((*env)->ExceptionCheck (env)) {
+      (*env)->ExceptionDescribe (env);
+      (*env)->ExceptionClear (env);
+      (*env)->DeleteLocalRef (env, abs_path);
+      (*env)->DeleteLocalRef (env, dir);
+      (*env)->DeleteLocalRef (env, context_class);
+      (*env)->DeleteLocalRef (env, file_class);
       return FALSE;
     }
     *cache_dir = abs_path ? g_strdup (abs_path_str) : NULL;
@@ -298,15 +320,30 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
 
   dir = (*env)->CallObjectMethod (env, context, get_files_dir_id);
   if ((*env)->ExceptionCheck (env)) {
+    (*env)->ExceptionDescribe (env);
+    (*env)->ExceptionClear (env);
+    (*env)->DeleteLocalRef (env, context_class);
+    (*env)->DeleteLocalRef (env, file_class);
     return FALSE;
   }
   if (dir) {
     abs_path = (*env)->CallObjectMethod (env, dir, get_absolute_path_id);
     if ((*env)->ExceptionCheck (env)) {
+      (*env)->ExceptionDescribe (env);
+      (*env)->ExceptionClear (env);
+      (*env)->DeleteLocalRef (env, dir);
+      (*env)->DeleteLocalRef (env, context_class);
+      (*env)->DeleteLocalRef (env, file_class);
       return FALSE;
     }
     abs_path_str = (*env)->GetStringUTFChars (env, abs_path, NULL);
     if ((*env)->ExceptionCheck (env)) {
+      (*env)->ExceptionDescribe (env);
+      (*env)->ExceptionClear (env);
+      (*env)->DeleteLocalRef (env, abs_path);
+      (*env)->DeleteLocalRef (env, dir);
+      (*env)->DeleteLocalRef (env, context_class);
+      (*env)->DeleteLocalRef (env, file_class);
       return FALSE;
     }
     *files_dir = files_dir ? g_strdup (abs_path_str) : NULL;
@@ -336,8 +373,10 @@ gst_android_init (JNIEnv * env, jclass klass, jobject context)
     return;
   }
 
-  if (!get_application_dirs (env, context, &cache_dir, &files_dir))
-    return;
+  if (!get_application_dirs (env, context, &cache_dir, &files_dir)) {
+    __android_log_print (ANDROID_LOG_ERROR, "GStreamer",
+        "Failed to get application dirs");
+  }
 
   if (cache_dir) {
     g_setenv ("TMP", cache_dir, TRUE);
