@@ -14,7 +14,6 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     files_libs = ['libgdk_pixbuf-2.0']
-    files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
     files_devel = ['lib/pkgconfig/gdk-pixbuf-2.0.pc', 'include/gdk-pixbuf-2.0']
     files_lang = ['gdk-pixbuf']
@@ -25,6 +24,8 @@ class Recipe(recipe.Recipe):
             self.configure_options += '--without-gdiplus '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--without-x11 '
+        if self.config.prefix_is_executable():
+            self.files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
 
     def post_install (self):
         if self.config.platform == Platform.WINDOWS and\
