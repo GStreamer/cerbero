@@ -13,14 +13,16 @@ class Package(package.Package):
     vendor = 'Gtk Project'
     org = 'org.gnome.gtk'
 
+    deps = ['base-system-1.0']
+
     files = ['gtk+3',
              'atk',
              'pango',
-             'gdk-pixbuf',
-             'cairo',
              'hicolor-icon-theme',
              'gnome-themes-standard',
              'gnome-icon-theme',
              'gnome-icon-theme-symbolic',
+             'librsvg-gtk',
              'librsvg',
+             'gdk-pixbuf:misc',
              ]
