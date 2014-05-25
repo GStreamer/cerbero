@@ -11,7 +11,8 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
     patches = ['fontconfig/0001-Ensure-we-use-our-installed-headers-instead-of-syste.patch',
-               'fontconfig/0002-Port-to-Android.patch']
+               'fontconfig/0002-Port-to-Android.patch',
+               'fontconfig/0003-configure-Allow-static-build.patch']
 
     files_libs = ['libfontconfig']
     files_etc = [
@@ -20,6 +21,8 @@ class Recipe(recipe.Recipe):
         'share/fontconfig'
         ]
     files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
+
+    autoreconf = True
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
