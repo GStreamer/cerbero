@@ -17,7 +17,6 @@ class Package(package.Package):
 
     files = ['gtk+3',
              'atk',
-             'pango',
              'hicolor-icon-theme',
              'gnome-themes-standard',
              'gnome-icon-theme',
