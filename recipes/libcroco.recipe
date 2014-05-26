@@ -13,5 +13,5 @@ class Recipe(recipe.Recipe):
                    'lib/pkgconfig/libcroco-0.6.pc']
 
     def prepare(self):
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.configure_options += ' --disable-Bsymbolic'
