@@ -22,6 +22,5 @@ class Package(package.Package):
              'gnome-icon-theme',
              'gnome-icon-theme-symbolic',
              'librsvg-gtk',
-             'librsvg',
              'gdk-pixbuf:misc',
              ]
