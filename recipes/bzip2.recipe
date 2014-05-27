@@ -32,23 +32,20 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        src = None
+        dst = None
+        libdir = os.path.join(self.config.prefix, 'lib')
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
-            libdir = os.path.join(self.config.prefix, 'lib')
-            libbz2 = os.path.join(libdir, 'libbz2.so')
-            if os.path.exists (libbz2):
-                os.remove (libbz2)
-            os.symlink(os.path.join(libdir, 'libbz2.so.1.0.6'), libbz2)
+            src = 'libbz2.so.1.0.6'
+            dst = 'libbz2.so'
         elif self.config.target_platform == Platform.DARWIN:
-            libdir = os.path.join(self.config.prefix, 'lib')
-            libbz2 = os.path.join(libdir, 'libbz2.dylib')
-            try:
-                os.symlink(os.path.join(libdir, 'libbz2.1.0.6.dylib'), libbz2)
-            except OSError:
-                pass
+            src = 'libbz2.1.0.6.dylib'
+            dst = 'libbz2.dylib'
         elif self.config.target_platform == Platform.IOS:
-            # FIXME This is to workaround a build issue, trying to ld ti libbz2.so
-            try:
-                os.symlink(os.path.join (self.config.prefix, 'lib', 'libbz2.dylib'),
-                        os.path.join (self.config.prefix, 'lib', 'libbz2.so'))
-            except OSError:
-                pass
+            src = 'libbz2.dylib'
+            dst = 'libbz2.so'
+        if src and dst:
+            p = os.path.join(libdir, dst)
+            if os.path.exists(p) or os.path.islink(p):
+                os.remove(p)
+            shell.call('ln -s %s %s' % (src, dst), libdir)
