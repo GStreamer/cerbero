@@ -246,12 +246,14 @@ class Package(PackageBase):
                 self.platform_files_devel.get(self.config.target_platform, [])
         self._parse_files()
 
-    def recipes_dependencies(self):
+    def recipes_dependencies(self, use_devel=True):
         deps = [x.split(':')[0] for x in self._files]
-        deps.extend([x.split(':')[0] for x in self._files_devel])
+        if use_devel:
+            deps.extend([x.split(':')[0] for x in self._files_devel])
+
         for name in self.deps:
             p = self.store.get_package(name)
-            deps += p.recipes_dependencies()
+            deps += p.recipes_dependencies(use_devel)
         return deps
 
     def recipes_licenses(self):
@@ -380,10 +382,10 @@ class MetaPackage(PackageBase):
     def list_packages(self):
         return [p[0] for p in self.packages]
 
-    def recipes_dependencies(self):
+    def recipes_dependencies(self, use_devel=True):
         deps = []
         for package in self.store.get_package_deps(self.name, True):
-            deps.extend(package.recipes_dependencies())
+            deps.extend(package.recipes_dependencies(use_devel))
 
         return remove_list_duplicates(deps)
 
@@ -534,11 +536,11 @@ class App(Package):
         self._app_recipe = self.cookbook.get_recipe(self.app_recipe)
         self.title = self.name
 
-    def recipes_dependencies(self):
+    def recipes_dependencies(self, use_devel=True):
         deps = []
         for dep in self.deps:
             package = self.store.get_package(dep)
-            deps.extend(package.recipes_dependencies())
+            deps.extend(package.recipes_dependencies(use_devel))
         if self.app_recipe is not None:
             deps.append(self.app_recipe)
         return list(set(deps))

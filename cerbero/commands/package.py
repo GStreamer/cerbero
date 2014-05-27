@@ -73,7 +73,7 @@ class Package(Command):
                     "--only-build-deps"))
 
         if not args.skip_deps_build:
-            self._build_deps(config, p)
+            self._build_deps(config, p, args.no_devel)
 
         if args.only_build_deps:
             return
@@ -101,9 +101,9 @@ class Package(Command):
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package):
+    def _build_deps(self, config, package, has_devel):
         build_command = build.Build()
-        build_command.runargs(config, package.recipes_dependencies(),
+        build_command.runargs(config, package.recipes_dependencies(has_devel),
             cookbook=self.store.cookbook)
 
 
