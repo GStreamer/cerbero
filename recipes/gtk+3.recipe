@@ -84,6 +84,9 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
+        if not self.config.variants.gtk3:
+            raise InvalidRecipeError(self, "GTK+3 variant is not enabled")
+
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:

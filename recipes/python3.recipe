@@ -792,6 +792,9 @@ class Recipe(recipe.Recipe):
     ]
 
 
+    def prepare(self):
+        if not self.config.variants.python3:
+            raise InvalidRecipeError(self, "The variant python3 is not enabled")
 
     def post_install(self):
         # Make sure it is the default python in our environment

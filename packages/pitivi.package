@@ -24,9 +24,3 @@ class Package(package.App):
     commands=[('pitivi', 'bin/pitivi')]
 
     default_gtk_theme='Adwaita'
-
-    def prepare(self):
-        if self.config.variants.python3 is False:
-            raise ConfigurationError("Pitivi needs python3. You should set "
-                    "\"variants = ['python3']\" in your ~/.cerbero/cerbero.cbc "
-                    "configuration file to build it.")
