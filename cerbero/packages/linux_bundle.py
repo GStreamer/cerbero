@@ -103,14 +103,6 @@ class LinuxBundler(PackagerBase):
 
         shell.call("ln -s . usr", self.tmp_install_dir, fail=False)
 
-        # FIXME Fix the root of that issue !
-        # Make libbz2.so symlinks relative
-        for command in ["rm libbz2.so libbz2.so.1.0",
-                        "ln -s libbz2.so.1.0.6 libbz2.so",
-                        "ln -s libbz2.so.1.0.6 libbz2.so.1.0",
-                        ]:
-            shell.call(command, os.path.join(self.tmp_install_dir, "lib"), False)
-
         # Make gd-pixbuf loader.cache file use relative paths
         cache = os.path.join(self.tmp_install_dir, 'lib', 'gdk-pixbuf-2.0',
             '2.10.0', 'loaders.cache')
