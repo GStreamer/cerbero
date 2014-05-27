@@ -49,8 +49,8 @@ License = enums.License
 class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
-                           'gi', 'python3']
-    __enabled_variants = ['debug', 'gtk3', 'clutter', 'python', 'testspackage']
+                           'gi', 'python3', 'gtk3']
+    __enabled_variants = ['debug', 'clutter', 'python', 'testspackage']
 
     def __init__(self, variants):
         for v in self.__enabled_variants:
@@ -157,9 +157,6 @@ class Config (object):
             m.warning(_("gobject introspection is not supported "
                         "cross-compiling, 'gi' variant will be removed"))
             self.variants.gi = False
-
-        if config.target_platform != Platform.LINUX:
-            self.variants.gtk3 = False
 
         for c in self.arch_config.values():
             c.variants = self.variants
