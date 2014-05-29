@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnome.org/pub/GNOME/sources/libcroco/0.6/libcroco-0.6.5.tar.xz'
+    deps = ['libxml2', 'glib']
 
     files_libs = ['libcroco-0.6']
     files_bins = ['csslint-0.6']
