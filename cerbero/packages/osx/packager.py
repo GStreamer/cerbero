@@ -299,7 +299,7 @@ class ProductPackage(PackagerBase):
             self.packages_paths[package_type],
             self.empty_packages[package_type], package_type,
             self.config.target_arch, home_folder=self.home_folder)
-        distro_path = tempfile.NamedTemporaryFile().name
+        distro_path = os.path.join(self.tmp, "Distribution.xml")
         distro.write(distro_path)
         output_file = os.path.join(self.output_dir, self._package_name('.pkg'))
         output_file = os.path.abspath(output_file)

@@ -193,6 +193,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                         shell.call('cp %s %s' % (obj_path, '%s-%s' % (libprefix, obj_f)), tmpdir_thinarch)
                         shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir_thinarch)
                         object_files_md5.append(md5)
+                shutil.rmtree(lib_tmpdir)
             shell.call('ar -s %s' % (libname), tmpdir_thinarch)
 
         files = [os.path.join(tmpdir, arch, libname) for arch in archs]
@@ -202,4 +203,4 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             shell.call('lipo %s -create -output %s' % (' '.join(files), self.install_name), tmpdir)
         else:
             shell.call('cp %s %s' % (os.path.join(tmpdir, self.arch, libname), self.install_name), tmpdir)
-
+        shutil.rmtree(tmpdir)
