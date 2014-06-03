@@ -16,10 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import os
-import tempfile
 
-from cerbero.packages.osx.info_plist import ComponentPropertyPlist
 from cerbero.utils import shell
 
 
@@ -53,10 +50,6 @@ class PackageBuild(object):
                 'install-location': destination}
         if scripts_path is not None:
             args['scripts'] = scripts_path
-        #plist = tempfile.NamedTemporaryFile()
-        #cpl = ComponentPropertyPlist(title, os.path.basename(output_file))
-        #cpl.save(plist.name)
-        #args['component-plist'] = plist.name
         shell.call(self._cmd_with_args(args, output_file))
 
     def _cmd_with_args(self, args, output):
