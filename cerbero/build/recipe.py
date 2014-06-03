@@ -411,6 +411,7 @@ class UniversalFlatRecipe(UniversalRecipe):
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
                 installed_files = shell.find_newer_files(self._config.prefix,
                                                          tmp.name, True)
+                tmp.close()
                 for f in installed_files:
 
                     def not_in_prefix(src):

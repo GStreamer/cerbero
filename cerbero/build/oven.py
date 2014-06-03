@@ -154,6 +154,7 @@ class Oven (object):
 
         if self.missing_files:
             self._print_missing_files(recipe, tmp)
+        tmp.close()
 
     def _handle_build_step_error(self, recipe, step):
         if step in [BuildSteps.FETCH, BuildSteps.EXTRACT]:

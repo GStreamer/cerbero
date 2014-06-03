@@ -107,6 +107,8 @@ class OSXUniversalGenerator(object):
         cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
             ' '.join([f.name for f in tmp_inputs]), output)
         self._call(cmd)
+        for tmp in tmp_inputs:
+            tmp.close()
 
     def get_file_type(self, filepath):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)

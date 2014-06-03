@@ -56,6 +56,7 @@ class OSXBootstrapper (BootstrapperBase):
         shell.call('chmod +x %s' % cpanm_installer)
         # Install XML::Parser, required for intltool
         shell.call("sudo %s XML::Parser" % cpanm_installer)
+        cpanm_installer.close()
 
 
 

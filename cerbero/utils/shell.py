@@ -423,3 +423,4 @@ PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ 
     else:
         shell = os.environ.get('SHELL', '/bin/bash')
         os.execlp(shell, shell, '--rcfile', bashrc.name)
+    bashrc.close()
