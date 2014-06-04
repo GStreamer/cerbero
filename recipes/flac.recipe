@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
                'flac/0002-fix-autoreconf.patch',
                'flac/0003-Detect-Clang-masquerading-as-GCC.patch']
     deps = [ 'libogg' ]
-    configure_options = ' --disable-cpplibs'
+    configure_options = ' --disable-cpplibs --enable-static'
 
     files_libs = ['libFLAC']
 
