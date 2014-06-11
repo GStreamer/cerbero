@@ -176,6 +176,9 @@ class Recipe(recipe.Recipe):
             elif self.config.target_distro == Distro.SUSE:
                 if self.config.target_arch == Architecture.X86_64:
                     path1 = '/usr/lib64/gio/modules/'
+            # Arch
+            elif self.config.target_distro == Distro.ARCH:
+                path1 = '/usr/lib/gio/modules/'
             elif self.config.target_distro == Distro.NONE:
                 if self.config.target_distro_version == DistroVersion.NONE_UCLIBC:
                     self.deps += ('gettext', 'libiconv')

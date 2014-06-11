@@ -130,6 +130,8 @@ class Recipe(recipe.Recipe):
             elif self.config.target_distro == Distro.SUSE:
                 if self.config.target_arch == Architecture.X86_64:
                     mod_path1 = '/usr/lib64/gtk-2.0'
+            elif self.config.target_distro == Distro.ARCH:
+                    mod_path1 = '/usr/lib/gtk-2.0'
             else:
                 raise FatalError(_("Add specific for other Linux distributions here"))
             self._set_flags(mod_path1, mod_path2, themes_path)

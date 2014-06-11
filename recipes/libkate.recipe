@@ -13,3 +13,5 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.autoreconf = True
+        elif self.config.target_distro == Distro.ARCH:
+            self.append_env = {'LDFLAGS': '-Wl,-O1,--sort-common,--as-needed,-z,relro'}

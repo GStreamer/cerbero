@@ -75,6 +75,10 @@ class Recipe(recipe.Recipe):
             # make sure gobject-introspection is built against the same interpretter
             # as we are
             self.config_sh = "PYTHON=%s %s" %(sys.executable, self.config_sh)
+        # on arch python2 needs to be specified as the interpreter
+        # the full path needs to be specified, since shebangs are generated
+        if self.config.target_distro == Distro.ARCH:
+            self.config_sh = "PYTHON=/usr/bin/python2 %s" % self.config_sh
 
     # TODO: catch the share/man stuff like man1/g-ir* ?
     def configure(self):
