@@ -15,6 +15,10 @@ class Recipe(recipe.Recipe):
 
     files_lang = ['gst-plugins-bad-1.0']
 
+    files_libs = ['libgstcodecparsers-1.0', 'libgstmpegts-1.0', 'libgsturidownloader-1.0',
+                  'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
+                  'libgstgl-1.0']
+
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
              'lib/gstreamer-1.0/libgstaiff%(mext)s',
@@ -63,9 +67,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
              'lib/gstreamer-1.0/libgstgdp%(mext)s',
              'lib/gstreamer-1.0/libgstrsvg%(mext)s',
-             '%(sdir)s/libgstcodecparsers-1.0%(sext)s',
-             '%(sdir)s/libgstmpegts-1.0%(sext)s',
-             '%(sdir)s/libgsturidownloader-1.0%(sext)s',
     ]
 
     platform_files_plugins_codecs = {
@@ -86,8 +87,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstmpegpsmux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegtsmux%(mext)s',
-             'lib/gstreamer-1.0/libgstvoaacenc%(mext)s',
-             '%(sdir)s/libgstmpegts-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstvoaacenc%(mext)s'
     ]
 
     files_plugins_dvd = [
@@ -105,16 +105,13 @@ class Recipe(recipe.Recipe):
     ]
 
     files_plugins_capture = [
-             'lib/gstreamer-1.0/libgstcamerabin2%(mext)s',
-             '%(sdir)s/libgstbasecamerabinsrc-1.0%(sext)s',
-             '%(sdir)s/libgstphotography-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstcamerabin2%(mext)s'
             ]
 
 
     platform_files_plugins_capture = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstdvb%(mext)s',
-             '%(sdir)s/libgstmpegts-1.0%(sext)s',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstwinscreencap%(mext)s',
@@ -129,33 +126,28 @@ class Recipe(recipe.Recipe):
     platform_files_plugins_sys = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstgl-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s'
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstgl-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s'
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstgl-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s'
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              #'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstgl-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s'
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-             '%(sdir)s/libgstgl-1.0%(sext)s',
+             'lib/gstreamer-1.0/libgstopengl%(mext)s'
             ]
     }
     files_typelibs = [
