@@ -21,7 +21,7 @@ class Package(package.Package):
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs', 'libvorbis:libs',
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
-            'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
+            'gst-plugins-bad-1.0:plugins_codecs:libs', 'gst-plugins-ugly-1.0:plugins_codecs',
             ]
     files_devel = ['gst-plugins-base-1.0-static:plugins_codecs_devel',
             'gst-plugins-good-1.0-static:plugins_codecs_devel',
