@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import re
 import inspect
 
 from cerbero.config import Platform

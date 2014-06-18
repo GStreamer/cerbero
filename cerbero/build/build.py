@@ -33,13 +33,9 @@ class Build (object):
     @type recipe: L{cerbero.recipe.Recipe}
     @ivar config: cerbero's configuration
     @type config: L{cerbero.config.Config}
-    @ivar supports_destdir: Whether build support the DESTDIR env
-    variable to install the package to a special directory
-    @type supports_destdir: boolean
     '''
 
     _properties_keys = []
-    supports_destdir = False
 
     def configure(self):
         '''
@@ -112,7 +108,6 @@ class MakefilesBase (Build):
     srcdir = '.'
     append_env = None
     new_env = None
-    supports_destdir = True
 
     def __init__(self):
         Build.__init__(self)
