@@ -128,25 +128,25 @@ def system_info():
     # Get the distro info
     if platform == Platform.LINUX:
         d = pplatform.linux_distribution()
-        if d[0] in ['Ubuntu', 'debian']:
+        if d[0] in ['Ubuntu', 'debian', 'LinuxMint']:
             distro = Distro.DEBIAN
-            if d[2] == 'maverick':
+            if d[2] in ['maverick', 'isadora']:
                 distro_version = DistroVersion.UBUNTU_MAVERICK
-            elif d[2] == 'lucid':
+            elif d[2] in ['lucid', 'julia']:
                 distro_version = DistroVersion.UBUNTU_LUCID
-            elif d[2] == 'natty':
+            elif d[2] in ['natty', 'katya']:
                 distro_version = DistroVersion.UBUNTU_NATTY
-            elif d[2] == 'oneiric':
+            elif d[2] in ['oneiric', 'lisa']:
                 distro_version = DistroVersion.UBUNTU_ONEIRIC
-            elif d[2] == 'precise':
+            elif d[2] in ['precise', 'maya']:
                 distro_version = DistroVersion.UBUNTU_PRECISE
-            elif d[2] == 'quantal':
+            elif d[2] in ['quantal', 'nadia']:
                 distro_version = DistroVersion.UBUNTU_QUANTAL
-            elif d[2] == 'raring':
+            elif d[2] in ['raring', 'olivia']:
                 distro_version = DistroVersion.UBUNTU_RARING
-            elif d[2] == 'saucy':
+            elif d[2] in ['saucy', 'petra']:
                 distro_version = DistroVersion.UBUNTU_SAUCY
-            elif d[2] == 'trusty':
+            elif d[2] in ['trusty', 'qiana']:
                 distro_version = DistroVersion.UBUNTU_TRUSTY
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
