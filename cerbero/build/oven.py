@@ -62,7 +62,7 @@ class Oven (object):
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False, dry_run=False, wanted_steps=[]):
+                 missing_files=False, dry_run=False):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -71,7 +71,6 @@ class Oven (object):
         self.no_deps = no_deps
         self.missing_files = missing_files
         self.config = cookbook.get_config()
-        self.wanted_steps = wanted_steps
         self.interactive = self.config.interactive
         shell.DRY_RUN = dry_run
 
@@ -120,7 +119,7 @@ class Oven (object):
 
     def _cook_recipe(self, recipe, count, total):
         if not self.cookbook.recipe_needs_build(recipe.name) and \
-                not self.force and not self.wanted_steps:
+                not self.force:
             m.build_step(count, total, recipe.name, _("already built"))
             return
 
@@ -132,8 +131,7 @@ class Oven (object):
         for desc, step in recipe.steps:
             m.build_step(count, total, recipe.name, step)
             # check if the current step needs to be done
-            if self.cookbook.step_done(recipe.name, step) and not self.force and \
-                    not step in self.wanted_steps:
+            if self.cookbook.step_done(recipe.name, step) and not self.force:
                 m.action(_("Step done"))
                 continue
             try:
