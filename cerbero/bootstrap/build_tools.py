@@ -80,6 +80,7 @@ class BuildTools (BootstrapperBase):
         config.load()
         config.variants.python3 = False
 
+        config.prefix = self.config.build_tools_prefix
         config.build_tools_prefix = self.config.build_tools_prefix
         config.sources = self.config.build_tools_sources
         config.build_tools_sources = self.config.build_tools_sources
