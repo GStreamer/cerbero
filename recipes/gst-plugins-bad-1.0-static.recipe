@@ -11,7 +11,7 @@ class Recipe(custom.GStreamerStatic):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'opus', 'nettle', 'librtmp',
             'schroedinger', 'libdca', 'libmms', 'libdvdnav', 'soundtouch',
-            'vo-aacenc', 'openjpeg' ]
+            'vo-aacenc', 'openjpeg', 'graphene' ]
 
     files_plugins_effects_devel = [
              'libgstaccurip',
