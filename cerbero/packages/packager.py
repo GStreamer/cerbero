@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Distro
+from cerbero.config import Distro, Platform
 from cerbero.errors import FatalError
 from cerbero.utils import  _
 from cerbero.utils import  messages as m
@@ -45,6 +45,10 @@ class Packager (object):
             m.warning(_("No specific packager available for the distro "
                 "version %s, using generic packager for distro %s" % (v, d)))
             v = None
+
+        if (d == Distro.WINDOWS and config.platform == Platform.LINUX):
+            m.warning("Cross-compiling for Windows, overriding Packager")
+            d = Distro.NONE
 
         return _packagers[d][v](config, package, store)
 
