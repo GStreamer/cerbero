@@ -3,8 +3,8 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
-    version = '0.4.18'
-    commit = 'orc-0.4.18'
+    version = '0.4.20'
+    commit = 'orc-0.4.20'
     licenses = [License.BSD_like]
     autoreconf = True
     deps = ['autoconf', 'automake', 'libtool']
