@@ -155,7 +155,7 @@ def local_checkout(git_dir, local_git_dir, commit):
     shell.call('%s branch build' % GIT, local_git_dir, fail=False)
     shell.call('%s checkout build' % GIT, local_git_dir)
     shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
-    return shell.call('%s clone %s -b build .' % (GIT, local_git_dir), git_dir)
+    return shell.call('%s clone %s -s -b build .' % (GIT, local_git_dir), git_dir)
 
 
 def add_remote(git_dir, name, url):
