@@ -42,6 +42,10 @@ class Package(Command):
             ArgparseArgument('-t', '--tarball', action='store_true',
                 default=False,
                 help=_('Creates a tarball instead of a native package')),
+            ArgparseArgument('-n', '--no-split', action='store_true',
+                default=False,
+                help=_('(only meaningfull when --tarball is set) Create one single '
+                       'tarball with devel and runtime files')),
             ArgparseArgument('-l', '--linux-bundle', action='store_true',
                 default=False,
                 help=_('Creates a tarball instead of a native package')),
@@ -85,8 +89,12 @@ class Package(Command):
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
-        paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
-                         args.force, args.keep_temp)
+        if args.tarball:
+            paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
+                             args.force, args.keep_temp, split=not args.no_split)
+        else:
+            paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
+                             args.force, args.keep_temp)
         if None in paths:
             paths.remove(None)
         p.post_install(paths)
