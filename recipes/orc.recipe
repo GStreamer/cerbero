@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     commit = 'orc-0.4.21'
     licenses = [License.BSD_like]
     autoreconf = True
+    configure_options = '--enable-static'
 
     files_libs = ['liborc-0.4', 'liborc-test-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
