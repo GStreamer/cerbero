@@ -65,6 +65,13 @@ class LinuxBundler(PackagerBase):
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False):
         self.tmp_install_dir = os.path.join(output_dir, "bundle_root")
+        self._force = force
+        if self._force:
+            try:
+                shutil.rmtree(self.tmp_install_dir)
+            except OSError as e:
+                pass
+
         self.desktop_file = os.path.join(self.tmp_install_dir, self.package.desktop_file)
         self.output_dir = output_dir
         self.devel = devel
@@ -149,6 +156,15 @@ class LinuxBundler(PackagerBase):
                              prefix_env_name="APPDIR")
 
     def _generate_bundle(self):
+        opath = os.path.join(self.output_dir, self.bundle_name)
+        if self._force:
+            try:
+                os.remove(opath)
+            except OSError:
+                pass
+        elif os.path.exists(opath):
+            raise OSError("Bundle output path %s exists", opath)
+
         shell.call("AppImageAssistant %s %s" % (self.tmp_install_dir, self.bundle_name),
                    self.output_dir)
 
