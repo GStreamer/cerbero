@@ -1,0 +1,37 @@
+From e737458d9294c960d9b16438c06b09ca601ffb96 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Thu, 26 Jun 2014 13:15:38 +0200
+Subject: [PATCH] pango: Don't fail to initialize if LC_CTYPE is not set
+
+g_once_init_leave() does not work on NULL, and just returns... and
+all future calls to g_once_init_enter() will block forever.
+
+Happens on Android, so let's just fall back to the C locale if there's
+nothing else we can do.
+---
+ pango/pango-language.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/pango/pango-language.c b/pango/pango-language.c
+index 15d5fb6..e9c9d1f 100644
+--- a/pango/pango-language.c
++++ b/pango/pango-language.c
+@@ -219,7 +219,14 @@ _pango_get_lc_ctype (void)
+ 
+   return g_strdup (ret);
+ #else
+-  return g_strdup (setlocale (LC_CTYPE, NULL));
++  {
++    gchar *lc_ctype = setlocale (LC_CTYPE, NULL);
++
++    if (lc_ctype)
++      return g_strdup (lc_ctype);
++    else
++      return g_strdup ("C");
++  }
+ #endif
+ }
+ 
+-- 
+2.0.0
+
