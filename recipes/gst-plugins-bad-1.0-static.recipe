@@ -60,6 +60,7 @@ class Recipe(custom.GStreamerStatic):
              'libgsty4mdec',
              'libgstjpegformat',
              'libgstgdp',
+             'libgstrsvg',
     ]
 
     platform_files_plugins_codecs_devel = {
