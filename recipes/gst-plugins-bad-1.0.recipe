@@ -17,7 +17,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgstcodecparsers-1.0', 'libgstmpegts-1.0', 'libgsturidownloader-1.0',
                   'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
-                  'libgstgl-1.0', 'libgstbadvideo-1.0', 'libgstinsertbin-1.0']
+                  'libgstgl-1.0', 'libgstbadbase-1.0', 'libgstbadvideo-1.0',
+                  'libgstinsertbin-1.0']
 
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
