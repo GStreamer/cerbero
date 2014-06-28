@@ -38,7 +38,7 @@ gst_ios_init (void)
 
   ca_certificates = g_build_filename (resources_dir, "ssl", "certs", "ca-certifcates.crt", NULL);
   g_setenv ("CA_CERTIFICATES", ca_certificates, TRUE);
-  g_free (ca_cacertificates);
+  g_free (ca_certificates);
     
   gst_init (NULL, NULL);
 
