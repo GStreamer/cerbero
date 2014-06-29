@@ -13,7 +13,7 @@ class Package(package.Package):
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'org.freedesktop.gstreamer'
-    uuid = '5581acc2-d38c-491b-83c9-14b7011.3.906'
+    uuid = '5581acc2-d38c-491b-83c9-14b7011c3c06'
     deps = ['gstreamer-1.0-core']
 
     files = ['gst-libav-1.0:plugins_codecs_restricted']
