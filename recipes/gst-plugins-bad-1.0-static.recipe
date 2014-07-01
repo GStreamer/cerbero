@@ -185,8 +185,9 @@ class Recipe(custom.GStreamerStatic):
             self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia')
             self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia_nonpublic')
 
+        if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
+            self.platform_files_plugins_capture_devel[Platform.LINUX].remove("libgstdvb")
         super(Recipe, self).prepare()
 
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-bad'))
         self.remotes['upstream'] = self.remotes['origin']
-
