@@ -183,3 +183,5 @@ class Recipe(recipe.Recipe):
             self.platform_files_plugins_sys[Platform.DARWIN].remove('lib/gstreamer-1.0/libgstapplemedia%(mext)s')
             self.platform_files_plugins_sys[Platform.DARWIN].remove('lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s')
 
+        if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
+            self.platform_files_plugins_capture[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb%(mext)s')
