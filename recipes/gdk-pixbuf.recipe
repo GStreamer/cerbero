@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.30/gdk-pixbuf-2.30.7.tar.xz'
     patches = ['gdk-pixbuf/0002-nls-update-gettext-macros-for-0.18.patch']
     configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
-    deps = ['jpeg', 'glib', 'libpng', 'tiff', 'zlib' ]
+    deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
     autoreconf = True
 
     files_libs = ['libgdk_pixbuf-2.0']
