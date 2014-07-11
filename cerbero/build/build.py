@@ -218,6 +218,7 @@ class Autotools (MakefilesBase):
     add_host_build_target = True
     can_use_configure_cache = True
     supports_cache_variables = True
+    disable_introspection = False
 
     def configure(self):
         if self.supports_non_src_build:
@@ -229,7 +230,7 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-maintainer-mode "
             self.configure_tpl += " --disable-silent-rules "
 
-        if self.config.variants.gi:
+        if self.config.variants.gi and not self.disable_introspection:
             self.configure_tpl += " --enable-introspection "
         else:
             self.configure_tpl += " --disable-introspection "
