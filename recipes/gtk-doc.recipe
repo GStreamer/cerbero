@@ -2,12 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk-doc'
-    version = '1.20'
+    version = '1.21'
     stype = SourceType.TARBALL
-    # FIXME : USE THE URL JUST BELOW ONCE GTK-DOC TARBALL ISSUES ARE FIXED
-    # https://bugzilla.gnome.org/show_bug.cgi?id=722621
-    # url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.20/gtk-doc-1.20.tar.xz'
-    url = 'http://people.freedesktop.org/~bilboed/gtk-doc-1.20.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.21/gtk-doc-1.21.tar.xz'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
     deps = ['libxslt']
