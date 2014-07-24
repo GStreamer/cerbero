@@ -9,4 +9,4 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libopenjpeg']
     files_bins = ['image_to_j2k', 'j2k_dump', 'j2k_to_image']
-    files_devel = ['include/openjpeg-1.5/openjpeg.h']
+    files_devel = ['include/openjpeg-1.5/openjpeg.h', 'lib/pkgconfig/libopenjpeg1.pc', 'lib/pkgconfig/libopenjpeg.pc']
