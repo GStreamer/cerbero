@@ -1,0 +1,12 @@
+class Recipe(recipe.Recipe):
+    version = '1.5.2'
+    name = 'openjpeg'
+    licenses = [License.BSD]
+    stype = SourceType.TARBALL
+    configure_options = ' --enable-static'
+    config_sh = 'autoreconf --install --force && ./configure'
+    url = 'http://optimate.dl.sourceforge.net/project/openjpeg.mirror/1.5.2/openjpeg-1.5.2.tar.gz'
+
+    files_libs = ['libopenjpeg']
+    files_bins = ['image_to_j2k', 'j2k_dump', 'j2k_to_image']
+    files_devel = ['include/openjpeg-1.5/openjpeg.h']
