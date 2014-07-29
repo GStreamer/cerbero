@@ -117,6 +117,7 @@ class Recipe(recipe.Recipe):
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstwinscreencap%(mext)s',
              'lib/gstreamer-1.0/libgstdirectsoundsrc%(mext)s',
+             'lib/gstreamer-1.0/libgstwinks%(mext)s',
             ]
     }
 

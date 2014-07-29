@@ -110,6 +110,7 @@ class Recipe(custom.GStreamerStatic):
         Platform.WINDOWS: [
              'libgstwinscreencap',
              'libgstdirectsoundsrc',
+             'libgstwinks',
             ]
     }
 
