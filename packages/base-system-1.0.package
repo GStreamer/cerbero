@@ -18,7 +18,7 @@ class Package(package.Package):
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
              'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
              'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
-             'libpng:libs', 'tiff:libs', 'jpeg:libs',
+             'libpng:libs', 'tiff:libs', 'libjpeg-turbo:libs',
              'libxml2:libs', 'pixman:libs',
              'zlib:libs', 'bzip2:libs', 'harfbuzz:libs',
              'libcroco:libs', 'librsvg:libs']
