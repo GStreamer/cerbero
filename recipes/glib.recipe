@@ -36,6 +36,7 @@ class Recipe(recipe.Recipe):
                'glib/0010-gio-fix-two-more-g_task_return_error_if_cancelled-le.patch',
                'glib/0011-networkmonitornetlink-IN6_IS_ADDR_MC_LINKLOCAL-is-on.patch',
                'glib/0001-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch',
+               'glib/0012-gutils-Don-t-use-issetugid-on-Android.patch',
            ]
 
     files_libs = [
