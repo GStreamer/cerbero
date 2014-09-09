@@ -96,7 +96,7 @@ Clean a recipe
 
 Create a package
 ----------------
-  $ cerbero package gstreamer-sdk
+  $ cerbero package gstreamer-1.0
 
 
 *******
