@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'tiff'
     version = '4.0.1'
     licenses = [License.BSD_like]
-    deps = [ 'zlib' ]
+    deps = [ 'zlib', 'libjpeg-turbo' ]
     configure_options = ' --disable-cxx'
 
     files_libs = ['libtiff']
