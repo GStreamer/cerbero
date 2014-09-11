@@ -16,3 +16,9 @@ class Recipe(recipe.Recipe):
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
             'include/jmorecfg.h','include/turbojpeg.h']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.DARWIN:
+            # avoid using xcode's nasm (doesn't support nasm-like arguments)
+            # instead use cerbero's yasm
+            self.new_env['NASM'] = 'yasm'
