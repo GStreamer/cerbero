@@ -18,9 +18,9 @@ FFI_H_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.0.13'
+    version = '3.1'
     stype = SourceType.TARBALL
-    url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
+    url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.1.tar.gz'
     licenses = [License.BSD_like]
     patches = ['libffi/0002-makefiles-fix-toolexeclibdir.patch',
                'libffi/0003-osx-fix-check-to-use-malloc-in-OSX-10.7.patch']
