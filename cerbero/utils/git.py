@@ -218,4 +218,4 @@ def apply_patch(patch, git_dir):
     @param patch: path of the patch file
     @type patch: str
     '''
-    shell.call('%s am %s' % (GIT, patch), git_dir)
+    shell.call('%s am --ignore-whitespace %s' % (GIT, patch), git_dir)
