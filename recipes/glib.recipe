@@ -37,6 +37,7 @@ class Recipe(recipe.Recipe):
                'glib/0011-networkmonitornetlink-IN6_IS_ADDR_MC_LINKLOCAL-is-on.patch',
                'glib/0001-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch',
                'glib/0012-gutils-Don-t-use-issetugid-on-Android.patch',
+               'glib/0013-grand-Only-use-rand_s-when-targetting-Visual-Studio-.patch',
            ]
 
     files_libs = [
