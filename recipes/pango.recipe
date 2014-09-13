@@ -3,15 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.36.1'
+    version = '1.36.7'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/pango/1.36/pango-1.36.1.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/pango/1.36/pango-1.36.7.tar.xz'
     autoreconf = True
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]
     configure_options = '--with-included-modules --enable-static --disable-gtk-doc'
     deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite', 'harfbuzz']
-    patches = ['pango/0001-pango-Don-t-fail-to-initialize-if-LC_CTYPE-is-not-se.patch']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
