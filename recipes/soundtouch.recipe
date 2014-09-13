@@ -18,4 +18,3 @@ class Recipe(recipe.Recipe):
         self.configure_options += ' --with-gnustl '
       elif self.config.target_platform == Platform.IOS:
         self.autoreconf = True
-        self.patches += ['soundtouch/0001-Don-t-use-fcheck-new.patch']
