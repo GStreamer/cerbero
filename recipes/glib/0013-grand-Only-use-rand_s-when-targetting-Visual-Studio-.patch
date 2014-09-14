@@ -1,4 +1,4 @@
-From 13799511a0e2044f8deb24aa95a4abd623c76c0f Mon Sep 17 00:00:00 2001
+From b3fbeb704191d96ab3305dcde281b5c4c442cd0d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Sat, 13 Sep 2014 16:31:03 +0300
 Subject: [PATCH] grand: Only use rand_s() when targetting Visual Studio >=
@@ -10,14 +10,22 @@ Windows XP.
 
 https://bugzilla.gnome.org/show_bug.cgi?id=736458
 ---
- glib/grand.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ glib/grand.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
 diff --git a/glib/grand.c b/glib/grand.c
-index 6262cd2..e5d681b 100644
+index 6262cd2..78a7708 100644
 --- a/glib/grand.c
 +++ b/glib/grand.c
-@@ -261,10 +261,22 @@ g_rand_new (void)
+@@ -56,6 +56,7 @@
+ 
+ #ifdef G_OS_WIN32
+ #include <stdlib.h>
++#include <process.h> /* For getpid() */
+ #endif
+ 
+ /**
+@@ -261,10 +262,22 @@ g_rand_new (void)
        seed[3] = getppid ();
      }
  #else /* G_OS_WIN32 */
