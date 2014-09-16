@@ -31,5 +31,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = ' --disable-spec --disable-doc'
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
+        elif self.config.target_platform == Platform.DARWIN:
+            self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_arch != self.config.arch:
             self.configure_options = ' --disable-spec --disable-doc --disable-examples'
