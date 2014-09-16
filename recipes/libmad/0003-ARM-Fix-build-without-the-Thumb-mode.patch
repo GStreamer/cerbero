@@ -1,0 +1,30 @@
+From 0e06e5f0d92fc82081f3c73ecad1be57e56039a8 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 26 Feb 2013 16:32:57 +0100
+Subject: [PATCH 3/4] ARM: Fix build without the Thumb mode
+
+---
+ imdct_l_arm.S | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/imdct_l_arm.S b/imdct_l_arm.S
+index badec5b..69aa21d 100644
+--- a/imdct_l_arm.S
++++ b/imdct_l_arm.S
+@@ -468,8 +468,11 @@ _III_imdct_l:
+ 
+     @----
+ 
+-    add     r2, pc, #(imdct36_long_karray-.-8)  @ r2 = base address of Knn array (PIC safe ?)
+-
++#ifdef __thumb__
++    adr     r2, imdct36_long_karray
++#else
++     add     r2, pc, #(imdct36_long_karray-.-8)  @ r2 = base address of Knn array (PIC safe ?)
++#endif
+ 
+ loop:
+     ldr     r12, [r0, #X0]
+-- 
+2.1.0
+

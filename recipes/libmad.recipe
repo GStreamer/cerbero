@@ -4,18 +4,26 @@ class Recipe(recipe.Recipe):
     name = 'libmad'
     version = '0.15.1b'
     licenses = [License.GPLv2]
+    stype = SourceType.TARBALL
+    url = 'http://downloads.sourceforge.net/project/mad/libmad/0.15.1b/libmad-0.15.1b.tar.gz'
+    patches = ['libmad/0001-Delete-invalid-compile-option.patch',
+               'libmad/0002-fix-autoreconf.patch',
+               'libmad/0003-ARM-Fix-build-without-the-Thumb-mode.patch',
+              ]
+    autoreconf = True
 
     files_libs = ['libmad']
     files_devel = ['include/mad.h']
 
     def prepare(self):
         if self.config.target_platform == Platform.IOS:
-            self.autoreconf = True
             self.configure_options += ' --enable-fpm=default '
             self.new_env = {'CCAS': os.environ['GAS']}
             self.new_env['CCAS'] += ' -no-integrated-as '
-        if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
+            self.patches += ['libmad/0004-Remove-clang-unsupported-compiler-flags.patch']
+        elif self.config.target_platform == Platform.DARWIN:
+            self.patches += ['libmad/0004-Remove-clang-unsupported-compiler-flags.patch']
+        elif self.config.target_platform == Platform.ANDROID:
             if Architecture.is_arm(self.config.target_arch):
                 # Disable thumb mode to get the optimizations compiled properly
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
