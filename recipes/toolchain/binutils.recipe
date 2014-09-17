@@ -53,6 +53,9 @@ class Recipe(recipe.Recipe):
         files.extend([x % {'host': 'mingw', 'bext': '%(bext)s'} for x in
                       self.files_binutils])
         self.files_binutils = files
+        # temporary hack to not build info files (requires old texinfo)
+        # Remove when switching to newer version than 2.22
+        self.new_env['MAKEINFO'] = 'missing'
 
     def post_install(self):
         import shutil
