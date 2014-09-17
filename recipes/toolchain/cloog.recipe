@@ -10,4 +10,4 @@ class Recipe(recipe.Recipe):
     configure_options = '--with-bits=gmp ' \
                         '--disable-shared ' \
                         '--enable-static'
-    deps = ['gmp']
+    deps = ['gmp-toolchain']
