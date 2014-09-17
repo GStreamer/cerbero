@@ -70,7 +70,7 @@
 				<key>HEADER_SEARCH_PATHS</key>
 				<string>&quot;~/Library/Developer/GStreamer/iPhone.sdk/GStreamer.framework/Headers&quot;</string>
 				<key>OTHER_LDFLAGS</key>
-				<string>-lresolv -lstdc++ -framework CoreFoundation -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreAudio -framework AudioToolbox -framework OpenGLES -framework AssetsLibrary -framework QuartzCore -framework AssetsLibrary</string>
+				<string>-lresolv -lstdc++ -framework CoreFoundation -framework Foundation -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreAudio -framework AudioToolbox -weak_framework VideoToolbox -framework OpenGLES -framework AssetsLibrary -framework QuartzCore -framework AssetsLibrary</string>
 			</dict>
 		</dict>
 	</array>
