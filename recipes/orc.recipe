@@ -17,3 +17,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'orc'))
         self.remotes['upstream'] = self.remotes['origin']
+
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
