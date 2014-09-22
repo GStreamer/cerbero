@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
                'libffi/0003-osx-fix-check-to-use-malloc-in-OSX-10.7.patch']
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.1/include/ffi.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
         self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
