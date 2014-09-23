@@ -18,6 +18,13 @@ class Recipe(recipe.Recipe):
         files = ['%s/lib/%s' % (host, x) for x in self.files_crt]
         files.extend(['%s/lib/%s' % ('mingw', x) for x in self.files_crt])
         self.files_crt = files
+        self.new_env['CC'] = '%s-gcc' % host
+        self.new_env['CXX'] = '%s-g++' % host
+        self.new_env['STRIP'] = '%s-strip' % host
+        self.new_env['RANLIB'] = '%s-ranlib' % host
+        self.new_env['DLLTOOL'] = '%s-dlltool' % host
+        self.new_env['AR'] = '%s-ar' % host
+        self.new_env['AS'] = '%s-as' % host
 
     files_crt = [
     'CRT_fp10.o', 'CRT_fp8.o', 'CRT_glob.o', 'CRT_noglob.o', 'binmode.o', 'crt1.o',

@@ -29,7 +29,15 @@ class Recipe(recipe.Recipe):
         self.remotes = {'origin': '%s/%s' %
                                 (self.config.git_root, 'mingw-w64')}
         if self.config.target_arch == Architecture.X86:
-            self.host = 'i686-w64-mingw32'
+            host = 'i686-w64-mingw32'
         else:
-            self.host = 'x86_64-w64-mingw32'
-        self.configure_options += ' --host=%s' % self.host
+            host = 'x86_64-w64-mingw32'
+        self.configure_options += ' --host=%s' % host
+        self.new_env['CC'] = '%s-gcc' % host
+        self.new_env['CXX'] = '%s-g++' % host
+        self.new_env['STRIP'] = '%s-strip' % host
+        self.new_env['RANLIB'] = '%s-ranlib' % host
+        self.new_env['DLLTOOL'] = '%s-dlltool' % host
+        self.new_env['AR'] = '%s-ar' % host
+        self.new_env['AS'] = '%s-as' % host
+
