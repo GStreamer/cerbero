@@ -12,3 +12,5 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.remotes = {'origin': '%s/%s' % (self.config.git_root, 'gmp')}
+        if self.config.target_arch == Architecture.X86:
+            self.new_env['ABI'] = "32"
