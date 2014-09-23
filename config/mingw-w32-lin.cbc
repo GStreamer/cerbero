@@ -6,3 +6,4 @@ cache_file='mingw-w32-lin'
 prefix=os.path.expanduser('~/mingw/linux/w32')
 sources=os.path.join(home_dir, 'sources', 'mingw-w32-lin')
 recipes_dir = os.path.join(recipes_dir, 'toolchain')
+host = ''
