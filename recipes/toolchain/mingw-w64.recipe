@@ -20,6 +20,8 @@ class Recipe(recipe.Recipe):
         self.files_crt = files
         self.new_env['CC'] = '%s-gcc' % host
         self.new_env['CXX'] = '%s-g++' % host
+        self.new_env['CPP'] = '%s-cpp' % host
+        self.new_env['LD'] = '%s-ld' % host
         self.new_env['STRIP'] = '%s-strip' % host
         self.new_env['RANLIB'] = '%s-ranlib' % host
         self.new_env['DLLTOOL'] = '%s-dlltool' % host
