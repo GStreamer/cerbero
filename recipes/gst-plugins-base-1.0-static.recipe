@@ -84,7 +84,7 @@ class Recipe(custom.GStreamerStatic):
                  'libgstxvimagesink',
                 ]
         else:
-            self.configure_options += ' --disable-x'
+            self.configure_options += ' --disable-x --disable-xvideo'
 
         if self.config.variants.alsa:
             self.files_plugins_sys_devel += ['libgstalsa']
