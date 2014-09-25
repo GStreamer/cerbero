@@ -1,0 +1,12 @@
+class Recipe(recipe.Recipe):
+    version = '3.99.5'
+    name = 'lame'
+    licenses = [License.GPL]
+    stype = SourceType.TARBALL
+    configure_options = ' --enable-static'
+    url = 'http://switch.dl.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz'
+
+    files_libs = ['libmp3lame']
+    files_bins = ['lame']
+    files_devel = ['include/lame/lame.h']
+
