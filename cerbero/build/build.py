@@ -108,6 +108,7 @@ class MakefilesBase (Build):
     srcdir = '.'
     append_env = None
     new_env = None
+    requires_non_src_build = False
 
     def __init__(self):
         Build.__init__(self)
@@ -115,8 +116,12 @@ class MakefilesBase (Build):
             self.append_env = {}
         if self.new_env is None:
             self.new_env = {}
-        self.make_dir = os.path.abspath(os.path.join(self.build_dir,
-                                                     self.srcdir))
+        self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
+                                                           self.srcdir))
+        if self.requires_non_src_build:
+            self.make_dir = os.path.join (self.config_src_dir, "cerbero-build-dir")
+        else:
+            self.make_dir = self.config_src_dir
         if self.config.allow_parallel_build and self.allow_parallel_build \
                 and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
@@ -124,6 +129,11 @@ class MakefilesBase (Build):
 
     @modify_environment
     def configure(self):
+        if not os.path.exists(self.make_dir):
+            os.makedirs(self.make_dir)
+        if self.requires_non_src_build:
+            self.config_sh = os.path.join('../', self.config_sh)
+
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
             'libdir': to_unixpath(self.config.libdir),
@@ -221,12 +231,9 @@ class Autotools (MakefilesBase):
     disable_introspection = False
 
     def configure(self):
-        if self.supports_non_src_build:
-            self.config_sh = os.path.join(self.repo_dir, self.config_sh)
-
         # Only use --disable-maintainer mode for real autotools based projects
-        if os.path.exists(os.path.join(self.make_dir, 'configure.in')) or\
-                os.path.exists(os.path.join(self.make_dir, 'configure.ac')):
+        if os.path.exists(os.path.join(self.config_src_dir, 'configure.in')) or\
+                os.path.exists(os.path.join(self.config_src_dir, 'configure.ac')):
             self.configure_tpl += " --disable-maintainer-mode "
             self.configure_tpl += " --disable-silent-rules "
 
@@ -236,10 +243,10 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-introspection "
 
         if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.make_dir)
+            shell.call(self.autoreconf_sh, self.config_src_dir)
 
         files = shell.check_call('find %s -type f -name config.guess' %
-                                 self.make_dir).split('\n')
+                                 self.config_src_dir).split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -248,7 +255,7 @@ class Autotools (MakefilesBase):
             shutil.copy(o, f)
 
         files = shell.check_call('find %s -type f -name config.sub' %
-                                 self.make_dir).split('\n')
+                                 self.config_src_dir).split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -282,7 +289,7 @@ class Autotools (MakefilesBase):
 
         if use_configure_cache and self.can_use_configure_cache:
             cache = os.path.join(self.config.sources, '.configure.cache')
-            self.config_sh += ' --cache-file=%s' % cache
+            self.configure_tpl += ' --cache-file=%s' % cache
 
         MakefilesBase.configure(self)
 

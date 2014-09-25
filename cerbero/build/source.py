@@ -39,7 +39,6 @@ class Source (object):
     @type patches: int
     '''
 
-    supports_non_src_build = False
     patches = []
     strip = 1
 
@@ -231,8 +230,6 @@ class Git (GitCache):
             shutil.rmtree(self.build_dir)
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
-        if self.supports_non_src_build:
-            return
 
         # checkout the current version
         git.local_checkout(self.build_dir, self.repo_dir, self.commit)
@@ -313,9 +310,6 @@ class Svn(Source):
     def extract(self):
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-
-        if self.supports_non_src_build:
-            return
 
         shutil.copytree(self.repo_dir, self.build_dir)
 
