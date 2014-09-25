@@ -169,8 +169,10 @@ def add_remote(git_dir, name, url):
     @param url: url of the remote
     @type url: str
     '''
-    shell.call('%s remote add -f %s %s' % (GIT, name, url), git_dir,
-               fail=False)
+    try:
+        shell.call('%s remote add %s %s' % (GIT, name, url), git_dir)
+    except:
+        shell.call('%s remote set-url %s %s' % (GIT, name, url), git_dir)
 
 
 def check_line_endings(platform):
