@@ -3,7 +3,7 @@ class Recipe(recipe.Recipe):
     name = 'lame'
     licenses = [License.GPL]
     stype = SourceType.TARBALL
-    configure_options = ' --enable-static'
+    configure_options = ' --enable-static --disable-frontend'
     url = 'http://switch.dl.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz'
 
     files_libs = ['libmp3lame']
