@@ -42,6 +42,11 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
 
+        if self.config.target_platform in [ Platform.ANDROID ]:
+            for d in ['lame']:
+                self.deps.remove(d)
+            self.files_plugins_codecs_restricted.remove('lib/gstreamer-1.0/libgstlame%(mext)s')
+
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
             for d in ['libdvdread']:
                 self.deps.remove(d)
