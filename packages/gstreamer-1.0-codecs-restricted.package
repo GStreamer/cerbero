@@ -23,6 +23,3 @@ class Package(package.Package):
     files_devel = ['gst-plugins-ugly-1.0-static:plugins_codecs_restricted_devel',
                    'gst-plugins-bad-1.0-static:plugins_codecs_restricted_devel']
 
-    def prepare(self):
-        if self.config.target_platform in [Platform.ANDROID]:
-            self.files.remove('lame:libs')

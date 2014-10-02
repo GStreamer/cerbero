@@ -39,11 +39,6 @@ class Recipe(custom.GStreamerStatic):
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
-        if self.config.target_platform in [ Platform.ANDROID ]:
-            for d in ['lame']:
-                self.deps.remove(d)
-            self.files_plugins_codecs_restricted_devel.remove('libgstlame')
-
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
             for d in ['libdvdread']:
                 self.deps.remove(d)
