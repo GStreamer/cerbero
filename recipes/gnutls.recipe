@@ -1,14 +1,27 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.0.22'
+    version = '3.2.4'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    stype = SourceType.TARBALL
     # main library is LGPLv3+ and binaries and libgnutls-openssl are
     # GPLv3+ and defined below
     licenses = [License.LGPLv3Plus]
-    configure_options = "--enable-local-libopts --disable-guile"
+    configure_options = "--enable-local-libopts --disable-guile \
+        --enable-static --enable-zlib --enable-shared --disable-doc"
     deps = ['zlib', 'nettle', 'libtasn1']
+    # GnuTLS uses error.h, which is a GNU extension only available with glibc
+    # bionic-fixup provides that to us for all platforms
+    platform_deps = {
+        Platform.WINDOWS: ['bionic-fixup'],
+        Platform.ANDROID: ['bionic-fixup'],
+        Platform.IOS: ['bionic-fixup'],
+        Platform.DARWIN: ['bionic-fixup']
+    }
 
     files_libs = ['libgnutls', 'libgnutlsxx']
     files_libs_extra = ['libgnutls-openssl']
@@ -28,3 +41,19 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-cxx'
         if self.config.target_platform == Platform.IOS:
             self.configure_options += ' --disable-cxx'
+
+    def configure(self):
+        if self.config.target_platform == Platform.ANDROID:
+            # On Android, SIZE_MAX is define under limits.h
+            shell.replace(os.path.join(self.build_dir, 'gl', 'read-file.c'),
+                {'#include <stdint.h>':
+                 '#include <limits.h>'})
+            # With some compilers/libcs, 'restrict' can be interpreted as 
+            # a variable name instead of the keyword leading to a "conflicting
+            # types" compilation error, so we replace it with __restrict to make
+            # it completely clear
+            shell.replace(os.path.join(self.build_dir, 'gl', 'sys_time.in.h'),
+                {'restrict':
+                 '__restrict'})
+        # Call configure from the base class
+        super(recipe.Recipe, self).configure()
