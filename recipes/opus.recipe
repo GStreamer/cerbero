@@ -3,9 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'opus'
-    version = '1.0.1'
+    version = '1.0.3'
     licenses = [License.BSD_like]
-    autoreconf = True
+    stype = SourceType.TARBALL
+    url = 'http://downloads.xiph.org/releases/{0}/{0}-{1}.tar.gz'.format(name, version)
 
     files_libs = ['libopus']
     files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']

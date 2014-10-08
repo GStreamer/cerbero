@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'sqlite'
-    version = '3080402'
+    version = '3080500'
     stype = SourceType.TARBALL
     srcdir = '../sqlite-autoconf-%s' % version
     url = 'https://sqlite.org/2014/sqlite-autoconf-%(version)s.tar.gz'
