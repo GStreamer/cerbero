@@ -48,12 +48,5 @@ class Recipe(recipe.Recipe):
             shell.replace(os.path.join(self.build_dir, 'gl', 'read-file.c'),
                 {'#include <stdint.h>':
                  '#include <limits.h>'})
-            # With some compilers/libcs, 'restrict' can be interpreted as 
-            # a variable name instead of the keyword leading to a "conflicting
-            # types" compilation error, so we replace it with __restrict to make
-            # it completely clear
-            shell.replace(os.path.join(self.build_dir, 'gl', 'sys_time.in.h'),
-                {'restrict':
-                 '__restrict'})
         # Call configure from the base class
         super(recipe.Recipe, self).configure()
