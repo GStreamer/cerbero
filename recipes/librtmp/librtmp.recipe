@@ -4,14 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'librtmp'
-    version = '2.4_p20131018'
+    version = '2.3'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'http://people.freedesktop.org/~bilboed/rtmpdump-2.4_p20131018.tar.bz2'
+    url = 'http://rtmpdump.mplayerhq.hu/download/rtmpdump-2.3.tgz'
     licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
-    deps = ['gnutls', 'libgcrypt', 'nettle']
+    patches = ['0001-Fix-Makefiles-to-support-several-platforms.patch']
+    deps = ['gnutls', 'libgcrypt']
     files_libs = ['librtmp']
     files_devel = ['include/librtmp/', 'lib/pkgconfig/librtmp.pc' ]
 
