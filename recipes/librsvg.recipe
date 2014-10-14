@@ -1,12 +1,12 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-
 class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.40.2'
     licenses = [License.LGPLv2]
-    deps = ['libcroco']
-
+    deps = ['libcroco', 'gdk-pixbuf', 'vala-m4', 'gobject-introspection-m4']
+    autoreconf = True
+    autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
     stype = SourceType.TARBALL
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-%(version)s.tar.xz'
 
@@ -17,9 +17,11 @@ class Recipe(recipe.Recipe):
                    'lib/pkgconfig/librsvg-2.0.pc',
                    'lib/librsvg-2.a', 'lib/librsvg-2.la']
     files_typelibs = ['Rsvg-2.0']
-    configure_options = ' --disable-pixbuf-loader --disable-gtk-theme '
+    # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
+    configure_options = ' --disable-pixbuf-loader --without-gtk3 '
 
-    patches = ['librsvg/0001-Add-an-implementation-of-realpath-for-windows-to-mak.patch']
+    patches = ['librsvg/0001-Add-an-implementation-of-realpath-for-windows-to-mak.patch',
+               'librsvg/option-enable-disable-gtk.patch']
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
