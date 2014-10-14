@@ -20,7 +20,7 @@ class Package(package.Package):
             'libogg:libs', 'schroedinger:libs', 'speex:libs',
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'taglib:libs', 'opus:libs', 'libvorbis:libs',
-            'openjpeg:libs',
+            'openjpeg:libs', 'openh264:libs',
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
             'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
             ]
