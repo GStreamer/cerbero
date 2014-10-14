@@ -1,0 +1,52 @@
+From 62a500033bd745684c3fd1802b3cf755755451c7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 14 Oct 2014 21:02:51 +0530
+Subject: [PATCH] Fix support for cross-compilation
+
+---
+ librtmp/Makefile | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/librtmp/Makefile b/librtmp/Makefile
+index 2c1c790..f4e2a0b 100644
+--- a/librtmp/Makefile
++++ b/librtmp/Makefile
+@@ -1,6 +1,7 @@
+ VERSION=v2.4
+ 
+-prefix=/usr/local
++prefix?=/usr/local
++pkgconfig?=$(shell which pkg-config)
+ 
+ incdir=$(prefix)/include/librtmp
+ bindir=$(prefix)/bin
+@@ -11,12 +12,12 @@ INCDIR=$(DESTDIR)$(incdir)
+ LIBDIR=$(DESTDIR)$(libdir)
+ MANDIR=$(DESTDIR)$(mandir)
+ 
+-CC=$(CROSS_COMPILE)gcc
+-LD=$(CROSS_COMPILE)ld
+-AR=$(CROSS_COMPILE)ar
++CC?=$(CROSS_COMPILE)gcc
++LD?=$(CROSS_COMPILE)ld
++AR?=$(CROSS_COMPILE)ar
+ 
+-SYS=posix
+-CRYPTO=OPENSSL
++SYS?=posix
++CRYPTO?=OPENSSL
+ #CRYPTO=GNUTLS
+ DEF_POLARSSL=-DUSE_POLARSSL
+ DEF_OPENSSL=-DUSE_OPENSSL
+@@ -29,7 +30,7 @@ LIBZ=-lz
+ LIBS_posix=
+ LIBS_darwin=
+ LIBS_mingw=-lws2_32 -lwinmm -lgdi32
+-LIB_GNUTLS=-lgnutls -lhogweed -lnettle -lgmp $(LIBZ)
++LIB_GNUTLS=$(shell $(pkgconfig) --libs gnutls nettle hogweed) -lgmp $(LIBZ)
+ LIB_OPENSSL=-lssl -lcrypto $(LIBZ)
+ LIB_POLARSSL=-lpolarssl $(LIBZ)
+ PRIVATE_LIBS=$(LIBS_$(SYS))
+-- 
+1.9.3
+

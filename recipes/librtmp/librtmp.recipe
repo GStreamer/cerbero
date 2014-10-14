@@ -4,15 +4,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'librtmp'
-    version = '2.3'
+    version = '2.4_p20131018'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'http://rtmpdump.mplayerhq.hu/download/rtmpdump-2.3.tgz'
+    url = 'http://people.freedesktop.org/~bilboed/rtmpdump-2.4_p20131018.tar.bz2'
     licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
-    patches = ['0001-Fix-Makefiles-to-support-several-platforms.patch']
-    deps = ['gnutls', 'libgcrypt']
+    patches = ['0001-Fix-support-for-cross-compilation.patch']
+    deps = ['gnutls', 'libgcrypt', 'nettle']
     files_libs = ['librtmp']
     files_devel = ['include/librtmp/', 'lib/pkgconfig/librtmp.pc' ]
 
@@ -24,7 +24,8 @@ class Recipe(recipe.Recipe):
             system = 'darwin'
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             system = 'posix'
-        self.make = 'make SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS' % (system)
+        # LDFLAGS are passed via XLDFLAGS, and are needed for at least Android
+        self.make = 'make SYS=%s prefix="$CERBERO_PREFIX" CRYPTO=GNUTLS XLDFLAGS="$LDFLAGS"' % (system)
         self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS' % (system)
 
     def post_install(self):
