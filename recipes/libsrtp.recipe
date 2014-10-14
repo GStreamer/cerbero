@@ -1,0 +1,35 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'libsrtp'
+    version = 'master'
+    licenses = [License.BSD_like]
+    configure_options = '--enable-openssl'
+    commit = 'origin/master'
+    remotes = { 'origin': 'https://github.com/cisco/libsrtp.git' }
+    deps = ['openssl']
+    files_libs = ['libsrtp']
+    files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
+
+    def prepare(self):
+        # libsrtp.so is not built with 'all'
+        self.make += ' all libsrtp.so'
+    
+    def configure(self):
+        print(self.configure_options)
+        shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
+             # The Makefile has an already-installed check that causes a build to
+             # fail if you install to the same prefix more than once
+            {' first"; exit 1;': ' first";',
+             # The order of library search dirs is important; we get build
+             # failures in crypto/test/ otherwise
+             '@LDFLAGS@ -L.': '-L. @LDFLAGS@',
+             # -fPIC is not a part of the CFLAGS, even though it should be
+             '@CFLAGS@': '-fPIC @CFLAGS@',
+             # Need LIBS for libsrtp.so
+             'libsrtp.so $^ $(LDFLAGS)': 'libsrtp.so $^ $(LDFLAGS) $(LIBS)',
+            })
+        # Call configure from the base class
+        super(recipe.Recipe, self).configure()
