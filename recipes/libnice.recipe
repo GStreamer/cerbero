@@ -1,0 +1,28 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libnice'
+    version = '0.1.8'
+    stype = SourceType.TARBALL
+    url = 'http://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
+    licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
+    configure_options = ' --enable-static --enable-shared --with-gstreamer \
+            --without-gstreamer-0.10 --enable-compile-warnings=maximum'
+    deps = ['glib', 'gtk-doc', 'gstreamer-1.0']
+
+    files_bins = ['stunbdc', 'stund']
+    files_libs = ['libnice']
+    files_devel = [
+        'include/nice',
+        'include/stun',
+        'lib/pkgconfig/nice.pc',
+    ]
+    files_plugins_net = ['lib/gstreamer-1.0/libgstnice%(mext)s']
+
+    def prepare(self):
+        # FIXME - if_arp.h? (iOS)
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += ' --disable-gtk-doc \
+                --disable-introspection'
+        else:
+            self.configure_options += ' --enable-gtk-doc'

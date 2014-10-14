@@ -16,11 +16,12 @@ class Package(package.Package):
     uuid = '2f9ca3f5-3b3b-4b4d-8cc9-6c08f21af807'
     deps = ['gstreamer-1.0-core', 'base-crypto']
 
-    files = ['libsoup:libs', 'libsrtp:libs',
+    files = ['libsoup:libs', 'libsrtp:libs', 'libnice:libs', 'libnice:plugins_net',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
 			'gst-rtsp-server-1.0:libs']
-    files_devel = ['gst-plugins-base-1.0-static:plugins_net_devel',
+    files_devel = ['libnice-static:plugins_net_devel',
+            'gst-plugins-base-1.0-static:plugins_net_devel',
             'gst-plugins-good-1.0-static:plugins_net_devel',
             'gst-plugins-ugly-1.0-static:plugins_net_devel',
             'gst-plugins-bad-1.0-static:plugins_net_devel']
