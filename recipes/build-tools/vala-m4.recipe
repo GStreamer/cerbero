@@ -1,0 +1,32 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import os
+import shutil
+
+class Recipe(recipe.Recipe):
+    """
+    Ships the vapigen.m4 macro file from the vala tarball
+    """
+    name = 'vala-m4'
+    _name = 'vala'
+    version = '0.26.1'
+    stype = SourceType.TARBALL
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/{0}/{2}/{0}-{1}.tar.xz'
+    url = url.format(_name, version, maj_ver)
+    srcdir = "{0}-{1}".format(_name, version)
+    licenses = [License.LGPLv2_1Plus]
+    btype = BuildType.CUSTOM
+    files_devel = ['share/aclocal/vala.m4', 'share/vala/Makefile.vapigen']
+
+    def prepare(self):
+        self.build_dir = os.path.join(os.path.dirname(self.build_dir),
+                                      '{0}-{1}'.format(self._name,
+                                          self.version))
+
+    def install(self):
+        shutil.copyfile(os.path.join(self.build_dir, 'vapigen', 'vapigen.m4'),
+                        os.path.join(self.config.install_dir, 'share',
+                                     'aclocal', 'vala.m4'))
+        shutil.copy(os.path.join(self.build_dir, 'vapigen', 'Makefile.vapigen'),
+                    os.path.join(self.config.install_dir, 'share', 'vala'))
