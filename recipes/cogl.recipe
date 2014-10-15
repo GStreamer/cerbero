@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'cogl'
-    version = '1.16.0'
+    version = '1.16.2'
     # TODO: check license - source files are LGPLv2+ and COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     use_system_libs = True
