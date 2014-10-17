@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     patches = ['gtk+3/0001-osx-fix-build-of-quartz-input-module.patch']
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.14/gtk+-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.12/gtk+-%(version)s.tar.xz'
     tarball_dirname = 'gtk+-%(version)s'
 
     files_libs = ['libgailutil-3', 'libgdk-3', 'libgtk-3']
