@@ -12,7 +12,6 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'gtkdocize && autoreconf -vfi'
     deps = ['glib']
-    patches = ['gobject-introspection/0001-config-add-support-to-set-typelib-and-gir-installati.patch']
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
@@ -90,6 +89,4 @@ class Recipe(recipe.Recipe):
             replacements = {'glib-2.0/include/glibconfig.h':
                     'glib-2.0/include/%s/glibconfig.h' % arch}
             shell.replace(makefileam, replacements)
-            self.configure_options += ' --with-typelib-dir=$CERBERO_PREFIX/lib/%s ' % arch
-            self.configure_options += ' --with-gir-dir=$CERBERO_PREFIX/share/gir-1.0/%s ' % arch
         super(Recipe, self).configure()
