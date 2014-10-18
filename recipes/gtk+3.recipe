@@ -13,7 +13,6 @@ class Recipe(recipe.Recipe):
         Platform.LINUX: ['at-spi2-atk'],
     }
     use_system_libs = True
-    patches = ['gtk+3/0001-osx-fix-build-of-quartz-input-module.patch']
 
     stype = SourceType.TARBALL
     url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.12/gtk+-%(version)s.tar.xz'
@@ -93,6 +92,8 @@ class Recipe(recipe.Recipe):
             self.configure_options += '--disable-papi --disable-cups '
         elif self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--enable-quartz-backend '
+            # this patch will break on other OSs without objective-c compiler installed
+            self.patches = ['gtk+3/0001-osx-fix-build-of-quartz-input-module.patch']
         elif self.config.target_platform == Platform.LINUX:
             # Can't change CFLAGS and use configure cache
             self.can_use_configure_cache = False
