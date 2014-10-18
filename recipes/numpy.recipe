@@ -333,6 +333,14 @@ class Recipe(recipe.Recipe):
 
 
     def install(self):
-        shell.call('python setup.py install --prefix=%s --install-lib=%s' %
+        flags = ""
+        if self.config.target_platform == Platform.DARWIN:
+            # numpy / setup.py seems to try to build a universal binary but fails.
+            # Force it to a single arch for now.
+            if self.config.target_arch == Architecture.X86:
+                flags = 'ARCHFLAGS="-arch i386" '
+            elif self.config.target_arch == Architecture.X86_64:
+                flags = 'ARCHFLAGS="-arch x86_64" '
+        shell.call(flags + 'python setup.py install --prefix=%s --install-lib=%s' %
                 (self.config.prefix, os.path.join(self.config.prefix,
                  self.config.py_prefix, "site-packages")), self.build_dir)
