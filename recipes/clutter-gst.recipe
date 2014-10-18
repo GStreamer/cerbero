@@ -10,6 +10,8 @@ class Recipe(recipe.Recipe):
     deps = ['clutter', 'gstreamer-1.0', 'gst-plugins-base-1.0']
     use_system_libs = True
 
+    patches = ['clutter-gst/0001-Fix-for-OS-X-10.9-and-10.10-builds.patch']
+
     files_libs = ['libclutter-gst-1.0']
     files_devel = ['lib/pkgconfig/clutter-gst-1.0.pc', 'include/clutter-1.0/clutter-gst']
     files_plugins_clutter = ['lib/gstreamer-1.0/libgstclutter%(mext)s']
