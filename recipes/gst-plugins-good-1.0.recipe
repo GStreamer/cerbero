@@ -108,7 +108,7 @@ class Recipe(recipe.Recipe):
         self.remotes['upstream'] = self.remotes['origin']
 
         # The second detail is to work around use of deprecated NSOpenGLPFAFullScreen on OS X 10.10
-        self.append_env['CFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations "
+        self.append_env['CFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations -DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1 "
         self.append_env['CXXFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations "
         self.append_env['CPPFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations "
         if self.config.target_platform != Platform.LINUX:
