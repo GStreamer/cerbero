@@ -11,7 +11,8 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
-    patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch']
+    patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
+               'cairo/0001-Disable-building-of-the-tests.patch']
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [
