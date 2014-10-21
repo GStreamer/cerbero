@@ -7,8 +7,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--enable-static --disable-introspection --disable-gsm \
-        --disable-examples --disable-camerabin --disable-festival \
-        --disable-inter --disable-videomaxrate --disable-bz2 --disable-libde265 \
+        --disable-examples --disable-festival --disable-inter \
+        --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
         --disable-dirac --disable-faac --disable-flite --disable-gme \
@@ -20,9 +20,9 @@ class Recipe(recipe.Recipe):
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
         --disable-xvid --disable-zbar --disable-sdi'
     # Explicitly enable plugins
-    configure_options += ' --enable-bz2 --enable-assrender --enable-faad \
-        --enable-kate --enable-openh264 --enable-opus --enable-hls \
-        --enable-rtmp --enable-srtp --enable-schro --enable-dts \
+    configure_options += ' --enable-bz2 --enable-assrender \
+        --enable-faad --enable-kate --enable-openh264 --enable-opus \
+        --enable-hls --enable-rtmp --enable-srtp --enable-schro --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
         --enable-voaacenc --enable-rsvg --enable-openjpeg'
     commit = 'origin/master'

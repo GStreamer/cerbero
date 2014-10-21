@@ -6,9 +6,8 @@ class Recipe(custom.GStreamerStatic):
     version = '1.5'
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
-    configure_options = '--enable-static --disable-introspection --disable-gsm \
-        --disable-examples --disable-camerabin --disable-festival \
-        --disable-inter --disable-videomaxrate --disable-bz2 --disable-libde265 \
+    extra_configure_options = '--disable-gsm --disable-festival --disable-inter \
+        --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
         --disable-dirac --disable-faac --disable-flite --disable-gme \
@@ -19,12 +18,6 @@ class Recipe(custom.GStreamerStatic):
         --disable-spandsp --disable-teletextdec --disable-timidity \
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
         --disable-xvid --disable-zbar --disable-sdi'
-    # Explicitly enable plugins
-    configure_options += '--enable-bz2 --enable-assrender --enable-faad \
-        --enable-kate --enable-openh264 --enable-opus --enable-hls \
-        --enable-rtmp --enable-srtp --enable-schro --enable-dts \
-        --enable-libmms --enable-resindvd --enable-soundtouch \
-        --enable-voaacenc --enable-rsvg --enable-openjpeg'
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
