@@ -15,16 +15,30 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         make = self.make
         if self.config.target_platform == Platform.IOS:
-            make += ' OS=ios ARCH=armv7'
+            make += ' OS=ios '
+            if self.config.target_arch == Architecture.X86:
+                make += ' ARCH=x86'
+            elif self.config.target_arch == Architecture.X86_64:
+                make += ' ARCH=x86_64'
+            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+                make += ' ARCH=armv7'
+            elif self.config.target_arch == Architecture.ARMv7S:
+                make += ' ARCH=armv7s'
         elif self.config.target_platform == Platform.DARWIN:
-            make += ' OS=darwin ARCH=i386'
+            make += ' OS=darwin '
+            if self.config.target_arch == Architecture.X86:
+                make += ' ARCH=x86'
+            elif self.config.target_arch == Architecture.X86_64:
+                make += ' ARCH=x86_64'
         elif self.config.target_platform == Platform.ANDROID:
             make += ' OS=android TARGET=android-9'
             make += ' NDKROOT=' + self.config.toolchain_prefix
+            if self.config.target_arch == Architecture.X86:
+                make += ' ARCH=x86'
         elif self.config.target_platform == Platform.WINDOWS:
             make += ' OS=mingw_nt'
             if self.config.target_arch == Architecture.X86:
-                make += ' ARCH=i386'
+                make += ' ARCH=x86'
             elif self.config.target_arch == Architecture.X86_64:
                 make += ' ARCH=x86_64'
         self.make = make + ' libraries'
