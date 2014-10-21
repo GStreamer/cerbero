@@ -6,17 +6,15 @@ class Recipe(recipe.Recipe):
     name = 'libsrtp'
     version = 'master'
     licenses = [License.BSD_like]
-    configure_options = '--enable-openssl'
     commit = 'origin/master'
     remotes = { 'origin': 'https://github.com/cisco/libsrtp.git' }
-    deps = ['openssl']
     files_libs = ['libsrtp']
     files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
 
     def prepare(self):
         # libsrtp.so is not built with 'all'
         self.make += ' all libsrtp.so'
-    
+
     def configure(self):
         print(self.configure_options)
         shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
