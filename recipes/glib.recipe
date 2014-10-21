@@ -66,7 +66,7 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/gobject-2.0.pc',
         'lib/pkgconfig/gthread-2.0.pc',
         'include/glib-2.0',
-        'share/aclocal/glib-2.0.m4'
+        'share/aclocal/glib-2.0.m4',
         'share/aclocal/glib-gettext.m4'
         ]
     platform_files_devel = {
