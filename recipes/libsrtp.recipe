@@ -14,6 +14,8 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # libsrtp.so is not built with 'all'
         self.make += ' all libsrtp.so'
+        # Don't accidentially build with pcap support
+        self.append_env['ac_cv_lib_pcap_pcap_create'] = 'no'
 
     def configure(self):
         print(self.configure_options)
@@ -28,6 +30,8 @@ class Recipe(recipe.Recipe):
              '@CFLAGS@': '-fPIC @CFLAGS@',
              # Need LIBS for libsrtp.so
              'libsrtp.so $^ $(LDFLAGS)': 'libsrtp.so $^ $(LDFLAGS) $(LIBS)',
+             # -Wl,-soname does not work with clang and is useless anyway
+             '-Wl,-soname,libsrtp.so': '',
             })
         # Call configure from the base class
         super(recipe.Recipe, self).configure()
