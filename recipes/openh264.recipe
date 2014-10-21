@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MAKEFILE
     licenses = [License.BSD]
     files_libs = ['libopenh264']
-    files_devel = ['include/openh264']
+    files_devel = ['include/wels']
 
     def prepare(self):
         make = self.make
