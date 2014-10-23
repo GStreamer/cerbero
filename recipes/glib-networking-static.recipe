@@ -5,10 +5,10 @@ from cerbero.errors import FatalError
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking-static'
-    version = '2.38.2'
+    version = '2.42.0'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.38/glib-networking-2.38.2.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.42/glib-networking-%(version)s.tar.xz'
     tarball_dirname = 'glib-networking-%(version)s'
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static --enable-more-warnings"

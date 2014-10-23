@@ -1,17 +1,17 @@
-From 180e757d61b1f98e5307849641685d2185ceeaa2 Mon Sep 17 00:00:00 2001
+From 011a0d4b781327150f9a5f9b838e27a0a991a855 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 12:19:00 +0100
-Subject: [PATCH 08/11] configure: fix link with Carbon framework
+Subject: [PATCH 7/8] configure: fix link with Carbon framework
 
 ---
  configure.ac | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
-index 579d713..1ce2ba6 100644
+index d751ab4..49cdd66 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -220,7 +220,7 @@ AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
+@@ -210,7 +210,7 @@ AM_CONDITIONAL(OS_CARBON, [test "$glib_have_carbon" = "yes"])
  
  if test "x$glib_have_carbon" = "xyes"; then
    AC_DEFINE(HAVE_CARBON, 1, [define to 1 if Carbon is available])
@@ -21,5 +21,5 @@ index 579d713..1ce2ba6 100644
  
  dnl Check cocoa
 -- 
-1.9.0
+2.1.0
 
