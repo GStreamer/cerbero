@@ -18,6 +18,9 @@ class Recipe(recipe.Recipe):
         'include/clutter-1.0/clutter',
         'include/clutter-1.0/cally',
     ]
+
+    files_libs = ['libclutter-1.0']
+
     platform_files_libs = {
         Platform.WINDOWS: ['libclutter-win32-1.0'],
         Platform.DARWIN: ['libclutter-osx-1.0'],
