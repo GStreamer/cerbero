@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk+3'
-    version = '3.12.2'
+    version = '3.14.1'
     # TODO: check license - some source files are LGPLv2, others LGPLv2+,
     #       others LGPLv2.1+, COPYING is LGPLv2 and the webpage states LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.12/gtk+-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.14/gtk+-%(version)s.tar.xz'
     tarball_dirname = 'gtk+-%(version)s'
 
     files_libs = ['libgailutil-3', 'libgdk-3', 'libgtk-3']

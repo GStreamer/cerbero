@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'atk'
-    version = '2.10.0'
+    version = '2.12.0'
     licenses = [License.LGPLv2Plus]
     deps = ['glib']
 
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/atk/2.10/atk-%(version)s.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/atk/2.12/atk-%(version)s.tar.xz'
 
     files_libs = ['libatk-1.0']
     files_devel = ['lib/pkgconfig/atk.pc', 'include/atk-1.0']
