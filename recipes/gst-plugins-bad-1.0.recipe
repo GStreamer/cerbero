@@ -60,6 +60,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstsmooth%(mext)s',
              'lib/gstreamer-1.0/libgstspeed%(mext)s',
              'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiomixer%(mext)s',
+             'lib/gstreamer-1.0/libgstcompositor%(mext)s',
     ]
 
     files_plugins_codecs = [

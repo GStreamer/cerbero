@@ -46,6 +46,8 @@ class Recipe(custom.GStreamerStatic):
              'libgstsmooth',
              'libgstspeed',
              'libgstvideofiltersbad',
+             'libgstaudiomixer',
+             'libgstcompositor',
     ]
 
     files_plugins_codecs_devel = [
