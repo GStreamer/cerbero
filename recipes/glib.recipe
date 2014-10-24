@@ -52,7 +52,7 @@ class Recipe(recipe.Recipe):
         'bin/glib-compile-resources%(bext)s',
         'bin/glib-genmarshal%(bext)s',
         'bin/gresource%(bext)s',
-        'bin/gdb-codegen',
+        'bin/gdbus-codegen',
         'lib/glib-2.0/include',
         'lib/pkgconfig/gio-2.0.pc',
         'lib/pkgconfig/glib-2.0.pc',
