@@ -3,9 +3,9 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gnonlin-1.0'
-    version = '1.2'
+    version = '1.4'
     licenses = [License.LGPLv2Plus]
-    commit = 'origin/1.2'
+    commit = 'origin/1.4'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--disable-examples "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]

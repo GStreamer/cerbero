@@ -3,9 +3,9 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-validate'
-    version = '1.0'
+    version = '1.4'
     licenses = [License.LGPLv2Plus]
-    commit = 'origin/master'
+    commit = 'origin/validate-1.4'
     srcdir = 'validate'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure --enable-static --program-transform-name= '
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
