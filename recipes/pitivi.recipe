@@ -3,7 +3,7 @@ from cerbero.errors import ConfigurationError
 
 class Recipe(recipe.Recipe):
     name = 'pitivi'
-    version = '0.93'
+    version = '0.94'
     licenses = [License.GPLv2Plus]
     remotes = {'origin': 'git://git.gnome.org/pitivi'}
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
@@ -15,7 +15,6 @@ class Recipe(recipe.Recipe):
             'gst-plugins-bad-1.0',
             'gst-plugins-ugly-1.0',
             'clutter-gtk',
-            'clutter-gst',
             'numpy',
             'gnome-themes-standard',
             'gnome-icon-theme',

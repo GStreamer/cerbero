@@ -7,7 +7,7 @@ class Package(package.App):
     name = 'pitivi'
     app_name = 'Pitivi'
     app_recipe = 'pitivi'
-    version = '0.93-beta'
+    version = '0.94'
     shortdesc = 'Pitivi video editor'
     longdesc = 'An open source full featured video editing application'
     url = "http://www.pitivi.org"
@@ -17,10 +17,10 @@ class Package(package.App):
     uuid = 'd9626750-e8b7-4e40-944d-98b67ed0c6bf'
 
     deps = ['gstreamer-1.0', 'gtk-3.0', 'python3']
-    files = ['shared-mime-info']
+    files = ['shared-mime-info', 'clutter', 'clutter-gtk']
 
     # Needed to bundle for linux
     desktop_file='share/applications/pitivi.desktop'
     commands=[('pitivi', 'bin/pitivi')]
 
-    default_gtk_theme='Adwaita'
+    default_gtk_theme='Adwaita:dark'
