@@ -35,7 +35,16 @@ class Recipe(recipe.Recipe):
         'include/gail-3.0',
     ]
 
-    files_misc = ['etc/gtk-3.0/']
+    files_misc = ['etc/gtk-3.0/',
+                  'share/glib-2.0/schemas/org.gtk.Settings.Debug.gschema.xml',
+                  'share/glib-2.0/schemas/gschema.dtd',
+                  'share/glib-2.0/schemas/gschemas.compiled',
+                  'share/glib-2.0/schemas/org.gtk.Demo.gschema.xml',
+                  'share/glib-2.0/schemas/org.gtk.exampleapp.gschema.xml',
+                  'share/glib-2.0/schemas/org.gtk.Settings.ColorChooser.gschema.xml',
+                  'share/glib-2.0/schemas/org.gtk.Settings.Debug.gschema.xml',
+                  'share/glib-2.0/schemas/org.gtk.Settings.FileChooser.gschema.xml'
+                 ]
 
     platform_files_libs = {
         Platform.WINDOWS: ['libgtk-win32-3.0', 'libgdk-win32-3.0'],
