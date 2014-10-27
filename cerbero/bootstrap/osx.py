@@ -28,12 +28,6 @@ from cerbero.utils import shell
 
 class OSXBootstrapper (BootstrapperBase):
 
-    GCC_BASE_URL = 'https://github.com/downloads/kennethreitz/'\
-                   'osx-gcc-installer/'
-    GCC_TAR = {
-        DistroVersion.OS_X_MOUNTAIN_LION: 'GCC-10.7-v2.pkg',
-        DistroVersion.OS_X_LION: 'GCC-10.7-v2.pkg',
-        DistroVersion.OS_X_SNOW_LEOPARD: 'GCC-10.6.pkg'}
     CPANM_URL = 'https://raw.github.com/miyagawa/cpanminus/master/cpanm'
 
     def start(self):
@@ -41,13 +35,6 @@ class OSXBootstrapper (BootstrapperBase):
         if not self.config.distro_packages_install:
             return
         self._install_perl_deps()
-        # FIXME: enable it when buildbots are properly configured
-        return
-        tar = self.GCC_TAR[self.config.distro_version]
-        url = os.path.join(self.GCC_BASE_URL, tar)
-        pkg = os.path.join(self.config.local_sources, tar)
-        shell.download(url, pkg, check_cert=False)
-        shell.call('sudo installer -pkg %s -target /' % pkg)
 
     def _install_perl_deps(self):
         # Install cpan-minus, a zero-conf CPAN wrapper

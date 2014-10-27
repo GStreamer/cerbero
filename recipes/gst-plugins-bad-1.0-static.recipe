@@ -165,12 +165,6 @@ class Recipe(custom.GStreamerStatic):
         if self.config.variants.nodebug:
             self.configure_options += ' --disable-gst-debug'
 
-        if self.config.target_platform == Platform.DARWIN and \
-           self.config.target_distro_version in [ DistroVersion.OS_X_SNOW_LEOPARD, DistroVersion.OS_X_LION ]:
-            # we won't build applemedia plugin because we don't have videotoolbox
-            self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia')
-            self.platform_files_plugins_sys_devel[Platform.DARWIN].remove('libgstapplemedia_nonpublic')
-
         if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove("libgstdvb")
         super(Recipe, self).prepare()
