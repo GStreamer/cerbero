@@ -42,11 +42,11 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
             elif self.config.target_arch == Architecture.ARM64:
-                dir = 'arm64-apple-darwin*'
-                arch = 'arm'
+                dir = 'aarch64-apple-darwin*'
+                arch = 'arm64'
             elif Architecture.is_arm(self.config.target_arch):
                 dir = 'arm-apple-darwin*'
-                arch = 'arm64'
+                arch = 'arm'
 
             self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffi.h'))
             self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffitarget.h'))
@@ -77,7 +77,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
             elif self.config.target_arch == Architecture.ARM64:
-                dir = 'arm64-apple-darwin*'
+                dir = 'aarch64-apple-darwin*'
             elif Architecture.is_arm(self.config.target_arch):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'
