@@ -120,8 +120,6 @@ def system_info():
             arch = Architecture.X86_64
         elif arch.endswith('86'):
             arch = Architecture.X86
-        elif arch == "Power Macintosh":
-            arch = Architecture.PPC
         else:
             raise FatalError(_("Architecture %s not supported") % arch)
 

@@ -30,7 +30,6 @@ class Architecture:
     ''' Enumeration of supported acrchitectures '''
     X86 = 'x86'
     X86_64 = 'x86_64'
-    PPC = 'ppc'
     UNIVERSAL = 'universal'
     ARM = 'arm'
     ARMv7 = 'armv7'

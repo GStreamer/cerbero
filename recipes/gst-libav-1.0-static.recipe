@@ -31,8 +31,6 @@ class Recipe(custom.GStreamerStatic):
                 asflags = ' -arch x86_64 -m64'
             elif self.config.target_arch == Architecture.X86:
                 asflags = ' -arch i386 -m32'
-            elif self.config.target_arch == Architecture.PPC:
-                asflags = ' -arch ppc'
             self.configure_options += ' ASFLAGS="%s"' % asflags
         elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:

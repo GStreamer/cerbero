@@ -40,8 +40,6 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86:
                 dir = 'i386-apple-darwin*'
                 arch = 'i386'
-            elif self.config.target_arch == Architecture.PPC:
-                dir = 'powerpc-apple-darwin*'
             elif self.config.target_arch == Architecture.ARM64:
                 dir = 'aarch64-apple-darwin*'
                 arch = 'arm64'
@@ -68,8 +66,6 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86:
                 dir = 'i386-apple-darwin*'
                 arch = 'i386'
-            elif self.config.target_arch == Architecture.PPC:
-                dir = 'powerpc-apple-darwin*'
             elif self.config.target_arch == Architecture.ARM64:
                 dir = 'aarch64-apple-darwin*'
             elif Architecture.is_arm(self.config.target_arch):
