@@ -11,6 +11,8 @@ FFI_H_UNVERSAL='''\
 #include "x86_64/ffi.h"
 #elif defined(__arm__)
 #include "arm/ffi.h"
+#elif defined(__arm64__)
+#include "arm64/ffi.h"
 #else
 #error "Unsupported Architecture"
 #endif
@@ -39,9 +41,12 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
+            elif self.config.target_arch == Architecture.ARM64:
+                dir = 'arm64-apple-darwin*'
+                arch = 'arm'
             elif Architecture.is_arm(self.config.target_arch):
                 dir = 'arm-apple-darwin*'
-                arch = 'arm'
+                arch = 'arm64'
 
             self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffi.h'))
             self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffitarget.h'))
@@ -71,6 +76,8 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             elif self.config.target_arch == Architecture.PPC:
                 dir = 'powerpc-apple-darwin*'
+            elif self.config.target_arch == Architecture.ARM64:
+                dir = 'arm64-apple-darwin*'
             elif Architecture.is_arm(self.config.target_arch):
                 dir = 'arm-apple-darwin*'
                 arch = 'arm'

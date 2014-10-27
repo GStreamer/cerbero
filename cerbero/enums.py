@@ -35,6 +35,7 @@ class Architecture:
     ARM = 'arm'
     ARMv7 = 'armv7'
     ARMv7S = 'armv7s'
+    ARM64 = 'arm64'
 
     @staticmethod
     def is_arm(arch):
