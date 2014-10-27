@@ -26,6 +26,7 @@ class Recipe(recipe.Recipe):
                'libvpx/0006-Add-armv7s-ios-support.patch',
                'libvpx/0007-configure-quote-local-variables-correctly.patch',
                'libvpx/0008-Add-support-for-iOS-simulator-on-x86-64.patch',
+               'libvpx/0009-Add-arm64-ios-support.patch',
                ]
 
     files_libs = ['libvpx']
