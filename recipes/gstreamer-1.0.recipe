@@ -10,6 +10,8 @@ GST_CONFIG_UNVERSAL='''\
 #include "x86_64/gstconfig.h"
 #elif defined(__arm__)
 #include "arm/gstconfig.h"
+#elif defined(__arm64__)
+#include "arm64/gstconfig.h"
 #else
 #error "Unsupported Architecture"
 #endif
@@ -91,6 +93,8 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
             elif Architecture.is_arm(arch):
                 arch = 'arm'
             self.files_devel.append(os.path.join('include', 'gstreamer-1.0', 'gst', '*', 'gstconfig.h'))
@@ -103,6 +107,8 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
             elif Architecture.is_arm(arch):
                 arch = 'arm'
 
