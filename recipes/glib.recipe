@@ -10,6 +10,8 @@ GLIB_CONFIG_UNVERSAL='''\
 #include "x86_64/glibconfig.h"
 #elif defined(__arm__)
 #include "arm/glibconfig.h"
+#elif defined(__arm64__)
+#include "arm64/glibconfig.h"
 #else
 #error "Unsupported Architecture"
 #endif
@@ -112,6 +114,8 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
             elif Architecture.is_arm(arch):
                 arch = 'arm'
             extra_flags = ''
@@ -185,7 +189,9 @@ class Recipe(recipe.Recipe):
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
-            if Architecture.is_arm(arch):
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
+            elif Architecture.is_arm(arch):
                 arch = 'arm'
 
             arch_dir = os.path.join(self.config.prefix, 'lib', 'glib-2.0',
