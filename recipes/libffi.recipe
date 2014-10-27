@@ -20,17 +20,18 @@ FFI_H_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.0.13'
-    stype = SourceType.TARBALL
-    url = 'http://www.mirrorservice.org/sites/sourceware.org/pub/libffi/libffi-3.0.13.tar.gz'
+    version = '3.2'
+    autoreconf = True
+    commit = 'ae8d2554c5f192be54dadc9f99a1449b4df1b222'
     licenses = [License.BSD_like]
-    patches = ['libffi/0002-makefiles-fix-toolexeclibdir.patch',
-               'libffi/0003-osx-fix-check-to-use-malloc-in-OSX-10.7.patch']
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.0.13/include/ffi.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.2/include/ffi.h', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
+        self.remotes['origin'] = 'https://github.com/atgreen/libffi.git'
+        self.remotes['upstream'] = self.remotes['origin']
+
         self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch
@@ -55,13 +56,6 @@ class Recipe(recipe.Recipe):
             self.make_install = 'make -C %s install' % dir
         else:
             self.files_devel.append(os.path.join(self.libffidir, 'include', 'ffitarget.h'))
-
-        if self.config.target_platform == Platform.IOS:
-            self.new_env = {'CC': os.environ['CC']}
-            self.new_env['CC'] += ' -no-integrated-as '
-            self.new_env = {'CCAS': os.environ['CC']}
-            self.new_env['CCAS'] += ' -no-integrated-as '
-            self.patches += ['libffi/0001-arm-fix-alignment.patch']
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
