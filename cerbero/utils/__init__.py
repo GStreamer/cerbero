@@ -210,10 +210,6 @@ def system_info():
             distro_version = DistroVersion.OS_X_MAVERICKS
         elif ver.startswith('10.8'):
             distro_version = DistroVersion.OS_X_MOUNTAIN_LION
-        elif ver.startswith('10.7'):
-            distro_version = DistroVersion.OS_X_LION
-        elif ver.startswith('10.6'):
-            distro_version = DistroVersion.OS_X_SNOW_LEOPARD
         else:
             raise FatalError("Mac version %s not supported" % ver)
 
