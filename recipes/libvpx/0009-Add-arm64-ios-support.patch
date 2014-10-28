@@ -17,7 +17,7 @@ index 9076104..47c2402 100755
                  tgt_isa=armv5te
                  ;;
 +            arm64*)
-+                tgt_isa=arm664
++                tgt_isa=arm64
 +                ;;
              *x86_64*|*amd64*)
                  tgt_isa=x86_64
