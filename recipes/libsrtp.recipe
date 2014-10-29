@@ -8,30 +8,18 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     commit = 'origin/master'
     remotes = { 'origin': 'https://github.com/cisco/libsrtp.git' }
+    patches = ['libsrtp/0001-Makefile.in-Add-support-for-building-on-cross-compil.patch']
+
     files_libs = ['libsrtp']
     files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
 
     def prepare(self):
-        # libsrtp.so is not built with 'all'
-        self.make += ' all libsrtp.so'
         # Don't accidentially build with pcap support
         self.append_env['ac_cv_lib_pcap_pcap_create'] = 'no'
-
-    def configure(self):
-        print(self.configure_options)
-        shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
-             # The Makefile has an already-installed check that causes a build to
-             # fail if you install to the same prefix more than once
-            {' first"; exit 1;': ' first";',
-             # The order of library search dirs is important; we get build
-             # failures in crypto/test/ otherwise
-             '@LDFLAGS@ -L.': '-L. @LDFLAGS@',
-             # -fPIC is not a part of the CFLAGS, even though it should be
-             '@CFLAGS@': '-fPIC @CFLAGS@',
-             # Need LIBS for libsrtp.so
-             'libsrtp.so $^ $(LDFLAGS)': 'libsrtp.so $^ $(LDFLAGS) $(LIBS)',
-             # -Wl,-soname does not work with clang and is useless anyway
-             '-Wl,-soname,libsrtp.so': '',
-            })
-        # Call configure from the base class
-        super(recipe.Recipe, self).configure()
+        if self.config.target_platform in (Platform.LINUX, Platform.ANDROID):
+            # libsrtp.so is not built with 'all'
+            self.make += ' all libsrtp.so'
+        elif self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            self.make += ' all libsrtp.dylib'
+        elif self.config.target_platform == Platform.WINDOWS:
+            self.make += ' all libsrtp.dll'

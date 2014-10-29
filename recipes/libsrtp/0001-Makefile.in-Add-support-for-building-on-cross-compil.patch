@@ -1,0 +1,105 @@
+From 224d8a7c248d2a11f1debc725827be92dfa4a597 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 5 Nov 2014 18:35:14 +0530
+Subject: [PATCH] Makefile.in: Add support for building on/cross-compiling for
+ Windows and OS X
+
+Also fix a bunch of problems with the build
+---
+ Makefile.in | 37 +++++++++++++++++++++++++------------
+ 1 file changed, 25 insertions(+), 12 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index eb4ce65..6de49fc 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -44,10 +44,10 @@ endif
+ CC	= @CC@
+ INCDIR	= -Icrypto/include -I$(srcdir)/include -I$(srcdir)/crypto/include
+ DEFS	= @DEFS@
+-CPPFLAGS= @CPPFLAGS@
++CPPFLAGS= -fPIC @CPPFLAGS@
+ CFLAGS	= @CFLAGS@
+ LIBS	= @LIBS@
+-LDFLAGS	= @LDFLAGS@ -L.
++LDFLAGS	= -L. @LDFLAGS@
+ COMPILE = $(CC) $(DEFS) $(INCDIR) $(CPPFLAGS) $(CFLAGS)
+ SRTPLIB	= -lsrtp
+ 
+@@ -82,6 +82,17 @@ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = libsrtp.pc
+ endif
+ 
++SHAREDLIBVERSION = .0
++ifeq (linux,$(findstring linux,@host@))
++SHAREDLIBSUFFIXNOVER = so
++else ifeq (mingw,$(findstring mingw,@host@))
++SHAREDLIBVERSION = 
++SHAREDLIBSUFFIXNOVER = dll
++else ifeq (darwin,$(findstring darwin,@host@))
++SHAREDLIBSUFFIXNOVER = dylib
++endif
++SHAREDLIBSUFFIX = $(SHAREDLIBSUFFIXNOVER)$(SHAREDLIBVERSION)
++
+ # implicit rules for object files and test apps
+ 
+ %.o: %.c
+@@ -122,9 +133,12 @@ libsrtp.a: $(srtpobj) $(cryptobj) $(gdoi)
+ 	ar cr libsrtp.a $^
+ 	$(RANLIB) libsrtp.a
+ 
+-libsrtp.so: $(srtpobj) $(cryptobj) $(gdoi) 
+-	$(CC) -shared -Wl,-soname,libsrtp.so \
+-	    -o libsrtp.so $^ $(LDFLAGS)
++libsrtp.$(SHAREDLIBSUFFIXNOVER): $(srtpobj) $(cryptobj) $(gdoi) 
++	$(CC) -shared -o libsrtp.$(SHAREDLIBSUFFIX) $^ $(LDFLAGS) $(LIBS)
++	if [ -n "$(SHAREDLIBVERSION)" ]; then \
++		ln -sfn libsrtp.$(SHAREDLIBSUFFIX) \
++			libsrtp.$(SHAREDLIBSUFFIXNOVER); \
++	fi
+ 
+ # libcryptomath.a contains general-purpose routines that are used to
+ # generate tables and verify cryptoalgorithm implementations - this
+@@ -224,16 +238,16 @@ libsrtpdoc:
+ .PHONY: clean superclean distclean install
+ 
+ install:
+-	@if [ -r $(DESTDIR)$(includedir)/srtp/srtp.h ]; then \
+-	   echo "you should run 'make uninstall' first"; exit 1;  \
+-	fi
+ 	$(INSTALL) -d $(DESTDIR)$(includedir)/srtp
+ 	$(INSTALL) -d $(DESTDIR)$(libdir)
+ 	cp $(srcdir)/include/*.h $(DESTDIR)$(includedir)/srtp  
+ 	cp $(srcdir)/crypto/include/*.h $(DESTDIR)$(includedir)/srtp
+ 	if [ "$(srcdir)" != "." ]; then cp crypto/include/*.h $(DESTDIR)$(includedir)/srtp; fi
+ 	if [ -f libsrtp.a ]; then cp libsrtp.a $(DESTDIR)$(libdir)/; fi
+-	if [ -f libsrtp.so ]; then cp libsrtp.so $(DESTDIR)$(libdir)/; fi
++	if [ -f libsrtp.$(SHAREDLIBSUFFIX) ]; then \
++		cp libsrtp.$(SHAREDLIBSUFFIX) $(DESTDIR)$(libdir)/; \
++		cp libsrtp.$(SHAREDLIBSUFFIXNOVER) $(DESTDIR)$(libdir)/; \
++	fi
+ 	if [ "$(pkgconfig_DATA)" != "" ]; then \
+ 		$(INSTALL) -d $(DESTDIR)$(pkgconfigdir); \
+ 		cp $(srcdir)/$(pkgconfig_DATA) $(DESTDIR)$(pkgconfigdir)/; \
+@@ -241,8 +255,7 @@ install:
+ 
+ uninstall:
+ 	rm -f $(DESTDIR)$(includedir)/srtp/*.h
+-	rm -f $(DESTDIR)$(libdir)/libsrtp.a
+-	rm -f $(DESTDIR)$(libdir)/libsrtp.so
++	rm -f $(DESTDIR)$(libdir)/libsrtp.*
+ 	-rmdir $(DESTDIR)$(includedir)/srtp
+ 	if [ "$(pkgconfig_DATA)" != "" ]; then \
+ 		rm -f $(DESTDIR)$(pkgconfigdir)/$(pkgconfig_DATA); \
+@@ -250,7 +263,7 @@ uninstall:
+ 
+ clean:
+ 	rm -rf $(cryptobj) $(srtpobj) $(cryptomath) TAGS \
+-        libcryptomath.a libsrtp.a libsrtp.so core *.core test/core
++        libcryptomath.a libsrtp.* core *.core test/core
+ 	for a in * */* */*/*; do			\
+               if [ -f "$$a~" ] ; then rm -f $$a~; fi;	\
+         done;
+-- 
+2.1.0
+
