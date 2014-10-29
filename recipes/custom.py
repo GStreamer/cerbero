@@ -4,6 +4,7 @@ import shutil
 from collections import defaultdict
 
 from cerbero.build import recipe
+from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform
 from cerbero.utils import to_unixpath
@@ -11,7 +12,6 @@ from cerbero.utils import to_unixpath
 
 class GStreamerStatic(recipe.Recipe):
 
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static "
     extra_configure_options = ''
     # Static build will always fail on make check
@@ -19,20 +19,27 @@ class GStreamerStatic(recipe.Recipe):
 
     def prepare(self):
         self.project_name = self.name.replace('-static', '')
-        self.remotes['upstream'] = 'git://anongit.freedesktop.org/gstreamer/%s' \
-                        % self.project_name
+        if self.stype in (SourceType.GIT, SourceType.GIT_TARBALL):
+            self.config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+            self.remotes['upstream'] = 'git://anongit.freedesktop.org/gstreamer/' + self.project_name
+            self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, self.project_name))
+            self.repo_dir = os.path.join(self.config.local_sources,
+                                         self.project_name)
+        elif self.stype == SourceType.TARBALL:
+            # Ensure that the correct unpacked directory is used 
+            # as the build directory
+            self.build_dir = os.path.join(os.path.dirname(self.build_dir),
+                                          '{0}-{1}'.format(self.project_name,
+                                                           self.version))
+        else:
+            raise Exception("Static recipes only work with GIT, GIT_TARBALL, and TARBALL SourceTypes")
 
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         self.configure_options += ' ' + self.extra_configure_options
 
-        self.remotes['origin'] = ('%s/%s.git' %
-                (self.config.git_root, self.project_name))
-
         self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
         self.make_install = 'make install DESTDIR=%s' % self.tmp_destdir
-        self.repo_dir = os.path.join(self.config.local_sources,
-                                     self.project_name)
 
         # Fill the list of files with the static library and the libtool link
         # library, libgstplugin.a and libgstplugin.la
@@ -79,8 +86,9 @@ class GStreamerStatic(recipe.Recipe):
         for f in self._files_list:
             f_no_static = f.replace('/static/', '/')
             shutil.copyfile(os.path.join(self.tmp_destdir,
-                to_unixpath(self.config.prefix)[1:], f_no_static),
-                os.path.join(self.config.prefix, f))
+                                         to_unixpath(self.config.prefix)[1:],
+                                         f_no_static),
+                            os.path.join(self.config.prefix, f))
 
 
 def list_gstreamer_plugins_by_category(config):
