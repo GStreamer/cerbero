@@ -17,7 +17,8 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
+        if self.config.target_platform != Platform.LINUX or \
+           self.config.target_distro == Distro.NONE:
             self.configure_options += '--with-icu=no '
         else:
             self.files_devel.append('lib/pkgconfig/harfbuzz-icu.pc')
