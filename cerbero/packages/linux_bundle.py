@@ -120,6 +120,7 @@ class LinuxBundler(PackagerBase):
                 shell.call("gtk-update-icon-cache %s" % icondir, fail=False)
 
         shell.call("update-mime-database %s" % os.path.join(self.tmp_install_dir, "share", "mime"), fail=False)
+        shell.call("glib-compile-schemas %s/share/glib-2.0/schemas" % self.tmp_install_dir)
 
         # Use system wide applications in case the bundle needs to open apps not included in
         # the bundle (to show the documentation most probably)
