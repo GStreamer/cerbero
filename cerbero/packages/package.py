@@ -309,11 +309,17 @@ class Package(PackageBase):
         self._recipes_files = {}
         for r in self._files:
             l = r.split(':')
-            self._recipes_files[l[0]] = l[1:]
+            if self._recipes_files.has_key(l[0]):
+                self._recipes_files[l[0]] += l[1:]
+            else:
+                self._recipes_files[l[0]] = l[1:]
         self._recipes_files_devel = {}
         for r in self._files_devel:
             l = r.split(':')
-            self._recipes_files_devel[l[0]] = l[1:]
+            if self._recipes_files_devel.has_key(l[0]):
+                self._recipes_files_devel[l[0]] += l[1:]
+            else:
+                self._recipes_files_devel[l[0]] = l[1:]
 
     def _list_licenses(self, recipes_files):
         licenses = {}
