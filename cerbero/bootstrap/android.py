@@ -27,7 +27,7 @@ from cerbero.utils import shell
 class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r9d-%s-%s.tar.bz2'
+    NDK_TAR = 'android-ndk-r10c-%s-%s.bin'
 
     def start(self):
         dest = self.config.toolchain_prefix
@@ -40,8 +40,9 @@ class AndroidBootstrapper (BootstrapperBase):
         shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
         if not os.path.exists(os.path.join(dest, "README.TXT")):
             try:
-                shell.call('tar -xvjf %s' % ndk_tar, dest)
-                shell.call('mv android-ndk-r9d/* .', dest)
+                shell.call('chmod +x ./%s' % ndk_tar, dest)
+                shell.call('./%s' % ndk_tar, dest)
+                shell.call('mv android-ndk-r10c/* .', dest)
             except Exception:
                 pass
 
