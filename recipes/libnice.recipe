@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     configure_options = ' --enable-static --enable-shared --with-gstreamer \
             --without-gstreamer-0.10 --enable-compile-warnings=maximum'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
+    patches = ['libnice/libnice-add-win32-support.patch']
+    autoreconf = True
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']

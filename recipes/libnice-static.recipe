@@ -12,7 +12,8 @@ class Recipe(custom.GStreamerStatic):
         --enable-compile-warnings=maximum'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
     # Patch is from upstream, remove for next release
-    patches = ['libnice/libnice-add-static-plugins-support.patch']
+    patches = ['libnice/libnice-add-static-plugins-support.patch',
+               'libnice/libnice-add-win32-support.patch']
     autoreconf = True
 
     files_plugins_net_devel = ['libgstnice']
