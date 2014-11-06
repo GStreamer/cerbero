@@ -37,14 +37,19 @@ class Wipe(Command):
                            'input')),
                 ArgparseArgument('--build-tools', action='store_true',
                     default=False,
-                    help=_('wipe the build tools too'))])
+                    help=_('wipe the build tools too')),
+                ArgparseArgument('--keep-sources', action='store_true',
+                    default=False,
+                    help=_('keep downloaded source files')),
+                ])
 
     def run(self, config, args):
         to_remove = [os.path.join(config.home_dir, config.cache_file)]
         to_remove.append(config.prefix)
-        to_remove.append(config.sources)
         to_remove.append(config.logs)
-        if (args.build_tools):
+        if not args.keep_sources:
+            to_remove.append(config.sources)
+        if args.build_tools:
             to_remove.append(os.path.join(config.home_dir, config.build_tools_cache))
             to_remove.append(config.build_tools_prefix)
             to_remove.append(config.build_tools_sources)
@@ -54,12 +59,15 @@ class Wipe(Command):
             return
 
         options = ['yes', 'no']
-        msg = _("WARNING!!!\n"
-                "This command will delete cerbero's build cache, "
-                "the sources directory and the builds directory "
-                "to reset the build system to its initial state.\n"
-                "The following paths will be removed:\n%s\n"
-                "Do you want to continue?" % '\n'.join(to_remove))
+        en_msg = "WARNING!!!\n" \
+                "This command will delete cerbero's build cache"
+        if not args.keep_sources:
+            en_msg += ", the sources directory,"
+        en_msg += " and the builds directory " \
+                "to reset the build system to its initial state.\n" \
+                "The following paths will be removed:\n%s\n" \
+                "Do you want to continue?" % '\n'.join(to_remove)
+        msg = _(en_msg)
         # Ask once
         if shell.prompt(msg, options) == options[0]:
             msg = _("Are you sure?")
