@@ -1,0 +1,31 @@
+From 1789d5507a208734f62471d2e20ed48a8c5f9bd1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Fri, 7 Nov 2014 20:27:49 +0100
+Subject: [PATCH] Don't use -mstructure-size-boundary=8
+
+It does not exist on clang.
+---
+ configure.ac | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 7b804b2..561c7cb 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -88,13 +88,6 @@ if test "x$GCC" = "xyes"; then
+ 			CXXFLAGS="$CXXFLAGS -fvisibility-inlines-hidden"
+ 		;;
+ 	esac
+-
+-	case "$host" in
+-		arm-*-*)
+-			# Request byte alignment on arm
+-			CXXFLAGS="$CXXFLAGS -mstructure-size-boundary=8"
+-		;;
+-	esac
+ fi
+ 
+ AM_CONDITIONAL(HAVE_GCC, test "x$GCC" = "xyes")
+-- 
+1.9.3 (Apple Git-50)
+

@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     deps = ['fontconfig', 'cairo', 'glib']
     configure_options = "--enable-static "
+    patches = ['harfbuzz/0001-Don-t-use-mstructure-size-boundary-8.patch']
+    autoreconf = True
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
