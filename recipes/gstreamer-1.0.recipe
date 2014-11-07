@@ -48,6 +48,7 @@ class Recipe(recipe.Recipe):
             'include/gstreamer-1.0/gst/base',
             'include/gstreamer-1.0/gst/controller',
             'include/gstreamer-1.0/gst/net',
+            'lib/gstreamer-1.0/include/gst/*.h',
             'lib/pkgconfig/gstreamer-1.0.pc',
             'lib/pkgconfig/gstreamer-base-1.0.pc',
             'lib/pkgconfig/gstreamer-controller-1.0.pc',
@@ -97,7 +98,7 @@ class Recipe(recipe.Recipe):
                 arch = 'arm64'
             elif Architecture.is_arm(arch):
                 arch = 'arm'
-            self.files_devel.append(os.path.join('include', 'gstreamer-1.0', 'gst', '*', 'gstconfig.h'))
+            self.files_devel.append(os.path.join('lib', 'gstreamer-1.0', 'include', 'gst', '*', 'gstconfig.h'))
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -112,12 +113,12 @@ class Recipe(recipe.Recipe):
             elif Architecture.is_arm(arch):
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.config.prefix, 'include', 'gstreamer-1.0',
-                                     'gst', arch)
+            arch_dir = os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',
+                                     'include', 'gst', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
             shutil.copyfile(os.path.join(self.build_dir, 'gst', 'gstconfig.h'),
                         os.path.join(arch_dir, 'gstconfig.h'))
-            with open(os.path.join(self.config.prefix, 'include', 'gstreamer-1.0',
-                                   'gst', 'gstconfig.h'), 'w+') as f:
+            with open(os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',
+                                   'include', 'gst', 'gstconfig.h'), 'w+') as f:
                 f.write(GST_CONFIG_UNVERSAL)
