@@ -151,11 +151,14 @@ def local_checkout(git_dir, local_git_dir, commit):
     '''
     # reset to a commit in case it's the first checkout and the masterbranch is
     # missing
+    branch_name = 'cerbero_build'
     shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
-    shell.call('%s branch build' % GIT, local_git_dir, fail=False)
-    shell.call('%s checkout build' % GIT, local_git_dir)
+    shell.call('%s branch %s' % (GIT, branch_name), local_git_dir, fail=False)
+    shell.call('%s checkout %s' % (GIT, branch_name), local_git_dir)
     shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
-    return shell.call('%s clone %s -s -b build .' % (GIT, local_git_dir), git_dir)
+    return shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir,
+                                                  branch_name),
+                      git_dir)
 
 
 def add_remote(git_dir, name, url):
