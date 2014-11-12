@@ -17,12 +17,4 @@ class Recipe(custom.GStreamerStatic):
     autoreconf = True
 
     files_plugins_net_devel = ['libgstnice']
-
-    def prepare(self):
-        # FIXME - if_arp.h?
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc \
-                --disable-introspection'
-        else:
-            self.configure_options += ' --enable-gtk-doc'
-        super(Recipe, self).prepare()
+    # FIXME - if_arp.h? (iOS)
