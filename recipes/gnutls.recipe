@@ -8,9 +8,9 @@ class Recipe(recipe.Recipe):
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     stype = SourceType.TARBALL
-    # main library is LGPLv3+ and binaries and libgnutls-openssl are
+    # main library is LGPLv2+ and binaries and libgnutls-openssl are
     # GPLv3+ and defined below
-    licenses = [License.LGPLv3Plus]
+    licenses = [License.LGPLv2Plus]
     configure_options = "--enable-local-libopts --disable-guile \
         --enable-static --enable-zlib --enable-shared --disable-doc"
     deps = ['zlib', 'nettle', 'libtasn1']
