@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
                'fontconfig/0002-Port-to-Android.patch',
                'fontconfig/0003-configure-Allow-static-build.patch',
                'fontconfig/0001-Do-not-build-tests-on-windows.patch',
+               'fontconfig/0001-Don-t-use-_mktemp_s-which-is-not-available-in-XP.patch',
                ]
 
     files_libs = ['libfontconfig']
