@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 from cerbero.build.build import modify_environment
+from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
@@ -28,6 +29,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN:
             self.openssl_platform = 'darwin64-x86_64-cc'
         elif self.config.target_platform == Platform.LINUX:
+            # FIXME: Does this work properly on 32-bit Linux?
             self.openssl_platform = 'linux-x86_64'
         elif self.config.target_platform == Platform.WINDOWS:
             # Set CROSS_COMPILE so that the correct `windres` is invoked.
@@ -39,10 +41,20 @@ class Recipe(recipe.Recipe):
                 self.target_host_prefix = 'x86_64-w64-mingw32-'
                 self.openssl_platform = 'mingw64'
                 self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
-
-        self.append_env['CFLAGS'] = ' -DRAND_bytes=openssl_RAND_bytes'
         self.make_install = 'make install_sw'
 
     @modify_environment
     def configure(self):
-        shell.call('sh ./Configure --prefix=%s shared %s' % (self.config.prefix, self.openssl_platform), self.build_dir)
+        # OpenSSL guesses the libdir incorrectly on x86_64
+        config_sh = 'sh ./Configure --prefix=' + self.config.prefix + \
+            ' --libdir=lib' + self.config.lib_suffix
+        shell.call(config_sh + ' shared ' + self.openssl_platform, self.build_dir)
+
+    def post_install(self):
+        # XXX: Don't forget to update this when the soname is bumped!
+        libtool_la = LibtoolLibrary('ssl', 1, 0, 0, self.config.libdir,
+                                    self.config.target_platform)
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('crypto', 1, 0, 0, self.config.libdir,
+                                    self.config.target_platform)
+        libtool_la.save()
