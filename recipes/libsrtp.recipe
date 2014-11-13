@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
@@ -23,3 +24,8 @@ class Recipe(recipe.Recipe):
             self.make += ' all libsrtp.dylib'
         elif self.config.target_platform == Platform.WINDOWS:
             self.make += ' all libsrtp.dll'
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('srtp', 0, None, None, self.config.libdir,
+                                    self.config.target_platform)
+        libtool_la.save()
