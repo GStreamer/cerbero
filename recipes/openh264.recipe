@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
@@ -9,6 +10,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     licenses = [License.BSD]
+    patches = [name + '/versioned-shared-library.patch']
     files_libs = ['libopenh264']
     files_devel = ['include/wels']
 
@@ -64,3 +66,8 @@ class Recipe(recipe.Recipe):
                           {'-miphoneos-version-min': '-mios-simulator-version-min'})
 
         # No configure script
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
+                                    self.config.target_platform)
+        libtool_la.save()
