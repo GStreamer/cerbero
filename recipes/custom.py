@@ -85,6 +85,8 @@ class GStreamerStatic(recipe.Recipe):
         # generated with the shared build
         for f in self._files_list:
             f_no_static = f.replace('/static/', '/')
+            # FIXME: This also needs to update the libdir= variable for .la
+            # files, otherwise libtool gives a "library was moved" warning
             shutil.copyfile(os.path.join(self.tmp_destdir,
                                          to_unixpath(self.config.prefix)[1:],
                                          f_no_static),
