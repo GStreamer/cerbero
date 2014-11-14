@@ -91,7 +91,8 @@ class Config (object):
                    'build_tools_cache', 'home_dir', 'recipes_commits',
                    'ios_platform', 'extra_build_tools',
                    'distro_packages_install', 'interactive',
-                   'target_arch_flags', 'sysroot', 'isysroot']
+                   'target_arch_flags', 'sysroot', 'isysroot',
+                   'extra_lib_path']
 
     def __init__(self):
         self._check_uninstalled()
@@ -238,6 +239,8 @@ class Config (object):
             ld_library_path = libdir
         else:
             ld_library_path = ""
+        if self.extra_lib_path is not None:
+            ld_library_path = self._join_path(ld_library_path, self.extra_lib_path)
         if self.toolchain_prefix is not None:
             ld_library_path = self._join_path(ld_library_path,
                 os.path.join(self.toolchain_prefix, 'lib'))
