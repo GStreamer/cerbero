@@ -16,7 +16,19 @@ class Package(package.App):
     org = 'org.pitivi'
     uuid = 'd9626750-e8b7-4e40-944d-98b67ed0c6bf'
 
-    deps = ['gstreamer-1.0', 'gtk-3.0', 'python3']
+    deps = ['gstreamer-1.0-core',
+            'gstreamer-1.0-system',
+            'gstreamer-1.0-playback',
+            'gstreamer-1.0-codecs',
+            'gstreamer-1.0-effects',
+            'gstreamer-1.0-visualizers',
+            'gstreamer-1.0-codecs-gpl',
+            'gstreamer-1.0-codecs-restricted',
+            'gstreamer-1.0-libav',
+            'gstreamer-1.0-encoding',
+            'gstreamer-1.0-editing',
+            'gstreamer-1.0-devtools',
+            'gtk-3.0', 'python3']
     files = ['shared-mime-info', 'clutter', 'clutter-gtk']
 
     # Needed to bundle for linux
