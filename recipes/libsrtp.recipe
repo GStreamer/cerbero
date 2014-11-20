@@ -2,6 +2,7 @@
 
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell
+import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
@@ -17,13 +18,13 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # Don't accidentially build with pcap support
         self.append_env['ac_cv_lib_pcap_pcap_create'] = 'no'
-        if self.config.target_platform in (Platform.LINUX, Platform.ANDROID):
-            # libsrtp.so is not built with 'all'
-            self.make += ' all libsrtp.so'
-        elif self.config.target_platform in (Platform.DARWIN, Platform.IOS):
-            self.make += ' all libsrtp.dylib'
-        elif self.config.target_platform == Platform.WINDOWS:
-            self.make += ' all libsrtp.dll'
+        self.make += ' all shared_library'
+
+    def install(self):
+        super(Recipe, self).install()
+        libdir = os.path.join(self.config.prefix,
+                              'lib' + self.config.lib_suffix)
+        shutil.copy(os.path.join(self.build_dir, 'srtp.def'), libdir)
 
     def post_install(self):
         libtool_la = LibtoolLibrary('srtp', 0, None, None, self.config.libdir,
