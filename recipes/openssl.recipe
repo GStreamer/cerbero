@@ -40,7 +40,7 @@ class Recipe(recipe.Recipe):
                 self.target_host_prefix = 'x86_64-w64-mingw32-'
                 self.openssl_platform = 'mingw64'
                 self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
-        self.make = 'make LDFLAGS="$LDFLAGS"'
+        self.make += ' LDFLAGS="$LDFLAGS"'
         self.make_install = 'make install_sw'
 
     @modify_environment
