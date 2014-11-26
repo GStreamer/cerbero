@@ -29,5 +29,6 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!
         libtool_la = LibtoolLibrary('srtp', 1, None, None, self.config.libdir,
-                                    self.config.target_platform)
+                                    self.config.target_platform,
+                                    deps=('-ldl', '-lc'))
         libtool_la.save()
