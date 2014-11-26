@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
                   'libgstinsertbin-1.0']
 
     files_plugins_devel = [
+        'include/gstreamer-1.0/gst/gl',
         'include/gstreamer-1.0/gst/mpegts'
     ]
 
