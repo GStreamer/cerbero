@@ -10,6 +10,10 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     licenses = [License.BSD]
+    # XXX: Part of this has been sent upstream:
+    # https://github.com/cisco/openh264/pull/1566
+    # However, upstream didn't want the library to be versioned on Android, so
+    # we'll need to carry forward that bit for ourselves.
     patches = [name + '/versioned-shared-library.patch']
     files_libs = ['libopenh264']
     files_devel = ['include/wels']
@@ -68,6 +72,7 @@ class Recipe(recipe.Recipe):
         # No configure script
 
     def post_install(self):
+        # XXX: Don't forget to keep this in sync with the library version!
         libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
                                     self.config.target_platform)
         libtool_la.save()
