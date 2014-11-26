@@ -6,11 +6,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
-    version = 'master'
+    version = '1.5.0'
+    stype = SourceType.TARBALL
+    url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     licenses = [License.BSD_like]
-    commit = 'origin/master'
-    remotes = { 'origin': 'https://github.com/cisco/libsrtp.git' }
-    patches = ['libsrtp/0001-Makefile.in-Add-support-for-building-on-cross-compil.patch']
+    patches = [name + '/shared-library.patch']
 
     files_libs = ['libsrtp']
     files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
@@ -27,6 +27,7 @@ class Recipe(recipe.Recipe):
         shutil.copy(os.path.join(self.build_dir, 'srtp.def'), libdir)
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('srtp', 0, None, None, self.config.libdir,
+        # XXX: Don't forget to keep this in sync with the library version!
+        libtool_la = LibtoolLibrary('srtp', 1, None, None, self.config.libdir,
                                     self.config.target_platform)
         libtool_la.save()
