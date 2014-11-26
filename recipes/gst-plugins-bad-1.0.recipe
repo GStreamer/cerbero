@@ -38,6 +38,10 @@ class Recipe(recipe.Recipe):
                   'libgstgl-1.0', 'libgstbadbase-1.0', 'libgstbadvideo-1.0',
                   'libgstinsertbin-1.0']
 
+    files_plugins_devel = [
+        'include/gstreamer-1.0/gst/mpegts'
+    ]
+
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
              'lib/gstreamer-1.0/libgstaiff%(mext)s',
