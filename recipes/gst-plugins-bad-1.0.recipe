@@ -30,6 +30,7 @@ class Recipe(recipe.Recipe):
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'schroedinger', 'libdca', 'libmms', 'libdvdnav',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg']
+    use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
 
