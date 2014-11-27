@@ -12,6 +12,7 @@ class Recipe(recipe.Recipe):
     patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch']
     platform_deps = {
         Platform.DARWIN:  ['libiconv'],
+        Platform.IOS:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
             }
 
