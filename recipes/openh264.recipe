@@ -73,7 +73,19 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!
+        dependency_libs=[]
+        if self.config.target_platform == Platform.IOS:
+            dependency_libs += ['-lc++']
+        elif self.config.target_platform == Platform.DARWIN:
+            dependency_libs += ['-lstdc++']
+        elif self.config.target_platform == Platform.ANDROID:
+            dependency_libs += ['-lgnustl', '-lm']
+        elif self.config.target_platform in [Platform.WINDOWS, Platform.LINUX]:
+            dependency_libs += ['-lstdc++', '-lm']
+        else:
+            raise NotImplementedError
+
         libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
                                     self.config.target_platform,
-                                    deps=('-lm', '-lc', '-ldl'))
+                                    deps=dependency_libs)
         libtool_la.save()

@@ -59,12 +59,10 @@ class Recipe(recipe.Recipe):
         # We don't build shared libraries on iOS as the build system
         # of openssl is broken and iOS does not support them anyway.
         if self.config.target_platform != Platform.IOS:
-            common_deps = ['-ldl', '-lc']
             libtool_la = LibtoolLibrary('ssl', 1, 0, 0, self.config.libdir,
                                         self.config.target_platform,
-                                        deps=['crypto'] + common_deps)
+                                        deps=['crypto'])
             libtool_la.save()
             libtool_la = LibtoolLibrary('crypto', 1, 0, 0, self.config.libdir,
-                                        self.config.target_platform,
-                                        deps=common_deps)
+                                        self.config.target_platform)
             libtool_la.save()
