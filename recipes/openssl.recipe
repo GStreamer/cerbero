@@ -17,19 +17,47 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # map platforms
         if self.config.target_platform == Platform.IOS:
-            self.openssl_platform = 'BSD-generic32'
+            if self.config.target_arch == Architecture.ARMv7:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.ARMv7S:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'BSD-generic64'
+            elif self.config.target_arch == Architecture.ARM64:
+                self.openssl_platform = 'BSD-generic64'
+            else:
+                raise NotImplementedError
         elif self.config.target_platform == Platform.ANDROID:
-            self.openssl_platform = 'android-armv7'
+            if self.config.target_arch == Architecture.ARM:
+                self.openssl_platform = 'android'
+            elif self.config.target_arch == Architecture.ARMv7:
+                self.openssl_platform = 'android-armv7'
+            elif self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'android-x86'
+            else:
+                raise NotImplementedError
+
             android_dev_path = os.path.join(self.config.toolchain_prefix,
                                             "platforms", "android-9",
                                             "arch-arm", "usr");
             # Set ANDROID_DEV so that the correct library search path is set
             self.make += ' ANDROID_DEV="{0}"'.format(android_dev_path)
         elif self.config.target_platform == Platform.DARWIN:
-            self.openssl_platform = 'darwin64-x86_64-cc'
+            if self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'darwin-i386-cc'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'darwin64-x86_64-cc'
+            else:
+                raise NotImplementedError
         elif self.config.target_platform == Platform.LINUX:
-            # FIXME: Does this work properly on 32-bit Linux?
-            self.openssl_platform = 'linux-x86_64'
+            if self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'linux-elf'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'linux-x86_64'
+            else:
+                raise NotImplementedError
         elif self.config.target_platform == Platform.WINDOWS:
             # Set CROSS_COMPILE so that the correct `windres` is invoked.
             # We don't do this in Configure because that messes with CC/LD/AR etc.
@@ -40,6 +68,8 @@ class Recipe(recipe.Recipe):
                 self.target_host_prefix = 'x86_64-w64-mingw32-'
                 self.openssl_platform = 'mingw64'
                 self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
+            else:
+                raise NotImplementedError
         self.make += ' LDFLAGS="$LDFLAGS"'
         self.make_install = 'make install_sw'
 
