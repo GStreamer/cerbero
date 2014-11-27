@@ -70,7 +70,8 @@ class Recipe(recipe.Recipe):
                 self.make += ' CROSS_COMPILE=x86_64-w64-mingw32-'
             else:
                 raise NotImplementedError
-        self.make += ' LDFLAGS="$LDFLAGS"'
+        # CFLAG is no typo!
+        self.make += ' LDFLAGS+="$LDFLAGS" CFLAG+="$CFLAGS"'
         self.make_install = 'make install_sw'
 
     @modify_environment
