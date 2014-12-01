@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/gnu/autoconf/autoconf-2.69.tar.xz'
     deps = ['m4']
 
-    files_bin = [
+    files_bins = [
         'bin/autoconf', 'bin/autoheader',
         'bin/autom4te', 'bin/autoreconf',
         'bin/autoscan', 'bin/autoupdate',

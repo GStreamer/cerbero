@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
         if self.config.platform in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' --disable-gtk-doc'
 
-    files_bin = ['bin/insanity-compare',
+    files_bins = ['bin/insanity-compare',
                  'bin/insanity-dbmerge',
                  'bin/insanity-dumpresults',
                  'bin/insanity-dumpresults-json',
