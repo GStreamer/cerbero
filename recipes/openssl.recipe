@@ -14,6 +14,10 @@ class Recipe(recipe.Recipe):
     # Parallel make fails randomly; probably races
     allow_parallel_build = False
 
+    files_bins = ['openssl']
+    files_libs = ['libcrypto', 'libssl']
+    files_devel = ['include/openssl']
+
     def prepare(self):
         # map platforms
         if self.config.target_platform == Platform.IOS:
