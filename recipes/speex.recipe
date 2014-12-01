@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.2rc1'
     licenses = [License.BSD_like]
     deps = ['libogg']
+    allow_parallel_build = False
 
     files_libs = ['libspeex', 'libspeexdsp']
     files_bins = ['speexdec', 'speexenc']
