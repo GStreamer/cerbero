@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--enable-static --disable-introspection --disable-gsm \
-        --disable-examples --disable-festival --disable-inter \
+        --disable-examples --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
@@ -57,6 +57,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstfrei0r%(mext)s',
              'lib/gstreamer-1.0/libgstgaudieffects%(mext)s',
              'lib/gstreamer-1.0/libgstgeometrictransform%(mext)s',
+             'lib/gstreamer-1.0/libgstinter%(mext)s',
              'lib/gstreamer-1.0/libgstinterlace%(mext)s',
              'lib/gstreamer-1.0/libgstivtc%(mext)s',
              'lib/gstreamer-1.0/libgstliveadder%(mext)s',

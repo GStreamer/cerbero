@@ -6,7 +6,7 @@ class Recipe(custom.GStreamerStatic):
     version = '1.5'
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
-    extra_configure_options = '--disable-gsm --disable-festival --disable-inter \
+    extra_configure_options = '--disable-gsm --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
@@ -38,6 +38,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstfrei0r',
              'libgstgaudieffects',
              'libgstgeometrictransform',
+             'libgstinter',
              'libgstinterlace',
              'libgstivtc',
              'libgstliveadder',
