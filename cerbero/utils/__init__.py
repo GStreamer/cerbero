@@ -152,7 +152,7 @@ def system_info():
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
             elif d[1].startswith('7.') or d[1].startswith('wheezy'):
                 distro_version = DistroVersion.DEBIAN_WHEEZY
-            elif d[1].startswith('jessie'):
+            elif d[1].startswith('8.') or d[1].startswith('jessie'):
                 distro_version = DistroVersion.DEBIAN_JESSIE
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
