@@ -9,6 +9,6 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/gnu/automake/automake-1.14.tar.xz'
     deps = ['autoconf']
 
-    files_bins = ['bin/automake', 'bin/aclocal',
+    files_bin = ['bin/automake', 'bin/aclocal',
                  'bin/automake-1.14', 'bin/aclocal-1.14']
     files_share = ['share/aclocal-1.14', 'share/automake-1.14']
