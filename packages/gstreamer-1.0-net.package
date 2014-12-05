@@ -19,7 +19,7 @@ class Package(package.Package):
     files = ['libsoup:libs', 'libsrtp:libs', 'libnice:libs', 'libnice:plugins_net',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
-			'gst-rtsp-server-1.0:libs']
+            'gst-rtsp-server-1.0:libs:typelibs']
     files_devel = ['libnice-static:plugins_net_devel',
             'gst-plugins-base-1.0-static:plugins_net_devel',
             'gst-plugins-good-1.0-static:plugins_net_devel',
