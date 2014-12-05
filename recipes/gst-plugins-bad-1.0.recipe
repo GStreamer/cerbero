@@ -183,6 +183,7 @@ class Recipe(recipe.Recipe):
             ]
     }
     files_typelibs = [
+        'GstGL-1.0',
         'GstInsertBin-1.0',
         'GstMpegts-1.0'
         ]
