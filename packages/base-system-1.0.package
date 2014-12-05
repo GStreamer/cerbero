@@ -36,4 +36,4 @@ class Package(package.Package):
 
     def prepare(self):
         if self.config.variants.gi:
-            self.files.append('gobject-introspection:libs')
+            self.files.append('gobject-introspection:libs:typelibs')
