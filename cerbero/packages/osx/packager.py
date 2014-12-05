@@ -153,12 +153,12 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         return [runtime_path, devel_path]
 
     def _get_install_dir(self):
-        if self.config.target_arch != Architecture.UNIVERSAL:
-            arch_dir = self.config.target_arch
-        else:
-            arch_dir = ''
+        #if self.config.target_arch != Architecture.UNIVERSAL:
+        #    arch_dir = self.config.target_arch
+        #else:
+        #    arch_dir = ''
         return os.path.join(self.install_dir, 'Versions',
-                self.sdk_version, arch_dir)
+                self.sdk_version) #, arch_dir)
 
     def _create_package(self, package_type, output_dir, force):
         self.package.set_mode(package_type)

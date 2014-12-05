@@ -118,12 +118,12 @@ class FrameworkBundlePackager(BundlePackagerBase):
         else:
             tmp = tempfile.mkdtemp()
 
-        if self.config.target_arch == Architecture.UNIVERSAL:
-            arch_dir = ''
-        else:
-            arch_dir = self.config.target_arch
+        #if self.config.target_arch == Architecture.UNIVERSAL:
+        #    arch_dir = ''
+        #else:
+        #    arch_dir = self.config.target_arch
 
-        vdir = os.path.join('Versions', self.package.sdk_version, arch_dir)
+        vdir = os.path.join('Versions', self.package.sdk_version) #, arch_dir)
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
 
