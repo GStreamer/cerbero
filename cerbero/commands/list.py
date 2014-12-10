@@ -37,7 +37,12 @@ class List(Command):
         if len(recipes) == 0:
             m.message(_("No recipes found"))
         for recipe in recipes:
-            m.message("%s - %s" % (recipe.name, recipe.version))
+            try:
+                current = recipe.built_version().split("\n")[0]
+            except:
+                current = "Not checked out"
+
+            m.message("%s - %s (current checkout: %s)" % (recipe.name, recipe.version, current))
 
 
 class ListPackages(Command):
