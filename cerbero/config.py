@@ -79,7 +79,7 @@ class Config (object):
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
                    'sources', 'local_sources', 'lib_suffix', 'git_root',
                    'distro', 'target_distro', 'environ_dir', 'cache_file',
-                   'toolchain_prefix', 'distro_version',
+                   'toolchain_prefix', 'toolchain_version', 'distro_version',
                    'target_distro_version', 'allow_system_libs',
                    'packages_dir', 'py_prefix', 'logs',
                    'install_dir', 'allow_parallel_build', 'num_of_cpus',
