@@ -557,7 +557,11 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def _copy_headers(self, files, version_dir):
         # Get the list of headers
         include_files = []
-        for d in self.include_dirs:
+        include_dirs = self.include_dirs
+        # Also copy all headers like include/zlib.h that are not in a
+        # include path given by pkg-config because it's the default one
+        include_dirs.append(os.path.join(self.config.prefix, 'include'))
+        for d in include_dirs:
             include_files += [x for x in files if d in x]
         self._copy_files (include_files, version_dir)
 
