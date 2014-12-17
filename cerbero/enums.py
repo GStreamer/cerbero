@@ -95,6 +95,8 @@ class DistroVersion:
     ANDROID_GINGERBREAD = 'android_gingerbread'  # API Level 9
     ANDROID_ICE_CREAM_SANDWICH = 'android_ice_cream_sandwich'  # API Level 14
     ANDROID_JELLY_BEAN = 'android_jelly_bean'  # API Level 16
+    ANDROID_KITKAT = 'android_kitkat'  # API Level 19
+    ANDROID_LOLLIPOP = 'android_lollipop' # API Level 21
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
