@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'Base system dependencies'
     longdesc = 'Base system dependencies'
     url = "http://gstreamer.freedesktop.org"
-    version = '1.4.4'
+    version = '1.4.5'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
