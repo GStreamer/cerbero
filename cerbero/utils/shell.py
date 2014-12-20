@@ -422,7 +422,12 @@ PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ 
         subprocess.check_call('%s -noxvrt' % msys)
     else:
         shell = os.environ.get('SHELL', '/bin/bash')
-        os.execlp(shell, shell, '--rcfile', bashrc.name)
+        if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:
+            os.execlp(shell, shell, '--rcfile', bashrc.name)
+        else:
+            os.environ["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+            os.execlp(shell, shell)
+
     bashrc.close()
 
 def which(pgm, path=None):
