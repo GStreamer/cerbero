@@ -27,7 +27,7 @@ from cerbero.utils import shell
 class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r10c-%s-%s.bin'
+    NDK_TAR = 'android-ndk-r10d-%s-%s.bin'
 
     def start(self):
         dest = self.config.toolchain_prefix
@@ -42,7 +42,7 @@ class AndroidBootstrapper (BootstrapperBase):
             try:
                 shell.call('chmod +x ./%s' % ndk_tar, dest)
                 shell.call('./%s' % ndk_tar, dest)
-                shell.call('mv android-ndk-r10c/* .', dest)
+                shell.call('mv android-ndk-r10d/* .', dest)
             except Exception:
                 pass
 
