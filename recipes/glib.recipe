@@ -33,8 +33,9 @@ class Recipe(recipe.Recipe):
                "glib/0005-Blacklist-the-bamf-GIO-module.patch",
                "glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
-               "glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch"]
-
+               "glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
+               'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
+              ]
 
     files_libs = [
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
