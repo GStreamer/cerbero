@@ -9,7 +9,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
     patches = ['gmp/0001-Use-results-from-configure-script-for-read-only-data.patch',
-               'gmp/0002-Fix-compilation-on-OSX.patch']
+               'gmp/0002-Fix-compilation-on-OSX.patch',
+               'gmp/0003-Conditionalise-ARM-asm-on-__thumb__.patch']
     tarball_dirname = 'gmp-6.0.0'
 
     files_libs = ['libgmp']
