@@ -1,0 +1,46 @@
+From 699ca1e0be3131b7fe55e38f218e379f146d55e6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Martin=20Storsj=C3=B6?= <martin@martin.st>
+Date: Wed, 22 Oct 2014 09:40:16 +0300
+Subject: [PATCH] Set LDFLAGS after the object files in shared library linking
+ commands
+
+This makes sure that the built libopenh264.so actually links to
+libpthread.so.
+---
+ Makefile | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 35f83b1..ed24a38 100644
+--- a/Makefile
++++ b/Makefile
+@@ -174,7 +174,7 @@ $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX): $(ENCODER_OBJS) $(DECODER_OBJS) $(PROC
+ 
+ $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER): $(ENCODER_OBJS) $(DECODER_OBJS) $(PROCESSING_OBJS) $(COMMON_OBJS)
+ 	$(QUIET)rm -f $@
+-	$(QUIET_CXX)$(CXX) $(SHARED) $(LDFLAGS) $(CXX_LINK_O) $+ $(SHLDFLAGS)
++	$(QUIET_CXX)$(CXX) $(SHARED) $(CXX_LINK_O) $+ $(LDFLAGS) $(SHLDFLAGS)
+ 	if [ "$(SHAREDLIBSUFFIXVER)" != "$(SHAREDLIBSUFFIX)" ]; then \
+ 		ln -sfn $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER) \
+ 			$(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIX); \
+@@ -191,7 +191,7 @@ endif
+ 
+ $(LIBPREFIX)$(MODULE_NAME).$(SHAREDLIBSUFFIXVER): $(MODULE_OBJS) $(ENCODER_OBJS) $(DECODER_OBJS) $(PROCESSING_OBJS) $(COMMON_OBJS)
+ 	$(QUIET)rm -f $@
+-	$(QUIET_CXX)$(CXX) $(SHARED) $(LDFLAGS) $(CXX_LINK_O) $+ $(SHLDFLAGS) $(MODULE_LDFLAGS)
++	$(QUIET_CXX)$(CXX) $(SHARED) $(CXX_LINK_O) $+ $(LDFLAGS) $(SHLDFLAGS) $(MODULE_LDFLAGS)
+ 
+ install-headers:
+ 	mkdir -p $(PREFIX)/include/wels
+@@ -236,7 +236,7 @@ $(LIBPREFIX)ut.$(LIBSUFFIX): $(DECODER_UNITTEST_OBJS) $(ENCODER_UNITTEST_OBJS) $
+ LIBRARIES +=$(LIBPREFIX)ut.$(SHAREDLIBSUFFIX)
+ $(LIBPREFIX)ut.$(SHAREDLIBSUFFIX): $(DECODER_UNITTEST_OBJS) $(ENCODER_UNITTEST_OBJS) $(PROCESSING_UNITTEST_OBJS) $(API_TEST_OBJS) $(COMMON_UNITTEST_OBJS)  $(CODEC_UNITTEST_DEPS)
+ 	$(QUIET)rm -f $@
+-	$(QUIET_CXX)$(CXX) $(SHARED) $(LDFLAGS) $(CXX_LINK_O) $+ $(CODEC_UNITTEST_LDFLAGS)
++	$(QUIET_CXX)$(CXX) $(SHARED) $(CXX_LINK_O) $+ $(LDFLAGS) $(CODEC_UNITTEST_LDFLAGS)
+ 
+ binaries: codec_unittest$(EXEEXT)
+ BINARIES += codec_unittest$(EXEEXT)
+-- 
+2.1.4
+

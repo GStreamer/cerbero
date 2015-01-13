@@ -14,7 +14,8 @@ class Recipe(recipe.Recipe):
     # https://github.com/cisco/openh264/pull/1566
     # However, upstream didn't want the library to be versioned on Android, so
     # we'll need to carry forward that bit for ourselves.
-    patches = [name + '/versioned-shared-library.patch']
+    patches = [name + '/versioned-shared-library.patch',
+               name + '/0001-Set-LDFLAGS-after-the-object-files-in-shared-library.patch']
     files_libs = ['libopenh264']
     files_devel = ['include/wels']
 
