@@ -14,7 +14,9 @@ class Recipe(recipe.Recipe):
     # https://github.com/cisco/openh264/pull/1566
     # However, upstream didn't want the library to be versioned on Android, so
     # we'll need to carry forward that bit for ourselves.
-    patches = [name + '/0001-Add-version-suffix.patch']
+    # 0002: Fixed upstream, remove patch on next update
+    patches = [name + '/0001-Add-version-suffix.patch',
+               name + '/0002-Don-t-install-the-pkg-config-file-as-readonly.patch']
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
 
@@ -84,11 +86,6 @@ class Recipe(recipe.Recipe):
             dependency_libs += ['-lstdc++', '-lm']
         else:
             raise NotImplementedError
-
-        # Unwritable files are not a good idea, openh264 installs it with 444
-        # by default
-        pc_path = os.path.join(self.config.prefix, 'lib', 'pkgconfig', 'openh264.pc')
-        os.chmod(pc_path, 0644)
 
         libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
                                     self.config.target_platform,
