@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     # we'll need to carry forward that bit for ourselves.
     patches = [name + '/0001-Add-version-suffix.patch']
     files_libs = ['libopenh264']
-    files_devel = ['include/wels']
+    files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
 
     def prepare(self):
         make = self.make
