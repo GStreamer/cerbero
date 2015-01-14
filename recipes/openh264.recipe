@@ -85,6 +85,11 @@ class Recipe(recipe.Recipe):
         else:
             raise NotImplementedError
 
+        # Unwritable files are not a good idea, openh264 installs it with 444
+        # by default
+        pc_path = os.path.join(self.config.prefix, 'lib', 'pkgconfig', 'openh264.pc')
+        os.chmod(pc_path, 0644)
+
         libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
                                     self.config.target_platform,
                                     deps=dependency_libs)
