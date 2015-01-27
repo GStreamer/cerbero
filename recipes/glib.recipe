@@ -36,6 +36,7 @@ class Recipe(recipe.Recipe):
                "glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
                'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+               'glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
               ]
 
     files_libs = [
