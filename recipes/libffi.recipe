@@ -20,9 +20,9 @@ FFI_H_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.2'
+    version = '3.2.1'
     autoreconf = True
-    commit = 'ae8d2554c5f192be54dadc9f99a1449b4df1b222'
+    commit = '20562ac0427c3578250d04c6e34fb0127d4551cf'
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']
