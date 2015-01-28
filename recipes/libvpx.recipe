@@ -84,9 +84,7 @@ class Recipe(recipe.Recipe):
                 arch = 'armv5te'
                 # Fix compiler error with -mthumb
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
-            elif self.config.target_arch == Architecture.ARMv7:
-                pass
-            elif self.config.target_arch == Architecture.X86:
+            elif self.config.target_arch in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
                 pass
             else:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
