@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --disable-asm'
         elif self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch == Architecture.X86:
+            if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
                 self.configure_options += ' --disable-asm'
             self.autoreconf = True
         elif self.config.target_platform == Platform.IOS:
