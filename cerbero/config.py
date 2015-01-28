@@ -404,6 +404,10 @@ class Config (object):
                 raise FatalError(_('directory (%s) can not be created') % path)
 
     def _join_path(self, path1, path2):
+        if len(path1) == 0:
+            return path2
+        if len(path2) == 0:
+            return path1
         if self.platform == Platform.WINDOWS:
             separator = ';'
         else:
