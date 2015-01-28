@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.2/include/ffi.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.2.1/include/ffi.h', 'lib/pkgconfig/libffi.pc']
 
     def prepare(self):
         self.remotes['origin'] = 'https://github.com/atgreen/libffi.git'
