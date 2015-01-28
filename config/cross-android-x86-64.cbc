@@ -1,0 +1,9 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform = Platform.ANDROID
+target_distro = Distro.ANDROID
+target_distro_version = DistroVersion.ANDROID_LOLLIPOP
+target_arch = Architecture.X86_64
+
+#variants = ['nodebug']
