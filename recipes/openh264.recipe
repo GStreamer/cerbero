@@ -41,10 +41,17 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86_64:
                 make += ' ARCH=x86_64'
         elif self.config.target_platform == Platform.ANDROID:
-            make += ' OS=android TARGET=android-9'
+            if self.config.target_distro_version == DistroVersion.ANDROID_LOLLIPOP:
+                make += ' OS=android TARGET=android-21 NDKLEVEL=21'
+            else:
+                make += ' OS=android TARGET=android-9'
             make += ' NDKROOT=' + self.config.toolchain_prefix
             if self.config.target_arch == Architecture.X86:
                 make += ' ARCH=x86'
+            elif self.config.target_arch == Architecture.ARM64:
+                make += ' ARCH=arm64'
+            elif self.config.target_arch == Architecture.X86_64:
+                make += ' ARCH=x86_64'
         elif self.config.target_platform == Platform.WINDOWS:
             make += ' OS=mingw_nt'
             if self.config.target_arch == Architecture.X86:
