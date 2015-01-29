@@ -2,7 +2,7 @@
 
 class Recipe(custom.GStreamerStatic):
     name = 'libnice-static'
-    version = '0.1.8'
+    version = '0.1.10'
     gstreamer_version = '1.0'
     stype = SourceType.TARBALL
     srcdir = '../libnice-' + version
@@ -11,9 +11,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = ' --without-gstreamer-0.10 \
         --enable-compile-warnings=maximum'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
-    # Patch is from upstream, remove for next release
-    patches = ['libnice/libnice-add-static-plugins-support.patch',
-               'libnice/libnice-add-win32-support.patch']
+    patches = ['libnice/libnice-add-win32-support.patch']
     autoreconf = True
 
     files_plugins_net_devel = ['libgstnice']
