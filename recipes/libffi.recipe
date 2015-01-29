@@ -27,6 +27,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libffi']
     files_devel = ['lib/libffi-3.2.1/include/ffi.h', 'lib/pkgconfig/libffi.pc']
+    patches = ['libffi/0001-libffi-Don-t-be-smart-about-toolexeclibdir.patch']
 
     def prepare(self):
         self.remotes['origin'] = 'https://github.com/atgreen/libffi.git'
