@@ -30,14 +30,16 @@ class Recipe(recipe.Recipe):
                   'cxx-stl', 'gnu-libstdc++', self.config.toolchain_version)
         if self.config.target_arch == Architecture.X86:
             stl_libdir = os.path.join(stl_prefix, 'libs', 'x86')
-        if self.config.target_arch == Architecture.X86_64:
+        elif self.config.target_arch == Architecture.X86_64:
             stl_libdir = os.path.join(stl_prefix, 'libs', 'x86_64')
         elif self.config.target_arch == Architecture.ARMv7:
             stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi-v7a')
         elif self.config.target_arch == Architecture.ARM64:
             stl_libdir = os.path.join(stl_prefix, 'libs', 'arm64-v8a')
-        else:
+        elif self.config.target_arch == Architecture.ARM:
             stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
+        else:
+            raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)
