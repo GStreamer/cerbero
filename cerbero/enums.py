@@ -76,6 +76,7 @@ class DistroVersion:
     FEDORA_20 = 'fedora_20'
     FEDORA_21 = 'fedora_21'
     REDHAT_6 = 'redhat_6'
+    REDHAT_7 = 'redhat_7'
     OPENSUSE_12_1 = 'opensuse_12_1'
     OPENSUSE_12_2 = 'opensuse_12_2'
     OPENSUSE_12_3 = 'opensuse_12_3'

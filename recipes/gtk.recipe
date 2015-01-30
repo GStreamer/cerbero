@@ -122,6 +122,7 @@ class Recipe(recipe.Recipe):
                                                        DistroVersion.FEDORA_20,
                                                        DistroVersion.FEDORA_21,
                                                        DistroVersion.REDHAT_6,
+                                                       DistroVersion.REDHAT_7,
                                                       ]:
                     if self.config.target_arch == Architecture.X86_64:
                         mod_path1 = '/usr/lib64/gtk-2.0'
