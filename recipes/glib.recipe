@@ -37,6 +37,7 @@ class Recipe(recipe.Recipe):
                'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
                'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
                'glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
+               'glib/0017-osx-thread-set-name.patch'
               ]
 
     files_libs = [

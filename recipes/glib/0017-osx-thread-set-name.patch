@@ -1,0 +1,50 @@
+From 2a0c18041ba71435df3fc3834d360553c97fdfe4 Mon Sep 17 00:00:00 2001
+From: Ilya Konstantinov <ilya.konstantinov@gmail.com>
+Date: Sat, 20 Dec 2014 11:19:00 -0500
+Subject: gthread: add thread name support on Mac OS
+
+https://bugzilla.gnome.org/show_bug.cgi?id=741807
+
+diff --git a/configure.ac b/configure.ac
+index bf87fd5..7777da7 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2240,6 +2240,16 @@ AS_IF([ test x"$have_threads" = xposix], [
+              AC_DEFINE(HAVE_PTHREAD_COND_TIMEDWAIT_RELATIVE_NP,1,
+                 [Have function pthread_cond_timedwait_relative_np])],
+             [AC_MSG_RESULT(no)])
++        dnl Sets thread names on OS X 10.6, iOS 3.2 (and higher)
++        AC_MSG_CHECKING(for pthread_setname_np(const char*))
++        AC_LINK_IFELSE(
++            [AC_LANG_PROGRAM(
++                [#include <pthread.h>],
++                [pthread_setname_np("example")])],
++            [AC_MSG_RESULT(yes)
++             AC_DEFINE(HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID,1,
++                [Have function pthread_setname_np(const char*)])],
++            [AC_MSG_RESULT(no)])
+         CPPFLAGS="$glib_save_CPPFLAGS"
+ ])
+ 
+diff --git a/glib/gthread-posix.c b/glib/gthread-posix.c
+index f4703f5..53c994e 100644
+--- a/glib/gthread-posix.c
++++ b/glib/gthread-posix.c
+@@ -1225,10 +1225,10 @@ g_system_thread_exit (void)
+ void
+ g_system_thread_set_name (const gchar *name)
+ {
+-#ifdef HAVE_SYS_PRCTL_H
+-#ifdef PR_SET_NAME
+-  prctl (PR_SET_NAME, name, 0, 0, 0, 0);
+-#endif
++#if defined(HAVE_SYS_PRCTL_H) && defined(PR_SET_NAME)
++  prctl (PR_SET_NAME, name, 0, 0, 0, 0); /* on Linux */
++#elif defined(HAVE_PTHREAD_SETNAME_NP_WITHOUT_TID)
++  pthread_setname_np(name); /* on OS X and iOS */
+ #endif
+ }
+ 
+-- 
+cgit v0.10.1
+
