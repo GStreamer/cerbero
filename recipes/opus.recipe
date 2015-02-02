@@ -3,10 +3,16 @@
 
 class Recipe(recipe.Recipe):
     name = 'opus'
-    version = '1.0.3'
+    version = '1.1'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'http://downloads.xiph.org/releases/{0}/{0}-{1}.tar.gz'.format(name, version)
 
     files_libs = ['libopus']
     files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']
+    # Starting with v1.1, Opus has special ARM assembly optimizations when
+    # built without floating point support. Since all our builds assume floating
+    # point is available (NEON or VFP), we're not enabling that. However, the
+    # option is there. Note that there is separate NEON/intrinsics support for
+    # ARM and x86.
+    # configure_options = '--disable-fixed-point --enable-asm'
