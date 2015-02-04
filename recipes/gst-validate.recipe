@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
 
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0']
-    files_libs = ['libgstvalidate-1.0', 'libfaultinjection-1.0']
+    files_libs = ['libgstvalidate-1.0']
     files_devel = ["include/gstreamer-1.0/gst/validate/*.h"
                    "lib/pkgconfig/gst-validate-1.0.pc"]
 
@@ -19,6 +19,8 @@ class Recipe(recipe.Recipe):
                       'bin/gst-validate-launcher',
                       "share/gstreamer-1.0/validate-scenario/*.scenario"
     ]
+
+    files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
 
     def prepare(self):
         self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-devtools'))
