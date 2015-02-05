@@ -7,7 +7,7 @@ from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform
-from cerbero.utils import to_unixpath
+from cerbero.utils import shell, to_unixpath
 
 
 class GStreamerStatic(recipe.Recipe):
@@ -81,16 +81,16 @@ class GStreamerStatic(recipe.Recipe):
             os.makedirs(plugins_dir)
         # Copy all files installed in the temporary build-static directory
         # to the prefix. Static plugins will be installed in
-        # lib/gstreamer-0.10/static to avoid conflicts with the libgstplugin.la
+        # lib/gstreamer-1.0/static to avoid conflicts with the libgstplugin.la
         # generated with the shared build
         for f in self._files_list:
-            f_no_static = f.replace('/static/', '/')
-            # FIXME: This also needs to update the libdir= variable for .la
-            # files, otherwise libtool gives a "library was moved" warning
-            shutil.copyfile(os.path.join(self.tmp_destdir,
-                                         to_unixpath(self.config.prefix)[1:],
-                                         f_no_static),
-                            os.path.join(self.config.prefix, f))
+            src = os.path.join(self.tmp_destdir,
+                    to_unixpath(self.config.prefix)[1:],
+                    f.replace('/static/', '/'))
+            dest = os.path.join(self.config.prefix, f)
+            if f.endswith('.la'):
+                shell.call('sed -i "s#^libdir=\'\(.*\)\'#libdir=\'\\1/static\'#" %s' % src)
+            shutil.copyfile(src, dest)
 
 
 def list_gstreamer_plugins_by_category(config):
