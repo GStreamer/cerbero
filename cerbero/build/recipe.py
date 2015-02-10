@@ -151,6 +151,9 @@ class Recipe(FilesProvider):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return "<Recipe %s>" % self.name
+
     def prepare(self):
         '''
         Can be overriden by subclasess to modify the recipe in function of
