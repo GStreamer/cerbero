@@ -27,5 +27,4 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --enable-threads=win32'
         if self.config.target_platform != Platform.LINUX:
             self.runtime_dep = True
-        if self.config.target_platform == Platform.IOS:
-            self.append_env['CFLAGS'] = '-Dlocale_charset=intl_locale_charset'
+        self.append_env['CFLAGS'] = '-Dlocale_charset=intl_locale_charset'

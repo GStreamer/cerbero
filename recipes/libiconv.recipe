@@ -26,5 +26,4 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
             self.runtime_dep = True
-        if self.config.target_platform == Platform.IOS:
-            self.append_env['CFLAGS'] = '-Dlocale_charset=iconv_locale_charset'
+        self.append_env['CFLAGS'] = '-Dlocale_charset=iconv_locale_charset'
