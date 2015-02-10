@@ -3,16 +3,17 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gettext'
-    version = '0.18.3.2'
+    version = '0.19.4'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.18.3.2.tar.gz'
+    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.4.tar.gz'
     srcdir = 'gettext-runtime'
     patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch']
     platform_deps = {
         Platform.DARWIN:  ['libiconv'],
         Platform.IOS:  ['libiconv'],
+        Platform.ANDROID:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
             }
 
