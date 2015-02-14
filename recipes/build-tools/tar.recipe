@@ -7,5 +7,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv3]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/gnu/tar/tar-1.28.tar.bz2'
+    patches = ['tar-fix-configure.patch']
 
     files_bins = ['tar']
