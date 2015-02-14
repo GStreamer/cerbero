@@ -28,6 +28,8 @@ class Recipe(recipe.Recipe):
                'libvpx/0008-Add-support-for-iOS-simulator-on-x86-64.patch',
                'libvpx/0009-Add-arm64-ios-support.patch',
                'libvpx/0010-Add-android-x86_64-target.patch',
+               'libvpx/0011-build-Remove-broken-custom-android-toolchain-usage.patch',
+               'libvpx/0012-configure-Add-Android-ARM64-support.patch',
                ]
 
     files_libs = ['libvpx']
