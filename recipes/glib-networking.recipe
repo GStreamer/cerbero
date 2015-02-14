@@ -4,7 +4,7 @@ from cerbero.utils.shell import which
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.42.0'
+    version = '2.42.1'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.42/glib-networking-%(version)s.tar.xz'

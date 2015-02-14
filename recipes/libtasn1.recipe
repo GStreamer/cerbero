@@ -2,13 +2,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
-    version = '2.14'
+    version = '4.2'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-2.14.tar.gz'
+    url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-4.2.tar.gz'
     licenses = [License.LGPLv2_1Plus]
-    patches = ['libtasn1/0001-Fix-include-for-Bionic-where-SIZE_MAX-is-in-limits.h.patch',
-               'libtasn1/0002-Fix-includes-for-Bionic-X86.patch',
-               'libtasn1/0003-Fix-check-for-Android-x86.patch']
 
     files_libs = ['libtasn1']
     files_devel = ['include/libtasn1.h', 'lib/pkgconfig/libtasn1.pc']

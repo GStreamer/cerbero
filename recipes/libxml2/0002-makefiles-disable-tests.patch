@@ -1,14 +1,14 @@
-From 4a0aeb3e7734b21e6eab54faffc72e0dea56dbb1 Mon Sep 17 00:00:00 2001
+From b67767a901ec31a0ddc1e2dff5c4f5d21241661f Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 18:05:43 +0100
-Subject: [PATCH 2/3] makefiles: disable tests
+Subject: [PATCH 2/5] makefiles: disable tests
 
 ---
  Makefile.am | 9 +++++----
  1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index a4a9f87..8a41588 100644
+index 70720f3..a2881a3 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -10,10 +10,11 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(srcdir)/include
@@ -28,5 +28,5 @@ index a4a9f87..8a41588 100644
  bin_PROGRAMS = xmllint xmlcatalog
  
 -- 
-1.8.1.2
+2.1.0
 

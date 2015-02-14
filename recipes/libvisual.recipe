@@ -8,5 +8,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     configure_options = ' --enable-static'
 
+    patches = ['libvisual/0001-configure.ac-Use-gettext-0.19.patch']
+    
     files_libs = ['libvisual-0.4']
     files_devel = ['include/libvisual-0.4', 'lib/pkgconfig/libvisual-0.4.pc']

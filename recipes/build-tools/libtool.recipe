@@ -3,10 +3,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libtool'
-    version = '2.4.2'
+    version = '2.4.5'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.2.tar.gz'
+    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.5.tar.gz'
 
     files_bin = ['bin/libtool', 'bin/libtoolize']
     files_libs = ['libltdl']

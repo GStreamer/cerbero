@@ -1,17 +1,17 @@
-From 39f985f4d0a804e870e7c15433de44d0c1215123 Mon Sep 17 00:00:00 2001
+From 5a75153014bd1c0669415bda1ee899c0ae9c3aad Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 18:07:07 +0100
-Subject: [PATCH 3/3] configure: fix python dir prefix
+Subject: [PATCH 3/5] configure: fix python dir prefix
 
 ---
- configure.in | 1 +
+ configure.ac | 1 +
  1 file changed, 1 insertion(+)
 
-diff --git a/configure.in b/configure.in
-index 7f77b9b..77e87b1 100644
---- a/configure.in
-+++ b/configure.in
-@@ -835,6 +835,7 @@ if test "$with_python" != "no" ; then
+diff --git a/configure.ac b/configure.ac
+index c3985f2..e5dbc15 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -908,6 +908,7 @@ if test "$with_python" != "no" ; then
  	    fi
  	fi
      fi
@@ -20,5 +20,5 @@ index 7f77b9b..77e87b1 100644
      PYTHON_LIBS=`python$PYTHON_VERSION-config --ldflags`
  else
 -- 
-1.8.1.2
+2.1.0
 

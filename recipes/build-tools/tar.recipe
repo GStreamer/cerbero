@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'tar'
-    version = '1.26'
+    version = '1.28'
     licenses = [License.GPLv3]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/tar/tar-1.26.tar.bz2'
+    url = 'http://ftp.gnu.org/gnu/tar/tar-1.28.tar.bz2'
 
     files_bins = ['tar']

@@ -5,9 +5,9 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
-    version = '0.32.4'
+    version = '0.32.6'
     stype = SourceType.TARBALL
-    url = 'http://cairographics.org/releases/pixman-0.32.4.tar.gz'
+    url = 'http://cairographics.org/releases/pixman-0.32.6.tar.gz'
     licenses = [License.MIT]
     autoreconf = True
     patches = ['pixman/0001-Fix-build-on-Android.patch',

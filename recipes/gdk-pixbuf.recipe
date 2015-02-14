@@ -4,13 +4,13 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
-    version = '2.30.7'
+    version = '2.30.8'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.30/gdk-pixbuf-2.30.7.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.30/gdk-pixbuf-2.30.8.tar.xz'
     patches = [
             'gdk-pixbuf/0001-io-extened-support-for-relotations-to-OS-X-and-Linux.patch',
-            'gdk-pixbuf/0002-nls-update-gettext-macros-for-0.18.patch',
+            'gdk-pixbuf/0002-nls-update-gettext-macros-for-0.19.patch',
             ]
     configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]

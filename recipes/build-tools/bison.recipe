@@ -3,10 +3,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'bison'
-    version = '3.0.2'
+    version = '3.0.4'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftpmirror.gnu.org/bison/bison-3.0.2.tar.gz'
+    url = 'http://ftpmirror.gnu.org/bison/bison-3.0.4.tar.gz'
 
     files_bins = ['bison']
 

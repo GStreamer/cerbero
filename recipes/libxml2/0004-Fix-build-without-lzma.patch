@@ -1,7 +1,7 @@
-From 4053dca5e7c411120018b7f57e790ade267ba757 Mon Sep 17 00:00:00 2001
+From 732ef56b0b1315f2cfa7ae8fe1181309ce95e87d Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Tue, 28 Jan 2014 11:44:22 +0100
-Subject: [PATCH] Fix build without lzma
+Subject: [PATCH 4/5] Fix build without lzma
 
 ---
  xmlIO.c | 6 +++---
@@ -9,7 +9,7 @@ Subject: [PATCH] Fix build without lzma
  2 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/xmlIO.c b/xmlIO.c
-index 847cb7e..8fb8702 100644
+index e628ab0..a1a927e 100644
 --- a/xmlIO.c
 +++ b/xmlIO.c
 @@ -35,7 +35,7 @@
@@ -21,7 +21,7 @@ index 847cb7e..8fb8702 100644
  #include <lzma.h>
  #endif
  
-@@ -1320,7 +1320,7 @@ xmlGzfileClose (void * context) {
+@@ -1334,7 +1334,7 @@ xmlGzfileClose (void * context) {
  }
  #endif /* HAVE_ZLIB_H */
  
@@ -30,7 +30,7 @@ index 847cb7e..8fb8702 100644
  /************************************************************************
   *									*
   *		I/O for compressed file accesses			*
-@@ -2314,7 +2314,7 @@ xmlRegisterDefaultInputCallbacks(void) {
+@@ -2328,7 +2328,7 @@ xmlRegisterDefaultInputCallbacks(void) {
      xmlRegisterInputCallbacks(xmlGzfileMatch, xmlGzfileOpen,
  	                      xmlGzfileRead, xmlGzfileClose);
  #endif /* HAVE_ZLIB_H */
@@ -40,7 +40,7 @@ index 847cb7e..8fb8702 100644
  	                      xmlXzfileRead, xmlXzfileClose);
  #endif /* HAVE_ZLIB_H */
 diff --git a/xzlib.c b/xzlib.c
-index 928bd17..5526e5f 100644
+index 0dcb9f4..1cf0c57 100644
 --- a/xzlib.c
 +++ b/xzlib.c
 @@ -8,7 +8,7 @@
@@ -52,12 +52,12 @@ index 928bd17..5526e5f 100644
  
  #include <string.h>
  #ifdef HAVE_ERRNO_H
-@@ -752,4 +752,4 @@ __libxml2_xzclose(xzFile file)
+@@ -795,4 +795,4 @@ __libxml2_xzclose(xzFile file)
      xmlFree(state);
      return ret ? ret : LZMA_OK;
  }
 -#endif /* HAVE_LZMA_H */
 +#endif /* HAVE_LIBLZMA */
 -- 
-1.8.3.2
+2.1.0
 

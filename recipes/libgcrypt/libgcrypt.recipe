@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libgcrypt'
-    version = '1.6.0'
+    version = '1.6.2'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING.LIB is GPLv2.1
     licenses = [License.LGPLv2_1Plus]
@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'ftp://ftp.gnupg.org/gcrypt/libgcrypt/libgcrypt-%(version)s.tar.bz2'
     autoreconf = True
     configure_options = ' --enable-static --enable-shared --with-gpg-error-prefix=$CERBERO_PREFIX'
-    patches = ['0001-Add-missing-file-in-distribution-tarball.patch', '0002-add-other-missing-file.patch', '0003-rndhw-Don-t-use-__LP64__-it-does-not-work-on-Windows.patch']
+    patches = ['0003-rndhw-Don-t-use-__LP64__-it-does-not-work-on-Windows.patch']
     deps = ['libgpg-error']
 
     files_libs = ['libgcrypt']

@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'automake'
-    version = '1.14'
+    version = '1.15'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/automake/automake-1.14.tar.xz'
+    url = 'http://ftp.gnu.org/gnu/automake/automake-1.15.tar.xz'
     deps = ['autoconf']
 
     files_bin = ['bin/automake', 'bin/aclocal',
-                 'bin/automake-1.14', 'bin/aclocal-1.14']
-    files_share = ['share/aclocal-1.14', 'share/automake-1.14']
+                 'bin/automake-1.15', 'bin/aclocal-1.15']
+    files_share = ['share/aclocal-1.15', 'share/automake-1.15']
