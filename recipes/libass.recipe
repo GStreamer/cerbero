@@ -3,8 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libass'
-    version = '0.10.0'
+    version = '0.12.1'
     licenses = [License.BSD_like]
+    stype = SourceType.TARBALL
+    url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.gz'.format(version)
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
     make_check = None
     autoreconf = True
@@ -12,6 +14,3 @@ class Recipe(recipe.Recipe):
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
 
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
