@@ -14,3 +14,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
 
+    def prepare(self):
+        if self.config.target_platform == Platform.IOS:
+            self.append_env = {'LDFLAGS': '-Wl,-read_only_relocs,suppress'}
