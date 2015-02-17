@@ -8,12 +8,12 @@ Subject: [PATCH] neon: fix function export names for iOS armv7
  1 file changed, 11 insertions(+), 5 deletions(-)
 
 diff --git a/arm/filter_neon.S b/arm/filter_neon.S
-index 40d9777..a252488 100644
+index 3b061d6..ac08afa 100644
 --- a/arm/filter_neon.S
 +++ b/arm/filter_neon.S
-@@ -21,6 +21,12 @@
- .section .note.GNU-stack,"",%progbits /* mark stack as non-executable */
- #endif
+@@ -22,6 +22,12 @@
+ 
+ #ifdef PNG_READ_SUPPORTED
  
 +#if defined(__APPLE__)
 +#define FUNC_PREFIX _
@@ -24,7 +24,7 @@ index 40d9777..a252488 100644
  /* Assembler NEON support - only works for 32-bit ARM (i.e. it does not work for
   * ARM64).  The code in arm/filter_neon_intrinsics.c supports ARM64, however it
   * only works if -mfpu=neon is specified on the GCC command line.  See pngpriv.h
-@@ -42,17 +48,17 @@
+@@ -42,7 +48,7 @@
  
  .macro  func    name, export=0
      .macro endfunc
@@ -33,7 +33,9 @@ index 40d9777..a252488 100644
          .endfunc
          .purgem endfunc
      .endm
-         .text
+@@ -55,11 +61,11 @@ ELF     .size   \name, . - \name
+         .align 2
+ 
      .if \export
 -        .global \name
 +        .global FUNC_PREFIX\name
@@ -48,5 +50,5 @@ index 40d9777..a252488 100644
  
  func    png_read_filter_row_sub4_neon, export=1
 -- 
-1.9.0
+2.1.0
 
