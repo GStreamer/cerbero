@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/gnu/automake/automake-1.15.tar.xz'
-    deps = ['autoconf']
+    deps = ['autoconf', 'gettext-tools', 'gettext-m4']
 
     files_bin = ['bin/automake', 'bin/aclocal',
                  'bin/automake-1.15', 'bin/aclocal-1.15']
