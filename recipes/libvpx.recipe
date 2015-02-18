@@ -54,6 +54,12 @@ class Recipe(recipe.Recipe):
         elif self.config.target_arch == Architecture.ARM64:
             arch = 'arm64'
 
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            # -O1 is needed while building with llvm/clang because of:
+            # https://code.google.com/p/webm/issues/detail?id=603
+            # TODO: Re-test and remove when a new libvpx release is made
+            self.configure_options += " --extra-cflags='-O1' "
+
         self.new_env['LD'] = os.environ.get('CC', 'gcc')
         if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin12'
