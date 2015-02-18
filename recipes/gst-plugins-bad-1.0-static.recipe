@@ -180,7 +180,7 @@ class Recipe(custom.GStreamerStatic):
                 self.deps.remove(d)
             self.files_plugins_dvd_devel.remove('libgstresindvd')
         if self.config.variants.nodebug:
-            self.configure_options += ' --disable-gst-debug'
+            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove("libgstdvb")

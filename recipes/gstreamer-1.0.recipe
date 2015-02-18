@@ -88,7 +88,7 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-registry '
 
         if self.config.variants.nodebug:
-            self.configure_options += ' --disable-gst-debug'
+            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch

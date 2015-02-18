@@ -48,4 +48,4 @@ class Recipe(recipe.Recipe):
             self.files_plugins_dvd.remove('lib/gstreamer-1.0/libgstdvdread%(mext)s')
 
         if self.config.variants.nodebug:
-            self.configure_options += ' --disable-gst-debug'
+            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'

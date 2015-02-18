@@ -37,7 +37,7 @@ class Recipe(custom.GStreamerStatic):
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         if self.config.variants.nodebug:
-            self.configure_options += ' --disable-gst-debug'
+            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
             for d in ['libdvdread']:

@@ -35,6 +35,8 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
               self.configure_options += ' --with-libav-extra-configure="--extra-cflags=\'-mincoming-stack-boundary=4\'"'
+        if self.config.variants.nodebug:
+            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
     def configure(self):
         super(recipe.Recipe, self).configure()
