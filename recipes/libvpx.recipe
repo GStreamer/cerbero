@@ -100,10 +100,11 @@ class Recipe(recipe.Recipe):
             self.config_sh = 'LD=$CC ./configure'
             self.configure_options.replace('--as=yasm', '')
             self.configure_options += ' --sdk-path=%s ' % self.config.toolchain_prefix
-            self.configure_options += ' --disable-examples '
         else:
             self.configure_options += '--enable-shared '
             platform = 'linux'
+
+        self.configure_options += ' --disable-examples '
 
         self.configure_options += '--target=%s-%s-gcc ' % (arch, platform)
 
