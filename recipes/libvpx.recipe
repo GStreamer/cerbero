@@ -19,7 +19,8 @@ class Recipe(recipe.Recipe):
     can_use_configure_cache = False
     make = 'make HAVE_GNU_STRIP=no'
 
-    patches = ['libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
+    patches = ['libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
+               'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
                'libvpx/0010-Add-android-x86_64-target.patch',
                'libvpx/0011-build-Remove-broken-custom-android-toolchain-usage.patch',
                'libvpx/0012-configure-Add-Android-ARM64-support.patch',
@@ -60,10 +61,10 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin12'
         elif self.config.target_platform == Platform.IOS:
-            if self.config.target_distro_version in [DistroVersion.IOS_7_0, DistroVersion.IOS_7_1, DistroVersion.IOS_8_0, DistroVersion.IOS_8_1]:
-                platform = 'ios7'
+            if self.config.target_arch == Architecture.X86 or self.config.target_arch == Architecture.X86_64:
+                platform = 'iphonesimulator'
             else:
-                platform = 'ios6'
+                platform = 'darwin'
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv6'
         elif self.config.target_platform == Platform.WINDOWS:
