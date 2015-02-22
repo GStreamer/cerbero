@@ -21,6 +21,11 @@ class Recipe(recipe.Recipe):
             'gnome-icon-theme-symbolic',
             'shared-mime-info'] # brings in gtk+
 
+    files_libs = ['libpitivi-1.0']
+    files_typelibs = [
+        'Pitivi-1.0',
+    ]
+    use_system_libs = True
     files_bins = ['pitivi']
     files_lang = ['pitivi']
     files_pitivi = ['lib/pitivi/python/pitivi',
