@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
 
     patches = ['libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
                'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
+               'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
                'libvpx/0010-Add-android-x86_64-target.patch',
                'libvpx/0011-build-Remove-broken-custom-android-toolchain-usage.patch',
                'libvpx/0012-configure-Add-Android-ARM64-support.patch',

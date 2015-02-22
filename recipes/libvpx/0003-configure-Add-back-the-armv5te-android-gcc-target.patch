@@ -1,0 +1,25 @@
+From 2046dd7d8d1abd5d71f419f06969e7e809e9800f Mon Sep 17 00:00:00 2001
+From: Arun Raghavan <arun@centricular.com>
+Date: Sun, 22 Feb 2015 21:20:50 +0530
+Subject: [PATCH] configure: Add back the armv5te-android-gcc target
+
+We need this to be able to build for pre-armv7 Android devices.
+---
+ configure | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure b/configure
+index 4509697..9b5a969 100755
+--- a/configure
++++ b/configure
+@@ -97,6 +97,7 @@ EOF
+ 
+ # all_platforms is a list of all supported target platforms. Maintain
+ # alphabetically by architecture, generic-gnu last.
++all_platforms="${all_platforms} armv5te-android-gcc"
+ all_platforms="${all_platforms} armv6-darwin-gcc"
+ all_platforms="${all_platforms} armv6-linux-rvct"
+ all_platforms="${all_platforms} armv6-linux-gcc"
+-- 
+2.1.0
+
