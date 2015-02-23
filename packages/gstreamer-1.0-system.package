@@ -17,7 +17,8 @@ class Package(package.Package):
     deps = ['gstreamer-1.0-core']
 
     files = ['gst-plugins-base-1.0:plugins_sys', 'gst-plugins-good-1.0:plugins_sys',
-            'gst-plugins-ugly-1.0:plugins_sys', 'gst-plugins-bad-1.0:plugins_sys']
+            'gst-plugins-ugly-1.0:plugins_sys', 'gst-plugins-bad-1.0:plugins_sys',
+            'graphene:libs']
     files_devel = ['gst-plugins-base-1.0-static:plugins_sys_devel',
             'gst-plugins-good-1.0-static:plugins_sys_devel',
             'gst-plugins-ugly-1.0-static:plugins_sys_devel',
