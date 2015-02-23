@@ -4,8 +4,8 @@ import sys
 class Recipe(recipe.Recipe):
     name = 'graphene'
     remotes = {'origin': 'https://github.com/ebassi/graphene.git'}
-    commit = '0.99.2'
-    version = '0.99.2'
+    commit = '40cdb93534f688d6f7c69cbd56ec1fe38ec0f7e5'
+    version = '1.2.1'
     licenses = [License.MIT]
     deps = ['glib']
 
