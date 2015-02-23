@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     commit = '40cdb93534f688d6f7c69cbd56ec1fe38ec0f7e5'
     version = '1.2.1'
     licenses = [License.MIT]
+    configure_options = ' --enable-static --enable-shared'
     deps = ['glib']
 
     config_sh = 'sh ./autogen.sh'
