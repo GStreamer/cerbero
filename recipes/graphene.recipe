@@ -4,7 +4,7 @@ import sys
 class Recipe(recipe.Recipe):
     name = 'graphene'
     remotes = {'origin': 'https://github.com/ebassi/graphene.git'}
-    commit = '40cdb93534f688d6f7c69cbd56ec1fe38ec0f7e5'
+    commit = '514dad96175d4e42a9758b13c30658578c3dd535'
     version = '1.2.1'
     licenses = [License.MIT]
     configure_options = ' --enable-static --enable-shared'
