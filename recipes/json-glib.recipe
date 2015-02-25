@@ -10,6 +10,8 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-static'
     autoreconf = True
 
+    patches = ["json-glib/0001-configure-Set-gettext-to-version-0.19.patch"]
+
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']
     files_devel  = ['include/json-glib-1.0', 'lib/pkgconfig/json-glib-1.0.pc']
