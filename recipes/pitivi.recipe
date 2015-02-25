@@ -31,3 +31,8 @@ class Recipe(recipe.Recipe):
     files_pitivi = ['lib/pitivi/python/pitivi',
                     'share/pitivi/',
                     'share/applications/pitivi.desktop']
+
+    def configure(self):
+        # We always need to activate the introspection
+        self.config.variants.gi = True
+        super(Recipe, self).configure()
