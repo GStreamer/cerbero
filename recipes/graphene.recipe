@@ -1,10 +1,27 @@
  # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import sys
+import shutil
+
+GRAPHENE_CONFIG_UNVERSAL='''\
+#ifdef __i386__
+#include "i386/graphene-config.h"
+#elif defined(__ppc__)
+#include "ppc/graphene-config.h"
+#elif defined(__x86_64__)
+#include "x86_64/graphene-config.h"
+#elif defined(__arm__)
+#include "arm/graphene-config.h"
+#elif defined(__arm64__)
+#include "arm64/graphene-config.h"
+#else
+#error "Unsupported Architecture"
+#endif
+'''
 
 class Recipe(recipe.Recipe):
     name = 'graphene'
     remotes = {'origin': 'https://github.com/ebassi/graphene.git'}
-    commit = '514dad96175d4e42a9758b13c30658578c3dd535'
+    commit = '4c04dc78af5be0967f43f253535bf2beb8f5de3d'
     version = '1.2.1'
     licenses = [License.MIT]
     configure_options = ' --enable-static --enable-shared'
@@ -17,6 +34,7 @@ class Recipe(recipe.Recipe):
 
     files_devel = [
         'include/graphene-1.0',
+        'lib/graphene-1.0/include'
         'lib/pkgconfig/graphene-1.0.pc',
         'lib/pkgconfig/graphene-gobject-1.0.pc',
     ]
@@ -30,3 +48,26 @@ class Recipe(recipe.Recipe):
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
             self.configure_options += ' --disable-sse2 --disable-gcc-vector '
+
+    def post_install(self):
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            # For the universal build we need to ship graphene-config.h of all
+            # architectures in a subfolder and include the correct one depending
+            # on the compiler architecture
+            arch = self.config.target_arch
+            if arch == Architecture.X86:
+                arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
+            elif Architecture.is_arm(arch):
+                arch = 'arm'
+
+            arch_dir = os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
+                                     'include', arch)
+            if not os.path.exists(arch_dir):
+                os.makedirs(arch_dir)
+            shutil.copyfile(os.path.join(self.build_dir, 'src', 'graphene-config.h'),
+                        os.path.join(arch_dir, 'graphene-config.h'))
+            with open(os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
+                                   'include', 'graphene-config.h'), 'w+') as f:
+                f.write(GRAPHENE_CONFIG_UNVERSAL)
