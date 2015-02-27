@@ -34,7 +34,7 @@ class Recipe(recipe.Recipe):
 
     files_devel = [
         'include/graphene-1.0',
-        'lib/graphene-1.0/include'
+        'lib/graphene-1.0/include',
         'lib/pkgconfig/graphene-1.0.pc',
         'lib/pkgconfig/graphene-gobject-1.0.pc',
     ]
