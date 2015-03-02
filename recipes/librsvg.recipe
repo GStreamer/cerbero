@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.40.6'
+    version = '2.40.8'
     licenses = [License.LGPLv2]
     deps = ['libcroco', 'gdk-pixbuf', 'vala-m4', 'gobject-introspection-m4']
     autoreconf = True
