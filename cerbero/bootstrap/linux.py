@@ -50,8 +50,7 @@ class DebianBootstrapper (UnixBootstrapper):
                 'libxml-simple-perl', 'dpkg-dev', 'debhelper',
                 'build-essential', 'devscripts', 'fakeroot', 'transfig',
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
-                'libxtst-dev', 'libxrandr-dev',
-                'libglu1-mesa-dev', 'icu-devtools', 'libicu-dev']
+                'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev']
     distro_packages = {
         DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
         DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
