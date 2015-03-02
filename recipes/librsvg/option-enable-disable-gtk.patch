@@ -11,13 +11,13 @@ Signed-off-by: Ross Burton <ross.burton@intel.com>
 
 https://bugzilla.gnome.org/show_bug.cgi?id=712693
 ---
- configure.in |   17 +++++++++++------
+ configure.ac |   17 +++++++++++------
  1 file changed, 11 insertions(+), 6 deletions(-)
 
-diff --git a/configure.in b/configure.in
+diff --git a/configure.ac b/configure.ac
 index f7a89dc..1498f72 100644
---- a/configure.in
-+++ b/configure.in
+--- a/configure.ac
++++ b/configure.ac
 @@ -119,17 +119,22 @@ AC_CHECK_FUNCS(strtok_r)
  # GTK
  # ===========================================================================
