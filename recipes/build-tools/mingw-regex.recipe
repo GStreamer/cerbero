@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'mingw-regex'
+    version = '2.5'
+    licenses = [License.LGPLv2_1Plus]
+    files_libs = ['libregex']
+    files_devel = ['include/regex.h']
+    autoreconf = True
+    commit = 'origin/master'
+    patches = ['mingw-regex/0001-Fix-compilation.patch']
+
+    def prepare(self):
+        self.remotes['origin'] = 'git://git.code.sf.net/p/mingw/regex'
+        self.remotes['upstream'] = self.remotes['origin']

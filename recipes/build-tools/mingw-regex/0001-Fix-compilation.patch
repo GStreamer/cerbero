@@ -1,0 +1,36 @@
+From 619fa92b1fc80f9a188a7a4198b01644887f6b4c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Mon, 2 Mar 2015 19:48:59 +0100
+Subject: [PATCH] Fix compilation
+
+I have no idea why compilation fails, but it does so this way on Windows:
+
+regcomp.c: At top level:
+regcomp.c:509:20: error: unknown type name 'preg'
+regcomp.c:509:26: error: unknown type name 'errbuf'
+regcomp.c:509:34: error: unknown type name 'errbuf_size'
+regcomp.c:514:1: error: expected identifier or '(' before '{' token
+---
+ regcomp.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/regcomp.c b/regcomp.c
+index 78a1218..fad65f5 100644
+--- a/regcomp.c
++++ b/regcomp.c
+@@ -506,11 +506,7 @@ weak_alias (__regcomp, regcomp)
+    from either regcomp or regexec.   We don't use PREG here.  */
+ 
+ size_t
+-regerror (errcode, preg, errbuf, errbuf_size)
+-    int errcode;
+-    const regex_t *__restrict preg;
+-    char *__restrict errbuf;
+-    size_t errbuf_size;
++regerror (int errcode, const regex_t *__restrict preg, char *__restrict errbuf, size_t errbuf_size)
+ {
+   const char *msg;
+   size_t msg_size;
+-- 
+2.1.4
+
