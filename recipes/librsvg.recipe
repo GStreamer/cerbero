@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.40.8'
     licenses = [License.LGPLv2]
-    deps = ['libcroco', 'gdk-pixbuf', 'vala-m4', 'gobject-introspection-m4']
+    deps = ['libcroco', 'gdk-pixbuf', 'vala-m4', 'gobject-introspection-m4', 'pango', 'cairo']
     autoreconf = True
     autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
     stype = SourceType.TARBALL
