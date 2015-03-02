@@ -19,7 +19,7 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.42.1'
+    version = '2.42.2'
     stype = SourceType.TARBALL
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.42/glib-%(version)s.tar.xz'
     licenses = [License.LGPLv2Plus]
@@ -36,8 +36,7 @@ class Recipe(recipe.Recipe):
                "glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
                'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               'glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
-               'glib/0017-osx-thread-set-name.patch'
+               'glib/0016-gio-Fix-build-on-Android-Lollipop.patch'
               ]
 
     files_libs = [
