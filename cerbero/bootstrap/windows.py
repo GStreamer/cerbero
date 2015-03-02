@@ -136,7 +136,7 @@ class WindowsBootstrapper(BootstrapperBase):
         else:
             inst_path = os.path.join(self.prefix, 'x86_64-w64-mingw32/include/GL/wglext.h')
         gl_header = 'http://www.opengl.org/registry/api/GL/wglext.h'
-        shell.download(gl_header, inst_path, False)
+        shell.download(gl_header, inst_path, False, check_cert=False)
 
     def install_bin_deps(self):
         # FIXME: build intltool as part of the build tools bootstrap
