@@ -33,6 +33,6 @@ class Recipe(recipe.Recipe):
                     'share/applications/pitivi.desktop']
 
     def configure(self):
-        # We always need to activate the introspection
-        self.config.variants.gi = True
+        if not self.config.variants.gi:
+            raise FatalError(_("GObject-Introspection support is required for pitivi"))
         super(Recipe, self).configure()
