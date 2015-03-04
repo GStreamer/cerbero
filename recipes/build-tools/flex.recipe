@@ -10,4 +10,4 @@ class Recipe(recipe.Recipe):
     patches = ['flex-Remove-no-undefined-from-LDFLAGS.patch',
                'flex-configure.ac-Use-gettext-0.19.patch']
     autoreconf = True
-    
+    platform_deps = {Platform.WINDOWS: ['mingw-gettext']}

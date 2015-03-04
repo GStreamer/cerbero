@@ -1,0 +1,230 @@
+From d359712db85c74a5d63f9da0e2de21e07c2b4a08 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <address@hidden>
+Date: Wed, 22 Oct 2014 12:51:52 +0200
+Subject: [PATCH] Add support for -weak_framework linking on Darwin
+
+---
+ build-aux/ltmain.in | 35 +++++++++++++++++++++++++++--------
+ 1 file changed, 27 insertions(+), 8 deletions(-)
+
+diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
+index 65b5a2d..7740a38 100644
+--- a/build-aux/ltmain.in
++++ b/build-aux/ltmain.in
+@@ -4749,6 +4749,19 @@ func_mode_link ()
+ 	  prev=
+ 	  continue
+ 	  ;;
++	weak_framework)
++	  case $host in
++	    *-*-darwin*)
++	      case "$deplibs " in
++		*" $qarg.ltweak_framework "*) ;;
++		*) func_append deplibs " $qarg.ltweak_framework" # this is fixed later
++		   ;;
++	      esac
++	      ;;
++	  esac
++	  prev=
++	  continue
++	  ;;
+ 	inst_prefix)
+ 	  inst_prefix_dir=$arg
+ 	  prev=
+@@ -4988,6 +5001,11 @@ func_mode_link ()
+ 	continue
+ 	;;
+ 
++      -weak_framework)
++	prev=weak_framework
++	continue
++	;;
++
+       -inst-prefix-dir)
+ 	prev=inst_prefix
+ 	continue
+@@ -5712,7 +5730,7 @@ func_mode_link ()
+ 	    continue
+ 	  fi
+ 	  ;; # -l
+-	*.ltframework)
++	*.ltframework | *.ltweak_framework)
+ 	  if test prog,link = "$linkmode,$pass"; then
+ 	    compile_deplibs="$deplib $compile_deplibs"
+ 	    finalize_deplibs="$deplib $finalize_deplibs"
+@@ -5727,6 +5745,7 @@ func_mode_link ()
+ 	  fi
+ 	  continue
+ 	  ;;
++
+ 	-L*)
+ 	  case $linkmode in
+ 	  lib)
+@@ -5882,7 +5901,7 @@ func_mode_link ()
+ 
+ 	# Convert "-framework foo" to "foo.ltframework"
+ 	if test -n "$inherited_linker_flags"; then
+-	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g'`
++	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g' | $SED 's/-weak_framework \([^ $]*\)/\1.ltweak_framework/g'`
+ 	  for tmp_inherited_linker_flag in $tmp_inherited_linker_flags; do
+ 	    case " $new_inherited_linker_flags " in
+ 	      *" $tmp_inherited_linker_flag "*) ;;
+@@ -5890,7 +5909,7 @@ func_mode_link ()
+ 	    esac
+ 	  done
+ 	fi
+-	dependency_libs=`$ECHO " $dependency_libs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	dependency_libs=`$ECHO " $dependency_libs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	if test lib,link = "$linkmode,$pass" ||
+ 	   test prog,scan = "$linkmode,$pass" ||
+ 	   { test prog != "$linkmode" && test lib != "$linkmode"; }; then
+@@ -6564,7 +6583,7 @@ func_mode_link ()
+ 	  compile_deplibs="$new_inherited_linker_flags $compile_deplibs"
+ 	  finalize_deplibs="$new_inherited_linker_flags $finalize_deplibs"
+ 	else
+-	  compiler_flags="$compiler_flags "`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	  compiler_flags="$compiler_flags "`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	fi
+       fi
+       dependency_libs=$newdependency_libs
+@@ -7472,8 +7491,8 @@ EOF
+       case $host in
+ 	*-*-darwin*)
+ 	  newdeplibs=`$ECHO " $newdeplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	  new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	  deplibs=`$ECHO " $deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	  new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
++	  deplibs=`$ECHO " $deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	  ;;
+       esac
+ 
+@@ -8203,8 +8222,8 @@ EOF
+ 	  esac
+ 	fi
+ 	# Time to change all our "foo.ltframework" stuff back to "-framework foo"
+-	compile_deplibs=`$ECHO " $compile_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	finalize_deplibs=`$ECHO " $finalize_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	compile_deplibs=`$ECHO " $compile_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
++	finalize_deplibs=`$ECHO " $finalize_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	;;
+       esac
+ 
+-- 
+2.1.1
+
+
+From d359712db85c74a5d63f9da0e2de21e07c2b4a08 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <address@hidden>
+Date: Wed, 22 Oct 2014 12:51:52 +0200
+Subject: [PATCH] Add support for -weak_framework linking on Darwin
+
+---
+ build-aux/ltmain.sh | 35 +++++++++++++++++++++++++++--------
+ 1 file changed, 27 insertions(+), 8 deletions(-)
+
+diff --git a/build-aux/ltmain.in b/build-aux/ltmain.in
+index 65b5a2d..7740a38 100644
+--- a/build-aux/ltmain.sh
++++ b/build-aux/ltmain.sh
+@@ -4749,6 +4749,19 @@ func_mode_link ()
+ 	  prev=
+ 	  continue
+ 	  ;;
++	weak_framework)
++	  case $host in
++	    *-*-darwin*)
++	      case "$deplibs " in
++		*" $qarg.ltweak_framework "*) ;;
++		*) func_append deplibs " $qarg.ltweak_framework" # this is fixed later
++		   ;;
++	      esac
++	      ;;
++	  esac
++	  prev=
++	  continue
++	  ;;
+ 	inst_prefix)
+ 	  inst_prefix_dir=$arg
+ 	  prev=
+@@ -4988,6 +5001,11 @@ func_mode_link ()
+ 	continue
+ 	;;
+ 
++      -weak_framework)
++	prev=weak_framework
++	continue
++	;;
++
+       -inst-prefix-dir)
+ 	prev=inst_prefix
+ 	continue
+@@ -5712,7 +5730,7 @@ func_mode_link ()
+ 	    continue
+ 	  fi
+ 	  ;; # -l
+-	*.ltframework)
++	*.ltframework | *.ltweak_framework)
+ 	  if test prog,link = "$linkmode,$pass"; then
+ 	    compile_deplibs="$deplib $compile_deplibs"
+ 	    finalize_deplibs="$deplib $finalize_deplibs"
+@@ -5727,6 +5745,7 @@ func_mode_link ()
+ 	  fi
+ 	  continue
+ 	  ;;
++
+ 	-L*)
+ 	  case $linkmode in
+ 	  lib)
+@@ -5882,7 +5901,7 @@ func_mode_link ()
+ 
+ 	# Convert "-framework foo" to "foo.ltframework"
+ 	if test -n "$inherited_linker_flags"; then
+-	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g'`
++	  tmp_inherited_linker_flags=`$ECHO "$inherited_linker_flags" | $SED 's/-framework \([^ $]*\)/\1.ltframework/g' | $SED 's/-weak_framework \([^ $]*\)/\1.ltweak_framework/g'`
+ 	  for tmp_inherited_linker_flag in $tmp_inherited_linker_flags; do
+ 	    case " $new_inherited_linker_flags " in
+ 	      *" $tmp_inherited_linker_flag "*) ;;
+@@ -5890,7 +5909,7 @@ func_mode_link ()
+ 	    esac
+ 	  done
+ 	fi
+-	dependency_libs=`$ECHO " $dependency_libs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	dependency_libs=`$ECHO " $dependency_libs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	if test lib,link = "$linkmode,$pass" ||
+ 	   test prog,scan = "$linkmode,$pass" ||
+ 	   { test prog != "$linkmode" && test lib != "$linkmode"; }; then
+@@ -6564,7 +6583,7 @@ func_mode_link ()
+ 	  compile_deplibs="$new_inherited_linker_flags $compile_deplibs"
+ 	  finalize_deplibs="$new_inherited_linker_flags $finalize_deplibs"
+ 	else
+-	  compiler_flags="$compiler_flags "`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	  compiler_flags="$compiler_flags "`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	fi
+       fi
+       dependency_libs=$newdependency_libs
+@@ -7472,8 +7491,8 @@ EOF
+       case $host in
+ 	*-*-darwin*)
+ 	  newdeplibs=`$ECHO " $newdeplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	  new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	  deplibs=`$ECHO " $deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	  new_inherited_linker_flags=`$ECHO " $new_inherited_linker_flags" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
++	  deplibs=`$ECHO " $deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	  ;;
+       esac
+ 
+@@ -8203,8 +8222,8 @@ EOF
+ 	  esac
+ 	fi
+ 	# Time to change all our "foo.ltframework" stuff back to "-framework foo"
+-	compile_deplibs=`$ECHO " $compile_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
+-	finalize_deplibs=`$ECHO " $finalize_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g'`
++	compile_deplibs=`$ECHO " $compile_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
++	finalize_deplibs=`$ECHO " $finalize_deplibs" | $SED 's% \([^ $]*\).ltframework% -framework \1%g' | $SED 's% \([^ $]*\).ltweak_framework% -weak_framework \1%g'`
+ 	;;
+       esac
+ 
+-- 
+2.1.1
+
+
