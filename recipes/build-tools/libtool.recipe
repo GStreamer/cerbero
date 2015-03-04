@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
+from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'libtool'
@@ -26,3 +27,9 @@ class Recipe(recipe.Recipe):
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
         super(recipe.Recipe, self).extract()
+
+    def configure(self):
+        shell.touch(os.path.join(self.build_dir, 'doc', 'libtool.1'))
+        shell.touch(os.path.join(self.build_dir, 'doc', 'libtoolize.1'))
+        super(recipe.Recipe, self).configure()
+
