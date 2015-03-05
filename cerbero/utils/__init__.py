@@ -280,3 +280,20 @@ def get_wix_prefix():
     if not os.path.exists(wix_prefix):
         raise FatalError("The required packaging tool 'WiX' was not found")
     return escape_path(to_unixpath(wix_prefix))
+
+def add_system_libs(config, new_env):
+    '''
+    Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
+    can be found.
+    '''
+    arch = config.target_arch
+    libdir = 'lib'
+    if arch == Architecture.X86:
+        arch = 'i386'
+    else:
+        if config.distro == Distro.REDHAT:
+            libdir = 'lib64'
+    search_paths = [os.environ['PKG_CONFIG_LIBDIR'],
+        '/usr/%s/pkgconfig' % libdir, '/usr/share/pkgconfig',
+        '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
+    new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
