@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
     deps = ['gmp', 'zlib']
     # Parallel make fails randomly; probably races
     allow_parallel_build = False
+    patches = [name + '/0001-Make-it-possible-to-only-install-libs.patch']
 
     files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
@@ -78,6 +79,12 @@ class Recipe(recipe.Recipe):
         # CFLAG is no typo!
         self.make += ' LDFLAGS+="$LDFLAGS" CFLAG+="$CFLAGS"'
         self.make_install = 'make install_sw'
+
+        # We probably don't need and can't use the tools on these platforms
+        if self.config.target_platform == Platform.IOS or \
+            self.config.target_platform == Platform.ANDROID:
+            self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
+            self.make_install = 'make install_libs'
 
     @modify_environment
     def configure(self):
