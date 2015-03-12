@@ -147,7 +147,7 @@ index 30fac70..c25e5bf 100644
 +/* FIXME: Random number that hopefully is not used by any application on
 + * top of GLib
 + */
-+#define GMAIN_COCOA_EVENT_SUBTYPE_EVENTLOOP ((NSEventSubtype)31722)
++#define GMAIN_COCOA_EVENT_SUBTYPE_EVENTLOOP ((short)31722)
 +#endif /* HAVE_COCOA */
 +
  #ifndef G_OS_WIN32
