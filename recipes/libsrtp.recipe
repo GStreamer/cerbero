@@ -6,11 +6,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
-    version = '1.5.0'
+    version = '1.5.2'
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     licenses = [License.BSD_like]
-    patches = [name + '/shared-library.patch']
 
     files_libs = ['libsrtp']
     files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
