@@ -2,9 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
-    version = '4.2'
+    version = '4.3'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-4.2.tar.gz'
+    url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-4.3.tar.gz'
     licenses = [License.LGPLv2_1Plus]
 
     files_libs = ['libtasn1']
