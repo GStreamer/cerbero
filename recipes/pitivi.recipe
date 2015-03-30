@@ -16,7 +16,6 @@ class Recipe(recipe.Recipe):
             'gst-plugins-ugly-1.0',
             'clutter-gtk',
             'numpy',
-            'gnome-themes-standard',
             'gnome-icon-theme',
             'gnome-icon-theme-symbolic',
             'shared-mime-info'] # brings in gtk+

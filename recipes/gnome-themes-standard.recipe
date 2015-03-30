@@ -11,11 +11,5 @@ class Recipe(recipe.Recipe):
     deps = ['gtk+3', 'librsvg-gtk']
     configure_options = '--disable-gtk2-engine'
 
-    files_misc = ['lib/gtk-3.0/3.0.0/theming-engines/libadwaita%(pext)s',
-                  'share/gnome-background-properties/adwaita.xml',
-                  'share/icons/Adwaita',
-                  'share/icons/HighContrast',
-                  'share/themes/Adwaita',
-                  'share/themes/HighContrast',
-                  ]
+    files_misc = ['share/icons/HighContrast', 'share/themes/HighContrast']
 
