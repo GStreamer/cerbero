@@ -15,7 +15,7 @@ index 5d13ff7..40a01d7 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -156,8 +156,9 @@ AC_C_BIGENDIAN
-
+ 
  dnl No fork on MinGW, disable some self-tests until we fix them.
  dnl Check clock_gettime and pthread_mutex_lock in libc (avoid linking to other libs)
 -AC_CHECK_FUNCS([fork inet_ntop inet_pton getrusage getpwuid_r nanosleep daemon getpid clock_gettime iconv localtime vasprintf],,)
@@ -25,22 +25,22 @@ index 5d13ff7..40a01d7 100644
 +if test "$ac_cv_have_decl_vasprintf" != "yes";then
    AC_MSG_CHECKING([for va_copy])
    AC_LINK_IFELSE([AC_LANG_PROGRAM([
-	#include <stdarg.h>
+ 	#include <stdarg.h>
 @@ -178,6 +179,8 @@ if test "$ac_cv_func_vasprintf" != "yes";then
-		[AC_MSG_RESULT(no)
-		AC_MSG_ERROR([Your system lacks vasprintf() and va_copy()])])
-	])
+ 		[AC_MSG_RESULT(no)
+ 		AC_MSG_ERROR([Your system lacks vasprintf() and va_copy()])])
+ 	])
 +else
 +  AC_DEFINE(HAVE_VASPRINTF, 1, [Have vasprintf()])
  fi
-
+ 
  AM_CONDITIONAL(HAVE_FORK, test "$ac_cv_func_fork" != "no")
 diff --git a/gl/m4/vasprintf.m4 b/gl/m4/vasprintf.m4
 index c76c99c..42c71c2 100644
 --- a/gl/m4/vasprintf.m4
 +++ b/gl/m4/vasprintf.m4
 @@ -7,8 +7,8 @@ dnl with or without modifications, as long as this notice is preserved.
-
+ 
  AC_DEFUN([gl_FUNC_VASPRINTF],
  [
 -  AC_CHECK_FUNCS([vasprintf])
@@ -50,5 +50,6 @@ index c76c99c..42c71c2 100644
      gl_REPLACE_VASPRINTF
    fi
  ])
---
+-- 
 2.1.0
+

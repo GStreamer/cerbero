@@ -12,13 +12,14 @@ index 40a01d7..87c3337 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -150,7 +150,7 @@ AM_CONDITIONAL(ENABLE_TESTS, test "$enable_tests" != "no")
-
+ 
  GTK_DOC_CHECK(1.1)
  AM_GNU_GETTEXT([external])
 -AM_GNU_GETTEXT_VERSION([0.18])
 +AM_GNU_GETTEXT_VERSION([0.19])
-
+ 
  AC_C_BIGENDIAN
-
---
+ 
+-- 
 2.1.0
+
