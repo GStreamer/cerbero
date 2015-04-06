@@ -1,0 +1,25 @@
+From db4611d135c892e057cbe12613d7daa8898aad1a Mon Sep 17 00:00:00 2001
+From: Edward Hervey <bilboed@bilboed.com>
+Date: Mon, 6 Apr 2015 10:32:45 +0200
+Subject: [PATCH] Use ACLOCAL_FLAGS
+
+---
+ Makefile.am | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Makefile.am b/Makefile.am
+index 361fecc..c88cc56 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -3,6 +3,8 @@ SUBDIRS = . gdk-pixbuf-loader tests tools doc
+ NULL =
+ BUILT_SOURCES =
+ 
++ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
++
+ lib_LTLIBRARIES = librsvg-@RSVG_API_MAJOR_VERSION@.la
+ 
+ bin_PROGRAMS = rsvg-convert
+-- 
+2.1.0
+

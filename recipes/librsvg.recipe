@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.40.8'
+    version = '2.40.9'
     licenses = [License.LGPLv2]
     deps = ['libcroco', 'gdk-pixbuf', 'vala-m4', 'gobject-introspection-m4', 'pango', 'cairo']
     autoreconf = True
@@ -20,7 +20,9 @@ class Recipe(recipe.Recipe):
     # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
     configure_options = ' --disable-pixbuf-loader --without-gtk3 '
 
-    patches = ['librsvg/option-enable-disable-gtk.patch']
+    patches = ['librsvg/option-enable-disable-gtk.patch',
+               'librsvg/0001-Use-ACLOCAL_FLAGS.patch'
+    ]
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
