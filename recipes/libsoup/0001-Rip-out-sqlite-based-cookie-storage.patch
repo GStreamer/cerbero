@@ -1,20 +1,20 @@
-From 4cb2d7b16e082255daf963f22a9c28882525b5e4 Mon Sep 17 00:00:00 2001
+From 55d5b25364415c30cccf15907fffedbd2133f803 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 14 Feb 2014 15:05:18 +0100
-Subject: [PATCH 1/3] Rip out sqlite-based cookie storage
+Subject: [PATCH] Rip out sqlite-based cookie storage
 
 We don't need that and it will increase the binary size for no good reason.
 ---
- configure.ac                  |  4 ----
- libsoup/Makefile.am           | 10 ++--------
- libsoup/libsoup-2.4.sym       |  2 --
- libsoup/libsoup-gnome-2.4.sym |  2 --
- libsoup/soup-gnome.h          |  1 -
- libsoup/soup.h                |  1 -
- 6 files changed, 2 insertions(+), 18 deletions(-)
+ configure.ac                  | 4 ----
+ libsoup/Makefile.am           | 8 +-------
+ libsoup/libsoup-2.4.sym       | 2 --
+ libsoup/libsoup-gnome-2.4.sym | 2 --
+ libsoup/soup-gnome.h          | 1 -
+ libsoup/soup.h                | 1 -
+ 6 files changed, 1 insertion(+), 17 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 96bb378..40da8e3 100644
+index 5808f84..33fd641 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -94,10 +94,6 @@ PKG_CHECK_MODULES(XML, libxml-2.0)
@@ -29,20 +29,18 @@ index 96bb378..40da8e3 100644
  dnl *** Check for Win32 ***
  dnl ***********************
 diff --git a/libsoup/Makefile.am b/libsoup/Makefile.am
-index 60920bd..24fc9f5 100644
+index 1c71dd2..f832427 100644
 --- a/libsoup/Makefile.am
 +++ b/libsoup/Makefile.am
-@@ -15,8 +15,7 @@ AM_CPPFLAGS = 				\
- 	-I$(top_builddir)		\
+@@ -16,7 +16,6 @@ AM_CPPFLAGS = 				\
  	$(SOUP_DEBUG_FLAGS)		\
  	$(GLIB_CFLAGS)			\
--	$(XML_CFLAGS)			\
--	$(SQLITE_CFLAGS)
-+	$(XML_CFLAGS)
+ 	$(XML_CFLAGS)			\
+-	$(SQLITE_CFLAGS)		\
+ 	$(CODE_COVERAGE_CFLAGS)
  
  libsoupincludedir = $(includedir)/libsoup-2.4/libsoup
- 
-@@ -33,7 +32,6 @@ soup_headers =			\
+@@ -34,7 +33,6 @@ soup_headers =			\
  	soup-content-sniffer.h	\
  	soup-cookie.h		\
  	soup-cookie-jar.h	\
@@ -50,7 +48,7 @@ index 60920bd..24fc9f5 100644
  	soup-cookie-jar-text.h	\
  	soup-date.h		\
  	soup-form.h		\
-@@ -88,8 +86,7 @@ EXTRA_DIST += libsoup-2.4.sym
+@@ -92,8 +90,7 @@ EXTRA_DIST += libsoup-2.4.sym
  libsoup_2_4_la_LIBADD =			\
  	$(GLIB_LIBS)			\
  	$(LIBWS2_32)			\
@@ -60,7 +58,7 @@ index 60920bd..24fc9f5 100644
  
  libsoup_2_4_la_SOURCES =		\
  	soup-address.c			\
-@@ -128,7 +125,6 @@ libsoup_2_4_la_SOURCES =		\
+@@ -134,7 +131,6 @@ libsoup_2_4_la_SOURCES =		\
  	soup-converter-wrapper.c	\
  	soup-cookie.c			\
  	soup-cookie-jar.c		\
@@ -68,7 +66,7 @@ index 60920bd..24fc9f5 100644
  	soup-cookie-jar-text.c		\
  	soup-date.c			\
  	soup-directory-input-stream.h	\
-@@ -197,7 +193,6 @@ if BUILD_LIBSOUP_GNOME
+@@ -207,7 +203,6 @@ if BUILD_LIBSOUP_GNOME
  libsoupgnomeincludedir = $(includedir)/libsoup-gnome-2.4/libsoup
  
  libsoupgnomeinclude_HEADERS =	\
@@ -76,7 +74,7 @@ index 60920bd..24fc9f5 100644
  	soup-gnome.h		\
  	soup-gnome-features.h
  
-@@ -215,7 +210,6 @@ libsoup_gnome_2_4_la_LIBADD =		\
+@@ -225,7 +220,6 @@ libsoup_gnome_2_4_la_LIBADD =		\
  	$(GLIB_LIBS)
  
  libsoup_gnome_2_4_la_SOURCES =		\
@@ -85,10 +83,10 @@ index 60920bd..24fc9f5 100644
  	soup-proxy-resolver-gnome.h	\
  	soup-proxy-resolver-gnome.c	\
 diff --git a/libsoup/libsoup-2.4.sym b/libsoup/libsoup-2.4.sym
-index be4cd7f..1de6408 100644
+index e881b7f..dd341f4 100644
 --- a/libsoup/libsoup-2.4.sym
 +++ b/libsoup/libsoup-2.4.sym
-@@ -113,8 +113,6 @@ soup_cookie_jar_accept_policy_get_type
+@@ -140,8 +140,6 @@ soup_cookie_jar_accept_policy_get_type
  soup_cookie_jar_add_cookie
  soup_cookie_jar_add_cookie_with_first_party
  soup_cookie_jar_all_cookies
@@ -120,7 +118,7 @@ index a2134a4..6747f3a 100644
  
  #endif /* SOUP_GNOME_H */
 diff --git a/libsoup/soup.h b/libsoup/soup.h
-index 82a2632..6b15a2c 100644
+index 7106cc5..f05b763 100644
 --- a/libsoup/soup.h
 +++ b/libsoup/soup.h
 @@ -21,7 +21,6 @@ extern "C" {
@@ -132,5 +130,5 @@ index 82a2632..6b15a2c 100644
  #include <libsoup/soup-date.h>
  #include <libsoup/soup-enum-types.h>
 -- 
-1.9.0
+2.1.0
 

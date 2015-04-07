@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libsoup'
-    version = '2.48.1'
+    version = '2.50.0'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/libsoup/2.48/libsoup-2.48.1.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/libsoup/2.50/libsoup-2.50.0.tar.xz'
     autoreconf = True
     autoreconf_sh = 'gtkdocize && intltoolize --automake --copy && autoreconf --force --install --verbose'
     configure_options = '--without-gnome --disable-more-warnings'
