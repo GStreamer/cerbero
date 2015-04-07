@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
-    version = '0.9.38'
+    version = '0.9.40'
     stype = SourceType.TARBALL
     url = 'http://www.freedesktop.org/software/harfbuzz/release/harfbuzz-%(version)s.tar.bz2'
     licenses = [License.LGPLv2Plus]
