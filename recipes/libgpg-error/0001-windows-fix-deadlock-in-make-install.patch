@@ -1,18 +1,18 @@
-From b1be9fd9e1d8a771db81a64f8267ca2ab4ad53a6 Mon Sep 17 00:00:00 2001
+From 84b12eebc88e9fd161edda0ec679813fcfdd5028 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Sat, 4 Jan 2014 19:40:24 +0100
 Subject: [PATCH] windows: fix deadlock in make install
 
 ---
- Makefile.am |   12 ------------
- Makefile.in |   10 ----------
+ Makefile.am | 12 ------------
+ Makefile.in | 10 ----------
  2 files changed, 22 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index acb192e..9322bfc 100644
+index e5f3f56..befc61e 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -57,18 +57,6 @@ gen-ChangeLog:
+@@ -63,17 +63,5 @@ gen-ChangeLog:
  	fi
  
  
@@ -30,12 +30,11 @@ index acb192e..9322bfc 100644
 -
  stowinstall:
  	$(MAKE) $(AM_MAKEFLAGS) install prefix=/usr/local/stow/libgpg-error
- 
 diff --git a/Makefile.in b/Makefile.in
-index 110f2fb..236d52f 100644
+index aa92e4d..f60fd45 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -847,16 +847,6 @@ gen-ChangeLog:
+@@ -901,16 +901,6 @@ gen-ChangeLog:
  	  mv $(distdir)/cl-t $(distdir)/ChangeLog;			\
  	fi
  
@@ -53,5 +52,5 @@ index 110f2fb..236d52f 100644
  	$(MAKE) $(AM_MAKEFLAGS) install prefix=/usr/local/stow/libgpg-error
  
 -- 
-1.7.10.msysgit.1
+2.1.0
 
