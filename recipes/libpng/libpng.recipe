@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.6.16'
+    version = '1.6.17'
     stype = SourceType.TARBALL
-    url = 'http://download.sourceforge.net/libpng/libpng-1.6.16.tar.xz'
+    url = 'http://download.sourceforge.net/libpng/libpng-1.6.17.tar.xz'
     licenses = [License.LibPNG]
     deps = ['zlib']
     patches = ['0001-neon-fix-function-export-names-for-iOS-armv7.patch']
