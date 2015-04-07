@@ -4,17 +4,18 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'libvorbis'
-    version = '1.3.4'
+    version = '1.3.5'
     stype = SourceType.TARBALL
-    url = 'http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.4.tar.xz'
+    url = 'http://downloads.xiph.org/releases/vorbis/libvorbis-1.3.5.tar.xz'
     licenses = [License.BSD_like]
     deps = ['libogg']
-    config_sh = 'sh autogen.sh'
+    config_sh = 'rm ltmain.sh && sh autogen.sh'
     patches = ['libvorbis/0001-Fix-linking-on-Android.patch',
                'libvorbis/0003-Link-the-other-libs-with-lm-too.patch',
                'libvorbis/0004-configure-check-for-endianness.patch',
                'libvorbis/0005-darwin-do-not-build-for-a-generic-arm-architecture.patch',
-               'libvorbis/0006-Use-our-version-of-automake-instead-of-some-random-o.patch'
+               'libvorbis/0006-Use-our-version-of-automake-instead-of-some-random-o.patch',
+               'libvorbis/0007-autogen.sh-Make-sure-libtoolize-runs-fully.patch'
               ]
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']

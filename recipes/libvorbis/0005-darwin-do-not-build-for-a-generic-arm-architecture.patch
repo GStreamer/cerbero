@@ -1,30 +1,30 @@
-From dded9c5c30cf45320541c27e444d9150b04e6ab5 Mon Sep 17 00:00:00 2001
+From 9feb6354cf8322a3a9cb89077a300bc61858dba2 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 4 Nov 2013 12:15:10 +0100
 Subject: [PATCH] darwin: do not build for a generic arm architecture
 
 These linker flags end up building for generic arm when armv7 is required
 ---
- configure.ac |    6 +++---
- 1 files changed, 3 insertions(+), 3 deletions(-)
+ configure.ac | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 953107d..a5c0f88 100644
+index 923eefe..4bf75a0 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -198,9 +198,9 @@ else
- 		CFLAGS="-O20 -Wall -Wextra -ffast-math -D__NO_MATH_INLINES -fsigned-char $sparc_cpu"
- 		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char $sparc_cpu" ;;
+@@ -197,9 +197,9 @@ else
+ 		CFLAGS="-O3 -Wall -Wextra -ffast-math -D__NO_MATH_INLINES -fsigned-char $sparc_cpu"
+ 		PROFILE="-pg -g -O3 -D__NO_MATH_INLINES -fsigned-char $sparc_cpu" ;;
  	*-*-darwin*)
 -		DEBUG="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O0 -fsigned-char"
--		CFLAGS="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O4 -ffast-math -fsigned-char"
--		PROFILE="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -pg -O4 -ffast-math -fsigned-char";;
+-		CFLAGS="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O3 -ffast-math -fsigned-char"
+-		PROFILE="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -pg -O3 -ffast-math -fsigned-char";;
 +		DEBUG="-DDARWIN -fno-common -Wall -g -O0 -fsigned-char"
-+		CFLAGS="-DDARWIN -fno-common -Wall -g -O2 -ffast-math -fsigned-char"
-+		PROFILE="-DDARWIN -fno-common -Wall -g -pg -O2 -ffast-math -fsigned-char";;
++		CFLAGS="-DDARWIN -fno-common -Wall -g -O3 -ffast-math -fsigned-char"
++		PROFILE="-DDARWIN -fno-common -Wall -g -pg -O3 -ffast-math -fsigned-char";;
  	*-*-os2*)
  		# Use -W instead of -Wextra because gcc on OS/2 is an old version.
  		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 -- 
-1.7.4.4
+2.1.0
 

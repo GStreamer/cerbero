@@ -1,0 +1,27 @@
+From fa7893ac074b42229464cc009251628ad25821b7 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <bilboed@bilboed.com>
+Date: Tue, 7 Apr 2015 10:16:15 +0200
+Subject: [PATCH] autogen.sh: Make sure libtoolize runs fully
+
+---
+ autogen.sh | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index e605da8..4f77601 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -116,8 +116,8 @@ echo "Generating configuration files for $package, please wait...."
+ 
+ echo "  $ACLOCAL $ACLOCAL_FLAGS"
+ $ACLOCAL $ACLOCAL_FLAGS || exit 1
+-echo "  $LIBTOOLIZE --automake"
+-$LIBTOOLIZE --automake || exit 1
++echo "  $LIBTOOLIZE --automake --force"
++$LIBTOOLIZE --automake --force || exit 1
+ echo "  autoheader"
+ autoheader || exit 1
+ echo "  $AUTOMAKE --add-missing $AUTOMAKE_FLAGS"
+-- 
+2.1.0
+
