@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     """
     name = 'gobject-introspection-m4'
     _name = 'gobject-introspection'
-    version = '1.42.0'
+    version = '1.44.0'
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'http://ftp.gnome.org/pub/GNOME/sources/{0}/{2}/{0}-{1}.tar.xz'
