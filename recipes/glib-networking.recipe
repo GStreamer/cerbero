@@ -4,10 +4,10 @@ from cerbero.utils.shell import which
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.42.1'
+    version = '2.44.0'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.42/glib-networking-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.44/glib-networking-%(version)s.tar.xz'
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-more-warnings"
     deps = ['glib', 'gnutls']
