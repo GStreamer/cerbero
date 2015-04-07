@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libgcrypt'
-    version = '1.6.2'
+    version = '1.6.3'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+
     #       and COPYING.LIB is GPLv2.1
     licenses = [License.LGPLv2_1Plus]
