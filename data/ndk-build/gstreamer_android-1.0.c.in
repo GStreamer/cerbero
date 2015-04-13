@@ -3,6 +3,8 @@
 #include <gio/gio.h>
 #include <android/log.h>
 
+static jobject _context = NULL;
+static jobject _class_loader = NULL;
 static GstClockTime _priv_gst_info_start_time;
 
 #define GST_G_IO_MODULE_DECLARE(name) \
@@ -359,6 +361,59 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
   return TRUE;
 }
 
+jobject
+gst_android_get_application_context ()
+{
+  return _context;
+}
+
+jobject
+gst_android_get_application_class_loader ()
+{
+  return _class_loader;
+}
+
+static gboolean
+init (JNIEnv *env, jobject context)
+{
+  jclass context_cls = NULL;
+  jmethodID get_class_loader_id = 0;
+
+  jobject class_loader = NULL;
+
+  context_cls = (*env)->GetObjectClass (env, context);
+  if (!context_cls) {
+    return FALSE;
+  }
+
+  get_class_loader_id = (*env)->GetMethodID (env, context_cls,
+      "getClassLoader", "()Ljava/lang/ClassLoader;");
+  if ((*env)->ExceptionCheck (env)) {
+    (*env)->ExceptionDescribe (env);
+    (*env)->ExceptionClear (env);
+    return FALSE;
+  }
+
+  class_loader = (*env)->CallObjectMethod (env, context, get_class_loader_id);
+  if ((*env)->ExceptionCheck (env)) {
+    (*env)->ExceptionDescribe (env);
+    (*env)->ExceptionClear (env);
+    return FALSE;
+  }
+
+  if (_context) {
+    (*env)->DeleteGlobalRef (env, _context);
+  }
+  _context = (*env)->NewGlobalRef (env, context);
+
+  if (_class_loader) {
+    (*env)->DeleteGlobalRef (env, _class_loader);
+  }
+  _class_loader = (*env)->NewGlobalRef (env, class_loader);
+
+  return TRUE;
+}
+
 static void
 gst_android_init (JNIEnv * env, jobject gstreamer, jobject context)
 {
@@ -366,6 +421,11 @@ gst_android_init (JNIEnv * env, jobject gstreamer, jobject context)
   gchar *files_dir;
   gchar *registry;
   GError *error = NULL;
+
+  if (!init (env, context)) {
+    __android_log_print (ANDROID_LOG_INFO, "GStreamer",
+        "GStreamer failed to initialize");
+  }
 
   if (gst_is_initialized ()) {
     __android_log_print (ANDROID_LOG_INFO, "GStreamer",
@@ -468,4 +528,26 @@ JNI_OnLoad (JavaVM * vm, void * reserved)
   }
 
   return JNI_VERSION_1_4;
+}
+
+void
+JNI_OnUnload (JavaVM * vm, void * reversed)
+{
+  JNIEnv *env = NULL;
+
+  if ((*vm)->GetEnv (vm, (void **) &env, JNI_VERSION_1_4) != JNI_OK) {
+    __android_log_print (ANDROID_LOG_ERROR, "GStreamer",
+        "Could not retrieve JNIEnv");
+    return;
+  }
+
+  if (_context) {
+    (*env)->DeleteGlobalRef (env, _context);
+    _context = NULL;
+  }
+
+  if (_class_loader) {
+    (*env)->DeleteGlobalRef (env, _class_loader);
+    _class_loader = NULL;
+  }
 }
