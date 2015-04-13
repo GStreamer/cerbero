@@ -134,6 +134,16 @@ GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,sdp,sdpelem)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,scaletempo,scaletempoplugin)
 GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,realmedia,rmdemux)
 
+GSTREAMER_PLUGINS_CLASSES    := $(strip \
+			$(subst $(GSTREAMER_NDK_BUILD_PATH),, \
+			$(foreach plugin, $(GSTREAMER_PLUGINS), \
+			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)$(plugin)/*.java))))
+
+GSTREAMER_PLUGINS_WITH_CLASSES := $(strip \
+			$(subst $(GSTREAMER_NDK_BUILD_PATH),, \
+			$(foreach plugin, $(GSTREAMER_PLUGINS), \
+			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)$(plugin)))))
+
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE    := $(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_DECLARE($(plugin));\n)
@@ -226,6 +236,12 @@ buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
 copyjavasource_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
+	@$(foreach plugin,$(GSTREAMER_PLUGINS_WITH_CLASSES), \
+		$(call host-mkdir, $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(plugin)))
+	@$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
+		$(call host-cp, \
+		$(GSTREAMER_NDK_BUILD_PATH)$(file), \
+		$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)))
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
