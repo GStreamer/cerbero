@@ -360,7 +360,7 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
 }
 
 static void
-gst_android_init (JNIEnv * env, jclass klass, jobject context)
+gst_android_init (JNIEnv * env, jobject gstreamer, jobject context)
 {
   gchar *cache_dir;
   gchar *files_dir;
@@ -445,7 +445,7 @@ static JNINativeMethod native_methods[] = {
 };
 
 jint
-JNI_OnLoad (JavaVM * vm, void *reserved)
+JNI_OnLoad (JavaVM * vm, void * reserved)
 {
   JNIEnv *env = NULL;
 
