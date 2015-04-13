@@ -1,0 +1,51 @@
+From 0be5968ee2b0a2beddf1e190a1f7cd8e372443a4 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <bilboed@bilboed.com>
+Date: Sat, 14 Feb 2015 15:08:37 +0100
+Subject: [PATCH 5/6] build: Remove (broken) custom android toolchain usage
+
+Amazed no one complained earlier, it was always picking the arm
+toolchain.
+---
+ build/make/configure.sh | 26 --------------------------
+ 1 file changed, 26 deletions(-)
+
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index 1b032de..fc653f1 100644
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -921,32 +921,6 @@ EOF
+ 
+         android*)
+           SDK_PATH=${sdk_path}
+-          COMPILER_LOCATION=`find "${SDK_PATH}" \
+-                             -name "arm-linux-androideabi-gcc*" -print -quit`
+-          TOOLCHAIN_PATH=${COMPILER_LOCATION%/*}/arm-linux-androideabi-
+-          CC=${TOOLCHAIN_PATH}gcc
+-          CXX=${TOOLCHAIN_PATH}g++
+-          AR=${TOOLCHAIN_PATH}ar
+-          LD=${TOOLCHAIN_PATH}gcc
+-          AS=${TOOLCHAIN_PATH}as
+-          STRIP=${TOOLCHAIN_PATH}strip
+-          NM=${TOOLCHAIN_PATH}nm
+-
+-          if [ -z "${alt_libc}" ]; then
+-            alt_libc=`find "${SDK_PATH}" -name arch-arm -print | \
+-              awk '{n = split($0,a,"/"); \
+-                split(a[n-1],b,"-"); \
+-                print $0 " " b[2]}' | \
+-                sort -g -k 2 | \
+-                awk '{ print $1 }' | tail -1`
+-          fi
+-
+-          add_cflags "--sysroot=${alt_libc}"
+-          add_ldflags "--sysroot=${alt_libc}"
+-
+-          # linker flag that routes around a CPU bug in some
+-          # Cortex-A8 implementations (NDK Dev Guide)
+-          add_ldflags "-Wl,--fix-cortex-a8"
+ 
+           enable_feature pic
+           soft_enable realtime_only
+-- 
+2.1.4
+

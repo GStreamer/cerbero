@@ -1,17 +1,17 @@
-From afcb34ead288d61ad5fd7efc6005432c3c650355 Mon Sep 17 00:00:00 2001
+From 6cb011274e293be313ab86442aa9f6f629dffc04 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Tue, 9 Oct 2012 13:48:12 +0200
-Subject: [PATCH 2/5] Include Android cpu-features.c instead of .h
+Subject: [PATCH 2/6] Include Android cpu-features.c instead of .h
 
 ---
  vpx_ports/arm_cpudetect.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/vpx_ports/arm_cpudetect.c b/vpx_ports/arm_cpudetect.c
-index 8ff95a1..94b7a79 100644
+index 8a4b8af..60401f3 100644
 --- a/vpx_ports/arm_cpudetect.c
 +++ b/vpx_ports/arm_cpudetect.c
-@@ -107,7 +107,7 @@
+@@ -101,7 +101,7 @@ return flags & mask;
  }
  
  #elif defined(__ANDROID__) /* end _MSC_VER */
@@ -21,5 +21,5 @@ index 8ff95a1..94b7a79 100644
  int arm_cpu_caps(void) {
    int flags;
 -- 
-1.8.3.1
+2.1.4
 
