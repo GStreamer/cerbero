@@ -81,7 +81,7 @@ class FilesProvider(object):
         '''
 
         return self.files_list_by_categories(
-            [x for x in self.categories if x != self.DEVEL_CAT])
+            [x for x in self.categories if not x.endswith(self.DEVEL_CAT)])
 
     def files_list(self):
         '''
