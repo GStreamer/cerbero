@@ -1,0 +1,23 @@
+From ddd14ab312014c7508eb8d20c3ebe2dd03fff355 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 22 Apr 2015 15:37:53 +0200
+Subject: [PATCH] Don't override our own ACLOCAL_FLAGS but append them to the
+ custom ones
+
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index d2dbe69..68470dc 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,4 +1,4 @@
+-ACLOCAL_AMFLAGS = -I build/autotools
++ACLOCAL_AMFLAGS = -I build/autotools ${ACLOCAL_FLAGS}
+ 
+ EXTRA_DIST =
+ 
+-- 
+2.1.4
+
