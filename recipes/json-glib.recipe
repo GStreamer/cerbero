@@ -2,15 +2,13 @@
 
 class Recipe(recipe.Recipe):
     name = 'json-glib'
-    version = '1.0.2'
+    version = '1.0.4'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
-    url = 'http://download.gnome.org/sources/json-glib/1.0/json-glib-1.0.2.tar.xz'
+    url = 'http://download.gnome.org/sources/json-glib/1.0/json-glib-1.0.4.tar.xz'
     deps = ['glib']
     configure_options = '--enable-static'
     autoreconf = True
-
-    patches = ["json-glib/0001-configure-Set-gettext-to-version-0.19.patch"]
 
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']
