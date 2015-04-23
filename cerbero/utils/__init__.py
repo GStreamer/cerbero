@@ -151,7 +151,7 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_RARING
             elif d[2] in ['saucy', 'petra']:
                 distro_version = DistroVersion.UBUNTU_SAUCY
-            elif d[2] in ['trusty', 'qiana']:
+            elif d[2] in ['trusty', 'qiana', 'rebecca']:
                 distro_version = DistroVersion.UBUNTU_TRUSTY
             elif d[2] in ['utopic']:
                 distro_version = DistroVersion.UBUNTU_UTOPIC
