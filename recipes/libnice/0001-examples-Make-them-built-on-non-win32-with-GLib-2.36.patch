@@ -1,0 +1,99 @@
+From 414f9e4a30fd69eee121fad373dd170c5b5586f5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
+Date: Wed, 22 Apr 2015 21:26:09 -0400
+Subject: [PATCH 1/5] examples: Make them built on non-win32 with GLib < 2.36
+
+---
+ examples/sdp-example.c      |  7 +++++--
+ examples/simple-example.c   | 10 ++++++----
+ examples/threaded-example.c |  6 +++++-
+ 3 files changed, 16 insertions(+), 7 deletions(-)
+
+diff --git a/examples/sdp-example.c b/examples/sdp-example.c
+index bf31c5a..342061f 100644
+--- a/examples/sdp-example.c
++++ b/examples/sdp-example.c
+@@ -44,7 +44,9 @@
+ 
+ #include <agent.h>
+ 
++#if GLIB_CHECK_VERSION(2, 36, 0)
+ #include <gio/gnetworking.h>
++#endif
+ 
+ static GMainLoop *gloop;
+ static gchar *stun_addr = NULL;
+@@ -93,10 +95,11 @@ main(int argc, char *argv[])
+     g_debug("Using stun server '[%s]:%u'\n", stun_addr, stun_port);
+   }
+ 
+-#if !GLIB_CHECK_VERSION(2, 36, 0)
++#if GLIB_CHECK_VERSION(2, 36, 0)
++  g_networking_init();
++#else
+   g_type_init();
+ #endif
+-  g_networking_init();
+ 
+   gloop = g_main_loop_new(NULL, FALSE);
+ 
+diff --git a/examples/simple-example.c b/examples/simple-example.c
+index aa259aa..c28cbb3 100644
+--- a/examples/simple-example.c
++++ b/examples/simple-example.c
+@@ -42,10 +42,11 @@
+ #include <string.h>
+ #include <ctype.h>
+ 
+-#include <gio/gnetworking.h>
+-
+ #include <agent.h>
+ 
++#if GLIB_CHECK_VERSION(2, 36, 0)
++#include <gio/gnetworking.h>
++#endif
+ 
+ static GMainLoop *gloop;
+ static GIOChannel* io_stdin;
+@@ -104,10 +105,11 @@ main(int argc, char *argv[])
+     g_debug("Using stun server '[%s]:%u'\n", stun_addr, stun_port);
+   }
+ 
+-#if !GLIB_CHECK_VERSION(2, 36, 0)
++#if GLIB_CHECK_VERSION(2, 36, 0)
++  g_networking_init();
++#else
+   g_type_init();
+ #endif
+-  g_networking_init();
+ 
+   gloop = g_main_loop_new(NULL, FALSE);
+ #ifdef G_OS_WIN32
+diff --git a/examples/threaded-example.c b/examples/threaded-example.c
+index 2564b3a..f1f2750 100644
+--- a/examples/threaded-example.c
++++ b/examples/threaded-example.c
+@@ -44,7 +44,9 @@
+ 
+ #include <agent.h>
+ 
++#if GLIB_CHECK_VERSION(2, 36, 0)
+ #include <gio/gnetworking.h>
++#endif
+ 
+ static GMainLoop *gloop;
+ static gchar *stun_addr = NULL;
+@@ -102,7 +104,9 @@ main(int argc, char *argv[])
+     g_debug("Using stun server '[%s]:%u'\n", stun_addr, stun_port);
+   }
+ 
+-#if !GLIB_CHECK_VERSION(2, 36, 0)
++#if GLIB_CHECK_VERSION(2, 36, 0)
++  g_networking_init();
++#else
+   g_type_init();
+ #endif
+   g_networking_init();
+-- 
+2.3.2 (Apple Git-55)
+

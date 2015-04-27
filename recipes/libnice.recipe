@@ -11,6 +11,13 @@ class Recipe(recipe.Recipe):
             --disable-gtk-doc'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
     autoreconf = True
+    patches = [
+        'libnice/0001-examples-Make-them-built-on-non-win32-with-GLib-2.36.patch',
+        'libnice/0002-stun-Add-missing-casts-to-unit-tests.patch',
+        'libnice/0003-agent-Move-utility-function-outside-ifdef.patch',
+        'libnice/0004-agent-Add-a-missing-cast-when-compiling-without-HAVE.patch',
+        'libnice/0005-agent-Fix-a-utility-function-being-defined-unnecessa.patch'
+    ]
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']

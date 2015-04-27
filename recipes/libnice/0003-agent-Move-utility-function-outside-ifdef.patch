@@ -1,0 +1,42 @@
+From a2c3519c851a7311976e1e99c7619cf6eae90081 Mon Sep 17 00:00:00 2001
+From: Philip Withnall <philip.withnall@collabora.co.uk>
+Date: Fri, 24 Apr 2015 10:18:32 +0100
+Subject: [PATCH 3/5] agent: Move utility function outside #ifdef
+
+This fixes compilation when HAVE_GETIFADDRS is not define. Reported on
+the mailing list by Curieux Tres <trescurieux@yahoo.fr>.
+---
+ agent/interfaces.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/agent/interfaces.c b/agent/interfaces.c
+index 0ce16e4..15bfa3c 100644
+--- a/agent/interfaces.c
++++ b/agent/interfaces.c
+@@ -190,11 +190,6 @@ nice_interfaces_is_private_ip (const struct sockaddr *_sa)
+   return FALSE;
+ }
+ 
+-#ifdef HAVE_GETIFADDRS
+-
+-static gchar *
+-sockaddr_to_string (const struct sockaddr *addr);
+-
+ static GList *
+ add_ip_to_list (GList *list, gchar *ip, gboolean append)
+ {
+@@ -212,6 +207,11 @@ add_ip_to_list (GList *list, gchar *ip, gboolean append)
+     return g_list_prepend (list, ip);
+ }
+ 
++#ifdef HAVE_GETIFADDRS
++
++static gchar *
++sockaddr_to_string (const struct sockaddr *addr);
++
+ GList *
+ nice_interfaces_get_local_ips (gboolean include_loopback)
+ {
+-- 
+2.3.2 (Apple Git-55)
+

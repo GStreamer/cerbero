@@ -1,0 +1,26 @@
+From 238293c2dc9033aaf2301eb4a0d29e7c24cb0400 Mon Sep 17 00:00:00 2001
+From: Philip Withnall <philip.withnall@collabora.co.uk>
+Date: Fri, 24 Apr 2015 10:27:07 +0100
+Subject: [PATCH 4/5] agent: Add a missing cast when compiling without
+ HAVE_GETIFADDRS
+
+---
+ agent/interfaces.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/agent/interfaces.c b/agent/interfaces.c
+index 15bfa3c..9a0e69c 100644
+--- a/agent/interfaces.c
++++ b/agent/interfaces.c
+@@ -328,7 +328,7 @@ nice_interfaces_get_local_ips (gboolean include_loopback)
+       else
+         nice_debug ("Ignoring loopback interface");
+     } else {
+-      if (nice_interfaces_is_private_ip (sa)) {
++      if (nice_interfaces_is_private_ip ((struct sockaddr *) sa)) {
+         ips = add_ip_to_list (ips, g_strdup (inet_ntoa (sa->sin_addr)), TRUE);
+       } else {
+         ips = add_ip_to_list (ips, g_strdup (inet_ntoa (sa->sin_addr)), FALSE);
+-- 
+2.3.2 (Apple Git-55)
+
