@@ -11,7 +11,6 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = ' --without-gstreamer-0.10 \
         --enable-compile-warnings=maximum'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
-    patches = ['libnice/libnice-add-win32-support.patch']
     autoreconf = True
 
     files_plugins_net_devel = ['libgstnice']

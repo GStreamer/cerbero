@@ -10,7 +10,6 @@ class Recipe(recipe.Recipe):
             --without-gstreamer-0.10 --enable-compile-warnings=maximum \
             --disable-gtk-doc'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
-    patches = [name + '/libnice-add-win32-support.patch']
     autoreconf = True
 
     files_bins = ['stunbdc', 'stund']
