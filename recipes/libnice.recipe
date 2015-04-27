@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.10'
+    version = '0.1.12'
     stype = SourceType.TARBALL
     url = 'http://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]

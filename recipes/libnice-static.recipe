@@ -2,7 +2,7 @@
 
 class Recipe(custom.GStreamerStatic):
     name = 'libnice-static'
-    version = '0.1.10'
+    version = '0.1.12'
     gstreamer_version = '1.0'
     stype = SourceType.TARBALL
     srcdir = '../libnice-' + version
