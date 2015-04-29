@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
-    files_bins = ['gst-discoverer-1.0']
+    files_bins = ['gst-discoverer-1.0', 'gst-play-1.0', 'gst-device-monitor-1.0']
 
     files_libs = ['libgstallocators-1.0',
                  'libgstapp-1.0', 'libgstaudio-1.0',
