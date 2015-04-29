@@ -70,6 +70,7 @@ class DistroVersion:
     UBUNTU_SAUCY = 'ubuntu_saucy'
     UBUNTU_TRUSTY = 'ubuntu_trusty'
     UBUNTU_UTOPIC = 'ubuntu_utopic'
+    UBUNTU_VIVID = 'ubuntu_vivid'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'

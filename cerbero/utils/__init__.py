@@ -155,6 +155,8 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_TRUSTY
             elif d[2] in ['utopic']:
                 distro_version = DistroVersion.UBUNTU_UTOPIC
+            elif d[2] in ['vivid']:
+                distro_version = DistroVersion.UBUNTU_VIVID
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
             elif d[1].startswith('7.') or d[1].startswith('wheezy'):
