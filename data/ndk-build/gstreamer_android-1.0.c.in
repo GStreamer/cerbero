@@ -20,14 +20,14 @@ G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
  @G_IO_MODULES_DECLARE@
 
 /* Call this function to register static plugins */
-static void
+void
 gst_android_register_static_plugins (void)
 {
  @PLUGINS_REGISTRATION@
 }
 
 /* Call this function to load GIO modules */
-static void
+void
 gst_android_load_gio_modules (void)
 {
  @G_IO_MODULES_LOAD@
