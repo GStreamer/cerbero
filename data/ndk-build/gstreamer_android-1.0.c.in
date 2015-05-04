@@ -20,26 +20,26 @@ G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
  @G_IO_MODULES_DECLARE@
 
 /* Call this function to register static plugins */
-void
+static void
 gst_android_register_static_plugins (void)
 {
  @PLUGINS_REGISTRATION@
 }
 
 /* Call this function to load GIO modules */
-void
+static void
 gst_android_load_gio_modules (void)
 {
  @G_IO_MODULES_LOAD@
 }
 
-void
+static void
 glib_print_handler (const gchar * string)
 {
   __android_log_print (ANDROID_LOG_INFO, "GLib+stdout", "%s", string);
 }
 
-void
+static void
 glib_printerr_handler (const gchar * string)
 {
   __android_log_print (ANDROID_LOG_ERROR, "GLib+stderr", "%s", string);
@@ -109,7 +109,7 @@ escape_string (GString * string)
   }
 }
 
-void
+static void
 glib_log_handler (const gchar * log_domain, GLogLevelFlags log_level,
     const gchar * message, gpointer user_data)
 {
@@ -177,7 +177,7 @@ emit:
   g_free (tag);
 }
 
-void
+static void
 gst_debug_logcat (GstDebugCategory * category, GstDebugLevel level,
     const gchar * file, const gchar * function, gint line,
     GObject * object, GstDebugMessage * message, gpointer unused)
