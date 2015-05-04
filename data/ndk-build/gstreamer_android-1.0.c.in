@@ -414,8 +414,8 @@ init (JNIEnv *env, jobject context)
   return TRUE;
 }
 
-static void
-gst_android_init (JNIEnv * env, jobject gstreamer, jobject context)
+void
+gst_android_init (JNIEnv * env, jobject context)
 {
   gchar *cache_dir;
   gchar *files_dir;
@@ -500,8 +500,14 @@ gst_android_init (JNIEnv * env, jobject gstreamer, jobject context)
       "GStreamer initialization complete");
 }
 
+static void
+gst_android_init_jni (JNIEnv * env, jobject gstreamer, jobject context)
+{
+  gst_android_init (env, context);
+}
+
 static JNINativeMethod native_methods[] = {
-  {"nativeInit", "(Landroid/content/Context;)V", (void *) gst_android_init}
+  {"nativeInit", "(Landroid/content/Context;)V", (void *) gst_android_init_jni}
 };
 
 jint
