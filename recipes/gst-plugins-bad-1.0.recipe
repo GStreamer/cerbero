@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-static --disable-introspection --disable-gsm \
         --disable-examples --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
-        --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
+        --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
         --disable-dirac --disable-faac --disable-flite --disable-gme \
         --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug \
@@ -158,7 +158,8 @@ class Recipe(recipe.Recipe):
     platform_files_plugins_sys = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
@@ -169,7 +170,8 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstapplemedia_nonpublic%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',

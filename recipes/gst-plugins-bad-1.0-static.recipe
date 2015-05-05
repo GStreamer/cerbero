@@ -8,7 +8,7 @@ class Recipe(custom.GStreamerStatic):
     licenses = [License.LGPLv2Plus]
     extra_configure_options = '--disable-gsm --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
-        --disable-decklink --disable-linsys --disable-fbdev --disable-apexsink \
+        --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
         --disable-dirac --disable-faac --disable-flite --disable-gme \
         --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug \
@@ -140,6 +140,7 @@ class Recipe(custom.GStreamerStatic):
         Platform.LINUX: [
              'libgstshm',
              'libgstopengl',
+             'libgstdecklink',
             ],
         Platform.WINDOWS: [
              'libgstd3dvideosink',
@@ -151,6 +152,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstapplemedia_nonpublic',
              'libgstshm',
              'libgstopengl',
+             'libgstdecklink',
             ],
         Platform.IOS: [
              'libgstapplemedia',
