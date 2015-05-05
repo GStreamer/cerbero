@@ -69,7 +69,7 @@ class Recipe(recipe.Recipe):
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
-            self.append_env['CFLAGS'] = " -D__ANDROID__ -Dandroid_getCpuFamily=vpx_android_getCpuFamily "\
+            self.append_env['CFLAGS'] = " -Dandroid_getCpuFamily=vpx_android_getCpuFamily "\
                 "-Dandroid_getCpuFeatures=vpx_android_getCpuFeatures "\
                 "-Dandroid_getCpuCount=vpx_android_getCpuCount " \
                 "-Dandroid_cpuInit=vpx_android_cpuInit " \
@@ -78,7 +78,9 @@ class Recipe(recipe.Recipe):
                 "-Dandroid_setCpu=vpx_android_setCpu " \
                 "-Dandroid_setCpuArm=vpx_android_setCpuArm "
 
-            self.append_env['ASFLAGS'] = " -D__ANDROID__ "
+            if self.config.target_arch == Architecture.X86:
+                self.append_env['ASFLAGS'] = " -D__ANDROID__ "
+                self.append_env['CFLAGS'] += " -D__ANDROID__ "
 
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv5te'
