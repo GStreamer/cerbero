@@ -1,0 +1,29 @@
+From 3f2ece3e30b1f59b169c787ff9e078e10a19750a Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Thu, 24 Oct 2013 12:31:47 +0200
+Subject: [PATCH 4/4] configure: let us decide if we really want PIC or not
+
+Fixes:
+"/usr/bin/ld: .libs/imdct.o: relocation R_X86_64_32 against `.bss' can
+not be used when making a shared object; recompile with -fPIC
+.libs/imdct.o: could not read symbols: Bad value`"
+---
+ liba52/configure.incl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/liba52/configure.incl b/liba52/configure.incl
+index 4dbbcea..96b39aa 100644
+--- a/liba52/configure.incl
++++ b/liba52/configure.incl
+@@ -2,7 +2,7 @@ AC_SUBST([LIBA52_CFLAGS])
+ AC_SUBST([LIBA52_LIBS])
+ 
+ dnl avoid -fPIC when possible
+-LIBA52_CFLAGS="$LIBA52_CFLAGS -prefer-non-pic"
++dnl LIBA52_CFLAGS="$LIBA52_CFLAGS -prefer-non-pic"
+ 
+ AC_ARG_ENABLE([double],
+     [  --enable-double         use double-precision samples])
+-- 
+2.1.4
+

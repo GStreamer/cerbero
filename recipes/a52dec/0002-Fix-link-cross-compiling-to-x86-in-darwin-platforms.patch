@@ -1,0 +1,46 @@
+From 1b9beeece64828c3083ae33f633c00cce4b69b65 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Thu, 5 Apr 2012 13:25:06 +0200
+Subject: [PATCH 2/4] Fix link cross-compiling to x86 in darwin platforms
+
+The -m32 flag is not passed properly to gcc, creating a x86_64 library
+---
+ configure.in       | 9 +++++++++
+ liba52/Makefile.am | 2 +-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/configure.in b/configure.in
+index 71fd92b..17fc818 100644
+--- a/configure.in
++++ b/configure.in
+@@ -30,6 +30,15 @@ if test x"$GCC" = x"yes"; then
+     OPT_CFLAGS="$CFLAGS -fomit-frame-pointer"
+     AC_TRY_CFLAGS([$OPT_CFLAGS],[CFLAGS=$OPT_CFLAGS])
+ 
++    case "$host" in
++    *-apple-darwin*)
++	case "$host" in
++	i?86-* ) LIBA52_LDFLAGS="-Wl, -m32";;
++	x86_64-*) LIBA52_LDFLAGS="-Wl, -m64";;
++	esac
++    esac
++    AC_SUBST(LIBA52_LDFLAGS)
++
+     dnl arch-specific flags
+     case "$host" in
+     i?86-* | k?-*)
+diff --git a/liba52/Makefile.am b/liba52/Makefile.am
+index 32768b4..7fb0bb7 100644
+--- a/liba52/Makefile.am
++++ b/liba52/Makefile.am
+@@ -4,6 +4,6 @@ lib_LTLIBRARIES = liba52.la
+ 
+ liba52_la_SOURCES = bitstream.c imdct.c bit_allocate.c parse.c downmix.c
+ liba52_la_LIBADD = @LIBA52_LIBS@ -lm
+-liba52_la_LDFLAGS = -no-undefined
++liba52_la_LDFLAGS = @LIBA52_LDFLAGS@ -no-undefined
+ 
+ EXTRA_DIST = configure.incl a52_internal.h bitstream.h tables.h
+-- 
+2.1.4
+

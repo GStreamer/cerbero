@@ -1,0 +1,26 @@
+From 0bcb55806e3964086e0eeabcef79dbc005ad8953 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <slomo@circular-chaos.org>
+Date: Mon, 23 Sep 2013 12:34:10 +0200
+Subject: [PATCH 3/4] Disable AC_C_ALWAYS_INLINE
+
+It causes errors with the new Xcode 5.0 toolchain and is not necessarily
+useful anyway
+---
+ configure.in | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/configure.in b/configure.in
+index 17fc818..354c524 100644
+--- a/configure.in
++++ b/configure.in
+@@ -94,7 +94,6 @@ AC_CHECK_GENERATE_INTTYPES([include])
+ 
+ dnl Checks for typedefs, structures, and compiler characteristics.
+ AC_C_CONST
+-AC_C_ALWAYS_INLINE
+ AC_C_RESTRICT
+ AC_TYPE_SIZE_T
+ AC_C_BIGENDIAN
+-- 
+2.1.4
+
