@@ -6,7 +6,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://sourceforge.net/projects/libmms/files/libmms/0.6.4/libmms-0.6.4.tar.gz'
     licenses = [License.LGPLv2_1Plus]
-    deps = [ 'glib' ]
+    patches = ['libmms/0001-Use-native-iconv-in-windows.patch',
+               'libmms/0005-Fix-build-on-OSX-leopard.patch']
 
     files_libs = ['libmms']
     files_devel = ['include/libmms', 'lib/pkgconfig/libmms.pc']
