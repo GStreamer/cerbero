@@ -313,6 +313,11 @@ class Svn(Source):
 
         shutil.copytree(self.repo_dir, self.build_dir)
 
+        for patch in self.patches:
+            if not os.path.isabs(patch):
+                patch = self.relative_path(patch)
+            shell.apply_patch(patch, self.build_dir, self.strip)
+
     def built_version(self):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))
 
