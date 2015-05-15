@@ -5,6 +5,8 @@ class Recipe(recipe.Recipe):
     version = '1.76.1'
     licenses = [License.BSD_like]
     btype = BuildType.CUSTOM
+    stype = SourceType.TARBALL
+    url = 'http://sourceforge.net/projects/docbook/files/docbook-xsl/1.78.1/docbook-xsl-1.78.1.tar.bz2'
 
     files_catalog = ['etc/catalog.xml']
 

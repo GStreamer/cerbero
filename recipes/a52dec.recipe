@@ -8,8 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
     autoreconf = True
-    patches = ['a52dec/0001-Honour-with-pic-option-properly.patch',
-               'a52dec/0002-Fix-link-cross-compiling-to-x86-in-darwin-platforms.patch',
+    patches = ['a52dec/0002-Fix-link-cross-compiling-to-x86-in-darwin-platforms.patch',
                'a52dec/0003-Disable-AC_C_ALWAYS_INLINE.patch',
                'a52dec/0004-configure-let-us-decide-if-we-really-want-PIC-or-not.patch']
 
