@@ -1,8 +1,0 @@
-# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
-class Recipe(recipe.Recipe):
-    name = 'libIDL'
-    version = '0.8.14'
-    licenses = [License.LGPL]
-    stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/libIDL/0.8/libIDL-0.8.14.tar.bz2'
