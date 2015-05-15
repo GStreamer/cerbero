@@ -13,6 +13,7 @@ class Recipe(custom.GStreamerStatic):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     extra_configure_options = "--enable-static --enable-lgpl --disable-example"
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
@@ -40,10 +41,6 @@ class Recipe(custom.GStreamerStatic):
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         super(Recipe, self).prepare()
-
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-libav'))
-        self.remotes['upstream'] = self.remotes['origin']
-
         for f in ['libavcodec', 'libavformat', 'libavutil', 'libavresample', 'libswscale']:
             for ext in ['.a', '.la']:
                 path = os.path.join('lib', f + ext)

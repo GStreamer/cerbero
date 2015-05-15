@@ -21,8 +21,6 @@ class GStreamerStatic(recipe.Recipe):
         self.project_name = self.name.replace('-static', '')
         if self.stype in (SourceType.GIT, SourceType.GIT_TARBALL):
             self.config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-            self.remotes['upstream'] = 'git://anongit.freedesktop.org/gstreamer/' + self.project_name
-            self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, self.project_name))
             self.repo_dir = os.path.join(self.config.local_sources,
                                          self.project_name)
         elif self.stype == SourceType.TARBALL:

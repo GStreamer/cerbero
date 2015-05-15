@@ -7,6 +7,7 @@ class Recipe(custom.GStreamerStatic):
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
     extra_configure_options = "--enable-static"
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     commit = 'origin/master'
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc']
@@ -95,7 +96,4 @@ class Recipe(custom.GStreamerStatic):
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         custom.GStreamerStatic.prepare(self)
-
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-base'))
-        self.remotes['upstream'] = self.remotes['origin']
 

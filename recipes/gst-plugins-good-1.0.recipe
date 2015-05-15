@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 '
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup',
@@ -104,9 +105,6 @@ class Recipe(recipe.Recipe):
     }
 
     def prepare(self):
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-plugins-good'))
-        self.remotes['upstream'] = self.remotes['origin']
-
         # The second detail is to work around use of deprecated NSOpenGLPFAFullScreen on OS X 10.10
         self.append_env['CFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 -DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1 "
         self.append_env['OBJCFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "

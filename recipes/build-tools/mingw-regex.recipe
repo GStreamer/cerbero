@@ -7,9 +7,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libregex']
     files_devel = ['include/regex.h']
     autoreconf = True
+    remotes = {'origin': 'git://git.code.sf.net/p/mingw/regex'}
     commit = 'origin/master'
     patches = ['mingw-regex/0001-Fix-compilation.patch']
 
-    def prepare(self):
-        self.remotes['origin'] = 'git://git.code.sf.net/p/mingw/regex'
-        self.remotes['upstream'] = self.remotes['origin']

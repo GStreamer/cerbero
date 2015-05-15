@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--disable-examples --enable-static "
-    remotes = {'upstream': 'git://anongit.freedesktop.org/gstreamer/gst-rtsp-server'}
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-rtsp-server'}
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
@@ -14,6 +14,3 @@ class Recipe(recipe.Recipe):
     files_libs = ['libgstrtspserver-1.0']
     files_typelibs = ['GstRtspServer-1.0']
 
-    def prepare(self):
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-rtsp-server'))
-        self.remotes['upstream'] = self.remotes['origin']

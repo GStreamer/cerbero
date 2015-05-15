@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     autoreconf_sh = 'sh autogen.sh'
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'glib', 'pygobject']
     # FIXME: disable checks until it's properly fixed
@@ -19,8 +20,4 @@ class Recipe(recipe.Recipe):
         'site-packages/gi/overrides/GstPbutils.py',
         'site-packages/gi/overrides/_gi_gst.so'
     ]
-
-    def prepare(self):
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-python'))
-        self.remotes['upstream'] = self.remotes['origin']
 

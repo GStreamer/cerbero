@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'gst-editing-services-1.0'
     version = '1.5'
     licenses = [License.LGPLv2Plus]
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
     commit = 'origin/master'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--program-prefix= --disable-examples --enable-static "
@@ -18,9 +19,6 @@ class Recipe(recipe.Recipe):
 #    files_python = ['site-packages/ges%(pext)s']
 
     def prepare(self):
-        self.remotes['origin'] = ('%s/%s' % ('git://anongit.freedesktop.org/gstreamer', 'gst-editing-services'))
-        self.remotes['upstream'] = self.remotes['origin']
-
         self.append_env['CFLAGS'] = " -Wno-error "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "

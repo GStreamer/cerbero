@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     version = 'v1.4.0'
     licenses = [License.BSD]
     btype = BuildType.MAKEFILE
+    remotes = {'origin': 'https://github.com/webmproject/libvpx.git'}
     commit = 'v1.4.0'
     configure_tpl = "./configure --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
@@ -35,9 +36,6 @@ class Recipe(recipe.Recipe):
 
 
     def prepare (self):
-        self.remotes['origin'] = 'https://github.com/webmproject/libvpx.git'
-        self.remotes['upstream'] = self.remotes['origin']
-
         if self.config.target_arch == Architecture.X86_64:
             arch = 'x86_64'
         elif self.config.target_arch == Architecture.X86:
