@@ -3,7 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'libdvdread'
-    version = '4.2.0'
+    version = '4.2.1'
+    stype = SourceType.TARBALL
+    url = 'http://download.videolan.org/pub/videolan/libdvdread/libdvdread-4.2.1.tar.xz'
     licenses = [License.GPLv2Plus]
     config_sh = 'sh autogen.sh'
 

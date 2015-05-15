@@ -1,0 +1,25 @@
+From 1e31e8a955dbe800413d6c475b91f9e77e5f65d8 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Wed, 29 Feb 2012 18:12:14 +0100
+Subject: [PATCH] Fix linking in windows compilation
+
+---
+ src/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index c7502a3..9ecfacb 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -21,7 +21,7 @@ libdvdnav_la_LIBADD = $(THREAD_LIBS) $(DVDREAD_LIBS) \
+ 
+ libdvdnav_la_LDFLAGS = \
+ 	-version-info $(DVDNAV_LT_CURRENT):$(DVDNAV_LT_REVISION):$(DVDNAV_LT_AGE) \
+-	-export-symbols-regex "(^dvdnav.*|^nav.*|^ifo.*|^DVD.*)"
++	-export-symbols-regex "(^dvdnav.*|^nav.*|^ifo.*|^DVD.*)" $(DVDREAD_LIBS)
+ #	-release $(DVDNAV_MAJOR).$(DVDNAV_MINOR).$(DVDNAV_SUB)
+ 
+ libdvdnavmini_la_SOURCES = $(libdvdnav_la_SOURCES)
+-- 
+2.1.4
+

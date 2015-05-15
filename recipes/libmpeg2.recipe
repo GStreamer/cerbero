@@ -4,8 +4,12 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'libmpeg2'
     version = '0.5.1'
+    stype = SourceType.TARBALL
+    url = 'http://libmpeg2.sourceforge.net/files/libmpeg2-0.5.1.tar.gz'
     licenses = [License.GPLv2Plus]
     autoreconf = True
+    patches = ['libmpeg2/0001-Disable-AC_C_ALWAYS_INLINE.patch',
+               'libmpeg2/0002-Import-revision-1206-from-upstream-to-fix-PIE-build.patch']
 
     files_libs = ['libmpeg2', 'libmpeg2convert']
     files_bins = ['mpeg2dec', 'extract_mpeg2', 'corrupt_mpeg2']

@@ -4,8 +4,11 @@
 class Recipe(recipe.Recipe):
     name = 'libkate'
     version = '0.4.1'
+    stype = SourceType.TARBALL
+    url = 'https://libkate.googlecode.com/files/libkate-0.4.1.tar.gz'
     licenses = [License.BSD_like]
     deps = ['libogg', 'libpng']
+    patches = ['libkate/0001-be-more-permissive-with-automake-errors-now-that-we-.patch']
 
     files_libs = ['libkate', 'liboggkate']
     files_devel = ['include/kate', 'lib/pkgconfig/kate.pc', 'lib/pkgconfig/oggkate.pc']

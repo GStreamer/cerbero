@@ -2,7 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'libmms'
-    version = '0.6.2'
+    version = '0.6.4'
+    stype = SourceType.TARBALL
+    url = 'http://sourceforge.net/projects/libmms/files/libmms/0.6.4/libmms-0.6.4.tar.gz'
     licenses = [License.LGPLv2_1Plus]
     deps = [ 'glib' ]
 

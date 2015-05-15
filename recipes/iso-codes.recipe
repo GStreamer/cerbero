@@ -3,5 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'iso-codes'
-    version = '3.37'
+    version = '3.57'
+    stype = SourceType.TARBALL
+    url = 'http://pkg-isocodes.alioth.debian.org/downloads/iso-codes-3.57.tar.xz'
     licenses = [License.LGPLv2_1Plus]

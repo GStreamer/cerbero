@@ -3,7 +3,10 @@
 class Recipe(recipe.Recipe):
     name = 'libdca'
     version = '0.0.5'
+    stype = SourceType.TARBALL
+    url = 'http://download.videolan.org/pub/videolan/libdca/0.0.5/libdca-0.0.5.tar.bz2'
     licenses = [License.GPL]
+    patches = ['libdca/0001-Disable-AC_C_ALWAYS_INLINE.patch']
     autoreconf = True
 
     files_libs = ['libdca']

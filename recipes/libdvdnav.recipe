@@ -3,11 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'libdvdnav'
-    version = '4.2.0'
+    version = '4.2.1'
+    stype = SourceType.TARBALL
+    url = 'http://download.videolan.org/pub/videolan/libdvdnav/libdvdnav-4.2.1.tar.xz'
     licenses = [License.GPLv2Plus]
     config_sh = 'sh autogen.sh'
     deps = ['libdvdread']
     configure_options = '--with-dvdread-config=$CERBERO_PREFIX/bin/dvdread-config'
+    patches = ['libdvdnav/0001-Fix-linking-in-windows-compilation.patch']
 
     files_libs = ['libdvdnav', 'libdvdnavmini']
     files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc',

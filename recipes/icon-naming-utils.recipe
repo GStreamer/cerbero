@@ -3,6 +3,8 @@
 class Recipe(recipe.Recipe):
     name = 'icon-naming-utils'
     version = '0.8.7'
+    stype = SourceType.TARBALL
+    url = 'http://tango.freedesktop.org/releases/icon-naming-utils-0.8.7.tar.gz'
     licenses = [License.GPLv2]
     deps = ['XML-Simple']
 
