@@ -130,7 +130,8 @@ class Recipe(recipe.Recipe):
                     mod_path2 = '/usr/lib/x86_64-linux-gnu/gtk-3.0'
             # Debian 
             elif self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY,
-                                                       DistroVersion.DEBIAN_JESSIE]:
+                                                       DistroVersion.DEBIAN_JESSIE,
+                                                       DistroVersion.DEBIAN_STRETCH]:
                 if self.config.target_arch == Architecture.X86:
                     mod_path1 = '/usr/lib/i386-linux-gnu/gtk-3.0'
                 elif self.config.target_arch == Architecture.X86_64:
