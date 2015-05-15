@@ -163,6 +163,8 @@ def system_info():
                 distro_version = DistroVersion.DEBIAN_WHEEZY
             elif d[1].startswith('8.') or d[1].startswith('jessie'):
                 distro_version = DistroVersion.DEBIAN_JESSIE
+            elif d[1].startswith('stretch'):
+                distro_version = DistroVersion.DEBIAN_STRETCH
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:
