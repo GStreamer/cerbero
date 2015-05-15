@@ -10,10 +10,9 @@ class Recipe(recipe.Recipe):
     deps = ['libogg']
     allow_parallel_build = False
 
-    files_libs = ['libspeex', 'libspeexdsp']
+    files_libs = ['libspeex']
     files_bins = ['speexdec', 'speexenc']
-    files_devel = ['include/speex', 'lib/pkgconfig/speex.pc',
-        'lib/pkgconfig/speexdsp.pc']
+    files_devel = ['include/speex', 'lib/pkgconfig/speex.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
