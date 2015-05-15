@@ -7,7 +7,6 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'git://git.gnome.org/snappy'}
     config_sh = 'autoreconf -fiv && sh ./configure'
     deps = ['glib', 'gstreamer', 'gst-plugins-base', 'clutter', 'clutter-gst']
-    platform_deps = { Platform.LINUX: ['libXtst'] }
     use_system_libs = True
 
     files_bins = ['snappy']

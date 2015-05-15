@@ -1,9 +1,0 @@
-# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
-class Recipe(recipe.Recipe):
-    name = 'libXtst'
-    version = '1.1.0'
-    # TODO - check license
-    licenses = [License.MIT]
-    use_system_libs = True
-    configure_options = ' --disable-shared '

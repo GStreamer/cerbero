@@ -4,7 +4,9 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '4.60.1'
+    version = '4.70.0'
+    stype = SourceType.TARBALL
+    url = 'http://www.wavpack.com/wavpack-4.70.0.tar.bz2'
     licenses = [License.BSD_like]
 
     files_libs = ['libwavpack']

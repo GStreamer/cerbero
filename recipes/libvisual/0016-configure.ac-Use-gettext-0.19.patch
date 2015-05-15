@@ -1,7 +1,7 @@
-From 90be93ccbce172020162e4f5422562efc3bdc18e Mon Sep 17 00:00:00 2001
+From cd15f0482252ae3568e106bf15e6bc95aa46fb1c Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Fri, 13 Feb 2015 12:49:31 +0100
-Subject: [PATCH] configure.ac: Use gettext 0.19
+Subject: [PATCH 16/16] configure.ac: Use gettext 0.19
 
 ---
  configure.ac | 2 +-
@@ -21,5 +21,5 @@ index e89815f..f8a1e9d 100644
  dnl -------------------------------
  dnl Check for native thread support
 -- 
-2.1.0
+2.1.4
 

@@ -12,9 +12,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libkate', 'liboggkate']
     files_devel = ['include/kate', 'lib/pkgconfig/kate.pc', 'lib/pkgconfig/oggkate.pc']
+    autoreconf = True
 
     def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
-        elif self.config.target_distro == Distro.ARCH:
+        if self.config.target_distro == Distro.ARCH:
             self.append_env = {'LDFLAGS': '-Wl,-O1,--sort-common,--as-needed,-z,relro'}

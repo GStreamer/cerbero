@@ -4,9 +4,20 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'tremor'
     version = '1.2.1+r18641'
+    stype = SourceType.SVN
+    url = 'https://svn.xiph.org/trunk/Tremor/'
+    revision = '18641'
     licenses = [License.BSD_like]
     deps = ['libogg']
     config_sh = 'sh autogen.sh'
+    patches = ['tremor/0001-Prevent-symbol-conflicts.patch',
+               'tremor/0002-Try-fixing-shared-build.patch',
+               'tremor/0003-Map-remaining-symbol-too.patch',
+               'tremor/0004-Fix-build-with-the-Android-NDK-for-x86.patch',
+               'tremor/0005-configure-check-for-machine-endianness.patch',
+               'tremor/0006-tremor-floor-mapping-residue-function-renaming.patch',
+               'tremor/0007-tremor-more-function-renaming.patch',
+               'tremor/0008-fix-more-duplicated-symbols.patch']
 
     files_libs = ['libvorbisidec']
     files_devel = [

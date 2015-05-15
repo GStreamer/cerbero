@@ -4,11 +4,25 @@
 class Recipe(recipe.Recipe):
     name = 'libvisual'
     version = '0.4.0'
+    stype = SourceType.TARBALL
+    url = 'http://sourceforge.net/projects/libvisual/files/libvisual/libvisual-0.4.0/libvisual-0.4.0.tar.bz2'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     configure_options = ' --enable-static'
+    patches = ['libvisual/0001-Check-properly-for-sched_setshceduler.patch',
+               'libvisual/0003-Add-long-long-check-for-win64.patch',
+               'libvisual/0005-Fix-compilation-in-win64.patch',
+               'libvisual/0006-Fix-build-in-PPC.patch',
+               'libvisual/0007-Fix-build-on-debian-squeeze.patch',
+               'libvisual/0008-Remove-malloc-realloc-configure-checks-they-re-broke.patch',
+               'libvisual/0009-Fix-build-for-Android-X86.patch',
+               'libvisual/0010-Only-define-inline-and-friends-if-they-re-not-define.patch',
+               'libvisual/0011-Fix-autoreconf-when-using-our-gettext-version.patch',
+               'libvisual/0012-configure-gettext-0.18-is-enough-no-0.18.2-needed.patch',
+               'libvisual/0013-Include-lv_cpu.h-for-visual_cpu_initialize.patch',
+               'libvisual/0014-Add-forward-declaration-of-visual_transform_init-as-.patch',
+               'libvisual/0015-Include-lv_cpu.h-in-another-place-too.patch',
+               'libvisual/0016-configure.ac-Use-gettext-0.19.patch']
 
-    patches = ['libvisual/0001-configure.ac-Use-gettext-0.19.patch']
-    
     files_libs = ['libvisual-0.4']
     files_devel = ['include/libvisual-0.4', 'lib/pkgconfig/libvisual-0.4.pc']

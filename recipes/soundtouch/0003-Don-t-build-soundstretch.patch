@@ -1,0 +1,25 @@
+From 6f58113396f35ed938e6e5d49f4aeffa02146cfc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
+Date: Thu, 25 Oct 2012 10:12:44 +0200
+Subject: [PATCH 3/9] Don't build soundstretch
+
+---
+ source/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source/Makefile.am b/source/Makefile.am
+index 960d8a9..f25185b 100644
+--- a/source/Makefile.am
++++ b/source/Makefile.am
+@@ -21,7 +21,7 @@
+ 
+ include $(top_srcdir)/config/am_include.mk
+ 
+-SUBDIRS=SoundTouch SoundStretch
++SUBDIRS=SoundTouch 
+ 
+ # set to something if you want other stuff to be included in the distribution tarball
+ #EXTRA_DIST=
+-- 
+2.1.4
+

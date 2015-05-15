@@ -1,0 +1,54 @@
+From c5ac748865c6f1e7c9da11dd86d672211fe6d43b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
+Date: Thu, 25 Oct 2012 11:14:41 +0200
+Subject: [PATCH 6/9] Fix pkg-config file
+
+---
+ configure.ac         | 2 ++
+ soundtouch-1.4.pc.in | 1 +
+ soundtouch.pc.in     | 1 +
+ 3 files changed, 4 insertions(+)
+
+diff --git a/configure.ac b/configure.ac
+index e867430..d4caa5d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -217,9 +217,11 @@ AC_ARG_WITH(
+   [with_gnustl=no])
+ if test "x$with_gnustl" != "xno"; then
+   PKG_CHECK_MODULES(GNUSTL, gnustl)
++  STL="gnustl"
+ fi
+ AC_SUBST(GNUSTL_LIBS)
+ AC_SUBST(GNUSTL_CFLAGS)
++AC_SUBST(STL)
+ 
+ dnl ############################################################################
+ dnl # Internationaliation and Localiation                                    #
+diff --git a/soundtouch-1.4.pc.in b/soundtouch-1.4.pc.in
+index ac6eaec..b9755f7 100644
+--- a/soundtouch-1.4.pc.in
++++ b/soundtouch-1.4.pc.in
+@@ -9,6 +9,7 @@ includedir=@includedir@
+ Name: SoundTouch
+ Description: SoundTouch is an open-source audio processing library for changing the Tempo, Pitch and Playback Rates of audio streams or files
+ Version: @VERSION@
++Requires: @STL@
+ Libs: -L${libdir} -lSoundTouch
+ Cflags: -I${includedir}/soundtouch  
+ 
+diff --git a/soundtouch.pc.in b/soundtouch.pc.in
+index 03d0360..6b02dc9 100644
+--- a/soundtouch.pc.in
++++ b/soundtouch.pc.in
+@@ -6,6 +6,7 @@ includedir=@includedir@
+ Name: SoundTouch
+ Description: SoundTouch is an open-source audio processing library for changing the Tempo, Pitch and Playback Rates of audio streams or files
+ Version: @VERSION@
++Requires: @STL@
+ Libs: -L${libdir} -lSoundTouch
+ Cflags: -I${includedir}/soundtouch  
+ 
+-- 
+2.1.4
+

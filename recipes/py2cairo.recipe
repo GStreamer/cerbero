@@ -3,10 +3,15 @@
 class Recipe(recipe.Recipe):
     name = 'py2cairo'
     version = '1.10.0'
+    stype = SourceType.TARBALL
+    url = "http://cairographics.org/releases/py2cairo-%(version)s.tar.bz2"
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     autoreconf = True
     deps = ['cairo']
+    patches = ['py2cairo/0001-Add-missing-file-needed-by-autoreconf.patch',
+               'py2cairo/0002-Fix-windows-cross-compilation.patch',
+               'py2cairo/0003-Use-cached-variable-for-python-in-native-windows-too.patch']
 
     files_python = [
         'site-packages/cairo/_cairo%(pext)s',

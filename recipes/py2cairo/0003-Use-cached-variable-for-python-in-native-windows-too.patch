@@ -1,0 +1,25 @@
+From 9164218729a83793205d1e456c90ec579eb6dcc2 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Mon, 23 Apr 2012 22:02:26 +0200
+Subject: [PATCH 3/3] Use cached variable for python in native windows too
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 71e9d6a..ab7cd85 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -66,7 +66,7 @@ AC_MSG_RESULT([$platform_win32])
+ 
+ AM_CONDITIONAL(PLATFORM_WIN32, test "$platform_win32" = "yes")
+ # Checks for header files ---
+-if test "x$cross_compiling" = "xyes" -a "x$platform_win32" = "xyes" ; then
++if test "x$platform_win32" = "xyes" ; then
+   # skip python cheks if cross-compiling to windows
+   # $PYTHON_INCLUDES and PYTHON_LIBS should be set properly
+   save_CPPFLAGS="$CPPFLAGS"
+-- 
+2.1.4
+

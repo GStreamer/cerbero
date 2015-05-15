@@ -4,10 +4,22 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
-    version = '1.7.0'
+    version = '1.8.0'
+    stype = SourceType.TARBALL
+    url = 'http://www.surina.net/soundtouch/soundtouch-1.8.0.tar.gz'
+    tarball_dirname = 'soundtouch'
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
     autoreconf = True
+    patches = ['soundtouch/0001-Add-dummy-file-to-make-sure-config-m4-exists.patch',
+               'soundtouch/0002-Use-STLPORT-on-Android.patch',
+               'soundtouch/0003-Don-t-build-soundstretch.patch',
+               'soundtouch/0004-Use-gnustl.patch',
+               'soundtouch/0005-Fix-soundstretch-linking.patch',
+               'soundtouch/0006-Fix-pkg-config-file.patch',
+               'soundtouch/0007-Make-it-compile-on-IOS.patch',
+               'soundtouch/0008-Fix-compilation-with-clang.patch',
+               'soundtouch/0009-Don-t-use-fcheck-new.patch']
 
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']

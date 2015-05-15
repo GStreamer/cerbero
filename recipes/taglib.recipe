@@ -6,11 +6,14 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'taglib'
     version = '1.7.2'
+    stype = SourceType.TARBALL
+    url = 'https://taglib.github.io/releases/taglib-1.7.2.tar.gz'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DENABLE_STATIC=1'
     btype = BuildType.CMAKE
     platform_deps = {Platform.ANDROID: ['gnustl']}
+    patches = ['taglib/0001-taglib-install-taglib-pc-on-windows-too.patch']
 
     files_libs = ['libtag', 'libtag_c']
     files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']

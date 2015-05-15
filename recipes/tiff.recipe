@@ -3,7 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'tiff'
-    version = '4.0.1'
+    version = '4.0.3'
+    stype = SourceType.TARBALL
+    url = 'http://download.osgeo.org/libtiff/tiff-4.0.3.tar.gz'
     licenses = [License.BSD_like]
     deps = [ 'zlib', 'libjpeg-turbo' ]
     configure_options = ' --disable-cxx'
