@@ -13,7 +13,13 @@ class Recipe(recipe.Recipe):
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DENABLE_STATIC=1'
     btype = BuildType.CMAKE
     platform_deps = {Platform.ANDROID: ['gnustl']}
-    patches = ['taglib/0001-taglib-install-taglib-pc-on-windows-too.patch']
+    patches = ['taglib/0001-taglib-install-taglob.pc-on-windows-too.patch',
+               'taglib/0002-fix-android-build-with-stlport.patch',
+               'taglib/0003-taglib.pc-require-stlport-for-android.patch',
+               'taglib/0004-build-shared-and-static-libraries.patch',
+               'taglib/0005-Use-gnustl-instead-of-stlport.patch',
+               'taglib/0006-Link-C-bindings-with-STL-too.patch',
+               'taglib/0007-Fix-pkg-config-file.patch']
 
     files_libs = ['libtag', 'libtag_c']
     files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']
