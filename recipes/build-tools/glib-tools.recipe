@@ -2,16 +2,29 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.34.2'
+    version = '2.44.0'
+    stype = SourceType.TARBALL
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.44/glib-%(version)s.tar.xz'
+    tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
-    configure_sh = 'sh autogen.sh'
+    config_sh = 'sh autogen.sh'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
-
+    patches = ["../glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",
+               "../glib/0002-Optionally-revert-to-the-old-pre-2.28-URI-handler-co.patch",
+               "../glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
+               "../glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
+               "../glib/0005-Blacklist-the-bamf-GIO-module.patch",
+               "../glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
+               "../glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
+               "../glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
+               '../glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
+               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+               '../glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
+               '../glib/0017-glib-gio-fix-redefine.patch'
+              ]
 
     def prepare(self):
-        self.remotes['origin'] = ('%s/%s.git' % (self.config.git_root, 'glib'))
-        self.repo_dir = os.path.join(self.config.local_sources, 'glib')
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
         elif self.config.target_platform == Platform.WINDOWS:
