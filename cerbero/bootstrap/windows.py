@@ -98,9 +98,11 @@ class WindowsBootstrapper(BootstrapperBase):
                 pass
 
     def install_python_sdk(self):
+        ### FIXME : MOVE OVER REPOSITORY TO STANDARD ROOT
+        old_sdk_git_root = 'git://anongit.freedesktop.org/gstreamer-sdk'
         m.action(_("Installing Python headers"))
         tmp_dir = tempfile.mkdtemp()
-        shell.call("git clone %s" % os.path.join(self.config.git_root,
+        shell.call("git clone %s" % os.path.join(old_sdk_git_root,
                                                  'windows-external-sdk.git'),
                    tmp_dir)
 
@@ -175,7 +177,7 @@ class WindowsBootstrapper(BootstrapperBase):
             # get the path
             libdir = libdir.split('=')[1]
             # strip the surrounding quotes
-            print libdir
+            print "Replacing old libdir : ", libdir
             return libdir.strip()[1:-1]
 
     def remove_mingw_cpp(self):
