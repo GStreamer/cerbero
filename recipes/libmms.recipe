@@ -8,11 +8,10 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     patches = ['libmms/0001-Use-native-iconv-in-windows.patch',
                'libmms/0005-Fix-build-on-OSX-leopard.patch']
-
+    autoreconf = True
     files_libs = ['libmms']
     files_devel = ['include/libmms', 'lib/pkgconfig/libmms.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
             self.append_env = {'LDFLAGS': '-liconv'}
