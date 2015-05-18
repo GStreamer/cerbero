@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     url = 'http://sourceforge.net/projects/libmms/files/libmms/0.6.4/libmms-0.6.4.tar.gz'
     licenses = [License.LGPLv2_1Plus]
     patches = ['libmms/0001-Use-native-iconv-in-windows.patch',
+               'libmms/0002-uri-Add-implementation-of-strndup-for-platforms-that.patch',
                'libmms/0005-Fix-build-on-OSX-leopard.patch']
     autoreconf = True
     files_libs = ['libmms']
