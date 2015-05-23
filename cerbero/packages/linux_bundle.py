@@ -38,6 +38,12 @@ else
     export GST_PLUGIN_PATH=${PLUGINS_SYMLINK}
 fi
 
+which gdk-pixbuf-query-loaders
+if [ $? -eq 0 ]; then
+    export GDK_PIXBUF_MODULE_FILE=/tmp/$(basename $APPDIR).gdk-pixbuf-loader.cache
+    gdk-pixbuf-query-loaders $APPDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so > $GDK_PIXBUF_MODULE_FILE 2>&1
+fi
+
 if test -z ${APP_IMAGE_TEST}; then
     # Invoke the app with the arguments passed
     cd ${APPDIR}
@@ -110,11 +116,6 @@ class LinuxBundler(PackagerBase):
 
         shell.call("ln -s . usr", self.tmp_install_dir, fail=False)
 
-        # Make gd-pixbuf loader.cache file use relative paths
-        cache = os.path.join(self.tmp_install_dir, 'lib', 'gdk-pixbuf-2.0',
-            '2.10.0', 'loaders.cache')
-        shell.replace(cache, {self.config.install_dir: '.'})
-
         for icondir in os.listdir(os.path.join(self.tmp_install_dir, "share/icons/")):
             if os.path.exists(os.path.join(icondir, "index.theme")):
                 shell.call("gtk-update-icon-cache %s" % icondir, fail=False)
@@ -136,7 +137,6 @@ class LinuxBundler(PackagerBase):
         # Base environment variables
         env = {}
         env['GSETTINGS_SCHEMA_DIR'] = '${APPDIR}/share/glib-2.0/schemas/:${GSETTINGS_SCHEMA_DIR}'
-        env['GDK_PIXBUF_MODULE_FILE'] = './lib/gdk-pixbuf-2.0/2.10.0/loaders.cache'
         env['GST_REGISTRY'] = '${HOME}/.cache/gstreamer-1.0/%s-bundle-registry' % self.package.name
         env['GST_REGISTRY_1_0'] = '${HOME}/.cache/gstreamer-1.0/%s-bundle-registry' % self.package.name
         if hasattr(self.package, "default_gtk_theme"):
