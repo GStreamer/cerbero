@@ -781,8 +781,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libpython3.3m']
 
     files_devel = [
-         '*.h', 'lib/libpython3.3m.a',
+         'include/python3.3m/*.h',
+         'lib/libpython3.3m.a',
          'lib/pkgconfig/python-3.3.pc',
+         'lib/pkgconfig/python-3.3m.pc',
+         'lib/pkgconfig/python3.pc',
     ]
 
     files_bins = [
