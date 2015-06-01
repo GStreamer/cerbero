@@ -93,7 +93,7 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
                 'docbook-utils-pdf', 'glib-networking', 'help2man',
                 'dbus-devel', 'glib2-devel', 'libXrandr-devel',
-                'libXtst-devel']
+                'libXtst-devel', 'git', 'subversion']
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
@@ -119,7 +119,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
             'xorg-x11-libXv-devel', 'Mesa-libGL-devel', 'libXcomposite-devel',
             'alsa-devel', 'libXi-devel', 'Mesa-devel',
             'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
-            'docbook-utils', 'glib-networking']
+            'docbook-utils', 'glib-networkinga', 'git', 'subversion']
 
 class ArchBootstrapper (UnixBootstrapper):
 
@@ -128,7 +128,8 @@ class ArchBootstrapper (UnixBootstrapper):
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
             'docbook-xsl', 'transfig', 'libxrender',
-            'libxv', 'mesa', 'python2', 'wget', 'glib-networking']
+            'libxv', 'mesa', 'python2', 'wget', 'glib-networking', 'git',
+            'subversion']
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
