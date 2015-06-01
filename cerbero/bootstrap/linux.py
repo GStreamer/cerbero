@@ -67,6 +67,7 @@ class DebianBootstrapper (UnixBootstrapper):
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
         if self.config.target_platform == Platform.WINDOWS:
+            self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
         if self.config.target_platform == Platform.LINUX:
@@ -98,6 +99,7 @@ class RedHatBootstrapper (UnixBootstrapper):
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
         if self.config.target_platform == Platform.WINDOWS:
+            self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
         if self.config.target_platform == Platform.LINUX:
