@@ -25,8 +25,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             system = 'posix'
         # LDFLAGS are passed via XLDFLAGS, and are needed for at least Android
-        self.make = 'make SYS=%s prefix="$CERBERO_PREFIX" CRYPTO=GNUTLS XLDFLAGS="$LDFLAGS" XCFLAGS="$CFLAGS" CC="$CC" LD="$LD"' % (system)
-        self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS XLDFLAGS="$LDFLAGS" XCFLAGS="$CFLAGS" CC="$CC" LD="$LD"' % (system)
+        self.make = 'make SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS XLDFLAGS=\\"$LDFLAGS\\" XCFLAGS=\\"$CFLAGS\\" CC=\\"$CC\\" LD=\\"$LD\\"' % (system)
+        self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS XLDFLAGS=\\"$LDFLAGS\\" XCFLAGS=\\"$CFLAGS\\" CC=\\"$CC\\" LD=\\"$LD\\"' % (system)
 
     def post_install(self):
         deps = ['gcrypt', 'gnutls']
