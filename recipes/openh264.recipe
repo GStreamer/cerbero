@@ -62,9 +62,21 @@ class Recipe(recipe.Recipe):
         self.make_install = make + ' install'
 
     def configure(self):
-        shell.replace(os.path.join(self.build_dir, 'Makefile'),
-                      # Fix hard-coded prefix
-                      {'PREFIX=/usr/local': "PREFIX=" + self.config.prefix})
+        if self.config.platform == Platform.WINDOWS:
+            # Convert c:/foo to /c/foo for this build system. It will add the
+            # initial / by itself, /c:/foo does not work and and //c is not
+            # the same as /c on Windows. //c/foo is a network path.
+            if not self.config.prefix.startswith('/') and self.config.prefix[1] == ':':
+                p = self.config.prefix[0] + self.config.prefix[2:]
+            else:
+                p = self.config.prefix
+            shell.replace(os.path.join(self.build_dir, 'Makefile'),
+                          # Fix hard-coded prefix
+                          {'PREFIX=/usr/local': "PREFIX=" + p})
+        else:
+            shell.replace(os.path.join(self.build_dir, 'Makefile'),
+                          # Fix hard-coded prefix
+                          {'PREFIX=/usr/local': "PREFIX=" + self.config.prefix})
         shell.replace(os.path.join(self.build_dir, 'build',
                                    'x86-common.mk'),
                       # Use yasm instead of nasm, since that's what Cerbero
