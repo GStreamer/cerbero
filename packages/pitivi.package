@@ -29,7 +29,7 @@ class Package(package.App):
             'gstreamer-1.0-editing',
             'gstreamer-1.0-devtools',
             'gtk-3.0', 'python3']
-    files = ['shared-mime-info', 'clutter', 'clutter-gtk', 'pitivi']
+    files = ['shared-mime-info', 'pitivi', 'matplotlib']
 
     # Needed to bundle for linux
     desktop_file='share/applications/pitivi.desktop'
