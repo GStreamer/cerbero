@@ -31,6 +31,16 @@ class Recipe(recipe.Recipe):
                 flags = 'ARCHFLAGS="-arch i386" '
             elif self.config.target_arch == Architecture.X86_64:
                 flags = 'ARCHFLAGS="-arch x86_64" '
-        shell.call(flags + 'python setup.py install --root / --prefix=%s' %
+
+        try:
+            pythonpath = os.environ["PYTHONPATH"]
+            del(os.environ["PYTHONPATH"])
+        except:
+            pythonpath = None
+
+
+        shell.call(flags + 'python2 setup.py install --root / --prefix=%s' %
                 (self.config.prefix), self.build_dir)
 
+        if pythonpath:
+            os.environ["PYTHONPATH"] = pythonpath
