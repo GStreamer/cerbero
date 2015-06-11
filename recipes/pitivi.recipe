@@ -14,8 +14,8 @@ class Recipe(recipe.Recipe):
             'gst-libav-1.0',
             'gst-plugins-bad-1.0',
             'gst-plugins-ugly-1.0',
-            'clutter-gtk',
             'numpy',
+            'matplotlib',
             'gnome-icon-theme',
             'gnome-icon-theme-symbolic',
             'shared-mime-info'] # brings in gtk+
