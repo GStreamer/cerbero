@@ -3,39 +3,43 @@
 
 class Recipe(recipe.Recipe):
     name = 'pygobject'
-    version = '3.12.1'
+    version = '3.16.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.12/pygobject-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.16/pygobject-%(version)s.tar.xz'
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
     make_check = None  # disabled until we fix the checks
+    patches = ["pygobject/0001-overrides-Provide-_overrides_module-attribute-to-mak.patch"]
     files_python = [
                     'site-packages/gi/_gi%(pext)s',
                     'site-packages/gi/_gi_cairo%(pext)s',
-                    'site-packages/gi/__init__.py',
-                    'site-packages/gi/_constants.py',
-                    'site-packages/gi/_gobject/__init__.py',
-                    'site-packages/gi/_option.py',
-                    'site-packages/gi/_propertyhelper.py',
-                    'site-packages/gi/_signalhelper.py',
-                    'site-packages/gi/docstring.py',
-                    'site-packages/gi/importer.py',
-                    'site-packages/gi/module.py',
-                    'site-packages/gi/overrides/GIMarshallingTests.py',
-                    'site-packages/gi/overrides/GLib.py',
-                    'site-packages/gi/overrides/GObject.py',
-                    'site-packages/gi/overrides/Gdk.py',
-                    'site-packages/gi/overrides/Gio.py',
-                    'site-packages/gi/overrides/Gtk.py',
-                    'site-packages/gi/overrides/Pango.py',
-                    'site-packages/gi/overrides/__init__.py',
-                    'site-packages/gi/overrides/keysyms.py',
-                    'site-packages/gi/pygtkcompat.py',
-                    'site-packages/gi/repository/__init__.py',
-                    'site-packages/gi/types.py',
                     'site-packages/pygtkcompat/__init__.py',
                     'site-packages/pygtkcompat/generictreemodel.py',
                     'site-packages/pygtkcompat/pygtkcompat.py',
+                    'site-packages/gi/_gobject/__init__.py',
+                    'site-packages/gi/importer.py',
+                    'site-packages/gi/__init__.py',
+                    'site-packages/gi/_constants.py',
+                    'site-packages/gi/_error.py',
+                    'site-packages/gi/docstring.py',
+                    'site-packages/gi/overrides/GObject.py',
+                    'site-packages/gi/overrides/Gdk.py',
+                    'site-packages/gi/overrides/__init__.py',
+                    'site-packages/gi/overrides/GIMarshallingTests.py',
+                    'site-packages/gi/overrides/Pango.py',
+                    'site-packages/gi/overrides/keysyms.py',
+                    'site-packages/gi/overrides/Gtk.py',
+                    'site-packages/gi/overrides/GLib.py',
+                    'site-packages/gi/overrides/GstPbutils.py',
+                    'site-packages/gi/overrides/Gst.py',
+                    'site-packages/gi/overrides/Gio.py',
+                    'site-packages/gi/_propertyhelper.py',
+                    'site-packages/gi/types.py',
+                    'site-packages/gi/_option.py',
+                    'site-packages/gi/repository/__init__.py',
+                    'site-packages/gi/pygtkcompat.py',
+                    'site-packages/gi/module.py',
+                    'site-packages/gi/_signalhelper.py',
                   ]
     files_devel = ['include/pygobject-3.0/pygobject.h',
                    'lib/pkgconfig/pygobject-3.0.pc',

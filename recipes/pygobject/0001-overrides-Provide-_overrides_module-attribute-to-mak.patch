@@ -1,0 +1,38 @@
+From ecb2e6c64cbc420ed8f0d8dc8d1c3f6c516d6f63 Mon Sep 17 00:00:00 2001
+From: Christoph Reiter <creiter@src.gnome.org>
+Date: Thu, 23 Apr 2015 22:03:54 +0200
+Subject: [PATCH] overrides: Provide _overrides_module attribute to make
+ gst-python overrides work again.
+
+gi_gst_fraction_from_value () in gst-python's gstmodule.c tries to access
+the Gst.Fraction class through gi.repository.Gst._overrides_module.Fraction
+and failed since _overrides_module was removed in revision 149c31beced944c.
+
+This adds it back pointing to the proxy itself which also contains Gst.Fraction.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=736678#c6
+---
+ gi/overrides/__init__.py | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/gi/overrides/__init__.py b/gi/overrides/__init__.py
+index 62cfd30..bc915b2 100644
+--- a/gi/overrides/__init__.py
++++ b/gi/overrides/__init__.py
+@@ -117,6 +117,13 @@ def load_overrides(introspection_module):
+         if has_old:
+             sys.modules[module_key] = old_module
+ 
++    # backwards compat: for gst-python/gstmodule.c,
++    # which tries to access Gst.Fraction through
++    # Gst._overrides_module.Fraction. We assign the proxy instead as that
++    # contains all overridden classes like Fraction during import anyway and
++    # there is no need to keep the real override module alive.
++    proxy._overrides_module = proxy
++
+     override_all = []
+     if hasattr(override_mod, "__all__"):
+         override_all = override_mod.__all__
+-- 
+2.4.2
+
