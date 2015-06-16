@@ -1,0 +1,38 @@
+From 87b6fbdb818c28316c98ff7201c53226da15b192 Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Tue, 16 Jun 2015 15:58:28 -0400
+Subject: [PATCH] Fix aclocal problems
+
+---
+ Makefile.am  | 2 ++
+ configure.ac | 1 +
+ 2 files changed, 3 insertions(+)
+
+diff --git a/Makefile.am b/Makefile.am
+index f5cf736..7d8b552 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -23,6 +23,8 @@ SUBDIRS = include/epoxy src
+ 
+ SUBDIRS += test
+ 
++ACLOCAL_AMFLAGS = -I m4
++
+ pkgconfigdir = $(libdir)/pkgconfig
+ pkgconfig_DATA = epoxy.pc
+ 
+diff --git a/configure.ac b/configure.ac
+index d8d0949..642883b 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -27,6 +27,7 @@ AC_INIT([libepoxy],
+         [libepoxy])
+ AC_CONFIG_SRCDIR([Makefile.am])
+ AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIRS([m4])
+ 
+ # Initialize Automake
+ AM_INIT_AUTOMAKE([foreign dist-bzip2 subdir-objects])
+-- 
+2.1.4
+
