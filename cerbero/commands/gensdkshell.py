@@ -24,7 +24,7 @@ from cerbero.utils import _, N_, ArgparseArgument, shell
 
 
 SCRIPT_TPL = '''\
-#!/bin/sh
+#!/bin/bash
 
 %s
 
