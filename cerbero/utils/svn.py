@@ -28,7 +28,7 @@ def checkout(url, dest):
     @param dest: path where to do the checkout
     @type url: string
     '''
-    shell.call('svn co %s %s' % (url, dest))
+    shell.call('svn co --non-interactive --trust-server-cert %s %s' % (url, dest))
 
 
 def update(repo, revision='HEAD'):
@@ -40,7 +40,7 @@ def update(repo, revision='HEAD'):
     @param revision: the revision to checkout
     @type revision: str
     '''
-    shell.call('svn up -r %s' % revision, repo)
+    shell.call('svn up --non-interactive --trust-server-cert -r %s' % revision, repo)
 
 
 def checkout_file(url, out_path):
