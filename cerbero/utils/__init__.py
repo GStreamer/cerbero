@@ -309,8 +309,11 @@ def add_system_libs(config, new_env):
     else:
         if config.distro == Distro.REDHAT:
             libdir = 'lib64'
+
     search_paths = [os.environ['PKG_CONFIG_LIBDIR'],
         '/usr/%s/pkgconfig' % libdir, '/usr/share/pkgconfig',
         '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
     new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
-    new_env['ACLOCAL_PATH'] = '/usr/share/aclocal'
+
+    search_paths = [os.environ['ACLOCAL_PATH'], '/usr/share/aclocal']
+    new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
