@@ -447,7 +447,7 @@ gst_android_init (JNIEnv * env, jobject context)
     registry = g_build_filename (cache_dir, "registry.bin", NULL);
     g_setenv ("GST_REGISTRY", registry, TRUE);
     g_free (registry);
-    g_setenv ("GST_REUSE_PLUGIN_SCANNER", "no", TRUE);
+    g_setenv ("GST_REGISTRY_REUSE_PLUGIN_SCANNER", "no", TRUE);
     /* TODO: Should probably also set GST_PLUGIN_SCANNER and GST_PLUGIN_SYSTEM_PATH */
   }
   if (files_dir) {
