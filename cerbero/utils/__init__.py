@@ -315,5 +315,5 @@ def add_system_libs(config, new_env):
         '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
     new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
-    search_paths = [os.environ['ACLOCAL_PATH'], '/usr/share/aclocal']
+    search_paths = [os.environ.get('ACLOCAL_PATH', ''), '/usr/share/aclocal']
     new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
