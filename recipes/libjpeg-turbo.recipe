@@ -3,14 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'libjpeg-turbo'
-    version = '1.4.0'
+    version = '1.4.1'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = " --with-jpeg8"
     autoreconf = True
-    url = 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.0/libjpeg-turbo-1.4.0.tar.gz'
+    url = 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.4.1/libjpeg-turbo-1.4.1.tar.gz'
     patches = ['libjpeg-turbo/0001-jmorecfg-Fix-INT32-re-definition-with-w32api.patch']
 
     files_libs = ['libjpeg','libturbojpeg']
