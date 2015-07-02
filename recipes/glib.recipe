@@ -37,7 +37,10 @@ class Recipe(recipe.Recipe):
                'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
                'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
                'glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
-               'glib/0017-glib-gio-fix-redefine.patch'
+               'glib/0017-glib-gio-fix-redefine.patch',
+               'glib/0018-gio-ginetaddress.c-Fix-Windows-XP-inet_pton-Emulatio.patch',
+               'glib/0019-Fix-g_inet_address_to_string-on-XP.patch',
+               'glib/0020-Fix-a-FIXME-in-the-WinXP-inet_pton-implementation.patch'
               ]
 
     files_libs = [
