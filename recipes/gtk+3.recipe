@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnome.org/pub/GNOME/sources/gtk+/3.16/gtk+-%(version)s.tar.xz'
     tarball_dirname = 'gtk+-%(version)s'
 
+    patches = ['gtk+3/0001-x11-Avoid-X-error-traps-within-server-grabs.patch']
     files_libs = ['libgailutil-3', 'libgdk-3', 'libgtk-3']
 
     files_bins = ['gtk3-widget-factory',
@@ -102,7 +103,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--enable-quartz-backend '
             # this patch will break on other OSs without objective-c compiler installed
-            self.patches = ['gtk+3/0001-osx-fix-build-of-quartz-input-module.patch']
+            self.patches.append('gtk+3/0001-osx-fix-build-of-quartz-input-module.patch')
         elif self.config.target_platform == Platform.LINUX:
             # Can't change CFLAGS and use configure cache
             self.can_use_configure_cache = False
