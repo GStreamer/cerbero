@@ -92,7 +92,7 @@ class Config (object):
                    'recipes_remotes', 'ios_platform', 'extra_build_tools',
                    'distro_packages_install', 'interactive',
                    'target_arch_flags', 'sysroot', 'isysroot',
-                   'extra_lib_path']
+                   'extra_lib_path', 'cached_sources']
 
     def __init__(self):
         self._check_uninstalled()
@@ -286,6 +286,7 @@ class Config (object):
         self.set_property('prefix', None)
         self.set_property('sources', None)
         self.set_property('local_sources', None)
+        self.set_property('cached_sources', self._relative_path('sources'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
         self.set_property('host', None)

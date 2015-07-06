@@ -99,10 +99,18 @@ class Tarball (Source):
         self.download_path = os.path.join(self.repo_dir, self.tarball_name)
 
     def fetch(self):
-        m.action(_('Fetching tarball %s to %s') %
-                 (self.url, self.download_path))
         if not os.path.exists(self.repo_dir):
             os.makedirs(self.repo_dir)
+
+        cached_file = os.path.join(self.config.cached_sources,
+                                   self.package_name, self.tarball_name)
+        if os.path.isfile(cached_file):
+            m.action(_('Copying cached tarball from %s to %s instead of %s') %
+                     (cached_file, self.download_path, self.url))
+            shutil.copy(cached_file, self.download_path)
+            return
+        m.action(_('Fetching tarball %s to %s') %
+                 (self.url, self.download_path))
         shell.download(self.url, self.download_path, check_cert=False)
 
     def extract(self):
@@ -143,14 +151,24 @@ class GitCache (Source):
     def fetch(self, checkout=True):
         if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
-        # add remotes from both upstream and config so user can easily
-        # cherry-pick patches between branches
-        for remote, url in self.remotes.iteritems():
-            git.add_remote(self.repo_dir, remote, url)
-        for remote, url in self.config.recipe_remotes(self.name).iteritems():
-            git.add_remote(self.repo_dir, remote, url)
-        # fetch remote branches
-        git.fetch(self.repo_dir, fail=False)
+
+        # First try to get the sources from the cached dir if there is one
+        cached_dir = os.path.join(self.config.cached_sources,  self.name)
+        if os.path.isdir(os.path.join(cached_dir, ".git")):
+            for remote, url in self.remotes.iteritems():
+                git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
+            for remote, url in self.config.recipe_remotes(self.name).iteritems():
+                git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
+            git.fetch(self.repo_dir, fail=False)
+        else:
+            # add remotes from both upstream and config so user can easily
+            # cherry-pick patches between branches
+            for remote, url in self.remotes.iteritems():
+                git.add_remote(self.repo_dir, remote, url)
+            for remote, url in self.config.recipe_remotes(self.name).iteritems():
+                git.add_remote(self.repo_dir, remote, url)
+            # fetch remote branches
+            git.fetch(self.repo_dir, fail=False)
         if checkout:
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
@@ -307,6 +325,14 @@ class Svn(Source):
     def fetch(self):
         if os.path.exists(self.repo_dir):
             shutil.rmtree(self.repo_dir)
+
+        cached_dir = os.path.join(self.config.cached_sources, self.package_name)
+        if os.path.isdir(os.path.join(cached_dir, ".svn")):
+            m.action(_('Copying cached repo from %s to %s instead of %s') %
+                     (cached_dir, self.repo_dir, self.url))
+            shell.copy_dir(cached_dir, self.repo_dir)
+            return
+
         os.makedirs(self.repo_dir)
         svn.checkout(self.url, self.repo_dir)
         svn.update(self.repo_dir, self.revision)
