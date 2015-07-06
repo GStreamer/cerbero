@@ -25,7 +25,6 @@ from cerbero.errors import FatalError
 from cerbero.utils import _, N_, shell
 from cerbero.utils import messages as m
 from cerbero.packages import PackagerBase
-from cerbero.config import DistroVersion
 
 
 LAUNCH_BUNDLE_COMMAND = """# Try to discover plugins only once
@@ -63,11 +62,10 @@ class LinuxBundler(PackagerBase):
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
-        self.bundle_name = "%s-%s-%s" %(self.package.name, self.package.version, self.config.arch)
+        self.bundle_name = "%s-%s-%s" % (self.package.name, self.package.version, self.config.arch)
         if not hasattr(self.package, "desktop_file"):
             raise FatalError("Can not create a linux bundle if the package does "
                              "not have a 'desktop_file' property set")
-
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False):
         self.tmp_install_dir = os.path.join(output_dir, "bundle_root")
@@ -75,7 +73,7 @@ class LinuxBundler(PackagerBase):
         if self._force:
             try:
                 shutil.rmtree(self.tmp_install_dir)
-            except OSError as e:
+            except OSError:
                 pass
 
         self.desktop_file = os.path.join(self.tmp_install_dir, self.package.desktop_file)
@@ -133,7 +131,6 @@ class LinuxBundler(PackagerBase):
     def _install_bundle_specific_files(self):
         # Installing desktop file and runner script
         shell.call("cp %s %s" % (self.desktop_file, self.tmp_install_dir), fail=False)
-        filepath = os.path.join(self.tmp_install_dir, "AppRun")
         # Base environment variables
         env = {}
         env['GSETTINGS_SCHEMA_DIR'] = '${APPDIR}/share/glib-2.0/schemas/:${GSETTINGS_SCHEMA_DIR}'
@@ -142,10 +139,9 @@ class LinuxBundler(PackagerBase):
         if hasattr(self.package, "default_gtk_theme"):
             env['GTK_THEME'] = self.package.default_gtk_theme
 
-        launch_command = LAUNCH_BUNDLE_COMMAND % ({
-                                "prefix": self.tmp_install_dir,
-                                "executable_path": self.package.commands[0][1],
-                                "appname": self.package.name})
+        launch_command = LAUNCH_BUNDLE_COMMAND % ({"prefix": self.tmp_install_dir,
+                                                   "executable_path": self.package.commands[0][1],
+                                                   "appname": self.package.name})
 
         shellvarsgen = gensdkshell.GenSdkShell()
 
@@ -186,17 +182,12 @@ class LinuxBundler(PackagerBase):
              [(_("Copy install path"), self._copy_installdir, True),
               (_("Installing bundle files"), self._install_bundle_specific_files, True),
               (_("Make all paths relatives"), self._make_paths_relative, True),
-              ]
-            ),
+              ]),
             ("generate-tarball",
              [(_("Running AppImageAssistant"), self._generate_bundle, True),
-              (_("Generating md5"), self._generate_md5sum, True)
-             ]
-            ),
+              (_("Generating md5"), self._generate_md5sum, True)]),
             ("clean-install-dir",
-             [(_("Clean tmp dirs"), self._clean_tmps, not self.keep_temp)]
-            )
-        ]
+             [(_("Clean tmp dirs"), self._clean_tmps, not self.keep_temp)])]
 
         for step in steps:
             shell.set_logfile_output("%s/%s-bundle-%s.log" % (self.config.logs, self.package.name, step[0]))
