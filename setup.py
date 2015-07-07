@@ -41,12 +41,49 @@ def datafiles(prefix):
             files.append((os.path.join(datadir, dirpath), [f]))
     return files
 
+# Intercept packages and recipes
+packages = [x[len('--package='):] for x in sys.argv
+            if x.startswith('--package=')]
+recipes = [x[len('--recipe='):] for x in sys.argv if x.startswith('--recipe=')]
+if len(packages) == 0:
+    packages = None
+if len(recipes) == 0:
+    recipes = None
+sys.argv = [x for x in sys.argv if not x.startswith('--package=') and
+            not x.startswith('--recipe=')]
+
 
 #Fill manifest
 shutil.copy('MANIFEST.in.in', 'MANIFEST.in')
 with open('MANIFEST.in', 'a+') as f:
-    for dirname in ['recipes', 'packages', 'data', 'config', 'tools']:
+    for dirname in ['data', 'config', 'tools']:
         f.write('\n'.join(['include %s' % x for x in parse_dir(dirname)]))
+        f.write('\n')
+
+    for (dirname, suffix) in [('packages', '.package'), ('recipes', '.recipe')]:
+        filenames = parse_dir(dirname)
+        requested = globals()[dirname]
+        if requested:
+            requested_filenames = tuple([os.sep + x + suffix for x in requested])
+
+            # Add special directories
+            if dirname == 'packages':
+                requested_dir = requested + ['gstreamer-1.0']
+            else:
+                requested_dir = requested + ['build-tools', 'toolchain']
+            requested_directories = tuple(os.path.join(dirname, x, "")
+                                     for x in requested_dir)
+
+            filenames = [p for p in filenames
+                         if p.startswith(requested_directories) or
+                         p.endswith(requested_filenames)]
+
+            missing_files = [p for p in requested_filenames if
+                             not [True for m in filenames if m.endswith(p)]]
+            assert not missing_files, \
+                "Not all %s from the command line (%s) exist" % \
+                (dirname, ", ".join(missing_files))
+        f.write('\n'.join(['include %s' % x for x in filenames]))
         f.write('\n')
 
 
