@@ -2,7 +2,10 @@ import os
 import sys
 import shutil
 from setuptools import setup, find_packages
+from setuptools.command import sdist as setuptools_sdist
 from cerbero.utils import shell
+from distutils.dir_util import copy_tree
+import distutils.log
 
 sys.path.insert(0, './cerbero')
 
@@ -76,7 +79,8 @@ with open('MANIFEST.in', 'a+') as f:
 
             filenames = [p for p in filenames
                          if p.startswith(requested_directories) or
-                         p.endswith(requested_filenames)]
+                         p.endswith(requested_filenames) or
+                         p.endswith('.py')]
 
             missing_files = [p for p in requested_filenames if
                              not [True for m in filenames if m.endswith(p)]]
@@ -94,6 +98,32 @@ if len(prefix) == 1:
 else:
     prefix = '/usr/local'
 
+class extended_sdist(setuptools_sdist.sdist):
+    user_options = setuptools_sdist.sdist.user_options + [
+        ('source-dirs=', None,
+         "Comma-separated list of source directories to add to the package"),
+        ('package=', None,
+         "Specific package to include, other packages are not included"),
+        ('recipe=', None,
+         "Specific recipe to include, other recipes are not included"),
+    ]
+
+    def initialize_options(self):
+        self.source_dirs = []
+        setuptools_sdist.sdist.initialize_options(self)
+
+    def finalize_options(self):
+        self.ensure_string_list('source_dirs')
+        setuptools_sdist.sdist.finalize_options(self)
+
+    def make_release_tree(self, base_dir, files):
+        setuptools_sdist.sdist.make_release_tree(self, base_dir, files)
+        for d in self.source_dirs:
+            src = d.rstrip().rstrip(os.sep)
+            dest = os.path.join(base_dir, 'sources', os.path.basename(src))
+            distutils.log.info("Copying %s -> %s", src, dest)
+            copy_tree(src, dest, update=not self.force, verbose=0,
+                      dry_run=self.dry_run)
 
 setup(
     name = "cerbero",
@@ -114,4 +144,7 @@ setup(
     classifiers=[
         "License :: OSI Approved :: LGPL License",
     ],
+    cmdclass = {
+        'sdist' : extended_sdist
+    }
 )
