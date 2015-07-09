@@ -100,6 +100,8 @@ class FetchPackage(Fetch):
         args = [
                 ArgparseArgument('package', nargs=1,
                     help=_('package to fetch')),
+                ArgparseArgument('--deps', action='store_false',
+                    default=True, help=_('also fetch dependencies')),
                 ]
         Fetch.__init__(self, args)
 
@@ -107,7 +109,7 @@ class FetchPackage(Fetch):
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
         return self.fetch(store.cookbook, package.recipes_dependencies(),
-                          True, args.reset_rdeps, args.full_reset)
+                          args.deps, args.reset_rdeps, args.full_reset)
 
 
 register_command(FetchRecipes)
