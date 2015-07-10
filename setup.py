@@ -127,12 +127,12 @@ class extended_sdist(setuptools_sdist.sdist):
 
 setup(
     name = "cerbero",
-    version = "0.1.0",
+    version = "1.5.90"
     author = "Andoni Morales",
     author_email = "amorales@fluendo.com",
     description = ("Multi platform build system for Open Source projects"),
     license = "LGPL",
-    url = "http://gstreamer.com",
+    url = "http://gstreamer.freedesktop.org/",
     packages = find_packages(exclude=['tests']),
     long_description=read('README'),
     zip_safe = False,
