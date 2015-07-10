@@ -161,6 +161,7 @@ class GitCache (Source):
                 git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
             git.fetch(self.repo_dir, fail=False)
         else:
+            cached_dir = None
             # add remotes from both upstream and config so user can easily
             # cherry-pick patches between branches
             for remote, url in self.remotes.iteritems():
@@ -172,6 +173,8 @@ class GitCache (Source):
         if checkout:
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
+            git.submodules_update(self.repo_dir, cached_dir, fail=False)
+
 
     def built_version(self):
         return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit))

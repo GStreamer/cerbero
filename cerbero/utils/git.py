@@ -111,6 +111,36 @@ def fetch(git_dir, fail=True):
     '''
     return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
+def submodules_update(git_dir, src_dir=None, fail=True):
+    '''
+    Update somdules from local directory
+
+    @param git_dir: path of the git repository
+    @type git_dir: str
+    @param src_dir: path or base URI of the source directory
+    @type src_dir: src
+    @param fail: raise an error if the command failed
+    @type fail: false
+    '''
+    if src_dir:
+        config = shell.check_call('%s config --file=.gitmodules --list' % GIT,
+                                  git_dir)
+        config_array = [s.split('=', 1) for s in config.split('\n')]
+        for c in config_array:
+            if c[0].startswith('submodule.') and c[0].endswith('.path'):
+                submodule = c[0][len('submodule.'):-len('.path')]
+                shell.call("%s config --file=.gitmodules submodule.%s.url %s" %
+                           (GIT, submodule, os.path.join(src_dir, c[1])),
+                           git_dir)
+    shell.call("%s submodule init" % GIT, git_dir)
+    shell.call("%s submodule sync" % GIT, git_dir)
+    shell.call("%s submodule update" % GIT, git_dir, fail=fail)
+    if src_dir:
+        for c in config_array:
+            if c[0].startswith('submodule.') and c[0].endswith('.url'):
+                shell.call("%s config --file=.gitmodules %s  %s" %
+                           (GIT, c[0], c[1]), git_dir)
+        shell.call("%s submodule sync" % GIT, git_dir)
 
 def checkout(git_dir, commit):
     '''
@@ -156,10 +186,9 @@ def local_checkout(git_dir, local_git_dir, commit):
     shell.call('%s branch %s' % (GIT, branch_name), local_git_dir, fail=False)
     shell.call('%s checkout %s' % (GIT, branch_name), local_git_dir)
     shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
-    return shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir,
-                                                  branch_name),
-                      git_dir)
-
+    shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
+               git_dir)
+    submodules_update(git_dir, local_git_dir)
 
 def add_remote(git_dir, name, url):
     '''
