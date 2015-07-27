@@ -41,7 +41,7 @@ class Recipe(custom.GStreamerStatic):
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
         super(Recipe, self).prepare()
-        for f in ['libavcodec', 'libavformat', 'libavutil', 'libswscale']:
+        for f in ['libavcodec', 'libavformat', 'libavutil', 'libswscale', 'libswresample']:
             for ext in ['.a', '.la']:
                 path = os.path.join('lib', f + ext)
                 self.files_plugins_codecs_restricted_devel.append(path)
