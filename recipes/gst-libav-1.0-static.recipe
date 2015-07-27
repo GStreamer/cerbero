@@ -52,7 +52,7 @@ class Recipe(custom.GStreamerStatic):
         libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
         if self.config.target_platform == Platform.WINDOWS:
             replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
-                            'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
+                            'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}
             shell.replace(os.path.join(libav_path, 'config.mak'), replacements)
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
@@ -72,7 +72,7 @@ class Recipe(custom.GStreamerStatic):
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
 
     def post_install(self):
-        for n in ['avutil', 'avcodec', 'avformat', 'swscale', 'swresample']:
+        for n in ['avutil', 'swresample', 'avcodec', 'avformat', 'swscale']:
             name = 'lib%s' % n
             lib = '%s.a' % name
             path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav',
