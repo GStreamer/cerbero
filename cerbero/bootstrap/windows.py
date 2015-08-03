@@ -33,7 +33,7 @@ MINGW_DOWNLOAD_SOURCE = 'http://gstreamer.freedesktop.org/data/cerbero/toolchain
 MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
 
 # Extra dependencies
-MINGWGET_DEPS = ['msys-wget']
+MINGWGET_DEPS = ['msys-wget', 'msys-flex', 'msys-bison', 'msys-perl']
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
 WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
 
