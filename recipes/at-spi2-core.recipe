@@ -13,11 +13,11 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libatspi']
     files_misc = ['etc/at-spi2/accessibility.conf',
-                  'etc/xdg/autostart/at-spi-dbus-bus.desktop'
+                  'etc/xdg/autostart/at-spi-dbus-bus.desktop',
                   'libexec/at-spi-bus-launcher',
-                  'libexec/at-spi2-registryd'
+                  'libexec/at-spi2-registryd',
                   'share/dbus-1/services/org.a11y.Bus.service',
-                  'share/dbus-1/services/org.a11y.atspi.Registry.service'
+                  'share/dbus-1/services/org.a11y.atspi.Registry.service',
                   'etc/at-spi2',
                   'etc/xdg/autostart/at-spi-dbus-bus.desktop',
                   'libexec/at-spi-bus-launcher',
