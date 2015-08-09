@@ -20,8 +20,6 @@ import os
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
-from cerbero.config import Distro
-from cerbero.utils import shell
 from cerbero.config import Distro, FatalError
 from cerbero.utils import _, shell
 
@@ -29,7 +27,8 @@ from cerbero.utils import _, shell
 class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_TAR = 'android-ndk-r10d-%s-%s.bin'
+    NDK_VERSION = 'r10e'
+    NDK_TAR = 'android-ndk-' + NDK_VERSION + '-%s-%s.bin'
 
     def start(self):
         dest = self.config.toolchain_prefix
@@ -44,7 +43,7 @@ class AndroidBootstrapper (BootstrapperBase):
             try:
                 shell.call('chmod +x ./%s' % ndk_tar, dest)
                 shell.call('./%s' % ndk_tar, dest)
-                shell.call('mv android-ndk-r10d/* .', dest)
+                shell.call('mv android-ndk-%s/* .' % (self.NDK_VERSION), dest)
             except Exception, ex:
                 raise FatalError(_("Error installing Android NDK: %s") % (ex))
 
