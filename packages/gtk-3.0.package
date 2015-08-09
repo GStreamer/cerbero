@@ -23,3 +23,7 @@ class Package(package.Package):
              'librsvg-gtk',
              'gdk-pixbuf:misc',
              ]
+
+    platform_files = {
+        Platform.LINUX: ['at-spi2-atk', 'at-spi2-core']
+    }
