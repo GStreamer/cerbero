@@ -22,6 +22,8 @@ from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Distro
 from cerbero.utils import shell
+from cerbero.config import Distro, FatalError
+from cerbero.utils import _, shell
 
 
 class AndroidBootstrapper (BootstrapperBase):
@@ -43,8 +45,8 @@ class AndroidBootstrapper (BootstrapperBase):
                 shell.call('chmod +x ./%s' % ndk_tar, dest)
                 shell.call('./%s' % ndk_tar, dest)
                 shell.call('mv android-ndk-r10d/* .', dest)
-            except Exception:
-                pass
+            except Exception, ex:
+                raise FatalError(_("Error installing Android NDK: %s") % (ex))
 
 
 def register_all():
