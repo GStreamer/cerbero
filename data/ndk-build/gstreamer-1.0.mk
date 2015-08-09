@@ -63,6 +63,16 @@ include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules/static
 
 # Host tools
+HOST_SED := $(strip $(NDK_HOST_SED))
+ifdef HOST_PREBUILT
+    ifndef HOST_SED
+        HOST_SED := $(strip $(wildcard $(HOST_PREBUILT)/sed$(HOST_EXEEXT)))
+    endif
+endif
+ifndef HOST_SED
+    HOST_CMP := sed
+endif
+
 ifeq ($(HOST_OS),windows)
     HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
     GSTREAMER_LD :=
