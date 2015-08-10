@@ -22,6 +22,7 @@ class Package(package.Package):
              'gnome-icon-theme-symbolic',
              'librsvg-gtk',
              'gdk-pixbuf:misc',
+             'libepoxy',
              ]
 
     platform_files = {
