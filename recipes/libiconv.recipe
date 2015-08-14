@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.14.tar.gz'
     patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
                'libiconv/0002-Add-support-for-Android.patch',
-               'libiconv/0003-stdint-fix-build-with-Android-s-Bionic-fox-x86.patch',]
+               'libiconv/0003-stdint-fix-build-with-Android-s-Bionic-fox-x86.patch',
+               'libiconv/0004-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
 
     configure_options = '--disable-nls --enable-static'
     platform_deps = {Platform.WINDOWS: ['gettext']}
@@ -26,4 +27,3 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
             self.runtime_dep = True
-        self.append_env['CFLAGS'] = '-Dlocale_charset=iconv_locale_charset'
