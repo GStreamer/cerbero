@@ -1,0 +1,70 @@
+From bf1346c6ec81c1d582d795da74706ee9d534c7df Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Fri, 14 Aug 2015 18:40:16 +0200
+Subject: [PATCH] Rename gnulib symbols
+
+---
+ Makefile.am            | 2 +-
+ configure.ac           | 1 +
+ lib/gllib/strverscmp.c | 3 ---
+ lib/glm4/strverscmp.m4 | 5 +++++
+ 4 files changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index a2fc98a..d5128dc 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -26,7 +26,7 @@ EXTRA_DIST = windows/asn1-parser/asn1-parser.vcproj			\
+ 	windows/test-parser/test-parser.vcproj				\
+ 	windows/test-tree/test-tree.vcproj windows/libtasn14win.mk
+ 
+-SUBDIRS = gl lib src examples tests doc
++SUBDIRS = gl lib src examples tests
+ 
+ ACLOCAL_AMFLAGS = -I m4 -I gl/m4 -I lib/glm4
+ 
+diff --git a/configure.ac b/configure.ac
+index 8130ef2..1e8e998 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -35,6 +35,7 @@ AC_SUBST(LT_AGE, 4)
+ AC_PROG_CC
+ gl_EARLY
+ lgl_EARLY
++AC_DEFINE([hash_pjw_bare], [libtasn_hash_pjw_bare], [Rename hash_pjw_bare])
+ AC_PROG_YACC
+ 
+ dnl Checks for programs.
+diff --git a/lib/gllib/strverscmp.c b/lib/gllib/strverscmp.c
+index 0abc1fe..26d7dee 100644
+--- a/lib/gllib/strverscmp.c
++++ b/lib/gllib/strverscmp.c
+@@ -45,9 +45,6 @@
+    of "digit" even when the host does not conform to POSIX.  */
+ #define ISDIGIT(c) ((unsigned int) (c) - '0' <= 9)
+ 
+-#undef __strverscmp
+-#undef strverscmp
+-
+ #ifndef weak_alias
+ # define __strverscmp strverscmp
+ #endif
+diff --git a/lib/glm4/strverscmp.m4 b/lib/glm4/strverscmp.m4
+index aca1d54..45a12e9 100644
+--- a/lib/glm4/strverscmp.m4
++++ b/lib/glm4/strverscmp.m4
+@@ -14,6 +14,11 @@ AC_DEFUN([gl_FUNC_STRVERSCMP],
+   if test $ac_cv_func_strverscmp = no; then
+     HAVE_STRVERSCMP=0
+   fi
++
++  if test "x$HAVE_STRVERSCMP" == "x0"; then
++    AC_DEFINE([strverscmp], [libtasn_strverscmp], [Rename strverscmp])
++    AC_DEFINE([__strverscmp], [libtasn_strverscmp], [Rename strverscmp])
++  fi
+ ])
+ 
+ # Prerequisites of lib/strverscmp.c.
+-- 
+2.5.0
+
