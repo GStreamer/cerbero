@@ -8,10 +8,9 @@ class Recipe(recipe.Recipe):
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     stype = SourceType.TARBALL
-    # main library is LGPLv2+ and binaries and libgnutls-openssl are
-    # GPLv3+ and defined below
+    # main library is LGPLv2+ and binaries is GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
-    configure_options = "--enable-local-libopts --disable-guile \
+    configure_options = "--enable-local-libopts --disable-guile --disable-openssl-compatibility \
         --enable-static --enable-zlib --enable-shared --disable-doc"
     deps = ['zlib', 'nettle', 'libtasn1']
     # GnuTLS uses error.h, which is a GNU extension only available with glibc
@@ -27,8 +26,6 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']
-    files_libs_extra = ['libgnutls-openssl']
-    licenses_libs_extra = [License.GPLv3]
     files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
     licenses_bins = [License.GPLv3]
     files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
