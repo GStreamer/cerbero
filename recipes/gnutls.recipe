@@ -4,7 +4,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.3.14'
+    version = '3.3.17'
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     stype = SourceType.TARBALL
@@ -22,7 +22,8 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['bionic-fixup']
     }
     patches = [name + "/0001-configure-vasprintf-is-defined-in-stdio.h.patch",
-               name + "/0002-configure-Update-gettext-version-to-0.19.patch"]
+               name + "/0002-configure-Update-gettext-version-to-0.19.patch",
+               name + "/0003-Update-to-libopts-41.1.16-for-fixing-the-build.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']
