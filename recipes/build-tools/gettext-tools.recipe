@@ -3,12 +3,12 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gettext-tools'
-    version = '0.19.4'
+    version = '0.19.5.1'
     licenses = [License.GPLv3]
     srcdir = 'gettext-tools'
     stype = SourceType.TARBALL
     tarball_dirname = 'gettext-%(version)s'
-    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.4.tar.gz'
+    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.5.1.tar.gz'
     platform_deps = {
             Platform.DARWIN:  ['libiconv', 'sed'],
             Platform.WINDOWS: ['libiconv', 'mingw-runtime'],}

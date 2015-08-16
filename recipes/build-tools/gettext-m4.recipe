@@ -3,10 +3,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gettext-m4'
-    version = '0.19.4'
+    version = '0.19.5.1'
     stype = SourceType.TARBALL
     tarball_dirname = 'gettext-%(version)s'
-    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.4.tar.gz'
+    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.5.1.tar.gz'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     autoreconf = True
