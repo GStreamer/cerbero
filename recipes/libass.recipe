@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'libass'
-    version = '0.12.1'
+    version = '0.12.3'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.gz'.format(version)
