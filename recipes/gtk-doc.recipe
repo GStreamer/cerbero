@@ -2,9 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk-doc'
-    version = '1.21'
+    version = '1.24'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.21/gtk-doc-1.21.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.24/gtk-doc-1.24.tar.xz'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
     deps = ['libxslt']
