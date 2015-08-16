@@ -4,10 +4,10 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'libtool'
-    version = '2.4.5'
+    version = '2.4.6'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.5.tar.gz'
+    url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz'
     deps = ['m4']
     patches = ['libtool/0001-Add-support-for-weak_framework-linking-on-Darwin.patch']
 
