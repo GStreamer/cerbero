@@ -3,7 +3,7 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'intltool'
-    version = '0.40.6'
+    version = '0.51.0'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/intltool/0.40/intltool-0.40.6.tar.gz'
+    url = 'https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz'
