@@ -21,7 +21,7 @@ GRAPHENE_CONFIG_UNVERSAL='''\
 class Recipe(recipe.Recipe):
     name = 'graphene'
     stype = SourceType.TARBALL
-    version = '1.2.2'
+    version = '1.2.6'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
     licenses = [License.MIT]
     configure_options = ' --enable-static --enable-shared'
