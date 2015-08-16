@@ -2,7 +2,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'fribidi'
-    version = '0.19.6'
+    version = '0.19.7'
     stype = SourceType.TARBALL
     url = 'http://fribidi.org/download/fribidi-%(version)s.tar.bz2'
     licenses = [License.LGPLv2_1Plus]
