@@ -7,7 +7,7 @@ class Package(package.Package):
     name = 'gstreamer-1.0-codecs'
     shortdesc = 'GStreamer 1.0 codecs'
     longdesc = 'GStreamer 1.0 codecs'
-    version = '1.5.2'
+    version = '1.5.90'
     codename = 'Congo'
     url = "http://gstreamer.freedesktop.org"
     license = License.LGPL
