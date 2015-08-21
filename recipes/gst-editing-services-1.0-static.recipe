@@ -1,24 +1,19 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.utils import shell
 
-class Recipe(recipe.Recipe):
-    name = 'gst-editing-services-1.0'
+
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-editing-services-1.0-static'
     version = '1.5'
+    gstreamer_version = '1.0'
     licenses = [License.LGPLv2Plus]
+    extra_configure_options = "--enable-static"
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
     commit = 'origin/master'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--program-prefix= --disable-examples --enable-static "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
-    files_bins = ['ges-launch-1.0']
-    files_devel = ['include/gstreamer-1.0/ges', 'lib/pkgconfig/gst-editing-services-1.0.pc']
-    files_libs = ['libges-1.0']
-    files_typelibs = ['GES-1.0']
-
-    files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s' ]
-
-#    files_python = ['site-packages/ges%(pext)s']
+    files_plugins_ges_devel = ['libgstnle']
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "
@@ -26,3 +21,5 @@ class Recipe(recipe.Recipe):
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc --disable-docbook'
+
+        custom.GStreamerStatic.prepare(self)
