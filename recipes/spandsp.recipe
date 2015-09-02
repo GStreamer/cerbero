@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'spandsp'
+    version = '0.0.6'
+    stype = SourceType.TARBALL
+    url = 'http://www.soft-switch.org/downloads/spandsp/spandsp-0.0.6.tar.gz'
+    licenses = [License.LGPLv2_1Plus]
+    deps = ['tiff']
+    allow_parallel_build = False
+
+    files_libs = ['libspandsp']
+    files_devel = ['include/spandsp', 'lib/pkgconfig/spandsp.pc']
+
