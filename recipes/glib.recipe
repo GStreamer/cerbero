@@ -39,7 +39,8 @@ class Recipe(recipe.Recipe):
                'glib/0016-gio-Fix-build-on-Android-Lollipop.patch',
                'glib/0018-gio-ginetaddress.c-Fix-Windows-XP-inet_pton-Emulatio.patch',
                'glib/0019-Fix-g_inet_address_to_string-on-XP.patch',
-               'glib/0020-Fix-a-FIXME-in-the-WinXP-inet_pton-implementation.patch'
+               'glib/0020-Fix-a-FIXME-in-the-WinXP-inet_pton-implementation.patch',
+               'glib/0021-gioerror-Add-more-mappings-for-WinSock-error-codes.patch'
               ]
 
     files_libs = [
