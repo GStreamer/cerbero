@@ -42,7 +42,8 @@ class Recipe(recipe.Recipe):
 
     files_plugins_core = ['lib/gstreamer-1.0/libgstcoreelements%(mext)s']
 
-    files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s']
+    files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s',
+                  'libexec/gstreamer-1.0/gst-ptp-helper%(bext)s']
 
     files_devel = [
             'include/gstreamer-1.0/gst/*.h',
