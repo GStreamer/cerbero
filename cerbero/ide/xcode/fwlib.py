@@ -185,14 +185,32 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                     lib_tmpdir = self._split_static_lib(lib)
 
                 obj_files = shell.ls_files(['*.o'], lib_tmpdir)
+                target_objs = []
                 for obj_f in obj_files:
                     obj_path = os.path.join(lib_tmpdir, obj_f)
                     md5 = shell.check_call('md5 -q %s' % obj_path).split('\n')[0]
                     md5 = '%s-%s' % (md5, os.path.getsize(obj_path))
                     if md5 not in object_files_md5:
-                        shell.call('cp %s %s' % (obj_path, '%s-%s' % (libprefix, obj_f)), tmpdir_thinarch)
-                        shell.call('ar -cqS %s %s-%s' % (libname, libprefix, obj_f), tmpdir_thinarch)
+                        target_name = '%s-%s' % (libprefix, obj_f)
+                        try:
+                            # Hard link source file to the target name
+                            os.link(obj_path, tmpdir_thinarch + '/' + target_name)
+                        except:
+			    # Fall back to cp if hard link doesn't work for any reason
+                            shell.call('cp %s %s' % (obj_path, target_name), tmpdir_thinarch)
+
+                        # If we have a duplicate object, commit any collected ones
+		        if target_name in target_objs:
+                            m.warning ("Committing %d objects due to dup %s" % (len (target_objs), target_name))
+                            shell.call('ar -cqS %s %s' % (libname, " ".join (target_objs)), tmpdir_thinarch)
+                            target_objs = []
+
+                        target_objs.append (target_name)
                         object_files_md5.append(md5)
+
+                # Put all the collected target_objs in the archive. cmdline limit is 262k args on OSX.
+		if len(target_objs):
+                    shell.call('ar -cqS %s %s' % (libname, " ".join (target_objs)), tmpdir_thinarch)
                 shutil.rmtree(lib_tmpdir)
             shell.call('ar -s %s' % (libname), tmpdir_thinarch)
 
