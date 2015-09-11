@@ -11,8 +11,6 @@ class Recipe(recipe.Recipe):
     srcdir = 'gettext-runtime'
     patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch']
     platform_deps = {
-        Platform.DARWIN:  ['libiconv'],
-        Platform.IOS:  ['libiconv'],
         Platform.ANDROID:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
             }

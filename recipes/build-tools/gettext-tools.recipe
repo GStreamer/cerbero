@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'gettext-%(version)s'
     url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.5.1.tar.gz'
     platform_deps = {
-            Platform.DARWIN:  ['libiconv', 'sed'],
+            Platform.DARWIN:  ['sed'],
             Platform.WINDOWS: ['libiconv', 'mingw-runtime'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
 

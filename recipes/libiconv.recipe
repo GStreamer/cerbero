@@ -25,5 +25,5 @@ class Recipe(recipe.Recipe):
     files_lang = ['libiconv']
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
+        if self.config.target_platform not in [Platform.LINUX, Platform.DARWIN, Platform.IOS]:
             self.runtime_dep = True

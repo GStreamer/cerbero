@@ -36,8 +36,10 @@ class Recipe(recipe.Recipe):
                 self.config.target_platform)
         libtool_la.save()
         deps = ['nettle', 'gmp']
+        if self.config.target_platform not in [Platform.LINUX, Platform.DARWIN, Platform.IOS]:
+            deps += ['iconv']
         if self.config.target_platform != Platform.LINUX:
-            deps += ['iconv', 'intl']
+            deps += ['intl']
         if self.config.target_platform != Platform.WINDOWS:
             deps += ['-lc']
 
