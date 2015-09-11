@@ -308,14 +308,20 @@ def add_system_libs(config, new_env):
     libdir = 'lib'
     if arch == Architecture.X86:
         arch = 'i386'
-    else:
+    elif arch == Architecture.X86_64:
         if config.distro == Distro.REDHAT:
             libdir = 'lib64'
 
+    sysroot = '/'
+    if config.sysroot:
+        sysroot = config.sysroot
+
     search_paths = [os.environ['PKG_CONFIG_LIBDIR'],
-        '/usr/%s/pkgconfig' % libdir, '/usr/share/pkgconfig',
-        '/usr/lib/%s-linux-gnu/pkgconfig' % arch]
+        os.path.join(sysroot, 'usr', libdir, 'pkgconfig'),
+        os.path.join(sysroot, 'usr/share/pkgconfig'),
+        os.path.join(sysroot, 'usr/lib/%s-linux-gnu/pkgconfig' % arch)]
     new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
-    search_paths = [os.environ.get('ACLOCAL_PATH', ''), '/usr/share/aclocal']
+    search_paths = [os.environ.get('ACLOCAL_PATH', ''),
+        os.path.join(sysroot, 'usr/share/aclocal')]
     new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
