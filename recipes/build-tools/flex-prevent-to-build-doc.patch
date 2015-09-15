@@ -1,0 +1,37 @@
+From 1d8134aa1caae96cb7c7d3b9fe369c745f1a3e05 Mon Sep 17 00:00:00 2001
+From: Justin Kim <justin.kim@collabora.com>
+Date: Tue, 15 Sep 2015 22:48:07 +0900
+Subject: [PATCH] flex: prevent to build doc
+
+---
+ Makefile.am  | 1 -
+ configure.ac | 1 -
+ 2 files changed, 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 462bbf7..96f3da7 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -117,7 +117,6 @@ BUILT_SOURCES = \
+ SUBDIRS = \
+ 	lib \
+ 	. \
+-	doc \
+ 	examples \
+ 	po \
+ 	tests
+diff --git a/configure.ac b/configure.ac
+index 33119a3..d98d06f 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -112,7 +112,6 @@ AC_CHECK_FUNCS([dup2 isascii memset pow regcomp setlocale strchr strtol])
+ 
+ AC_CONFIG_FILES(
+ Makefile
+-doc/Makefile
+ examples/Makefile
+ examples/fastwc/Makefile
+ examples/manual/Makefile
+-- 
+2.3.2 (Apple Git-55)
+
