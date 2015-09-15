@@ -7,8 +7,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://downloads.sourceforge.net/project/{0}/{0}-{1}.tar.gz'.format(name, version)
     files_bins = ['flex', 'flex++', 'lex']
-    patches = ['flex-Remove-no-undefined-from-LDFLAGS.patch',
-               'flex-configure.ac-Use-gettext-0.19.patch',
-               'flex-prevent-to-build-doc.patch']
+    patches = ['flex/flex-Remove-no-undefined-from-LDFLAGS.patch',
+               'flex/flex-configure.ac-Use-gettext-0.19.patch',
+               'flex/flex-prevent-to-build-doc.patch']
     autoreconf = True
     platform_deps = {Platform.WINDOWS: ['mingw-gettext']}
