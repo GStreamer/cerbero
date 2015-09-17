@@ -44,7 +44,7 @@ class Main(object):
 
     def __init__(self, args):
         if user_is_root():
-            self.log_error(_("ERROR: cerbero can't be run as root"))
+            m.warning(_("Running as root"))
 
         self.check_in_cerbero_shell()
         self.init_logging()
