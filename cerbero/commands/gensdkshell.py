@@ -90,6 +90,8 @@ class GenSdkShell(Command):
                 '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env)
         self._putvar('GST_PLUGIN_SCANNER_1_0',
                 '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env)
+        self._putvar('GST_PLUGIN_SYSTEM_PATH', '%s/lib/gstreamer-0.10' % prefix_env)
+        self._putvar('GST_PLUGIN_SYSTEM_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
         self._putvar('PYTHONPATH',  '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'
                 % (prefix_env, py_prefix))
         self._putvar('CFLAGS',  '-I%s/include ${CFLAGS}' % prefix_env, " ")
