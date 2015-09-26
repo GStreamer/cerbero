@@ -48,8 +48,21 @@ if test -z ${APP_IMAGE_TEST}; then
     cd ${APPDIR}
     ${APPDIR}/%(executable_path)s $*
 else
-    # Run a shell in test mode
-    bash;
+    if [ $SHELL = "/bin/zsh" ]; then
+        export ZDOTDIR=$MYPITIVI/.zdotdir
+        mkdir -p $ZDOTDIR
+        cp ~/.zshrc $ZDOTDIR
+        echo "autoload -Uz bashcompinit; bashcompinit" >> $ZDOTDIR/.zshrc
+        echo "PROMPT=[%(appname)s]\ \$PROMPT" >> $ZDOTDIR/.zshrc
+        zsh
+    elif [ $SHELL = "/bin/bash" ]; then
+        RCFILE=$MYPITIVI/.bashrc
+        cp ~/.bashrc $RCFILE
+        echo "export PS1=[%(appname)s]\ \$PS1" >> $RCFILE
+        /bin/bash --rcfile $RCFILE
+    else
+        CERBERO_ENV="[%(appname)s]" $SHELL
+    fi
 fi
 
 # Cleaning up the link to gstplugins
