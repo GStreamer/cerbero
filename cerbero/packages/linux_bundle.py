@@ -29,7 +29,7 @@ from cerbero.packages import PackagerBase
 
 LAUNCH_BUNDLE_COMMAND = """# Try to discover plugins only once
 PLUGINS_SYMLINK=${HOME}/.cache/gstreamer-1.0/%(appname)s-gstplugins
-rm ${PLUGINS_SYMLINK}
+rm ${PLUGINS_SYMLINK} > /dev/null 2>&1
 ln -s ${APPDIR}/lib/gstreamer-1.0/ ${PLUGINS_SYMLINK}
 if [ $? -ne 0 ]; then
     export GST_PLUGIN_PATH=${APPDIR}/lib/gstreamer-1.0/
@@ -37,7 +37,7 @@ else
     export GST_PLUGIN_PATH=${PLUGINS_SYMLINK}
 fi
 
-which gdk-pixbuf-query-loaders
+which gdk-pixbuf-query-loaders > /dev/null 2>&1
 if [ $? -eq 0 ]; then
     export GDK_PIXBUF_MODULE_FILE=/tmp/$(basename $APPDIR).gdk-pixbuf-loader.cache
     gdk-pixbuf-query-loaders $APPDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so > $GDK_PIXBUF_MODULE_FILE 2>&1
