@@ -49,15 +49,16 @@ if test -z ${APP_IMAGE_TEST}; then
     ${APPDIR}/%(executable_path)s $*
 else
     if [ $SHELL = "/bin/zsh" ]; then
-        export ZDOTDIR=$MYPITIVI/.zdotdir
+        export ZDOTDIR=$(mktemp -d)
         mkdir -p $ZDOTDIR
         cp ~/.zshrc $ZDOTDIR
         echo "autoload -Uz bashcompinit; bashcompinit" >> $ZDOTDIR/.zshrc
         echo "PROMPT=[%(appname)s]\ \$PROMPT" >> $ZDOTDIR/.zshrc
         zsh
     elif [ $SHELL = "/bin/bash" ]; then
-        RCFILE=$MYPITIVI/.bashrc
+        RCFILE=$(mktemp -d)/.bashrc
         cp ~/.bashrc $RCFILE
+        echo "" >> $RCFILE
         echo "export PS1=[%(appname)s]\ \$PS1" >> $RCFILE
         /bin/bash --rcfile $RCFILE
     else
