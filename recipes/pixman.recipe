@@ -17,6 +17,11 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']
 
     def prepare(self):
+        # clang from xcode has a known bug, avoid codepath that trigger it
+        # More info : https://github.com/Homebrew/homebrew/issues/41056
+        if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ] and \
+           self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
+            self.configure_options = '--disable-mmx'
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.configure_options = '--disable-arm-iwmmxt'
