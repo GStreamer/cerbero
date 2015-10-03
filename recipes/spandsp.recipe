@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     deps = ['tiff']
     allow_parallel_build = False
+    patches = []
 
     files_libs = ['libspandsp']
     files_devel = ['include/spandsp', 'lib/pkgconfig/spandsp.pc']
