@@ -1,0 +1,40 @@
+From a4941856fe595f8090caf229fc52a41f430d8002 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Sat, 3 Oct 2015 19:44:00 +0100
+Subject: [PATCH] Fix build for windows using mingw
+
+---
+ src/spandsp/telephony.h | 2 ++
+ src/t4_rx.c             | 3 +++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/src/spandsp/telephony.h b/src/spandsp/telephony.h
+index 49d7200..8614c75 100644
+--- a/src/spandsp/telephony.h
++++ b/src/spandsp/telephony.h
+@@ -26,6 +26,8 @@
+ #if !defined(_SPANDSP_TELEPHONY_H_)
+ #define _SPANDSP_TELEPHONY_H_
+ 
++#define LIBSPANDSP_EXPORTS 1
++
+ #if defined(_M_IX86)  ||  defined(_M_X64)
+ #if defined(LIBSPANDSP_EXPORTS)
+ #define SPAN_DECLARE(type)              __declspec(dllexport) type __stdcall
+diff --git a/src/t4_rx.c b/src/t4_rx.c
+index eb24bf1..b0f7490 100644
+--- a/src/t4_rx.c
++++ b/src/t4_rx.c
+@@ -60,6 +60,9 @@
+ #include "config.h"
+ #endif
+ 
++/* Avoid including winsock2.h */
++extern int __stdcall gethostname(char * name, int namelen);
++
+ #include <stdlib.h>
+ #include <inttypes.h>
+ #include <limits.h>
+-- 
+2.4.3
+

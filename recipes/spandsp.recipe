@@ -18,3 +18,5 @@ class Recipe(recipe.Recipe):
         if self.config.arch != self.config.target_arch:
             self.new_env['ac_cv_func_malloc_0_nonnull'] = 'yes'
             self.new_env['ac_cv_func_realloc_0_nonnull'] = 'yes'
+        if self.config.target_platform == Platform.WINDOWS:
+            self.patches += ['spandsp/0001-Fix-build-for-windows-using-mingw.patch']
