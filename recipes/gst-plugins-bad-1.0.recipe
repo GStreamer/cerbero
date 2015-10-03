@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
         --disable-mpeg2enc --disable-mplex --disable-musepack --disable-mythtv \
         --disable-neon --disable-ofa --disable-openal --disable-opencv \
         --disable-pvr --disable-sdl --disable-sndfile --disable-soundtouch \
-        --disable-spandsp --disable-teletextdec --disable-timidity \
+        --disable-teletextdec --disable-timidity \
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
         --disable-xvid --disable-zbar --disable-sdi --disable-qt'
     # Explicitly enable plugins
@@ -24,13 +24,13 @@ class Recipe(recipe.Recipe):
         --enable-faad --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-schro --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
-        --enable-voaacenc --enable-rsvg --enable-openjpeg'
+        --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     commit = '1.6.0'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'schroedinger', 'libdca', 'libmms', 'libdvdnav',
-            'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene']
+            'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene', 'spandsp']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -99,6 +99,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstgdp%(mext)s',
              'lib/gstreamer-1.0/libgstrsvg%(mext)s',
              'lib/gstreamer-1.0/libgstopenjpeg%(mext)s',
+             'lib/gstreamer-1.0/libgstspandsp%(mext)s',
     ]
 
     platform_files_plugins_codecs = {
