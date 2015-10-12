@@ -62,7 +62,6 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstinter%(mext)s',
              'lib/gstreamer-1.0/libgstinterlace%(mext)s',
              'lib/gstreamer-1.0/libgstivtc%(mext)s',
-             'lib/gstreamer-1.0/libgstliveadder%(mext)s',
              'lib/gstreamer-1.0/libgstrawparse%(mext)s',
              'lib/gstreamer-1.0/libgstremovesilence%(mext)s',
              'lib/gstreamer-1.0/libgstsegmentclip%(mext)s',

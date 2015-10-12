@@ -42,7 +42,6 @@ class Recipe(custom.GStreamerStatic):
              'libgstinter',
              'libgstinterlace',
              'libgstivtc',
-             'libgstliveadder',
              'libgstrawparse',
              'libgstremovesilence',
              'libgstsegmentclip',
