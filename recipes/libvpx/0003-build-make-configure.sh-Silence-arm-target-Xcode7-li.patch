@@ -1,0 +1,32 @@
+From b8954a822f45b3facf27cb5af6ae2b0cda3d688c Mon Sep 17 00:00:00 2001
+From: Tom Finegan <tomfinegan@google.com>
+Date: Fri, 18 Sep 2015 16:01:32 -0700
+Subject: [PATCH 3/3] build/make/configure.sh: Silence arm target Xcode7 link
+ warnings.
+
+Always add IOS_VERSION_MIN to darwin arm cflags. The warning occured
+because the default (9.0) does not match the value set by configure
+(6.0).
+
+BUG=https://code.google.com/p/webm/issues/detail?id=1075
+
+Change-Id: Ia9085ceeca10e057f9eb781c14f07581bb6280a5
+---
+ build/make/configure.sh | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/build/make/configure.sh b/build/make/configure.sh
+index 28c8eee..b8465fd 100644
+--- a/build/make/configure.sh
++++ b/build/make/configure.sh
+@@ -756,6 +756,7 @@ process_common_toolchain() {
+   # platforms, so use the newest one available.
+   case ${toolchain} in
+     arm*-darwin*)
++      add_cflags "-miphoneos-version-min=${IOS_VERSION_MIN}"
+       iphoneos_sdk_dir="$(show_darwin_sdk_path iphoneos)"
+       if [ -d "${iphoneos_sdk_dir}" ]; then
+         add_cflags  "-isysroot ${iphoneos_sdk_dir}"
+-- 
+2.6.1
+

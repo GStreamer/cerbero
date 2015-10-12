@@ -27,6 +27,9 @@ class Recipe(recipe.Recipe):
                'libvpx/0004-Add-android-x86_64-target.patch',
                'libvpx/0005-build-Remove-broken-custom-android-toolchain-usage.patch',
                'libvpx/0006-configure-Add-Android-ARM64-support.patch',
+               'libvpx/0001-build-make-configure.sh-docs-for-soft_-dis-en-able.patch',
+               'libvpx/0002-build-make-configure.sh-Fix-armv7-builds-in-Xcode7.patch',
+               'libvpx/0003-build-make-configure.sh-Silence-arm-target-Xcode7-li.patch',
                ]
 
     files_libs = ['libvpx']
