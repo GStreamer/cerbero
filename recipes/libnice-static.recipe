@@ -11,6 +11,9 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = ' --without-gstreamer-0.10 \
         --enable-compile-warnings=maximum'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
+    patches = [
+        "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch"
+    ]
 
     files_plugins_net_devel = ['libgstnice']
     # FIXME - if_arp.h? (iOS)
