@@ -3,12 +3,12 @@
 
 class Recipe(custom.GStreamerStatic):
     name = 'gstreamer-1.0-static'
-    version = '1.5'
+    version = '1.7'
     gstreamer_version = '1.0'
     licenses = [License.LGPLv2_1Plus]
     extra_configure_options = '--enable-static'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
-    commit = '1.6.0'
+    commit = 'origin/master'
     deps = ['glib', 'gtk-doc-lite']
     # Static build will always fail on make check
     make_check = None

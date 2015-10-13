@@ -19,12 +19,12 @@ GST_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'gstreamer-1.0'
-    version = '1.5'
+    version = '1.7'
     licenses = [License.LGPLv2_1Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --program-prefix= --disable-examples "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
-    commit = '1.6.0'
+    commit = 'origin/master'
     deps = ['glib', 'gtk-doc-lite']
 
     files_bins = ['gst-inspect-1.0',
