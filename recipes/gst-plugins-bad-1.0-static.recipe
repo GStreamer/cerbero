@@ -168,6 +168,8 @@ class Recipe(custom.GStreamerStatic):
 
     files_plugins_sys  = []
 
+    files_devel = []
+
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
         self.append_env['OBJCFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
@@ -179,6 +181,9 @@ class Recipe(custom.GStreamerStatic):
             self.configure_options += \
                 ' --disable-cog --disable-sdl '\
                 '--disable-cdaudio'
+        if self.config.target_platform == Platform.ANDROID:
+            self.files_devel += \
+                ['share/gst-android/ndk-build']
         if self.config.variants.gtk3:
             self.deps.append("gtk+3")
             self.files_plugins_sys = ["libgstgtksink"]
