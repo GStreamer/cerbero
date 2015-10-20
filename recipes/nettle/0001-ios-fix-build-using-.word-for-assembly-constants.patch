@@ -1,18 +1,18 @@
-From 0bfeb3d7bec127ccd76e6fad937702f5aef12500 Mon Sep 17 00:00:00 2001
+From 9c2bd4a5fd64aa63558ea54bcd13d52eb50a9de9 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Tue, 29 Oct 2013 17:59:29 +0100
 Subject: [PATCH] ios: fix build using .word for assembly constants
 
 ---
- arm/ecc-521-modp.asm |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+ arm/ecc-521-modp.asm | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/arm/ecc-521-modp.asm b/arm/ecc-521-modp.asm
-index fe30580..287cac4 100644
+index c311a89..8cb5264 100644
 --- a/arm/ecc-521-modp.asm
 +++ b/arm/ecc-521-modp.asm
-@@ -35,7 +35,11 @@ define(<N>, <lr>)
- 	C ecc_521_modp (const struct ecc_curve *ecc, mp_limb_t *rp)
+@@ -48,7 +48,11 @@ define(<N>, <lr>)
+ 	C ecc_521_modp (const struct ecc_modulo *m, mp_limb_t *rp)
  	.text
  .Lc511:
 +#ifdef __APPLE__
@@ -24,5 +24,5 @@ index fe30580..287cac4 100644
  	.align 2
  
 -- 
-1.7.4.4
+2.6.1
 
