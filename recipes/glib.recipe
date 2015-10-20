@@ -35,7 +35,8 @@ class Recipe(recipe.Recipe):
                "glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
                "glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
-               'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch'
+               'glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+               'glib/0020-Include-ntdef.h-for-NTSTATUS.patch'
               ]
 
     files_libs = [
@@ -109,6 +110,7 @@ class Recipe(recipe.Recipe):
             self.make = '%s private_LDFLAGS=""' % self.make
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --with-libiconv=gnu'
+            self.append_env['CFLAGS'] = ' -DMINGW_HAS_SECURE_API=1 '
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
 

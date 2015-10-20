@@ -1,0 +1,27 @@
+From 70aea6bcd4cf340623435269cbc797adfc84aa8b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 20 Oct 2015 17:36:33 +0300
+Subject: [PATCH] Include ntdef.h for NTSTATUS
+
+---
+ glib/gwin32.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/glib/gwin32.c b/glib/gwin32.c
+index 7781c04..a0cbd1d 100644
+--- a/glib/gwin32.c
++++ b/glib/gwin32.c
+@@ -51,6 +51,10 @@
+ 
+ #define MODERN_API_FAMILY 2
+ 
++#if WINAPI_FAMILY != MODERN_API_FAMILY
++#  include <ntdef.h>
++#endif
++
+ #if WINAPI_FAMILY == MODERN_API_FAMILY
+ /* This is for modern UI Builds, where we can't use LoadLibraryW()/GetProcAddress() */
+ /* ntddk.h is found in the WDK, and MinGW */
+-- 
+2.6.1
+
