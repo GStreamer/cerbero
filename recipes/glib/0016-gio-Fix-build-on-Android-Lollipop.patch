@@ -1,4 +1,4 @@
-From b2479dd810349aacf539c0a92fba7b2d2a9eda6c Mon Sep 17 00:00:00 2001
+From 32f26819f765cce5c69917a8184dd470623bd200 Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Tue, 27 Jan 2015 16:27:13 +0100
 Subject: [PATCH] gio: Fix build on Android Lollipop
@@ -6,30 +6,23 @@ Subject: [PATCH] gio: Fix build on Android Lollipop
 The various nameser headers are public headers starting from Android L
 (target arch 21).
 ---
- gio/gthreadedresolver.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ gio/gthreadedresolver.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/gio/gthreadedresolver.c b/gio/gthreadedresolver.c
-index c02c593..0af726a 100644
+index 2ba42f1..a70e8df 100644
 --- a/gio/gthreadedresolver.c
 +++ b/gio/gthreadedresolver.c
-@@ -264,6 +264,7 @@ lookup_by_address_finish (GResolver     *resolver,
+@@ -263,7 +263,7 @@ lookup_by_address_finish (GResolver     *resolver,
+ 
  #if defined(G_OS_UNIX)
  
- #ifdef __BIONIC__
-+#if __ANDROID_API__ < 21
+-#if defined __BIONIC__ && !defined BIND_4_COMPAT
++#if defined __BIONIC__ && !defined BIND_4_COMPAT && __ANDROID_API__ < 21
  /* Copy from bionic/libc/private/arpa_nameser_compat.h
   * and bionic/libc/private/arpa_nameser.h */
  typedef struct {
-@@ -396,6 +397,7 @@ typedef enum __ns_type {
- 	ns_t_max = 65536
- } ns_type;
- 
-+#endif  /* __ANDROID_API__ < 21 */
- #endif /* __BIONIC__ */
- 
- static GVariant *
-@@ -801,7 +803,6 @@ free_records (GList *records)
+@@ -801,7 +801,6 @@ free_records (GList *records)
  
  #if defined(G_OS_UNIX)
  #ifdef __BIONIC__
@@ -38,5 +31,5 @@ index c02c593..0af726a 100644
  #endif
  #endif
 -- 
-2.1.0
+2.6.1
 

@@ -1,4 +1,4 @@
-From 4c45757b1687f27e20163a2f3bc560d250dbc123 Mon Sep 17 00:00:00 2001
+From 9c9505f39bac91f514f5f0f8296c94d18b05489d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 12 Dec 2014 16:40:23 +0100
 Subject: [PATCH] Implementation of Cocoa event loop integration in
@@ -11,7 +11,7 @@ Subject: [PATCH] Implementation of Cocoa event loop integration in
  3 files changed, 996 insertions(+), 2 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 511d404..b3aab01 100644
+index 40e65c4..5736e0d 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -239,7 +239,7 @@ AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
@@ -21,13 +21,13 @@ index 511d404..b3aab01 100644
 -  COCOA_LIBS="-Wl,-framework,Foundation"
 +  COCOA_LIBS="-Wl,-framework,Foundation -Wl,-framework,AppKit"
    LDFLAGS="$LDFLAGS $COCOA_LIBS"
- fi
- AC_SUBST([COCOA_LIBS])
+   osx_version=`sw_vers -productVersion`
+   osx_min_version="10.9.0"
 diff --git a/glib/Makefile.am b/glib/Makefile.am
-index 1b9e081..27ae84f 100644
+index 2783b51..de06789 100644
 --- a/glib/Makefile.am
 +++ b/glib/Makefile.am
-@@ -42,6 +42,10 @@ AM_CPPFLAGS = 				\
+@@ -44,6 +44,10 @@ AM_CPPFLAGS = 				\
  	-DGLIB_COMPILATION 		\
  	-DPCRE_STATIC
  
@@ -38,7 +38,7 @@ index 1b9e081..27ae84f 100644
  AM_CFLAGS = $(GLIB_WARN_CFLAGS)
  
  MIRRORING_TAB_SOURCE = 				\
-@@ -348,7 +352,7 @@ pcre_inc =
+@@ -351,7 +355,7 @@ pcre_inc =
  endif
  
  libglib_2_0_la_CFLAGS = $(AM_CFLAGS) $(GLIB_HIDDEN_VISIBILITY_CFLAGS)
@@ -48,7 +48,7 @@ index 1b9e081..27ae84f 100644
  
  libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \
 diff --git a/glib/gmain.c b/glib/gmain.c
-index 30fac70..c25e5bf 100644
+index 9b90100..8ab6a3e 100644
 --- a/glib/gmain.c
 +++ b/glib/gmain.c
 @@ -71,6 +71,10 @@
@@ -62,7 +62,7 @@ index 30fac70..c25e5bf 100644
  #ifdef HAVE_MACH_MACH_TIME_H
  #include <mach/mach_time.h>
  #endif
-@@ -419,6 +423,90 @@ static GMainContext *glib_worker_context;
+@@ -448,6 +452,90 @@ static GMainContext *glib_worker_context;
  G_LOCK_DEFINE_STATIC (main_loop);
  static GMainContext *default_main_context;
  
@@ -153,7 +153,7 @@ index 30fac70..c25e5bf 100644
  #ifndef G_OS_WIN32
  
  
-@@ -3174,6 +3262,36 @@ g_main_context_acquire (GMainContext *context)
+@@ -3217,6 +3305,36 @@ g_main_context_acquire (GMainContext *context)
      {
        context->owner = self;
        g_assert (context->owner_count == 0);
@@ -190,7 +190,7 @@ index 30fac70..c25e5bf 100644
      }
  
    if (context->owner == self)
-@@ -3223,6 +3341,25 @@ g_main_context_release (GMainContext *context)
+@@ -3266,6 +3384,25 @@ g_main_context_release (GMainContext *context)
  	  if (!loop_internal_waiter)
  	    g_mutex_unlock (waiter->mutex);
  	}
@@ -216,7 +216,7 @@ index 30fac70..c25e5bf 100644
      }
  
    UNLOCK_CONTEXT (context); 
-@@ -5622,3 +5759,856 @@ g_get_worker_context (void)
+@@ -5705,3 +5842,856 @@ g_get_worker_context (void)
  
    return glib_worker_context;
  }
@@ -1074,5 +1074,5 @@ index 30fac70..c25e5bf 100644
 +
 +#endif
 -- 
-1.9.3 (Apple Git-50)
+2.6.1
 

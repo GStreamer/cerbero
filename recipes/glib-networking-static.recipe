@@ -6,17 +6,16 @@ from cerbero.utils.shell import which
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking-static'
-    version = '2.42.1'
+    version = '2.46.1'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.42/glib-networking-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.46/glib-networking-%(version)s.tar.xz'
     tarball_dirname = 'glib-networking-%(version)s'
     autoreconf = True
     configure_options = "--without-ca-certificates --enable-static-modules --enable-static --enable-more-warnings"
     deps = ['glib', 'gnutls', 'glib-networking']
     patches = ['glib-networking/0001-Add-support-for-static-modules.patch',
-               'glib-networking/0002-Get-the-CA-certificate-path-from-the-environment-var.patch',
-               'glib-networking/0003-tlsconnection-fix-memleak.patch']
+               'glib-networking/0002-Get-the-CA-certificate-path-from-the-environment-var.patch']
 
     files_devel = ['lib/gio/modules/static/libgiognutls.a',
                    'lib/gio/modules/static/libgiognutls.la']
