@@ -4,7 +4,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.3.17'
+    version = '3.3.18'
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     stype = SourceType.TARBALL
