@@ -78,6 +78,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstgdp',
              'libgstrsvg',
              'libgstopenjpeg',
+             'libgstspandsp',
     ]
 
     platform_files_plugins_codecs_devel = {
