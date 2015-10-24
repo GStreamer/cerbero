@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     deps = ['tiff']
     allow_parallel_build = False
-    patches = []
+    patches = [ 'spandsp/0001-spandsp-do-not-compile-has_X86FEATURE-symbols.patch' ]
 
     files_libs = ['libspandsp']
     files_devel = ['include/spandsp', 'include/spandsp.h', 'lib/pkgconfig/spandsp.pc']
