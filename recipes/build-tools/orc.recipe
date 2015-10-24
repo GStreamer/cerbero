@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
-    version = '0.4.23'
+    version = '0.4.24'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/orc'}
-    commit = 'origin/master'
+    commit = 'orc-0.4.24'
     licenses = [License.BSD_like]
     autoreconf = True
     deps = ['autoconf', 'automake', 'libtool']
