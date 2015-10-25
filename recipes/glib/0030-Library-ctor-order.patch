@@ -1,7 +1,7 @@
-From 342d3296851dfabd88e9e3909ab45fa16e8139e0 Mon Sep 17 00:00:00 2001
+From 1133ed82df5390a9426818e5097b83c4af6374a0 Mon Sep 17 00:00:00 2001
 From: Matthias Clasen <mclasen@redhat.com>
 Date: Tue, 6 Oct 2015 19:43:38 -0400
-Subject: Make glib_init safe to call more than once
+Subject: [PATCH 1/4] Make glib_init safe to call more than once
 
 This will be needed to fix constructor order for non-GNU libc.
 
@@ -29,12 +29,12 @@ index e7002e6..405e2ad 100644
    g_debug_init ();
    g_quark_init ();
 -- 
-cgit v0.11.2
+2.6.2
 
-From e0dce8a9ae77cd4430db224c3bb056d9d1882e58 Mon Sep 17 00:00:00 2001
+From d9fab911ecf633ae1425eb4f4501d4896ceb161b Mon Sep 17 00:00:00 2001
 From: Matthias Clasen <mclasen@redhat.com>
 Date: Tue, 6 Oct 2015 19:45:38 -0400
-Subject: Export glib_init via GLIB_PRIVATE_CALL
+Subject: [PATCH 2/4] Export glib_init via GLIB_PRIVATE_CALL
 
 This will be used in the next commit to call glib_init from the
 gobject constructor, to ensure proper constructor ordering with
@@ -109,12 +109,12 @@ index 0a28008..198e07f 100644
  } GLibPrivateVTable;
  
 -- 
-cgit v0.11.2
+2.6.2
 
-From 8d83aace106b6832629a3e05f49d074a4288c8df Mon Sep 17 00:00:00 2001
+From 490ae890ec857274d02980ba30bf6a2a1945b91c Mon Sep 17 00:00:00 2001
 From: Matthias Clasen <mclasen@redhat.com>
 Date: Tue, 6 Oct 2015 20:09:08 -0400
-Subject: Call glib_init from the gobject constructor
+Subject: [PATCH 3/4] Call glib_init from the gobject constructor
 
 We are using quarks in the gobject constructor, among other things,
 so we need to ensure that glib is being initialized first.
@@ -125,7 +125,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=756139
  1 file changed, 6 insertions(+)
 
 diff --git a/gobject/gtype.c b/gobject/gtype.c
-index 990002b..be1922c 100644
+index 6a0de28..7545079 100644
 --- a/gobject/gtype.c
 +++ b/gobject/gtype.c
 @@ -31,6 +31,7 @@
@@ -135,8 +135,8 @@ index 990002b..be1922c 100644
 +#include "glib-private.h"
  #include "gconstructor.h"
  
- #ifdef	G_ENABLE_DEBUG
-@@ -4376,6 +4377,11 @@ gobject_init_ctor (void)
+ #ifdef G_OS_WIN32
+@@ -4371,6 +4372,11 @@ gobject_init (void)
    TypeNode *node;
    GType type;
  
@@ -149,12 +149,12 @@ index 990002b..be1922c 100644
  
    /* setup GObject library wide debugging flags */
 -- 
-cgit v0.11.2
+2.6.2
 
-From 99ff9bb5e0ef261e39cb3c67a2d212f6bbeb99e4 Mon Sep 17 00:00:00 2001
+From 97698d94cb35a3565cf5c3f59ffb1b856b90ed8d Mon Sep 17 00:00:00 2001
 From: Emmanuele Bassi <ebassi@gnome.org>
 Date: Thu, 8 Oct 2015 12:32:58 +0100
-Subject: Maintain the struct order when initializing
+Subject: [PATCH 4/4] Maintain the struct order when initializing
 
 Otherwise it'll break every GLIB_PRIVATE_CALL user.
 ---
@@ -186,6 +186,5 @@ index dd04e58..3dbf744 100644
  
    return &table;
 -- 
-cgit v0.11.2
-
+2.6.2
 
