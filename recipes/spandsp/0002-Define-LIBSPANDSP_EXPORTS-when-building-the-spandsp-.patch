@@ -1,0 +1,25 @@
+From 0769c5e6c28a08a15666764456046b753c0ca03b Mon Sep 17 00:00:00 2001
+From: George Kiagiadakis <george.kiagiadakis@collabora.com>
+Date: Mon, 26 Oct 2015 17:12:46 +0000
+Subject: [PATCH] Define LIBSPANDSP_EXPORTS when building the spandsp library
+ to fix mingw build
+
+---
+ src/Makefile.am | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 3aab162..72ff3af 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -173,6 +173,7 @@ libspandsp_la_SOURCES = ademco_contactid.c \
+                         vector_int.c
+ 
+ libspandsp_la_LDFLAGS = -version-info @SPANDSP_LT_CURRENT@:@SPANDSP_LT_REVISION@:@SPANDSP_LT_AGE@ $(COMP_VENDOR_LDFLAGS)
++libspandsp_la_CFLAGS = -DLIBSPANDSP_EXPORTS=1 $(COMP_VENDOR_CFLAGS)
+ 
+ nobase_include_HEADERS = spandsp/ademco_contactid.h \
+                          spandsp/adsi.h \
+-- 
+2.4.3
+
