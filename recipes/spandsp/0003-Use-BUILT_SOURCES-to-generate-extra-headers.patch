@@ -1,0 +1,35 @@
+From 238b6cb088d339c0d772c501289c3bc708f768b4 Mon Sep 17 00:00:00 2001
+From: George Kiagiadakis <george.kiagiadakis@collabora.com>
+Date: Tue, 27 Oct 2015 17:27:20 +0000
+Subject: [PATCH] Use BUILT_SOURCES to generate extra headers
+
+The .o / .lo dependencies do not work reliably with more recent autotools.
+---
+ src/Makefile.am | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 72ff3af..5fa1d41 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -567,3 +567,17 @@ spandsp/version.h:
+ 	NOWTIME=`date --utc +"%H%M%S"` ; \
+ 	sed 's/$$SPANDSP_RELEASE_DATE/'$$NOWDATE'/;s/$$SPANDSP_RELEASE_TIME/'$$NOWTIME'/' \
+ 		<$(srcdir)/spandsp/version.h.in >$@
++
++
++BUILT_SOURCES = \
++	at_interpreter_dictionary.h \
++	math_fixed_tables.h \
++	spandsp/version.h \
++	${V17_V32BIS_RX_INCL} \
++	${V17_V32BIS_TX_INCL} \
++	${V22BIS_RX_INCL} \
++	${V22BIS_TX_INCL} \
++	${V27_RX_INCL} \
++	${V27TER_TX_INCL} \
++	${V29_RX_INCL} \
++	${V29_TX_INCL}
+-- 
+2.4.3
+
