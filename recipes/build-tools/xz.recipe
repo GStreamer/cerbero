@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'xz'
-    version = '5.2.0'
+    version = '5.2.2'
     licenses = [License.GPLv3]
     stype = SourceType.TARBALL
-    url = 'http://tukaani.org/xz/xz-5.2.0.tar.bz2'
+    url = 'http://tukaani.org/xz/xz-5.2.2.tar.bz2'
 
     files_bins = ['xz']
