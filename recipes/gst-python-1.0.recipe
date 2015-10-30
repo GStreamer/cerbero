@@ -3,14 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'gst-python-1.0'
-    version = '1.3'
+    version = '1.6'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+ and
     #       COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     autoreconf_sh = 'sh autogen.sh'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
-    commit = '1.6.0'
+    commit = '1.6.1'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'glib', 'pygobject']
     # FIXME: disable checks until it's properly fixed
     make_check = None
