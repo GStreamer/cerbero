@@ -1,6 +1,21 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 
+GMP_H_UNVERSAL='''\
+#ifdef __i386__
+#include "i386/gmp.h"
+#elif defined(__ppc__)
+#include "ppc/gmp.h"
+#elif defined(__x86_64__)
+#include "x86_64/gmp.h"
+#elif defined(__arm__)
+#include "arm/gmp.h"
+#elif defined(__arm64__)
+#include "arm64/gmp.h"
+#else
+#error "Unsupported Architecture"
+#endif
+'''
 
 class Recipe(recipe.Recipe):
     name = 'gmp'
@@ -22,6 +37,9 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = ' --disable-assembly'
 
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            self.files_devel.append(os.path.join('include', '*', 'gmp.h'))
+
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
             src = os.path.join(self.config.prefix, 'lib', 'libgmp-10.dll')
@@ -33,3 +51,22 @@ class Recipe(recipe.Recipe):
             shutil.copy(src, dll_a)
             gmp_la = os.path.join(self.config.prefix, 'lib', 'libgmp.la')
             shell.replace(gmp_la, {'libgmp.lib': 'libgmp.dll.a'})
+        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            # For the universal build we need to ship gmp.h of both
+            # architectures in a subfolder and include the correct one depending
+            # on the compiler architecture
+            arch = self.config.target_arch
+            if arch == Architecture.X86:
+                arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
+            elif Architecture.is_arm(arch):
+                arch = 'arm'
+
+            arch_dir = os.path.join(self.config.prefix, 'include', arch)
+            if not os.path.exists(arch_dir):
+                os.makedirs(arch_dir)
+            shutil.copyfile(os.path.join(self.build_dir, 'gmp.h'),
+                        os.path.join(arch_dir, 'gmp.h'))
+            with open(os.path.join(self.config.prefix, 'include', 'gmp.h'), 'w+') as f:
+                f.write(GMP_H_UNVERSAL)
