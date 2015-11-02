@@ -18,7 +18,6 @@
 
 import os
 import tarfile
-import zipfile
 
 from cerbero.packages import PackageType
 from cerbero.packages.disttarball import DistTarball
@@ -54,24 +53,6 @@ class AndroidPackager(DistTarball):
             filepath = os.path.join(self.prefix, f)
             tar.add(filepath, os.path.join(package_prefix, f))
         tar.close()
-        filenames.append(filename)
-
-        # Create the zip file for windows
-        filename = os.path.join(output_dir, self._get_name(package_type,
-            ext='zip'))
-        if os.path.exists(filename):
-            if force:
-                os.remove(filename)
-            else:
-                raise UsageError("File %s already exists" % filename)
-
-        zipf = zipfile.ZipFile(filename, 'w')
-
-        for f in files:
-            filepath = os.path.join(self.prefix, f)
-            zipf.write(filepath, os.path.join(package_prefix, f),
-                    compress_type=zipfile.ZIP_DEFLATED)
-        zipf.close()
         filenames.append(filename)
 
         return  ' '.join(filenames)
