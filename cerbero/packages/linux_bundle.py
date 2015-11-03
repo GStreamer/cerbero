@@ -43,6 +43,11 @@ if [ $? -eq 0 ]; then
     gdk-pixbuf-query-loaders $APPDIR/lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg.so > $GDK_PIXBUF_MODULE_FILE 2>&1
 fi
 
+if [[ -e /etc/fonts/fonts.conf && -z "$FONTCONFIG_FILE" ]]
+then
+    export FONTCONFIG_FILE=/etc/fonts/fonts.conf
+fi
+
 if test -z ${APP_IMAGE_TEST}; then
     # Invoke the app with the arguments passed
     cd ${APPDIR}
