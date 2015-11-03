@@ -29,10 +29,10 @@ from cerbero.packages import PackagerBase
 
 LAUNCH_BUNDLE_COMMAND = """# Try to discover plugins only once
 PLUGINS_SYMLINK=${HOME}/.cache/gstreamer-1.0/%(appname)s-gstplugins
-rm ${PLUGINS_SYMLINK} > /dev/null 2>&1
 ln -s ${APPDIR}/lib/gstreamer-1.0/ ${PLUGINS_SYMLINK}
 if [ $? -ne 0 ]; then
-    export GST_PLUGIN_PATH=${APPDIR}/lib/gstreamer-1.0/
+    echo "Bundle is already running, exiting"
+    exit 1
 else
     export GST_PLUGIN_PATH=${PLUGINS_SYMLINK}
 fi
