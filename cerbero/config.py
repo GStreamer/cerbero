@@ -427,18 +427,18 @@ class Config (object):
                 DEFAULT_CONFIG_FILE
             m.warning(msg)
 
-    def _load_cmd_config(self, filename):
-        if filename is not None:
+    def _load_cmd_config(self, filenames):
+        if filenames is not None:
+            for f in filenames:
+                if not os.path.exists(f):
+                    f = os.path.join(CONFIG_DIR, f + "." + CONFIG_EXT)
 
-            if not os.path.exists(filename):
-                filename = os.path.join(CONFIG_DIR, filename + "." + CONFIG_EXT)
-
-            if os.path.exists(filename):
-                self._parse(filename, reset=False)
-                self.filename = DEFAULT_CONFIG_FILE
-            else:
-                raise ConfigurationError(_("Configuration file %s doesn't "
-                                           "exists") % filename)
+                if os.path.exists(f):
+                    self._parse(f, reset=False)
+                    self.filename = DEFAULT_CONFIG_FILE
+                else:
+                    raise ConfigurationError(_("Configuration file %s doesn't "
+                                               "exists") % f)
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %

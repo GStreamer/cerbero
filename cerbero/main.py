@@ -76,7 +76,7 @@ class Main(object):
     def create_parser(self):
         ''' Creates the arguments parser '''
         self.parser = argparse.ArgumentParser(description=_(description))
-        self.parser.add_argument('-c', '--config', type=str, default=None,
+        self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))
 
     def parse_arguments(self, args):
