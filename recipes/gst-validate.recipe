@@ -22,6 +22,9 @@ class Recipe(recipe.Recipe):
     ]
 
     files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
+    files_typelibs = [
+        'GstValidate-1.0'
+    ]
 
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
