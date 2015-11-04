@@ -28,14 +28,32 @@ from cerbero.packages import PackagerBase
 
 
 LAUNCH_BUNDLE_COMMAND = """# Try to discover plugins only once
+LOCKFILE="/tmp/%(appname)s-bundle.lock"
+if [ -e $LOCKFILE ]
+then
+    PID=$(cat $LOCKFILE)
+    if kill -0 $PID 2> /dev/null
+    then
+        echo "$? $PID pitivi already running -> exiting"
+        exit 1
+    else
+        echo "Stalled process $PID allow restarting"
+    fi
+fi
+echo $$ > $LOCKFILE
+
 PLUGINS_SYMLINK=${HOME}/.cache/gstreamer-1.0/%(appname)s-gstplugins
+rm ${PLUGINS_SYMLINK} > /dev/null 2>&1
 ln -s ${APPDIR}/lib/gstreamer-1.0/ ${PLUGINS_SYMLINK}
 if [ $? -ne 0 ]; then
-    echo "Bundle is already running, exiting"
-    exit 1
+    export GST_PLUGIN_PATH=${APPDIR}/lib/gstreamer-1.0/
 else
     export GST_PLUGIN_PATH=${PLUGINS_SYMLINK}
 fi
+
+trap 'ECODE=$?;
+      echo "[statsgen] Removing lock. Exit: ${ETXT[ECODE]}($ECODE)" >&2
+      rm "${PLUGINS_SYMLINK}" "${LOCKFILE}"' 0
 
 which gdk-pixbuf-query-loaders > /dev/null 2>&1
 if [ $? -eq 0 ]; then
