@@ -1,7 +1,7 @@
-From 55d5b25364415c30cccf15907fffedbd2133f803 Mon Sep 17 00:00:00 2001
+From 3a685c0fb9ec123a5699800e9e2e050ffe303ab0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 14 Feb 2014 15:05:18 +0100
-Subject: [PATCH] Rip out sqlite-based cookie storage
+Subject: [PATCH 1/2] Rip out sqlite-based cookie storage
 
 We don't need that and it will increase the binary size for no good reason.
 ---
@@ -9,12 +9,13 @@ We don't need that and it will increase the binary size for no good reason.
  libsoup/Makefile.am           | 8 +-------
  libsoup/libsoup-2.4.sym       | 2 --
  libsoup/libsoup-gnome-2.4.sym | 2 --
+ libsoup/soup-autocleanups.h   | 1 -
  libsoup/soup-gnome.h          | 1 -
  libsoup/soup.h                | 1 -
- 6 files changed, 1 insertion(+), 17 deletions(-)
+ 7 files changed, 1 insertion(+), 18 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 5808f84..33fd641 100644
+index 75dc3ca..e9aa3df 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -94,10 +94,6 @@ PKG_CHECK_MODULES(XML, libxml-2.0)
@@ -29,10 +30,10 @@ index 5808f84..33fd641 100644
  dnl *** Check for Win32 ***
  dnl ***********************
 diff --git a/libsoup/Makefile.am b/libsoup/Makefile.am
-index 1c71dd2..f832427 100644
+index 2f8079c..b2cde34 100644
 --- a/libsoup/Makefile.am
 +++ b/libsoup/Makefile.am
-@@ -16,7 +16,6 @@ AM_CPPFLAGS = 				\
+@@ -19,7 +19,6 @@ AM_CPPFLAGS = 				\
  	$(SOUP_DEBUG_FLAGS)		\
  	$(GLIB_CFLAGS)			\
  	$(XML_CFLAGS)			\
@@ -40,7 +41,7 @@ index 1c71dd2..f832427 100644
  	$(CODE_COVERAGE_CFLAGS)
  
  libsoupincludedir = $(includedir)/libsoup-2.4/libsoup
-@@ -34,7 +33,6 @@ soup_headers =			\
+@@ -38,7 +37,6 @@ soup_headers =			\
  	soup-content-sniffer.h	\
  	soup-cookie.h		\
  	soup-cookie-jar.h	\
@@ -48,7 +49,7 @@ index 1c71dd2..f832427 100644
  	soup-cookie-jar-text.h	\
  	soup-date.h		\
  	soup-form.h		\
-@@ -92,8 +90,7 @@ EXTRA_DIST += libsoup-2.4.sym
+@@ -97,8 +95,7 @@ EXTRA_DIST += libsoup-2.4.sym
  libsoup_2_4_la_LIBADD =			\
  	$(GLIB_LIBS)			\
  	$(LIBWS2_32)			\
@@ -57,8 +58,8 @@ index 1c71dd2..f832427 100644
 +	$(XML_LIBS)
  
  libsoup_2_4_la_SOURCES =		\
- 	soup-address.c			\
-@@ -134,7 +131,6 @@ libsoup_2_4_la_SOURCES =		\
+ 	gconstructor.h			\
+@@ -140,7 +137,6 @@ libsoup_2_4_la_SOURCES =		\
  	soup-converter-wrapper.c	\
  	soup-cookie.c			\
  	soup-cookie-jar.c		\
@@ -66,7 +67,7 @@ index 1c71dd2..f832427 100644
  	soup-cookie-jar-text.c		\
  	soup-date.c			\
  	soup-directory-input-stream.h	\
-@@ -207,7 +203,6 @@ if BUILD_LIBSOUP_GNOME
+@@ -215,7 +211,6 @@ if BUILD_LIBSOUP_GNOME
  libsoupgnomeincludedir = $(includedir)/libsoup-gnome-2.4/libsoup
  
  libsoupgnomeinclude_HEADERS =	\
@@ -74,7 +75,7 @@ index 1c71dd2..f832427 100644
  	soup-gnome.h		\
  	soup-gnome-features.h
  
-@@ -225,7 +220,6 @@ libsoup_gnome_2_4_la_LIBADD =		\
+@@ -233,7 +228,6 @@ libsoup_gnome_2_4_la_LIBADD =		\
  	$(GLIB_LIBS)
  
  libsoup_gnome_2_4_la_SOURCES =		\
@@ -83,7 +84,7 @@ index 1c71dd2..f832427 100644
  	soup-proxy-resolver-gnome.h	\
  	soup-proxy-resolver-gnome.c	\
 diff --git a/libsoup/libsoup-2.4.sym b/libsoup/libsoup-2.4.sym
-index e881b7f..dd341f4 100644
+index e6ff89e..7b1e53c 100644
 --- a/libsoup/libsoup-2.4.sym
 +++ b/libsoup/libsoup-2.4.sym
 @@ -140,8 +140,6 @@ soup_cookie_jar_accept_policy_get_type
@@ -105,6 +106,18 @@ index 67f62de..8e12248 100644
  soup_gnome_features_2_26_get_type
  soup_password_manager_gnome_get_type
  soup_proxy_resolver_gnome_get_type
+diff --git a/libsoup/soup-autocleanups.h b/libsoup/soup-autocleanups.h
+index 910abe7..ba50e4b 100644
+--- a/libsoup/soup-autocleanups.h
++++ b/libsoup/soup-autocleanups.h
+@@ -38,7 +38,6 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupContentDecoder, g_object_unref)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupContentSniffer, g_object_unref)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupCookie, soup_cookie_free)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupCookieJar, g_object_unref)
+-G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupCookieJarDB, g_object_unref)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupCookieJarText, g_object_unref)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupDate, soup_date_free)
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(SoupLogger, g_object_unref)
 diff --git a/libsoup/soup-gnome.h b/libsoup/soup-gnome.h
 index a2134a4..6747f3a 100644
 --- a/libsoup/soup-gnome.h
@@ -118,10 +131,10 @@ index a2134a4..6747f3a 100644
  
  #endif /* SOUP_GNOME_H */
 diff --git a/libsoup/soup.h b/libsoup/soup.h
-index 7106cc5..f05b763 100644
+index 6bedb62..78b8832 100644
 --- a/libsoup/soup.h
 +++ b/libsoup/soup.h
-@@ -21,7 +21,6 @@ extern "C" {
+@@ -23,7 +23,6 @@ extern "C" {
  #include <libsoup/soup-content-sniffer.h>
  #include <libsoup/soup-cookie.h>
  #include <libsoup/soup-cookie-jar.h>
@@ -130,5 +143,5 @@ index 7106cc5..f05b763 100644
  #include <libsoup/soup-date.h>
  #include <libsoup/soup-enum-types.h>
 -- 
-2.1.0
+2.6.2.409.gb049f0a
 
