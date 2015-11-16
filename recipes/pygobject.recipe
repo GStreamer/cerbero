@@ -3,13 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'pygobject'
-    version = '3.16.1'
+    version = '3.18.2'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.16/pygobject-%(version)s.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/pygobject/3.18/pygobject-%(version)s.tar.xz'
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
     make_check = None  # disabled until we fix the checks
-    patches = ["pygobject/0001-overrides-Provide-_overrides_module-attribute-to-mak.patch"]
     files_python = [
                     'site-packages/gi/_gi%(pext)s',
                     'site-packages/gi/_gi_cairo%(pext)s',
