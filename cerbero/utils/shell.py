@@ -237,6 +237,11 @@ def download(url, destination=None, recursive=False, check_cert=True):
         if LOGFILE is None:
             logging.info("File %s already downloaded." % destination)
     else:
+        if not recursive and not os.path.exists(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        elif recursive and not os.path.exists(destination):
+            os.makedirs(destination)
+
         if LOGFILE:
             LOGFILE.write("Downloading %s\n" % url)
         else:
@@ -269,9 +274,14 @@ def download_curl(url, destination=None, recursive=False, check_cert=True):
     else:
         cmd += "-O %s " % url
 
-    if os.path.exists(destination):
+    if not recursive and os.path.exists(destination):
         logging.info("File %s already downloaded." % destination)
     else:
+        if not recursive and not os.path.exists(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        elif recursive and not os.path.exists(destination):
+            os.makedirs(destination)
+
         logging.info("Downloading %s", url)
         try:
             call(cmd, path)
