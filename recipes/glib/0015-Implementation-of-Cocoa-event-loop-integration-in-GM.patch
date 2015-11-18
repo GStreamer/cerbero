@@ -7,8 +7,8 @@ Subject: [PATCH] Implementation of Cocoa event loop integration in
 ---
  configure.ac     |   2 +-
  glib/Makefile.am |   6 +-
- glib/gmain.c     | 990 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 996 insertions(+), 2 deletions(-)
+ glib/gmain.c     | 982 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 988 insertions(+), 2 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
 index 40e65c4..5736e0d 100644
@@ -62,7 +62,7 @@ index 9b90100..8ab6a3e 100644
  #ifdef HAVE_MACH_MACH_TIME_H
  #include <mach/mach_time.h>
  #endif
-@@ -448,6 +452,90 @@ static GMainContext *glib_worker_context;
+@@ -448,6 +452,85 @@ static GMainContext *glib_worker_context;
  G_LOCK_DEFINE_STATIC (main_loop);
  static GMainContext *default_main_context;
  
@@ -117,11 +117,6 @@ index 9b90100..8ab6a3e 100644
 + */
 +static GPollFunc cocoa_old_poll_func;
 +
-+/* Reference to the run loop of the main thread. (There is a unique
-+ * CFRunLoop per thread.)
-+ */
-+static CFRunLoopRef cocoa_main_thread_run_loop;
-+
 +/* Reference to our run loop observer */
 +static CFRunLoopObserverRef cocoa_observer;
 +
@@ -153,7 +148,7 @@ index 9b90100..8ab6a3e 100644
  #ifndef G_OS_WIN32
  
  
-@@ -3217,6 +3305,36 @@ g_main_context_acquire (GMainContext *context)
+@@ -3217,6 +3300,34 @@ g_main_context_acquire (GMainContext *context)
      {
        context->owner = self;
        g_assert (context->owner_count == 0);
@@ -172,15 +167,13 @@ index 9b90100..8ab6a3e 100644
 +            cocoa_old_poll_func = context->poll_func;
 +            context->poll_func = cocoa_poll_func;
 +
-+            /* Hook into the the CFRunLoop for the main thread */
-+            cocoa_main_thread_run_loop = CFRunLoopGetCurrent ();
 +            cocoa_observer = CFRunLoopObserverCreate (NULL, /* default allocator */
 +                                                kCFRunLoopAllActivities,
 +                                                true, /* repeats: not one-shot */
 +                                                0, /* order (priority) */
 +                                                cocoa_run_loop_observer_callback,
 +                                                NULL);
-+            CFRunLoopAddObserver (cocoa_main_thread_run_loop, cocoa_observer, kCFRunLoopCommonModes);
++            CFRunLoopAddObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
 +
 +            /* Initialize our autorelease pool */
 +            cocoa_autorelease_pool = [[NSAutoreleasePool alloc] init];
@@ -190,7 +183,7 @@ index 9b90100..8ab6a3e 100644
      }
  
    if (context->owner == self)
-@@ -3266,6 +3384,25 @@ g_main_context_release (GMainContext *context)
+@@ -3266,6 +3377,24 @@ g_main_context_release (GMainContext *context)
  	  if (!loop_internal_waiter)
  	    g_mutex_unlock (waiter->mutex);
  	}
@@ -204,10 +197,9 @@ index 9b90100..8ab6a3e 100644
 +          context->poll_func = cocoa_old_poll_func;
 +          cocoa_old_poll_func = NULL;
 +
-+          CFRunLoopRemoveObserver (cocoa_main_thread_run_loop, cocoa_observer, kCFRunLoopCommonModes);
++          CFRunLoopRemoveObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
 +          CFRelease (cocoa_observer);
 +          cocoa_observer = NULL;
-+          cocoa_main_thread_run_loop = NULL;
 +
 +          [cocoa_autorelease_pool release];
 +          cocoa_autorelease_pool = NULL;
@@ -216,7 +208,7 @@ index 9b90100..8ab6a3e 100644
      }
  
    UNLOCK_CONTEXT (context); 
-@@ -5705,3 +5842,856 @@ g_get_worker_context (void)
+@@ -5705,3 +5834,856 @@ g_get_worker_context (void)
  
    return glib_worker_context;
  }
@@ -347,7 +339,7 @@ index 9b90100..8ab6a3e 100644
 +   * race condition (the loop could go into waiting state right after
 +   * we checked).
 +   */
-+  CFRunLoopWakeUp (cocoa_main_thread_run_loop);
++  CFRunLoopWakeUp (CFRunLoopGetMain ());
 +}
 +
 +static void *
@@ -456,7 +448,7 @@ index 9b90100..8ab6a3e 100644
 +  CFRunLoopSourceContext source_context = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, cocoa_got_fd_activity };
 +  cocoa_select_main_thread_source = CFRunLoopSourceCreate (NULL, 0, &source_context);
 +  
-+  CFRunLoopAddSource (cocoa_main_thread_run_loop, cocoa_select_main_thread_source, kCFRunLoopCommonModes);
++  CFRunLoopAddSource (CFRunLoopGetMain (), cocoa_select_main_thread_source, kCFRunLoopCommonModes);
 +
 +  cocoa_select_thread_state = COCOA_WAITING;
 +  
@@ -955,7 +947,7 @@ index 9b90100..8ab6a3e 100644
 +  if (n_ready > 0 || timeout == 0)
 +    {
 +      /* We have stuff to do, no sleeping allowed! */
-+      CFRunLoopWakeUp (cocoa_main_thread_run_loop);
++      CFRunLoopWakeUp (CFRunLoopGetMain ());
 +    }
 +  else if (timeout > 0)
 +    {
@@ -975,7 +967,7 @@ index 9b90100..8ab6a3e 100644
 +					     cocoa_dummy_timer_callback,
 +					     NULL);
 +
-+      CFRunLoopAddTimer (cocoa_main_thread_run_loop, cocoa_run_loop_timer, kCFRunLoopCommonModes);
++      CFRunLoopAddTimer (CFRunLoopGetMain (), cocoa_run_loop_timer, kCFRunLoopCommonModes);
 +    }
 +  
 +  cocoa_run_loop_polling_async = n_ready < 0;
@@ -992,7 +984,7 @@ index 9b90100..8ab6a3e 100644
 +
 +  if (cocoa_run_loop_timer)
 +    {
-+      CFRunLoopRemoveTimer (cocoa_main_thread_run_loop, cocoa_run_loop_timer, kCFRunLoopCommonModes);
++      CFRunLoopRemoveTimer (CFRunLoopGetMain (), cocoa_run_loop_timer, kCFRunLoopCommonModes);
 +      CFRelease (cocoa_run_loop_timer);
 +      cocoa_run_loop_timer = NULL;
 +    }
