@@ -3,7 +3,7 @@ from cerbero.errors import ConfigurationError
 
 class Recipe(recipe.Recipe):
     name = 'pitivi'
-    version = '0.94'
+    version = '0.95'
     licenses = [License.GPLv2Plus]
     remotes = {'origin': 'git://git.gnome.org/pitivi'}
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
