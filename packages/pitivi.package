@@ -7,7 +7,7 @@ class Package(package.App):
     name = 'pitivi'
     app_name = 'Pitivi'
     app_recipe = 'pitivi'
-    version = '0.94'
+    version = '0.95'
     shortdesc = 'Pitivi video editor'
     longdesc = 'An open source full featured video editing application'
     url = "http://www.pitivi.org"
