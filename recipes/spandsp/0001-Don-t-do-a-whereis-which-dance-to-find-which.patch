@@ -1,0 +1,28 @@
+From a676d4018eb5fc0ad7368e4be1b1299b7921837f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 24 Nov 2015 22:21:42 +0530
+Subject: [PATCH] Don't do a "whereis which" dance to find which
+
+whereis does not exist on Windows and if which is not in the $PATH, why
+would whereis be?!
+---
+ autogen.sh | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/autogen.sh b/autogen.sh
+index 2d9a067..98464f5 100755
+--- a/autogen.sh
++++ b/autogen.sh
+@@ -59,8 +59,7 @@ version_compare()
+ 
+ 	debug "Checking $PROGRAM >= $MAJOR.$MINOR.$MICRO"
+ 
+-	WHICH_PATH=`whereis which | cut -f2 -d' '`
+-	COMMAND=`$WHICH_PATH $PROGRAM`
++	COMMAND=`which $PROGRAM`
+ 	if [ -z $COMMAND ]; then
+ 		echo "$PROGRAM-$MAJOR.$MINOR.$MICRO is required and was not found."
+ 		return 1
+-- 
+2.6.2.409.gb049f0a
+
