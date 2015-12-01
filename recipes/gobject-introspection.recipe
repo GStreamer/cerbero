@@ -79,9 +79,6 @@ class Recipe(recipe.Recipe):
         # the full path needs to be specified, since shebangs are generated
         if self.config.target_distro == Distro.ARCH:
             self.config_sh = "PYTHON=/usr/bin/python2 %s" % self.config_sh
-        # on OSX specify which architecture we want
-        if self.config.target_platform in [Platform.DARWIN]:
-            self.new_env['ARCHFLAGS'] = '-arch %s' % self.config.target_arch
 
     # TODO: catch the share/man stuff like man1/g-ir* ?
     def configure(self):
