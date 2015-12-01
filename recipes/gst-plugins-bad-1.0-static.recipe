@@ -58,7 +58,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstdashdemux',
              'libgstdvbsuboverlay',
              'libgstdvdspu',
-             'libgstfragmented',
+             'libgsthls',
              'libgstid3tag',
              'libgstkate',
              'libgstmidi',

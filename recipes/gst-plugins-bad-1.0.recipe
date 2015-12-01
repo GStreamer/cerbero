@@ -78,7 +78,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstdashdemux%(mext)s',
              'lib/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
              'lib/gstreamer-1.0/libgstdvdspu%(mext)s',
-             'lib/gstreamer-1.0/libgstfragmented%(mext)s',
+             'lib/gstreamer-1.0/libgsthls%(mext)s',
              'lib/gstreamer-1.0/libgstid3tag%(mext)s',
              'lib/gstreamer-1.0/libgstkate%(mext)s',
              'lib/gstreamer-1.0/libgstmidi%(mext)s',
