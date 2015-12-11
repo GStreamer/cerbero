@@ -203,7 +203,7 @@ endif
 delsharedlib_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
 delsharedlib_$(TARGET_ARCH_ABI):
 	@$(call host-rm,$(prebuilt))
-	@$(foreach path,$(wildcard $(PRIV_B_DIR)/sed*), $(call host-rm,$(path)))
+	@$(foreach path,$(wildcard $(PRIV_B_DIR)/sed*), $(call host-rm,$(path));)
 $(LOCAL_INSTALLED): delsharedlib_$(TARGET_ARCH_ABI)
 
 # Generates a source file that declares and registers all the required plugins
@@ -243,11 +243,11 @@ copyjavasource_$(TARGET_ARCH_ABI):
 	@$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
 	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
 	@$(foreach plugin,$(GSTREAMER_PLUGINS_WITH_CLASSES), \
-		$(call host-mkdir, $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(plugin)))
+		$(call host-mkdir, $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(plugin));)
 	@$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
 		$(call host-cp, \
 		$(GSTREAMER_NDK_BUILD_PATH)$(file), \
-		$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)))
+		$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file));)
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
