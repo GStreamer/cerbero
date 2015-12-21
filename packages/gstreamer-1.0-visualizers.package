@@ -13,7 +13,7 @@ class Package(package.Package):
     license = License.LGPL
     vendor = 'GStreamer Project'
     org = 'org.freedesktop.gstreamer'
-    uuid = 'b8800fa1-44bb-4a95-87e1.6.24cdc62ec3'
+    uuid = 'b8800fa1-44bb-4a95-87e1-6814cdc62ec3'
     deps = ['gstreamer-1.0-core']
 
     files = ['libvisual', 'gst-plugins-base-1.0:plugins_vis', 'gst-plugins-good-1.0:plugins_vis',
