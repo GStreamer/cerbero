@@ -9,7 +9,7 @@ class Package(VSTemplatePackage):
     shortdesc = 'GStreamer 1.0 VS templates'
     longdesc = 'GStreamer 1.0 Visual Studio templates'
     url = "http://gstreamer.freedesktop.org"
-    version = '1.7.0'
+    version = '1.7.1'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'

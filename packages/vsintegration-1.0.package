@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'Visual Studio Integration'
     longdesc = 'Visual Studio Integration'
     url = "http://gstreamer.freedesktop.org"
-    version = '1.7.0'
+    version = '1.7.1'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'

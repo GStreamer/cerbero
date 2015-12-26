@@ -8,7 +8,7 @@ class Package(package.Package):
     shortdesc = 'GStreamer 1.0 visualization plugins'
     longdesc = 'GStreamer 1.0 visualization plugins'
     url = "http://gstreamer.freedesktop.org"
-    version = '1.7.0'
+    version = '1.7.1'
     codename = 'Congo'
     license = License.LGPL
     vendor = 'GStreamer Project'
