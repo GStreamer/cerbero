@@ -72,6 +72,7 @@ class DistroVersion:
     UBUNTU_TRUSTY = 'ubuntu_trusty'
     UBUNTU_UTOPIC = 'ubuntu_utopic'
     UBUNTU_VIVID = 'ubuntu_vivid'
+    UBUNTU_WILY = 'ubuntu_wily'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'
