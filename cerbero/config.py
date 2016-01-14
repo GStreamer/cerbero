@@ -329,7 +329,7 @@ class Config (object):
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
-            raise ConfigurationError('Unkown key %s' % name)
+            raise ConfigurationError('Unknown key %s' % name)
         if force or getattr(self, name) is None:
             setattr(self, name, value)
 
