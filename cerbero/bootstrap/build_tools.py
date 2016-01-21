@@ -59,6 +59,7 @@ class BuildTools (BootstrapperBase):
                 self.BUILD_TOOLS.append('cmake')
         if self.config.target_platform == Platform.LINUX:
             self.BUILD_TOOLS.append('app-image-kit')
+            self.BUILD_TOOLS.append('meson')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID,

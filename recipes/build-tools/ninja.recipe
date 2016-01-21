@@ -1,0 +1,26 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'ninja'
+    version = '1.6'
+    licenses = [License.Apachev2]
+    btype = BuildType.CUSTOM
+    remotes = {'origin': 'https://github.com/ninja-build/ninja.git'}
+    commit = 'v1.6.0'
+    deps = []
+
+    files_bin = ['bin/ninja']
+
+    def configure(self):
+        os.chdir(self.build_dir)
+        shell.call('./configure.py --bootstrap')
+
+    def install(self):
+        try:
+            os.remove(os.path.join (self.config.prefix, "bin", "ninja"))
+        except OSError:
+            pass
+
+        shutil.move(os.path.join(self.build_dir, "ninja"),
+                    os.path.join (self.config.prefix, "bin"))

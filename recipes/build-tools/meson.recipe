@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import os
+import stat
+
+class Recipe(recipe.Recipe):
+    name = 'meson'
+    version = '0.28'
+    licenses = [License.Apachev2]
+    btype = BuildType.CUSTOM
+    remotes = {'origin': 'https://github.com/mesonbuild/meson.git'}
+    commit = '0.28.0'
+    deps = ['ninja']
+
+    files_bin = ['bin/meson']
+    files_python = []
+
+    def install(self):
+        os.chdir(self.build_dir)
+        shell.call('./install_meson.py --prefix %s' %
+                   self.config.prefix)
