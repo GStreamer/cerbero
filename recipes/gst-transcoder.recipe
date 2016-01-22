@@ -20,6 +20,10 @@ class Recipe(recipe.Recipe):
         'include/gstreamer-1.0/gst/transcoder/',
     ]
 
+    files_plugins_encoding = [
+             'lib/gstreamer-1.0/libgsttranscoderplugin%(mext)s',
+    ]
+
     files_bins = ['gst-transcoder-1.0']
     btype = BuildType.MAKEFILE
 
