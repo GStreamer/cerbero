@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
     files_bins = ['gst-transcoder-1.0']
     btype = BuildType.MAKEFILE
 
-    config_sh = 'configure'
+    config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s %(options)s"
 
     def prepare(self):
