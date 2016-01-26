@@ -435,7 +435,6 @@ class Config (object):
 
                 if os.path.exists(f):
                     self._parse(f, reset=False)
-                    self.filename = DEFAULT_CONFIG_FILE
                 else:
                     raise ConfigurationError(_("Configuration file %s doesn't "
                                                "exists") % f)
