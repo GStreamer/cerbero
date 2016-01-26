@@ -43,8 +43,9 @@ class Recipe(recipe.Recipe):
                 self.new_env = {'AS': os.environ.get('CC', '')}
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
-                self.new_env = {'AS': os.environ.get('GAS', '')}
-                self.new_env['AS'] += ' -no-integrated-as '
+                if 'GAS' in os.environ:
+                    self.new_env = {'AS': os.environ['GAS']}
+                    self.new_env['AS'] += ' -no-integrated-as '
             elif self.config.target_arch == Architecture.X86:
                 enable_asm = False
 

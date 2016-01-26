@@ -16,6 +16,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.IOS:
-            self.new_env = {'CCAS': os.environ.get('GAS', '')}
+            if 'GAS' in os.environ:
+                self.new_env = {'CCAS': os.environ['GAS']}
+                self.new_env['CCAS'] += ' -no-integrated-as '
         if self.config.target_arch == Architecture.ARM64:
             self.configure_options += ' --disable-arm-neon '

@@ -18,8 +18,9 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.IOS:
             self.configure_options += ' --enable-fpm=default '
-            self.new_env = {'CCAS': os.environ['GAS']}
-            self.new_env['CCAS'] += ' -no-integrated-as '
+            if 'GAS' in os.environ:
+                self.new_env = {'CCAS': os.environ['GAS']}
+                self.new_env['CCAS'] += ' -no-integrated-as '
             self.patches += ['libmad/0004-Remove-clang-unsupported-compiler-flags.patch']
         elif self.config.target_platform == Platform.DARWIN:
             self.patches += ['libmad/0004-Remove-clang-unsupported-compiler-flags.patch']

@@ -23,8 +23,9 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-sdl '
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
-                self.new_env = {'CCAS': os.environ['GAS']}
-                self.new_env['CCAS'] += ' -no-integrated-as '
+                if 'GAS' in os.environ:
+                    self.new_env = {'CCAS': os.environ['GAS']}
+                    self.new_env['CCAS'] += ' -no-integrated-as '
                 self.append_env = {'LDFLAGS': ' -Wl,-read_only_relocs,suppress'}
 
     def compile(self):
