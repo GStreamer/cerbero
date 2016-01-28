@@ -18,7 +18,9 @@
 # Boston, MA 02111-1307, USA.
 
 import subprocess
+import os
 
+from cerbero.errors import FatalError
 
 class PkgConfig(object):
     '''
@@ -77,6 +79,11 @@ class PkgConfig(object):
         include_dirs = []
         for pc in PkgConfig.list_all():
             pkgconfig = PkgConfig(pc)
+            d = pkgconfig.include_dirs()
+            for p in d:
+                if not os.path.isabs(p):
+                    raise FatalError("pkg-config file %s contains relative include dir %s" % (pc, p))
+
             include_dirs.extend(pkgconfig.include_dirs())
         return list(set(include_dirs))
 
