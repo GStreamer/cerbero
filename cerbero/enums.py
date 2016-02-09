@@ -38,8 +38,12 @@ class Architecture:
 
     @staticmethod
     def is_arm(arch):
+        '''Returns whether the architecture is an ARM based one.
+        Note that it will include 32bit *and* 64bit ARM targets. If you
+        wish to do something special for 64bit you should first check for
+        that before calling this method.'''
         return arch in [Architecture.ARM, Architecture.ARMv7,
-                Architecture.ARMv7S]
+                Architecture.ARMv7S, Architecture.ARM64]
 
 
 class Distro:
