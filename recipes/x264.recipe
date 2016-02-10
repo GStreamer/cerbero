@@ -45,7 +45,9 @@ class Recipe(recipe.Recipe):
             if Architecture.is_arm(self.config.target_arch):
                 if 'GAS' in os.environ:
                     self.new_env = {'AS': os.environ['GAS']}
-                    self.new_env['AS'] += ' -no-integrated-as '
+                    if self.config.target_arch != Architecture.ARM64:
+                        # -no-integrated-as is only required for 32bit arm
+                        self.new_env['AS'] += ' -no-integrated-as '
             elif self.config.target_arch == Architecture.X86:
                 enable_asm = False
 
