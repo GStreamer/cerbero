@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'mpg123'
+    version = '1.23.1'
+    stype = SourceType.TARBALL
+    url = 'http://downloads.sourceforge.net/project/mpg123/mpg123/1.23.1/mpg123-1.23.1.tar.bz2'
+    licenses = [License.LGPLv2_1]
+    autoreconf = True
+    configure_options = '--with-audio=dummy --enable-static'
+    patches = ['mpg123/0001-Disable-tools-and-libout123-library.patch']
+
+    files_libs = ['libmpg123', 'lib/pkgconfig/libmpg123.pc']
+    files_devel = ['include/mpg123.h', 'include/fmt123.h']
+

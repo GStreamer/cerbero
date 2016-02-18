@@ -10,7 +10,7 @@ class Recipe(custom.GStreamerStatic):
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     commit = 'origin/master'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
-            'libdvdread', 'libmpeg2', 'libmad', 'x264', 'lame']
+            'libdvdread', 'libmpeg2', 'libmad', 'x264', 'lame', 'mpg123']
 
     files_plugins_codecs_restricted_devel = [
              'libgsta52dec',
@@ -25,6 +25,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstrmdemux',
              'libgstx264',
              'libgstlame',
+             'libgstmpg123',
     ]
 
     files_plugins_dvd_devel = [
