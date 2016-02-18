@@ -51,52 +51,68 @@ You need to install the following software:
   * Microsoft SDK 7.1: http://www.microsoft.com/en-us/download/details.aspx?id=8279
   * Windows Driver Kit 7.1.0: http://msdn.microsoft.com/en-us/windows/hardware/hh852365
 
-cerbero must be run in the MingGW shell, which is accessible from the main menu.
+cerbero must be run in the MingGW shell, which is accessible from the main menu or desktop 
+(if it is not, go to Mingw Installation manager, select MSYS Base Development and install
+msys-bash  lnk).
+
 The last step is making python and git available from the shell, for which you will need
 to create a .profile file:
-  $ echo "export PATH=\"\$PATH:/c/Python27:/c/Git/bin\"" > ~/.profile
+
+If you use 64-bit Windows, please execute:
+
+echo 'export PATH="$PATH:/c/Python27:/c/Program Files (x86)/Git/bin:/c/MinGW/bin/"' > ~/.profile
+
+If you use 32-bit Windows, please execute:
+
+echo 'export PATH="$PATH:/c/Python27:/c/Program Files/Git/bin:/c/MinGW/bin/"' > ~/.profile
 
 Note that inside the shell, / is mapped to c:\Mingw\msys\1.0\
-
 
 *****
 Usage
 *****
 
+Despite the presence of setup.py this tool does not need installation. It is invoked via the
+cerbero-uninstalled script, which should be invoked as ./cerbero-uninstalled, or you can add 
+the cerbero directory in your path and invoke it as cerbero-uninstalled.
+
+The examples below assume the tool is in your PATH; if not, just remember to use ./cerbero-uninstalled
+instead of cerbero-uninstalled.
+
 Bootstrap
 ---------
 Before using cerbero for the first time, you will need to run the bootstrap command.
 This command installs the missing parts of the build system using the packages manager
-when available.
-  $ cerbero bootstrap
+when available. Note that this will take a while (a couple hours or even more).
+  $ cerbero-uninstalled bootstrap
 
 Help
 ----
-  $ cerbero --help
+  $ cerbero-uninstalled --help
 
 List available recipes
 ----------------------
-  $ cerbero list
+  $ cerbero-uninstalled list
 
 List available packages
 -----------------------
-  $ cerbero list-packages
+  $ cerbero-uninstalled list-packages
 
 Build a recipe
 --------------
-  $ cerbero build gtk+
+  $ cerbero-uninstalled build gtk+
 
 Rebuild a single recipe
 -----------------------
-  $ cerbero buildone gtk+
+  $ cerbero-uninstalled buildone gtk+
 
 Clean a recipe
 --------------
-  $ cerbero cleanone gtk+
+  $ cerbero-uninstalled cleanone gtk+
 
-Create a package
+Create a package (this automatically invokes build)
 ----------------
-  $ cerbero package gstreamer-1.0
+  $ cerbero-uninstalled package gstreamer-1.0
 
 
 *******
