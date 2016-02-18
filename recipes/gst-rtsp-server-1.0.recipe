@@ -13,4 +13,4 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/gstreamer-1.0/gst/rtsp-server', 'lib/pkgconfig/gstreamer-rtsp-server-1.0.pc']
     files_libs = ['libgstrtspserver-1.0']
     files_typelibs = ['GstRtspServer-1.0']
-
+    files_plugins_net = [ 'lib/gstreamer-1.0/libgstrtspclientsink%(mext)s' ]

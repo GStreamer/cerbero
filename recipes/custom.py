@@ -101,7 +101,7 @@ def list_gstreamer_plugins_by_category(config):
                         'mpegdemux': 'mpegdemux2', 'rmdemux': 'realmedia'}
         plugins = defaultdict(list)
         for r in ['gstreamer', 'gst-plugins-base', 'gst-plugins-good',
-                  'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg']:
+                  'gst-plugins-bad', 'gst-plugins-ugly', 'gst-ffmpeg', 'gst-rtsp-server']:
             r = cookbook.get_recipe(r)
             for attr_name in dir(r):
                 if attr_name.startswith('files_plugins_'):
@@ -130,7 +130,7 @@ def list_gstreamer_1_0_plugins_by_category(config):
         plugins = defaultdict(list)
         for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
                   'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0',
-                  'gst-libav-1.0', 'gst-editing-services-1.0']:
+                  'gst-libav-1.0', 'gst-editing-services-1.0', 'gst-rtsp-server-1.0']:
             r = cookbook.get_recipe(r)
             for attr_name in dir(r):
                 if attr_name.startswith('files_plugins_'):

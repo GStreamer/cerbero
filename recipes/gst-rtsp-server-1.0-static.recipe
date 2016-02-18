@@ -1,0 +1,25 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(custom.GStreamerStatic):
+    name = 'gst-rtsp-server-1.0-static'
+    version = '1.7'
+    gstreamer_version = '1.0'
+    licenses = [License.LGPLv2Plus]
+    extra_configure_options = "--disable-examples --enable-static"
+    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-rtsp-server'}
+    commit = 'origin/master'
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
+    use_system_libs = True
+
+    files_plugins_net_devel = [ 'libgstrtspclientsink' ]
+
+    def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CXXFLAGS'] = " -Wno-error "
+        self.append_env['CPPFLAGS'] = " -Wno-error "
+        if self.config.target_platform != Platform.LINUX:
+            self.configure_options += '--disable-gtk-doc '
+
+        custom.GStreamerStatic.prepare(self)
+
