@@ -14,8 +14,6 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'git://github.com/tinyalsa/tinyalsa'}
     commit = 'origin/master'
 
-    patches = [ 'tinyalsa/0001-build-Don-t-hardcode-build-commands.patch' ]
-
     files_devel = [ 'include/tinyalsa/asoundlib.h' ]
 
     files_libs = [ 'libtinyalsa' ]
