@@ -13,3 +13,9 @@ class Recipe(recipe.Recipe):
     files_libs = ['libmpg123', 'lib/pkgconfig/libmpg123.pc']
     files_devel = ['include/mpg123.h', 'include/fmt123.h']
 
+    def prepare(self):
+        if self.config.target_platform in [Platform.ANDROID]:
+            if self.config.target_arch == Architecture.ARM:
+                # Disable thumb mode to get the optimizations compiled properly
+                self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
+
