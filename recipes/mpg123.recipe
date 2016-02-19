@@ -18,4 +18,8 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.ARM:
                 # Disable thumb mode to get the optimizations compiled properly
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
+        if self.config.target_platform in [Platform.IOS]:
+            if self.config.target_arch == Architecture.X86:
+                # make sure we use 32bit asm
+                self.configure_options += ' --with-cpu=x86 '
 
