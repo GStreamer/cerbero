@@ -10,8 +10,8 @@ class Recipe(recipe.Recipe):
     configure_options = '--with-audio=dummy --enable-static'
     patches = ['mpg123/0001-Disable-tools-and-libout123-library.patch']
 
-    files_libs = ['libmpg123', 'lib/pkgconfig/libmpg123.pc']
-    files_devel = ['include/mpg123.h', 'include/fmt123.h']
+    files_libs = ['libmpg123']
+    files_devel = ['include/mpg123.h', 'include/fmt123.h', 'lib/pkgconfig/libmpg123.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.ANDROID]:
