@@ -1,0 +1,42 @@
+From 4f01a0292b613ece878a3c1076bd9211c9301d03 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sat, 20 Feb 2016 10:42:33 +0200
+Subject: [PATCH] Try harder to generate Win32 DLLs
+
+---
+ configure.ac                  | 4 +---
+ source/SoundTouch/Makefile.am | 1 +
+ 2 files changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 5053626..3bed150 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -46,11 +46,9 @@ AC_PROG_INSTALL
+ #AC_PROG_LN_S
+ AC_PROG_MAKE_SET
+ 
++AC_LIBTOOL_WIN32_DLL
+ AM_PROG_LIBTOOL dnl turn on using libtool
+ 
+-
+-
+-
+ dnl ############################################################################
+ dnl # Checks for header files                                                  #
+ dnl ############################################################################
+diff --git a/source/SoundTouch/Makefile.am b/source/SoundTouch/Makefile.am
+index b2e598b..90cfb71 100644
+--- a/source/SoundTouch/Makefile.am
++++ b/source/SoundTouch/Makefile.am
+@@ -38,6 +38,7 @@ AM_CXXFLAGS=-O3 -I../../include $(GNUSTL_CFLAGS)
+ 
+ # Compile the files that need MMX and SSE individually.
+ libSoundTouch_la_LIBADD=libSoundTouchMMX.la libSoundTouchSSE.la $(GNUSTL_LIBS)
++libSoundTouch_la_LDFLAGS=-no-undefined
+ noinst_LTLIBRARIES=libSoundTouchMMX.la libSoundTouchSSE.la
+ libSoundTouchMMX_la_SOURCES=mmx_optimized.cpp
+ libSoundTouchSSE_la_SOURCES=sse_optimized.cpp
+-- 
+2.7.0
+

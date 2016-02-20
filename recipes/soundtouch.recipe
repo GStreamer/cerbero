@@ -19,7 +19,8 @@ class Recipe(recipe.Recipe):
                'soundtouch/0006-Fix-pkg-config-file.patch',
                'soundtouch/0007-Make-it-compile-on-IOS.patch',
                'soundtouch/0008-Fix-compilation-with-clang.patch',
-               'soundtouch/0009-Don-t-use-fcheck-new.patch']
+               'soundtouch/0009-Don-t-use-fcheck-new.patch',
+               'soundtouch/0010-Try-harder-to-generate-Win32-DLLs.patch']
 
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']
