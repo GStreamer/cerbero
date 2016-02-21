@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.ARM:
                 # FIXME : Is disabling asm on ARM (< v7) still needed ?
                 enable_asm = False
-            if self.config.target_arch == Architecture.ARMv7:
+            elif Architecture.is_arm(self.config.target_arch):
                 self.new_env = {'AS': os.environ.get('CC', '')}
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
