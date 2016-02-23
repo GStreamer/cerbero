@@ -30,6 +30,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             # configure for android
             self.configure_options += ' -DANDROID_NDK=1 '
+            self.append_env['CXXFLAGS'] = " -frtti "
         self.configure_options += ' -DZLIB_ROOT=%s ' % self.config.prefix
 
     def install(self):
