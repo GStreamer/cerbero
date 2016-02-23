@@ -29,5 +29,6 @@ class Recipe(recipe.Recipe):
       self.configure_options += ' --enable-static '
       if self.config.target_platform == Platform.ANDROID:
         self.configure_options += ' --with-gnustl '
+        self.append_env['CXXFLAGS'] = " -fexceptions "
       elif self.config.target_platform == Platform.IOS:
         self.autoreconf = True
