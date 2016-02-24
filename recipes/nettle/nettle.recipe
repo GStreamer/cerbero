@@ -10,7 +10,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '3.1.1'
+    version = '3.2'
     stype = SourceType.TARBALL
     url = 'http://www.lysator.liu.se/~nisse/archive/nettle-{0}.tar.gz'.format(version)
 
