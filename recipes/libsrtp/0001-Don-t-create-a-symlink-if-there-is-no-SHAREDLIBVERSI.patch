@@ -1,0 +1,29 @@
+From e01dd7b69e66d68373fab75b54220957609f248a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 24 Feb 2016 11:23:28 +0200
+Subject: [PATCH] Don't create a symlink if there is no $(SHAREDLIBVERSION)
+
+Otherwise we create a symlink with the same name as the target, which will
+create a symlink pointing to itself.
+---
+ Makefile.in | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 8ff7305..5f9baa9 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -250,7 +250,9 @@ install:
+ 		$(INSTALL) -d $(DESTDIR)$(SHAREDLIB_DIR); \
+ 		cp libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/; \
+ 		cp libsrtp2.$(SHAREDLIBSUFFIXNOVER) $(DESTDIR)$(SHAREDLIB_DIR)/; \
+-		ln -sfn libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp2.$(SHAREDLIBSUFFIXNOVER); \
++		if [ -n "$(SHAREDLIBVERSION)" ]; then \
++			ln -sfn libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp2.$(SHAREDLIBSUFFIXNOVER); \
++		fi; \
+ 	fi
+ 	if [ "$(pkgconfig_DATA)" != "" ]; then \
+ 		$(INSTALL) -d $(DESTDIR)$(pkgconfigdir); \
+-- 
+2.7.0
+
