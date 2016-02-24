@@ -1,4 +1,4 @@
-From e01dd7b69e66d68373fab75b54220957609f248a Mon Sep 17 00:00:00 2001
+From fa772c2e3d41de4cdd587700f567b5aff59452bb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Wed, 24 Feb 2016 11:23:28 +0200
 Subject: [PATCH] Don't create a symlink if there is no $(SHAREDLIBVERSION)
@@ -10,16 +10,16 @@ create a symlink pointing to itself.
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/Makefile.in b/Makefile.in
-index 8ff7305..5f9baa9 100644
+index d9b2c4f..c0a67be 100644
 --- a/Makefile.in
 +++ b/Makefile.in
-@@ -250,7 +250,9 @@ install:
+@@ -273,7 +273,9 @@ install:
+ 	if [ -f libsrtp.$(SHAREDLIBSUFFIX) ]; then \
  		$(INSTALL) -d $(DESTDIR)$(SHAREDLIB_DIR); \
- 		cp libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/; \
- 		cp libsrtp2.$(SHAREDLIBSUFFIXNOVER) $(DESTDIR)$(SHAREDLIB_DIR)/; \
--		ln -sfn libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp2.$(SHAREDLIBSUFFIXNOVER); \
+ 		cp libsrtp.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/; \
+-		ln -sfn libsrtp.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp.$(SHAREDLIBSUFFIXNOVER); \
 +		if [ -n "$(SHAREDLIBVERSION)" ]; then \
-+			ln -sfn libsrtp2.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp2.$(SHAREDLIBSUFFIXNOVER); \
++			ln -sfn libsrtp.$(SHAREDLIBSUFFIX) $(DESTDIR)$(SHAREDLIB_DIR)/libsrtp.$(SHAREDLIBSUFFIXNOVER); \
 +		fi; \
  	fi
  	if [ "$(pkgconfig_DATA)" != "" ]; then \
