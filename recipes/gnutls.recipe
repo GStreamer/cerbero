@@ -21,7 +21,8 @@ class Recipe(recipe.Recipe):
         Platform.IOS: ['bionic-fixup'],
         Platform.DARWIN: ['bionic-fixup']
     }
-    patches = [name + "/0001-configure-vasprintf-is-defined-in-stdio.h.patch"]
+    patches = [name + "/0001-configure-vasprintf-is-defined-in-stdio.h.patch",
+               name + "/0002-configure-Android-is-ELF-too.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

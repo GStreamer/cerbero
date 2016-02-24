@@ -1,4 +1,4 @@
-From a6f664b3d7c5460bb4dedb993b8a4783469aba9b Mon Sep 17 00:00:00 2001
+From aac609327e2c6c57e488213b58e38134ff26a526 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 31 Mar 2015 15:57:59 +0530
 Subject: [PATCH 1/2] configure: vasprintf is defined in stdio.h
@@ -11,10 +11,10 @@ compilation using mingw fails due to redefinition of asprintf.
  2 files changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 5d13ff7..40a01d7 100644
+index 23eb576..22b2d98 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -156,8 +156,9 @@ AC_C_BIGENDIAN
+@@ -203,8 +203,9 @@ AC_C_BIGENDIAN
  
  dnl No fork on MinGW, disable some self-tests until we fix them.
  dnl Check clock_gettime and pthread_mutex_lock in libc (avoid linking to other libs)
@@ -26,7 +26,7 @@ index 5d13ff7..40a01d7 100644
    AC_MSG_CHECKING([for va_copy])
    AC_LINK_IFELSE([AC_LANG_PROGRAM([
  	#include <stdarg.h>
-@@ -178,6 +179,8 @@ if test "$ac_cv_func_vasprintf" != "yes";then
+@@ -225,6 +226,8 @@ if test "$ac_cv_func_vasprintf" != "yes";then
  		[AC_MSG_RESULT(no)
  		AC_MSG_ERROR([Your system lacks vasprintf() and va_copy()])])
  	])
@@ -36,7 +36,7 @@ index 5d13ff7..40a01d7 100644
  
  AM_CONDITIONAL(HAVE_FORK, test "$ac_cv_func_fork" != "no")
 diff --git a/gl/m4/vasprintf.m4 b/gl/m4/vasprintf.m4
-index c76c99c..42c71c2 100644
+index b785dc3..c01ab64 100644
 --- a/gl/m4/vasprintf.m4
 +++ b/gl/m4/vasprintf.m4
 @@ -7,8 +7,8 @@ dnl with or without modifications, as long as this notice is preserved.
@@ -51,5 +51,5 @@ index c76c99c..42c71c2 100644
    fi
  ])
 -- 
-2.1.0
+2.7.0
 
