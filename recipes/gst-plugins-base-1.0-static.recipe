@@ -10,7 +10,7 @@ class Recipe(custom.GStreamerStatic):
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     commit = 'origin/master'
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
-            'libvisual', 'libvorbis', 'zlib', 'orc']
+            'libvisual', 'libvorbis', 'zlib', 'orc', 'opus']
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
@@ -45,6 +45,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstogg',
              'libgsttheora',
              'libgstvorbis',
+             'libgstopus',
             ]
 
     files_plugins_vis_devel = [

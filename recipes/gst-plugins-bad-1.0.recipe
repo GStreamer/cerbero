@@ -97,7 +97,7 @@ class Recipe(recipe.Recipe):
              'lib/gstreamer-1.0/libgstmidi%(mext)s',
              'lib/gstreamer-1.0/libgstmxf%(mext)s',
              'lib/gstreamer-1.0/libgstopenh264%(mext)s',
-             'lib/gstreamer-1.0/libgstopus%(mext)s',
+             'lib/gstreamer-1.0/libgstopusparse%(mext)s',
              'lib/gstreamer-1.0/libgstpcapparse%(mext)s',
              'lib/gstreamer-1.0/libgstpnm%(mext)s',
              'lib/gstreamer-1.0/libgstrfbsrc%(mext)s',

@@ -65,7 +65,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstmidi',
              'libgstmxf',
              'libgstopenh264',
-             'libgstopus',
+             'libgstopusparse',
              'libgstpcapparse',
              'libgstpnm',
              'libgstrfbsrc',
