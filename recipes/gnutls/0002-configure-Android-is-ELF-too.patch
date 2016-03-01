@@ -1,7 +1,7 @@
-From 6aa766813b4c93458dfbfe0e62590ba76cea3ec7 Mon Sep 17 00:00:00 2001
+From db06b9322de28af1c868a9d4dab2728f6515b996 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Wed, 24 Feb 2016 12:42:26 +0200
-Subject: [PATCH 2/3] configure: Android is ELF too
+Subject: [PATCH 2/4] configure: Android is ELF too
 
 ---
  configure.ac | 1 +

@@ -1,7 +1,7 @@
-From 3f009ce19972fd78b216a7598a04943daf7b6817 Mon Sep 17 00:00:00 2001
+From 4df19d35188fe9e49eb720760b7aba9ebc3e80e1 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Wed, 24 Feb 2016 16:46:11 +0200
-Subject: [PATCH 3/3] Disable ncrypt support
+Subject: [PATCH 3/4] Disable ncrypt support
 
 It's Windows Vista only and our mingw toolchain does not support it currently
 either.

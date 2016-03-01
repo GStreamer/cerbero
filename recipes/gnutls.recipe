@@ -23,7 +23,8 @@ class Recipe(recipe.Recipe):
     }
     patches = [name + "/0001-configure-vasprintf-is-defined-in-stdio.h.patch",
                name + "/0002-configure-Android-is-ELF-too.patch",
-               name + "/0003-Disable-ncrypt-support.patch"]
+               name + "/0003-Disable-ncrypt-support.patch",
+               name + "/0004-Stop-using-weak-linked-_gnutls_global_init_skip-in-l.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

@@ -1,0 +1,44 @@
+From 703226118ff5ccd8d5fe9a41ad3e2c6f063b0c75 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 1 Mar 2016 15:43:36 +0200
+Subject: [PATCH 4/4] Stop using weak linked _gnutls_global_init_skip() in
+ library constructor
+
+It fails on Windows, see https://gitlab.com/gnutls/gnutls/issues/74
+
+https://bugzilla.gnome.org/show_bug.cgi?id=762921
+---
+ lib/gnutls_global.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/lib/gnutls_global.c b/lib/gnutls_global.c
+index 9bda352..409fd96 100644
+--- a/lib/gnutls_global.c
++++ b/lib/gnutls_global.c
+@@ -462,9 +462,10 @@ static void _CONSTRUCTOR lib_init(void)
+ int ret;
+ const char *e;
+ 
++#if 0
+ 	if (_gnutls_global_init_skip() != 0)
+ 		return;
+-
++#endif
+ 	e = getenv("GNUTLS_NO_EXPLICIT_INIT");
+ 	if (e != NULL) {
+ 		ret = atoi(e);
+@@ -483,9 +484,10 @@ static void _DESTRUCTOR lib_deinit(void)
+ {
+ 	const char *e;
+ 
++#if 0
+ 	if (_gnutls_global_init_skip() != 0)
+ 		return;
+-
++#endif
+ 	e = getenv("GNUTLS_NO_EXPLICIT_INIT");
+ 	if (e != NULL) {
+ 		int ret = atoi(e);
+-- 
+2.7.0
+
