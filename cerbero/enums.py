@@ -100,6 +100,7 @@ class DistroVersion:
     WINDOWS_VISTA = 'windows_vista'
     WINDOWS_7 = 'windows_7'
     WINDOWS_8 = 'windows_8'
+    WINDOWS_8_1 = 'windows_8_1'
     WINDOWS_10 = 'windows_10'
     OS_X_SIERRA = 'osx_sierra'
     OS_X_MAVERICKS = 'osx_mavericks'
