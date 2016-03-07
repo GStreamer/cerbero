@@ -121,7 +121,7 @@ def call(cmd, cmd_dir='.', fail=True):
     @type cmd: str
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
-    @param fail: wheter to raise an exception if the command failed or not
+    @param fail: whether or not to raise an exception if the command fails
     @type fail: bool
     '''
     try:
