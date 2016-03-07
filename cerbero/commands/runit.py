@@ -27,7 +27,7 @@ class Run(Command):
 
     def __init__(self):
         Command.__init__(self,
-            [ArgparseArgument('cmd', nargs='*',
+            [ArgparseArgument('cmd', nargs='+',
                              help=_('command to run')),
             ])
 
