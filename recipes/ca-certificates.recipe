@@ -8,7 +8,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'ca-certificates'
-    version = '0.1'
+    version = '2016-02-26'
     licenses = [License.MPLv2]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
