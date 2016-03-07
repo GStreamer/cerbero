@@ -29,11 +29,15 @@ class Run(Command):
         Command.__init__(self,
             [ArgparseArgument('cmd', nargs='+',
                              help=_('command to run')),
+             ArgparseArgument('-v', '--verbose',
+                             action='store_true',
+                             default=False,
+                             help=_('verbose mode'))
             ])
 
     def run(self, config, args):
         command = ' '.join(args.cmd)
-        shell.call(command)
+        shell.call(command, '.', True, args.verbose)
 
 
 register_command(Run)
