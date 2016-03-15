@@ -26,9 +26,9 @@ from cerbero.utils import _, shell
 
 class AndroidBootstrapper (BootstrapperBase):
 
-    NDK_BASE_URL = 'http://dl.google.com/android/ndk/'
-    NDK_VERSION = 'r10e'
-    NDK_TAR = 'android-ndk-' + NDK_VERSION + '-%s-%s.bin'
+    NDK_BASE_URL = 'http://dl.google.com/android/repository/'
+    NDK_VERSION = 'r11'
+    NDK_TAR = 'android-ndk-' + NDK_VERSION + '-%s-%s.zip'
 
     def start(self):
         dest = self.config.toolchain_prefix
@@ -41,9 +41,8 @@ class AndroidBootstrapper (BootstrapperBase):
         shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
         if not os.path.exists(os.path.join(dest, "README.TXT")):
             try:
-                shell.call('chmod +x ./%s' % ndk_tar, dest)
-                shell.call('./%s' % ndk_tar, dest)
-                shell.call('mv android-ndk-%s/* .' % (self.NDK_VERSION), dest)
+                shell.call('unzip %s' % ndk_tar, dest)
+                shell.call('mv android-ndk-%s-%s-%s.tar.bz2/* .' % (self.NDK_VERSION, self.config.platform, self.config.arch), dest)
             except Exception, ex:
                 raise FatalError(_("Error installing Android NDK: %s") % (ex))
 
