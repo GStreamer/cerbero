@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'sh autogen.sh'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-python'}
-    commit = 'origin/master'
+    commit = '1.7.91'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'glib', 'pygobject']
     # FIXME: disable checks until it's properly fixed
     make_check = None
