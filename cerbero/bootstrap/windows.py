@@ -85,7 +85,7 @@ class WindowsBootstrapper(BootstrapperBase):
 
         tarfile = os.path.join(self.prefix, tarball)
         tarfile = os.path.abspath(tarfile)
-        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile)
+        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile, check_cert=False)
         try:
             shell.unpack(tarfile, self.prefix)
         except Exception:
