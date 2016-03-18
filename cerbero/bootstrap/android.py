@@ -39,10 +39,10 @@ class AndroidBootstrapper (BootstrapperBase):
         except:
             pass
         shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
-        if not os.path.exists(os.path.join(dest, "README.TXT")):
+        if not os.path.exists(os.path.join(dest, "ndk-build")):
             try:
                 shell.call('unzip %s' % ndk_tar, dest)
-                shell.call('mv android-ndk-%s-%s-%s.tar.bz2/* .' % (self.NDK_VERSION, self.config.platform, self.config.arch), dest)
+                shell.call('mv android-ndk-%s/* .' % self.NDK_VERSION, dest)
             except Exception, ex:
                 raise FatalError(_("Error installing Android NDK: %s") % (ex))
 
