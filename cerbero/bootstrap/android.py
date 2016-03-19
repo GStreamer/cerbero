@@ -28,20 +28,20 @@ class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/repository/'
     NDK_VERSION = 'r11'
-    NDK_TAR = 'android-ndk-' + NDK_VERSION + '-%s-%s.zip'
+    NDK_ZIP = 'android-ndk-' + NDK_VERSION + '-%s-%s.zip'
 
     def start(self):
         dest = self.config.toolchain_prefix
-        ndk_tar = self.NDK_TAR % (self.config.platform, self.config.arch)
-        tar = os.path.join(dest, ndk_tar)
+        ndk_zip = self.NDK_ZIP % (self.config.platform, self.config.arch)
+        zip_file = os.path.join(dest, ndk_zip)
         try:
             os.makedirs(dest)
         except:
             pass
-        shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_tar), tar)
+        shell.download("%s/%s" % (self.NDK_BASE_URL, ndk_zip), zip_file)
         if not os.path.exists(os.path.join(dest, "ndk-build")):
             try:
-                shell.call('unzip %s' % ndk_tar, dest)
+                shell.call('unzip %s' % ndk_zip, dest)
                 shell.call('mv android-ndk-%s/* .' % self.NDK_VERSION, dest)
             except Exception, ex:
                 raise FatalError(_("Error installing Android NDK: %s") % (ex))
