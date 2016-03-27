@@ -61,7 +61,7 @@ pkg-config-get-libs = \
 pkg-config-get-libs-no-deps = \
   $(eval __tmpvar.libs := ) \
   $(foreach package,$1,\
-    $(eval __tmpvar.libs += $(shell $(HOST_SED) -n 's/^Libs: \(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$(package).pc)))\
+    $(eval __tmpvar.libs += $(shell $(SED) -n 's/^Libs: \(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$(package).pc)))\
   $(filter -l%, $(__tmpvar.libs))
 
 # -----------------------------------------------------------------------------
@@ -71,7 +71,7 @@ pkg-config-get-libs-no-deps = \
 # Usage    : $(call pkg-config-get-prefix,<package>)
 # -----------------------------------------------------------------------------
 pkg-config-get-prefix = \
-  $(shell $(HOST_SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$1.pc)
+  $(shell $(SED) -n 's/^prefix=\(.*\)/\1/p' $(GSTREAMER_ROOT)/lib/pkgconfig/$1.pc)
 
 # -----------------------------------------------------------------------------
 # Function : libtool-whole-archive
@@ -259,10 +259,10 @@ libtool-get-search-paths = \
   $(filter -L%,$1)
 
 libtool-get-dependency-libs = \
-  $(shell $(HOST_SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
+  $(shell $(SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
 
 libtool-replace-prefixes = \
   $(subst $(BUILD_PREFIX),$(GSTREAMER_ROOT),$1 )
 
 libtool-get-static-library = \
-  $(shell $(HOST_SED) -n "s/^old_library='\(.*\)'/\1/p" $1)
+  $(shell $(SED) -n "s/^old_library='\(.*\)'/\1/p" $1)
