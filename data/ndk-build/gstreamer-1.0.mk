@@ -63,20 +63,10 @@ include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules/static
 
 # Host tools
-HOST_SED := $(strip $(NDK_HOST_SED))
-ifdef HOST_PREBUILT
-    ifndef HOST_SED
-        HOST_SED := $(strip $(wildcard $(HOST_PREBUILT)/sed$(HOST_EXEEXT)))
-    endif
-endif
-ifndef HOST_SED
-    HOST_CMP := sed
-endif
-
 ifeq ($(HOST_OS),windows)
-    HOST_SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
-    GSTREAMER_LD :=
+    SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
 else
+    SED := sed
 endif
 
 ifndef GSTREAMER_ANDROID_MODULE_NAME
@@ -218,10 +208,10 @@ genstatic_$(TARGET_ARCH_ABI):
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
 	@$(call host-mkdir,$(PRIV_B_DIR))
 	@$(call host-cp,$(PRIV_C_IN),$(PRIV_C))
-	@$(HOST_SED) -i "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C)
-	@$(HOST_SED) -i "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" $(PRIV_C)
-	@$(HOST_SED) -i "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" $(PRIV_C)
-	@$(HOST_SED) -i "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" $(PRIV_C)
+	@$(SED) -i "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C)
+	@$(SED) -i "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" $(PRIV_C)
+	@$(SED) -i "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" $(PRIV_C)
+	@$(SED) -i "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" $(PRIV_C)
 
 # Compile the source file
 $(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
@@ -249,19 +239,19 @@ copyjavasource_$(TARGET_ARCH_ABI):
 		$(GSTREAMER_NDK_BUILD_PATH)$(file), \
 		$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file));)
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
-	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_FONTS@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_FONTS@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_FONTS@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
-	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_CA_CERTIFICATES@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_CA_CERTIFICATES@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_CA_CERTIFICATES@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 ifneq (,$(findstring yes,$(GSTREAMER_INCLUDE_FONTS)$(GSTREAMER_INCLUDE_CA_CERTIFICATES)))
-	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_COPY_FILE@;;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 else
-	@$(HOST_SED) -i "s;@INCLUDE_COPY_FILE@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@$(SED) -i "s;@INCLUDE_COPY_FILE@;//;g" $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 endif
 
 copyfontsres_$(TARGET_ARCH_ABI):
