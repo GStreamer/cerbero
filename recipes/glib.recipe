@@ -173,6 +173,7 @@ class Recipe(recipe.Recipe):
                                                        DistroVersion.FEDORA_21,
                                                        DistroVersion.FEDORA_22,
                                                        DistroVersion.FEDORA_23,
+                                                       DistroVersion.FEDORA_24,
                                                        DistroVersion.REDHAT_6,
                                                        DistroVersion.REDHAT_7,
                                                        ]:
