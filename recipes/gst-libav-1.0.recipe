@@ -3,7 +3,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-libav-1.0'
-    version = '1.7'
+    version = '1.9'
     # TODO - check license - plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]

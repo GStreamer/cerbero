@@ -4,7 +4,7 @@ from cerbero.utils import to_unixpath
 
 class Recipe(recipe.Recipe):
     name = 'gst-transcoder'
-    version = '1.7'
+    version = '1.9'
     licenses = [License.LGPLv2Plus]
     remotes = {'origin': 'https://github.com/pitivi/gst-transcoder.git'}
     commit = 'origin/master'

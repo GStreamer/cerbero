@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'gst-python-1.0'
-    version = '1.7'
+    version = '1.9'
     # TODO: check license - some source files are LGPLv2+, others LGPLv2.1+ and
     #       COPYING is LGPLv2.1
     licenses = [License.LGPLv2_1Plus]

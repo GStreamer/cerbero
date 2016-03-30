@@ -3,7 +3,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-editing-services-1.0'
-    version = '1.7'
+    version = '1.9'
     licenses = [License.LGPLv2Plus]
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
     commit = 'origin/master'
