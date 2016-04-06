@@ -4,19 +4,20 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '4.70.0'
+    version = '4.80.0'
     stype = SourceType.TARBALL
-    url = 'http://www.wavpack.com/wavpack-4.70.0.tar.bz2'
+    url = 'http://www.wavpack.com/wavpack-4.80.0.tar.bz2'
     licenses = [License.BSD_like]
+    autoreconf = True
 
     files_libs = ['libwavpack']
-    files_bins = ['wavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
 
     def configure(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.autoreconf = True
-            shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
-                {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
+        shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
+            {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
+        if self.config.target_arch not in [Architecture.X86, Architecture.X86_64, Architecture.ARMv7, Architecture.ARMv7S]:
+            self.configure_options += ' --disable-asm '
+
         super(Recipe, self).configure()
 
