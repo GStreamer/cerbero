@@ -35,6 +35,10 @@ def init(git_dir):
     '''
     shell.call('mkdir -p %s' % git_dir)
     shell.call('%s init' % GIT, git_dir)
+    # Set the user configuration for this repository so that Cerbero never warns
+    # about it or errors out (it errors out with git-for-windows)
+    shell.call('%s config user.email "cerbero@gstreamer.freedesktop.org"' % GIT, git_dir)
+    shell.call('%s config user.name "Cerbero Build System"' % GIT, git_dir)
 
 
 def clean(git_dir):
