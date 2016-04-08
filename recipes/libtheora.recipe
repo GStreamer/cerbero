@@ -15,23 +15,20 @@ class Recipe(recipe.Recipe):
                'libtheora/0004-Use-our-automake-version-and-not-an-older-one.patch',
                'libtheora/0005-Update-Makefile.in-too-to-avoid-needing-to-call-auto.patch',
                'libtheora/0006-examples-Don-t-use-png_sizeof.patch']
+    configure_options = ' --disable-spec --disable-doc'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = ['include/theora', 'lib/pkgconfig/theora.pc',
                    'lib/pkgconfig/theoraenc.pc', 'lib/pkgconfig/theoradec.pc']
 
-
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options = ' --disable-spec --disable-doc'
-        elif self.config.target_platform == Platform.ANDROID:
-            self.configure_options = ' --disable-spec --disable-doc --disable-examples'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' --disable-examples'
             self.config_sh = 'sh autogen.sh'
         elif self.config.target_platform == Platform.IOS:
-            self.configure_options = ' --disable-spec --disable-doc'
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_platform == Platform.DARWIN:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_arch != self.config.arch:
-            self.configure_options = ' --disable-spec --disable-doc --disable-examples'
+            self.configure_options += ' --disable-examples'
