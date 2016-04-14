@@ -19,7 +19,7 @@ class Recipe(custom.GStreamerStatic):
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
         --disable-xvid --disable-zbar --disable-sdi --disable-qt'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
-    commit = '1.6.3'
+    commit = '1.6.4'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'schroedinger', 'libdca', 'libmms', 'libdvdnav',
