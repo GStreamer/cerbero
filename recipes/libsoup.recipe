@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'gtkdocize && intltoolize --automake --copy && autoreconf --force --install --verbose'
     configure_options = '--without-gnome --disable-more-warnings --disable-vala'
-    deps = ['libxml2', 'glib']
+    deps = ['libxml2', 'glib', 'glib-networking']
     patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
                'libsoup/0002-Don-t-build-tests.patch',
            ]
