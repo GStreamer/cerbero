@@ -176,7 +176,10 @@ class MakefilesBase (Build):
             self._old_env[var] = os.environ.get(var, None)
 
         for var, val in append_env.iteritems():
-            os.environ[var] = '%s %s' % (os.environ.get(var, ''), val)
+            if not os.environ.has_key(var):
+                os.environ[var] = val
+            else:
+                os.environ[var] = '%s %s' % (os.environ[var], val)
 
         for var, val in new_env.iteritems():
             if val is None:
