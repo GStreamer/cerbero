@@ -127,6 +127,9 @@ class MakefilesBase (Build):
             self.make += ' -j%d' % self.config.num_of_cpus
         self._old_env = None
 
+        # Make sure user's env doesn't mess up with our build.
+        self.new_env['MAKEFLAGS'] = None
+
     @modify_environment
     def configure(self):
         if not os.path.exists(self.make_dir):
