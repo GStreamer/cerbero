@@ -8,6 +8,6 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/regex.h']
     autoreconf = True
     remotes = {'origin': 'git://git.code.sf.net/p/mingw/regex'}
-    commit = 'origin/master'
+    commit = 'r2-5-1'
     patches = ['mingw-regex/0001-Fix-compilation.patch']
 
