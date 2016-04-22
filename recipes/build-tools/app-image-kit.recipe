@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPL]
     btype = BuildType.MAKEFILE
     remotes = {'origin': 'https://github.com/thiblahute/AppImageKit.git'}
-    commit = 'origin/master'
+    commit = '2512a71419a2ba9949784e71d3f374e407f9492e'
 
     config_sh = 'cmake .'
     configure_tpl = "%(config-sh)s"
