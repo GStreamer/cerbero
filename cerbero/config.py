@@ -29,7 +29,6 @@ from cerbero.utils import messages as m
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
-DEFAULT_HOME = os.path.expanduser('~/cerbero')
 DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'git://anongit.freedesktop.org/gstreamer'
@@ -282,7 +281,7 @@ class Config (object):
 
     def load_defaults(self):
         self.set_property('cache_file', None)
-        self.set_property('home_dir', DEFAULT_HOME)
+        self.set_property('home_dir', self._default_home_dir())
         self.set_property('prefix', None)
         self.set_property('sources', None)
         self.set_property('local_sources', None)
@@ -488,6 +487,13 @@ class Config (object):
             p = os.path.join(self.data_dir, path)
         else:
             p = os.path.join(os.path.dirname(__file__), '..', path)
+        return os.path.abspath(p)
+
+    def _default_home_dir(self):
+        if self.uninstalled:
+            p = os.path.join(os.path.dirname(__file__), '..', 'build')
+        else:
+            p = os.path.expanduser('~/cerbero')
         return os.path.abspath(p)
 
     def _perl_version(self):

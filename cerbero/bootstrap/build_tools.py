@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Config, DEFAULT_HOME, Platform, DistroVersion
+from cerbero.config import Config, Platform, DistroVersion
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
