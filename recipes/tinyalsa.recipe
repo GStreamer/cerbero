@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.Apachev2]
     btype = BuildType.MAKEFILE
     remotes = {'origin': 'git://github.com/tinyalsa/tinyalsa'}
-    commit = 'origin/master'
+    commit = '9bad3fa00f3080906566c6b3acd14513d1ae4afd'
 
     files_devel = [ 'include/tinyalsa/asoundlib.h' ]
 
