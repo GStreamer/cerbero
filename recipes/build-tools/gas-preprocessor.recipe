@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     btype = BuildType.CUSTOM
     remotes = {'origin': 'git://git.libav.org/gas-preprocessor.git'}
-    commit = 'origin/master'
+    commit = 'dd811e7a8403ef762e333909c54c24674ee04892'
 
     def install(self):
         if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
