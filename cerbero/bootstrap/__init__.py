@@ -23,4 +23,4 @@ class BootstrapperBase (object):
         self.config = config
 
     def start(self):
-        raise NotImplemented("'start' must be implemented by subclasess")
+        raise NotImplemented("'start' must be implemented by subclasses")
