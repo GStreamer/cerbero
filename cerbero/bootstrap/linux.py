@@ -19,6 +19,7 @@
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.config import Platform, Architecture, Distro, DistroVersion
+from cerbero.errors import ConfigurationError
 from cerbero.utils import shell
 
 import subprocess
@@ -26,10 +27,14 @@ import subprocess
 class UnixBootstrapper (BootstrapperBase):
 
     tool = ''
+    checks = []
     packages = []
     distro_packages = {}
 
     def start(self):
+        for c in self.checks:
+            c()
+
         if self.config.distro_packages_install:
             packages = self.packages
             if self.config.distro_version in self.distro_packages:
@@ -70,6 +75,7 @@ class DebianBootstrapper (UnixBootstrapper):
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
+                self.checks.append(self.create_debian_arch_check('i386'))
         if self.config.target_platform == Platform.LINUX:
             self.packages.append('chrpath')
             self.packages.append('libfuse-dev')
@@ -79,6 +85,20 @@ class DebianBootstrapper (UnixBootstrapper):
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID]:
             self.packages.remove('autopoint')
 
+    def create_debian_arch_check(self, arch):
+        def check_arch():
+            native_arch = shell.check_call('dpkg --print-architecture')
+            if native_arch == arch:
+                return
+            foreign_archs = shell.check_call('dpkg --print-foreign-architectures')
+            if arch in foreign_archs.split():
+                return
+            raise ConfigurationError(('Architecture %s is missing from your setup. ' + \
+                                      'You can add it with: "dpkg --add-architeture %s",' + \
+                                      ' then run "apt-get update."') \
+                                      % (arch, arch))
+
+        return check_arch
 
 class RedHatBootstrapper (UnixBootstrapper):
 
