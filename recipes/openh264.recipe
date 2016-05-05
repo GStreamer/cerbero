@@ -27,10 +27,10 @@ class Recipe(recipe.Recipe):
                 make += ' ARCH=i386'
             elif self.config.target_arch == Architecture.X86_64:
                 make += ' ARCH=x86_64'
-            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+            elif self.config.target_arch in [Architecture.ARMv7, Architecture.ARMv7S]:
                 make += ' ARCH=armv7'
-            elif self.config.target_arch == Architecture.ARMv7S:
-                make += ' ARCH=armv7s'
+            elif self.config.target_arch == Architecture.ARM:
+                make += ' ARCH=arm APP_ABI=armeabi'
             elif self.config.target_arch == Architecture.ARM64:
                 make += ' ARCH=arm64'
         elif self.config.target_platform == Platform.DARWIN:
