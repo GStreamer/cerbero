@@ -35,12 +35,11 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-win32thread'
         self.configure_options += ' --host=%s-pc-%s' % (arch, self.config.target_platform)
-        if self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch == Architecture.ARM:
-                # FIXME : Is disabling asm on ARM (< v7) still needed ?
-                enable_asm = False
-            elif Architecture.is_arm(self.config.target_arch):
-                self.new_env = {'AS': os.environ.get('CC', '')}
+        if self.config.target_arch == Architecture.ARM:
+            # FIXME : Is disabling asm on ARM (< v7) still needed ?
+            enable_asm = False
+        elif Architecture.is_arm(self.config.target_arch):
+            self.new_env = {'AS': os.environ.get('CC', '')}
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
                 if 'GAS' in os.environ:
