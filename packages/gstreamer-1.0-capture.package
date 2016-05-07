@@ -20,7 +20,7 @@ class Package(package.Package):
              'gst-plugins-good-1.0:plugins_capture',
              'gst-plugins-ugly-1.0:plugins_capture',
              'gst-plugins-bad-1.0:plugins_capture']
-    files_devel = ['gst-plugins-base-1.0-static:plugins_capture_devel'
+    files_devel = ['gst-plugins-base-1.0-static:plugins_capture_devel',
                    'gst-plugins-good-1.0-static:plugins_capture_devel',
                    'gst-plugins-ugly-1.0-static:plugins_capture_devel',
                    'gst-plugins-bad-1.0-static:plugins_capture_devel']
