@@ -2,9 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'XML-Simple'
-    version = '2.20'
+    version = '2.22'
     stype = SourceType.TARBALL
-    url = 'http://search.cpan.org/CPAN/authors/id/G/GR/GRANTM/XML-Simple-2.20.tar.gz'
+    url = 'http://search.cpan.org/CPAN/authors/id/G/GR/GRANTM/XML-Simple-2.22.tar.gz'
     licenses = [License.GPLv1Plus]
     btype = BuildType.MAKEFILE
     configure_tpl = 'perl Makefile.PL PREFIX=$CERBERO_PREFIX'
