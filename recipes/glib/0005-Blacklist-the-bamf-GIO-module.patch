@@ -1,7 +1,7 @@
-From 8e4363702a79166ad20ceb0136a2d8bfb18d4e91 Mon Sep 17 00:00:00 2001
+From 5b229f28dbba371b4ba2b5fbc94bb292bf999649 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Mon, 12 Mar 2012 14:30:02 +0100
-Subject: [PATCH 5/8] Blacklist the bamf GIO module
+Subject: [PATCH 05/10] Blacklist the bamf GIO module
 
 I uses Ubuntu specific GLib API on Ubuntu... and thus crashes
 everything that ever tries to use GIO.
@@ -10,10 +10,10 @@ everything that ever tries to use GIO.
  1 file changed, 7 insertions(+)
 
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index 06bae56..4b3dccf 100644
+index e17905d..865ad74 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -352,6 +352,13 @@ is_valid_module_name (const gchar        *basename,
+@@ -366,6 +366,13 @@ is_valid_module_name (const gchar        *basename,
  {
    gboolean result;
  
@@ -28,5 +28,5 @@ index 06bae56..4b3dccf 100644
    if (!g_str_has_prefix (basename, "lib") ||
        !g_str_has_suffix (basename, ".so"))
 -- 
-2.1.0
+2.8.1
 

@@ -2,12 +2,13 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.46.2'
+    version = '2.48.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.46/glib-%(version)s.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.48/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
+    configure_options = '--with-pcre=internal'
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
     patches = ["../glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",
@@ -18,10 +19,7 @@ class Recipe(recipe.Recipe):
                "../glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "../glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
                "../glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
-               '../glib/0014-Don-t-use-AT_FDCWD-on-iOS-for-now.patch',
-               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               '../glib/0016-gparamspecs-GTypes-are-stored-in-v_pointer-not-v_lon.patch',
-               '../glib/0030-Library-ctor-order.patch'
+               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch'
               ]
 
     def prepare(self):

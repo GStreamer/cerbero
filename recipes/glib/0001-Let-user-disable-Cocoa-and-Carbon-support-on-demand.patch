@@ -1,7 +1,7 @@
-From 0c96c0272ceb01f9a4041339dc656de3b89fb066 Mon Sep 17 00:00:00 2001
+From c2e0bbaa51758c9f1561db7069388f578e6eeb62 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 13 Nov 2014 17:22:59 +0530
-Subject: [PATCH] Let user disable Cocoa and Carbon support on demand
+Subject: [PATCH 01/10] Let user disable Cocoa and Carbon support on demand
 
 Also always AC_SUBST COCOA_LIBS and CARBON_LIBS since these are used in the
 pkg-config file, etc.
@@ -10,10 +10,10 @@ pkg-config file, etc.
  1 file changed, 45 insertions(+), 28 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index f8b41e8..40e65c4 100644
+index 94c9de1..de42595 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -169,32 +169,10 @@ AC_MSG_RESULT([$glib_native_android])
+@@ -172,32 +172,10 @@ AC_MSG_RESULT([$glib_native_android])
  
  AC_SUBST(LIB_EXE_MACHINE_FLAG)
  
@@ -46,7 +46,7 @@ index f8b41e8..40e65c4 100644
  
  AS_IF([test "$glib_native_win32" = "yes"], [
    AC_CHECK_TOOL(WINDRES, windres, no)
-@@ -211,19 +189,58 @@ AS_IF([test "$glib_native_win32" = "yes"], [
+@@ -214,19 +192,58 @@ AS_IF([test "$glib_native_win32" = "yes"], [
  ])
  AM_CONDITIONAL(MS_LIB_AVAILABLE, [test x$ms_librarian = xyes])
  
@@ -110,7 +110,7 @@ index f8b41e8..40e65c4 100644
    osx_version=`sw_vers -productVersion`
    osx_min_version="10.9.0"
    AC_MSG_CHECKING([OSX version >= $osx_min_version])
-@@ -232,7 +249,7 @@ AS_IF([test "x$glib_have_cocoa" = "xyes"], [
+@@ -235,7 +252,7 @@ AS_IF([test "x$glib_have_cocoa" = "xyes"], [
      AC_MSG_ERROR([OSX version is too old!])
    ])
    AC_MSG_RESULT([yes])
@@ -120,5 +120,5 @@ index f8b41e8..40e65c4 100644
  AC_SUBST([COCOA_LIBS])
  
 -- 
-2.6.1
+2.8.1
 

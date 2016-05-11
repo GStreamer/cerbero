@@ -1,7 +1,8 @@
-From 9de6088e011fb8b351cb5563d127cc29fcb8278a Mon Sep 17 00:00:00 2001
+From fbe70c34939822bb4574a87daa71d6925f2cd117 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Fri, 9 Mar 2012 08:44:13 +0100
-Subject: [PATCH 2/8] Optionally revert to the old (pre-2.28) URI handler code
+Subject: [PATCH 02/10] Optionally revert to the old (pre-2.28) URI handler
+ code
 
 This is required to work with the GVfs distributed on Linux distributions
 that ship with GLib 2.24 (e.g. Ubuntu Lucid and Debian Squeeze).
@@ -10,10 +11,10 @@ that ship with GLib 2.24 (e.g. Ubuntu Lucid and Debian Squeeze).
  1 file changed, 51 insertions(+)
 
 diff --git a/gio/gdesktopappinfo.c b/gio/gdesktopappinfo.c
-index 582a5dc..fbaacf1 100644
+index d65288d..fadcada 100644
 --- a/gio/gdesktopappinfo.c
 +++ b/gio/gdesktopappinfo.c
-@@ -4115,6 +4115,7 @@ g_app_info_get_default_for_type (const char *content_type,
+@@ -4082,6 +4082,7 @@ out:
  GAppInfo *
  g_app_info_get_default_for_uri_scheme (const char *uri_scheme)
  {
@@ -21,7 +22,7 @@ index 582a5dc..fbaacf1 100644
    GAppInfo *app_info;
    char *content_type, *scheme_down;
  
-@@ -4125,6 +4126,56 @@ g_app_info_get_default_for_uri_scheme (const char *uri_scheme)
+@@ -4092,6 +4093,56 @@ g_app_info_get_default_for_uri_scheme (const char *uri_scheme)
    g_free (content_type);
  
    return app_info;
@@ -79,5 +80,5 @@ index 582a5dc..fbaacf1 100644
  
  /* "Get all" API {{{2 */
 -- 
-2.1.0
+2.8.1
 

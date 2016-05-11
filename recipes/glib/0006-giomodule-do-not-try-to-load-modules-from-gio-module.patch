@@ -1,8 +1,8 @@
-From 110d2d8150f8fc38b2219e0f31ceef838bd7fcdb Mon Sep 17 00:00:00 2001
+From 9b078a9131138bfe53a0885b407ae1bbadac1889 Mon Sep 17 00:00:00 2001
 From: Thiago Santos <thiago.sousa.santos@collabora.com>
 Date: Wed, 22 May 2013 15:00:34 -0300
-Subject: [PATCH 6/8] giomodule: do not try to load modules from gio-module-dir
- in IOS
+Subject: [PATCH 06/10] giomodule: do not try to load modules from
+ gio-module-dir in IOS
 
 There is no gio-module-dir for ios. When it tries to load on a real
 device it gets ignored because the path doesn't exist. When it tries
@@ -13,19 +13,23 @@ exist in the user machine, but it will fail to load the modules
  1 file changed, 2 insertions(+)
 
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index 4b3dccf..4012b94 100644
+index 865ad74..278597a 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -1055,7 +1055,9 @@ _g_io_modules_ensure_loaded (void)
-       if (module_dir == NULL)
-         module_dir = GIO_MODULE_DIR;
+@@ -1085,11 +1085,13 @@ _g_io_modules_ensure_loaded (void)
+ 	  g_strfreev (paths);
+ 	}
  
 +#ifndef GST_SDK_IOS
+       /* Then load the compiled in path */
+       module_dir = get_gio_module_dir ();
+ 
        g_io_modules_scan_all_in_directory_with_scope (module_dir, scope);
+       g_free (module_dir);
 +#endif
  
  #ifdef GST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH
        /* Now load all modules from the distro, e.g. gvfs */
 -- 
-2.1.0
+2.8.1
 

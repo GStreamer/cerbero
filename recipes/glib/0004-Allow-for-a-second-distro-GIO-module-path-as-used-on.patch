@@ -1,7 +1,7 @@
-From 79921512ccf535a32c1ffb1a31ce9f6b56450af1 Mon Sep 17 00:00:00 2001
+From 47138b062f774ca52f160e8e90c4fe76821786f3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Mon, 12 Mar 2012 13:04:41 +0100
-Subject: [PATCH 4/8] Allow for a second distro GIO module path as used on
+Subject: [PATCH 04/10] Allow for a second distro GIO module path as used on
  Ubuntu
 
 ...because apparently only half of their packages are multi-arch
@@ -11,10 +11,10 @@ capable...
  1 file changed, 5 insertions(+)
 
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index 61173fb..06bae56 100644
+index b97aa78..e17905d 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -1055,6 +1055,11 @@ _g_io_modules_ensure_loaded (void)
+@@ -1089,6 +1089,11 @@ _g_io_modules_ensure_loaded (void)
        g_io_modules_scan_all_in_directory_with_scope (GST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH, scope);
  #endif
  
@@ -27,5 +27,5 @@ index 61173fb..06bae56 100644
  
        /* Initialize types from built-in "modules" */
 -- 
-2.1.0
+2.8.1
 

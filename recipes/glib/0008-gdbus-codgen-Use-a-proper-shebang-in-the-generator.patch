@@ -1,7 +1,7 @@
-From 2586072d15d012ae280386ebf4ec322b2957a7b2 Mon Sep 17 00:00:00 2001
+From 41e24e3e65eda9ed104a9ef4b030daf347208d77 Mon Sep 17 00:00:00 2001
 From: Thibault Saunier <tsaunier@gnome.org>
 Date: Wed, 2 Apr 2014 19:41:59 +0200
-Subject: [PATCH 8/8] gdbus-codgen: Use a proper shebang in the generator
+Subject: [PATCH 07/10] gdbus-codgen: Use a proper shebang in the generator
 
 ---
  gio/gdbus-2.0/codegen/gdbus-codegen.in | 2 +-
@@ -18,5 +18,5 @@ index fd31a55..b9c7e19 100644
  # GDBus - GLib D-Bus Library
  #
 -- 
-2.1.0
+2.8.1
 
