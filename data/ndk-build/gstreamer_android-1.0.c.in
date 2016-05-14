@@ -3,6 +3,17 @@
 #include <gio/gio.h>
 #include <android/log.h>
 
+/* XXX: Workaround for Android <21 making signal() an inline function
+ * around bsd_signal(), and Android >= 21 not having any bsd_signal()
+ * symbol but only signal().
+ * See https://bugzilla.gnome.org/show_bug.cgi?id=766235
+ */
+__sighandler_t bsd_signal(int signum, __sighandler_t handler) __attribute__((weak));
+__sighandler_t bsd_signal(int signum, __sighandler_t handler)
+{
+  return signal(signum, handler);
+}
+
 static jobject _context = NULL;
 static jobject _class_loader = NULL;
 static GstClockTime _priv_gst_info_start_time;
