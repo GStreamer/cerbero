@@ -1,0 +1,63 @@
+From 1ed65e560039a1b729720bbc5d9b72f72bab2152 Mon Sep 17 00:00:00 2001
+From: Erik de Castro Lopo <erikd@mega-nerd.com>
+Date: Tue, 31 Mar 2015 18:21:38 +1100
+Subject: [PATCH 1/2] configure.ac : Add -mstackrealign whenever we add -msse2.
+
+There have been some (pretty much unconfirmed) reports of problems
+with SSE enabled but without this stack alignment flag.
+---
+ configure.ac | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure.ac b/configure.ac
+index 2dcc698..eb9b0cc 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -399,6 +399,7 @@ if test x$ac_cv_c_compiler_gnu = xyes ; then
+ 
+ 	if test "x$asm_optimisation$sse_os" = "xyesyes" ; then
+ 		XIPH_ADD_CFLAGS([-msse2])
++		XIPH_ADD_CFLAGS([-mstackrealign])
+ 		fi
+ 
+ 	fi
+-- 
+2.7.2.windows.1
+
+From a84587061cab4d55fa2668ea431d3b61e711c8a3 Mon Sep 17 00:00:00 2001
+From: Tristan Matthews <tmatth@videolan.org>
+Date: Sat, 11 Apr 2015 01:05:30 -0400
+Subject: [PATCH 2/2] configure: Only use -mstackrealign on i686 for
+ mingw32/os2
+
+Signed-off-by: Erik de Castro Lopo <erikd@mega-nerd.com>
+---
+ configure.ac | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index eb9b0cc..6f34c66 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -399,11 +399,17 @@ if test x$ac_cv_c_compiler_gnu = xyes ; then
+ 
+ 	if test "x$asm_optimisation$sse_os" = "xyesyes" ; then
+ 		XIPH_ADD_CFLAGS([-msse2])
+-		XIPH_ADD_CFLAGS([-mstackrealign])
+ 		fi
+ 
+ 	fi
+ 
++case "$host_os" in
++	"mingw32"|"os2")
++	if test "$host_cpu" = "i686"; then
++		XIPH_ADD_CFLAGS([-mstackrealign])
++		fi
++	esac
++
+ XIPH_ADD_CFLAGS([-Wextra])
+ 
+ if test x$enable_werror = "xyes" ; then
+-- 
+2.7.2.windows.1
+
