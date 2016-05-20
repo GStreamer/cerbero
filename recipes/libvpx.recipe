@@ -27,6 +27,7 @@ class Recipe(recipe.Recipe):
                'libvpx/0005-build-Remove-broken-custom-android-toolchain-usage.patch',
                'libvpx/0006-configure-Add-Android-ARM64-support.patch',
                'libvpx/0006-Don-t-embed-bitcode-on-iOS-until-we-support-that-pro.patch',
+               'libvpx/0009-fix-win32-crash-subpel-variance.patch',
                ]
 
     files_libs = ['libvpx']

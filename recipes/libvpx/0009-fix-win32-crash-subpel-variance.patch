@@ -1,0 +1,227 @@
+From 5fc9688792735888731acaf5e2628cd1b3a76d1b Mon Sep 17 00:00:00 2001
+From: Sergey Kolomenkin <kolomenkin@gmail.com>
+Date: Mon, 7 Dec 2015 12:54:57 -0800
+Subject: [PATCH] fix null pointer crash in Win32 because esp register is
+ broken
+
+https://bugs.chromium.org/p/webm/issues/detail?id=1105
+
+Change-Id: I304ea85ea1f6474e26f074dc39dc0748b90d4d3d
+---
+ vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm | 4 ++--
+ vpx_dsp/x86/subpel_variance_sse2.asm             | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm b/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
+index 93df92a..5f9c963 100644
+--- a/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
++++ b/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
+@@ -124,7 +124,6 @@ SECTION .text
+ 
+       ; Store bilin_filter and pw_8 location in stack
+       GET_GOT eax
+-      add esp, 4                ; restore esp
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -132,6 +131,7 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
++      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %else
+       cglobal highbd_sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, \
+@@ -141,7 +141,6 @@ SECTION .text
+ 
+       ; Store bilin_filter and pw_8 location in stack
+       GET_GOT eax
+-      add esp, 4                ; restore esp
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -149,6 +148,7 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
++      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %endif
+   %else
+diff --git a/vpx_dsp/x86/subpel_variance_sse2.asm b/vpx_dsp/x86/subpel_variance_sse2.asm
+index 05dcff7..1176a2f 100644
+--- a/vpx_dsp/x86/subpel_variance_sse2.asm
++++ b/vpx_dsp/x86/subpel_variance_sse2.asm
+@@ -140,7 +140,6 @@ SECTION .text
+ 
+       ;Store bilin_filter and pw_8 location in stack
+       GET_GOT eax
+-      add esp, 4                ; restore esp
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -148,6 +147,7 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
++      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %else
+       cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, \
+@@ -157,7 +157,6 @@ SECTION .text
+ 
+       ;Store bilin_filter and pw_8 location in stack
+       GET_GOT eax
+-      add esp, 4                ; restore esp
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -165,6 +164,7 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
++      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %endif
+   %else
+-- 
+2.7.2.windows.1
+
+From 322ea7ff5bce741e0657179f63ee1c1bb54da864 Mon Sep 17 00:00:00 2001
+From: Yunqing Wang <yunqingwang@google.com>
+Date: Thu, 10 Dec 2015 14:25:01 -0800
+Subject: [PATCH] Fix the win32 crash when GET_GOT is not defined
+
+This patch continues to fix the win32 crash issue:
+https://bugs.chromium.org/p/webm/issues/detail?id=1105
+
+Johann's patch is here:
+https://chromium-review.googlesource.com/#/c/316446/2
+
+Change-Id: I7fe191c717e40df8602e229371321efb0d689375
+---
+ third_party/x86inc/x86inc.asm                    |  4 ++++
+ vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm | 12 ++++++++----
+ vpx_dsp/x86/subpel_variance_sse2.asm             | 12 ++++++++----
+ 3 files changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/third_party/x86inc/x86inc.asm b/third_party/x86inc/x86inc.asm
+index be59de3..e4cda88 100644
+--- a/third_party/x86inc/x86inc.asm
++++ b/third_party/x86inc/x86inc.asm
+@@ -119,6 +119,7 @@
+ %if ABI_IS_32BIT
+     %if CONFIG_PIC=1
+         %ifidn __OUTPUT_FORMAT__,elf32
++            %define GET_GOT_DEFINED 1
+             %define GET_GOT_SAVE_ARG 1
+             %define WRT_PLT wrt ..plt
+             %macro GET_GOT 1
+@@ -138,6 +139,7 @@
+                 %define RESTORE_GOT pop %1
+             %endmacro
+         %elifidn __OUTPUT_FORMAT__,macho32
++            %define GET_GOT_DEFINED 1
+             %define GET_GOT_SAVE_ARG 1
+             %macro GET_GOT 1
+                 push %1
+@@ -149,6 +151,8 @@
+                 %undef RESTORE_GOT
+                 %define RESTORE_GOT pop %1
+             %endmacro
++        %else
++            %define GET_GOT_DEFINED 0
+         %endif
+     %endif
+ 
+diff --git a/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm b/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
+index 5f9c963..22d52a2 100644
+--- a/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
++++ b/vpx_dsp/x86/highbd_subpel_variance_impl_sse2.asm
+@@ -123,7 +123,10 @@ SECTION .text
+       %define sec_str sec_stridemp
+ 
+       ; Store bilin_filter and pw_8 location in stack
+-      GET_GOT eax
++      %if GET_GOT_DEFINED == 1
++        GET_GOT eax
++        add esp, 4                ; restore esp
++      %endif
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -131,7 +134,6 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
+-      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %else
+       cglobal highbd_sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, \
+@@ -140,7 +142,10 @@ SECTION .text
+       %define block_height heightd
+ 
+       ; Store bilin_filter and pw_8 location in stack
+-      GET_GOT eax
++      %if GET_GOT_DEFINED == 1
++        GET_GOT eax
++        add esp, 4                ; restore esp
++      %endif
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -148,7 +153,6 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
+-      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %endif
+   %else
+diff --git a/vpx_dsp/x86/subpel_variance_sse2.asm b/vpx_dsp/x86/subpel_variance_sse2.asm
+index 1176a2f..c655e4b 100644
+--- a/vpx_dsp/x86/subpel_variance_sse2.asm
++++ b/vpx_dsp/x86/subpel_variance_sse2.asm
+@@ -139,7 +139,10 @@ SECTION .text
+       %define sec_str sec_stridemp
+ 
+       ;Store bilin_filter and pw_8 location in stack
+-      GET_GOT eax
++      %if GET_GOT_DEFINED == 1
++        GET_GOT eax
++        add esp, 4                ; restore esp
++      %endif
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -147,7 +150,6 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
+-      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %else
+       cglobal sub_pixel_variance%1xh, 7, 7, 13, src, src_stride, x_offset, \
+@@ -156,7 +158,10 @@ SECTION .text
+       %define block_height heightd
+ 
+       ;Store bilin_filter and pw_8 location in stack
+-      GET_GOT eax
++      %if GET_GOT_DEFINED == 1
++        GET_GOT eax
++        add esp, 4                ; restore esp
++      %endif
+ 
+       lea ecx, [GLOBAL(bilin_filter_m)]
+       mov g_bilin_filterm, ecx
+@@ -164,7 +169,6 @@ SECTION .text
+       lea ecx, [GLOBAL(pw_8)]
+       mov g_pw_8m, ecx
+ 
+-      RESTORE_GOT               ; restore esp
+       LOAD_IF_USED 0, 1         ; load eax, ecx back
+     %endif
+   %else
+-- 
+2.7.2.windows.1
+
