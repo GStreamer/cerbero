@@ -254,7 +254,7 @@ class Package(PackageBase):
         for name in self.deps:
             p = self.store.get_package(name)
             deps += p.recipes_dependencies(use_devel)
-        return deps
+        return remove_list_duplicates(deps)
 
     def recipes_licenses(self):
         return self._list_licenses(self._recipes_files)
@@ -543,7 +543,7 @@ class App(Package):
             deps.extend(package.recipes_dependencies(use_devel))
         if self.app_recipe is not None:
             deps.append(self.app_recipe)
-        return list(set(deps))
+        return remove_list_duplicates(deps)
 
     def files_list(self):
         # for each package, call the function that list files
