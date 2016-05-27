@@ -106,3 +106,4 @@ def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
     register_packager(Distro.NONE, Packager)
+    register_packager(Distro.GENTOO, Packager)

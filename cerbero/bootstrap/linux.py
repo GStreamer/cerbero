@@ -167,9 +167,21 @@ class ArchBootstrapper (UnixBootstrapper):
         else:
             self.packages.append('gcc')
 
+class GentooBootstrapper (UnixBootstrapper):
+
+    tool = 'sudo emerge -u %s'
+    packages = ['dev-util/intltool', 'sys-fs/fuse', 'dev-util/cmake',
+            'app-doc/doxygen', 'dev-util/gtk-doc', 'sys-devel/libtool',
+            'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
+            'sys-devel/autoconf', 'sys-devel/make', 'net-misc/curl',
+            'sys-devel/gettext', 'media-libs/alsa-lib', 'media-sound/pulseaudio',
+            'dev-lang/yasm', 'dev-util/gperf', 'app-text/docbook-xsl-stylesheets',
+            'media-gfx/transfig', 'x11-libs/libXrender', 'x11-libs/libXv',
+            'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking']
 
 def register_all():
     register_bootstrapper(Distro.DEBIAN, DebianBootstrapper)
     register_bootstrapper(Distro.REDHAT, RedHatBootstrapper)
     register_bootstrapper(Distro.SUSE, OpenSuseBootstrapper)
     register_bootstrapper(Distro.ARCH, ArchBootstrapper, DistroVersion.ARCH_ROLLING)
+    register_bootstrapper(Distro.GENTOO, GentooBootstrapper, DistroVersion.GENTOO_VERSION)

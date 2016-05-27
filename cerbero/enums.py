@@ -56,6 +56,7 @@ class Distro:
     OS_X = 'osx'
     IOS = 'ios'
     ANDROID = 'android'
+    GENTOO = 'gentoo'
     NONE = 'none'
 
 
@@ -90,6 +91,7 @@ class DistroVersion:
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
     ARCH_ROLLING = 'rolling'
+    GENTOO_VERSION = 'gentoo-version'
     OPENSUSE_12_1 = 'opensuse_12_1'
     OPENSUSE_12_2 = 'opensuse_12_2'
     OPENSUSE_12_3 = 'opensuse_12_3'

@@ -213,6 +213,9 @@ def system_info():
         elif d[0].strip() in ['arch']:
             distro = Distro.ARCH
             distro_version = DistroVersion.ARCH_ROLLING
+        elif d[0].strip() in ['Gentoo Base System']:
+            distro = Distro.GENTOO
+            distro_version = DistroVersion.GENTOO_VERSION
         else:
             raise FatalError("Distribution '%s' not supported" % str(d))
     elif platform == Platform.WINDOWS:
