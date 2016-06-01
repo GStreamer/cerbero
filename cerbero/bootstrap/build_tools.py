@@ -22,6 +22,8 @@ from cerbero.config import Config, Platform, DistroVersion
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
+from cerbero.utils import _
+from cerbero.errors import FatalError, ConfigurationError
 
 
 class BuildTools (BootstrapperBase):
@@ -91,6 +93,8 @@ class BuildTools (BootstrapperBase):
         config.build_tools_cache = self.config.build_tools_cache
         config.external_recipes = self.config.external_recipes
 
+        if not os.path.exists(config.toolchain_prefix):
+            raise ConfigurationError(_("Please run bootstrap without any '-c' arguments first to setup build-tools for this machine"))
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
         if not os.path.exists(config.sources):
