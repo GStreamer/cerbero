@@ -7,3 +7,4 @@ target_distro_version = DistroVersion.ANDROID_GINGERBREAD
 target_arch = Architecture.ARM
 
 #variants = ['nodebug']
+allow_parallel_build = True

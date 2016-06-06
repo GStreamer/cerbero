@@ -8,10 +8,38 @@
  * symbol but only signal().
  * See https://bugzilla.gnome.org/show_bug.cgi?id=766235
  */
+static gpointer
+load_real_signal (gpointer data)
+{
+  GModule *module;
+  gpointer ret = NULL;
+
+  module = g_module_open ("libc.so", G_MODULE_BIND_LOCAL);
+  g_module_symbol (module, "signal", &ret);
+
+  /* As fallback, let's try bsd_signal */
+  if (ret == NULL) {
+    g_warning ("Can't find signal(3) in libc.so!");
+    g_module_symbol (module, "bsd_signal", &ret);
+  }
+
+  g_module_close (module);
+
+  return ret;
+}
+
 __sighandler_t bsd_signal(int signum, __sighandler_t handler) __attribute__((weak));
 __sighandler_t bsd_signal(int signum, __sighandler_t handler)
 {
-  return signal(signum, handler);
+  static GOnce gonce = G_ONCE_INIT;
+  __sighandler_t (*real_signal) (int signum, __sighandler_t handler);
+
+  g_once (&gonce, load_real_signal, NULL);
+
+  real_signal = gonce.retval;
+  g_assert (real_signal != NULL);
+
+  return real_signal(signum, handler);
 }
 
 static jobject _context = NULL;
