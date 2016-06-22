@@ -50,12 +50,19 @@ class Recipe(recipe.Recipe):
         'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/audio',
         'include/gstreamer-1.0/gst/video',
+        'include/gstreamer-1.0/gst/basecamerabinsrc',
+        'include/gstreamer-1.0/gst/codecparsers',
+        'include/gstreamer-1.0/gst/insertbin',
+        'include/gstreamer-1.0/gst/interfaces',
+        'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-gl-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-bad-base-1.0.pc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
-        'lib/pkgconfig/gstreamer-bad-video-1.0.pc'
+        'lib/pkgconfig/gstreamer-bad-video-1.0.pc',
+        'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
+        'lib/pkgconfig/gstreamer-insertbin-1.0.pc'
     ]
 
     files_plugins_effects = [
