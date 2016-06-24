@@ -93,7 +93,7 @@ class BuildTools (BootstrapperBase):
         config.build_tools_cache = self.config.build_tools_cache
         config.external_recipes = self.config.external_recipes
 
-        if not os.path.exists(config.toolchain_prefix):
+        if config.toolchain_prefix and not os.path.exists(config.toolchain_prefix):
             raise ConfigurationError(_("Please run bootstrap without any '-c' arguments first to setup build-tools for this machine"))
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
