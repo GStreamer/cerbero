@@ -60,7 +60,8 @@ class BuildTools (BootstrapperBase):
             if self.config.distro_version in [DistroVersion.REDHAT_6]:
                 self.BUILD_TOOLS.append('cmake')
         if self.config.target_platform == Platform.LINUX:
-            self.BUILD_TOOLS.append('app-image-kit')
+            if self.config.variants.appimagekit:
+                self.BUILD_TOOLS.append('app-image-kit')
             if self.config.variants.python3:
                 self.BUILD_TOOLS.append('meson')
         if self.config.target_platform == Platform.IOS:
