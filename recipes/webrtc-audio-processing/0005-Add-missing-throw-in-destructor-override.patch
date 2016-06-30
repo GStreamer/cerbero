@@ -1,0 +1,30 @@
+From 637b5bd28370e18287897fd0ba2570705d6da80f Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 14:16:42 -0400
+Subject: [PATCH 05/19] Add missing throw in destructor override
+
+This is being inforced by mingw.
+
+Signed-off-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/common_audio/vad/vad.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/webrtc/common_audio/vad/vad.cc b/webrtc/common_audio/vad/vad.cc
+index 95a162f..2e9cd69 100644
+--- a/webrtc/common_audio/vad/vad.cc
++++ b/webrtc/common_audio/vad/vad.cc
+@@ -23,7 +23,7 @@ class VadImpl final : public Vad {
+     Reset();
+   }
+ 
+-  ~VadImpl() override { WebRtcVad_Free(handle_); }
++  ~VadImpl() throw() override { WebRtcVad_Free(handle_); }
+ 
+   Activity VoiceActivity(const int16_t* audio,
+                          size_t num_samples,
+-- 
+2.7.4
+

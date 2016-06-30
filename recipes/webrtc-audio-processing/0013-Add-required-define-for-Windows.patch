@@ -1,0 +1,33 @@
+From 7f656b91d9f48d72f0e89eda299f586018a8344c Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Mon, 4 Jul 2016 15:07:48 -0400
+Subject: [PATCH 13/19] Add required define for Windows
+
+This will also add it to the .pc file as WEBRTC_WIN leaks into the
+public interface and undefined __STRICT_ANSI__ so M_PI is available.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ configure.ac | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 400b4a4..4333751 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -67,8 +67,11 @@ AS_CASE(["${host}"],
+              [OS_FLAGS="-DWEBRTC_MAC -DWEBRTC_IOS"],
+              [OS_FLAGS="-DWEBRTC_MAC"])
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
++        ],
++    [*-mingw32*],
++        [
++         PLATFORM_CFLAGS="-DWEBRTC_WIN -U__STRICT_ANSI__"
+         ]
+-    # FIXME: Add Windows support
+ )
+ AC_SUBST(PLATFORM_CFLAGS)
+ 
+-- 
+2.7.4
+

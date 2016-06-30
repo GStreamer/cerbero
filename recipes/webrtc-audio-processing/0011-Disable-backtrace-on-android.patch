@@ -1,0 +1,37 @@
+From 31097f798ebb7b23afe4f85107e874f126c51522 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 16:44:09 -0400
+Subject: [PATCH 11/19] Disable backtrace on android
+
+The check get confused if one uses GNU STL rather then STL port.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/base/checks.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/webrtc/base/checks.cc b/webrtc/base/checks.cc
+index 32a2f74..77cbb1c 100644
+--- a/webrtc/base/checks.cc
++++ b/webrtc/base/checks.cc
+@@ -16,7 +16,7 @@
+ #include <cstdio>
+ #include <cstdlib>
+ 
+-#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN)
++#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN) && !defined(WEBRTC_ANDROID)
+ #include <cxxabi.h>
+ #include <execinfo.h>
+ #endif
+@@ -55,7 +55,7 @@ void PrintError(const char* format, ...) {
+ // to get usable symbols on Linux. This is copied from V8. Chromium has a more
+ // advanced stace trace system; also more difficult to copy.
+ void DumpBacktrace() {
+-#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN)
++#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN) && !defined(WEBRTC_ANDROID)
+   void* trace[100];
+   int size = backtrace(trace, sizeof(trace) / sizeof(*trace));
+   char** symbols = backtrace_symbols(trace, size);
+-- 
+2.7.4
+

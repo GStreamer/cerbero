@@ -1,0 +1,30 @@
+From b4e65a077431f3937a3938d918f510edddb4b403 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 15:24:54 -0400
+Subject: [PATCH 09/19] Fix build on win64
+
+This trace function is mixing long int and long long int pointers.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/system_wrappers/source/trace_posix.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/webrtc/system_wrappers/source/trace_posix.cc b/webrtc/system_wrappers/source/trace_posix.cc
+index cb702d8..1419d24 100644
+--- a/webrtc/system_wrappers/source/trace_posix.cc
++++ b/webrtc/system_wrappers/source/trace_posix.cc
+@@ -36,8 +36,9 @@ int32_t TracePosix::AddTime(char* trace_message, const TraceLevel level) const {
+     return -1;
+   }
+   struct tm buffer;
++  time_t sys_time_sec = system_time_high_res.tv_sec;
+   const struct tm* system_time =
+-    localtime_r(&system_time_high_res.tv_sec, &buffer);
++    localtime_r(&sys_time_sec, &buffer);
+ 
+   const uint32_t ms_time = system_time_high_res.tv_usec / 1000;
+   uint32_t prev_tickCount = 0;
+-- 
+2.7.4
+

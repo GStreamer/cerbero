@@ -1,0 +1,31 @@
+From 20f3ac5a17b31635029374507148ae2122a7a663 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 14:17:45 -0400
+Subject: [PATCH 06/19] lrint is available with mingw
+
+This make use of lrint when building with mingw. The assembly code
+for X86 is MSVC specific and would not build.
+
+Signed-off-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ .../modules/audio_coding/codecs/isac/main/source/os_specific_inline.h   | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/webrtc/modules/audio_coding/codecs/isac/main/source/os_specific_inline.h b/webrtc/modules/audio_coding/codecs/isac/main/source/os_specific_inline.h
+index 2b446e9..a0453a0 100644
+--- a/webrtc/modules/audio_coding/codecs/isac/main/source/os_specific_inline.h
++++ b/webrtc/modules/audio_coding/codecs/isac/main/source/os_specific_inline.h
+@@ -15,7 +15,7 @@
+ #include <math.h>
+ #include "webrtc/typedefs.h"
+ 
+-#if defined(WEBRTC_POSIX)
++#if defined(__GNUC__)
+ #define WebRtcIsac_lrint lrint
+ #elif (defined(WEBRTC_ARCH_X86) && defined(WIN32))
+ static __inline long int WebRtcIsac_lrint(double x_dbl) {
+-- 
+2.7.4
+

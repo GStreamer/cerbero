@@ -1,0 +1,43 @@
+From 9f75161dbff32ea1fc2b1492ec93df3188b4d948 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Mon, 4 Jul 2016 16:03:15 -0400
+Subject: [PATCH 15/19] Fix case sensitivity in windows include
+
+While cross-compiling from linux, we need all include to be
+lower case.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/system_wrappers/source/event_timer_win.cc | 2 +-
+ webrtc/system_wrappers/source/trace_win.cc       | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/webrtc/system_wrappers/source/event_timer_win.cc b/webrtc/system_wrappers/source/event_timer_win.cc
+index 4c58698..bc388c2 100644
+--- a/webrtc/system_wrappers/source/event_timer_win.cc
++++ b/webrtc/system_wrappers/source/event_timer_win.cc
+@@ -10,7 +10,7 @@
+ 
+ #include "webrtc/system_wrappers/source/event_timer_win.h"
+ 
+-#include "Mmsystem.h"
++#include "mmsystem.h"
+ 
+ namespace webrtc {
+ 
+diff --git a/webrtc/system_wrappers/source/trace_win.cc b/webrtc/system_wrappers/source/trace_win.cc
+index 4caedfc..fce691f 100644
+--- a/webrtc/system_wrappers/source/trace_win.cc
++++ b/webrtc/system_wrappers/source/trace_win.cc
+@@ -13,7 +13,7 @@
+ #include <assert.h>
+ #include <stdarg.h>
+ 
+-#include "Mmsystem.h"
++#include "mmsystem.h"
+ 
+ namespace webrtc {
+ TraceWindows::TraceWindows()
+-- 
+2.7.4
+

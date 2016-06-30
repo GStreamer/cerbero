@@ -1,0 +1,80 @@
+From 2fdaa677557602f946ababdf68b1866ba3d1cb4d Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Mon, 4 Jul 2016 16:02:29 -0400
+Subject: [PATCH 14/19] Properly select the right system wrappers
+
+This is needed for windows build to be usable.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ configure.ac                       |  6 ++++++
+ webrtc/system_wrappers/Makefile.am | 12 ++++++++++--
+ 2 files changed, 16 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 4333751..bd8e409 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -55,11 +55,13 @@ AS_CASE(["${host}"],
+         [
+          OS_CFLAGS="-DWEBRTC_ANDROID -DWEBRTC_LINUX"
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
++         HAVE_POSIX=1
+         ],
+     [*-*linux*],
+         [
+          OS_CFLAGS="-DWEBRTC_LINUX"
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
++         HAVE_POSIX=1
+         ],
+     [*-*darwin*],
+         [
+@@ -67,13 +69,17 @@ AS_CASE(["${host}"],
+              [OS_FLAGS="-DWEBRTC_MAC -DWEBRTC_IOS"],
+              [OS_FLAGS="-DWEBRTC_MAC"])
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
++         HAVE_POSIX=1
+         ],
+     [*-mingw32*],
+         [
+          PLATFORM_CFLAGS="-DWEBRTC_WIN -U__STRICT_ANSI__"
++         HAVE_WIN=1
+         ]
+ )
+ AC_SUBST(PLATFORM_CFLAGS)
++AM_CONDITIONAL(HAVE_POSIX, [test "x${HAVE_POSIX}" = "x1"])
++AM_CONDITIONAL(HAVE_WIN, [test "x${HAVE_WIN}" = "x1"])
+ 
+ AS_CASE(["${host_cpu}"],
+     [i?86|x86_64],
+diff --git a/webrtc/system_wrappers/Makefile.am b/webrtc/system_wrappers/Makefile.am
+index 6c9f4ee..8215013 100644
+--- a/webrtc/system_wrappers/Makefile.am
++++ b/webrtc/system_wrappers/Makefile.am
+@@ -42,13 +42,21 @@ libsystem_wrappers_la_SOURCES = include/aligned_malloc.h \
+ 				source/trace_impl.h \
+ 				source/trace_posix.h \
+ 				source/trace_win.h
+-# This assumes that we want the POSIX implementation -- should eventually be
+-# converted to a conditional to include Windows support
++if HAVE_POSIX
+ libsystem_wrappers_la_SOURCES += source/critical_section_posix.cc \
+ 				 source/event_timer_posix.cc \
+ 				 source/rw_lock_posix.cc \
+ 				 source/thread_posix.cc \
+ 				 source/trace_posix.cc
++endif
++if HAVE_WIN
++libsystem_wrappers_la_SOURCES += source/critical_section_win.cc \
++				 source/event_timer_win.cc \
++				 source/rw_lock_win.cc \
++				 source/rw_lock_generic.cc \
++				 source/thread_win.cc \
++				 source/trace_win.cc
++endif
+ libsystem_wrappers_la_CXXFLAGS = $(AM_CXXFLAGS) $(COMMON_CXXFLAGS)
+ 
+ EXTRA_DIST = BUILD.gn \
+-- 
+2.7.4
+

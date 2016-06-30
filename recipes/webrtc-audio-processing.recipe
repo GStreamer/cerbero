@@ -1,0 +1,52 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'webrtc-audio-processing'
+    version = '0.2'
+    licenses = [License.BSD_like]
+    stype = SourceType.TARBALL
+    url = 'http://freedesktop.org/software/pulseaudio/webrtc-audio-processing/{0}-{1}.tar.xz'.format(name, version)
+
+    platform_deps = {Platform.ANDROID: ['gnustl']}
+
+    patches = [ 'webrtc-audio-processing/0000-Add-sal.h-as-it-s-missing-in-cerbero-mingw.patch',
+                'webrtc-audio-processing/0000-Add-fix_interlocked_exchange_pointer_win.h.patch',
+                'webrtc-audio-processing/0001-build-enforce-linking-with-no-undefined-add-explicit.patch',
+                'webrtc-audio-processing/0002-build-Make-sure-files-with-SSE2-code-are-compiled-wi.patch',
+                'webrtc-audio-processing/0003-Don-t-include-execinfo.h-for-windows.patch',
+                'webrtc-audio-processing/0004-Don-t-use-MSVC-specific-exception-handler-for-MINGW.patch',
+                'webrtc-audio-processing/0005-Add-missing-throw-in-destructor-override.patch',
+                'webrtc-audio-processing/0006-lrint-is-available-with-mingw.patch',
+                'webrtc-audio-processing/0007-Fix-case-sensitivity-issue-with-MinGW-cross-build.patch',
+                'webrtc-audio-processing/0008-Add-missing-windows-specific-headers.patch',
+                'webrtc-audio-processing/0009-Fix-build-on-win64.patch',
+                'webrtc-audio-processing/0010-Add-cerbero-gnustl-support-for-Android.patch',
+                'webrtc-audio-processing/0011-Disable-backtrace-on-android.patch',
+                'webrtc-audio-processing/0012-Don-t-blindly-link-to-pthread.patch',
+                'webrtc-audio-processing/0013-Add-required-define-for-Windows.patch',
+                'webrtc-audio-processing/0014-Properly-select-the-right-system-wrappers.patch',
+                'webrtc-audio-processing/0015-Fix-case-sensitivity-in-windows-include.patch',
+                'webrtc-audio-processing/0016-Define-MSVC-_WIN32-so-we-can-build-on-mingw.patch',
+                'webrtc-audio-processing/0017-Add-missing-windows-conditions-variable.patch',
+                'webrtc-audio-processing/0018-Protect-against-unsupported-CPU-types.patch',
+                'webrtc-audio-processing/0019-osx-Fix-type-OS_FLAGS-instead-of-OS_CFLAGS.patch',
+                'webrtc-audio-processing/0020-Sync-defines-and-libs-with-build.gn.patch',
+                'webrtc-audio-processing/0021-Use-no-undefined-to-support-both-clang-and-gcc.patch',
+                'webrtc-audio-processing/0022-Re-add-pthread-linking-on-linux.patch',
+                'webrtc-audio-processing/0023-Add-ARM-64bit-support.patch']
+    autoreconf = True
+
+    files_libs = ['libwebrtc_audio_processing']
+    files_devel = ['include/webrtc_audio_processing', 'lib/pkgconfig/webrtc-audio-processing.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            # TODO add --enable-neon=runtime, there is a conflict with cerbero
+            # that defines -mfpu=vfp... plus webrtc-audio-processing build
+            # system is doing it wrong, as it should add -mfpu=neon only for
+            # the files that contains neon intrinsic.
+            self.configure_options += ' --with-gnustl'
+        elif self.config.target_platform == Platform.WINDOWS:
+            # This recipe requires at least Windows Vista
+            self.append_env['CFLAGS'] = ' -UWINVER -U_WIN32_WINNT -DWINVER=0x0600 -D_WIN32_WINNT=0x0600'
+            self.append_env['CXXFLAGS'] = self.append_env['CFLAGS']

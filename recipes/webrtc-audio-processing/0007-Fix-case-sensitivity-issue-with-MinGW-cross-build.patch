@@ -1,0 +1,42 @@
+From 64ad5f20beb6d7695c68986eda4bfc36ea1c3053 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 14:19:18 -0400
+Subject: [PATCH 07/19] Fix case sensitivity issue with MinGW cross-build
+
+Signed-off-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/system_wrappers/source/file_impl.cc  | 2 +-
+ webrtc/system_wrappers/source/rw_lock_win.h | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/webrtc/system_wrappers/source/file_impl.cc b/webrtc/system_wrappers/source/file_impl.cc
+index 0ee0dea..39a036a 100644
+--- a/webrtc/system_wrappers/source/file_impl.cc
++++ b/webrtc/system_wrappers/source/file_impl.cc
+@@ -13,7 +13,7 @@
+ #include <assert.h>
+ 
+ #ifdef _WIN32
+-#include <Windows.h>
++#include <windows.h>
+ #else
+ #include <stdarg.h>
+ #include <string.h>
+diff --git a/webrtc/system_wrappers/source/rw_lock_win.h b/webrtc/system_wrappers/source/rw_lock_win.h
+index c279eab..07fac96 100644
+--- a/webrtc/system_wrappers/source/rw_lock_win.h
++++ b/webrtc/system_wrappers/source/rw_lock_win.h
+@@ -13,7 +13,7 @@
+ 
+ #include "webrtc/system_wrappers/include/rw_lock_wrapper.h"
+ 
+-#include <Windows.h>
++#include <windows.h>
+ 
+ namespace webrtc {
+ 
+-- 
+2.7.4
+

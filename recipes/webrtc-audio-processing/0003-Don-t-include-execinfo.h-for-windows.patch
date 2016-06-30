@@ -1,0 +1,39 @@
+From 6355e0ef6a871897a34c1fe1f10f62d147d8f43f Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 14:11:48 -0400
+Subject: [PATCH 03/19] Don't include execinfo.h for windows
+
+And that even if we have GLIBC. This fixes a build issue in mingw.
+
+Signed-off-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/base/checks.cc | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/webrtc/base/checks.cc b/webrtc/base/checks.cc
+index 49a31f2..32a2f74 100644
+--- a/webrtc/base/checks.cc
++++ b/webrtc/base/checks.cc
+@@ -16,7 +16,7 @@
+ #include <cstdio>
+ #include <cstdlib>
+ 
+-#if defined(__GLIBCXX__) && !defined(__UCLIBC__)
++#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN)
+ #include <cxxabi.h>
+ #include <execinfo.h>
+ #endif
+@@ -55,7 +55,7 @@ void PrintError(const char* format, ...) {
+ // to get usable symbols on Linux. This is copied from V8. Chromium has a more
+ // advanced stace trace system; also more difficult to copy.
+ void DumpBacktrace() {
+-#if defined(__GLIBCXX__) && !defined(__UCLIBC__)
++#if defined(__GLIBCXX__) && !defined(__UCLIBC__) && !defined(WEBRTC_WIN)
+   void* trace[100];
+   int size = backtrace(trace, sizeof(trace) / sizeof(*trace));
+   char** symbols = backtrace_symbols(trace, size);
+-- 
+2.7.4
+

@@ -1,0 +1,31 @@
+From 07f1de1f39d0bded62220d8dcc3ea5308af9839a Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Thu, 30 Jun 2016 14:15:09 -0400
+Subject: [PATCH 04/19] Don't use MSVC specific exception handler for MINGW
+
+Signed-off-by: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ webrtc/base/platform_thread.cc | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/webrtc/base/platform_thread.cc b/webrtc/base/platform_thread.cc
+index 4167392..33d2bdd 100644
+--- a/webrtc/base/platform_thread.cc
++++ b/webrtc/base/platform_thread.cc
+@@ -70,7 +70,11 @@ void SetCurrentThreadName(const char* name) {
+   __try {
+     ::RaiseException(0x406D1388, 0, sizeof(threadname_info) / sizeof(DWORD),
+                      reinterpret_cast<ULONG_PTR*>(&threadname_info));
++#ifdef __MINGW32__
++  } catch (...) {
++#else
+   } __except (EXCEPTION_EXECUTE_HANDLER) {
++#endif
+   }
+ #elif defined(WEBRTC_LINUX) || defined(WEBRTC_ANDROID)
+   prctl(PR_SET_NAME, reinterpret_cast<unsigned long>(name));
+-- 
+2.7.4
+

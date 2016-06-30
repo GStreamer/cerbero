@@ -1,0 +1,25 @@
+From 3d3a874a75bef020dcdb30e20c722b5a159c1ee1 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Wed, 6 Jul 2016 13:57:00 -0400
+Subject: [PATCH 3/3] Re-add pthread linking on linux
+
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 2658849..5aab9e6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -62,7 +62,7 @@ AS_CASE(["${host}"],
+         [
+          OS_CFLAGS="-DWEBRTC_LINUX -DWEBRTC_THREAD_RR"
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
+-         OS_LDFLAGS="-lrt"
++         OS_LDFLAGS="-lrt -lpthread"
+          HAVE_POSIX=1
+         ],
+     [*-*darwin*],
+-- 
+2.7.4
+

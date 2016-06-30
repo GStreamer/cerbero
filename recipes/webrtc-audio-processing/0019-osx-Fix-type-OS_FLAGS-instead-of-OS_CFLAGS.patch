@@ -1,0 +1,27 @@
+From a0ba303ba94b7af3fd176bc441119ac6eaae19b4 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Tue, 5 Jul 2016 18:44:19 -0400
+Subject: [PATCH 2/4] osx: Fix type OS_FLAGS instead of OS_CFLAGS
+
+---
+ configure.ac | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index d6c2457..7a8798e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -66,8 +66,8 @@ AS_CASE(["${host}"],
+     [*-*darwin*],
+         [
+          AS_IF([test "$HAVE_IOS" = "yes"],
+-             [OS_FLAGS="-DWEBRTC_MAC -DWEBRTC_IOS"],
+-             [OS_FLAGS="-DWEBRTC_MAC"])
++             [OS_CFLAGS="-DWEBRTC_MAC -DWEBRTC_IOS"],
++             [OS_CFLAGS="-DWEBRTC_MAC"])
+          PLATFORM_CFLAGS="-DWEBRTC_POSIX"
+          HAVE_POSIX=1
+         ],
+-- 
+2.7.4
+

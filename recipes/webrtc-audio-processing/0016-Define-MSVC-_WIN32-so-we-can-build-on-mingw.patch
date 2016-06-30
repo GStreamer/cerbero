@@ -1,0 +1,26 @@
+From 3c7d0a358081fb17a877802399b7685e55947289 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Mon, 4 Jul 2016 17:54:45 -0400
+Subject: [PATCH 16/19] Define MSVC _WIN32 so we can build on mingw
+
+https://bugs.freedesktop.org/show_bug.cgi?id=96754
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index bd8e409..2ca5ea9 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -73,7 +73,7 @@ AS_CASE(["${host}"],
+         ],
+     [*-mingw32*],
+         [
+-         PLATFORM_CFLAGS="-DWEBRTC_WIN -U__STRICT_ANSI__"
++         PLATFORM_CFLAGS="-DWEBRTC_WIN -D_WIN32 -U__STRICT_ANSI__"
+          HAVE_WIN=1
+         ]
+ )
+-- 
+2.7.4
+
