@@ -255,9 +255,9 @@ copyjavasource_$(TARGET_ARCH_ABI):
 		$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)$(file),$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)) && ) echo Done cp
 
 	cat $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | \
-		$(SED) "s;@INCLUDE_FONTS@;//;g" | \
-		$(SED) "s;@INCLUDE_CA_CERTIFICATES@;//;g" | \
-		$(SED) "s;@INCLUDE_COPY_FILE@;//;g" \
+		$(SED) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" | \
+		$(SED) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | \
+		$(SED) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" \
 		> $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
 copyfontsres_$(TARGET_ARCH_ABI):
