@@ -160,9 +160,9 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
 
 
 def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
+    if split and isinstance(cmd, str):
+        cmd = shlex.split(cmd)
     try:
-        if split:
-            cmd = shlex.split(cmd)
         process = subprocess.Popen(cmd, cwd=cmd_dir,
                                    stdout=subprocess.PIPE,
                                    stderr=open(os.devnull), shell=shell)
