@@ -207,8 +207,7 @@ genstatic_$(TARGET_ARCH_ABI): PRIV_G_R := $(G_IO_MODULES_DECLARE)
 genstatic_$(TARGET_ARCH_ABI):
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
 	@$(call host-mkdir,$(PRIV_B_DIR))
-	@cat $(PRIV_C_IN) | \
-		$(SED) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" | \
+	@$(SED) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C_IN) | \
 		$(SED) "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" | \
 		$(SED) "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" | \
 		$(SED) "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" > $(PRIV_C)
@@ -254,8 +253,7 @@ copyjavasource_$(TARGET_ARCH_ABI):
 	@$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
 		$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)$(file),$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)) && ) echo Done cp
 
-	@cat $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | \
-		$(SED) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" | \
+	@$(SED) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | \
 		$(SED) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | \
 		$(SED) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" \
 		> $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
