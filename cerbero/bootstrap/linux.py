@@ -179,9 +179,16 @@ class GentooBootstrapper (UnixBootstrapper):
             'media-gfx/transfig', 'x11-libs/libXrender', 'x11-libs/libXv',
             'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking']
 
+class NoneBootstrapper (BootstrapperBase):
+
+    def start(self):
+        pass
+
+
 def register_all():
     register_bootstrapper(Distro.DEBIAN, DebianBootstrapper)
     register_bootstrapper(Distro.REDHAT, RedHatBootstrapper)
     register_bootstrapper(Distro.SUSE, OpenSuseBootstrapper)
     register_bootstrapper(Distro.ARCH, ArchBootstrapper, DistroVersion.ARCH_ROLLING)
     register_bootstrapper(Distro.GENTOO, GentooBootstrapper, DistroVersion.GENTOO_VERSION)
+    register_bootstrapper(Distro.NONE, NoneBootstrapper)
