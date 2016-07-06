@@ -127,7 +127,7 @@ class RedHatBootstrapper (UnixBootstrapper):
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
             if self.config.distro_version == DistroVersion.FEDORA_24:
-                self.packages.append('libncurses-compat-libs')
+                self.packages.append('libncurses-compat-libs.i686')
         if self.config.target_platform == Platform.LINUX:
             self.packages.append('chrpath')
             self.packages.append('fuse-devel')
