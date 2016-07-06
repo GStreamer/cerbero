@@ -30,5 +30,5 @@ class Recipe(recipe.Recipe):
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_platform == Platform.DARWIN:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
-        elif self.config.target_arch != self.config.arch:
+        elif self.config.cross_compiling():
             self.configure_options += ' --disable-examples'
