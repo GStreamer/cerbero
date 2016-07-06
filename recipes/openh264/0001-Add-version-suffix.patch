@@ -1,4 +1,4 @@
-From 18b2d54c3ed52506ca31bb48a1516bb08d92eadd Mon Sep 17 00:00:00 2001
+From 6bd06197e2ec7af8a7b41fa2b291c4834feb5649 Mon Sep 17 00:00:00 2001
 From: Zaheer Abbas Merali <zaheermerali@gmail.com>
 Date: Tue, 13 Jan 2015 11:15:25 -0800
 Subject: [PATCH] Add version suffix
@@ -6,25 +6,24 @@ Subject: [PATCH] Add version suffix
 ---
  Makefile                  | 2 +-
  build/platform-android.mk | 5 +++--
- build/platform-freebsd.mk | 1 +
  build/platform-linux.mk   | 1 +
- 4 files changed, 6 insertions(+), 3 deletions(-)
+ 3 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 4fa3095..3b9ff8b 100644
+index 372a63f..b9d7e74 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -181,7 +181,7 @@ endif
+@@ -207,7 +207,7 @@ libraries: $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX)
+ 
+ # No point in building dylib for ios
+ ifneq (ios, $(OS))
+-libraries: $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIX)
++libraries: $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
  endif
  
- ifneq (ios, $(OS))
--libraries: $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX) $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIX)
-+libraries: $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX) $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
- else
- libraries: $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX)
- endif
+ LIBRARIES += $(LIBPREFIX)$(PROJECT_NAME).$(LIBSUFFIX) $(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
 diff --git a/build/platform-android.mk b/build/platform-android.mk
-index aab007d..e95d270 100644
+index 5cc6261..d5fd8b5 100644
 --- a/build/platform-android.mk
 +++ b/build/platform-android.mk
 @@ -1,9 +1,10 @@
@@ -40,18 +39,8 @@ index aab007d..e95d270 100644
  NDKLEVEL = 12
  ifeq ($(ARCH), arm)
    ifneq ($(APP_ABI), armeabi)
-diff --git a/build/platform-freebsd.mk b/build/platform-freebsd.mk
-index 49be825..3d0feaa 100644
---- a/build/platform-freebsd.mk
-+++ b/build/platform-freebsd.mk
-@@ -1,4 +1,5 @@
- include $(SRC_PATH)build/arch.mk
-+SHAREDLIB_DIR = $(PREFIX)/lib
- SHAREDLIBSUFFIX = so
- SHAREDLIBSUFFIXVER=$(SHAREDLIBSUFFIX).$(SHAREDLIBVERSION)
- SHLDFLAGS = -Wl,-soname,$(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
 diff --git a/build/platform-linux.mk b/build/platform-linux.mk
-index bb0dd84..e98b972 100644
+index b6419d1..3a0941b 100644
 --- a/build/platform-linux.mk
 +++ b/build/platform-linux.mk
 @@ -1,4 +1,5 @@
@@ -61,5 +50,5 @@ index bb0dd84..e98b972 100644
  SHAREDLIBSUFFIXVER=$(SHAREDLIBSUFFIX).$(SHAREDLIBVERSION)
  SHLDFLAGS = -Wl,-soname,$(LIBPREFIX)$(PROJECT_NAME).$(SHAREDLIBSUFFIXVER)
 -- 
-1.9.1
+2.8.1
 
