@@ -23,16 +23,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self.tmp_destdir = os.path.join(self.build_dir, 'static-build')
 
-        querymodule_path = None
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-          # For the universal build we need to use the right gio-querymodules
-          arch = self.config.target_arch
-          querymodule_path = os.path.join(self.config.prefix, arch, 'bin', 'gio-querymodules')
-        else:
-          querymodule_path = os.path.join(self.config.prefix, 'bin', 'gio-querymodules')
-
-        if not self.config.prefix_is_executable():
-          querymodule_path = which('true')
+        querymodule_path = which('true')
 
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
           self.append_env['CFLAGS'] = ' -DGST_CA_CERTIFICATES_FROM_ENV'
