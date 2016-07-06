@@ -102,7 +102,6 @@ class DebianBootstrapper (UnixBootstrapper):
 
 class RedHatBootstrapper (UnixBootstrapper):
 
-    tool = 'su -c "yum install %s"'
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
                 'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -118,6 +117,11 @@ class RedHatBootstrapper (UnixBootstrapper):
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
+        if self.config.distro_version == DistroVersion.FEDORA_23 or \
+           self.config.distro_version == DistroVersion.FEDORA_24:
+            self.tool = 'dnf install %s'
+        else:
+            self.tool = 'yum install %s'
         if self.config.target_platform == Platform.WINDOWS:
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
@@ -128,7 +132,9 @@ class RedHatBootstrapper (UnixBootstrapper):
             self.packages.append('chrpath')
             self.packages.append('fuse-devel')
         # Use sudo to gain root access on everything except RHEL
-        if self.config.distro_version != DistroVersion.REDHAT_6:
+        if self.config.distro_version == DistroVersion.REDHAT_6:
+            self.tool = 'su -c "' + self.tool + '"'
+        else:
             self.tool = 'sudo ' + self.tool
 
 class OpenSuseBootstrapper (UnixBootstrapper):
