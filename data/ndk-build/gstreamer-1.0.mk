@@ -142,18 +142,18 @@ GSTREAMER_PLUGINS_WITH_CLASSES := $(strip \
 
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE    := $(foreach plugin, $(GSTREAMER_PLUGINS), \
-			GST_PLUGIN_STATIC_DECLARE($(plugin));\n)
+			GST_PLUGIN_STATIC_DECLARE($(plugin));)
 # Generate the plugins' registration strings
 GSTREAMER_PLUGINS_REGISTER   := $(foreach plugin, $(GSTREAMER_PLUGINS), \
-			GST_PLUGIN_STATIC_REGISTER($(plugin));\n)
+			GST_PLUGIN_STATIC_REGISTER($(plugin));)
 
 # Generate list of gio modules
 G_IO_MODULES_PATH            := $(foreach path, $(G_IO_MODULES_PATH), -L$(path))
 G_IO_MODULES_LIBS            := $(foreach module, $(G_IO_MODULES), -lgio$(module))
 G_IO_MODULES_DECLARE         := $(foreach module, $(G_IO_MODULES), \
-			GST_G_IO_MODULE_DECLARE($(module));\n)
+			GST_G_IO_MODULE_DECLARE($(module));)
 G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
-			GST_G_IO_MODULE_LOAD($(module));\n)
+			GST_G_IO_MODULE_LOAD($(module));)
 
 # Get the full list of libraries
 # link at least to gstreamer-1.0 in case the plugins list is empty
