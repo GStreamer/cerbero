@@ -27,7 +27,7 @@ class Recipe(recipe.Recipe):
           if os.path.exists(arch_path):
               querymodule_path = arch_path
 
-        if not self.config.prefix_is_executable():
+        if self.config.cross_compiling():
           querymodule_path = which('true')
 
         if self.config.target_platform in [Platform.ANDROID]:

@@ -41,7 +41,7 @@ class BuildTools (BootstrapperBase):
 
         # if cross-compiling or not on linux, make sure we have gtk-doc
         if self.config.target_platform != Platform.LINUX or\
-           not self.config.prefix_is_executable():
+           self.config.cross_compiling():
             self.BUILD_TOOLS.append('gtk-doc-lite')
 
         if self.config.platform == Platform.WINDOWS:
@@ -69,7 +69,7 @@ class BuildTools (BootstrapperBase):
                                           DistroVersion.UBUNTU_NATTY]:
             self.BUILD_TOOLS.append('glib-tools')
         if self.config.platform != Platform.LINUX and\
-                not self.config.prefix_is_executable():
+                self.config.cross_compiling():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
         self.BUILD_TOOLS += self.config.extra_build_tools

@@ -176,9 +176,9 @@ class Config (object):
 
         # Build variants before copying any config
         self.variants = Variants(self.variants)
-        if self.cross_compiling() and self.variants.gi:
-            m.warning(_("gobject introspection is not supported "
-                        "cross-compiling, 'gi' variant will be removed"))
+        if not self.prefix_is_executable() and self.variants.gi:
+            m.warning(_("gobject introspection requires an executable "
+                        "prefix, 'gi' variant will be removed"))
             self.variants.gi = False
 
         for c in self.arch_config.values():
@@ -250,12 +250,12 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path and self.prefix_is_executable():
+        if bindir not in path and not self.cross_compiling():
             path = self._join_path(bindir, path)
         path = self._join_path(
             os.path.join(self.build_tools_prefix, 'bin'), path)
 
-        if self.prefix_is_executable():
+        if not self.cross_compiling():
             ld_library_path = libdir
         else:
             ld_library_path = ""
@@ -382,10 +382,14 @@ class Config (object):
         return {}
 
     def cross_compiling(self):
+        "Are we building for the host platform or not?"
         return self.target_platform != self.platform or \
-                self.target_arch != self.arch
+                self.target_arch != self.arch or \
+                self.target_distro_version != self.distro_version
 
     def prefix_is_executable(self):
+        """Can the binaries from the target platform can be executed in the
+        build env?"""
         if self.target_platform != self.platform:
             return False
         if self.target_arch != self.arch:
