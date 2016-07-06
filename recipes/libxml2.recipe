@@ -28,5 +28,5 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = '--with-python=no'
         elif self.config.target_platform == Platform.LINUX:
-            if Architecture.is_arm(self.config.target_arch):
+            if self.config.cross_compiling():
                 self.configure_options = '--with-python=no'
