@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.9'
     licenses = [License.LGPLv2Plus]
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
-    commit = '1.9.1'
+    commit = 'origin/master'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--program-prefix= --disable-examples --enable-static "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
