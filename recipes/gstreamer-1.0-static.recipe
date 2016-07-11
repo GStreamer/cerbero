@@ -31,5 +31,8 @@ class Recipe(custom.GStreamerStatic):
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
+        if self.config.variants.unwind:
+            self.deps += ['libunwind']
+
         custom.GStreamerStatic.prepare(self)
 
