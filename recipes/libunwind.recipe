@@ -1,0 +1,13 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libunwind'
+    version = '1.1'
+    licenses = [License.MIT]
+    stype = SourceType.TARBALL
+    url = 'http://download.savannah.gnu.org/releases/libunwind/libunwind-1.1.tar.gz'
+
+    files_libs = ['libunwind']
+    files_devel = ['include/libunwind-*.h',
+                   'include/unwind.h',
+                   'lib/pkgconfig/libunwind-*.pc']
