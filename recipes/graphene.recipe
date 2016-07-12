@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
     licenses = [License.MIT]
     # Disable NEON completly, it's broken and experimental   
-    configure_options = ' --enable-static --enable-shared --diable-arm-neon'
+    configure_options = ' --enable-static --enable-shared --disable-arm-neon'
     deps = ['glib']
 
     config_sh = 'sh ./autogen.sh'
