@@ -138,6 +138,8 @@ libdir='%(libdir)s'
         libtool_deps = [x for x in deps if not x.startswith('-l')]
         lib_deps = [x for x in deps if x.startswith('-l')]
         for d in libtool_deps:
-            deps_str += ' %s/lib%s.la ' % (self.libdir, d)
+            if not d.startswith('lib'):
+                d = 'lib' + d
+            deps_str += ' %s/%s.la ' % (self.libdir, d)
         deps_str += ' '.join(lib_deps)
         return deps_str
