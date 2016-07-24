@@ -301,7 +301,7 @@ class CookBook (object):
         if state.get(recipe, 'clean') == 'processed':
             return
         if state.get(recipe, 'clean') == 'in-progress':
-            raise FatalError(_("Dependency Cycle"))
+            raise FatalError(_("Dependency Cycle: {0}".format(recipe.name)))
         state[recipe] = 'in-progress'
         recipe_deps = recipe.list_deps()
         if not recipe.runtime_dep:
@@ -312,7 +312,11 @@ class CookBook (object):
             except RecipeNotFoundError, e:
                 raise FatalError(_("Recipe %s has a unknown dependency %s"
                                  % (recipe.name, recipe_name)))
-            self._find_deps(recipedep, state, ordered)
+            try:
+                self._find_deps(recipedep, state, ordered)
+            except FatalError:
+                m.error('Error finding deps of "{0}"'.format(recipe.name))
+                raise
         state[recipe] = 'processed'
         ordered.append(recipe)
         return ordered
