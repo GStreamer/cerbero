@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     name = 'nettle'
     version = '3.2'
     stype = SourceType.TARBALL
-    url = 'http://www.lysator.liu.se/~nisse/archive/nettle-{0}.tar.gz'.format(version)
+    url = 'https://ftp.gnu.org/gnu/nettle/nettle-{0}.tar.gz'.format(version)
 
     licenses = [License.LGPLv2_1Plus]
     configure_options = '--enable-shared --enable-public-key'
@@ -46,6 +46,16 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('hogweed', 4, 0, 0, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()
+
+        if self.config.target_platform == Platform.WINDOWS:
+            # On Windows, since the DLL does not have soversioning in the file
+            # extension, the major version is added to the library name. So
+            # hogweed -> hogweed-4, nettle -> nettle-6. Edit the pkg-config file
+            # accordingly.
+            shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'hogweed.pc'),
+                          {'-lhogweed': '-lhogweed-4'})
+            shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'nettle.pc'),
+                          {'-lnettle': '-lnettle-6'})
 
         if self.config.target_platform == Platform.LINUX:
             # Fix the libs permissions to 0755 to make the rpm packaging happy.
