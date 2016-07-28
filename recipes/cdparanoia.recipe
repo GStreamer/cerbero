@@ -37,4 +37,4 @@ class Recipe(recipe.Recipe):
                 f = os.path.join(self.config.prefix, lib)
                 if os.path.isfile(f) and not os.path.islink(f) and \
                    fnmatch(f, '*.so.*'):
-                    os.chmod(f, 0755)
+                    os.chmod(f, 0o755)
