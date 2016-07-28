@@ -169,8 +169,8 @@ class LinuxPackager(PackagerBase):
         licenses = []
         recipes_licenses = self.package.recipes_licenses()
         recipes_licenses.update(self.package.devel_recipes_licenses())
-        for recipe_name, categories_licenses in recipes_licenses.iteritems():
-            for category_licenses in categories_licenses.itervalues():
+        for recipe_name, categories_licenses in recipes_licenses.items():
+            for category_licenses in categories_licenses.values():
                 licenses.extend(category_licenses)
         return sorted(list(set(licenses)))
 

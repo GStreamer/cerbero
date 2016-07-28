@@ -26,6 +26,7 @@ from cerbero.packages import PackageType
 from cerbero.packages.linux import LinuxPackager
 from cerbero.packages.package import MetaPackage
 from cerbero.utils import shell, _
+from functools import reduce
 
 
 SPEC_TPL = '''

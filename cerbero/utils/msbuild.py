@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import _winreg as winreg
+import winreg as winreg
 import os
 
 from cerbero.config import Architecture
@@ -73,5 +73,5 @@ class MSBuild(object):
 
     def _format_properties(self):
         props = ['/property:%s=%s' % (k, v) for k, v in
-                 self.properties.iteritems()]
+                 self.properties.items()]
         return ' '.join(props)

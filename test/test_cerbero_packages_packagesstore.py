@@ -61,18 +61,18 @@ class PackageTest(unittest.TestCase):
 
     def testAddPackage(self):
         package = common.Package1(self.config, None, None)
-        self.assertEquals(len(self.store._packages), 0)
+        self.assertEqual(len(self.store._packages), 0)
         self.store.add_package(package)
-        self.assertEquals(len(self.store._packages), 1)
-        self.assertEquals(package, self.store._packages[package.name])
+        self.assertEqual(len(self.store._packages), 1)
+        self.assertEqual(package, self.store._packages[package.name])
 
     def testGetPackage(self):
         package = common.Package1(self.config, None, None)
         self.store.add_package(package)
-        self.assertEquals(package, self.store.get_package(package.name))
+        self.assertEqual(package, self.store.get_package(package.name))
 
     def testPackageNotFound(self):
-        self.failUnlessRaises(PackageNotFoundError, self.store.get_package,
+        self.assertRaises(PackageNotFoundError, self.store.get_package,
             'unknown')
 
     def testPackagesList(self):
@@ -81,21 +81,21 @@ class PackageTest(unittest.TestCase):
         self.store.add_package(package)
         self.store.add_package(metapackage)
         l = sorted([package, metapackage], key=lambda x: x.name)
-        self.assertEquals(l, self.store.get_packages_list())
+        self.assertEqual(l, self.store.get_packages_list())
 
     def testPackageDeps(self):
         package = common.Package1(self.config, None,  None)
         package2 = common.Package2(self.config, None, None)
         self.store.add_package(package)
         self.store.add_package(package2)
-        self.assertEquals(package.deps,
+        self.assertEqual(package.deps,
             [x.name for x in self.store.get_package_deps(package.name)])
 
     def testMetaPackageDeps(self):
         metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(metapackage)
         # the metapackage depends on package that are not yet in the store
-        self.failUnlessRaises(PackageNotFoundError,
+        self.assertRaises(PackageNotFoundError,
             self.store.get_package_deps, metapackage.name)
         for klass in [common.Package1, common.Package2, common.Package3,
                 common.Package4]:
@@ -107,7 +107,7 @@ class PackageTest(unittest.TestCase):
         deps = ['gstreamer-test-bindings', 'gstreamer-test1',
                 'gstreamer-test2', 'gstreamer-test3']
         res = [x.name for x in self.store.get_package_deps(metapackage.name)]
-        self.assertEquals(sorted(deps), sorted(res))
+        self.assertEqual(sorted(deps), sorted(res))
 
     def testLoadPackageFromFile(self):
         package_file = tempfile.NamedTemporaryFile()
@@ -115,7 +115,7 @@ class PackageTest(unittest.TestCase):
         package_file.flush()
         p = self.store._load_package_from_file(package_file.name)
         self.assertIsInstance(p, Package)
-        self.assertEquals('test-package', p.name)
+        self.assertEqual('test-package', p.name)
 
     def testLoadMetaPackageFromFile(self):
         for x, t in [(SDKPACKAGE, SDKPackage),
@@ -124,9 +124,9 @@ class PackageTest(unittest.TestCase):
             package_file.write(x)
             package_file.flush()
             p = self.store._load_package_from_file(package_file.name)
-            print p, type(p)
+            print(p, type(p))
             self.assertIsInstance(p, t)
-            self.assertEquals('test-package', p.name)
+            self.assertEqual('test-package', p.name)
 
     def testImports(self):
         package_file = tempfile.NamedTemporaryFile()
@@ -136,5 +136,5 @@ class PackageTest(unittest.TestCase):
         self.assertIsInstance(p, Package)
         try:
             p.test_imports()
-        except ImportError, e:
+        except ImportError as e:
             self.fail("Import error raised, %s", e)

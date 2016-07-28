@@ -56,7 +56,7 @@ class DebugPackages(Command):
 
     def find_orphan_files(self, allfiles, prefix, excludes=[]):
         cmd = 'find . -type f %s'
-        exc = map(lambda x: "\\( ! -name '%s' \\)" % x, excludes)
+        exc = ["\\( ! -name '%s' \\)" % x for x in excludes]
         cmd = cmd % ' '.join(exc)
 
         distfiles = shell.check_call(cmd, prefix).split('\n')

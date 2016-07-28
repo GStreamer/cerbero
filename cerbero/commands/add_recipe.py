@@ -75,7 +75,7 @@ class AddRecipe(Command):
             ArgparseArgument('-l', '--licenses', default='',
                              help=_('comma separated list of the recipe '
                                     'licenses. Supported licenses: %s') %
-                                    ', '.join(self.supported_licenses.keys())),
+                                    ', '.join(list(self.supported_licenses.keys()))),
             ArgparseArgument('-c', '--commit', default='',
                              help=_('commit to use '
                                     '(default to "sdk-$version")')),
@@ -125,7 +125,7 @@ class AddRecipe(Command):
             for dname in deps:
                 try:
                     recipe = cookbook.get_recipe(dname)
-                except RecipeNotFoundError, ex:
+                except RecipeNotFoundError as ex:
                     raise UsageError(_("Error creating recipe: "
                             "dependant recipe %s does not exist") % dname)
             template_args['deps'] = deps
@@ -137,7 +137,7 @@ class AddRecipe(Command):
 
             m.action(_("Recipe '%s' successfully created in %s") %
                     (name, filename))
-        except IOError, ex:
+        except IOError as ex:
             raise FatalError(_("Error creating recipe: %s") % ex)
 
     def validate_licenses(self, licenses):

@@ -51,7 +51,7 @@ class PackageMakerTest(unittest.TestCase):
         tmpdest = packager._create_bundle(files, PackageType.RUNTIME)[0]
         bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')
         bundlefiles = sorted([f[2:] for f in bundlefiles])[1:]
-        self.assertEquals(bundlefiles, self.files)
+        self.assertEqual(bundlefiles, self.files)
         shutil.rmtree(tmpdest)
 
     def _add_files(self):
@@ -86,7 +86,7 @@ class TestPackageMaker(unittest.TestCase):
         args = {'r': 'root', 'i': 'pkg_id', 'n': 'version', 't': 'title',
                 'l': 'destination', 'o': 'output_file'}
         cmd = pm._cmd_with_args(args)
-        self.assertEquals(cmd,
+        self.assertEqual(cmd,
             "./PackageMaker  -i 'pkg_id' -l 'destination' -o 'output_file' "
             "-n 'version' -r 'root' -t 'title'")
 
@@ -94,6 +94,6 @@ class TestPackageMaker(unittest.TestCase):
         pm = DummyPackageMaker()
         pm.create_package('root', 'pkg_id', 'version', 'title',
                           'output_file', 'destination')
-        self.assertEquals(pm.cmd,
+        self.assertEqual(pm.cmd,
             "./PackageMaker  -g '10.6' -i 'pkg_id' -l 'destination' -o 'output_file' "
             "-n 'version' -r 'root' -t 'title'")

@@ -79,39 +79,39 @@ class PackageTest(unittest.TestCase):
         shutil.rmtree(self.tmp)
 
     def testFilesCategories(self):
-        self.assertEquals(sorted(['bins', 'libs', 'misc', 'devel']),
+        self.assertEqual(sorted(['bins', 'libs', 'misc', 'devel']),
                 self.win32recipe._files_categories())
 
     def testListBinaries(self):
-        self.assertEquals(self.win32recipe.files_list_by_category('bins'),
+        self.assertEqual(self.win32recipe.files_list_by_category('bins'),
                 sorted(self.winbin))
-        self.assertEquals(self.linuxrecipe.files_list_by_category('bins'),
+        self.assertEqual(self.linuxrecipe.files_list_by_category('bins'),
                 sorted(self.linuxbin))
 
     def testListLibraries(self):
         add_files(self.tmp)
-        self.assertEquals(self.win32recipe.files_list_by_category('libs'),
+        self.assertEqual(self.win32recipe.files_list_by_category('libs'),
                 sorted(self.winlib))
-        self.assertEquals(self.linuxrecipe.files_list_by_category('libs'),
+        self.assertEqual(self.linuxrecipe.files_list_by_category('libs'),
                 sorted(self.linuxlib))
 
     def testDevelFiles(self):
         add_files(self.tmp)
-        self.assertEquals(self.win32recipe.devel_files_list(),
+        self.assertEqual(self.win32recipe.devel_files_list(),
                 sorted(self.windevfiles))
-        self.assertEquals(self.linuxrecipe.devel_files_list(),
+        self.assertEqual(self.linuxrecipe.devel_files_list(),
                 sorted(self.lindevfiles))
 
     def testDistFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc
         add_files(self.tmp)
-        self.assertEquals(self.win32recipe.dist_files_list(), sorted(win32files))
-        self.assertEquals(self.linuxrecipe.dist_files_list(), sorted(linuxfiles))
+        self.assertEqual(self.win32recipe.dist_files_list(), sorted(win32files))
+        self.assertEqual(self.linuxrecipe.dist_files_list(), sorted(linuxfiles))
 
     def testGetAllFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc + self.windevfiles
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc + self.lindevfiles
         add_files(self.tmp)
-        self.assertEquals(self.win32recipe.files_list(), sorted(win32files))
-        self.assertEquals(self.linuxrecipe.files_list(), sorted(linuxfiles))
+        self.assertEqual(self.win32recipe.files_list(), sorted(win32files))
+        self.assertEqual(self.linuxrecipe.files_list(), sorted(linuxfiles))

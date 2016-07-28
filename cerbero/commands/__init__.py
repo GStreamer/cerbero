@@ -64,7 +64,7 @@ def load_commands(subparsers):
             continue
         try:
             __import__('cerbero.commands.%s' % name)
-        except ImportError, e:
+        except ImportError as e:
             m.warning("Error importing command %s:\n %s" % (name, e))
     for command in _commands.values():
         command.add_parser(subparsers)

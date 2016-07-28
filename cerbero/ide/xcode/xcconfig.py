@@ -19,6 +19,7 @@
 
 import sys
 from cerbero.ide.pkgconfig import PkgConfig
+from functools import reduce
 
 
 XCCONFIG_TPL = '''
@@ -55,7 +56,7 @@ class XCConfig(object):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print "usage: xcconfig output_file libraries"
+        print("usage: xcconfig output_file libraries")
         sys.exit(1)
     xcconfig = XCConfig(sys.argv[2:])
     xcconfig.create(sys.argv[1])

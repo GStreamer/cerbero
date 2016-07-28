@@ -51,7 +51,7 @@ class GenLibraryFiles(Command):
         for recipe in recipes:
             try:
                 recipe.gen_library_file(args.output_dir)
-            except Exception, e:
+            except Exception as e:
                 m.message(_("Error generaring library files for %s:\n %s") %
                           (recipe.name, e))
 

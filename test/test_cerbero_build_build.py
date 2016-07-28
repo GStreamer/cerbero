@@ -55,27 +55,27 @@ class ModifyEnvTest(unittest.TestCase):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, "%s %s" % (self.val1, self.val2))
 
     def testAppendNonExistentEnv(self):
         if self.var in os.environ:
             del os.environ[self.var]
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, ' %s' % self.val2)
+        self.assertEqual(val, ' %s' % self.val2)
 
     def testNewEnv(self):
         os.environ[self.var] = self.val1
         self.mk.new_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, self.val2)
+        self.assertEqual(val, self.val2)
 
     def testAppendAndNewEnv(self):
         os.environ[self.var] = ''
         self.mk.append_env = {self.var: self.val1}
         self.mk.new_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, self.val2)
+        self.assertEqual(val, self.val2)
 
     def testSystemLibs(self):
         os.environ['PKG_CONFIG_PATH'] = '/path/1'
@@ -83,15 +83,15 @@ class ModifyEnvTest(unittest.TestCase):
         self.mk.config.allow_system_libs = True
         self.mk.use_system_libs = True
         val = self.mk.get_env_var('PKG_CONFIG_PATH')
-        self.assertEquals(val,'/path/2:/usr/lib/pkgconfig:'
+        self.assertEqual(val,'/path/2:/usr/lib/pkgconfig:'
             '/usr/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig')
         val = self.mk.get_env_var('PKG_CONFIG_LIBDIR')
-        self.assertEquals(val,'/path/2')
+        self.assertEqual(val,'/path/2')
 
     def testNestedModif(self):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, "%s %s" % (self.val1, self.val2))
         val = self.mk.get_env_var_nested(self.var)
-        self.assertEquals(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, "%s %s" % (self.val1, self.val2))

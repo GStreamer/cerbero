@@ -291,8 +291,8 @@ def remove_list_duplicates(seq):
 
 def parse_file(filename, dict):
     try:
-        execfile(filename, dict)
-    except Exception, ex:
+        exec(compile(open(filename).read(), filename, 'exec'), dict)
+    except Exception as ex:
         import traceback
         traceback.print_exc()
         raise ex

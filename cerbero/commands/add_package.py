@@ -110,7 +110,7 @@ class AddPackage(Command):
             ArgparseArgument('-l', '--license', default='',
                              help=_('license of the package. '
                                     'Supported licenses: %s') %
-                                    ', '.join(self.supported_licenses.keys())),
+                                    ', '.join(list(self.supported_licenses.keys()))),
             ArgparseArgument('-d', '--deps', default='',
                              help=_('comma separated list of the package '
                                     'dependencies')),
@@ -136,7 +136,7 @@ class AddPackage(Command):
                                     'windows:recipe2) '
                                     'Supported platforms: %s') %
                                     ', '.join(
-                                        self.supported_platforms.keys())),
+                                        list(self.supported_platforms.keys()))),
             ArgparseArgument('--platform-files-devel', default='',
                              help=_('comma separated list of platform:recipe '
                                     'files to add to the devel package '
@@ -144,7 +144,7 @@ class AddPackage(Command):
                                     'windows:recipe2) '
                                     'Supported platforms: %s') %
                                     ', '.join(
-                                        self.supported_platforms.keys())),
+                                        list(self.supported_platforms.keys()))),
             ArgparseArgument('-f', '--force', action='store_true',
                 default=False, help=_('Replace package if existing'))])
 
@@ -194,7 +194,7 @@ class AddPackage(Command):
             for dname in deps:
                 try:
                     package = store.get_package(dname)
-                except Exception, ex:
+                except Exception as ex:
                     raise UsageError(_("Error creating package: "
                             "dependant package %s does not exist") % dname)
             template_args['deps'] = deps
@@ -211,7 +211,7 @@ class AddPackage(Command):
             for pname in includes:
                 try:
                     package = store.get_package(pname)
-                except Exception, ex:
+                except Exception as ex:
                     raise UsageError(_("Error creating package: "
                             "included package %s does not exist") % pname)
                 include_files.extend(package.files)
@@ -264,12 +264,12 @@ class AddPackage(Command):
 
             m.action(_("Package '%s' successfully created in %s") %
                     (name, filename))
-        except IOError, ex:
+        except IOError as ex:
             raise FatalError(_("Error creating package: %s") % ex)
 
     def merge_dict(self, d1, d2):
         ret = d1
-        for k, v in d2.iteritems():
+        for k, v in d2.items():
             if k in ret:
                 ret[k].extend(v)
             else:
@@ -313,7 +313,7 @@ class AddPackage(Command):
             parsed_files = extra_files
 
         template_arg = []
-        for platform, files in parsed_files.iteritems():
+        for platform, files in parsed_files.items():
             template_arg.append(
                 self.supported_platforms[platform] + ': [' + \
                     ', '.join(['\'' + recipe_files + '\'' \

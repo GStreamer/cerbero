@@ -39,7 +39,7 @@ class LinuxPackagesTest(unittest.TestCase):
                 f.write('%s="test"\n' % p)
         func()
         for p in properties:
-            self.assertEquals(getattr(config, p), 'test')
+            self.assertEqual(getattr(config, p), 'test')
 
     def testAllPropsInitializedNone(self):
         config = Config()
@@ -92,9 +92,9 @@ class LinuxPackagesTest(unittest.TestCase):
                  'force_git_commit': None,
                  'universal_archs': [cconfig.Architecture.X86, cconfig.Architecture.X86_64],
                  }
-        self.assertEquals(sorted(config._properties), sorted(props.keys()))
-        for p, v in props.iteritems():
-            self.assertEquals(getattr(config, p), v)
+        self.assertEqual(sorted(config._properties), sorted(props.keys()))
+        for p, v in props.items():
+            self.assertEqual(getattr(config, p), v)
 
     def testLoadMainConfig(self):
         config = Config()
@@ -126,7 +126,7 @@ class LinuxPackagesTest(unittest.TestCase):
         config = Config()
         del os.environ[cconfig.CERBERO_UNINSTALLED]
         config._check_uninstalled()
-        self.failUnlessRaises(FatalError, config.load_defaults)
+        self.assertRaises(FatalError, config.load_defaults)
 
     def testCheckUninstalled(self):
         config = Config()
@@ -145,43 +145,43 @@ class LinuxPackagesTest(unittest.TestCase):
         config.do_setup_env()
         env = config.get_env(tmpdir, os.path.join(tmpdir, 'lib'),
                              config.py_prefix)
-        for k, v in env.iteritems():
-            self.assertEquals(os.environ[k], v)
+        for k, v in env.items():
+            self.assertEqual(os.environ[k], v)
 
     def testParseBadConfigFile(self):
         config = Config()
         tmpfile = tempfile.NamedTemporaryFile()
         with open(tmpfile.name, 'w') as f:
             f.write('nonsense line')
-        self.failUnlessRaises(ConfigurationError, config.parse, tmpfile.name)
+        self.assertRaises(ConfigurationError, config.parse, tmpfile.name)
 
     def testJoinPath(self):
         config = Config()
         config.platform = Platform.LINUX
-        self.assertEquals(config._join_path('/test1', '/test2'), '/test1:/test2')
+        self.assertEqual(config._join_path('/test1', '/test2'), '/test1:/test2')
         config.platform = Platform.WINDOWS
-        self.assertEquals(config._join_path('/test1', '/test2'), '/test1;/test2')
+        self.assertEqual(config._join_path('/test1', '/test2'), '/test1;/test2')
 
     def testLoadCommandConfig(self):
         config = Config()
         config.filename = None
         config._load_cmd_config(None)
         self.assertIsNone(config.filename)
-        self.failUnlessRaises(ConfigurationError, config._load_cmd_config,
+        self.assertRaises(ConfigurationError, config._load_cmd_config,
                 '/foo/bar')
         tmpfile = tempfile.NamedTemporaryFile()
         config._load_cmd_config(tmpfile.name)
-        self.assertEquals(config.filename, cconfig.DEFAULT_CONFIG_FILE)
+        self.assertEqual(config.filename, cconfig.DEFAULT_CONFIG_FILE)
 
     def testLastDefaults(self):
         config = Config()
         config._load_last_defaults()
         cerbero_home = os.path.expanduser('~/cerbero')
-        self.assertEquals(config.prefix, os.path.join(cerbero_home, 'dist'))
-        self.assertEquals(config.install_dir, config.prefix)
-        self.assertEquals(config.sources,
+        self.assertEqual(config.prefix, os.path.join(cerbero_home, 'dist'))
+        self.assertEqual(config.install_dir, config.prefix)
+        self.assertEqual(config.sources,
             os.path.join(cerbero_home, 'sources'))
-        self.assertEquals(config.local_sources,
+        self.assertEqual(config.local_sources,
             os.path.join(cerbero_home, 'sources', 'local'))
 
     def testRecipesExternalRepositories(self):
@@ -192,7 +192,7 @@ class LinuxPackagesTest(unittest.TestCase):
         expected = {'default': ('test', 0),
                     'test1': ('/path/to/repo', 1),
                     'test2': ('/path/to/other/repo', 2)}
-        self.assertEquals(config.get_recipes_repos(), expected)
+        self.assertEqual(config.get_recipes_repos(), expected)
 
     def testPakcagesExternalRepositories(self):
         config = Config()
@@ -202,4 +202,4 @@ class LinuxPackagesTest(unittest.TestCase):
         expected = {'default': ('test', 0),
                     'test1': ('/path/to/repo', 1),
                     'test2': ('/path/to/other/repo', 2)}
-        self.assertEquals(config.get_packages_repos(), expected)
+        self.assertEqual(config.get_packages_repos(), expected)

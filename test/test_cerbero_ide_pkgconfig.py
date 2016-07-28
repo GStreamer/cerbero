@@ -35,41 +35,41 @@ class TestPkgConfig(unittest.TestCase):
     def testListAll(self):
         expected = ['gobject-2.0', 'gmodule-2.0', 'libxml-2.0', 'gthread-2.0',
                 'glib-2.0', 'gmodule-no-export-2.0', 'gstreamer-0.10']
-        self.assertEquals(sorted(PkgConfig.list_all()), sorted(expected))
+        self.assertEqual(sorted(PkgConfig.list_all()), sorted(expected))
 
     def testIncludeDirs(self):
         expected = ['/usr/include/gstreamer-0.10', '/usr/include/glib-2.0',
                     '/usr/lib/glib-2.0/include',
                     '/usr/include/libxml2']
-        self.assertEquals(self.pkgconfig.include_dirs(), expected)
+        self.assertEqual(self.pkgconfig.include_dirs(), expected)
         expected = ['/usr/include/gstreamer-0.10']
-        self.assertEquals(self.pkgconfig2.include_dirs(), expected)
+        self.assertEqual(self.pkgconfig2.include_dirs(), expected)
 
     def testCFlags(self):
         expected = ['-pthread']
-        self.assertEquals(self.pkgconfig.cflags(), expected)
+        self.assertEqual(self.pkgconfig.cflags(), expected)
         expected = []
-        self.assertEquals(self.pkgconfig2.cflags(), expected)
+        self.assertEqual(self.pkgconfig2.cflags(), expected)
 
     def testLibrariesDir(self):
         expected = []
-        self.assertEquals(self.pkgconfig.libraries_dirs(), expected)
+        self.assertEqual(self.pkgconfig.libraries_dirs(), expected)
         expected = []
-        self.assertEquals(self.pkgconfig2.libraries_dirs(), expected)
+        self.assertEqual(self.pkgconfig2.libraries_dirs(), expected)
 
     def testLibraries(self):
         expected = ['gstreamer-0.10', 'gobject-2.0', 'gmodule-2.0', 'xml2',
                     'gthread-2.0', 'rt', 'glib-2.0']
-        self.assertEquals(self.pkgconfig.libraries(), expected)
+        self.assertEqual(self.pkgconfig.libraries(), expected)
         expected = ['gstreamer-0.10']
-        self.assertEquals(self.pkgconfig2.libraries(), expected)
+        self.assertEqual(self.pkgconfig2.libraries(), expected)
 
     def testRequires(self):
         expected = ['glib-2.0', 'gobject-2.0', 'gmodule-no-export-2.0',
                     'gthread-2.0', 'libxml-2.0']
-        self.assertEquals(self.pkgconfig.requires(), expected)
-        self.assertEquals(self.pkgconfig2.requires(), expected)
+        self.assertEqual(self.pkgconfig.requires(), expected)
+        self.assertEqual(self.pkgconfig2.requires(), expected)
 
     def testPrefix(self):
-        self.assertEquals(self.pkgconfig.prefix(), '/usr')
-        self.assertEquals(self.pkgconfig2.prefix(), '/usr')
+        self.assertEqual(self.pkgconfig.prefix(), '/usr')
+        self.assertEqual(self.pkgconfig2.prefix(), '/usr')

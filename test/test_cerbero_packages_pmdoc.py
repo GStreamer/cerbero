@@ -42,17 +42,17 @@ class IndexTest(unittest.TestCase, XMLMixin):
 
     def testAddRoot(self):
         self.index._add_root()
-        self.assertEquals(self.index.root.tag, Index.DOCUMENT_TAG)
-        self.assertEquals(self.index.root.attrib['spec'], Index.SPEC_VERSION)
-        self.assertEquals(len(self.index.root.getchildren()), 0)
+        self.assertEqual(self.index.root.tag, Index.DOCUMENT_TAG)
+        self.assertEqual(self.index.root.attrib['spec'], Index.SPEC_VERSION)
+        self.assertEqual(len(self.index.root.getchildren()), 0)
 
     def testAddProperties(self):
         self.index._add_root()
         self.index._add_properties()
         children = self.index.root.getchildren()
-        self.assertEquals(len(children), 1)
+        self.assertEqual(len(children), 1)
         properties = children[0]
-        self.assertEquals(len(properties.getchildren()), 6)
+        self.assertEqual(len(properties.getchildren()), 6)
         self.check_text(properties, Index.TAG_ORGANIZATION, self.package.org)
         self.check_text(properties, Index.TAG_TITLE, self.package.title)
         self.check_text(properties, Index.TAG_BUILD,
@@ -68,7 +68,7 @@ class IndexTest(unittest.TestCase, XMLMixin):
         self.index._add_root()
         self.index._add_distribution()
         children = self.index.root.getchildren()
-        self.assertEquals(len(children), 1)
+        self.assertEqual(len(children), 1)
         dist =children[0]
         self.find_one(dist, Index.TAG_SCRIPTS)
         self.check_attrib(dist, Index.TAG_VERSION, Index.ATTR_MIN_SPEC,
@@ -90,7 +90,7 @@ class IndexTest(unittest.TestCase, XMLMixin):
         self.index._add_contents()
         children = self.index.root.getchildren()
         # 1 choice + 4 item
-        self.assertEquals(len(children), 5)
+        self.assertEqual(len(children), 5)
         contents = self.find_one(self.index.root, Index.TAG_CONTENTS)
         packages =[]
 
@@ -107,14 +107,14 @@ class IndexTest(unittest.TestCase, XMLMixin):
                 self.fail("Incorrect choice %s" % choice)
             elpkrefs = [x.attrib['id'] for x in \
                         choice.iterfind(Index.TAG_PKGREF)]
-            self.assertEquals(sorted(["default.%s.%s" %
+            self.assertEqual(sorted(["default.%s.%s" %
                 (self.config.target_arch, x) for x in pkrefs]),
                               sorted(elpkrefs))
             packages.extend(pkrefs)
 
         items = [x.text[:-4] for x in self.index.root.iterfind(Index.TAG_ITEM) if
                  x.attrib['type']=='pkgref']
-        self.assertEquals(sorted(packages), sorted(items))
+        self.assertEqual(sorted(packages), sorted(items))
 
 
 class PkgRefTest(unittest.TestCase, XMLMixin):
@@ -128,10 +128,10 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
 
     def testAddRoot(self):
         self.pkgref._add_root()
-        self.assertEquals(self.pkgref.root.tag, PkgRef.TAG_PKGREF)
-        self.assertEquals(self.pkgref.root.attrib['spec'], PkgRef.SPEC_VERSION)
-        self.assertEquals(self.pkgref.root.attrib['uuid'], self.package.uuid)
-        self.assertEquals(len(self.pkgref.root.getchildren()), 0)
+        self.assertEqual(self.pkgref.root.tag, PkgRef.TAG_PKGREF)
+        self.assertEqual(self.pkgref.root.attrib['spec'], PkgRef.SPEC_VERSION)
+        self.assertEqual(self.pkgref.root.attrib['uuid'], self.package.uuid)
+        self.assertEqual(len(self.pkgref.root.getchildren()), 0)
 
     def testAddScripts(self):
         self.pkgref._add_root()
@@ -170,7 +170,7 @@ class PkgRefTest(unittest.TestCase, XMLMixin):
                 'parent', 'installTo.isRelativeType', 'installTo',
                 'version', 'identifier']
         docmods = [x.text for x in config.iterfind(PkgRef.TAG_MOD)]
-        self.assertEquals(sorted(mods), sorted(docmods))
+        self.assertEqual(sorted(mods), sorted(docmods))
         flags = self.find_one(config, PkgRef.TAG_FLAGS)
         self.find_one(flags, PkgRef.TAG_FOLLOW_SYMLINKS)
 
@@ -204,10 +204,10 @@ class PkgContentsTest(unittest.TestCase, XMLMixin):
 
     def testAddRoot(self):
         self.pkgcontents._add_root()
-        self.assertEquals(self.pkgcontents.root.tag,
+        self.assertEqual(self.pkgcontents.root.tag,
                 PkgContents.TAG_PKG_CONTENTS)
-        self.assertEquals(self.pkgcontents.root.attrib['spec'], PkgContents.SPEC_VERSION)
-        self.assertEquals(len(self.pkgcontents.root.getchildren()), 0)
+        self.assertEqual(self.pkgcontents.root.attrib['spec'], PkgContents.SPEC_VERSION)
+        self.assertEqual(len(self.pkgcontents.root.getchildren()), 0)
 
     def testAddPackageRoot(self):
         self.pkgcontents._add_root()
@@ -222,7 +222,7 @@ class PkgContentsTest(unittest.TestCase, XMLMixin):
         children = [x for x in self.pkgcontents.proot.getchildren()
                     if x.tag == PkgContents.TAG_F]
         children_path = [x.attrib['n'] for x in children]
-        self.assertEquals(sorted(children_path), sorted(['bin', 'lib', 'README']))
+        self.assertEqual(sorted(children_path), sorted(['bin', 'lib', 'README']))
         for c in children:
             if c.attrib['n'] == 'bin':
                 self.check_attrib(c, PkgContents.TAG_F, 'n', 'gst-inspect')
@@ -232,9 +232,9 @@ class PkgContentsTest(unittest.TestCase, XMLMixin):
                         self.check_attrib(c, PkgContents.TAG_F, 'n',
                                          'libgstplugin.so')
                     else:
-                        self.assertEquals(c.attrib['n'], 'libgstreamer.so.1.0')
+                        self.assertEqual(c.attrib['n'], 'libgstreamer.so.1.0')
             else:
-                self.assertEquals(c.attrib['n'], 'README')
+                self.assertEqual(c.attrib['n'], 'README')
 
 class TestPMDoc(unittest.TestCase):
 
@@ -269,4 +269,4 @@ class TestPMDoc(unittest.TestCase):
         for p in packages:
             expected_files.append("%s.xml" % p)
             expected_files.append("%s-contents.xml" % p)
-        self.assertEquals(sorted(files), sorted(expected_files))
+        self.assertEqual(sorted(files), sorted(expected_files))

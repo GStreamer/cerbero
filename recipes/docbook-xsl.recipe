@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
                     lines= f.readlines()
                     if len(lines) != 0:
                         lines = lines[2:-1]
-            except Exception, ex:
+            except Exception as ex:
                 lines = ['']
             return ''.join(lines)
 

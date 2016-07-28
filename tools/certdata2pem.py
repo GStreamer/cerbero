@@ -70,13 +70,13 @@ for line in open('certdata.txt', 'r'):
         field, type = line_parts
         value = None
     else:
-        raise NotImplementedError, 'line_parts < 2 not supported.'
+        raise NotImplementedError('line_parts < 2 not supported.')
     if type == 'MULTILINE_OCTAL':
         in_multiline = True
         value = ""
         continue
     obj[field] = value
-if len(obj.items()) > 0:
+if len(list(obj.items())) > 0:
     objects.append(obj)
 
 # Read blacklist.
@@ -95,7 +95,7 @@ for obj in objects:
     if obj['CKA_CLASS'] not in ('CKO_NETSCAPE_TRUST', 'CKO_NSS_TRUST'):
         continue
     if obj['CKA_LABEL'] in blacklist:
-        print "Certificate %s blacklisted, ignoring." % obj['CKA_LABEL']
+        print("Certificate %s blacklisted, ignoring." % obj['CKA_LABEL'])
     elif obj['CKA_TRUST_SERVER_AUTH'] in ('CKT_NETSCAPE_TRUSTED_DELEGATOR',
                                           'CKT_NSS_TRUSTED_DELEGATOR'):
         trust[obj['CKA_LABEL']] = True
@@ -104,13 +104,13 @@ for obj in objects:
         trust[obj['CKA_LABEL']] = True
     elif obj['CKA_TRUST_SERVER_AUTH'] in ('CKT_NETSCAPE_UNTRUSTED',
                                           'CKT_NSS_NOT_TRUSTED'):
-        print '!'*74
-        print "UNTRUSTED BUT NOT BLACKLISTED CERTIFICATE FOUND: %s" % obj['CKA_LABEL']
-        print '!'*74
+        print('!'*74)
+        print("UNTRUSTED BUT NOT BLACKLISTED CERTIFICATE FOUND: %s" % obj['CKA_LABEL'])
+        print('!'*74)
     else:
-        print "Ignoring certificate %s.  SAUTH=%s, EPROT=%s" % \
+        print("Ignoring certificate %s.  SAUTH=%s, EPROT=%s" % \
               (obj['CKA_LABEL'], obj['CKA_TRUST_SERVER_AUTH'],
-               obj['CKA_TRUST_EMAIL_PROTECTION'])
+               obj['CKA_TRUST_EMAIL_PROTECTION']))
 
 for obj in objects:
     if obj['CKA_CLASS'] == 'CKO_CERTIFICATE':

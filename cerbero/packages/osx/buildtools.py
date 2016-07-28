@@ -54,7 +54,7 @@ class PackageBuild(object):
 
     def _cmd_with_args(self, args, output):
         args_str = ''
-        for k, v in args.iteritems():
+        for k, v in args.items():
             args_str += " --%s '%s'" % (k, v)
         return '%s %s %s' % (self.CMD, args_str, output)
 

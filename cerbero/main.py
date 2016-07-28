@@ -20,9 +20,9 @@ from cerbero import hacks
 
 try:
     import argparse
-except ImportError, e:
-    print "Could not import argparse. Try installing it with "\
-          "'sudo easy_install argparse"
+except ImportError as e:
+    print("Could not import argparse. Try installing it with "\
+          "'sudo easy_install argparse")
     raise e
 
 import sys
@@ -96,28 +96,28 @@ class Main(object):
         try:
             self.config = config.Config()
             self.config.load(self.args.config)
-        except ConfigurationError, exc:
+        except ConfigurationError as exc:
             self.log_error(exc, False)
 
     def run_command(self):
         command = self.args.command
         try:
             res = commands.run(command, self.config, self.args)
-        except UsageError, exc:
+        except UsageError as exc:
             self.log_error(exc, True, command)
             sys.exit(1)
-        except FatalError, exc:
+        except FatalError as exc:
             traceback.print_exc()
             self.log_error(exc, True, command)
-        except BuildStepError, exc:
+        except BuildStepError as exc:
             self.log_error(exc.msg, False, command)
-        except AbortedError, exc:
+        except AbortedError as exc:
             self.log_error('', False, command)
-        except CerberoException, exc:
+        except CerberoException as exc:
             self.log_error(exc, False, command)
         except KeyboardInterrupt:
             self.log_error(_('Interrupted'))
-        except IOError, e:
+        except IOError as e:
             if e.errno != errno.EPIPE:
                 raise
             sys.exit(0)
