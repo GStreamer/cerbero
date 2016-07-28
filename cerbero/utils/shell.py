@@ -165,8 +165,13 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
     try:
         process = subprocess.Popen(cmd, cwd=cmd_dir,
                                    stdout=subprocess.PIPE,
-                                   stderr=open(os.devnull), shell=shell)
+                                   stderr=subprocess.DEVNULL, shell=shell)
         output, unused_err = process.communicate()
+        if sys.stdout.encoding:
+            output = output.decode(encoding=sys.stdout.encoding, errors='ignore')
+        else:
+            output = output.decode(errors='ignore')
+
         if process.poll() and fail:
             raise Exception()
     except Exception:
