@@ -18,7 +18,7 @@
 
 import os
 import sys
-
+import collections
 
 ### XML Hacks ###
 
@@ -61,13 +61,12 @@ etree.ElementTree.write = write
 # am_cv_python_platform
 
 environclass = os.environ.__class__
-import UserDict
 
 
 class _Environ(environclass):
 
     def __init__(self, environ):
-        UserDict.UserDict.__init__(self)
+        super().__init__()
         self.data = {}
         for k, v in list(environ.items()):
             self.data[k] = v

@@ -499,7 +499,7 @@ class Config (object):
     def _perl_version(self):
         version = shell.check_call("perl -e 'print \"$]\";'")
         # FIXME: when perl's mayor is >= 10
-        mayor = version[0]
+        mayor = str(version[0])
         minor = str(int(version[2:5]))
         revision = str(int(version[5:8]))
         return '.'.join([mayor, minor, revision])
