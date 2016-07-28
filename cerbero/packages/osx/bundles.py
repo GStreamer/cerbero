@@ -148,10 +148,10 @@ class FrameworkBundlePackager(BundlePackagerBase):
             links[name] = 'Versions/Current/%s' % name
 
         # Create all links
-        for dest, src in links.iteritems():
+        for dest, src in links.items():
             shell.call ('ln -s %s %s' % (src, dest), tmp)
         inner_tmp = os.path.join(tmp, vdir)
-        for dest, src in inner_links.iteritems():
+        for dest, src in inner_links.items():
             shell.call ('ln -s %s %s' % (src, dest), inner_tmp)
 
         # Copy the framework library to Versions/$VERSION/$ARCH/Framework

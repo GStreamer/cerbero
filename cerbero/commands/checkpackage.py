@@ -43,8 +43,7 @@ class CheckPackage(Command):
 
         store = PackagesStore(config)
         p = store.get_package(p_name)
-        ordered_recipes = map(lambda x: cookbook.get_recipe(x),
-                    p.recipes_dependencies())
+        ordered_recipes = [cookbook.get_recipe(x) for x in p.recipes_dependencies()]
 
         for recipe in ordered_recipes:
             if cookbook.recipe_needs_build(recipe.name):
@@ -62,7 +61,7 @@ class CheckPackage(Command):
                 try:
                     m.message('Running checks for recipe %s' % recipe.name)
                     stepfunc()
-                except Exception, ex:
+                except Exception as ex:
                     failed.append(recipe.name)
                     m.warning(_("%s checks failed: %s") % (recipe.name, ex))
         if failed:

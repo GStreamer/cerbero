@@ -65,12 +65,12 @@ class ShowConfig(Command):
     def run(self, config, args):
         for n in config._properties:
             if n == "variants":
-                print "%25s :" % (n)
+                print("%25s :" % (n))
                 variants = getattr(config, n).__dict__
                 for v in variants:
-                    print "%30s : %s" % (v, variants[v])
+                    print("%30s : %s" % (v, variants[v]))
             else:
-                print "%25s : %s" % (n, getattr(config, n))
+                print("%25s : %s" % (n, getattr(config, n)))
 
 
 register_command(List)

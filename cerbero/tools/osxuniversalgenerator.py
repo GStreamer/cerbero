@@ -133,14 +133,14 @@ class OSXUniversalGenerator(object):
                 if ftype.startswith('ERROR') and f.endswith('.h'):
                     action = 'copy'
                 else:
-                    raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
+                    raise Exception('Unexpected file type %s %s' % (str(ftype), f))
             actions.append(action)
         if len(actions) == 0:
             return 'skip' #we should skip this one, the file doesn't exist
         all_same = all(x == actions[0] for x in actions)
         if not all_same:
-            raise Exception, 'Different file types found: %s : %s' \
-                             % (str(ftype), str(files_list))
+            raise Exception('Different file types found: %s : %s' \
+                             % (str(ftype), str(files_list)))
         return actions[0]
 
     def do_merge(self, filepath, dirs):
@@ -165,7 +165,7 @@ class OSXUniversalGenerator(object):
         elif action == 'skip':
             pass #just pass
         else:
-            raise Exception, 'unexpected action %s' % action
+            raise Exception('unexpected action %s' % action)
 
     def parse_dirs(self, dirs, filters=None):
         self.missing = []

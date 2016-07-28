@@ -71,24 +71,24 @@ class LinuxPackagesTest(unittest.TestCase):
         # Test default values
         package = Package1(config, None, None)
         packager = linux.LinuxPackager(config, package, None)
-        self.assertEquals(packager.package_prefix, '')
-        self.assertEquals(packager.full_package_name, 'gstreamer-test1-1.0')
-        self.assertEquals(packager.packager, DEFAULT_PACKAGER)
+        self.assertEqual(packager.package_prefix, '')
+        self.assertEqual(packager.full_package_name, 'gstreamer-test1-1.0')
+        self.assertEqual(packager.packager, DEFAULT_PACKAGER)
 
         # Test packages_prefix and packager
         config.packages_prefix = 'test'
         config.packager = 'Pin <pan@p.un>'
         packager = linux.LinuxPackager(config, package, None)
-        self.assertEquals(packager.package_prefix, 'test-')
-        self.assertEquals(packager.full_package_name,
+        self.assertEqual(packager.package_prefix, 'test-')
+        self.assertEqual(packager.full_package_name,
                           'test-gstreamer-test1-1.0')
-        self.assertEquals(packager.packager, 'Pin <pan@p.un>')
+        self.assertEqual(packager.packager, 'Pin <pan@p.un>')
 
         # Test ignore package
         package.ignore_package_prefix = True
         packager = linux.LinuxPackager(config, package, None)
-        self.assertEquals(packager.package_prefix, '')
-        self.assertEquals(packager.full_package_name, 'gstreamer-test1-1.0')
+        self.assertEqual(packager.package_prefix, '')
+        self.assertEqual(packager.full_package_name, 'gstreamer-test1-1.0')
 
     def testRequires(self):
         self.packager._empty_packages = []
@@ -98,25 +98,25 @@ class LinuxPackagesTest(unittest.TestCase):
                            'gstreamer-test1'])
 
         requires = self.packager.get_requires(PackageType.RUNTIME, '-dev')
-        self.assertEquals(expected, requires)
+        self.assertEqual(expected, requires)
 
         # test devel packages
         requires = self.packager.get_requires(PackageType.DEVEL, '-dev')
-        self.assertEquals([], requires)
+        self.assertEqual([], requires)
         self.store.get_package('gstreamer-test1').has_devel_package = True
         requires = self.packager.get_requires(PackageType.DEVEL, '-dev')
-        self.assertEquals(['gstreamer-test1-dev'], requires)
+        self.assertEqual(['gstreamer-test1-dev'], requires)
         for p in expected:
             self.store.get_package(p).has_devel_package = True
         requires = self.packager.get_requires(PackageType.DEVEL, '-dev')
-        self.assertEquals([x + '-dev' for x in expected], requires)
+        self.assertEqual([x + '-dev' for x in expected], requires)
 
         # test empty packages
         self.packager._empty_packages = \
             [self.store.get_package('gstreamer-test2')]
         requires = self.packager.get_requires(PackageType.RUNTIME, '-dev')
         expected.remove('gstreamer-test2')
-        self.assertEquals(expected, requires)
+        self.assertEqual(expected, requires)
 
     def testMetaPackageRequires(self):
         self.packager._empty_packages = []
@@ -127,16 +127,16 @@ class LinuxPackagesTest(unittest.TestCase):
         self.store.get_package('gstreamer-test3').has_runtime_package = True
         self.store.get_package('gstreamer-test-bindings').has_runtime_package = True
         requires = self.packager.get_meta_requires(PackageType.RUNTIME, '')
-        self.assertEquals(expected, requires)
+        self.assertEqual(expected, requires)
 
         # test devel packages
         requires = self.packager.get_meta_requires(PackageType.DEVEL, '-dev')
-        self.assertEquals(([], [], []), requires)
+        self.assertEqual(([], [], []), requires)
 
         # test empty packages
         self.store.get_package('gstreamer-test1').has_devel_package = True
         requires = self.packager.get_meta_requires(PackageType.DEVEL, '-dev')
-        self.assertEquals((['gstreamer-test1-dev'], [], []), requires)
+        self.assertEqual((['gstreamer-test1-dev'], [], []), requires)
 
         for p in [self.store.get_package(x[0]) for x in expected]:
             p.has_devel_package = True
@@ -144,7 +144,7 @@ class LinuxPackagesTest(unittest.TestCase):
         expected = (['gstreamer-test1-dev'],
                     ['gstreamer-test3-dev'],
                     ['gstreamer-test-bindings-dev'])
-        self.assertEquals(expected, requires)
+        self.assertEqual(expected, requires)
 
     def testPackDeps(self):
         expected = sorted(['gstreamer-test-bindings',
@@ -158,12 +158,12 @@ class LinuxPackagesTest(unittest.TestCase):
         global packed
         packed = []
         self.packager.pack_deps('', '', True)
-        self.assertEquals(sorted(packed), expected)
+        self.assertEqual(sorted(packed), expected)
         packed = []
 
         self.packager.devel = False
         self.packager.pack_deps('', '', True)
-        self.assertEquals(sorted(packed), expected)
+        self.assertEqual(sorted(packed), expected)
         packed = []
 
     def testPack(self):
@@ -172,11 +172,11 @@ class LinuxPackagesTest(unittest.TestCase):
         paths = self.packager.pack('', False, True, True, False, None)
         self.assertTrue(os.path.exists('gstreamer-runtime-stamp'))
         os.remove('gstreamer-runtime-stamp')
-        self.assertEquals(paths, ['test'])
+        self.assertEqual(paths, ['test'])
 
         self.packager = DummyPackager(self.config,
             self.store.get_package('gstreamer-test1'), self.store)
         paths = self.packager.pack('', False, True, True, False, None)
         self.assertTrue(os.path.exists('gstreamer-test1-stamp'))
         os.remove('gstreamer-test1-stamp')
-        self.assertEquals(paths, ['test'])
+        self.assertEqual(paths, ['test'])

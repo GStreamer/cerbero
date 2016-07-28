@@ -95,7 +95,7 @@ class Oven (object):
         for recipe in ordered_recipes:
             try:
                 self._cook_recipe(recipe, i, len(ordered_recipes))
-            except BuildStepError, be:
+            except BuildStepError as be:
                 if not self.interactive:
                     raise be
                 msg = be.msg

@@ -31,6 +31,7 @@ from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.utils import N_, _
 from cerbero.utils import shell
 from cerbero.utils import messages as m
+from functools import reduce
 
 
 class MetaRecipe(type):
@@ -84,7 +85,7 @@ class BuildSteps(object):
                 BuildSteps.POST_INSTALL]
 
 
-class Recipe(FilesProvider):
+class Recipe(FilesProvider, metaclass=MetaRecipe):
     '''
     Base class for recipes.
     A Recipe describes a module and the way it's built.
@@ -108,8 +109,6 @@ class Recipe(FilesProvider):
     @cvar runtime_dep: runtime dep common to all recipes
     @type runtime_dep: bool
     '''
-
-    __metaclass__ = MetaRecipe
 
     name = None
     licenses = []
@@ -266,7 +265,7 @@ class MetaUniversalRecipe(type):
             setattr(cls, step, lambda self, name=step: step_func(self, name))
 
 
-class UniversalRecipe(object):
+class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
     '''
     Stores similar recipe objects that are going to be built together
 
@@ -275,16 +274,14 @@ class UniversalRecipe(object):
     other targets, it will likely be a unitary group
     '''
 
-    __metaclass__ = MetaUniversalRecipe
-
     def __init__(self, config):
         self._config = config
         self._recipes = {}
         self._proxy_recipe = None
 
     def __str__(self):
-        if self._recipes.values():
-            return str(self._recipes.values()[0])
+        if list(self._recipes.values()):
+            return str(list(self._recipes.values())[0])
         return super(UniversalRecipe, self).__str__()
 
     def add_recipe(self, recipe):
@@ -317,17 +314,17 @@ class UniversalRecipe(object):
     def __setattr__(self, name, value):
         object.__setattr__(self, name, value)
         if name not in ['_config', '_recipes', '_proxy_recipe']:
-            for o in self._recipes.values():
+            for o in list(self._recipes.values()):
                 setattr(o, name, value)
 
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
             # No, really, let's not download a million times...
-            stepfunc = getattr(self._recipes.values()[0], step)
+            stepfunc = getattr(list(self._recipes.values())[0], step)
             stepfunc()
             return
 
-        for arch, recipe in self._recipes.iteritems():
+        for arch, recipe in self._recipes.items():
             config = self._config.arch_config[arch]
             config.do_setup_env()
             stepfunc = getattr(recipe, step)
@@ -353,7 +350,7 @@ class UniversalFlatRecipe(UniversalRecipe):
 
     def merge(self):
         arch_inputs = {}
-        for arch, recipe in self._recipes.iteritems():
+        for arch, recipe in self._recipes.items():
             # change the prefix temporarly to the arch prefix where files are
             # actually installed
             recipe.config.prefix = os.path.join(self.config.prefix, arch)
@@ -361,15 +358,15 @@ class UniversalFlatRecipe(UniversalRecipe):
             recipe.config.prefix = self._config.prefix
 
         # merge the common files
-        inputs = reduce(lambda x, y: x & y, arch_inputs.values())
+        inputs = reduce(lambda x, y: x & y, list(arch_inputs.values()))
         output = self._config.prefix
         generator = OSXUniversalGenerator(output)
         generator.merge_files(list(inputs),
                 [os.path.join(self._config.prefix, arch) for arch in
-                 self._recipes.keys()])
+                 list(self._recipes.keys())])
 
         # merge the architecture specific files
-        for arch in self._recipes.keys():
+        for arch in list(self._recipes.keys()):
             ainputs = list(inputs ^ arch_inputs[arch])
             output = self._config.prefix
             generator = OSXUniversalGenerator(output)
@@ -379,7 +376,7 @@ class UniversalFlatRecipe(UniversalRecipe):
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
             # No, really, let's not download a million times...
-            stepfunc = getattr(self._recipes.values()[0], step)
+            stepfunc = getattr(list(self._recipes.values())[0], step)
             stepfunc()
             return
 
@@ -387,9 +384,9 @@ class UniversalFlatRecipe(UniversalRecipe):
         # with the same final prefix, but we want to install each architecture
         # on a different path (eg: /path/to/prefix/x86).
 
-        archs_prefix = self._recipes.keys()
+        archs_prefix = list(self._recipes.keys())
 
-        for arch, recipe in self._recipes.iteritems():
+        for arch, recipe in self._recipes.items():
             config = self._config.arch_config[arch]
             config.do_setup_env()
             stepfunc = getattr(recipe, step)

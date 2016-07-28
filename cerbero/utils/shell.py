@@ -79,7 +79,7 @@ def close_logfile_output(dump=False):
         while True:
             data = LOGFILE.read()
             if data:
-                print data
+                print(data)
             else:
                 break
     # if logfile is empty, remove it
@@ -249,7 +249,7 @@ def download(url, destination=None, recursive=False, check_cert=True):
             logging.info("Downloading %s", url)
         try:
             call(cmd, path)
-        except FatalError, e:
+        except FatalError as e:
             os.remove(destination)
             raise e
 
@@ -286,7 +286,7 @@ def download_curl(url, destination=None, recursive=False, check_cert=True):
         logging.info("Downloading %s", url)
         try:
             call(cmd, path)
-        except FatalError, e:
+        except FatalError as e:
             os.remove(destination)
             raise e
 
@@ -346,7 +346,7 @@ def replace(filepath, replacements):
     ''' Replaces keys in the 'replacements' dict with their values in file '''
     with open(filepath, 'r') as f:
         content = f.read()
-    for k, v in replacements.iteritems():
+    for k, v in replacements.items():
         content = content.replace(k, v)
     with open(filepath, 'w+') as f:
         f.write(content)
@@ -360,9 +360,9 @@ def prompt(message, options=[]):
     ''' Prompts the user for input with the message and options '''
     if len(options) != 0:
         message = "%s [%s] " % (message, '/'.join(options))
-    res = raw_input(message)
+    res = input(message)
     while res not in [str(x) for x in options]:
-        res = raw_input(message)
+        res = input(message)
     return res
 
 
@@ -371,9 +371,9 @@ def prompt_multiple(message, options):
     output = message + '\n'
     for i in range(len(options)):
         output += "[%s] %s\n" % (i, options[i])
-    res = raw_input(output)
+    res = input(output)
     while res not in [str(x) for x in range(len(options))]:
-        res = raw_input(output)
+        res = input(output)
     return options[int(res)]
 
 

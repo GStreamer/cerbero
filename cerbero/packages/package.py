@@ -261,7 +261,7 @@ class Package(PackageBase):
 
     def devel_recipes_licenses(self):
         licenses = self._list_licenses(self._recipes_files_devel)
-        for recipe_name, categories in self._recipes_files.iteritems():
+        for recipe_name, categories in self._recipes_files.items():
             # also add development licenses for recipe from which used the
             # 'libs' category
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
@@ -276,7 +276,7 @@ class Package(PackageBase):
 
     def files_list(self):
         files = []
-        for recipe_name, categories in self._recipes_files.iteritems():
+        for recipe_name, categories in self._recipes_files.items():
             recipe = self.cookbook.get_recipe(recipe_name)
             if len(categories) == 0:
                 rfiles = recipe.dist_files_list()
@@ -287,13 +287,13 @@ class Package(PackageBase):
 
     def devel_files_list(self):
         files = []
-        for recipe, categories in self._recipes_files.iteritems():
+        for recipe, categories in self._recipes_files.items():
             # only add development files for recipe from which used the 'libs'
             # category
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
                 rfiles = self.cookbook.get_recipe(recipe).devel_files_list()
                 files.extend(rfiles)
-        for recipe, categories in self._recipes_files_devel.iteritems():
+        for recipe, categories in self._recipes_files_devel.items():
             recipe = self.cookbook.get_recipe(recipe)
             if not categories:
                 rfiles = recipe.devel_files_list()
@@ -311,21 +311,21 @@ class Package(PackageBase):
         self._recipes_files = {}
         for r in self._files:
             l = r.split(':')
-            if self._recipes_files.has_key(l[0]):
+            if l[0] in self._recipes_files:
                 self._recipes_files[l[0]] += l[1:]
             else:
                 self._recipes_files[l[0]] = l[1:]
         self._recipes_files_devel = {}
         for r in self._files_devel:
             l = r.split(':')
-            if self._recipes_files_devel.has_key(l[0]):
+            if l[0] in self._recipes_files_devel:
                 self._recipes_files_devel[l[0]] += l[1:]
             else:
                 self._recipes_files_devel[l[0]] = l[1:]
 
     def _list_licenses(self, recipes_files):
         licenses = {}
-        for recipe_name, categories in recipes_files.iteritems():
+        for recipe_name, categories in recipes_files.items():
             r = self.cookbook.get_recipe(recipe_name)
             # Package.files|files_devel|platform_files|platform_files_devel = \
             #        [recipe:category]

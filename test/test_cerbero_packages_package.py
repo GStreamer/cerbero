@@ -50,23 +50,23 @@ class PackageTest(unittest.TestCase):
         shutil.rmtree(self.tmp)
 
     def testPackageMode(self):
-        self.assertEquals(self.linuxpackage.name, 'gstreamer-test1')
-        self.assertEquals(self.linuxpackage.shortdesc, 'GStreamer Test')
+        self.assertEqual(self.linuxpackage.name, 'gstreamer-test1')
+        self.assertEqual(self.linuxpackage.shortdesc, 'GStreamer Test')
         self.linuxpackage.set_mode(PackageType.DEVEL)
-        self.assertEquals(self.linuxpackage.package_mode, PackageType.DEVEL)
-        self.assertEquals(self.linuxpackage.name, 'gstreamer-test1-devel')
-        self.assertEquals(self.linuxpackage.shortdesc,
+        self.assertEqual(self.linuxpackage.package_mode, PackageType.DEVEL)
+        self.assertEqual(self.linuxpackage.name, 'gstreamer-test1-devel')
+        self.assertEqual(self.linuxpackage.shortdesc,
             'GStreamer Test (Development Files)')
 
     def testParseFiles(self):
-        self.assertEquals(self.win32package._recipes_files['recipe1'],
+        self.assertEqual(self.win32package._recipes_files['recipe1'],
                 ['misc', 'libs', 'bins'])
-        self.assertEquals(self.win32package._recipes_files['recipe5'], ['libs'])
+        self.assertEqual(self.win32package._recipes_files['recipe5'], ['libs'])
 
     def testListRecipesDeps(self):
-        self.assertEquals(self.win32package.recipes_dependencies(),
+        self.assertEqual(self.win32package.recipes_dependencies(),
                           ['recipe1', 'recipe5', 'recipe2'])
-        self.assertEquals(self.linuxpackage.recipes_dependencies(),
+        self.assertEqual(self.linuxpackage.recipes_dependencies(),
                           ['recipe1', 'recipe2'])
 
     def testFilesList(self):
@@ -79,9 +79,9 @@ class PackageTest(unittest.TestCase):
                 'lib/libgstreamer-x11.so.1', 'lib/libgstreamer-0.10.so.1',
                 'libexec/gstreamer-0.10/pluginsloader', 'linux']
 
-        self.assertEquals(sorted(winfiles),
+        self.assertEqual(sorted(winfiles),
             sorted(self.win32package.files_list()))
-        self.assertEquals(sorted(linuxfiles),
+        self.assertEqual(sorted(linuxfiles),
             sorted(self.linuxpackage.files_list()))
 
     def testDevelFilesList(self):
@@ -97,18 +97,18 @@ class PackageTest(unittest.TestCase):
             'lib/libtest.def', 'lib/test.lib', 'lib/libgstreamer-0.10.dll.a',
             'lib/libgstreamer-0.10.def', 'lib/gstreamer-0.10.lib']
 
-        self.assertEquals(sorted(windevfiles), self.win32package.devel_files_list())
-        self.assertEquals(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
+        self.assertEqual(sorted(windevfiles), self.win32package.devel_files_list())
+        self.assertEqual(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
 
     def testSystemDependencies(self):
         config = Config(self.tmp, Platform.LINUX)
         config.target_distro = Distro.DEBIAN
         package = Package4(config, None, None)
-        self.assertEquals(package.get_sys_deps(), ['python'])
+        self.assertEqual(package.get_sys_deps(), ['python'])
         config.target_distro = Distro.REDHAT
         config.target_distro_version = DistroVersion.FEDORA_16
         package = Package4(config, None, None)
-        self.assertEquals(package.get_sys_deps(), ['python27'])
+        self.assertEqual(package.get_sys_deps(), ['python27'])
 
 
 class TestMetaPackages(unittest.TestCase):
@@ -132,20 +132,20 @@ class TestMetaPackages(unittest.TestCase):
             files.extend(list_func())
 
         list_func = getattr(self.package, func_name)
-        self.assertEquals(sorted(files), list_func())
+        self.assertEqual(sorted(files), list_func())
 
     def testListPackages(self):
         expected = ['gstreamer-test1', 'gstreamer-test3',
                 'gstreamer-test-bindings', 'gstreamer-test2']
-        self.assertEquals(self.package.list_packages(), expected)
+        self.assertEqual(self.package.list_packages(), expected)
 
     def testPlatfromPackages(self):
         packages_attr = object.__getattribute__(self.package, 'packages')
-        self.assertEquals(len(packages_attr), 3)
+        self.assertEqual(len(packages_attr), 3)
         platform_packages_attr = object.__getattribute__(self.package,
                                                          'platform_packages')
-        self.assertEquals(len(platform_packages_attr), 1)
-        self.assertEquals(len(self.package.packages),
+        self.assertEqual(len(platform_packages_attr), 1)
+        self.assertEqual(len(self.package.packages),
                 len(packages_attr) + len(platform_packages_attr))
 
     def testFilesList(self):
@@ -174,7 +174,7 @@ class AppPackageTest(unittest.TestCase):
         self.app.embed_deps = True
         expected = self.app._app_recipe.files_list()
         result = self.app.files_list()
-        self.assertEquals(expected, result)
+        self.assertEqual(expected, result)
 
     def testListFilesWithEmbededDeps(self):
         self.app.embed_deps = True
@@ -188,16 +188,16 @@ class AppPackageTest(unittest.TestCase):
             files.extend(package.files_list())
         files.extend(self.app._app_recipe.files_list())
         files = sorted(set(files))
-        self.assertEquals(files, self.app.files_list())
+        self.assertEqual(files, self.app.files_list())
 
     def testListFilesWithoutEmbededDeps(self):
         self.app.embed_deps = False
         expected = self.app._app_recipe.files_list()
         result = self.app.files_list()
-        self.assertEquals(expected, result)
+        self.assertEqual(expected, result)
 
     def testDevelFilesList(self):
-        self.assertEquals(self.app.devel_files_list(), [])
+        self.assertEqual(self.app.devel_files_list(), [])
 
     def testAllFilesList(self):
-        self.assertEquals(self.app.files_list(), self.app.all_files_list())
+        self.assertEqual(self.app.files_list(), self.app.all_files_list())

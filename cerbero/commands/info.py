@@ -58,8 +58,8 @@ class PackageInfo(Command):
                 recipes_licenses = p.recipes_licenses()
                 recipes_licenses.update(p.devel_recipes_licenses())
                 for recipe_name, categories_licenses in \
-                        recipes_licenses.iteritems():
-                    for category_licenses in categories_licenses.itervalues():
+                        recipes_licenses.items():
+                    for category_licenses in categories_licenses.values():
                         licenses.extend(category_licenses)
             licenses = sorted(list(set(licenses)))
             d = {'name': p.name, 'version': p.version, 'url': p.url,

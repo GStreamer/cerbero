@@ -43,7 +43,7 @@ class AndroidBootstrapper (BootstrapperBase):
             try:
                 shell.call('unzip %s' % ndk_zip, dest)
                 shell.call('mv android-ndk-%s/* .' % self.NDK_VERSION, dest)
-            except Exception, ex:
+            except Exception as ex:
                 raise FatalError(_("Error installing Android NDK: %s") % (ex))
 
 

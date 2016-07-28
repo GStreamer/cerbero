@@ -62,9 +62,7 @@ class Recipe(recipe.Recipe):
     platform_licenses_test = {Platform.LINUX: [License.BSD]}
 
 
-class Class3(object):
-
-    __metaclass__ = recipe.MetaUniversalRecipe
+class Class3(object, metaclass=recipe.MetaUniversalRecipe):
 
     def _do_step(self, name):
         return name
@@ -92,12 +90,12 @@ class TestReceiptMetaClass(unittest.TestCase):
     def testFunctions(self):
         self.assertTrue(hasattr(self.t, 'class1_method'))
         self.assertTrue(hasattr(self.t, 'class2_method'))
-        self.assertEquals(self.t.fetch(), 'CODEPASS')
-        self.assertEquals(self.t.compile(), 'CODEPASS')
-        self.assertEquals(self.t.post_install(), 'CODEPASS')
+        self.assertEqual(self.t.fetch(), 'CODEPASS')
+        self.assertEqual(self.t.compile(), 'CODEPASS')
+        self.assertEqual(self.t.post_install(), 'CODEPASS')
 
     def testSubclassesInit(self):
-        self.assertEquals(self.t.test, 'CODEPASS')
+        self.assertEqual(self.t.test, 'CODEPASS')
 
 
 class TestReceipt(unittest.TestCase):
@@ -114,14 +112,14 @@ class TestReceipt(unittest.TestCase):
         build_dir = os.path.join(self.config.sources, self.recipe.package_name)
         build_dir = os.path.abspath(build_dir)
 
-        self.assertEquals(self.recipe.repo_dir, repo_dir)
-        self.assertEquals(self.recipe.build_dir, build_dir)
+        self.assertEqual(self.recipe.repo_dir, repo_dir)
+        self.assertEqual(self.recipe.build_dir, build_dir)
 
     def testListDeps(self):
         self.recipe.config.target_platform = Platform.LINUX
-        self.assertEquals(['dep1', 'dep2', 'dep3'], self.recipe.list_deps())
+        self.assertEqual(['dep1', 'dep2', 'dep3'], self.recipe.list_deps())
         self.recipe.config.target_platform = Platform.WINDOWS
-        self.assertEquals(['dep1', 'dep2', 'dep4'], self.recipe.list_deps())
+        self.assertEqual(['dep1', 'dep2', 'dep4'], self.recipe.list_deps())
 
     def testRemoveSteps(self):
         self.recipe._remove_steps(['donotexits'])
@@ -141,20 +139,20 @@ class TestLicenses(unittest.TestCase):
         self.recipe = Recipe(self.config)
 
     def testLicenses(self):
-        self.assertEquals(self.recipe.licenses, [License.LGPL])
+        self.assertEqual(self.recipe.licenses, [License.LGPL])
 
         licenses_libs = self.recipe.list_licenses_by_categories(['libs'])
-        self.assertEquals(licenses_libs['libs'], [License.LGPL])
-        self.assertEquals(licenses_libs.values(), [[License.LGPL]])
+        self.assertEqual(licenses_libs['libs'], [License.LGPL])
+        self.assertEqual(list(licenses_libs.values()), [[License.LGPL]])
         licenses_bins = self.recipe.list_licenses_by_categories(['bins'])
-        self.assertEquals(licenses_bins['bins'], [License.GPL])
-        self.assertEquals(licenses_bins.values(), [[License.GPL]])
+        self.assertEqual(licenses_bins['bins'], [License.GPL])
+        self.assertEqual(list(licenses_bins.values()), [[License.GPL]])
 
         self.recipe.platform = Platform.LINUX
         self.recipe.config.target_platform = Platform.LINUX
         licenses_test = self.recipe.list_licenses_by_categories(['test'])
-        self.assertEquals(licenses_test['test'], [License.BSD])
-        self.assertEquals(licenses_test.values(), [[License.BSD]])
+        self.assertEqual(licenses_test['test'], [License.BSD])
+        self.assertEqual(list(licenses_test.values()), [[License.BSD]])
 
 
 class TestMetaUniveralRecipe(unittest.TestCase):
@@ -164,7 +162,7 @@ class TestMetaUniveralRecipe(unittest.TestCase):
         for _, step in recipe.BuildSteps():
             self.assertTrue(hasattr(obj, step))
             stepfunc = getattr(obj, step)
-            self.assertEquals(stepfunc(), step)
+            self.assertEqual(stepfunc(), step)
 
 
 class TestUniversalRecipe(unittest.TestCase):
@@ -186,30 +184,30 @@ class TestUniversalRecipe(unittest.TestCase):
         self.assertTrue(self.recipe.is_empty())
 
     def testProxyEmpty(self):
-        self.failUnlessRaises(AttributeError, getattr, self.recipe, 'name')
+        self.assertRaises(AttributeError, getattr, self.recipe, 'name')
 
     def testProxyRecipe(self):
         self.recipe.add_recipe(self.recipe_x86)
-        self.assertEquals(self.recipe.name, self.recipe_x86.name)
-        self.assertEquals(self.recipe.licence, self.recipe_x86.licence)
-        self.assertEquals(self.recipe.uuid, self.recipe_x86.uuid)
+        self.assertEqual(self.recipe.name, self.recipe_x86.name)
+        self.assertEqual(self.recipe.licence, self.recipe_x86.licence)
+        self.assertEqual(self.recipe.uuid, self.recipe_x86.uuid)
 
     def testAddRecipe(self):
         self.recipe.add_recipe(self.recipe_x86)
-        self.assertEquals(self.recipe._recipes[Architecture.X86],
+        self.assertEqual(self.recipe._recipes[Architecture.X86],
                           self.recipe_x86)
-        self.assertEquals(self.recipe._proxy_recipe,
+        self.assertEqual(self.recipe._proxy_recipe,
                           self.recipe_x86)
 
     def testDifferentRecipe(self):
         self.recipe.add_recipe(self.recipe_x86)
         recipe_test = Recipe1(self.config_x86)
         recipe_test.name = 'noname'
-        self.failUnlessRaises(FatalError, self.recipe.add_recipe, recipe_test)
+        self.assertRaises(FatalError, self.recipe.add_recipe, recipe_test)
 
     def testSteps(self):
-        self.assertEquals(self.recipe.steps, [])
+        self.assertEqual(self.recipe.steps, [])
         self.recipe.add_recipe(self.recipe_x86)
         self.recipe.add_recipe(self.recipe_x86_64)
-        self.assertEquals(self.recipe.steps,
+        self.assertEqual(self.recipe.steps,
                 recipe.BuildSteps() + [recipe.BuildSteps.MERGE])

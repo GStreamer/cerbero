@@ -155,18 +155,18 @@ class GitCache (Source):
         # First try to get the sources from the cached dir if there is one
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
         if os.path.isdir(os.path.join(cached_dir, ".git")):
-            for remote, url in self.remotes.iteritems():
+            for remote, url in self.remotes.items():
                 git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
-            for remote, url in self.config.recipe_remotes(self.name).iteritems():
+            for remote, url in self.config.recipe_remotes(self.name).items():
                 git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
             git.fetch(self.repo_dir, fail=False)
         else:
             cached_dir = None
             # add remotes from both upstream and config so user can easily
             # cherry-pick patches between branches
-            for remote, url in self.remotes.iteritems():
+            for remote, url in self.remotes.items():
                 git.add_remote(self.repo_dir, remote, url)
-            for remote, url in self.config.recipe_remotes(self.name).iteritems():
+            for remote, url in self.config.recipe_remotes(self.name).items():
                 git.add_remote(self.repo_dir, remote, url)
             # fetch remote branches
             git.fetch(self.repo_dir, fail=False)

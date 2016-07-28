@@ -148,12 +148,12 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                 if len(s) == 4 and s[2] == 'T':
                     syms[s[3]].append(s)
             dups = {}
-            for k,v in syms.iteritems():
+            for k,v in syms.items():
                 if len(v) > 1:
                     dups[k] = v
             if dups:
                 m.warning ("The static library contains duplicated symbols")
-            for k, v in dups.iteritems():
+            for k, v in dups.items():
                 m.message (k)  # symbol name
                 for l in v:
                     m.message ("     %s" % l[0])  # file

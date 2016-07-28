@@ -57,7 +57,7 @@ class PackagesStore (object):
         @return: list of packages
         @rtype: list
         '''
-        packages = self._packages.values()
+        packages = list(self._packages.values())
         packages.sort(key=lambda x: x.name)
         return packages
 
@@ -160,7 +160,7 @@ class PackagesStore (object):
         self._packages = {}
         packages = defaultdict(dict)
         repos = self._config.get_packages_repos()
-        for reponame, (repodir, priority) in repos.iteritems():
+        for reponame, (repodir, priority) in repos.items():
             packages[int(priority)].update(
                     self._load_packages_from_dir(repodir))
         # Add recipes by asceding pripority
@@ -189,7 +189,7 @@ class PackagesStore (object):
                  'Distro': Distro, 'DistroVersion': DistroVersion,
                  'License': License, 'package': package,
                  'PackageType': PackageType}
-            execfile(filepath, d)
+            exec(compile(open(filepath).read(), filepath, 'exec'), d)
             if 'Package' in d:
                 p = d['Package'](self._config, self, self.cookbook)
             elif 'SDKPackage' in d:
@@ -206,7 +206,7 @@ class PackagesStore (object):
             # may have changed it
             p.load_files()
             return p
-        except Exception, ex:
+        except Exception as ex:
             import traceback
             traceback.print_exc()
             m.warning("Error loading package %s" % ex)

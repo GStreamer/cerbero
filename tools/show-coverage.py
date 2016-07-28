@@ -17,7 +17,7 @@ class Presentation:
 
     def show(self, maxlen=20):
         format = '%%-%ds  %%3d %%%%   (%%4d / %%4d)' % maxlen
-        print format % (self.name, self.percent, self.covered, self.lines)
+        print(format % (self.name, self.percent, self.covered, self.lines))
 
 
 class Coverage:
@@ -46,20 +46,19 @@ class Coverage:
 
     def show_results(self):
         if not hasattr(self, 'files'):
-            print 'No coverage data'
+            print('No coverage data')
             return
 
         if self.files:
-            self.maxlen = max(map(lambda f: len(self._strip_filename(f)),
-                                  self.files))
+            self.maxlen = max([len(self._strip_filename(f)) for f in self.files])
         else:
             self.maxlen = 0
 
-        print 'Coverage report:'
-        print '-' * (self.maxlen + 23)
+        print('Coverage report:')
+        print('-' * (self.maxlen + 23))
         for file in self.files:
             self.show_one(file)
-        print '-' * (self.maxlen + 23)
+        print('-' * (self.maxlen + 23))
 
         p = Presentation('Total', self.total_lines, self.total_covered)
         p.show(self.maxlen)

@@ -49,11 +49,11 @@ class TestPkgConfig(unittest.TestCase):
                     '/usr/lib/glib-2.0/include '
                     '/usr/include/libxml2',
              'lsp': ''}
-        self.assertEquals(expected, xcconfig._fill())
+        self.assertEqual(expected, xcconfig._fill())
 
     def testXCConfig(self):
         tmp = tempfile.NamedTemporaryFile()
         xcconfig = XCConfig('gstreamer-0.10')
         xcconfig.create(tmp.name)
         with open(tmp.name, 'r') as f:
-            self.assertEquals(f.read(), XCCONFIG)
+            self.assertEqual(f.read(), XCCONFIG)

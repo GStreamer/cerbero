@@ -98,10 +98,10 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
         for arch in [Architecture.X86, Architecture.X86_64]:
             res = self._get_file_type(
                     os.path.join(self.tmp, arch, 'lib', 'libfoo.so'))
-            self.assertEquals(res, SHARED_LIBRARY[arch])
+            self.assertEqual(res, SHARED_LIBRARY[arch])
             res = self._get_file_type(
                     os.path.join(self.tmp, arch, 'bin', 'test_app'))
-            self.assertEquals(res, EXECUTABLE[arch])
+            self.assertEqual(res, EXECUTABLE[arch])
 
     def testMergeDirs(self):
         self._compile(Architecture.X86)
@@ -158,7 +158,7 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
 
         self.assertTrue(os.path.exists(file1))
         self.assertTrue(os.path.exists(file2))
-        self.assertEquals(os.readlink(file2), file1)
+        self.assertEqual(os.readlink(file2), file1)
 
     def testMergePCFiles(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
@@ -171,7 +171,7 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
                 [os.path.join(self.tmp, Architecture.X86),
                  os.path.join(self.tmp, Architecture.X86_64)])
         pc_file = os.path.join(self.tmp, Architecture.UNIVERSAL, 'test.pc')
-        self.assertEquals(open(pc_file).readline(),
+        self.assertEqual(open(pc_file).readline(),
                 os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))
 
     def testMergedLibraryPaths(self):
