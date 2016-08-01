@@ -5,7 +5,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'openh264'
-    version = '1.5.0'
+    version = '1.6.0'
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
