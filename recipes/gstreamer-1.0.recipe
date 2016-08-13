@@ -1,22 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 
-GST_CONFIG_UNVERSAL='''\
-#ifdef __i386__
-#include "i386/gstconfig.h"
-#elif defined(__ppc__)
-#include "ppc/gstconfig.h"
-#elif defined(__x86_64__)
-#include "x86_64/gstconfig.h"
-#elif defined(__arm__)
-#include "arm/gstconfig.h"
-#elif defined(__arm64__)
-#include "arm64/gstconfig.h"
-#else
-#error "Unsupported Architecture"
-#endif
-'''
-
 class Recipe(recipe.Recipe):
     name = 'gstreamer-1.0'
     version = '1.9'
@@ -54,7 +38,6 @@ class Recipe(recipe.Recipe):
             'include/gstreamer-1.0/gst/base',
             'include/gstreamer-1.0/gst/controller',
             'include/gstreamer-1.0/gst/net',
-            'lib/gstreamer-1.0/include/gst/*.h',
             'lib/pkgconfig/gstreamer-1.0.pc',
             'lib/pkgconfig/gstreamer-base-1.0.pc',
             'lib/pkgconfig/gstreamer-controller-1.0.pc',
@@ -93,35 +76,5 @@ class Recipe(recipe.Recipe):
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            arch = self.config.target_arch
-            if arch == Architecture.X86:
-                arch = 'i386'
-            elif arch == Architecture.ARM64:
-                arch = 'arm64'
-            elif Architecture.is_arm(arch):
-                arch = 'arm'
-            self.files_devel.append(os.path.join('lib', 'gstreamer-1.0', 'include', 'gst', '*', 'gstconfig.h'))
-
     def post_install(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            # For the universal build we need to ship gstconfig.h of both
-            # architectures in a subfolder and include the correct one depending
-            # on the compiler architecture
-            arch = self.config.target_arch
-            if arch == Architecture.X86:
-                arch = 'i386'
-            elif arch == Architecture.ARM64:
-                arch = 'arm64'
-            elif Architecture.is_arm(arch):
-                arch = 'arm'
-
-            arch_dir = os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',
-                                     'include', 'gst', arch)
-            if not os.path.exists(arch_dir):
-                os.makedirs(arch_dir)
-            shutil.copyfile(os.path.join(self.build_dir, 'gst', 'gstconfig.h'),
-                        os.path.join(arch_dir, 'gstconfig.h'))
-            with open(os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',
-                                   'include', 'gst', 'gstconfig.h'), 'w+') as f:
-                f.write(GST_CONFIG_UNVERSAL)
+        pass
