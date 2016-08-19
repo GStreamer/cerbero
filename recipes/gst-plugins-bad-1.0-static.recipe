@@ -153,14 +153,12 @@ class Recipe(custom.GStreamerStatic):
             ],
         Platform.DARWIN: [
              'libgstapplemedia',
-             'libgstapplemedia_nonpublic',
              'libgstshm',
              'libgstopengl',
              'libgstdecklink',
             ],
         Platform.IOS: [
              'libgstapplemedia',
-             #'libgstapplemedia_nonpublic',
              'libgstopengl',
              'libgstshm',
             ],
