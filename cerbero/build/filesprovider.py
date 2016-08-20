@@ -37,6 +37,15 @@ class FilesProvider(object):
     LANG_CAT = 'lang'
     TYPELIB_CAT = 'typelibs'
 
+    # Extension Glob Legend:
+    # bext = binary extension
+    # sext = shared library extension
+    # sdir = shared library directory
+    # mext = module (plugin) extension
+    # smext = static module (plugin) extension
+    # pext = python module extension (.pyd on Windows)
+    # srext = ??? (original commit message that added this doesn't say what it's
+    #              for and it's used only by matplotlib; perhaps incorrectly)
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sext': '*-*.dll', 'sdir': 'bin',
             'mext': '.dll', 'smext': '.a', 'pext': '.pyd', 'srext': '.dll'},
