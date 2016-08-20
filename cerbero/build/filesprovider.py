@@ -18,10 +18,12 @@
 
 import os
 import re
+import glob
 import inspect
 
 from cerbero.config import Platform
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 
 class FilesProvider(object):
@@ -36,26 +38,28 @@ class FilesProvider(object):
     DEVEL_CAT = 'devel'
     LANG_CAT = 'lang'
     TYPELIB_CAT = 'typelibs'
+    _DLL_REGEX = r'^(lib)?{}(-[0-9]+){{0,2}}\.dll$'
+    _SO_REGEX = r'^lib{}\.so(\.[0-9]+){{0,2}}$'
+    _DYLIB_REGEX = r'^lib{}\.dylib$'
 
     # Extension Glob Legend:
     # bext = binary extension
-    # sext = shared library extension
+    # sext = shared library matching regex
+    # srext = shared library extension (no regex)
     # sdir = shared library directory
     # mext = module (plugin) extension
     # smext = static module (plugin) extension
     # pext = python module extension (.pyd on Windows)
-    # srext = ??? (original commit message that added this doesn't say what it's
-    #              for and it's used only by matplotlib; perhaps incorrectly)
     EXTENSIONS = {
-        Platform.WINDOWS: {'bext': '.exe', 'sext': '*-*.dll', 'sdir': 'bin',
+        Platform.WINDOWS: {'bext': '.exe', 'sext': _DLL_REGEX, 'sdir': 'bin',
             'mext': '.dll', 'smext': '.a', 'pext': '.pyd', 'srext': '.dll'},
-        Platform.LINUX: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
+        Platform.LINUX: {'bext': '', 'sext': _SO_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
-        Platform.ANDROID: {'bext': '', 'sext': '.so.*', 'sdir': 'lib',
+        Platform.ANDROID: {'bext': '', 'sext': _SO_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
-        Platform.DARWIN: {'bext': '', 'sext': '.*.dylib', 'sdir': 'lib',
+        Platform.DARWIN: {'bext': '', 'sext': _DYLIB_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.dylib'},
-        Platform.IOS: {'bext': '', 'sext': '.*.dylib', 'sdir': 'lib',
+        Platform.IOS: {'bext': '', 'sext': _DYLIB_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.dylib'}}
 
     def __init__(self, config):
@@ -196,29 +200,35 @@ class FilesProvider(object):
         Search libraries in the prefix. Unfortunately the filename might vary
         depending on the platform and we need to match the library name and
         it's extension. There is a corner case on windows where a libray might
-        be named libfoo.dll or libfoo-1.dll
+        be named foo.dll, foo-1.dll, libfoo.dll, or libfoo-1.dll
         '''
-        if len(files) == 0:
-            return []
-
-        dlls = []
-        # on windows check libfoo.dll too instead of only libfoo-x.dll
-        if self.config.target_platform == Platform.WINDOWS:
-            pattern = '%(sdir)s/%%s.dll' % self.extensions
-            for f in files:
-                path = os.path.join(self.config.prefix, pattern % f)
-                if os.path.exists(path):
-                    dlls.append(pattern % f)
-            files = list(set(files) - set(dlls))
-
-        pattern = '%(sdir)s/%(file)s%(sext)s'
+        libdir = self.extensions['sdir']
+        libregex = self.extensions['sext']
+        libext = self.extensions['srext']
 
         libsmatch = []
+        notfound = []
         for f in files:
-            self.extensions['file'] = f
-            libsmatch.append(pattern % self.extensions)
+            # Use globbing to find all files that look like they might match
+            # this library to narrow down our exact search
+            fpath = os.path.join(libdir, '*{0}*{1}*'.format(f[3:], libext))
+            found = glob.glob(os.path.join(self.config.prefix, fpath))
+            # Find which of those actually match via an exact regex
+            # Ideally Python should provide a function for regex file 'globbing'
+            for each in found:
+                fname = os.path.basename(each)
+                if re.match(libregex.format(f[3:]), fname):
+                    libsmatch.append(os.path.join(libdir, fname))
+                    break
+            else:
+                notfound.append(f)
 
-        return shell.ls_files(libsmatch, self.config.prefix) + dlls
+        if notfound:
+            msg = "Some libraries weren't found while searching!"
+            for each in notfound:
+                msg += '\n' + each
+            m.warning(msg)
+        return libsmatch
 
     def _pyfile_get_name(self, f):
         if os.path.exists(os.path.join(self.config.prefix, f)):
