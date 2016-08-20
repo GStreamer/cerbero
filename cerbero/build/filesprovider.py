@@ -110,7 +110,12 @@ class FilesProvider(object):
         '''
         files = []
         for cat in categories:
-            files.extend(self._list_files_by_category(cat))
+            cat_files = self._list_files_by_category(cat)
+            # The library search function returns a dict that is a mapping from
+            # library name to filename, but here we only want a list of files
+            if not isinstance(cat_files, list):
+                cat_files = cat_files.values()
+            files.extend(cat_files)
         return sorted(list(set(files)))
 
     def files_list_by_category(self, category):
@@ -121,9 +126,9 @@ class FilesProvider(object):
 
     def libraries(self):
         '''
-        Return a list of the libraries
+        Return a dict of the library names and library paths
         '''
-        return self.files_list_by_category(self.LIBS_CAT)
+        return self._list_files_by_category(self.LIBS_CAT)
 
     def use_gobject_introspection(self):
         return self.TYPELIB_CAT in self._files_categories()
@@ -201,12 +206,17 @@ class FilesProvider(object):
         depending on the platform and we need to match the library name and
         it's extension. There is a corner case on windows where a libray might
         be named foo.dll, foo-1.dll, libfoo.dll, or libfoo-1.dll
+
+        NOTE: Unlike other searchfuncs which return lists, this returns a dict
+              with a mapping from the libname to the actual on-disk file. We use
+              the libname (the key) in gen_library_file so we don't have to
+              guess (sometimes incorrectly) based on the dll filename.
         '''
         libdir = self.extensions['sdir']
         libregex = self.extensions['sext']
         libext = self.extensions['srext']
 
-        libsmatch = []
+        libsmatch = {}
         notfound = []
         for f in files:
             # Use globbing to find all files that look like they might match
@@ -217,8 +227,8 @@ class FilesProvider(object):
             # Ideally Python should provide a function for regex file 'globbing'
             for each in found:
                 fname = os.path.basename(each)
-                if re.match(libregex.format(f[3:]), fname):
-                    libsmatch.append(os.path.join(libdir, fname))
+                if re.match(libregex.format(re.escape(f[3:])), fname):
+                    libsmatch[f] = os.path.join(libdir, fname)
                     break
             else:
                 notfound.append(f)

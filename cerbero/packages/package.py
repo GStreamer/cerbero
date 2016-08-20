@@ -558,7 +558,7 @@ class App(Package):
             # Also include all the libraries provided by the recipes we depend
             # on.
             for recipe in self.cookbook.list_recipe_deps(self.app_recipe):
-                files.extend(recipe.libraries())
+                files.extend(recipe.libraries().values())
                 files.extend(recipe.files_list_by_category(FilesProvider.PY_CAT))
                 files.extend(recipe.files_list_by_category(FilesProvider.TYPELIB_CAT))
 

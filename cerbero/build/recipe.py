@@ -218,9 +218,9 @@ class Recipe(FilesProvider):
         Generates library files (.lib) for the dll's provided by this recipe
         '''
         genlib = GenLib()
-        for dllpath in self.libraries():
+        for (libname, dllpath) in self.libraries().items():
             try:
-                implib = genlib.create(
+                implib = genlib.create(libname,
                     os.path.join(self.config.prefix, dllpath),
                     self.config.target_arch,
                     os.path.join(self.config.prefix, 'lib'))
