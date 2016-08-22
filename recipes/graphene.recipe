@@ -21,7 +21,7 @@ GRAPHENE_CONFIG_UNVERSAL='''\
 class Recipe(recipe.Recipe):
     name = 'graphene'
     stype = SourceType.TARBALL
-    version = '1.2.6'
+    version = '1.4.0'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
     licenses = [License.MIT]
     # Disable NEON completly, it's broken and experimental   
@@ -47,6 +47,13 @@ class Recipe(recipe.Recipe):
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
             self.configure_options += ' --disable-sse2 --disable-gcc-vector '
+
+        # -msse4.1 causes clang to segfault building graphene-matrix.c on OS X
+        # when building for x64_64. Disable it for now.
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            arch = self.config.target_arch
+            if arch == Architecture.X86_64:
+                self.new_env['SSE41_CFLAGS'] = " "
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
