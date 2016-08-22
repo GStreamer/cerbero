@@ -1,4 +1,4 @@
-From 6cb011274e293be313ab86442aa9f6f629dffc04 Mon Sep 17 00:00:00 2001
+From 4becc7c54ad3e7f8e5c9d1d59ba401cd4a2c9b3c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Tue, 9 Oct 2012 13:48:12 +0200
 Subject: [PATCH 2/6] Include Android cpu-features.c instead of .h
@@ -21,5 +21,5 @@ index 8a4b8af..60401f3 100644
  int arm_cpu_caps(void) {
    int flags;
 -- 
-2.1.4
+2.9.3
 

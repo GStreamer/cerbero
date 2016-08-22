@@ -1,4 +1,4 @@
-From 9e1a08a4ace9fdb6ad9d1fbffd7e336f0d9122cc Mon Sep 17 00:00:00 2001
+From dd6530bc04f545891ff6bb12dff9b4df73c2eaff Mon Sep 17 00:00:00 2001
 From: Arun Raghavan <arun@centricular.com>
 Date: Sun, 22 Feb 2015 21:20:50 +0530
 Subject: [PATCH 3/6] configure: Add back the armv5te-android-gcc target
@@ -9,17 +9,17 @@ We need this to be able to build for pre-armv7 Android devices.
  1 file changed, 1 insertion(+)
 
 diff --git a/configure b/configure
-index f3708f9..ef3b733 100755
+index f82ee04..ea8e015 100755
 --- a/configure
 +++ b/configure
-@@ -97,6 +97,7 @@ EOF
- 
- # all_platforms is a list of all supported target platforms. Maintain
- # alphabetically by architecture, generic-gnu last.
+@@ -111,6 +111,7 @@ all_platforms="${all_platforms} armv7-win32-vs11"
+ all_platforms="${all_platforms} armv7-win32-vs12"
+ all_platforms="${all_platforms} armv7-win32-vs14"
+ all_platforms="${all_platforms} armv7s-darwin-gcc"
 +all_platforms="${all_platforms} armv5te-android-gcc"
- all_platforms="${all_platforms} armv6-darwin-gcc"
- all_platforms="${all_platforms} armv6-linux-rvct"
- all_platforms="${all_platforms} armv6-linux-gcc"
+ all_platforms="${all_platforms} armv8-linux-gcc"
+ all_platforms="${all_platforms} mips32-linux-gcc"
+ all_platforms="${all_platforms} mips64-linux-gcc"
 -- 
-2.1.4
+2.9.3
 

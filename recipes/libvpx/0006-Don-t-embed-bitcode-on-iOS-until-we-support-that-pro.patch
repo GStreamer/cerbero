@@ -1,4 +1,4 @@
-From 67eb0bf3becf475e1c880c973bf86628a19f728a Mon Sep 17 00:00:00 2001
+From f104b6a2de3da66aab7f1771d0cc49ff9ac9c5b8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Mon, 28 Dec 2015 17:20:41 +0200
 Subject: [PATCH 6/6] Don't embed bitcode on iOS until we support that properly
@@ -8,10 +8,10 @@ Subject: [PATCH 6/6] Don't embed bitcode on iOS until we support that properly
  1 file changed, 5 deletions(-)
 
 diff --git a/build/make/configure.sh b/build/make/configure.sh
-index 56c3d40..46eeab4 100644
+index e56108e..528174b 100644
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -1019,11 +1019,6 @@ EOF
+@@ -1078,11 +1078,6 @@ EOF
  
            asm_conversion_cmd="${source_path}/build/make/ads2gas_apple.pl"
  
@@ -24,5 +24,5 @@ index 56c3d40..46eeab4 100644
  
          linux*)
 -- 
-2.6.4
+2.9.3
 

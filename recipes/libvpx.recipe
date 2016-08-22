@@ -6,11 +6,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.5.0'
+    version = 'v1.6.0'
     licenses = [License.BSD]
     btype = BuildType.MAKEFILE
     remotes = {'origin': 'https://github.com/webmproject/libvpx.git'}
-    commit = 'v1.5.0'
+    commit = 'v1.6.0'
     configure_tpl = "./configure --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm --disable-unit-tests --size-limit=16384x16384 "\
@@ -24,10 +24,9 @@ class Recipe(recipe.Recipe):
     patches = ['libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
                'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
                'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
-               'libvpx/0005-build-Remove-broken-custom-android-toolchain-usage.patch',
-               'libvpx/0006-configure-Add-Android-ARM64-support.patch',
+               'libvpx/0004-build-Remove-broken-custom-android-toolchain-usage.patch',
+               'libvpx/0005-configure-Add-Android-ARM64-support.patch',
                'libvpx/0006-Don-t-embed-bitcode-on-iOS-until-we-support-that-pro.patch',
-               'libvpx/0009-fix-win32-crash-subpel-variance.patch',
                ]
 
     files_libs = ['libvpx']

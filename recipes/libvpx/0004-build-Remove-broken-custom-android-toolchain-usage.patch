@@ -1,21 +1,21 @@
-From 0be5968ee2b0a2beddf1e190a1f7cd8e372443a4 Mon Sep 17 00:00:00 2001
+From 9f724884ab61061e55b9350267fb609d172114d8 Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Sat, 14 Feb 2015 15:08:37 +0100
-Subject: [PATCH 5/6] build: Remove (broken) custom android toolchain usage
+Subject: [PATCH 4/6] build: Remove (broken) custom android toolchain usage
 
 Amazed no one complained earlier, it was always picking the arm
 toolchain.
 ---
- build/make/configure.sh | 26 --------------------------
- 1 file changed, 26 deletions(-)
+ build/make/configure.sh | 28 ----------------------------
+ 1 file changed, 28 deletions(-)
 
 diff --git a/build/make/configure.sh b/build/make/configure.sh
-index 1b032de..fc653f1 100644
+index d4da469..e56108e 100644
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -921,32 +921,6 @@ EOF
+@@ -1016,34 +1016,6 @@ EOF
+           fi
  
-         android*)
            SDK_PATH=${sdk_path}
 -          COMPILER_LOCATION=`find "${SDK_PATH}" \
 -                             -name "arm-linux-androideabi-gcc*" -print -quit`
@@ -37,8 +37,10 @@ index 1b032de..fc653f1 100644
 -                awk '{ print $1 }' | tail -1`
 -          fi
 -
--          add_cflags "--sysroot=${alt_libc}"
--          add_ldflags "--sysroot=${alt_libc}"
+-          if [ -d "${alt_libc}" ]; then
+-            add_cflags "--sysroot=${alt_libc}"
+-            add_ldflags "--sysroot=${alt_libc}"
+-          fi
 -
 -          # linker flag that routes around a CPU bug in some
 -          # Cortex-A8 implementations (NDK Dev Guide)
@@ -47,5 +49,5 @@ index 1b032de..fc653f1 100644
            enable_feature pic
            soft_enable realtime_only
 -- 
-2.1.4
+2.9.3
 
