@@ -40,7 +40,7 @@ class FilesProvider(object):
     TYPELIB_CAT = 'typelibs'
     _DLL_REGEX = r'^(lib)?{}(-[0-9]+){{0,2}}\.dll$'
     _SO_REGEX = r'^lib{}\.so(\.[0-9]+){{0,2}}$'
-    _DYLIB_REGEX = r'^lib{}(\.[0-9]+){{0,2}}\.dylib$'
+    _DYLIB_REGEX = r'^lib{}(\.[0-9]+){{0,3}}\.dylib$'
 
     # Extension Glob Legend:
     # bext = binary extension
