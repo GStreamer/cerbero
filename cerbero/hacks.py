@@ -142,7 +142,6 @@ def rmtree(path, ignore_errors=False, onerror=None):
         This is the only way to ensure that readonly files are deleted by
         rmtree on Windows. See: http://bugs.python.org/issue19643
         '''
-        os.chmod(path, stat.S_IWRITE)
         # Due to the way 'onerror' is implemented in shutil.rmtree, errors
         # encountered while listing directories cannot be recovered from. So if
         # a directory cannot be listed, shutil.rmtree assumes that it is empty
@@ -151,6 +150,7 @@ def rmtree(path, ignore_errors=False, onerror=None):
         # get an OSError while trying to remove a specific path.
         # See: http://bugs.python.org/issue8523
         try:
+            os.chmod(path, stat.S_IWRITE)
             func(path)
         except OSError:
             shell_call('rm -rf ' + path)
