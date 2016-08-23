@@ -25,6 +25,22 @@ from cerbero.config import Platform
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 
+def flatten_files_list(all_files):
+    """
+    Some files search functions return a list of lists instead of a flat list
+    of files. We flatten it here.
+
+    Specifically, each list is a list of files found for each entry in
+    `recipe.files_libs`.
+    """
+    flattened = []
+    for entry_files in all_files:
+        if isinstance(entry_files, list):
+            for entry_file in entry_files:
+                flattened.append(entry_file)
+        else:
+            flattened.append(entry_files)
+    return flattened
 
 class FilesProvider(object):
     '''
@@ -112,9 +128,9 @@ class FilesProvider(object):
         for cat in categories:
             cat_files = self._list_files_by_category(cat)
             # The library search function returns a dict that is a mapping from
-            # library name to filename, but here we only want a list of files
+            # library name to filenames, but we only want a list of filenames
             if not isinstance(cat_files, list):
-                cat_files = cat_files.values()
+                cat_files = flatten_files_list(cat_files.values())
             files.extend(cat_files)
         return sorted(list(set(files)))
 
@@ -225,12 +241,12 @@ class FilesProvider(object):
             found = glob.glob(os.path.join(self.config.prefix, fpath))
             # Find which of those actually match via an exact regex
             # Ideally Python should provide a function for regex file 'globbing'
+            libsmatch[f] = []
             for each in found:
                 fname = os.path.basename(each)
                 if re.match(libregex.format(re.escape(f[3:])), fname):
-                    libsmatch[f] = os.path.join(libdir, fname)
-                    break
-            else:
+                    libsmatch[f].append(os.path.join(libdir, fname))
+            if not libsmatch[f]:
                 notfound.append(f)
 
         if notfound:
