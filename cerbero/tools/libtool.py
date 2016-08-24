@@ -111,7 +111,7 @@ libdir='%(libdir)s'
                 dlname_all = '%s.%s' % (dlname, minor)
                 minor_str = minor
                 if micro is not None:
-                    dlname_all = '%s.%s' % (dlname, micro)
+                    dlname_all = '%s.%s' % (dlname_all, micro)
                     micro_str = micro
         old_library = '%s.a' % libname
         self.change_value('libname', self.laname)
