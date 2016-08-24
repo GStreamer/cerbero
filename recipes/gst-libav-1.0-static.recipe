@@ -89,10 +89,8 @@ class Recipe(custom.GStreamerStatic):
                 deps += ['avutil']
             if n == 'avfilter':
                 deps += ['avutil', 'avcodec', 'avformat']
-            libtool_la = LibtoolLibrary(n, None, None, None, self.config.libdir,
+            libtool_la = LibtoolLibrary(n, self.config.libdir,
                 self.config.target_platform, deps)
-            libtool_la.change_value ('dlname', '')
-            libtool_la.change_value ('library_names', '')
             libtool_la.save()
         super(Recipe, self).post_install()
         gstlibavlib = os.path.join(self.config.prefix, 'lib', 'gstreamer-1.0',

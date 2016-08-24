@@ -33,7 +33,6 @@ class Recipe(recipe.Recipe):
             self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS XLDFLAGS="$LDFLAGS" XCFLAGS="$CFLAGS" CC="$CC" LD="$LD"' % (system)
 
     def post_install(self):
-        deps = ['gnutls']
-        libtool_la = LibtoolLibrary('rtmp', 0, None, None, self.config.libdir,
-                self.config.target_platform, deps)
+        libtool_la = LibtoolLibrary('rtmp', self.config.libdir,
+                self.config.target_platform, deps=['gnutls'])
         libtool_la.save()
