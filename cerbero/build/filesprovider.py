@@ -54,8 +54,12 @@ class FilesProvider(object):
     DEVEL_CAT = 'devel'
     LANG_CAT = 'lang'
     TYPELIB_CAT = 'typelibs'
+    # Usually DLLs have 0 or 1 version components (just the major version), but
+    # some packages like Nettle add 2, so we check for upto 2.
     _DLL_REGEX = r'^(lib)?{}(-[0-9]+){{0,2}}\.dll$'
-    _SO_REGEX = r'^lib{}\.so(\.[0-9]+){{0,2}}$'
+    # UNIX shared libraries can have between 0 and 3 version components
+    # (major, minor, micro)
+    _SO_REGEX = r'^lib{}\.so(\.[0-9]+){{0,3}}$'
     _DYLIB_REGEX = r'^lib{}(\.[0-9]+){{0,3}}\.dylib$'
 
     # Extension Glob Legend:
