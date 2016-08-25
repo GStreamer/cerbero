@@ -29,14 +29,17 @@ class Recipe(recipe.Recipe):
                 (shared_makefile, self.config.prefix, extension, self.config.prefix)
 
     def post_install(self):
+        libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
         src = None
         dst = None
         libdir = os.path.join(self.config.prefix, 'lib')
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
-            src = 'libbz2.so.{}'.format(self.version)
+            src = 'libbz2.so.1.0.6'
             dst = 'libbz2.so'
         elif self.config.target_platform == Platform.DARWIN:
-            src = 'libbz2.{}.dylib'.format(self.version)
+            src = 'libbz2.1.0.6.dylib'
             dst = 'libbz2.dylib'
         elif self.config.target_platform == Platform.IOS:
             src = 'libbz2.dylib'
@@ -46,7 +49,3 @@ class Recipe(recipe.Recipe):
             if os.path.exists(p) or os.path.islink(p):
                 os.remove(p)
             shell.call('ln -s %s %s' % (src, dst), libdir)
-
-        libtool_la = LibtoolLibrary('bz2', self.config.libdir,
-                self.config.target_platform)
-        libtool_la.save()

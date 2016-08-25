@@ -40,8 +40,9 @@ class Recipe(recipe.Recipe):
                 os.path.join(self.config.prefix, 'lib', 'libtag.a'))
 
     def post_install(self):
+        deps = ['z']
         if self.config.target_platform == Platform.ANDROID:
             deps.append('gnustl')
-        libtool_la = LibtoolLibrary('tag', self.config.libdir,
-                self.config.target_platform, deps=['z'])
+        libtool_la = LibtoolLibrary('tag', 1, 7, None, self.config.libdir,
+                self.config.target_platform, deps)
         libtool_la.save()

@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
                 self.configure_options += " --uname=arm-linux-androideabi "
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('z', self.config.libdir,
+        libtool_la = LibtoolLibrary('z', 1, 2, 8, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
         # FIXME This is to workaround a build issue trying to ld to libz.so

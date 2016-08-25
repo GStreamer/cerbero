@@ -54,6 +54,6 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-asm '
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('x264', self.config.libdir,
+        libtool_la = LibtoolLibrary('x264', 148, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()

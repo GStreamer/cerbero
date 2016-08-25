@@ -107,7 +107,7 @@ class Recipe(recipe.Recipe):
         else:
             raise NotImplementedError
 
-        libtool_la = LibtoolLibrary('openh264', self.config.libdir,
+        libtool_la = LibtoolLibrary('openh264', 0, None, None, self.config.libdir,
                                     self.config.target_platform,
                                     deps=dependency_libs)
         libtool_la.save()
