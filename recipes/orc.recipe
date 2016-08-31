@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.23'
+    version = '0.4.26'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/orc'}
     commit = 'origin/master'
     licenses = [License.BSD_like]
