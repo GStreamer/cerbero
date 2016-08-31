@@ -104,6 +104,12 @@ class Config (object):
         self._raw_environ = os.environ.copy()
         self._pre_environ = os.environ.copy()
 
+    def _copy(self, arch):
+        c = copy.deepcopy(self)
+        c.target_arch = arch
+        c._raw_environ = os.environ.copy()
+        return c
+
     def load(self, filename=None):
 
         # First load the default configuration
@@ -126,10 +132,26 @@ class Config (object):
         # building Universal binaries
         if self.target_arch == Architecture.UNIVERSAL:
             arch_config = {}
-            for arch in self.universal_archs:
-                arch_config[arch] = copy.deepcopy(self)
-                arch_config[arch].target_arch = arch
-                arch_config[arch]._raw_environ = os.environ.copy()
+
+            if isinstance(self.universal_archs, list):
+                # Simple list of architectures, just duplicate all the config
+                for arch in self.universal_archs:
+                    arch_config[arch] = self.config._copy(arch)
+            elif isinstance(self.universal_archs, dict):
+                # Map of architectures to the corresponding config file. We
+                # do this so that we don't need to duplicate arch specific
+                # config again in the universal config.
+                for arch, config_file in self.universal_archs.items():
+                    arch_config[arch] = self._copy(arch)
+                    if config_file is not None:
+                        # This works because the override config files are
+                        # fairly light. Things break if they are more complex
+                        # as load config can have side effects in global state
+                        d = os.path.dirname(filename[0])
+                        arch_config[arch]._load_cmd_config([os.path.join(d, config_file)])
+            else:
+                raise ConfigurationError('universal_archs must be a list or a dict')
+
             self.arch_config = arch_config
 
         # Finally fill the missing gaps in the config
