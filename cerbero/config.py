@@ -436,7 +436,7 @@ class Config (object):
                     self._parse(f, reset=False)
                 else:
                     raise ConfigurationError(_("Configuration file %s doesn't "
-                                               "exists") % f)
+                                               "exist") % f)
 
     def _load_platform_config(self):
         platform_config = os.path.join(self.environ_dir, '%s.config' %
