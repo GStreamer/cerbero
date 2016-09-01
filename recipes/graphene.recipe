@@ -40,6 +40,8 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/graphene-gobject-1.0.pc',
     ]
 
+    patches = ['graphene/0001-simd4f-Fix-a-compilation-error.patch']
+
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")

@@ -1,0 +1,26 @@
+From 5141ce208a5e290cde191f8b8119909c0435aaf8 Mon Sep 17 00:00:00 2001
+From: Arun Raghavan <arun@arunraghavan.net>
+Date: Thu, 1 Sep 2016 09:28:45 +0530
+Subject: [PATCH] simd4f: Fix a compilation error
+
+Not sure why the missing semicolon didn't get caught before.
+---
+ src/graphene-simd4f.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/graphene-simd4f.h b/src/graphene-simd4f.h
+index 5d505d2..5790acc 100644
+--- a/src/graphene-simd4f.h
++++ b/src/graphene-simd4f.h
+@@ -859,7 +859,7 @@ typedef int graphene_simd4i_t __attribute__((vector_size (16)));
+       (v)[1] != 0.f ? 1.f / (v)[1] : 0.f, \
+       (v)[2] != 0.f ? 1.f / (v)[2] : 0.f, \
+       (v)[3] != 0.f ? 1.f / (v)[3] : 0.f, \
+-    } \
++    }; \
+   }))
+ 
+ # define graphene_simd4f_sqrt(v) \
+-- 
+2.7.4
+
