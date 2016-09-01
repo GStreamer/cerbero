@@ -11,7 +11,7 @@ diff --git a/configure.ac b/configure.ac
 index bf77f3a..01f46f4 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -128,17 +128,22 @@ AC_CHECK_FUNCS(strtok_r)
+@@ -130,17 +130,22 @@ AC_CHECK_FUNCS(strtok_r)
  # GTK
  # ===========================================================================
  
@@ -39,13 +39,13 @@ index bf77f3a..01f46f4 100644
  
  dnl ===========================================================================
  dnl GDK-Pixbuf SVG loader
-@@ -289,6 +294,6 @@ librsvg-$VERSION
+@@ -298,6 +303,6 @@ librsvg-$VERSION
  	Build introspectable bindings:  ${found_introspection}
  	Build Vala bindings:            ${enable_vala}
  	Build GdkPixbuf loader:         ${enable_pixbuf_loader}
 -        GTK+ $GTK3_REQUIRED or later:           ${have_gtk_3}
 +        GTK+ $GTK3_REQUIRED or later:           ${with_gtk_3}
- 	Build miscellaenous tools:      ${build_misc_tools}
+ 	Build miscellaneous tools:      ${build_misc_tools}
  "
 -- 
 2.4.3
