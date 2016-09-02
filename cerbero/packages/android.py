@@ -20,7 +20,7 @@ import os
 import tarfile
 
 from cerbero.config import Architecture
-from cerbero.packages import PackageType
+from cerbero.packages import PackageType, PackagerBase
 from cerbero.packages.disttarball import DistTarball
 from cerbero.errors import UsageError
 
