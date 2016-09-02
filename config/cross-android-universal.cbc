@@ -1,0 +1,19 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform = Platform.ANDROID
+target_distro = Distro.ANDROID
+target_distro_version = DistroVersion.ANDROID_GINGERBREAD
+target_arch = Architecture.UNIVERSAL
+
+universal_archs = {
+            # Path is relative to this file
+            Architecture.ARM:    "cross-android.cbc",
+            Architecture.ARMv7:  "cross-android-armv7.cbc",
+            Architecture.ARM64:  "cross-android-arm64.cbc",
+            Architecture.X86:    "cross-android-x86.cbc",
+            Architecture.X86_64: "cross-android-x86-64.cbc",
+        }
+
+#variants = ['nodebug']
+allow_parallel_build = True
