@@ -16,6 +16,7 @@ class Recipe(recipe.Recipe):
     # we'll need to carry forward that bit for ourselves.
     # 0002: Fixed upstream, remove patch on next update
     patches = [name + '/0001-Add-version-suffix.patch']
+    patches += [name + '/0002-Remove-fembed-bitcode-for-iOS-build.patch']
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
 

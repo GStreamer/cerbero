@@ -1,0 +1,25 @@
+From 273749d669fc1e73298ca2fb265b32a512f512ce Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Sat, 3 Sep 2016 03:26:14 +1000
+Subject: [PATCH] Remove -fembed-bitcode for iOS build.
+
+To keep support for XCode 6
+---
+ build/platform-ios.mk | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/build/platform-ios.mk b/build/platform-ios.mk
+index 4ec8919..5bcb28e 100644
+--- a/build/platform-ios.mk
++++ b/build/platform-ios.mk
+@@ -12,6 +12,6 @@ SDK_MIN = 5.1
+ 
+ XCODE=$(shell xcode-select -p)
+ SDKROOT = $(XCODE)/Platforms/$(SDKTYPE).platform/Developer/SDKs/$(SDKTYPE)$(SDK).sdk
+-CFLAGS += -arch $(ARCH) -isysroot $(SDKROOT) -miphoneos-version-min=$(SDK_MIN) -DAPPLE_IOS -fembed-bitcode
++CFLAGS += -arch $(ARCH) -isysroot $(SDKROOT) -miphoneos-version-min=$(SDK_MIN) -DAPPLE_IOS
+ LDFLAGS += -arch $(ARCH) -isysroot $(SDKROOT) -miphoneos-version-min=$(SDK_MIN)
+ 
+-- 
+2.3.2 (Apple Git-55)
+
