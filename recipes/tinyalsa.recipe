@@ -23,8 +23,8 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
 
     def install(self):
-        include_path = os.path.join(self.config.install_dir, 'include', 'tinyalsa')
-        library_path = os.path.join(self.config.install_dir, 'lib')
+        include_path = os.path.join(self.config.prefix, 'include', 'tinyalsa')
+        library_path = os.path.join(self.config.prefix, 'lib')
 
         tinyalsa_header = os.path.join(self.build_dir, 'include', 'tinyalsa', 'asoundlib.h')
         tinyalsa_lib = os.path.join(self.build_dir, 'libtinyalsa.a')

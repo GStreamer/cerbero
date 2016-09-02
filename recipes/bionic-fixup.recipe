@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
 
     def install(self):
-        include_path = os.path.join(self.config.install_dir, 'include')
+        include_path = os.path.join(self.config.prefix, 'include')
         bionicfixup_path = os.path.join(self.config.recipes_dir, 'bionic-fixup')
         if not os.path.exists(include_path):
             os.makedirs(include_path)

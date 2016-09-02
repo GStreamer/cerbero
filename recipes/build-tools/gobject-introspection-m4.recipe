@@ -25,4 +25,4 @@ class Recipe(recipe.Recipe):
 
     def install(self):
         shutil.copy(os.path.join(self.build_dir, 'm4', 'introspection.m4'),
-                    os.path.join(self.config.install_dir, 'share', 'aclocal'))
+                    os.path.join(self.config.prefix, 'share', 'aclocal'))
