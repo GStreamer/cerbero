@@ -136,7 +136,7 @@ class Config (object):
             if isinstance(self.universal_archs, list):
                 # Simple list of architectures, just duplicate all the config
                 for arch in self.universal_archs:
-                    arch_config[arch] = self.config._copy(arch)
+                    arch_config[arch] = self._copy(arch)
             elif isinstance(self.universal_archs, dict):
                 # Map of architectures to the corresponding config file. We
                 # do this so that we don't need to duplicate arch specific
