@@ -21,7 +21,8 @@ class Package(package.Package):
              'libpng:libs', 'tiff:libs', 'libjpeg-turbo:libs',
              'libxml2:libs', 'pixman:libs',
              'zlib:libs', 'bzip2:libs', 'harfbuzz:libs',
-             'libcroco:libs', 'librsvg:libs']
+             'libcroco:libs', 'librsvg:libs',
+             'json-glib:bins:libs']
 
     platform_files = {
         Platform.WINDOWS: ['gettext:libs:lang', 'libiconv:libs:lang',
