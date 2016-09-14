@@ -2,17 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'base-crypto'
     shortdesc = 'Crypto base dependencies'
     longdesc = 'Crypto base dependencies'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
-    org = 'org.freedesktop.gstreamer'
     uuid = 'b3a6046d-5a39-4d54-93ee-3770d2f316f5'
     deps = ['base-system-1.0']
 

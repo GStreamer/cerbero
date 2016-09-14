@@ -2,17 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'gstreamer-1.0-libav'
     shortdesc = 'GStreamer 1.0 libav wrapper'
     longdesc = 'GStreamer 1.0 libav wrapper'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
-    org = 'org.freedesktop.gstreamer'
     uuid = '5581acc2-d38c-491b-83c9-14b7011c3c06'
     deps = ['gstreamer-1.0-core']
 

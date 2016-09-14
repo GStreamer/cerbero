@@ -2,16 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'gstreamer-1.0-net-restricted'
     shortdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
     longdesc = 'GStreamer 1.0 plugins for network protocols with potential patent issues in some countries'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
     org = 'org.freedesktop.gstreamer'
     uuid = '8cf57a89-3ba3-4db0-8b66-15e79b541ffe'
     deps = ['gstreamer-1.0-core', 'base-crypto']

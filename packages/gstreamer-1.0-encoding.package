@@ -2,17 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'gstreamer-1.0-encoding'
     shortdesc = 'GStreamer 1.0 plugins for encoding'
     longdesc = 'GStreamer 1.0 plugins for encoding'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
-    org = 'org.freedesktop.gstreamer'
     uuid = '0c91cd49-7dd2-4b48-aa7a-3f71d17c09b4'
     deps = ['gstreamer-1.0-core', 'gstreamer-1.0-playback']
 

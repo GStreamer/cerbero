@@ -1,20 +1,14 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 
-class SDKPackage(package.SDKPackage):
+class SDKPackage(custom.GStreamer, package.SDKPackage):
 
     name = "gstreamer-1.0"
     shortdesc = "GStreamer 1.0"
     longdesc = "GStreamer 1.0"
     title = "GStreamer 1.0"
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
     sdk_version = '1.0'
-    codename = 'Congo'
-    license = License.LGPL
     uuid = 'b1b4b712-0d09-4a34-8117-8a69b6deecc2'
-    vendor = "GStreamer Project"
-    org = "org.freedesktop.gstreamer"
     ignore_package_prefix = True
     packages =[
                # (name, required, selected)

@@ -2,17 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'vsintegration-1.0'
     shortdesc = 'Visual Studio Integration'
     longdesc = 'Visual Studio Integration'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
-    org = 'org.freedesktop.gstreamer'
     uuid = '0d032a12-05b0-42a3-9b79-6b31d070dfca'
 
     files = ['vsintegration-1.0']

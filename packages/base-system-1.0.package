@@ -2,17 +2,11 @@
 # -*- Mode: Python -*-
 
 
-class Package(package.Package):
+class Package(custom.GStreamer, package.Package):
 
     name = 'base-system-1.0'
     shortdesc = 'Base system dependencies'
     longdesc = 'Base system dependencies'
-    url = "http://gstreamer.freedesktop.org"
-    version = '1.9.2'
-    codename = 'Congo'
-    license = License.LGPL
-    vendor = 'GStreamer Project'
-    org = 'org.freedesktop.gstreamer'
     uuid = 'fae6046d-5a39-4d54-93ee-3770d2f316f5'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
