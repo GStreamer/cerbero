@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import imp
 from collections import defaultdict
 
 from cerbero.build.cookbook import CookBook
@@ -171,8 +172,18 @@ class PackagesStore (object):
         packages_dict = {}
         packages = shell.find_files('*%s' % self.PKG_EXT, repo)
         packages.extend(shell.find_files('*/*%s' % self.PKG_EXT, repo))
+        try:
+            custom = None
+            m_path = os.path.join(repo, 'custom.py')
+            if os.path.exists(m_path):
+                custom = imp.load_source('custom', m_path)
+        except Exception, ex:
+            # import traceback
+            # traceback.print_exc()
+            # m.warning("Error loading package %s" % ex)
+            custom = None
         for f in packages:
-            p = self._load_package_from_file(f)
+            p = self._load_package_from_file(f, custom)
             if p is None:
                 m.warning(_("Could not found a valid package in %s") % f)
                 continue
@@ -181,14 +192,14 @@ class PackagesStore (object):
         return packages_dict
 
 
-    def _load_package_from_file(self, filepath):
+    def _load_package_from_file(self, filepath, custom=None):
         mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
 
         try:
             d = {'Platform': Platform, 'Architecture': Architecture,
                  'Distro': Distro, 'DistroVersion': DistroVersion,
                  'License': License, 'package': package,
-                 'PackageType': PackageType}
+                 'PackageType': PackageType, 'custom': custom}
             execfile(filepath, d)
             if 'Package' in d:
                 p = d['Package'](self._config, self, self.cookbook)
