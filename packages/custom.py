@@ -7,7 +7,6 @@ class GStreamer:
 
     url = "http://gstreamer.freedesktop.org"
     version = '1.9.2.1'
-    codename = 'Congo'
     vendor = 'GStreamer Project'
     licenses = [License.LGPL]
     org = 'org.freedesktop.gstreamer'

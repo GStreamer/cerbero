@@ -39,10 +39,6 @@ class Package(package.Package):
     version = '%(version)s'
 '''
 
-CODENAME_TPL = \
-'''    codename = '%(codename)s'
-'''
-
 VENDOR_TPL = \
 '''    vendor = '%(vendor)s'
 '''
@@ -101,8 +97,6 @@ class AddPackage(Command):
                              help=_('version of the package')),
             ArgparseArgument('-s', '--short-desc', default='',
                              help=_('a short description of the package')),
-            ArgparseArgument('-c', '--codename', default='',
-                             help=_('a codename for the package')),
             ArgparseArgument('-v', '--vendor', default='',
                              help=_('the package vendor')),
             ArgparseArgument('-u', '--url', default='',
@@ -168,10 +162,6 @@ class AddPackage(Command):
             template_args['shortdesc'] = args.short_desc
         else:
             template_args['shortdesc'] = name
-
-        if args.codename:
-            template += CODENAME_TPL
-            template_args['codename'] = args.codename
 
         if args.vendor:
             template += VENDOR_TPL

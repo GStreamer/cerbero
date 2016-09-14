@@ -8,7 +8,6 @@ class Package(package.Package):
     longdesc = 'Python 3'
     url = "http://python.org/"
     version = '3.3'
-    codename = 'Congo'
     # Python Software Foundation License
     licenses = [License.BSD_like]
     vendor = 'Python Project'
