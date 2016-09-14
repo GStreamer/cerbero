@@ -7,11 +7,18 @@ from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
 from cerbero.config import Platform
+from cerbero.enums import License
 from cerbero.utils import shell, to_unixpath
 
+class GStreamer:
 
-class GStreamerStatic(recipe.Recipe):
+    licenses = [License.LGPLv2Plus]
+    version = '1.9'
+    commit = '1.9.2'
 
+class GStreamerStatic(GStreamer, recipe.Recipe):
+
+    gstreamer_version = '1.0'
     configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static "
     extra_configure_options = ''
     # Static build will always fail on make check

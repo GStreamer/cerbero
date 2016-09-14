@@ -1,14 +1,11 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 
-class Recipe(recipe.Recipe):
+class Recipe(recipe.Recipe, custom.GStreamer):
     name = 'gst-plugins-ugly-1.0'
-    version = '1.9'
-    licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-sidplay --disable-twolame "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
-    commit = '1.9.2'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
             'libdvdread', 'libmpeg2', 'libmad', 'x264', 'lame', 'mpg123']
 

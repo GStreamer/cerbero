@@ -7,14 +7,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(custom.GStreamerStatic):
     name = 'gst-libav-1.0-static'
-    version = '1.9'
-    gstreamer_version = '1.0'
     # TODO - check license - plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     extra_configure_options = "--enable-static --enable-lgpl --disable-example"
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
-    commit = '1.9.2'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
     files_plugins_codecs_restricted_devel = ['libgstlibav']
