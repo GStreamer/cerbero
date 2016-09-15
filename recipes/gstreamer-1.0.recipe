@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 
-class Recipe(recipe.Recipe, custom.GStreamer):
+class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --program-prefix= --disable-examples "

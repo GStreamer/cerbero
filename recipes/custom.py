@@ -10,13 +10,17 @@ from cerbero.config import Platform
 from cerbero.enums import License
 from cerbero.utils import shell, to_unixpath
 
-class GStreamer:
+class GStreamerBase:
 
     licenses = [License.LGPLv2Plus]
     version = '1.9'
     commit = 'origin/master'
 
-class GStreamerStatic(GStreamer, recipe.Recipe):
+class GStreamer(GStreamerBase, recipe.Recipe):
+
+    pass
+
+class GStreamerStatic(GStreamerBase, recipe.Recipe):
 
     gstreamer_version = '1.0'
     configure_options = "--enable-introspection=no --disable-examples --enable-static-plugins --disable-shared --enable-static "
