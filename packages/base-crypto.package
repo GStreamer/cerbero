@@ -14,5 +14,7 @@ class Package(custom.GStreamer, package.Package):
              'libtasn1:libs', 'nettle:libs']
 
     platform_files_devel = {
-        Platform.ANDROID: ['ca-certificates:etc']
+        Platform.ANDROID: ['ca-certificates:etc'],
+        Platform.IOS: ['ca-certificates:etc'],
+        Platform.DARWIN: ['ca-certificates:etc']
     }
