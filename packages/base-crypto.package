@@ -16,5 +16,6 @@ class Package(custom.GStreamer, package.Package):
     platform_files_devel = {
         Platform.ANDROID: ['ca-certificates:etc'],
         Platform.IOS: ['ca-certificates:etc'],
-        Platform.DARWIN: ['ca-certificates:etc']
+        Platform.DARWIN: ['ca-certificates:etc'],
+        Platform.WINDOWS: ['ca-certificates:etc']
     }
