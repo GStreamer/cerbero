@@ -125,6 +125,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
                 m.message("Running command '%s'" % cmd)
         else:
             LOGFILE.write("Running command '%s'\n" % cmd)
+            LOGFILE.flush()
         shell = True
         if PLATFORM == Platform.WINDOWS:
             # windows do not understand ./
