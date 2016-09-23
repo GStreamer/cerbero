@@ -32,10 +32,8 @@ class GenLib(object):
     DLLTOOL_TPL = '$DLLTOOL -d %s -l %s -D %s'
     LIB_TPL = '%s /DEF:%s /OUT:%s /MACHINE:%s'
 
-    def create(self, libname, dllpath, arch, outputdir=None):
+    def create(self, libname, dllpath, arch, outputdir):
         bindir, dllname = os.path.split(dllpath)
-        if outputdir is None:
-            outputdir = bindir
 
         # Create the .def file
         shell.call('gendef %s' % dllpath, outputdir)

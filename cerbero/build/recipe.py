@@ -217,6 +217,9 @@ class Recipe(FilesProvider):
         '''
         Generates library files (.lib) for the dll's provided by this recipe
         '''
+        if output_dir is None:
+            output_dir = os.path.join(self.config.prefix,
+                                      'lib' + self.config.lib_suffix)
         genlib = GenLib()
         for (libname, dllpaths) in self.libraries().items():
             if len(dllpaths) > 1:
@@ -227,7 +230,7 @@ class Recipe(FilesProvider):
                 implib = genlib.create(libname,
                     os.path.join(self.config.prefix, dllpaths[0]),
                     self.config.target_arch,
-                    os.path.join(self.config.prefix, 'lib'))
+                    output_dir)
                 logging.debug('Created %s' % implib)
             except:
                 m.warning("Could not create {}.lib, gendef might be missing".format(libname))
