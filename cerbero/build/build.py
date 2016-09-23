@@ -42,6 +42,13 @@ class Build (object):
     can_msvc = False
     _properties_keys = []
 
+    def using_msvc(self):
+        if not self.can_msvc:
+            return False
+        if not self.config.variants.visualstudio:
+            return False
+        return True
+
     def configure(self):
         '''
         Configures the module
@@ -425,7 +432,7 @@ class Meson (Build, ModifyEnvBase) :
             # NOTE: This means we require a native compiler on the build
             # machine when cross-compiling, which in practice is not a problem
             reset_toolchain_envvars = True
-        if 'visualstudio' in self.config.variants and self.can_msvc:
+        if self.using_msvc():
             # The toolchain env vars set by us are for GCC, so unset them if
             # we're building with MSVC
             reset_toolchain_envvars = True

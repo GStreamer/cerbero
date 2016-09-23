@@ -26,7 +26,7 @@ from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.config import Platform
 from cerbero.errors import FatalError
-from cerbero.ide.vs.genlib import GenLib
+from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.utils import N_, _
 from cerbero.utils import shell
@@ -214,18 +214,20 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
 
     def gen_library_file(self, output_dir=None):
         '''
-        Generates library files (.lib) for the dll's provided by this recipe
+        Generates library files (.lib or .dll.a) for the DLLs provided by this recipe
         '''
         if output_dir is None:
             output_dir = os.path.join(self.config.prefix,
                                       'lib' + self.config.lib_suffix)
-        genlib = GenLib()
+        # Generate a GNU import library or an MSVC import library
+        genlib = GenGnuLib() if self.using_msvc() else GenLib()
+        # Generate the .dll.a or .lib file as needed
         for (libname, dllpaths) in list(self.libraries().items()):
             if len(dllpaths) > 1:
-                m.warning("BUG: Found multiple DLLs for libname {}:\n{}".format(libname, '\n'.join(dllpaths)))
+                m.warning("BUG: Found multiple DLLs for libname {!r}:\n{}".format(libname, '\n'.join(dllpaths)))
                 continue
             if len(dllpaths) == 0:
-                m.warning("Could not create {}.lib, no matching DLLs found".format(libname))
+                m.warning("Could not create import library for {!r}, no matching DLLs found".format(libname))
                 continue
             try:
                 implib = genlib.create(libname,
@@ -233,8 +235,8 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                     self.config.target_arch,
                     output_dir)
                 logging.debug('Created %s' % implib)
-            except:
-                m.warning("Could not create {}.lib, gendef might be missing".format(libname))
+            except FatalError:
+                m.warning("Could not create {!r}, gendef might be missing".format(genlib.filename))
 
     def recipe_dir(self):
         '''
