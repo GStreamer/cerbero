@@ -439,8 +439,13 @@ PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ 
 
 def which(pgm, path=None):
     if path is None:
-        path=os.getenv('PATH')
+        path = os.getenv('PATH')
     for p in path.split(os.path.pathsep):
-        p=os.path.join(p,pgm)
-        if os.path.exists(p) and os.access(p,os.X_OK):
+        p = os.path.join(p, pgm)
+        if os.path.exists(p) and os.access(p, os.X_OK):
             return p
+        if PLATFORM == Platform.WINDOWS:
+            for ext in os.getenv('PATHEXT').split(';'):
+                pext = p + ext
+                if os.path.exists(pext):
+                    return pext
