@@ -88,15 +88,35 @@ def fix_winpath(path):
     return path.replace('\\', '/')
 
 
+def windows_arch():
+    """
+    Detecting the 'native' architecture of Windows is not a trivial task. We
+    cannot trust that the architecture that Python is built for is the 'native'
+    one because you can run 32-bit apps on 64-bit Windows using WOW64 and
+    people sometimes install 32-bit Python on 64-bit Windows.
+    """
+    # These env variables are always available. See:
+    # https://msdn.microsoft.com/en-us/library/aa384274(VS.85).aspx
+    # https://blogs.msdn.microsoft.com/david.wang/2006/03/27/howto-detect-process-bitness/
+    arch = os.environ.get('PROCESSOR_ARCHITEW6432', '').lower()
+    if not arch:
+        # If this doesn't exist, something is messing with the environment
+        try:
+            arch = os.environ['PROCESSOR_ARCHITECTURE'].lower()
+        except KeyError:
+            raise FatalError(_('Unable to detect Windows architecture'))
+    return arch
+
 def system_info():
     '''
     Get the sysem information.
     Return a tuple with the platform type, the architecture and the
     distribution
     '''
-
     # Get the platform info
-    platform = sys.platform
+    platform = os.environ.get('OS', '').lower()
+    if not platform:
+        platform = sys.platform
     if platform.startswith('win'):
         platform = Platform.WINDOWS
     elif platform.startswith('darwin'):
@@ -108,11 +128,13 @@ def system_info():
 
     # Get the architecture info
     if platform == Platform.WINDOWS:
-        platform_str = sysconfig.get_platform()
-        if platform_str in ['win-amd64', 'win-ia64']:
+        arch = windows_arch()
+        if platform_str in ('x64', 'amd64'):
             arch = Architecture.X86_64
-        else:
+        elif arch == 'x86':
             arch = Architecture.X86
+        else:
+            raise FatalError(_("Windows arch %s is not supported") % arch)
     else:
         uname = os.uname()
         arch = uname[4]
