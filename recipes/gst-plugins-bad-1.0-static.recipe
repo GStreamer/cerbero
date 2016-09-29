@@ -20,7 +20,7 @@ class Recipe(custom.GStreamerStatic):
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'schroedinger', 'libdca', 'libmms', 'libdvdnav',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene',
-            'spandsp', 'webrtc-audio-processing']
+            'spandsp', 'webrtc-audio-processing','sbc']
     use_system_libs = True
 
     files_plugins_effects_devel = [
@@ -78,6 +78,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstrsvg',
              'libgstopenjpeg',
              'libgstspandsp',
+             'libgstsbc',
     ]
 
     platform_files_plugins_codecs_devel = {
