@@ -39,7 +39,8 @@ class UsageError(CerberoException):
 
 class FatalError(CerberoException):
     header = 'Fatal Error: '
-
+    def __init__(self, arch=''):
+        self.arch = arch
 
 class CommandError(CerberoException):
     header = 'Command Error: '
@@ -49,9 +50,10 @@ class BuildStepError(CerberoException):
     recipe = ''
     step = ''
 
-    def __init__(self, recipe, step, trace=''):
+    def __init__(self, recipe, step, trace='', arch=''):
         self.recipe = recipe
         self.step = step
+        self.arch = arch
         CerberoException.__init__(self, _("Recipe '%s' failed at the build "
             "step '%s'\n%s") % (recipe, step, trace))
 
