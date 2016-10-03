@@ -250,7 +250,7 @@ def download(url, destination=None, recursive=False, check_cert=True, overwrite=
             raise e
 
 
-def download_curl(url, destination=None, recursive=False, check_cert=True):
+def download_curl(url, destination=None, recursive=False, check_cert=True, overwrite=False):
     '''
     Downloads a file with cURL
 
