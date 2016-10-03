@@ -18,6 +18,7 @@
 
 import os
 import shutil
+import tarfile
 
 from cerbero.config import Platform
 from cerbero.utils import git, svn, shell, _
@@ -98,26 +99,31 @@ class Tarball (Source):
                 self.replace_name_and_version(self.tarball_dirname)
         self.download_path = os.path.join(self.repo_dir, self.tarball_name)
 
-    def fetch(self):
+    def fetch(self, redownload=False):
         if not os.path.exists(self.repo_dir):
             os.makedirs(self.repo_dir)
 
         cached_file = os.path.join(self.config.cached_sources,
                                    self.package_name, self.tarball_name)
-        if os.path.isfile(cached_file):
+        if not redownload and os.path.isfile(cached_file):
             m.action(_('Copying cached tarball from %s to %s instead of %s') %
                      (cached_file, self.download_path, self.url))
             shutil.copy(cached_file, self.download_path)
             return
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
-        shell.download(self.url, self.download_path, check_cert=False)
+        shell.download(self.url, self.download_path, check_cert=False, overwrite=redownload)
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        shell.unpack(self.download_path, self.config.sources)
+        try:
+            shell.unpack(self.download_path, self.config.sources)
+        except (IOError, tarfile.ReadError):
+            m.action(_('Corrupted or partial tarball, redownloading...'))
+            self.fetch(redownload=True)
+            shell.unpack(self.download_path, self.config.sources)
         if self.tarball_dirname is not None:
             os.rename(os.path.join(self.config.sources, self.tarball_dirname),
                     self.build_dir)

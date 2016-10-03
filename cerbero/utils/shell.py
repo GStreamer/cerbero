@@ -209,7 +209,7 @@ def unpack(filepath, output_dir):
         raise FatalError("Unknown tarball format %s" % filepath)
 
 
-def download(url, destination=None, recursive=False, check_cert=True):
+def download(url, destination=None, recursive=False, check_cert=True, overwrite=False):
     '''
     Downloads a file with wget
 
@@ -230,7 +230,7 @@ def download(url, destination=None, recursive=False, check_cert=True):
     if not check_cert:
         cmd += " --no-check-certificate"
 
-    if not recursive and os.path.exists(destination):
+    if not recursive and not overwrite and os.path.exists(destination):
         if LOGFILE is None:
             logging.info("File %s already downloaded." % destination)
     else:
@@ -271,7 +271,7 @@ def download_curl(url, destination=None, recursive=False, check_cert=True):
     else:
         cmd += "-O %s " % url
 
-    if not recursive and os.path.exists(destination):
+    if not recursive and not overwrite and os.path.exists(destination):
         logging.info("File %s already downloaded." % destination)
     else:
         if not recursive and not os.path.exists(os.path.dirname(destination)):
