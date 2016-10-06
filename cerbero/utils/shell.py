@@ -196,9 +196,11 @@ def unpack(filepath, output_dir):
     @type output_dir: str
     '''
     logging.info("Unpacking %s in %s" % (filepath, output_dir))
-    if filepath.endswith('tar.gz') or filepath.endswith('tar.bz2') \
-       or filepath.endswith('tbz2') or filepath.endswith('tgz'):
-        tf = tarfile.open(filepath, mode='r:*')
+    if filepath.endswith('tar.gz') or filepath.endswith('tgz'):
+        tf = tarfile.open(filepath, mode='r:gz')
+        tf.extractall(path=output_dir)
+    elif filepath.endswith('tar.bz2') or filepath.endswith('tbz2'):
+        tf = tarfile.open(filepath, mode='r:bz2')
         tf.extractall(path=output_dir)
     elif filepath.endswith('tar.xz'):
         call("%s -Jxf %s" % (TAR, to_unixpath(filepath)), output_dir)
