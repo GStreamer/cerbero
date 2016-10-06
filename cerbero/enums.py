@@ -120,6 +120,8 @@ class DistroVersion:
     ANDROID_JELLY_BEAN = 'android_jelly_bean'  # API Level 16
     ANDROID_KITKAT = 'android_kitkat'  # API Level 19
     ANDROID_LOLLIPOP = 'android_lollipop' # API Level 21
+    ANDROID_MARSHMALLOW = 'android_marshmallow' # API Level 23
+    ANDROID_NOUGAT = 'android_nougat' # API Level 24
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
