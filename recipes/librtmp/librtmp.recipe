@@ -16,6 +16,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['librtmp']
     files_devel = ['include/librtmp/', 'lib/pkgconfig/librtmp.pc' ]
 
+    def extract(self):
+        new_name = self.download_path.replace("bz2", "gz")
+        os.rename(self.download_path, new_name)
+        self.download_path = new_name
+        super(recipe.Recipe, self).extract()
 
     def prepare (self):
         if self.config.target_platform == Platform.WINDOWS:
