@@ -1,0 +1,90 @@
+From b2fe6ee5aca711efe156091fe3d4903a29d75509 Mon Sep 17 00:00:00 2001
+From: Olivier Crete <olivier.crete@collabora.com>
+Date: Tue, 4 Oct 2016 15:44:51 -0400
+Subject: [PATCH 3/3] gnutls: Use db relative to libglib-2.0 if needed
+
+---
+ configure.ac                    |  3 +++
+ tls/gnutls/gtlsbackend-gnutls.c | 39 ++++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 41 insertions(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index a1bb166..59209a5 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -127,6 +127,9 @@ if test "$with_gnutls" = "yes"; then
+         AC_MSG_RESULT($with_ca_certificates)
+         AC_DEFINE_UNQUOTED(GTLS_SYSTEM_CA_FILE, ["$with_ca_certificates"], [The system TLS CA list])
+     fi
++
++    AC_CHECK_FUNCS(dladdr)
++    AC_CHECK_HEADERS([dlfcn.h])
+ fi
+ 
+ dnl *****************************
+diff --git a/tls/gnutls/gtlsbackend-gnutls.c b/tls/gnutls/gtlsbackend-gnutls.c
+index 8f2437a..1cf9127 100644
+--- a/tls/gnutls/gtlsbackend-gnutls.c
++++ b/tls/gnutls/gtlsbackend-gnutls.c
+@@ -34,6 +34,10 @@
+ #include "gtlsfiledatabase-gnutls.h"
+ #include "gtlsserverconnection-gnutls.h"
+ 
++#if defined(HAVE_DLFCN_H) && defined (HAVE_DLADDR)
++#include <dlfcn.h>
++#endif
++
+ struct _GTlsBackendGnutlsPrivate
+ {
+   GMutex mutex;
+@@ -119,13 +123,46 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
+                                            GError            **error)
+ {
+   const gchar *anchor_file = NULL;
++  GTlsDatabase *db = NULL;
++#ifdef HAVE_DLADDR
++  gchar *free_me = NULL;
++#endif
++
+ #ifdef GTLS_SYSTEM_CA_FILE
+   anchor_file = GTLS_SYSTEM_CA_FILE;
+ #endif
++
++#ifdef HAVE_DLADDR
++  if (!anchor_file || !g_file_test (anchor_file, G_FILE_TEST_IS_REGULAR))
++    {
++      Dl_info info;
++      if (dladdr (g_tls_file_database_new, &info))
++        {
++          GFile *file = g_file_new_for_path (info.dli_fname);
++          GFile *parent = g_file_get_parent (file);
++
++          if (parent)
++            {
++              GFile *rel = g_file_resolve_relative_path (parent,
++                  "../etc/ssl/certs/ca-certificates.crt");
++              if (rel)
++                anchor_file = free_me = g_file_get_path (rel);
++              g_object_unref (parent);
++            }
++          g_object_unref (file);
++        }
++    }
++#endif
++
+ #ifdef GST_CA_CERTIFICATES_FROM_ENV
+   anchor_file = g_getenv ("CA_CERTIFICATES");
+ #endif
+-  return g_tls_file_database_new (anchor_file, error);
++  db = g_tls_file_database_new (anchor_file, error);
++
++#ifdef HAVE_DLADDR
++  g_free (free_me);
++#endif
++  return db;
+ }
+ 
+ static void
+-- 
+2.8.4 (Apple Git-73)
+

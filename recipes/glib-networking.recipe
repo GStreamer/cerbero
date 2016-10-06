@@ -12,7 +12,8 @@ class Recipe(recipe.Recipe):
     configure_options = "--without-ca-certificates --enable-more-warnings"
     deps = ['glib', 'gnutls']
     patches = ['glib-networking/0001-Add-support-for-static-modules.patch',
-               'glib-networking/0002-Get-the-CA-certificate-path-from-the-environment-var.patch']
+               'glib-networking/0002-Get-the-CA-certificate-path-from-the-environment-var.patch',
+               'glib-networking/0003-gnutls-Use-db-relative-to-libglib-2.0-if-needed.patch']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
