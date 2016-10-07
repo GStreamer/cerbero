@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'xz'
@@ -9,3 +9,13 @@ class Recipe(recipe.Recipe):
     url = 'http://tukaani.org/xz/xz-5.2.2.tar.bz2'
 
     files_bins = ['xz']
+
+    def prepare(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            # On OS X 10.11.6 and XCode 8, clock_gettime is defined as a weak
+            # symbol and is not available, but configure tests detect it anyway
+            # because the headers and C library define the symbol and xz throws
+            # an error at runtime. Forcibly tell configure that clock_gettime is
+            # not available and use the fallback.
+            #self.append_env['ac_cv_search_clock_gettime'] = 'no'
+            self.append_env['ac_cv_func_clock_gettime'] = 'no'
