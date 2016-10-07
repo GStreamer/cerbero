@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 import glob
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 FFI_H_UNVERSAL='''\
 #ifdef __i386__
@@ -32,6 +33,10 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
+
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_mkostemp'] = 'no'
+
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch
             if self.config.target_arch == Architecture.X86_64:

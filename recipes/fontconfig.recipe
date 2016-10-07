@@ -1,6 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
 import os
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     def prepare(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_mkostemp'] = 'no'
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86_64:
                 self.configure_options += ' --with-arch=x86_64 '

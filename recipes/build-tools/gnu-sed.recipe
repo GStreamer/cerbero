@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'sed'
@@ -7,3 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/gnu/sed/sed-4.2.2.tar.gz'
+
+    def prepare(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_mkostemp'] = 'no'

@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 GLIB_CONFIG_UNVERSAL='''\
 #ifdef __i386__
@@ -97,6 +98,8 @@ class Recipe(recipe.Recipe):
         if self.config.variants.python3 is True:
             self.deps.append("Python")
 
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_mkostemp'] = 'no'
         if self.config.target_platform != Platform.WINDOWS:
             self.configure_options += ' --enable-static'
         if self.config.target_platform != Platform.LINUX:

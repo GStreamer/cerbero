@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import needs_xcode8_sdk_workaround
+
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
     version = '4.7'
@@ -11,3 +13,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libtasn1']
     files_devel = ['include/libtasn1.h', 'lib/pkgconfig/libtasn1.pc']
+
+    def prepare(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_clock_gettime'] = 'no'

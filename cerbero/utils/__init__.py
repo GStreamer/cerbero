@@ -27,6 +27,7 @@ try:
     import xml.etree.cElementTree as etree
 except ImportError:
     from lxml import etree
+from distutils.version import StrictVersion
 import gettext
 import platform as pplatform
 import re
@@ -364,3 +365,13 @@ def add_system_libs(config, new_env):
     search_paths = [os.environ.get('ACLOCAL_PATH', ''),
         os.path.join(sysroot, 'usr/share/aclocal')]
     new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
+
+def needs_xcode8_sdk_workaround(config):
+    '''
+    Returns whether the XCode 8 clock_gettime, mkostemp, getentropy workaround
+    from https://bugzilla.gnome.org/show_bug.cgi?id=772451 is needed
+    '''
+    if config.target_platform == Platform.DARWIN and \
+       StrictVersion(config.min_osx_sdk_version) < StrictVersion('10.12'):
+        return True
+    return False

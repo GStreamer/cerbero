@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 from cerbero.utils import shell
+from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
@@ -34,6 +35,9 @@ class Recipe(recipe.Recipe):
     files_lang = ['gnutls']
 
     def prepare(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            self.append_env['ac_cv_func_clock_gettime'] = 'no'
+            self.append_env['ac_cv_func_clock_settime'] = 'no'
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-threads=win32'
             self.can_use_configure_cache = False
@@ -45,6 +49,12 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-cxx'
 
     def configure(self):
+        if needs_xcode8_sdk_workaround(self.config):
+            # There is no env var that can be set to make the AC_COMPILE_IFELSE
+            # macro that checks this evaluate to 'no', so we change the symbol.
+            # Edit configure.ac and not configure because we autoreconf later.
+            shell.replace(os.path.join(self.build_dir, 'configure.ac'),
+                          {'getentropy': 'getentropy_DISABLED_NOT_FOR_MACOS10_12'})
         if self.config.target_platform == Platform.ANDROID:
             # On Android, SIZE_MAX is define under limits.h
             shell.replace(os.path.join(self.build_dir, 'gl', 'read-file.c'),
