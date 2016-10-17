@@ -9,4 +9,5 @@ class Recipe(recipe.Recipe):
     files_libs = ['libsbc']
     files_devel = ['include/sbc/sbc.h', 'lib/pkgconfig/sbc.pc']
     configure_options = '--disable-tester --disable-tools'
+    patches = ['sbc/0001-sbc-Use-stdint.h.patch']
 

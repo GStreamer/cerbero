@@ -1,0 +1,27 @@
+From 3c6c579144ea52e55bfc292bde7a8838fa8a4327 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <edward@centricular.com>
+Date: Mon, 17 Oct 2016 08:32:50 +0200
+Subject: [PATCH] sbc: Use <stdint.h>
+
+mingw doesn't include stdint.h by default. Include it because sbc
+uses int32_t and other standard types
+---
+ sbc/sbc_math.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/sbc/sbc_math.h b/sbc/sbc_math.h
+index 5476860..25b08ea 100644
+--- a/sbc/sbc_math.h
++++ b/sbc/sbc_math.h
+@@ -24,6 +24,8 @@
+  *
+  */
+ 
++#include <stdint.h>
++
+ #define fabs(x) ((x) < 0 ? -(x) : (x))
+ /* C does not provide an explicit arithmetic shift right but this will
+    always be correct and every compiler *should* generate optimal code */
+-- 
+2.7.4
+
