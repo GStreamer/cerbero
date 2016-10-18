@@ -130,7 +130,8 @@ class OSXUniversalGenerator(object):
                         action = ft[1]
                     break
             if not action:
-                if ftype.startswith('ERROR') and f.endswith('.h'):
+                # Sometimes `file` barfs on header files, so fallback to a copy
+                if f.endswith('.h'):
                     action = 'copy'
                 else:
                     raise Exception, 'Unexpected file type %s %s' % (str(ftype), f)
