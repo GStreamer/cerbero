@@ -130,7 +130,7 @@ def system_info():
     # Get the architecture info
     if platform == Platform.WINDOWS:
         arch = windows_arch()
-        if platform_str in ('x64', 'amd64'):
+        if arch in ('x64', 'amd64'):
             arch = Architecture.X86_64
         elif arch == 'x86':
             arch = Architecture.X86
