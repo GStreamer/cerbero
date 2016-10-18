@@ -370,8 +370,13 @@ def needs_xcode8_sdk_workaround(config):
     '''
     Returns whether the XCode 8 clock_gettime, mkostemp, getentropy workaround
     from https://bugzilla.gnome.org/show_bug.cgi?id=772451 is needed
+
+    These symbols are only available on macOS 10.12+ and iOS 10.0+
     '''
-    if config.target_platform == Platform.DARWIN and \
-       StrictVersion(config.min_osx_sdk_version) < StrictVersion('10.12'):
-        return True
+    if config.target_platform == Platform.DARWIN:
+        if StrictVersion(config.min_osx_sdk_version) < StrictVersion('10.12'):
+            return True
+    elif config.target_platform == Platform.IOS:
+        if StrictVersion(config.ios_min_version) < StrictVersion('10.0'):
+            return True
     return False
