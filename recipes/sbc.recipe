@@ -11,3 +11,12 @@ class Recipe(recipe.Recipe):
     configure_options = '--disable-tester --disable-tools'
     patches = ['sbc/0001-sbc-Use-stdint.h.patch']
 
+    def compile(self):
+        if self.config.target_platform != Platform.LINUX:
+            # Don't use --version-script on platforms other than GNU/Linux.
+            # ld does not support that on non-GNU platforms. This is not done
+            # via a patch to Makefile.am because the Autotools build system
+            # doesn't regenerate after the Autofoo sources are changed.
+            shell.replace(os.path.join(self.build_dir, 'Makefile'),
+                          {'-Wl,--version-script=$(top_srcdir)/sbc/sbc.sym': '$(NULL)'})
+        super(Recipe, self).compile()

@@ -1,0 +1,28 @@
+From 67e8b58614c0434cd90be1c0341f2a8d7340efff Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 18 Oct 2016 20:04:18 +0530
+Subject: [PATCH] Don't use --version-script on all platforms
+
+In this patch we just disable it, and apply the patch conditionally
+---
+ Makefile.am | 4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index ba0ab46..590348e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -26,8 +26,8 @@ lib_LTLIBRARIES = sbc/libsbc.la
+ sbc_libsbc_la_SOURCES = $(sbc_headers) $(sbc_sources)
+ 
+ sbc_libsbc_la_LDFLAGS = -no-undefined \
+-		-version-info $(SBC_CURRENT):$(SBC_REVISION):$(SBC_AGE) \
+-		-Wl,--version-script=$(top_srcdir)/sbc/sbc.sym
++		-version-info $(SBC_CURRENT):$(SBC_REVISION):$(SBC_AGE)
++#		-Wl,--version-script=$(top_srcdir)/sbc/sbc.sym
+ 
+ sbc_libsbc_la_DEPENDENCIES = sbc/sbc.sym
+ 
+-- 
+2.8.4 (Apple Git-73)
+
