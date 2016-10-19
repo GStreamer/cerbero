@@ -1,0 +1,25 @@
+From 7ee8b35e86bc6ab485413615742dc64abe00b3fa Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 19 Oct 2016 23:56:42 +0530
+Subject: [PATCH] Don't use NEON with aarch64 on Clang
+
+Clang hasn't implemented vmov, vadd, vld, etc for aarch64.
+---
+ sbc/sbc_primitives_neon.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/sbc/sbc_primitives_neon.h b/sbc/sbc_primitives_neon.h
+index ea3da06..e3fd3d0 100644
+--- a/sbc/sbc_primitives_neon.h
++++ b/sbc/sbc_primitives_neon.h
+@@ -30,6 +30,7 @@
+ #include "sbc_primitives.h"
+ 
+ #if defined(__GNUC__) && defined(__ARM_NEON__) && \
++		!(defined(__clang__) && defined(__aarch64__)) && \
+ 		!defined(SBC_HIGH_PRECISION) && (SCALE_OUT_BITS == 15)
+ 
+ #define SBC_BUILD_WITH_NEON_SUPPORT
+-- 
+2.8.4 (Apple Git-73)
+
