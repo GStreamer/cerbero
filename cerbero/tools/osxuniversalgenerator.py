@@ -43,7 +43,7 @@ file_types = [
     ('LaTeX', 'copy'),
     ('Zip', 'copy'),
     ('empty', 'copy'),
-    ('data', 'copy'),
+    ('PEM certificate', 'copy'),
 ]
 
 class OSXUniversalGenerator(object):
