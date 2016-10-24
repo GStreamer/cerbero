@@ -98,6 +98,7 @@ class DistroVersion:
     WINDOWS_7 = 'windows_7'
     WINDOWS_8 = 'windows_8'
     WINDOWS_10 = 'windows_10'
+    OS_X_SIERRA = 'osx_sierra'
     OS_X_MAVERICKS = 'osx_mavericks'
     OS_X_MOUNTAIN_LION = 'osx_mountain_lion'
     OS_X_YOSEMITE = 'osx_yosemite'
