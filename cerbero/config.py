@@ -250,7 +250,7 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path and not self.cross_compiling():
+        if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
         path = self._join_path(
             os.path.join(self.build_tools_prefix, 'bin'), path)
