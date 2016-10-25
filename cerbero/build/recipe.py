@@ -224,8 +224,10 @@ class Recipe(FilesProvider):
         for (libname, dllpaths) in self.libraries().items():
             if len(dllpaths) > 1:
                 m.warning("BUG: Found multiple DLLs for libname {}:\n{}".format(libname, '\n'.join(dllpaths)))
+                continue
             if len(dllpaths) == 0:
                 m.warning("Could not create {}.lib, no matching DLLs found".format(libname))
+                continue
             try:
                 implib = genlib.create(libname,
                     os.path.join(self.config.prefix, dllpaths[0]),
