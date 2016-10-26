@@ -118,7 +118,10 @@ class Tarball (Source):
             return
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
-        shell.download(self.url, self.download_path, check_cert=False, overwrite=redownload)
+        # Enable certificate checking Linux for now
+        # FIXME: Add more platforms here after testing
+        cc = self.config.platform == Platform.Linux
+        shell.download(self.url, self.download_path, check_cert=cc, overwrite=redownload)
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
