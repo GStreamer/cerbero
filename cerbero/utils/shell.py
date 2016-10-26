@@ -246,7 +246,8 @@ def download(url, destination=None, recursive=False, check_cert=True, overwrite=
         try:
             call(cmd, path)
         except FatalError, e:
-            os.remove(destination)
+            if os.path.exists(destination):
+                os.remove(destination)
             raise e
 
 
