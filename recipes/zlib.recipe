@@ -34,8 +34,9 @@ class Recipe(recipe.Recipe):
                 self.configure_options += " --uname=x86_64-linux-android "
             else:
                 self.configure_options += " --uname=arm-linux-androideabi "
-        elif self.config.cross_compiling() and self.config.host:
-            self.configure_options += " --uname=" + self.config.host
+        elif self.config.target_platform == Platform.LINUX:
+            if self.config.cross_compiling() and self.config.host:
+                self.configure_options += " --uname=" + self.config.host
 
     def post_install(self):
         libtool_la = LibtoolLibrary('z', 1, 2, 8, self.config.libdir,
