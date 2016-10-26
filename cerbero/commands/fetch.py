@@ -22,6 +22,7 @@ from cerbero.build.cookbook import CookBook
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates
 from cerbero.utils import messages as m
+from cerbero.build.source import Tarball
 
 
 class Fetch(Command):
@@ -32,9 +33,11 @@ class Fetch(Command):
                     'dependencies too')))
         args.append(ArgparseArgument('--full-reset', action='store_true',
                     default=False, help=_('reset to extract step if rebuild is needed')))
+        args.append(ArgparseArgument('--print-only', action='store_true',
+                    default=False, help=_('print all source URLs to stdout')))
         Command.__init__(self, args)
 
-    def fetch(self, cookbook, recipes, no_deps, reset_rdeps, full_reset):
+    def fetch(self, cookbook, recipes, no_deps, reset_rdeps, full_reset, print_only):
         fetch_recipes = []
         if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
@@ -49,6 +52,11 @@ class Fetch(Command):
         to_rebuild = []
         for i in range(len(fetch_recipes)):
             recipe = fetch_recipes[i]
+            if print_only:
+                # For now just print tarball URLs
+                if isinstance(recipe, Tarball):
+                    m.message("TARBALL: {} {}".format(recipe.url, recipe.tarball_name))
+                continue
             m.build_step(i + 1, len(fetch_recipes), recipe, 'Fetch')
             recipe.fetch()
             bv = cookbook.recipe_built_version(recipe.name)
@@ -89,7 +97,7 @@ class FetchRecipes(Fetch):
     def run(self, config, args):
         cookbook = CookBook(config)
         return self.fetch(cookbook, args.recipes, args.no_deps,
-                          args.reset_rdeps, args.full_reset)
+                          args.reset_rdeps, args.full_reset, args.print_only)
 
 
 class FetchPackage(Fetch):
@@ -109,7 +117,8 @@ class FetchPackage(Fetch):
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
         return self.fetch(store.cookbook, package.recipes_dependencies(),
-                          args.deps, args.reset_rdeps, args.full_reset)
+                          args.deps, args.reset_rdeps, args.full_reset,
+                          args.print_only)
 
 
 register_command(FetchRecipes)

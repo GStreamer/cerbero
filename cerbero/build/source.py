@@ -19,6 +19,8 @@
 import os
 import shutil
 import tarfile
+import urllib
+import urlparse
 
 from cerbero.config import Platform
 from cerbero.utils import git, svn, shell, _
@@ -98,6 +100,10 @@ class Tarball (Source):
             self.tarball_dirname = \
                 self.replace_name_and_version(self.tarball_dirname)
         self.download_path = os.path.join(self.repo_dir, self.tarball_name)
+        # URL-encode spaces and other special characters in the URL's path
+        split = list(urlparse.urlsplit(self.url))
+        split[2] = urllib.quote(split[2])
+        self.url = urlparse.urlunsplit(split)
 
     def fetch(self, redownload=False):
         if not os.path.exists(self.repo_dir):
