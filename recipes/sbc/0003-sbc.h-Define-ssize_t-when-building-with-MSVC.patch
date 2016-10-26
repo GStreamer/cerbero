@@ -1,0 +1,29 @@
+From 852570a535b5f3cbcb36eb71f9c6a6862b9d9426 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 25 Oct 2016 23:09:22 +0530
+Subject: [PATCH] sbc.h: Define ssize_t when building with MSVC
+
+---
+ sbc/sbc.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/sbc/sbc.h b/sbc/sbc.h
+index d6f123e..1d1343d 100644
+--- a/sbc/sbc.h
++++ b/sbc/sbc.h
+@@ -35,6 +35,12 @@ extern "C" {
+ #include <stdint.h>
+ #include <sys/types.h>
+ 
++/* On MSVC, ssize_t is SSIZE_T */
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++#define ssize_t SSIZE_T
++#endif
++
+ /* sampling frequency */
+ #define SBC_FREQ_16000		0x00
+ #define SBC_FREQ_32000		0x01
+-- 
+2.9.0.windows.1
+
