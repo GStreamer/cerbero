@@ -124,7 +124,7 @@ class Tarball (Source):
                  (self.url, self.download_path))
         # Enable certificate checking Linux for now
         # FIXME: Add more platforms here after testing
-        cc = self.config.platform == Platform.Linux
+        cc = self.config.platform == Platform.LINUX
         try:
             shell.download(self.url, self.download_path, check_cert=cc,
                            overwrite=redownload)
