@@ -27,6 +27,8 @@ from cerbero.utils import git, svn, shell, _
 from cerbero.errors import FatalError, InvalidRecipeError
 import cerbero.utils.messages as m
 
+# Must end in a / for urlparse.urljoin to work correctly
+TARBALL_MIRROR = 'https://gstreamer.freedesktop.org/src/mirror/'
 
 class Source (object):
     '''
@@ -84,6 +86,7 @@ class Tarball (Source):
     url = None
     tarball_name = None
     tarball_dirname = None
+    mirror_url = None
 
     def __init__(self):
         Source.__init__(self)
@@ -104,6 +107,7 @@ class Tarball (Source):
         split = list(urlparse.urlsplit(self.url))
         split[2] = urllib.quote(split[2])
         self.url = urlparse.urlunsplit(split)
+        self.mirror_url = urlparse.urljoin(TARBALL_MIRROR, self.tarball_name)
 
     def fetch(self, redownload=False):
         if not os.path.exists(self.repo_dir):
@@ -121,7 +125,13 @@ class Tarball (Source):
         # Enable certificate checking Linux for now
         # FIXME: Add more platforms here after testing
         cc = self.config.platform == Platform.Linux
-        shell.download(self.url, self.download_path, check_cert=cc, overwrite=redownload)
+        try:
+            shell.download(self.url, self.download_path, check_cert=cc,
+                           overwrite=redownload)
+        except FatalError:
+            # Try our mirror
+            shell.download(self.mirror_url, self.download_path, check_cert=cc,
+                           overwrite=redownload)
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
