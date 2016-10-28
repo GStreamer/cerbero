@@ -33,7 +33,17 @@ class Recipe(recipe.Recipe):
             self.make_install = 'make install SYS=%s prefix=$CERBERO_PREFIX CRYPTO=GNUTLS XLDFLAGS="$LDFLAGS" XCFLAGS="$CFLAGS" CC="$CC" LD="$LD"' % (system)
 
     def post_install(self):
+        soversion = 1
+        # On Windows, rtmp installs a duplicate DLL by trying to symlink which
+        # results in a copy under MinGW since symlinks aren't supported there.
+        if self.config.target_platform == Platform.WINDOWS:
+            dlldir = os.path.join(self.config.prefix, 'bin')
+            real_rtmp_dll = os.path.join(dlldir, 'librtmp-{}.dll'.format(soversion))
+            dupe_rtmp_dll = os.path.join(dlldir, 'librtmp.dll')
+            print(dupe_rtmp_dll)
+            if os.path.isfile(dupe_rtmp_dll) and os.path.isfile(real_rtmp_dll):
+                os.remove(dupe_rtmp_dll)
         deps = ['gnutls']
-        libtool_la = LibtoolLibrary('rtmp', 0, None, None, self.config.libdir,
-                self.config.target_platform, deps)
+        libtool_la = LibtoolLibrary('rtmp', soversion, None, None,
+                self.config.libdir, self.config.target_platform, deps)
         libtool_la.save()
