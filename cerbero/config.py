@@ -383,6 +383,12 @@ class Config (object):
 
     def cross_compiling(self):
         "Are we building for the host platform or not?"
+        # On Windows, building 32-bit on 64-bit is not cross-compilation since
+        # 32-bit Windows binaries run on 64-bit Windows via WOW64.
+        if self.platform == Platform.WINDOWS:
+            if self.arch == Architecture.X86_64 and \
+               self.target_arch == Architecture.X86:
+                return False
         return self.target_platform != self.platform or \
                 self.target_arch != self.arch or \
                 self.target_distro_version != self.distro_version
