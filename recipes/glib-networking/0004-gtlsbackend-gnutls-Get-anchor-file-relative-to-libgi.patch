@@ -1,0 +1,51 @@
+From aad2b4a10fc1e21155724c6cc2bd735a589ad626 Mon Sep 17 00:00:00 2001
+From: Sebastian Droege <sebastian@centricular.com>
+Date: Tue, 1 Nov 2016 19:48:12 +0000
+Subject: [PATCH 4/4] gtlsbackend-gnutls: Get anchor file relative to libgio on
+ Windows
+
+---
+ tls/gnutls/gtlsbackend-gnutls.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/tls/gnutls/gtlsbackend-gnutls.c b/tls/gnutls/gtlsbackend-gnutls.c
+index 1cf9127..74c98af 100644
+--- a/tls/gnutls/gtlsbackend-gnutls.c
++++ b/tls/gnutls/gtlsbackend-gnutls.c
+@@ -38,6 +38,10 @@
+ #include <dlfcn.h>
+ #endif
+ 
++#ifdef G_OS_WIN32
++#include <windows.h>
++#endif
++
+ struct _GTlsBackendGnutlsPrivate
+ {
+   GMutex mutex;
+@@ -154,6 +158,22 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
+     }
+ #endif
+ 
++#ifdef G_OS_WIN32
++    if (!anchor_file || !g_file_test (anchor_file, G_FILE_TEST_IS_REGULAR))
++      {
++        HMODULE module;
++        gchar *module_path;
++        module = GetModuleHandle ("libgio-2.0-0.dll");
++        if (module)
++          {
++            module_path = g_win32_get_package_installation_directory_of_module (module);
++            if (module_path)
++              anchor_file = g_build_filename (module_path, "etc", "ssl", "certs", "ca-certificates.crt", NULL);
++            g_free (module_path);
++          }
++      }
++#endif
++
+ #ifdef GST_CA_CERTIFICATES_FROM_ENV
+   anchor_file = g_getenv ("CA_CERTIFICATES");
+ #endif
+-- 
+2.6.3.windows.1
+
