@@ -1,15 +1,15 @@
-From aad2b4a10fc1e21155724c6cc2bd735a589ad626 Mon Sep 17 00:00:00 2001
+From 6f3db1bb19c5f06dda25f13aa1e1a381233f3fd2 Mon Sep 17 00:00:00 2001
 From: Sebastian Droege <sebastian@centricular.com>
 Date: Tue, 1 Nov 2016 19:48:12 +0000
 Subject: [PATCH 4/4] gtlsbackend-gnutls: Get anchor file relative to libgio on
  Windows
 
 ---
- tls/gnutls/gtlsbackend-gnutls.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ tls/gnutls/gtlsbackend-gnutls.c | 24 ++++++++++++++++++++++--
+ 1 file changed, 22 insertions(+), 2 deletions(-)
 
 diff --git a/tls/gnutls/gtlsbackend-gnutls.c b/tls/gnutls/gtlsbackend-gnutls.c
-index 1cf9127..74c98af 100644
+index 1cf9127..8b281e5 100644
 --- a/tls/gnutls/gtlsbackend-gnutls.c
 +++ b/tls/gnutls/gtlsbackend-gnutls.c
 @@ -38,6 +38,10 @@
@@ -23,7 +23,16 @@ index 1cf9127..74c98af 100644
  struct _GTlsBackendGnutlsPrivate
  {
    GMutex mutex;
-@@ -154,6 +158,22 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
+@@ -124,7 +128,7 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
+ {
+   const gchar *anchor_file = NULL;
+   GTlsDatabase *db = NULL;
+-#ifdef HAVE_DLADDR
++#if defined(HAVE_DLADDR) || defined(G_OS_WIN32)
+   gchar *free_me = NULL;
+ #endif
+ 
+@@ -154,12 +158,28 @@ g_tls_backend_gnutls_real_create_database (GTlsBackendGnutls  *self,
      }
  #endif
  
@@ -37,7 +46,7 @@ index 1cf9127..74c98af 100644
 +          {
 +            module_path = g_win32_get_package_installation_directory_of_module (module);
 +            if (module_path)
-+              anchor_file = g_build_filename (module_path, "etc", "ssl", "certs", "ca-certificates.crt", NULL);
++              anchor_file = free_me = g_build_filename (module_path, "etc", "ssl", "certs", "ca-certificates.crt", NULL);
 +            g_free (module_path);
 +          }
 +      }
@@ -46,6 +55,13 @@ index 1cf9127..74c98af 100644
  #ifdef GST_CA_CERTIFICATES_FROM_ENV
    anchor_file = g_getenv ("CA_CERTIFICATES");
  #endif
+   db = g_tls_file_database_new (anchor_file, error);
+ 
+-#ifdef HAVE_DLADDR
++#if defined(HAVE_DLADDR) || defined(G_OS_WIN32)
+   g_free (free_me);
+ #endif
+   return db;
 -- 
-2.6.3.windows.1
+2.10.2
 
