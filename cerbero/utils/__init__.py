@@ -178,7 +178,7 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_RARING
             elif d[2] in ['saucy', 'petra']:
                 distro_version = DistroVersion.UBUNTU_SAUCY
-            elif d[2] in ['trusty', 'qiana', 'rebecca']:
+            elif d[2] in ['trusty', 'qiana', 'rebecca', 'rafaela', 'rosa']:
                 distro_version = DistroVersion.UBUNTU_TRUSTY
             elif d[2] in ['utopic']:
                 distro_version = DistroVersion.UBUNTU_UTOPIC
@@ -186,7 +186,7 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_VIVID
             elif d[2] in ['wily']:
                 distro_version = DistroVersion.UBUNTU_WILY
-            elif d[2] in ['xenial']:
+            elif d[2] in ['xenial', 'sarah', 'serena']:
                 distro_version = DistroVersion.UBUNTU_XENIAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
@@ -197,6 +197,7 @@ def system_info():
             elif d[1].startswith('stretch'):
                 distro_version = DistroVersion.DEBIAN_STRETCH
             else:
+                print str(d)
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:
             distro = Distro.REDHAT
