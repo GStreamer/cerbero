@@ -20,7 +20,8 @@ class Recipe(recipe.Recipe):
                "../glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
                "../glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               '../glib/0016-gmessages-Fix-compilation-on-Android.patch'
+               '../glib/0016-gmessages-Fix-compilation-on-Android.patch',
+               '../glib/0017-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch'
               ]
 
     def prepare(self):
