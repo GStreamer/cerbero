@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.50/glib-%(version)s.tar.xz'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
-    configure_options = '--with-pcre=internal'
+    configure_options = '--with-pcre=internal --disable-libmount '
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
     patches = ["glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",
@@ -105,7 +105,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.WINDOWS:
             self.configure_options += ' --enable-static'
         if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc --disable-libmount '
+            self.configure_options += ' --disable-gtk-doc '
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)
             self.append_env['CFLAGS'] = ' -DNVALGRIND=1 '
