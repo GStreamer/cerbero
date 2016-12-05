@@ -1,7 +1,7 @@
-From 5ad93badab2ec54798e8e31ba25b056e6ef8045d Mon Sep 17 00:00:00 2001
+From fb1ec591571dfcc64d6284804b7fe289e7bc123c Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 12 Dec 2014 16:40:23 +0100
-Subject: [PATCH 10/10] Implementation of Cocoa event loop integration in
+Subject: [PATCH] Implementation of Cocoa event loop integration in
  GMainContext
 
 ---
@@ -11,10 +11,10 @@ Subject: [PATCH 10/10] Implementation of Cocoa event loop integration in
  3 files changed, 988 insertions(+), 2 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index de42595..00991c5 100644
+index 17c1509..5194f69 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -242,7 +242,7 @@ AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
+@@ -244,7 +244,7 @@ AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
  
  if test "x$glib_have_cocoa" = "xyes"; then
    AC_DEFINE(HAVE_COCOA, 1, [define to 1 if Cocoa is available])
@@ -24,7 +24,7 @@ index de42595..00991c5 100644
    osx_version=`sw_vers -productVersion`
    osx_min_version="10.9.0"
 diff --git a/glib/Makefile.am b/glib/Makefile.am
-index d2295cb..a10bece 100644
+index 82a7d3a..01bf1c6 100644
 --- a/glib/Makefile.am
 +++ b/glib/Makefile.am
 @@ -44,6 +44,10 @@ AM_CPPFLAGS = 				\
@@ -41,17 +41,17 @@ index d2295cb..a10bece 100644
 @@ -351,7 +355,7 @@ pcre_inc =
  endif
  
- libglib_2_0_la_CFLAGS = $(AM_CFLAGS) $(GLIB_HIDDEN_VISIBILITY_CFLAGS)
--libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD)
-+libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD) $(COCOA_LIBS)
+ libglib_2_0_la_CFLAGS = $(AM_CFLAGS) $(GLIB_HIDDEN_VISIBILITY_CFLAGS) $(LIBSYSTEMD_CFLAGS)
+-libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD) $(LIBSYSTEMD_LIBS)
++libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD) $(LIBSYSTEMD_LIBS) $(COCOA_LIBS)
  libglib_2_0_la_DEPENDENCIES = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ $(glib_win32_res) $(glib_def)
  
  libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \
 diff --git a/glib/gmain.c b/glib/gmain.c
-index 29ccee0..b7db6c0 100644
+index 4f90574..9998be7 100644
 --- a/glib/gmain.c
 +++ b/glib/gmain.c
-@@ -71,6 +71,10 @@
+@@ -72,6 +72,10 @@
  #include <windows.h>
  #endif /* G_OS_WIN32 */
  
@@ -62,7 +62,7 @@ index 29ccee0..b7db6c0 100644
  #ifdef HAVE_MACH_MACH_TIME_H
  #include <mach/mach_time.h>
  #endif
-@@ -448,6 +452,85 @@ static GMainContext *glib_worker_context;
+@@ -449,6 +453,85 @@ static GMainContext *glib_worker_context;
  G_LOCK_DEFINE_STATIC (main_loop);
  static GMainContext *default_main_context;
  
@@ -148,7 +148,32 @@ index 29ccee0..b7db6c0 100644
  #ifndef G_OS_WIN32
  
  
-@@ -3217,6 +3300,34 @@ g_main_context_acquire (GMainContext *context)
+@@ -3323,6 +3406,24 @@ g_main_context_release (GMainContext *context)
+ 	  if (!loop_internal_waiter)
+ 	    g_mutex_unlock (waiter->mutex);
+ 	}
++
++#ifdef HAVE_COCOA
++      if (g_atomic_pointer_compare_and_exchange (&cocoa_main_context, context, NULL))
++        {
++#ifdef G_MAIN_POLL_DEBUG
++          g_print ("%p stopped being the cocoa default main context\n", context);
++#endif
++          context->poll_func = cocoa_old_poll_func;
++          cocoa_old_poll_func = NULL;
++
++          CFRunLoopRemoveObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
++          CFRelease (cocoa_observer);
++          cocoa_observer = NULL;
++
++          [cocoa_autorelease_pool release];
++          cocoa_autorelease_pool = NULL;
++        }
++#endif
+     }
+ 
+   UNLOCK_CONTEXT (context); 
+@@ -3394,6 +3495,34 @@ g_main_context_wait (GMainContext *context,
      {
        context->owner = self;
        g_assert (context->owner_count == 0);
@@ -183,32 +208,7 @@ index 29ccee0..b7db6c0 100644
      }
  
    if (context->owner == self)
-@@ -3266,6 +3377,24 @@ g_main_context_release (GMainContext *context)
- 	  if (!loop_internal_waiter)
- 	    g_mutex_unlock (waiter->mutex);
- 	}
-+
-+#ifdef HAVE_COCOA
-+      if (g_atomic_pointer_compare_and_exchange (&cocoa_main_context, context, NULL))
-+        {
-+#ifdef G_MAIN_POLL_DEBUG
-+          g_print ("%p stopped being the cocoa default main context\n", context);
-+#endif
-+          context->poll_func = cocoa_old_poll_func;
-+          cocoa_old_poll_func = NULL;
-+
-+          CFRunLoopRemoveObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
-+          CFRelease (cocoa_observer);
-+          cocoa_observer = NULL;
-+
-+          [cocoa_autorelease_pool release];
-+          cocoa_autorelease_pool = NULL;
-+        }
-+#endif
-     }
- 
-   UNLOCK_CONTEXT (context); 
-@@ -5705,3 +5834,856 @@ g_get_worker_context (void)
+@@ -5816,3 +5945,856 @@ g_get_worker_context (void)
  
    return glib_worker_context;
  }
@@ -1066,5 +1066,5 @@ index 29ccee0..b7db6c0 100644
 +
 +#endif
 -- 
-2.8.1
+2.11.0
 

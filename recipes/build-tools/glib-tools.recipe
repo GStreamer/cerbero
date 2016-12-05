@@ -2,9 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.48.1'
+    version = '2.50.2'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.48/glib-%(version)s.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.50/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
@@ -19,12 +19,13 @@ class Recipe(recipe.Recipe):
                "../glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "../glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
                "../glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
-               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch'
+               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+               '../glib/0016-gmessages-Fix-compilation-on-Android.patch'
               ]
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
+            self.configure_options += ' --disable-gtk-doc --disable-libmount '
         elif self.config.target_platform == Platform.WINDOWS:
             self.configure_options = '--with-libiconv=gnu'
             self.append_env['CFLAGS'] = ' -DMINGW_HAS_SECURE_API=1 '
