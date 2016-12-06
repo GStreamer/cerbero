@@ -10,7 +10,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '3.2'
+    version = '3.3'
     stype = SourceType.TARBALL
     url = 'https://ftp.gnu.org/gnu/{0}/{0}-{1}.tar.gz'.format(name, version)
 

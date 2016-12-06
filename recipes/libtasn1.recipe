@@ -4,16 +4,19 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'libtasn1'
-    version = '4.7'
+    version = '4.9'
     stype = SourceType.TARBALL
     url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-{0}.tar.gz'.format(version)
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     patches = ['libtasn1/0001-Rename-gnulib-symbols.patch']
+    configure_options = '--disable-doc'
 
     files_libs = ['libtasn1']
     files_devel = ['include/libtasn1.h', 'lib/pkgconfig/libtasn1.pc']
 
     def prepare(self):
+        # Don't make it an error if functions are not inlined
+        self.append_env['CFLAGS'] = ' -Wno-error=inline '
         if needs_xcode8_sdk_workaround(self.config):
             self.append_env['ac_cv_func_clock_gettime'] = 'no'
