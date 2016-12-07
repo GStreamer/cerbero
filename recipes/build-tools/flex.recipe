@@ -2,13 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'flex'
-    version = '2.5.39'
+    version = '2.6.2'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
-    url = 'http://downloads.sourceforge.net/project/{0}/{0}-{1}.tar.gz'.format(name, version)
+    url = 'https://github.com/westes/flex/releases/download/v{0}/flex-{0}.tar.gz'.format(version)
     files_bins = ['flex', 'flex++', 'lex']
-    patches = ['flex/flex-Remove-no-undefined-from-LDFLAGS.patch',
-               'flex/flex-configure.ac-Use-gettext-0.19.patch',
-               'flex/flex-prevent-to-build-doc.patch']
+    patches = ['flex/flex-prevent-to-build-doc.patch']
     autoreconf = True
     platform_deps = {Platform.WINDOWS: ['mingw-gettext']}

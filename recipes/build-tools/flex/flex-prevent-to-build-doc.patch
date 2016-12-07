@@ -1,4 +1,4 @@
-From 1d8134aa1caae96cb7c7d3b9fe369c745f1a3e05 Mon Sep 17 00:00:00 2001
+From 54e3f4d658c089f555ab0848a73b99e302581177 Mon Sep 17 00:00:00 2001
 From: Justin Kim <justin.kim@collabora.com>
 Date: Tue, 15 Sep 2015 22:48:07 +0900
 Subject: [PATCH] flex: prevent to build doc
@@ -9,22 +9,22 @@ Subject: [PATCH] flex: prevent to build doc
  2 files changed, 2 deletions(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index 462bbf7..96f3da7 100644
+index 1540bb7..c839eb1 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -117,7 +117,6 @@ BUILT_SOURCES = \
+@@ -45,7 +45,6 @@ EXTRA_DIST = \
  SUBDIRS = \
  	lib \
- 	. \
+ 	src \
 -	doc \
  	examples \
  	po \
- 	tests
+ 	tests \
 diff --git a/configure.ac b/configure.ac
-index 33119a3..d98d06f 100644
+index c786752..c9b2151 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -112,7 +112,6 @@ AC_CHECK_FUNCS([dup2 isascii memset pow regcomp setlocale strchr strtol])
+@@ -146,7 +146,6 @@ AC_REPLACE_FUNCS(reallocarray)
  
  AC_CONFIG_FILES(
  Makefile
@@ -33,5 +33,5 @@ index 33119a3..d98d06f 100644
  examples/fastwc/Makefile
  examples/manual/Makefile
 -- 
-2.3.2 (Apple Git-55)
+2.11.0
 
