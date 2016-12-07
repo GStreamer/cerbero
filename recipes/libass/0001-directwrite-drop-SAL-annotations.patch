@@ -1,0 +1,121 @@
+From 4531a8a8ec9918c2d18d499faf6d1485d9a978d2 Mon Sep 17 00:00:00 2001
+From: Oleg Oshmyan <chortos@inbox.lv>
+Date: Wed, 7 Dec 2016 18:16:29 +0200
+Subject: [PATCH] directwrite: drop SAL annotations
+
+Some MinGW setups don't define the SAL macros. They don't
+serve any value to us, so just remove them from our code.
+
+Fixes libass#251.
+---
+ libass/ass_directwrite.c | 32 ++++++++++++++++----------------
+ libass/dwrite_c.h        |  1 +
+ 2 files changed, 17 insertions(+), 16 deletions(-)
+
+diff --git a/libass/ass_directwrite.c b/libass/ass_directwrite.c
+index e41a0d5..45d2a2e 100644
+--- a/libass/ass_directwrite.c
++++ b/libass/ass_directwrite.c
+@@ -66,8 +66,8 @@ typedef struct FallbackLogTextRenderer {
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_IsPixelSnappingDisabled(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
+-    _Out_ BOOL* isDisabled
++    void* clientDrawingContext,
++    BOOL* isDisabled
+     )
+ {
+     *isDisabled = true;
+@@ -76,8 +76,8 @@ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_IsPixelSnappingDisabled
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_GetCurrentTransform(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
+-    _Out_ DWRITE_MATRIX* transform
++    void* clientDrawingContext,
++    DWRITE_MATRIX* transform
+     )
+ {
+     return E_NOTIMPL;
+@@ -85,8 +85,8 @@ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_GetCurrentTransform(
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_GetPixelsPerDip(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
+-    _Out_ FLOAT* pixelsPerDip
++    void* clientDrawingContext,
++    FLOAT* pixelsPerDip
+     )
+ {
+     return E_NOTIMPL;
+@@ -94,12 +94,12 @@ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_GetPixelsPerDip(
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_DrawGlyphRun(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
++    void* clientDrawingContext,
+     FLOAT baselineOriginX,
+     FLOAT baselineOriginY,
+     DWRITE_MEASURING_MODE measuringMode,
+-    _In_ DWRITE_GLYPH_RUN const* glyphRun,
+-    _In_ DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
++    DWRITE_GLYPH_RUN const* glyphRun,
++    DWRITE_GLYPH_RUN_DESCRIPTION const* glyphRunDescription,
+     IUnknown* clientDrawingEffect
+     )
+ {
+@@ -122,10 +122,10 @@ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_DrawGlyphRun(
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_DrawUnderline(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
++    void* clientDrawingContext,
+     FLOAT baselineOriginX,
+     FLOAT baselineOriginY,
+-    _In_ DWRITE_UNDERLINE const* underline,
++    DWRITE_UNDERLINE const* underline,
+     IUnknown* clientDrawingEffect
+     )
+ {
+@@ -134,10 +134,10 @@ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_DrawUnderline(
+ 
+ static HRESULT STDMETHODCALLTYPE FallbackLogTextRenderer_DrawStrikethrough(
+     IDWriteTextRenderer *This,
+-    _In_opt_ void* clientDrawingContext,
++    void* clientDrawingContext,
+     FLOAT baselineOriginX,
+     FLOAT baselineOriginY,
+-    _In_ DWRITE_STRIKETHROUGH const* strikethrough,
++    DWRITE_STRIKETHROUGH const* strikethrough,
+     IUnknown* clientDrawingEffect
+     )
+ {
+@@ -722,9 +722,9 @@ static ASS_FontProviderFuncs directwrite_callbacks = {
+ };
+ 
+ typedef HRESULT (WINAPI *DWriteCreateFactoryFn)(
+-  _In_  DWRITE_FACTORY_TYPE factoryType,
+-  _In_  REFIID              iid,
+-  _Out_ IUnknown            **factory
++    DWRITE_FACTORY_TYPE factoryType,
++    REFIID              iid,
++    IUnknown            **factory
+ );
+ 
+ /*
+diff --git a/libass/dwrite_c.h b/libass/dwrite_c.h
+index 93c78a7..1e7307d 100644
+--- a/libass/dwrite_c.h
++++ b/libass/dwrite_c.h
+@@ -13,6 +13,7 @@
+ #define DWRITEAPI DECLSPEC_IMPORT
+ 
+ #include <unknwn.h>
++DEFINE_GUID(IID_IUnknown, 0x00000000, 0x0000, 0x0000, 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46);
+ 
+ typedef struct IDWriteFactory IDWriteFactory;
+ typedef struct IDWriteFont IDWriteFont;
+-- 
+2.11.0
+
