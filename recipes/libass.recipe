@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
     make_check = None
     autoreconf = True
+    patches = ['libass/0001-Only-enable-DirectWrite-if-the-Dwrite.h-header-is-fo.patch']
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
