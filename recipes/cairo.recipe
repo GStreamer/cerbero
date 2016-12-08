@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'cairo'
-    version = '1.14.2'
+    version = '1.14.6'
     stype = SourceType.TARBALL
-    url = 'http://cairographics.org/releases/cairo-1.14.2.tar.xz'
+    url = 'http://cairographics.org/releases/cairo-1.14.6.tar.xz'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     autoreconf = True
@@ -13,7 +13,6 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
     patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
                'cairo/0001-Disable-building-of-the-tests.patch',
-               'cairo/0001-Fix-broken-canvas-text-font-size-in-Inkscape.patch',
                ]
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
