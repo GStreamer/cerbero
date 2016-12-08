@@ -4,11 +4,11 @@ import shutil
 from cerbero.utils import shell
 
 # Created with tools/certdata2pem on the Mozilla CA list
-# https://mxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt
+# https://dxr.mozilla.org/mozilla-central/source/security/nss/lib/ckfw/builtins/certdata.txt
 
 class Recipe(recipe.Recipe):
     name = 'ca-certificates'
-    version = '2016-02-26'
+    version = '2016-09-22'
     licenses = [License.MPLv2]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
