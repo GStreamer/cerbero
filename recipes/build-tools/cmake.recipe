@@ -3,11 +3,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'cmake'
-    version = '2.8.12'
+    version = '3.7.1'
     licenses = [License.BSD_like]
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
-    url = 'http://www.cmake.org/files/v2.8/cmake-2.8.12.tar.gz'
+    url = 'http://www.cmake.org/files/v3.7/cmake-3.7.1.tar.gz'
     deps = ['autoconf']
 
     add_host_build_target = False
