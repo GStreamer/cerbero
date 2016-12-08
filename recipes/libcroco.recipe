@@ -2,10 +2,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libcroco'
-    version = '0.6.8'
+    version = '0.6.11'
     licenses = [License.LGPLv2_1]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/GNOME/sources/libcroco/0.6/libcroco-0.6.8.tar.xz'
+    url = 'http://ftp.gnome.org/pub/GNOME/sources/libcroco/0.6/libcroco-0.6.11.tar.xz'
     deps = ['libxml2', 'glib', 'gdk-pixbuf']
 
     files_libs = ['libcroco-0.6']
