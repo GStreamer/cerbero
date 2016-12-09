@@ -2,10 +2,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk-doc-lite'
-    version = '1.24'
+    version = '1.25'
     stype = SourceType.TARBALL
     tarball_dirname = 'gtk-doc-%(version)s'
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.24/gtk-doc-1.24.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/1.25/gtk-doc-1.25.tar.xz'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
