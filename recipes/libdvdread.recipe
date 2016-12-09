@@ -8,6 +8,10 @@ class Recipe(recipe.Recipe):
     url = 'http://www.videolan.org/pub/videolan/libdvdread/5.0.0/libdvdread-5.0.0.tar.bz2'
     licenses = [License.GPLv2Plus]
     autoreconf = True
+    patches = ['libdvdread/0001-Fix-compilation-on-Windows-by-including-files-with-t.patch',
+               'libdvdread/0002-Build-DLLs-on-Windows.patch',
+              ]
+    configure_options = ' --enable-static --enable-shared '
 
     files_libs = ['libdvdread']
     files_devel = ['include/dvdread', 'lib/pkgconfig/dvdread.pc',

@@ -1,0 +1,39 @@
+From d8917e0719ac5cbb0f29593463e06138c3bead4c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Fri, 9 Dec 2016 15:27:14 +0200
+Subject: [PATCH 2/2] Build DLLs on Windows
+
+---
+ Makefile.am  | 2 +-
+ configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 555df61..1ebb2d2 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -34,7 +34,7 @@ libdvdnav_la_SOURCES = \
+ 	src/vm/vmcmd.c \
+ 	src/vm/vmcmd.h
+ 
+-libdvdnav_la_LDFLAGS = \
++libdvdnav_la_LDFLAGS = -no-undefined \
+ 	-version-info $(DVDNAV_LT_CURRENT):$(DVDNAV_LT_REVISION):$(DVDNAV_LT_AGE) \
+ 	-export-symbols-regex "^dvdnav" $(DVDREAD_LIBS)
+ libdvdnav_la_LIBADD = $(THREAD_LIBS) $(DVDREAD_LIBS)
+diff --git a/configure.ac b/configure.ac
+index 3eff01a..d64fdfc 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -17,7 +17,7 @@ AC_CANONICAL_HOST
+ AM_INIT_AUTOMAKE([1.6 foreign dist-bzip2 no-dist-gzip subdir-objects])
+ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+ 
+-LT_INIT
++LT_INIT([win32-dll])
+ 
+ AC_CONFIG_HEADERS([config.h])
+ AC_CONFIG_MACRO_DIR([m4])
+-- 
+2.11.0
+
