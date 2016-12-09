@@ -2,12 +2,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'docbook-xml'
-    version = '4.3'
+    version = '4.5'
     # FIXME - no license defined
     licenses = []
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
-    url = 'http://docbook.org/xml/4.3/docbook-xml-4.3.zip'
+    url = 'http://docbook.org/xml/4.5/docbook-xml-4.5.zip'
 
     files_catalog = ['etc/catalog.xml']
 
