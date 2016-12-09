@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'expat'
-    version = '2.1.0'
+    version = '2.2.0'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
-    url = 'http://downloads.sourceforge.net/project/expat/expat/2.1.0/expat-2.1.0.tar.gz'
+    url = 'http://downloads.sourceforge.net/project/expat/expat/2.2.0/expat-2.2.0.tar.bz2'
 
     files_libs = ['libexpat']
     files_devel = ['include/expat.h', 'include/expat_external.h', 'lib/pkgconfig/expat.pc']
