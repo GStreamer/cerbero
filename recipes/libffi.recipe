@@ -24,7 +24,7 @@ class Recipe(recipe.Recipe):
     version = '3.2.1'
     autoreconf = True
     remotes = {'origin': 'https://github.com/atgreen/libffi.git'}
-    commit = '20562ac0427c3578250d04c6e34fb0127d4551cf'
+    commit = '60e4250a77eb3fde500bfd68ec40519fe34b21bd'
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']

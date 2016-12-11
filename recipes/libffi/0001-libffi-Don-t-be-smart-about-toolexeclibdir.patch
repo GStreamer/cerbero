@@ -1,20 +1,20 @@
-From 9d4196a8868abd07dfb1ce9a3fb1dda23872061e Mon Sep 17 00:00:00 2001
+From a5c50a560bc1a6b54a26688cfb77b46e769f2c18 Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Thu, 29 Jan 2015 15:37:02 +0100
 Subject: [PATCH] libffi: Don't be smart about toolexeclibdir
 
 ---
- configure.ac | 21 +--------------------
- 1 file changed, 1 insertion(+), 20 deletions(-)
+ configure.ac | 23 +----------------------
+ 1 file changed, 1 insertion(+), 22 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index a7bf5ee..fe6f905 100644
+index e49a788..d3c7c47 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -590,26 +590,7 @@ AC_ARG_ENABLE(purify-safety,
-     AC_DEFINE(USING_PURIFY, 1, [Define this if you are using Purify and want to suppress spurious messages.])
-   fi)
- 
+@@ -348,28 +348,7 @@ AC_ARG_ENABLE(multi-os-directory,
+ [  --disable-multi-os-directory
+                           disable use of gcc --print-multi-os-directory to change the library installation directory])
+                           
 -# These variables are only ever used when we cross-build to X86_WIN32.
 -# And we only support this with GCC, so...
 -if test "x$GCC" = "xyes"; then
@@ -26,11 +26,13 @@ index a7bf5ee..fe6f905 100644
 -    toolexecdir="${libdir}"/gcc-lib/'$(target_alias)'
 -    toolexeclibdir="${libdir}"
 -  fi
--  multi_os_directory=`$CC $CFLAGS -print-multi-os-directory`
--  case $multi_os_directory in
--    .) ;; # Avoid trailing /.
--    ../*) toolexeclibdir=$toolexeclibdir/$multi_os_directory ;;
--  esac
+-  if test x"$enable_multi_os_directory" != x"no"; then
+-    multi_os_directory=`$CC $CFLAGS -print-multi-os-directory`
+-    case $multi_os_directory in
+-      .) ;; # Avoid trailing /.
+-      ../*) toolexeclibdir=$toolexeclibdir/$multi_os_directory ;;
+-    esac
+-  fi
 -  AC_SUBST(toolexecdir)
 -else
 -  toolexeclibdir="${libdir}"
@@ -38,7 +40,7 @@ index a7bf5ee..fe6f905 100644
 +toolexeclibdir="${libdir}"
  AC_SUBST(toolexeclibdir)
  
- AC_CONFIG_COMMANDS(include, [test -d include || mkdir include])
+ # Check linker support.
 -- 
-2.1.0
+2.11.0
 
