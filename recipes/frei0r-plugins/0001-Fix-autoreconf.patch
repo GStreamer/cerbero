@@ -1,0 +1,45 @@
+From e1f3334b5e366a764a877c3b404656815b9264d5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sun, 11 Dec 2016 12:42:36 +0200
+Subject: [PATCH] Fix autoreconf
+
+---
+ AUTHORS         | 0
+ ChangeLog       | 0
+ README          | 0
+ TODO            | 0
+ src/Makefile.am | 2 ++
+ 5 files changed, 2 insertions(+)
+ create mode 100644 AUTHORS
+ create mode 100644 ChangeLog
+ create mode 100644 README
+ create mode 100644 TODO
+
+diff --git a/AUTHORS b/AUTHORS
+new file mode 100644
+index 0000000..e69de29
+diff --git a/ChangeLog b/ChangeLog
+new file mode 100644
+index 0000000..e69de29
+diff --git a/README b/README
+new file mode 100644
+index 0000000..e69de29
+diff --git a/TODO b/TODO
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 28906cf..c10dc96 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -8,6 +8,8 @@
+ # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
++AUTOMAKE_OPTIONS = subdir-objects
++
+ plugin_LTLIBRARIES = \
+ 	3dflippo.la \
+ 	addition.la \
+-- 
+2.11.0
+

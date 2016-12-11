@@ -4,10 +4,12 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'frei0r-plugins'
-    version = '1.4'
+    version = '1.5.0'
     licenses = [License.LGPL]
     stype = SourceType.TARBALL
-    url = 'http://files.dyne.org/frei0r/releases/frei0r-plugins-1.4.tar.gz'
+    url = 'http://files.dyne.org/frei0r/releases/frei0r-plugins-1.5.0.tar.gz'
+    autoreconf = True
+    patches = ['frei0r-plugins/0001-Fix-autoreconf.patch']
 
     files_plugins = ['lib/frei0r-1']
     files_devel = [
