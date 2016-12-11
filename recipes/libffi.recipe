@@ -21,7 +21,7 @@ FFI_H_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.2.1'
+    version = '3.99999'
     autoreconf = True
     remotes = {'origin': 'https://github.com/atgreen/libffi.git'}
     commit = '60e4250a77eb3fde500bfd68ec40519fe34b21bd'
