@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.2.1/include/ffi.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['lib/libffi-3.99999/include/ffi.h', 'lib/pkgconfig/libffi.pc']
     patches = ['libffi/0001-libffi-Don-t-be-smart-about-toolexeclibdir.patch']
 
     def prepare(self):
