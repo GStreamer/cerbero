@@ -1,28 +1,28 @@
-From 6f510bf9c9b0f86c40b8f5afa05f409493d8f7b8 Mon Sep 17 00:00:00 2001
+From 176a2e59de2df7f94be610bf7511922c728bb5ec Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Wed, 15 Oct 2014 16:14:19 +0200
 Subject: [PATCH] Don't use _mktemp_s which is not available in XP
 
 ---
- configure.ac   |    2 +-
- src/fccompat.c |    4 ++--
+ configure.ac   | 2 +-
+ src/fccompat.c | 4 ++--
  2 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 135e95a..f014ecf 100644
+index 1b48d50..785afb3 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -150,7 +150,7 @@ AC_TYPE_PID_T
+@@ -160,7 +160,7 @@ AC_TYPE_PID_T
  # Checks for library functions.
  AC_FUNC_VPRINTF
  AC_FUNC_MMAP
--AC_CHECK_FUNCS([link mkstemp mkostemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink regcomp regerror regexec regfree fstatvfs fstatfs lstat])
-+AC_CHECK_FUNCS([link mkstemp mkostemp _mktemp mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink regcomp regerror regexec regfree fstatvfs fstatfs lstat])
+-AC_CHECK_FUNCS([link mkstemp mkostemp _mktemp_s mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat])
++AC_CHECK_FUNCS([link mkstemp mkostemp _mktemp mkdtemp getopt getopt_long getprogname getexecname rand random lrand48 random_r rand_r readlink fstatvfs fstatfs lstat])
  
  dnl AC_CHECK_FUNCS doesn't check for header files.
  dnl posix_fadvise() may be not available in older libc.
 diff --git a/src/fccompat.c b/src/fccompat.c
-index f4f3f5f..68a70ff 100644
+index 31d80be..b34c46e 100644
 --- a/src/fccompat.c
 +++ b/src/fccompat.c
 @@ -152,8 +152,8 @@ FcMakeTempfile (char *template)
@@ -37,5 +37,5 @@ index f4f3f5f..68a70ff 100644
     fd = FcOpen(template, O_RDWR | O_EXCL | O_CREAT, 0600);
  #endif
 -- 
-1.7.10.msysgit.1
+2.11.0
 

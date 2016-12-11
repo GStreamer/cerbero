@@ -4,16 +4,14 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
-    version = '2.11.1'
+    version = '2.12.1'
     stype = SourceType.TARBALL
     url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
     autoreconf = True
-    patches = ['fontconfig/0001-Ensure-we-use-our-installed-headers-instead-of-syste.patch',
-               'fontconfig/0002-Port-to-Android.patch',
-               'fontconfig/0003-configure-Allow-static-build.patch',
+    patches = ['fontconfig/0003-configure-Allow-static-build.patch',
                'fontconfig/0001-Do-not-build-tests-on-windows.patch',
                'fontconfig/0001-Don-t-use-_mktemp_s-which-is-not-available-in-XP.patch',
                ]

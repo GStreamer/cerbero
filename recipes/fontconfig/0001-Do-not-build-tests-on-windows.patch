@@ -1,33 +1,30 @@
-From dfeb55ef3e21b562f02a857af5d7203d9c6d3754 Mon Sep 17 00:00:00 2001
+From 8092554e6e14be784267a3eb829a804092248a7d Mon Sep 17 00:00:00 2001
 From: Thibault Saunier <tsaunier@gnome.org>
 Date: Wed, 2 Apr 2014 10:09:29 +0200
 Subject: [PATCH] Do not build tests on windows
 
 ---
- Makefile.am | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ Makefile.am | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index 2b949e4..4502bf6 100644
+index 2b4a5b8..4262789 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -23,11 +23,15 @@
+@@ -23,7 +23,12 @@
  
- SUBDIRS=fontconfig fc-case fc-lang fc-glyphname src \
+ SUBDIRS=fontconfig fc-blanks fc-case fc-lang fc-glyphname src \
  	fc-cache fc-cat fc-list fc-match fc-pattern fc-query fc-scan \
 -	fc-validate conf.d test
 +	fc-validate conf.d
- if ENABLE_DOCS
- SUBDIRS += doc
- endif
- 
++
 +if !OS_WIN32
 +SUBDIRS += test
 +endif
 +
- ACLOCAL_AMFLAGS = -I m4
- 
- EXTRA_DIST = \
+ if ENABLE_DOCS
+ SUBDIRS += doc
+ endif
 -- 
-1.9.0
+2.11.0
 
