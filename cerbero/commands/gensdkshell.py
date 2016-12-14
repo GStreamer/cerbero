@@ -100,9 +100,6 @@ class GenSdkShell(Command):
         self._putvar('LDFLAGS',  '-L%s ${LDFLAGS}' % libdir, " ")
         self._putvar('GIO_EXTRA_MODULES',  '%s/gio/modules' % libdir)
         self._putvar('GI_TYPELIB_PATH',  '%s/girepository-1.0' % libdir)
-        if config.variants.gtk3:
-            self._putvar('GTK_PATH', '%s/gtk-3.0' % libdir, None)
-            self._putvar('GTK_DATA_PREFIX', prefix_env, None)
 
         envstr = 'export %s="%s"\n' % (prefix_env_name, prefix)
         for e, v in env.iteritems():

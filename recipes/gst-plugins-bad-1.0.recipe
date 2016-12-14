@@ -218,10 +218,6 @@ class Recipe(custom.GStreamer):
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
 
-        if self.config.variants.gtk3:
-            self.deps.append("gtk+3")
-            self.files_plugins_sys = ["lib/gstreamer-1.0/libgstgtksink%(mext)s"]
-
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:

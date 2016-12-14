@@ -21,5 +21,3 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         if self.config.variants.cdparanoia:
             self.files += ['cdparanoia:libs']
-        if self.config.variants.gtk3:
-            self.deps += ['gtk-3.0']

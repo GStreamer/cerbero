@@ -5,4 +5,4 @@ target_platform = Platform.LINUX
 target_distro = Distro.DEBIAN
 target_arch = Architecture.ARMv7
 variants = ['noalsa', 'nox11', 'nopulse', 'nocdparanoia', 'nosdl',
-            'nogtk3', 'noclutter', 'nov4l2', 'notestspackage', 'nopython']
+            'noclutter', 'nov4l2', 'notestspackage', 'nopython']
