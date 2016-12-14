@@ -49,7 +49,7 @@ class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
                            'gi', 'unwind']
-    __enabled_variants = ['debug', 'clutter', 'python', 'testspackage']
+    __enabled_variants = ['debug', 'python', 'testspackage']
 
     def __init__(self, variants):
         for v in self.__enabled_variants:
