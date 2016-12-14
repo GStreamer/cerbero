@@ -26,7 +26,6 @@ from cerbero.errors import PackageNotFoundError, UsageError
 from cerbero.packages.packager import Packager
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.disttarball import DistTarball
-from cerbero.packages.linux_bundle import LinuxBundler
 
 
 class Package(Command):
@@ -46,9 +45,6 @@ class Package(Command):
                 default=False,
                 help=_('(only meaningfull when --tarball is set) Create one single '
                        'tarball with devel and runtime files')),
-            ArgparseArgument('-l', '--linux-bundle', action='store_true',
-                default=False,
-                help=_('Creates a tarball instead of a native package')),
             ArgparseArgument('-f', '--force', action='store_true',
                 default=False, help=_('Delete any existing package file')),
             ArgparseArgument('-d', '--no-devel', action='store_false',
@@ -82,10 +78,6 @@ class Package(Command):
             raise PackageNotFoundError(args.package[0])
         if args.tarball:
             pkg = DistTarball(config, p, self.store)
-        elif args.linux_bundle:
-            if config.target_platform != Platform.LINUX:
-                UsageError("Linux bundler is usable only for linux platforms")
-            pkg = LinuxBundler(config, p, self.store)
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)

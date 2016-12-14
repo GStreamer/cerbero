@@ -55,7 +55,6 @@ lame                    |  3.99.5       |
 libnice                 |  0.1.10       |
 libass                  |  0.12.1       |
 
-app-image-kit           |  0.9.3        | 
 gtk+3			|  3.18.5	|
 librsvg			|  2.40.6	|
 python3			|  3.3.5	| 3.4.1 (2014-05-19)
