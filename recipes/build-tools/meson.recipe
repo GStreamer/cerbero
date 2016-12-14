@@ -5,11 +5,11 @@ import stat
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.28'
+    version = '0.36.0'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     remotes = {'origin': 'https://github.com/mesonbuild/meson.git'}
-    commit = '0.28.0'
+    commit = '0.36.0'
     deps = ['ninja']
 
     files_bin = ['bin/meson']
