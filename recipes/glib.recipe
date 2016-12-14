@@ -97,9 +97,6 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
-        if self.config.variants.python3 is True:
-            self.deps.append("Python")
-
         if needs_xcode8_sdk_workaround(self.config):
             self.append_env['ac_cv_func_mkostemp'] = 'no'
         if self.config.target_platform != Platform.WINDOWS:

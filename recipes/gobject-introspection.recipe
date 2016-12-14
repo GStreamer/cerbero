@@ -70,11 +70,6 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        if self.config.variants.python3:
-            # cerbero is python2 only, same as gobject-introspection,
-            # make sure gobject-introspection is built against the same interpretter
-            # as we are
-            self.config_sh = "PYTHON=%s %s" %(sys.executable, self.config_sh)
         # on arch python2 needs to be specified as the interpreter
         # the full path needs to be specified, since shebangs are generated
         if self.config.target_distro == Distro.ARCH:

@@ -58,9 +58,6 @@ class BuildTools (BootstrapperBase):
                 self.BUILD_TOOLS.append('yasm')
             if self.config.distro_version in [DistroVersion.REDHAT_6]:
                 self.BUILD_TOOLS.append('cmake')
-        if self.config.target_platform == Platform.LINUX:
-            if self.config.variants.python3:
-                self.BUILD_TOOLS.append('meson')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID,
@@ -81,7 +78,6 @@ class BuildTools (BootstrapperBase):
         config.prefix = self.config.build_tools_prefix
         config.home_dir = self.config.home_dir
         config.load()
-        config.variants.python3 = False
 
         config.prefix = self.config.build_tools_prefix
         config.build_tools_prefix = self.config.build_tools_prefix

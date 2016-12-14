@@ -48,7 +48,7 @@ License = enums.License
 class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
-                           'gi', 'python3', 'gtk3', 'unwind']
+                           'gi', 'gtk3', 'unwind']
     __enabled_variants = ['debug', 'clutter', 'python', 'testspackage']
 
     def __init__(self, variants):
@@ -122,12 +122,6 @@ class Config (object):
         # Next, if a config file is provided use it to override the settings
         # from the main configuration file
         self._load_cmd_config(filename)
-
-        # We need to set py_prefix as soon as possible
-        if "python3" in self.variants:
-            # FIXME Find a smarter way to figure out what version of python3
-            # is built.
-            self.py_prefix = 'lib/python3.3'
 
         # Create a copy of the config for each architecture in case we are
         # building Universal binaries
@@ -296,9 +290,6 @@ class Config (object):
                'MONO_GAC_PREFIX': prefix,
                'GSTREAMER_ROOT': prefix
                }
-
-        if self.variants.python3:
-           env['PYTHON'] = "python3"
 
         return env
 
