@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'cairo'
-    version = '1.14.6'
+    version = '1.14.8'
     stype = SourceType.TARBALL
-    url = 'http://cairographics.org/releases/cairo-1.14.6.tar.xz'
+    url = 'http://cairographics.org/releases/cairo-1.14.8.tar.xz'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     autoreconf = True
