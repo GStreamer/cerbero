@@ -6,7 +6,7 @@ class Recipe(custom.GStreamerStatic):
     extra_configure_options = "--enable-static --disable-iec958 --disable-mpegstream --disable-cdio --disable-sidplay --disable-twolame"
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
-            'libdvdread', 'libmpeg2', 'libmad', 'x264', 'lame', 'mpg123']
+            'libdvdread', 'libmpeg2', 'x264', 'lame', 'mpg123']
 
     files_plugins_codecs_restricted_devel = [
              'libgsta52dec',
@@ -15,7 +15,6 @@ class Recipe(custom.GStreamerStatic):
              'libgstasf',
              'libgstdvdsub',
              'libgstdvdlpcmdec',
-             'libgstmad',
              'libgstmpeg2dec',
              'libgstxingmux',
              'libgstrmdemux',
