@@ -1,25 +1,25 @@
-From f018a3b641e4d234ef25c0868124c3a7e05cb200 Mon Sep 17 00:00:00 2001
+From bb3cfc0e16e592e93bcda45ecab61ce5d9bc3009 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Thu, 1 Mar 2012 03:39:51 +0100
-Subject: [PATCH 2/3] Don't build tests
+Subject: [PATCH 2/2] Don't build tests
 
 ---
  Makefile.am | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index c8fa95c..1362307 100644
+index a99287c..a7ddcf2 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -1,7 +1,7 @@
  ## Process this file with automake to produce Makefile.in
  ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
  
--SUBDIRS = libsoup po tests examples docs
-+SUBDIRS = libsoup po examples docs
+-SUBDIRS = libsoup po tests examples docs build/win32
++SUBDIRS = libsoup po examples docs build/win32
  
  EXTRA_DIST =				\
  	data/effective_tld_names.dat	\
 -- 
-1.9.0
+2.11.0
 
