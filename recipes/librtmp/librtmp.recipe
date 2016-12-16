@@ -4,10 +4,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'librtmp'
-    version = '2.4_p20131018'
+    version = '2.4_p20151223'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-2.4_p20131018.tar.gz'
+    url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-2.4_p20151223.tar.gz'
     licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
