@@ -1,14 +1,14 @@
-From 96f847847fb61f4fde56cb84f72cfc2e821b5886 Mon Sep 17 00:00:00 2001
+From 9726b4dc063e7260177756e57d1a26cf3f5a603e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Thu, 25 Oct 2012 11:00:51 +0200
-Subject: [PATCH 5/9] Fix soundstretch linking
+Subject: [PATCH 5/5] Fix soundstretch linking
 
 ---
  source/SoundStretch/Makefile.am | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/source/SoundStretch/Makefile.am b/source/SoundStretch/Makefile.am
-index b73069e..ffadbed 100644
+index d2c0dfa..cee20f1 100644
 --- a/source/SoundStretch/Makefile.am
 +++ b/source/SoundStretch/Makefile.am
 @@ -41,14 +41,14 @@ soundstretch_SOURCES=main.cpp RunParameters.cpp WavFile.cpp
@@ -19,15 +19,15 @@ index b73069e..ffadbed 100644
 +soundstretch_LDADD=../SoundTouch/libSoundTouch.la -lm $(GNUSTL_LIBS)
  
  ## linker flags. 
- # OP 2011-7-17 Linker flags disabled to prevent stripping symbols by default
- # soundstretch_LDFLAGS=-s
+ # OP 2011-7-17 Linker flag -s disabled to prevent stripping symbols by default
+ #soundstretch_LDFLAGS=-s
  
  ## additional compiler flags
--soundstretch_CXXFLAGS=-O3
-+soundstretch_CXXFLAGS=-O3 $(GNUSTL_CFLAGS)
+-soundstretch_CXXFLAGS=-O3 $(AM_CXXFLAGS)
++soundstretch_CXXFLAGS=-O3 $(AM_CXXFLAGS) $(GNUSTL_CFLAGS
  
  #clean-local: 
  #	-rm -f additional-files-to-remove-on-make-clean
 -- 
-2.1.4
+2.11.0
 

@@ -1,7 +1,7 @@
-From 67bd83b2f8de7b1c2d715397d83f46c9e15a2d93 Mon Sep 17 00:00:00 2001
+From bc4bb887c794da89662338a377df9433604a86be Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Thu, 25 Oct 2012 10:59:29 +0200
-Subject: [PATCH 4/9] Use gnustl
+Subject: [PATCH 4/4] Use gnustl
 
 ---
  configure.ac                  | 18 +++++++++---------
@@ -10,10 +10,10 @@ Subject: [PATCH 4/9] Use gnustl
  3 files changed, 18 insertions(+), 18 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 1806ae0..e867430 100644
+index ce4488d..85aca97 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -207,19 +207,19 @@ dnl add whatever functions you might want to check for here
+@@ -232,19 +232,19 @@ dnl add whatever functions you might want to check for here
  
  
  AC_ARG_WITH(
@@ -43,7 +43,7 @@ index 1806ae0..e867430 100644
  dnl ############################################################################
  dnl # Internationaliation and Localiation                                    #
 diff --git a/source/Makefile.am b/source/Makefile.am
-index f25185b..960d8a9 100644
+index 7968419..aec67e4 100644
 --- a/source/Makefile.am
 +++ b/source/Makefile.am
 @@ -21,7 +21,7 @@
@@ -51,20 +51,20 @@ index f25185b..960d8a9 100644
  include $(top_srcdir)/config/am_include.mk
  
 -SUBDIRS=SoundTouch 
-+SUBDIRS=SoundTouch SoundStretch
++SUBDIRS=SoundTouch
  
  # set to something if you want other stuff to be included in the distribution tarball
  #EXTRA_DIST=
 diff --git a/source/SoundTouch/Makefile.am b/source/SoundTouch/Makefile.am
-index cbe5bc2..dafde68 100644
+index e5d37fa..c9169bb 100644
 --- a/source/SoundTouch/Makefile.am
 +++ b/source/SoundTouch/Makefile.am
 @@ -34,10 +34,10 @@ libSoundTouch_la_SOURCES=AAFilter.cpp FIRFilter.cpp FIFOSampleBuffer.cpp    \
      InterpolateShannon.cpp
  
  # Compiler flags
--AM_CXXFLAGS=-O3 -fcheck-new -I../../include $(STLPORT_CFLAGS)
-+AM_CXXFLAGS=-O3 -fcheck-new -I../../include $(GNUSTL_CFLAGS)
+-AM_CXXFLAGS+=-O3 $(STLPORT_CFLAGS)
++AM_CXXFLAGS+=-O3 $(GNUSTL_CFLAGS)
  
  # Compile the files that need MMX and SSE individually.
 -libSoundTouch_la_LIBADD=libSoundTouchMMX.la libSoundTouchSSE.la $(STLPORT_LIBS)
@@ -101,7 +101,7 @@ index cbe5bc2..dafde68 100644
 +libSoundTouchSSE_la_CXXFLAGS = $(AM_CXXFLAGS) $(GNUSTL_CFLAGS)
  endif
  
- 
+ # Modify the default 0.0.0 to LIB_SONAME.0.0
 -- 
-2.1.4
+2.11.0
 

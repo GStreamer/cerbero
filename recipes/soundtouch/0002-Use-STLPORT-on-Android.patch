@@ -1,7 +1,7 @@
-From ad7054b333a84cab2d6aa7ff578b64b7103c3029 Mon Sep 17 00:00:00 2001
+From 1525028246bcac98dae6fc47860fc9f7ec39240e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Thu, 25 Oct 2012 10:02:29 +0200
-Subject: [PATCH 2/9] Use STLPORT on Android
+Subject: [PATCH 2/2] Use STLPORT on Android
 
 ---
  configure.ac                  | 18 ++++++++++++++----
@@ -9,10 +9,10 @@ Subject: [PATCH 2/9] Use STLPORT on Android
  2 files changed, 22 insertions(+), 12 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 37dbcca..1806ae0 100644
+index d3df5eb..ce4488d 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -206,10 +206,20 @@ dnl add whatever functions you might want to check for here
+@@ -231,10 +231,20 @@ dnl add whatever functions you might want to check for here
  #AC_CHECK_FUNCS([floor ftruncate memmove memset mkdir modf pow realpath sqrt strchr strdup strerror strrchr strstr strtol])
  
  
@@ -38,15 +38,15 @@ index 37dbcca..1806ae0 100644
  dnl ############################################################################
  dnl # Internationaliation and Localiation                                    #
 diff --git a/source/SoundTouch/Makefile.am b/source/SoundTouch/Makefile.am
-index f4a7b8a..cbe5bc2 100644
+index 4756880..7549259 100644
 --- a/source/SoundTouch/Makefile.am
 +++ b/source/SoundTouch/Makefile.am
 @@ -34,10 +34,10 @@ libSoundTouch_la_SOURCES=AAFilter.cpp FIRFilter.cpp FIFOSampleBuffer.cpp    \
      InterpolateShannon.cpp
  
  # Compiler flags
--AM_CXXFLAGS=-O3 -fcheck-new -I../../include
-+AM_CXXFLAGS=-O3 -fcheck-new -I../../include $(STLPORT_CFLAGS)
+-AM_CXXFLAGS+=-O3
++AM_CXXFLAGS+=-O3 $(STLPORT_CFLAGS)
  
  # Compile the files that need MMX and SSE individually.
 -libSoundTouch_la_LIBADD=libSoundTouchMMX.la libSoundTouchSSE.la
@@ -83,7 +83,7 @@ index f4a7b8a..cbe5bc2 100644
 +libSoundTouchSSE_la_CXXFLAGS = $(AM_CXXFLAGS) $(STLPORT_CFLAGS)
  endif
  
- 
+ # Modify the default 0.0.0 to LIB_SONAME.0.0
 -- 
-2.1.4
+2.11.0
 

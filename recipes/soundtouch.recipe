@@ -4,9 +4,9 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
-    version = '1.8.0'
+    version = '1.9.2'
     stype = SourceType.TARBALL
-    url = 'http://www.surina.net/soundtouch/soundtouch-1.8.0.tar.gz'
+    url = 'http://www.surina.net/soundtouch/soundtouch-1.9.2.tar.gz'
     tarball_dirname = 'soundtouch'
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
@@ -19,7 +19,6 @@ class Recipe(recipe.Recipe):
                'soundtouch/0006-Fix-pkg-config-file.patch',
                'soundtouch/0007-Make-it-compile-on-IOS.patch',
                'soundtouch/0008-Fix-compilation-with-clang.patch',
-               'soundtouch/0009-Don-t-use-fcheck-new.patch',
                'soundtouch/0010-Try-harder-to-generate-Win32-DLLs.patch']
 
     files_libs = ['libSoundTouch']
