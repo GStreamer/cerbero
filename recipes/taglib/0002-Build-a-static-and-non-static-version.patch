@@ -1,0 +1,36 @@
+From 218e8693604e76397a22fef217a671295a0cf210 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sat, 17 Dec 2016 22:56:41 +0200
+Subject: [PATCH 2/2] Build a static and non-static version
+
+---
+ taglib/CMakeLists.txt | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/taglib/CMakeLists.txt b/taglib/CMakeLists.txt
+index 4f8c876..5f894db 100644
+--- a/taglib/CMakeLists.txt
++++ b/taglib/CMakeLists.txt
+@@ -342,7 +342,9 @@ set(tag_LIB_SRCS
+   tagutils.cpp
+ )
+ 
+-add_library(tag ${tag_LIB_SRCS} ${tag_HDRS})
++add_library(tag SHARED ${tag_LIB_SRCS} ${tag_HDRS})
++add_library(tag_static STATIC ${tag_LIB_SRCS} ${tag_HDRS})
++set_target_properties(tag_static PROPERTIES COMPILE_DEFINITIONS TAGLIB_STATIC)
+ 
+ if(ZLIB_FOUND)
+   target_link_libraries(tag ${ZLIB_LIBRARIES})
+@@ -372,7 +374,7 @@ if(BUILD_FRAMEWORK)
+   set_target_properties(tag PROPERTIES FRAMEWORK TRUE)
+ endif()
+ 
+-install(TARGETS tag
++install(TARGETS tag tag_static
+   FRAMEWORK DESTINATION ${FRAMEWORK_INSTALL_DIR}
+   LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+-- 
+2.11.0
+

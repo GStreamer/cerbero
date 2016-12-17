@@ -5,21 +5,16 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'taglib'
-    version = '1.7.2'
+    version = '1.11.1'
     stype = SourceType.TARBALL
     url = 'http://{0}.org/releases/{0}-{1}.tar.gz'.format(name, version)
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
-    configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DENABLE_STATIC=1'
+    configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DBUILD_SHARED_LIBS=1 -DBUILD_STATIC_LIBS=1'
     btype = BuildType.CMAKE
     platform_deps = {Platform.ANDROID: ['gnustl']}
-    patches = ['taglib/0001-taglib-install-taglob.pc-on-windows-too.patch',
-               'taglib/0002-fix-android-build-with-stlport.patch',
-               'taglib/0003-taglib.pc-require-stlport-for-android.patch',
-               'taglib/0004-build-shared-and-static-libraries.patch',
-               'taglib/0005-Use-gnustl-instead-of-stlport.patch',
-               'taglib/0006-Link-C-bindings-with-STL-too.patch',
-               'taglib/0007-Fix-pkg-config-file.patch']
+    patches = ['taglib/0001-Link-with-correct-STL-on-Android.patch',
+              ]
 
     files_libs = ['libtag', 'libtag_c']
     files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']
