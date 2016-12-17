@@ -18,7 +18,7 @@ class Recipe(custom.GStreamerStatic):
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
-            'libsrtp', 'schroedinger', 'libdca', 'libmms', 'libdvdnav',
+            'libsrtp', 'libdca', 'libmms', 'libdvdnav',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene',
             'spandsp', 'webrtc-audio-processing','sbc']
     use_system_libs = True
