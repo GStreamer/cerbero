@@ -67,7 +67,6 @@ class Recipe(custom.GStreamerStatic):
              'libgstpcapparse',
              'libgstpnm',
              'libgstrfbsrc',
-             'libgstschro',
              'libgstsiren',
              'libgstsmoothstreaming',
              'libgstsubenc',
