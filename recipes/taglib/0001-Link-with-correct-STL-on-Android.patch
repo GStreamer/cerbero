@@ -1,7 +1,7 @@
-From 98eeb9a724b145f6b51fbc2e127de929343b66e1 Mon Sep 17 00:00:00 2001
+From 7d759960c628ecaff5f80a8c6c42842ecd96829d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Sat, 17 Dec 2016 22:39:47 +0200
-Subject: [PATCH] Link with correct STL on Android
+Subject: [PATCH 1/2] Link with correct STL on Android
 
 ---
  CMakeLists.txt            | 15 +++++++++++----
@@ -50,7 +50,7 @@ index 387f1bd..c4aafc6 100644
  if(BUILD_FRAMEWORK)
    set_target_properties(tag_c PROPERTIES FRAMEWORK TRUE)
 diff --git a/taglib.pc.cmake b/taglib.pc.cmake
-index ba9d655..268845e 100644
+index ba9d655..5f42e0b 100644
 --- a/taglib.pc.cmake
 +++ b/taglib.pc.cmake
 @@ -5,7 +5,7 @@ includedir=@INCLUDE_INSTALL_DIR@
@@ -58,7 +58,7 @@ index ba9d655..268845e 100644
  Name: TagLib
  Description: Audio meta-data library
 -Requires: 
-+Requires: ${GNUSTL_PC}
++Requires: @GNUSTL_PC@
  Version: @TAGLIB_LIB_VERSION_STRING@
  Libs: -L${libdir} -ltag
  Cflags: -I${includedir}/taglib

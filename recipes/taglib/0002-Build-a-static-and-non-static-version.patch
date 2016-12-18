@@ -1,4 +1,4 @@
-From 218e8693604e76397a22fef217a671295a0cf210 Mon Sep 17 00:00:00 2001
+From 0ce96f3b8d9cd146f1c18c4f651c208a8884f7cb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Sat, 17 Dec 2016 22:56:41 +0200
 Subject: [PATCH 2/2] Build a static and non-static version
