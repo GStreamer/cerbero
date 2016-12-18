@@ -17,8 +17,8 @@ class Recipe(recipe.Recipe):
                'taglib/0002-Build-a-static-and-non-static-version.patch',
               ]
 
-    files_libs = ['libtag', 'libtag_c']
-    files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc', 'lib/pkgconfig/taglib_c.pc']
+    files_libs = ['libtag']
+    files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
