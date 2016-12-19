@@ -1,9 +1,0 @@
-# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
-
-class Recipe(recipe.Recipe):
-    name = 'iso-codes'
-    version = '3.72'
-    stype = SourceType.TARBALL
-    url = 'http://pkg-isocodes.alioth.debian.org/downloads/iso-codes-3.72.tar.xz'
-    licenses = [License.LGPLv2_1Plus]
