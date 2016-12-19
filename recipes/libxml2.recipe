@@ -3,17 +3,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.9.2'
+    version = '2.9.4'
     stype = SourceType.TARBALL
-    url = 'http://xmlsoft.org/sources/libxml2-2.9.2.tar.gz'
+    url = 'http://xmlsoft.org/sources/libxml2-2.9.4.tar.gz'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     autoreconf = True
     patches = ['libxml2/0001-Enable-windows-cross-compilation.patch',
                'libxml2/0002-makefiles-disable-tests.patch',
                'libxml2/0003-configure-fix-python-dir-prefix.patch',
-               'libxml2/0004-Fix-build-without-lzma.patch',
-               'libxml2/0005-configure.ac-Don-t-overwrite-LDFLAGS.patch',
                ]
 
     files_libs = ['libxml2']
