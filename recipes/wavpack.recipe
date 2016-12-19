@@ -4,11 +4,13 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '4.80.0'
+    version = '5.0.0'
     stype = SourceType.TARBALL
-    url = 'http://www.wavpack.com/wavpack-4.80.0.tar.bz2'
+    url = 'https://github.com/dbry/WavPack/archive/5.0.0.tar.gz'
+    tarball_dirname = 'WavPack-%(version)s'
     licenses = [License.BSD_like]
     autoreconf = True
+    configure_options = ' --disable-apps '
 
     files_libs = ['libwavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
