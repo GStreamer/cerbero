@@ -3,10 +3,10 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'tremor'
-    version = '1.2.1+r18641'
+    version = '1.2.1+r19427'
     stype = SourceType.SVN
     url = 'https://svn.xiph.org/trunk/Tremor/'
-    revision = '18641'
+    revision = '19427'
     licenses = [License.BSD_like]
     deps = ['libogg']
     config_sh = 'sh autogen.sh'
