@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
     autoreconf = True
+
     patches = ['soundtouch/0001-Add-dummy-file-to-make-sure-config-m4-exists.patch',
                'soundtouch/0002-Use-STLPORT-on-Android.patch',
                'soundtouch/0003-Don-t-build-soundstretch.patch',
