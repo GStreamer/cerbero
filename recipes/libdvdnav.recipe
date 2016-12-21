@@ -9,11 +9,10 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     autoreconf = True
     deps = ['libdvdread']
-    configure_options = '--with-dvdread-config=$CERBERO_PREFIX/bin/dvdread-config'
     patches = ['libdvdnav/0001-Fix-linking-in-windows-compilation.patch',
                'libdvdnav/0002-Build-DLLs-on-Windows.patch',
               ]
 
     files_libs = ['libdvdnav']
-    files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc', 'bin/dvdnav-config']
+    files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc']
 
