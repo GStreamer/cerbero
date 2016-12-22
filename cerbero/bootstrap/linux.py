@@ -117,8 +117,7 @@ class RedHatBootstrapper (UnixBootstrapper):
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
-        if self.config.distro_version == DistroVersion.FEDORA_23 or \
-           self.config.distro_version == DistroVersion.FEDORA_24:
+        if self.config.distro_version in [DistroVersion.FEDORA_23, DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
             self.tool = 'dnf install %s'
         else:
             self.tool = 'yum install %s'
@@ -126,7 +125,7 @@ class RedHatBootstrapper (UnixBootstrapper):
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
-            if self.config.distro_version == DistroVersion.FEDORA_24:
+            if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
                 self.packages.append('libncurses-compat-libs.i686')
         if self.config.target_platform == Platform.LINUX:
             self.packages.append('chrpath')
