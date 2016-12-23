@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
     autoreconf = True
+    patches = ['gdk-pixbuf/0001-thumbnailer-Add-EXEEXT-to-the-the-gdk-pixbuf-print-m.patch']
 
     files_libs = ['libgdk_pixbuf-2.0']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
