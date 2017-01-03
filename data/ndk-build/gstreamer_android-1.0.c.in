@@ -44,6 +44,7 @@ __sighandler_t bsd_signal(int signum, __sighandler_t handler)
 
 static jobject _context = NULL;
 static jobject _class_loader = NULL;
+static JavaVM  *_java_vm = NULL;
 static GstClockTime _priv_gst_info_start_time;
 
 #define GST_G_IO_MODULE_DECLARE(name) \
@@ -401,15 +402,21 @@ get_application_dirs (JNIEnv * env, jobject context, gchar ** cache_dir,
 }
 
 jobject
-gst_android_get_application_context ()
+gst_android_get_application_context (void)
 {
   return _context;
 }
 
 jobject
-gst_android_get_application_class_loader ()
+gst_android_get_application_class_loader (void)
 {
   return _class_loader;
+}
+
+JavaVM *
+gst_android_get_java_vm (void)
+{
+  return _java_vm;
 }
 
 static gboolean
@@ -573,6 +580,9 @@ JNI_OnLoad (JavaVM * vm, void * reserved)
     return 0;
   }
 
+  /* Remember Java VM */
+  _java_vm = vm;
+
   /* Tell the androidmedia plugin about the Java VM if we can */
   module = g_module_open (NULL, G_MODULE_BIND_LOCAL);
   if (module) {
@@ -608,4 +618,6 @@ JNI_OnUnload (JavaVM * vm, void * reversed)
     (*env)->DeleteGlobalRef (env, _class_loader);
     _class_loader = NULL;
   }
+
+  _java_vm = NULL;
 }
