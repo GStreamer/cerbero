@@ -1,0 +1,36 @@
+From 0c00d8a2641b109323fdc4c9fa20bc9668e36ef6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 4 Jan 2017 22:02:47 +0200
+Subject: [PATCH 2/2] Don't use RTLD_DEFAULT on Android for g_module_self()
+
+On 64 bit Android this is #defined to 0, which is considered an invalid
+library handle in all other cases. RTLD_DEFAULT is only supposed to be
+used with dlsym() it seems, and the usage here was just an
+"optimization" before.
+
+By dlopen'ing NULL, we get the same on all Android variants and it
+actually works instead of erroring out.
+---
+ gmodule/gmodule-dl.c | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/gmodule/gmodule-dl.c b/gmodule/gmodule-dl.c
+index e452e34..68e8e3d 100644
+--- a/gmodule/gmodule-dl.c
++++ b/gmodule/gmodule-dl.c
+@@ -111,12 +111,7 @@ _g_module_self (void)
+   /* to query symbols from the program itself, special link options
+    * are required on some systems.
+    */
+-  
+-#ifdef __BIONIC__
+-  handle = RTLD_DEFAULT;
+-#else
+   handle = dlopen (NULL, RTLD_GLOBAL | RTLD_LAZY);
+-#endif
+   if (!handle)
+     g_module_set_error (fetch_dlerror (TRUE));
+   
+-- 
+2.11.0
+

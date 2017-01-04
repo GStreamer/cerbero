@@ -1,0 +1,62 @@
+From 3f63a6990de4c581ec374b00a000b29a605c92a7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 4 Jan 2017 21:39:48 +0200
+Subject: [PATCH] Check for RTLD_LAZY and others in configure
+
+They are no #defines on Android but enum values, and on 64 bit Android
+they have different values than what we would otherwise fall-back to.
+---
+ configure.ac         | 10 ++++++++++
+ gmodule/gmodule-dl.c |  7 ++++---
+ 2 files changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 00991c5..94d35be 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1506,6 +1506,16 @@ dnl *** check whether we need preceeding underscores
+   		G_MODULE_NEED_USCORE=0
+ 	fi
+ 
++        AC_CHECK_DECL([RTLD_LAZY],
++                      [AC_DEFINE(HAVE_RTLD_LAZY, 1, [Define to 1 if RTLD_LAZY is available])],
++                      [], [[#include <dlfcn.h>]])
++        AC_CHECK_DECL([RTLD_NOW],
++                      [AC_DEFINE(HAVE_RTLD_NOW, 1, [Define to 1 if RTLD_NOW is available])],
++                      [], [[#include <dlfcn.h>]])
++        AC_CHECK_DECL([RTLD_GLOBAL],
++                      [AC_DEFINE(HAVE_RTLD_GLOBAL, 1, [Define to 1 if RTLD_GLOBAL is available])],
++                      [], [[#include <dlfcn.h>]])
++
+ 	LDFLAGS="$LDFLAGS_orig"
+ dnl *** check for having dlerror()
+ 	AC_CHECK_FUNC(dlerror,
+diff --git a/gmodule/gmodule-dl.c b/gmodule/gmodule-dl.c
+index 20225df..e452e34 100644
+--- a/gmodule/gmodule-dl.c
++++ b/gmodule/gmodule-dl.c
+@@ -57,17 +57,18 @@
+  * RTLD_GLOBAL - the external symbols defined in the library will be made
+  *		 available to subsequently loaded libraries.
+  */
+-#ifndef	RTLD_LAZY
++#ifndef	HAVE_RTLD_LAZY
+ #define	RTLD_LAZY	1
+ #endif	/* RTLD_LAZY */
+-#ifndef	RTLD_NOW
++#ifndef	HAVE_RTLD_NOW
+ #define	RTLD_NOW	0
+ #endif	/* RTLD_NOW */
+ /* some systems (OSF1 V5.0) have broken RTLD_GLOBAL linkage */
+ #ifdef G_MODULE_BROKEN_RTLD_GLOBAL
+ #undef	RTLD_GLOBAL
++#undef	HAVE_RTLD_GLOBAL
+ #endif /* G_MODULE_BROKEN_RTLD_GLOBAL */
+-#ifndef	RTLD_GLOBAL
++#ifndef	HAVE_RTLD_GLOBAL
+ #define	RTLD_GLOBAL	0
+ #endif	/* RTLD_GLOBAL */
+ 
+-- 
+2.11.0
+
