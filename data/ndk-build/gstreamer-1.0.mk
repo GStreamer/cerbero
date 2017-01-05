@@ -260,12 +260,16 @@ copyjavasource_$(TARGET_ARCH_ABI):
 		$(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" \
 		> $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
+ifndef GSTREAMER_ASSETS_DIR
+GSTREAMER_ASSETS_DIR := src/main/assets
+endif
+
 copyfontsres_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,assets/fontconfig)
-	@$(call host-mkdir,assets/fontconfig/fonts/truetype/)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,assets/fontconfig)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,assets/fontconfig/fonts/truetype)
+	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig)
+	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype/)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,$(GSTREAMER_ASSETS_DIR)/fontconfig)
+	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype)
 copycacertificatesres_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,assets/ssl/certs)
-	@$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,assets/ssl/certs)
+	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
+	@$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
 
