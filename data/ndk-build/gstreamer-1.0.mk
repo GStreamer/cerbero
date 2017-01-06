@@ -261,7 +261,7 @@ copyjavasource_$(TARGET_ARCH_ABI):
 		> $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
 ifndef GSTREAMER_ASSETS_DIR
-GSTREAMER_ASSETS_DIR := src/main/assets
+GSTREAMER_ASSETS_DIR := assets
 endif
 
 copyfontsres_$(TARGET_ARCH_ABI):
