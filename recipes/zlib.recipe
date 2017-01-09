@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     version = '1.2.8'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'http://zlib.net/zlib-1.2.8.tar.xz'
+    url = 'http://zlib.net/fossils/zlib-1.2.8.tar.gz'
     licenses = [License.BSD_like]
     add_host_build_target = False
     can_use_configure_cache = False
