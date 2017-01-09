@@ -4,10 +4,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'zlib'
-    version = '1.2.8'
+    version = '1.2.10'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'http://zlib.net/fossils/zlib-1.2.8.tar.gz'
+    url = 'http://zlib.net/fossils/zlib-1.2.10.tar.gz'
     licenses = [License.BSD_like]
     add_host_build_target = False
     can_use_configure_cache = False

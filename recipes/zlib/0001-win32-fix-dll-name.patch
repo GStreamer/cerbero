@@ -1,4 +1,4 @@
-From 507c4fde9ab55ff58e30abb95d27d923325c73e8 Mon Sep 17 00:00:00 2001
+From 9bdbe1d8262bc19457a2c43bc78279f2b0be4b47 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 17:50:25 +0100
 Subject: [PATCH] win32: fix dll name
@@ -8,7 +8,7 @@ Subject: [PATCH] win32: fix dll name
  1 file changed, 2 insertions(+), 3 deletions(-)
 
 diff --git a/win32/Makefile.gcc b/win32/Makefile.gcc
-index 6d1ded6..d2aa544 100644
+index 305be50..3970c79 100644
 --- a/win32/Makefile.gcc
 +++ b/win32/Makefile.gcc
 @@ -30,18 +30,17 @@
@@ -26,12 +26,12 @@ index 6d1ded6..d2aa544 100644
 +SHARED_MODE=1
  
  #LOC = -DASMV
- #LOC = -DDEBUG -g
+ #LOC = -DZLIB_DEBUG -g
  
 -PREFIX =
  CC = $(PREFIX)gcc
  CFLAGS = $(LOC) -O3 -Wall
  
 -- 
-1.8.1.2
+2.11.0
 
