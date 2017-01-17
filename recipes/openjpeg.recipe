@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
                 os.path.join(self.config.prefix, 'lib', 'libopenjp2.a'))
 
     def post_install(self):
-        deps = ['m']
+        deps = ['-lm']
         libtool_la = LibtoolLibrary('openjp2', 2, 1, None, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()
