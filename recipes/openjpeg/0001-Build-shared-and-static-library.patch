@@ -1,0 +1,35 @@
+From 61c9f553d816c4a512494dac02f48c00d4bb1261 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 17 Jan 2017 13:25:53 +0200
+Subject: [PATCH] Build shared and static library
+
+---
+ src/lib/openjp2/CMakeLists.txt | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/openjp2/CMakeLists.txt b/src/lib/openjp2/CMakeLists.txt
+index fcf60ec..bf82a6f 100644
+--- a/src/lib/openjp2/CMakeLists.txt
++++ b/src/lib/openjp2/CMakeLists.txt
+@@ -54,9 +54,17 @@ if(UNIX)
+   target_link_libraries(${OPENJPEG_LIBRARY_NAME} m)
+ endif()
+ set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
++set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES COMPILE_DEFINITIONS OPJ_EXPORTS)
++
++add_library(${OPENJPEG_LIBRARY_NAME}_static STATIC ${OPENJPEG_SRCS})
++if(UNIX)
++  target_link_libraries(${OPENJPEG_LIBRARY_NAME}_static m)
++endif()
++set_target_properties(${OPENJPEG_LIBRARY_NAME}_static PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
++set_target_properties(${OPENJPEG_LIBRARY_NAME}_static PROPERTIES COMPILE_DEFINITIONS OPJ_STATIC)
+ 
+ # Install library
+-install(TARGETS ${OPENJPEG_LIBRARY_NAME}
++install(TARGETS ${OPENJPEG_LIBRARY_NAME} ${OPENJPEG_LIBRARY_NAME}_static
+   EXPORT OpenJPEGTargets
+   RUNTIME DESTINATION ${OPENJPEG_INSTALL_BIN_DIR} COMPONENT Applications
+   LIBRARY DESTINATION ${OPENJPEG_INSTALL_LIB_DIR} COMPONENT Libraries
+-- 
+2.11.0
+
