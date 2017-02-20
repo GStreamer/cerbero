@@ -27,7 +27,7 @@ from cerbero.utils import _, shell
 class AndroidBootstrapper (BootstrapperBase):
 
     NDK_BASE_URL = 'http://dl.google.com/android/repository/'
-    NDK_VERSION = 'r12b'
+    NDK_VERSION = 'r13b'
     NDK_ZIP = 'android-ndk-' + NDK_VERSION + '-%s-%s.zip'
 
     def start(self):
