@@ -252,6 +252,8 @@ def system_info():
                 distro_version = DistroVersion.OPENSUSE_12_2
             elif d[1] == '12.3':
                 distro_version = DistroVersion.OPENSUSE_12_3
+            elif d[1] == '42.2':
+                distro_version = DistroVersion.OPENSUSE_42_2
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution OpenSuse '%s' "
