@@ -163,6 +163,15 @@ def system_info():
                 with open('/etc/os-release', 'r') as f:
                     if 'ID="amzn"\n' in f.readlines():
                         d = ('RedHat', 'amazon', '')
+                    else:
+                        f.seek(0, 0)
+                        for line in f:
+                            k,v = line.rstrip().split("=")
+                            if k == 'NAME':
+                                name = v.strip('"')
+                            elif k == 'VERSION_ID':
+                                version = v.strip('"')
+                        d = (name, version, '');
 
         if d[0] in ['Ubuntu', 'debian', 'LinuxMint']:
             distro = Distro.DEBIAN
@@ -247,6 +256,9 @@ def system_info():
                 # FIXME Fill this
                 raise FatalError("Distribution OpenSuse '%s' "
                                  "not supported" % str(d))
+        elif d[0].strip() in ['openSUSE Tumbleweed']:
+            distro = Distro.SUSE
+            distro_version = DistroVersion.OPENSUSE_TUMBLEWEED
         elif d[0].strip() in ['arch']:
             distro = Distro.ARCH
             distro_version = DistroVersion.ARCH_ROLLING
