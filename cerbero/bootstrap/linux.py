@@ -146,9 +146,10 @@ class OpenSuseBootstrapper (UnixBootstrapper):
             'transfig', 'intltool', 'patterns-openSUSE-devel_rpm_build',
             'python-devel', 'xorg-x11-libXrender-devel', 'libpulse-devel',
             'xorg-x11-libXv-devel', 'Mesa-libGL-devel', 'libXcomposite-devel',
-            'alsa-devel', 'libXi-devel', 'Mesa-devel',
+            'libX11-devel', 'alsa-devel', 'libXi-devel', 'Mesa-devel',
+            'Mesa-libGLESv3-devel',
             'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
-            'docbook-utils', 'glib-networkinga', 'git', 'subversion']
+            'docbook-utils', 'glib-networking', 'git', 'subversion']
 
 class ArchBootstrapper (UnixBootstrapper):
 

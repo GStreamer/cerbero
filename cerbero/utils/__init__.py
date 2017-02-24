@@ -372,7 +372,7 @@ def add_system_libs(config, new_env):
     if arch == Architecture.X86:
         arch = 'i386'
     elif arch == Architecture.X86_64:
-        if config.distro == Distro.REDHAT:
+        if config.distro == Distro.REDHAT or config.distro == Distro.SUSE:
             libdir = 'lib64'
 
     sysroot = '/'

@@ -130,6 +130,9 @@ class MakefilesBase (Build):
         # Make sure user's env doesn't mess up with our build.
         self.new_env['MAKEFLAGS'] = None
 
+        # Disable site config, which is set on openSUSE
+        self.new_env['CONFIG_SITE'] = None
+
     @modify_environment
     def configure(self):
         if not os.path.exists(self.make_dir):
