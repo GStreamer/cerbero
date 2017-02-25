@@ -28,6 +28,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaudiotestsrc%(mext)s',
              'lib/gstreamer-1.0/libgstgio%(mext)s',
              'lib/gstreamer-1.0/libgstpango%(mext)s',
+             'lib/gstreamer-1.0/libgstrawparse%(mext)s',
              'lib/gstreamer-1.0/libgsttypefindfunctions%(mext)s',
              'lib/gstreamer-1.0/libgstvideoconvert%(mext)s',
              'lib/gstreamer-1.0/libgstvideorate%(mext)s',

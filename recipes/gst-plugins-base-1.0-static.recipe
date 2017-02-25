@@ -19,6 +19,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstaudiotestsrc',
              'libgstgio',
              'libgstpango',
+             'libgstrawparse',
              'libgsttypefindfunctions',
              'libgstvideoconvert',
              'libgstvideorate',
