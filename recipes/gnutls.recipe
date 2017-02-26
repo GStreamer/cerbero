@@ -5,14 +5,14 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.4.17'
+    version = '3.5.9'
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'ftp://ftp.gnutls.org/gcrypt/{0}/v{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     stype = SourceType.TARBALL
     # main library is LGPLv2+ and binaries is GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     configure_options = "--enable-local-libopts --disable-guile --disable-openssl-compatibility \
-        --without-p11-kit --enable-static --enable-zlib --enable-shared --disable-doc"
+        --without-p11-kit --enable-static --enable-zlib --enable-shared --disable-doc --with-included-unistring"
     deps = ['zlib', 'nettle', 'libtasn1']
     # GnuTLS uses error.h, which is a GNU extension only available with glibc
     # bionic-fixup provides that to us for all platforms
@@ -22,8 +22,7 @@ class Recipe(recipe.Recipe):
         Platform.IOS: ['bionic-fixup'],
         Platform.DARWIN: ['bionic-fixup']
     }
-    patches = [name + "/0001-configure-vasprintf-is-defined-in-stdio.h.patch",
-               name + "/0003-Disable-ncrypt-support.patch"]
+    patches = [name + "/0003-Disable-ncrypt-support.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

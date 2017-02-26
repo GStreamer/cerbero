@@ -1,34 +1,35 @@
-From 4df19d35188fe9e49eb720760b7aba9ebc3e80e1 Mon Sep 17 00:00:00 2001
+From 1b408de7690f293ef02f2180fb43f96048e3e4f0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Wed, 24 Feb 2016 16:46:11 +0200
-Subject: [PATCH 3/4] Disable ncrypt support
+Subject: [PATCH] Disable ncrypt support
 
 It's Windows Vista only and our mingw toolchain does not support it currently
 either.
 ---
- lib/Makefile.am | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ lib/Makefile.am | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/lib/Makefile.am b/lib/Makefile.am
-index 873a569..1ce9728 100644
+index dc49bc6..9963f85 100644
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
-@@ -85,11 +85,11 @@ COBJECTS = gnutls_range.c gnutls_record.c \
- 	safe-memfuncs.c inet_pton.c atfork.c atfork.h \
- 	system-keys.h urls.c urls.h auto-verify.c
+@@ -86,11 +86,11 @@ COBJECTS = range.c record.c compress.c debug.c cipher.c			\
+ 	system-keys.h urls.c urls.h prf.c auto-verify.c dh-session.c \
+ 	cert-session.c handshake-checks.c dtls-sw.c dh-primes.c
  
 -if WINDOWS
--COBJECTS += system-keys-win.c
+-COBJECTS += system/keys-win.c
 -else
-+#if WINDOWS
-+#COBJECTS += system-keys-win.c
-+#else
- COBJECTS += system-keys-dummy.c
+-COBJECTS += system/keys-dummy.c
 -endif
++#if WINDOWS
++#COBJECTS += system/keys-win.c
++#else
++COBJECTS += system/keys-dummy.c
 +#endif
  
  if ENABLE_SELF_CHECKS
  COBJECTS += crypto-selftests.c crypto-selftests-pk.c
 -- 
-2.7.0
+2.11.0
 
