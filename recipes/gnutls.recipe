@@ -45,6 +45,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-cxx'
         if self.config.target_platform == Platform.IOS:
+            if self.config.target_arch == Architecture.ARM64:
+                self.configure_options += ' --disable-hardware-acceleration'
             self.configure_options += ' --disable-cxx'
 
     def configure(self):
