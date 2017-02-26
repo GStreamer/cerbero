@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
-    configure_options = '--with-pcre=internal --disable-libmount '
+    configure_options = '--with-pcre=internal --disable-libmount --enable-dtrace=no '
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
     patches = ["../glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",

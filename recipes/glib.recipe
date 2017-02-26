@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.50/glib-%(version)s.tar.xz'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
-    configure_options = '--with-pcre=internal --disable-libmount '
+    configure_options = '--with-pcre=internal --disable-libmount --enable-dtrace=no '
     deps = ['libffi', 'zlib']
     can_use_configure_cache = False
     patches = ["glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",
@@ -128,7 +128,7 @@ class Recipe(recipe.Recipe):
             if self.config.target_platform == Platform.IOS:
                 # Disable mac OS X specifics
                 extra_flags = '-DGST_SDK_IOS=1'
-                self.configure_options += ' --disable-carbon --enable-dtrace=no --disable-modular-tests --disable-cocoa'
+                self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
 
             self.append_env['CFLAGS']="-DHAVE_STRNDUP %s" % extra_flags
 
