@@ -1,4 +1,4 @@
-From d9b65f1d1534a49847cab560a81984cbd89078f2 Mon Sep 17 00:00:00 2001
+From 617d3457f88a5306d2499c2365bda7ee3d92b7e4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Mon, 5 Dec 2016 12:10:48 +0200
 Subject: [PATCH] gmessages: Fix compilation on Android
@@ -9,7 +9,7 @@ There is no systemd on Android.
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/glib/gmessages.c b/glib/gmessages.c
-index 8f45c3d..231396f 100644
+index 2ef2b9d..d4290fb 100644
 --- a/glib/gmessages.c
 +++ b/glib/gmessages.c
 @@ -175,7 +175,7 @@
@@ -21,8 +21,8 @@ index 8f45c3d..231396f 100644
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <sys/un.h>
-@@ -1842,7 +1842,7 @@ g_log_writer_supports_color (gint output_fd)
-   return isatty (output_fd);
+@@ -1922,7 +1922,7 @@ g_log_writer_supports_color (gint output_fd)
+ #endif
  }
  
 -#ifdef __linux__
@@ -30,7 +30,7 @@ index 8f45c3d..231396f 100644
  static int journal_fd = -1;
  
  #ifndef SOCK_CLOEXEC
-@@ -1881,7 +1881,7 @@ open_journal (void)
+@@ -1961,7 +1961,7 @@ open_journal (void)
  gboolean
  g_log_writer_is_journald (gint output_fd)
  {
@@ -39,7 +39,7 @@ index 8f45c3d..231396f 100644
    /* FIXME: Use the new journal API for detecting whether we’re writing to the
     * journal. See: https://github.com/systemd/systemd/issues/2473
     */
-@@ -2016,7 +2016,7 @@ g_log_writer_format_fields (GLogLevelFlags   log_level,
+@@ -2096,7 +2096,7 @@ g_log_writer_format_fields (GLogLevelFlags   log_level,
    return g_string_free (gstring, FALSE);
  }
  
@@ -48,7 +48,7 @@ index 8f45c3d..231396f 100644
  static int
  journal_sendv (struct iovec *iov,
                 gsize         iovlen)
-@@ -2130,7 +2130,7 @@ g_log_writer_journald (GLogLevelFlags   log_level,
+@@ -2210,7 +2210,7 @@ g_log_writer_journald (GLogLevelFlags   log_level,
                         gsize            n_fields,
                         gpointer         user_data)
  {

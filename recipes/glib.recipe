@@ -20,7 +20,7 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.50.2'
+    version = '2.50.3'
     stype = SourceType.TARBALL
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.50/glib-%(version)s.tar.xz'
     licenses = [License.LGPLv2Plus]
