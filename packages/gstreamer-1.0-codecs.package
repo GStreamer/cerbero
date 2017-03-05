@@ -19,11 +19,11 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
             'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
             ]
-    files_devel = ['gst-plugins-base-1.0-static:plugins_codecs_devel',
-            'gst-plugins-good-1.0-static:plugins_codecs_devel',
-            'gst-plugins-bad-1.0-static:plugins_codecs_devel',
-            'gst-plugins-ugly-1.0-static:plugins_codecs_devel',
-            'gst-plugins-bad-1.0-static:codecs_devel']
+    files_devel = ['gst-plugins-base-1.0:plugins_codecs_devel',
+            'gst-plugins-good-1.0:plugins_codecs_devel',
+            'gst-plugins-bad-1.0:plugins_codecs_devel',
+            'gst-plugins-ugly-1.0:plugins_codecs_devel',
+            'gst-plugins-bad-1.0:codecs_devel']
     platform_files = {
             Platform.ANDROID: ['tremor:libs'],
             Platform.IOS: ['tremor:libs']

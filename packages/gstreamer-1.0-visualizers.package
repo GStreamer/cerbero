@@ -12,7 +12,7 @@ class Package(custom.GStreamer, package.Package):
 
     files = ['libvisual', 'gst-plugins-base-1.0:plugins_vis', 'gst-plugins-good-1.0:plugins_vis',
              'gst-plugins-ugly-1.0:plugins_vis', 'gst-plugins-bad-1.0:plugins_vis']
-    files_devel = ['gst-plugins-base-1.0-static:plugins_vis_devel',
-            'gst-plugins-good-1.0-static:plugins_vis_devel',
-            'gst-plugins-ugly-1.0-static:plugins_vis_devel',
-            'gst-plugins-bad-1.0-static:plugins_vis_devel']
+    files_devel = ['gst-plugins-base-1.0:plugins_vis_devel',
+            'gst-plugins-good-1.0:plugins_vis_devel',
+            'gst-plugins-ugly-1.0:plugins_vis_devel',
+            'gst-plugins-bad-1.0:plugins_vis_devel']

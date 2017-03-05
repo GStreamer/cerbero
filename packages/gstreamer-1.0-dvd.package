@@ -15,7 +15,7 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-good-1.0:plugins_dvd',
             'gst-plugins-ugly-1.0:plugins_dvd',
             'gst-plugins-bad-1.0:plugins_dvd']
-    files_devel = ['gst-plugins-base-1.0-static:plugins_dvd_devel'
-            'gst-plugins-good-1.0-static:plugins_dvd_devel',
-            'gst-plugins-ugly-1.0-static:plugins_dvd_devel',
-            'gst-plugins-bad-1.0-static:plugins_dvd_devel']
+    files_devel = ['gst-plugins-base-1.0:plugins_dvd_devel'
+            'gst-plugins-good-1.0:plugins_dvd_devel',
+            'gst-plugins-ugly-1.0:plugins_dvd_devel',
+            'gst-plugins-bad-1.0:plugins_dvd_devel']

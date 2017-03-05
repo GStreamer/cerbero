@@ -4,7 +4,7 @@ import shutil
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-static --program-prefix= --disable-examples "
+    configure_options = "--enable-static --enable-static-plugins --program-prefix= --disable-examples "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
     deps = ['glib', 'gtk-doc-lite']
 
@@ -22,6 +22,9 @@ class Recipe(custom.GStreamer):
     }
 
     files_plugins_core = ['lib/gstreamer-1.0/libgstcoreelements%(mext)s']
+    files_plugins_core_devel = [
+        'lib/gstreamer-1.0/libgstcoreelements.a', 'lib/gstreamer-1.0/libgstcoreelements.la',
+    ]
 
     files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s']
 

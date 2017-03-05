@@ -4,9 +4,9 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     licenses = [License.LGPLv2Plus]
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
+    remotes = {'origin': 'file:///home/nicolas/Sources/gstreamer-master/gst-editing-services'}
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--program-prefix= --disable-examples --enable-static "
+    configure_options = "--program-prefix= --disable-examples --enable-static --enable-static-plugins "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
     files_bins = ['ges-launch-1.0']
@@ -15,6 +15,7 @@ class Recipe(custom.GStreamer):
     files_typelibs = ['GES-1.0']
 
     files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s' ]
+    files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la']
 
 #    files_python = ['site-packages/ges%(pext)s']
 

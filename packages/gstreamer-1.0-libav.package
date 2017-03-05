@@ -11,4 +11,4 @@ class Package(custom.GStreamer, package.Package):
     deps = ['gstreamer-1.0-core']
 
     files = ['gst-libav-1.0:plugins_codecs_restricted']
-    files_devel = ['gst-libav-1.0-static:plugins_codecs_restricted_devel']
+    files_devel = ['gst-libav-1.0:plugins_codecs_restricted_devel']

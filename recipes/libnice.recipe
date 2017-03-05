@@ -6,9 +6,9 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
-    configure_options = ' --enable-static --enable-shared --with-gstreamer \
-            --without-gstreamer-0.10 --enable-compile-warnings=maximum \
-            --disable-gtk-doc'
+    configure_options = '--enable-static --enable-static-plugins --enable-shared \
+            --with-gstreamer --without-gstreamer-0.10 \
+            --enable-compile-warnings=maximum --disable-gtk-doc'
     deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
     autoreconf = True
     patches = [
@@ -27,12 +27,7 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/nice.pc',
     ]
     files_plugins_net = ['lib/gstreamer-1.0/libgstnice%(mext)s']
+    files_plugins_net_devel = [
+        'lib/gstreamer-1.0/libgstnice.a', 'lib/gstreamer-1.0/libgstnice.la',
+    ]
     # FIXME - if_arp.h? (iOS)
-
-    def configure(self):
-        # Only build the shared gst plugin in this recipe.
-        # We do need the static libnice.a library, though,
-        # so we don't use --disable-static
-        shell.replace(os.path.join(self.build_dir, 'gst', 'Makefile.am'),
-                      {'-module': '-shared -module'})
-        super(Recipe, self).configure()

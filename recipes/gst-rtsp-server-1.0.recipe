@@ -3,14 +3,17 @@
 class Recipe(custom.GStreamer):
     name = 'gst-rtsp-server-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-examples --enable-static "
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-rtsp-server'}
+    configure_options = "--disable-examples --enable-static --enable-static-plugins "
+    remotes = {'origin': 'file:///home/nicolas/Sources/gstreamer-master/gst-rtsp-server'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
     files_devel = ['include/gstreamer-1.0/gst/rtsp-server', 'lib/pkgconfig/gstreamer-rtsp-server-1.0.pc']
     files_libs = ['libgstrtspserver-1.0']
     files_typelibs = ['GstRtspServer-1.0']
     files_plugins_net = [ 'lib/gstreamer-1.0/libgstrtspclientsink%(mext)s' ]
+    files_plugins_net_devel = [
+        'lib/gstreamer-1.0/libgstrtspclientsink.a', 'lib/gstreamer-1.0/libgstrtspclientsink.la',
+    ]
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "

@@ -35,9 +35,8 @@ GSTREAMER_ROOT := $(wildcard $(GSTREAMER_ROOT))
 
 # Path for GStreamer static plugins
 ifndef GSTREAMER_STATIC_PLUGINS_PATH
-GSTREAMER_STATIC_PLUGINS_PATH := lib/gstreamer-1.0
+GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_ROOT)/lib/gstreamer-1.0
 endif
-GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_ROOT)/lib/gstreamer-1.0/static
 
 # Path for the NDK integration makefiles
 ifndef GSTREAMER_NDK_BUILD_PATH

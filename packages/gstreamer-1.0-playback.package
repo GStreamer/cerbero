@@ -14,7 +14,7 @@ class Package(custom.GStreamer, package.Package):
              'gst-plugins-good-1.0:plugins_playback',
              'gst-plugins-ugly-1.0:plugins_playback',
              'gst-plugins-bad-1.0:plugins_playback']
-    files_devel = ['gst-plugins-base-1.0-static:plugins_playback_devel',
-                   'gst-plugins-good-1.0-static:plugins_playback_devel',
-                   'gst-plugins-ugly-1.0-static:plugins_playback_devel',
-                   'gst-plugins-bad-1.0-static:plugins_playback_devel']
+    files_devel = ['gst-plugins-base-1.0:plugins_playback_devel',
+                   'gst-plugins-good-1.0:plugins_playback_devel',
+                   'gst-plugins-ugly-1.0:plugins_playback_devel',
+                   'gst-plugins-bad-1.0:plugins_playback_devel']
