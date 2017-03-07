@@ -155,8 +155,8 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_capture = [
-             'lib/gstreamer-1.0/libgstcamerabin2%(mext)s'
-            ]
+             'lib/gstreamer-1.0/libgstcamerabin%(mext)s'
+    ]
 
 
     platform_files_plugins_capture = {
@@ -172,7 +172,7 @@ class Recipe(custom.GStreamer):
 
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
-            ]
+    ]
 
     platform_files_plugins_sys = {
         Platform.LINUX: [

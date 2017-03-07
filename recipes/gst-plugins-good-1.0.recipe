@@ -75,14 +75,14 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstrtsp%(mext)s',
              'lib/gstreamer-1.0/libgstrtp%(mext)s',
              'lib/gstreamer-1.0/libgstrtpmanager%(mext)s',
-             'lib/gstreamer-1.0/libgstsouphttpsrc%(mext)s',
+             'lib/gstreamer-1.0/libgstsoup%(mext)s',
              'lib/gstreamer-1.0/libgstudp%(mext)s',
     ]
 
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstgoom%(mext)s',
              'lib/gstreamer-1.0/libgstgoom2k1%(mext)s',
-            ]
+    ]
 
     files_plugins_capture = []
 
@@ -123,7 +123,7 @@ class Recipe(custom.GStreamer):
             self.configure_options += ' --disable-x --disable-xvideo'
 
         if self.config.variants.pulse:
-            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstpulse%(mext)s']
+            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstpulseaudio%(mext)s']
         else:
             self.configure_options += ' --disable-pulse'
 

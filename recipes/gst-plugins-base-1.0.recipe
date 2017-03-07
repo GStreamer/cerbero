@@ -39,12 +39,12 @@ class Recipe(custom.GStreamer):
 
     files_plugins_playback = [
              'lib/gstreamer-1.0/libgstplayback%(mext)s',
-            ]
+    ]
 
     # Not used currently
     files_plugins_encoding = [
-             'lib/gstreamer-1.0/libgstencodebin%(mext)s',
-            ]
+             'lib/gstreamer-1.0/libgstencoding%(mext)s',
+    ]
 
     files_plugins_codecs = [
              'lib/gstreamer-1.0/libgstsubparse%(mext)s',
@@ -56,7 +56,7 @@ class Recipe(custom.GStreamer):
 
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstlibvisual%(mext)s',
-            ]
+    ]
 
     files_plugins_devel = [
             'include/gstreamer-1.0/gst/allocators',
@@ -86,7 +86,7 @@ class Recipe(custom.GStreamer):
 
     files_plugins_net = [
             'lib/gstreamer-1.0/libgsttcp%(mext)s',
-            ]
+    ]
     files_plugins_sys = []
 
 
@@ -132,7 +132,7 @@ class Recipe(custom.GStreamer):
             self.files_plugins_sys += [
                  'lib/gstreamer-1.0/libgstximagesink%(mext)s',
                  'lib/gstreamer-1.0/libgstxvimagesink%(mext)s',
-                ]
+            ]
         else:
             self.configure_options += ' --disable-x --disable-xvideo '
 

@@ -18,7 +18,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstmpeg2dec%(mext)s',
              'lib/gstreamer-1.0/libgstxingmux%(mext)s',
-             'lib/gstreamer-1.0/libgstrmdemux%(mext)s',
+             'lib/gstreamer-1.0/libgstrealmedia%(mext)s',
              'lib/gstreamer-1.0/libgstx264%(mext)s',
              'lib/gstreamer-1.0/libgstlame%(mext)s',
              'lib/gstreamer-1.0/libgstmpg123%(mext)s',

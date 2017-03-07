@@ -34,7 +34,7 @@ class Recipe(custom.GStreamerStatic):
 
     # Not used currently
     files_plugins_encoding_devel = [
-             'libgstencodebin',
+             'libgstencoding',
             ]
 
     files_plugins_codecs_devel = [

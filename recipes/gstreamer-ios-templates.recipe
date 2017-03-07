@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
         shell.copy_dir(os.path.join(self.config.data_dir, 'xcode',
                                     'templates', 'ios'), share_dir)
 
-        plugins, replacements = list_gstreamer_1_0_plugins_by_category(self.config)
+        plugins = list_gstreamer_1_0_plugins_by_category(self.config)
 
         decls = []
         regs = []
@@ -41,8 +41,6 @@ class Recipe(recipe.Recipe):
               define = '//%s' % define
             categories += define
             for p in ps:
-                if p in replacements:
-                    p = replacements[p]
                 p_up = p.upper()
                 decls.append(DEFINES_TPL % (p_up, c, DECLARE_PLUGIN_TPL % p))
                 regs.append(DEFINES_TPL % (p_up, c, REGISTER_PLUGIN_TPL % p))

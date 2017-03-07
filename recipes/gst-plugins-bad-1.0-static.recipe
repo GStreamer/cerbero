@@ -116,7 +116,7 @@ class Recipe(custom.GStreamerStatic):
     ]
 
     files_plugins_capture_devel = [
-             'libgstcamerabin2',
+             'libgstcamerabin',
             ]
 
 

@@ -17,7 +17,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstdvdlpcmdec',
              'libgstmpeg2dec',
              'libgstxingmux',
-             'libgstrmdemux',
+             'libgstrealmedia',
              'libgstx264',
              'libgstlame',
              'libgstmpg123',

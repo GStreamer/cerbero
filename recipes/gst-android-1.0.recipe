@@ -36,12 +36,10 @@ class Recipe(recipe.Recipe):
             else:
                 shell.copy_dir(s, d)
 
-        plugins, replacements = list_gstreamer_1_0_plugins_by_category(self.config)
+        plugins = list_gstreamer_1_0_plugins_by_category(self.config)
         f = open(os.path.join(ndk_build_dir_dst, 'plugins.mk'), 'w')
         for c, p in plugins.iteritems():
             p = ' '.join(p)
-            for k,v in replacements.iteritems():
-                p = p.replace(k, v)
             f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), p))
         f.close()
 

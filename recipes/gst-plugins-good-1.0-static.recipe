@@ -72,7 +72,7 @@ class Recipe(custom.GStreamerStatic):
              'libgstrtsp',
              'libgstrtp',
              'libgstrtpmanager',
-             'libgstsouphttpsrc',
+             'libgstsoup',
              'libgstudp',
     ]
 
@@ -119,7 +119,7 @@ class Recipe(custom.GStreamerStatic):
         else:
             self.configure_options += '  --disable-x'
         if self.config.variants.pulse:
-            self.files_plugins_sys_devel += ['libgstpulse']
+            self.files_plugins_sys_devel += ['libgstpulseaudio']
         else:
             self.configure_options += '  --disable-pulse'
 

@@ -132,12 +132,6 @@ def list_gstreamer_plugins_by_category(config):
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
-        # For plugins named differently
-        replacements = {'decodebin': 'playback', 'playbin': 'playback',
-                        'uridecodebin': 'playback', 'sdpelem': 'sdp',
-                        'encodebin': 'encoding', 'souphttpsrc': 'soup',
-                        'siren': 'gstsiren', 'scaletempoplugin' : 'scaletempo',
-                        'rmdemux': 'realmedia', 'camerabin2': 'camerabin'}
         plugins = defaultdict(list)
         for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
                   'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0',
@@ -165,4 +159,4 @@ def list_gstreamer_1_0_plugins_by_category(config):
                     else:
                         e = e[3:-8]
                     plugins[cat_name].append(e)
-        return plugins, replacements
+        return plugins

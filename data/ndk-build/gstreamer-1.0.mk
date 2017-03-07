@@ -113,24 +113,12 @@ LOCAL_EXPORT_C_INCLUDES += $(GSTREAMER_ROOT)/include
 
 include $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_prebuilt.mk
 
-# Some plugins use a different name for the module name, like the playback
-# plugin, which uses playbin for the module name: libgstplaybin.so
-fix-plugin-name = \
-	$(subst gst$1 ,gst$2 ,$(GSTREAMER_PLUGINS_LIBS))
-
 fix-deps = \
 	$(subst $1,$1 $2,$(GSTREAMER_ANDROID_LIBS))
 
 
 # Generate list of plugin links (eg: -lcoreelements -lvideoscale)
 GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(plugin) )
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,camerabin,camerabin2)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,encoding,encodebin)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,soup,souphttpsrc)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,gstsiren,siren)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,sdp,sdpelem)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,scaletempo,scaletempoplugin)
-GSTREAMER_PLUGINS_LIBS       := $(call fix-plugin-name,realmedia,rmdemux)
 
 GSTREAMER_PLUGINS_CLASSES    := $(strip \
 			$(subst $(GSTREAMER_NDK_BUILD_PATH),, \
