@@ -98,6 +98,8 @@ class Config (object):
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties']
 
+    cookbook = None
+
     def __init__(self):
         self._check_uninstalled()
         self.python_exe = sys.executable
