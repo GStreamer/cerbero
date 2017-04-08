@@ -30,6 +30,7 @@ class Recipe(custom.GStreamer):
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene',
             'spandsp', 'webrtc-audio-processing', 'sbc']
     use_system_libs = True
+    patches = ['gst-plugins-bad/0001-gl-Remove-duplicate-typedef-of-GstGLFramebufferClass.patch']
 
     files_lang = ['gst-plugins-bad-1.0']
 
