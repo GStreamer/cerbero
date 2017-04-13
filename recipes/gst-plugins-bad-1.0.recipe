@@ -219,6 +219,13 @@ class Recipe(custom.GStreamer):
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
 
+        if self.config.platform == Platform.WINDOWS:
+            # FIXME: This will almost certainly fail to build on Windows due to
+			# https://bugzilla.gnome.org/show_bug.cgi?id=770264
+			# See also, -static and gstreamer-1.0-effects.package
+			self.deps.remove('webrtc-audio-processing')
+			self.files_plugins_effects.remove('lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s')
+
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += '--disable-gtk-doc '
         if self.config.target_platform == Platform.WINDOWS:
