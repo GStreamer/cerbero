@@ -89,6 +89,7 @@ class DistroVersion:
     FEDORA_23 = 'fedora_23'
     FEDORA_24 = 'fedora_24'
     FEDORA_25 = 'fedora_25'
+    FEDORA_26 = 'fedora_26'
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
     ARCH_ROLLING = 'rolling'
