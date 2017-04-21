@@ -15,7 +15,6 @@ class Recipe(custom.GStreamerStatic):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
     files_plugins_codecs_restricted_devel = ['libgstlibav']
-    patches = ['gst-libav/0001-Revert-configure-Set-the-assembler-used-for-libav-to.patch']
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "

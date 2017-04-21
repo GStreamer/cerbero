@@ -10,7 +10,6 @@ class Recipe(custom.GStreamer):
     configure_options = "--enable-lgpl --disable-examples "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
-    patches = ['gst-libav/0001-Revert-configure-Set-the-assembler-used-for-libav-to.patch']
 
     files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
 
