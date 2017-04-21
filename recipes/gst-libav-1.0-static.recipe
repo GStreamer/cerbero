@@ -15,6 +15,7 @@ class Recipe(custom.GStreamerStatic):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
     files_plugins_codecs_restricted_devel = ['libgstlibav']
+    patches = ['gst-libav/0001-Revert-configure-Set-the-assembler-used-for-libav-to.patch']
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "
@@ -34,6 +35,10 @@ class Recipe(custom.GStreamerStatic):
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
               self.configure_options += ' --with-libav-extra-configure="--extra-cflags=\'-mincoming-stack-boundary=4\'"'
+        elif self.config.target_platform == Platform.IOS:
+            if Architecture.is_arm(self.config.target_arch):
+                if 'GAS' in os.environ:
+                    self.new_env = {'AS': os.environ['GAS']}
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
