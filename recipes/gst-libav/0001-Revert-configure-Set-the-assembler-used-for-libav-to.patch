@@ -1,0 +1,29 @@
+From 5442435c5f18341b782244fd98b3ca8e8846852c Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Fri, 21 Apr 2017 11:50:17 +1000
+Subject: [PATCH] Revert "configure: Set the assembler used for libav to $CC"
+
+This reverts commit 1a265f029aa9be1bf3f72d1dcd9feafbf23a6298.
+
+It also makes it impossible to pass something other than $CC
+as the assembler
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index f0b807f..691e16d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -407,7 +407,7 @@ else
+   fi
+ 
+   if test x"$AS" != x; then
+-    emblibav_configure_args="$emblibav_configure_args --as=\\\"\\\$CC\\\""
++    emblibav_configure_args="$emblibav_configure_args --as=\\\"\\\$AS\\\""
+   fi
+ 
+   if test x"$CC" != x; then
+-- 
+2.9.3
+
