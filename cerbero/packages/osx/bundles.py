@@ -127,7 +127,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
         rdir = '%s/Resources/' % vdir
         shell.call ('mkdir -p %s' % rdir, tmp)
 
-        links = {'Versions/Current': '../%s' % vdir,
+        links = {'Versions/Current': '%s' % self.package.sdk_version,
                  'Resources': 'Versions/Current/Resources',
                  'Commands': 'Versions/Current/Commands',
                  'Headers': 'Versions/Current/Headers',
