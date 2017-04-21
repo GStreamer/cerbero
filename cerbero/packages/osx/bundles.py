@@ -34,9 +34,9 @@ class BundlePackagerBase(PackagerBase):
     in a MetaPackage.
     '''
 
-    def __init__(self, package, name, desc, uuid):
+    def __init__(self, package, pkgname, desc, uuid):
         self.package = Package(package.config, package.store, None)
-        self.package.name = name
+        self.package.name = pkgname
         self.package.shortdesc = desc
         self.package.version = package.version
         self.package.sdk_version = package.sdk_version
@@ -98,8 +98,9 @@ class FrameworkBundlePackager(BundlePackagerBase):
     name = 'osx-framework'
     title = 'Framework Bundle'
 
-    def __init__(self, package, name, desc, uuid):
-        BundlePackagerBase.__init__(self, package, name, desc, uuid)
+    def __init__(self, package, filename, pkgname, desc, uuid):
+        BundlePackagerBase.__init__(self, package, pkgname, desc, uuid)
+        self.name = filename
 
     def create_bundle(self, target_dir=None):
         '''

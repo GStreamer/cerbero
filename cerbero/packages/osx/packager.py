@@ -271,7 +271,8 @@ class ProductPackage(PackagerBase):
     def _create_framework_bundle_packager(self):
         m.action(_("Creating framework package"))
         packager = FrameworkBundlePackager(self.package, 'osx-framework',
-                'Framework Bundle',
+                'GStreamer',
+                'GStreamer OSX Framework Bundle Version %s' % (self.package.version),
                 '3ffe67c2-4565-411f-8287-e8faa892f853')
         return packager
 
@@ -568,7 +569,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
     def _create_framework_bundle_packager(self):
         m.action(_("Creating framework package"))
         packager = FrameworkBundlePackager(self.package, 'ios-framework',
-                'Framework Bundle',
+                'GStreamer',
+                'GStreamer iOS Framework Bundle Version %s' % (self.package.version),
                 '3ffe67c2-3421-411f-8287-e8faa892f853')
         return packager
 
