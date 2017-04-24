@@ -1,4 +1,4 @@
-From fb1ec591571dfcc64d6284804b7fe289e7bc123c Mon Sep 17 00:00:00 2001
+From 86e1e199eb2b8441efb74b4a45cb0f83ccd4334d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 12 Dec 2014 16:40:23 +0100
 Subject: [PATCH] Implementation of Cocoa event loop integration in
@@ -7,11 +7,11 @@ Subject: [PATCH] Implementation of Cocoa event loop integration in
 ---
  configure.ac     |   2 +-
  glib/Makefile.am |   6 +-
- glib/gmain.c     | 982 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 988 insertions(+), 2 deletions(-)
+ glib/gmain.c     | 985 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 991 insertions(+), 2 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index 17c1509..5194f69 100644
+index 60e4938..51de9f2 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -244,7 +244,7 @@ AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
@@ -48,7 +48,7 @@ index 82a7d3a..01bf1c6 100644
  
  libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \
 diff --git a/glib/gmain.c b/glib/gmain.c
-index 4f90574..9998be7 100644
+index 4f90574..c537af4 100644
 --- a/glib/gmain.c
 +++ b/glib/gmain.c
 @@ -72,6 +72,10 @@
@@ -148,32 +148,7 @@ index 4f90574..9998be7 100644
  #ifndef G_OS_WIN32
  
  
-@@ -3323,6 +3406,24 @@ g_main_context_release (GMainContext *context)
- 	  if (!loop_internal_waiter)
- 	    g_mutex_unlock (waiter->mutex);
- 	}
-+
-+#ifdef HAVE_COCOA
-+      if (g_atomic_pointer_compare_and_exchange (&cocoa_main_context, context, NULL))
-+        {
-+#ifdef G_MAIN_POLL_DEBUG
-+          g_print ("%p stopped being the cocoa default main context\n", context);
-+#endif
-+          context->poll_func = cocoa_old_poll_func;
-+          cocoa_old_poll_func = NULL;
-+
-+          CFRunLoopRemoveObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
-+          CFRelease (cocoa_observer);
-+          cocoa_observer = NULL;
-+
-+          [cocoa_autorelease_pool release];
-+          cocoa_autorelease_pool = NULL;
-+        }
-+#endif
-     }
- 
-   UNLOCK_CONTEXT (context); 
-@@ -3394,6 +3495,34 @@ g_main_context_wait (GMainContext *context,
+@@ -3267,6 +3350,35 @@ g_main_context_acquire (GMainContext *context)
      {
        context->owner = self;
        g_assert (context->owner_count == 0);
@@ -205,10 +180,36 @@ index 4f90574..9998be7 100644
 +          }
 +      }
 +#endif
++
+       TRACE (GLIB_MAIN_CONTEXT_ACQUIRE (context, TRUE  /* success */));
      }
  
-   if (context->owner == self)
-@@ -5816,3 +5945,856 @@ g_get_worker_context (void)
+@@ -3323,6 +3435,24 @@ g_main_context_release (GMainContext *context)
+ 	  if (!loop_internal_waiter)
+ 	    g_mutex_unlock (waiter->mutex);
+ 	}
++
++#ifdef HAVE_COCOA
++      if (g_atomic_pointer_compare_and_exchange (&cocoa_main_context, context, NULL))
++        {
++#ifdef G_MAIN_POLL_DEBUG
++          g_print ("%p stopped being the cocoa default main context\n", context);
++#endif
++          context->poll_func = cocoa_old_poll_func;
++          cocoa_old_poll_func = NULL;
++
++          CFRunLoopRemoveObserver (CFRunLoopGetMain (), cocoa_observer, kCFRunLoopCommonModes);
++          CFRelease (cocoa_observer);
++          cocoa_observer = NULL;
++
++          [cocoa_autorelease_pool release];
++          cocoa_autorelease_pool = NULL;
++        }
++#endif
+     }
+ 
+   UNLOCK_CONTEXT (context); 
+@@ -5816,3 +5946,858 @@ g_get_worker_context (void)
  
    return glib_worker_context;
  }
@@ -266,6 +267,7 @@ index 4f90574..9998be7 100644
 +  COCOA_POLLING_DESCRIPTORS,
 +} CocoaSelectThreadState;
 +
++#ifdef G_MAIN_POLL_DEBUG
 +static const char *const cocoa_state_names[]  = {
 +  "BEFORE_START",
 +  "WAITING",
@@ -273,6 +275,7 @@ index 4f90574..9998be7 100644
 +  "POLLING_RESTART",
 +  "POLLING_DESCRIPTORS"
 +};
++#endif
 +
 +static CocoaSelectThreadState cocoa_select_thread_state = COCOA_BEFORE_START;
 +
@@ -766,7 +769,7 @@ index 4f90574..9998be7 100644
 +
 +  if (event &&
 +      [event type] == NSApplicationDefined &&
-+      [event subtype] == GMAIN_COCOA_EVENT_SUBTYPE_EVENTLOOP)
++      (NSInteger) [event subtype] == GMAIN_COCOA_EVENT_SUBTYPE_EVENTLOOP)
 +    {
 +      /* Just used to wake us up; if an event and a FD arrived at the same
 +       * time; could have come from a previous iteration in some cases,
@@ -1066,5 +1069,5 @@ index 4f90574..9998be7 100644
 +
 +#endif
 -- 
-2.11.0
+2.9.3
 
