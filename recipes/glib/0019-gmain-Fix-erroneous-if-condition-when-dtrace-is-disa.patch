@@ -1,0 +1,33 @@
+From cda76baac0c447a4f3ef5c9a34c15e9b8b586c44 Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Mon, 24 Apr 2017 22:24:26 +1000
+Subject: [PATCH] gmain: Fix erroneous if condition when dtrace is disabled
+
+Add a block around an if statement whose contents disappear
+when DTrace support is compiled out, making it erroneously
+associate to the next line.
+---
+ glib/gmain.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/glib/gmain.c b/glib/gmain.c
+index c537af4..e0db289 100644
+--- a/glib/gmain.c
++++ b/glib/gmain.c
+@@ -1681,11 +1681,12 @@ g_source_set_callback_indirect (GSource              *source,
+   if (context)
+     LOCK_CONTEXT (context);
+ 
+-  if (callback_funcs != &g_source_callback_funcs)
++  if (callback_funcs != &g_source_callback_funcs) {
+     TRACE (GLIB_SOURCE_SET_CALLBACK_INDIRECT (source, callback_data,
+                                               callback_funcs->ref,
+                                               callback_funcs->unref,
+                                               callback_funcs->get));
++  }
+ 
+   old_cb_data = source->callback_data;
+   old_cb_funcs = source->callback_funcs;
+-- 
+2.9.3
+

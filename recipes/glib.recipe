@@ -40,7 +40,8 @@ class Recipe(recipe.Recipe):
                'glib/0016-gmessages-Fix-compilation-on-Android.patch',
                'glib/0017-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
                'glib/0018-Check-for-RTLD_LAZY-and-others-in-configure.patch',
-               'glib/0018-Don-t-use-RTLD_DEFAULT-on-Android-for-g_module_self.patch'
+               'glib/0018-Don-t-use-RTLD_DEFAULT-on-Android-for-g_module_self.patch',
+               'glib/0019-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch'
               ]
 
     files_libs = [
