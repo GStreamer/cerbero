@@ -1,0 +1,41 @@
+From 74bb30b6a23b0ddf51c8c84458823cab1c6b4735 Mon Sep 17 00:00:00 2001
+From: Jan Schmidt <jan@centricular.com>
+Date: Wed, 10 May 2017 16:45:08 +1000
+Subject: [PATCH] Set INSTALL_NAME_DIR
+
+Make sure that the id on the installed lib contains the full path,
+so that the plugin links to it correctly. Otherwise, we end up
+with a plugin that can't find the dylib at runtime
+---
+ CMakeLists.txt                 | 2 +-
+ src/lib/openjp2/CMakeLists.txt | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 229da1e..1822b23 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -106,7 +106,7 @@ if(NOT OPENJPEG_INSTALL_BIN_DIR)
+ endif()
+ 
+ if(NOT OPENJPEG_INSTALL_LIB_DIR)
+-  set(OPENJPEG_INSTALL_LIB_DIR "lib")
++  set(OPENJPEG_INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+ endif()
+ 
+ if(NOT OPENJPEG_INSTALL_SHARE_DIR)
+diff --git a/src/lib/openjp2/CMakeLists.txt b/src/lib/openjp2/CMakeLists.txt
+index bf82a6f..3765aab 100644
+--- a/src/lib/openjp2/CMakeLists.txt
++++ b/src/lib/openjp2/CMakeLists.txt
+@@ -55,6 +55,7 @@ if(UNIX)
+ endif()
+ set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES ${OPENJPEG_LIBRARY_PROPERTIES})
+ set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES COMPILE_DEFINITIONS OPJ_EXPORTS)
++set_target_properties(${OPENJPEG_LIBRARY_NAME} PROPERTIES INSTALL_NAME_DIR ${OPENJPEG_INSTALL_LIB_DIR})
+ 
+ add_library(${OPENJPEG_LIBRARY_NAME}_static STATIC ${OPENJPEG_SRCS})
+ if(UNIX)
+-- 
+2.9.3
+
