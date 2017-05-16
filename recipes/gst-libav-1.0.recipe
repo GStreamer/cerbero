@@ -10,7 +10,7 @@ class Recipe(custom.GStreamer):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-lgpl --disable-examples --enable-static --enable-static-plugins "
+    configure_options = "--enable-lgpl --disable-examples --enable-static "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-libav'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 

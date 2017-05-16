@@ -3,7 +3,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-rtsp-server-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-examples --enable-static --enable-static-plugins "
+    configure_options = "--disable-examples --enable-static "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-rtsp-server'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 

@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-validate'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-devtools'}
     srcdir = 'validate'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure --enable-static --enable-static-plugins --program-transform-name= '
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure --enable-static --program-transform-name= '
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'json-glib']
 
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0']

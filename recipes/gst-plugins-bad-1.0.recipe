@@ -4,7 +4,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--enable-static --enable-static-plugins --disable-introspection --disable-gsm \
+    configure_options = '--enable-static --disable-introspection --disable-gsm \
         --disable-examples --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-linsys --disable-fbdev --disable-apexsink \
