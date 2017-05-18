@@ -92,6 +92,8 @@ class DistroVersion:
     FEDORA_26 = 'fedora_26'
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
+    # Amazon Linux seems to be RedHat/CentOS-based
+    AMAZON_LINUX = 'amazon_linux'
     ARCH_ROLLING = 'rolling'
     GENTOO_VERSION = 'gentoo-version'
     OPENSUSE_12_1 = 'opensuse_12_1'

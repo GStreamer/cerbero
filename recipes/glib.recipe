@@ -168,22 +168,9 @@ class Recipe(recipe.Recipe):
                 elif self.config.target_arch == Architecture.X86_64:
                     path1 = '/usr/lib/x86_64-linux-gnu/gio/modules'
             # RedHat
-            elif self.config.target_distro_version in [DistroVersion.FEDORA_16,
-                                                       DistroVersion.FEDORA_17,
-                                                       DistroVersion.FEDORA_18,
-                                                       DistroVersion.FEDORA_19,
-                                                       DistroVersion.FEDORA_20,
-                                                       DistroVersion.FEDORA_21,
-                                                       DistroVersion.FEDORA_22,
-                                                       DistroVersion.FEDORA_23,
-                                                       DistroVersion.FEDORA_24,
-                                                       DistroVersion.FEDORA_25,
-                                                       DistroVersion.FEDORA_26,
-                                                       DistroVersion.REDHAT_6,
-                                                       DistroVersion.REDHAT_7,
-                                                       ]:
-                    if self.config.target_arch == Architecture.X86_64:
-                        path1 = '/usr/lib64/gio/modules/'
+            elif self.config.target_distro == Distro.REDHAT:
+                if self.config.target_arch == Architecture.X86_64:
+                    path1 = '/usr/lib64/gio/modules/'
             # Suse
             elif self.config.target_distro == Distro.SUSE:
                 if self.config.target_arch == Architecture.X86_64:

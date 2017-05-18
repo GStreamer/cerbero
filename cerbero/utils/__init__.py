@@ -159,6 +159,10 @@ def system_info():
                 # FIXME: the python2.7 platform module does not support Arch Linux.
                 # Mimic python3.4 platform.linux_distribution() output.
                 d = ('arch', 'Arch', 'Linux')
+            elif os.path.exists('/etc/os-release'):
+                with open('/etc/os-release', 'r') as f:
+                    if 'ID="amzn"\n' in f.readlines():
+                        d = ('RedHat', 'amazon', '')
 
         if d[0] in ['Ubuntu', 'debian', 'LinuxMint']:
             distro = Distro.DEBIAN
@@ -226,6 +230,8 @@ def system_info():
                 distro_version = DistroVersion.REDHAT_6
             elif d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
+            elif d[1] == 'amazon':
+                distro_version = DistroVersion.AMAZON_LINUX
             else:
                 # FIXME Fill this
                 raise FatalError("Distribution '%s' not supported" % str(d))
