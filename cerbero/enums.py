@@ -97,6 +97,7 @@ class DistroVersion:
     ARCH_ROLLING = 'rolling'
     GENTOO_VERSION = 'gentoo-version'
     OPENSUSE_42_2 = 'opensuse_42_2'
+    OPENSUSE_42_3 = 'opensuse_42_3'
     OPENSUSE_TUMBLEWEED = 'tumbleweed'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
