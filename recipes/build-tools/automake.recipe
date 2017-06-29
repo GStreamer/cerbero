@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'automake'
-    version = '1.15'
+    version = '1.15.1'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/automake/automake-1.15.tar.xz'
+    url = 'http://ftp.gnu.org/gnu/automake/automake-1.15.1.tar.xz'
     deps = ['autoconf', 'gettext-tools', 'gettext-m4']
 
     files_bin = ['bin/automake', 'bin/aclocal',
