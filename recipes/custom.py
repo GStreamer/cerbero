@@ -39,6 +39,9 @@ def list_gstreamer_1_0_plugins_by_category(config):
                     if len(c) != 3:
                         continue
                     e = c[2]
+                    # we only care about files with the replaceable %(mext)s extension
+                    if not e.endswith ('%(mext)s'):
+                        continue
                     if e.startswith('libgst'):
                         e = e[6:-8]
                     else:
