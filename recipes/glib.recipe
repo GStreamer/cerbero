@@ -162,7 +162,8 @@ class Recipe(recipe.Recipe):
             # Debian
             elif self.config.target_distro_version in [DistroVersion.DEBIAN_WHEEZY,
                                                        DistroVersion.DEBIAN_JESSIE,
-                                                       DistroVersion.DEBIAN_STRETCH]:
+                                                       DistroVersion.DEBIAN_STRETCH,
+                                                       DistroVersion.DEBIAN_BUSTER]:
                 if self.config.target_arch == Architecture.X86:
                     path1 = '/usr/lib/i386-linux-gnu/gio/modules'
                 elif self.config.target_arch == Architecture.X86_64:
