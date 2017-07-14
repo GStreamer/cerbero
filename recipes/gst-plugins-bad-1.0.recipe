@@ -22,7 +22,8 @@ class Recipe(custom.GStreamer):
         --enable-faad --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
-        --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp'
+        --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
+        --enable-decklink'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
@@ -297,6 +298,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
              'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
@@ -325,6 +327,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstd3dvideosink.a', 'lib/gstreamer-1.0/libgstd3dvideosink.la',
              'lib/gstreamer-1.0/libgstwasapi.a', 'lib/gstreamer-1.0/libgstwasapi.la',
              'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+             'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
