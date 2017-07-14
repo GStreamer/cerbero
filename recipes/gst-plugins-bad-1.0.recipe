@@ -297,7 +297,7 @@ class Recipe(custom.GStreamer):
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.DARWIN: [
@@ -309,11 +309,11 @@ class Recipe(custom.GStreamer):
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
-             'lib/gstreamer-1.0/libgstopengl%(mext)s'
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
             ]
     }
 
