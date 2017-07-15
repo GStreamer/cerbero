@@ -4,10 +4,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'zlib'
-    version = '1.2.10'
+    version = '1.2.11'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'http://zlib.net/fossils/zlib-1.2.10.tar.gz'
+    url = 'http://zlib.net/fossils/zlib-1.2.11.tar.gz'
     licenses = [License.BSD_like]
     add_host_build_target = False
     can_use_configure_cache = False
@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
                 self.configure_options += " --uname=" + self.config.host
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('z', 1, 2, 8, self.config.libdir,
+        libtool_la = LibtoolLibrary('z', 1, 2, 11, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
         # FIXME This is to workaround a build issue trying to ld to libz.so
