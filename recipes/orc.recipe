@@ -3,11 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.26'
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/orc'}
-    commit = 'origin/master'
+    version = '0.4.27'
+    stype = SourceType.TARBALL
+    url = 'https://gstreamer.freedesktop.org/data/src/orc/orc-0.4.27.tar.xz'
     licenses = [License.BSD_like]
-    autoreconf = True
     configure_options = '--enable-static'
 
     files_libs = ['liborc-0.4', 'liborc-test-0.4']
