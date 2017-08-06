@@ -166,7 +166,7 @@ class Recipe(custom.GStreamer):
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio%(mext)s',
-             'lib/gstreamer-1.0/libgstosxvideosink%(mext)s',
+             'lib/gstreamer-1.0/libgstosxvideo%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstosxaudio%(mext)s'
@@ -179,7 +179,7 @@ class Recipe(custom.GStreamer):
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio.a', 'lib/gstreamer-1.0/libgstosxaudio.la',
-             'lib/gstreamer-1.0/libgstosxvideosink.a', 'lib/gstreamer-1.0/libgstosxvideosink.la',
+             'lib/gstreamer-1.0/libgstosxvideo.a', 'lib/gstreamer-1.0/libgstosxvideo.la',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstosxaudio.a', 'lib/gstreamer-1.0/libgstosxaudio.la',
