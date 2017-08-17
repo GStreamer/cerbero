@@ -10,7 +10,7 @@ class Recipe(custom.GStreamer):
         --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
         --disable-dirac --disable-faac --disable-flite --disable-gme \
-        --disable-ladspa --disable-lv2 --disable-mimic --disable-modplug \
+        --disable-lv2 --disable-mimic --disable-modplug \
         --disable-mpeg2enc --disable-mplex --disable-musepack --disable-mythtv \
         --disable-neon --disable-ofa --disable-openal --disable-opencv \
         --disable-pvr --disable-sdl --disable-sndfile \
@@ -29,7 +29,7 @@ class Recipe(custom.GStreamer):
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'graphene',
-            'spandsp', 'webrtc-audio-processing', 'sbc']
+            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -92,6 +92,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaudiomixer%(mext)s',
              'lib/gstreamer-1.0/libgstcompositor%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
+             'lib/gstreamer-1.0/libgstladspa%(mext)s',
     ]
 
     files_plugins_effects_devel = [
@@ -120,6 +121,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaudiomixer.a', 'lib/gstreamer-1.0/libgstaudiomixer.la',
              'lib/gstreamer-1.0/libgstcompositor.a', 'lib/gstreamer-1.0/libgstcompositor.la',
              'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
+             'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
     ]
 
     files_plugins_codecs = [

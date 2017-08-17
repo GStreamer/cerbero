@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'ladspa'
+    version = '1.13'
+    licenses = [License.LGPLv2_1]
+    btype = BuildType.CUSTOM
+    stype = SourceType.TARBALL
+    url = 'http://www.ladspa.org/download/ladspa_sdk_1.13.tgz'
+    tarball_dirname = 'ladspa_sdk'
+
+    files_devel = ['include/ladspa.h']
+
+    def install(self):
+        include_path =  os.path.join(self.config.prefix, 'include')
+        if not os.path.exists(include_path):
+            os.makedirs(include_path)
+
+        ladspa_h = os.path.join(self.build_dir, 'src', 'ladspa.h')
+        shutil.copy(ladspa_h, include_path)
