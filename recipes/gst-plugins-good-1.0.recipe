@@ -7,7 +7,7 @@ class Recipe(custom.GStreamer):
     configure_options = '--enable-static --disable-examples --disable-oss4 --disable-oss --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 '
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
-            'speex', 'gdk-pixbuf', 'libsoup',
+            'speex', 'gdk-pixbuf', 'libsoup', 'mpg123',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
             'libvpx', 'libdv', 'cairo']
 
@@ -89,6 +89,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstisomp4%(mext)s',
              'lib/gstreamer-1.0/libgstjpeg%(mext)s',
              'lib/gstreamer-1.0/libgstmatroska%(mext)s',
+             'lib/gstreamer-1.0/libgstmpg123%(mext)s',
              'lib/gstreamer-1.0/libgstmulaw%(mext)s',
              'lib/gstreamer-1.0/libgstmultipart%(mext)s',
              'lib/gstreamer-1.0/libgstpng%(mext)s',
@@ -116,6 +117,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstisomp4.a', 'lib/gstreamer-1.0/libgstisomp4.la',
              'lib/gstreamer-1.0/libgstjpeg.a', 'lib/gstreamer-1.0/libgstjpeg.la',
              'lib/gstreamer-1.0/libgstmatroska.a', 'lib/gstreamer-1.0/libgstmatroska.la',
+             'lib/gstreamer-1.0/libgstmpg123.a', 'lib/gstreamer-1.0/libgstmpg123.la',
              'lib/gstreamer-1.0/libgstmulaw.a', 'lib/gstreamer-1.0/libgstmulaw.la',
              'lib/gstreamer-1.0/libgstmultipart.a', 'lib/gstreamer-1.0/libgstmultipart.la',
              'lib/gstreamer-1.0/libgstpng.a', 'lib/gstreamer-1.0/libgstpng.la',

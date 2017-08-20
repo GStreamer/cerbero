@@ -7,7 +7,7 @@ class Recipe(custom.GStreamer):
     configure_options = "--enable-static --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-sidplay --disable-twolame "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
-            'libdvdread', 'libmpeg2', 'x264', 'lame', 'mpg123']
+            'libdvdread', 'libmpeg2', 'x264', 'lame']
 
     files_plugins_codecs_restricted = [
              'lib/gstreamer-1.0/libgsta52dec%(mext)s',
@@ -21,7 +21,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstrealmedia%(mext)s',
              'lib/gstreamer-1.0/libgstx264%(mext)s',
              'lib/gstreamer-1.0/libgstlame%(mext)s',
-             'lib/gstreamer-1.0/libgstmpg123%(mext)s',
     ]
 
     files_plugins_codecs_restricted_devel = [
@@ -36,7 +35,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstrealmedia.a', 'lib/gstreamer-1.0/libgstrealmedia.la',
              'lib/gstreamer-1.0/libgstx264.a', 'lib/gstreamer-1.0/libgstx264.la',
              'lib/gstreamer-1.0/libgstlame.a', 'lib/gstreamer-1.0/libgstlame.la',
-             'lib/gstreamer-1.0/libgstmpg123.a', 'lib/gstreamer-1.0/libgstmpg123.la',
     ]
 
     files_plugins_dvd = [
