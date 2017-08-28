@@ -297,7 +297,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstd3dvideosink%(mext)s',
+             'lib/gstreamer-1.0/libgstd3d%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
              'lib/gstreamer-1.0/libgstopengl%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
@@ -326,7 +326,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstd3dvideosink.a', 'lib/gstreamer-1.0/libgstd3dvideosink.la',
+             'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
              'lib/gstreamer-1.0/libgstwasapi.a', 'lib/gstreamer-1.0/libgstwasapi.la',
              'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',

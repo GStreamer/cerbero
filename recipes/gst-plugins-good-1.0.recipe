@@ -166,7 +166,7 @@ class Recipe(custom.GStreamer):
 
     platform_files_plugins_sys = {
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstdirectsoundsink%(mext)s',
+             'lib/gstreamer-1.0/libgstdirectsound%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio%(mext)s',
@@ -179,7 +179,7 @@ class Recipe(custom.GStreamer):
 
     platform_files_plugins_sys_devel = {
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstdirectsoundsink.a', 'lib/gstreamer-1.0/libgstdirectsoundsink.la',
+             'lib/gstreamer-1.0/libgstdirectsound.a', 'lib/gstreamer-1.0/libgstdirectsound.la',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstosxaudio.a', 'lib/gstreamer-1.0/libgstosxaudio.la',
