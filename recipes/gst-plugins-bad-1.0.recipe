@@ -39,7 +39,7 @@ class Recipe(custom.GStreamer):
                   'libgstgl-1.0', 'libgstbadbase-1.0', 'libgstbadvideo-1.0',
                   'libgstinsertbin-1.0', 'libgstadaptivedemux-1.0',
                   'libgstplayer-1.0', 'libgstbadaudio-1.0',
-                  'libgstbadallocators-1.0']
+                  'libgstbadallocators-1.0', 'libgstisoff-1.0']
 
     files_plugins_devel = [
         'include/gstreamer-1.0/gst/gl',
@@ -54,6 +54,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/insertbin',
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/allocators',
+        'include/gstreamer-1.0/gst/isoff',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-gl-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
