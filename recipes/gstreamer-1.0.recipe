@@ -21,9 +21,13 @@ class Recipe(custom.GStreamer):
         Platform.DARWIN: ['libgstcheck-1.0'],
     }
 
-    files_plugins_core = ['lib/gstreamer-1.0/libgstcoreelements%(mext)s']
+    files_plugins_core = [
+        'lib/gstreamer-1.0/libgstcoreelements%(mext)s',
+        'lib/gstreamer-1.0/libgstcoretracers%(mext)s'
+    ]
     files_plugins_core_devel = [
         'lib/gstreamer-1.0/libgstcoreelements.a', 'lib/gstreamer-1.0/libgstcoreelements.la',
+        'lib/gstreamer-1.0/libgstcoretracers.a', 'lib/gstreamer-1.0/libgstcoretracers.la',
     ]
 
     files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s']
