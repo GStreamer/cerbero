@@ -9,7 +9,7 @@ class Recipe(custom.GStreamerStatic):
     # Static build will always fail on make check
     make_check = None
 
-    files_plugins_core_devel = ['libgstcoreelements']
+    files_plugins_core_devel = ['libgstcoreelements', 'libgstcoretracers']
 
     def prepare(self):
         self.append_env['CFLAGS'] = " -Wno-error "
