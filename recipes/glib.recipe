@@ -37,7 +37,8 @@ class Recipe(recipe.Recipe):
                "glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
                'glib/0010-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
-               'glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch'
+               'glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
+               'glib/0001-gmodule-Use-RTLD_DEFAULT-if-defined-__BIONIC__.patch'
               ]
 
     files_libs = [

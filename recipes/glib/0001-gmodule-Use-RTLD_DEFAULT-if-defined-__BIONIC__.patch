@@ -1,0 +1,67 @@
+From 635d5628a86fb9118c0e98e37e2545649bcfd093 Mon Sep 17 00:00:00 2001
+From: Justin Kim <justin.kim@collabora.com>
+Date: Thu, 28 Sep 2017 16:10:05 +0900
+Subject: [PATCH] gmodule: Use RTLD_DEFAULT if defined __BIONIC__
+
+This is a partial change of the previous work[0].
+On 64 bit Android since android-23, 'handle = dlopen(NULL); dlsym(handle)'
+doesn't work. Instead, only 'dlsym(RTLD_DEFAULT)' returns a valid pointer.
+
+However, RTLD_DEFAULT is defined as '(void *) 0x0' on 64bit Android which
+is usually used for invalid value so this patch allows the specific case.
+
+[0] 0d81bb4e318b97780c70a55605cacf7e5b3fcaf7
+
+Signed-off-by: Justin Kim <justin.kim@collabora.com>
+---
+ gmodule/gmodule-dl.c | 9 +++++----
+ gmodule/gmodule.c    | 4 ++++
+ 2 files changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/gmodule/gmodule-dl.c b/gmodule/gmodule-dl.c
+index 42363aac5..5d0200c9d 100644
+--- a/gmodule/gmodule-dl.c
++++ b/gmodule/gmodule-dl.c
+@@ -115,10 +115,11 @@ _g_module_self (void)
+   /* On Android 32 bit (i.e. not __LP64__), dlopen(NULL)
+    * does not work reliable and generally no symbols are found
+    * at all. RTLD_DEFAULT works though.
+-   * On Android 64 bit, dlopen(NULL) seems to work but RTLD_DEFAULT
+-   * is NULL, which is considered an invalid module.
++   * On Android 64 bit, dlopen(NULL) seems to work but dlsym(handle)
++   * always returns 'undefined symbol'. Only if RTLD_DEFAULT or 
++   * NULL is given, dlsym returns an appropriate pointer.
+    */
+-#if defined(__BIONIC__) && !defined(__LP64__)
++#if defined(__BIONIC__)
+   handle = RTLD_DEFAULT;
+ #else
+   handle = dlopen (NULL, RTLD_GLOBAL | RTLD_LAZY);
+@@ -138,7 +139,7 @@ _g_module_close (gpointer handle,
+    *
+    * See above for the Android special case
+    */
+-#if defined(__BIONIC__) && !defined(__LP64__)
++#if defined(__BIONIC__)
+   is_unref = (handle != RTLD_DEFAULT);
+ #else
+   is_unref |= 1;
+diff --git a/gmodule/gmodule.c b/gmodule/gmodule.c
+index c55fc762e..886eb85b0 100644
+--- a/gmodule/gmodule.c
++++ b/gmodule/gmodule.c
+@@ -510,7 +510,11 @@ g_module_open (const gchar    *file_name,
+       if (!main_module)
+ 	{
+ 	  handle = _g_module_self ();
++/* On Android 64 bit, RTLD_DEFAULT is (void *)0x0
++ * so it always fails to create main_module if file_name is NULL */
++#if !defined(__BIONIC__) || !defined(__LP64__)
+ 	  if (handle)
++#endif
+ 	    {
+ 	      main_module = g_new (GModule, 1);
+ 	      main_module->file_name = NULL;
+-- 
+2.14.1
+
