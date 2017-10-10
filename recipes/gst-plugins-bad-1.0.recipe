@@ -94,6 +94,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstcompositor%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
              'lib/gstreamer-1.0/libgstladspa%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
     ]
 
     files_plugins_effects_devel = [
