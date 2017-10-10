@@ -124,6 +124,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstcompositor.a', 'lib/gstreamer-1.0/libgstcompositor.la',
              'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
              'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
+             'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
     ]
 
     files_plugins_codecs = [
