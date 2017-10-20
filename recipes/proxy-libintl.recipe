@@ -1,0 +1,22 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'proxy-libintl'
+    version = '0.1'
+    licenses = [License.LGPLv2_1]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'https://github.com/frida/proxy-libintl/archive/%(version)s.tar.gz'
+
+    files_libs = ['libintl']
+    files_devel = [
+            'include/libintl.h',
+            'lib/libintl.la'
+            ]
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('intl', None, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
