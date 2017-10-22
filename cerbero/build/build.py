@@ -357,9 +357,177 @@ class CMake (MakefilesBase):
         MakefilesBase.configure(self)
 
 
+# Note: We force stpcpy to be false because our ancient version of the mingw
+# toolchain claims to provide it but doesn't define it in the standard string.h
+# This is fixed in newer versions of GCC where stpcpy is only available when SSP
+# support enabled.
+MESON_CROSS_FILE_TPL = \
+'''
+[host_machine]
+system = '{system}'
+cpu_family = '{cpu}'
+cpu = '{cpu}'
+endian = '{endian}'
+
+[properties]
+c_args = {c_args}
+cpp_args = {cpp_args}
+c_link_args = {c_link_args}
+cpp_link_args = {c_link_args}
+has_function_stpcpy = false
+
+[binaries]
+c = {CC}
+cpp = {CXX}
+ar = {AR}
+strip = {STRIP}
+pkgconfig = 'pkg-config'
+'''
+
+class Meson (Build, ModifyEnvBase) :
+    '''
+    Build handler for meson project
+    '''
+
+    make = None
+    make_install = None
+    make_check = None
+    make_clean = None
+    meson_sh = None
+    meson_options = {}
+    meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
+            --default-library=%(default-library)s --buildtype=%(buildtype)s \
+            --backend=%(backend)s ..'
+    meson_default_library = 'shared'
+    meson_backend = 'ninja'
+
+    def __init__(self):
+        Build.__init__(self)
+        ModifyEnvBase.__init__(self)
+
+        self.meson_dir = os.path.join(self.build_dir, "_builddir")
+
+        # HACK: CC and CXX must be the native toolchain
+        # https://bugzilla.gnome.org/show_bug.cgi?id=791670
+        if self.config.cross_compiling():
+            self.new_env['CC'] = None
+            self.new_env['CXX'] = None
+
+        # Find Meson
+        if not self.meson_sh:
+            meson_path = os.path.join(self.config.build_tools_prefix, 'bin', 'meson')
+            self.meson_sh = self.config.python_exe + ' ' + meson_path
+
+        # Find ninja
+        if not self.make:
+            self.make = 'ninja'
+        if not self.make_install:
+            self.make_install = self.make + ' install'
+        if not self.make_check:
+            self.make_check = self.make + ' test'
+        if not self.make_clean:
+            self.make_clean = self.make + ' clean'
+
+    def _split_flags(self, flags):
+        return [flag for flag in flags.split(' ') if flag != '']
+
+    def write_meson_cross_file(self):
+        # Create and pass a specs file that sets link_args for GCC to find
+        # 'system' libraries (those that Cerbero builds and installs). This is
+        # only needed when cross-compiling because with a native compiler the
+        # LIBRARY_PATH variable applies.
+        specs_file = os.path.join(self.meson_dir, 'meson-gcc-specs-file.txt')
+        with open(specs_file, 'w') as f:
+            f.write('*link_libgcc:\n')
+            f.write('%D -L{0}/lib{1}\n'.format(self.config.prefix, self.config.lib_suffix))
+
+        c_link_args = ['-specs=' + specs_file]
+        c_link_args += self._split_flags(os.environ.get('LDFLAGS', ''))
+        c_args = self._split_flags(os.environ.get('CFLAGS', ''))
+        cpp_args = self._split_flags(os.environ.get('CXXFLAGS', ''))
+
+        # Take CC and CXX from _old_env because we modified env to make them be
+        # the native toolchain.
+        cc = self._old_env.get('CC', '').split(' ')
+        cxx = self._old_env.get('CXX', '').split(' ')
+        ar=os.environ.get('AR', '').split(' ')
+        strip=os.environ.get('STRIP', '').split(' ')
+
+        # Create a cross-info file that tells Meson and GCC how to cross-compile
+        # this project
+        cross_file = os.path.join(self.meson_dir, 'meson-cross-file.txt')
+        contents = MESON_CROSS_FILE_TPL.format(
+                system=self.config.target_platform,
+                cpu=self.config.target_arch,
+                # Assume all ARM sub-archs are in little endian mode
+                endian='little',
+                CC=cc,
+                CXX=cxx,
+                AR=ar,
+                STRIP=strip,
+                c_args=c_args,
+                cpp_args=cpp_args,
+                c_link_args=c_link_args)
+        with open(cross_file, 'w') as f:
+            f.write(contents)
+
+        return cross_file
+
+    @modify_environment
+    def configure(self):
+        if os.path.exists(self.meson_dir):
+            # Only remove if it's not empty
+            if os.listdir(self.meson_dir):
+                shutil.rmtree(self.meson_dir)
+                os.makedirs(self.meson_dir)
+        else:
+            os.makedirs(self.meson_dir)
+
+        if self.config.variants.debug:
+            buildtype = 'debug'
+        elif self.config.variants.nodebug:
+            buildtype = 'release'
+        else:
+            buildtype = 'debugoptimized'
+
+        meson_cmd = self.meson_tpl % {
+            'meson-sh': self.meson_sh,
+            'prefix': to_unixpath(self.config.prefix),
+            'libdir': 'lib' + self.config.lib_suffix,
+            'default-library': self.meson_default_library,
+            'buildtype': buildtype,
+            'backend': self.meson_backend }
+
+        if self.config.cross_compiling():
+            f = self.write_meson_cross_file()
+            meson_cmd += ' --cross-file=' + f
+
+        for (key, value) in self.meson_options.items():
+            meson_cmd += ' -D%s=%s' % (key, str(value))
+
+        shell.call(meson_cmd, self.meson_dir)
+
+    @modify_environment
+    def compile(self):
+        shell.call(self.make, self.meson_dir)
+
+    @modify_environment
+    def install(self):
+        shell.call(self.make_install, self.meson_dir)
+
+    @modify_environment
+    def clean(self):
+        shell.call(self.make_clean, self.meson_dir)
+
+    @modify_environment
+    def check(self):
+        shell.call(self.make_check, self.meson_dir)
+
+
 class BuildType (object):
 
     CUSTOM = CustomBuild
     MAKEFILE = MakefilesBase
     AUTOTOOLS = Autotools
     CMAKE = CMake
+    MESON = Meson
