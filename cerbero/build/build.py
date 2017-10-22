@@ -91,80 +91,21 @@ def modify_environment(func):
     return call
 
 
-class MakefilesBase (Build):
+class ModifyEnvBase:
     '''
-    Base class for makefiles build systems like autotools and cmake
+    Base class for build systems that require extra env variables
     '''
 
-    config_sh = ''
-    configure_tpl = ''
-    configure_options = ''
-    make = 'make'
-    make_install = 'make install'
-    make_check = None
-    make_clean = 'make clean'
-    use_system_libs = False
-    allow_parallel_build = True
-    srcdir = '.'
     append_env = None
     new_env = None
-    requires_non_src_build = False
+    use_system_libs = False
 
     def __init__(self):
-        Build.__init__(self)
         if self.append_env is None:
             self.append_env = {}
         if self.new_env is None:
             self.new_env = {}
-        self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
-                                                           self.srcdir))
-        if self.requires_non_src_build:
-            self.make_dir = os.path.join (self.config_src_dir, "cerbero-build-dir")
-        else:
-            self.make_dir = self.config_src_dir
-        if self.config.allow_parallel_build and self.allow_parallel_build \
-                and self.config.num_of_cpus > 1:
-            self.make += ' -j%d' % self.config.num_of_cpus
         self._old_env = None
-
-        # Make sure user's env doesn't mess up with our build.
-        self.new_env['MAKEFLAGS'] = None
-
-        # Disable site config, which is set on openSUSE
-        self.new_env['CONFIG_SITE'] = None
-
-    @modify_environment
-    def configure(self):
-        if not os.path.exists(self.make_dir):
-            os.makedirs(self.make_dir)
-        if self.requires_non_src_build:
-            self.config_sh = os.path.join('../', self.config_sh)
-
-        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
-            'prefix': to_unixpath(self.config.prefix),
-            'libdir': to_unixpath(self.config.libdir),
-            'host': self.config.host,
-            'target': self.config.target,
-            'build': self.config.build,
-            'options': self.configure_options},
-            self.make_dir)
-
-    @modify_environment
-    def compile(self):
-        shell.call(self.make, self.make_dir)
-
-    @modify_environment
-    def install(self):
-        shell.call(self.make_install, self.make_dir)
-
-    @modify_environment
-    def clean(self):
-        shell.call(self.make_clean, self.make_dir)
-
-    @modify_environment
-    def check(self):
-        if self.make_check:
-            shell.call(self.make_check, self.build_dir)
 
     def _modify_env(self, append_env, new_env):
         '''
@@ -211,6 +152,75 @@ class MakefilesBase (Build):
         can be found.
         '''
         add_system_libs(self.config, new_env)
+
+
+class MakefilesBase (Build, ModifyEnvBase):
+    '''
+    Base class for makefiles build systems like autotools and cmake
+    '''
+
+    config_sh = ''
+    configure_tpl = ''
+    configure_options = ''
+    make = 'make'
+    make_install = 'make install'
+    make_check = None
+    make_clean = 'make clean'
+    allow_parallel_build = True
+    srcdir = '.'
+    requires_non_src_build = False
+
+    def __init__(self):
+        Build.__init__(self)
+        ModifyEnvBase.__init__(self)
+        self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
+                                                           self.srcdir))
+        if self.requires_non_src_build:
+            self.make_dir = os.path.join (self.config_src_dir, "cerbero-build-dir")
+        else:
+            self.make_dir = self.config_src_dir
+        if self.config.allow_parallel_build and self.allow_parallel_build \
+                and self.config.num_of_cpus > 1:
+            self.make += ' -j%d' % self.config.num_of_cpus
+
+        # Make sure user's env doesn't mess up with our build.
+        self.new_env['MAKEFLAGS'] = None
+
+        # Disable site config, which is set on openSUSE
+        self.new_env['CONFIG_SITE'] = None
+
+    @modify_environment
+    def configure(self):
+        if not os.path.exists(self.make_dir):
+            os.makedirs(self.make_dir)
+        if self.requires_non_src_build:
+            self.config_sh = os.path.join('../', self.config_sh)
+
+        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
+            'prefix': to_unixpath(self.config.prefix),
+            'libdir': to_unixpath(self.config.libdir),
+            'host': self.config.host,
+            'target': self.config.target,
+            'build': self.config.build,
+            'options': self.configure_options},
+            self.make_dir)
+
+    @modify_environment
+    def compile(self):
+        shell.call(self.make, self.make_dir)
+
+    @modify_environment
+    def install(self):
+        shell.call(self.make_install, self.make_dir)
+
+    @modify_environment
+    def clean(self):
+        shell.call(self.make_clean, self.make_dir)
+
+    @modify_environment
+    def check(self):
+        if self.make_check:
+            shell.call(self.make_check, self.build_dir)
 
 
 class Autotools (MakefilesBase):
