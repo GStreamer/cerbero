@@ -1,0 +1,26 @@
+From 4e18a60eb7fed0edf0d113861efd9044197abae7 Mon Sep 17 00:00:00 2001
+From: Nicola Murino <nicola.murino@gmail.com>
+Date: Mon, 23 Oct 2017 16:18:06 +0200
+Subject: [PATCH] pgusage: remove system call
+
+system is undefined on iOS and we don't need it anyway
+---
+ src/libopts/pgusage.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/libopts/pgusage.c b/src/libopts/pgusage.c
+index 3d229c1..da8e9ab 100644
+--- a/src/libopts/pgusage.c
++++ b/src/libopts/pgusage.c
+@@ -165,7 +165,7 @@ optionPagedUsage(tOptions * opts, tOptDesc * od)
+             dup2(STDOUT_FILENO, STDERR_FILENO);
+         }
+ 
+-        ignore_val( system( fil_name));
++        //ignore_val( system( fil_name));
+         AGFREE(fil_name);
+ 
+     case PAGER_STATE_CHILD:
+-- 
+2.14.2
+
