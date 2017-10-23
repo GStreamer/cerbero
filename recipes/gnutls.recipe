@@ -24,7 +24,8 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['bionic-fixup']
     }
     patches = [name + "/0003-Disable-ncrypt-support.patch",
-               name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch"]
+               name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
+               name + "/0001-pgusage-remove-system-call.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']
