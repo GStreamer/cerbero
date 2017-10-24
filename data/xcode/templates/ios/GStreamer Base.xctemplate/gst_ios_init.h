@@ -19,7 +19,7 @@ G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
 
 //#define GST_IOS_GIO_MODULE_GNUTLS
 
-void gst_ios_init ();
+void gst_ios_init (void);
 
 G_END_DECLS
 
