@@ -1,8 +1,8 @@
-From e5ae075ff9b3cba2ee7b7393bc7f4b49c3d3ee79 Mon Sep 17 00:00:00 2001
+From 3235f26bdf88a9423bbb44c56870ff7df284c7bf Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Mon, 5 Dec 2016 12:28:57 +0200
-Subject: [PATCH] GSocket: Fix race conditions on Win32 if multiple threads are
- waiting on conditions for the same socket
+Subject: [PATCH 10/13] GSocket: Fix race conditions on Win32 if multiple
+ threads are waiting on conditions for the same socket
 
 WSAWaitForMultipleEvents() only returns for one of the waiting threads, and
 that one might not even be the one waiting for the condition that changed. As
@@ -19,7 +19,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=762283
  1 file changed, 68 insertions(+), 26 deletions(-)
 
 diff --git a/gio/gsocket.c b/gio/gsocket.c
-index 5a2f33285..ff5403b6f 100644
+index f69b565..c5fc855 100644
 --- a/gio/gsocket.c
 +++ b/gio/gsocket.c
 @@ -249,11 +249,14 @@ struct _GSocketPrivate
@@ -305,5 +305,5 @@ index 5a2f33285..ff5403b6f 100644
        }
  
 -- 
-2.11.0
+2.7.4
 

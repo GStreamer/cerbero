@@ -1,7 +1,7 @@
-From 72cfa4e02c0644f80e9252db455e7657843c329d Mon Sep 17 00:00:00 2001
+From 2f168353a9406e1db0ee7206e46c2d523e8aeddc Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Fri, 9 Mar 2012 08:51:12 +0100
-Subject: [PATCH 03/10] Add support for loading GIO modules from the distro's
+Subject: [PATCH 03/13] Add support for loading GIO modules from the distro's
  GIO module path
 
 This is needed to e.g. load GVfs from the distro. Without this elements
@@ -11,10 +11,10 @@ like giosrc are pretty useless and we really don't want to ship GVfs.
  1 file changed, 5 insertions(+)
 
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index da7c167..b97aa78 100644
+index 7b9662d..4c53e1f 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -1084,6 +1084,11 @@ _g_io_modules_ensure_loaded (void)
+@@ -1098,6 +1098,11 @@ _g_io_modules_ensure_loaded (void)
        g_io_modules_scan_all_in_directory_with_scope (module_dir, scope);
        g_free (module_dir);
  
@@ -27,5 +27,5 @@ index da7c167..b97aa78 100644
  
        /* Initialize types from built-in "modules" */
 -- 
-2.8.1
+2.7.4
 
