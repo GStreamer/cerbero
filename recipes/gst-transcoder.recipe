@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     remotes = {'origin': 'https://github.com/pitivi/gst-transcoder.git'}
     commit = 'origin/master'
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gobject-introspection']
+    btype = BuildType.MESON
 
     files_libs = ['libgsttranscoder-1.0']
 
@@ -29,16 +30,3 @@ class Recipe(recipe.Recipe):
     ]
 
     files_bins = ['gst-transcoder-1.0']
-    btype = BuildType.MAKEFILE
-
-    config_sh = './configure'
-    configure_tpl = "%(config-sh)s --prefix %(prefix)s %(options)s"
-
-    def prepare(self):
-        # --libdir is relative in meson
-        libdir = self.config.libdir.replace(
-            os.path.join(os.path.commonprefix([
-            to_unixpath(self.config.prefix),
-            to_unixpath(self.config.libdir)]), ''), '')
-
-        self.configure_options = ' --libdir=%s/ ' % libdir
