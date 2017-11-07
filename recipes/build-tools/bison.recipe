@@ -8,6 +8,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://ftpmirror.gnu.org/bison/bison-3.0.4.tar.gz'
 
+    patches = ['bison/0001-Fix-build-invalid-instruction-on-macOS-10.3.patch']
+
     files_bins = ['bison']
 
     def extract(self):
