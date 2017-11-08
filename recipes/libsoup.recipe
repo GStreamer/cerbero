@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
                          --disable-always-build-tests --disable-glibtest --disable-installed-tests'
     deps = ['libxml2', 'glib', 'glib-networking']
     patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
-               'libsoup/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
+               'libsoup/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch',
+               'libsoup/0001-configure.ac-Don-t-check-intltool-version.patch' ]
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']

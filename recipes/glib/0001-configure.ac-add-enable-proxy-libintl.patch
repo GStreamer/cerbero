@@ -1,0 +1,61 @@
+From 941a8a5432ef70fdf257eae33cf3f2254447fe76 Mon Sep 17 00:00:00 2001
+From: Justin Kim <justin.kim@collabora.com>
+Date: Wed, 8 Nov 2017 15:14:40 +0900
+Subject: [PATCH] configure.ac: add --enable-proxy-libintl
+
+---
+ Makefile.am  |  4 ++++
+ configure.ac | 14 ++++++++++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/Makefile.am b/Makefile.am
+index b9accad..fdd4e34 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -6,7 +6,11 @@ include $(top_srcdir)/glib.mk
+ 
+ ACLOCAL_AMFLAGS = -I m4macros ${ACLOCAL_FLAGS}
+ 
++if PROXY_LIBINTL
++SUBDIRS = . m4macros glib gmodule gthread gobject gio docs tests
++else
+ SUBDIRS = . m4macros glib gmodule gthread gobject gio po docs tests
++endif
+ DIST_SUBDIRS = $(SUBDIRS) build win32
+ 
+ bin_SCRIPTS = glib-gettextize
+diff --git a/configure.ac b/configure.ac
+index 2cf402c..d73c254 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -478,6 +478,17 @@ dnl
+ dnl gettext support
+ dnl
+ 
++AC_ARG_ENABLE(proxy-libintl,
++              [AS_HELP_STRING([--enable-proxy-libintl],
++                              [build with proxy-libintl])],,
++              [enable_proxy_libintl=yes])
++
++AS_IF([ test "x$enable_proxy_libintl" = "xyes"], [
++  AC_DEFINE(HAVE_GETTEXT,1, "")
++  AC_DEFINE(ENABLE_NLS,1, "")
++  INTLLIBS="-lintl"
++],[
++
+ ALL_LINGUAS="`grep -v '^#' "$srcdir/po/LINGUAS" | tr '\n' ' '`"
+ AC_SUBST([CONFIG_STATUS_DEPENDENCIES],['$(top_srcdir)/po/LINGUAS'])
+ GLIB_GNU_GETTEXT
+@@ -489,6 +500,9 @@ if test "$gt_cv_have_gettext" != "yes" ; then
+ ])
+ fi
+ 
++])
++AM_CONDITIONAL(PROXY_LIBINTL, [test "$enable_proxy_libintl" = "yes"])
++
+ LIBS="$INTLLIBS $LIBS"
+ 
+ GETTEXT_PACKAGE=glib20
+-- 
+2.14.3 (Apple Git-98)
+

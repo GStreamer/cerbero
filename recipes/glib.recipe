@@ -38,7 +38,8 @@ class Recipe(recipe.Recipe):
                'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
                'glib/0010-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
                'glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
-               'glib/0001-gmodule-Use-RTLD_DEFAULT-if-defined-__BIONIC__.patch'
+               'glib/0001-gmodule-Use-RTLD_DEFAULT-if-defined-__BIONIC__.patch',
+               'glib/0001-configure.ac-add-enable-proxy-libintl.patch'
               ]
 
     files_libs = [
@@ -107,6 +108,8 @@ class Recipe(recipe.Recipe):
             # gives us compiler errors :)
             self.append_env['CFLAGS'] = ' -DNVALGRIND=1 '
         if self.config.target_platform == Platform.ANDROID:
+            self.deps += ['proxy-libintl']
+            self.configure_options += ' --enable-proxy-libintl'
             # Hack to fix building of the glib/tests/private test
             self.make = '%s private_LDFLAGS=""' % self.make
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
@@ -131,6 +134,9 @@ class Recipe(recipe.Recipe):
                 arch = 'arm'
             extra_flags = ''
             if self.config.target_platform == Platform.IOS:
+                self.deps += ['proxy-libintl']
+                self.configure_options += ' --enable-proxy-libintl'
+
                 # Disable mac OS X specifics
                 extra_flags = '-DGST_SDK_IOS=1'
                 self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
