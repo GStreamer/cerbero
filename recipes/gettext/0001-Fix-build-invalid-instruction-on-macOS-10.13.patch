@@ -1,0 +1,69 @@
+From ec2d9a1b91c238a55784d6d75008290acae49246 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Thu, 16 Nov 2017 16:29:08 +1100
+Subject: [PATCH] Fix build/invalid instruction on macOS 10.13
+
+Similar issue for bison:
+https://stackoverflow.com/questions/46726504/bison-3-0-4-fails-in-illegal-instruction-4-on-macos-high-sierra-10-13
+---
+ gettext-runtime/intl/vasnprintf.c        | 2 +-
+ gettext-runtime/libasprintf/vasnprintf.c | 2 +-
+ gettext-tools/gnulib-lib/vasnprintf.c    | 2 +-
+ gettext-tools/libgettextpo/vasnprintf.c  | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/gettext-runtime/intl/vasnprintf.c b/gettext-runtime/intl/vasnprintf.c
+index 236bfe5..48f91cd 100644
+--- a/gettext-runtime/intl/vasnprintf.c
++++ b/gettext-runtime/intl/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !((defined __APPLE__ && __clang_major__ >= 9) || ((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+diff --git a/gettext-runtime/libasprintf/vasnprintf.c b/gettext-runtime/libasprintf/vasnprintf.c
+index 236bfe5..4b1d63a 100644
+--- a/gettext-runtime/libasprintf/vasnprintf.c
++++ b/gettext-runtime/libasprintf/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !((defined __APPLE__ && __clang_major__ >= 9) || ((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__):)
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+diff --git a/gettext-tools/gnulib-lib/vasnprintf.c b/gettext-tools/gnulib-lib/vasnprintf.c
+index 72bf3bc..065e9c6 100644
+--- a/gettext-tools/gnulib-lib/vasnprintf.c
++++ b/gettext-tools/gnulib-lib/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !((defined __APPLE__ && __clang_major__ >= 9) || ((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+diff --git a/gettext-tools/libgettextpo/vasnprintf.c b/gettext-tools/libgettextpo/vasnprintf.c
+index 72bf3bc..065e9c6 100644
+--- a/gettext-tools/libgettextpo/vasnprintf.c
++++ b/gettext-tools/libgettextpo/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !((defined __APPLE__ && __clang_major__ >= 9) || ((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+-- 
+2.15.0
+

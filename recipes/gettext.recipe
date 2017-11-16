@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz'
     srcdir = 'gettext-runtime'
     patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
-               'gettext/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch' ]
+               'gettext/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
+               'gettext/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch' ]
     platform_deps = {
         Platform.ANDROID:  ['libiconv'],
         Platform.WINDOWS:  ['mingw-runtime'],
