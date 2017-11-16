@@ -2,9 +2,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.50.3'
+    version = '2.54.2'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.50/glib-%(version)s.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.54/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh autogen.sh'
@@ -17,14 +17,11 @@ class Recipe(recipe.Recipe):
                "../glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
                "../glib/0005-Blacklist-the-bamf-GIO-module.patch",
                "../glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
-               "../glib/0008-gdbus-codgen-Use-a-proper-shebang-in-the-generator.patch",
-               "../glib/0009-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
-               '../glib/0015-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               '../glib/0016-gmessages-Fix-compilation-on-Android.patch',
-               '../glib/0017-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
-               '../glib/0018-Check-for-RTLD_LAZY-and-others-in-configure.patch',
-               '../glib/0018-Don-t-use-RTLD_DEFAULT-on-Android-for-g_module_self.patch',
-               '../glib/0019-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch'
+               "../glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
+               '../glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+               '../glib/0010-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
+               '../glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
+               '../glib/0001-gmodule-Use-RTLD_DEFAULT-if-defined-__BIONIC__.patch'
               ]
 
     def prepare(self):
