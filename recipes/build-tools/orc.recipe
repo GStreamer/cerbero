@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
-    version = '0.4.27'
+    version = '0.4.28'
     stype = SourceType.TARBALL
     tarball_dirname = 'orc-%(version)s'
-    url = 'https://gstreamer.freedesktop.org/data/src/orc/orc-0.4.27.tar.xz'
+    url = 'https://gstreamer.freedesktop.org/data/src/orc/orc-0.4.28.tar.xz'
     licenses = [License.BSD_like]
     deps = ['autoconf', 'automake', 'libtool']
 

@@ -3,9 +3,9 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.27'
+    version = '0.4.28'
     stype = SourceType.TARBALL
-    url = 'https://gstreamer.freedesktop.org/data/src/orc/orc-0.4.27.tar.xz'
+    url = 'https://gstreamer.freedesktop.org/data/src/orc/orc-0.4.28.tar.xz'
     licenses = [License.BSD_like]
     configure_options = '--enable-static'
 
