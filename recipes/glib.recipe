@@ -56,7 +56,7 @@ class Recipe(recipe.Recipe):
         'bin/glib-gettextize',
         'bin/glib-mkenums',
         'bin/glib-compile-resources%(bext)s',
-        'bin/glib-genmarshal%(bext)s',
+        'bin/glib-genmarshal',
         'bin/gresource%(bext)s',
         'bin/gdbus-codegen',
         'lib/glib-2.0/include',
