@@ -336,11 +336,18 @@ class ProductPackage(PackagerBase):
         dmg_file = os.path.join(self.output_dir,
             self._package_name('-packages.dmg'))
 
-        # Create Disk Image
-        cmd = 'hdiutil create %s -ov' % dmg_file
-        for p in paths:
-            cmd += ' -srcfolder %s' % p
-        shell.call(cmd)
+        m.action(_("Creating image %s ") % dmg_file)
+        # create a temporary directory to store packages
+        workdir = os.path.join (self.tmp, "hdidir")
+        os.makedirs(workdir)
+        try:
+            for p in paths:
+                shutil.copy(p, workdir)
+            # Create Disk Image
+            cmd = 'hdiutil create %s -ov -srcfolder %s' % (dmg_file, workdir)
+            shell.call(cmd)
+        finally:
+            shutil.rmtree(workdir)
 
 
 class ApplicationPackage(PackagerBase):
