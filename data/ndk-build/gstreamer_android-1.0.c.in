@@ -2,6 +2,7 @@
 #include <gst/gst.h>
 #include <gio/gio.h>
 #include <android/log.h>
+#include <string.h>
 
 /* XXX: Workaround for Android <21 making signal() an inline function
  * around bsd_signal(), and Android >= 21 not having any bsd_signal()
