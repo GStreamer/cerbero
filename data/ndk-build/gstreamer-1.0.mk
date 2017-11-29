@@ -206,10 +206,8 @@ genstatic_$(TARGET_ARCH_ABI): PRIV_G_R := $(G_IO_MODULES_DECLARE)
 genstatic_$(TARGET_ARCH_ABI):
 	@$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
 	@$(call host-mkdir,$(PRIV_B_DIR))
-	@$(SED_LOCAL) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C_IN) | \
-		$(SED_LOCAL) "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" | \
-		$(SED_LOCAL) "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" | \
-		$(SED_LOCAL) "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" > $(PRIV_C)
+	@# android-studio doesn't seem to like line continuation characters when executing shell commands
+	@$(SED_LOCAL) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C_IN) | $(SED_LOCAL) "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" > $(PRIV_C)
 
 # Compile the source file
 $(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
@@ -252,10 +250,8 @@ copyjavasource_$(TARGET_ARCH_ABI):
 	@$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
 		$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)$(file),$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)) && ) echo Done cp
 
-	@$(SED_LOCAL) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | \
-		$(SED_LOCAL) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | \
-		$(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" \
-		> $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	@# android-studio doesn't seem to like line continuation characters when executing shell commands
+	@$(SED_LOCAL) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | $(SED_LOCAL) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | $(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" > $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
 ifndef GSTREAMER_ASSETS_DIR
 GSTREAMER_ASSETS_DIR := src/main/assets
