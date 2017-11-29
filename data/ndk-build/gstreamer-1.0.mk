@@ -157,14 +157,24 @@ GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)
 # In newer NDK, SYSROOT is replaced by SYSROOT_INC and SYSROOT_LINK, which
 # now points to the root directory. But this will probably change in the future from:
 # https://android.googlesource.com/platform/ndk/+/fa8c1b4338c1bef2813ecee0ee298e9498a1aaa7
-ifndef SYSROOT
-    SYSROOT_GST := $(NDK_PLATFORMS_ROOT)/$(TARGET_PLATFORM)/arch-$(TARGET_ARCH)
+ifdef SYSROOT
+    SYSROOT_GST_INC := $(SYSROOT)
+    SYSROOT_GST_LINK := $(SYSROOT)
 else
-    SYSROOT_GST := $(SYSROOT)
+    ifdef SYSROOT_INC
+        $(call assert-defined, SYSROOT_LINK)
+        ifdef SYSROOT_LINK
+            SYSROOT_GST_INC := $(SYSROOT_INC)
+            SYSROOT_GST_LINK := $(SYSROOT_LINK)
+        endif
+    else
+        SYSROOT_GST_INC := $(NDK_PLATFORMS_ROOT)/$(TARGET_PLATFORM)/arch-$(TARGET_ARCH)
+        SYSROOT_GST_LINK := $(SYSROOT_GST_INC)
+    endif
 endif
 
 # Create the link command
-GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT_GST) \
+GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT_GST_LINK) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
@@ -204,7 +214,7 @@ genstatic_$(TARGET_ARCH_ABI):
 
 # Compile the source file
 $(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
-$(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT_GST) $(TARGET_CFLAGS) \
+$(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT_GST_INC) $(SYSROOT_ARCH_INC_ARG) $(TARGET_CFLAGS) \
 	-c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 $(GSTREAMER_ANDROID_O): PRIV_GST_CFLAGS := $(GSTREAMER_ANDROID_CFLAGS) $(TARGET_CFLAGS)
 $(GSTREAMER_ANDROID_O): genstatic_$(TARGET_ARCH_ABI)
