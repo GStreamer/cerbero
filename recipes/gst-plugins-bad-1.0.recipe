@@ -36,7 +36,7 @@ class Recipe(custom.GStreamer):
 
     files_libs = ['libgstcodecparsers-1.0', 'libgstmpegts-1.0', 'libgsturidownloader-1.0',
                   'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
-                  'libgstgl-1.0', 'libgstbadbase-1.0', 'libgstbadvideo-1.0',
+                  'libgstgl-1.0', 'libgstbadvideo-1.0',
                   'libgstinsertbin-1.0', 'libgstadaptivedemux-1.0',
                   'libgstplayer-1.0', 'libgstbadaudio-1.0',
                   'libgstbadallocators-1.0', 'libgstisoff-1.0']
@@ -59,7 +59,6 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-gl-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
-        'lib/pkgconfig/gstreamer-bad-base-1.0.pc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
         'lib/pkgconfig/gstreamer-bad-video-1.0.pc',
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
