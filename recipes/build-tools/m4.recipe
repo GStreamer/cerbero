@@ -12,4 +12,5 @@ class Recipe(recipe.Recipe):
     patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch']
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error=cast-align -Wno-error=implicit-fallthrough"
+        self.configure_options += " --disable-gcc-warnings"
+        self.append_env['CFLAGS'] = " -Wno-error=cast-align"
