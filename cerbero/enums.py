@@ -126,6 +126,7 @@ class DistroVersion:
     IOS_10_3 = 'ios_10_3'
     IOS_11_0 = 'ios_11_0'
     IOS_11_1 = 'ios_11_1'
+    IOS_11_2 = 'ios_11_2'
     ANDROID_GINGERBREAD = 'android_gingerbread'  # API Level 9
     ANDROID_ICE_CREAM_SANDWICH = 'android_ice_cream_sandwich'  # API Level 14
     ANDROID_JELLY_BEAN = 'android_jelly_bean'  # API Level 16
