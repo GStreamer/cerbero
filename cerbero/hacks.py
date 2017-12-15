@@ -39,14 +39,14 @@ def pretify(string, pretty_print=True):
 def write(self, file_or_filename, encoding=None, pretty_print=False):
     if not pretty_print:
         return oldwrite(self, file_or_filename, encoding)
-    tmpfile = io.StringIO()
+    tmpfile = io.BytesIO()
     oldwrite(self, tmpfile, encoding)
     tmpfile.seek(0)
     if hasattr(file_or_filename, "write"):
         out_file = file_or_filename
     else:
         out_file = open(file_or_filename, "wb")
-    out_file.write(pretify(tmpfile.read()))
+    out_file.write(pretify(tmpfile.read()).encode())
     if not hasattr(file_or_filename, "write"):
         out_file.close()
 
@@ -56,49 +56,7 @@ etree.ElementTree.write = write
 
 ### Windows Hacks ###
 
-# On windows, python transforms all enviroment variables to uppercase,
-# but we need lowercase ones to override configure options like
-# am_cv_python_platform
-
-environclass = os.environ.__class__
-import UserDict
-
-
-class _Environ(environclass):
-
-    def __init__(self, environ):
-        UserDict.UserDict.__init__(self)
-        self.data = {}
-        for k, v in list(environ.items()):
-            self.data[k] = v
-
-    def __setitem__(self, key, item):
-        os.putenv(key, item)
-        self.data[key] = item
-
-    def __getitem__(self, key):
-        return self.data[key]
-
-    def __delitem__(self, key):
-        os.putenv(key, '')
-        del self.data[key]
-
-    def pop(self, key, *args):
-        os.putenv(key, '')
-        return self.data.pop(key, *args)
-
-    def has_key(self, key):
-        return key in self.data
-
-    def __contains__(self, key):
-        return key in self.data
-
-    def get(self, key, failobj=None):
-        return self.data.get(key, failobj)
-
-
 # we don't want backlashes in paths as it breaks shell commands
-
 oldexpanduser = os.path.expanduser
 oldabspath = os.path.abspath
 oldrealpath = os.path.realpath
@@ -120,11 +78,16 @@ def realpath(path):
     return oldrealpath(path).replace('\\', '/')
 
 if sys.platform.startswith('win'):
-    os.environ = _Environ(os.environ)
     os.path.join = join
     os.path.expanduser = expanduser
     os.path.abspath = abspath
     os.path.realpath = realpath
+
+    # On windows, python transforms all enviroment variables to uppercase,
+    # but we need lowercase ones to override configure options like
+    # am_cv_python_platform
+    os.environ.encodekey = os.environ.encodevalue
+
 
 import stat
 import shutil

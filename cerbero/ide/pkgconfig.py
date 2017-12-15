@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # cerbero - a multi-platform build system for Open Source software
 # Copyright (C) 2012 Andoni Morales Alastruey <ylatuya@gmail.com>
 #
@@ -19,6 +19,7 @@
 
 import subprocess
 import os
+import sys
 
 from cerbero.errors import FatalError
 
@@ -102,6 +103,10 @@ class PkgConfig(object):
         process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
         output, unused_err = process.communicate()
         output = output.strip()
+
+        if sys.stdout.encoding:
+            output = output.decode(sys.stdout.encoding)
+
         if delimiter:
             res = output.split('%s' % delimiter)
             if res[0] == ' ':

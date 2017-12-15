@@ -166,6 +166,11 @@ class LicenseDescription:
         self.acronym = acronym
         self.pretty_name = pretty_name
 
+    def __lt__(self, other):
+        return self.acronym < other.acronym
+
+    def __repr__(self):
+        return "LicenseDescription(%s)" % self.acronym
 
 class License:
     ''' Enumeration of licensesversions '''

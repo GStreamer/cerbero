@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # cerbero - a multi-platform build system for Open Source software
 # Copyright (C) 2012 Thiago Santos <thiago.sousa.santos@collabora.com>
 #
@@ -21,6 +21,7 @@ import os
 import subprocess
 import shutil
 import tempfile
+import sys
 
 from cerbero.utils import shell
 from cerbero.tools.osxrelocator import OSXRelocator
@@ -224,6 +225,10 @@ class OSXUniversalGenerator(object):
         process = subprocess.Popen(cmd, cwd=cwd,
             stdout=subprocess.PIPE, shell=True)
         output, unused_err = process.communicate()
+
+        if sys.stdout.encoding:
+            output = output.decode(sys.stdout.encoding)
+
         return output
 
 

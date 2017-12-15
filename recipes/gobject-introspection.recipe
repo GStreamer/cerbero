@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     autoreconf = True
     autoreconf_sh = 'gtkdocize && autoreconf -vfi'
+    configure_options = '--with-python=python3'
     deps = ['glib']
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
@@ -73,7 +74,7 @@ class Recipe(recipe.Recipe):
         # on arch python2 needs to be specified as the interpreter
         # the full path needs to be specified, since shebangs are generated
         if self.config.target_distro == Distro.ARCH:
-            self.config_sh = "PYTHON=/usr/bin/python2 %s" % self.config_sh
+            self.config_sh = "PYTHON=/usr/bin/python3 %s" % self.config_sh
 
     # TODO: catch the share/man stuff like man1/g-ir* ?
     def configure(self):

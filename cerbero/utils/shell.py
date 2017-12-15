@@ -170,6 +170,10 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
             raise Exception()
     except Exception:
         raise FatalError(_("Error running command: %s") % cmd)
+
+    if sys.stdout.encoding:
+        output = output.decode(sys.stdout.encoding)
+
     return output
 
 
@@ -465,7 +469,7 @@ PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ 
 '''
 
     bashrc = tempfile.NamedTemporaryFile()
-    bashrc.write(BASHRC % (platform, arch))
+    bashrc.write((BASHRC % (platform, arch)).encode())
     bashrc.flush()
 
     if sourcedir:

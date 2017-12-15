@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # cerbero - a multi-platform build system for Open Source software
 # Copyright (C) 2012 Andoni Morales Alastruey <ylatuya@gmail.com>
 #

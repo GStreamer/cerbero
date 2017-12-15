@@ -48,7 +48,7 @@ class DebianBootstrapper (UnixBootstrapper):
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
-                'libpulse-dev', 'python-dev', 'texinfo', 'gettext',
+                'libpulse-dev', 'python3-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
                 'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
@@ -107,7 +107,7 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
                 'texinfo-tex', 'texlive-dvips', 'docbook-style-xsl',
                 'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
-                'python-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
+                'python3-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
                 'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
                 'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
@@ -144,7 +144,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
             'gtk-doc', 'curl', 'doxygen', 'texinfo',
             'texlive', 'docbook-xsl-stylesheets',
             'transfig', 'intltool', 'patterns-openSUSE-devel_rpm_build',
-            'python-devel', 'xorg-x11-libXrender-devel', 'libpulse-devel',
+            'python3-devel', 'xorg-x11-libXrender-devel', 'libpulse-devel',
             'xorg-x11-libXv-devel', 'Mesa-libGL-devel', 'libXcomposite-devel',
             'libX11-devel', 'alsa-devel', 'libXi-devel', 'Mesa-devel',
             'Mesa-libGLESv3-devel',
@@ -158,7 +158,7 @@ class ArchBootstrapper (UnixBootstrapper):
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
             'docbook-xsl', 'transfig', 'libxrender',
-            'libxv', 'mesa', 'python2', 'wget', 'glib-networking', 'git',
+            'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
             'subversion', 'xorg-util-macros']
 
     def __init__(self, config):
