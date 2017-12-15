@@ -33,7 +33,7 @@ class Recipe(recipe.Recipe):
         decls = []
         regs = []
         categories = ''
-        for c, ps in plugins.iteritems():
+        for c, ps in plugins.items():
             c = c.upper()
             define = DEFINE_TPL % c
             # By default enable only the core plugins

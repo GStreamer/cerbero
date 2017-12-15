@@ -133,7 +133,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         try:
             runtime_path = self._create_package(PackageType.RUNTIME,
                     output_dir, force)
-        except EmptyPackageError, e:
+        except EmptyPackageError as e:
             if not devel:
                 raise e
             runtime_path = None
@@ -145,7 +145,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
             # create the development package
             devel_path = self._create_package(PackageType.DEVEL, output_dir,
                     force)
-        except EmptyPackageError, e:
+        except EmptyPackageError as e:
             if runtime_path is None:
                 raise e
             devel_path = None
@@ -332,7 +332,7 @@ class ProductPackage(PackagerBase):
                 self.empty_packages[PackageType.DEVEL].append(p)
 
     def _create_packages_dmg(self):
-        paths = self.packages_paths[PackageType.RUNTIME].values()
+        paths = list(self.packages_paths[PackageType.RUNTIME].values())
         dmg_file = os.path.join(self.output_dir,
             self._package_name('-packages.dmg'))
 

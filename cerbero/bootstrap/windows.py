@@ -175,7 +175,7 @@ class WindowsBootstrapper(BootstrapperBase):
             # get the path
             libdir = libdir.split('=')[1]
             # strip the surrounding quotes
-            print "Replacing old libdir : ", libdir
+            print("Replacing old libdir : ", libdir)
             return libdir.strip()[1:-1]
 
     def remove_mingw_cpp(self):

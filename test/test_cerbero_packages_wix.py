@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import unittest
-import StringIO
+import io
 
 from cerbero import hacks
 from cerbero.build import recipe
@@ -97,14 +97,14 @@ class MergeModuleTest(unittest.TestCase):
 
     def test_add_root(self):
         self.mergemodule._add_root()
-        self.assertEquals(
+        self.assertEqual(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" />',
                           etree.tostring(self.mergemodule.root))
 
     def test_add_module(self):
         self.mergemodule._add_root()
         self.mergemodule._add_module()
-        self.assertEquals(
+        self.assertEqual(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
                 '<Module Id="_gstreamer_test" Language="1033" Version="1.0" />'
             '</Wix>', etree.tostring(self.mergemodule.root))
@@ -113,7 +113,7 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_root()
         self.mergemodule._add_module()
         self.mergemodule._add_package()
-        self.assertEquals(
+        self.assertEqual(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
                 '<Module Id="_gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
@@ -126,7 +126,7 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_module()
         self.mergemodule._add_package()
         self.mergemodule._add_root_dir()
-        self.assertEquals(
+        self.assertEqual(
             '<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">'
                 '<Module Id="_gstreamer_test" Language="1033" Version="1.0">'
                     '<Package Comments="test" Description="GStreamer Test" Id="1" '
@@ -140,14 +140,14 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_module()
         self.mergemodule._add_package()
         self.mergemodule._add_root_dir()
-        self.assertEquals(len(self.mergemodule._dirnodes), 1)
-        self.assertEquals(self.mergemodule._dirnodes[''], self.mergemodule.rdir)
+        self.assertEqual(len(self.mergemodule._dirnodes), 1)
+        self.assertEqual(self.mergemodule._dirnodes[''], self.mergemodule.rdir)
         self.mergemodule._add_directory('lib/gstreamer-0.10')
-        self.assertEquals(len(self.mergemodule._dirnodes), 3)
+        self.assertEqual(len(self.mergemodule._dirnodes), 3)
         self.assertTrue('lib' in self.mergemodule._dirnodes)
         self.assertTrue('lib/gstreamer-0.10' in self.mergemodule._dirnodes)
         self.mergemodule._add_directory('bin')
-        self.assertEquals(len(self.mergemodule._dirnodes), 4)
+        self.assertEqual(len(self.mergemodule._dirnodes), 4)
         self.assertTrue('bin' in self.mergemodule._dirnodes)
 
     def test_add_file(self):
@@ -155,14 +155,14 @@ class MergeModuleTest(unittest.TestCase):
         self.mergemodule._add_module()
         self.mergemodule._add_package()
         self.mergemodule._add_root_dir()
-        self.assertEquals(len(self.mergemodule._dirnodes), 1)
-        self.assertEquals(self.mergemodule._dirnodes[''], self.mergemodule.rdir)
+        self.assertEqual(len(self.mergemodule._dirnodes), 1)
+        self.assertEqual(self.mergemodule._dirnodes[''], self.mergemodule.rdir)
         self.mergemodule._add_file('bin/gst-inspect-0.10.exe')
-        self.assertEquals(len(self.mergemodule._dirnodes), 2)
+        self.assertEqual(len(self.mergemodule._dirnodes), 2)
         self.assertTrue('bin' in self.mergemodule._dirnodes)
         self.assertTrue('gstreamer-0.10.exe' not in self.mergemodule._dirnodes)
         self.mergemodule._add_file('bin/gst-launch-0.10.exe')
-        self.assertEquals(len(self.mergemodule._dirnodes), 2)
+        self.assertEqual(len(self.mergemodule._dirnodes), 2)
         self.assertTrue('bin' in self.mergemodule._dirnodes)
         self.assertTrue('gstreamer-0.10.exe' not in self.mergemodule._dirnodes)
 
@@ -170,19 +170,19 @@ class MergeModuleTest(unittest.TestCase):
         self.config.platform = Platform.WINDOWS
         self.mergemodule._get_uuid = lambda : '1'
         self.mergemodule.fill()
-        tmp = StringIO.StringIO()
+        tmp = io.StringIO()
         self.mergemodule.write(tmp)
         #self._compstr(tmp.getvalue(), MERGE_MODULE)
-        self.assertEquals(MERGE_MODULE, tmp.getvalue())
+        self.assertEqual(MERGE_MODULE, tmp.getvalue())
 
     def _compstr(self, str1, str2):
         str1 = str1.split('\n')
         str2 = str2.split('\n')
         for i in range(len(str1)):
             if str1[i] != str2[i]:
-                print str1[i]
-                print str2[i]
-                print ""
+                print(str1[i])
+                print(str2[i])
+                print("")
 
 
 class InstallerTest(unittest.TestCase):

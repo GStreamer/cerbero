@@ -63,9 +63,9 @@ class Check(Command):
             if stepfunc:
                 try:
                     stepfunc()
-                except FatalError, e:
+                except FatalError as e:
                     raise e
-                except Exception, ex:
+                except Exception as ex:
                     raise FatalError(_("Error running %s checks: %s") %
                         (recipe.name, ex))
 

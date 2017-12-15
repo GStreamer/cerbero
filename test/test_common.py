@@ -51,9 +51,9 @@ class XMLMixin():
         n = self.find_one(parent, tag)
         if attrib not in n.attrib:
             self.fail("Attribute %s not found in %s" % (attrib, n))
-        self.assertEquals(n.attrib[attrib], value)
+        self.assertEqual(n.attrib[attrib], value)
 
     def check_text(self, parent, tag, value):
         n = self.find_one(parent, tag)
-        self.assertEquals(n.text, value)
+        self.assertEqual(n.text, value)
         

@@ -23,7 +23,7 @@ import sys
 ### XML Hacks ###
 
 import re
-import StringIO
+import io
 from xml.dom import minidom
 from cerbero.utils import etree
 oldwrite = etree.ElementTree.write
@@ -39,7 +39,7 @@ def pretify(string, pretty_print=True):
 def write(self, file_or_filename, encoding=None, pretty_print=False):
     if not pretty_print:
         return oldwrite(self, file_or_filename, encoding)
-    tmpfile = StringIO.StringIO()
+    tmpfile = io.StringIO()
     oldwrite(self, tmpfile, encoding)
     tmpfile.seek(0)
     if hasattr(file_or_filename, "write"):
@@ -69,7 +69,7 @@ class _Environ(environclass):
     def __init__(self, environ):
         UserDict.UserDict.__init__(self)
         self.data = {}
-        for k, v in environ.items():
+        for k, v in list(environ.items()):
             self.data[k] = v
 
     def __setitem__(self, key, item):

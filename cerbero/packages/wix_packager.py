@@ -159,7 +159,7 @@ class MSIPackager(PackagerBase):
         zipf.close()
 
         if not keep_temp:
-            for msms in self.merge_modules.values():
+            for msms in list(self.merge_modules.values()):
                 for p in msms:
                     os.remove(p)
 
@@ -192,7 +192,7 @@ class MSIPackager(PackagerBase):
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
-        self.merge_modules[package_type] = packagedeps.values()
+        self.merge_modules[package_type] = list(packagedeps.values())
 
     def _create_config(self):
         config = WixConfig(self.config, self.package)

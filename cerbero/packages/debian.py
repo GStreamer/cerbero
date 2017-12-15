@@ -242,7 +242,7 @@ class DebianPackager(LinuxPackager):
         self._write_debian_file(packagedir, 'control', control + control_devel)
         self._write_debian_file(packagedir, 'copyright', copyright)
         rules_path = self._write_debian_file(packagedir, 'rules', rules)
-        os.chmod(rules_path, 0755)
+        os.chmod(rules_path, 0o755)
         self._write_debian_file(packagedir, os.path.join('source', 'format'),
                 source_format)
         if self.package.has_runtime_package:

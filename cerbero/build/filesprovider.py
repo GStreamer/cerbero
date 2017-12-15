@@ -191,7 +191,7 @@ class FilesProvider(object):
             # The library search function returns a dict that is a mapping from
             # library name to filenames, but we only want a list of filenames
             if not isinstance(cat_files, list):
-                cat_files = flatten_files_list(cat_files.values())
+                cat_files = flatten_files_list(list(cat_files.values()))
             files.extend(cat_files)
         return sorted(list(set(files)))
 

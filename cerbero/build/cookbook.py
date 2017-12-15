@@ -143,7 +143,7 @@ class CookBook (object):
         @return: list of recipes
         @rtype: list
         '''
-        recipes = self.recipes.values()
+        recipes = list(self.recipes.values())
         recipes.sort(key=lambda x: x.name)
         return recipes
 
@@ -268,10 +268,10 @@ class CookBook (object):
         @rtype: list
         '''
         recipe = self.get_recipe(recipe_name)
-        return [r for r in self.recipes.values() if recipe.name in r.deps]
+        return [r for r in list(self.recipes.values()) if recipe.name in r.deps]
 
     def _runtime_deps (self):
-        return [x.name for x in self.recipes.values() if x.runtime_dep]
+        return [x.name for x in list(self.recipes.values()) if x.runtime_dep]
 
     def _cache_file(self, config):
         if config.cache_file is not None:
@@ -294,7 +294,7 @@ class CookBook (object):
                 os.makedirs(os.path.dirname(cache_file))
             with open(cache_file, 'wb') as f:
                 pickle.dump(self.status, f)
-        except IOError, ex:
+        except IOError as ex:
             m.warning(_("Could not cache the CookBook: %s") % ex)
 
     def _find_deps(self, recipe, state={}, ordered=[]):
@@ -309,7 +309,7 @@ class CookBook (object):
         for recipe_name in recipe_deps:
             try:
                 recipedep = self.get_recipe(recipe_name)
-            except RecipeNotFoundError, e:
+            except RecipeNotFoundError as e:
                 raise FatalError(_("Recipe %s has a unknown dependency %s"
                                  % (recipe.name, recipe_name)))
             try:
@@ -335,14 +335,14 @@ class CookBook (object):
         self.recipes = {}
         recipes = defaultdict(dict)
         recipes_repos = self._config.get_recipes_repos()
-        for reponame, (repodir, priority) in recipes_repos.iteritems():
+        for reponame, (repodir, priority) in recipes_repos.items():
             recipes[int(priority)].update(self._load_recipes_from_dir(repodir))
         # Add recipes by asceding pripority
         for key in sorted(recipes.keys()):
             self.recipes.update(recipes[key])
 
         # Check for updates in the recipe file to reset the status
-        for recipe in self.recipes.values():
+        for recipe in list(self.recipes.values()):
             if recipe.name not in self.status:
                 continue
             st = self.status[recipe.name]
@@ -399,7 +399,7 @@ class CookBook (object):
                 recipe = crecipe.UniversalFlatRecipe(self._config)
             else:
                 recipe = crecipe.UniversalRecipe(self._config)
-        for c in self._config.arch_config.keys():
+        for c in list(self._config.arch_config.keys()):
             try:
                 d = {'Platform': Platform, 'Architecture': Architecture,
                      'BuildType': BuildType, 'SourceType': SourceType,
@@ -423,9 +423,9 @@ class CookBook (object):
                     recipe.add_recipe(r)
                 else:
                     return r
-            except InvalidRecipeError, e:
+            except InvalidRecipeError as e:
                 self._invalid_recipes[r.name] = e
-            except Exception, ex:
+            except Exception as ex:
                 m.warning("Error loading recipe in file %s %s" %
                           (filepath, ex))
         if self._config.target_arch == Architecture.UNIVERSAL:

@@ -48,7 +48,7 @@ class AndroidPackager(DistTarball):
             if isinstance(self.config.universal_archs, list):
                 archs = self.config.universal_archs
             elif isinstance(self.config.universal_archs, dict):
-                archs = self.config.universal_archs.keys()
+                archs = list(self.config.universal_archs.keys())
             else:
                 raise ConfigurationError('universal_archs must be a list or a dict')
 

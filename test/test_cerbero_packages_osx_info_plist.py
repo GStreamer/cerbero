@@ -41,27 +41,27 @@ class InfoPlistTest(unittest.TestCase):
                                     'Test package')
 
     def testFormatProperty(self):
-        self.assertEquals('<key>Key</key>\n<string>Value</string>',
+        self.assertEqual('<key>Key</key>\n<string>Value</string>',
                 self.info_plist._format_property('Key', 'Value'))
 
     def testGetPropertiesString(self):
         result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'icon': '', 'ptype': ''}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def testFrameworkPackageType(self):
         self.info_plist = FrameworkPlist('test', 'test.org', '1.0',
                                          'Test package')
         result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'FMWK', 'icon': ''}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def testApplicationPackageType(self):
         self.info_plist = ApplicationPlist('test', 'test.org', '1.0',
                                            'Test package')
         result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'APPL', 'icon': ''}
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def testGetPropertiesStringWithIcon(self):
         self.info_plist.icon = 'test.ico'
@@ -70,7 +70,7 @@ class InfoPlistTest(unittest.TestCase):
             self.info_plist._format_property('CFBundleIconFile', 'test.ico') +
             '\n'}
         self.info_plist.icon = None
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def testSave(self):
         tmp = tempfile.NamedTemporaryFile()
@@ -80,4 +80,4 @@ class InfoPlistTest(unittest.TestCase):
         expected = INFO_PLIST_TPL % (self.info_plist.BEGIN,
                                      self.info_plist._get_properties_string(),
                                      self.info_plist.END)
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)

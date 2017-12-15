@@ -95,7 +95,7 @@ class Oven (object):
         for recipe in ordered_recipes:
             try:
                 self._cook_recipe(recipe, i, len(ordered_recipes))
-            except BuildStepError, be:
+            except BuildStepError as be:
                 if not self.interactive:
                     raise be
                 msg = be.msg
@@ -144,7 +144,7 @@ class Oven (object):
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
                 shell.close_logfile_output()
-            except FatalError, e:
+            except FatalError as e:
                 shell.close_logfile_output(dump=True)
                 self._handle_build_step_error(recipe, step, e.arch)
             except Exception:

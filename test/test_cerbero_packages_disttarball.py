@@ -44,27 +44,27 @@ class DistTarballTest(unittest.TestCase):
     def testRuntimePackage(self):
         # Creates one package with the runtime files
         filenames = self.packager.pack(self.tmp, devel=False)
-        self.assertEquals(len(filenames), 1)
+        self.assertEqual(len(filenames), 1)
         tar = tarfile.open(filenames[0], "r:bz2")
         tarfiles = sorted([x.path for x in tar.getmembers()])
-        self.assertEquals(tarfiles, self.package.files_list())
+        self.assertEqual(tarfiles, self.package.files_list())
 
     def testRuntimeAndDevelPackages(self):
         # Creates 2 packages, one with the runtime files a second one with the
         # devel files
         filenames = self.packager.pack(self.tmp, devel=True)
-        self.assertEquals(len(filenames), 2)
+        self.assertEqual(len(filenames), 2)
         tar = tarfile.open(filenames[0], "r:bz2")
         tarfiles = sorted([x.path for x in tar.getmembers()])
-        self.assertEquals(tarfiles, self.package.files_list())
+        self.assertEqual(tarfiles, self.package.files_list())
         tar = tarfile.open(filenames[1], "r:bz2")
         tarfiles = sorted([x.path for x in tar.getmembers()])
-        self.assertEquals(tarfiles, self.package.devel_files_list())
+        self.assertEqual(tarfiles, self.package.devel_files_list())
 
     def testRuntimeWithDevelPackage(self):
         # Creates 1 package, with the runtime files and the devel files
         filenames = self.packager.pack(self.tmp, devel=True, split=False)
-        self.assertEquals(len(filenames), 1)
+        self.assertEqual(len(filenames), 1)
         tar = tarfile.open(filenames[0], "r:bz2")
         tarfiles = sorted([x.path for x in tar.getmembers()])
-        self.assertEquals(tarfiles, self.package.all_files_list())
+        self.assertEqual(tarfiles, self.package.all_files_list())

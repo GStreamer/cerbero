@@ -34,7 +34,7 @@ class PackageTest(unittest.TestCase):
         self.cookbook = CookBook(self.config, False)
 
     def testSetGetConfig(self):
-        self.assertEquals(self.config, self.cookbook.get_config())
+        self.assertEqual(self.config, self.cookbook.get_config())
         self.cookbook.set_config(None)
         self.assertIsNone(self.cookbook._config)
 
@@ -42,7 +42,7 @@ class PackageTest(unittest.TestCase):
         status = {'test': 'test'}
         self.cookbook.set_status(status)
         self.cookbook._restore_cache()
-        self.assertEquals(self.cookbook.status, {})
+        self.assertEqual(self.cookbook.status, {})
 
     def testSaveCache(self):
         tmp = tempfile.NamedTemporaryFile()
@@ -52,7 +52,7 @@ class PackageTest(unittest.TestCase):
         self.cookbook.save()
         with open(self.cookbook._cache_file(self.config), 'rb') as f:
             loaded_status = pickle.load(f)
-            self.assertEquals(status, loaded_status)
+            self.assertEqual(status, loaded_status)
 
     def testLoad(self):
         tmp = tempfile.NamedTemporaryFile()
@@ -61,30 +61,30 @@ class PackageTest(unittest.TestCase):
         with open(tmp.name, 'wb') as f:
             pickle.dump(status, f)
         self.cookbook._restore_cache()
-        self.assertEquals(status, self.cookbook.status)
+        self.assertEqual(status, self.cookbook.status)
 
     def testAddGetRecipe(self):
         recipe = Recipe1(self.config)
-        self.failUnlessRaises(RecipeNotFoundError, self.cookbook.get_recipe,
+        self.assertRaises(RecipeNotFoundError, self.cookbook.get_recipe,
                               recipe.name)
         self.cookbook.add_recipe(recipe)
-        self.assertEquals(recipe, self.cookbook.recipes[recipe.name])
-        self.assertEquals(recipe, self.cookbook.get_recipe(recipe.name))
-        self.assertEquals(self.cookbook.get_recipes_list(), [recipe])
+        self.assertEqual(recipe, self.cookbook.recipes[recipe.name])
+        self.assertEqual(recipe, self.cookbook.get_recipe(recipe.name))
+        self.assertEqual(self.cookbook.get_recipes_list(), [recipe])
 
     def testGetRecipesStatus(self):
         recipe = Recipe1(self.config)
         self.cookbook._restore_cache()
-        self.assertEquals(self.cookbook.status, {})
+        self.assertEqual(self.cookbook.status, {})
         self.cookbook.add_recipe(recipe)
-        self.assertEquals(len(self.cookbook.status), 0)
+        self.assertEqual(len(self.cookbook.status), 0)
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(len(self.cookbook.status), 1)
-        self.assertEquals(status.steps, [])
+        self.assertEqual(len(self.cookbook.status), 1)
+        self.assertEqual(status.steps, [])
         status.steps.append('1')
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(len(self.cookbook.status), 1)
-        self.assertEquals(status.steps[0], '1')
+        self.assertEqual(len(self.cookbook.status), 1)
+        self.assertEqual(status.steps[0], '1')
 
     def testUpdateStatus(self):
         recipe = Recipe1(self.config)
@@ -92,13 +92,13 @@ class PackageTest(unittest.TestCase):
         self.cookbook._restore_cache()
         self.cookbook.update_step_status(recipe.name, 'fetch')
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(status.steps, ['fetch'])
+        self.assertEqual(status.steps, ['fetch'])
         self.cookbook.update_step_status(recipe.name, 'build')
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(status.steps, ['fetch', 'build'])
+        self.assertEqual(status.steps, ['fetch', 'build'])
         self.cookbook.update_step_status(recipe.name, 'install')
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(status.steps, ['fetch', 'build', 'install'])
+        self.assertEqual(status.steps, ['fetch', 'build', 'install'])
         for step in ['fetch', 'build', 'install']:
             self.assertTrue(self.cookbook.step_done(recipe.name, step))
 
@@ -108,10 +108,10 @@ class PackageTest(unittest.TestCase):
         self.cookbook._restore_cache()
         self.cookbook.update_build_status(recipe.name, '1.0')
         self.assertTrue(self.cookbook.status[recipe.name].needs_build)
-        self.assertEquals(self.cookbook.status[recipe.name].built_version, '1.0')
+        self.assertEqual(self.cookbook.status[recipe.name].built_version, '1.0')
         self.cookbook.update_build_status(recipe.name, None)
         self.assertFalse(self.cookbook.status[recipe.name].needs_build)
-        self.assertEquals(self.cookbook.status[recipe.name].built_version, None)
+        self.assertEqual(self.cookbook.status[recipe.name].built_version, None)
 
     def testResetRecipeStatus(self):
         recipe = Recipe1(self.config)
@@ -119,5 +119,5 @@ class PackageTest(unittest.TestCase):
         self.cookbook._restore_cache()
         self.cookbook.reset_recipe_status(recipe.name)
         status = self.cookbook._recipe_status(recipe.name)
-        self.assertEquals(status.steps, [])
+        self.assertEqual(status.steps, [])
         self.assertTrue(self.cookbook.status[recipe.name].needs_build)

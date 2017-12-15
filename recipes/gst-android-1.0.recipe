@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
 
         plugins = list_gstreamer_1_0_plugins_by_category(self.config)
         f = open(os.path.join(ndk_build_dir_dst, 'plugins.mk'), 'w')
-        for c, p in plugins.iteritems():
+        for c, p in plugins.items():
             p = ' '.join(p)
             f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), p))
         f.close()
