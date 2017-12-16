@@ -13,8 +13,7 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/ninja']
 
     def configure(self):
-        os.chdir(self.build_dir)
-        shell.call('./configure.py --bootstrap')
+        shell.call('./configure.py --bootstrap', self.build_dir)
 
     def install(self):
         try:

@@ -5,17 +5,17 @@ import stat
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.36.0'
+    version = '0.45.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     remotes = {'origin': 'https://github.com/mesonbuild/meson.git'}
-    commit = '0.36.0'
+    commit = version
     deps = ['ninja']
 
     files_bin = ['bin/meson']
     files_python = []
 
     def install(self):
-        os.chdir(self.build_dir)
-        shell.call('./install_meson.py --prefix %s' %
-                   self.config.prefix)
+        shell.call('%s setup.py install --prefix %s' %
+                (self.config.python_exe, self.config.prefix),
+                self.build_dir)

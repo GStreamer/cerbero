@@ -96,6 +96,7 @@ class Config (object):
 
     def __init__(self):
         self._check_uninstalled()
+        self.python_exe = sys.executable
 
         for a in self._properties:
             setattr(self, a, None)
@@ -238,7 +239,13 @@ class Config (object):
                                    'cerbero-registry-%s' % self.target_arch)
         gstregistry = os.path.expanduser(gstregistry)
         gstregistry10 = os.path.expanduser(gstregistry10)
-        pythonpath = os.path.join(prefix, py_prefix, 'site-packages')
+
+        # Ensure python paths exists because setup.py won't create them
+        pythonpath = [os.path.join(prefix, py_prefix, 'site-packages'),
+                      os.path.join(self.build_tools_prefix, py_prefix, 'site-packages')]
+        for path in pythonpath:
+            self._create_path(path)
+        pythonpath = os.pathsep.join(pythonpath)
 
         if self.platform == Platform.LINUX:
             xdgdatadir += ":/usr/share:/usr/local/share"
