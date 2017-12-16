@@ -24,18 +24,18 @@ minimum base to bootstrap
 
 Linux
 -----
-On Linux, you will only need a distribution with python 2.7.
+On linux, you will only need a distribution with python >= 3.4.
 
 OSX
 ---
 On OSX you will need to have install the following software:
   * XCode
+  * python3 https://www.python.org/downloads/
 
 Windows
 -------
 The initial setup on Windows is a little bit longer, but only a few programs are required.
-  * Python2.7: https://www.python.org/downloads/
-     IMPORTANT : Chose the 2.7 version. The 3.x versions are *not* supported
+  * Python3: https://www.python.org/downloads/
   * CMake: http://www.cmake.org/cmake/resources/software.html
   * Git: http://git-scm.com/download/win
      IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
@@ -53,16 +53,10 @@ cerbero must be run in the MingGW shell, which is accessible from the main menu 
 (if it is not, go to Mingw Installation manager, select MSYS Base Development and install
 msys-bash  lnk).
 
-The last step is making python and git available from the shell, for which you will need
-to create a .profile file:
-
-If you use 64-bit Windows, please execute:
-
-echo 'export PATH="$PATH:/c/Python27:/c/Program Files (x86)/Git/bin:/c/MinGW/bin/"' > ~/.profile
-
-If you use 32-bit Windows, please execute:
-
-echo 'export PATH="$PATH:/c/Python27:/c/Program Files/Git/bin:/c/MinGW/bin/"' > ~/.profile
+The path to your $HOME must not contain spaces. If your windows username
+contains spaces, you can create a new directory in /home and execute:
+$ echo 'export HOME=/home/newdir' > ~/.profile
+Then restart your shell and type 'cd' to go to the new home directory.
 
 Note that inside the shell, / is mapped to c:\Mingw\msys\1.0\
 
@@ -76,6 +70,8 @@ the cerbero directory in your path and invoke it as cerbero-uninstalled.
 
 The examples below assume the tool is in your PATH; if not, just remember to use ./cerbero-uninstalled
 instead of cerbero-uninstalled.
+
+On Windows it should be invoked as "python ./cerbero-uninstalled".
 
 Bootstrap
 ---------
@@ -124,4 +120,4 @@ cerbero is released under the GNU Lesser General Public License, Version 2.1 (LG
 Dependencies
 ************
 
- * python 2.7
+ * python 3.4
