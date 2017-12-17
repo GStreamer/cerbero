@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-plugins-ugly-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-sidplay "
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-ugly'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
             'libdvdread', 'x264']
 

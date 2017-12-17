@@ -8,7 +8,7 @@ class Recipe(custom.GStreamer):
     configure_options = '--enable-static --disable-examples --disable-oss4 --disable-oss \
          --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 \
          --disable-twolame --disable-qt --disable-gtk3'
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-good'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-good'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',

@@ -30,7 +30,7 @@ echo "installing mock"
 set +e
 groupadd -r mock
 usermod -G $USER mock
-git clone git://git.fedorahosted.org/git/mock.git mock
+git clone "https://github.com/rpm-software-management/mock" mock
 set -e
 
 cd mock

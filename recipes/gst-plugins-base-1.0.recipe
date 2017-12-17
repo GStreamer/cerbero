@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-plugins-base-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --program-prefix= --disable-examples "
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
