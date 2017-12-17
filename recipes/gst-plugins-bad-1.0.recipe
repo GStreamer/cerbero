@@ -25,7 +25,7 @@ class Recipe(custom.GStreamer):
         --enable-libmms --enable-resindvd --enable-soundtouch \
         --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
         --enable-decklink --enable-webrtc --enable-dtls'
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',

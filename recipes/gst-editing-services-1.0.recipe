@@ -4,7 +4,7 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     licenses = [License.LGPLv2Plus]
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-editing-services'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-editing-services'}
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--program-prefix= --disable-examples --enable-static "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']

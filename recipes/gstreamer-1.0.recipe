@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = "--enable-static --program-prefix= --disable-examples "
-    remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gstreamer'}
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gstreamer'}
     deps = ['glib', 'gtk-doc-lite']
 
     files_bins = ['gst-inspect-1.0',
