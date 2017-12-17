@@ -7,7 +7,7 @@ class Recipe(custom.GStreamer):
     configure_options = "--enable-static --program-prefix= --disable-examples "
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
-            'libvisual', 'libvorbis', 'zlib', 'orc', 'opus']
+            'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene']
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
@@ -17,7 +17,7 @@ class Recipe(custom.GStreamer):
                  'libgstapp-1.0', 'libgstaudio-1.0',
                  'libgstfft-1.0', 'libgstpbutils-1.0', 'libgstriff-1.0', 'libgstrtp-1.0',
                  'libgstrtsp-1.0', 'libgstsdp-1.0', 'libgsttag-1.0',
-                 'libgstvideo-1.0',]
+                 'libgstvideo-1.0', 'libgstgl-1.0']
 
     files_plugins_core = [
              'lib/gstreamer-1.0/libgstadder%(mext)s',
@@ -101,6 +101,8 @@ class Recipe(custom.GStreamer):
             'include/gstreamer-1.0/gst/app',
             'include/gstreamer-1.0/gst/audio',
             'include/gstreamer-1.0/gst/fft',
+            'include/gstreamer-1.0/gst/gl',
+            'lib/gstreamer-1.0/include/gst/gl',
             'include/gstreamer-1.0/gst/pbutils',
             'include/gstreamer-1.0/gst/riff',
             'include/gstreamer-1.0/gst/rtp',
@@ -112,6 +114,7 @@ class Recipe(custom.GStreamer):
             'lib/pkgconfig/gstreamer-app-1.0.pc',
             'lib/pkgconfig/gstreamer-audio-1.0.pc',
             'lib/pkgconfig/gstreamer-fft-1.0.pc',
+            'lib/pkgconfig/gstreamer-gl-1.0.pc',
             'lib/pkgconfig/gstreamer-pbutils-1.0.pc',
             'lib/pkgconfig/gstreamer-riff-1.0.pc',
             'lib/pkgconfig/gstreamer-rtp-1.0.pc',
@@ -152,12 +155,49 @@ class Recipe(custom.GStreamer):
             ]
     }
 
+    platform_files_plugins_sys = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+            ],
+        Platform.WINDOWS: [
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+            ],
+        Platform.ANDROID: [
+             'lib/gstreamer-1.0/libgstopengl%(mext)s',
+            ]
+    }
+
+    platform_files_plugins_sys_devel = {
+        Platform.LINUX: [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+            ],
+        Platform.WINDOWS: [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+            ],
+        Platform.DARWIN: [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+            ],
+        Platform.IOS: [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+            ],
+        Platform.ANDROID: [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+            ]
+    }
+
     files_lang = ['gst-plugins-base-1.0']
 
     files_typelibs = [
         'GstAllocators-1.0',
         'GstApp-1.0',
         'GstFft-1.0',
+        'GstGL-1.0',
         'GstPbutils-1.0',
         'GstRiff-1.0',
         'GstRtp-1.0',
@@ -169,7 +209,8 @@ class Recipe(custom.GStreamer):
         ]
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error "
+        self.append_env['CFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
+        self.append_env['OBJCFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
         self.append_env['CXXFLAGS'] = " -Wno-error "
         self.append_env['CPPFLAGS'] = " -Wno-error "
         if self.config.target_platform != Platform.LINUX:
