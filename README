@@ -31,7 +31,6 @@ OSX
 ---
 On OSX you will need to have install the following software:
   * XCode
-  * CMake: http://www.cmake.org/cmake/resources/software.html
 
 Windows
 -------
