@@ -199,7 +199,7 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_VIVID
             elif d[2] in ['wily']:
                 distro_version = DistroVersion.UBUNTU_WILY
-            elif d[2] in ['xenial', 'sarah']:
+            elif d[2] in ['xenial', 'sarah', 'serena', 'sonya', 'sylvia']:
                 distro_version = DistroVersion.UBUNTU_XENIAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
