@@ -41,8 +41,7 @@ WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
 class WindowsBootstrapper(BootstrapperBase):
     '''
     Bootstrapper for windows builds.
-    Installs the mingw-w64 compiler toolchain and headers for Directx and
-    Python
+    Installs the mingw-w64 compiler toolchain and headers for Directx
     '''
 
     def start(self):
@@ -70,7 +69,6 @@ class WindowsBootstrapper(BootstrapperBase):
             # After mingw is beeing installed
             self.install_bin_deps()
         self.install_gl_headers()
-        self.install_python_sdk()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -96,34 +94,6 @@ class WindowsBootstrapper(BootstrapperBase):
                 shutil.rmtree('/mingw/lib')
             except Exception:
                 pass
-
-    def install_python_sdk(self):
-        ### FIXME : MOVE OVER REPOSITORY TO STANDARD ROOT
-        old_sdk_git_root = 'git://anongit.freedesktop.org/gstreamer-sdk'
-        m.action(_("Installing Python headers"))
-        tmp_dir = tempfile.mkdtemp()
-        shell.call("git clone %s" % os.path.join(old_sdk_git_root,
-                                                 'windows-external-sdk.git'),
-                   tmp_dir)
-
-        python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
-        python_headers = to_unixpath(os.path.abspath(python_headers))
-
-        shell.call('mkdir -p %s' % python_headers)
-        python_libs = os.path.join(self.prefix, 'lib')
-        python_libs = to_unixpath(python_libs)
-
-        temp = to_unixpath(os.path.abspath(tmp_dir))
-        shell.call('cp -f %s/windows-external-sdk/python27/%s/include/* %s' %
-                  (temp, self.version, python_headers))
-        shell.call('cp -f %s/windows-external-sdk/python27/%s/lib/* %s' %
-                  (temp, self.version, python_libs))
-        try:
-            os.remove('%s/lib/python.dll' % self.prefix)
-        except:
-            pass
-        shell.call('ln -s python27.dll python.dll', '%s/lib' % self.prefix)
-        shutil.rmtree(tmp_dir)
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
