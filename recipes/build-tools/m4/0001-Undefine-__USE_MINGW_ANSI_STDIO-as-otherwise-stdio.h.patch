@@ -1,0 +1,32 @@
+From c6a64804ca545899b13d733b9373354cb0fba394 Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Tue, 19 Dec 2017 15:43:19 -0500
+Subject: [PATCH] Undefine __USE_MINGW_ANSI_STDIO as otherwise stdio.h defines
+ asprintf
+
+And configure did not find it because it's an inline function in
+stdio.h, not a function that is available in some library. Fixes
+compilation on Windows.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=755222
+---
+ lib/asprintf.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/lib/asprintf.c b/lib/asprintf.c
+index d0ca5f2..d8c5b8d 100644
+--- a/lib/asprintf.c
++++ b/lib/asprintf.c
+@@ -21,6 +21,9 @@
+ #ifdef IN_LIBASPRINTF
+ # include "vasprintf.h"
+ #else
++# ifdef __USE_MINGW_ANSI_STDIO
++#  undef __USE_MINGW_ANSI_STDIO
++# endif
+ # include <stdio.h>
+ #endif
+ 
+-- 
+2.7.4
+

@@ -9,7 +9,8 @@ class Recipe(recipe.Recipe):
     url = 'http://ftp.gnu.org/gnu/m4/m4-1.4.18.tar.xz'
     files_bins = ['m4']
 
-    patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch']
+    patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
+               'm4/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch']
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
