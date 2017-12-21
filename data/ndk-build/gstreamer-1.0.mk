@@ -188,8 +188,8 @@ endif
 
 delsharedlib_$(TARGET_ARCH_ABI): PRIV_B_DIR := $(GSTREAMER_BUILD_DIR)
 delsharedlib_$(TARGET_ARCH_ABI):
-	@$(call host-rm,$(prebuilt))
-	@$(foreach path,$(wildcard $(PRIV_B_DIR)/sed*), $(call host-rm,$(path)) && ) echo Done rm
+	$(hide)$(call host-rm,$(prebuilt))
+	$(hide)$(foreach path,$(wildcard $(PRIV_B_DIR)/sed*), $(call host-rm,$(path)) && ) echo Done rm
 $(LOCAL_INSTALLED): delsharedlib_$(TARGET_ARCH_ABI)
 
 # Generates a source file that declares and registers all the required plugins
@@ -202,9 +202,9 @@ genstatic_$(TARGET_ARCH_ABI): PRIV_P_R := $(GSTREAMER_PLUGINS_REGISTER)
 genstatic_$(TARGET_ARCH_ABI): PRIV_G_L := $(G_IO_MODULES_LOAD)
 genstatic_$(TARGET_ARCH_ABI): PRIV_G_R := $(G_IO_MODULES_DECLARE)
 genstatic_$(TARGET_ARCH_ABI):
-	@$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
-	@$(call host-mkdir,$(PRIV_B_DIR))
-	@$(SED_LOCAL) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C_IN) | $(SED_LOCAL) "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" > $(PRIV_C)
+	$(hide)$(HOST_ECHO) "GStreamer      : [GEN] => $(PRIV_C)"
+	$(hide)$(call host-mkdir,$(PRIV_B_DIR))
+	$(hide)$(SED_LOCAL) "s/@PLUGINS_DECLARATION@/$(PRIV_P_D)/g" $(PRIV_C_IN) | $(SED_LOCAL) "s/@PLUGINS_REGISTRATION@/$(PRIV_P_R)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_LOAD@/$(PRIV_G_L)/g" | $(SED_LOCAL) "s/@G_IO_MODULES_DECLARE@/$(PRIV_G_R)/g" > $(PRIV_C)
 
 # Compile the source file
 $(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
@@ -212,15 +212,15 @@ $(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT_GST_INC)
 	-c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 $(GSTREAMER_ANDROID_O): PRIV_GST_CFLAGS := $(GSTREAMER_ANDROID_CFLAGS) $(TARGET_CFLAGS)
 $(GSTREAMER_ANDROID_O): genstatic_$(TARGET_ARCH_ABI)
-	@$(HOST_ECHO) "GStreamer      : [COMPILE] => $(PRIV_C)"
-	@$(PRIV_CC_CMD)
+	$(hide)$(HOST_ECHO) "GStreamer      : [COMPILE] => $(PRIV_C)"
+	$(hide)$(PRIV_CC_CMD)
 
 # Creates a shared library including gstreamer, its plugins and all the dependencies
 buildsharedlibrary_$(TARGET_ARCH_ABI): PRIV_CMD := $(GSTREAMER_ANDROID_CMD)
 buildsharedlibrary_$(TARGET_ARCH_ABI): PRIV_SO := $(GSTREAMER_ANDROID_SO)
 buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
-	@$(HOST_ECHO) "GStreamer      : [LINK] => $(PRIV_SO)"
-	@$(PRIV_CMD)
+	$(hide)$(HOST_ECHO) "GStreamer      : [LINK] => $(PRIV_SO)"
+	$(hide)$(PRIV_CMD)
 
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
 GSTREAMER_INCLUDE_FONTS_SUBST :=
@@ -242,23 +242,23 @@ endif
 
 # about the sed command, android-studio doesn't seem to like line continuation characters when executing shell commands
 copyjavasource_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
-	@$(foreach plugin,$(GSTREAMER_PLUGINS_WITH_CLASSES), \
+	$(hide)$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer)
+	$(hide)$(foreach plugin,$(GSTREAMER_PLUGINS_WITH_CLASSES), \
 		$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(plugin)) && ) echo Done mkdir
-	@$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
+	$(hide)$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
 		$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)$(file),$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)) && ) echo Done cp
-	@$(SED_LOCAL) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | $(SED_LOCAL) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | $(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" > $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	$(hide)$(SED_LOCAL) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | $(SED_LOCAL) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | $(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" > $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
 ifndef GSTREAMER_ASSETS_DIR
 GSTREAMER_ASSETS_DIR := src/main/assets
 endif
 
 copyfontsres_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig)
-	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype/)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,$(GSTREAMER_ASSETS_DIR)/fontconfig)
-	@$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype)
+	$(hide)$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig)
+	$(hide)$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype/)
+	$(hide)$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts.conf,$(GSTREAMER_ASSETS_DIR)/fontconfig)
+	$(hide)$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)/fontconfig/fonts/Ubuntu-R.ttf,$(GSTREAMER_ASSETS_DIR)/fontconfig/fonts/truetype)
 copycacertificatesres_$(TARGET_ARCH_ABI):
-	@$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
-	@$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
+	$(hide)$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
+	$(hide)$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
 
