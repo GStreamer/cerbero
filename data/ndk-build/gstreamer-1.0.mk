@@ -33,11 +33,6 @@ endif
 # Expand home directory (~/)
 GSTREAMER_ROOT := $(wildcard $(GSTREAMER_ROOT))
 
-# Path for GStreamer static plugins
-ifndef GSTREAMER_STATIC_PLUGINS_PATH
-GSTREAMER_STATIC_PLUGINS_PATH := $(GSTREAMER_ROOT)/lib/gstreamer-1.0
-endif
-
 # Path for the NDK integration makefiles
 ifndef GSTREAMER_NDK_BUILD_PATH
 GSTREAMER_NDK_BUILD_PATH := $(GSTREAMER_ROOT)/share/gst-android/ndk-build
@@ -175,7 +170,7 @@ endif
 # Create the link command
 GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT_GST_LINK) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
-	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+	-L$(GSTREAMER_ROOT)/lib $(G_IO_MODULES_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
 GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
