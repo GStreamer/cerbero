@@ -23,11 +23,10 @@ class Recipe(recipe.Recipe):
                 'gstreamer-pbutils-1.0', 'gstreamer-riff-1.0',
                 'gstreamer-rtp-1.0', 'gstreamer-rtsp-1.0',
                 'gstreamer-sdp-1.0', 'gstreamer-tag-1.0',
-                'gstreamer-video-1.0',
+                'gstreamer-video-1.0', 'gstreamer-gl-1.0',
                 # gst-plugins-bad
-                'gstreamer-bad-allocators-1.0',
                 'gstreamer-bad-audio-1.0', 'gstreamer-bad-video-1.0',
-                'gstreamer-codecparsers-1.0', 'gstreamer-gl-1.0',
+                'gstreamer-codecparsers-1.0',
                 'gstreamer-insertbin-1.0', 'gstreamer-mpegts-1.0',
                 'gstreamer-player-1.0'
                 ]
