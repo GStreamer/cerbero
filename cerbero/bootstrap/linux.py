@@ -94,7 +94,7 @@ class DebianBootstrapper (UnixBootstrapper):
             if arch in foreign_archs.split():
                 return
             raise ConfigurationError(('Architecture %s is missing from your setup. ' + \
-                                      'You can add it with: "dpkg --add-architeture %s",' + \
+                                      'You can add it with: "dpkg --add-architecture %s",' + \
                                       ' then run "apt-get update."') \
                                       % (arch, arch))
 
