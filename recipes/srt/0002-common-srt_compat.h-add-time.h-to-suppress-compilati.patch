@@ -1,0 +1,28 @@
+From 19d8194d2eb1d26b70451482937e12920fd0d25f Mon Sep 17 00:00:00 2001
+From: Justin Kim <justin.kim@collabora.com>
+Date: Tue, 28 Nov 2017 21:02:18 +0900
+Subject: [PATCH 2/9] common/srt_compat.h: add time.h to suppress compilation
+ warnings
+
+`time.h` provides `localtime_s()`.
+
+Signed-off-by: Justin Kim <justin.kim@collabora.com>
+---
+ common/srt_compat.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common/srt_compat.h b/common/srt_compat.h
+index 15128f2..d73e193 100644
+--- a/common/srt_compat.h
++++ b/common/srt_compat.h
+@@ -26,6 +26,7 @@ written by
+ #define HAISRT_COMPAT_H__
+ 
+ #include <stddef.h>
++#include <time.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+-- 
+2.15.1
+
