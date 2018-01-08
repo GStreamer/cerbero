@@ -61,25 +61,25 @@ class Distro:
 
 
 class DistroVersion:
-    ''' Enumeration of supported distribution versions '''
-    DEBIAN_SQUEEZE = 'debian_squeeze'
-    DEBIAN_WHEEZY = 'debian_wheezy'
-    DEBIAN_JESSIE = 'debian_jessy'
-    DEBIAN_STRETCH = 'debian_stretch'
-    DEBIAN_BUSTER = 'debian_buster'
-    UBUNTU_MAVERICK = 'ubuntu_maverick'
-    UBUNTU_LUCID = 'ubuntu_lucid'
-    UBUNTU_NATTY = 'ubuntu_natty'
-    UBUNTU_ONEIRIC = 'ubuntu_oneiric'
-    UBUNTU_PRECISE = 'ubuntu_precise'
-    UBUNTU_QUANTAL = 'ubuntu_quantal'
-    UBUNTU_RARING = 'ubuntu_raring'
-    UBUNTU_SAUCY = 'ubuntu_saucy'
-    UBUNTU_TRUSTY = 'ubuntu_trusty'
-    UBUNTU_UTOPIC = 'ubuntu_utopic'
-    UBUNTU_VIVID = 'ubuntu_vivid'
-    UBUNTU_WILY = 'ubuntu_wily'
-    UBUNTU_XENIAL = 'ubuntu_xenial'
+    ''' Enumeration of supported distribution versions, withing each distro, they must be sortable'''
+    DEBIAN_SQUEEZE = 'debian_06_squeeze'
+    DEBIAN_WHEEZY = 'debian_07_wheezy'
+    DEBIAN_JESSIE = 'debian_08_jessy'
+    DEBIAN_STRETCH = 'debian_09_stretch'
+    DEBIAN_BUSTER = 'debian_10_buster'
+    UBUNTU_LUCID = 'ubuntu_10_04_lucid'
+    UBUNTU_MAVERICK = 'ubuntu_10_10_maverick'
+    UBUNTU_NATTY = 'ubuntu_11_04_natty'
+    UBUNTU_ONEIRIC = 'ubuntu_11_10_oneiric'
+    UBUNTU_PRECISE = 'ubuntu_12_04_precise'
+    UBUNTU_QUANTAL = 'ubuntu_12_10_quantal'
+    UBUNTU_RARING = 'ubuntu_13_04_raring'
+    UBUNTU_SAUCY = 'ubuntu_13_10_saucy'
+    UBUNTU_TRUSTY = 'ubuntu_14_04_trusty'
+    UBUNTU_UTOPIC = 'ubuntu_14_10_utopic'
+    UBUNTU_VIVID = 'ubuntu_15_04_vivid'
+    UBUNTU_WILY = 'ubuntu_15_10_wily'
+    UBUNTU_XENIAL = 'ubuntu_16_04_xenial'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'
@@ -103,9 +103,9 @@ class DistroVersion:
     OPENSUSE_TUMBLEWEED = 'tumbleweed'
     WINDOWS_XP = 'windows_xp'
     WINDOWS_VISTA = 'windows_vista'
-    WINDOWS_7 = 'windows_7'
-    WINDOWS_8 = 'windows_8'
-    WINDOWS_8_1 = 'windows_8_1'
+    WINDOWS_7 = 'windows_07'
+    WINDOWS_8 = 'windows_08'
+    WINDOWS_8_1 = 'windows_08_1'
     WINDOWS_10 = 'windows_10'
     OS_X_MAVERICKS = 'osx_mavericks'
     OS_X_MOUNTAIN_LION = 'osx_mountain_lion'
@@ -113,15 +113,15 @@ class DistroVersion:
     OS_X_EL_CAPITAN = 'osx_el_capitan'
     OS_X_SIERRA = 'osx_sierra'
     OS_X_HIGH_SIERRA = 'osx_high_sierra'
-    IOS_8_0 = 'ios_8_0'
-    IOS_8_1 = 'ios_8_1'
-    IOS_8_2 = 'ios_8_2'
-    IOS_8_3 = 'ios_8_3'
-    IOS_8_4 = 'ios_8_4'
-    IOS_9_0 = 'ios_9_0'
-    IOS_9_1 = 'ios_9_1'
-    IOS_9_2 = 'ios_9_2'
-    IOS_9_3 = 'ios_9_3'
+    IOS_8_0 = 'ios_08_0'
+    IOS_8_1 = 'ios_08_1'
+    IOS_8_2 = 'ios_08_2'
+    IOS_8_3 = 'ios_08_3'
+    IOS_8_4 = 'ios_08_4'
+    IOS_9_0 = 'ios_09_0'
+    IOS_9_1 = 'ios_09_1'
+    IOS_9_2 = 'ios_09_2'
+    IOS_9_3 = 'ios_09_3'
     IOS_10_0 = 'ios_10_0'
     IOS_10_1 = 'ios_10_1'
     IOS_10_2 = 'ios_10_2'
@@ -129,13 +129,13 @@ class DistroVersion:
     IOS_11_0 = 'ios_11_0'
     IOS_11_1 = 'ios_11_1'
     IOS_11_2 = 'ios_11_2'
-    ANDROID_GINGERBREAD = 'android_gingerbread'  # API Level 9
-    ANDROID_ICE_CREAM_SANDWICH = 'android_ice_cream_sandwich'  # API Level 14
-    ANDROID_JELLY_BEAN = 'android_jelly_bean'  # API Level 16
-    ANDROID_KITKAT = 'android_kitkat'  # API Level 19
-    ANDROID_LOLLIPOP = 'android_lollipop' # API Level 21
-    ANDROID_MARSHMALLOW = 'android_marshmallow' # API Level 23
-    ANDROID_NOUGAT = 'android_nougat' # API Level 24
+    ANDROID_GINGERBREAD = 'android_09_gingerbread'  # API Level 9
+    ANDROID_ICE_CREAM_SANDWICH = 'android_14_ice_cream_sandwich'  # API Level 14
+    ANDROID_JELLY_BEAN = 'android_16_jelly_bean'  # API Level 16
+    ANDROID_KITKAT = 'android_19_kitkat'  # API Level 19
+    ANDROID_LOLLIPOP = 'android_21_lollipop' # API Level 21
+    ANDROID_MARSHMALLOW = 'android_23_marshmallow' # API Level 23
+    ANDROID_NOUGAT = 'android_24_nougat' # API Level 24
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 

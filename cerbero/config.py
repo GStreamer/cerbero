@@ -396,6 +396,10 @@ class Config (object):
             return False
         return True
 
+    def target_distro_version_gte(self, distro_version):
+        assert distro_version.startswith(self.target_distro + "_")
+        return distro_version >= self.target_distro_version
+
     def _parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename}
         if not reset:
