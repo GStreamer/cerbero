@@ -29,8 +29,7 @@ class Recipe(custom.GStreamer):
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
-            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
-            'srt']
+            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -385,6 +384,11 @@ class Recipe(custom.GStreamer):
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstresindvd.la')
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
+        if self.config.target_platform != Platform.ANDROID or \
+             self.config.target_distro_version_gte (DistroVersion.ANDROID_KITKAT):
+            self.configure_options += ' --enable-srt '
+            self.deps += ['srt']
+            self.files_plugins_net += [ 'lib/gstreamer-1.0/libgstsrt%(mext)s' ]
 
         if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
             self.platform_files_plugins_capture[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb%(mext)s')
