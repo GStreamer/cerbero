@@ -1,0 +1,31 @@
+From cdadec9c1be10c37119816e3dcdc8702a2d9ccfa Mon Sep 17 00:00:00 2001
+From: Olivier Crete <olivier.crete@collabora.com>
+Date: Mon, 8 Jan 2018 16:57:20 -0500
+Subject: [PATCH] Fix includes for iOS
+
+---
+ common/srt_compat.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/common/srt_compat.c b/common/srt_compat.c
+index b03083c..d926d33 100644
+--- a/common/srt_compat.c
++++ b/common/srt_compat.c
+@@ -42,7 +42,14 @@ written by
+ 
+ #include <assert.h>
+ #include <sys/time.h>
++#ifdef __APPLE__
++#include "TargetConditionals.h"
++#endif
++#if TARGET_OS_IOS || TARGET_OS_WATCH || TARGET_OS_TV
++#include <MobileCoreServices/MobileCoreServices.h>
++#else
+ #include <CoreServices/CoreServices.h>
++#endif
+ #include <pthread.h>
+ #include <mach/mach.h>
+ #include <mach/clock.h>
+-- 
+2.14.3 (Apple Git-98)
+

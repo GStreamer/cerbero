@@ -1,0 +1,29 @@
+From 1a822272c17f1ecaf081c2b900c4b4dde73f1823 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
+Date: Mon, 8 Jan 2018 16:00:31 -0500
+Subject: [PATCH] Include syslog.h on Android
+
+---
+ srtcore/logging_api.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/srtcore/logging_api.h b/srtcore/logging_api.h
+index 8fa63b1..592d312 100644
+--- a/srtcore/logging_api.h
++++ b/srtcore/logging_api.h
+@@ -37,8 +37,12 @@ written by
+ #ifdef WIN32
+ #include "win/syslog_defs.h"
+ #else
++#ifdef ANDROID
++#include <syslog.h>
++#else
+ #include <sys/syslog.h>
+ #endif
++#endif
+ 
+ // Syslog is included so that it provides log level names.
+ // Haivision log standard requires the same names plus extra one:
+-- 
+2.14.3
+

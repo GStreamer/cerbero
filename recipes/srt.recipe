@@ -20,13 +20,18 @@ class Recipe(recipe.Recipe):
                'srt/0006-Clean-.pc-to-provide-the-dependecies.patch',
                'srt/0007-srt_compat.h-Enable-localtime_s-only-if-MSC_VER-1500.patch',
                'srt/0008-build-Fix-for-MinGW-support.patch',
-               'srt/0009-Fix-include-path-for-wintime.h.patch']
+               'srt/0009-Fix-include-path-for-wintime.h.patch',
+               'srt/0010-Include-syslog.h-on-Android.patch',
+               'srt/0011-Fix-includes-for-iOS.patch']
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.configure_options += ' -DENABLE_SHARED=OFF '
+        if self.config.target_platform == Platform.ANDROID:
+            self.append_env['CXXFLAGS'] = " -frtti -fexceptions `pkg-config --cflags gnustl`"
+            self.deps += ['gnustl']
 
     def post_install(self):
         libtool_la = LibtoolLibrary('srt', 1, 2, 2, self.config.libdir,
