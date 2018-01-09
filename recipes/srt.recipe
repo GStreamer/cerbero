@@ -32,6 +32,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             self.append_env['CXXFLAGS'] = " -frtti -fexceptions `pkg-config --cflags gnustl`"
             self.deps += ['gnustl']
+            self.configure_options += " -DPTHREAD_INCLUDE_DIR=/ignoreme -DPTHREAD_LIBRARY=pthread "
 
     def post_install(self):
         libtool_la = LibtoolLibrary('srt', 1, 2, 2, self.config.libdir,
