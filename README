@@ -24,8 +24,7 @@ minimum base to bootstrap
 
 Linux
 -----
-On linux, you will only need a distribution with python >= 2.6 and python's argparse module,
-which is already included in python2.7
+On Linux, you will only need a distribution with python 2.7.
 
 OSX
 ---
@@ -125,5 +124,4 @@ cerbero is released under the GNU Lesser General Public License, Version 2.1 (LG
 Dependencies
 ************
 
- * python >= 2.6
- * python-argparse
+ * python 2.7
