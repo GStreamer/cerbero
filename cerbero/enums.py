@@ -64,7 +64,7 @@ class DistroVersion:
     ''' Enumeration of supported distribution versions, withing each distro, they must be sortable'''
     DEBIAN_SQUEEZE = 'debian_06_squeeze'
     DEBIAN_WHEEZY = 'debian_07_wheezy'
-    DEBIAN_JESSIE = 'debian_08_jessy'
+    DEBIAN_JESSIE = 'debian_08_jessie'
     DEBIAN_STRETCH = 'debian_09_stretch'
     DEBIAN_BUSTER = 'debian_10_buster'
     UBUNTU_LUCID = 'ubuntu_10_04_lucid'
