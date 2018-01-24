@@ -369,7 +369,13 @@ class Config (object):
 
     def recipe_remotes(self, recipe_name):
         if recipe_name in self.recipes_remotes:
-            return self.recipes_remotes[recipe_name]
+            rrs = self.recipes_remotes[recipe_name]
+            if not isinstance(rrs, dict):
+                raise ConfigurationError('recipes_remotes value for recipe %s '
+                                         'must be a dict in the form '
+                                         '{ \'remote-name\' : \'remote-url\' }'
+                                         % recipe_name)
+            return rrs
         return {}
 
     def cross_compiling(self):
