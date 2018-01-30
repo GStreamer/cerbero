@@ -4,7 +4,7 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
-    version = '2.12.1'
+    version = '2.12.6'
     stype = SourceType.TARBALL
     url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
     licenses = [License.MIT]
