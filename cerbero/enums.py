@@ -80,6 +80,7 @@ class DistroVersion:
     UBUNTU_VIVID = 'ubuntu_15_04_vivid'
     UBUNTU_WILY = 'ubuntu_15_10_wily'
     UBUNTU_XENIAL = 'ubuntu_16_04_xenial'
+    UBUNTU_ARTFUL = 'ubuntu_17_10_artful'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'
