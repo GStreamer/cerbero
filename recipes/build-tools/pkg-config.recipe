@@ -11,3 +11,6 @@ class Recipe(recipe.Recipe):
 
     files_bins = ['pkg-config']
     files_share = ['share/aclocal/pkg.m4']
+
+    def prepare(self):
+        self.append_env['CFLAGS'] = " -Wno-error=format-nonliteral "
