@@ -140,6 +140,25 @@ class DistroVersion:
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
+    @staticmethod
+    def get_android_api_version(version):
+        '''Returns the corresponding android api version'''
+        if version == DistroVersion.ANDROID_GINGERBREAD:
+            return 9
+        elif version == DistroVersion.ANDROID_ICE_CREAM_SANDWICH:
+            return 14
+        elif version == DistroVersion.ANDROID_JELLY_BEAN:
+            return 16
+        elif version == DistroVersion.ANDROID_KITKAT:
+            return 19
+        elif version == DistroVersion.ANDROID_LOLLIPOP:
+            return 21
+        elif version == DistroVersion.ANDROID_MARSHMALLOW:
+            return 23
+        elif version == DistroVersion.ANDROID_NOUGAT:
+            return 24
+        else:
+            raise FatalError("DistroVersion not supported")
 
 class LicenseDescription:
 
