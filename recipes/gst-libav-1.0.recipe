@@ -43,10 +43,8 @@ class Recipe(custom.GStreamer):
                 asflags = ' -arch i386 -m32'
             self.configure_options += ' ASFLAGS="%s"' % asflags
         elif self.config.target_platform == Platform.ANDROID:
-            libavextraconf = ""
-            if DistroVersion.get_android_api_version(self.config.target_distro_version) < 21:
-                # We need android version >= 21 to have linux perf
-                libavextraconf = " --disable-linux-perf"
+            # This creates too much problems and we can do without it
+            libavextraconf = " --disable-linux-perf"
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
                 libavextraconf += " --extra-cflags=\'-mincoming-stack-boundary=4\'"
