@@ -1,7 +1,7 @@
-From 9dd3534f278e4104b1d6a2d1e8d5ec5da82ee9e7 Mon Sep 17 00:00:00 2001
+From 8ffd258e962bc100403c6e2d333a7dc39a8e5bef Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 14 Aug 2015 13:41:59 +0200
-Subject: [PATCH] lib: Only rename locale_charset() for libiconv, not
+Subject: [PATCH 2/2] lib: Only rename locale_charset() for libiconv, not
  libcharset
 
 If we rename it for both, both will still conflict with each other.
@@ -12,7 +12,7 @@ for libiconv.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/lib/Makefile.in b/lib/Makefile.in
-index a538cce..5657510 100644
+index 9871a3c..fc90beb 100644
 --- a/lib/Makefile.in
 +++ b/lib/Makefile.in
 @@ -13,7 +13,7 @@ libdir = @libdir@
@@ -25,5 +25,5 @@ index a538cce..5657510 100644
  LDFLAGS = @LDFLAGS@ $(LDFLAGS_@WOE32DLL@)
  LDFLAGS_yes = -Wl,--export-all-symbols
 -- 
-2.5.0
+2.16.1
 
