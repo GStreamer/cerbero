@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
     can_use_configure_cache = False
     configure_tpl = "./configure --prefix %(prefix)s "\
                     "--libdir %(libdir)s %(options)s"
-    patches = ['zlib/0001-win32-fix-dll-name.patch']
+    patches = ['zlib/0001-win32-fix-dll-name.patch',
+               'zlib/0001-Fix-test-builds-to-use-the-built-libz-headers-librar.patch']
 
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
@@ -28,6 +29,8 @@ class Recipe(recipe.Recipe):
                                 'BINARY_PATH=%(prefix)s/bin ' % {'prefix':self.config.prefix}
             self._remove_steps ([BuildSteps.CONFIGURE])
         elif self.config.target_platform == Platform.ANDROID:
+            # zlib creates LDFLAGS from CFLAGS.  Allow for that
+            self.append_env['CFLAGS'] = os.environ.get('LDFLAGS', '')
             if self.config.target_arch == Architecture.X86:
                 self.configure_options += " --uname=i686-linux-android "
             if self.config.target_arch == Architecture.X86_64:
