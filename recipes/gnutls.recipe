@@ -45,6 +45,8 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-hardware-acceleration'
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-cxx'
+            # Fix build with NDK 16
+            self.append_env['ac_cv_header_stdatomic_h'] = 'no'
         if self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.ARM64:
                 self.configure_options += ' --disable-hardware-acceleration'
