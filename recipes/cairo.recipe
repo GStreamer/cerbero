@@ -52,3 +52,11 @@ class Recipe(recipe.Recipe):
             self.configure_options += '--without-x '
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += ' --enable-quartz-font --enable-quartz-image'
+        elif self.config.target_platform == Platform.ANDROID:
+            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
+                # FIXME: HACK to make projects using mmap compile with NDK 16
+                # we fail to compile with -D_FILE_OFFSET_BITS=64
+                # because we don't use clang and we use a platform < 21 (Lollipop)
+                # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
+                self.new_env['ac_cv_func_mmap'] = 'no'
