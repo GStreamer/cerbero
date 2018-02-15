@@ -22,6 +22,10 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --without-threads'
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options = '--with-python=no'
+            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            if v < 21:
+                self.new_env['CFLAGS'] = os.environ.get('CFLAGS', '') + ' -D_FILE_OFFSET_BITS=32'
+                self.new_env['CPPFLAGS'] = os.environ.get('CPPFLAGS', '') + ' -D_FILE_OFFSET_BITS=32'
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = '--with-python=no'
         elif self.config.target_platform == Platform.LINUX:
