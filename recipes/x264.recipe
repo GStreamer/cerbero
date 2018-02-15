@@ -52,6 +52,11 @@ class Recipe(recipe.Recipe):
         if enable_asm is False:
             self.configure_options += ' --disable-asm '
 
+        if self.config.target_platform == Platform.ANDROID:
+            # Don't build the cli on Android, it fails with NDK 16
+            self.configure_options += ' --disable-cli'
+            self.files_bins.remove('x264')
+
     def post_install(self):
         libtool_la = LibtoolLibrary('x264', 148, None, None, self.config.libdir,
                 self.config.target_platform)
