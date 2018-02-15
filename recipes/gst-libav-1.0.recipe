@@ -84,3 +84,8 @@ class Recipe(custom.GStreamer):
                                 'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
 
+                v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+                if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
+                        replacements = {'-D_FILE_OFFSET_BITS=64': '',}
+                        shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
+

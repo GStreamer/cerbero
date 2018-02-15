@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import fix_android_ndk16_cxx
+
 class Recipe(recipe.Recipe):
     name = 'webrtc-audio-processing'
     version = '0.2'
@@ -50,3 +52,7 @@ class Recipe(recipe.Recipe):
             # This recipe requires at least Windows Vista
             self.append_env['CFLAGS'] = ' -UWINVER -U_WIN32_WINNT -DWINVER=0x0600 -D_WIN32_WINNT=0x0600'
             self.append_env['CXXFLAGS'] = self.append_env['CFLAGS']
+
+    def configure (self):
+        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'webrtc', 'modules', 'audio_processing'))
+        super(recipe.Recipe, self).configure()

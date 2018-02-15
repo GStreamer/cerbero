@@ -425,3 +425,26 @@ def needs_xcode8_sdk_workaround(config):
         if StrictVersion(config.ios_min_version) < StrictVersion('10.0'):
             return True
     return False
+
+def fix_android_ndk16_cxx(config, destdir):
+    '''
+    Apply fixes for building c++ libraries with gcc for Android with NDK r16+
+
+    @destdir is the destination directory where the shared library will be created
+    '''
+    # FIXME: HACK c++ code fails to link with newer NDK... and libtool.
+    # maybe a standalone toolchain is a better option ?
+    if config.target_platform == Platform.ANDROID:
+        libdir = 'lib'
+        if config.target_arch in [Architecture.X86_64]:
+            libdir = 'lib64'
+        crt_so_path = os.path.join(config.sysroot, 'usr', libdir)
+
+        crtbegin_so = os.path.join(crt_so_path, 'crtbegin_so.o')
+        m.action("copying %s to %s" % (crtbegin_so, destdir))
+        shutil.copy (crtbegin_so, destdir);
+
+        crtend_so = os.path.join(crt_so_path, 'crtend_so.o')
+        m.action("copying %s to %s" % (crtend_so, destdir))
+        shutil.copy (crtend_so, destdir);
+    return False

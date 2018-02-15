@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.utils import fix_android_ndk16_cxx
 
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-good-1.0'
@@ -230,3 +231,7 @@ class Recipe(custom.GStreamer):
 
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
+
+    def configure(self):
+        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'ext', 'taglib'))
+        super(recipe.Recipe, self).configure()

@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
+from cerbero.utils import shell, fix_android_ndk16_cxx
 
 
 class Recipe(recipe.Recipe):
@@ -32,3 +32,7 @@ class Recipe(recipe.Recipe):
         self.append_env['CXXFLAGS'] = " -fexceptions "
       elif self.config.target_platform == Platform.IOS:
         self.autoreconf = True
+
+    def configure (self):
+        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'source', 'SoundTouch'))
+        super(recipe.Recipe, self).configure()

@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 from cerbero.tools.libtool import LibtoolLibrary
-from cerbero.utils import shell
+from cerbero.utils import shell, fix_android_ndk16_cxx
 
 class Recipe(recipe.Recipe):
     name = 'openh264'
@@ -94,6 +94,8 @@ class Recipe(recipe.Recipe):
                                        'platform-ios.mk'),
                           # Use correct compiler flag for iOS simulator
                           {'-miphoneos-version-min': '-mios-simulator-version-min'})
+
+        fix_android_ndk16_cxx (self.config, self.make_dir)
 
         # No configure script
 
