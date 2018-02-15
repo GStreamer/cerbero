@@ -47,6 +47,13 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-cxx'
             # Fix build with NDK 16
             self.append_env['ac_cv_header_stdatomic_h'] = 'no'
+            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
+                # FIXME: HACK to make projects compile with NDK 16
+                # we fail to compile with -D_FILE_OFFSET_BITS=64
+                # because we don't use clang and we use a platform < 21 (Lollipop)
+                # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
+                self.new_env['ac_cv_func_mmap'] = 'no'
         if self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.ARM64:
                 self.configure_options += ' --disable-hardware-acceleration'
