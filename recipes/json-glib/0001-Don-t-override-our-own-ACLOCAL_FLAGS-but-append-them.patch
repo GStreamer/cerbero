@@ -1,6 +1,6 @@
-From ddd14ab312014c7508eb8d20c3ebe2dd03fff355 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
-Date: Wed, 22 Apr 2015 15:37:53 +0200
+From d2e2c104f9b8137842abab2709140a8ddc82c9de Mon Sep 17 00:00:00 2001
+From: Edward Hervey <bilboed@bilboed.com>
+Date: Wed, 21 Feb 2018 14:25:48 +0100
 Subject: [PATCH] Don't override our own ACLOCAL_FLAGS but append them to the
  custom ones
 
@@ -9,15 +9,15 @@ Subject: [PATCH] Don't override our own ACLOCAL_FLAGS but append them to the
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index d2dbe69..68470dc 100644
+index 328b384..5f574cc 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -1,4 +1,4 @@
 -ACLOCAL_AMFLAGS = -I build/autotools
 +ACLOCAL_AMFLAGS = -I build/autotools ${ACLOCAL_FLAGS}
  
- EXTRA_DIST =
- 
+ EXTRA_DIST = \
+ 	meson.build \
 -- 
-2.1.4
+2.14.3
 
