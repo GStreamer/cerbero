@@ -3,15 +3,15 @@
 
 class Recipe(recipe.Recipe):
     name = 'libjpeg-turbo'
-    version = '1.5.1'
+    version = '1.5.3'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s"
     configure_options = " --with-jpeg8"
     autoreconf = True
-    url = 'http://downloads.sourceforge.net/project/libjpeg-turbo/1.5.1/libjpeg-turbo-1.5.1.tar.gz'
-    patches = ['libjpeg-turbo/0001-Include-limits.h-for-SIZE_MAX.patch']
+    url = 'http://downloads.sourceforge.net/project/libjpeg-turbo/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
+    patches = []
 
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
