@@ -1,0 +1,46 @@
+From 16d37d31b690a3f5543606bd21d7c7039018d501 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <edward@centricular.com>
+Date: Wed, 21 Feb 2018 14:56:29 +0100
+Subject: [PATCH] Remove decoder symbols
+
+---
+ include/libmp3lame.sym | 18 ------------------
+ 1 file changed, 18 deletions(-)
+
+diff --git a/include/libmp3lame.sym b/include/libmp3lame.sym
+index ff7d318..20f8d5b 100644
+--- a/include/libmp3lame.sym
++++ b/include/libmp3lame.sym
+@@ -1,5 +1,4 @@
+ lame_init
+-lame_init_old
+ lame_set_num_samples
+ lame_get_num_samples
+ lame_set_in_samplerate
+@@ -183,23 +182,6 @@ lame_mp3_tags_fid
+ lame_get_lametag_frame
+ lame_close
+ lame_encode_finish
+-hip_decode_init
+-hip_decode_exit
+-hip_set_errorf
+-hip_set_debugf
+-hip_set_msgf
+-hip_decode
+-hip_decode_headers
+-hip_decode1
+-hip_decode1_headers
+-hip_decode1_headersB
+-lame_decode_init
+-lame_decode
+-lame_decode_headers
+-lame_decode1
+-lame_decode1_headers
+-lame_decode1_headersB
+-lame_decode_exit
+ id3tag_genre_list
+ id3tag_init
+ id3tag_add_v2
+-- 
+2.14.3
+

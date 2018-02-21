@@ -1,12 +1,14 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
 class Recipe(recipe.Recipe):
-    version = '3.99.5'
+    version = '3.100'
     name = 'lame'
     licenses = [License.GPL]
     stype = SourceType.TARBALL
     configure_options = ' --enable-static --disable-frontend --disable-decoder'
-    url = 'http://downloads.sourceforge.net/project/lame/lame/3.99/lame-3.99.5.tar.gz'
+    url = 'http://downloads.sourceforge.net/project/lame/lame/%(version)s/lame-%(version)s.tar.gz'
     autoreconf = True
-    patches = ['lame/0001-Make-lame-work-with-auto-1.12.patch']
+    patches = ['lame/0001-Remove-decoder-symbols.patch']
 
     files_libs = ['libmp3lame']
     files_bins = ['lame']
