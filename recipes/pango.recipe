@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.40.3'
+    version = '1.40.14'
     stype = SourceType.TARBALL
     url = 'http://ftp.acc.umu.se/pub/GNOME/sources/pango/1.40/pango-%(version)s.tar.xz'
     autoreconf = True
