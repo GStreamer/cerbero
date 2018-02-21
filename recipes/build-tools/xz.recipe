@@ -3,10 +3,10 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'xz'
-    version = '5.2.2'
+    version = '5.2.3'
     licenses = [License.GPLv3]
     stype = SourceType.TARBALL
-    url = 'http://tukaani.org/xz/xz-5.2.2.tar.bz2'
+    url = 'http://tukaani.org/xz/xz-%(version)s.tar.bz2'
 
     files_bins = ['xz']
 
