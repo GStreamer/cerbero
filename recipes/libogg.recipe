@@ -19,6 +19,6 @@ class Recipe(recipe.Recipe):
             if Architecture.is_arm(self.config.target_arch):
                 # These optimizations make the linker think the object file is not
                 # for the arm architecture
-                shell.replace (os.path.join(self.build_dir, 'configure.in'),
+                shell.replace (os.path.join(self.build_dir, 'configure.ac'),
                                {'-O4': '-O2'})
         super(recipe.Recipe, self).configure()
