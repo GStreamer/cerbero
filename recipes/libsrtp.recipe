@@ -6,7 +6,7 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
-    version = '1.5.4'
+    version = '1.6.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     licenses = [License.BSD_like]
