@@ -4,10 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'fribidi'
     version = '0.19.7'
     stype = SourceType.TARBALL
-    # Upstream tarballs have changed
-    # See https://github.com/fribidi/fribidi/issues/28
-    #url = 'http://fribidi.org/download/fribidi-%(version)s.tar.bz2'
-    url = 'https://gstreamer.freedesktop.org/data/src/mirror/fribidi-0.19.7.tar.bz2'
+    url = 'https://github.com/fribidi/fribidi/releases/download/{0}/fribidi-{0}.tar.bz2'.format(version)
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     deps = ['glib']
