@@ -3,14 +3,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'libass'
-    version = '0.13.4'
+    version = '0.13.7'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.gz'.format(version)
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
     make_check = None
     autoreconf = True
-    patches = ['libass/0001-directwrite-drop-SAL-annotations.patch']
+    patches = ['libass/0001-define-IID_Unknown.patch']
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
