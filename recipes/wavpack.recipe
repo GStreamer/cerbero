@@ -4,9 +4,9 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'wavpack'
-    version = '5.0.0'
+    version = '5.1.0'
     stype = SourceType.TARBALL
-    url = 'https://github.com/dbry/WavPack/archive/5.0.0.tar.gz'
+    url = 'https://github.com/dbry/WavPack/archive/%(version)s.tar.gz'
     tarball_dirname = 'WavPack-%(version)s'
     licenses = [License.BSD_like]
     autoreconf = True
