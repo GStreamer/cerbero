@@ -3,7 +3,7 @@
 
 class Recipe(recipe.Recipe):
     name = 'opus'
-    version = '1.1.3'
+    version = '1.2.1'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'http://downloads.xiph.org/releases/{0}/{0}-{1}.tar.gz'.format(name, version)
