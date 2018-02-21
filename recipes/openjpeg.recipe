@@ -1,29 +1,24 @@
+ # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
 import shutil
 
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
-    version = '2.1.0'
+    version = '2.3.0'
     name = 'openjpeg'
     licenses = [License.BSD]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    url = 'http://downloads.sourceforge.net/project/openjpeg.mirror/2.1.0/openjpeg-2.1.0.tar.gz'
+    url = 'https://github.com/uclouvain/openjpeg/archive/v%(version)s.tar.gz'
     configure_options = ' -DBUILD_CODEC:bool=off -DBUILD_PKGCONFIG_FILES:bool=on '
-    patches = ['openjpeg/0001-Build-shared-and-static-library.patch',
-               'openjpeg/0002-Set-INSTALL_NAME_DIR.patch']
+    patches = ['openjpeg/0002-Set-INSTALL_NAME_DIR.patch']
 
     files_libs = ['libopenjp2']
-    files_devel = ['include/openjpeg-2.1/openjpeg.h',
-                   'include/openjpeg-2.1/opj_stdint.h',
-                   'include/openjpeg-2.1/opj_config.h',
+    files_devel = ['include/openjpeg-2.3/openjpeg.h',
+                   'include/openjpeg-2.3/opj_stdint.h',
+                   'include/openjpeg-2.3/opj_config.h',
                    'lib/pkgconfig/libopenjp2.pc']
-
-    def install(self):
-        super(recipe.Recipe, self).install()
-        shutil.move(
-                os.path.join(self.config.prefix, 'lib', 'libopenjp2_static.a'),
-                os.path.join(self.config.prefix, 'lib', 'libopenjp2.a'))
 
     def post_install(self):
         deps = ['-lm']
