@@ -3,16 +3,13 @@
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.9.4'
+    version = '2.9.7'
     stype = SourceType.TARBALL
-    url = 'http://xmlsoft.org/sources/libxml2-2.9.4.tar.gz'
+    url = 'http://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     autoreconf = True
-    patches = ['libxml2/0001-Enable-windows-cross-compilation.patch',
-               'libxml2/0002-makefiles-disable-tests.patch',
-               'libxml2/0003-configure-fix-python-dir-prefix.patch',
-               ]
+    patches = ['libxml2/0003-configure-fix-python-dir-prefix.patch']
 
     files_libs = ['libxml2']
     files_devel = ['include/libxml2', 'lib/xml2Conf.sh', 'bin/xml2-config',
@@ -20,7 +17,9 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options = '--without-threads'
+            if self.config.cross_compiling():
+                self.configure_options = '--with-python=no'
+            self.configure_options += ' --without-threads'
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options = '--with-python=no'
         elif self.config.target_platform == Platform.IOS:
