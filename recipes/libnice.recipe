@@ -13,7 +13,9 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     patches = [
         "libnice/0001-Fix-build-with-android-NDK-r16.patch",
-        "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch"
+        "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch",
+        "libnice/0001-agent-Redefine-socket-error-messages-for-windows.patch",
+        "libnice/0001-stun-Also-rename-windows-specific-function.patch"
     ]
 
     files_bins = ['stunbdc', 'stund']
