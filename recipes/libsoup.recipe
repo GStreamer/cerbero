@@ -3,17 +3,16 @@
 
 class Recipe(recipe.Recipe):
     name = 'libsoup'
-    version = '2.56.0'
+    version = '2.60.3'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/libsoup/2.56/libsoup-2.56.0.tar.xz'
+    url = 'http://ftp.gnome.org/pub/gnome/sources/libsoup/2.60/libsoup-%(version)s.tar.xz'
     autoreconf = True
     autoreconf_sh = 'gtkdocize && intltoolize --automake --copy && autoreconf --force --install --verbose'
-    configure_options = '--without-gnome --disable-more-warnings --disable-vala --with-gssapi=no'
+    configure_options = '--without-gnome --disable-more-warnings --disable-vala --with-gssapi=no \
+                         --disable-always-build-tests --disable-glibtest --disable-installed-tests'
     deps = ['libxml2', 'glib', 'glib-networking']
-    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
-               'libsoup/0002-Don-t-build-tests.patch',
-           ]
+    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch']
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
