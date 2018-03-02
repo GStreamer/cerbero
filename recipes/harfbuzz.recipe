@@ -13,3 +13,12 @@ class Recipe(recipe.Recipe):
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
+                # FIXME: HACK to make projects using mmap compile with NDK 16
+                # we fail to compile with -D_FILE_OFFSET_BITS=64
+                # because we don't use clang and we use a platform < 21 (Lollipop)
+                # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
+                self.new_env['ac_cv_func_mmap'] = 'no'
