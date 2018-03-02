@@ -48,6 +48,10 @@ class Recipe(custom.GStreamer):
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
                 libavextraconf += " --extra-cflags=\'-mincoming-stack-boundary=4\'"
+            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+                # Fails to link into an android App
+                # https://github.com/android-ndk/ndk/issues/337
+                libavextraconf += " --disable-neon"
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         elif self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
