@@ -138,6 +138,10 @@ class Config (object):
                 # config again in the universal config.
                 for arch, config_file in self.universal_archs.items():
                     arch_config[arch] = self._copy(arch)
+                    # Allow the config to detect whether this config is
+                    # running under a universal setup and some
+                    # paths/configuration need to change
+                    arch_config[arch].variants += ['universal']
                     if config_file is not None:
                         # This works because the override config files are
                         # fairly light. Things break if they are more complex
