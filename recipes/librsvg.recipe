@@ -21,8 +21,8 @@ class Recipe(recipe.Recipe):
     configure_options = ' --disable-pixbuf-loader --without-gtk3 '
 
     patches = ['librsvg/option-enable-disable-gtk.patch',
-               'librsvg/0001-Use-ACLOCAL_FLAGS.patch'
-    ]
+               'librsvg/0001-Use-ACLOCAL_FLAGS.patch',
+               'librsvg/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
