@@ -166,7 +166,15 @@ shutil.rmtree = rmtree
 
 # use cURL to download instead of wget
 
-if sys.platform.startswith('darwin'):
-    import cerbero.utils.shell as cshell
-    del cshell.download
-    cshell.download = cshell.download_curl
+import cerbero.utils.shell
+# wget shipped with msys fails with an SSL error on github URLs
+# https://githubengineering.com/crypto-removal-notice/
+if not sys.platform.startswith('win') and cerbero.utils.shell.which('wget'):
+    cerbero.utils.shell.download = cerbero.utils.shell.download_wget
+elif cerbero.utils.shell.which('curl'):
+    cerbero.utils.shell.download = cerbero.utils.shell.download_curl
+else:
+    # This is a very basic implementation, replace this with the requests
+    # module or something else when porting to Python 3. We can try to remove
+    # our dependency on wget/curl.
+    cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
