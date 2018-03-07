@@ -17,8 +17,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            if self.config.cross_compiling():
-                self.configure_options = '--with-python=no'
+            self.configure_options = '--with-python=no'
             self.configure_options += ' --without-threads'
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options = '--with-python=no'
