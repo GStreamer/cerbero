@@ -28,6 +28,7 @@ import time
 import glob
 import shutil
 import hashlib
+import urllib2
 
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
@@ -210,8 +211,7 @@ def unpack(filepath, output_dir):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-
-def download(url, destination=None, recursive=False, check_cert=True, overwrite=False):
+def download_wget(url, destination=None, recursive=False, check_cert=True, overwrite=False):
     '''
     Downloads a file with wget
 
@@ -251,6 +251,50 @@ def download(url, destination=None, recursive=False, check_cert=True, overwrite=
             if os.path.exists(destination):
                 os.remove(destination)
             raise e
+
+
+def download_urllib2(url, destination=None, recursive=False, check_cert=False, overwrite=False):
+    '''
+    Download a file with urllib2, which does not rely on external programs
+
+    @param url: url to download
+    @type: str
+    @param destination: destination where the file will be saved
+    @type destination: str
+    '''
+    if recursive:
+        logging.warn("Recursive download is not implemented with urllib2, trying wget")
+        download_wget(url, destination, recursive, check_cert, overwrite)
+        return
+    ctx = None
+    if not check_cert:
+        import ssl
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    # This is roughly what wget and curl do
+    if not destination:
+        destination = os.path.basename(url)
+
+    if not overwrite and os.path.exists(destination):
+        if LOGFILE is None:
+            logging.info("File %s already downloaded." % destination)
+        return
+    if not os.path.exists(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination))
+    if LOGFILE:
+        LOGFILE.write("Downloading %s\n" % url)
+    else:
+        logging.info("Downloading %s", url)
+    try:
+        logging.info(destination)
+        with open(destination, 'wb') as d:
+            f = urllib2.urlopen(url, context=ctx)
+            d.write(f.read())
+    except urllib2.HTTPError, e:
+        if os.path.exists(destination):
+            os.remove(destination)
+        raise e
 
 
 def download_curl(url, destination=None, recursive=False, check_cert=True, overwrite=False):
