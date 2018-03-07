@@ -12,7 +12,7 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.13.0.1'
+    version = '1.13.90'
     commit = 'origin/master'
 
 def list_gstreamer_1_0_plugins_by_category(config):
