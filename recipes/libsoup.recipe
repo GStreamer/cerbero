@@ -12,7 +12,8 @@ class Recipe(recipe.Recipe):
     configure_options = '--without-gnome --disable-more-warnings --disable-vala --with-gssapi=no \
                          --disable-always-build-tests --disable-glibtest --disable-installed-tests'
     deps = ['libxml2', 'glib', 'glib-networking']
-    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch']
+    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
+               'libsoup/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
