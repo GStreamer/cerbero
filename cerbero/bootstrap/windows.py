@@ -32,6 +32,10 @@ GCC_VERSION = '4.7.3'
 MINGW_DOWNLOAD_SOURCE = 'http://gstreamer.freedesktop.org/data/cerbero/toolchain/windows'
 MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
 
+# MinGW Perl
+PERL_VERSION = '5.24.0'
+MINGW_PERL_TPL = 'https://sourceforge.net/projects/perl-mingw/files/{0}/perl-{0}-mingw32.zip'
+
 # Extra dependencies
 MINGWGET_DEPS = ['msys-wget', 'msys-flex', 'msys-bison', 'msys-perl']
 GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
@@ -50,6 +54,7 @@ class WindowsBootstrapper(BootstrapperBase):
                     "endings conversion. You can fix it running:\n"
                     "$git config core.autocrlf false")
         self.prefix = self.config.toolchain_prefix
+        self.perl_prefix = self.config.mingw_perl_prefix
         self.platform = self.config.target_platform
         self.arch = self.config.target_arch
         if self.arch == Architecture.X86:
@@ -60,7 +65,6 @@ class WindowsBootstrapper(BootstrapperBase):
 
         self.check_dirs()
         if self.platform == Platform.WINDOWS:
-            # For wget
             self.install_mingwget_deps()
         self.install_mingw()
         self.remove_mingw_cpp()
@@ -69,8 +73,11 @@ class WindowsBootstrapper(BootstrapperBase):
             # After mingw is beeing installed
             self.install_bin_deps()
         self.install_gl_headers()
+        self.install_openssl_mingw_perl()
 
     def check_dirs(self):
+        if not os.path.exists(self.perl_prefix):
+            os.makedirs(self.perl_prefix)
         if not os.path.exists(self.prefix):
             os.makedirs(self.prefix)
         etc_path = os.path.join(self.config.prefix, 'etc')
@@ -94,6 +101,28 @@ class WindowsBootstrapper(BootstrapperBase):
                 shutil.rmtree('/mingw/lib')
             except Exception:
                 pass
+
+    def install_openssl_mingw_perl(self):
+        '''
+        This perl is only used by openssl; we can't use it everywhere else
+        because it can't find msys tools, and so perl scripts like autom4te
+        fail to run, f.ex., m4. Lucky for us, openssl doesn't use those.
+        '''
+        url = MINGW_PERL_TPL.format(PERL_VERSION)
+        tarfile = os.path.join(self.perl_prefix, os.path.basename(url))
+        tarfile = os.path.abspath(tarfile)
+        shell.download(url, tarfile, check_cert=False)
+        try:
+            shell.unpack(tarfile, self.perl_prefix)
+        except Exception:
+            pass
+        # Move perl installation from perl-5.xx.y to perl
+        perldir = os.path.join(self.perl_prefix, 'perl-' + PERL_VERSION)
+        for d in os.listdir(perldir):
+            dest = os.path.join(self.perl_prefix, d)
+            if os.path.exists(dest):
+                shutil.rmtree(dest)
+            shutil.move(os.path.join(perldir, d), self.perl_prefix)
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:

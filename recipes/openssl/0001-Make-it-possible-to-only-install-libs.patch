@@ -1,0 +1,61 @@
+From b0ea7aec6223be1480138bbb9f7e06d722881e30 Mon Sep 17 00:00:00 2001
+From: Arun Raghavan <arun@centricular.com>
+Date: Tue, 10 Mar 2015 20:39:51 +0530
+Subject: [PATCH] Make it possible to only install libs
+
+This is particularly uesful for places where we don't care about the
+tools, tests, etc.
+---
+ Makefile.org | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile.org b/Makefile.org
+index b7a3f96..33e770a 100644
+--- a/Makefile.org
++++ b/Makefile.org
+@@ -136,7 +136,9 @@ FIPSCANLIB=
+ 
+ BASEADDR=
+ 
+-DIRS=   crypto ssl engines apps test tools
++LIBDIRS= crypto ssl engines
++EXEDIRS= apps test tools
++DIRS= $(LIBDIRS) $(EXEDIRS)
+ ENGDIRS= ccgost
+ SHLIBDIRS= crypto ssl
+ 
+@@ -259,7 +261,7 @@ BUILD_CMD=  if [ -d "$$dir" ]; then \
+ 		$(CLEARENV) && $(MAKE) -e $(BUILDENV) TOP=.. DIR=$$dir $$target \
+ 	    ) || exit 1; \
+ 	    fi
+-RECURSIVE_BUILD_CMD=for dir in $(DIRS); do $(BUILD_CMD); done
++RECURSIVE_BUILD_CMD=for dir in $${DIRS:-$(DIRS)}; do $(BUILD_CMD); done
+ BUILD_ONE_CMD=\
+ 	if expr " $(DIRS) " : ".* $$dir " >/dev/null 2>&1; then \
+ 		$(BUILD_CMD); \
+@@ -538,7 +540,13 @@ dist_pem_h:
+ 
+ install: all install_docs install_sw
+ 
+-install_sw:
++install_sw: install_libs
++	@set -e; target=install; DIRS="$(EXEDIRS)"; $(RECURSIVE_BUILD_CMD)
++
++install_libs: install_common
++	@set -e; target=install; DIRS="$(LIBDIRS)"; $(RECURSIVE_BUILD_CMD)
++
++install_common:
+ 	@$(PERL) $(TOP)/util/mkdir-p.pl $(INSTALL_PREFIX)$(INSTALLTOP)/bin \
+ 		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR) \
+ 		$(INSTALL_PREFIX)$(INSTALLTOP)/$(LIBDIR)/engines \
+@@ -552,7 +560,6 @@ install_sw:
+ 	(cp $$i $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i; \
+ 	chmod 644 $(INSTALL_PREFIX)$(INSTALLTOP)/include/openssl/$$i ); \
+ 	done;
+-	@set -e; target=install; $(RECURSIVE_BUILD_CMD)
+ 	@set -e; liblist="$(LIBS)"; for i in $$liblist ;\
+ 	do \
+ 		if [ -f "$$i" ]; then \
+-- 
+2.1.0
+

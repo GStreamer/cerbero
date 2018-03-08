@@ -21,6 +21,7 @@ import subprocess
 import shlex
 import sys
 import os
+import re
 import tarfile
 import zipfile
 import tempfile
@@ -29,6 +30,7 @@ import glob
 import shutil
 import hashlib
 import urllib2
+from distutils.version import StrictVersion
 
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
@@ -496,3 +498,14 @@ def which(pgm, path=None):
                 pext = p + ext
                 if os.path.exists(pext):
                     return pext
+
+def check_perl_version(needed):
+    try:
+        out = check_call(['perl', '--version'])
+    except FatalError:
+        return None, None
+    m = re.search('v[0-9]+\.[0-9]+(\.[0-9]+)?', out)
+    if not m:
+        raise FatalError('Could not detect perl version')
+    newer = StrictVersion(m.group()[1:]) >= StrictVersion(needed)
+    return which('perl'), newer

@@ -223,6 +223,8 @@ class License:
             'LibPNG License')
     MIT = LicenseDescription('MIT',
             'MIT License')
+    OPENSSL = LicenseDescription('OpenSSL',
+            'OpenSSL License')
     PUBLIC_DOMAIN = LicenseDescription('PublicDomain',
             'Public domain')
     Proprietary = LicenseDescription('Proprietary',

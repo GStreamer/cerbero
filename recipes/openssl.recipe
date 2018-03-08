@@ -1,0 +1,125 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.build.build import modify_environment
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.utils import shell, messages
+from cerbero.errors import FatalError
+
+class Recipe(recipe.Recipe):
+    name = 'openssl'
+    version = '1.1.0g'
+    licenses = [License.BSD_like]
+    stype = SourceType.TARBALL
+    url = 'ftp://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
+    deps = ['zlib']
+    # Parallel make fails randomly; probably races
+    allow_parallel_build = False
+    patches = [name + '/0001-Configure-add-support-for-sysroot-isysroot-isystem.patch']
+
+    files_bins = ['openssl']
+    files_libs = ['libcrypto', 'libssl']
+    files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc',
+                   'lib/pkgconfig/libssl.pc', 'lib/pkgconfig/libcrypto.pc']
+
+    def prepare(self):
+        # map platforms
+        if self.config.target_platform == Platform.IOS:
+            if self.config.target_arch == Architecture.ARMv7:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.ARMv7S:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'BSD-generic32'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'BSD-generic64'
+            elif self.config.target_arch == Architecture.ARM64:
+                self.openssl_platform = 'BSD-generic64'
+            else:
+                raise NotImplementedError
+        elif self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.ARM:
+                self.openssl_platform = 'android-armeabi'
+            elif self.config.target_arch == Architecture.ARMv7:
+                self.openssl_platform = 'android-armeabi'
+            elif self.config.target_arch == Architecture.ARM64:
+                self.openssl_platform = 'android64-aarch64'
+            elif self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'android-x86'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'android64'
+            else:
+                raise NotImplementedError
+
+            self.make += ' CROSS_SYSROOT="{0}"'.format(self.config.sysroot)
+        elif self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'darwin-i386-cc'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'darwin64-x86_64-cc'
+            else:
+                raise NotImplementedError
+        elif self.config.target_platform == Platform.LINUX:
+            if self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'linux-elf'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'linux-x86_64'
+            else:
+                raise NotImplementedError
+        elif self.config.target_platform == Platform.WINDOWS:
+            if self.config.target_arch == Architecture.X86:
+                self.openssl_platform = 'mingw'
+            elif self.config.target_arch == Architecture.X86_64:
+                self.openssl_platform = 'mingw64'
+            else:
+                raise NotImplementedError
+        # CFLAG is no typo!
+        self.make += ' LDFLAGS+="$LDFLAGS -fPIC" CFLAG+="$CFLAGS -fPIC -DOPENSSL_PIC"'
+        self.make_install = 'make install_sw'
+
+        # We probably don't need and can't use the tools on these platforms
+        if self.config.target_platform == Platform.IOS or \
+            self.config.target_platform == Platform.ANDROID:
+            self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
+            self.make_install = 'make install_dev'
+
+    def strip_unknown_args(self, args):
+        unknown = ['-no-canonical-prefixes']
+        return ' '.join([a for a in args.split(' ') if a not in unknown])
+
+    @modify_environment
+    def configure(self):
+        if self.config.platform == Platform.WINDOWS:
+            # Msys ships with a too-old perl, so we modify PATH to use the
+            # mingw-perl that was downloaded and installed by bootstrap.
+            openssl_path = os.environ['CERBERO_OPENSSL_PERL_PATH']
+            os.environ['PATH'] =  openssl_path + ';' + os.environ['PATH']
+            perl, newer = shell.check_perl_version('5.10.0')
+            m = 'please run bootstrap again'
+            if newer is None:
+                raise FatalError('Perl not found, ' + m)
+            if newer is False:
+                raise FatalError('Configured Perl {!r} is too old, {}'
+                                 ''.format(perl, m))
+        # OpenSSL guesses the libdir incorrectly on x86_64
+        config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
+            ' --libdir=lib' + self.config.lib_suffix + ' ' + \
+            self.strip_unknown_args(os.environ.get('CFLAGS', '')) + ' ' + \
+            self.strip_unknown_args(os.environ.get('LDFLAGS', ''))
+        if self.config.target_platform == Platform.IOS:
+            config_sh += ' no-shared no-dso '
+        else:
+            config_sh += ' shared '
+        shell.call(config_sh + self.openssl_platform, self.build_dir)
+
+    def post_install(self):
+        # XXX: Don't forget to update this when the soname is bumped!
+        # We don't build shared libraries on iOS as the build system
+        # of openssl is broken and iOS does not support them anyway.
+        if self.config.target_platform != Platform.IOS:
+            libtool_la = LibtoolLibrary('ssl', 1, 1, 0, self.config.libdir,
+                                        self.config.target_platform,
+                                        deps=['crypto'])
+            libtool_la.save()
+            libtool_la = LibtoolLibrary('crypto', 1, 1, 0, self.config.libdir,
+                                        self.config.target_platform)
+            libtool_la.save()

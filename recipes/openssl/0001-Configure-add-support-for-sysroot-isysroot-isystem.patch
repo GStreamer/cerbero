@@ -1,0 +1,51 @@
+From fe6af0f9c448ad7c1e2c3ab777079e38b4a8e34c Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Thu, 22 Feb 2018 21:59:33 +1100
+Subject: [PATCH] Configure: add support for --sysroot/-isysroot/-isystem
+
+---
+ Configure | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/Configure b/Configure
+index d644963..933dd91 100755
+--- a/Configure
++++ b/Configure
+@@ -678,6 +678,34 @@ while (@argvcopy)
+ 		$config{fips} = 1;
+ 		$nofipscanistercheck = 1;
+ 		}
++	elsif (/^--sysroot=(.*)$/)
++		{
++		$_ =~ s/%([0-9a-f]{1,2})/chr(hex($1))/gei;
++		$user_cflags.=" --sysroot=".$1;
++		}
++	elsif (/^--sysroot$/)
++		{
++		my $sysroot = shift(@argvcopy) || "";
++		$user_cflags.=" --sysroot ".$sysroot;
++		}
++	elsif (/^-isysroot=(.*)$/)
++		{
++		$user_cflags.=" -isysroot=".$1;
++		}
++	elsif (/^-isysroot$/)
++		{
++		my $isysroot = shift(@argvcopy) || "";
++		$user_cflags.=" -isysroot ".$isysroot;
++		}
++	elsif (/^-isystem=(.*)$/)
++		{
++		$user_cflags.=" -isystem=".$1;
++		}
++	elsif (/^-isystem$/)
++		{
++		my $isystem = shift(@argvcopy) || "";
++		$user_cflags.=" -isystem ".$isystem;
++		}
+ 	elsif (/^[-+]/)
+ 		{
+ 		if (/^--prefix=(.*)$/)
+-- 
+2.16.1
+
