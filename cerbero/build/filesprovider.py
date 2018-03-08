@@ -32,10 +32,31 @@ def find_shlib_regex(libname, prefix, libdir, ext, regex):
     found = glob.glob(os.path.join(prefix, fpath))
     # Find which of those actually match via an exact regex
     # Ideally Python should provide a function for regex file 'globbing'
+    matches = []
     for each in found:
         fname = os.path.basename(each)
         if re.match(regex.format(re.escape(libname)), fname):
-            yield os.path.join(libdir, fname)
+            matches.append(os.path.join(libdir, fname))
+    return matches
+
+def find_dll_implib(libname, prefix, libdir, ext, regex):
+    implibdir = 'lib'
+    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib']
+    dlltool = os.environ.get('DLLTOOL', None)
+    if not dlltool:
+        raise FatalError('dlltool was not found, check cerbero configuration')
+    for implib in implibs:
+        path = os.path.join(prefix, implibdir, implib)
+        if not os.path.exists(path):
+            continue
+        try:
+            dllname = shell.check_call([dlltool, '-I', path])
+        except FatalError:
+            continue
+        dllname = dllname.strip()
+        return [os.path.join(libdir, dllname)]
+    return []
+
 
 def flatten_files_list(all_files):
     """
@@ -66,10 +87,10 @@ class FilesProvider(object):
     DEVEL_CAT = 'devel'
     LANG_CAT = 'lang'
     TYPELIB_CAT = 'typelibs'
-    # Usually DLLs have 0 or 1 version components (just the major version), but
-    # some packages like Nettle add 2, so we check for upto 2. We don't use
-    # {m,n} here because we want to capture all the matches.
-    _DLL_REGEX = r'^(lib)?{}(-[0-9]+)?(-[0-9]+)?\.dll$'
+    # DLLs can be named anything, there may not be any correlation between that
+    # and the import library (which is actually used while linking), so don't
+    # try to use a regex. Instead, get the dll name from the import .
+    _DLL_REGEX = None
     # UNIX shared libraries can have between 0 and 3 version components:
     # major, minor, micro. We don't use {m,n} here because we want to capture
     # all the matches.
@@ -238,23 +259,30 @@ class FilesProvider(object):
         '''
         Search libraries in the prefix. Unfortunately the filename might vary
         depending on the platform and we need to match the library name and
-        it's extension. There is a corner case on windows where a libray might
-        be named foo.dll, foo-1.dll, libfoo.dll, or libfoo-1.dll
+        it's extension. There is a corner case on windows where the DLL might
+        have any name, so we search for the .lib or .dll.a import library
+        and get the DLL name from that.
 
         NOTE: Unlike other searchfuncs which return lists, this returns a dict
-              with a mapping from the libname to the actual on-disk file. We use
-              the libname (the key) in gen_library_file so we don't have to
-              guess (sometimes incorrectly) based on the dll filename.
+              with a mapping from the libname to a list of actual on-disk
+              files. We use the libname (the key) in gen_library_file so we
+              don't have to guess (incorrectly) based on the dll filename.
         '''
         libdir = self.extensions['sdir']
         libext = self.extensions['srext']
         libregex = self.extensions['sregex']
+        if libregex:
+            find_func = find_shlib_regex
+        elif self.config.target_platform == Platform.WINDOWS:
+            find_func = find_dll_implib
+        else:
+            raise AssertionError
 
         libsmatch = {}
         notfound = []
         for f in files:
-            libsmatch[f] = list(find_shlib_regex(f[3:], self.config.prefix,
-                                                 libdir, libext, libregex))
+            libsmatch[f] = find_func(f[3:], self.config.prefix, libdir, libext,
+                                     libregex)
             if not libsmatch[f]:
                 notfound.append(f)
 
