@@ -368,6 +368,8 @@ class Recipe(custom.GStreamer):
 			# See also, -static and gstreamer-1.0-effects.package
 			self.deps.remove('webrtc-audio-processing')
 			self.files_plugins_effects.remove('lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s')
+			self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.a')
+			self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.la')
 
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc '
