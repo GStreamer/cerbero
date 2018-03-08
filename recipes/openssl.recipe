@@ -109,6 +109,11 @@ class Recipe(recipe.Recipe):
             config_sh += ' no-shared no-dso '
         else:
             config_sh += ' shared '
+        # ssl3 is needed by sphinx which is used by gst-validate, which tries
+        # to use this libssl and fails with undefined symbols. md2 is needed by
+        # librpmio.so.8, which is used during package generation on Fedora.
+        if self.config.target_platform == Platform.LINUX:
+            config_sh += ' enable-ssl3 enable-ssl3-method enable-md2 '
         shell.call(config_sh + self.openssl_platform, self.build_dir)
 
     def post_install(self):
