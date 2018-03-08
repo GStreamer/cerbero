@@ -17,18 +17,18 @@ class Recipe(custom.GStreamer):
         --disable-pvr --disable-sdl --disable-sndfile \
         --disable-teletextdec --disable-timidity \
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
-        --disable-xvid --disable-zbar --disable-sdi'
+        --disable-xvid --disable-zbar --disable-sdi --disable-srt'
     # Explicitly enable plugins
     configure_options += ' --enable-bz2 --enable-assrender \
         --enable-faad --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
         --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
-        --enable-decklink --disable-srt'
+        --enable-decklink --enable-webrtc'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
-            'libsrtp', 'libdca', 'libmms', 'libdvdnav',
+            'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa']
     use_system_libs = True
@@ -236,6 +236,7 @@ class Recipe(custom.GStreamer):
     files_plugins_net_devel = [
              'lib/gstreamer-1.0/libgstsdpelem.a', 'lib/gstreamer-1.0/libgstsdpelem.la',
              'lib/gstreamer-1.0/libgstsrtp.a', 'lib/gstreamer-1.0/libgstsrtp.la',
+             'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
     ]
 
     files_plugins_net_restricted = [
