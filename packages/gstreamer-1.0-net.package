@@ -11,6 +11,7 @@ class Package(custom.GStreamer, package.Package):
     deps = ['gstreamer-1.0-core', 'base-crypto']
 
     files = ['libsoup:libs', 'libsrtp:libs', 'libnice:libs', 'libnice:plugins_net',
+            'openssl:libs',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
             'gst-rtsp-server-1.0:libs:typelibs:plugins_net']
