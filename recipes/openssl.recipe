@@ -12,9 +12,6 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'ftp://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
     deps = ['zlib']
-    # Parallel make fails randomly; probably races
-    allow_parallel_build = False
-    patches = [name + '/0001-Configure-add-support-for-sysroot-isysroot-isystem.patch']
 
     files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
@@ -72,8 +69,12 @@ class Recipe(recipe.Recipe):
                 self.openssl_platform = 'mingw64'
             else:
                 raise NotImplementedError
-        # CFLAG is no typo!
-        self.make += ' LDFLAGS+="$LDFLAGS -fPIC" CFLAG+="$CFLAGS -fPIC -DOPENSSL_PIC"'
+        # NOTE: CFLAG and LDFLAG are not typos!
+        # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
+        # build, and we can't pass arguments via Configure because on Darwin,
+        # Configure reads the `-arch x86_64` as meaning that you want to use
+        # `x86_64` as the platform, and errors out about a redefined platform.
+        self.make += ' CC="$CC $CFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
         self.make_install = 'make install_sw'
 
         # We probably don't need and can't use the tools on these platforms
@@ -81,10 +82,6 @@ class Recipe(recipe.Recipe):
             self.config.target_platform == Platform.ANDROID:
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
             self.make_install = 'make install_dev'
-
-    def strip_unknown_args(self, args):
-        unknown = ['-no-canonical-prefixes']
-        return ' '.join([a for a in args.split(' ') if a not in unknown])
 
     @modify_environment
     def configure(self):
@@ -102,9 +99,7 @@ class Recipe(recipe.Recipe):
                                  ''.format(perl, m))
         # OpenSSL guesses the libdir incorrectly on x86_64
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
-            ' --libdir=lib' + self.config.lib_suffix + ' ' + \
-            self.strip_unknown_args(os.environ.get('CFLAGS', '')) + ' ' + \
-            self.strip_unknown_args(os.environ.get('LDFLAGS', ''))
+            ' --libdir=lib' + self.config.lib_suffix + ' '
         if self.config.target_platform == Platform.IOS:
             config_sh += ' no-shared no-dso '
         else:
