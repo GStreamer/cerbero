@@ -286,7 +286,10 @@ class FilesProvider(object):
             if not libsmatch[f]:
                 notfound.append(f)
 
-        if notfound:
+        # It's ok if shared libraries aren't found for iOS, we only want the
+        # static libraries. In fact, all recipes should only build static on
+        # iOS, but most don't.
+        if notfound and self.config.target_platform != Platform.IOS:
             msg = "Some libraries weren't found while searching!"
             for each in notfound:
                 msg += '\n' + each
