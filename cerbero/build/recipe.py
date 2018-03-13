@@ -345,7 +345,6 @@ class UniversalRecipe(object):
             try:
                 stepfunc()
             except FatalError, e:
-                e.arch = arch
                 raise e
             return
 
