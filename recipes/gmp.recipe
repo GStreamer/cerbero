@@ -42,13 +42,20 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
-            src = os.path.join(self.config.prefix, 'lib', 'libgmp-10.dll')
-            dll = os.path.join(self.config.prefix, 'bin', 'libgmp-10.dll')
+            dllname = 'libgmp-10.dll'
+
+            src = os.path.join(self.config.prefix, 'lib', dllname)
+            dll = os.path.join(self.config.prefix, 'bin', dllname)
             dll_a = os.path.join(self.config.prefix, 'lib', 'libgmp.dll.a')
+            defs_file = os.path.join(self.build_dir, '.libs', 'libgmp-3.dll.def')
+            dlltool = os.environ.get('DLLTOOL', None)
+            if not dlltool:
+              raise FatalError('dlltool was not found, check cerbero configuration')
+
             if os.path.exists(dll_a):
                 os.remove(dll_a)
+            shell.check_call([dlltool, '-D', dllname, '-d', defs_file, '-l', dll_a])
             shutil.copy(src, dll)
-            shutil.copy(src, dll_a)
             gmp_la = os.path.join(self.config.prefix, 'lib', 'libgmp.la')
             shell.replace(gmp_la, {'libgmp.lib': 'libgmp.dll.a'})
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
