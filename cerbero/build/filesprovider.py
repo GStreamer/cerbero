@@ -54,7 +54,10 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
         except FatalError:
             continue
         dllname = dllname.strip()
+        if dllname == '':
+            continue
         return [os.path.join(libdir, dllname)]
+    m.warning("No dllname from implibs {}".format(implibs))
     return []
 
 
