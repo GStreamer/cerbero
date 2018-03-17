@@ -12,8 +12,8 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.13.91'
-    commit = '1.13.91'
+    version = '1.13.91.1'
+    commit = 'origin/master'
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
