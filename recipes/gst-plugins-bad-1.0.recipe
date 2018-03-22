@@ -81,6 +81,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstinterlace%(mext)s',
              'lib/gstreamer-1.0/libgstivtc%(mext)s',
              'lib/gstreamer-1.0/libgstlegacyrawparse%(mext)s',
+             'lib/gstreamer-1.0/libgstproxy%(mext)s',
              'lib/gstreamer-1.0/libgstremovesilence%(mext)s',
              'lib/gstreamer-1.0/libgstsegmentclip%(mext)s',
              'lib/gstreamer-1.0/libgstsmooth%(mext)s',
