@@ -66,12 +66,18 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
     path = os.path.join(prefix, libdir, dllname)
     if os.path.exists(path):
         return [os.path.join(libdir, dllname)]
+    # libvpx's build system does not build DLLs on Windows, so it's expected
+    # that the DLL can't be found. Similar code exists in _search_libraries()
+    # XXX: Remove this when libvpx is ported to Meson.
+    if libname == 'vpx':
+        return []
     if len(implib_notfound) == len(implibs):
-        m.warning("No implibs found for library name {}".format(libname))
+        mlog.warning("No import libraries found for {!r}".format(libname))
     else:
-        m.warning("No dllname found from implibs {}".format(implibs))
+        implibs = ', '.join(set(implibs) - set(implib_notfound))
+        mlog.warning("No dllname found from implibs: {}".format(implibs))
+    # This will trigger an error in _search_libraries()
     return []
-
 
 def flatten_files_list(all_files):
     """
@@ -298,7 +304,7 @@ class FilesProvider(object):
         for f in files:
             libsmatch[f] = find_func(f[3:], self.config.prefix, libdir, libext,
                                      libregex)
-            if not libsmatch[f]:
+            if not libsmatch[f] and f != 'libvpx':
                 notfound.append(f)
 
         # It's ok if shared libraries aren't found for iOS, we only want the
@@ -308,7 +314,7 @@ class FilesProvider(object):
             msg = "Some libraries weren't found while searching!"
             for each in notfound:
                 msg += '\n' + each
-            m.warning(msg)
+            raise FatalError(msg)
         return libsmatch
 
     def _pyfile_get_name(self, f):
