@@ -45,9 +45,11 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
     dlltool = os.environ.get('DLLTOOL', None)
     if not dlltool:
         raise FatalError('dlltool was not found, check cerbero configuration')
+    implib_notfound = []
     for implib in implibs:
         path = os.path.join(prefix, implibdir, implib)
         if not os.path.exists(path):
+            implib_notfound.append(implib)
             continue
         try:
             dllname = shell.check_call([dlltool, '-I', path])
@@ -57,7 +59,17 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
         if dllname == '':
             continue
         return [os.path.join(libdir, dllname)]
-    m.warning("No dllname from implibs {}".format(implibs))
+    # If import libraries aren't found, look for a DLL by exactly the specified
+    # name. This is to cover cases like libgcc_s_sjlj-1.dll which don't have an
+    # import library since they're only used at runtime.
+    dllname = 'lib{}.dll'.format(libname)
+    path = os.path.join(prefix, libdir, dllname)
+    if os.path.exists(path):
+        return [os.path.join(libdir, dllname)]
+    if len(implib_notfound) == len(implibs):
+        m.warning("No implibs found for library name {}".format(libname))
+    else:
+        m.warning("No dllname found from implibs {}".format(implibs))
     return []
 
 
