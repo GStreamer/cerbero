@@ -24,6 +24,7 @@ import inspect
 from cerbero.config import Platform
 from cerbero.utils import shell
 from cerbero.utils import messages as m
+from cerbero.errors import FatalError
 
 def find_shlib_regex(libname, prefix, libdir, ext, regex):
     # Use globbing to find all files that look like they might match
