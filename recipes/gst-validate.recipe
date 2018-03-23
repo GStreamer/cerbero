@@ -26,5 +26,4 @@ class Recipe(custom.GStreamer):
 
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
-            self.files_libs.extend(["libgstvalidate-preload-1.0",
-                    "libgstvalidate-default-overrides-1.0"])
+            self.files_libs.append("libgstvalidate-default-overrides-1.0")
