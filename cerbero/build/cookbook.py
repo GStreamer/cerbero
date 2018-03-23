@@ -190,7 +190,7 @@ class CookBook (object):
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
-        @param built_version: built version ir None to reset it
+        @param built_version: built version or None to reset it
         @type built_version: str
         '''
         status = self._recipe_status(recipe_name)
@@ -350,6 +350,10 @@ class CookBook (object):
             if not hasattr(st, 'filepath') or not getattr(st, 'filepath'):
                 st.filepath = recipe.__file__
             if recipe.__file__ != st.filepath:
+                self.reset_recipe_status(recipe.name)
+            # Need to check the version too, because the version can be
+            # inherited from a different file, f.ex. recipes/custom.py
+            elif recipe.built_version() != st.built_version:
                 self.reset_recipe_status(recipe.name)
             else:
                 rmtime = os.path.getmtime(recipe.__file__)
