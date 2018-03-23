@@ -39,8 +39,9 @@ class UsageError(CerberoException):
 
 class FatalError(CerberoException):
     header = 'Fatal Error: '
-    def __init__(self, arch=''):
+    def __init__(self, msg='', arch=''):
         self.arch = arch
+        CerberoException.__init__(self, msg)
 
 class CommandError(CerberoException):
     header = 'Command Error: '
