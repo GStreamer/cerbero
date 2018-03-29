@@ -19,6 +19,10 @@ class Recipe(recipe.Recipe):
                 # Disable thumb mode to get the optimizations compiled properly
                 self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
                 self.new_env['CCASFLAGS'] = os.environ.get('CCASFLAGS', '').replace('-mthumb', '')
+            elif self.config.target_arch == Architecture.X86:
+                # The custom assembly breaks compiling an application by
+                # using relocations.
+                self.configure_options += ' --with-cpu=generic '
         if self.config.target_platform in [Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
                 # make sure we use 32bit asm
