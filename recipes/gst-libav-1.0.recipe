@@ -52,6 +52,13 @@ class Recipe(custom.GStreamer):
                 # Fails to link into an android App
                 # https://github.com/android-ndk/ndk/issues/337
                 libavextraconf += " --disable-neon"
+            if self.config.target_arch in [Architecture.X86]:
+                # Fails to link into an android app with relocation warnings
+                # in the custom assembly
+                # https://stackoverflow.com/questions/34691970/ffmpeg-for-android-neon-build-has-text-relocations/34697703#34697703
+                # https://issuetracker.google.com/issues/37067983
+                # https://trac.ffmpeg.org/ticket/4928
+                libavextraconf += " --disable-asm"
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         elif self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
