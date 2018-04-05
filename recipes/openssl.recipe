@@ -111,6 +111,12 @@ class Recipe(recipe.Recipe):
             config_sh += ' no-shared no-dso '
         else:
             config_sh += ' shared '
+
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.ARMv7:
+                # Openssl can't seem to figure this out anymore
+                config_sh += ' -D__ARM_MAX_ARCH__=7 '
+
         # ssl3 is needed by sphinx which is used by gst-validate, which tries
         # to use this libssl and fails with undefined symbols. md2 is needed by
         # librpmio.so.8, which is used during package generation on Fedora.
