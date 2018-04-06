@@ -375,6 +375,7 @@ cpp_args = {cpp_args}
 c_link_args = {c_link_args}
 cpp_link_args = {c_link_args}
 has_function_stpcpy = false
+{extra_properties}
 
 [binaries]
 c = {CC}
@@ -395,6 +396,7 @@ class Meson (Build, ModifyEnvBase) :
     make_clean = None
     meson_sh = None
     meson_options = {}
+    meson_cross_properties = {}
     meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
             --default-library=%(default-library)s --buildtype=%(buildtype)s \
             --backend=%(backend)s ..'
@@ -453,6 +455,10 @@ class Meson (Build, ModifyEnvBase) :
         ar=os.environ.get('AR', '').split(' ')
         strip=os.environ.get('STRIP', '').split(' ')
 
+        extra_properties = ''
+        for k, v in self.meson_cross_properties.items():
+            extra_properties += '{} = {}\n'.format(k, str(v))
+
         # Create a cross-info file that tells Meson and GCC how to cross-compile
         # this project
         cross_file = os.path.join(self.meson_dir, 'meson-cross-file.txt')
@@ -467,7 +473,8 @@ class Meson (Build, ModifyEnvBase) :
                 STRIP=strip,
                 c_args=c_args,
                 cpp_args=cpp_args,
-                c_link_args=c_link_args)
+                c_link_args=c_link_args,
+                extra_properties=extra_properties)
         with open(cross_file, 'w') as f:
             f.write(contents)
 
