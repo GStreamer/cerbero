@@ -5,36 +5,28 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.2.2'
+    version = '1.2.3'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     configure_options = '-DUSE_GNUTLS=ON -DENABLE_CXX11=OFF'
     deps = ['gnutls']
 
-    patches = ['srt/0001-channel.cpp-add-mswsock.h-for-Win32.patch',
-               'srt/0002-common-srt_compat.h-add-time.h-to-suppress-compilati.patch',
-               'srt/0003-srtcore-api.h-change-inet_ntop-to-getnameinfo.patch',
-               'srt/0004-build-support-cross-compiling-by-mingw.patch',
-               'srt/0006-Clean-.pc-to-provide-the-dependecies.patch',
-               'srt/0007-srt_compat.h-Enable-localtime_s-only-if-MSC_VER-1500.patch',
-               'srt/0008-build-Fix-for-MinGW-support.patch',
-               'srt/0009-Fix-include-path-for-wintime.h.patch',
-               'srt/0010-Include-syslog.h-on-Android.patch',
-               'srt/0011-Fix-includes-for-iOS.patch']
+    patches = ['srt/0001-srt-build-both-shared-and-static-libraries.patch']
+
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.configure_options += ' -DENABLE_SHARED=OFF '
+            self.configure_options += ' -DENABLE_BOTH=ON '
         if self.config.target_platform == Platform.ANDROID:
             self.append_env['CXXFLAGS'] = " -frtti -fexceptions `pkg-config --cflags gnustl`"
+            self.append_env['LDFLAGS'] = " -lgnustl"
             self.deps += ['gnustl']
-            self.configure_options += " -DPTHREAD_INCLUDE_DIR=/ignoreme -DPTHREAD_LIBRARY=pthread "
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('srt', 1, 2, 2, self.config.libdir,
+        libtool_la = LibtoolLibrary('srt', 1, 2, 3, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
