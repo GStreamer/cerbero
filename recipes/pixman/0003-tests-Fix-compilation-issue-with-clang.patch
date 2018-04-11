@@ -1,0 +1,42 @@
+From de179a736038508a53420f580a70bc8146cb31c9 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <edward@centricular.com>
+Date: Wed, 11 Apr 2018 17:09:27 +0200
+Subject: [PATCH 3/3] tests: Fix compilation issue with clang
+
+See https://bugs.freedesktop.org/show_bug.cgi?id=104886
+---
+ test/utils-prng.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/test/utils-prng.c b/test/utils-prng.c
+index c27b5be..64907c7 100644
+--- a/test/utils-prng.c
++++ b/test/utils-prng.c
+@@ -199,12 +199,24 @@ randmemset_internal (prng_t                  *prng,
+         }
+         else
+         {
++
++#ifndef __has_builtin
++#define __has_builtin(x) 0
++#endif
++
+ #ifdef HAVE_GCC_VECTOR_EXTENSIONS
++# if !defined(__clang__) || __has_builtin(__builtin_shuffle)
+             const uint8x16 bswap_shufflemask =
+             {
+                 3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12
+             };
+             randdata.vb = __builtin_shuffle (randdata.vb, bswap_shufflemask);
++# elif __has_builtin(__builtin_shufflevector)
++            randdata.vb = __builtin_shufflevector(randdata.vb, randdata.vb, 3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, 15, 14, 13, 12);
++# else
++#  error "GCC_VECTOR_EXTENSION is defined, but neither __builtin_shuffle nor __builtin_shufflevector is supported!"
++# endif
++
+             store_rand_128_data (buf, &randdata, aligned);
+             buf += 16;
+ #else
+-- 
+2.14.3
+

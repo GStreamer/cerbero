@@ -1,7 +1,7 @@
-From 950691e5aec082e4fa69a9a14ba2067c100c7878 Mon Sep 17 00:00:00 2001
+From 358d3881468c0c75cafa0247b01d28845d45d26e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Wed, 22 Aug 2012 15:10:56 +0200
-Subject: [PATCH 2/2] Enable CPU detection on Android
+Subject: [PATCH 2/3] Enable CPU detection on Android
 
 ---
  configure.ac       | 5 +++++
@@ -9,10 +9,10 @@ Subject: [PATCH 2/2] Enable CPU detection on Android
  2 files changed, 10 insertions(+)
 
 diff --git a/configure.ac b/configure.ac
-index a6bffbe..fe12101 100644
+index ba04952..89aad98 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -514,8 +514,13 @@ case $host_os in
+@@ -529,8 +529,13 @@ case $host_os in
  	 SSE2_LDFLAGS="$HWCAP_LDFLAGS"
        fi
        ;;
@@ -27,10 +27,10 @@ index a6bffbe..fe12101 100644
  AC_SUBST(IWMMXT_CFLAGS)
  AC_SUBST(MMX_CFLAGS)
 diff --git a/pixman/Makefile.am b/pixman/Makefile.am
-index b376d9a..aaa6e6f 100644
+index 581b6f6..0e0fbeb 100644
 --- a/pixman/Makefile.am
 +++ b/pixman/Makefile.am
-@@ -112,6 +112,11 @@ libpixman-iwmmxt.la: libpixman_iwmmxt_la-pixman-mmx.lo $(libpixman_iwmmxt_la_DEP
+@@ -114,6 +114,11 @@ libpixman-iwmmxt.la: libpixman_iwmmxt_la-pixman-mmx.lo $(libpixman_iwmmxt_la_DEP
  	$(AM_V_CCLD)$(libpixman_iwmmxt_la_LINK) libpixman_iwmmxt_la-pixman-mmx.lo $(libpixman_iwmmxt_la_LIBADD) $(LIBS)
  endif
  
@@ -43,5 +43,5 @@ index b376d9a..aaa6e6f 100644
  if USE_MIPS_DSPR2
  noinst_LTLIBRARIES += libpixman-mips-dspr2.la
 -- 
-1.9.0
+2.14.3
 

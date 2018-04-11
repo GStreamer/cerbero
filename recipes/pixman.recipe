@@ -11,7 +11,9 @@ class Recipe(recipe.Recipe):
     licenses = [License.MIT]
     autoreconf = True
     patches = ['pixman/0001-Fix-build-on-Android.patch',
-               'pixman/0002-Enable-CPU-detection-on-Android.patch']
+               'pixman/0002-Enable-CPU-detection-on-Android.patch',
+               'pixman/0003-tests-Fix-compilation-issue-with-clang.patch'
+    ]
 
     files_libs = ['libpixman-1']
     files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']
