@@ -38,7 +38,9 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86_64:
                 make += ' ARCH=x86_64'
         elif self.config.target_platform == Platform.ANDROID:
-            if self.config.target_distro_version == DistroVersion.ANDROID_LOLLIPOP:
+            if self.config.target_distro_version == DistroVersion.ANDROID_NOUGAT:
+                make += ' OS=android TARGET=android-24 NDKLEVEL=24'
+            elif self.config.target_distro_version == DistroVersion.ANDROID_LOLLIPOP:
                 make += ' OS=android TARGET=android-21 NDKLEVEL=21'
             else:
                 make += ' OS=android TARGET=android-14'
