@@ -64,6 +64,10 @@ class Recipe(custom.GStreamer):
             if Architecture.is_arm(self.config.target_arch):
                 if 'GAS' in os.environ:
                     self.new_env = {'AS': os.environ['GAS']}
+            # Some optimisations that were previously silently disabled
+            # cause warnings now. Ignore them
+            libavextraconf = " --extra-cflags=\'-Wno-ignored-optimization-argument\' "
+            self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
