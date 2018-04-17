@@ -3,11 +3,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'ninja'
-    version = '1.7.2'
+    version = '1.8.2'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
-    remotes = {'origin': 'https://github.com/ninja-build/ninja.git'}
-    commit = 'v1.7.2'
+    stype = SourceType.TARBALL
+    url = 'https://github.com/ninja-build/ninja/archive/v%(version)s.tar.gz'
     deps = []
 
     files_bin = ['bin/ninja']

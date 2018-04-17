@@ -8,8 +8,8 @@ class Recipe(recipe.Recipe):
     version = '0.45.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
-    remotes = {'origin': 'https://github.com/mesonbuild/meson.git'}
-    commit = version
+    stype = SourceType.TARBALL
+    url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
     deps = ['ninja']
 
     files_bin = ['bin/meson']
