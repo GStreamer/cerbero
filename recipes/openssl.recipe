@@ -67,6 +67,12 @@ class Recipe(recipe.Recipe):
                 self.openssl_platform = 'linux-elf'
             elif self.config.target_arch == Architecture.X86_64:
                 self.openssl_platform = 'linux-x86_64'
+            elif self.config.target_arch == Architecture.ARM:
+                self.openssl_platform = 'linux-armv4'
+            elif self.config.target_arch == Architecture.ARMv7:
+                self.openssl_platform = 'linux-armv4'
+            elif self.config.target_arch == Architecture.ARM64:
+                self.openssl_platform = 'linux-aarch64'
             else:
                 raise NotImplementedError
         elif self.config.target_platform == Platform.WINDOWS:
