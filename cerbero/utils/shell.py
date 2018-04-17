@@ -29,7 +29,7 @@ import time
 import glob
 import shutil
 import hashlib
-import urllib.request, urllib.error, urllib.parse
+import urllib3
 from distutils.version import StrictVersion
 
 from cerbero.enums import Platform
