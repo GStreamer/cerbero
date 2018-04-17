@@ -29,7 +29,7 @@ import time
 import glob
 import shutil
 import hashlib
-import urllib2
+import urllib3
 from distutils.version import StrictVersion
 
 from cerbero.enums import Platform
