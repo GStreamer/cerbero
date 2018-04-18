@@ -68,6 +68,13 @@ class Recipe(custom.GStreamer):
             # cause warnings now. Ignore them
             libavextraconf = " --extra-cflags=\'-Wno-ignored-optimization-argument\' "
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
+            if self.config.target_arch in [Architecture.X86]:
+                # Fails to link because of different stack sized
+                # https://bugzilla.gnome.org/show_bug.cgi?id=795355
+                #
+                # Might also be fixed by setting -mincoming-stack-boundary=4,
+                # see Android above
+                libavextraconf += " --disable-asm"
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 
