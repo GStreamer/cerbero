@@ -166,11 +166,13 @@ def system_info():
                     else:
                         f.seek(0, 0)
                         for line in f:
-                            k,v = line.rstrip().split("=")
-                            if k == 'NAME':
-                                name = v.strip('"')
-                            elif k == 'VERSION_ID':
-                                version = v.strip('"')
+                            # skip empty lines and comment lines
+                            if line.strip() and not line.lstrip().startswith('#'):
+                                k,v = line.rstrip().split("=")
+                                if k == 'NAME':
+                                    name = v.strip('"')
+                                elif k == 'VERSION_ID':
+                                    version = v.strip('"')
                         d = (name, version, '');
 
         if d[0] in ['Ubuntu', 'debian', 'LinuxMint']:
