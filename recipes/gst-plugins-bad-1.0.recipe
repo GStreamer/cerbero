@@ -111,6 +111,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstinterlace.a', 'lib/gstreamer-1.0/libgstinterlace.la',
              'lib/gstreamer-1.0/libgstivtc.a', 'lib/gstreamer-1.0/libgstivtc.la',
              'lib/gstreamer-1.0/libgstlegacyrawparse.a', 'lib/gstreamer-1.0/libgstlegacyrawparse.la',
+             'lib/gstreamer-1.0/libgstproxy.a', 'lib/gstreamer-1.0/libgstproxy.la',
              'lib/gstreamer-1.0/libgstremovesilence.a', 'lib/gstreamer-1.0/libgstremovesilence.la',
              'lib/gstreamer-1.0/libgstsegmentclip.a', 'lib/gstreamer-1.0/libgstsegmentclip.la',
              'lib/gstreamer-1.0/libgstsmooth.a', 'lib/gstreamer-1.0/libgstsmooth.la',
