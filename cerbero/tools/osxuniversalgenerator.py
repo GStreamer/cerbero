@@ -22,9 +22,17 @@ import subprocess
 import shutil
 import tempfile
 
+import os.path
+
 from cerbero.utils import shell
 from cerbero.tools.osxrelocator import OSXRelocator
 
+def get_parent_prefix(f, dirs):
+    dirs = dirs[:]
+    while dirs:
+        dir_ = os.path.join(os.path.realpath(dirs.pop(0)), '')
+        if f.startswith(dir_):
+            yield(dir_)
 
 file_types = [
     ('Mach-O', 'merge'),
@@ -97,7 +105,7 @@ class OSXUniversalGenerator(object):
             tmp = tempfile.NamedTemporaryFile(suffix=os.path.basename(f))
             tmp_inputs.append(tmp)
             shutil.copy(f, tmp.name)
-            prefix_to_replace = [d for d in dirs if d in f][0]
+            prefix_to_replace = os.path.abspath(next(get_parent_prefix(f, dirs)))
             relocator = OSXRelocator (self.output_root, prefix_to_replace, self.output_root,
                                       False)
             # since we are using a temporary file, we must force the library id
