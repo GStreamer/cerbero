@@ -1,0 +1,30 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(custom.GStreamer):
+    name = 'gst-omx-1.0'
+    licenses = [License.LGPLv2_1]
+    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    configure_options = '--disable-examlpes --enable-static '
+    remotes = { 'origin': 'git://anongit.freedesktop.org/gstreamer/gst-omx' }
+    deps = [ 'gstreamer-1.0', 'gst-plugins-base-1.0' ]
+
+    files_plugins_codecs = ['lib/gstreamer-1.0/libgstomx%(mext)s']
+    files_plugins_codecs_devel = [
+        'lib/gstreamer-1.0/libgstomx.a',
+        'lib/gstreamer-1.0/libgstomx.la'
+    ]
+
+    def prepare(self):
+        if self.config.variants.rpi:
+            flags = (
+                ' -I=/opt/vc/include'
+                ' -I=/opt/vc/include/IL'
+                ' -I=/opt/vc/include/interface/vcos/pthreads'
+                ' -I=/opt/vc/include/interface/vmcs_host/linux '
+            )
+            self.configure_options += ' --with-omx-target=rpi '
+            self.append_env['CFLAGS'] = flags
+            self.append_env['CPPFLAGS'] = flags
+            self.append_env['LDFLAGS'] = ' -L=/opt/vc/lib '
+        else:
+            self.configure_options += ' --with-omx-target=generic '

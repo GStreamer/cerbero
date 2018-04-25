@@ -26,5 +26,9 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-bad-1.0:codecs_devel']
     platform_files = {
             Platform.ANDROID: ['tremor:libs'],
-            Platform.IOS: ['tremor:libs']
+            Platform.IOS: ['tremor:libs'],
+            Platform.LINUX: ['gst-omx-1.0:plugins_codecs']
+    }
+    platform_files_devel = {
+            Platform.LINUX: ['gst-omx-1.0:plugins_codecs_devel']
     }
