@@ -4,7 +4,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-omx-1.0'
     licenses = [License.LGPLv2_1]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--disable-examlpes --enable-static '
+    configure_options = '--disable-examples --enable-static '
     remotes = { 'origin': 'git://anongit.freedesktop.org/gstreamer/gst-omx' }
     deps = [ 'gstreamer-1.0', 'gst-plugins-base-1.0' ]
 
