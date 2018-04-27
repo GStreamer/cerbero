@@ -41,11 +41,8 @@ class Recipe(recipe.Recipe):
             self.new_env = {'AS': os.environ.get('CC', '')}
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
-                if 'GAS' in os.environ:
-                    self.new_env = {'AS': os.environ['GAS']}
-                    if self.config.target_arch != Architecture.ARM64:
-                        # -no-integrated-as is only required for 32bit arm
-                        self.new_env['AS'] += ' -no-integrated-as '
+                self.new_env = {'AS': 'tools/gas-preprocessor.pl ' + os.environ['CC'] + ' ' + os.environ['CFLAGS']}
+                self.patches = ['x264/0001-Disable-fembed-bitcode-incompatible-argument.patch']
             elif self.config.target_arch == Architecture.X86:
                 enable_asm = False
 

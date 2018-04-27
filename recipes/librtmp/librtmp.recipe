@@ -11,7 +11,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
-    patches = ['0001-Fix-support-for-cross-compilation.patch']
+    patches = ['0001-Fix-support-for-cross-compilation.patch',
+               '0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']
     deps = ['gnutls', 'nettle']
     files_libs = ['librtmp']
     files_devel = ['include/librtmp/', 'lib/pkgconfig/librtmp.pc' ]

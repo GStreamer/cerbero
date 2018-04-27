@@ -69,10 +69,6 @@ class Recipe(custom.GStreamer):
             libavextraconf = " --extra-cflags=\'-Wno-ignored-optimization-argument\' "
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
 
-	    # Silence warnings about not being able to create compact stack unwinds
-            # with newer XCode
-            self.append_env['LDFLAGS'] = " -Wl,-no_compact_unwind "
-
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
 

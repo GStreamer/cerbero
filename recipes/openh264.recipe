@@ -12,6 +12,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
+    patches = ['openh264/0001-openh264-Build-for-8.0-fembed-bitcode.patch',
+               'openh264/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']
 
     def prepare(self):
         make = self.make

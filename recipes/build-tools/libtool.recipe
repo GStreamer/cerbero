@@ -9,7 +9,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://ftpmirror.gnu.org/libtool/libtool-2.4.6.tar.gz'
     deps = ['m4']
-    patches = ['libtool/0001-Add-support-for-weak_framework-linking-on-Darwin.patch']
+    patches = ['libtool/0001-Add-support-for-weak_framework-linking-on-Darwin.patch',
+               'libtool/0002-libtool-Stop-adding-bind_at_load-on-all-Darwin.patch']
 
     files_bin = ['bin/libtool', 'bin/libtoolize']
     files_libs = ['libltdl']

@@ -26,7 +26,6 @@ class Recipe(recipe.Recipe):
                'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
                'libvpx/0004-build-Remove-broken-custom-android-toolchain-usage.patch',
                'libvpx/0005-configure-Add-Android-ARM64-support.patch',
-               'libvpx/0006-Don-t-embed-bitcode-on-iOS-until-we-support-that-pro.patch',
                'libvpx/0001-Add-visibility-protected-attribute-for-global-variab.patch',
                ]
 
