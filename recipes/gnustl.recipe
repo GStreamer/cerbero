@@ -29,17 +29,18 @@ class Recipe(recipe.Recipe):
         stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
                   'cxx-stl', 'gnu-libstdc++', self.config.toolchain_version)
         if self.config.target_arch == Architecture.X86:
-            stl_libdir = os.path.join(stl_prefix, 'libs', 'x86')
+            libarch = 'x86'
         elif self.config.target_arch == Architecture.X86_64:
-            stl_libdir = os.path.join(stl_prefix, 'libs', 'x86_64')
+            libarch = 'x86_64'
         elif self.config.target_arch == Architecture.ARMv7:
-            stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi-v7a')
+            libarch = 'armeabi-v7a'
         elif self.config.target_arch == Architecture.ARM64:
-            stl_libdir = os.path.join(stl_prefix, 'libs', 'arm64-v8a')
+            libarch = 'arm64-v8a'
         elif self.config.target_arch == Architecture.ARM:
-            stl_libdir = os.path.join(stl_prefix, 'libs', 'armeabi')
+            libarch = 'armeabi'
         else:
             raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
+        stl_libdir = os.path.join(stl_prefix, 'libs', libarch)
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)
@@ -65,7 +66,7 @@ class Recipe(recipe.Recipe):
             os.makedirs(pkgdir)
         stl_pc = PkgConfigWritter('gnustl', 'gnustl', '1.0',
                 '', '-L${libdir} -lgnustl -lsupc++ -lstdc++ ',
-                '-I%s/include -I%s/libs/armeabi/include' % (stl_prefix, stl_prefix), self.config.prefix)
+                '-I%s/include -I%s/libs/%s/include' % (stl_prefix, stl_prefix, libarch), self.config.prefix)
         stl_pc.libs_priv = '${libdir}/libgnustl.a ${libdir}/libsupc++.a'
         stl_pc.rel_incldir = 'include'
         stl_pc.save('gnustl', pkgdir)
