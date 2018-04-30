@@ -34,6 +34,8 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
 
+        self.configure_options += ' --disable-docs '
+
         if needs_xcode8_sdk_workaround(self.config):
             self.append_env['ac_cv_func_mkostemp'] = 'no'
 
