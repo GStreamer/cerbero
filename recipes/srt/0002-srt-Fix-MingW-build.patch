@@ -1,18 +1,17 @@
-From ccb27788e0cc1b1a599e8fb43138a584cfc46c38 Mon Sep 17 00:00:00 2001
+From c7d685624501ef702013bc96a2197020bfa39bb2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Mon, 30 Apr 2018 11:45:25 -0400
-Subject: [PATCH] srt: Fix MingW build
+Subject: [PATCH 2/2] srt: Fix MingW build
 
 ---
  CMakeLists.txt       | 6 +++++-
  srtcore/api.h        | 6 +++++-
- srtcore/channel.cpp  | 5 +++--
  srtcore/srt.h        | 8 ++++++++
  srtcore/srt_compat.h | 4 +++-
- 5 files changed, 24 insertions(+), 5 deletions(-)
+ 5 files changed, 23 insertions(+), 4 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index e913122..1f3814b 100644
+index 3b5cfde..6014376 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -320,7 +320,7 @@ if (${ENABLE_PROFILE} AND HAVE_COMPILER_GNU_COMPAT)
@@ -72,36 +71,6 @@ index 61a1465..820ac4d 100644
  
      output << ":" << ntohs(((sockaddr_in*)sadr)->sin_port); // TRICK: sin_port and sin6_port have the same offset and size
      return output.str();
-diff --git a/srtcore/channel.cpp b/srtcore/channel.cpp
-index ae47523..61f3dbf 100644
---- a/srtcore/channel.cpp
-+++ b/srtcore/channel.cpp
-@@ -410,6 +410,7 @@ int CChannel::sendto(const sockaddr* addr, CPacket& packet) const
- EReadStatus CChannel::recvfrom(sockaddr* addr, CPacket& packet) const
- {
-     EReadStatus status = RST_OK;
-+    int msg_flags;
- 
- #ifndef WIN32
-     msghdr mh;   
-@@ -432,7 +433,7 @@ EReadStatus CChannel::recvfrom(sockaddr* addr, CPacket& packet) const
- #endif
- 
-     int res = ::recvmsg(m_iSocket, &mh, 0);
--    int msg_flags = mh.msg_flags;
-+    msg_flags = mh.msg_flags;
- 
- 
-     // Note that there are exactly four groups of possible errors
-@@ -533,7 +534,7 @@ EReadStatus CChannel::recvfrom(sockaddr* addr, CPacket& packet) const
-     }
- 
-     // Not sure if this problem has ever occurred on Windows, just a sanity check.
--    int msg_flags = 0;
-+    msg_flags = 0;
-     if (flag & MSG_PARTIAL)
-         msg_flags = 1;
- #endif
 diff --git a/srtcore/srt.h b/srtcore/srt.h
 index 08249d6..a34136e 100644
 --- a/srtcore/srt.h
@@ -122,7 +91,7 @@ index 08249d6..a34136e 100644
        // Explicitly define 32-bit and 64-bit numbers
        typedef __int32 int32_t;
 diff --git a/srtcore/srt_compat.h b/srtcore/srt_compat.h
-index a0ce20a..9da8ba4 100644
+index 702324e..6def89d 100644
 --- a/srtcore/srt_compat.h
 +++ b/srtcore/srt_compat.h
 @@ -20,6 +20,8 @@ written by
@@ -134,7 +103,7 @@ index a0ce20a..9da8ba4 100644
  #ifdef WIN32
     #ifndef __MINGW__
        #ifdef SRT_DYNAMIC
-@@ -64,7 +66,7 @@ inline struct tm SysLocalTime(time_t tt)
+@@ -86,7 +88,7 @@ inline struct tm SysLocalTime(time_t tt)
  {
      struct tm tms;
      memset(&tms, 0, sizeof tms);

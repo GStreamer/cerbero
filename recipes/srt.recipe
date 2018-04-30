@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
-    patches = ['srt/0001-srt-Fix-MingW-build.patch']
+    patches = ['srt/0001-Build-Fix-MingW-build.patch',
+               'srt/0002-srt-Fix-MingW-build.patch']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
