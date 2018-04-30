@@ -1,0 +1,27 @@
+From 18345a2b556b0ae6ac5ee0933e18af01fb839902 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
+Date: Mon, 30 Apr 2018 15:57:59 -0400
+Subject: [PATCH 3/3] platform_sys: Only invlude inttypes.h with MSFT compilers
+
+---
+ srtcore/platform_sys.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/srtcore/platform_sys.h b/srtcore/platform_sys.h
+index 33c4d9b..ce546d2 100644
+--- a/srtcore/platform_sys.h
++++ b/srtcore/platform_sys.h
+@@ -15,9 +15,9 @@
+    #include <ws2tcpip.h>
+    #include <ws2ipdef.h>
+    #include <windows.h>
+-   #include <inttypes.h>
+    #include <stdint.h>
+    #if defined(_MSC_VER)
++      #include <inttypes.h>
+       #pragma warning(disable:4251)
+    #endif
+ #else
+-- 
+2.17.0
+
