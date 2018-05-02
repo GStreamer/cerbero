@@ -1,14 +1,14 @@
-From c7d685624501ef702013bc96a2197020bfa39bb2 Mon Sep 17 00:00:00 2001
+From 765ceaa719afa93cad006ad7f569658ffbce12b2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Mon, 30 Apr 2018 11:45:25 -0400
-Subject: [PATCH 2/2] srt: Fix MingW build
+Subject: [PATCH 2/5] srt: Fix MingW build
 
 ---
  CMakeLists.txt       | 6 +++++-
  srtcore/api.h        | 6 +++++-
  srtcore/srt.h        | 8 ++++++++
  srtcore/srt_compat.h | 4 +++-
- 5 files changed, 23 insertions(+), 4 deletions(-)
+ 4 files changed, 21 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index 3b5cfde..6014376 100644

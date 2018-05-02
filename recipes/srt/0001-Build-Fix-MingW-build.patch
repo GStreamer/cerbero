@@ -1,7 +1,7 @@
-From e91353ef4f29d7ba6792187bd252177c417e89e0 Mon Sep 17 00:00:00 2001
+From 22b752bd1f16dc0dcc146109561fada732dc4496 Mon Sep 17 00:00:00 2001
 From: Jose Santiago <jsantiago@haivision.com>
 Date: Tue, 10 Apr 2018 14:15:31 -0500
-Subject: [PATCH 1/2] Build: Fix MingW build
+Subject: [PATCH 1/5] Build: Fix MingW build
 
 Patch taken from upstraem
 ---
