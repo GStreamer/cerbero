@@ -6,7 +6,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--enable-static --disable-introspection --disable-gsm \
-        --disable-examples --disable-festival \
+        --disable-examples --disable-faad --disable-festival \
         --disable-videomaxrate --disable-bz2 --disable-libde265 \
         --disable-linsys --disable-fbdev --disable-apexsink \
         --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
@@ -20,14 +20,14 @@ class Recipe(custom.GStreamer):
         --disable-xvid --disable-zbar --disable-sdi'
     # Explicitly enable plugins
     configure_options += ' --enable-bz2 --enable-assrender \
-        --enable-faad --enable-kate --enable-openh264 --enable-opus \
+        --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
         --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
         --enable-decklink --enable-webrtc --enable-dtls --enable-srt'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
+            'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'openssl',
             'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa', 'srt']
@@ -205,7 +205,6 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs_restricted = [
              'lib/gstreamer-1.0/libgstasfmux%(mext)s',
              'lib/gstreamer-1.0/libgstdtsdec%(mext)s',
-             'lib/gstreamer-1.0/libgstfaad%(mext)s',
              'lib/gstreamer-1.0/libgstmpegpsdemux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegpsmux%(mext)s',
              'lib/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
@@ -216,7 +215,6 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs_restricted_devel = [
              'lib/gstreamer-1.0/libgstasfmux.a', 'lib/gstreamer-1.0/libgstasfmux.la',
              'lib/gstreamer-1.0/libgstdtsdec.a', 'lib/gstreamer-1.0/libgstdtsdec.la',
-             'lib/gstreamer-1.0/libgstfaad.a', 'lib/gstreamer-1.0/libgstfaad.la',
              'lib/gstreamer-1.0/libgstmpegpsdemux.a', 'lib/gstreamer-1.0/libgstmpegpsdemux.la',
              'lib/gstreamer-1.0/libgstmpegpsmux.a', 'lib/gstreamer-1.0/libgstmpegpsmux.la',
              'lib/gstreamer-1.0/libgstmpegtsdemux.a', 'lib/gstreamer-1.0/libgstmpegtsdemux.la',
