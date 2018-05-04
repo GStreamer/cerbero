@@ -172,8 +172,24 @@ class GitCache (Source):
             self.remotes['origin'] = '%s/%s.git' % \
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
+        self._previous_env = None
+
+    def _git_env_setup(self):
+        # When running git commands, which is the host git, we need to make
+        # sure it is run in an environment which doesn't pick up the libraries
+        # we build in cerbero
+        env = os.environ.copy()
+        self._previous_env = os.environ.copy()
+        env["LD_LIBRARY_PATH"] = self.config._pre_environ.get("LD_LIBRARY_PATH", "")
+        os.environ = env
+
+    def _git_env_restore(self):
+        if self._previous_env is not None:
+            os.environ = self._previous_env
+            self._previous_env = None
 
     def fetch(self, checkout=True):
+        self._git_env_setup()
         if not os.path.exists(self.repo_dir):
             git.init(self.repo_dir)
 
@@ -199,6 +215,7 @@ class GitCache (Source):
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
             git.submodules_update(self.repo_dir, cached_dir, fail=False)
+        self._git_env_restore()
 
 
     def built_version(self):
