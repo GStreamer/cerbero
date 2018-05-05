@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc',
                    'lib/pkgconfig/libssl.pc', 'lib/pkgconfig/libcrypto.pc']
 
-    patches = ['openssl/0001-build-disable-poly1305-custom-assembly-on-armv4-as-i.patch']
+    patches = ['openssl/0001-fix-arm-poly1305-linkage.patch']
 
     def prepare(self):
         # map platforms
