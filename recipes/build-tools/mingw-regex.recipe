@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libregex']
     files_devel = ['include/regex.h']
     autoreconf = True
-    remotes = {'origin': 'git://git.code.sf.net/p/mingw/regex'}
+    remotes = {'origin': 'https://git.code.sf.net/p/mingw/regex'}
     commit = '7aa7b79d53a4b275d70397b424acffc57dbcf7a2'
     patches = ['mingw-regex/0001-Fix-compilation.patch']
 
