@@ -34,6 +34,7 @@ class Recipe(recipe.Recipe):
         libtool_la.save()
         src = None
         dst = None
+        dst2 = None
         libdir = os.path.join(self.config.prefix, 'lib')
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             src = 'libbz2.so.1.0.6'
