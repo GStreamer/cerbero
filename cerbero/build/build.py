@@ -22,6 +22,7 @@ from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 import shutil
+import shlex
 import re
 
 
@@ -370,10 +371,6 @@ cpu = '{cpu}'
 endian = '{endian}'
 
 [properties]
-c_args = {c_args}
-cpp_args = {cpp_args}
-c_link_args = {c_link_args}
-cpp_link_args = {c_link_args}
 has_function_stpcpy = false
 {extra_properties}
 
@@ -430,10 +427,17 @@ class Meson (Build, ModifyEnvBase) :
         if not self.make_clean:
             self.make_clean = self.make + ' clean'
 
-    def _split_flags(self, flags):
-        return [flag for flag in flags.split(' ') if flag != '']
-
     def write_meson_cross_file(self):
+        # Take CC and CXX from _old_env because we modified env to make them be
+        # the native toolchain.
+        cc = self._old_env.get('CC', '').split(' ')
+        cxx = self._old_env.get('CXX', '').split(' ')
+        ar=os.environ.get('AR', '').split(' ')
+        strip=os.environ.get('STRIP', '').split(' ')
+
+        # *FLAGS are only passed to the native compiler, so while
+        # cross-compiling we need to pass these through the cross file.
+        #
         # Create and pass a specs file that sets link_args for GCC to find
         # 'system' libraries (those that Cerbero builds and installs). This is
         # only needed when cross-compiling because with a native compiler the
@@ -442,18 +446,17 @@ class Meson (Build, ModifyEnvBase) :
         with open(specs_file, 'w') as f:
             f.write('*link_libgcc:\n')
             f.write('%D -L{0}/lib{1}\n'.format(self.config.prefix, self.config.lib_suffix))
-
         c_link_args = ['-specs=' + specs_file]
-        c_link_args += self._split_flags(os.environ.get('LDFLAGS', ''))
-        c_args = self._split_flags(os.environ.get('CFLAGS', ''))
-        cpp_args = self._split_flags(os.environ.get('CXXFLAGS', ''))
+        c_link_args += shlex.split(os.environ.get('LDFLAGS', ''))
+        cpp_link_args = c_link_args
+        c_args = shlex.split(os.environ.get('CFLAGS', ''))
+        cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
 
-        # Take CC and CXX from _old_env because we modified env to make them be
-        # the native toolchain.
-        cc = self._old_env.get('CC', '').split(' ')
-        cxx = self._old_env.get('CXX', '').split(' ')
-        ar=os.environ.get('AR', '').split(' ')
-        strip=os.environ.get('STRIP', '').split(' ')
+        for args in ('c_args', 'cpp_args', 'c_link_args', 'cpp_link_args'):
+            if args in self.meson_cross_properties:
+                self.meson_cross_properties[args] += locals()[args]
+            else:
+                self.meson_cross_properties[args] = locals()[args]
 
         extra_properties = ''
         for k, v in self.meson_cross_properties.items():
@@ -471,9 +474,6 @@ class Meson (Build, ModifyEnvBase) :
                 CXX=cxx,
                 AR=ar,
                 STRIP=strip,
-                c_args=c_args,
-                cpp_args=cpp_args,
-                c_link_args=c_link_args,
                 extra_properties=extra_properties)
         with open(cross_file, 'w') as f:
             f.write(contents)
