@@ -23,6 +23,7 @@ from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 import shutil
 import shlex
+import copy
 import re
 
 
@@ -452,14 +453,17 @@ class Meson (Build, ModifyEnvBase) :
         c_args = shlex.split(os.environ.get('CFLAGS', ''))
         cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
 
+        # Operate on a copy of the recipe properties to avoid accumulating args
+        # from all archs when doing universal builds
+        cross_properties = copy.deepcopy(self.meson_cross_properties)
         for args in ('c_args', 'cpp_args', 'c_link_args', 'cpp_link_args'):
-            if args in self.meson_cross_properties:
-                self.meson_cross_properties[args] += locals()[args]
+            if args in cross_properties:
+                cross_properties[args] += locals()[args]
             else:
-                self.meson_cross_properties[args] = locals()[args]
+                cross_properties[args] = locals()[args]
 
         extra_properties = ''
-        for k, v in self.meson_cross_properties.items():
+        for k, v in cross_properties.items():
             extra_properties += '{} = {}\n'.format(k, str(v))
 
         # Create a cross-info file that tells Meson and GCC how to cross-compile
