@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
         'share/aclocal/orc.m4', 'bin/orcc%(bext)s']
 
     def prepare(self):
+        self.configure_options += ' --disable-gtk-doc '
         # Don't build testing helper library on ios
         if self.config.target_platform in [Platform.IOS]:
             self.configure_options += ' --disable-tests '
