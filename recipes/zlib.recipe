@@ -6,49 +6,17 @@ class Recipe(recipe.Recipe):
     name = 'zlib'
     version = '1.2.11'
     stype = SourceType.TARBALL
-    btype = BuildType.MAKEFILE
+    btype = BuildType.MESON
     url = 'http://zlib.net/fossils/zlib-1.2.11.tar.gz'
     licenses = [License.BSD_like]
-    add_host_build_target = False
-    can_use_configure_cache = False
-    configure_tpl = "./configure --prefix %(prefix)s "\
-                    "--libdir %(libdir)s %(options)s"
+    meson_options = {'default-library': 'both'}
     patches = ['zlib/0001-win32-fix-dll-name.patch',
-               'zlib/0001-Fix-test-builds-to-use-the-built-libz-headers-librar.patch']
-
+               'zlib/0001-Fix-test-builds-to-use-the-built-libz-headers-librar.patch',
+               'zlib/0001-Add-a-meson-port.patch']
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
-
-
-    def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.make = 'make -f win32/Makefile.gcc PREFIX=%s- ' % self.config.host
-            self.make_install = 'make install -f win32/Makefile.gcc '\
-                                'INCLUDE_PATH=%(prefix)s/include '\
-                                'LIBRARY_PATH=%(prefix)s/lib ' \
-                                'BINARY_PATH=%(prefix)s/bin ' % {'prefix':self.config.prefix}
-            self._remove_steps ([BuildSteps.CONFIGURE])
-        elif self.config.target_platform == Platform.ANDROID:
-            # zlib creates LDFLAGS from CFLAGS.  Allow for that
-            self.append_env['CFLAGS'] = os.environ.get('LDFLAGS', '')
-            if self.config.target_arch == Architecture.X86:
-                self.configure_options += " --uname=i686-linux-android "
-            if self.config.target_arch == Architecture.X86_64:
-                self.configure_options += " --uname=x86_64-linux-android "
-            else:
-                self.configure_options += " --uname=arm-linux-androideabi "
-        elif self.config.target_platform == Platform.LINUX:
-            if self.config.cross_compiling() and self.config.host:
-                self.configure_options += " --uname=" + self.config.host
 
     def post_install(self):
         libtool_la = LibtoolLibrary('z', 1, 2, 11, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
-        # FIXME This is to workaround a build issue trying to ld to libz.so
-        if self.config.target_platform == Platform.IOS:
-            try:
-                os.symlink(os.path.join (self.config.prefix, 'lib', 'libz.dylib'),
-                        os.path.join (self.config.prefix, 'lib', 'libz.so'))
-            except OSError:
-                pass
