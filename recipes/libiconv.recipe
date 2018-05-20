@@ -14,7 +14,6 @@ class Recipe(recipe.Recipe):
 #               'libiconv/0003-stdint-fix-build-with-Android-s-Bionic-fox-x86.patch',
 
     configure_options = '--disable-nls --enable-static'
-    platform_deps = {Platform.WINDOWS: ['gettext']}
     autoreconf_sh = './autogen.sh --skip-gnulib && autoreconf -fiv'
 
     files_bins = ['iconv', ]
@@ -23,7 +22,3 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
     files_lang = ['libiconv']
-
-    def prepare(self):
-        if self.config.target_platform not in [Platform.LINUX, Platform.DARWIN, Platform.IOS]:
-            self.runtime_dep = True
