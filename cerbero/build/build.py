@@ -405,8 +405,6 @@ class Meson (Build, ModifyEnvBase) :
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
-        self.meson_dir = os.path.join(self.build_dir, "_builddir")
-
         # HACK: CC and CXX must be the native toolchain
         # https://bugzilla.gnome.org/show_bug.cgi?id=791670
         if self.config.cross_compiling():
@@ -483,6 +481,8 @@ class Meson (Build, ModifyEnvBase) :
 
     @modify_environment
     def configure(self):
+        # self.build_dir is different on each call to configure() when doing universal builds
+        self.meson_dir = os.path.join(self.build_dir, "_builddir")
         if os.path.exists(self.meson_dir):
             # Only remove if it's not empty
             if os.listdir(self.meson_dir):
@@ -500,7 +500,7 @@ class Meson (Build, ModifyEnvBase) :
 
         meson_cmd = self.meson_tpl % {
             'meson-sh': self.meson_sh,
-            'prefix': to_unixpath(self.config.prefix),
+            'prefix': self.config.prefix,
             'libdir': 'lib' + self.config.lib_suffix,
             'default-library': self.meson_default_library,
             'buildtype': buildtype,
