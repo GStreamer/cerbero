@@ -1,0 +1,57 @@
+From 4be630b1769a0827b093435ff3f45287d4e8b77a Mon Sep 17 00:00:00 2001
+From: Tom Schoonjans <Tom.Schoonjans@diamond.ac.uk>
+Date: Tue, 13 Mar 2018 16:57:03 +0000
+Subject: [PATCH] Fix building tls plugin without pkcs11
+
+https://bugzilla.gnome.org/show_bug.cgi?id=794292
+---
+ meson.build           | 3 +--
+ tls/tests/meson.build | 7 ++++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index ee2bd9d..130d517 100644
+--- a/meson.build
++++ b/meson.build
+@@ -85,6 +85,7 @@ pkg = import('pkgconfig')
+ po_dir = join_paths(meson.source_root(), 'po')
+ 
+ top_inc = include_directories('.')
++tls_inc = include_directories('tls')
+ 
+ subdir('po')
+ 
+@@ -106,8 +107,6 @@ if enable_libproxy_support or enable_gnome_proxy_support
+ endif
+ 
+ if enable_pkcs11_support
+-  tls_inc = include_directories('tls')
+-
+   subdir('tls/pkcs11')
+ endif
+ 
+diff --git a/tls/tests/meson.build b/tls/tests/meson.build
+index 7e1ae13..d3611c1 100644
+--- a/tls/tests/meson.build
++++ b/tls/tests/meson.build
+@@ -1,4 +1,7 @@
+-incs = [top_inc]
++incs = [
++  top_inc,
++  tls_inc
++]
+ 
+ deps = [
+   gio_dep,
+@@ -25,8 +28,6 @@ test_programs = [
+ ]
+ 
+ if enable_pkcs11_support
+-  incs += tls_inc
+-
+   pkcs11_deps = deps + [
+     libgiopkcs11_dep,
+     pkcs11_dep
+-- 
+2.17.0
+

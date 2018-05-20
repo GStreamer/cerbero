@@ -10,19 +10,6 @@ Subject: [PATCH 09/13] Implementation of Cocoa event loop integration in
  glib/gmain.c     | 985 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
  3 files changed, 991 insertions(+), 2 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index e9419f6..285d405 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -245,7 +245,7 @@ AM_CONDITIONAL(OS_COCOA, [test "$glib_have_cocoa" = "yes"])
- 
- if test "x$glib_have_cocoa" = "xyes"; then
-   AC_DEFINE(HAVE_COCOA, 1, [define to 1 if Cocoa is available])
--  COCOA_LIBS="-Wl,-framework,Foundation"
-+  COCOA_LIBS="-Wl,-framework,Foundation -Wl,-framework,AppKit"
-   LDFLAGS="$LDFLAGS $COCOA_LIBS"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
- #include <AvailabilityMacros.h>
 diff --git a/glib/Makefile.am b/glib/Makefile.am
 index d755853..611eb5b 100644
 --- a/glib/Makefile.am

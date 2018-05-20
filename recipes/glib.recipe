@@ -1,6 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
-from cerbero.utils import needs_xcode8_sdk_workaround
+from cerbero.errors import FatalError
 
 GLIB_CONFIG_UNVERSAL='''\
 #ifdef __i386__
@@ -20,26 +20,25 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.54.3'
+    version = '2.56.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.54/glib-%(version)s.tar.xz'
+    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-%(version)s.tar.xz'
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh autogen.sh'
-    configure_options = '--with-pcre=internal --disable-libmount --enable-dtrace=no '
+    btype = BuildType.MESON
+    meson_options = {'gtk_doc': 'false', 'internal_pcre': 'true', 'libmount': 'false',
+                     'dtrace': 'false'}
     deps = ['libffi', 'zlib']
-    can_use_configure_cache = False
-    patches = ["glib/0001-Let-user-disable-Cocoa-and-Carbon-support-on-demand.patch",
-               "glib/0002-Optionally-revert-to-the-old-pre-2.28-URI-handler-co.patch",
-               "glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
+
+    patches = ["glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
                "glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
                "glib/0005-Blacklist-the-bamf-GIO-module.patch",
                "glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               'glib/0010-GSocket-Fix-race-conditions-on-Win32-if-multiple-thr.patch',
                'glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
-               'glib/0001-gmodule-Use-RTLD_DEFAULT-if-defined-__BIONIC__.patch',
-               'glib/0001-configure.ac-add-enable-proxy-libintl.patch'
+               'glib/glib-2.57-meson-backported-fixes.patch',
+               'glib/0001-meson-Add-exception-for-atomic-ops-test-for-Android.patch',
+               'glib/0001-DO-NOT-UPSTREAM-Prototypes-missing-in-Cerbero-s-anci.patch',
               ]
 
     files_libs = [
@@ -98,33 +97,44 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
-        if needs_xcode8_sdk_workaround(self.config):
-            self.append_env['ac_cv_func_mkostemp'] = 'no'
         if self.config.target_platform != Platform.WINDOWS:
-            self.configure_options += ' --enable-static'
+            #self.meson_options.update({'default_library': 'both'})
+            pass
         if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc '
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)
             self.append_env['CFLAGS'] = ' -DNVALGRIND=1 '
+            self.meson_options.update({'xattr': 'false'})
+            self.deps.append('proxy-libintl')
+
+        # macOS provides libiconv as a separate library
+        if self.config.target_platform == Platform.DARWIN:
+            self.meson_options.update({'iconv': 'native'})
+        # linux and BSD provide iconv as a part of libc
+        elif self.config.target_platform == Platform.LINUX:
+            self.meson_options.update({'iconv': 'libc'})
+        # On Windows, glib uses an internal copy of libiconv
+        elif self.config.target_platform == Platform.WINDOWS:
+            self.meson_options.update({'iconv': 'native'})
+        # Other platforms don't provide libiconv, so we build it
+        else: 
+            self.deps.append('libiconv')
+            self.meson_options.update({'iconv': 'gnu'})
+
         if self.config.target_platform == Platform.ANDROID:
-            self.deps += ['proxy-libintl']
-            self.configure_options += ' --enable-proxy-libintl'
-            # Hack to fix building of the glib/tests/private test
-            self.make = '%s private_LDFLAGS=""' % self.make
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
                 # FIXME: HACK to make projects using mmap compile with NDK 16
                 # we fail to compile with -D_FILE_OFFSET_BITS=64
                 # because we don't use clang and we use a platform < 21 (Lollipop)
                 # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.new_env['ac_cv_func_mmap'] = 'no'
+                self.meson_cross_properties['c_args'] = ['-U_FILE_OFFSET_BITS']
         elif self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --with-libiconv=gnu'
-            self.append_env['CFLAGS'] = ' -DMINGW_HAS_SECURE_API=1 '
+            # Want secure versions of stdlib functions. Glib already defines
+            # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
+            self.append_env['CFLAGS'] = ' -DMINGW_HAS_SECURE_API=1 -U_WIN32_WINNT '
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
-
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
@@ -134,20 +144,17 @@ class Recipe(recipe.Recipe):
                 arch = 'arm'
             extra_flags = ''
             if self.config.target_platform == Platform.IOS:
-                self.deps += ['proxy-libintl']
-                self.configure_options += ' --enable-proxy-libintl'
-
                 # Disable mac OS X specifics
                 extra_flags = '-DGST_SDK_IOS=1'
-                self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
-
-            self.append_env['CFLAGS']="-DHAVE_STRNDUP %s" % extra_flags
+                # XXX: Why did we disable these for iOS?
+                #self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
+            self.append_env['CFLAGS'] = extra_flags
 
         elif self.config.target_platform == Platform.LINUX:
             path1 = '/usr/lib/gio/modules'
             path2 = None
             use_old_uri_scheme = False
-            self.configure_options += ' --disable-selinux'
+            self.meson_options.update({'selinux': 'false'})
             # Old Debian/Ubuntu
             if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE,
                                                      DistroVersion.UBUNTU_LUCID,
@@ -188,11 +195,7 @@ class Recipe(recipe.Recipe):
             self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
     def post_install(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            shutil.copy(os.path.join(self.build_dir, 'glib', 'glibconfig.h.win32'),
-                        os.path.join(self.config.prefix, 'lib', 'glib-2.0',
-                                     'include', 'glibconfig.h'))
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             # For the universal build we need to ship glibconfig.h of both
             # architectures in a subfolder and include the correct one depending
             # on the compiler architecture
@@ -208,7 +211,7 @@ class Recipe(recipe.Recipe):
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
-            shutil.copyfile(os.path.join(self.build_dir, 'glib', 'glibconfig.h'),
+            shutil.copyfile(os.path.join(self.meson_dir, 'glib', 'glibconfig.h'),
                         os.path.join(arch_dir, 'glibconfig.h'))
             with open(os.path.join(self.config.prefix, 'lib', 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:

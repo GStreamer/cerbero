@@ -360,10 +360,6 @@ class CMake (MakefilesBase):
         MakefilesBase.configure(self)
 
 
-# Note: We force stpcpy to be false because our ancient version of the mingw
-# toolchain claims to provide it but doesn't define it in the standard string.h
-# This is fixed in newer versions of GCC where stpcpy is only available when SSP
-# support enabled.
 MESON_CROSS_FILE_TPL = \
 '''
 [host_machine]
@@ -373,7 +369,6 @@ cpu = '{cpu}'
 endian = '{endian}'
 
 [properties]
-has_function_stpcpy = false
 {extra_properties}
 
 [binaries]

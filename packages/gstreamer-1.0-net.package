@@ -28,6 +28,6 @@ class Package(custom.GStreamer, package.Package):
                 [DistroVersion.DEBIAN_SQUEEZE,
                  DistroVersion.UBUNTU_MAVERICK,
                  DistroVersion.UBUNTU_LUCID]:
-            self.files += ['glib-networking', 'glib-networking-static']
+            self.files += ['glib-networking']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
