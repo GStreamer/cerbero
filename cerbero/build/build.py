@@ -510,6 +510,10 @@ class Meson (Build, ModifyEnvBase) :
             f = self.write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
 
+        # We enable -fembed-bitcode which is incompatible with -Wl,-dead_strip_dylibs
+        if self.config.target_platform == Platform.IOS:
+            self.meson_options.update({'b_asneeded': 'false'})
+
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))
 
