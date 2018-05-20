@@ -420,7 +420,7 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find ninja
         if not self.make:
-            self.make = 'ninja'
+            self.make = 'ninja -v'
         if not self.make_install:
             self.make_install = self.make + ' install'
         if not self.make_check:
@@ -438,16 +438,13 @@ class Meson (Build, ModifyEnvBase) :
 
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
-        #
-        # Create and pass a specs file that sets link_args for GCC to find
-        # 'system' libraries (those that Cerbero builds and installs). This is
-        # only needed when cross-compiling because with a native compiler the
-        # LIBRARY_PATH variable applies.
-        specs_file = os.path.join(self.meson_dir, 'meson-gcc-specs-file.txt')
-        with open(specs_file, 'w') as f:
-            f.write('*link_libgcc:\n')
-            f.write('%D -L{0}/lib{1}\n'.format(self.config.prefix, self.config.lib_suffix))
-        c_link_args = ['-specs=' + specs_file]
+        if isinstance(self.config.universal_archs, dict):
+            # Universal builds have arch-specific prefixes inside the universal prefix
+            libdir = '{}/{}/lib{}'.format(self.config.prefix, self.config.target_arch,
+                                          self.config.lib_suffix)
+        else:
+            libdir = '{}/lib{}'.format(self.config.prefix, self.config.lib_suffix)
+        c_link_args = ['-L' + libdir]
         c_link_args += shlex.split(os.environ.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
         c_args = shlex.split(os.environ.get('CFLAGS', ''))
