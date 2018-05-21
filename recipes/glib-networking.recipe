@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
                      'gnome_proxy_support': 'false', 'pkcs11_support': 'false'}
     deps = ['glib', 'gnutls']
     patches = [name + '/0001-Fix-building-tls-plugin-without-pkcs11.patch',
+               name + '/0001-meson-Use-.so-for-modules-on-macOS-instead-of-dylib.patch',
                # XXX: This patch may require changes to gnutls's system trust
                # since we can no longer set the certificate path in glib-networking
                name + '/0001-Use-the-GnuTLS-system-trust-by-default.patch',

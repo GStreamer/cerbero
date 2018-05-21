@@ -1,0 +1,82 @@
+From 864113e2f490b090d2cfbe12626cacaca4f992e8 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 22 May 2018 05:03:18 +0530
+Subject: [PATCH] meson: Use .so for modules on macOS instead of dylib
+
+This matches what libtool produces, and what gio/gmodule expect.
+---
+ meson.build                | 5 ++++-
+ proxy/gnome/meson.build    | 1 +
+ proxy/libproxy/meson.build | 1 +
+ tls/gnutls/meson.build     | 1 +
+ 4 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 2467ac7..9487f07 100644
+--- a/meson.build
++++ b/meson.build
+@@ -16,6 +16,7 @@ installed_tests_metadir = join_paths(datadir, 'installed-tests', meson.project_n
+ installed_tests_execdir = join_paths(libexecdir, 'installed-tests', meson.project_name())
+ 
+ cc = meson.get_compiler('c')
++host_system = host_machine.system()
+ 
+ config_h = configuration_data()
+ 
+@@ -36,7 +37,7 @@ symbol_map = join_paths(meson.current_source_dir(), meson.project_name() + '.map
+ 
+ module_ldflags = []
+ 
+-if host_machine.system().contains('linux')
++if host_system.contains('linux')
+   test_ldflag = '-Wl,--version-script,' + symbol_map
+ 
+   module_ldflags += cc.get_supported_arguments(test_ldflag)
+@@ -93,6 +94,8 @@ subdir('po')
+ enable_installed_tests = get_option('installed_tests')
+ test_template = files('template.test.in')
+ 
++module_suffix = host_system == 'darwin' ? 'so' : ''
++
+ if enable_libproxy_support or enable_gnome_proxy_support
+   proxy_test_programs = []
+ 
+diff --git a/proxy/gnome/meson.build b/proxy/gnome/meson.build
+index 069a459..1e65c9a 100644
+--- a/proxy/gnome/meson.build
++++ b/proxy/gnome/meson.build
+@@ -16,6 +16,7 @@ module = shared_module(
+   dependencies: deps,
+   link_args: module_ldflags,
+   link_depends: symbol_map,
++  name_suffix: module_suffix,
+   install: true,
+   install_dir: gio_module_dir
+ )
+diff --git a/proxy/libproxy/meson.build b/proxy/libproxy/meson.build
+index baa7ab7..c0c8af6 100644
+--- a/proxy/libproxy/meson.build
++++ b/proxy/libproxy/meson.build
+@@ -40,6 +40,7 @@ module = shared_module(
+   c_args: '-DGLIBPROXY_MODULE',
+   link_args: module_ldflags,
+   link_depends: symbol_map,
++  name_suffix: module_suffix,
+   install: true,
+   install_dir: gio_module_dir
+ )
+diff --git a/tls/gnutls/meson.build b/tls/gnutls/meson.build
+index 98bbb73..c0d4b3f 100644
+--- a/tls/gnutls/meson.build
++++ b/tls/gnutls/meson.build
+@@ -38,6 +38,7 @@ module = shared_module(
+   dependencies: deps,
+   link_args: module_ldflags,
+   link_depends: symbol_map,
++  name_suffix: module_suffix,
+   install: true,
+   install_dir: gio_module_dir
+ )
+-- 
+2.17.0
+
