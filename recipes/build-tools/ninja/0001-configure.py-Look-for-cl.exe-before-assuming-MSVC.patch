@@ -1,0 +1,38 @@
+From b6784276d7ccea28ab1a5d5936f98b8342e8eb57 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 16 May 2018 13:32:14 +0530
+Subject: [PATCH] configure.py: Look for cl.exe before assuming MSVC
+
+Cerbero uses Native-Windows Python with MinGW which gets detected
+incorrectly.
+---
+ configure.py | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/configure.py b/configure.py
+index a443748..a627f46 100644
+--- a/configure.py
++++ b/configure.py
+@@ -27,6 +27,7 @@ import pipes
+ import string
+ import subprocess
+ import sys
++import shutil
+ 
+ sourcedir = os.path.dirname(os.path.realpath(__file__))
+ sys.path.insert(0, os.path.join(sourcedir, 'misc'))
+@@ -53,7 +54,10 @@ class Platform(object):
+         elif self._platform.startswith('mingw'):
+             self._platform = 'mingw'
+         elif self._platform.startswith('win'):
+-            self._platform = 'msvc'
++            if shutil.which('cl'):
++                self._platform = 'msvc'
++            else:
++                self._platform = 'mingw'
+         elif self._platform.startswith('bitrig'):
+             self._platform = 'bitrig'
+         elif self._platform.startswith('netbsd'):
+-- 
+2.12.2.windows.2
+
