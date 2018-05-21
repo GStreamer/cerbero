@@ -1,0 +1,25 @@
+From f59786e81d82ef061dab19cf4ce8981943bab9c3 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 21 May 2018 21:57:15 +0530
+Subject: [PATCH] for_darwin: Also accept system='ios' in cross files
+
+---
+ mesonbuild/mesonlib.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mesonbuild/mesonlib.py b/mesonbuild/mesonlib.py
+index 2a3b920b..fe426c57 100644
+--- a/mesonbuild/mesonlib.py
++++ b/mesonbuild/mesonlib.py
+@@ -373,7 +373,7 @@ def for_darwin(is_cross, env):
+     if not is_cross:
+         return is_osx()
+     elif env.cross_info.has_host():
+-        return env.cross_info.config['host_machine']['system'] == 'darwin'
++        return env.cross_info.config['host_machine']['system'] in ('darwin', 'ios')
+     return False
+ 
+ def for_android(is_cross, env):
+-- 
+2.17.0
+
