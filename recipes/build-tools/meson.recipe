@@ -5,7 +5,7 @@ import stat
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.45.1'
+    version = '0.46.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
