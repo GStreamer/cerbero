@@ -25,7 +25,7 @@ class Package(custom.GStreamer, package.Package):
         Platform.LINUX: [],
         Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'gnustl',
             'bionic-fixup:libs'],
-        Platform.IOS: ['proxy-libint:libs:lang', 'bionic-fixup:libs']
+        Platform.IOS: ['proxy-libintl:libs:lang', 'bionic-fixup:libs']
         }
 
     def prepare(self):
