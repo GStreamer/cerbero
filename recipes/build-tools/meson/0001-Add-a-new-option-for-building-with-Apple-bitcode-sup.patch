@@ -113,7 +113,7 @@ index 762e7c56..5e7e7a75 100644
 +    as_needed = option_enabled(linker.base_options, options, 'b_asneeded')
 +    bitcode = option_enabled(linker.base_options, options, 'b_bitcode')
 +    if bitcode:
-+        args.append('-bitcode_bundle')
++        args.append('-Wl,-bitcode_bundle')
 +    elif as_needed:
 +        # -Wl,-dead_strip_dylibs is incompatible with bitcode
 +        args.append(linker.get_asneeded_args())
