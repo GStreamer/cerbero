@@ -19,6 +19,8 @@
 import os
 import sys
 import copy
+import sysconfig
+from pathlib import PurePath
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -240,9 +242,12 @@ class Config (object):
         gstregistry = os.path.expanduser(gstregistry)
         gstregistry10 = os.path.expanduser(gstregistry10)
 
+        pypath = sysconfig.get_path('purelib', vars={'base': ''})
+        # Ensure that / is the path separator and not \, then strip /
+        pypath = PurePath(pypath).as_posix().strip('/')
         # Ensure python paths exists because setup.py won't create them
-        pythonpath = [os.path.join(prefix, py_prefix, 'site-packages'),
-                      os.path.join(self.build_tools_prefix, py_prefix, 'site-packages')]
+        pythonpath = [os.path.join(prefix, pypath),
+                      os.path.join(self.build_tools_prefix, pypath)]
         for path in pythonpath:
             self._create_path(path)
         pythonpath = os.pathsep.join(pythonpath)
@@ -328,8 +333,9 @@ class Config (object):
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
-        self.set_property('py_prefix', 'lib/python%s.%s' %
-                (sys.version_info[0], sys.version_info[1]))
+        stdlibpath = sysconfig.get_path('stdlib', vars={'installed_base': ''})
+        # Ensure that the path uses / as path separator and not \
+        self.set_property('py_prefix', PurePath(stdlibpath).as_posix())
         self.set_property('lib_suffix', '')
         self.set_property('data_dir', self._find_data_dir())
         self.set_property('environ_dir', self._relative_path('config'))

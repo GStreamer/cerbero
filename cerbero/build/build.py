@@ -17,14 +17,15 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import re
+import copy
+import shutil
+import shlex
+import sysconfig
 
 from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
-import shutil
-import shlex
-import copy
-import re
 
 
 class Build (object):
@@ -413,7 +414,13 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find Meson
         if not self.meson_sh:
-            meson_path = os.path.join(self.config.build_tools_prefix, 'bin', 'meson')
+            if self.config.platform == Platform.WINDOWS:
+                meson = 'meson.py'
+            else:
+                meson = 'meson'
+            # 'Scripts' on Windows and 'bin' on other platforms including MSYS
+            bindir = sysconfig.get_path('scripts', vars={'base':''}).strip('\\/')
+            meson_path = os.path.join(self.config.build_tools_prefix, bindir, meson)
             self.meson_sh = self.config.python_exe + ' ' + meson_path
 
         # Find ninja

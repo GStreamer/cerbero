@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-import os
-import stat
+import subprocess
+from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
@@ -17,6 +17,11 @@ class Recipe(recipe.Recipe):
     files_python = []
 
     def install(self):
-        shell.call('%s setup.py install --prefix %s' %
-                (self.config.python_exe, self.config.prefix),
-                self.build_dir)
+        # setup.py barfs if using posix paths on Windows
+        if self.config.platform == Platform.WINDOWS:
+            prefix = str(PurePath(self.config.prefix))
+        else:
+            prefix = self.config.prefix
+        # Use subprocess.check_call because we don't want to bother with shell quoting
+        subprocess.check_call([self.config.python_exe, 'setup.py', 'install', '--prefix', prefix],
+                              cwd=self.build_dir)
