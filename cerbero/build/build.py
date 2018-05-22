@@ -186,6 +186,12 @@ class MakefilesBase (Build, ModifyEnvBase):
                 and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
 
+        # Only add this for non-meson recipes
+        if self.config.ios_platform == 'iPhoneOS':
+            self.append_env['CFLAGS'] = ' -fembed-bitcode '
+            self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
+            self.append_env['LDFLAGS'] = ' -Wl,-bitcode_bundle '
+
         # Make sure user's env doesn't mess up with our build.
         self.new_env['MAKEFLAGS'] = None
 
@@ -507,6 +513,10 @@ class Meson (Build, ModifyEnvBase) :
             'default-library': self.meson_default_library,
             'buildtype': buildtype,
             'backend': self.meson_backend }
+
+        # Don't enable bitcode by passing flags manually, use the option
+        if self.config.ios_platform == 'iPhoneOS':
+            self.meson_options.update({'b_bitcode': 'true'})
 
         if self.config.cross_compiling():
             f = self.write_meson_cross_file()

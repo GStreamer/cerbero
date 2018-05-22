@@ -11,7 +11,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
     deps = ['ninja']
-    patches = ['meson/0001-for_darwin-Also-accept-system-ios-in-cross-files.patch']
+    patches = ['meson/0001-for_darwin-Also-accept-system-ios-in-cross-files.patch',
+               'meson/0001-Add-a-new-option-for-building-with-Apple-bitcode-sup.patch']
 
     files_bin = ['bin/meson']
     files_python = []
