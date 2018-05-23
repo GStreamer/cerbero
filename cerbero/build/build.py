@@ -190,7 +190,9 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.config.ios_platform == 'iPhoneOS':
             self.append_env['CFLAGS'] = ' -fembed-bitcode '
             self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
-            self.append_env['LDFLAGS'] = ' -Wl,-bitcode_bundle '
+            # Autotools only adds LDFLAGS when doing compiler checks,
+            # so add -fembed-bitcode again
+            self.append_env['LDFLAGS'] = ' -fembed-bitcode -Wl,-bitcode_bundle '
 
         # Make sure user's env doesn't mess up with our build.
         self.new_env['MAKEFLAGS'] = None
