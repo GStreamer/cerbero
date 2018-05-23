@@ -186,14 +186,6 @@ class MakefilesBase (Build, ModifyEnvBase):
                 and self.config.num_of_cpus > 1:
             self.make += ' -j%d' % self.config.num_of_cpus
 
-        # Only add this for non-meson recipes
-        if self.config.ios_platform == 'iPhoneOS':
-            self.append_env['CFLAGS'] = ' -fembed-bitcode '
-            self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
-            # Autotools only adds LDFLAGS when doing compiler checks,
-            # so add -fembed-bitcode again
-            self.append_env['LDFLAGS'] = ' -fembed-bitcode -Wl,-bitcode_bundle '
-
         # Make sure user's env doesn't mess up with our build.
         self.new_env['MAKEFLAGS'] = None
 
@@ -206,6 +198,14 @@ class MakefilesBase (Build, ModifyEnvBase):
             os.makedirs(self.make_dir)
         if self.requires_non_src_build:
             self.config_sh = os.path.join('../', self.config_sh)
+
+        # Only add this for non-meson recipes, and only for iPhoneOS
+        if self.config.ios_platform == 'iPhoneOS':
+            self.append_env['CFLAGS'] = ' -fembed-bitcode '
+            self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
+            # Autotools only adds LDFLAGS when doing compiler checks,
+            # so add -fembed-bitcode again
+            self.append_env['LDFLAGS'] = ' -fembed-bitcode -Wl,-bitcode_bundle '
 
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
