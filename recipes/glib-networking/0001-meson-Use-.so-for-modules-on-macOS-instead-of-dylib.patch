@@ -36,7 +36,7 @@ index 2467ac7..9487f07 100644
  enable_installed_tests = get_option('installed_tests')
  test_template = files('template.test.in')
  
-+module_suffix = host_system == 'darwin' ? 'so' : ''
++module_suffix = ['darwin', 'ios'].contains(host_system) ? 'so' : ''
 +
  if enable_libproxy_support or enable_gnome_proxy_support
    proxy_test_programs = []
