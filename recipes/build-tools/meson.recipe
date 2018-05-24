@@ -13,7 +13,6 @@ class Recipe(recipe.Recipe):
     deps = ['ninja']
     patches = ['meson/0001-for_darwin-Also-accept-system-ios-in-cross-files.patch',
                'meson/0001-Add-a-new-option-for-building-with-Apple-bitcode-sup.patch']
-
     files_bin = ['bin/meson']
     files_python = []
 
