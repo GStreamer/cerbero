@@ -1,4 +1,4 @@
-From da07964b60ea4cda2c8b5795bc7c2075283c3a4f Mon Sep 17 00:00:00 2001
+From 3f5e9270d1b8348401f60998069997eb8d8777b2 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 22 May 2018 13:39:00 +0530
 Subject: [PATCH] Add a new option for building with Apple bitcode support
@@ -9,9 +9,9 @@ an option so that those can be quietly disabled.
 ---
  mesonbuild/backend/ninjabackend.py  |  3 +-
  mesonbuild/backend/vs2010backend.py |  3 +-
- mesonbuild/compilers/compilers.py   | 57 ++++++++++++++++++++---------
- run_unittests.py                    | 31 ++++++++++++++++
- 4 files changed, 74 insertions(+), 20 deletions(-)
+ mesonbuild/compilers/compilers.py   | 49 ++++++++++++++++++++---------
+ run_unittests.py                    | 43 +++++++++++++++++++++++++
+ 4 files changed, 81 insertions(+), 17 deletions(-)
 
 diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
 index c7e194e6..f1925bec 100644
@@ -42,7 +42,7 @@ index 09822edf..0ff7157c 100644
              extra_link_args += self.build.get_project_link_args(compiler, target.subproject)
              # Add link args added using add_global_link_arguments()
 diff --git a/mesonbuild/compilers/compilers.py b/mesonbuild/compilers/compilers.py
-index 762e7c56..5e7e7a75 100644
+index 762e7c56..45564ae1 100644
 --- a/mesonbuild/compilers/compilers.py
 +++ b/mesonbuild/compilers/compilers.py
 @@ -249,6 +249,9 @@ base_options = {'b_pch': coredata.UserBooleanOption('b_pch', 'Use precompiled he
@@ -72,7 +72,7 @@ index 762e7c56..5e7e7a75 100644
 +        if option not in boptions:
 +            return False
 +        return options[option].value
-+    except:
++    except KeyError:
 +        return False
 +
  def get_base_compile_args(options, compiler):
@@ -88,7 +88,7 @@ index 762e7c56..5e7e7a75 100644
      return args
  
  def get_base_link_args(options, linker, is_shared_module):
-@@ -360,21 +373,21 @@ def get_base_link_args(options, linker, is_shared_module):
+@@ -360,21 +373,23 @@ def get_base_link_args(options, linker, is_shared_module):
              args.append('-fprofile-use')
      except KeyError:
          pass
@@ -112,7 +112,9 @@ index 762e7c56..5e7e7a75 100644
 +        args.append('-Wl,--no-undefined')
 +    as_needed = option_enabled(linker.base_options, options, 'b_asneeded')
 +    bitcode = option_enabled(linker.base_options, options, 'b_bitcode')
-+    if bitcode:
++    # Shared modules cannot be built with bitcode_bundle because
++    # -bitcode_bundle is incompatible with -undefined and -bundle
++    if bitcode and not is_shared_module:
 +        args.append('-Wl,-bitcode_bundle')
 +    elif as_needed:
 +        # -Wl,-dead_strip_dylibs is incompatible with bitcode
@@ -120,7 +122,7 @@ index 762e7c56..5e7e7a75 100644
      return args
  
  class CrossNoRunException(MesonException):
-@@ -859,7 +872,7 @@ class Compiler:
+@@ -859,7 +874,7 @@ class Compiler:
      def get_std_shared_lib_link_args(self):
          return []
  
@@ -129,7 +131,7 @@ index 762e7c56..5e7e7a75 100644
          return self.get_std_shared_lib_link_args()
  
      def get_link_whole_for(self, args):
-@@ -1068,7 +1081,9 @@ class GnuCompiler:
+@@ -1068,7 +1083,9 @@ class GnuCompiler:
          self.defines = defines or {}
          self.base_options = ['b_pch', 'b_lto', 'b_pgo', 'b_sanitize', 'b_coverage',
                               'b_colorout', 'b_ndebug', 'b_staticpic']
@@ -140,7 +142,7 @@ index 762e7c56..5e7e7a75 100644
              self.base_options.append('b_lundef')
          self.base_options.append('b_asneeded')
          # All GCC backends can do assembly
-@@ -1184,7 +1199,9 @@ class ClangCompiler:
+@@ -1184,7 +1201,9 @@ class ClangCompiler:
          self.clang_type = clang_type
          self.base_options = ['b_pch', 'b_lto', 'b_pgo', 'b_sanitize', 'b_coverage',
                               'b_ndebug', 'b_staticpic', 'b_colorout']
@@ -151,30 +153,20 @@ index 762e7c56..5e7e7a75 100644
              self.base_options.append('b_lundef')
          self.base_options.append('b_asneeded')
          # All Clang backends can do assembly and LLVM IR
-@@ -1253,10 +1270,14 @@ class ClangCompiler:
+@@ -1253,7 +1272,7 @@ class ClangCompiler:
              extra_args.append('-Wl,-no_weak_imports')
          return super().has_function(funcname, prefix, env, extra_args, dependencies)
  
 -    def get_std_shared_module_link_args(self):
--        if self.clang_type == CLANG_OSX:
--            return ['-bundle', '-Wl,-undefined,dynamic_lookup']
--        return ['-shared']
 +    def get_std_shared_module_link_args(self, options):
-+        if self.clang_type != CLANG_OSX:
-+            return ['-shared']
-+        args = ['-Wl,-undefined,dynamic_lookup']
-+        if not option_enabled(self.base_options, options, 'b_bitcode'):
-+            # -bitcode_bundle and -fembed-bitcode are incompatible with -bundle
-+            args.append('-bundle')
-+        return args
- 
-     def get_link_whole_for(self, args):
          if self.clang_type == CLANG_OSX:
+             return ['-bundle', '-Wl,-undefined,dynamic_lookup']
+         return ['-shared']
 diff --git a/run_unittests.py b/run_unittests.py
-index 3608d3e5..3afa425f 100755
+index 3608d3e5..593f21f3 100755
 --- a/run_unittests.py
 +++ b/run_unittests.py
-@@ -3128,6 +3128,37 @@ endian = 'little'
+@@ -3128,6 +3128,49 @@ endian = 'little'
              deps.append(b'-lintl')
          self.assertEqual(set(deps), set(stdo.split()))
  
@@ -208,6 +200,18 @@ index 3608d3e5..3afa425f 100755
 +            contents = f.read()
 +            m = re.search('LINK_ARGS =.*-bitcode_bundle', contents)
 +        self.assertIsNone(m, msg=contents)
++
++    def test_apple_bitcode_modules(self):
++        '''
++        Same as above, just for shared_module()
++        '''
++        if not is_osx():
++            raise unittest.SkipTest('Apple bitcode not relevant')
++        testdir = os.path.join(self.common_test_dir, '156 shared module resolving symbol in executable')
++        # Ensure that it builds even with bitcode enabled
++        self.init(testdir, extra_args='-Db_bitcode=true')
++        self.build()
++        self.run_tests()
 +
  class LinuxArmCrossCompileTests(BasePlatformTests):
      '''
