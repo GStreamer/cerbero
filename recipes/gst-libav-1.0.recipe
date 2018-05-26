@@ -68,6 +68,11 @@ class Recipe(custom.GStreamer):
             # cause warnings now. Ignore them
             libavextraconf = " --extra-cflags=\'-Wno-ignored-optimization-argument\' "
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
+        elif self.config.target_platform == Platform.WINDOWS:
+            # FIXME: Remove when we update to ffmpeg 4.0 which fixes targetting Vista
+            winflags = '-UWINVER -U_WIN32_WINNT -DWINVER=0x0501 -D_WIN32_WINNT=0x0501'
+            libavextraconf = "--extra-cflags='{}'".format(winflags)
+            self.configure_options += ' --with-libav-extra-configure="{}" '.format(libavextraconf)
 
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
