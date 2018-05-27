@@ -27,6 +27,3 @@ class Recipe(custom.GStreamer):
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
             self.files_libs.append("libgstvalidate-default-overrides-1.0")
-        elif self.config.target_platform == Platform.WINDOWS:
-            # We build with -Werror for pre-releases, and that fails on Windows
-            self.append_env['CFLAGS'] = ' -Wno-error '
