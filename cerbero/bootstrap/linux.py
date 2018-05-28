@@ -113,7 +113,8 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
                 'docbook-utils-pdf', 'glib-networking', 'help2man',
                 'dbus-devel', 'glib2-devel', 'libXrandr-devel',
-                'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros']
+                'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
+                'mesa-libEGL-devel']
 
     def __init__(self, config):
         UnixBootstrapper.__init__(self, config)
