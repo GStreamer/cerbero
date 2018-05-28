@@ -27,8 +27,9 @@ class Package(custom.GStreamer, package.Package):
     platform_files = {
             Platform.ANDROID: ['tremor:libs'],
             Platform.IOS: ['tremor:libs'],
-            Platform.LINUX: ['gst-omx-1.0:plugins_codecs']
     }
-    platform_files_devel = {
-            Platform.LINUX: ['gst-omx-1.0:plugins_codecs_devel']
-    }
+
+    def prepare(self):
+        if self.config.variants.rpi:
+            self.files.append('gst-omx-1.0:plugins_codecs')
+            self.files_devel.append('gst-omx-1.0:plugins_codecs_devel')
