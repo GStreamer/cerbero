@@ -1,7 +1,7 @@
-From f1c8feee014007cc913b71357acb609f8d1200df Mon Sep 17 00:00:00 2001
+From 6c8ee5721428db1635bcc05044419038cbcf82ba Mon Sep 17 00:00:00 2001
 From: Michael Catanzaro <mcatanzaro@igalia.com>
 Date: Thu, 8 Feb 2018 22:02:06 -0600
-Subject: [PATCH] Use the GnuTLS system trust by default
+Subject: [PATCH 3/4] Use the GnuTLS system trust by default
 
 Get rid of the ca_certificates_path build flag. The default GTlsDatabase
 will now use the GnuTLS system trust. GTlsFileDatabase now builds its
@@ -86,10 +86,10 @@ index 4c5fd8f..0000000
 -
 -sys.exit(errno.ENOENT)
 diff --git a/meson.build b/meson.build
-index cf6782c..ee2bd9d 100644
+index c875331..5c2bb05 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -62,14 +62,7 @@ if enable_gnome_proxy_support
+@@ -64,14 +64,7 @@ if enable_gnome_proxy_support
  endif
  
  # *** Checks for GnuTLS     ***
@@ -105,7 +105,7 @@ index cf6782c..ee2bd9d 100644
  
  # *** Checks for p11-kit  ***
  enable_pkcs11_support = get_option('pkcs11_support')
-@@ -126,5 +119,4 @@ meson.add_install_script('meson_post_install.py', gio_module_dir)
+@@ -134,5 +127,4 @@ meson.add_install_script('meson_post_install.py', gio_module_dir)
  output = '\n\n  libproxy support:    ' + enable_libproxy_support.to_string() + '\n'
  output += '  GNOME proxy support: ' + enable_gnome_proxy_support.to_string() + '\n'
  output += '  PKCS#11 support:     ' + enable_pkcs11_support.to_string() + '\n'

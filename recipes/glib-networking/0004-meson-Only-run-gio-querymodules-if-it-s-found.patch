@@ -1,19 +1,21 @@
-From dc607d8e1c44a9a6eb796c1946f7e5e4a7c74cdd Mon Sep 17 00:00:00 2001
+From 81e64a81ba808bc05aaa6f95eed47366bffa9ea9 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 9 May 2018 20:03:00 +0530
-Subject: [PATCH 6/6] meson: Only run gio-querymodules if it's found
+Subject: [PATCH 4/4] meson: Only run gio-querymodules if it's found
 
 And run the correct one if it's found
+
+https://bugzilla.gnome.org/show_bug.cgi?id=795982
 ---
  meson.build           | 6 +++++-
  meson_post_install.py | 2 +-
  2 files changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
-index f8e0e41..7dd53b9 100644
+index 5c2bb05..c8a4666 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -126,7 +126,11 @@ endif
+@@ -122,7 +122,11 @@ endif
  subdir('tls/gnutls')
  subdir('tls/tests')
  

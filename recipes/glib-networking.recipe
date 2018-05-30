@@ -4,7 +4,7 @@ from cerbero.utils.shell import which
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.56.0'
+    version = '2.56.1'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
@@ -12,12 +12,13 @@ class Recipe(recipe.Recipe):
     meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
                      'gnome_proxy_support': 'false', 'pkcs11_support': 'false'}
     deps = ['glib', 'gnutls']
-    patches = [name + '/0001-Fix-building-tls-plugin-without-pkcs11.patch',
-               name + '/0001-meson-Use-.so-for-modules-on-macOS-instead-of-dylib.patch',
+    # These patches are upstream, remove on bump
+    patches = [name + '/0001-meson-Use-.so-for-modules-on-macOS-instead-of-dylib.patch',
+               name + '/0002-meson-Unbreak-the-non-macOS-builds.patch',
                # XXX: This patch may require changes to gnutls's system trust
                # since we can no longer set the certificate path in glib-networking
-               name + '/0001-Use-the-GnuTLS-system-trust-by-default.patch',
-               name + '/0006-meson-Only-run-gio-querymodules-if-it-s-found.patch']
+               name + '/0003-Use-the-GnuTLS-system-trust-by-default.patch',
+               name + '/0004-meson-Only-run-gio-querymodules-if-it-s-found.patch',]
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
