@@ -1,0 +1,106 @@
+From 31a8e2d7431e0b33b8beeb0591f08428aec6af26 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 8 Jun 2018 00:37:24 +0530
+Subject: [PATCH 4/5] depfixer: Rewrite install_name for dylibs on install
+
+The install name is used by consumers of the library to find the
+library at runtime. If it's @rpath/libfoo.dylib, all consumers must
+manually add the library path to RPATH, which is not what people
+expect.
+
+Almost everyone sets the library install name as the full path to the
+library, and this is done at install time with install_name_tool.
+---
+ mesonbuild/scripts/depfixer.py      | 40 ++++++++++++++++++-------------------
+ mesonbuild/scripts/meson_install.py |  3 ++-
+ 2 files changed, 21 insertions(+), 22 deletions(-)
+
+diff --git a/mesonbuild/scripts/depfixer.py b/mesonbuild/scripts/depfixer.py
+index 185c76a4..132cc72c 100644
+--- a/mesonbuild/scripts/depfixer.py
++++ b/mesonbuild/scripts/depfixer.py
+@@ -364,7 +364,7 @@ def get_darwin_rpaths_to_remove(fname):
+             result.append(rp)
+     return result
+ 
+-def fix_darwin(fname, new_rpath):
++def fix_darwin(fname, new_rpath, final_path):
+     try:
+         rpaths = get_darwin_rpaths_to_remove(fname)
+     except subprocess.CalledProcessError:
+@@ -372,40 +372,38 @@ def fix_darwin(fname, new_rpath):
+         # non-executable target. Just return.
+         return
+     try:
+-        for rp in rpaths:
+-            subprocess.check_call(['install_name_tool', '-delete_rpath', rp, fname],
++        args = []
++        if rpaths:
++            for rp in rpaths:
++                args += ['-delete_rpath', rp]
++            subprocess.check_call(['install_name_tool', fname] + args,
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL)
++        args = []
+         if new_rpath:
+-            subprocess.check_call(['install_name_tool', '-add_rpath', new_rpath, fname],
++            args += ['-add_rpath', new_rpath]
++        # Rewrite -install_name @rpath/libfoo.dylib to /path/to/libfoo.dylib
++        if fname.endswith('dylib'):
++            args += ['-id', final_path]
++        if args:
++            subprocess.check_call(['install_name_tool', fname] + args,
+                                   stdout=subprocess.DEVNULL,
+                                   stderr=subprocess.DEVNULL)
+     except Exception as e:
+         raise
+         sys.exit(0)
+ 
+-def fix_rpath(fname, new_rpath, verbose=True):
++def fix_rpath(fname, new_rpath, final_path, verbose=True):
++    # Static libraries never have rpaths
++    if fname.endswith('.a'):
++        return
+     try:
+         fix_elf(fname, new_rpath, verbose)
+-        return 0
++        return
+     except SystemExit as e:
+         if isinstance(e.code, int) and e.code == 0:
+             pass
+         else:
+             raise
+     if shutil.which('install_name_tool'):
+-        fix_darwin(fname, new_rpath)
+-    return 0
+-
+-def run(args):
+-    if len(args) < 1 or len(args) > 2:
+-        print('This application resets target rpath.')
+-        print('Don\'t run this unless you know what you are doing.')
+-        print('%s: <binary file> <prefix>' % sys.argv[0])
+-        sys.exit(1)
+-    fname = args[0]
+-    new_rpath = None if len(args) == 1 else args[1]
+-    return fix_rpath(fname, new_rpath)
+-
+-if __name__ == '__main__':
+-    sys.exit(run(sys.argv[1:]))
++        fix_darwin(fname, new_rpath, final_path, install_name_mappings)
+diff --git a/mesonbuild/scripts/meson_install.py b/mesonbuild/scripts/meson_install.py
+index 013f2a00..1ee9507b 100644
+--- a/mesonbuild/scripts/meson_install.py
++++ b/mesonbuild/scripts/meson_install.py
+@@ -368,7 +368,8 @@ def install_targets(d):
+                     printed_symlink_error = True
+         if os.path.isfile(outname):
+             try:
+-                depfixer.fix_rpath(outname, install_rpath, False)
++                depfixer.fix_rpath(outname, install_rpath, final_path,
++                                   verbose=False)
+             except SystemExit as e:
+                 if isinstance(e.code, int) and e.code == 0:
+                     pass
+-- 
+2.15.1 (Apple Git-101)
+
