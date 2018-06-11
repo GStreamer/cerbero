@@ -79,6 +79,3 @@ class Recipe(custom.GStreamer):
 
         if self.config.variants.nodebug:
             self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
-
-    def post_install(self):
-        pass
