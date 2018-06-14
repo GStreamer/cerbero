@@ -1,6 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
 from cerbero.errors import FatalError
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
 
 GLIB_CONFIG_UNVERSAL='''\
 #ifdef __i386__
@@ -221,3 +223,16 @@ class Recipe(recipe.Recipe):
             with open(os.path.join(self.config.prefix, 'lib', 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:
                 f.write(GLIB_CONFIG_UNVERSAL)
+        major, minor, micro = get_libtool_versions(self.version)
+        # Meson does not generate la files
+        LibtoolLibrary('glib-2.0', major, minor, micro,
+                self.config.libdir, self.config.target_platform).save()
+        LibtoolLibrary('gobject-2.0', major, minor, micro,
+                self.config.libdir, self.config.target_platform,
+                deps=['glib-2.0', 'ffi']).save()
+        LibtoolLibrary('gmodule-2.0', major, minor, micro,
+                self.config.libdir, self.config.target_platform,
+                deps=['glib-2.0']).save()
+        LibtoolLibrary('gio-2.0', major, minor, micro,
+                self.config.libdir, self.config.target_platform,
+                deps=['gobject-2.0', 'gmodule-2.0', 'z']).save()

@@ -2,7 +2,6 @@
 import shutil
 
 from cerbero.utils import shell
-from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(custom.GStreamer):
     name = 'gst-libav-1.0'

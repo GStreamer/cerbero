@@ -19,7 +19,28 @@
 
 import os
 from cerbero.config import Platform
+from cerbero.errors import FatalError
 
+def get_libtool_versions(version, soversion=0):
+    parts = version.split('.')
+    if not parts or len(parts) > 3:
+        raise FatalError('Version must contain three or fewer parts: {!r}'
+                         ''.format(version))
+    try:
+        major = int(parts[0])
+        minor = 0
+        micro = 0
+        if len(parts) > 1:
+            minor = int(parts[1])
+            if len(parts) > 2:
+                micro = int(parts[2])
+    except ValueError:
+        raise FatalError('Invalid version: {!r}'.format(version))
+    interface_age = 0
+    if (minor % 2) == 0:
+        interface_age = micro
+    binary_age = (100 * minor) + micro
+    return (soversion, binary_age - interface_age, interface_age)
 
 class LibtoolLibrary(object):
     '''
