@@ -50,7 +50,7 @@ License = enums.License
 class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
-                           'gi', 'unwind', 'rpi']
+                           'gi', 'unwind', 'rpi', 'visualstudio']
     __enabled_variants = ['debug', 'python', 'testspackage']
 
     def __init__(self, variants):
@@ -94,7 +94,8 @@ class Config (object):
                    'distro_packages_install', 'interactive',
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
-                   'ios_min_version', 'toolchain_path', 'mingw_perl_prefix']
+                   'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
+                   'msvc_toolchain_env']
 
     def __init__(self):
         self._check_uninstalled()

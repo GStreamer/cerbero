@@ -38,6 +38,8 @@ class Build (object):
     @type config: L{cerbero.config.Config}
     '''
 
+    # Whether this recipe's build system can be built with MSVC
+    can_msvc = False
     _properties_keys = []
 
     def configure(self):
@@ -201,6 +203,7 @@ class MakefilesBase (Build, ModifyEnvBase):
 
         # Only add this for non-meson recipes, and only for iPhoneOS
         if self.config.ios_platform == 'iPhoneOS':
+            # FIXME: this overwrites values set by the recipe
             self.append_env['CFLAGS'] = ' -fembed-bitcode '
             self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
             # Autotools only adds LDFLAGS when doing compiler checks,
@@ -384,6 +387,7 @@ c = {CC}
 cpp = {CXX}
 ar = {AR}
 strip = {STRIP}
+windres = {WINDRES}
 pkgconfig = 'pkg-config'
 '''
 
@@ -404,16 +408,34 @@ class Meson (Build, ModifyEnvBase) :
             --backend=%(backend)s --wrap-mode=nodownload ..'
     meson_default_library = 'shared'
     meson_backend = 'ninja'
+    # All meson recipes are MSVC-compatible, except if the code itself isn't
+    can_msvc = True
 
     def __init__(self):
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
-        # HACK: CC and CXX must be the native toolchain
-        # https://bugzilla.gnome.org/show_bug.cgi?id=791670
+        # Whether to reset the toolchain env vars set by the cerbero config
+        # before building the recipe
+        reset_toolchain_envvars = False
         if self.config.cross_compiling():
-            self.new_env['CC'] = None
-            self.new_env['CXX'] = None
+            # We export the cross toolchain with env vars, but Meson picks the
+            # native toolchain from these, so unset them.
+            # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=791670
+            # NOTE: This means we require a native compiler on the build
+            # machine when cross-compiling, which in practice is not a problem
+            reset_toolchain_envvars = True
+        if 'visualstudio' in self.config.variants and self.can_msvc:
+            # The toolchain env vars set by us are for GCC, so unset them if
+            # we're building with MSVC
+            reset_toolchain_envvars = True
+            # Set the MSVC toolchain environment
+            self.new_env.update(self.config.msvc_toolchain_env)
+        if reset_toolchain_envvars:
+            # Only reset vars that are read by Meson for now
+            for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
+                        'CXXFLAGS', 'LDFLAGS'):
+                self.new_env[var] = None
 
         # Find Meson
         if not self.meson_sh:
@@ -437,12 +459,14 @@ class Meson (Build, ModifyEnvBase) :
             self.make_clean = self.make + ' clean'
 
     def write_meson_cross_file(self):
-        # Take CC and CXX from _old_env because we modified env to make them be
-        # the native toolchain.
+        # Take cross toolchain from _old_env because we removed them from the
+        # env so meson doesn't detect them as the native toolchain.
+        # Same for *FLAGS below.
         cc = self._old_env.get('CC', '').split(' ')
         cxx = self._old_env.get('CXX', '').split(' ')
-        ar=os.environ.get('AR', '').split(' ')
-        strip=os.environ.get('STRIP', '').split(' ')
+        ar = self._old_env.get('AR', '').split(' ')
+        strip = self._old_env.get('STRIP', '').split(' ')
+        windres = self._old_env.get('WINDRES', '').split(' ')
 
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
@@ -453,10 +477,10 @@ class Meson (Build, ModifyEnvBase) :
         else:
             libdir = '{}/lib{}'.format(self.config.prefix, self.config.lib_suffix)
         c_link_args = ['-L' + libdir]
-        c_link_args += shlex.split(os.environ.get('LDFLAGS', ''))
+        c_link_args += shlex.split(self._old_env.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
-        c_args = shlex.split(os.environ.get('CFLAGS', ''))
-        cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
+        c_args = shlex.split(self._old_env.get('CFLAGS', ''))
+        cpp_args = shlex.split(self._old_env.get('CXXFLAGS', ''))
 
         # Operate on a copy of the recipe properties to avoid accumulating args
         # from all archs when doing universal builds
@@ -483,6 +507,7 @@ class Meson (Build, ModifyEnvBase) :
                 CXX=cxx,
                 AR=ar,
                 STRIP=strip,
+                WINDRES=windres,
                 extra_properties=extra_properties)
         with open(cross_file, 'w') as f:
             f.write(contents)

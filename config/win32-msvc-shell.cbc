@@ -1,0 +1,9 @@
+# Please also edit win64-msvc-shell.cbc when updating this file
+
+from cerbero.config import Architecture
+
+target_arch = Architecture.X86
+
+# When set, we export the msvc toolchain in windows.config instead of when
+# building the recipe, and there won't be any MinGW toolchain paths
+os.environ['CERBERO_MSVC_SHELL'] = '1'
