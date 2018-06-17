@@ -29,7 +29,7 @@ index 11ae73919..b8b1e353c 100644
 +#error "compiler has atomic ops, but doesn't define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4"
 +#endif
 +'''
- if cc.links(atomictest, name : 'atomic ops')
+ if cc.get_id() == 'msvc' or cc.links(atomictest, name : 'atomic ops')
 -  glibconfig_conf.set('G_ATOMIC_LOCK_FREE', true)
 +  have_atomic_lock_free = true
 +  if host_system == 'android' and not cc.compiles(atomicdefine, name : 'atomic ops define')

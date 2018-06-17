@@ -1332,6 +1332,8 @@ Date: Wed, 9 May 2018 17:13:34 +0530
 Subject: [PATCH 18/24] meson: Fix atomic ops check
 
 It should link, not just compile. This is what configure does too.
+
+Also, we always have it on MSVC (already upstream in a separate commit)
 ---
  meson.build | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
@@ -1345,7 +1347,7 @@ index f4bf5b89b..1fc8f339d 100644
  }
  '''
 -if cc.compiles(atomictest, name : 'atomic ops')
-+if cc.links(atomictest, name : 'atomic ops')
++if cc.get_id() == 'msvc' or cc.links(atomictest, name : 'atomic ops')
    glibconfig_conf.set('G_ATOMIC_LOCK_FREE', true)
  else
 -  if host_machine.cpu_family() == 'x86' and cc.compiles(atomictest, args : '-march=i486')
@@ -1615,7 +1617,7 @@ index 4c2daede2..608d2c426 100644
 +  return 0;
  }
  '''
- if cc.links(atomictest, name : 'atomic ops')
+ if cc.get_id() == 'msvc' or cc.links(atomictest, name : 'atomic ops')
 -- 
 2.17.0
 
