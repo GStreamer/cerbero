@@ -12,7 +12,6 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CMAKE
     url = 'https://github.com/uclouvain/openjpeg/archive/v%(version)s.tar.gz'
     configure_options = ' -DBUILD_CODEC:bool=off -DBUILD_PKGCONFIG_FILES:bool=on '
-    patches = ['openjpeg/0002-Set-INSTALL_NAME_DIR.patch']
 
     files_libs = ['libopenjp2']
     files_devel = ['include/openjpeg-2.3/openjpeg.h',
