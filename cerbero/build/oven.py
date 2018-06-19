@@ -146,7 +146,7 @@ class Oven (object):
                 shell.close_logfile_output()
             except FatalError as e:
                 shell.close_logfile_output(dump=True)
-                self._handle_build_step_error(recipe, step, e.arch)
+                self._handle_build_step_error(recipe, step, traceback.format_exc(), e.arch)
             except Exception:
                 shell.close_logfile_output(dump=True)
                 raise BuildStepError(recipe, step, traceback.format_exc())
@@ -156,13 +156,13 @@ class Oven (object):
             self._print_missing_files(recipe, tmp)
             tmp.close()
 
-    def _handle_build_step_error(self, recipe, step , arch):
+    def _handle_build_step_error(self, recipe, step, trace, arch):
         if step in [BuildSteps.FETCH, BuildSteps.EXTRACT]:
             # if any of the source steps failed, wipe the directory and reset
             # the recipe status to start from scratch next time
             shutil.rmtree(recipe.build_dir)
             self.cookbook.reset_recipe_status(recipe.name)
-        raise BuildStepError(recipe, step, arch=arch)
+        raise BuildStepError(recipe, step, trace=trace, arch=arch)
 
     def _print_missing_files(self, recipe, tmp):
         recipe_files = set(recipe.files_list())
