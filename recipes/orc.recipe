@@ -21,6 +21,3 @@ class Recipe(recipe.Recipe):
         else:
             self.files_libs.append('liborc-test-0.4')
             self.files_devel.append('bin/orc-bugreport%(bext)s')
-        self.append_env['CFLAGS'] = " -Wno-error "
-        self.append_env['CXXFLAGS'] = " -Wno-error "
-        self.append_env['CPPFLAGS'] = " -Wno-error "

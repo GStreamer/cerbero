@@ -7,7 +7,7 @@ class Recipe(custom.GStreamer):
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
     configure_options = '--enable-static --disable-examples --disable-oss4 --disable-oss \
          --disable-dv1394 --disable-aalib --disable-libcaca --disable-jack --disable-shout2 \
-         --disable-twolame --disable-qt --disable-gtk3'
+         --disable-twolame --disable-qt --disable-gtk3 --disable-gtk-doc --disable-fatal-warnings '
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-good'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
@@ -196,16 +196,14 @@ class Recipe(custom.GStreamer):
 
     def prepare(self):
         # The second detail is to work around use of deprecated NSOpenGLPFAFullScreen on OS X 10.10
-        self.append_env['CFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 -DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1 "
-        self.append_env['OBJCFLAGS'] = " -Wno-error -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
-        self.append_env['CXXFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations "
-        self.append_env['CPPFLAGS'] = " -Wno-error -Wno-error=deprecated-declarations "
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc '
+        self.append_env['CFLAGS'] = " -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 -DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1 "
+        self.append_env['OBJCFLAGS'] = " -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
+
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --disable-aalib --disable-esd '
-        if self.config.target_platform == Platform.LINUX:
+        elif self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
+
         if self.config.variants.v4l2:
             self.files_plugins_capture += ['lib/gstreamer-1.0/libgstvideo4linux2%(mext)s']
             self.files_plugins_capture_devel += [
@@ -213,6 +211,7 @@ class Recipe(custom.GStreamer):
             ]
         else:
             self.configure_options += ' --disable-gst_v4l2'
+
         if self.config.variants.x11:
             self.files_plugins_capture += ['lib/gstreamer-1.0/libgstximagesrc%(mext)s']
             self.files_plugins_capture_devel += [

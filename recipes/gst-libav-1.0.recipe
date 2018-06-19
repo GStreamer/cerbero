@@ -9,7 +9,8 @@ class Recipe(custom.GStreamer):
     #        the linked libs
     licenses = [License.LGPLv2Plus]
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-lgpl --disable-examples --enable-static "
+    configure_options = "--enable-lgpl --disable-examples --enable-static \
+        --disable-gtk-doc --disable-fatal-warnings "
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-libav'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
 
@@ -24,13 +25,6 @@ class Recipe(custom.GStreamer):
     ]
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error "
-        self.append_env['CXXFLAGS'] = " -Wno-error "
-        self.append_env['CPPFLAGS'] = " -Wno-error "
-
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
-
         # Default AS is $CC, except iOS (set below)
         if Architecture.is_arm(self.config.target_arch):
             self.new_env = {'AS': os.environ.get('CC', '')}

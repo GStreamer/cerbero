@@ -5,8 +5,10 @@ class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     licenses = [License.LGPLv2Plus]
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-editing-services'}
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--program-prefix= --disable-examples --enable-static "
+    autoreconf = True
+    autoreconfig_sh = './autogen.sh --noconfigure'
+    configure_options = "--program-prefix= --disable-examples --enable-static \
+        --disable-gtk-doc --disable-docbook --disable-fatal-warnings "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
     files_bins = ['ges-launch-1.0']
@@ -18,10 +20,7 @@ class Recipe(custom.GStreamer):
     files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la']
 
 #    files_python = ['site-packages/ges%(pext)s']
-
+    
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error "
-        self.append_env['CXXFLAGS'] = " -Wno-error "
-        self.append_env['CPPFLAGS'] = " -Wno-error "
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc --disable-docbook'
+        # Disable -Werror and other error cflags
+        self.make += ' ERROR_CFLAGS='

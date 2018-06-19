@@ -4,7 +4,8 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-ugly-1.0'
     config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-static --disable-examples --disable-iec958 --disable-mpegstream --disable-cdio --disable-sidplay "
+    configure_options = "--enable-static --disable-examples --disable-iec958 --disable-mpegstream \
+        --disable-cdio --disable-sidplay --disable-gtk-doc --disable-fatal-warnings "
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-ugly'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
             'libdvdread', 'x264']
@@ -44,12 +45,6 @@ class Recipe(custom.GStreamer):
     files_lang = ['gst-plugins-ugly-1.0']
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -Wno-error "
-        self.append_env['CXXFLAGS'] = " -Wno-error "
-        self.append_env['CPPFLAGS'] = " -Wno-error "
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
-
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
             for d in ['libdvdread']:
                 self.deps.remove(d)

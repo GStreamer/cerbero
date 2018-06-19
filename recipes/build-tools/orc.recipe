@@ -14,9 +14,4 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
         'bin/orc-bugreport%(bext)s', 'share/aclocal/orc.m4',
         'bin/orcc%(bext)s']
-
-    def prepare(self):
-        self.configure_options += ' --disable-gtk-doc '
-        self.append_env['CFLAGS'] = " -Wno-error "
-        self.append_env['CXXFLAGS'] = " -Wno-error "
-        self.append_env['CPPFLAGS'] = " -Wno-error "
+    configure_options = ' --disable-gtk-doc '
