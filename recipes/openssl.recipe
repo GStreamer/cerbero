@@ -94,15 +94,15 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             # Msys ships with a too-old perl, so we modify PATH to use the
             # mingw-perl that was downloaded and installed by bootstrap.
-            openssl_path = os.environ['CERBERO_OPENSSL_PERL_PATH']
-            os.environ['PATH'] =  openssl_path + ';' + os.environ['PATH']
-            perl, newer = shell.check_perl_version('5.10.0')
+            openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
+            os.environ['PATH'] = openssl_path + ';' + os.environ['PATH']
+            perl, found, newer = shell.check_perl_version('5.10.0')
             m = 'please run bootstrap again'
             if newer is None:
                 raise FatalError('Perl not found, ' + m)
             if newer is False:
-                raise FatalError('Configured Perl {!r} is too old, {}'
-                                 ''.format(perl, m))
+                raise FatalError('Configured Perl {!r} is {} which is too old, {}'
+                                 ''.format(perl, found, m))
         # OpenSSL guesses the libdir incorrectly on x86_64
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
             ' --libdir=lib' + self.config.lib_suffix + ' '
