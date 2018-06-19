@@ -504,12 +504,14 @@ def which(pgm, path=None):
                     return pext
 
 def check_perl_version(needed):
+    perl = which('perl')
     try:
-        out = check_call(['perl', '--version'])
+        out = check_call([perl, '--version'])
     except FatalError:
-        return None, None
+        return None, None, None
     m = re.search('v[0-9]+\.[0-9]+(\.[0-9]+)?', out)
     if not m:
         raise FatalError('Could not detect perl version')
-    newer = StrictVersion(m.group()[1:]) >= StrictVersion(needed)
-    return which('perl'), newer
+    found = m.group()[1:]
+    newer = StrictVersion(found) >= StrictVersion(needed)
+    return perl, found, newer
