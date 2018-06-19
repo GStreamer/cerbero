@@ -20,6 +20,7 @@ import os
 import re
 import glob
 import inspect
+from pathlib import Path
 
 from cerbero.config import Platform
 from cerbero.utils import shell
@@ -80,6 +81,15 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
     # This will trigger an error in _search_libraries()
     return []
 
+def find_pdb_implib(libname, prefix):
+    dlls = find_dll_implib(libname, prefix, 'bin', None, None)
+    pdbs = []
+    for dll in dlls:
+        pdb = dll[:-3] + 'pdb'
+        if os.path.exists(os.path.join(prefix, pdb)):
+            pdbs.append(pdb)
+    return pdbs
+
 def flatten_files_list(all_files):
     """
     Some files search functions return a list of lists instead of a flat list
@@ -106,12 +116,13 @@ class FilesProvider(object):
     LIBS_CAT = 'libs'
     BINS_CAT = 'bins'
     PY_CAT = 'python'
+    # devel is implemented as "all files that aren't in any other category"
     DEVEL_CAT = 'devel'
     LANG_CAT = 'lang'
     TYPELIB_CAT = 'typelibs'
     # DLLs can be named anything, there may not be any correlation between that
     # and the import library (which is actually used while linking), so don't
-    # try to use a regex. Instead, get the dll name from the import .
+    # try to use a regex. Instead, get the dll name from the import library.
     _DLL_REGEX = None
     # UNIX shared libraries can have between 0 and 3 version components:
     # major, minor, micro. We don't use {m,n} here because we want to capture
@@ -144,6 +155,7 @@ class FilesProvider(object):
         self.platform = config.target_platform
         self.extensions = self.EXTENSIONS[self.platform]
         self.py_prefix = config.py_prefix
+        self.add_files_bins_devel()
         self.categories = self._files_categories()
         self._searchfuncs = {self.LIBS_CAT: self._search_libraries,
                              self.BINS_CAT: self._search_binaries,
@@ -151,6 +163,28 @@ class FilesProvider(object):
                              self.LANG_CAT: self._search_langfiles,
                              self.TYPELIB_CAT: self._search_typelibfiles,
                              'default': self._search_files}
+
+    def add_files_bins_devel(self):
+        '''
+        When a recipe is built with MSVC, all binaries have a corresponding
+        .pdb file that must be included in the devel package. This files list
+        is identical to `self.files_bins`, so we duplicate it here into a devel
+        category. It will get included via the 'default' search function.
+        '''
+        # These checks are just optimizations, files that aren't found are
+        # ignored anyway
+        if self.config.target_platform != Platform.WINDOWS:
+            return
+        if not self.can_msvc:
+            return
+        pdbs = []
+        if hasattr(self, 'files_bins'):
+            for f in self.files_bins:
+                pdbs.append('bin/{}.pdb'.format(f))
+        if hasattr(self, 'platform_files_bins'):
+            for f in self.platform_files_bins.get(self.config.target_platform, []):
+                pdbs.append('bin/{}.pdb'.format(f))
+        self.files_bins_devel = pdbs
 
     def devel_files_list(self):
         '''
@@ -214,11 +248,12 @@ class FilesProvider(object):
         ''' Get the list of categories available '''
         categories = []
         for name, value in inspect.getmembers(self):
-            if (isinstance(value, list) or isinstance(value, dict)):
-                if name.startswith('files_'):
-                    categories.append(name.split('files_')[1])
-                if name.startswith('platform_files_'):
-                    categories.append(name.split('platform_files_')[1])
+            if not isinstance(value, (dict, list)):
+                continue
+            if name.startswith('files_'):
+                categories.append(name.split('files_')[1])
+            if name.startswith('platform_files_'):
+                categories.append(name.split('platform_files_')[1])
         return sorted(list(set(categories)))
 
     def _get_category_files_list(self, category):
@@ -245,11 +280,27 @@ class FilesProvider(object):
 
     def _search_files(self, files):
         '''
-        Search files in the prefix, doing the extension replacements and
-        listing directories
+        Search plugin files and arbitrary files in the prefix, doing the
+        extension replacements, globbing, and listing directories
         '''
         # replace extensions
-        fs = [f % self.extensions for f in files]
+        files_expanded = [f % self.extensions for f in files]
+        fs = []
+        for f in files_expanded:
+            if not f.endswith('.dll'):
+                fs.append(f)
+                continue
+            # Plugins DLLs are required to be simple: libfoo.dll or foo.dll
+            if not f.startswith('lib'):
+                raise AssertionError('Plugin files must start with "lib": {!r}'.format(f))
+            if (Path(self.config.prefix) / f).is_file():
+                # libfoo.dll, built with MinGW
+                fs.append(f)
+            elif (Path(self.config.prefix) / f[3:]).is_file():
+                # foo.dll, built with MSVC
+                fs.append(f[3:])
+                # foo.pdb
+                fs.append(f[3:-3] + 'pdb')
         # fill directories
         dirs = [x for x in fs if
                 os.path.isdir(os.path.join(self.config.prefix, x))]
@@ -438,8 +489,13 @@ class FilesProvider(object):
             elif self.platform in [Platform.DARWIN, Platform.IOS]:
                 pattern += 'lib/%(f)s.dylib '
 
-            libsmatch = [pattern % {'f': x, 'fnolib': x[3:]} for x in
-                         self._get_category_files_list(category)]
+            libsmatch = []
+            for x in self._get_category_files_list(category):
+                libsmatch.append(pattern % {'f': x, 'fnolib': x[3:]})
+                # PDB names are derived from DLL library names (which are
+                # arbitrary), so we must use the same search function for them.
+                if self.platform == Platform.WINDOWS and self.can_msvc:
+                    devel_libs += find_pdb_implib(x[3:], self.config.prefix)
             devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
         return devel_libs
 
