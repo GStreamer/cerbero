@@ -8,7 +8,8 @@ class Recipe(custom.GStreamer):
     # TODO - check license - plugin is certainly LGPLv2+, but need to check
     #        the linked libs
     licenses = [License.LGPLv2Plus]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    autoreconf = True
+    autoreconfig_sh = './autogen.sh --noconfigure'
     configure_options = "--enable-lgpl --disable-examples --enable-static \
         --disable-gtk-doc --disable-fatal-warnings "
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-libav'}
@@ -40,7 +41,7 @@ class Recipe(custom.GStreamer):
             libavextraconf = " --disable-linux-perf"
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
-                libavextraconf += " --extra-cflags=\'-mincoming-stack-boundary=4\'"
+                libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
             elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 # Fails to link into an android App
                 # https://github.com/android-ndk/ndk/issues/337
@@ -59,11 +60,19 @@ class Recipe(custom.GStreamer):
                     self.new_env = {'AS': os.environ['GAS']}
             # Some optimisations that were previously silently disabled
             # cause warnings now. Ignore them
-            libavextraconf = " --extra-cflags=\'-Wno-ignored-optimization-argument\' "
+            libavextraconf = " --extra-cflags='-Wno-ignored-optimization-argument' "
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         elif self.config.target_platform == Platform.WINDOWS:
             # FIXME: Remove when we update to ffmpeg 4.0 which fixes targetting Vista
-            winflags = '-UWINVER -U_WIN32_WINNT -DWINVER=0x0501 -D_WIN32_WINNT=0x0501'
+            if self.config.platform == Platform.WINDOWS:
+                # On Windows, configure is run as `sh -c "./configure <args>"`,
+                # and these arguments are passed to ffmpeg's configure, so we
+                # need a double layer of escaping for the spaces to be escaped
+                # on correctly, otherwise we get an error about how
+                # `-U_WIN32_WINNT` is not a valid configure argument.
+                winflags = '"-UWINVER\ -U_WIN32_WINNT\ -DWINVER=0x0501\ -D_WIN32_WINNT=0x0501"'
+            else:
+                winflags = '-UWINVER -U_WIN32_WINNT -DWINVER=0x0501 -D_WIN32_WINNT=0x0501'
             libavextraconf = "--extra-cflags='{}'".format(winflags)
             self.configure_options += ' --with-libav-extra-configure="{}" '.format(libavextraconf)
 
