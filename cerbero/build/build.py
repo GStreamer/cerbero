@@ -401,7 +401,7 @@ class Meson (Build, ModifyEnvBase) :
     meson_cross_properties = {}
     meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
             --default-library=%(default-library)s --buildtype=%(buildtype)s \
-            --backend=%(backend)s ..'
+            --backend=%(backend)s --wrap-mode=nodownload ..'
     meson_default_library = 'shared'
     meson_backend = 'ninja'
 
