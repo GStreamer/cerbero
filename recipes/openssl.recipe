@@ -91,8 +91,7 @@ class Recipe(recipe.Recipe):
         self.make_install = 'make install_sw'
 
         # We probably don't need and can't use the tools on these platforms
-        if self.config.target_platform == Platform.IOS or \
-            self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
             self.make_install = 'make install_dev'
 
@@ -118,7 +117,7 @@ class Recipe(recipe.Recipe):
         else:
             config_sh += ' shared '
 
-        if self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform in (Platform.ANDROID, Platform.LINUX):
             if self.config.target_arch == Architecture.ARMv7:
                 # Openssl can't seem to figure this out anymore
                 config_sh += ' -D__ARM_MAX_ARCH__=7 '
