@@ -58,10 +58,12 @@ class Package(Command):
                     'create this package (conflicts with --skip-deps-build)')),
             ArgparseArgument('-k', '--keep-temp', action='store_true',
                 default=False, help=_('Keep temporary files for debug')),
+            ArgparseArgument('--offline', action='store_true',
+                default=False, help=_('Use only the source cache, no network')),
             ])
 
     def run(self, config, args):
-        self.store = PackagesStore(config)
+        self.store = PackagesStore(config, offline=args.offline)
         p = self.store.get_package(args.package[0])
 
         if args.skip_deps_build and args.only_build_deps:
@@ -69,7 +71,7 @@ class Package(Command):
                     "--only-build-deps"))
 
         if not args.skip_deps_build:
-            self._build_deps(config, p, args.no_devel)
+            self._build_deps(config, p, args.no_devel, args.offline)
 
         if args.only_build_deps:
             return
@@ -93,10 +95,10 @@ class Package(Command):
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package, has_devel):
+    def _build_deps(self, config, package, has_devel, offline):
         build_command = build.Build()
         build_command.runargs(config, package.recipes_dependencies(has_devel),
-            cookbook=self.store.cookbook)
+            cookbook=self.store.cookbook, offline=offline)
 
 
 register_command(Package)

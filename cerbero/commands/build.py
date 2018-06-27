@@ -38,7 +38,10 @@ class Build(Command):
                            'listed in the recipe')),
                 ArgparseArgument('--dry-run', action='store_true',
                     default=False,
-                    help=_('only print commands instead of running them '))]
+                    help=_('only print commands instead of running them ')),
+                ArgparseArgument('--offline', action='store_true',
+                    default=False, help=_('Use only the source cache, no network')),
+                ]
             if force is None:
                 args.append(
                     ArgparseArgument('--force', action='store_true',
@@ -61,12 +64,12 @@ class Build(Command):
         if self.no_deps is None:
             self.no_deps = args.no_deps
         self.runargs(config, args.recipe, args.missing_files, self.force,
-                     self.no_deps, dry_run=args.dry_run)
+                     self.no_deps, dry_run=args.dry_run, offline=args.offline)
 
     def runargs(self, config, recipes, missing_files=False, force=False,
-                no_deps=False, cookbook=None, dry_run=False):
+                no_deps=False, cookbook=None, dry_run=False, offline=False):
         if cookbook is None:
-            cookbook = CookBook(config)
+            cookbook = CookBook(config, offline=offline)
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,

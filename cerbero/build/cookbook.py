@@ -86,7 +86,8 @@ class CookBook (object):
 
     RECIPE_EXT = '.recipe'
 
-    def __init__(self, config, load=True):
+    def __init__(self, config, load=True, offline=False):
+        self.offline = offline
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
         self._invalid_recipes = {} # recipe -> error
@@ -343,6 +344,9 @@ class CookBook (object):
 
         # Check for updates in the recipe file to reset the status
         for recipe in list(self.recipes.values()):
+            # Set the offline property, used by the recipe while performing the
+            # fetch build step
+            recipe.offline = self.offline
             if recipe.name not in self.status:
                 continue
             st = self.status[recipe.name]

@@ -45,6 +45,7 @@ class Source (object):
 
     patches = []
     strip = 1
+    offline = False
 
     def fetch(self):
         '''
@@ -122,6 +123,12 @@ class Tarball (Source):
                      (cached_file, self.download_path, self.url))
             shutil.copy(cached_file, self.download_path)
             return
+        if self.offline:
+            if not os.path.isfile(self.download_path):
+                msg = 'Offline mode: tarball {!r} not found in cached sources ({}) or local sources ({})'
+                raise FatalError(msg.format(self.tarball_name, self.config.cached_sources, self.repo_dir))
+            m.action(_('Found tarball for %s at %s') % (self.url, self.download_path))
+            return
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
         # Enable certificate checking only on Linux for now
@@ -192,11 +199,15 @@ class GitCache (Source):
 
     def fetch(self, checkout=True):
         self._git_env_setup()
-        if not os.path.exists(self.repo_dir):
-            git.init(self.repo_dir)
-
         # First try to get the sources from the cached dir if there is one
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
+
+        if not os.path.exists(self.repo_dir):
+            if not cached_dir and offline:
+                msg = 'Offline mode: git repo for {!r} not found in cached sources ({}) or local sources ({})'
+                raise FatalError(msg.format(self.name, self.config.cached_sources, self.repo_dir))
+            git.init(self.repo_dir)
+
         if os.path.isdir(os.path.join(cached_dir, ".git")):
             for remote, url in self.remotes.items():
                 git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
@@ -212,11 +223,12 @@ class GitCache (Source):
             for remote, url in self.config.recipe_remotes(self.name).items():
                 git.add_remote(self.repo_dir, remote, url)
             # fetch remote branches
-            git.fetch(self.repo_dir, fail=False)
+            if not self.offline:
+                git.fetch(self.repo_dir, fail=False)
         if checkout:
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
-            git.submodules_update(self.repo_dir, cached_dir, fail=False)
+            git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline)
         self._git_env_restore()
 
 
@@ -280,6 +292,7 @@ class Git (GitCache):
     def __init__(self):
         GitCache.__init__(self)
         if self.commit is None:
+            # Used by recipes in recipes/toolchain/
             self.commit = 'origin/sdk-%s' % self.version
         # For forced commits in the config
         self.commit = self.config.recipe_commit(self.name) or self.commit
@@ -378,6 +391,9 @@ class Svn(Source):
             return
 
         os.makedirs(self.repo_dir)
+        if self.offline:
+            raise FatalError('Offline mode: no cached svn repos found for {} at {!r}'
+                             ''.format(self.package_name, self.config.cached_sources))
         svn.checkout(self.url, self.repo_dir)
         svn.update(self.repo_dir, self.revision)
 

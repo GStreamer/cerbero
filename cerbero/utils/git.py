@@ -127,7 +127,7 @@ def fetch(git_dir, fail=True):
     '''
     return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
 
-def submodules_update(git_dir, src_dir=None, fail=True):
+def submodules_update(git_dir, src_dir=None, fail=True, offline=False):
     '''
     Update somdules from local directory
 
@@ -137,6 +137,8 @@ def submodules_update(git_dir, src_dir=None, fail=True):
     @type src_dir: src
     @param fail: raise an error if the command failed
     @type fail: false
+    @param offline: don't use the network
+    @type offline: false
     '''
     if src_dir:
         config = shell.check_call('%s config --file=.gitmodules --list' % GIT,
@@ -149,8 +151,11 @@ def submodules_update(git_dir, src_dir=None, fail=True):
                            (GIT, submodule, os.path.join(src_dir, c[1])),
                            git_dir)
     shell.call("%s submodule init" % GIT, git_dir)
-    shell.call("%s submodule sync" % GIT, git_dir)
-    shell.call("%s submodule update" % GIT, git_dir, fail=fail)
+    if src_dir or not offline:
+        shell.call("%s submodule sync" % GIT, git_dir)
+        shell.call("%s submodule update" % GIT, git_dir, fail=fail)
+    else:
+        shell.call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail)
     if src_dir:
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.url'):

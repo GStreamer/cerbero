@@ -36,12 +36,12 @@ class PackagesStore (object):
 
     PKG_EXT = '.package'
 
-    def __init__(self, config, load=True):
+    def __init__(self, config, load=True, offline=False):
         self._config = config
 
         self._packages = {}  # package_name -> package
 
-        self.cookbook = CookBook(config, load)
+        self.cookbook = CookBook(config, load=load, offline=offline)
         # used in tests to skip loading a dir with packages definitions
         if not load:
             return
