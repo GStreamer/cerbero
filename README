@@ -24,7 +24,7 @@ minimum base to bootstrap
 
 Linux
 -----
-On linux, you will only need a distribution with python >= 3.4.
+On linux, you will only need a distribution with python >= 3.5.
 
 OSX
 ---
@@ -36,22 +36,32 @@ Windows
 -------
 The initial setup on Windows is a little bit longer, but only a few programs are required.
   * Python3: https://www.python.org/downloads/
+   * First page of the installer
+    - Check "Add Python 3.x to PATH"
+    - Click "Customize installation"
+   * Second page, check "pip"
+   * Third page, select:
+    - Install for all users
+    - Associate files with Python
+    - Add Python to environment variables
+    - Customize install location: C:\Python3
   * CMake: http://www.cmake.org/cmake/resources/software.html
-  * Git: http://git-scm.com/download/win
+  * Git: http://git-scm.com/download/win or https://gitforwindows.org/
      IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
   * Msys/MinGW: http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
      Install it with all the options enabled
   * WiX 3.5: http://wix.codeplex.com/releases/view/60102
 
-The Direct Show plugins still needs to be built using Microsoft's compiler and their SDK,
-due to the dependency on the Direct Show base classes.
-You need to install the following software:
-  * Microsoft SDK 7.1: http://www.microsoft.com/en-us/download/details.aspx?id=8279
-  * Windows Driver Kit 7.1.0: http://msdn.microsoft.com/en-us/windows/hardware/hh852365
+Several packages that have Meson build files are now built by default with
+Visual Studio, so you need to install Visual Studio 2015 or newer in the
+default location. The Visual Studio Community build which is free for
+open-source use can be installed at:
+
+  * https://visualstudio.microsoft.com/vs/older-downloads/
 
 cerbero must be run in the MingGW shell, which is accessible from the main menu or desktop 
 (if it is not, go to Mingw Installation manager, select MSYS Base Development and install
-msys-bash  lnk).
+msys-bash lnk).
 
 The path to your $HOME must not contain spaces. If your windows username
 contains spaces, you can create a new directory in /home and execute:
@@ -68,9 +78,6 @@ Despite the presence of setup.py this tool does not need installation. It is inv
 cerbero-uninstalled script, which should be invoked as ./cerbero-uninstalled, or you can add 
 the cerbero directory in your path and invoke it as cerbero-uninstalled.
 
-The examples below assume the tool is in your PATH; if not, just remember to use ./cerbero-uninstalled
-instead of cerbero-uninstalled.
-
 On Windows it should be invoked as "python ./cerbero-uninstalled".
 
 Bootstrap
@@ -78,35 +85,35 @@ Bootstrap
 Before using cerbero for the first time, you will need to run the bootstrap command.
 This command installs the missing parts of the build system using the packages manager
 when available. Note that this will take a while (a couple hours or even more).
-  $ cerbero-uninstalled bootstrap
+  $ ./cerbero-uninstalled bootstrap
 
 Help
 ----
-  $ cerbero-uninstalled --help
+  $ ./cerbero-uninstalled --help
 
 List available recipes
 ----------------------
-  $ cerbero-uninstalled list
+  $ ./cerbero-uninstalled list
 
 List available packages
 -----------------------
-  $ cerbero-uninstalled list-packages
+  $ ./cerbero-uninstalled list-packages
 
 Build a recipe
 --------------
-  $ cerbero-uninstalled build gtk+
+  $ ./cerbero-uninstalled build gtk+
 
 Rebuild a single recipe
 -----------------------
-  $ cerbero-uninstalled buildone gtk+
+  $ ./cerbero-uninstalled buildone gtk+
 
 Clean a recipe
 --------------
-  $ cerbero-uninstalled cleanone gtk+
+  $ ./cerbero-uninstalled cleanone gtk+
 
 Create a package (this automatically invokes build)
 ----------------
-  $ cerbero-uninstalled package gstreamer-1.0
+  $ ./cerbero-uninstalled package gstreamer-1.0
 
 
 *******
@@ -114,10 +121,3 @@ License
 *******
 
 cerbero is released under the GNU Lesser General Public License, Version 2.1 (LGPLv2.1)
-
-
-************
-Dependencies
-************
-
- * python 3.4
