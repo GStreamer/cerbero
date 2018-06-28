@@ -63,19 +63,21 @@ class WindowsBootstrapper(BootstrapperBase):
         else:
             self.version = 'w64'
         self.platform = self.config.platform
-        self.msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
 
         self.check_dirs()
         if self.platform == Platform.WINDOWS:
+            self.msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
             self.install_mingwget_deps()
         self.install_mingw()
-        self.remove_mingw_cpp()
+        if self.platform == Platform.WINDOWS:
+            self.remove_mingw_cpp()
         self.add_non_prefixed_strings()
         if self.platform == Platform.WINDOWS:
-            # After mingw is beeing installed
+            # After mingw has been installed
             self.install_bin_deps()
         self.install_gl_headers()
-        self.install_openssl_mingw_perl()
+        if self.platform == Platform.WINDOWS:
+            self.install_openssl_mingw_perl()
 
     def check_dirs(self):
         if not os.path.exists(self.perl_prefix):
