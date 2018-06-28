@@ -78,6 +78,8 @@ def realpath(path):
     return oldrealpath(path).replace('\\', '/')
 
 if sys.platform.startswith('win'):
+    # FIXME: replace all usage of os.path.join with pathlib.PurePath.as_posix()
+    # instead of doing this brittle monkey-patching.
     os.path.join = join
     os.path.expanduser = expanduser
     os.path.abspath = abspath
