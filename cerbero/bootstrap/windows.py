@@ -19,6 +19,7 @@
 import os
 import tempfile
 import shutil
+from pathlib import Path
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
@@ -62,6 +63,7 @@ class WindowsBootstrapper(BootstrapperBase):
         else:
             self.version = 'w64'
         self.platform = self.config.platform
+        self.msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
 
         self.check_dirs()
         if self.platform == Platform.WINDOWS:
@@ -182,8 +184,9 @@ class WindowsBootstrapper(BootstrapperBase):
         # Fixes glib's checks in configure, where cpp -v is called
         # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
-        if os.path.exists('/mingw/bin/cpp.exe'):
-            shutil.move('/mingw/bin/cpp.exe', '/mingw/bin/cpp.exe.bck')
+        if (self.msys_mingw_bindir / 'cpp.exe').is_file():
+            shutil.move(self.msys_mingw_bindir / 'cpp.exe',
+                        self.msys_mingw_bindir / 'cpp.exe.bck')
 
     def add_non_prefixed_strings(self):
         # libtool m4 macros uses non-prefixed 'strings' command. We need to
