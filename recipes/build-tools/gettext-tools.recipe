@@ -1,4 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from pathlib import Path
+
 from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
@@ -21,3 +24,17 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --enable-threads=win32'
             self.append_env['LDFLAGS'] = '-liconv'
+
+    def post_install(self):
+        if self.config.platform == Platform.WINDOWS:
+            # The msgmerge built by us randomly hangs on Windows when called
+            # during configure, so replace it with the msgmerge from MSYS-MinGW
+            # which works fine.
+            build_tools_bin = Path(self.config.build_tools_prefix) / 'bin'
+            msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
+            msys_msgmerge = msys_mingw_bindir / 'msgmerge.exe'
+            if msys_msgmerge.is_file():
+                if (build_tools_bin / 'msgmerge.exe').is_file():
+                    os.replace(str(build_tools_bin / 'msgmerge.exe'),
+                               str(build_tools_bin / 'msgmerge.exe.bck'))
+                shutil.copy(str(msys_msgmerge), str(build_tools_bin))
