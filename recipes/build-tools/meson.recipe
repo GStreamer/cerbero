@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
                'meson/0002-Add-a-new-option-for-building-with-Apple-bitcode-sup.patch',
                'meson/0003-pkgconfig-deps-Also-resolve-paths-to-shared-librarie.patch',
                'meson/0004-depfixer-Rewrite-install_name-for-dylibs-on-install.patch',
-               'meson/0005-macos-Rewrite-install_name-for-dependent-built-libra.patch',]
+               'meson/0005-macos-Rewrite-install_name-for-dependent-built-libra.patch',
+               'meson/0006-Allow-command-lists-for-find_program.patch',]
 
     files_bin = ['bin/meson']
     files_python = []
