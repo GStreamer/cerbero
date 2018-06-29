@@ -171,11 +171,7 @@ class FilesProvider(object):
         is identical to `self.files_bins`, so we duplicate it here into a devel
         category. It will get included via the 'default' search function.
         '''
-        # These checks are just optimizations, files that aren't found are
-        # ignored anyway
-        if self.config.target_platform != Platform.WINDOWS:
-            return
-        if not self.can_msvc:
+        if not self.using_msvc():
             return
         pdbs = []
         if hasattr(self, 'files_bins'):
