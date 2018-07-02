@@ -18,28 +18,32 @@
 
 import os
 import subprocess
+from pathlib import Path
 
 from cerbero.config import Architecture
 from cerbero.errors import FatalError
 
 # We only support Visual Studio 2015 as of now
 vcvarsalls = {
-    '14.0': [r'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat',
-             r'C:\Program Files\Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
-    '15.0': [r'C:\Program Files (x86)\Microsoft Visual Studio 15.0\VC\vcvarsall.bat',
-             r'C:\Program Files\Microsoft Visual Studio 15.0\VC\vcvarsall.bat'],
+    '14.0': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
+    '15.0': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat'],
 }
+program_files = Path(os.environ['PROGRAMFILES(X86)'])
 
 vcvarsall = None
-for (version, paths) in vcvarsalls.items():
-    for path in paths:
+for version in sorted(vcvarsalls.keys(), reverse=True):
+    if vcvarsall:
+        break
+    for path in vcvarsalls[version]:
+        path = program_files / path
         # Find the location of the Visual Studio installation
-        if os.path.isfile(path):
-            vcvarsall = path
+        if path.is_file():
+            vcvarsall = path.as_posix()
             break
 if not vcvarsall:
     versions = ', '.join(vcvarsalls.keys())
-    raise FatalError('Microsoft Visual Studio not found, looked for: ' + versions)
+    raise FatalError('Microsoft Visual Studio not found, please file a bug. We looked for: ' + versions)
 
 def append_path(var, path, sep=';'):
     if var and not var.endswith(sep):
@@ -69,8 +73,16 @@ def get_vcvarsall_arg(arch, target_arch):
     raise FatalError('Unsupported arch/target_arch: {0}/{1}'.format(arch, target_arch))
 
 def run_and_get_env(cmd):
-    output = subprocess.check_output(cmd, shell=True, universal_newlines=True)
-    return output.split('\n')
+    env = os.environ.copy()
+    env['VSCMD_ARG_no_logo'] = '1'
+    env['VSCMD_DEBUG'] = ''
+    output = subprocess.check_output(cmd, shell=True, env=env,
+                                     universal_newlines=True)
+    lines = []
+    for line in output.split('\n'):
+        if '=' in line:
+            lines.append(line)
+    return lines
 
 def get_msvc_env(vcvarsall, arch, target_arch):
     ret_env = {}
