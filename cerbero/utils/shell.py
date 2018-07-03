@@ -259,7 +259,7 @@ def download_wget(url, destination=None, recursive=False, check_cert=True, overw
             raise e
 
 
-def download_urllib2(url, destination=None, recursive=False, check_cert=False, overwrite=False):
+def download_urllib2(url, destination=None, recursive=False, check_cert=True, overwrite=False):
     '''
     Download a file with urllib2, which does not rely on external programs
 
