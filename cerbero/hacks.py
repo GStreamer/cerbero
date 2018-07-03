@@ -169,12 +169,14 @@ shutil.rmtree = rmtree
 import cerbero.utils.shell
 # wget shipped with msys fails with an SSL error on github URLs
 # https://githubengineering.com/crypto-removal-notice/
-if not sys.platform.startswith('win') and cerbero.utils.shell.which('wget'):
+# curl on Windows (if provided externally) is often badly-configured and fails
+# to download over https, so just always use urllib2 on Windows.
+if sys.platform.startswith('win'):
+    cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
+elif cerbero.utils.shell.which('wget'):
     cerbero.utils.shell.download = cerbero.utils.shell.download_wget
 elif cerbero.utils.shell.which('curl'):
     cerbero.utils.shell.download = cerbero.utils.shell.download_curl
 else:
-    # This is a very basic implementation, replace this with the requests
-    # module or something else when porting to Python 3. We can try to remove
-    # our dependency on wget/curl.
+    # Fallback. TODO: make this the default and remove curl/wget dependency
     cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
