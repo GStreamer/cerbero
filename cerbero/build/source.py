@@ -128,7 +128,7 @@ class Tarball (Source):
         try:
             shell.download(self.url, self.download_path, check_cert=cc,
                            overwrite=redownload)
-        except FatalError:
+        except (FatalError, urllib.error.URLError):
             # Try our mirror
             shell.download(self.mirror_url, self.download_path, check_cert=cc,
                            overwrite=redownload)
