@@ -22,6 +22,7 @@ import copy
 import shutil
 import shlex
 import sysconfig
+from itertools import chain
 
 from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
@@ -90,11 +91,12 @@ def modify_environment(func):
     ''' Decorator to modify the build environment '''
     def call(*args):
         self = args[0]
+        prepend_env = self.prepend_env
         append_env = self.append_env
         new_env = self.new_env.copy()
         if self.use_system_libs and self.config.allow_system_libs:
             self._add_system_libs(new_env)
-        old_env = self._modify_env(append_env, new_env)
+        old_env = self._modify_env(prepend_env, append_env, new_env)
         res = func(*args)
         self._restore_env(old_env)
         return res
@@ -109,17 +111,20 @@ class ModifyEnvBase:
     '''
 
     append_env = None
+    prepend_env = None
     new_env = None
     use_system_libs = False
 
     def __init__(self):
         if self.append_env is None:
             self.append_env = {}
+        if self.prepend_env is None:
+            self.prepend_env = {}
         if self.new_env is None:
             self.new_env = {}
         self._old_env = None
 
-    def _modify_env(self, append_env, new_env):
+    def _modify_env(self, prepend_env, append_env, new_env):
         '''
         Modifies the build environment appending the values in
         append_env or replacing the values in new_env
@@ -128,14 +133,20 @@ class ModifyEnvBase:
             return None
 
         self._old_env = {}
-        for var in list(append_env.keys()) + list(new_env.keys()):
+        for var in chain(prepend_env.keys(), append_env.keys(), new_env.keys()):
             self._old_env[var] = os.environ.get(var, None)
 
-        for var, val in append_env.items():
-            if var not in os.environ:
+        for var, (val, sep) in self._iter_env(prepend_env):
+            if var not in os.environ or not os.environ[var]:
                 os.environ[var] = val
             else:
-                os.environ[var] = '%s %s' % (os.environ[var], val)
+                os.environ[var] = '{}{}{}'.format(val, sep, os.environ[var])
+
+        for var, (val, sep) in self._iter_env(append_env):
+            if var not in os.environ or not os.environ[var]:
+                os.environ[var] = val
+            else:
+                os.environ[var] = '{}{}{}'.format(os.environ[var], sep, val)
 
         for var, val in new_env.items():
             if val is None:
@@ -144,6 +155,21 @@ class ModifyEnvBase:
             else:
                 os.environ[var] = val
         return self._old_env
+
+    @staticmethod
+    def _iter_env(env):
+        for var, val in env.items():
+            if isinstance(val, str):
+                yield var, (val, ' ')
+                continue
+            elif isinstance(val, list):
+                if len(val) == 1:
+                    yield var, (val[0], ' ')
+                    continue
+                elif len(val) == 2:
+                    yield var, (val[0], val[1])
+                    continue
+            raise AssertionError('Invalid value for env: {!r}'.format(val))
 
     def _restore_env(self, old_env):
         ''' Restores the old environment '''
@@ -437,7 +463,7 @@ class Meson (Build, ModifyEnvBase) :
             # we're building with MSVC
             reset_toolchain_envvars = True
             # Set the MSVC toolchain environment
-            self.new_env.update(self.config.msvc_toolchain_env)
+            self.prepend_env.update(self.config.msvc_toolchain_env)
         if reset_toolchain_envvars:
             # Only reset vars that are read by Meson for now
             for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
