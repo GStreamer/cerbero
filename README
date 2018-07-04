@@ -59,9 +59,14 @@ open-source use can be installed at:
 
   * https://visualstudio.microsoft.com/vs/older-downloads/
 
-cerbero must be run in the MingGW shell, which is accessible from the main menu or desktop 
-(if it is not, go to Mingw Installation manager, select MSYS Base Development and install
-msys-bash lnk).
+You should add the cerbero git directory to the list of excluded folders in your
+anti-virus, or you will get random build failures when Autotools does file
+operations such as renames and deletions. It will also slow your build by
+about 3-4x.
+
+cerbero must be run in the MingGW shell, which is accessible from the main menu
+or desktop (if it is not, go to Mingw Installation manager, select MSYS Base
+Development and install msys-bash lnk).
 
 The path to your $HOME must not contain spaces. If your windows username
 contains spaces, you can create a new directory in /home and execute:
