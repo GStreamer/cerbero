@@ -73,10 +73,10 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
     if libname == 'vpx':
         return []
     if len(implib_notfound) == len(implibs):
-        mlog.warning("No import libraries found for {!r}".format(libname))
+        m.warning("No import libraries found for {!r}".format(libname))
     else:
         implibs = ', '.join(set(implibs) - set(implib_notfound))
-        mlog.warning("No dllname found from implibs: {}".format(implibs))
+        m.warning("No dllname found from implibs: {}".format(implibs))
     # This will trigger an error in _search_libraries()
     return []
 
