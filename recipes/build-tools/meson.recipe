@@ -5,18 +5,12 @@ from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.46.1'
+    version = '0.47.0'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
     deps = ['ninja']
-    patches = ['meson/0001-for_darwin-Also-accept-system-ios-in-cross-files.patch',
-               'meson/0002-Add-a-new-option-for-building-with-Apple-bitcode-sup.patch',
-               'meson/0003-pkgconfig-deps-Also-resolve-paths-to-shared-librarie.patch',
-               'meson/0004-depfixer-Rewrite-install_name-for-dylibs-on-install.patch',
-               'meson/0005-macos-Rewrite-install_name-for-dependent-built-libra.patch',
-               'meson/0006-Allow-command-lists-for-find_program.patch',]
 
     files_bin = ['bin/meson']
     files_python = []
