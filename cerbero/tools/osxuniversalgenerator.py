@@ -87,8 +87,6 @@ class OSXUniversalGenerator(object):
         self.missing = []
 
     def merge_files(self, filelist, dirs):
-        if len(filelist) == 0:
-            return
         for f in filelist:
             self.do_merge(f, dirs)
 

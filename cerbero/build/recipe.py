@@ -328,7 +328,7 @@ class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
     def __setattr__(self, name, value):
         object.__setattr__(self, name, value)
         if name not in ['_config', '_recipes', '_proxy_recipe']:
-            for o in list(self._recipes.values()):
+            for o in self._recipes.values():
                 setattr(o, name, value)
 
     def get_for_arch (self, arch, name):
@@ -386,15 +386,14 @@ class UniversalFlatRecipe(UniversalRecipe):
             recipe.config.prefix = self._config.prefix
 
         # merge the common files
-        inputs = reduce(lambda x, y: x & y, list(arch_inputs.values()))
+        inputs = reduce(lambda x, y: x & y, arch_inputs.values())
         output = self._config.prefix
         generator = OSXUniversalGenerator(output)
-        generator.merge_files(list(inputs),
-                [os.path.join(self._config.prefix, arch) for arch in
-                 list(self._recipes.keys())])
+        dirs = [os.path.join(self._config.prefix, arch) for arch in self._recipes.keys()]
+        generator.merge_files(inputs, dirs)
 
         # merge the architecture specific files
-        for arch in list(self._recipes.keys()):
+        for arch in self._recipes.keys():
             ainputs = list(inputs ^ arch_inputs[arch])
             output = self._config.prefix
             generator = OSXUniversalGenerator(output)
