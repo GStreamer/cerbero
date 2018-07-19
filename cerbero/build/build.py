@@ -229,7 +229,9 @@ class MakefilesBase (Build, ModifyEnvBase):
         # Only add this for non-meson recipes, and only for iPhoneOS
         if self.config.ios_platform == 'iPhoneOS':
             bitcode_cflags = ' -fembed-bitcode '
-            bitcode_ldflags = bitcode_cflags + '-Wl,-bitcode_bundle '
+            # FIXME: Can't pass -bitcode_bundle to Makefile projects because we
+            # can't control what options they pass while linking dylibs
+            bitcode_ldflags = bitcode_cflags #+ '-Wl,-bitcode_bundle '
             # FIXME: Use real objects here instead of strings to clean up this ugliness
             if 'CFLAGS' in self.append_env:
                 self.append_env['CFLAGS'] += bitcode_cflags
