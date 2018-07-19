@@ -224,9 +224,27 @@ class MakefilesBase (Build, ModifyEnvBase):
 
         # Make sure user's env doesn't mess up with our build.
         self.new_env['MAKEFLAGS'] = None
-
         # Disable site config, which is set on openSUSE
         self.new_env['CONFIG_SITE'] = None
+        # Only add this for non-meson recipes, and only for iPhoneOS
+        if self.config.ios_platform == 'iPhoneOS':
+            bitcode_cflags = ' -fembed-bitcode '
+            bitcode_ldflags = bitcode_cflags + '-Wl,-bitcode_bundle '
+            # FIXME: Use real objects here instead of strings to clean up this ugliness
+            if 'CFLAGS' in self.append_env:
+                self.append_env['CFLAGS'] += bitcode_cflags
+            else:
+                self.append_env['CFLAGS'] = bitcode_cflags
+            if 'CCASFLAGS' in self.append_env:
+                self.append_env['CCASFLAGS'] += bitcode_cflags
+            else:
+                self.append_env['CCASFLAGS'] = bitcode_cflags
+            # Autotools only adds LDFLAGS when doing compiler checks,
+            # so add -fembed-bitcode again
+            if 'LDFLAGS' in self.append_env:
+                self.append_env['LDFLAGS'] += bitcode_ldflags
+            else:
+                self.append_env['LDFLAGS'] = bitcode_ldflags
 
     @modify_environment
     def configure(self):
@@ -234,15 +252,6 @@ class MakefilesBase (Build, ModifyEnvBase):
             os.makedirs(self.make_dir)
         if self.requires_non_src_build:
             self.config_sh = os.path.join('../', self.config_sh)
-
-        # Only add this for non-meson recipes, and only for iPhoneOS
-        if self.config.ios_platform == 'iPhoneOS':
-            # FIXME: this overwrites values set by the recipe
-            self.append_env['CFLAGS'] = ' -fembed-bitcode '
-            self.append_env['CCASFLAGS'] = ' -fembed-bitcode '
-            # Autotools only adds LDFLAGS when doing compiler checks,
-            # so add -fembed-bitcode again
-            self.append_env['LDFLAGS'] = ' -fembed-bitcode -Wl,-bitcode_bundle '
 
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
@@ -341,7 +350,7 @@ class Autotools (MakefilesBase):
         if self.use_system_libs and self.config.allow_system_libs:
             use_configure_cache = False
 
-        if self.new_env or self.append_env:
+        if self.new_env or self.append_env or self.prepend_env:
             use_configure_cache = False
 
         if use_configure_cache and self.can_use_configure_cache:
