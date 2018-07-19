@@ -104,9 +104,10 @@ class Recipe(recipe.Recipe):
         return flags
 
     def prepare(self):
-        if self.config.target_platform != Platform.WINDOWS:
-            #self.meson_options.update({'default_library': 'both'})
-            pass
+        # Glib doesn't support static libraries on Windows yet
+        if self.config.target_platform == Platform.WINDOWS:
+            self.meson_default_library = 'shared'
+
         if self.config.target_platform != Platform.LINUX:
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)

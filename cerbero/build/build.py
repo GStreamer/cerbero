@@ -440,7 +440,7 @@ class Meson (Build, ModifyEnvBase) :
     meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
             --default-library=%(default-library)s --buildtype=%(buildtype)s \
             --backend=%(backend)s --wrap-mode=nodownload ..'
-    meson_default_library = 'shared'
+    meson_default_library = 'both'
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
@@ -502,14 +502,14 @@ class Meson (Build, ModifyEnvBase) :
         strip = self._old_env.get('STRIP', '').split(' ')
         windres = self._old_env.get('WINDRES', '').split(' ')
 
-        # *FLAGS are only passed to the native compiler, so while
-        # cross-compiling we need to pass these through the cross file.
         if isinstance(self.config.universal_archs, dict):
             # Universal builds have arch-specific prefixes inside the universal prefix
             libdir = '{}/{}/lib{}'.format(self.config.prefix, self.config.target_arch,
                                           self.config.lib_suffix)
         else:
             libdir = '{}/lib{}'.format(self.config.prefix, self.config.lib_suffix)
+        # *FLAGS are only passed to the native compiler, so while
+        # cross-compiling we need to pass these through the cross file.
         c_link_args = ['-L' + libdir]
         c_link_args += shlex.split(self._old_env.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
@@ -582,6 +582,9 @@ class Meson (Build, ModifyEnvBase) :
         if self.config.cross_compiling():
             f = self.write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
+
+        if 'default_library' in self.meson_options:
+            raise RuntimeError('Do not set `default_library` in self.meson_options, use self.meson_default_library instead')
 
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))
