@@ -19,6 +19,7 @@
 import tempfile
 import shutil
 import traceback
+from subprocess import CalledProcessError
 
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
@@ -146,7 +147,14 @@ class Oven (object):
                 shell.close_logfile_output()
             except FatalError as e:
                 shell.close_logfile_output(dump=True)
-                self._handle_build_step_error(recipe, step, traceback.format_exc(), e.arch)
+                if isinstance(e.__context__, CalledProcessError):
+                    # Don't print trace if the FatalError is merely that the
+                    # subprocess exited with a non-zero status. The traceback
+                    # is just confusing and useless in that case.
+                    trace = ''
+                else:
+                    trace = traceback.format_exc()
+                self._handle_build_step_error(recipe, step, trace, e.arch)
             except Exception:
                 shell.close_logfile_output(dump=True)
                 raise BuildStepError(recipe, step, traceback.format_exc())
