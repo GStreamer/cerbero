@@ -134,7 +134,8 @@ class ModifyEnvBase:
 
         self._old_env = {}
         for var in chain(prepend_env.keys(), append_env.keys(), new_env.keys()):
-            self._old_env[var] = os.environ.get(var, None)
+            if var in os.environ:
+                self._old_env[var] = os.environ[var]
 
         for var, (val, sep) in self._iter_env(prepend_env):
             if var not in os.environ or not os.environ[var]:
