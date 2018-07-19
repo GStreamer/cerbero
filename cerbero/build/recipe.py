@@ -305,8 +305,9 @@ class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
         if self._proxy_recipe is None:
             self._proxy_recipe = recipe
         else:
-            if recipe.name != self._proxy_recipe.name:
-                raise FatalError(_("Recipes must have the same name"))
+            for attr in ('name', 'deps', 'platform_deps'):
+                if getattr(recipe, attr) != getattr(self._proxy_recipe, attr):
+                    raise FatalError(_("Recipes must have the same " + attr))
         self._recipes[recipe.config.target_arch] = recipe
 
     def is_empty(self):
