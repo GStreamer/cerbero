@@ -461,27 +461,9 @@ class Meson (Build, ModifyEnvBase) :
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
-        # Whether to reset the toolchain env vars set by the cerbero config
-        # before building the recipe
-        reset_toolchain_envvars = False
-        if self.config.cross_compiling():
-            # We export the cross toolchain with env vars, but Meson picks the
-            # native toolchain from these, so unset them.
-            # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=791670
-            # NOTE: This means we require a native compiler on the build
-            # machine when cross-compiling, which in practice is not a problem
-            reset_toolchain_envvars = True
         if self.using_msvc():
-            # The toolchain env vars set by us are for GCC, so unset them if
-            # we're building with MSVC
-            reset_toolchain_envvars = True
             # Set the MSVC toolchain environment
             self.prepend_env.update(self.config.msvc_toolchain_env)
-        if reset_toolchain_envvars:
-            # Only reset vars that are read by Meson for now
-            for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
-                        'CXXFLAGS', 'LDFLAGS'):
-                self.new_env[var] = None
 
         # Find Meson
         if not self.meson_sh:
@@ -508,11 +490,11 @@ class Meson (Build, ModifyEnvBase) :
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
         # Same for *FLAGS below.
-        cc = self._old_env.get('CC', '').split(' ')
-        cxx = self._old_env.get('CXX', '').split(' ')
-        ar = self._old_env.get('AR', '').split(' ')
-        strip = self._old_env.get('STRIP', '').split(' ')
-        windres = self._old_env.get('WINDRES', '').split(' ')
+        cc = os.environ.get('CC', '').split(' ')
+        cxx = os.environ.get('CXX', '').split(' ')
+        ar = os.environ.get('AR', '').split(' ')
+        strip = os.environ.get('STRIP', '').split(' ')
+        windres = os.environ.get('WINDRES', '').split(' ')
 
         if isinstance(self.config.universal_archs, dict):
             # Universal builds have arch-specific prefixes inside the universal prefix
@@ -523,10 +505,10 @@ class Meson (Build, ModifyEnvBase) :
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
         c_link_args = ['-L' + libdir]
-        c_link_args += shlex.split(self._old_env.get('LDFLAGS', ''))
+        c_link_args += shlex.split(os.environ.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
-        c_args = shlex.split(self._old_env.get('CFLAGS', ''))
-        cpp_args = shlex.split(self._old_env.get('CXXFLAGS', ''))
+        c_args = shlex.split(os.environ.get('CFLAGS', ''))
+        cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
 
         # Operate on a copy of the recipe properties to avoid accumulating args
         # from all archs when doing universal builds
@@ -590,10 +572,38 @@ class Meson (Build, ModifyEnvBase) :
         # Don't enable bitcode by passing flags manually, use the option
         if self.config.ios_platform == 'iPhoneOS':
             self.meson_options.update({'b_bitcode': 'true'})
-
         if self.config.cross_compiling():
             f = self.write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
+
+        # Whether to reset the toolchain env vars set by the cerbero config
+        # and the recipe before building the recipe
+        reset_toolchain_envvars = False
+        if self.config.cross_compiling() or self.using_msvc():
+            # We export the cross toolchain with env vars, but Meson picks the
+            # native toolchain from these, so unset them.
+            # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=791670
+            # NOTE: This means we require a native compiler on the build
+            # machine when cross-compiling, which in practice is not a problem
+            #
+            # The toolchain env vars set by us are for GCC, so unset them if
+            # we're building with MSVC
+            #
+            # Only unset vars that are read by Meson for now
+            for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
+                        'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
+                if var in os.environ:
+                    del os.environ[var]
+            # Re-add *FLAGS that weren't set by the config, but instead were set in
+            # the recipe or other places via @modify_environment
+            if self.using_msvc():
+                for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
+                    if var in self.append_env or var in self.prepend_env:
+                        os.environ[var] = ''
+                    if var in self.prepend_env:
+                        os.environ[var] = self.prepend_env[var]
+                    if var in self.append_env:
+                        os.environ[var] += self.append_env[var]
 
         if 'default_library' in self.meson_options:
             raise RuntimeError('Do not set `default_library` in self.meson_options, use self.meson_default_library instead')
