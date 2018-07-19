@@ -117,8 +117,8 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     sources = None
     stype = source.SourceType.GIT_TARBALL
     btype = build.BuildType.AUTOTOOLS
-    deps = list()
-    platform_deps = {}
+    deps = None
+    platform_deps = None
     force = False
     runtime_dep = False
     _default_steps = BuildSteps()
@@ -134,7 +134,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
         self.deps = self.deps or []
-        self.platform_deps = self.platform_deps or []
+        self.platform_deps = self.platform_deps or {}
         self._steps = self._default_steps[:]
         if self.config.target_platform == Platform.WINDOWS:
             self._steps.append(BuildSteps.GEN_LIBFILES)

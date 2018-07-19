@@ -435,8 +435,8 @@ class Meson (Build, ModifyEnvBase) :
     make_check = None
     make_clean = None
     meson_sh = None
-    meson_options = {}
-    meson_cross_properties = {}
+    meson_options = None
+    meson_cross_properties = None
     meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
             --default-library=%(default-library)s --buildtype=%(buildtype)s \
             --backend=%(backend)s --wrap-mode=nodownload ..'
@@ -446,6 +446,9 @@ class Meson (Build, ModifyEnvBase) :
     can_msvc = True
 
     def __init__(self):
+        self.meson_options = self.meson_options or {}
+        self.meson_cross_properties = self.meson_cross_properties or {}
+
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
