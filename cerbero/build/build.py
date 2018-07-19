@@ -492,11 +492,11 @@ class Meson (Build, ModifyEnvBase) :
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
         # Same for *FLAGS below.
-        cc = os.environ.get('CC', '').split(' ')
-        cxx = os.environ.get('CXX', '').split(' ')
-        ar = os.environ.get('AR', '').split(' ')
-        strip = os.environ.get('STRIP', '').split(' ')
-        windres = os.environ.get('WINDRES', '').split(' ')
+        cc = os.environ['CC'].split()
+        cxx = os.environ['CXX'].split()
+        ar = os.environ['AR'].split()
+        strip = os.environ.get('STRIP', '').split()
+        windres = os.environ.get('WINDRES', '').split()
 
         if isinstance(self.config.universal_archs, dict):
             # Universal builds have arch-specific prefixes inside the universal prefix
@@ -596,8 +596,8 @@ class Meson (Build, ModifyEnvBase) :
                         'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
                 if var in os.environ:
                     del os.environ[var]
-            # Re-add *FLAGS that weren't set by the config, but instead were set in
-            # the recipe or other places via @modify_environment
+            # Re-add *FLAGS that weren't set by the config, but instead were
+            # set in the recipe or other places via @modify_environment
             if self.using_msvc():
                 for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
                     if var in self.append_env or var in self.prepend_env:
