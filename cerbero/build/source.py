@@ -139,7 +139,7 @@ class Tarball (Source):
             shutil.rmtree(self.build_dir)
         try:
             shell.unpack(self.download_path, self.config.sources)
-        except (IOError, tarfile.ReadError):
+        except (IOError, EOFError, tarfile.ReadError):
             m.action(_('Corrupted or partial tarball, redownloading...'))
             self.fetch(redownload=True)
             shell.unpack(self.download_path, self.config.sources)
