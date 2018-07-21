@@ -18,6 +18,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # Don't make compiler warnings errors, there are quite a few
         # depending on the compiler used
-        self.append_env['CFLAGS'] = ' -Wno-error '
+        self.append_env('CFLAGS', '-Wno-error')
         if needs_xcode8_sdk_workaround(self.config):
-            self.append_env['ac_cv_func_clock_gettime'] = 'no'
+            self.set_env('ac_cv_func_clock_gettime', 'no')

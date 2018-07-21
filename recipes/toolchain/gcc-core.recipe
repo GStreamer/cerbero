@@ -27,9 +27,9 @@ class Recipe(recipe.Recipe):
     requires_non_src_build = True
     add_host_build_target = False
     deps = ['mingw-w64-headers', 'gmp-toolchain', 'mpfr', 'mpc', 'cloog']
-    new_env = {'CPP': None}
 
     def prepare(self):
+        self.set_env('CPP') # Unset CPP, added in a4acba058
         self.remotes = {'origin': '%s/%s' %
                         (self.config.git_root, 'gcc')}
         self.repo_dir = os.path.join(self.config.local_sources, 'gcc')

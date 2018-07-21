@@ -19,5 +19,4 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
-
-        self.append_env['CFLAGS'] = " -fPIC "
+        self.append_env('CFLAGS', '-fPIC')

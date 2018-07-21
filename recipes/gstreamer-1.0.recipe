@@ -73,4 +73,4 @@ class Recipe(custom.GStreamer):
             self.configure_options += ' --disable-registry '
 
         if self.config.variants.nodebug:
-            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
+            self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

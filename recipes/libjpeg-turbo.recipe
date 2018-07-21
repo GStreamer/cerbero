@@ -21,4 +21,4 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # avoid using xcode's nasm (doesn't support nasm-like arguments)
             # instead use cerbero's yasm
-            self.new_env['NASM'] = 'yasm'
+            self.set_env('NASM', 'yasm')

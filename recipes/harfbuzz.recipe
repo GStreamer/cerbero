@@ -22,4 +22,4 @@ class Recipe(recipe.Recipe):
                 # we fail to compile with -D_FILE_OFFSET_BITS=64
                 # because we don't use clang and we use a platform < 21 (Lollipop)
                 # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.new_env['ac_cv_func_mmap'] = 'no'
+                self.set_env('ac_cv_func_mmap', 'no')

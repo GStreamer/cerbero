@@ -25,20 +25,20 @@ class Recipe(recipe.Recipe):
            self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
             self.configure_options = '--disable-mmx'
         if self.config.target_platform == Platform.IOS:
-            self.append_env['CFLAGS'] = ' -DPIXMAN_NO_TLS '
+            self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.configure_options = '--disable-arm-iwmmxt'
             # Prevent symbol conflicts
-            self.append_env['CFLAGS'] = \
-                "-Dandroid_getCpuFamily=pixman_android_getCpuFamily "\
-                "-Dandroid_getCpuFeatures=pixman_android_getCpuFeatures "\
-                "-Dandroid_getCpuCount=pixman_android_getCpuCount " \
-                "-Dandroid_cpuInit=pixman_android_cpuInit " \
-                "-Dandroid_cpuInitDummy=pixman_android_cpuInitDummy " \
-                "-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm " \
-                "-Dandroid_setCpu=pixman_android_setCpu " \
-                "-Dandroid_setCpuArm=pixman_android_setCpuArm "
+            self.append_env('CFLAGS',
+                '-Dandroid_getCpuFamily=pixman_android_getCpuFamily',
+                '-Dandroid_getCpuFeatures=pixman_android_getCpuFeatures',
+                '-Dandroid_getCpuCount=pixman_android_getCpuCount',
+                '-Dandroid_cpuInit=pixman_android_cpuInit',
+                '-Dandroid_cpuInitDummy=pixman_android_cpuInitDummy',
+                '-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm',
+                '-Dandroid_setCpu=pixman_android_setCpu',
+                '-Dandroid_setCpuArm=pixman_android_setCpuArm')
 
     def configure(self):
         if self.config.target_platform == Platform.ANDROID:

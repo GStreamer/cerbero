@@ -91,106 +91,117 @@ def modify_environment(func):
     ''' Decorator to modify the build environment '''
     def call(*args):
         self = args[0]
-        prepend_env = self.prepend_env
-        append_env = self.append_env
-        new_env = self.new_env.copy()
         if self.use_system_libs and self.config.allow_system_libs:
-            self._add_system_libs(new_env)
-        old_env = self._modify_env(prepend_env, append_env, new_env)
+            self._add_system_libs()
+        self._modify_env()
         res = func(*args)
-        self._restore_env(old_env)
+        self._restore_env()
         return res
 
     call.__name__ = func.__name__
     return call
 
 
+class EnvVarOp:
+    '''
+    An operation to be done on the values of a particular env var
+    '''
+    def __init__(self, op, var, vals, sep):
+        if op == 'append':
+            op = self.append
+        elif op == 'prepend':
+            op = self.prepend
+        elif op == 'set':
+            op = self.set
+        else:
+            raise ValueError('Unknown op: {!r}'.format(op))
+        self.execute = op
+        self.var = var
+        self.vals = vals
+        self.sep = sep
+
+    def set(self):
+        if not self.vals:
+            # An empty array means unset the env var
+            if self.var in os.environ:
+                del os.environ[self.var]
+        else:
+            os.environ[self.var] = self.sep.join(self.vals)
+
+    def append(self):
+        if self.var not in os.environ:
+            os.environ[self.var] = self.sep.join(self.vals)
+        else:
+            os.environ[self.var] += self.sep + self.sep.join(self.vals)
+
+    def prepend(self):
+        if self.var not in os.environ:
+            os.environ[self.var] = self.sep.join(self.vals)
+        else:
+            old = os.environ[self.var]
+            os.environ[self.var] = self.sep.join(self.vals) + self.sep + old
+
+
 class ModifyEnvBase:
     '''
-    Base class for build systems that require extra env variables
+    Base class for build systems and recipes that require extra env variables
     '''
 
-    append_env = None
-    prepend_env = None
-    new_env = None
     use_system_libs = False
 
     def __init__(self):
-        if self.append_env is None:
-            self.append_env = {}
-        if self.prepend_env is None:
-            self.prepend_env = {}
-        if self.new_env is None:
-            self.new_env = {}
-        self._old_env = None
-
-    def _modify_env(self, prepend_env, append_env, new_env):
-        '''
-        Modifies the build environment appending the values in
-        append_env or replacing the values in new_env
-        '''
-        if self._old_env is not None:
-            return None
-
+        # An array of #EnvVarOp operations that will be performed sequentially
+        # on the env when @modify_environment is called.
+        self._new_env = []
+        # Set of env vars that will be modified
+        self._env_vars = set()
+        # Old environment to restore
         self._old_env = {}
-        for var in chain(prepend_env.keys(), append_env.keys(), new_env.keys()):
+
+    def append_env(self, var, *vals, sep=' '):
+        self._env_vars.add(var)
+        self._new_env.append(EnvVarOp('append', var, vals, sep))
+
+    def prepend_env(self, var, *vals, sep=' '):
+        self._env_vars.add(var)
+        self._new_env.append(EnvVarOp('prepend', var, vals, sep))
+
+    def set_env(self, var, *vals, sep=' '):
+        self._env_vars.add(var)
+        self._new_env.append(EnvVarOp('set', var, vals, sep))
+
+    def _modify_env(self):
+        '''
+        Modifies the build environment by inserting env vars from new_env
+        '''
+        assert(not self._old_env)
+        # Store old env
+        for var in self._env_vars:
             if var in os.environ:
                 self._old_env[var] = os.environ[var]
+        # Modify env
+        for env_op in self._new_env:
+            env_op.execute()
 
-        for var, (val, sep) in self._iter_env(prepend_env):
-            if var not in os.environ or not os.environ[var]:
-                os.environ[var] = val
-            else:
-                os.environ[var] = '{}{}{}'.format(val, sep, os.environ[var])
-
-        for var, (val, sep) in self._iter_env(append_env):
-            if var not in os.environ or not os.environ[var]:
-                os.environ[var] = val
-            else:
-                os.environ[var] = '{}{}{}'.format(os.environ[var], sep, val)
-
-        for var, val in new_env.items():
-            if val is None:
-                if var in os.environ:
-                    del os.environ[var]
-            else:
-                os.environ[var] = val
-        return self._old_env
-
-    @staticmethod
-    def _iter_env(env):
-        for var, val in env.items():
-            if isinstance(val, str):
-                yield var, (val, ' ')
-                continue
-            elif isinstance(val, list):
-                if len(val) == 1:
-                    yield var, (val[0], ' ')
-                    continue
-                elif len(val) == 2:
-                    yield var, (val[0], val[1])
-                    continue
-            raise AssertionError('Invalid value for env: {!r}'.format(val))
-
-    def _restore_env(self, old_env):
+    def _restore_env(self):
         ''' Restores the old environment '''
-        if old_env is None:
-            return
-
-        for var, val in old_env.items():
+        for var, val in self._old_env.items():
             if val is None:
                 if var in os.environ:
                     del os.environ[var]
             else:
                 os.environ[var] = val
-        self._old_env = None
+        self._old_env.clear()
 
-    def _add_system_libs(self, new_env):
+    def _add_system_libs(self):
         '''
         Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
         can be found.
         '''
+        new_env = {}
         add_system_libs(self.config, new_env)
+        for var, val in new_env.items():
+            self.set_env(var, val)
 
 
 class MakefilesBase (Build, ModifyEnvBase):
@@ -223,30 +234,23 @@ class MakefilesBase (Build, ModifyEnvBase):
             self.make += ' -j%d' % self.config.num_of_cpus
 
         # Make sure user's env doesn't mess up with our build.
-        self.new_env['MAKEFLAGS'] = None
+        self.set_env('MAKEFLAGS')
         # Disable site config, which is set on openSUSE
-        self.new_env['CONFIG_SITE'] = None
+        self.set_env('CONFIG_SITE')
         # Only add this for non-meson recipes, and only for iPhoneOS
         if self.config.ios_platform == 'iPhoneOS':
-            bitcode_cflags = ' -fembed-bitcode '
-            # FIXME: Can't pass -bitcode_bundle to Makefile projects because we
+            bitcode_cflags = ['-fembed-bitcode']
+            # NOTE: Can't pass -bitcode_bundle to Makefile projects because we
             # can't control what options they pass while linking dylibs
-            bitcode_ldflags = bitcode_cflags #+ '-Wl,-bitcode_bundle '
-            # FIXME: Use real objects here instead of strings to clean up this ugliness
-            if 'CFLAGS' in self.append_env:
-                self.append_env['CFLAGS'] += bitcode_cflags
-            else:
-                self.append_env['CFLAGS'] = bitcode_cflags
-            if 'CCASFLAGS' in self.append_env:
-                self.append_env['CCASFLAGS'] += bitcode_cflags
-            else:
-                self.append_env['CCASFLAGS'] = bitcode_cflags
+            bitcode_ldflags = bitcode_cflags #+ ['-Wl,-bitcode_bundle']
+            self.append_env('CFLAGS', *bitcode_cflags)
+            self.append_env('CXXFLAGS', *bitcode_cflags)
+            self.append_env('OBCCFLAGS', *bitcode_cflags)
+            self.append_env('OBJCXXFLAGS', *bitcode_cflags)
+            self.append_env('CCASFLAGS', *bitcode_cflags)
             # Autotools only adds LDFLAGS when doing compiler checks,
             # so add -fembed-bitcode again
-            if 'LDFLAGS' in self.append_env:
-                self.append_env['LDFLAGS'] += bitcode_ldflags
-            else:
-                self.append_env['LDFLAGS'] = bitcode_ldflags
+            self.append_env('LDFLAGS', *bitcode_ldflags)
 
     @modify_environment
     def configure(self):
@@ -352,7 +356,7 @@ class Autotools (MakefilesBase):
         if self.use_system_libs and self.config.allow_system_libs:
             use_configure_cache = False
 
-        if self.new_env or self.append_env or self.prepend_env:
+        if self._new_env:
             use_configure_cache = False
 
         if use_configure_cache and self.can_use_configure_cache:
@@ -465,7 +469,8 @@ class Meson (Build, ModifyEnvBase) :
 
         if self.using_msvc():
             # Set the MSVC toolchain environment
-            self.prepend_env.update(self.config.msvc_toolchain_env)
+            for var, (val, sep) in self.config.msvc_toolchain_env.items():
+                self.prepend_env(var, val, sep=sep)
 
         # Find Meson
         if not self.meson_sh:
@@ -603,12 +608,9 @@ class Meson (Build, ModifyEnvBase) :
             # set in the recipe or other places via @modify_environment
             if self.using_msvc():
                 for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
-                    if var in self.append_env or var in self.prepend_env:
-                        os.environ[var] = ''
-                    if var in self.prepend_env:
-                        os.environ[var] = self.prepend_env[var]
-                    if var in self.append_env:
-                        os.environ[var] += self.append_env[var]
+                    for env_op in self._new_env:
+                        if env_op.var == var:
+                            env_op.execute()
 
         if 'default_library' in self.meson_options:
             raise RuntimeError('Do not set `default_library` in self.meson_options, use self.meson_default_library instead')

@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX:
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)
-            self.append_env['CFLAGS'] = ' -DNVALGRIND=1 '
+            self.append_env('CFLAGS', '-DNVALGRIND=1')
             self.meson_options.update({'xattr': 'false'})
         # macOS provides libiconv as a separate library
         if self.config.target_platform == Platform.DARWIN:
@@ -40,4 +40,4 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
-            self.append_env['CFLAGS'] = ' -DMINGW_HAS_SECURE_API=1 -U_WIN32_WINNT '
+            self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')

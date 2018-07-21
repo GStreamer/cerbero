@@ -33,13 +33,13 @@ class Recipe(recipe.Recipe):
         else:
             host = 'x86_64-w64-mingw32'
         self.configure_options += ' --host=%s' % host
-        self.new_env['CC'] = '%s-gcc' % host
-        self.new_env['CXX'] = '%s-g++' % host
-        self.new_env['CPP'] = '%s-cpp' % host
-        self.new_env['LD'] = '%s-ld' % host
-        self.new_env['STRIP'] = '%s-strip' % host
-        self.new_env['RANLIB'] = '%s-ranlib' % host
-        self.new_env['DLLTOOL'] = '%s-dlltool' % host
-        self.new_env['AR'] = '%s-ar' % host
-        self.new_env['AS'] = '%s-as' % host
+        self.set_env('CC', '%s-gcc' % host)
+        self.set_env('CXX', '%s-g++' % host)
+        self.set_env('CPP', '%s-cpp' % host)
+        self.set_env('LD', '%s-ld' % host)
+        self.set_env('STRIP', '%s-strip' % host)
+        self.set_env('RANLIB', '%s-ranlib' % host)
+        self.set_env('DLLTOOL', '%s-dlltool' % host)
+        self.set_env('AR', '%s-ar' % host)
+        self.set_env('AS', '%s-as' % host)
 

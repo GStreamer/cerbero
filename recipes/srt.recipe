@@ -23,8 +23,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
-            self.append_env['CXXFLAGS'] = " -frtti -fexceptions `pkg-config --cflags gnustl`"
-            self.append_env['LDFLAGS'] = " -lgnustl"
+            self.append_env('CXXFLAGS', '-frtti', '-fexceptions', '`pkg-config --cflags gnustl`')
+            self.append_env('LDFLAGS', '-lgnustl')
             self.deps += ['gnustl']
 
     def post_install(self):

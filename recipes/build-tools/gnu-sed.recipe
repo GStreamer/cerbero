@@ -11,4 +11,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if needs_xcode8_sdk_workaround(self.config):
-            self.append_env['ac_cv_func_mkostemp'] = 'no'
+            self.set_env('ac_cv_func_mkostemp', 'no')

@@ -89,23 +89,21 @@ class Recipe(recipe.Recipe):
     files_lang = ['glib20']
 
     def _set_gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
-        self.append_env['CFLAGS'] += self._gio_flags(path1, path2, use_old_uri_scheme)
+        self.append_env('CFLAGS', *self._gio_flags(path1, path2, use_old_uri_scheme))
 
     def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
-        flags = ''
+        flags = []
         def escape(path):
             return '\\"%s\\"' % path
         if path1 is not None:
-            flags += ' -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=%s' % escape(path1)
+            flags.append('-DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=' + escape(path1))
         if path2 is not None:
-            flags += ' -DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=%s' % escape(path2)
+            flags.append('-DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH2=' + escape(path2))
         if use_old_uri_scheme:
-            flags += ' -DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1'
+            flags.append('-DGST_SDK_GLIB_GIO_OLD_URI_SCHEME_HANDLERS=1')
         return flags
 
     def prepare(self):
-        # We add CFLAGS in various places, so initialize it first
-        self.append_env['CFLAGS'] = ''
         # Glib doesn't support static libraries on Windows yet
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_default_library = 'shared'
@@ -113,7 +111,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX:
             # Disable valgrind code on non-Linux, in the best case it just
             # gives us compiler errors :)
-            self.append_env['CFLAGS'] += ' -DNVALGRIND=1 '
+            self.append_env('CFLAGS', '-DNVALGRIND=1')
             self.meson_options.update({'xattr': 'false'})
             self.deps.append('proxy-libintl')
 
@@ -138,11 +136,11 @@ class Recipe(recipe.Recipe):
                 # we fail to compile with -D_FILE_OFFSET_BITS=64
                 # because we don't use clang and we use a platform < 21 (Lollipop)
                 # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.meson_cross_properties['c_args'] = ['-U_FILE_OFFSET_BITS']
+                self.append_env('CFLAGS', '-U_FILE_OFFSET_BITS')
         elif self.config.target_platform == Platform.WINDOWS:
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
-            self.append_env['CFLAGS'] += ' -DMINGW_HAS_SECURE_API=1 -U_WIN32_WINNT '
+            self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
             arch = self.config.target_arch
@@ -152,13 +150,13 @@ class Recipe(recipe.Recipe):
                 arch = 'arm64'
             elif Architecture.is_arm(arch):
                 arch = 'arm'
-            extra_flags = ''
+            extra_flags = []
             if self.config.target_platform == Platform.IOS:
                 # Disable mac OS X specifics
-                extra_flags = '-DGST_SDK_IOS=1'
+                extra_flags = ['-DGST_SDK_IOS=1']
                 # XXX: Why did we disable these for iOS?
                 #self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
-            self.append_env['CFLAGS'] += extra_flags
+            self.append_env('CFLAGS', *extra_flags)
 
         elif self.config.target_platform == Platform.LINUX:
             path1 = '/usr/lib/gio/modules'

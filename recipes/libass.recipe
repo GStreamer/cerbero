@@ -18,4 +18,4 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.IOS and \
             self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
-            self.append_env = {'LDFLAGS': '-Wl,-read_only_relocs,suppress'}
+            self.append_env('LDFLAGS', '-Wl,-read_only_relocs,suppress')

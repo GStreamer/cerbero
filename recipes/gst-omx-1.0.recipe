@@ -16,15 +16,12 @@ class Recipe(custom.GStreamer):
 
     def prepare(self):
         if self.config.variants.rpi:
-            flags = (
-                ' -I=/opt/vc/include'
-                ' -I=/opt/vc/include/IL'
-                ' -I=/opt/vc/include/interface/vcos/pthreads'
-                ' -I=/opt/vc/include/interface/vmcs_host/linux '
-            )
+            flags = ['-I/opt/vc/include', '-I/opt/vc/include/IL',
+                     '-I/opt/vc/include/interface/vcos/pthreads',
+                     '-I/opt/vc/include/interface/vmcs_host/linux']
             self.configure_options += ' --with-omx-target=rpi '
-            self.append_env['CFLAGS'] = flags
-            self.append_env['CPPFLAGS'] = flags
-            self.append_env['LDFLAGS'] = ' -L=/opt/vc/lib '
+            self.append_env('CFLAGS', *flags)
+            self.append_env('CPPFLAGS', *flags)
+            self.append_env('LDFLAGS', '-L/opt/vc/lib')
         else:
             self.configure_options += ' --with-omx-target=generic '

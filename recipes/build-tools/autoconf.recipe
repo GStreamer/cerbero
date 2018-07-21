@@ -22,4 +22,4 @@ class Recipe(recipe.Recipe):
         # default one provided with mingw/msys
         if self.config.target_platform == Platform.WINDOWS:
             self.deps.remove('m4')
-            self.append_env['M4'] = '/bin/m4'
+            self.set_env('M4', '/bin/m4')

@@ -12,4 +12,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.append_env['LDFLAGS'] = '-lintl'
+            self.append_env('LDFLAGS', '-lintl')

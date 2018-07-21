@@ -53,4 +53,4 @@ class Recipe(custom.GStreamer):
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstdvdread.a')
 
         if self.config.variants.nodebug:
-            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
+            self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

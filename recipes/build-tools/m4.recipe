@@ -14,4 +14,4 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
-        self.append_env['CFLAGS'] = " -Wno-error=cast-align"
+        self.append_env('CFLAGS', '-Wno-error=cast-align')

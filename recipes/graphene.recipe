@@ -55,7 +55,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch
             if arch == Architecture.X86_64:
-                self.new_env['SSE41_CFLAGS'] = " "
+                self.set_env('SSE41_CFLAGS', ' ')
 
     def post_install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:

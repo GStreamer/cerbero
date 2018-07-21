@@ -213,8 +213,8 @@ class Recipe(custom.GStreamer):
         ]
 
     def prepare(self):
-        self.append_env['CFLAGS'] = " -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
-        self.append_env['OBJCFLAGS'] = " -DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1 "
+        self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
+        self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
         if self.config.variants.cdparanoia:
             self.deps.append('cdparanoia')
@@ -247,7 +247,7 @@ class Recipe(custom.GStreamer):
             self.configure_options += ' --disable-alsa'
 
         if self.config.variants.nodebug:
-            self.append_env['CFLAGS'] += ' -DGST_LEVEL_MAX=GST_LEVEL_FIXME'
+            self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
 
         if self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
@@ -256,4 +256,4 @@ class Recipe(custom.GStreamer):
                 # we fail to compile with -D_FILE_OFFSET_BITS=64
                 # because we don't use clang and we use a platform < 21 (Lollipop)
                 # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.new_env['ac_cv_func_mmap'] = 'no'
+                self.set_env('ac_cv_func_mmap', 'no')

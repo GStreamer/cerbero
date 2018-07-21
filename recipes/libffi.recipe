@@ -37,7 +37,7 @@ class Recipe(recipe.Recipe):
         self.configure_options += ' --disable-docs '
 
         if needs_xcode8_sdk_workaround(self.config):
-            self.append_env['ac_cv_func_mkostemp'] = 'no'
+            self.set_env('ac_cv_func_mkostemp', 'no')
 
         if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
             arch = self.config.target_arch

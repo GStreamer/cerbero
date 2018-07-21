@@ -26,9 +26,10 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_arch == Architecture.ARMv7:
             if self.config.target_platform != Platform.IOS:
-                self.new_env['CFLAGS'] = os.environ['CFLAGS'] + " -Wa,-mimplicit-it=thumb "
+                self.append_env('CFLAGS', '-Wa,-mimplicit-it=thumb')
         elif self.config.target_arch == Architecture.ARM:
-            self.new_env['CFLAGS'] = os.environ['CFLAGS'].replace('-mthumb', '')
+            # Disable thumb code generation
+            self.append_env('CFLAGS', '-marm')
 
     def configure(self):
         if self.config.target_platform == Platform.IOS:

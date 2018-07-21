@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # Don't accidentially build with pcap support
-        self.append_env['ac_cv_lib_pcap_pcap_create'] = 'no'
+        self.set_env('ac_cv_lib_pcap_pcap_create', 'no')
         self.make += ' all shared_library'
 
     def install(self):

@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
             self.configure_options = ' --disable-assembly'
         elif self.config.target_platform == Platform.ANDROID:
             # gmp use CFLAGS to compile and link some programs during configure
-            self.append_env['CFLAGS'] = os.environ.get('LDFLAGS', '')
+            self.append_env('CFLAGS', os.environ['LDFLAGS'])
 
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('include', '*', 'gmp.h'))
