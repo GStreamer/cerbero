@@ -340,8 +340,9 @@ class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
 
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
+            arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            stepfunc = getattr(list(self._recipes.values())[0], step)
+            stepfunc = getattr(recipe, step)
             try:
                 stepfunc()
             except FatalError as e:
