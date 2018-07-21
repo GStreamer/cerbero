@@ -595,6 +595,9 @@ class Meson (Build, ModifyEnvBase) :
             for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
                         'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
                 if var in os.environ:
+                    # Store it on _old_env so that the value is restored when
+                    # we return from self.configure()
+                    self._old_env[var] = os.environ[var]
                     del os.environ[var]
             # Re-add *FLAGS that weren't set by the config, but instead were
             # set in the recipe or other places via @modify_environment
