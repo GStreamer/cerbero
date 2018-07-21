@@ -22,7 +22,6 @@ import copy
 import shutil
 import shlex
 import sysconfig
-from itertools import chain
 
 from cerbero.config import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
@@ -88,7 +87,11 @@ class CustomBuild(Build):
 
 
 def modify_environment(func):
-    ''' Decorator to modify the build environment '''
+    '''
+    Decorator to modify the build environment
+
+    When called recursively, it only modifies the environment once.
+    '''
     def call(*args):
         self = args[0]
         if self.use_system_libs and self.config.allow_system_libs:
@@ -158,15 +161,22 @@ class ModifyEnvBase:
         # Old environment to restore
         self._old_env = {}
 
+    def check_reentrancy(self):
+        if self._old_env:
+            raise RuntimeError('Do not modify the env inside @modify_environment, it will have no effect')
+
     def append_env(self, var, *vals, sep=' '):
+        self.check_reentrancy()
         self._env_vars.add(var)
         self._new_env.append(EnvVarOp('append', var, vals, sep))
 
     def prepend_env(self, var, *vals, sep=' '):
+        self.check_reentrancy()
         self._env_vars.add(var)
         self._new_env.append(EnvVarOp('prepend', var, vals, sep))
 
     def set_env(self, var, *vals, sep=' '):
+        self.check_reentrancy()
         self._env_vars.add(var)
         self._new_env.append(EnvVarOp('set', var, vals, sep))
 
@@ -174,7 +184,9 @@ class ModifyEnvBase:
         '''
         Modifies the build environment by inserting env vars from new_env
         '''
-        assert(not self._old_env)
+        # Don't modify env again if already did it once for this function call
+        if self._old_env:
+            return
         # Store old env
         for var in self._env_vars:
             if var in os.environ:
