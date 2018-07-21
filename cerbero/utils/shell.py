@@ -336,7 +336,8 @@ def download_curl(url, destination=None, recursive=False, check_cert=True, overw
         try:
             call(cmd, path)
         except FatalError as e:
-            os.remove(destination)
+            if os.path.exists(destination):
+                os.remove(destination)
             raise e
 
 
