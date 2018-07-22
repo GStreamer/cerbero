@@ -26,6 +26,14 @@ class Recipe(custom.GStreamer):
     ]
 
     def prepare(self):
+        # Default AS is $CC, except iOS (set below)
+        if Architecture.is_arm(self.config.target_arch):
+            if self.config.target_platform == Platform.IOS:
+                if 'GAS' in os.environ:
+                    self.set_env('AS', os.environ['GAS'])
+            else:
+                self.set_env('AS', os.environ['CC'])
+
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
                 asflags = ' -arch x86_64 -m64'
@@ -51,9 +59,6 @@ class Recipe(custom.GStreamer):
                 libavextraconf += " --disable-asm"
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         elif self.config.target_platform == Platform.IOS:
-            if Architecture.is_arm(self.config.target_arch):
-                if 'GAS' in os.environ:
-                    self.set_env('AS', os.environ['GAS'])
             # Some optimisations that were previously silently disabled
             # cause warnings now. Ignore them
             libavextraconf = " --extra-cflags='-Wno-ignored-optimization-argument' "
