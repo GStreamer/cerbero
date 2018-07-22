@@ -12,9 +12,9 @@ diff --git a/configure b/configure
 index f82ee04..ea8e015 100755
 --- a/configure
 +++ b/configure
-@@ -111,6 +111,7 @@ all_platforms="${all_platforms} armv7-win32-vs11"
- all_platforms="${all_platforms} armv7-win32-vs12"
+@@ -111,6 +111,7 @@ all_platforms="${all_platforms} armv7-win32-vs12"
  all_platforms="${all_platforms} armv7-win32-vs14"
+ all_platforms="${all_platforms} armv7-win32-vs15"
  all_platforms="${all_platforms} armv7s-darwin-gcc"
 +all_platforms="${all_platforms} armv5te-android-gcc"
  all_platforms="${all_platforms} armv8-linux-gcc"
