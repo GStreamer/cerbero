@@ -44,7 +44,8 @@ class Recipe(recipe.Recipe):
                 AS = []
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
-                AS = ['tools/gas-preprocessor.pl', os.environ['CC'], os.environ['CFLAGS']]
+                AS = ['tools/gas-preprocessor.pl', os.environ['CC'],
+                      os.environ['CFLAGS'], '-fembed-bitcode']
                 self.patches = ['x264/0001-Disable-fembed-bitcode-incompatible-argument.patch']
             elif self.config.target_arch == Architecture.X86:
                 enable_asm = False
