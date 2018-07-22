@@ -11,8 +11,8 @@ class Recipe(recipe.Recipe):
     name = 'cdparanoia'
     version = '10.2'
     stype = SourceType.TARBALL
-    url = 'http://downloads.xiph.org/releases/cdparanoia/cdparanoia-III-10.2.src.tgz'
-    tarball_dirname = 'cdparanoia-III-%(version)s'
+    url = 'http://downloads.xiph.org/releases/%(name)s/%(name)s-III-%(version)s.src.tgz'
+    tarball_dirname = '%(name)s-III-%(version)s'
     autoreconf = True
     # binaries are GPL
     licenses = [License.LGPLv2_1Plus]

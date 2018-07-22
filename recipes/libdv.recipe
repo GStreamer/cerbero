@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libdv'
     version = '1.0.0'
     stype = SourceType.TARBALL
-    url = 'http://sourceforge.net/projects/libdv/files/libdv/1.0.0/libdv-1.0.0.tar.gz'
+    url = 'http://sourceforge.net/projects/libdv/files/libdv/%(version)s/libdv-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     patches = ['libdv/0001-Check-properly-for-sched_setscheduler.patch',

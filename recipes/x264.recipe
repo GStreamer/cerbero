@@ -11,8 +11,8 @@ class Recipe(recipe.Recipe):
                     "--libdir=%(libdir)s"
     configure_options = '--enable-shared --enable-static --enable-pic ' \
                         '--disable-strip --disable-lavf'
-    url = 'http://download.videolan.org/pub/x264/snapshots/x264-snapshot-20161218-2245-stable.tar.bz2'
-    tarball_dirname= 'x264-snapshot-20161218-2245-stable'
+    url = 'http://download.videolan.org/pub/x264/snapshots/x264-snapshot-%(version)s-stable.tar.bz2'
+    tarball_dirname= 'x264-snapshot-%(version)s-stable'
 
     files_libs = ['libx264']
     files_bins = ['x264']

@@ -20,7 +20,7 @@ GMP_H_UNVERSAL='''\
 class Recipe(recipe.Recipe):
     name = 'gmp'
     version = '6.1.2'
-    url = 'http://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.xz'
+    url = 'http://ftp.gnu.org/gnu/gmp/gmp-%(version)s.tar.xz'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
     tarball_dirname = 'gmp-6.1.2'

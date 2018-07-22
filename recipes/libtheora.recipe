@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.1.1'
     licenses = [License.BSD]
     stype = SourceType.TARBALL
-    url = 'http://downloads.xiph.org/releases/theora/libtheora-1.1.1.tar.bz2'
+    url = 'http://downloads.xiph.org/releases/theora/libtheora-%(version)s.tar.bz2'
     deps = ['libogg', 'libvorbis']
     allow_parallel_build = False
     patches = ['libtheora/0001-Add-option-to-disable-doc.patch',

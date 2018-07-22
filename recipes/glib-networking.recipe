@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = 'http://ftp.gnome.org/pub/gnome/sources/glib-networking/2.56/glib-networking-%(version)s.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
                      'gnome_proxy_support': 'false', 'pkcs11_support': 'false'}
     deps = ['glib', 'gnutls']

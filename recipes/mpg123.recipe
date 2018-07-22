@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'mpg123'
     version = '1.25.10'
     stype = SourceType.TARBALL
-    url = 'http://downloads.sourceforge.net/project/mpg123/mpg123/1.25.10/mpg123-1.25.10.tar.bz2'
+    url = 'http://downloads.sourceforge.net/project/mpg123/mpg123/%(version)s/mpg123-%(version)s.tar.bz2'
     licenses = [License.LGPLv2_1]
     autoreconf = True
     configure_options = '--with-audio=dummy --enable-static'

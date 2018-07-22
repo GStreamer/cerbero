@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libvisual'
     version = '0.4.0'
     stype = SourceType.TARBALL
-    url = 'http://sourceforge.net/projects/libvisual/files/libvisual/libvisual-0.4.0/libvisual-0.4.0.tar.bz2'
+    url = 'http://sourceforge.net/projects/libvisual/files/libvisual/libvisual-%(version)s/libvisual-%(version)s.tar.bz2'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     configure_options = ' --enable-static'

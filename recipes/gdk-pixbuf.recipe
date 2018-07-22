@@ -7,7 +7,8 @@ class Recipe(recipe.Recipe):
     version = '2.36.2'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnome.org/pub/gnome/sources/gdk-pixbuf/2.36/gdk-pixbuf-2.36.2.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
     autoreconf = True
