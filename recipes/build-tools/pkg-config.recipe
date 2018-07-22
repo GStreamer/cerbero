@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.29.2'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url='http://pkgconfig.freedesktop.org/releases/pkg-config-0.29.2.tar.gz'
+    url = 'https://pkgconfig.freedesktop.org/releases/pkg-config-%(version)s.tar.gz'
     configure_options = '--with-internal-glib --disable-host-tool '
 
     files_bins = ['pkg-config']

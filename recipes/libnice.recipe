@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'libnice'
     version = '0.1.14'
     stype = SourceType.TARBALL
-    url = 'http://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
+    url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     configure_options = '--enable-static --enable-static-plugins --enable-shared \
             --with-gstreamer --without-gstreamer-0.10 \

@@ -20,7 +20,6 @@ import os
 import shutil
 import tarfile
 import urllib.request, urllib.parse, urllib.error
-import urllib.parse
 
 from cerbero.config import Platform
 from cerbero.utils import git, svn, shell, _
@@ -108,6 +107,9 @@ class Tarball (Source):
         split[2] = urllib.parse.quote(split[2])
         self.url = urllib.parse.urlunsplit(split)
         self.mirror_url = urllib.parse.urljoin(TARBALL_MIRROR, self.tarball_name)
+        o = urllib.parse.urlparse(self.url)
+        if o.scheme in ('http', 'ftp'):
+            raise FatalError('Download URL {!r} must use HTTPS'.format(self.url))
 
     def fetch(self, redownload=False):
         if not os.path.exists(self.repo_dir):
@@ -122,7 +124,7 @@ class Tarball (Source):
             return
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
-        # Enable certificate checking Linux for now
+        # Enable certificate checking only on Linux for now
         # FIXME: Add more platforms here after testing
         cc = self.config.platform == Platform.LINUX
         try:

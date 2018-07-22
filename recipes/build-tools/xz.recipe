@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '5.2.3'
     licenses = [License.GPLv3]
     stype = SourceType.TARBALL
-    url = 'http://tukaani.org/xz/xz-%(version)s.tar.bz2'
+    url = 'https://download.sourceforge.net/lzmautils/xz-%(version)s.tar.bz2'
 
     files_bins = ['xz']
 

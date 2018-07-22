@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
-    url = 'http://www.cmake.org/files/v3.7/cmake-3.7.1.tar.gz'
+    url = 'https://www.cmake.org/files/v3.7/cmake-%(version)s.tar.gz'
     deps = ['autoconf']
 
     add_host_build_target = False

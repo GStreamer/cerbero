@@ -5,7 +5,8 @@ class Recipe(recipe.Recipe):
     name = 'pango'
     version = '1.40.14'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/pango/1.40/pango-%(version)s.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     autoreconf = True
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]

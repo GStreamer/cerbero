@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     version = '1.5.0'
     licenses = [License.LGPL]
     stype = SourceType.TARBALL
-    url = 'http://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
+    url = 'https://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
     autoreconf = True
     patches = ['frei0r-plugins/0001-Fix-autoreconf.patch']
 

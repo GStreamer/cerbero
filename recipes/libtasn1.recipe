@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'libtasn1'
     version = '4.13'
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/gnu/libtasn1/libtasn1-{0}.tar.gz'.format(version)
+    url = 'https://ftp.gnu.org/gnu/libtasn1/libtasn1-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     patches = ['libtasn1/0001-Rename-gnulib-symbols.patch']

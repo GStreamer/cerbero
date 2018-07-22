@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.27'
     stype = SourceType.TARBALL
     tarball_dirname = 'gtk-doc-%(version)s'
-    # url = 'http://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/%(version)s/gtk-doc-%(version)s.tar.xz'
+    # url = 'https://ftp.acc.umu.se/pub/GNOME/sources/gtk-doc/%(version)s/gtk-doc-%(version)s.tar.xz'
     # !!! gtk-doc 1.27 doesn't unpack on MingW, because the uid of the packager is out of range 1..65535
     # So mirror our own re-tarballed version.
     # See https://bugzilla.gnome.org/show_bug.cgi?id=722621

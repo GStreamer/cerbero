@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'libmms'
     version = '0.6.4'
     stype = SourceType.TARBALL
-    url = 'http://sourceforge.net/projects/libmms/files/libmms/%(version)s/libmms-%(version)s.tar.gz'
+    url = 'https://download.sourceforge.net/libmms/libmms-%(version)s.tar.gz'
     licenses = [License.LGPLv2_1Plus]
     patches = ['libmms/0002-uri-Add-implementation-of-strndup-for-platforms-that.patch',
                'libmms/0005-Fix-build-on-OSX-leopard.patch']

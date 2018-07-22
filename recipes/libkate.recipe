@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libkate'
     version = '0.4.1'
     stype = SourceType.TARBALL
-    url = 'http://downloads.xiph.org/releases/kate/libkate-%(version)s.tar.gz'
+    url = 'https://downloads.xiph.org/releases/kate/libkate-%(version)s.tar.gz'
     licenses = [License.BSD_like]
     deps = ['libogg', 'libpng']
     patches = ['libkate/0001-be-more-permissive-with-automake-errors-now-that-we-.patch']

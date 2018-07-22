@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/librsvg/2.40/librsvg-%(version)s.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']

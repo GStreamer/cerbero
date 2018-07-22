@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/pub/gnu/%(name)s/%(name)s-%(version)s.tar.gz'
+    url = 'https://ftp.gnu.org/pub/gnu/%(name)s/%(name)s-%(version)s.tar.gz'
     srcdir = 'gettext-runtime'
     patches = ['gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
                'gettext/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',

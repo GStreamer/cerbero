@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
                     "--libdir=%(libdir)s"
     configure_options = " --with-jpeg8"
     autoreconf = True
-    url = 'http://downloads.sourceforge.net/project/libjpeg-turbo/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
+    url = 'https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-%(version)s.tar.gz'
     patches = []
 
     files_libs = ['libjpeg','libturbojpeg']

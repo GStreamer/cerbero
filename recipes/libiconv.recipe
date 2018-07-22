@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
-    url = 'http://ftp.gnu.org/pub/gnu/libiconv/libiconv-%(version)s.tar.gz'
+    url = 'https://ftp.gnu.org/pub/gnu/libiconv/libiconv-%(version)s.tar.gz'
     patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
                'libiconv/0002-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
 #               'libiconv/0002-Add-support-for-Android.patch',

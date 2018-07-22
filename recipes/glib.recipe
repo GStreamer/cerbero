@@ -24,7 +24,8 @@ class Recipe(recipe.Recipe):
     name = 'glib'
     version = '2.56.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-%(version)s.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'gtk_doc': 'false', 'internal_pcre': 'true', 'libmount': 'false',

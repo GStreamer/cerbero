@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = []
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
-    url = 'http://docbook.org/xml/%(version)s/%(name)s-%(version)s.zip'
+    url = 'https://docbook.org/xml/%(version)s/%(name)s-%(version)s.zip'
 
     files_catalog = ['etc/catalog.xml']
 

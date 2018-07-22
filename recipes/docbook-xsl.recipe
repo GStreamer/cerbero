@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
-    url = 'http://sourceforge.net/projects/docbook/files/%(name)s/%(version)s/%(name)s-%(version)s.tar.bz2'
+    url = 'https://download.sourceforge.net/docbook/%(name)s-%(version)s.tar.bz2'
 
     files_catalog = ['etc/catalog.xml']
 

@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     srcdir = 'gettext-tools'
     stype = SourceType.TARBALL
     tarball_dirname = 'gettext-%(version)s'
-    url = 'http://ftp.gnu.org/pub/gnu/gettext/gettext-0.19.8.1.tar.gz'
+    url = 'https://ftp.gnu.org/pub/gnu/gettext/gettext-%(version)s.tar.gz'
     platform_deps = {
             Platform.DARWIN:  ['sed'],
             Platform.WINDOWS: ['libiconv', 'mingw-runtime'],}

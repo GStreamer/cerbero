@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'freetype'
     version = '2.9'
     stype = SourceType.TARBALL
-    url = 'http://download.savannah.gnu.org/releases/freetype/freetype-%(version)s.tar.bz2'
+    url = 'https://download.savannah.gnu.org/releases/freetype/freetype-%(version)s.tar.bz2'
     licenses = [License.FreeType]
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s --libdir=%(libdir)s --with-harfbuzz=no"
     deps = ['zlib', 'bzip2', 'libpng']

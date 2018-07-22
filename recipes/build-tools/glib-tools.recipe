@@ -4,7 +4,8 @@ class Recipe(recipe.Recipe):
     name = 'glib-tools'
     version = '2.56.1'
     stype = SourceType.TARBALL
-    url = 'http://ftp.acc.umu.se/pub/GNOME/sources/glib/2.56/glib-%(version)s.tar.xz'
+    maj_ver = '.'.join(version.split('.')[0:2])
+    url = 'https://download.gnome.org/sources/glib/{}/glib-%(version)s.tar.xz'.format(maj_ver)
     tarball_dirname = 'glib-%(version)s'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON

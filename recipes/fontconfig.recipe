@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'fontconfig'
     version = '2.12.6'
     stype = SourceType.TARBALL
-    url = 'http://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
+    url = 'https://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
     licenses = [License.MIT]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']

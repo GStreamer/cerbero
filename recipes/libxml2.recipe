@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libxml2'
     version = '2.9.7'
     stype = SourceType.TARBALL
-    url = 'http://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
+    url = 'https://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     autoreconf = True

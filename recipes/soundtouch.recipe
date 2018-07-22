@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'soundtouch'
     version = '1.9.2'
     stype = SourceType.TARBALL
-    url = 'http://www.surina.net/soundtouch/soundtouch-%(version)s.tar.gz'
+    url = 'https://www.surina.net/soundtouch/soundtouch-%(version)s.tar.gz'
     tarball_dirname = 'soundtouch'
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
