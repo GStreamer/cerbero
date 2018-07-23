@@ -110,15 +110,7 @@ class EnvVarOp:
     An operation to be done on the values of a particular env var
     '''
     def __init__(self, op, var, vals, sep):
-        if op == 'append':
-            op = self.append
-        elif op == 'prepend':
-            op = self.prepend
-        elif op == 'set':
-            op = self.set
-        else:
-            raise ValueError('Unknown op: {!r}'.format(op))
-        self.execute = op
+        self.execute = getattr(self, op)
         self.var = var
         self.vals = vals
         self.sep = sep
