@@ -514,12 +514,6 @@ class Meson (Build, ModifyEnvBase) :
         if 'OBJCXX' in os.environ:
             cross_binaries['objcpp'] = os.environ['OBJCXX'].split()
 
-        if isinstance(self.config.universal_archs, dict):
-            # Universal builds have arch-specific prefixes inside the universal prefix
-            libdir = '{}/{}/lib{}'.format(self.config.prefix, self.config.target_arch,
-                                          self.config.lib_suffix)
-        else:
-            libdir = '{}/lib{}'.format(self.config.prefix, self.config.lib_suffix)
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
         c_args = shlex.split(os.environ.get('CFLAGS', ''))
@@ -527,8 +521,7 @@ class Meson (Build, ModifyEnvBase) :
         objc_args = shlex.split(os.environ.get('OBJCFLAGS', ''))
         objcpp_args = shlex.split(os.environ.get('OBJCXXFLAGS', ''))
         # Link args
-        base_link_args = ['-L' + libdir]
-        c_link_args = base_link_args + shlex.split(os.environ.get('LDFLAGS', ''))
+        c_link_args = shlex.split(os.environ.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
         if 'OBJLDFLAGS' in os.environ:
             objc_link_args = base_link_args + shlex.split(os.environ['OBJLDFLAGS'])
