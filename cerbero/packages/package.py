@@ -280,7 +280,7 @@ class Package(PackageBase):
             else:
                 rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
-        return sorted(files)
+        return sorted(list(set(files)))
 
     def devel_files_list(self):
         files = []
@@ -297,12 +297,12 @@ class Package(PackageBase):
             else:
                 rfiles = recipe.files_list_by_categories(categories)
             files.extend(rfiles)
-        return sorted(files)
+        return sorted(list(set(files)))
 
     def all_files_list(self):
         files = self.files_list()
         files.extend(self.devel_files_list())
-        return sorted(files)
+        return remove_list_duplicates(files)
 
     def _parse_files(self):
         self._recipes_files = {}
@@ -405,8 +405,7 @@ class MetaPackage(PackageBase):
         files = []
         for package in self.store.get_package_deps(self.name):
             files.extend(func(package))
-        files.sort()
-        return files
+        return sorted(list(set(files)))
 
     def __getattribute__(self, name):
         if name == 'packages':
