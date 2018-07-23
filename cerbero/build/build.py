@@ -524,7 +524,7 @@ class Meson (Build, ModifyEnvBase) :
         c_link_args = shlex.split(os.environ.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
         if 'OBJLDFLAGS' in os.environ:
-            objc_link_args = base_link_args + shlex.split(os.environ['OBJLDFLAGS'])
+            objc_link_args = shlex.split(os.environ['OBJLDFLAGS'])
         else:
             objc_link_args = c_link_args
         objcpp_link_args = objc_link_args
