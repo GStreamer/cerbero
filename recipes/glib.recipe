@@ -116,8 +116,8 @@ class Recipe(recipe.Recipe):
             self.meson_options.update({'xattr': 'false'})
             self.deps.append('proxy-libintl')
 
-        # macOS provides libiconv as a separate library
-        if self.config.target_platform == Platform.DARWIN:
+        # macOS and iOS provide libiconv as a separate library
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options.update({'iconv': 'native'})
         # linux and BSD provide iconv as a part of libc
         elif self.config.target_platform == Platform.LINUX:
