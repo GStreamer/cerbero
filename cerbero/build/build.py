@@ -442,6 +442,7 @@ ar = {AR}
 strip = {STRIP}
 windres = {WINDRES}
 pkgconfig = 'pkg-config'
+{extra_binaries}
 '''
 
 class Meson (Build, ModifyEnvBase) :
@@ -507,6 +508,12 @@ class Meson (Build, ModifyEnvBase) :
         strip = os.environ.get('STRIP', '').split()
         windres = os.environ.get('WINDRES', '').split()
 
+        cross_binaries = {}
+        if 'OBJC' in os.environ:
+            cross_binaries['objc'] = os.environ['OBJC'].split()
+        if 'OBJCXX' in os.environ:
+            cross_binaries['objcpp'] = os.environ['OBJCXX'].split()
+
         if isinstance(self.config.universal_archs, dict):
             # Universal builds have arch-specific prefixes inside the universal prefix
             libdir = '{}/{}/lib{}'.format(self.config.prefix, self.config.target_arch,
@@ -515,16 +522,25 @@ class Meson (Build, ModifyEnvBase) :
             libdir = '{}/lib{}'.format(self.config.prefix, self.config.lib_suffix)
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
-        c_link_args = ['-L' + libdir]
-        c_link_args += shlex.split(os.environ.get('LDFLAGS', ''))
-        cpp_link_args = c_link_args
         c_args = shlex.split(os.environ.get('CFLAGS', ''))
         cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
+        objc_args = shlex.split(os.environ.get('OBJCFLAGS', ''))
+        objcpp_args = shlex.split(os.environ.get('OBJCXXFLAGS', ''))
+        # Link args
+        base_link_args = ['-L' + libdir]
+        c_link_args = base_link_args + shlex.split(os.environ.get('LDFLAGS', ''))
+        cpp_link_args = c_link_args
+        if 'OBJLDFLAGS' in os.environ:
+            objc_link_args = base_link_args + shlex.split(os.environ['OBJLDFLAGS'])
+        else:
+            objc_link_args = c_link_args
+        objcpp_link_args = objc_link_args
 
         # Operate on a copy of the recipe properties to avoid accumulating args
         # from all archs when doing universal builds
         cross_properties = copy.deepcopy(self.meson_cross_properties)
-        for args in ('c_args', 'cpp_args', 'c_link_args', 'cpp_link_args'):
+        for args in ('c_args', 'cpp_args', 'objc_args', 'c_link_args',
+                     'cpp_link_args', 'objcpp_link_args'):
             if args in cross_properties:
                 cross_properties[args] += locals()[args]
             else:
@@ -533,6 +549,10 @@ class Meson (Build, ModifyEnvBase) :
         extra_properties = ''
         for k, v in cross_properties.items():
             extra_properties += '{} = {}\n'.format(k, str(v))
+
+        extra_binaries = ''
+        for k, v in cross_binaries.items():
+            extra_binaries += '{} = {}\n'.format(k, str(v))
 
         # Create a cross-info file that tells Meson and GCC how to cross-compile
         # this project
@@ -547,6 +567,7 @@ class Meson (Build, ModifyEnvBase) :
                 AR=ar,
                 STRIP=strip,
                 WINDRES=windres,
+                extra_binaries=extra_binaries,
                 extra_properties=extra_properties)
         with open(cross_file, 'w') as f:
             f.write(contents)
@@ -601,8 +622,8 @@ class Meson (Build, ModifyEnvBase) :
             # we're building with MSVC
             #
             # Only unset vars that are read by Meson for now
-            for var in ('CC', 'CXX', 'AR', 'WINDRES', 'STRIP', 'CFLAGS',
-                        'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
+            for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
+                        'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
                 if var in os.environ:
                     # Store it on _old_env so that the value is restored when
                     # we return from self.configure()
@@ -611,7 +632,8 @@ class Meson (Build, ModifyEnvBase) :
             # Re-add *FLAGS that weren't set by the config, but instead were
             # set in the recipe or other places via @modify_environment
             if self.using_msvc():
-                for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'LDFLAGS'):
+                for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
+                            'LDFLAGS', 'OBJLDFLAGS'):
                     for env_op in self._new_env:
                         if env_op.var == var:
                             env_op.execute()
