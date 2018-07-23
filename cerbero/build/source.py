@@ -197,7 +197,7 @@ class GitCache (Source):
 
         # First try to get the sources from the cached dir if there is one
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
-        if os.path.isdir(os.path.join(cached_dir, ".git")):
+        if os.path.isdir(cached_dir + ".git"):
             for remote, url in self.remotes.items():
                 git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
             for remote, url in self.config.recipe_remotes(self.name).items():
