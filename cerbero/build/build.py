@@ -421,6 +421,7 @@ class CMake (MakefilesBase):
             os.remove(cmake_cache)
         if os.path.exists(cmake_files):
             shutil.rmtree(cmake_files)
+        self.make += ' VERBOSE=1 '
         MakefilesBase.configure(self)
 
 
