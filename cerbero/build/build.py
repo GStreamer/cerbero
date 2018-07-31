@@ -379,9 +379,12 @@ class CMake (MakefilesBase):
     '''
 
     config_sh = 'cmake'
-    configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '\
-                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s %(options)s '\
-                    '-DCMAKE_BUILD_TYPE=Release '\
+    configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s ' \
+                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s ' \
+                    '-DCMAKE_INSTALL_LIBDIR=%(libdir)s ' \
+                    '-DCMAKE_INSTALL_BINDIR=%(prefix)s/bin ' \
+                    '-DCMAKE_INSTALL_INCLUDEDIR=%(prefix)s/include ' \
+                    '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
 
     @modify_environment
