@@ -12,14 +12,7 @@ class Recipe(recipe.Recipe):
     meson_options = {'gtk_doc': 'false', 'internal_pcre': 'true', 'libmount': 'false',
                      'dtrace': 'false', 'iconv': 'libc'}
     deps = ['libffi', 'zlib']
-    patches = ["../glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
-               "../glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
-               "../glib/0005-Blacklist-the-bamf-GIO-module.patch",
-               "../glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
-               "../glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
-               '../glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               '../glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
-               '../glib/glib-2.57-meson-backported-fixes.patch',
+    patches = ['../glib/glib-2.57-meson-backported-fixes.patch',
                '../glib/0001-DO-NOT-UPSTREAM-Prototypes-missing-in-Cerbero-s-anci.patch',
                '../glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
               ]

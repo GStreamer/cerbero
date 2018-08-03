@@ -45,6 +45,9 @@ class Recipe(recipe.Recipe):
                'glib/0001-meson-Add-exception-for-atomic-ops-test-for-Android.patch',
                'glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
                'glib/0001-Use-a-real-test-for-G_HAVE_GNUC_VISIBILITY.patch',
+               'glib/0001-Revert-Revert-Rename-objective-c-files-from-c-to-m.patch',
+               'glib/0002-Revert-Revert-Meson-Fix-cocoa-and-carbon-support.patch',
+               'glib/0003-Fix-missing-osx-files-when-running-make-dist.patch',
                # Under discussion upstream: https://gitlab.gnome.org/GNOME/glib/issues/1413
                'glib/0001-meson-Always-set-G_MODULE_SUFFIX-to-so-on-macOS.patch',
               ]
