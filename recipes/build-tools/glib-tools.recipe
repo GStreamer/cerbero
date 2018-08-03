@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
                '../glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
                '../glib/glib-2.57-meson-backported-fixes.patch',
                '../glib/0001-DO-NOT-UPSTREAM-Prototypes-missing-in-Cerbero-s-anci.patch',
+               '../glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
               ]
 
     def prepare(self):
