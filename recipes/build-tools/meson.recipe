@@ -10,7 +10,12 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    patches = ['meson/0001-Don-t-require-an-import-library-for-shared-modules.patch']
+    patches = [
+        # https://github.com/mesonbuild/meson/pull/3985
+        'meson/0001-Don-t-require-an-import-library-for-shared-modules.patch',
+        # https://github.com/mesonbuild/meson/pull/3939
+        'meson/0001-Fix-linking-of-shared-static-libs-with-static-libs.patch',
+    ]
     deps = ['ninja']
 
     files_bin = ['bin/meson']
