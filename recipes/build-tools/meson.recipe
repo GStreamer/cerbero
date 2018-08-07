@@ -5,11 +5,12 @@ from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.47.0'
+    version = '0.47.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
+    patches = ['meson/0001-Don-t-require-an-import-library-for-shared-modules.patch']
     deps = ['ninja']
 
     files_bin = ['bin/meson']
