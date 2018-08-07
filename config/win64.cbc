@@ -2,4 +2,3 @@ prefix='c:/gstreamer/1.0/x86_64'
 from cerbero.config import Architecture
 arch = Architecture.X86_64
 target_arch = Architecture.X86_64
-allow_parallel_build = False
