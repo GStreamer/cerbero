@@ -28,8 +28,8 @@ from cerbero.errors import FatalError, ConfigurationError
 
 class BuildTools (BootstrapperBase):
 
-    BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'pkg-config',
-                   'orc-tool', 'gettext-m4', 'gettext-tools']
+    BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'gettext-tools', 'libtool',
+                   'pkg-config', 'orc-tool', 'gettext-m4']
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'yasm', 'bison', 'flex'],
         Platform.WINDOWS: ['intltool', 'yasm'],
