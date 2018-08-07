@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     url = 'https://ftp.gnu.org/pub/gnu/gettext/gettext-%(version)s.tar.gz'
     platform_deps = {
             Platform.DARWIN:  ['sed'],
-            Platform.WINDOWS: ['libiconv', 'mingw-runtime'],}
+            Platform.WINDOWS: ['libiconv', 'mingw-runtime', 'automake'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
     patches = ['../gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
                '../gettext/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
