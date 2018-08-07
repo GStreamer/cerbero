@@ -7,7 +7,9 @@ class Recipe(recipe.Recipe):
     version = '1.0.6'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
-    url = 'http://bzip.org/1.0.6/bzip2-1.0.6.tar.gz'
+    # This URL doesn't support https, so we don't use it
+    #url = 'https://bzip.org/%(version)s/bzip2-%(version)s.tar.gz'
+    url = 'https://gstreamer.freedesktop.org/src/mirror/bzip2-%(version)s.tar.gz'
     patches = ['bzip2/0001-Fix-Makefiles-and-add-support-for-Windows-and-OS-X.patch']
 
     files_libs = ['libbz2']
