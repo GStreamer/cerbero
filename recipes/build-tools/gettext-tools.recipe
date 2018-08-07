@@ -1,8 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
-from pathlib import Path
-
-from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gettext-tools'
@@ -30,11 +27,13 @@ class Recipe(recipe.Recipe):
             # The msgmerge built by us randomly hangs on Windows when called
             # during configure, so replace it with the msgmerge from MSYS-MinGW
             # which works fine.
-            build_tools_bin = Path(self.config.build_tools_prefix) / 'bin'
-            msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
-            msys_msgmerge = msys_mingw_bindir / 'msgmerge.exe'
-            if msys_msgmerge.is_file():
-                if (build_tools_bin / 'msgmerge.exe').is_file():
-                    os.replace(str(build_tools_bin / 'msgmerge.exe'),
-                               str(build_tools_bin / 'msgmerge.exe.bck'))
-                shutil.copy(str(msys_msgmerge), str(build_tools_bin))
+            build_tools_bin = os.path.join(self.config.build_tools_prefix, 'bin')
+            msys_mingw_bindir = os.path.dirname(shutil.which('mingw-get'))
+            msys_msgmerge = os.path.join(msys_mingw_bindir, 'msgmerge.exe')
+            if os.path.isfile(msys_msgmerge):
+                built_msgmerge = os.path.join(build_tools_bin, 'msgmerge.exe')
+                if os.path.isfile(built_msgmerge):
+                    if os.path.isfile(built_msgmerge + '.bck'):
+                        os.remove(built_msgmerge + '.bck')
+                    os.rename(built_msgmerge, built_msgmerge + '.bck')
+                shutil.copy(msys_msgmerge, build_tools_bin)
