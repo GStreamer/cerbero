@@ -11,7 +11,9 @@ class Recipe(recipe.Recipe):
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
     meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
-                     'gnome_proxy_support': 'false', 'pkcs11_support': 'false'}
+                     'gnome_proxy_support': 'false', 'pkcs11_support': 'false',
+                     # Also build static modules on all platforms
+                     'static_modules': 'true'}
     deps = ['glib', 'gnutls']
     # These patches are upstream, remove on bump
     patches = [name + '/0001-meson-Use-.so-for-modules-on-macOS-instead-of-dylib.patch',
@@ -25,7 +27,3 @@ class Recipe(recipe.Recipe):
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
     files_devel = ['lib/gio/modules/libgiognutls.a']
-
-    def prepare(self):
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.meson_options.update({'static_modules': 'true'})
