@@ -7,7 +7,9 @@ class Recipe(recipe.Recipe):
     name = 'taglib'
     version = '1.11.1'
     stype = SourceType.TARBALL
-    url = 'https://taglib.org/releases/taglib-%(version)s.tar.gz'
+    # This uses a github certificate, hence fails TLS check
+    #url = 'https://taglib.org/releases/taglib-%(version)s.tar.gz'
+    url = 'https://github.com/taglib/taglib/releases/download/v1.11.1/taglib-%(version)s.tar.gz'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DBUILD_SHARED_LIBS=1 -DBUILD_STATIC_LIBS=1 -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
