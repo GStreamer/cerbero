@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
     autoreconf_sh = 'gtkdocize && autoreconf -vfi'
     configure_options = '--with-python=python3'
     deps = ['glib']
+    patches = [name + '/0001-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch']
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
