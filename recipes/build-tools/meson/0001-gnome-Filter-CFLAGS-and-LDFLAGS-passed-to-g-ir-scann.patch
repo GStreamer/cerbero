@@ -94,14 +94,14 @@ index 43cdb71c..8b555b3f 100644
          if gir_has_extra_lib_arg(self.interpreter) and use_gir_args:
              def fix_ldflags(ldflags):
 -                fixed_ldflags = OrderedSet()
-+                fixed_ldflags = []
++                fixed_ldflags =  OrderedSet()
                  for ldflag in ldflags:
                      if ldflag.startswith("-l"):
 -                        fixed_ldflags.add(ldflag.replace('-l', '--extra-library=', 1))
 -                    else:
 -                        fixed_ldflags.add(ldflag)
 +                        ldflag = ldflag.replace('-l', '--extra-library=', 1)
-+                    fixed_ldflags.append(ldflag)
++                    fixed_ldflags.add(ldflag)
                  return fixed_ldflags
              internal_ldflags = fix_ldflags(internal_ldflags)
              external_ldflags = fix_ldflags(external_ldflags)
