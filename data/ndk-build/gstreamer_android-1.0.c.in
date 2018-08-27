@@ -49,10 +49,10 @@ static JavaVM  *_java_vm = NULL;
 static GstClockTime _priv_gst_info_start_time;
 
 #define GST_G_IO_MODULE_DECLARE(name) \
-extern void G_PASTE(g_io_module_, G_PASTE(name, _load_static)) (void)
+extern void G_PASTE(g_io_, G_PASTE(name, _load)) (gpointer data)
 
 #define GST_G_IO_MODULE_LOAD(name) \
-G_PASTE(g_io_module_, G_PASTE(name, _load_static)) ()
+G_PASTE(g_io_, G_PASTE(name, _load)) (NULL)
 
 /* Declaration of static plugins */
  @PLUGINS_DECLARATION@

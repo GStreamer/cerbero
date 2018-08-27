@@ -59,7 +59,7 @@ endif
 include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 
 # Path for the static GIO modules
-G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules/static
+G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules
 
 # Host tools
 ifeq ($(HOST_OS),windows)
@@ -139,8 +139,7 @@ GSTREAMER_PLUGINS_REGISTER   := $(foreach plugin, $(GSTREAMER_PLUGINS), \
 			GST_PLUGIN_STATIC_REGISTER($(plugin));)
 
 # Generate list of gio modules
-G_IO_MODULES_PATH            := $(foreach path, $(G_IO_MODULES_PATH), -L$(path))
-G_IO_MODULES_LIBS            := $(foreach module, $(G_IO_MODULES), -lgio$(module))
+G_IO_MODULES_LIBS            := $(foreach module, $(G_IO_MODULES), $(G_IO_MODULES_PATH)/libgio$(module).a)
 G_IO_MODULES_DECLARE         := $(foreach module, $(G_IO_MODULES), \
 			GST_G_IO_MODULE_DECLARE($(module));)
 G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
@@ -177,7 +176,7 @@ endif
 # Create the link command
 GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT_GST_LINK) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
-	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) $(G_IO_MODULES_PATH) \
+	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
 GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
