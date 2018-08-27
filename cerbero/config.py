@@ -359,7 +359,7 @@ class Config (object):
         self.set_property('build_tools_cache', None)
         self.set_property('recipes_commits', {})
         self.set_property('recipes_remotes', {})
-        self.set_property('extra_build_tools', {})
+        self.set_property('extra_build_tools', [])
         self.set_property('distro_packages_install', True)
         self.set_property('interactive', True)
 
