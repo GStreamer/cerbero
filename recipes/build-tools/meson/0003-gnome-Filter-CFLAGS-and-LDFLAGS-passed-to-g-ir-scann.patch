@@ -1,7 +1,7 @@
-From 7756c44f206a4303e1db391ed4abee45bfaadc48 Mon Sep 17 00:00:00 2001
+From 880ab2f77ddd8ea26f95513ec5908bd8b66851fc Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 14 Aug 2018 20:58:35 +0530
-Subject: [PATCH] gnome: Filter CFLAGS and LDFLAGS passed to g-ir-scanner
+Subject: [PATCH 3/4] gnome: Filter CFLAGS and LDFLAGS passed to g-ir-scanner
 
 g-ir-scanner is very picky about the flags that it can accept, so the
 build fails on macOS if you have Framework dependencies, which add -F
@@ -15,7 +15,7 @@ https://github.com/mesonbuild/meson/pull/4024
  1 file changed, 49 insertions(+), 19 deletions(-)
 
 diff --git a/mesonbuild/modules/gnome.py b/mesonbuild/modules/gnome.py
-index 43cdb71c..8b555b3f 100644
+index cb69641e..dd8b555d 100644
 --- a/mesonbuild/modules/gnome.py
 +++ b/mesonbuild/modules/gnome.py
 @@ -314,10 +314,13 @@ class GnomeModule(ExtensionModule):

@@ -5,7 +5,7 @@ from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.47.1'
+    version = '0.47.2'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
@@ -14,9 +14,9 @@ class Recipe(recipe.Recipe):
         # https://github.com/mesonbuild/meson/pull/3985
         'meson/0001-Don-t-require-an-import-library-for-shared-modules.patch',
         # https://github.com/mesonbuild/meson/pull/3939
-        'meson/0001-Fix-linking-of-shared-static-libs-with-static-libs.patch',
+        'meson/0002-Fix-linking-of-shared-static-libs-with-static-libs.patch',
         # https://github.com/mesonbuild/meson/pull/4024
-        'meson/0001-gnome-Filter-CFLAGS-and-LDFLAGS-passed-to-g-ir-scann.patch',
+        'meson/0003-gnome-Filter-CFLAGS-and-LDFLAGS-passed-to-g-ir-scann.patch',
     ]
     deps = ['ninja']
 

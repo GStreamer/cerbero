@@ -1,7 +1,7 @@
-From 3da7d29f8309d0944754bc8cf3c91ce887de0882 Mon Sep 17 00:00:00 2001
+From 066ecd28d82e0c868511a1fa28ebe23833a018a0 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 25 Jul 2018 12:59:41 +0530
-Subject: [PATCH] Fix linking of shared/static libs with static libs
+Subject: [PATCH 2/4] Fix linking of shared/static libs with static libs
 
 This commit contains the following fixes:
 
@@ -30,34 +30,16 @@ All these situations are tested by the unit test added in this commit.
 Closes https://github.com/mesonbuild/meson/issues/3934
 Closes https://github.com/mesonbuild/meson/issues/3937
 ---
- mesonbuild/backend/ninjabackend.py            |  2 +-
- mesonbuild/backend/vs2010backend.py           |  2 +-
- mesonbuild/build.py                           | 61 +++++++++++++----
- run_unittests.py                              | 65 ++++++++++++++++++-
- .../common/146 C and CPP link/meson.build     |  4 +-
- .../consumer/meson.build                      | 11 ++++
- .../consumer/tester.c                         | 14 ++++
- .../35 both library usability/provider/both.c | 14 ++++
- .../provider/meson.build                      | 36 ++++++++++
- .../provider/otherlib/installed.c             |  4 ++
- .../provider/otherlib/internal.c              |  4 ++
- .../provider/otherlib/meson.build             |  3 +
- .../provider/tester.c                         | 14 ++++
- 13 files changed, 218 insertions(+), 16 deletions(-)
- create mode 100644 test cases/unit/35 both library usability/consumer/meson.build
- create mode 100644 test cases/unit/35 both library usability/consumer/tester.c
- create mode 100644 test cases/unit/35 both library usability/provider/both.c
- create mode 100644 test cases/unit/35 both library usability/provider/meson.build
- create mode 100644 test cases/unit/35 both library usability/provider/otherlib/installed.c
- create mode 100644 test cases/unit/35 both library usability/provider/otherlib/internal.c
- create mode 100644 test cases/unit/35 both library usability/provider/otherlib/meson.build
- create mode 100644 test cases/unit/35 both library usability/provider/tester.c
+ mesonbuild/backend/ninjabackend.py  |  2 +-
+ mesonbuild/backend/vs2010backend.py |  2 +-
+ mesonbuild/build.py                 | 61 +++++++++++++++++++++++------
+ 3 files changed, 52 insertions(+), 13 deletions(-)
 
 diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
-index c248ae8d..e916201a 100644
+index 89784458..bdaf8ed6 100644
 --- a/mesonbuild/backend/ninjabackend.py
 +++ b/mesonbuild/backend/ninjabackend.py
-@@ -2620,7 +2620,7 @@ rule FORTRAN_DEP_HACK%s
+@@ -2608,7 +2608,7 @@ rule FORTRAN_DEP_HACK%s
              # line where the static library is used.
              dependencies = []
          else:
@@ -65,9 +47,9 @@ index c248ae8d..e916201a 100644
 +            dependencies = target.get_dependencies(link_whole=True)
          internal = self.build_target_link_arguments(linker, dependencies)
          commands += internal
-         # For 'automagic' deps: Boost and GTest. Also dependency('threads').
+         # Only non-static built targets need link args and link dependencies
 diff --git a/mesonbuild/backend/vs2010backend.py b/mesonbuild/backend/vs2010backend.py
-index d42e91dd..a02df5da 100644
+index 281680cc..0efa61ef 100644
 --- a/mesonbuild/backend/vs2010backend.py
 +++ b/mesonbuild/backend/vs2010backend.py
 @@ -997,7 +997,7 @@ class Vs2010Backend(backends.Backend):
@@ -80,7 +62,7 @@ index d42e91dd..a02df5da 100644
              linkname = os.path.join(down, self.get_target_filename_for_linking(lobj))
              if t in target.link_whole_targets:
 diff --git a/mesonbuild/build.py b/mesonbuild/build.py
-index 65438b00..50241035 100644
+index 709dbf77..c0cdb917 100644
 --- a/mesonbuild/build.py
 +++ b/mesonbuild/build.py
 @@ -827,22 +827,43 @@ This will become a hard error in a future Meson release.''')

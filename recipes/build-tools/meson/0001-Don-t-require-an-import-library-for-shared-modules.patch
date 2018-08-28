@@ -1,7 +1,7 @@
-From 923e637e94de222bd6166147b0991209ba4c6d7b Mon Sep 17 00:00:00 2001
+From 98b396543eb4f8ce214b9e2767604d266a9b7ecb Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 7 Aug 2018 21:03:51 +0530
-Subject: [PATCH] Don't require an import library for shared modules
+Subject: [PATCH 1/4] Don't require an import library for shared modules
 
 Shared modules may be resource-only DLLs, or might automatically
 self-initialize using C constructors or WinMain at DLL load time.
@@ -15,7 +15,7 @@ a message about it instead of erroring out.
  3 files changed, 11 insertions(+), 2 deletions(-)
 
 diff --git a/mesonbuild/backend/backends.py b/mesonbuild/backend/backends.py
-index 354d25a7..a58704ff 100644
+index 87da90d2..2e4fb728 100644
 --- a/mesonbuild/backend/backends.py
 +++ b/mesonbuild/backend/backends.py
 @@ -55,7 +55,7 @@ class InstallData:
@@ -36,7 +36,7 @@ index 354d25a7..a58704ff 100644
  class ExecutableSerialisation:
      def __init__(self, name, fname, cmd_args, env, is_cross, exe_wrapper,
 diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
-index 45ae899a..71d3b862 100644
+index b9473ec9..89784458 100644
 --- a/mesonbuild/backend/ninjabackend.py
 +++ b/mesonbuild/backend/ninjabackend.py
 @@ -790,7 +790,8 @@ int dummy;
@@ -50,10 +50,10 @@ index 45ae899a..71d3b862 100644
                  # Install secondary outputs. Only used for Vala right now.
                  if num_outdirs > 1:
 diff --git a/mesonbuild/minstall.py b/mesonbuild/minstall.py
-index 4615b6dd..248f12ee 100644
+index bef814bb..1d721795 100644
 --- a/mesonbuild/minstall.py
 +++ b/mesonbuild/minstall.py
-@@ -384,6 +384,13 @@ class Installer:
+@@ -432,6 +432,13 @@ class Installer:
  
      def install_targets(self, d):
          for t in d.targets:
