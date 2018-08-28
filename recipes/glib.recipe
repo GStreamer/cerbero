@@ -48,8 +48,10 @@ class Recipe(recipe.Recipe):
                'glib/0001-Revert-Revert-Rename-objective-c-files-from-c-to-m.patch',
                'glib/0002-Revert-Revert-Meson-Fix-cocoa-and-carbon-support.patch',
                'glib/0003-Fix-missing-osx-files-when-running-make-dist.patch',
-               # Under discussion upstream: https://gitlab.gnome.org/GNOME/glib/issues/1413
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/280
                'glib/0001-meson-Always-set-G_MODULE_SUFFIX-to-so-on-macOS.patch',
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/282
+               'glib/0001-meson-Add-macOS-libtool-versioning-to-maintain-ABI-c.patch',
               ]
 
     files_libs = [
