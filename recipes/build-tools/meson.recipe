@@ -17,6 +17,8 @@ class Recipe(recipe.Recipe):
         'meson/0002-Fix-linking-of-shared-static-libs-with-static-libs.patch',
         # https://github.com/mesonbuild/meson/pull/4024
         'meson/0003-gnome-Filter-CFLAGS-and-LDFLAGS-passed-to-g-ir-scann.patch',
+        # https://github.com/mesonbuild/meson/pull/4095
+        'meson/0004-Improve-support-for-macOS-dylib-versioning.patch',
     ]
     deps = ['ninja']
 
