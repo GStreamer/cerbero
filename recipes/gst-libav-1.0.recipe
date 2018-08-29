@@ -5,8 +5,6 @@ from cerbero.utils import shell
 
 class Recipe(custom.GStreamer):
     name = 'gst-libav-1.0'
-    # TODO - check license - plugin is certainly LGPLv2+, but need to check
-    #        the linked libs
     licenses = [License.LGPLv2Plus]
     autoreconf = True
     autoreconfig_sh = './autogen.sh --noconfigure'
@@ -34,6 +32,10 @@ class Recipe(custom.GStreamer):
             else:
                 self.set_env('AS', os.environ['CC'])
 
+        # Explicitly disable nonfree code and [l]gplv3 in case upstream changes
+        # the default
+        libavextraconf = " --disable-nonfree --disable-version3 "
+
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
                 asflags = ' -arch x86_64 -m64'
@@ -42,7 +44,7 @@ class Recipe(custom.GStreamer):
             self.configure_options += ' ASFLAGS="%s"' % asflags
         elif self.config.target_platform == Platform.ANDROID:
             # This creates too much problems and we can do without it
-            libavextraconf = " --disable-linux-perf"
+            libavextraconf += " --disable-linux-perf"
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
                 libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
@@ -61,7 +63,7 @@ class Recipe(custom.GStreamer):
         elif self.config.target_platform == Platform.IOS:
             # Some optimisations that were previously silently disabled
             # cause warnings now. Ignore them
-            libavextraconf = " --extra-cflags='-Wno-ignored-optimization-argument' "
+            libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
             self.configure_options += ' --with-libav-extra-configure="%s"' % libavextraconf
         elif self.config.target_platform == Platform.WINDOWS:
             # FIXME: Remove when we update to ffmpeg 4.0 which fixes targetting Vista
@@ -74,7 +76,7 @@ class Recipe(custom.GStreamer):
                 winflags = '"-UWINVER\ -U_WIN32_WINNT\ -DWINVER=0x0501\ -D_WIN32_WINNT=0x0501"'
             else:
                 winflags = '-UWINVER -U_WIN32_WINNT -DWINVER=0x0501 -D_WIN32_WINNT=0x0501'
-            libavextraconf = "--extra-cflags='{}'".format(winflags)
+            libavextraconf += "--extra-cflags='{}'".format(winflags)
             self.configure_options += ' --with-libav-extra-configure="{}" '.format(libavextraconf)
 
         if self.config.variants.nodebug:
