@@ -537,7 +537,7 @@ class Meson (Build, ModifyEnvBase) :
         # from all archs when doing universal builds
         cross_properties = copy.deepcopy(self.meson_cross_properties)
         for args in ('c_args', 'cpp_args', 'objc_args', 'c_link_args',
-                     'cpp_link_args', 'objcpp_link_args'):
+                     'cpp_link_args', 'objc_link_args', 'objcpp_link_args'):
             if args in cross_properties:
                 cross_properties[args] += locals()[args]
             else:
