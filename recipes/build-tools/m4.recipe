@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     files_bins = ['m4']
 
     patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
-               'm4/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch']
+               'm4/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
+               'm4/0001-m4-compilation-with-glibc-2.28.patch']
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
