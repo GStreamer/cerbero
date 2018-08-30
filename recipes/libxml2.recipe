@@ -5,7 +5,9 @@ class Recipe(recipe.Recipe):
     name = 'libxml2'
     version = '2.9.7'
     stype = SourceType.TARBALL
-    url = 'https://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
+    # Upstream still has a broken SSL certificate, use our mirror
+    #url = 'https://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
+    url = 'https://gstreamer.freedesktop.org/src/mirror/libxml2-%(version)s.tar.gz'
     licenses = [License.MIT]
     deps = [ 'zlib' ]
     autoreconf = True
