@@ -135,9 +135,9 @@ index a047f7dd..d05d9d59 100644
              abs_rpaths.append(build_rpath)
 -        # Ensure that there is enough space for large RPATHs
 -        args = ['-Wl,-headerpad_max_install_names']
-         # Need to deduplicate abs_rpaths, as rpath_paths and
-         # build_rpath are not guaranteed to be disjoint sets
-         args += ['-Wl,-rpath,' + rp for rp in OrderedSet(abs_rpaths)]
+         args += ['-Wl,-rpath,' + rp for rp in abs_rpaths]
+         return args
+ 
 @@ -1100,12 +1100,9 @@ def get_macos_dylib_install_name(prefix, shlib_name, suffix, soversion):
      install_name += '.dylib'
      return '@rpath/' + install_name
