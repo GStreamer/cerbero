@@ -9,7 +9,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/frida/proxy-libintl/archive/%(version)s.tar.gz'
-    patches = [name + '/0001-libintl.h-Fix-detection-with-AM_GNU_GETTEXT.patch']
+    patches = [name + '/0001-libintl.h-Fix-detection-with-AM_GNU_GETTEXT.patch',
+               name + '/0001-meson-Use-same-library-versioning-on-macOS-as-gettex.patch',]
 
     files_libs = ['libintl']
     files_devel = [
