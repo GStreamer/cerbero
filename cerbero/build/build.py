@@ -476,10 +476,15 @@ class Meson (Build, ModifyEnvBase) :
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
-        if self.using_msvc():
-            # Set the MSVC toolchain environment
-            for var, (val, sep) in self.config.msvc_toolchain_env.items():
-                self.prepend_env(var, val, sep=sep)
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.using_msvc():
+                # Set the MSVC toolchain environment
+                for var, (val, sep) in self.config.msvc_toolchain_env.items():
+                    self.prepend_env(var, val, sep=sep)
+            else:
+                # Set the MinGW toolchain environment
+                for var, (val, sep) in self.config.mingw_toolchain_env.items():
+                    self.prepend_env(var, val, sep=sep)
 
         # Find Meson
         if not self.meson_sh:

@@ -95,7 +95,7 @@ class Config (object):
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
-                   'msvc_toolchain_env']
+                   'msvc_toolchain_env', 'mingw_toolchain_env']
 
     def __init__(self):
         self._check_uninstalled()
