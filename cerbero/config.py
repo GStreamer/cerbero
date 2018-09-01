@@ -345,7 +345,7 @@ class Config (object):
         self.set_property('use_configure_cache', False)
         self.set_property('external_recipes', {})
         self.set_property('external_packages', {})
-        self.set_property('universal_archs', [])
+        self.set_property('universal_archs', None)
         self.set_property('variants', [])
         self.set_property('build_tools_prefix', None)
         self.set_property('build_tools_sources', None)
@@ -405,6 +405,17 @@ class Config (object):
         return self.target_platform != self.platform or \
                 self.target_arch != self.arch or \
                 self.target_distro_version != self.distro_version
+
+    def cross_universal_type(self):
+        if not self.cross_compiling():
+            return None
+        # cross-ios-universal, each arch prefix is merged and flattened into one prefix
+        if isinstance(self.universal_archs, list):
+            return 'flat'
+        # cross-android-universal, each arch prefix is separate
+        if isinstance(self.universal_archs, dict):
+            return 'normal'
+        return None
 
     def prefix_is_executable(self):
         """Can the binaries from the target platform can be executed in the

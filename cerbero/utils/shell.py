@@ -158,11 +158,13 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
     return ret
 
 
-def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False):
+def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
+    if env is None:
+        env = os.environ.copy()
     if split and isinstance(cmd, str):
         cmd = shlex.split(cmd)
     try:
-        process = subprocess.Popen(cmd, cwd=cmd_dir,
+        process = subprocess.Popen(cmd, cwd=cmd_dir, env=env,
                                    stdout=subprocess.PIPE,
                                    stderr=open(os.devnull), shell=shell)
         output, unused_err = process.communicate()

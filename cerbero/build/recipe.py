@@ -21,6 +21,7 @@ import logging
 import shutil
 import tempfile
 import time
+from functools import reduce
 
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
@@ -29,9 +30,9 @@ from cerbero.errors import FatalError
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.utils import N_, _
-from cerbero.utils import shell
+from cerbero.utils import shell, add_system_libs
 from cerbero.utils import messages as m
-from functools import reduce
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class MetaRecipe(type):
@@ -160,11 +161,70 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
         '''
         pass
 
+    def _get_arch_prefix(self):
+        if self.config.cross_universal_type() == 'flat':
+            return os.path.join(self.config.prefix, self.config.target_arch)
+        return self.config.prefix
+
+    def _write_gst_la_file(self, la_path, pcname, major, minor, micro, env):
+        ladir, laname = os.path.split(la_path)
+        ladir = os.path.join(self._get_arch_prefix(), ladir)
+        dep_libs = []
+        ret = shell.check_call('pkg-config --libs-only-l --static ' + pcname, env=env)
+        for lib in set(ret.split()):
+            # Don't add the library itself to the list of dependencies
+            if lib[2:] == laname[3:-3]:
+                continue
+            lafile = os.path.join(self.config.libdir, 'lib' + lib[2:] + '.la')
+            if os.path.isfile(lafile):
+                dep_libs.append(lib[2:])
+            else:
+                dep_libs.append(lib)
+        LibtoolLibrary(laname[:-3], major, minor, micro, ladir,
+                       self.config.target_platform, deps=dep_libs).save()
+
+    def generate_gst_la_files(self):
+        '''
+        Generate .la files for all libraries and plugins packaged by this Meson
+        recipe using the pkg-config files installed by our Meson build files.
+        '''
+        pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
+        env = os.environ.copy()
+        env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
+        if self.use_system_libs:
+            add_system_libs(self.config, env)
+        # Get la file -> pkg-config name mapping
+        libs_la_files = {}
+        plugin_la_files = {}
+        for f in self.devel_files_list():
+            if not f.endswith('.a') or not f.startswith('lib/'):
+                continue
+            if f.startswith('lib/gstreamer-1.0/'):
+                libtype = 'plugin'
+            else:
+                libtype = 'library'
+            fpath = os.path.join(self._get_arch_prefix(), f)
+            if not os.path.isfile(fpath):
+                arch = self.config.target_arch
+                m.warning('{} {} {!r} not found'.format(arch, libtype, fpath))
+                continue
+            pcname = os.path.basename(f)[3:-2]
+            la = os.path.splitext(f)[0] + '.la'
+            if libtype == 'plugin':
+                self._write_gst_la_file(la, pcname, None, None, None, env)
+            else:
+                pcname = pcname.replace('gst', 'gstreamer-')
+                # Same versioning as gstreamer
+                minor, micro = (map(int, self.version.split('.')[1:3]))
+                minor = minor * 100 + micro
+                self._write_gst_la_file(la, pcname, 0, minor, 0, env)
+
     def post_install(self):
         '''
-        Runs a post installation steps
+        Runs post installation steps
         '''
-        pass
+        if self.btype == build.BuildType.MESON and self.name.startswith('gst'):
+            self.generate_gst_la_files()
 
     def built_version(self):
         '''
