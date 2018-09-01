@@ -476,7 +476,7 @@ class Meson (Build, ModifyEnvBase) :
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
-        if self.config.target_platform == Platform.WINDOWS:
+        if self.config.platform == Platform.WINDOWS:
             if self.using_msvc():
                 # Set the MSVC toolchain environment
                 for var, (val, sep) in self.config.msvc_toolchain_env.items():
