@@ -8,7 +8,7 @@ class Recipe(custom.GStreamer):
     meson_options = {'examples': 'disabled', 'oss': 'disabled', 'oss4': 'disabled',
                      'dv1394': 'disabled', 'aalib': 'disabled', 'libcaca': 'disabled',
                      'jack': 'disabled', 'shout2': 'disabled', 'twolame': 'disabled',
-                     'qt5': 'disabled', 'gtk3': 'disabled'}
+                     'qt5': 'disabled', 'gtk3': 'disabled', 'jpeg': 'enabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-good'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',

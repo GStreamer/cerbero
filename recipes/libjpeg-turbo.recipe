@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
-            'include/jmorecfg.h','include/turbojpeg.h']
+                   'include/jmorecfg.h','include/turbojpeg.h', 'lib/pkgconfig/libjpeg.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
