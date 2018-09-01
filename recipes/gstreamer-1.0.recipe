@@ -3,9 +3,8 @@ import shutil
 
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-static --program-prefix= --disable-examples \
-        --disable-gtk-doc --disable-docbook --disable-fatal-warnings "
+    btype = BuildType.MESON
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gstreamer'}
     deps = ['glib', 'gtk-doc-lite']
 
@@ -70,7 +69,7 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform == Platform.IOS:
             # iOS only supports static builds so plugins must be linked
             # and registered statically.
-            self.configure_options += ' --disable-registry '
+            self.meson_options['registry'] = 'false'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

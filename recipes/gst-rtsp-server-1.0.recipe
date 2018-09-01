@@ -2,8 +2,8 @@
 
 class Recipe(custom.GStreamer):
     name = 'gst-rtsp-server-1.0'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--disable-examples --enable-static --disable-gtk-doc --disable-fatal-warnings "
+    btype = BuildType.MESON
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-rtsp-server'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0' ]
 

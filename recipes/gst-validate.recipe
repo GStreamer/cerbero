@@ -3,9 +3,10 @@ from cerbero.utils import shell
 
 class Recipe(custom.GStreamer):
     name = 'gst-validate'
+    btype = BuildType.MESON
+    meson_options = {'gtk_doc': 'disabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-devtools'}
     srcdir = 'validate'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure --enable-static --program-transform-name= '
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'json-glib']
 
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0',

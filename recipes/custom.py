@@ -14,6 +14,7 @@ class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.15.0.1'
     commit = 'origin/master'
+    can_msvc = False
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)

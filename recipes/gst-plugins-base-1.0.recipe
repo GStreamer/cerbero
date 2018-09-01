@@ -3,9 +3,8 @@
 
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-base-1.0'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = "--enable-static --program-prefix= --disable-examples \
-        --disable-gtk-doc --disable-fatal-warnings "
+    btype = BuildType.MESON
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'gl': 'enabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-base'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
@@ -222,8 +221,9 @@ class Recipe(custom.GStreamer):
             self.files_plugins_sys_devel += [
                 'lib/gstreamer-1.0/libgstcdparanoia.a', 'lib/gstreamer-1.0/libgstcdparanoia.la',
             ]
+            self.meson_options['cdparanoia'] = 'enabled'
         else:
-            self.configure_options += ' --disable-cdparanoia'
+            self.meson_options['cdparanoia'] = 'disabled'
 
         if self.config.variants.x11:
             self.files_plugins_sys += [
@@ -235,16 +235,20 @@ class Recipe(custom.GStreamer):
                  'lib/gstreamer-1.0/libgstximagesink.a', 'lib/gstreamer-1.0/libgstximagesink.la',
                  'lib/gstreamer-1.0/libgstxvimagesink.a', 'lib/gstreamer-1.0/libgstxvimagesink.la',
             ]
+            self.meson_options['x11'] = 'enabled'
+            self.meson_options['xvideo'] = 'enabled'
         else:
-            self.configure_options += ' --disable-x --disable-xvideo '
+            self.meson_options['x11'] = 'disabled'
+            self.meson_options['xvideo'] = 'disabled'
 
         if self.config.variants.alsa:
             self.files_plugins_sys += ['lib/gstreamer-1.0/libgstalsa%(mext)s']
             self.files_plugins_sys_devel += [
                 'lib/gstreamer-1.0/libgstalsa.a', 'lib/gstreamer-1.0/libgstalsa.la',
             ]
+            self.meson_options['alsa'] = 'enabled'
         else:
-            self.configure_options += ' --disable-alsa'
+            self.meson_options['alsa'] = 'disabled'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

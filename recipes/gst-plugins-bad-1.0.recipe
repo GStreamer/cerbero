@@ -4,27 +4,17 @@ from cerbero.utils import fix_android_ndk16_cxx
 
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--enable-static --disable-introspection --disable-gsm \
-        --disable-examples --disable-faad --disable-festival \
-        --disable-videomaxrate --disable-bz2 --disable-libde265 \
-        --disable-linsys --disable-fbdev --disable-apexsink \
-        --disable-celt --disable-curl --disable-dc1394 --disable-directfb \
-        --disable-dirac --disable-faac --disable-flite --disable-gme \
-        --disable-lv2 --disable-mimic --disable-modplug \
-        --disable-mpeg2enc --disable-mplex --disable-musepack --disable-mythtv \
-        --disable-neon --disable-ofa --disable-openal --disable-opencv \
-        --disable-pvr --disable-sdl --disable-sndfile \
-        --disable-teletextdec --disable-timidity \
-        --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
-        --disable-xvid --disable-zbar --disable-sdi --disable-gtk-doc --disable-fatal-warnings '
-    # Explicitly enable plugins
-    configure_options += ' --enable-bz2 --enable-assrender \
-        --enable-kate --enable-openh264 --enable-opus \
-        --enable-hls --enable-rtmp --enable-srtp --enable-dts \
-        --enable-libmms --enable-resindvd --enable-soundtouch \
-        --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
-        --enable-decklink --enable-webrtc --enable-dtls --enable-srt'
+    btype = BuildType.MESON
+    # Explicitly enable plugins that we provide dependencies for to ensure that
+    # we error out if they weren't found.
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'bz2': 'enabled',
+                     'assrender': 'enabled', 'kate': 'enabled', 'openh264': 'enabled',
+                     'opus': 'enabled', 'hls': 'enabled', 'rtmp': 'enabled',
+                     'srtp': 'enabled', 'dts': 'enabled', 'libmms': 'enabled',
+                     'resindvd': 'enabled', 'soundtouch': 'enabled', 'openjpeg': 'enabled',
+                     'voaacenc': 'enabled', 'rsvg': 'enabled', 'openglmixers': 'enabled',
+                     'spandsp': 'enabled', 'decklink': 'enabled', 'webrtc': 'enabled',
+                     'dtls': 'enabled', 'srt': 'enabled', 'webrtcdsp': 'enabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
@@ -286,6 +276,14 @@ class Recipe(custom.GStreamer):
             ]
     }
 
+    files_plugins_sys = [
+            'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
+    ]
+
+    files_plugins_sys_devel = [
+             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
+    ]
+
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
     ]
@@ -297,58 +295,48 @@ class Recipe(custom.GStreamer):
     platform_files_plugins_sys = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
-             'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
-             'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
             ]
     }
 
     platform_files_plugins_sys_devel = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
              'lib/gstreamer-1.0/libgstwasapi.a', 'lib/gstreamer-1.0/libgstwasapi.la',
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.DARWIN: [
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles.a', 'lib/gstreamer-1.0/libgstopensles.la',
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
             ]
     }
 
@@ -373,18 +361,29 @@ class Recipe(custom.GStreamer):
             self.files_plugins_effects.remove('lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s')
             self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.a')
             self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.la')
+            self.meson_options['webrtcdsp'] = 'disabled'
+            self.meson_options['wasapi'] = 'enabled'
+            self.meson_options['d3dvideosink'] = 'enabled'
+            self.meson_options['directsound'] = 'enabled'
+            self.meson_options['winks'] = 'enabled'
+            self.meson_options['winscreencap'] = 'enabled'
+        else:
+            # webrtc-audio-processing headers require C++11, older GCCs require
+            # explicitly opting in (f.ex., mingw gcc and android)
+            self.meson_options['cpp_std'] = 'gnu++11'
 
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += \
-                ' --disable-cog --disable-sdl '\
-                '--disable-cdaudio'
+        if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
+            self.meson_options['shm'] = 'enabled'
+
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            self.meson_options['applemedia'] = 'enabled'
 
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
-            for d in ['libdvdnav']:
-                self.deps.remove(d)
+            self.deps.remove('libdvdnav')
             self.files_plugins_dvd.remove('lib/gstreamer-1.0/libgstresindvd%(mext)s')
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstresindvd.a')
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstresindvd.la')
+            self.meson_options['resindvd'] = 'disabled'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
@@ -393,9 +392,3 @@ class Recipe(custom.GStreamer):
             self.platform_files_plugins_capture[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb%(mext)s')
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.a')
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.la')
-
-    def configure (self):
-        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'ext', 'openh264'))
-        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'ext', 'soundtouch'))
-        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'ext', 'webrtcdsp'))
-        super(recipe.Recipe, self).configure()

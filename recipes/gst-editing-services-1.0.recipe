@@ -3,12 +3,11 @@ from cerbero.utils import shell
 
 class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
-    licenses = [License.LGPLv2Plus]
+    btype = BuildType.MESON
+    # Explicitly enable plugins that we provide dependencies for to ensure that
+    # we error out if they weren't found.
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-editing-services'}
-    autoreconf = True
-    autoreconfig_sh = './autogen.sh --noconfigure'
-    configure_options = "--program-prefix= --disable-examples --enable-static \
-        --disable-gtk-doc --disable-docbook --disable-fatal-warnings "
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
     files_bins = ['ges-launch-1.0']
@@ -20,7 +19,3 @@ class Recipe(custom.GStreamer):
     files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la']
 
 #    files_python = ['site-packages/ges%(pext)s']
-    
-    def prepare(self):
-        # Disable -Werror and other error cflags
-        self.make += ' ERROR_CFLAGS='

@@ -3,7 +3,10 @@
 
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-ugly-1.0'
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
+    btype = BuildType.MESON
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'a52dec': 'enabled',
+                     'dvdread': 'enabled', 'amrnb': 'enabled', 'amrwbdec': 'enabled',
+                     'x264': 'enabled'}
     configure_options = "--enable-static --disable-examples --disable-iec958 --disable-mpegstream \
         --disable-cdio --disable-sidplay --disable-gtk-doc --disable-fatal-warnings "
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-ugly'}
@@ -46,11 +49,11 @@ class Recipe(custom.GStreamer):
 
     def prepare(self):
         if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
-            for d in ['libdvdread']:
-                self.deps.remove(d)
+            self.deps.remove('libdvdread')
             self.files_plugins_dvd.remove('lib/gstreamer-1.0/libgstdvdread%(mext)s')
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstdvdread.la')
             self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstdvdread.a')
+            self.meson_options['dvdread'] = 'disabled'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

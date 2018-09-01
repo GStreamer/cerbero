@@ -2,11 +2,9 @@
 
 class Recipe(custom.GStreamer):
     name = 'gst-omx-1.0'
-    licenses = [License.LGPLv2_1]
-    config_sh = 'sh ./autogen.sh --noconfigure && ./configure'
-    configure_options = '--disable-examples --enable-static '
-    remotes = { 'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-omx' }
-    deps = [ 'gstreamer-1.0', 'gst-plugins-base-1.0' ]
+    btype = BuildType.MESON
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-omx'}
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
 
     files_plugins_codecs = ['lib/gstreamer-1.0/libgstomx%(mext)s']
     files_plugins_codecs_devel = [
@@ -19,9 +17,9 @@ class Recipe(custom.GStreamer):
             flags = ['-I/opt/vc/include', '-I/opt/vc/include/IL',
                      '-I/opt/vc/include/interface/vcos/pthreads',
                      '-I/opt/vc/include/interface/vmcs_host/linux']
-            self.configure_options += ' --with-omx-target=rpi '
             self.append_env('CFLAGS', *flags)
             self.append_env('CPPFLAGS', *flags)
             self.append_env('LDFLAGS', '-L/opt/vc/lib')
+            self.meson_options['target'] = 'rpi'
         else:
-            self.configure_options += ' --with-omx-target=generic '
+            self.meson_options['target'] = 'generic'
