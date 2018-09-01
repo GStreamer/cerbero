@@ -153,7 +153,9 @@ class FilesProvider(object):
     def __init__(self, config):
         self.config = config
         self.platform = config.target_platform
-        self.extensions = self.EXTENSIONS[self.platform]
+        self.extensions = self.EXTENSIONS[self.platform].copy()
+        if self._dylib_plugins():
+            self.extensions['mext'] = '.dylib'
         self.py_prefix = config.py_prefix
         self.add_files_bins_devel()
         self.categories = self._files_categories()
@@ -163,6 +165,17 @@ class FilesProvider(object):
                              self.LANG_CAT: self._search_langfiles,
                              self.TYPELIB_CAT: self._search_typelibfiles,
                              'default': self._search_files}
+
+    def _dylib_plugins(self):
+        from cerbero.build.build import BuildType
+        # gstreamer plugins on macOS and iOS use the .dylib extension when built with Meson
+        if self.btype != BuildType.MESON:
+            return False
+        if self.platform not in (Platform.DARWIN, Platform.IOS):
+            return False
+        if not self.name.startswith('gst'):
+            return False
+        return True
 
     def add_files_bins_devel(self):
         '''
