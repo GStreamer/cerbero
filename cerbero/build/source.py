@@ -177,7 +177,13 @@ class GitCache (Source):
         Source.__init__(self)
         if self.remotes is None:
             self.remotes = {}
-        if not 'origin' in self.remotes:
+        if 'origin' in self.remotes:
+            o = urllib.parse.urlparse(self.remotes['origin'])
+            if o.scheme in ('http', 'git', 'ssh'):
+                raise FatalError('git remote origin URL {!r} must use HTTPS not {!r}'
+                                 ''.format(self.url, o.scheme))
+        else:
+            # XXX: When is this used?
             self.remotes['origin'] = '%s/%s.git' % \
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
