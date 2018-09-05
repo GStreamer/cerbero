@@ -1,94 +1,19 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
-import glob
-from cerbero.utils import needs_xcode8_sdk_workaround
-
-FFI_H_UNVERSAL='''\
-#ifdef __i386__
-#include "i386/ffi.h"
-#elif defined(__ppc__)
-#include "ppc/ffi.h"
-#elif defined(__x86_64__)
-#include "x86_64/ffi.h"
-#elif defined(__arm__)
-#include "arm/ffi.h"
-#elif defined(__arm64__)
-#include "arm64/ffi.h"
-#else
-#error "Unsupported Architecture"
-#endif
-'''
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libffi'
-    version = '3.99999'
-    autoreconf = True
-    remotes = {'origin': 'https://github.com/atgreen/libffi.git'}
-    commit = '60e4250a77eb3fde500bfd68ec40519fe34b21bd'
+    version = '3.2.9999'
+    remotes = {'origin': 'https://github.com/{0}/{0}.git'.format(name)}
+    commit = '369ef49f71186fc9d6ab15614488ad466fac3fc1'
     licenses = [License.BSD_like]
+    btype = BuildType.MESON
+    patches = [name + '/libffi-port-to-meson-and-msvc.patch']
 
     files_libs = ['libffi']
-    files_devel = ['lib/libffi-3.99999/include/ffi.h', 'lib/pkgconfig/libffi.pc']
-    patches = ['libffi/0001-libffi-Don-t-be-smart-about-toolexeclibdir.patch']
-
-    def prepare(self):
-        self.libffidir = os.path.join('lib', 'libffi-%s' % self.version)
-
-        self.configure_options += ' --disable-docs '
-
-        if needs_xcode8_sdk_workaround(self.config):
-            self.set_env('ac_cv_func_mkostemp', 'no')
-
-        if self.config.target_platform  in [Platform.DARWIN, Platform.IOS]:
-            arch = self.config.target_arch
-            if self.config.target_arch == Architecture.X86_64:
-                dir = 'x86_64-apple-darwin*'
-            elif self.config.target_arch == Architecture.X86:
-                dir = 'i386-apple-darwin*'
-                arch = 'i386'
-            elif self.config.target_arch == Architecture.ARM64:
-                dir = 'aarch64-apple-darwin*'
-                arch = 'arm64'
-            elif Architecture.is_arm(self.config.target_arch):
-                dir = 'arm-apple-darwin*'
-                arch = 'arm'
-
-            self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffi.h'))
-            self.files_devel.append(os.path.join(self.libffidir, 'include', '*', 'ffitarget.h'))
-
-            self.make = 'make -C %s' % dir
-            self.make_install = 'make -C %s install' % dir
-        else:
-            self.files_devel.append(os.path.join(self.libffidir, 'include', 'ffitarget.h'))
+    files_devel = ['include/ffi*.h', 'lib/pkgconfig/libffi.pc']
 
     def post_install(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            # For the universal build we need to ship ffi.h of both
-            # architectures in a subfolder and include the correct one depending
-            # on the compiler architecture
-            arch = self.config.target_arch
-            if self.config.target_arch == Architecture.X86_64:
-                dir = 'x86_64-apple-darwin*'
-            elif self.config.target_arch == Architecture.X86:
-                dir = 'i386-apple-darwin*'
-                arch = 'i386'
-            elif self.config.target_arch == Architecture.ARM64:
-                dir = 'aarch64-apple-darwin*'
-            elif Architecture.is_arm(self.config.target_arch):
-                dir = 'arm-apple-darwin*'
-                arch = 'arm'
-
-            arch_dir = os.path.join(self.config.prefix, self.libffidir, 'include', arch)
-            if not os.path.exists(arch_dir):
-                os.makedirs(arch_dir)
-
-
-            replacements = {'#include <ffitarget.h>': '#include "ffitarget.h"'}
-            shell.replace(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffi.h'))[0], replacements)
-
-            shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffi.h'))[0],
-                        os.path.join(arch_dir, 'ffi.h'))
-            shutil.copyfile(glob.glob(os.path.join(self.build_dir, dir, 'include', 'ffitarget.h'))[0],
-                        os.path.join(arch_dir, 'ffitarget.h'))
-            with open(os.path.join(self.config.prefix, self.libffidir, 'include', 'ffi.h'), 'w+') as f:
-                f.write(FFI_H_UNVERSAL)
+        libtool_la = LibtoolLibrary('ffi', 7, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
