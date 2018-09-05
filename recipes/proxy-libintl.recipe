@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
@@ -19,6 +18,6 @@ class Recipe(recipe.Recipe):
             ]
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('intl', None, None, None, self.config.libdir,
+        libtool_la = LibtoolLibrary('intl', 8, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
