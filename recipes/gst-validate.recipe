@@ -5,6 +5,8 @@ class Recipe(custom.GStreamer):
     name = 'gst-validate'
     btype = BuildType.MESON
     meson_options = {'gtk_doc': 'disabled'}
+    # gst-validate tarball has a different layout than the git repo, just always build from git
+    stype = SourceType.GIT
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-devtools'}
     srcdir = 'validate'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'json-glib']

@@ -5,7 +5,6 @@ from cerbero.utils import fix_android_ndk16_cxx
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     btype = BuildType.MESON
-    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'bz2': 'enabled',

@@ -4,10 +4,11 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     btype = BuildType.MESON
+    url = 'https://gstreamer.freedesktop.org/src/%(name)s/gstreamer-editing-services-%(version)s.tar.xz'
+    tarball_dirname = 'gstreamer-editing-services-%(version)s'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
-    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-editing-services'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
     files_bins = ['ges-launch-1.0']

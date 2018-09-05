@@ -5,7 +5,6 @@ from cerbero.utils import fix_android_ndk16_cxx
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-good-1.0'
     btype = BuildType.MESON
-    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-good'}
     meson_options = {'examples': 'disabled', 'oss': 'disabled', 'oss4': 'disabled',
                      'dv1394': 'disabled', 'aalib': 'disabled', 'libcaca': 'disabled',
                      'jack': 'disabled', 'shout2': 'disabled', 'twolame': 'disabled',

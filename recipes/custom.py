@@ -13,8 +13,26 @@ from cerbero.utils import shell, to_unixpath
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.15.0.1'
-    commit = 'origin/master'
     can_msvc = False
+    tagged_for_release = False
+    # Always define `commit`, used by gst-validate
+    if int(version.split('.')[1]) % 2 == 0:
+        # Even version, use the specific branch
+        commit = 'origin/' + '.'.join(version.split('.')[0:2])
+    else:
+        # Odd version, use git master
+        commit = 'origin/master'
+
+    if not tagged_for_release:
+        # Pre-release version, use git master
+        stype = SourceType.GIT
+        remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/%(name)s'}
+    else:
+        # Release version, use tarballs
+        stype = SourceType.TARBALL
+        url = 'https://gstreamer.freedesktop.org/src/%(name)s/%(name)s-%(version)s.tar.xz'
+        tarball_dirname = '%(name)s-%(version)s'
+
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)

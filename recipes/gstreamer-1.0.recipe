@@ -5,7 +5,6 @@ class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     btype = BuildType.MESON
     meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
-    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gstreamer'}
     deps = ['glib', 'gtk-doc-lite']
 
     files_bins = ['gst-inspect-1.0',
