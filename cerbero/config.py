@@ -383,17 +383,6 @@ class Config (object):
             return self.recipes_commits[recipe_name]
         return None
 
-    def recipe_remotes(self, recipe_name):
-        if recipe_name in self.recipes_remotes:
-            rrs = self.recipes_remotes[recipe_name]
-            if not isinstance(rrs, dict):
-                raise ConfigurationError('recipes_remotes value for recipe %s '
-                                         'must be a dict in the form '
-                                         '{ \'remote-name\' : \'remote-url\' }'
-                                         % recipe_name)
-            return rrs
-        return {}
-
     def cross_compiling(self):
         "Are we building for the host platform or not?"
         # On Windows, building 32-bit on 64-bit is not cross-compilation since
