@@ -5,17 +5,18 @@ from cerbero.utils import fix_android_ndk16_cxx
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     btype = BuildType.MESON
+    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'bz2': 'enabled',
+                     'closedcaption': 'disabled',
                      'assrender': 'enabled', 'kate': 'enabled', 'openh264': 'enabled',
-                     'opus': 'enabled', 'hls': 'enabled', 'rtmp': 'enabled',
-                     'srtp': 'enabled', 'dts': 'enabled', 'libmms': 'enabled',
-                     'resindvd': 'enabled', 'soundtouch': 'enabled', 'openjpeg': 'enabled',
-                     'voaacenc': 'enabled', 'rsvg': 'enabled', 'openglmixers': 'enabled',
-                     'spandsp': 'enabled', 'decklink': 'enabled', 'webrtc': 'enabled',
-                     'dtls': 'enabled', 'srt': 'enabled', 'webrtcdsp': 'enabled'}
-    remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
+                     'opus': 'enabled', 'hls': 'enabled', 'rtmp': 'enabled', 'srtp': 'enabled',
+                     'dts': 'enabled', 'libmms': 'enabled', 'resindvd': 'enabled',
+                     'soundtouch': 'enabled', 'openjpeg': 'enabled', 'voaacenc': 'enabled',
+                     'rsvg': 'enabled', 'openglmixers': 'enabled', 'spandsp': 'enabled',
+                     'decklink': 'enabled', 'webrtc': 'enabled', 'dtls': 'enabled',
+                     'sbc': 'enabled', 'srt': 'enabled', 'webrtcdsp': 'enabled'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
@@ -362,15 +363,17 @@ class Recipe(custom.GStreamer):
             self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.a')
             self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.la')
             self.meson_options['webrtcdsp'] = 'disabled'
+        else:
+            # webrtc-audio-processing headers require C++11, older GCCs require
+            # explicitly opting in (f.ex., mingw gcc and android)
+            self.meson_options['cpp_std'] = 'gnu++11'
+
+        if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
-        else:
-            # webrtc-audio-processing headers require C++11, older GCCs require
-            # explicitly opting in (f.ex., mingw gcc and android)
-            self.meson_options['cpp_std'] = 'gnu++11'
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'

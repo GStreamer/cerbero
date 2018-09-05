@@ -4,8 +4,10 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-base-1.0'
     btype = BuildType.MESON
-    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'gl': 'enabled'}
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-base'}
+    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'gl': 'enabled',
+                     'pango': 'enabled', 'opus': 'enabled', 'vorbis': 'auto',
+                     'ogg': 'enabled', 'theora': 'enabled', 'libvisual': 'enabled'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
