@@ -1,7 +1,7 @@
-From c22383a042c424c946d8dfb1843d6dd4135d784f Mon Sep 17 00:00:00 2001
+From 499eb8930247634e59783a26f27a9cc8dada7e87 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Fri, 9 Dec 2016 15:24:04 +0200
-Subject: [PATCH 2/2] Build DLLs on Windows
+Subject: [PATCH 2/3] Build DLLs on Windows
 
 ---
  Makefile.am  | 2 +-
@@ -35,5 +35,5 @@ index 7b2dad3..ed91829 100644
  AC_CONFIG_HEADER(config.h)
  AC_CONFIG_MACRO_DIR([m4])
 -- 
-2.11.0
+2.18.0.windows.1
 
