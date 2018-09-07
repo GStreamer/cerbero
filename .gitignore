@@ -15,3 +15,4 @@ MANIFEST.in
 *~
 *.wsx
 *.wixobj
+.idea/
