@@ -58,21 +58,42 @@ public class GStreamer {
 @INCLUDE_CA_CERTIFICATES@    }
 
 @INCLUDE_COPY_FILE@    private static void copyFile(AssetManager assetManager, String assetPath, File outFile) throws IOException {
-@INCLUDE_COPY_FILE@        InputStream in;
-@INCLUDE_COPY_FILE@        OutputStream out;
-@INCLUDE_COPY_FILE@        byte[] buffer = new byte[1024];
-@INCLUDE_COPY_FILE@        int read;
+@INCLUDE_COPY_FILE@        InputStream in = null;
+@INCLUDE_COPY_FILE@        OutputStream out = null;
+@INCLUDE_COPY_FILE@        IOException exception = null;
 @INCLUDE_COPY_FILE@
 @INCLUDE_COPY_FILE@        if (outFile.exists())
 @INCLUDE_COPY_FILE@            outFile.delete();
 @INCLUDE_COPY_FILE@
-@INCLUDE_COPY_FILE@        in = assetManager.open(assetPath);
-@INCLUDE_COPY_FILE@        out = new FileOutputStream (outFile);
-@INCLUDE_COPY_FILE@        while((read = in.read(buffer)) != -1){
-@INCLUDE_COPY_FILE@          out.write(buffer, 0, read);
+@INCLUDE_COPY_FILE@        try {
+@INCLUDE_COPY_FILE@            in = assetManager.open(assetPath);
+@INCLUDE_COPY_FILE@            out = new FileOutputStream(outFile);
+@INCLUDE_COPY_FILE@
+@INCLUDE_COPY_FILE@            byte[] buffer = new byte[1024];
+@INCLUDE_COPY_FILE@            int read;
+@INCLUDE_COPY_FILE@            while ((read = in.read(buffer)) != -1) {
+@INCLUDE_COPY_FILE@                out.write(buffer, 0, read);
+@INCLUDE_COPY_FILE@            }
+@INCLUDE_COPY_FILE@            out.flush();
+@INCLUDE_COPY_FILE@        } catch (IOException e) {
+@INCLUDE_COPY_FILE@            exception = e;
+@INCLUDE_COPY_FILE@        } finally {
+@INCLUDE_COPY_FILE@            if (in != null)
+@INCLUDE_COPY_FILE@                try {
+@INCLUDE_COPY_FILE@                    in.close();
+@INCLUDE_COPY_FILE@                } catch (IOException e) {
+@INCLUDE_COPY_FILE@                    if (exception == null)
+@INCLUDE_COPY_FILE@                        exception = e;
+@INCLUDE_COPY_FILE@                }
+@INCLUDE_COPY_FILE@            if (out != null)
+@INCLUDE_COPY_FILE@                try {
+@INCLUDE_COPY_FILE@                    out.close();
+@INCLUDE_COPY_FILE@                } catch (IOException e) {
+@INCLUDE_COPY_FILE@                    if (exception == null)
+@INCLUDE_COPY_FILE@                        exception = e;
+@INCLUDE_COPY_FILE@                }
+@INCLUDE_COPY_FILE@            if (exception != null)
+@INCLUDE_COPY_FILE@                throw exception;
 @INCLUDE_COPY_FILE@        }
-@INCLUDE_COPY_FILE@        in.close();
-@INCLUDE_COPY_FILE@        out.flush();
-@INCLUDE_COPY_FILE@        out.close();
-@INCLUDE_COPY_FILE@   }
+@INCLUDE_COPY_FILE@    }
 }
