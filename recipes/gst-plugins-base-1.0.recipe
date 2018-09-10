@@ -6,8 +6,9 @@ class Recipe(custom.GStreamer):
     btype = BuildType.MESON
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-base'}
     meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'gl': 'enabled',
-                     'pango': 'enabled', 'opus': 'enabled', 'vorbis': 'auto',
-                     'ogg': 'enabled', 'theora': 'enabled', 'libvisual': 'enabled'}
+                     'pango': 'enabled', 'opus': 'enabled', 'vorbis': 'enabled',
+                     'ogg': 'enabled', 'theora': 'enabled', 'libvisual': 'enabled',
+                     'tremor': 'disabled'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
@@ -254,6 +255,9 @@ class Recipe(custom.GStreamer):
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
+
+        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+            self.meson_options['tremor'] = 'enabled'
 
         if self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
