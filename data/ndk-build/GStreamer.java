@@ -13,9 +13,9 @@ public class GStreamer {
     private static native void nativeInit(Context context) throws Exception;
 
     public static void init(Context context) throws Exception {
-        nativeInit(context);
-@INCLUDE_FONTS@        copyFonts(context);
 @INCLUDE_CA_CERTIFICATES@        copyCaCertificates(context);
+@INCLUDE_FONTS@        copyFonts(context);
+        nativeInit(context);
     }
 
 @INCLUDE_FONTS@    private static void copyFonts(Context context) {
