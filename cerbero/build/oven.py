@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import sys
 import tempfile
 import shutil
 import traceback
@@ -147,13 +148,18 @@ class Oven (object):
                 shell.close_logfile_output()
             except FatalError as e:
                 shell.close_logfile_output(dump=True)
-                if isinstance(e.__context__, CalledProcessError):
-                    # Don't print trace if the FatalError is merely that the
-                    # subprocess exited with a non-zero status. The traceback
-                    # is just confusing and useless in that case.
-                    trace = ''
-                else:
-                    trace = traceback.format_exc()
+                exc_traceback = sys.exc_info()[2]
+                trace = ''
+                # Don't print trace if the FatalError is merely that the
+                # subprocess exited with a non-zero status. The traceback
+                # is just confusing and useless in that case.
+                if not isinstance(e.__context__, CalledProcessError):
+                    tb = traceback.extract_tb(exc_traceback)[-1]
+                    if tb.filename.endswith('.recipe'):
+                        # Print the recipe and line number of the exception
+                        # if it starts in a recipe
+                        trace += 'Exception at {}:{}\n'.format(tb.filename, tb.lineno)
+                    trace += e.args[0] + '\n'
                 self._handle_build_step_error(recipe, step, trace, e.arch)
             except Exception:
                 shell.close_logfile_output(dump=True)
