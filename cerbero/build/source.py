@@ -20,6 +20,7 @@ import os
 import shutil
 import tarfile
 import urllib.request, urllib.parse, urllib.error
+from hashlib import sha256
 
 from cerbero.config import Platform
 from cerbero.utils import git, svn, shell, _
@@ -83,13 +84,17 @@ class Tarball (Source):
     '''
     Source handler for tarballs
 
-    @cvar url: dowload URL for the tarball
+    @cvar url: download URL for the tarball
     @type url: str
+
+    @cvar tarball_checksum: sha256 checksum for the tarball
+    @type tarball_checksum: str
     '''
 
     url = None
     tarball_name = None
     tarball_dirname = None
+    tarball_checksum = None
     mirror_url = None
 
     def __init__(self):
@@ -122,7 +127,7 @@ class Tarball (Source):
 
         cached_file = os.path.join(self.config.cached_sources,
                                    self.package_name, self.tarball_name)
-        if not redownload and os.path.isfile(cached_file):
+        if not redownload and os.path.isfile(cached_file) and self.verify(cached_file, fatal=False):
             m.action(_('Copying cached tarball from %s to %s instead of %s') %
                      (cached_file, self.download_path, self.url))
             shutil.copy(cached_file, self.download_path)
@@ -131,6 +136,7 @@ class Tarball (Source):
             if not os.path.isfile(self.download_path):
                 msg = 'Offline mode: tarball {!r} not found in cached sources ({}) or local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.config.cached_sources, self.repo_dir))
+            self.verify()
             m.action(_('Found tarball for %s at %s') % (self.url, self.download_path))
             return
         m.action(_('Fetching tarball %s to %s') %
@@ -145,6 +151,35 @@ class Tarball (Source):
             # Try our mirror
             shell.download(self.mirror_url, self.download_path, check_cert=cc,
                            overwrite=redownload)
+        self.verify()
+
+    @staticmethod
+    def _checksum(fname):
+        h = sha256()
+        with open(fname, 'rb') as f:
+            # Read in chunks of 512k till f.read() returns b'' instead of reading
+            # the whole file at once which will fail on systems with low memory
+            for block in iter(lambda: f.read(512 * 1024), b''):
+                h.update(block)
+        return h.hexdigest()
+
+    def verify(self, fname=None, fatal=True):
+        if fname is None:
+            fname = self.download_path
+        checksum = self._checksum(fname)
+        if self.tarball_checksum is None:
+            raise FatalError('tarball_checksum is missing in {}.recipe for tarball {}\n'
+                             'The SHA256 of the current file is {}\nPlease verify and '
+                             'add it to the recipe'.format(self.name, self.url, checksum))
+        if checksum != self.tarball_checksum:
+            movedto = fname + '.failed-checksum'
+            os.replace(fname, movedto)
+            m.action(_('Checksum failed, tarball %s moved to %s') % (fname, movedto))
+            if not fatal:
+                return False
+            raise FatalError('Checksum for {} is {!r} instead of {!r}'
+                             .format(fname, checksum, self.tarball_checksum))
+        return True
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
