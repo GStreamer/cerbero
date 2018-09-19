@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     version = '0.19.7'
     stype = SourceType.TARBALL
     url = 'https://github.com/fribidi/fribidi/releases/download/{0}/fribidi-{0}.tar.bz2'.format(version)
+    tarball_checksum = '08222a6212bbc2276a2d55c3bf370109ae4a35b689acbc66571ad2a670595a8e'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     deps = ['glib']

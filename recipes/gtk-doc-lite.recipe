@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     # So mirror our own re-tarballed version.
     # See https://bugzilla.gnome.org/show_bug.cgi?id=722621
     url = 'https://gstreamer.freedesktop.org/src/mirror/gtk-doc-%(version)s.tar.xz'
+    tarball_checksum = 'd00d589e68d0820bb1ab07291a24914f0c1b594040843baccce0489c33052601'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM

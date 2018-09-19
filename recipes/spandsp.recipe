@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.0.6'
     stype = SourceType.TARBALL
     url = 'https://www.soft-switch.org/downloads/spandsp/spandsp-%(version)s.tar.gz'
+    tarball_checksum = 'cc053ac67e8ac4bb992f258fd94f275a7872df959f6a87763965feabfdcc9465'
     licenses = [License.LGPLv2_1Plus]
     deps = ['tiff']
     allow_parallel_build = False

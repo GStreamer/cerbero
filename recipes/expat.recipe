@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://github.com/libexpat/libexpat/releases/download/R_2_2_5/%(name)s-%(version)s.tar.bz2'
+    tarball_checksum = 'd9dc32efba7e74f788fcc4f212a43216fc37cf5f23f4c2339664d473353aedf6'
 
     files_libs = ['libexpat']
     files_devel = ['include/expat.h', 'include/expat_external.h', 'lib/pkgconfig/expat.pc']

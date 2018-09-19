@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPL]
     stype = SourceType.TARBALL
     url = 'https://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
+    tarball_checksum = '781cf84a6c2a9a3252f54d2967b57f6de75a31fc1684371e112638c981f72b60'
     autoreconf = True
     patches = ['frei0r-plugins/0001-Fix-autoreconf.patch']
 

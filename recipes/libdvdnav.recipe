@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '5.0.1'
     stype = SourceType.TARBALL
     url = 'https://www.videolan.org/pub/videolan/libdvdnav/%(version)s/libdvdnav-%(version)s.tar.bz2'
+    tarball_checksum = '72b1cb8266f163d4a1481b92c7b6c53e6dc9274d2a6befb08ffc351fe7a4a2a9'
     licenses = [License.GPLv2Plus]
     autoreconf = True
     deps = ['libdvdread']

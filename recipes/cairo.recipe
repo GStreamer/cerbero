@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.14.12'
     stype = SourceType.TARBALL
     url = 'https://cairographics.org/releases/cairo-%(version)s.tar.xz'
+    tarball_checksum = '8c90f00c500b2299c0a323dd9beead2a00353752b2092ead558139bd67f7bf16'
     # either LGPLv2.1 or MPLv1.1
     licenses = [License.LGPLv2_1]
     autoreconf = True

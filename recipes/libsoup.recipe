@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = '1b0dc762f23abe4e0d29b77370e539fd35f31d8e8e0318d6ddccff395be68a22'
     autoreconf = True
     autoreconf_sh = 'gtkdocize && autoreconf --force --install --verbose'
     configure_options = '--without-gnome --disable-more-warnings --disable-vala --with-gssapi=no \

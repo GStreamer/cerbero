@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://downloads.xiph.org/releases/flac/flac-%(version)s.tar.xz'
+    tarball_checksum = '91cfc3ed61dc40f47f050a109b08610667d73477af6ef36dcad31c31a4a8d53f'
     deps = ['libogg']
     configure_options = ' --disable-cpplibs --enable-static'
 
@@ -16,6 +17,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libFLAC']
 
     files_bins = ['flac', 'metaflac']
+    tarball_checksum = '91cfc3ed61dc40f47f050a109b08610667d73477af6ef36dcad31c31a4a8d53f'
     licenses_bins = [License.GPLv2Plus]
 
     files_devel = [

@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = '3a082ad67d68b55970aed0b2034a06618167be98a42d5c70de736756b45d325d'
     configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
     autoreconf = True

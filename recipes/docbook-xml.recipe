@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://docbook.org/xml/%(version)s/%(name)s-%(version)s.zip'
+    tarball_checksum = '4e4e037a2b83c98c6c94818390d4bdd3f6e10f6ec62dd79188594e26190dc7b4'
 
     files_catalog = ['etc/catalog.xml']
 

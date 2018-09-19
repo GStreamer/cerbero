@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
     name = 'gmp'
     version = '6.1.2'
     url = 'https://ftp.gnu.org/gnu/gmp/gmp-%(version)s.tar.xz'
+    tarball_checksum = '87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
     tarball_dirname = 'gmp-6.1.2'

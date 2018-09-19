@@ -5,6 +5,7 @@ class Recipe(recipe.Recipe):
     version = '0.1.14'
     stype = SourceType.TARBALL
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
+    tarball_checksum = 'be120ba95d4490436f0da077ffa8f767bf727b82decf2bf499e39becc027809c'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     configure_options = '--enable-static --enable-static-plugins --enable-shared \
             --with-gstreamer --without-gstreamer-0.10 \

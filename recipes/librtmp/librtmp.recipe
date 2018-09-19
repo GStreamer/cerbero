@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-2.4_p20151223.tar.gz'
+    tarball_checksum = 'b066f2583fd20aeb7b9c48535027e28026f8a38bc00d446fc81e09a597f38654'
     licenses = [License.LGPLv2_1]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'

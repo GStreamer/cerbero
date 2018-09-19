@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '0.4.0'
     stype = SourceType.TARBALL
     url = 'https://download.sourceforge.net/libvisual/libvisual-%(version)s.tar.bz2'
+    tarball_checksum = '78f38d3ce857edde5482aa4415b504bbcd4d4a688fd4de09ec2131ad08174279'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     configure_options = ' --enable-static'

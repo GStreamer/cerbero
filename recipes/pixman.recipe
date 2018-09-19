@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     version = '0.34.0'
     stype = SourceType.TARBALL
     url = 'https://cairographics.org/releases/pixman-%(version)s.tar.gz'
+    tarball_checksum = '21b6b249b51c6800dc9553b65106e1e37d0e25df942c90531d4c3997aa20a88e'
     licenses = [License.MIT]
     autoreconf = True
     patches = ['pixman/0001-Fix-build-on-Android.patch',

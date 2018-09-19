@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://freedesktop.org/software/pulseaudio/%(name)s/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = '4b46a7f91a5d255c2451f9862c86e2a5de904902724b4bba1fd23e2854f21df5'
 
     platform_deps = {Platform.ANDROID: ['gnustl']}
 

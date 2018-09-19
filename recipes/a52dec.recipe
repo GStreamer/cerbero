@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     # This URL doesn't support https, so we don't use it
     #url = 'http://liba52.sourceforge.net/files/a52dec-%(version)s.tar.gz'
     url = 'https://gstreamer.freedesktop.org/src/mirror/a52dec-%(version)s.tar.gz'
+    tarball_checksum = 'a21d724ab3b3933330194353687df82c475b5dfb997513eef4c25de6c865ec33'
     licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
     autoreconf = True

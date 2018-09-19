@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
     url = 'https://www.cmake.org/files/v3.7/cmake-%(version)s.tar.gz'
+    tarball_checksum = '449a5bce64dbd4d5b9517ebd1a1248ed197add6ad27934478976fd5f1f9330e1'
     deps = ['autoconf']
 
     add_host_build_target = False

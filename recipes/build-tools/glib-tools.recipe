@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/glib/{}/glib-%(version)s.tar.xz'.format(maj_ver)
     tarball_dirname = 'glib-%(version)s'
+    tarball_checksum = '40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'gtk_doc': 'false', 'internal_pcre': 'true', 'libmount': 'false',

@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://downloads.xiph.org/releases/{0}/{0}-{1}.tar.gz'.format(name, version)
+    tarball_checksum = 'cfafd339ccd9c5ef8d6ab15d7e1a412c054bf4cb4ecbbbcc78c12ef2def70732'
 
     files_libs = ['libopus']
     files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']

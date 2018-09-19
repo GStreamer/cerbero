@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = 'fd55a9037d39e7a10f0db64309f5f0265fa32ec962bf85066087b83a2807f40a'
     deps = ['glib']
     configure_options = '--enable-static'
     autoreconf = True

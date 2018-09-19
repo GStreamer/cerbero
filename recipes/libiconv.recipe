@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     url = 'https://ftp.gnu.org/pub/gnu/libiconv/libiconv-%(version)s.tar.gz'
+    tarball_checksum = 'ccf536620a45458d26ba83887a983b96827001e92a13847b45e4925cc8913178'
     patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
                'libiconv/0002-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
 #               'libiconv/0002-Add-support-for-Android.patch',

@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     name = 'srt'
     version = '1.3.0'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
+    tarball_checksum = '645c13a9a5c5b59315f82245737289e071a5441ee40de6e2e45af61e305e1f2c'
     licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE

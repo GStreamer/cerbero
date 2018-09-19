@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '4.0.9'
     stype = SourceType.TARBALL
     url = 'https://download.osgeo.org/libtiff/tiff-%(version)s.tar.gz'
+    tarball_checksum = '6e7bdeec2c310734e734d19aae3a71ebe37a4d842e0e23dbb1b8921c0026cfcd'
     licenses = [License.BSD_like]
     deps = [ 'zlib', 'libjpeg-turbo' ]
     configure_options = ' --disable-cxx no_gl=yes'

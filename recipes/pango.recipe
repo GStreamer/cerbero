@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = '90af1beaa7bf9e4c52db29ec251ec4fd0a8f2cc185d521ad1f88d01b3a6a17e3'
     autoreconf = True
     autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
     licenses = [License.LGPLv2Plus]

@@ -6,6 +6,7 @@ class Recipe(recipe.Recipe):
     version = '5.0.0'
     stype = SourceType.TARBALL
     url = 'https://www.videolan.org/pub/videolan/libdvdread/%(version)s/libdvdread-%(version)s.tar.bz2'
+    tarball_checksum = '66fb1a3a42aa0c56b02547f69c7eb0438c5beeaf21aee2ae2c6aa23ea8305f14'
     licenses = [License.GPLv2Plus]
     autoreconf = True
     patches = [name + '/0001-Fix-compilation-on-Windows-by-including-files-with-t.patch',

@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://www.ladspa.org/download/ladspa_sdk_%(version)s.tgz'
     tarball_dirname = 'ladspa_sdk'
+    tarball_checksum = 'b5ed3f4f253a0f6c1b7a1f4b8cf62376ca9f51d999650dd822650c43852d306b'
 
     files_devel = ['include/ladspa.h']
 

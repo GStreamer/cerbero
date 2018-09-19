@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.Apachev2]
     stype = SourceType.TARBALL
     url = 'https://downloads.sourceforge.net/opencore-amr/vo-aacenc-%(version)s.tar.gz'
+    tarball_checksum = 'e51a7477a359f18df7c4f82d195dab4e14e7414cbd48cf79cc195fc446850f36'
     autoreconf = True
 
     files_libs = ['libvo-aacenc']

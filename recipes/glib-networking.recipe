@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = 'df47b0e0a037d2dcf6b1846cbdf68dd4b3cc055e026bb40c4a55f19f29f635c8'
     meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
                      'gnome_proxy_support': 'false', 'pkcs11_support': 'false',
                      # Also build static modules on all platforms

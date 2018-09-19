@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
     url = 'https://ftp.gnu.org/gnu/m4/m4-%(version)s.tar.xz'
+    tarball_checksum = 'f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07'
     files_bins = ['m4']
 
     patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',

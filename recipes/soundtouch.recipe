@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://www.surina.net/soundtouch/soundtouch-%(version)s.tar.gz'
     tarball_dirname = 'soundtouch'
+    tarball_checksum = 'caeb86511e81420eeb454cb5db53f56d96b8451d37d89af6e55b12eb4da1c513'
     licenses = [License.LGPLv2_1Plus]
     autoreconf_sh = './bootstrap'
     autoreconf = True

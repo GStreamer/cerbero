@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    tarball_checksum = 'b88ded5e5f064ab58a93aadecd6d58db2ec9d970648534c63807d4f9a7bb877e'
     licenses = [License.GPLv2Plus]
     autoreconf = True
     autoreconf_sh = 'gtkdocize && autoreconf -vfi'
