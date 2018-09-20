@@ -295,8 +295,8 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                     self.config.target_arch,
                     output_dir)
                 logging.debug('Created %s' % implib)
-            except FatalError:
-                m.warning("Could not create {!r}, gendef might be missing".format(genlib.filename))
+            except FatalError as e:
+                m.warning("Could not create {!r}: {}".format(genlib.filename, e.msg))
 
     def recipe_dir(self):
         '''
