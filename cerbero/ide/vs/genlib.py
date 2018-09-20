@@ -36,11 +36,12 @@ class GenLib(object):
     def create(self, libname, dllpath, arch, outputdir):
         bindir, dllname = os.path.split(dllpath)
 
-        # Create the .def file
-        shell.call('gendef %s' % dllpath, outputdir)
-
         defname = dllname.replace('.dll', '.def')
         implib = '%s.lib' % libname[3:]
+        self.implib = implib
+
+        # Create the .def file
+        shell.call('gendef %s' % dllpath, outputdir)
 
         # Create the import library
         vc_path = self._get_vc_tools_path()

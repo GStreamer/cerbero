@@ -234,8 +234,8 @@ class Recipe(FilesProvider):
                     self.config.target_arch,
                     output_dir)
                 logging.debug('Created %s' % implib)
-            except:
-                m.warning("Could not create {}.lib, gendef might be missing".format(libname))
+            except FatalError, e:
+                m.warning("Could not create {!r}: {}".format(genlib.implib, e.msg))
 
     def recipe_dir(self):
         '''
