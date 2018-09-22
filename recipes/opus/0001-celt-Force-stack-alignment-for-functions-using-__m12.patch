@@ -1,0 +1,45 @@
+From 19cdfbefcf600c878fd55c144c4dea7186fbc395 Mon Sep 17 00:00:00 2001
+From: Nicolas Dufresne <nicolas.dufresne@collabora.com>
+Date: Sat, 22 Sep 2018 17:21:30 -0400
+Subject: [PATCH] celt: Force stack alignment for functions using __m128
+
+We are using an old GCC for Windows 32bit builds, and it assumes the
+stack will be 16bytes aligned when dealing with __m128 which should be
+aligned. As a side effect, when it's not, movaps will crash. This should
+be fixed in newer version of GCC.
+---
+ celt/x86/pitch_sse.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/celt/x86/pitch_sse.c b/celt/x86/pitch_sse.c
+index 20e7312..3eee8da 100644
+--- a/celt/x86/pitch_sse.c
++++ b/celt/x86/pitch_sse.c
+@@ -40,6 +40,16 @@
+ #include <xmmintrin.h>
+ #include "arch.h"
+ 
++#ifdef _WIN32
++void xcorr_kernel_sse(const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4], int len) __attribute__((force_align_arg_pointer));
++void dual_inner_prod_sse(const opus_val16 *x, const opus_val16 *y01, const opus_val16 *y02,
++      int N, opus_val32 *xy1, opus_val32 *xy2) __attribute__((force_align_arg_pointer));
++opus_val32 celt_inner_prod_sse(const opus_val16 *x, const opus_val16 *y,
++      int N) __attribute__((force_align_arg_pointer));
++void comb_filter_const_sse(opus_val32 *y, opus_val32 *x, int T, int N,
++      opus_val16 g10, opus_val16 g11, opus_val16 g12) __attribute__((force_align_arg_pointer));
++#endif
++
+ void xcorr_kernel_sse(const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4], int len)
+ {
+    int j;
+@@ -75,7 +85,6 @@ void xcorr_kernel_sse(const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4
+    _mm_storeu_ps(sum,_mm_add_ps(xsum1,xsum2));
+ }
+ 
+-
+ void dual_inner_prod_sse(const opus_val16 *x, const opus_val16 *y01, const opus_val16 *y02,
+       int N, opus_val32 *xy1, opus_val32 *xy2)
+ {
+-- 
+2.17.1
+

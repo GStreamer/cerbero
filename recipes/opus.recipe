@@ -8,6 +8,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'http://downloads.xiph.org/releases/{0}/{0}-{1}.tar.gz'.format(name, version)
 
+    patches = ['opus/0001-celt-Force-stack-alignment-for-functions-using-__m12.patch']
+
     files_libs = ['libopus']
     files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']
     # Starting with v1.1, Opus has special ARM assembly optimizations when
