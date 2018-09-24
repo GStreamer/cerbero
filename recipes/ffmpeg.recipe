@@ -1,0 +1,119 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'ffmpeg'
+    version = '4.0.2'
+    licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.bz2'
+    tarball_checksum = '346c51735f42c37e0712e0b3d2f6476c86ac15863e4445d9e823fe396420d056'
+
+    btype = BuildType.MAKEFILE
+    configure_tpl = "./configure --prefix=%(prefix)s --libdir=%(libdir)s \
+        --enable-static --enable-pic --disable-shared \
+        --disable-avdevice --disable-postproc --disable-swscale \
+        --disable-programs --disable-ffplay --disable-ffprobe --disable-ffmpeg \
+        --disable-encoder=flac --disable-protocols --disable-devices \
+        --disable-network --disable-hwaccels --disable-dxva2 --disable-vdpau \
+        --disable-filters --enable-filter=yadif --disable-doc --disable-d3d11va \
+        --disable-audiotoolbox --disable-videotoolbox --disable-vaapi --disable-crystalhd \
+        --disable-mediacodec --disable-nvenc --disable-mmal --disable-omx \
+        --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
+        --disable-libnpp --disable-iconv --disable-jni --disable-v4l2_m2m \
+        --enable-optimizations --disable-nonfree --disable-version3 %(options)s"
+
+    deps = ['bzip2', 'zlib']
+
+    files_devel = [
+        'lib/libavcodec.a', 'lib/libavcodec.la',
+        'lib/libavformat.a', 'lib/libavformat.la',
+        'lib/libavutil.a', 'lib/libavutil.la',
+        'lib/libswresample.a', 'lib/libswresample.la',
+        'lib/libavfilter.a', 'lib/libavfilter.la',
+    ]
+
+    def prepare(self):
+        # Default AS is $CC, except iOS (set below)
+        if Architecture.is_arm(self.config.target_arch):
+            if self.config.target_platform == Platform.IOS:
+                if 'GAS' in os.environ:
+                    self.set_env('AS', os.environ['GAS'])
+            else:
+                self.set_env('AS', os.environ['CC'])
+
+        # Explicitly disable nonfree code and [l]gplv3 in case upstream changes
+        # the default
+        libavextraconf = ""
+        # Arch-specific flags
+        if self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.X86_64:
+                asflags = ' -arch x86_64 -m64'
+            elif self.config.target_arch == Architecture.X86:
+                asflags = ' -arch i386 -m32'
+            self.configure_options += ' ASFLAGS="%s"' % asflags
+        elif self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch == Architecture.X86:
+              # libav internally aligns stacks, while Android doesn't
+                libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
+            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
+                # Fails to link into an android App
+                # https://github.com/android-ndk/ndk/issues/337
+                libavextraconf += " --disable-neon"
+            if self.config.target_arch in [Architecture.X86]:
+                # Fails to link into an android app with relocation warnings
+                # in the custom assembly
+                # https://stackoverflow.com/questions/34691970/ffmpeg-for-android-neon-build-has-text-relocations/34697703#34697703
+                # https://issuetracker.google.com/issues/37067983
+                # https://trac.ffmpeg.org/ticket/4928
+                libavextraconf += " --disable-asm"
+        elif self.config.target_platform == Platform.IOS:
+            # Some optimisations that were previously silently disabled
+            # cause warnings now. Ignore them
+            libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
+        self.configure_options += libavextraconf
+
+    def configure(self):
+        super(recipe.Recipe, self).configure()
+        libav_path = self.build_dir
+        if self.config.target_platform == Platform.WINDOWS:
+            replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
+                            'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
+            shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
+        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            if self.config.target_arch == Architecture.X86:
+                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
+                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
+                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+            if self.config.target_platform == Platform.IOS:
+                replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
+                                'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
+                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
+        # log2 and log2f are not provided by bionic, but they are not checked
+        # properly
+        elif self.config.target_platform == Platform.ANDROID:
+                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
+                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
+                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
+
+                v = DistroVersion.get_android_api_version(self.config.target_distro_version)
+                if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
+                        replacements = {'-D_FILE_OFFSET_BITS=64': '',}
+                        shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
+
+    def post_install(self):
+        LibtoolLibrary('avutil', None, None, None,
+                       self.config.libdir, self.config.target_platform).save()
+        LibtoolLibrary('swresample', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avutil']).save()
+        LibtoolLibrary('avcodec', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['swresample', 'avutil', 'z']).save()
+        LibtoolLibrary('avformat', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z']).save()
+        LibtoolLibrary('avfilter', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avformat', 'avcodec', 'swresample', 'avutil']).save()

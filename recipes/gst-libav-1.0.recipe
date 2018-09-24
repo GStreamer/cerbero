@@ -9,106 +9,14 @@ class Recipe(custom.GStreamer):
     autoreconf = True
     autoreconfig_sh = './autogen.sh --noconfigure'
     configure_options = "--disable-gpl --enable-static --disable-gtk-doc \
-        --disable-fatal-warnings "
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'zlib' ]
+        --disable-fatal-warnings --with-system-libav "
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'ffmpeg']
 
     files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
     files_plugins_codecs_restricted_devel = [
         'lib/gstreamer-1.0/libgstlibav.a', 'lib/gstreamer-1.0/libgstlibav.la',
-        'lib/libavcodec.a', 'lib/libavcodec.la',
-        'lib/libavformat.a', 'lib/libavformat.la',
-        'lib/libavutil.a', 'lib/libavutil.la',
-        'lib/libswresample.a', 'lib/libswresample.la',
-        'lib/libavfilter.a', 'lib/libavfilter.la',
     ]
 
     def prepare(self):
-        # Default AS is $CC, except iOS (set below)
-        if Architecture.is_arm(self.config.target_arch):
-            if self.config.target_platform == Platform.IOS:
-                if 'GAS' in os.environ:
-                    self.set_env('AS', os.environ['GAS'])
-            else:
-                self.set_env('AS', os.environ['CC'])
-
-        # Explicitly disable nonfree code and [l]gplv3 in case upstream changes
-        # the default
-        libavextraconf = " --disable-nonfree --disable-version3 "
-
-        if self.config.target_platform == Platform.DARWIN:
-            if self.config.target_arch == Architecture.X86_64:
-                asflags = ' -arch x86_64 -m64'
-            elif self.config.target_arch == Architecture.X86:
-                asflags = ' -arch i386 -m32'
-            self.configure_options += ' ASFLAGS="%s"' % asflags
-        elif self.config.target_platform == Platform.ANDROID:
-            # This creates too much problems and we can do without it
-            libavextraconf += " --disable-linux-perf"
-            if self.config.target_arch == Architecture.X86:
-              # libav internally aligns stacks, while Android doesn't
-                libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
-            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
-                # Fails to link into an android App
-                # https://github.com/android-ndk/ndk/issues/337
-                libavextraconf += " --disable-neon"
-            if self.config.target_arch in [Architecture.X86]:
-                # Fails to link into an android app with relocation warnings
-                # in the custom assembly
-                # https://stackoverflow.com/questions/34691970/ffmpeg-for-android-neon-build-has-text-relocations/34697703#34697703
-                # https://issuetracker.google.com/issues/37067983
-                # https://trac.ffmpeg.org/ticket/4928
-                libavextraconf += " --disable-asm"
-        elif self.config.target_platform == Platform.IOS:
-            # Some optimisations that were previously silently disabled
-            # cause warnings now. Ignore them
-            libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
-        elif self.config.target_platform == Platform.WINDOWS:
-            # FIXME: Remove when we update to ffmpeg 4.0 which fixes targetting Vista
-            if self.config.platform == Platform.WINDOWS:
-                # On Windows, configure is run as `sh -c "./configure <args>"`,
-                # and these arguments are passed to ffmpeg's configure, so we
-                # need a double layer of escaping for the spaces to be escaped
-                # on correctly, otherwise we get an error about how
-                # `-U_WIN32_WINNT` is not a valid configure argument.
-                winflags = '"-UWINVER\ -U_WIN32_WINNT\ -DWINVER=0x0501\ -D_WIN32_WINNT=0x0501"'
-            else:
-                winflags = '-UWINVER -U_WIN32_WINNT -DWINVER=0x0501 -D_WIN32_WINNT=0x0501'
-            libavextraconf += "--extra-cflags='{}'".format(winflags)
-        self.configure_options += ' --with-libav-extra-configure="{}" '.format(libavextraconf)
-
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
-
-        super(Recipe, self).prepare()
-
-
-    def configure(self):
-        super(recipe.Recipe, self).configure()
-
-        libav_path = os.path.join(self.build_dir, 'gst-libs', 'ext', 'libav')
-        if self.config.target_platform == Platform.WINDOWS:
-            replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
-                            'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
-            shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            if self.config.target_arch == Architecture.X86:
-                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
-                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
-                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-            if self.config.target_platform == Platform.IOS:
-                replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
-                                'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
-                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-        # log2 and log2f are not provided by bionic, but they are not checked
-        # properly
-        elif self.config.target_platform == Platform.ANDROID:
-                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
-                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-
-                v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-                if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
-                        replacements = {'-D_FILE_OFFSET_BITS=64': '',}
-                        shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-
