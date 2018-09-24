@@ -10,11 +10,11 @@ class Recipe(recipe.Recipe):
     # Note: openssl helpfully moves tarballs somewhere else (old/x.y.z/)
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
-    version = '1.1.0h'
+    version = '1.1.1'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
     url = 'https://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
-    tarball_checksum = '5835626cde9e99656585fc7aaa2302a73a7e1340bf8c14fd635a62c66802a517'
+    tarball_checksum = '2836875a0f89c03d0fdf483941512613a50cfb421d6fd94b9f41d7279d586a3d'
     deps = ['zlib']
     # Parallel make fails randomly due to undefined macros, probably races
     allow_parallel_build = False
@@ -23,8 +23,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libcrypto', 'libssl']
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc',
                    'lib/pkgconfig/libssl.pc', 'lib/pkgconfig/libcrypto.pc']
-
-    patches = ['openssl/0001-fix-arm-poly1305-linkage.patch']
 
     def prepare(self):
         # map platforms
@@ -43,15 +41,15 @@ class Recipe(recipe.Recipe):
                 raise NotImplementedError
         elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.ARM:
-                self.openssl_platform = 'android-armeabi'
+                self.openssl_platform = 'android-arm'
             elif self.config.target_arch == Architecture.ARMv7:
-                self.openssl_platform = 'android-armeabi'
+                self.openssl_platform = 'android-arm'
             elif self.config.target_arch == Architecture.ARM64:
-                self.openssl_platform = 'android64-aarch64'
+                self.openssl_platform = 'android-arm64'
             elif self.config.target_arch == Architecture.X86:
                 self.openssl_platform = 'android-x86'
             elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'android64'
+                self.openssl_platform = 'android-x86_64'
             else:
                 raise NotImplementedError
 
@@ -88,13 +86,13 @@ class Recipe(recipe.Recipe):
         # build, and we can't pass arguments via Configure because on Darwin,
         # Configure reads the `-arch x86_64` as meaning that you want to use
         # `x86_64` as the platform, and errors out about a redefined platform.
-        self.make += ' CC="$CC $CFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
-        self.make_install = 'make install_sw'
+        self.make += ' AR="$AR" CC="$CC $CFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
+        self.make_install = 'make install_sw RANLIB="$RANLIB"'
 
         # We probably don't need and can't use the tools on these platforms
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
-            self.make_install = 'make install_dev'
+            self.make_install = 'make install_dev RANLIB="$RANLIB"'
 
     @modify_environment
     def configure(self):
@@ -112,7 +110,7 @@ class Recipe(recipe.Recipe):
                                  ''.format(perl, found, m))
         # OpenSSL guesses the libdir incorrectly on x86_64
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
-            ' --libdir=lib' + self.config.lib_suffix + ' '
+            ' --libdir=lib' + self.config.lib_suffix + '  no-makedepend '
         if self.config.target_platform == Platform.IOS:
             config_sh += ' no-shared no-dso '
         else:
