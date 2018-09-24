@@ -1,15 +1,9 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shutil
-
-from cerbero.utils import shell
 
 class Recipe(custom.GStreamer):
     name = 'gst-libav-1.0'
     licenses = [License.LGPLv2Plus]
-    autoreconf = True
-    autoreconfig_sh = './autogen.sh --noconfigure'
-    configure_options = "--disable-gpl --enable-static --disable-gtk-doc \
-        --disable-fatal-warnings --with-system-libav "
+    btype = BuildType.MESON
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'ffmpeg']
 
     files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
