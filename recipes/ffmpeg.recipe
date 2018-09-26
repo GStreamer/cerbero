@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '346c51735f42c37e0712e0b3d2f6476c86ac15863e4445d9e823fe396420d056'
 
     btype = BuildType.MAKEFILE
-    configure_tpl = "./configure --prefix=%(prefix)s --libdir=%(libdir)s \
+    configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
+        --ar="$AR" --as="$CC" --cc="$CC" --ld="$CC" --nm="$NM" \
         --enable-static --enable-pic --disable-shared \
         --disable-avdevice --disable-postproc --disable-swscale \
         --disable-programs --disable-ffplay --disable-ffprobe --disable-ffmpeg \
@@ -21,7 +22,7 @@ class Recipe(recipe.Recipe):
         --disable-mediacodec --disable-nvenc --disable-mmal --disable-omx \
         --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
         --disable-libnpp --disable-iconv --disable-jni --disable-v4l2_m2m \
-        --enable-optimizations --disable-nonfree --disable-version3 %(options)s"
+        --enable-optimizations --disable-nonfree --disable-version3 %(options)s'
 
     deps = ['bzip2', 'zlib']
 
@@ -42,9 +43,7 @@ class Recipe(recipe.Recipe):
             else:
                 self.set_env('AS', os.environ['CC'])
 
-        # Explicitly disable nonfree code and [l]gplv3 in case upstream changes
-        # the default
-        libavextraconf = ""
+        libavextraconf = ''
         # Arch-specific flags
         if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86_64:
@@ -71,6 +70,19 @@ class Recipe(recipe.Recipe):
             # Some optimisations that were previously silently disabled
             # cause warnings now. Ignore them
             libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
+
+        if self.config.cross_compiling():
+            libavextraconf += ' --enable-cross-compile'
+            target_os = self.config.target_platform
+            if target_os == 'windows':
+                target_os = 'mingw32'
+            elif target_os == 'ios':
+                target_os = 'darwin'
+            target_arch = self.config.host.split('-', 1)[0]
+            libavextraconf += ' --target-os=' + target_os
+            libavextraconf += ' --arch=' + target_arch
+            libavextraconf += ' --cross-prefix={}- '.format(self.config.host)
+
         self.configure_options += libavextraconf
 
     def configure(self):
