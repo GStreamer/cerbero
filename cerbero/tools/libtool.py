@@ -92,7 +92,7 @@ libdir='%(libdir)s'
 '''
 
     def __init__(self, libname, major, minor, micro, libdir, platform,
-            deps=None):
+            deps=None, static_only=False):
         self.libtool_vars = {
             'libname': '',
             'dlname': '',
@@ -136,9 +136,10 @@ libdir='%(libdir)s'
                     micro_str = micro
         old_library = '%s.a' % libname
         self.change_value('libname', self.laname)
-        self.change_value('dlname', dlname)
-        self.change_value('library_names', '%s %s %s' % (dlname_all, dlname,
-            dlname_base))
+        if not static_only:
+            self.change_value('dlname', dlname)
+            self.change_value('library_names', '%s %s %s' % (dlname_all, dlname,
+                dlname_base))
         self.change_value('old_library', old_library)
         self.change_value('current', minor_str)
         self.change_value('age', minor_str)

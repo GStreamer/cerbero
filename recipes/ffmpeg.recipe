@@ -104,16 +104,20 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         LibtoolLibrary('avutil', None, None, None,
-                       self.config.libdir, self.config.target_platform).save()
+                       self.config.libdir, self.config.target_platform,
+                       static_only=True).save()
         LibtoolLibrary('swresample', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avutil']).save()
+                       deps=['avutil'], static_only=True).save()
         LibtoolLibrary('avcodec', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['swresample', 'avutil', 'z']).save()
+                       deps=['swresample', 'avutil', 'z'],
+                       static_only=True).save()
         LibtoolLibrary('avformat', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z']).save()
+                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z'],
+                       static_only=True).save()
         LibtoolLibrary('avfilter', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avformat', 'avcodec', 'swresample', 'avutil']).save()
+                       deps=['avformat', 'avcodec', 'swresample', 'avutil'],
+                       static_only=True).save()
