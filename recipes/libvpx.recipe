@@ -53,12 +53,14 @@ class Recipe(recipe.Recipe):
         elif self.config.target_arch == Architecture.ARM64:
             arch = 'arm64'
 
+        if self.config.platform == Platform.DARWIN:
+            # make sure the linker uses the correct stdlib when building with
+            # 10.13 which makes the usage of libstdc++ a hard error.
+            self.append_env('LDFLAGS', '-stdlib=libc++')
+
         if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin12'
         elif self.config.target_platform == Platform.IOS:
-            # make sure the linker (which the libvpx configure system
-            # replaces by CXX) use the proper stdlib.
-            self.append_env('LDFLAGS', '-stdlib=libc++')
             if self.config.target_arch == Architecture.X86 or self.config.target_arch == Architecture.X86_64:
                 platform = 'iphonesimulator'
             else:
