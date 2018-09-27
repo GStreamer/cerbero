@@ -45,13 +45,7 @@ class Recipe(recipe.Recipe):
 
         libavextraconf = ''
         # Arch-specific flags
-        if self.config.target_platform == Platform.DARWIN:
-            if self.config.target_arch == Architecture.X86_64:
-                asflags = ' -arch x86_64 -m64'
-            elif self.config.target_arch == Architecture.X86:
-                asflags = ' -arch i386 -m32'
-            self.configure_options += ' ASFLAGS="%s"' % asflags
-        elif self.config.target_platform == Platform.ANDROID:
+        if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
                 libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
