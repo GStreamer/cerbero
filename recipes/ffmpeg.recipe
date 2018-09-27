@@ -27,11 +27,11 @@ class Recipe(recipe.Recipe):
     deps = ['bzip2', 'zlib']
 
     files_devel = [
-        'lib/libavcodec.a', 'lib/libavcodec.la',
-        'lib/libavformat.a', 'lib/libavformat.la',
-        'lib/libavutil.a', 'lib/libavutil.la',
-        'lib/libswresample.a', 'lib/libswresample.la',
-        'lib/libavfilter.a', 'lib/libavfilter.la',
+        'lib/libavcodec.a', 'lib/libavcodec.la', 'lib/pkgconfig/libavcodec.pc', 'include/libavcodec',
+        'lib/libavformat.a', 'lib/libavformat.la', 'lib/pkgconfig/libavformat.pc', 'include/libavformat',
+        'lib/libavutil.a', 'lib/libavutil.la', 'lib/pkgconfig/libavutil.pc', 'include/libavutil',
+        'lib/libswresample.a', 'lib/libswresample.la', 'lib/pkgconfig/libswresample.pc', 'include/libswresample',
+        'lib/libavfilter.a', 'lib/libavfilter.la', 'lib/pkgconfig/libavfilter.pc', 'include/libavfilter',
     ]
 
     def prepare(self):
