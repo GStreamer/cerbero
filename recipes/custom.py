@@ -14,7 +14,7 @@ class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.14.3'
     # Change to tag when making a release, then back to branch
-    commit = '1.14.3'
+    commit = 'origin/1.14'
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
