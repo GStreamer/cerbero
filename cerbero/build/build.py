@@ -247,6 +247,7 @@ class MakefilesBase (Build, ModifyEnvBase):
             # NOTE: Can't pass -bitcode_bundle to Makefile projects because we
             # can't control what options they pass while linking dylibs
             bitcode_ldflags = bitcode_cflags #+ ['-Wl,-bitcode_bundle']
+            self.append_env('ASFLAGS', *bitcode_cflags)
             self.append_env('CFLAGS', *bitcode_cflags)
             self.append_env('CXXFLAGS', *bitcode_cflags)
             self.append_env('OBCCFLAGS', *bitcode_cflags)
