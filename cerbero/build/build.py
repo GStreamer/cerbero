@@ -216,7 +216,7 @@ class MakefilesBase (Build, ModifyEnvBase):
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
-    make = 'make'
+    make = 'make V=1'
     make_install = 'make install'
     make_check = None
     make_clean = 'make clean'
