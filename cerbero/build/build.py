@@ -508,7 +508,42 @@ class Meson (Build, ModifyEnvBase) :
         if not self.make_clean:
             self.make_clean = self.make + ' clean'
 
-    def write_meson_cross_file(self):
+    @staticmethod
+    def _get_option_value(opt_type, value):
+        if opt_type == 'feature':
+            return 'enabled' if value else 'disabled'
+        if opt_type == 'boolean':
+            return 'true' if value else 'false'
+        raise AssertionError('Invalid option type {!r}'.format(opt_type))
+
+    def _set_introspection_option(self):
+        '''
+        Parse the meson_options.txt file, figure out whether there is an
+        introspection option, figure out the type, and enable/disable it as per
+        the cerbero configuration.
+        '''
+        # Don't overwrite if it's already set
+        if 'introspection' in self.meson_options:
+            return
+        # Error out on invalid usage
+        if not os.path.isdir(self.build_dir):
+            raise FatalError('build directory doesn\'t exist yet?')
+        # Check if the option exists, and if so, what the type is
+        meson_options = os.path.join(self.build_dir, 'meson_options.txt')
+        if not os.path.isfile(meson_options):
+            return
+        with open(meson_options, 'r') as f:
+            options = f.read()
+            if re.search("option\s*\(\s*'introspection',[^)]+type\s*:\s*'feature'", options):
+                opt_type = 'feature'
+            elif re.search("option\s*\(\s*'introspection',[^)]+type\s*:\s*'boolean'", options):
+                opt_type = 'boolean'
+            else:
+                return
+        self.meson_options['introspection'] = \
+                self._get_option_value(opt_type, self.config.variants.gi)
+
+    def _write_meson_cross_file(self):
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
         # Same for *FLAGS below.
@@ -589,6 +624,9 @@ class Meson (Build, ModifyEnvBase) :
         else:
             os.makedirs(self.meson_dir)
 
+        # Explicitly enable/disable introspection
+        self._set_introspection_option()
+
         if self.config.variants.debug:
             buildtype = 'debug'
         elif self.config.variants.nodebug:
@@ -608,7 +646,7 @@ class Meson (Build, ModifyEnvBase) :
         if self.config.ios_platform == 'iPhoneOS':
             self.meson_options.update({'b_bitcode': 'true'})
         if self.config.cross_compiling():
-            f = self.write_meson_cross_file()
+            f = self._write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
 
         # Whether to reset the toolchain env vars set by the cerbero config
