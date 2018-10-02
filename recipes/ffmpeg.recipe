@@ -64,6 +64,13 @@ class Recipe(recipe.Recipe):
             # Some optimisations that were previously silently disabled
             # cause warnings now. Ignore them
             libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
+            if self.config.target_arch == Architecture.X86:
+                # Fails to link in gst-libav due to text relocations in
+                # custom assembly:
+                # ld: illegal text-relocation to 'anon' in libavfilter.a(vf_yadif.o)
+                # from '_ff_yadif_filter_line_ssse3' in libavfilter.a(vf_yadif.o)
+                # for architecture i386
+                libavextraconf += ' --disable-asm  '
 
         if self.config.cross_compiling():
             libavextraconf += ' --enable-cross-compile'
