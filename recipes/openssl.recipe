@@ -86,7 +86,7 @@ class Recipe(recipe.Recipe):
         # build, and we can't pass arguments via Configure because on Darwin,
         # Configure reads the `-arch x86_64` as meaning that you want to use
         # `x86_64` as the platform, and errors out about a redefined platform.
-        self.make += ' AR="$AR" CC="$CC $CFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
+        self.make += ' AR="$AR" RANLIB="$RANLIB" CC="$CC $CFLAGS" LD="$LD $LDFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
         self.make_install = 'make install_sw RANLIB="$RANLIB"'
 
         # We probably don't need and can't use the tools on these platforms
@@ -115,11 +115,6 @@ class Recipe(recipe.Recipe):
             config_sh += ' no-shared no-dso '
         else:
             config_sh += ' shared '
-
-        if self.config.target_platform in (Platform.ANDROID, Platform.LINUX):
-            if self.config.target_arch == Architecture.ARMv7:
-                # Openssl can't seem to figure this out anymore
-                config_sh += ' -D__ARM_MAX_ARCH__=7 '
 
         # ssl3 is needed by sphinx which is used by gst-validate, which tries
         # to use this libssl and fails with undefined symbols. md2 is needed by
