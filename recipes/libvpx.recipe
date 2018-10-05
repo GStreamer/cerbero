@@ -53,6 +53,11 @@ class Recipe(recipe.Recipe):
             arch = 'arm64'
 
         self.new_env['LD'] = os.environ.get('CC', 'gcc')
+        if self.config.platform == Platform.DARWIN:
+            # make sure the linker uses the correct stdlib when building with
+            # 10.13 which makes the usage of libstdc++ a hard error.
+            self.append_env['LDFLAGS'] = '-stdlib=libc++'
+
         if self.config.target_platform == Platform.DARWIN:
             platform = 'darwin12'
         elif self.config.target_platform == Platform.IOS:
