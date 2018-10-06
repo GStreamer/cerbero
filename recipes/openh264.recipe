@@ -89,11 +89,19 @@ class Recipe(recipe.Recipe):
                       # ships with
                       {'ASM = nasm': "ASM = yasm"})
 
-        if self.config.target_platform == Platform.IOS and self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
+        if self.config.target_platform == Platform.IOS:
+            shell.replace(os.path.join(self.build_dir, 'Makefile'),
+                          # Use correct compiler flag for iOS simulator
+                          {'STATIC_LDFLAGS=-lstdc++': 'STATIC_LDFLAGS=-lc++'})
             shell.replace(os.path.join(self.build_dir, 'build',
                                        'platform-ios.mk'),
                           # Use correct compiler flag for iOS simulator
-                          {'-miphoneos-version-min': '-mios-simulator-version-min'})
+                          {'SDK_MIN = 5.1': 'SDK_MIN = 7.0'})
+            if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
+                shell.replace(os.path.join(self.build_dir, 'build',
+                                           'platform-ios.mk'),
+                              # Use correct compiler flag for iOS simulator
+                              {'-miphoneos-version-min': '-mios-simulator-version-min'})
 
         fix_android_ndk16_cxx (self.config, self.make_dir)
 
@@ -102,10 +110,8 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!
         dependency_libs=[]
-        if self.config.target_platform == Platform.IOS:
+        if self.config.platform == Platform.DARWIN:
             dependency_libs += ['-lc++']
-        elif self.config.target_platform == Platform.DARWIN:
-            dependency_libs += ['-lstdc++']
         elif self.config.target_platform == Platform.ANDROID:
             dependency_libs += ['gnustl', '-lm']
         elif self.config.target_platform in [Platform.WINDOWS, Platform.LINUX]:
