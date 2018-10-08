@@ -21,15 +21,15 @@ GRAPHENE_CONFIG_UNVERSAL='''\
 class Recipe(recipe.Recipe):
     name = 'graphene'
     stype = SourceType.TARBALL
-    version = '1.4.0'
+    btype = BuildType.MESON
+    version = '1.8.2'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
-    tarball_checksum = 'de80295fc62fe88be9617cc696c205947d354176f7fd60c217647b4843944219'
+    tarball_checksum = '8c7d895536936e65c7f859f87bd14c258ac7f2c4ec999010e39e658f47c4d2ee'
     licenses = [License.MIT]
-    # Disable NEON completly, it's broken and experimental   
-    configure_options = ' --enable-static --enable-shared --disable-arm-neon'
-    deps = ['glib']
+    # Disable NEON completely, it's broken and experimental
+    meson_options = {'arm_neon' : 'false', 'introspection' : 'false' }
 
-    config_sh = 'sh ./autogen.sh'
+    deps = ['glib']
 
     files_libs = ['libgraphene-1.0']
     files_typelibs = ['Graphene-1.0']
@@ -41,15 +41,15 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/graphene-gobject-1.0.pc',
     ]
 
-    patches = ['graphene/0001-simd4f-Fix-a-compilation-error.patch']
-
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")
+            self.meson_options['instrospection'] = 'true'
 
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
-            self.configure_options += ' --disable-sse2 --disable-gcc-vector '
+            self.meson_options['sse2'] = 'false'
+            self.meson_options['gcc_vector'] = 'false'
 
         # -msse4.1 causes clang to segfault building graphene-matrix.c on OS X
         # when building for x64_64. Disable it for now.
