@@ -4,16 +4,24 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
-    version = '2.36.2'
+    version = '2.38.0'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
-    tarball_checksum = '3a082ad67d68b55970aed0b2034a06618167be98a42d5c70de736756b45d325d'
-    configure_options = '--with-included-loaders --enable-static --enable-gio-sniffing=no '
+    tarball_checksum = 'dd50973c7757bcde15de6bcd3a6d462a445efd552604ae6435a0532fbbadae47'
+    meson_options = {'docs' : 'false',
+                     'man' : 'false',
+                     'installed_tests' : 'false',
+                     'builtin_loaders' : 'all',
+                     'gio_sniffing' : 'false',
+                     'x11' : 'false'}
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
-    autoreconf = True
-    patches = ['gdk-pixbuf/0001-thumbnailer-Add-EXEEXT-to-the-the-gdk-pixbuf-print-m.patch']
+
+    patches = ['gdk-pixbuf/0001-meson-add-option-for-disabling-GIO-sniffing.patch',
+               'gdk-pixbuf/0001-meson-Don-t-generate-the-loader-cache-when-cross-com.patch',
+               'gdk-pixbuf/0001-meson-don-t-build-tests-or-the-thumbnailer-if-cross-.patch']
 
     files_libs = ['libgdk_pixbuf-2.0']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
@@ -23,11 +31,13 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += '--without-gdiplus '
-        if self.config.target_platform == Platform.DARWIN:
-            self.configure_options += '--without-x11 '
+            self.meson_options['native_windows_loaders'] = 'true'
+        if self.config.target_platform == Platform.LINUX:
+            self.meson_options['x11'] = 'true'
         if self.config.prefix_is_executable():
             self.files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
+        else:
+            self.meson_options['tests'] = 'false'
 
     def post_install (self):
         if self.config.platform == Platform.WINDOWS and\
