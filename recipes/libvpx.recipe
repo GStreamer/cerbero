@@ -29,6 +29,7 @@ class Recipe(recipe.Recipe):
                'libvpx/0004-build-Remove-broken-custom-android-toolchain-usage.patch',
                # Taken from AOSP: https://android.googlesource.com/platform/external/libvpx/+/android-o-mr1-iot-release-1.0.3/
                'libvpx/0005-Add-visibility-protected-attribute-for-global-variab.patch',
+               'libvpx/0007-Fix-pkg-config-file-library-list.patch',
                ]
 
     files_libs = ['libvpx']
