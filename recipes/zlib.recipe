@@ -10,7 +10,6 @@ class Recipe(recipe.Recipe):
     url = 'https://zlib.net/fossils/zlib-%(version)s.tar.gz'
     tarball_checksum = 'c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1'
     licenses = [License.BSD_like]
-    meson_options = {'default-library': 'both'}
     patches = ['zlib/0001-win32-fix-dll-name.patch',
                'zlib/0001-Fix-test-builds-to-use-the-built-libz-headers-librar.patch',
                'zlib/0001-Add-a-meson-port.patch']
