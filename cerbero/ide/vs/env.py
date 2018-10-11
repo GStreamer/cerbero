@@ -84,6 +84,11 @@ def run_and_get_env(cmd):
             lines.append(line)
     return lines
 
+# For a specific env var, get only the values that were prepended to it by MSVC
+def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
+    index = msvc.index(nomsvc)
+    return msvc[0:index]
+
 def get_msvc_env(vcvarsall, arch, target_arch):
     ret_env = {}
     if not os.path.isfile(vcvarsall):
@@ -94,7 +99,14 @@ def get_msvc_env(vcvarsall, arch, target_arch):
     vcvars_env_cmd = '"{0}" {1} & {2}'.format(vcvarsall, arg, 'set')
     with_msvc = run_and_get_env(vcvars_env_cmd)
 
+    msvc = dict([each.split('=', 1) for each in with_msvc])
+    nomsvc = dict([each.split('=', 1) for each in without_msvc])
+
     for each in set(with_msvc) - set(without_msvc):
-        (var, value) = each.split('=', 1)
-        ret_env[var] = value
+        var = each.split('=', 1)[0]
+        # Use the new values for all vars, except PATH
+        if var == 'PATH':
+            ret_env[var] = get_envvar_msvc_values(msvc[var], nomsvc[var])
+        else:
+            ret_env[var] = msvc[var]
     return ret_env

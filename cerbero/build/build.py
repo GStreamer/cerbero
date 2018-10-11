@@ -479,13 +479,16 @@ class Meson (Build, ModifyEnvBase) :
 
         if self.config.platform == Platform.WINDOWS:
             if self.using_msvc():
-                # Set the MSVC toolchain environment
-                for var, (val, sep) in self.config.msvc_toolchain_env.items():
-                    self.prepend_env(var, val, sep=sep)
+                toolchain_env = self.config.msvc_toolchain_env
             else:
-                # Set the MinGW toolchain environment
-                for var, (val, sep) in self.config.mingw_toolchain_env.items():
+                toolchain_env = self.config.mingw_toolchain_env
+            # Set the toolchain environment
+            for var, (val, sep) in toolchain_env.items():
+                # We prepend PATH and replace the rest
+                if var == 'PATH':
                     self.prepend_env(var, val, sep=sep)
+                else:
+                    self.set_env(var, val, sep=sep)
 
         # Find Meson
         if not self.meson_sh:
