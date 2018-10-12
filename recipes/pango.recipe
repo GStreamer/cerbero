@@ -14,7 +14,9 @@ class Recipe(recipe.Recipe):
     patches = [# https://gitlab.gnome.org/GNOME/pango/merge_requests/23
                name + '/0001-meson-Don-t-run-help2man-when-cross-building.patch',
                # Cherry-picked from upstream master
-               name + '/0001-meson-fix-build-on-osx.patch']
+               name + '/0001-meson-fix-build-on-osx.patch',
+               # https://gitlab.gnome.org/GNOME/pango/merge_requests/24
+               name + '/0001-meson-Set-the-compatibility-version-correctly-on-mac.patch']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
