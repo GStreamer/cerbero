@@ -50,7 +50,7 @@ The initial setup on Windows is a little bit longer, but only a few programs are
      IMPORTANT: Select the install option "Checkout as-is, Commit as-is"
   * Msys/MinGW: http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
      Install it with all the options enabled
-  * WiX 3.5: http://wix.codeplex.com/releases/view/60102
+  * WiX 3.11.1 installer: https://github.com/wixtoolset/wix3/releases/tag/wix3111rtm
 
 Several packages that have Meson build files are now built by default with
 Visual Studio, so you need to install Visual Studio 2015 or newer in the
