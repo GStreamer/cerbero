@@ -526,7 +526,7 @@ class Meson (Build, ModifyEnvBase) :
         the cerbero configuration.
         '''
         # Don't overwrite if it's already set
-        if 'introspection' in self.meson_options:
+        if 'introspection' in self.meson_options or 'gir' in self.meson_options:
             return
         # Error out on invalid usage
         if not os.path.isdir(self.build_dir):
@@ -535,15 +535,21 @@ class Meson (Build, ModifyEnvBase) :
         meson_options = os.path.join(self.build_dir, 'meson_options.txt')
         if not os.path.isfile(meson_options):
             return
+        opt_name = None
         with open(meson_options, 'r') as f:
             options = f.read()
-            if re.search("option\s*\(\s*'introspection',[^)]+type\s*:\s*'feature'", options):
-                opt_type = 'feature'
-            elif re.search("option\s*\(\s*'introspection',[^)]+type\s*:\s*'boolean'", options):
-                opt_type = 'boolean'
+            for opt_name in ('introspection', 'gir'):
+                if re.search("option\s*\(\s*'{}',".format(opt_name), options):
+                    break
             else:
                 return
-        self.meson_options['introspection'] = \
+            if re.search("option\s*\(\s*'{}',[^)]+type\s*:\s*'feature'".format(opt_name), options):
+                opt_type = 'feature'
+            elif re.search("option\s*\(\s*'{}',[^)]+type\s*:\s*'boolean'".format(opt_name), options):
+                opt_type = 'boolean'
+            else:
+                raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
+        self.meson_options[opt_name] = \
                 self._get_option_value(opt_type, self.config.variants.gi)
 
     def _write_meson_cross_file(self):
