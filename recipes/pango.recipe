@@ -3,16 +3,18 @@
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.40.14'
+    version = '1.42.4'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
-    tarball_checksum = '90af1beaa7bf9e4c52db29ec251ec4fd0a8f2cc185d521ad1f88d01b3a6a17e3'
-    autoreconf = True
-    autoreconf_sh = 'ACLOCAL="$ACLOCAL $ACLOCAL_FLAGS" autoreconf -ivf '
+    tarball_checksum = '1d2b74cd63e8bd41961f2f8d952355aa0f9be6002b52c8aa7699d9f5da597c9d'
     licenses = [License.LGPLv2Plus]
-    configure_options = '--with-included-modules --enable-static --disable-gtk-doc'
-    deps = ['cairo', 'fontconfig', 'freetype', 'gtk-doc-lite', 'harfbuzz']
+    deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'gtk-doc-lite', 'harfbuzz']
+    # 
+    patches = [name + '/0001-meson-Don-t-run-help2man-when-cross-building.patch',
+               # Already upstream
+               name + '/0001-meson-fix-build-on-osx.patch']
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-querymodules', 'pango-view']
@@ -31,7 +33,3 @@ class Recipe(recipe.Recipe):
         'PangoCairo-1.0',
         'PangoFT2-1.0'
         ]
-
-    def prepare(self):
-        if not self.config.variants.x11:
-            self.configure_options += ' --without-x '
