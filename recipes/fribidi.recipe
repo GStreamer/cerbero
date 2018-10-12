@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     deps = ['glib']
-    #patches = ['fribidi/0001-fribidi.def-Include-all-required-symbols.patch']
+    # Taken from upstream master, remove on bump
     patches = ['fribidi/0001-Build-generator-executables-natively.patch']
 
     files_libs = ['libfribidi']
