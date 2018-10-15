@@ -30,6 +30,7 @@ import errno
 import logging
 import traceback
 import os
+import time
 
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
@@ -47,10 +48,10 @@ class Main(object):
             m.warning(_("Running as root"))
 
         self.check_in_cerbero_shell()
-        self.init_logging()
         self.create_parser()
         self.load_commands()
         self.parse_arguments(args)
+        self.init_logging()
         self.load_config()
         self.run_command()
 
@@ -70,12 +71,16 @@ class Main(object):
 
     def init_logging(self):
         ''' Initialize logging '''
+        if self.args.timestamps:
+            m.START_TIME = time.clock()
         logging.getLogger().setLevel(logging.INFO)
         logging.getLogger().addHandler(logging.StreamHandler())
 
     def create_parser(self):
         ''' Creates the arguments parser '''
         self.parser = argparse.ArgumentParser(description=_(description))
+        self.parser.add_argument('-t', '--timestamps', action='store_true', default=False,
+                help=_('Print timestamps with every message printed'))
         self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))
 

@@ -17,20 +17,31 @@
 # Boston, MA 02111-1307, USA.
 
 import sys
+import time
+import datetime
 
 
 ACTION_TPL = '-----> %s'
 STEP_TPL = '[(%s/%s) %s -> %s ]'
+START_TIME = None
+
+
+def _output(msg, fd):
+    global START_TIME
+    prefix = ''
+    if START_TIME is not None:
+        prefix = str(datetime.timedelta(seconds=int(time.clock() - START_TIME)))
+        prefix += ' '
+    fd.write(prefix + msg + '\n')
+    fd.flush()
 
 
 def message(msg):
-    sys.stdout.write(msg + '\n')
-    sys.stdout.flush()
+    _output(msg, sys.stdout)
 
 
 def error(msg):
-    sys.stderr.write(msg + '\n')
-    sys.stderr.flush()
+    _output(msg, sys.stderr)
 
 
 def warning(msg):
