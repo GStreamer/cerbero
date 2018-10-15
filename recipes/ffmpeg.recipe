@@ -11,8 +11,8 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.MAKEFILE
     configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
-        --ar="$AR" --as="$CC" --cc="$CC" --ld="$CC" --nm="$NM" \
-        --enable-static --enable-pic --disable-shared \
+        --ar="$AR" --as="$CC" --cc="$CC" --ld="$CC" --nm="$NM" --ranlib="$RANLIB" \
+        --strip="$STRIP" --enable-static --enable-pic --enable-shared \
         --disable-avdevice --disable-postproc --disable-swscale \
         --disable-programs --disable-ffplay --disable-ffprobe --disable-ffmpeg \
         --disable-encoder=flac --disable-protocols --disable-devices \
@@ -26,6 +26,7 @@ class Recipe(recipe.Recipe):
 
     deps = ['bzip2', 'zlib']
 
+    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter']
     files_devel = [
         'lib/libavcodec.a', 'lib/libavcodec.la', 'lib/pkgconfig/libavcodec.pc', 'include/libavcodec',
         'lib/libavformat.a', 'lib/libavformat.la', 'lib/pkgconfig/libavformat.pc', 'include/libavformat',
@@ -94,8 +95,9 @@ class Recipe(recipe.Recipe):
         super(recipe.Recipe, self).configure()
         libav_path = self.build_dir
         if self.config.target_platform == Platform.WINDOWS:
-            replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
-                            'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
+            # XXX: --windres option doesn't exist, despite --help listing it
+            replacements = {'WINDRES=windres': 'WINDRES=' + os.environ['WINDRES'],
+                            'DLLTOOL=dlltool': 'DLLTOOL=' + os.environ['DLLTOOL']}
             shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
@@ -103,10 +105,6 @@ class Recipe(recipe.Recipe):
                                 'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
                 shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
                 shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-            if self.config.target_platform == Platform.IOS:
-                replacements = {'RANLIB=ranlib': 'RANLIB=%s' % os.environ['RANLIB'],
-                                'RANLIB=%s-ranlib' % self.config.host: 'RANLIB=%s' % os.environ['RANLIB']}    
-                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
         # log2 and log2f are not provided by bionic, but they are not checked
         # properly
         elif self.config.target_platform == Platform.ANDROID:
@@ -121,20 +119,16 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         LibtoolLibrary('avutil', None, None, None,
-                       self.config.libdir, self.config.target_platform,
-                       static_only=True).save()
+                       self.config.libdir, self.config.target_platform).save()
         LibtoolLibrary('swresample', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avutil'], static_only=True).save()
+                       deps=['avutil']).save()
         LibtoolLibrary('avcodec', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['swresample', 'avutil', 'z'],
-                       static_only=True).save()
+                       deps=['swresample', 'avutil', 'z']).save()
         LibtoolLibrary('avformat', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z'],
-                       static_only=True).save()
+                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z']).save()
         LibtoolLibrary('avfilter', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avformat', 'avcodec', 'swresample', 'avutil'],
-                       static_only=True).save()
+                       deps=['avformat', 'avcodec', 'swresample', 'avutil']).save()
