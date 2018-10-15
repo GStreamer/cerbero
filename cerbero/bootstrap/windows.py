@@ -70,7 +70,7 @@ class WindowsBootstrapper(BootstrapperBase):
             self.install_mingwget_deps()
         self.install_mingw()
         if self.platform == Platform.WINDOWS:
-            self.remove_mingw_cpp()
+            self.remove_mingw_unused()
         self.add_non_prefixed_strings()
         if self.platform == Platform.WINDOWS:
             # After mingw has been installed
@@ -182,13 +182,16 @@ class WindowsBootstrapper(BootstrapperBase):
             print("Replacing old libdir : ", libdir)
             return libdir.strip()[1:-1]
 
-    def remove_mingw_cpp(self):
-        # Fixes glib's checks in configure, where cpp -v is called
+    def remove_mingw_unused(self):
+        # Fixes checks in configure, where cpp -v is called
         # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
-        if (self.msys_mingw_bindir / 'cpp.exe').is_file():
-            shutil.move(self.msys_mingw_bindir / 'cpp.exe',
-                        self.msys_mingw_bindir / 'cpp.exe.bck')
+        #
+        # MSYS's link.exe overrides MSVC's link.exe in new shells, so rename it
+        for tool in ('cpp', 'link'):
+            if (self.msys_mingw_bindir / tool + '.exe').is_file():
+                os.replace(self.msys_mingw_bindir / tool + '.exe',
+                           self.msys_mingw_bindir / tool + '.exe.bck')
 
     def add_non_prefixed_strings(self):
         # libtool m4 macros uses non-prefixed 'strings' command. We need to
