@@ -13,7 +13,7 @@ class Package(custom.GStreamer, package.Package):
              'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
              'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
              'libpng:libs', 'tiff:libs', 'libjpeg-turbo:libs',
-             'libxml2:libs', 'pixman:libs',
+             'libxml2:libs', 'pixman:libs', 'fribidi:libs',
              'zlib:libs', 'bzip2:libs', 'harfbuzz:libs',
              'libcroco:libs', 'librsvg:libs',
              'json-glib:bins:libs']
