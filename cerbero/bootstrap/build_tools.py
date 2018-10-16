@@ -65,7 +65,7 @@ class BuildTools (BootstrapperBase):
         if self.config.distro_version in [DistroVersion.UBUNTU_LUCID,
                                           DistroVersion.UBUNTU_NATTY]:
             self.BUILD_TOOLS.append('glib-tools')
-        if self.config.platform != Platform.LINUX and not \
+        if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
