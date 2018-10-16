@@ -6,16 +6,15 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
-    version = '1.6.0'
+    version = '2.2.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
-    tarball_checksum = '1a3e7904354d55e45b3c5c024ec0eab1b8fa76fdbf4dd2ea2625dad2b3c6edde'
+    tarball_checksum = '44fd7497bce78767e96b54a11bca520adb2ad32effd515f04bce602b60a1a50b'
     licenses = [{License.BSD_like: ['LICENSE']}]
-    patches = ['libsrtp/0001-Don-t-create-a-symlink-if-there-is-no-SHAREDLIBVERSI.patch',
-               'libsrtp/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']
+    patches = ['libsrtp/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']#
 
-    files_libs = ['libsrtp']
-    files_devel = ['include/srtp', 'lib/pkgconfig/libsrtp.pc']
+    files_libs = ['libsrtp2']
+    files_devel = ['include/srtp2', 'lib/pkgconfig/libsrtp2.pc']
 
     def prepare(self):
         # Don't accidentially build with pcap support
@@ -29,7 +28,8 @@ class Recipe(recipe.Recipe):
         shutil.copy(os.path.join(self.build_dir, 'srtp.def'), libdir)
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('srtp', 1, None, None, self.config.libdir,
+        # XXX: Don't forget to keep this in sync with the library version!
+        libtool_la = LibtoolLibrary('srtp2', 1, None, None, self.config.libdir,
                                     self.config.target_platform)
         libtool_la.save()
         super().post_install()
