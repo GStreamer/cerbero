@@ -2,12 +2,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'gtk-doc-lite'
-    version = '1.27'
+    version = '1.29'
     stype = SourceType.TARBALL
     tarball_dirname = 'gtk-doc-%(version)s'
     maj_ver = '.'.join(version.split('.')[0:2])
     url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format('gtk-doc', maj_ver, version)
-    tarball_checksum = 'e26bd3f7080c749b1cb66c46c6bf8239e2f320a949964fb9c6d56e1b0c6d9a6f'
+    tarball_checksum = '14578e002496567276d310a62c9ffd6c56ee8806ce5079ffb0b81c4111f586b1'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
@@ -28,12 +28,13 @@ class Recipe(recipe.Recipe):
         bin_dir = os.path.join(self.config.prefix, 'bin')
         if not os.path.exists(bin_dir):
             os.makedirs(bin_dir)
-        shutil.copy(os.path.join(self.build_dir, 'gtk-doc.m4'),
+        autotools_dir = os.path.join(self.build_dir, 'buildsystems/autotools')
+        shutil.copy(os.path.join(autotools_dir, 'gtk-doc.m4'),
                     os.path.join(aclocal_dir, 'gtk-doc.m4'))
-        shutil.copy(os.path.join(self.build_dir, 'gtk-doc.make'),
+        shutil.copy(os.path.join(autotools_dir, 'gtk-doc.make'),
                     os.path.join(data_dir,  'gtk-doc.make'))
         gtkdocize = os.path.join(self.config.prefix, 'bin', 'gtkdocize')
-        shutil.copy(os.path.join(self.build_dir, 'gtkdocize.in'), gtkdocize)
+        shutil.copy(os.path.join(autotools_dir, 'gtkdocize.in'), gtkdocize)
         replacements = {'@PACKAGE@': 'gtk-doc', '@VERSION@': self.version,
                         '@prefix@': self.config.prefix,
                         '@datarootdir@': '${prefix}/share',
