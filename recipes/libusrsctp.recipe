@@ -46,27 +46,28 @@ class Recipe(recipe.Recipe):
         for f in ['NEWS', 'README', 'AUTHORS', 'ChangeLog']:
             print (os.path.join(self.build_dir, f))
             shell.touch(os.path.join(self.build_dir, f), True)
-        os.mkdir(os.path.join(self.build_dir, 'm4'))
+        #os.mkdir(os.path.join(self.build_dir, 'm4'))
 
     def configure(self):
         usrsctplib_path = os.path.join(self.build_dir, 'usrsctplib')
+        recipe_path = os.path.join(self.config.recipes_dir, self.name)
         if self.config.target_platform == Platform.ANDROID:
             # ifaddrs is a GNU extension that isn't available on Android
-            ifaddrs_path = os.path.join(self.config.recipes_dir, self.name)
-            shutil.copy(os.path.join(ifaddrs_path, "ifaddrs.c"),
+            shutil.copy(os.path.join(recipe_path, "ifaddrs.c"),
                         usrsctplib_path)
-            shutil.copy(os.path.join(ifaddrs_path, "ifaddrs.h"),
+            shutil.copy(os.path.join(recipe_path, "ifaddrs.h"),
                         usrsctplib_path)
             shell.replace(os.path.join(usrsctplib_path, 'Makefile.am'),
                           {'sctp_os_userspace.h':
                            'sctp_os_userspace.h ifaddrs.c ifaddrs.h'})
         elif self.config.target_platform == Platform.IOS:
-            simulator_includes = "/Applications/Xcode.app//Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk/usr/include"
-            shutil.copytree(os.path.join(simulator_includes, "net"),
-                    os.path.join(usrsctplib_path, "platform/net"))
-            shutil.copytree(os.path.join(simulator_includes, "netinet"),
-                    os.path.join(usrsctplib_path, "platform/netinet"))
-            self.append_env["CPPFLAGS"] = "-I %s" % os.path.join(usrsctplib_path, "platform")
+            def copyreplacetree(src, dst):
+                if os.path.exists(dst):
+                    shutil.rmtree(dst)
+                shutil.copytree(src, dst)
+            copyreplacetree(os.path.join(recipe_path, "net"),
+                        os.path.join(usrsctplib_path, "net"))
+            self.append_env("CPPFLAGS", "-I %s" % os.path.join(usrsctplib_path, "platform"))
         # Disable compilation of examples
         shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
                       {'SUBDIRS = usrsctplib programs':
