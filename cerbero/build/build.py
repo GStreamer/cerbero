@@ -536,19 +536,24 @@ class Meson (Build, ModifyEnvBase) :
         if not os.path.isfile(meson_options):
             return
         opt_name = None
+        opt_type = None
         with open(meson_options, 'r') as f:
             options = f.read()
-            for opt_name in ('introspection', 'gir'):
-                if re.search("option\s*\(\s*'{}',".format(opt_name), options):
-                    break
-            else:
-                return
-            if re.search("option\s*\(\s*'{}',[^)]+type\s*:\s*'feature'".format(opt_name), options):
-                opt_type = 'feature'
-            elif re.search("option\s*\(\s*'{}',[^)]+type\s*:\s*'boolean'".format(opt_name), options):
-                opt_type = 'boolean'
-            else:
-                raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
+            # iterate over all option()s individually
+            option_regex = "option\s*\(\s*(?:'(?P<name>[^']+)')\s*,\s*(?P<entry>(?P<identifier>[a-zA-Z0-9]+)\s*:\s*(?:(?P<string>'[^']+')|[^'\),\s]+)\s*,?\s*)+\)"
+            for match in re.finditer(option_regex, options, re.MULTILINE):
+                option = match.group(0)
+                # find the 'gir' or 'introspection' option()
+                if match.group('name') in ('gir', 'introspection'):
+                    # get the type of the option
+                    type_regex = "type\s*:\s*'(?P<type>[^']+)'"
+                    ty = re.search (type_regex, option, re.MULTILINE)
+                    if ty and ty.group('type') in ('feature', 'boolean'):
+                        opt_name = match.group('name')
+                        opt_type = ty.group('type')
+                        break
+                    else:
+                        raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
         self.meson_options[opt_name] = \
                 self._get_option_value(opt_type, self.config.variants.gi)
 
