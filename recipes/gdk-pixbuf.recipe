@@ -32,8 +32,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['native_windows_loaders'] = 'true'
-        if self.config.target_platform == Platform.LINUX:
-            self.meson_options['x11'] = 'true'
         if self.config.prefix_is_executable():
             self.files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
         else:
