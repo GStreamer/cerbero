@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
     # Disable NEON completely, it's broken and experimental
     meson_options = {'arm_neon' : 'false', 'introspection' : 'false' }
 
+    patches = ['graphene/0001-meson-fix-HAVE_INIT_ONCE-declaration.patch']
+
     deps = ['glib']
 
     files_libs = ['libgraphene-1.0']
