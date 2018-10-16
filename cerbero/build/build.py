@@ -544,18 +544,19 @@ class Meson (Build, ModifyEnvBase) :
             for match in re.finditer(option_regex, options, re.MULTILINE):
                 option = match.group(0)
                 # find the 'gir' or 'introspection' option()
-                if match.group('name') in ('gir', 'introspection'):
+                opt_name = match.group('name')
+                if opt_name in ('gir', 'introspection'):
                     # get the type of the option
                     type_regex = "type\s*:\s*'(?P<type>[^']+)'"
                     ty = re.search (type_regex, option, re.MULTILINE)
                     if ty and ty.group('type') in ('feature', 'boolean'):
-                        opt_name = match.group('name')
                         opt_type = ty.group('type')
                         break
                     else:
                         raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
-        self.meson_options[opt_name] = \
-                self._get_option_value(opt_type, self.config.variants.gi)
+        if opt_name and opt_type:
+            self.meson_options[opt_name] = \
+                    self._get_option_value(opt_type, self.config.variants.gi)
 
     def _write_meson_cross_file(self):
         # Take cross toolchain from _old_env because we removed them from the
