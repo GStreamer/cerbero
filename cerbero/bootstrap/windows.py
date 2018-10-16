@@ -189,9 +189,9 @@ class WindowsBootstrapper(BootstrapperBase):
         #
         # MSYS's link.exe overrides MSVC's link.exe in new shells, so rename it
         for tool in ('cpp', 'link'):
-            if (self.msys_mingw_bindir / tool + '.exe').is_file():
-                os.replace(self.msys_mingw_bindir / tool + '.exe',
-                           self.msys_mingw_bindir / tool + '.exe.bck')
+            if (self.msys_mingw_bindir / (tool + '.exe')).is_file():
+                os.replace(self.msys_mingw_bindir / (tool + '.exe'),
+                           self.msys_mingw_bindir / (tool + '.exe.bck'))
 
     def add_non_prefixed_strings(self):
         # libtool m4 macros uses non-prefixed 'strings' command. We need to
