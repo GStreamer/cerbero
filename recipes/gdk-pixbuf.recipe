@@ -21,7 +21,8 @@ class Recipe(recipe.Recipe):
 
     patches = ['gdk-pixbuf/0001-meson-add-option-for-disabling-GIO-sniffing.patch',
                'gdk-pixbuf/0001-meson-Don-t-generate-the-loader-cache-when-cross-com.patch',
-               'gdk-pixbuf/0001-meson-don-t-build-tests-or-the-thumbnailer-if-cross-.patch']
+               'gdk-pixbuf/0001-meson-don-t-build-tests-or-the-thumbnailer-if-cross-.patch',
+               'gdk-pixbuf/0001-build-add-enum-generation-header-to-sources-of-built.patch']
 
     files_libs = ['libgdk_pixbuf-2.0']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
