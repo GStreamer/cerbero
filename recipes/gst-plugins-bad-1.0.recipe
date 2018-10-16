@@ -20,7 +20,7 @@ class Recipe(custom.GStreamer):
             'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'openssl',
-            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa', 'srt']
+            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa', 'srt', 'libusrsctp']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
