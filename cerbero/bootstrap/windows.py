@@ -95,10 +95,7 @@ class WindowsBootstrapper(BootstrapperBase):
         tarfile = os.path.join(self.prefix, tarball)
         tarfile = os.path.abspath(tarfile)
         shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile, check_cert=False)
-        try:
-            shell.unpack(tarfile, self.prefix)
-        except Exception:
-            pass
+        shell.unpack(tarfile, self.prefix)
         self.fix_lib_paths()
         if self.arch == Architecture.X86:
             try:
@@ -116,10 +113,7 @@ class WindowsBootstrapper(BootstrapperBase):
         tarfile = os.path.join(self.perl_prefix, os.path.basename(url))
         tarfile = os.path.abspath(tarfile)
         shell.download(url, tarfile, check_cert=False)
-        try:
-            shell.unpack(tarfile, self.perl_prefix)
-        except Exception:
-            pass
+        shell.unpack(tarfile, self.perl_prefix)
         # Move perl installation from perl-5.xx.y to perl
         perldir = os.path.join(self.perl_prefix, 'perl-' + PERL_VERSION)
         for d in os.listdir(perldir):

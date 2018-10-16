@@ -212,7 +212,8 @@ def unpack(filepath, output_dir):
         tf = tarfile.open(filepath, mode='r:bz2')
         tf.extractall(path=output_dir)
     elif filepath.endswith('tar.xz'):
-        call("%s -Jxf %s" % (TAR, to_unixpath(filepath)), output_dir)
+        tf = tarfile.open(filepath, mode='r:xz')
+        tf.extractall(path=output_dir)
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
