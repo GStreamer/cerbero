@@ -261,10 +261,12 @@ class Config (object):
             ldflags += os.environ.get('LDFLAGS', '')
 
         path = os.environ.get('PATH', '')
-        if bindir not in path and self.prefix_is_executable():
-            path = self._join_path(bindir, path)
         path = self._join_path(
             os.path.join(self.build_tools_prefix, 'bin'), path)
+        # Add the prefix bindir after the build-tools bindir so that on Windows
+        # binaries are run with the same libraries that they are linked with.
+        if bindir not in path and self.prefix_is_executable():
+            path = self._join_path(bindir, path)
 
         if not self.cross_compiling():
             ld_library_path = libdir
