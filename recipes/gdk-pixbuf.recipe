@@ -18,6 +18,10 @@ class Recipe(recipe.Recipe):
                      'gio_sniffing' : 'false',
                      'x11' : 'false'}
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
+    # gdk-pixbuf loads files with fopen() and passes the FILE handle directly
+    # to the image loader. You can't pass FILE handles between MinGW and MSVC,
+    # so build with MinGW till all the image loaders can be built with MSVC.
+    can_msvc = False
 
     patches = ['gdk-pixbuf/0001-meson-add-option-for-disabling-GIO-sniffing.patch',
                'gdk-pixbuf/0001-meson-Don-t-generate-the-loader-cache-when-cross-com.patch',
