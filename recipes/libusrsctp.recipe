@@ -40,6 +40,8 @@ class Recipe(recipe.Recipe):
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
+    patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch']
+
     def extract(self):
         super(recipe.Recipe, self).extract()
 
@@ -68,12 +70,4 @@ class Recipe(recipe.Recipe):
             copyreplacetree(os.path.join(recipe_path, "net"),
                         os.path.join(usrsctplib_path, "net"))
             self.append_env("CPPFLAGS", "-I %s" % os.path.join(usrsctplib_path, "platform"))
-        # Disable compilation of examples
-        shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
-                      {'SUBDIRS = usrsctplib programs':
-                       'SUBDIRS = usrsctplib'})
-        # Disable -Werror
-        shell.replace(os.path.join(self.build_dir, 'configure.ac'),
-                      {'-Werror':
-                       '-Wno-error'})
         super(recipe.Recipe, self).configure()
