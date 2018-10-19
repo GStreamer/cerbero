@@ -37,7 +37,6 @@ class Recipe(recipe.Recipe):
             files_devel_tpl += ['lib/{}.a']
         for lib in self.files_libs:
             self.files_devel += [tpl.format(lib) for tpl in files_devel_tpl]
-        print(self.files_devel)
 
         # Default AS is $CC, except iOS (set below)
         if Architecture.is_arm(self.config.target_arch):
