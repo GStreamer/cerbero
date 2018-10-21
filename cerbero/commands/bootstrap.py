@@ -37,6 +37,8 @@ class Bootstrap(Command):
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only, args.offline)
         for bootstrapper in bootstrappers:
+            bootstrapper.fetch()
+            bootstrapper.extract()
             bootstrapper.start()
 
 register_command(Bootstrap)

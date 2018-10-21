@@ -16,12 +16,52 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import os
+import shutil
+from cerbero.build.source import BaseTarball
+
+
+class BootstrapTarball(BaseTarball):
+
+    def __init__(self, config, offline, url, checksum, download_dir, tarball_name=None):
+        self.config = config
+        self.offline = offline
+        self.url = url
+        self.download_dir = download_dir
+        self.tarball_name = tarball_name
+        self.tarball_checksum = checksum
+        super().__init__()
+
 
 class BootstrapperBase (object):
+    # Dict of URLs to be fetched and their checksums
+    fetch_urls = None
+    # Dict of extract steps to be done
+    extract_steps = None
 
     def __init__(self, config, offline):
         self.config = config
         self.offline = offline
+        self.fetch_urls = {}
+        self.extract_steps = []
+        self.sources = {}
 
     def start(self):
         raise NotImplemented("'start' must be implemented by subclasses")
+
+    def fetch(self):
+        for url, checksum in self.fetch_urls.items():
+            source = BootstrapTarball(self.config, self.offline, url, checksum,
+                                      self.config.local_sources)
+            self.sources[url] = source
+            source.fetch()
+
+    def extract(self):
+        for (url, unpack, unpack_dir) in self.extract_steps:
+            if unpack:
+                self.sources[url].extract(unpack_dir)
+            else:
+                # Just copy the file as-is
+                fname = os.path.basename(url)
+                fpath = os.path.join(self.config.local_sources, fname)
+                shutil.copy(fpath, unpack_dir)
