@@ -70,8 +70,8 @@ class DebianBootstrapper (UnixBootstrapper):
         DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
     }
 
-    def __init__(self, config):
-        UnixBootstrapper.__init__(self, config)
+    def __init__(self, config, offline):
+        UnixBootstrapper.__init__(self, config, offline)
         if self.config.target_platform == Platform.WINDOWS:
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
@@ -117,8 +117,8 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
                 'mesa-libEGL-devel']
 
-    def __init__(self, config):
-        UnixBootstrapper.__init__(self, config)
+    def __init__(self, config, offline):
+        UnixBootstrapper.__init__(self, config, offline)
         if self.config.distro_version in [DistroVersion.FEDORA_23, DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
             self.tool = 'dnf install %s'
         else:
@@ -163,8 +163,8 @@ class ArchBootstrapper (UnixBootstrapper):
             'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
             'subversion', 'xorg-util-macros']
 
-    def __init__(self, config):
-        UnixBootstrapper.__init__(self, config)
+    def __init__(self, config, offline):
+        UnixBootstrapper.__init__(self, config, offline)
 
         has_multilib = True
         try:

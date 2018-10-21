@@ -49,11 +49,8 @@ class WindowsBootstrapper(BootstrapperBase):
     Installs the mingw-w64 compiler toolchain and headers for Directx
     '''
 
-    def start(self):
-        if not git.check_line_endings(self.config.platform):
-            raise ConfigurationError("git is configured to use automatic line "
-                    "endings conversion. You can fix it running:\n"
-                    "$git config core.autocrlf false")
+    def __init__(self, config, offline):
+        super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix
         self.perl_prefix = self.config.mingw_perl_prefix
         self.platform = self.config.target_platform
@@ -64,6 +61,11 @@ class WindowsBootstrapper(BootstrapperBase):
             self.version = 'w64'
         self.platform = self.config.platform
 
+    def start(self):
+        if not git.check_line_endings(self.config.platform):
+            raise ConfigurationError("git is configured to use automatic line "
+                    "endings conversion. You can fix it running:\n"
+                    "$git config core.autocrlf false")
         self.check_dirs()
         if self.platform == Platform.WINDOWS:
             self.msys_mingw_bindir = Path(shutil.which('mingw-get')).parent

@@ -19,8 +19,9 @@
 
 class BootstrapperBase (object):
 
-    def __init__(self, config):
+    def __init__(self, config, offline):
         self.config = config
+        self.offline = offline
 
     def start(self):
         raise NotImplemented("'start' must be implemented by subclasses")

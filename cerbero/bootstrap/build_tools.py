@@ -36,8 +36,8 @@ class BuildTools (BootstrapperBase):
         Platform.LINUX: ['intltool-m4'],
     }
 
-    def __init__(self, config):
-        BootstrapperBase.__init__(self, config)
+    def __init__(self, config, offline):
+        BootstrapperBase.__init__(self, config, offline)
 
         # if cross-compiling or not on linux, make sure we have gtk-doc
         if self.config.target_platform != Platform.LINUX or\
@@ -97,7 +97,7 @@ class BuildTools (BootstrapperBase):
             os.makedirs(config.sources)
 
         config.do_setup_env()
-        cookbook = CookBook(config)
+        cookbook = CookBook(config, offline=self.offline)
         recipes = self.BUILD_TOOLS
         recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
         oven = Oven(recipes, cookbook)

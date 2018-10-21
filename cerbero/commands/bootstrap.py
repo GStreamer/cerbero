@@ -29,11 +29,13 @@ class Bootstrap(Command):
     def __init__(self):
         args = [
             ArgparseArgument('--build-tools-only', action='store_true',
-                default=False, help=_('only bootstrap the build tools'))]
+                default=False, help=_('only bootstrap the build tools')),
+            ArgparseArgument('--offline', action='store_true',
+                default=False, help=_('Use only the source cache, no network'))]
         Command.__init__(self, args)
 
     def run(self, config, args):
-        bootstrappers = Bootstrapper(config, args.build_tools_only)
+        bootstrappers = Bootstrapper(config, args.build_tools_only, args.offline)
         for bootstrapper in bootstrappers:
             bootstrapper.start()
 
