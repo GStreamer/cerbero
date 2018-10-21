@@ -30,18 +30,32 @@ from cerbero.utils import messages as m
 
 # Toolchain
 GCC_VERSION = '4.7.3'
-MINGW_DOWNLOAD_SOURCE = 'http://gstreamer.freedesktop.org/data/cerbero/toolchain/windows'
-MINGW_TARBALL_TPL = "mingw-%s-gcc-%s-%s-%s.tar.xz"
+MINGW_DOWNLOAD_TPL = 'https://gstreamer.freedesktop.org/data/cerbero/toolchain/windows/mingw-%s-gcc-%s-%s-%s.tar.xz'
+MINGW_CHECKSUMS = {
+    'mingw-w32-gcc-4.7.3-linux-x86.tar.xz': '16a3ad2584f0dc25ec122029143b186c99f362d1be1a77a338431262491004ae',
+    'mingw-w64-gcc-4.7.3-linux-x86_64.tar.xz': 'e673536cc89a778043789484f691d7e35458a5d72638dc4b0123f92ecf868592',
+    'mingw-w32-gcc-4.7.3-windows-x86.tar.xz': 'da783488ab3a2b28471c13ece97c643f8e8ec774308fb2a01152b23618f13a33',
+    'mingw-w32-gcc-4.7.3-windows-x86_64.tar.xz': '820fa7490b3d738b9cf8c360cdd9a7aeb0592510a8ea50486e721b5b92722b08',
+}
 
 # MinGW Perl
 PERL_VERSION = '5.24.0'
 MINGW_PERL_TPL = 'https://sourceforge.net/projects/perl-mingw/files/{0}/perl-{0}-mingw32.zip'
+MINGW_PERL_CHECKSUM = '9d4db40959727d43b4ff4b9884f5aebda20292347978036683684c2608c1397b'
 
-# Extra dependencies
+# Khronos wglext.h for Windows GL
+OPENGL_COMMIT = 'a4b0c7d5d10a8fca5866c6d08a608010843a4b36'
+KHRONOS_WGL_TPL = 'https://raw.githubusercontent.com/KhronosGroup/OpenGL-Registry/{}/api/GL/wglext.h'
+WGL_CHECKSUM = '8961c809d180e3590fca32053341fe3a83394edcb936f7699f0045feadb16115'
+
+# Extra binary dependencies
+GNOME_FTP = 'https://download.gnome.org/binaries/win32/'
+WINDOWS_BIN_DEPS = [
+    ('intltool/0.40/intltool_0.40.4-1_win32.zip',
+     '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33')]
+
+# MSYS packages needed
 MINGWGET_DEPS = ['msys-wget', 'msys-flex', 'msys-bison', 'msys-perl']
-GNOME_FTP = 'http://ftp.gnome.org/pub/gnome/binaries/win32/'
-WINDOWS_BIN_DEPS = ['intltool/0.40/intltool_0.40.4-1_win32.zip']
-
 
 class WindowsBootstrapper(BootstrapperBase):
     '''
@@ -60,6 +74,30 @@ class WindowsBootstrapper(BootstrapperBase):
         else:
             self.version = 'w64'
         self.platform = self.config.platform
+        # Register all network resources this bootstrapper needs. They will all
+        # be downloaded into self.config.local_sources
+        #
+        # MinGW toolchain
+        url = MINGW_DOWNLOAD_TPL % (self.version, GCC_VERSION, self.platform, self.arch)
+        self.fetch_urls.append((url, MINGW_CHECKSUMS[os.path.basename(url)]))
+        self.extract_steps.append((url, True, self.prefix))
+        # wglext.h
+        url = KHRONOS_WGL_TPL.format(OPENGL_COMMIT)
+        self.fetch_urls.append((url, WGL_CHECKSUM))
+        inst_path = os.path.join(self.prefix, self.config.host, 'include/GL')
+        self.extract_steps.append((url, False, inst_path))
+        if self.platform == Platform.WINDOWS:
+            # MinGW Perl needed by openssl
+            url = MINGW_PERL_TPL.format(PERL_VERSION)
+            self.fetch_urls.append((url, MINGW_PERL_CHECKSUM))
+            self.extract_steps.append((url, True, self.perl_prefix))
+            # Newer versions of binary deps such as intltool. Must be extracted
+            # after the MinGW toolchain from above is extracted so that it
+            # replaces the older files.
+            for dep, checksum in WINDOWS_BIN_DEPS:
+                url = GNOME_FTP + dep
+                self.fetch_urls.append((url, checksum))
+                self.extract_steps.append((url, True, self.prefix))
 
     def start(self):
         if not git.check_line_endings(self.config.platform):
@@ -67,19 +105,14 @@ class WindowsBootstrapper(BootstrapperBase):
                     "endings conversion. You can fix it running:\n"
                     "$git config core.autocrlf false")
         self.check_dirs()
+        self.fix_mingw()
+        self.fix_non_prefixed_strings()
         if self.platform == Platform.WINDOWS:
-            self.msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
+            self.fix_openssl_mingw_perl()
+            self.fix_bin_deps()
+            # FIXME: This uses the network
             self.install_mingwget_deps()
-        self.install_mingw()
-        if self.platform == Platform.WINDOWS:
-            self.remove_mingw_unused()
-        self.add_non_prefixed_strings()
-        if self.platform == Platform.WINDOWS:
-            # After mingw has been installed
-            self.install_bin_deps()
-        self.install_gl_headers()
-        if self.platform == Platform.WINDOWS:
-            self.install_openssl_mingw_perl()
+            self.fix_mingw_unused()
 
     def check_dirs(self):
         if not os.path.exists(self.perl_prefix):
@@ -90,14 +123,7 @@ class WindowsBootstrapper(BootstrapperBase):
         if not os.path.exists(etc_path):
             os.makedirs(etc_path)
 
-    def install_mingw(self):
-        tarball = MINGW_TARBALL_TPL % (self.version, GCC_VERSION,
-                self.platform, self.arch)
-
-        tarfile = os.path.join(self.prefix, tarball)
-        tarfile = os.path.abspath(tarfile)
-        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile, check_cert=False)
-        shell.unpack(tarfile, self.prefix)
+    def fix_mingw(self):
         self.fix_lib_paths()
         if self.arch == Architecture.X86:
             try:
@@ -105,17 +131,12 @@ class WindowsBootstrapper(BootstrapperBase):
             except Exception:
                 pass
 
-    def install_openssl_mingw_perl(self):
+    def fix_openssl_mingw_perl(self):
         '''
         This perl is only used by openssl; we can't use it everywhere else
         because it can't find msys tools, and so perl scripts like autom4te
         fail to run, f.ex., m4. Lucky for us, openssl doesn't use those.
         '''
-        url = MINGW_PERL_TPL.format(PERL_VERSION)
-        tarfile = os.path.join(self.perl_prefix, os.path.basename(url))
-        tarfile = os.path.abspath(tarfile)
-        shell.download(url, tarfile, check_cert=False)
-        shell.unpack(tarfile, self.perl_prefix)
         # Move perl installation from perl-5.xx.y to perl
         perldir = os.path.join(self.perl_prefix, 'perl-' + PERL_VERSION)
         for d in os.listdir(perldir):
@@ -123,36 +144,21 @@ class WindowsBootstrapper(BootstrapperBase):
             if os.path.exists(dest):
                 shutil.rmtree(dest)
             shutil.move(os.path.join(perldir, d), self.perl_prefix)
+        os.rmdir(perldir)
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
             shell.call('mingw-get install %s' % dep)
 
-    def install_gl_headers(self):
-        m.action("Installing wglext.h")
-        if self.arch == Architecture.X86:
-            inst_path = os.path.join(self.prefix, 'i686-w64-mingw32/include/GL/wglext.h')
-        else:
-            inst_path = os.path.join(self.prefix, 'x86_64-w64-mingw32/include/GL/wglext.h')
-        gl_header = 'http://www.opengl.org/registry/api/GL/wglext.h'
-        shell.download(gl_header, inst_path, False, check_cert=False)
-
-    def install_bin_deps(self):
-        # FIXME: build intltool as part of the build tools bootstrap
-        for url in WINDOWS_BIN_DEPS:
-            temp = fix_winpath(tempfile.mkdtemp())
-            path = os.path.join(temp, 'download.zip')
-            shell.download(GNOME_FTP + url, path)
-            shell.unpack(path, self.config.toolchain_prefix)
+    def fix_bin_deps(self):
         # replace /opt/perl/bin/perl in intltool
-        files = shell.ls_files(['bin/intltool*'], self.config.toolchain_prefix)
+        files = shell.ls_files(['bin/intltool*'], self.prefix)
         for f in files:
-            shell.replace(os.path.join(self.config.toolchain_prefix, f),
+            shell.replace(os.path.join(self.prefix, f),
                           {'/opt/perl/bin/perl': '/bin/perl'})
-        return
 
     def fix_lib_paths(self):
-        orig_sysroot = self.find_mingw_sys_root()
+        orig_sysroot = self._find_mingw_sys_root()
         if self.config.platform != Platform.WINDOWS:
             new_sysroot = os.path.join(self.prefix, 'mingw', 'lib')
         else:
@@ -164,7 +170,7 @@ class WindowsBootstrapper(BootstrapperBase):
             path = os.path.abspath(os.path.join(lib_path, path))
             shell.replace(path, {orig_sysroot: new_sysroot})
 
-    def find_mingw_sys_root(self):
+    def _find_mingw_sys_root(self):
         if self.config.platform != Platform.WINDOWS:
             f = os.path.join(self.prefix, 'mingw', 'lib', 'libstdc++.la')
         else:
@@ -178,18 +184,19 @@ class WindowsBootstrapper(BootstrapperBase):
             print("Replacing old libdir : ", libdir)
             return libdir.strip()[1:-1]
 
-    def remove_mingw_unused(self):
+    def fix_mingw_unused(self):
+        msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
         # Fixes checks in configure, where cpp -v is called
         # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
         #
         # MSYS's link.exe overrides MSVC's link.exe in new shells, so rename it
         for tool in ('cpp', 'link'):
-            if (self.msys_mingw_bindir / (tool + '.exe')).is_file():
-                os.replace(self.msys_mingw_bindir / (tool + '.exe'),
-                           self.msys_mingw_bindir / (tool + '.exe.bck'))
+            if (msys_mingw_bindir / (tool + '.exe')).is_file():
+                os.replace(msys_mingw_bindir / (tool + '.exe'),
+                           msys_mingw_bindir / (tool + '.exe.bck'))
 
-    def add_non_prefixed_strings(self):
+    def fix_non_prefixed_strings(self):
         # libtool m4 macros uses non-prefixed 'strings' command. We need to
         # create a copy here
         if self.config.platform == Platform.WINDOWS:

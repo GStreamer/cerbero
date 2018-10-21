@@ -17,18 +17,23 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import tempfile
-import shutil
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
-from cerbero.config import Distro, DistroVersion
+from cerbero.config import Distro
 from cerbero.utils import shell
 
+CPANM_VERSION = '1.7044'
+CPANM_URL_TPL = 'https://raw.githubusercontent.com/miyagawa/cpanminus/{}/cpanm'
+CPANM_CHECKSUM = '22b92506243649a73cfb55c5990cedd24cdbb20b15b4530064d2496d94d1642b'
 
 class OSXBootstrapper (BootstrapperBase):
 
-    CPANM_URL = 'https://raw.github.com/miyagawa/cpanminus/master/cpanm'
+
+    def __init__(self, config, offline):
+        super().__init__(config, offline)
+        url = CPANM_URL_TPL.format(CPANM_VERSION)
+        self.fetch_urls.append((url, CPANM_CHECKSUM))
 
     def start(self):
         # skip system package install if not needed
@@ -37,14 +42,10 @@ class OSXBootstrapper (BootstrapperBase):
         self._install_perl_deps()
 
     def _install_perl_deps(self):
-        # Install cpan-minus, a zero-conf CPAN wrapper
-        cpanm_installer = tempfile.NamedTemporaryFile()
-        shell.download(self.CPANM_URL, cpanm_installer.name, overwrite=True)
-        shell.call('chmod +x %s' % cpanm_installer.name)
+        cpanm_installer = os.path.join(self.config.local_sources, 'cpanm')
+        shell.call('chmod +x %s' % cpanm_installer)
         # Install XML::Parser, required for intltool
-        shell.call("sudo %s XML::Parser" % cpanm_installer.name)
-        cpanm_installer.close()
-
+        shell.call("sudo %s XML::Parser" % cpanm_installer)
 
 
 def register_all():

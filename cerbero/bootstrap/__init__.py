@@ -34,15 +34,15 @@ class BootstrapTarball(BaseTarball):
 
 
 class BootstrapperBase (object):
-    # Dict of URLs to be fetched and their checksums
+    # List of URLs to be fetched
     fetch_urls = None
-    # Dict of extract steps to be done
+    # List of extract steps to be performed
     extract_steps = None
 
     def __init__(self, config, offline):
         self.config = config
         self.offline = offline
-        self.fetch_urls = {}
+        self.fetch_urls = []
         self.extract_steps = []
         self.sources = {}
 
@@ -50,7 +50,8 @@ class BootstrapperBase (object):
         raise NotImplemented("'start' must be implemented by subclasses")
 
     def fetch(self):
-        for url, checksum in self.fetch_urls.items():
+        'Fetch bootstrap binaries'
+        for (url, checksum) in self.fetch_urls:
             source = BootstrapTarball(self.config, self.offline, url, checksum,
                                       self.config.local_sources)
             self.sources[url] = source
