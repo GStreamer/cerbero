@@ -220,7 +220,7 @@ def unpack(filepath, output_dir):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-def download_wget(url, destination=None, recursive=False, check_cert=True, overwrite=False):
+def download_wget(url, destination=None, check_cert=True, overwrite=False):
     '''
     Downloads a file with wget
 
@@ -231,24 +231,18 @@ def download_wget(url, destination=None, recursive=False, check_cert=True, overw
     '''
     cmd = "wget %s " % url
     path = None
-    if recursive:
-        cmd += "-r "
-        path = destination
-    else:
-        if destination is not None:
-            cmd += "-O %s " % destination
+    if destination is not None:
+        cmd += "-O %s " % destination
 
     if not check_cert:
         cmd += " --no-check-certificate"
 
-    if not recursive and not overwrite and os.path.exists(destination):
+    if not overwrite and os.path.exists(destination):
         if LOGFILE is None:
             logging.info("File %s already downloaded." % destination)
     else:
-        if not recursive and not os.path.exists(os.path.dirname(destination)):
+        if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
-        elif recursive and not os.path.exists(destination):
-            os.makedirs(destination)
 
         if LOGFILE:
             LOGFILE.write("Downloading %s\n" % url)
@@ -262,7 +256,7 @@ def download_wget(url, destination=None, recursive=False, check_cert=True, overw
             raise e
 
 
-def download_urllib2(url, destination=None, recursive=False, check_cert=True, overwrite=False):
+def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
     '''
     Download a file with urllib2, which does not rely on external programs
 
@@ -271,10 +265,6 @@ def download_urllib2(url, destination=None, recursive=False, check_cert=True, ov
     @param destination: destination where the file will be saved
     @type destination: str
     '''
-    if recursive:
-        logging.warn("Recursive download is not implemented with urllib2, trying wget")
-        download_wget(url, destination, recursive, check_cert, overwrite)
-        return
     ctx = None
     if not check_cert:
         import ssl
@@ -306,7 +296,7 @@ def download_urllib2(url, destination=None, recursive=False, check_cert=True, ov
         raise e
 
 
-def download_curl(url, destination=None, recursive=False, check_cert=True, overwrite=False):
+def download_curl(url, destination=None, check_cert=True, overwrite=False):
     '''
     Downloads a file with cURL
 
@@ -316,9 +306,6 @@ def download_curl(url, destination=None, recursive=False, check_cert=True, overw
     @type destination: str
     '''
     path = None
-    if recursive:
-        raise FatalError(_("cURL doesn't support recursive downloads"))
-
     cmd = "curl -L "
     if not check_cert:
         cmd += " -k "
@@ -327,13 +314,11 @@ def download_curl(url, destination=None, recursive=False, check_cert=True, overw
     else:
         cmd += "-O %s " % url
 
-    if not recursive and not overwrite and os.path.exists(destination):
+    if not overwrite and os.path.exists(destination):
         logging.info("File %s already downloaded." % destination)
     else:
-        if not recursive and not os.path.exists(os.path.dirname(destination)):
+        if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
-        elif recursive and not os.path.exists(destination):
-            os.makedirs(destination)
 
         logging.info("Downloading %s", url)
         try:
@@ -351,21 +336,6 @@ def _splitter(string, base_url):
             yield "%s/%s" % (base_url, line.split(' ')[2])
         except:
             continue
-
-
-def recursive_download(url, destination):
-    '''
-    Recursive download for servers that don't return a list a url's but only
-    the index.html file
-    '''
-    raw_list = check_call('curl %s' % url)
-
-    with tempfile.NamedTemporaryFile() as f:
-        for path in _splitter(raw_list, url):
-            f.file.write(path + '\n')
-        if not os.path.exists(destination):
-            os.makedirs(destination)
-        call("wget -i %s %s" % (f.name, url), destination)
 
 
 def ls_files(files, prefix):
