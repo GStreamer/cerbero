@@ -80,7 +80,7 @@ class CustomSource (Source):
         pass
 
 
-class Tarball (Source):
+class BaseTarball(object):
     '''
     Source handler for tarballs
 
@@ -95,23 +95,11 @@ class Tarball (Source):
     tarball_name = None
     tarball_dirname = None
     tarball_checksum = None
-    mirror_url = None
 
     def __init__(self):
-        Source.__init__(self)
-        if not self.url:
-            raise InvalidRecipeError(
-                _("'url' attribute is missing in the recipe"))
-        self.url = self.replace_name_and_version(self.url)
-        if self.tarball_name is not None:
-            self.tarball_name = \
-                self.replace_name_and_version(self.tarball_name)
-        else:
+        if not self.tarball_name:
             self.tarball_name = os.path.basename(self.url)
-        if self.tarball_dirname is not None:
-            self.tarball_dirname = \
-                self.replace_name_and_version(self.tarball_dirname)
-        self.download_path = os.path.join(self.repo_dir, self.tarball_name)
+        self.download_path = os.path.join(self.download_dir, self.tarball_name)
         # URL-encode spaces and other special characters in the URL's path
         split = list(urllib.parse.urlsplit(self.url))
         split[2] = urllib.parse.quote(split[2])
@@ -122,23 +110,15 @@ class Tarball (Source):
             raise FatalError('Download URL {!r} must use HTTPS'.format(self.url))
 
     def fetch(self, redownload=False):
-        if not os.path.exists(self.repo_dir):
-            os.makedirs(self.repo_dir)
-
-        cached_file = os.path.join(self.config.cached_sources,
-                                   self.package_name, self.tarball_name)
-        if not redownload and os.path.isfile(cached_file) and self.verify(cached_file, fatal=False):
-            m.action(_('Copying cached tarball from %s to %s instead of %s') %
-                     (cached_file, self.download_path, self.url))
-            shutil.copy(cached_file, self.download_path)
-            return
         if self.offline:
             if not os.path.isfile(self.download_path):
-                msg = 'Offline mode: tarball {!r} not found in cached sources ({}) or local sources ({})'
-                raise FatalError(msg.format(self.tarball_name, self.config.cached_sources, self.repo_dir))
+                msg = 'Offline mode: tarball {!r} not found in local sources ({})'
+                raise FatalError(msg.format(self.tarball_name, self.download_dir))
             self.verify()
-            m.action(_('Found tarball for %s at %s') % (self.url, self.download_path))
+            m.action(_('Found %s at %s') % (self.url, self.download_path))
             return
+        if not os.path.exists(self.download_dir):
+            os.makedirs(self.download_dir)
         m.action(_('Fetching tarball %s to %s') %
                  (self.url, self.download_path))
         # Enable certificate checking only on Linux for now
@@ -181,19 +161,53 @@ class Tarball (Source):
                              .format(fname, checksum, self.tarball_checksum))
         return True
 
+    def extract(self, unpack_dir):
+        try:
+            shell.unpack(self.download_path, unpack_dir)
+        except (IOError, EOFError, tarfile.ReadError):
+            m.action(_('Corrupted or partial tarball, redownloading...'))
+            self.fetch(redownload=True)
+            shell.unpack(self.download_path, unpack_dir)
+
+
+class Tarball(BaseTarball, Source):
+
+    def __init__(self):
+        Source.__init__(self)
+        if not self.url:
+            raise InvalidRecipeError(
+                _("'url' attribute is missing in the recipe"))
+        self.url = self.replace_name_and_version(self.url)
+        if self.tarball_name is not None:
+            self.tarball_name = \
+                self.replace_name_and_version(self.tarball_name)
+        if self.tarball_dirname is not None:
+            self.tarball_dirname = \
+                self.replace_name_and_version(self.tarball_dirname)
+        self.download_dir = self.repo_dir
+        BaseTarball.__init__(self)
+
+    def fetch(self, redownload=False):
+        if not os.path.exists(self.download_dir):
+            os.makedirs(self.download_dir)
+
+        cached_file = os.path.join(self.config.cached_sources,
+                                   self.package_name, self.tarball_name)
+        if not redownload and os.path.isfile(cached_file) and self.verify(cached_file, fatal=False):
+            m.action(_('Copying cached tarball from %s to %s instead of %s') %
+                     (cached_file, self.download_path, self.url))
+            shutil.copy(cached_file, self.download_path)
+            return
+        super().fetch(redownload=redownload)
+
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        try:
-            shell.unpack(self.download_path, self.config.sources)
-        except (IOError, EOFError, tarfile.ReadError):
-            m.action(_('Corrupted or partial tarball, redownloading...'))
-            self.fetch(redownload=True)
-            shell.unpack(self.download_path, self.config.sources)
+        super().extract(self.config.sources)
         if self.tarball_dirname is not None:
             os.rename(os.path.join(self.config.sources, self.tarball_dirname),
-                    self.build_dir)
+                      self.build_dir)
         git.init_directory(self.build_dir)
         for patch in self.patches:
             if not os.path.isabs(patch):
