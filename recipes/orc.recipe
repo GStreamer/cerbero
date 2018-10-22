@@ -6,9 +6,11 @@ class Recipe(recipe.Recipe):
     version = '0.4.28'
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc'}
     commit = 'origin/master'
+    btype = BuildType.MESON
     licenses = [License.BSD_like]
-    autoreconf = True
-    configure_options = '--enable-static'
+    meson_options = {'benchmarks': 'disabled', 'examples': 'disabled',
+                     'gtk_doc': 'disabled', 'tests': 'disabled',
+                     'tools': 'enabled', 'orc-test': 'enabled'}
 
     files_libs = ['liborc-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
@@ -16,8 +18,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # Don't build testing helper library on ios
-        if self.config.target_platform in [Platform.IOS]:
-            self.configure_options += ' --disable-tests '
-        else:
+        if self.config.target_platform != Platform.IOS:
             self.files_libs.append('liborc-test-0.4')
             self.files_devel.append('bin/orc-bugreport%(bext)s')
+        else:
+            self.meson_options['orc-test'] = 'disabled'

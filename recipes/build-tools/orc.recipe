@@ -6,12 +6,14 @@ class Recipe(recipe.Recipe):
     version = '0.4.28'
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc'}
     commit = 'origin/master'
+    btype = BuildType.MESON
     licenses = [License.BSD_like]
-    autoreconf = True
-    deps = ['autoconf', 'automake', 'libtool']
+    deps = ['meson']
+    meson_options = {'benchmarks': 'disabled', 'examples': 'disabled',
+                     'gtk_doc': 'disabled', 'tests': 'disabled',
+                     'tools': 'enabled', 'orc-test': 'enabled'}
 
     files_libs = ['liborc-0.4', 'liborc-test-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
         'bin/orc-bugreport%(bext)s', 'share/aclocal/orc.m4',
         'bin/orcc%(bext)s']
-    configure_options = ' --disable-gtk-doc '
