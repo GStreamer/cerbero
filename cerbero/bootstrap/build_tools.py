@@ -90,7 +90,7 @@ class BuildTools (BootstrapperBase, Fetch):
         config.build_tools_cache = self.config.build_tools_cache
         config.external_recipes = self.config.external_recipes
 
-        if not os.path.exists(config.toolchain_prefix):
+        if config.toolchain_prefix and not os.path.exists(config.toolchain_prefix):
             os.makedirs(config.toolchain_prefix)
         if not os.path.exists(config.prefix):
             os.makedirs(config.prefix)
