@@ -55,7 +55,7 @@ WINDOWS_BIN_DEPS = [
      '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33')]
 
 # MSYS packages needed
-MINGWGET_DEPS = ['msys-wget', 'msys-flex', 'msys-bison', 'msys-perl']
+MINGWGET_DEPS = ['msys-flex', 'msys-bison', 'msys-perl']
 
 class WindowsBootstrapper(BootstrapperBase):
     '''
