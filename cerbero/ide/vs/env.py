@@ -25,25 +25,25 @@ from cerbero.errors import FatalError
 
 # We only support Visual Studio 2015 as of now
 vcvarsalls = {
-    '14.0': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
-    '15.0': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
+    '2015': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
+    '2017': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat'],
 }
 program_files = Path(os.environ['PROGRAMFILES(X86)'])
 
-vcvarsall = None
-for version in sorted(vcvarsalls.keys(), reverse=True):
-    if vcvarsall:
-        break
-    for path in vcvarsalls[version]:
-        path = program_files / path
-        # Find the location of the Visual Studio installation
-        if path.is_file():
-            vcvarsall = path.as_posix()
-            break
-if not vcvarsall:
-    versions = ', '.join(vcvarsalls.keys())
-    raise FatalError('Microsoft Visual Studio not found, please file a bug. We looked for: ' + versions)
+def get_vcvarsall(version=None):
+    if version is not None:
+        versions = [version]
+    else:
+        versions = sorted(vcvarsalls.keys(), reverse=True)
+    for version in versions:
+        for path in vcvarsalls[version]:
+            path = program_files / path
+            # Find the location of the Visual Studio installation
+            if path.is_file():
+                return path.as_posix()
+    raise FatalError('Microsoft Visual Studio not found, please file a bug. '
+                     'We looked for: ' + ', '.join(versions))
 
 def append_path(var, path, sep=';'):
     if var and not var.endswith(sep):
@@ -89,10 +89,9 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
     index = msvc.index(nomsvc)
     return msvc[0:index]
 
-def get_msvc_env(vcvarsall, arch, target_arch):
+def get_msvc_env(arch, target_arch, version=None):
     ret_env = {}
-    if not os.path.isfile(vcvarsall):
-        raise FatalError("'{0}' not found".format(vcvarsall))
+    vcvarsall = get_vcvarsall(version)
 
     without_msvc = run_and_get_env('set')
     arg = get_vcvarsall_arg(arch, target_arch)
