@@ -20,7 +20,7 @@ import os
 import sys
 import copy
 import sysconfig
-from pathlib import PurePath
+from pathlib import PurePath, Path
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
@@ -510,8 +510,7 @@ class Config (object):
         self.set_property('cache_file',
                 "%s_%s.cache" % (self.target_platform, self.target_arch))
         self.set_property('install_dir', self.prefix)
-        self.set_property('local_sources',
-                os.path.join(self.home_dir, 'sources', 'local'))
+        self.set_property('local_sources', self._default_local_sources_dir())
         self.set_property('build_tools_prefix',
                 os.path.join(self.home_dir, 'build-tools'))
         self.set_property('build_tools_sources',
@@ -547,6 +546,23 @@ class Config (object):
         else:
             p = os.path.expanduser('~/cerbero')
         return os.path.abspath(p)
+
+    def _default_local_sources_dir(self):
+        # For backwards-compatibility, keep the old value for setups that
+        # define their own home_dir inside which all cerbero work must be
+        # contained; f.ex. ci.gstreamer.net
+        if self.home_dir != self._default_home_dir():
+            return os.path.join(self.home_dir, 'sources', 'local')
+        # Default value should be in a user-specific location so that it can
+        # be shared across all cerbero directories and invocations
+        if self.platform == Platform.WINDOWS and 'USERPROFILE' in os.environ:
+            cache_dir = Path(os.environ['USERPROFILE']) / '.cache'
+        elif 'XDG_CACHE_HOME' in os.environ:
+            cache_dir = Path(os.environ['XDG_CACHE_HOME'])
+        else:
+            # Path.home() reads the HOME env var
+            cache_dir = Path.home() / '.cache'
+        return (cache_dir / 'cerbero-sources').resolve().as_posix()
 
     def _perl_version(self):
         version = shell.check_call("perl -e 'print \"$]\";'")
