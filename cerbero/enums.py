@@ -45,6 +45,10 @@ class Architecture:
         return arch in [Architecture.ARM, Architecture.ARMv7,
                 Architecture.ARMv7S, Architecture.ARM64]
 
+    @staticmethod
+    def is_arm32(arch):
+        return arch in [Architecture.ARM, Architecture.ARMv7, Architecture.ARMv7S]
+
 
 class Distro:
     ''' Enumeration of supported distributions '''

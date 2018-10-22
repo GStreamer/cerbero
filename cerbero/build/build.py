@@ -23,7 +23,7 @@ import shutil
 import shlex
 import sysconfig
 
-from cerbero.config import Platform, Architecture, Distro
+from cerbero.enums import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 
@@ -433,7 +433,7 @@ MESON_CROSS_FILE_TPL = \
 '''
 [host_machine]
 system = '{system}'
-cpu_family = '{cpu}'
+cpu_family = '{cpu_family}'
 cpu = '{cpu}'
 endian = '{endian}'
 
@@ -558,6 +558,14 @@ class Meson (Build, ModifyEnvBase) :
             self.meson_options[opt_name] = \
                     self._get_option_value(opt_type, self.config.variants.gi)
 
+    def _get_cpu_family(self):
+        if Architecture.is_arm(self.config.target_arch):
+            if Architecture.is_arm32(self.config.target_arch):
+                return 'arm'
+            else:
+                return 'aarch64'
+        return self.config.target_arch
+
     def _write_meson_cross_file(self):
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
@@ -613,6 +621,7 @@ class Meson (Build, ModifyEnvBase) :
         contents = MESON_CROSS_FILE_TPL.format(
                 system=self.config.target_platform,
                 cpu=self.config.target_arch,
+                cpu_family=self._get_cpu_family(),
                 # Assume all ARM sub-archs are in little endian mode
                 endian='little',
                 CC=cc,
