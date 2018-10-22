@@ -35,7 +35,7 @@ MINGW_CHECKSUMS = {
     'mingw-w32-gcc-4.7.3-linux-x86.tar.xz': '16a3ad2584f0dc25ec122029143b186c99f362d1be1a77a338431262491004ae',
     'mingw-w64-gcc-4.7.3-linux-x86_64.tar.xz': 'e673536cc89a778043789484f691d7e35458a5d72638dc4b0123f92ecf868592',
     'mingw-w32-gcc-4.7.3-windows-x86.tar.xz': 'da783488ab3a2b28471c13ece97c643f8e8ec774308fb2a01152b23618f13a33',
-    'mingw-w32-gcc-4.7.3-windows-x86_64.tar.xz': '820fa7490b3d738b9cf8c360cdd9a7aeb0592510a8ea50486e721b5b92722b08',
+    'mingw-w64-gcc-4.7.3-windows-x86_64.tar.xz': '820fa7490b3d738b9cf8c360cdd9a7aeb0592510a8ea50486e721b5b92722b08',
 }
 
 # MinGW Perl
