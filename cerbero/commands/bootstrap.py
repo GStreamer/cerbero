@@ -41,4 +41,22 @@ class Bootstrap(Command):
             bootstrapper.extract()
             bootstrapper.start()
 
+
+class FetchBootstrap(Command):
+    doc = N_('Fetch the sources required for bootstrap')
+    name = 'fetch-bootstrap'
+
+    def __init__(self):
+        args = [
+            ArgparseArgument('--build-tools-only', action='store_true',
+                default=False, help=_('only fetch the build tools'))]
+        Command.__init__(self, args)
+
+    def run(self, config, args):
+        bootstrappers = Bootstrapper(config, args.build_tools_only, False)
+        for bootstrapper in bootstrappers:
+            bootstrapper.fetch_recipes()
+            bootstrapper.fetch()
+
 register_command(Bootstrap)
+register_command(FetchBootstrap)

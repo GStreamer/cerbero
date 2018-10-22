@@ -22,11 +22,12 @@ from cerbero.config import Config, Platform, DistroVersion
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
+from cerbero.commands.fetch import Fetch
 from cerbero.utils import _
 from cerbero.errors import FatalError, ConfigurationError
 
 
-class BuildTools (BootstrapperBase):
+class BuildTools (BootstrapperBase, Fetch):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'gettext-tools', 'libtool',
                    'pkg-config', 'orc-tool', 'gettext-m4', 'meson']
@@ -71,7 +72,6 @@ class BuildTools (BootstrapperBase):
             self.BUILD_TOOLS.append('glib-tools')
         self.BUILD_TOOLS += self.config.extra_build_tools
 
-    def start(self):
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
         config = Config()
@@ -97,9 +97,14 @@ class BuildTools (BootstrapperBase):
             os.makedirs(config.sources)
 
         config.do_setup_env()
-        cookbook = CookBook(config, offline=self.offline)
-        recipes = self.BUILD_TOOLS
-        recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
-        oven = Oven(recipes, cookbook)
+        self.cookbook = CookBook(config, offline=self.offline)
+        self.recipes = self.BUILD_TOOLS
+        self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
+
+    def start(self):
+        oven = Oven(self.recipes, self.cookbook)
         oven.start_cooking()
         self.config.do_setup_env()
+
+    def fetch_recipes(self):
+        Fetch.fetch(self.cookbook, self.recipes, False, False, False, False)

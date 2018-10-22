@@ -57,6 +57,10 @@ class BootstrapperBase (object):
             self.sources[url] = source
             source.fetch()
 
+    def fetch_recipes(self):
+        'Fetch build-tools recipes; only called by fetch-bootstrap'
+        pass
+
     def extract(self):
         for (url, unpack, unpack_dir) in self.extract_steps:
             if unpack:

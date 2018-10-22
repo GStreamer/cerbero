@@ -37,7 +37,8 @@ class Fetch(Command):
                     default=False, help=_('print all source URLs to stdout')))
         Command.__init__(self, args)
 
-    def fetch(self, cookbook, recipes, no_deps, reset_rdeps, full_reset, print_only):
+    @staticmethod
+    def fetch(cookbook, recipes, no_deps, reset_rdeps, full_reset, print_only):
         fetch_recipes = []
         if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
