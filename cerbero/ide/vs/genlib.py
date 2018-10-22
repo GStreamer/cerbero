@@ -18,8 +18,9 @@
 
 import os
 import re
+import shutil
 
-from cerbero.config import Architecture
+from cerbero.enums import Architecture, Platform
 from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
 
@@ -35,7 +36,7 @@ class GenLib(object):
     LIB_TPL = '%s /DEF:%s /OUT:%s /MACHINE:%s'
     filename = 'unknown'
 
-    def create(self, libname, dllpath, arch, outputdir):
+    def create(self, libname, dllpath, platform, target_arch, outputdir):
         # foo.lib must not start with 'lib'
         if libname.startswith('lib'):
             self.filename = libname[3:] + '.lib'
@@ -50,22 +51,25 @@ class GenLib(object):
         defname = dllname.replace('.dll', '.def')
 
         # Create the import library
-        vc_path = self._get_vc_tools_path()
+        lib_path, paths = self._get_lib_exe_path(target_arch, platform)
 
         # Prefer LIB.exe over dlltool:
         # http://sourceware.org/bugzilla/show_bug.cgi?id=12633
-        if vc_path is not None:
+        if lib_path is not None:
             # Spaces msys and shell are a beautiful combination
-            lib_path = to_unixpath(os.path.join(vc_path, 'lib.exe'))
+            lib_path = to_unixpath(lib_path)
             lib_path = lib_path.replace('\\', '/')
             lib_path = lib_path.replace('(', '\\\(').replace(')', '\\\)')
             lib_path = lib_path.replace(' ', '\\\\ ')
-            if arch == Architecture.X86:
+            if target_arch == Architecture.X86:
                 arch = 'x86'
             else:
                 arch = 'x64'
+            old_path = os.environ['PATH']
+            os.environ['PATH'] = paths + ';' + old_path
             shell.call(self.LIB_TPL % (lib_path, defname, self.filename, arch),
                        outputdir)
+            os.environ['PATH'] = old_path
         else:
             m.warning("Using dlltool instead of lib.exe! Resulting .lib files"
                 " will have problems with Visual Studio, see "
@@ -74,14 +78,14 @@ class GenLib(object):
                        outputdir)
         return os.path.join(outputdir, self.filename)
 
-    def _get_vc_tools_path(self):
-        for version in ['100', '110', '120', '130', '140', '150']:
-            variable = 'VS{0}COMNTOOLS'.format(version)
-            if variable in os.environ:
-                path = os.path.join(os.environ[variable], '..', '..', 'VC', 'bin', 'amd64')
-                if os.path.exists (path):
-                    return path
-        return None
+    def _get_lib_exe_path(self, target_arch, platform):
+        # No Visual Studio tools while cross-compiling
+        if platform != Platform.WINDOWS:
+            return None, None
+        from cerbero.ide.vs.env import get_msvc_env
+        msvc_env = get_msvc_env('x86', target_arch)
+        paths = msvc_env['PATH']
+        return shutil.which('lib', path=paths), paths
 
 class GenGnuLib(GenLib):
     '''
@@ -95,7 +99,7 @@ class GenGnuLib(GenLib):
     so we create a GNU-compatible import library which will always work.
     '''
 
-    def create(self, libname, dllpath, arch, outputdir):
+    def create(self, libname, dllpath, platform, target_arch, outputdir):
         # libfoo.dll.a must start with 'lib'
         if libname.startswith('lib'):
             self.filename = libname + '.dll.a'

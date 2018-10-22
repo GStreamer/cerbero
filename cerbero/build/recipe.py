@@ -292,7 +292,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
             try:
                 implib = genlib.create(libname,
                     os.path.join(self.config.prefix, dllpaths[0]),
-                    self.config.target_arch,
+                    self.config.platform, self.config.target_arch,
                     output_dir)
                 logging.debug('Created %s' % implib)
             except FatalError as e:
