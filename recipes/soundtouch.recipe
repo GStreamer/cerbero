@@ -1,39 +1,34 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell, fix_android_ndk16_cxx
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
-    version = '1.9.2'
+    version = '2.1.0'
+    btype = BuildType.MESON
     stype = SourceType.TARBALL
-    url = 'https://www.surina.net/soundtouch/soundtouch-%(version)s.tar.gz'
-    tarball_dirname = 'soundtouch'
-    tarball_checksum = 'caeb86511e81420eeb454cb5db53f56d96b8451d37d89af6e55b12eb4da1c513'
+    url = 'https://gitlab.com/soundtouch/soundtouch/-/archive/%(version)s/soundtouch-%(version)s.tar.gz'
+    tarball_checksum = '454712b08bf758f6a4c0df8821350c323e5b274443a20e21d193d17c5dc3d0d5'
     licenses = [License.LGPLv2_1Plus]
-    autoreconf_sh = './bootstrap'
-    autoreconf = True
 
-    patches = ['soundtouch/0001-Add-dummy-file-to-make-sure-config-m4-exists.patch',
-               'soundtouch/0002-Use-STLPORT-on-Android.patch',
-               'soundtouch/0003-Don-t-build-soundstretch.patch',
-               'soundtouch/0004-Use-gnustl.patch',
-               'soundtouch/0005-Fix-soundstretch-linking.patch',
-               'soundtouch/0006-Fix-pkg-config-file.patch',
-               'soundtouch/0007-Make-it-compile-on-IOS.patch',
+    patches = [
                'soundtouch/0008-Fix-compilation-with-clang.patch',
-               'soundtouch/0010-Try-harder-to-generate-Win32-DLLs.patch']
+               'soundtouch/0001-Add-minimal-meson-build-system.patch',
+               'soundtouch/0002-add-support-for-linking-with-gnustl-on-android.patch',
+              ]
 
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']
 
     def prepare (self):
-      self.configure_options += ' --enable-static '
       if self.config.target_platform == Platform.ANDROID:
-        self.configure_options += ' --with-gnustl '
-        self.append_env('CXXFLAGS', '-fexceptions')
-      elif self.config.target_platform == Platform.IOS:
-        self.autoreconf = True
+        self.append_env('CXXFLAGS', '-fexceptions -DST_NO_EXCEPTION_HANDLING')
 
-    def configure (self):
-        fix_android_ndk16_cxx (self.config, os.path.join(self.make_dir, 'source', 'SoundTouch'))
-        super(recipe.Recipe, self).configure()
+    def post_install (self):
+        dependency_libs = []
+        if self.config.target_platform == Platform.ANDROID:
+            dependency_libs += ['gnustl', '-lm']
+
+        lib = LibtoolLibrary('SoundTouch', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=dependency_libs)
+        lib.save()
