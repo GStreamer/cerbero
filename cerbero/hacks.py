@@ -145,3 +145,24 @@ elif cerbero.utils.shell.which('curl'):
 else:
     # Fallback. TODO: make this the default and remove curl/wget dependency
     cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
+
+### Python ZipFile module bug ###
+# zipfile.ZipFile.extractall() does not preserve permissions
+# https://bugs.python.org/issue15795
+
+import zipfile
+from zipfile import ZipFile as zipfile_ZipFile
+
+class ZipFile(zipfile_ZipFile):
+    def _extract_member(self, member, targetpath, pwd):
+        if not isinstance(member, zipfile.ZipInfo):
+            member = self.getinfo(member)
+
+        path = super()._extract_member(member, targetpath, pwd)
+
+        attr = member.external_attr >> 16
+        if attr != 0:
+            os.chmod(path, attr)
+        return path
+
+zipfile.ZipFile = ZipFile
