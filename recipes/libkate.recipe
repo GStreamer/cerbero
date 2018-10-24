@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libkate'
     version = '0.4.1'
     stype = SourceType.TARBALL
-    url = 'https://downloads.xiph.org/releases/kate/libkate-%(version)s.tar.gz'
+    url = 'xiph://kate/libkate-%(version)s.tar.gz'
     tarball_checksum = 'c40e81d5866c3d4bf744e76ce0068d8f388f0e25f7e258ce0c8e76d7adc87b68'
     licenses = [License.BSD_like]
     deps = ['libogg', 'libpng']

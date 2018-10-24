@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'opencore-amr'
     version = '0.1.5'
     stype = SourceType.TARBALL
-    url = 'https://download.sourceforge.net/opencore-amr/opencore-amr-%(version)s.tar.gz'
+    url = 'sf://.tar.gz'
     tarball_checksum = '2c006cb9d5f651bfb5e60156dbff6af3c9d35c7bbcc9015308c0aff1e14cd341'
     licenses = [License.Apachev2]
     patches = ['opencore-amr/0001-Fix-include-dir-in-pc-files.patch']

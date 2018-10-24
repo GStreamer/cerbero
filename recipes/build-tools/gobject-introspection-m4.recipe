@@ -10,18 +10,12 @@ class Recipe(recipe.Recipe):
     _name = 'gobject-introspection'
     version = '1.54.1'
     stype = SourceType.TARBALL
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{2}/{0}-{1}.tar.xz'.format(_name, version, maj_ver)
+    url = 'gnome://{0}/%(maj_ver)s/{0}-%(version)s.tar.xz'.format(_name)
     tarball_checksum = 'b88ded5e5f064ab58a93aadecd6d58db2ec9d970648534c63807d4f9a7bb877e'
-    srcdir = "{0}-{1}".format(_name, version)
+    tarball_dirname = '{}-%(version)s'.format(_name)
     licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
     files_devel = ['share/aclocal/introspection.m4']
-
-    def prepare(self):
-        self.build_dir = os.path.join(os.path.dirname(self.build_dir),
-                                      '{0}-{1}'.format(self._name,
-                                          self.version))
 
     def install(self):
         shutil.copy(os.path.join(self.build_dir, 'm4', 'introspection.m4'),

@@ -4,7 +4,7 @@ class Recipe(recipe.Recipe):
     name = 'mpg123'
     version = '1.25.10'
     stype = SourceType.TARBALL
-    url = 'https://downloads.sourceforge.net/mpg123/mpg123-%(version)s.tar.bz2'
+    url = 'sf://.tar.bz2'
     tarball_checksum = '6c1337aee2e4bf993299851c70b7db11faec785303cfca3a5c3eb5f329ba7023'
     licenses = [License.LGPLv2_1]
     autoreconf = True

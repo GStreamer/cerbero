@@ -8,22 +8,14 @@ class Recipe(recipe.Recipe):
     Ships the vapigen.m4 macro file from the vala tarball
     """
     name = 'vala-m4'
-    _name = 'vala'
     version = '0.35.2'
     stype = SourceType.TARBALL
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{2}/{0}-{1}.tar.xz'
-    url = url.format(_name, version, maj_ver)
+    url = 'gnome://vala/%(maj_ver)s/vala-%(version)s.tar.xz'
+    tarball_dirname = 'vala-%(version)s'
     tarball_checksum = 'af5efb30e8a303dd1c211e2a30ba0b41e64d47c9d6c5271f1d8ffb4fb63a017f'
-    srcdir = "{0}-{1}".format(_name, version)
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.CUSTOM
     files_devel = ['share/aclocal/vala.m4', 'share/vala/Makefile.vapigen']
-
-    def prepare(self):
-        self.build_dir = os.path.join(os.path.dirname(self.build_dir),
-                                      '{0}-{1}'.format(self._name,
-                                          self.version))
 
     def install(self):
         shutil.copy(os.path.join(self.build_dir, 'vapigen', 'vapigen.m4'),

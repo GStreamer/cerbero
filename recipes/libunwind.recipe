@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.1'
     licenses = [License.MIT]
     stype = SourceType.TARBALL
-    url = 'https://download.savannah.gnu.org/releases/libunwind/libunwind-%(version)s.tar.gz'
+    url = 'savannah://.tar.gz'
     tarball_checksum = '9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a'
 
     files_libs = ['libunwind']

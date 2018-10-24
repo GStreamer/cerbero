@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '1.15.1'
     licenses = [License.GPLv2]
     stype = SourceType.TARBALL
-    url = 'https://ftp.gnu.org/gnu/automake/automake-%(version)s.tar.xz'
+    url = 'gnu://'
     tarball_checksum = 'af6ba39142220687c500f79b4aa2f181d9b24e4f8d8ec497cea4ba26c64bedaf'
     deps = ['autoconf', 'gettext-m4']
 

@@ -5,8 +5,7 @@ class Recipe(recipe.Recipe):
     version = '0.6.12'
     licenses = [License.LGPLv2_1]
     stype = SourceType.TARBALL
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    url = 'gnome://'
     tarball_checksum = 'ddc4b5546c9fb4280a5017e2707fbd4839034ed1aba5b7d4372212f34f84f860'
     deps = ['libxml2', 'glib', 'gdk-pixbuf']
 

@@ -30,6 +30,14 @@ import cerbero.utils.messages as m
 # Must end in a / for urlparse.urljoin to work correctly
 TARBALL_MIRROR = 'https://gstreamer.freedesktop.org/src/mirror/'
 
+URL_TEMPLATES = {
+    'gnome': ('https://download.gnome.org/sources/', '%(name)s/%(maj_ver)s/%(name)s-%(version)s', '.tar.xz'),
+    'gnu': ('https://ftpmirror.gnu.org/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
+    'savannah': ('https://download.savannah.gnu.org/releases/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
+    'sf': ('https://download.sourceforge.net/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
+    'xiph': ('https://downloads.xiph.org/releases/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
+}
+
 class Source (object):
     '''
     Base class for sources handlers
@@ -59,6 +67,22 @@ class Source (object):
         Extracts the sources
         '''
         raise NotImplemented("'extract' must be implemented by subclasses")
+
+    def expand_url_template(self, s):
+        '''
+        Expand a standard URL template (GNOME, SourceForge, GNU, etc)
+        and get a URL that just needs the name and version substituted.
+        '''
+        schemes = tuple(s + '://' for s in URL_TEMPLATES.keys())
+        if s.startswith(schemes):
+            scheme, url = s.split('://', 1)
+            parts = URL_TEMPLATES[scheme]
+            if url == '':
+                return ''.join(parts)
+            if url.startswith('.'):
+                return parts[0] + parts[1] + url
+            return parts[0] + url
+        return s
 
     def replace_name_and_version(self, string):
         '''
@@ -178,6 +202,7 @@ class Tarball(BaseTarball, Source):
         if not self.url:
             raise InvalidRecipeError(
                 _("'url' attribute is missing in the recipe"))
+        self.url = self.expand_url_template(self.url)
         self.url = self.replace_name_and_version(self.url)
         if self.tarball_name is not None:
             self.tarball_name = \

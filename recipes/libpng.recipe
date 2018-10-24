@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'libpng'
     version = '1.6.35'
     stype = SourceType.TARBALL
-    url = 'https://download.sourceforge.net/libpng/libpng-%(version)s.tar.xz'
+    url = 'sf://'
     tarball_checksum = '23912ec8c9584917ed9b09c5023465d71709dce089be503c7867fec68a93bcd7'
     licenses = [License.LibPNG]
     deps = ['zlib']

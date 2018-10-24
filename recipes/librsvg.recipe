@@ -8,8 +8,7 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
     stype = SourceType.TARBALL
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    url = 'gnome://'
     tarball_checksum = 'cff4dd3c3b78bfe99d8fcfad3b8ba1eee3289a0823c0e118d78106be6b84c92b'
 
     files_libs = ['librsvg-2']

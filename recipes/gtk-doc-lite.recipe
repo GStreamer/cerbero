@@ -5,8 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.29'
     stype = SourceType.TARBALL
     tarball_dirname = 'gtk-doc-%(version)s'
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format('gtk-doc', maj_ver, version)
+    url = 'gnome://gtk-doc/%(maj_ver)s/gtk-doc-%(version)s.tar.xz'
     tarball_checksum = '14578e002496567276d310a62c9ffd6c56ee8806ce5079ffb0b81c4111f586b1'
     # TODO: check license - source files are GPLv2+ and COPYING is GPLv3
     licenses = [License.GPLv2Plus]

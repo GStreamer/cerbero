@@ -6,12 +6,13 @@ class Recipe(recipe.Recipe):
     version = '1.5.3'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
+    url = 'sf://.tar.gz'
+    tarball_checksum = 'b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523'
+
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s"
     configure_options = " --with-jpeg8"
     autoreconf = True
-    url = 'https://downloads.sourceforge.net/libjpeg-turbo/libjpeg-turbo-%(version)s.tar.gz'
-    tarball_checksum = 'b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523'
     patches = []
 
     files_libs = ['libjpeg','libturbojpeg']

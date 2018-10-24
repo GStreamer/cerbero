@@ -6,8 +6,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.MESON
     stype = SourceType.TARBALL
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    url = 'gnome://'
     tarball_checksum = '720c5f4379513dc11fd97dc75336eb0c0d3338c53128044d9fabec4374f4bc47'
     deps = ['glib']
 

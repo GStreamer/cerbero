@@ -8,8 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    maj_ver = '.'.join(version.split('.')[0:2])
-    url = 'https://download.gnome.org/sources/{0}/{1}/{0}-{2}.tar.xz'.format(name, maj_ver, version)
+    url = 'gnome://'
     tarball_checksum = 'dd50973c7757bcde15de6bcd3a6d462a445efd552604ae6435a0532fbbadae47'
     meson_options = {'docs' : 'false',
                      'man' : 'false',
