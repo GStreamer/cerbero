@@ -68,7 +68,8 @@ class Source (object):
         if name.startswith('gst') and name.endswith('-1.0'):
             # gst-libav-1.0, etc is useless for substitution, convert to 'gst-libav'
             name = name[:-4]
-        return string % {'name': name, 'version': self.version}
+        maj_ver = '.'.join(self.version.split('.')[0:2])
+        return string % {'name': name, 'version': self.version, 'maj_ver': maj_ver}
 
 
 class CustomSource (Source):
