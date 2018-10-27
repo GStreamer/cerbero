@@ -250,6 +250,11 @@ class Config (object):
         pythonpath = [os.path.join(prefix, pypath),
                       os.path.join(self.build_tools_prefix, pypath)]
         for path in pythonpath:
+            if self.platform == Platform.WINDOWS:
+                # pythonpaths start with 'Lib' on Windows, which is extremely
+                # undesirable since our libdir is 'lib'. Windows APIs are
+                # case-preserving case-insensitive.
+                path = path.lower()
             self._create_path(path)
         pythonpath = os.pathsep.join(pythonpath)
 
