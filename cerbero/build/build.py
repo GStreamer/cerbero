@@ -341,14 +341,15 @@ class Autotools (MakefilesBase):
             shutil.copy(o, f)
 
         # ensure our libtool modifications are actually picked up by recipes
-        files = shell.check_call('find %s -type f -name ltmain.sh' %
-                                 self.config_src_dir).split('\n')
-        files.remove('')
-        for f in files:
-            o = os.path.join(self.config.build_tools_prefix, 'share', 'libtool', 'build-aux',
-                             'ltmain.sh')
-            m.action("copying %s to %s" % (o, f))
-            shutil.copy(o, f)
+        if self.name != 'libtool':
+            files = shell.check_call('find %s -type f -name ltmain.sh' %
+                                     self.config_src_dir).split('\n')
+            files.remove('')
+            for f in files:
+                o = os.path.join(self.config.build_tools_prefix, 'share', 'libtool', 'build-aux',
+                                 'ltmain.sh')
+                m.action("copying %s to %s" % (o, f))
+                shutil.copy(o, f)
 
         if self.config.platform == Platform.WINDOWS and \
                 self.supports_cache_variables:
