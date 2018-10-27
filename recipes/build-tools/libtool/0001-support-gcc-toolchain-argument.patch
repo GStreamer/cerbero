@@ -1,0 +1,25 @@
+From d6c4e993f38142c245a341f98d07e772863d3ad8 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Wed, 7 Mar 2018 12:55:33 +1100
+Subject: [PATCH] support -gcc-toolchain argument
+
+---
+ build-aux/ltmain.sh | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/build-aux/ltmain.sh b/build-aux/ltmain.sh
+index c5b34b3..2513684 100644
+--- a/build-aux/ltmain.sh
++++ b/build-aux/ltmain.sh
+@@ -7080,7 +7080,7 @@ func_mode_link ()
+       # Tru64 UNIX uses -model [arg] to determine the layout of C++
+       # classes, name mangling, and exception handling.
+       # Darwin uses the -arch flag to determine output architecture.
+-      -model|-arch|-isysroot|--sysroot)
++      -model|-arch|-isysroot|--sysroot|-gcc-toolchain)
+ 	func_append compiler_flags " $arg"
+ 	func_append compile_command " $arg"
+ 	func_append finalize_command " $arg"
+-- 
+2.16.2
+
