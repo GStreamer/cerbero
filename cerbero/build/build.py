@@ -472,10 +472,13 @@ class Meson (Build, ModifyEnvBase) :
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
-        self.meson_cross_properties = self.meson_cross_properties or {}
 
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
+
+        cross_props = copy.deepcopy(self.config.meson_cross_properties)
+        cross_props.update(self.config.meson_cross_properties or {})
+        self.meson_cross_properties = cross_props
 
         if self.config.platform == Platform.WINDOWS:
             if self.using_msvc():

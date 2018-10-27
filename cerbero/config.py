@@ -95,7 +95,8 @@ class Config (object):
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
-                   'msvc_toolchain_env', 'mingw_toolchain_env']
+                   'msvc_toolchain_env', 'mingw_toolchain_env',
+                   'meson_cross_properties']
 
     def __init__(self):
         self._check_uninstalled()
@@ -364,6 +365,7 @@ class Config (object):
         self.set_property('extra_build_tools', [])
         self.set_property('distro_packages_install', True)
         self.set_property('interactive', True)
+        self.set_property('meson_cross_properties', {})
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
