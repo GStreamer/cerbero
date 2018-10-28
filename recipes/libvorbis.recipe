@@ -4,10 +4,10 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'libvorbis'
-    version = '1.3.5'
+    version = '1.3.6'
     stype = SourceType.TARBALL
-    url = 'xiph://vorbis/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '54f94a9527ff0a88477be0a71c0bab09a4c3febe0ed878b24824906cd4b0e1d1'
+    url = 'xiph://vorbis/libvorbis-%(version)s.tar.xz'
+    tarball_checksum = 'af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415'
     licenses = [License.BSD_like]
     deps = ['libogg']
     config_sh = 'rm ltmain.sh && sh autogen.sh'
@@ -15,9 +15,10 @@ class Recipe(recipe.Recipe):
                'libvorbis/0003-Link-the-other-libs-with-lm-too.patch',
                'libvorbis/0004-configure-check-for-endianness.patch',
                'libvorbis/0005-darwin-do-not-build-for-a-generic-arm-architecture.patch',
-               'libvorbis/0006-Use-our-version-of-automake-instead-of-some-random-o.patch',
-               'libvorbis/0007-autogen.sh-Make-sure-libtoolize-runs-fully.patch'
+               'libvorbis/0001-build-check-if-mno-ieee-fp-is-supported.patch',
               ]
+    config_sh = './autogen.sh && ./configure'
+    autoreconf = True
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']
     files_devel = [
