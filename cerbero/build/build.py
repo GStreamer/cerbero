@@ -492,14 +492,11 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find Meson
         if not self.meson_sh:
-            if self.config.platform == Platform.WINDOWS:
-                meson = 'meson.py'
-            else:
-                meson = 'meson'
             # 'Scripts' on Windows and 'bin' on other platforms including MSYS
             bindir = sysconfig.get_path('scripts', vars={'base':''}).strip('\\/')
-            meson_path = os.path.join(self.config.build_tools_prefix, bindir, meson)
-            self.meson_sh = self.config.python_exe + ' ' + meson_path
+            # meson installs `meson.exe` on windows and `meson` on other
+            # platforms that read shebangs
+            self.meson_sh = os.path.join(self.config.build_tools_prefix, bindir, 'meson')
 
         # Find ninja
         if not self.make:
