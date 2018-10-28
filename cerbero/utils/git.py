@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import time
 import shutil
 
 from cerbero.config import Platform
@@ -185,6 +186,11 @@ def get_hash(git_dir, commit):
     @param commit: the commit to log
     @type commit: str
     '''
+    if not os.path.isdir(os.path.join(git_dir, '.git')):
+        # If a recipe's source type is switched from tarball to git, then we
+        # can get called from built_version() when the directory isn't git.
+        # Return a fixed string + unix time to trigger a full fetch.
+        return 'not-git-' + str(time.time())
     return shell.check_call('%s show -s --pretty=%%H %s' %
                             (GIT, commit), git_dir)
 
