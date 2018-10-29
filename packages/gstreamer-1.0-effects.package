@@ -10,7 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = '4be3f88b-b552-4cd7-aecd-cf935fe270f7'
     deps = ['gstreamer-1.0-core']
 
-    files = ['soundtouch:libs',
+    files = ['ladspa:libs', 'soundtouch:libs',
              'webrtc-audio-processing:libs',
              'gst-plugins-base-1.0:plugins_effects',
              'gst-plugins-good-1.0:plugins_effects',
