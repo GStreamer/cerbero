@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-static --enable-static-plugins --enable-shared \
             --with-gstreamer --without-gstreamer-0.10 \
             --enable-compile-warnings=maximum --disable-gtk-doc'
-    deps = ['glib', 'gtk-doc-lite', 'gstreamer-1.0']
+    deps = ['glib', 'gstreamer-1.0']
     autoreconf = True
     patches = [
         "libnice/0001-Fix-build-with-android-NDK-r16.patch",

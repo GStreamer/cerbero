@@ -29,8 +29,11 @@ from cerbero.errors import FatalError, ConfigurationError
 
 class BuildTools (BootstrapperBase, Fetch):
 
+    # XXX: Remove vala-m4 and introspection-m4 once all GNOME recipes are
+    # ported to Meson, and revisit gtk-doc-lite too.
     BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'gettext-tools', 'libtool',
-                   'pkg-config', 'orc-tool', 'gettext-m4', 'meson']
+                   'pkg-config', 'orc-tool', 'gettext-m4', 'vala-m4',
+                   'gobject-introspection-m4', 'gtk-doc-lite', 'meson']
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'yasm', 'bison', 'flex'],
         Platform.WINDOWS: ['intltool', 'yasm'],
@@ -39,11 +42,6 @@ class BuildTools (BootstrapperBase, Fetch):
 
     def __init__(self, config, offline):
         BootstrapperBase.__init__(self, config, offline)
-
-        # if cross-compiling or not on linux, make sure we have gtk-doc
-        if self.config.target_platform != Platform.LINUX or\
-           self.config.cross_compiling():
-            self.BUILD_TOOLS.append('gtk-doc-lite')
 
         if self.config.platform == Platform.WINDOWS:
             self.BUILD_TOOLS.remove('m4')

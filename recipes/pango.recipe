@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'gnome://'
     tarball_checksum = '1d2b74cd63e8bd41961f2f8d952355aa0f9be6002b52c8aa7699d9f5da597c9d'
     licenses = [License.LGPLv2Plus]
-    deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'gtk-doc-lite', 'harfbuzz']
+    deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'harfbuzz']
     patches = [# https://gitlab.gnome.org/GNOME/pango/merge_requests/23
                name + '/0001-meson-Don-t-run-help2man-when-cross-building.patch',
                # Cherry-picked from upstream master

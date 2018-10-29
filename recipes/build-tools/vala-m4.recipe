@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'af5efb30e8a303dd1c211e2a30ba0b41e64d47c9d6c5271f1d8ffb4fb63a017f'
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.CUSTOM
-    files_devel = ['share/aclocal/vala.m4', 'share/vala/Makefile.vapigen']
+    files_devel = ['share/aclocal/vala.m4', 'share/aclocal/vapigen.m4',
+                   'share/vala/Makefile.vapigen']
 
     def install(self):
         shutil.copy(os.path.join(self.build_dir, 'vapigen', 'vapigen.m4'),
