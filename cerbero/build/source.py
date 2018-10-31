@@ -465,21 +465,27 @@ class Svn(Source):
         self.revision = self.config.recipe_commit(self.name) or self.revision
 
     def fetch(self):
-        if os.path.exists(self.repo_dir):
-            shutil.rmtree(self.repo_dir)
-
         cached_dir = os.path.join(self.config.cached_sources, self.package_name)
         if os.path.isdir(os.path.join(cached_dir, ".svn")):
+            if os.path.exists(self.repo_dir):
+                shutil.rmtree(self.repo_dir)
             m.action(_('Copying cached repo from %s to %s instead of %s') %
                      (cached_dir, self.repo_dir, self.url))
             shell.copy_dir(cached_dir, self.repo_dir)
             return
 
-        os.makedirs(self.repo_dir)
-        if self.offline:
-            raise FatalError('Offline mode: no cached svn repos found for {} at {!r}'
-                             ''.format(self.package_name, self.config.cached_sources))
-        svn.checkout(self.url, self.repo_dir)
+        checkout = True
+        if os.path.exists(self.repo_dir):
+            if os.path.isdir(os.path.join(self.repo_dir, '.svn')):
+                if self.offline:
+                    return
+                checkout = False
+            else:
+                shutil.rmtree(self.repo_dir)
+
+        if checkout:
+            os.makedirs(self.repo_dir, exist_ok=True)
+            svn.checkout(self.url, self.repo_dir)
         svn.update(self.repo_dir, self.revision)
 
     def extract(self):
