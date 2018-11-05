@@ -166,36 +166,98 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
             return os.path.join(self.config.prefix, self.config.target_arch)
         return self.config.prefix
 
-    def _write_gst_la_file(self, la_path, pcname, major, minor, micro, env):
-        ladir, laname = os.path.split(la_path)
-        ladir = os.path.join(self._get_arch_prefix(), ladir)
-        dep_libs = []
+    def _get_unique_ordered(self, elems):
+        used = []
+        return [x for x in elems if x not in used and (used.append(x) or True)]
+
+    def _get_la_deps_from_pc (self, laname, pcname, env):
         ret = shell.check_call('pkg-config --libs-only-l --static ' + pcname, env=env)
-        for lib in set(ret.split()):
-            # Don't add the library itself to the list of dependencies
-            if lib[2:] == laname[3:-3]:
-                continue
-            lafile = os.path.join(self.config.libdir, 'lib' + lib[2:] + '.la')
-            if os.path.isfile(lafile):
-                dep_libs.append(lib[2:])
-            else:
-                dep_libs.append(lib)
-        LibtoolLibrary(laname[:-3], major, minor, micro, ladir,
-                       self.config.target_platform, deps=dep_libs).save()
+        # Don't add the library itself to the list of dependencies
+        return ['lib' + lib[2:] for lib in self._get_unique_ordered(ret.split()) if lib[2:] != laname[3:]]
+
+    def _resolve_deps(self, deps):
+        resolved = []
+        unresolved = []
+
+        def resolve_step(node):
+            unresolved.append(node.name)
+            for dep in node.deps:
+                if dep not in resolved:
+                    if dep in unresolved:
+                        raise Exception('Circular reference detected: %s -> %s' % (node.name, dep))
+                    possible_nodes = [d for d in deps if d.name == dep]
+                    if len(possible_nodes) > 0:
+                        resolve_step(possible_nodes[0])
+            if node.name not in resolved:
+                resolved.append(node.name)
+            unresolved.remove(node.name)
+
+        for node in deps:
+            resolve_step(node)
+
+        ret = []
+        for dep in resolved:
+            possible = [d for d in deps if d.name == dep]
+            if len(dep) > 0:
+                ret.append(possible[0])
+
+        return ret
 
     def generate_gst_la_files(self):
         '''
         Generate .la files for all libraries and plugins packaged by this Meson
         recipe using the pkg-config files installed by our Meson build files.
         '''
+        class GeneratedLA(object):
+            name = None
+            major = None
+            minor = None
+            micro = None
+            libdir = None
+            platform = None
+            deps = None
+
+            def __init__(self, la_name, major, minor, micro, libdir, deps=None):
+                if not deps:
+                    deps = []
+
+                self.name = la_name
+                self.major = major
+                self.minor = minor
+                self.micro = micro
+                self.libdir = libdir
+                self.deps = deps
+
+            def __eq__(self, other):
+                if not isinstance(other, GeneratedLA):
+                    return False
+                return self.name == other.name and self.libdir == other.libdir
+
+            def __str__(self):
+                return "<GeneratedLA:%s@%s version:%s.%s.%s in \'%s\' deps: [%s]" % (
+                        str(self.name), str(hex(id(self))), str(self.major),
+                        str(self.minor), str(self.micro), str(self.libdir),
+                        ", ".join(self.deps))
+
+        lib_to_pcname_map = {
+            'gstadaptivedemux-1.0' : None,
+            'gstbadaudio-1.0' : 'gstreamer-bad-audio-1.0',
+            'gstbadvideo-1.0' : 'gstreamer-bad-video-1.0',
+            'gstbasecamerabinsrc-1.0' : None,
+            'gstisoff-1.0' : None,
+            'gstphotography-1.0' : None,
+            'gsturidownloader-1.0' : None,
+            'gstrtspserver-1.0' : 'gstreamer-rtsp-server-1.0',
+        }
+        generated_libs = []
+
         pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
         env = os.environ.copy()
         env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
         if self.use_system_libs:
             add_system_libs(self.config, env)
-        # Get la file -> pkg-config name mapping
-        libs_la_files = {}
-        plugin_la_files = {}
+
+        # retrieve the list of files we need to generate
         for f in self.devel_files_list():
             if not f.endswith('.a') or not f.startswith('lib/'):
                 continue
@@ -208,16 +270,56 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                 arch = self.config.target_arch
                 m.warning('{} {} {!r} not found'.format(arch, libtype, fpath))
                 continue
-            pcname = os.path.basename(f)[3:-2]
-            la = os.path.splitext(f)[0] + '.la'
-            if libtype == 'plugin':
-                self._write_gst_la_file(la, pcname, None, None, None, env)
-            else:
-                pcname = pcname.replace('gst', 'gstreamer-')
-                # Same versioning as gstreamer
+            pcname = os.path.basename(f)[3:-6 if f.endswith('.dll.a') else -2]
+            la_path = os.path.splitext(f)[0]
+            ladir, laname = os.path.split(la_path)
+            ladir = os.path.join(self._get_arch_prefix(), ladir)
+
+            major = minor = micro = None
+            if libtype == 'library':
+                if pcname in lib_to_pcname_map:
+                    pcname = lib_to_pcname_map[pcname]
+                elif not pcname.startswith('gstreamer-'):
+                    pcname = pcname.replace('gst', 'gstreamer-')
+
+                # some libs don't have .pc files
+                if not pcname:
+                    continue
+
                 minor, micro = (map(int, self.version.split('.')[1:3]))
                 minor = minor * 100 + micro
-                self._write_gst_la_file(la, pcname, 0, minor, 0, env)
+                major = micro = 0
+
+            pcpath = os.path.join(ladir, 'pkgconfig', pcname + '.pc')
+            if not os.path.isfile(pcpath):
+                arch = self.config.target_arch
+                # XXX: make this fatal?
+                m.warning('{} pkg-config file {!r} not found'.format(arch, pcpath))
+                continue
+
+            deps = self._get_la_deps_from_pc(laname, pcname, env)
+
+            generated = GeneratedLA(laname, major, minor, micro, ladir, deps)
+            generated_libs.append(generated)
+
+        # resolve dependencies so that dependant libs are generated
+        # before libraries/plugins using them
+        for lib in self._resolve_deps(generated_libs):
+            dep_libs = []
+            for dep in lib.deps:
+                # check if the lib is available as an .la and use that instead
+                # of -l arguments
+                lafile = os.path.join(self.config.libdir, dep + '.la')
+                if os.path.isfile(lafile):
+                    # LibtoolLibrary prepends the libdir and appends '.la' for us
+                    dep_libs.append(lafile[:-3])
+                else:
+                    if dep.startswith('lib'):
+                        dep = dep[3:]
+                    dep_libs.append('-l' + dep)
+
+            LibtoolLibrary(lib.name, lib.major, lib.minor, lib.micro, lib.libdir,
+                      self.config.target_platform, deps=dep_libs).save()
 
     def post_install(self):
         '''
