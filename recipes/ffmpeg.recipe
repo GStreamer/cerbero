@@ -51,7 +51,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
-                libavextraconf += " --extra-cflags='-mincoming-stack-boundary=4'"
+                libavextraconf += " --extra-cflags='-mstackrealign'"
             elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
                 # Fails to link into an android App
                 # https://github.com/android-ndk/ndk/issues/337
