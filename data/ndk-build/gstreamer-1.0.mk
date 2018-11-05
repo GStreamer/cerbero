@@ -174,7 +174,7 @@ else
 endif
 
 # Create the link command
-GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CC) $(TARGET_LDFLAGS) -shared --sysroot=$(SYSROOT_GST_LINK) \
+GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CXX) $(GLOBAL_LDFLAGS) $(TARGET_LDFLAGS) -nostdlib++ -shared --sysroot=$(SYSROOT_GST_LINK) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
@@ -212,7 +212,7 @@ genstatic_$(TARGET_ARCH_ABI):
 
 # Compile the source file
 $(GSTREAMER_ANDROID_O): PRIV_C := $(GSTREAMER_ANDROID_C)
-$(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT_GST_INC) $(SYSROOT_ARCH_INC_ARG) $(TARGET_CFLAGS) \
+$(GSTREAMER_ANDROID_O): PRIV_CC_CMD := $(TARGET_CC) --sysroot=$(SYSROOT_GST_INC) $(SYSROOT_ARCH_INC_ARG) $(GLOBAL_CFLAGS) $(TARGET_CFLAGS) \
 	-c $(GSTREAMER_ANDROID_C) -Wall -Werror -o $(GSTREAMER_ANDROID_O) $(GSTREAMER_ANDROID_CFLAGS)
 $(GSTREAMER_ANDROID_O): PRIV_GST_CFLAGS := $(GSTREAMER_ANDROID_CFLAGS) $(TARGET_CFLAGS)
 $(GSTREAMER_ANDROID_O): genstatic_$(TARGET_ARCH_ABI)
@@ -265,4 +265,3 @@ copyfontsres_$(TARGET_ARCH_ABI):
 copycacertificatesres_$(TARGET_ARCH_ABI):
 	$(hide)$(call host-mkdir,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
 	$(hide)$(call host-cp,$(GSTREAMER_ROOT)/etc/ssl/certs/ca-certificates.crt,$(GSTREAMER_ASSETS_DIR)/ssl/certs)
-
