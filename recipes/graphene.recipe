@@ -2,6 +2,8 @@
 import sys
 import shutil
 
+from cerbero.tools.libtool import LibtoolLibrary
+
 GRAPHENE_CONFIG_UNVERSAL='''\
 #ifdef __i386__
 #include "i386/graphene-config.h"
@@ -85,3 +87,7 @@ class Recipe(recipe.Recipe):
             with open(os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
                                    'include', 'graphene-config.h'), 'w+') as f:
                 f.write(GRAPHENE_CONFIG_UNVERSAL)
+
+        lib = LibtoolLibrary('graphene-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gobject-2.0', '-lm', '-pthread'])
+        lib.save()
