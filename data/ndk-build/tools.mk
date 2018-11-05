@@ -156,7 +156,12 @@ libtool-parse-file = \
   $(call __libtool_log, parsing file $1)\
   $(if $(call libtool-lib-processed,$2),\
       $(call __libtool_log, library $2 already parsed),\
-    $(eval __libtool_libs.$2.STATIC_LIB := $(patsubst %.la,%.a,$1))\
+    $(eval __libtool_libs.$2.old_lib := $(call libtool-get-old-library,$1)) \
+    $(eval __libtool_libs.$2.base_dir := $(dir $1)) \
+    $(if $(strip $(__libtool_libs.$2.old_lib)), \
+      $(eval __libtool_libs.$2.STATIC_LIB := $(__libtool_libs.$2.base_dir)$(__libtool_libs.$2.old_lib)),\
+      $(eval __libtool_libs.$2.STATIC_LIB := $(empty))\
+    ) \
     $(eval __libtool_libs.$2.DYN_LIB := -l$2)\
     $(eval __tmpvar.$2.dep_libs := $(call libtool-get-dependency-libs,$1))\
     $(eval __tmpvar.$2.dep_libs := $(call libtool-replace-prefixes,$(__tmpvar.$2.dep_libs)))\
@@ -260,6 +265,9 @@ libtool-get-search-paths = \
 
 libtool-get-dependency-libs = \
   $(shell $(SED) -n "s/^dependency_libs='\(.*\)'/\1/p" $1)
+
+libtool-get-old-library = \
+  $(shell $(SED) -n "s/^old_library='\(.*\)'/\1/p" $1)
 
 libtool-replace-prefixes = \
   $(subst $(BUILD_PREFIX),$(GSTREAMER_ROOT),$1 )
