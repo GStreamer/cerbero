@@ -15,13 +15,16 @@ class Recipe(recipe.Recipe):
                'libtheora/0003-Fix-linking-of-theora-encoder-library.patch',
                'libtheora/0004-Use-our-automake-version-and-not-an-older-one.patch',
                'libtheora/0005-Update-Makefile.in-too-to-avoid-needing-to-call-auto.patch',
-               'libtheora/0006-examples-Don-t-use-png_sizeof.patch']
+               'libtheora/0006-examples-Don-t-use-png_sizeof.patch',
+               'libtheora/0001-build-allow-skipping-configure-in-autogen.sh.patch']
     configure_options = ' --disable-spec --disable-doc'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = ['include/theora', 'lib/pkgconfig/theora.pc',
                    'lib/pkgconfig/theoraenc.pc', 'lib/pkgconfig/theoradec.pc']
+    autoreconf = True
+    autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
