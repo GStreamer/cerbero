@@ -1,6 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.utils import shell
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
@@ -47,3 +47,7 @@ class Recipe(recipe.Recipe):
             cache = os.path.join(self.config.prefix, 'lib', 'gdk-pixbuf-2.0',
                 '2.10.0', 'loaders.cache')
             shell.replace(cache, {self.config.prefix: '../'})
+
+        lib = LibtoolLibrary('gdk_pixbuf-2.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gobject-2.0', 'gio-2.0', 'tiff', 'jpeg', 'png16'])
+        lib.save()
