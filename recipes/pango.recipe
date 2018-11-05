@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pango'
@@ -34,3 +34,11 @@ class Recipe(recipe.Recipe):
         'PangoCairo-1.0',
         'PangoFT2-1.0'
         ]
+
+    def post_install(self):
+        LibtoolLibrary('pango-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gobject-2.0', 'fribidi']).save()
+        LibtoolLibrary('pangoft2-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['pango-1.0', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
+        LibtoolLibrary('pangocairo-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['pango-1.0', 'cairo', 'pixman-1', 'pangoft2-1.0']).save()
