@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
+
 class Recipe(recipe.Recipe):
     name = 'fribidi'
     version = '1.0.5'
@@ -15,3 +17,8 @@ class Recipe(recipe.Recipe):
     files_libs = ['libfribidi']
     files_bins = ['fribidi']
     files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']
+
+    def post_install (self):
+        lib = LibtoolLibrary('fribidi', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['glib-2.0'])
+        lib.save()
