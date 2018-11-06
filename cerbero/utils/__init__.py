@@ -245,6 +245,8 @@ def system_info():
                 distro_version = DistroVersion.FEDORA_27
             elif d[1] == '28':
                 distro_version = DistroVersion.FEDORA_28
+            elif d[1] == '29':
+                distro_version = DistroVersion.FEDORA_29
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
             elif d[1].startswith('7.'):
