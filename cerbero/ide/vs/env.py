@@ -27,7 +27,8 @@ from cerbero.errors import FatalError
 vcvarsalls = {
     '2015': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
     '2017': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat'],
+             r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
 }
 program_files = Path(os.environ['PROGRAMFILES(X86)'])
 
