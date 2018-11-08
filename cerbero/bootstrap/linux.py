@@ -119,7 +119,10 @@ class RedHatBootstrapper (UnixBootstrapper):
 
     def __init__(self, config, offline):
         UnixBootstrapper.__init__(self, config, offline)
-        if self.config.distro_version in [DistroVersion.FEDORA_23, DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
+        if self.config.distro_version in [DistroVersion.FEDORA_23,
+                                          DistroVersion.FEDORA_24, DistroVersion.FEDORA_25,
+                                          DistroVersion.FEDORA_26, DistroVersion.FEDORA_27,
+                                          DistroVersion.FEDORA_28, DistroVersion.FEDORA_29]:
             self.tool = 'dnf install %s'
         else:
             self.tool = 'yum install %s'
