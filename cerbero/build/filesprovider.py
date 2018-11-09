@@ -287,6 +287,22 @@ class FilesProvider(object):
                                        self._searchfuncs['default'])
         return search(self._get_category_files_list(category))
 
+    def _find_plugin_dll_files(self, f):
+        # Plugin template is always libfoo%(mext)s
+        if not f.startswith('lib'):
+            raise AssertionError('Plugin files must start with "lib": {!r}'.format(f))
+        # Plugin DLLs are required to be libfoo.dll (mingw) or foo.dll (msvc)
+        if (Path(self.config.prefix) / f).is_file():
+            # libfoo.dll
+            return [f]
+        if self.using_msvc():
+            fdir, fname = os.path.split(f)
+            fmsvc = '{}/{}'.format(fdir, fname[3:])
+            if (Path(self.config.prefix) / fmsvc).is_file():
+                # foo.dll, foo.pdb
+                return [fmsvc, fmsvc[:-3] + 'pdb']
+        raise FatalError('GStreamer plugin {!r} not found'.format(f))
+
     def _search_files(self, files):
         '''
         Search plugin files and arbitrary files in the prefix, doing the
@@ -299,17 +315,7 @@ class FilesProvider(object):
             if not f.endswith('.dll'):
                 fs.append(f)
                 continue
-            # Plugins DLLs are required to be simple: libfoo.dll or foo.dll
-            if not f.startswith('lib'):
-                raise AssertionError('Plugin files must start with "lib": {!r}'.format(f))
-            if (Path(self.config.prefix) / f).is_file():
-                # libfoo.dll, built with MinGW
-                fs.append(f)
-            elif (Path(self.config.prefix) / f[3:]).is_file():
-                # foo.dll, built with MSVC
-                fs.append(f[3:])
-                # foo.pdb
-                fs.append(f[3:-3] + 'pdb')
+            fs += self._find_plugin_dll_files(f)
         # fill directories
         dirs = [x for x in fs if
                 os.path.isdir(os.path.join(self.config.prefix, x))]

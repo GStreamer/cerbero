@@ -22,7 +22,6 @@ class Recipe(custom.GStreamer):
                       "share/gstreamer-1.0/validate/scenarios/*.scenario"
     ]
 
-    files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
     files_typelibs = [
         'GstValidate-1.0'
     ]
@@ -30,3 +29,7 @@ class Recipe(custom.GStreamer):
     def prepare(self):
         if self.config.target_platform == Platform.LINUX:
             self.files_libs.append("libgstvalidate-default-overrides-1.0")
+
+        if self.config.platform != Platform.WINDOWS:
+            # validatedefaultinjection plugin isn't built on Windows
+            self.files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
