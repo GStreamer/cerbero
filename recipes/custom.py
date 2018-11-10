@@ -26,7 +26,7 @@ class GStreamer(recipe.Recipe):
     if not tagged_for_release:
         # Pre-release version, use git master
         stype = SourceType.GIT
-        remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/%(name)s'}
+        remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s'}
     else:
         # Release version, use tarballs
         stype = SourceType.TARBALL
