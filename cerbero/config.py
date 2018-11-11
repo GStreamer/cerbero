@@ -567,7 +567,7 @@ class Config (object):
         else:
             # Path.home() reads the HOME env var
             cache_dir = Path.home() / '.cache'
-        return (cache_dir / 'cerbero-sources').resolve().as_posix()
+        return (cache_dir / 'cerbero-sources').as_posix()
 
     def _perl_version(self):
         version = shell.check_call("perl -e 'print \"$]\";'")
