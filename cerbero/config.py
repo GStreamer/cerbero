@@ -574,7 +574,11 @@ class Config (object):
         return (cache_dir / 'cerbero-sources').as_posix()
 
     def _perl_version(self):
-        version = shell.check_call("perl -e 'print \"$]\";'")
+        try:
+            version = shell.check_call("perl -e 'print \"$]\";'")
+        except:
+            m.warning(_("Perl not found, you may need to run bootstrap."))
+            version = '0.000000'
         # FIXME: when perl's mayor is >= 10
         mayor = str(version[0])
         minor = str(int(version[2:5]))
