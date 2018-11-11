@@ -18,10 +18,10 @@
 
 import os
 import shutil
-from cerbero.build.source import BaseTarball
+from cerbero.build.source import BaseTarball, Source
 
 
-class BootstrapTarball(BaseTarball):
+class BootstrapTarball(BaseTarball, Source):
 
     def __init__(self, config, offline, url, checksum, download_dir, tarball_name=None):
         self.config = config
@@ -30,7 +30,7 @@ class BootstrapTarball(BaseTarball):
         self.download_dir = download_dir
         self.tarball_name = tarball_name
         self.tarball_checksum = checksum
-        super().__init__()
+        BaseTarball.__init__(self)
 
 
 class BootstrapperBase (object):
