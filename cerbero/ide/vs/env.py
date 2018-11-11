@@ -30,13 +30,22 @@ vcvarsalls = {
              r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
 }
-program_files = Path(os.environ['PROGRAMFILES(X86)'])
+
+def get_program_files_dir():
+    if 'PROGRAMFILES(X86)' in os.environ:
+        # Windows 64-bit
+        return Path(os.environ['PROGRAMFILES(X86)'])
+    elif 'PROGRAMFILES' in os.environ:
+        # Windows 32-bit
+        return Path(os.environ['PROGRAMFILES'])
+    raise FatalError('Could not find path to 32-bit Program Files directory')
 
 def get_vcvarsall(version=None):
     if version is not None:
         versions = [version]
     else:
         versions = sorted(vcvarsalls.keys(), reverse=True)
+    program_files = get_program_files_dir()
     for version in versions:
         for path in vcvarsalls[version]:
             path = program_files / path
