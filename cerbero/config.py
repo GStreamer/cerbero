@@ -244,11 +244,13 @@ class Config (object):
         gstregistry10 = os.path.expanduser(gstregistry10)
 
         pypath = sysconfig.get_path('purelib', vars={'base': ''})
-        # Ensure that / is the path separator and not \, then strip /
-        pypath = PurePath(pypath).as_posix().strip('/')
+        # Must strip \/ to ensure that the path is relative
+        pypath = PurePath(pypath.strip('\\/'))
+        # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
+        # native path separator and must end in a path separator.
+        pythonpath = [str(prefix / pypath) + os.sep,
+                      str(self.build_tools_prefix / pypath) + os.sep]
         # Ensure python paths exists because setup.py won't create them
-        pythonpath = [os.path.join(prefix, pypath),
-                      os.path.join(self.build_tools_prefix, pypath)]
         for path in pythonpath:
             if self.platform == Platform.WINDOWS:
                 # pythonpaths start with 'Lib' on Windows, which is extremely
