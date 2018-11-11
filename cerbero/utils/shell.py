@@ -46,6 +46,8 @@ PLATFORM = system_info()[0]
 LOGFILE = None  # open('/tmp/cerbero.log', 'w+')
 DRY_RUN = False
 
+CALL_ENV = None
+
 
 def set_logfile_output(location):
     '''
@@ -111,6 +113,15 @@ def _fix_mingw_cmd(path):
     return ''.join(l_path)
 
 
+def set_call_env(env):
+    global CALL_ENV
+    CALL_ENV = env
+
+def restore_call_env():
+    global CALL_ENV
+    CALL_ENV = None
+
+
 def call(cmd, cmd_dir='.', fail=True, verbose=False):
     '''
     Run a shell command
@@ -122,6 +133,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
     @param fail: whether or not to raise an exception if the command fails
     @type fail: bool
     '''
+    global CALL_ENV
     try:
         if LOGFILE is None:
             if verbose:
@@ -146,10 +158,14 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
             m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
             ret = 0
         else:
+            if CALL_ENV is not None:
+                env = CALL_ENV.copy()
+            else:
+                env = os.environ.copy()
             ret = subprocess.check_call(cmd, cwd=cmd_dir,
                                        stderr=subprocess.STDOUT,
                                        stdout=StdOut(stream),
-                                       env=os.environ.copy(), shell=shell)
+                                       env=env, shell=shell)
     except subprocess.CalledProcessError:
         if fail:
             raise FatalError(_("Error running command: %s") % cmd)
@@ -160,7 +176,10 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
 
 def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
     if env is None:
-        env = os.environ.copy()
+        if CALL_ENV is not None:
+            env = CALL_ENV.copy()
+        else:
+            env = os.environ.copy()
     if split and isinstance(cmd, str):
         cmd = shlex.split(cmd)
     try:

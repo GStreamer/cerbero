@@ -56,7 +56,23 @@ class Source (object):
     strip = 1
     offline = False
 
-    def fetch(self):
+    def _fetch_env_setup(self):
+        # When running git commands, which is the host git, we need to make
+        # sure it is run in an environment which doesn't pick up the libraries
+        # we build in cerbero
+        env = os.environ.copy()
+        env["LD_LIBRARY_PATH"] = self.config._pre_environ.get("LD_LIBRARY_PATH", "")
+        shell.set_call_env(env)
+
+    def _fetch_env_restore(self):
+        shell.restore_call_env()
+
+    def fetch(self, **kwargs):
+        self._fetch_env_setup()
+        self.fetch_impl(**kwargs)
+        self._fetch_env_restore()
+
+    def fetch_impl(self):
         '''
         Fetch the sources
         '''
@@ -98,7 +114,7 @@ class Source (object):
 
 class CustomSource (Source):
 
-    def fetch(self):
+    def fetch_impl(self):
         pass
 
     def extract(self):
@@ -134,7 +150,7 @@ class BaseTarball(object):
         if o.scheme in ('http', 'ftp'):
             raise FatalError('Download URL {!r} must use HTTPS'.format(self.url))
 
-    def fetch(self, redownload=False):
+    def fetch_impl(self, redownload=False):
         if self.offline:
             if not os.path.isfile(self.download_path):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
@@ -213,7 +229,7 @@ class Tarball(BaseTarball, Source):
         self.download_dir = self.repo_dir
         BaseTarball.__init__(self)
 
-    def fetch(self, redownload=False):
+    def fetch_impl(self, redownload=False):
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
 
@@ -224,7 +240,7 @@ class Tarball(BaseTarball, Source):
                      (cached_file, self.download_path, self.url))
             shutil.copy(cached_file, self.download_path)
             return
-        super().fetch(redownload=redownload)
+        super().fetch_impl(redownload=redownload)
 
     def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
@@ -272,22 +288,7 @@ class GitCache (Source):
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
         self._previous_env = None
 
-    def _git_env_setup(self):
-        # When running git commands, which is the host git, we need to make
-        # sure it is run in an environment which doesn't pick up the libraries
-        # we build in cerbero
-        env = os.environ.copy()
-        self._previous_env = os.environ.copy()
-        env["LD_LIBRARY_PATH"] = self.config._pre_environ.get("LD_LIBRARY_PATH", "")
-        os.environ = env
-
-    def _git_env_restore(self):
-        if self._previous_env is not None:
-            os.environ = self._previous_env
-            self._previous_env = None
-
-    def fetch(self, checkout=True):
-        self._git_env_setup()
+    def fetch_impl(self, checkout=True):
         # First try to get the sources from the cached dir if there is one
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
 
@@ -314,7 +315,6 @@ class GitCache (Source):
             commit = self.config.recipe_commit(self.name) or self.commit
             git.checkout(self.repo_dir, commit)
             git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline)
-        self._git_env_restore()
 
 
     def built_version(self):
@@ -464,7 +464,7 @@ class Svn(Source):
         # For forced revision in the config
         self.revision = self.config.recipe_commit(self.name) or self.revision
 
-    def fetch(self):
+    def fetch_impl(self):
         cached_dir = os.path.join(self.config.cached_sources, self.package_name)
         if os.path.isdir(os.path.join(cached_dir, ".svn")):
             if os.path.exists(self.repo_dir):
