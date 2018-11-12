@@ -184,7 +184,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
             for dep in node.deps:
                 if dep not in resolved:
                     if dep in unresolved:
-                        raise Exception('Circular reference detected: %s -> %s' % (node.name, dep))
+                        raise RuntimeError('Circular reference detected: %s -> %s' % (node.name, dep))
                     possible_nodes = [d for d in deps if d.name == dep]
                     if len(possible_nodes) > 0:
                         resolve_step(possible_nodes[0])
