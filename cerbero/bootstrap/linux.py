@@ -58,7 +58,7 @@ class DebianBootstrapper (UnixBootstrapper):
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
                 'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev',
                 'libegl1-mesa-dev', 'git', 'subversion', 'xutils-dev',
-                'intltool']
+                'intltool', 'ccache']
     distro_packages = {
         DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
         DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
@@ -115,7 +115,7 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'docbook-utils-pdf', 'glib-networking', 'help2man',
                 'dbus-devel', 'glib2-devel', 'libXrandr-devel',
                 'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
-                'mesa-libEGL-devel']
+                'mesa-libEGL-devel', 'ccache']
 
     def __init__(self, config, offline):
         UnixBootstrapper.__init__(self, config, offline)
@@ -154,7 +154,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
             'libX11-devel', 'alsa-devel', 'libXi-devel', 'Mesa-devel',
             'Mesa-libGLESv3-devel',
             'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
-            'docbook-utils', 'glib-networking', 'git', 'subversion']
+            'docbook-utils', 'glib-networking', 'git', 'subversion', 'ccache']
 
 class ArchBootstrapper (UnixBootstrapper):
 
@@ -164,7 +164,7 @@ class ArchBootstrapper (UnixBootstrapper):
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
             'docbook-xsl', 'transfig', 'libxrender',
             'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
-            'subversion', 'xorg-util-macros']
+            'subversion', 'xorg-util-macros', 'ccache']
 
     def __init__(self, config, offline):
         UnixBootstrapper.__init__(self, config, offline)
