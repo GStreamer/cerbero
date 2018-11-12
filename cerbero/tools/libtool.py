@@ -156,6 +156,9 @@ libdir='%(libdir)s'
         self.libtool_vars[key] = val
 
     def _parse_deps(self, deps):
+        # FIXME: these deps need to be resolved recursively since the list of
+        # dependency_libs in .la files are exhaustive. For now, recipes are
+        # handling that.
         deps_str = ''
         libtool_deps = [x for x in deps if not x.startswith('-l')]
         lib_deps = [x for x in deps if x.startswith('-l')]
