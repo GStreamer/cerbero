@@ -189,12 +189,16 @@ class WindowsBootstrapper(BootstrapperBase):
         # Fixes checks in configure, where cpp -v is called
         # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
-        #
-        # MSYS's link.exe overrides MSVC's link.exe in new shells, so rename it
-        for tool in ('cpp', 'link'):
-            if (msys_mingw_bindir / (tool + '.exe')).is_file():
-                os.replace(msys_mingw_bindir / (tool + '.exe'),
-                           msys_mingw_bindir / (tool + '.exe.bck'))
+        if (msys_mingw_bindir / 'cpp.exe').is_file():
+            os.replace(msys_mingw_bindir / 'cpp.exe',
+                       msys_mingw_bindir / 'cpp.exe.bck')
+        # MSYS's link.exe (for symlinking) overrides MSVC's link.exe (for
+        # C linking) in new shells, so rename it. No one uses `link` for
+        # symlinks anyway.
+        msys_link_exe = Path(shutil.which('link'))
+        msys_link_bindir = msys_link_exe.parent
+        if msys_link_exe.is_file() and 'msys/1.0/bin/link' in msys_link_exe.as_posix():
+            os.replace(msys_link_exe, msys_link_bindir / 'link.exe.bck')
 
     def fix_non_prefixed_strings(self):
         # libtool m4 macros uses non-prefixed 'strings' command. We need to
