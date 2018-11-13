@@ -20,6 +20,9 @@ class Recipe(recipe.Recipe):
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', 'lib/pkgconfig/soundtouch.pc']
 
+    # FIXME: Meson port does not export symbols correctly for use with MSVC
+    can_msvc = False
+
     def prepare (self):
       if self.config.target_platform == Platform.ANDROID:
         self.append_env('CXXFLAGS', '-fexceptions -DST_NO_EXCEPTION_HANDLING')
