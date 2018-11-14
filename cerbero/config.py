@@ -276,10 +276,10 @@ class Config (object):
         if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
 
+        ld_library_path = self._join_path(
+            os.path.join(self.build_tools_prefix, 'lib'), path)
         if not self.cross_compiling():
-            ld_library_path = libdir
-        else:
-            ld_library_path = ""
+            ld_library_path = self._join_path(ld_library_path, libdir)
         if self.extra_lib_path is not None:
             ld_library_path = self._join_path(ld_library_path, self.extra_lib_path)
         if self.toolchain_prefix is not None:
