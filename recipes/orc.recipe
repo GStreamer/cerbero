@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'orc'
@@ -23,3 +23,12 @@ class Recipe(recipe.Recipe):
             self.files_devel.append('bin/orc-bugreport%(bext)s')
         else:
             self.meson_options['orc-test'] = 'disabled'
+
+    def post_install(self):
+        dependency_libs = []
+        if self.config.target_platform == Platform.ANDROID:
+            dependency_libs += ['-lm', '-llog']
+
+        lib = LibtoolLibrary('orc-0.4', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=dependency_libs)
+        lib.save()
