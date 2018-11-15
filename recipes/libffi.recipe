@@ -11,7 +11,19 @@ class Recipe(recipe.Recipe):
     patches = [name + '/libffi-port-to-meson-and-msvc.patch']
 
     files_libs = ['libffi']
-    files_devel = ['include/ffi*.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['include/ffi.h', 'include/ffitarget.h', 'lib/pkgconfig/libffi.pc']
+
+    def prepare(self):
+        if Architecture.is_arm32(self.config.target_arch):
+            suffix = 'arm'
+        elif self.config.target_arch == Architecture.ARM64:
+            suffix = 'aarch64'
+        else:
+            suffix = self.config.target_arch
+        # We can't use * to catch these headers automatically because it tries
+        # to pick up the wrong headers during Android universal builds.
+        self.files_devel.append('include/ffi-{}.h'.format(suffix))
+        self.files_devel.append('include/ffitarget-{}.h'.format(suffix))
 
     def post_install(self):
         libtool_la = LibtoolLibrary('ffi', 7, None, None, self.config.libdir,
