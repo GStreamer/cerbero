@@ -30,6 +30,8 @@ class Bootstrap(Command):
         args = [
             ArgparseArgument('--build-tools-only', action='store_true',
                 default=False, help=_('only bootstrap the build tools')),
+            ArgparseArgument('--system-only', action='store_true',
+                default=False, help=('only boostrap the system')),
             ArgparseArgument('--offline', action='store_true',
                 default=False, help=_('Use only the source cache, no network')),
             ArgparseArgument('-y', '--assume-yes', action='store_true',
@@ -38,7 +40,7 @@ class Bootstrap(Command):
 
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only,
-                args.offline, args.assume_yes)
+                args.offline, args.assume_yes, args.system_only)
         for bootstrapper in bootstrappers:
             bootstrapper.fetch()
             bootstrapper.extract()
@@ -57,7 +59,7 @@ class FetchBootstrap(Command):
 
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only,
-                offline=False, assume_yes=False)
+                offline=False, assume_yes=False, system_only=False)
         for bootstrapper in bootstrappers:
             bootstrapper.fetch_recipes()
             bootstrapper.fetch()
