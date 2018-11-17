@@ -27,9 +27,15 @@ import subprocess
 class UnixBootstrapper (BootstrapperBase):
 
     tool = ''
+    command = ''
+    yes_arg = ''
     checks = []
     packages = []
     distro_packages = {}
+
+    def __init__(self, config, offline, assume_yes):
+        BootstrapperBase.__init__(self, config, offline)
+        self.assume_yes = assume_yes
 
     def start(self):
         for c in self.checks:
@@ -39,12 +45,18 @@ class UnixBootstrapper (BootstrapperBase):
             packages = self.packages
             if self.config.distro_version in self.distro_packages:
                 packages += self.distro_packages[self.config.distro_version]
-            shell.call(self.tool % ' '.join(self.packages))
+            tool = self.tool
+            if self.assume_yes:
+              tool += ' ' + self.yes_arg;
+            tool += ' ' + self.command;
+            shell.call(tool % ' '.join(self.packages))
 
 
 class DebianBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo apt-get install %s'
+    tool = 'sudo apt-get'
+    command = 'install %s'
+    yes_arg = '-y'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
@@ -70,8 +82,8 @@ class DebianBootstrapper (UnixBootstrapper):
         DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
     }
 
-    def __init__(self, config, offline):
-        UnixBootstrapper.__init__(self, config, offline)
+    def __init__(self, config, offline, assume_yes):
+        UnixBootstrapper.__init__(self, config, offline, assume_yes)
         if self.config.target_platform == Platform.WINDOWS:
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
@@ -103,6 +115,9 @@ class DebianBootstrapper (UnixBootstrapper):
 
 class RedHatBootstrapper (UnixBootstrapper):
 
+    tool = 'dnf'
+    command = 'install %s'
+    yes_arg = '-y'
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
                 'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm',
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -117,15 +132,12 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
                 'mesa-libEGL-devel', 'ccache']
 
-    def __init__(self, config, offline):
-        UnixBootstrapper.__init__(self, config, offline)
-        if self.config.distro_version in [DistroVersion.FEDORA_23,
-                                          DistroVersion.FEDORA_24, DistroVersion.FEDORA_25,
-                                          DistroVersion.FEDORA_26, DistroVersion.FEDORA_27,
-                                          DistroVersion.FEDORA_28, DistroVersion.FEDORA_29]:
-            self.tool = 'dnf install %s'
-        else:
-            self.tool = 'yum install %s'
+    def __init__(self, config, offline, assume_yes):
+        UnixBootstrapper.__init__(self, config, offline, assume_yes)
+
+        if self.config.distro_version < DistroVersion.FEDORA_23:
+            self.tool = 'yum'
+
         if self.config.target_platform == Platform.WINDOWS:
             self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
@@ -143,7 +155,9 @@ class RedHatBootstrapper (UnixBootstrapper):
 
 class OpenSuseBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo zypper install %s'
+    tool = 'sudo zypper'
+    command = 'install %s'
+    yes_arg = '-y'
     packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
             'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'yasm',
             'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -158,7 +172,9 @@ class OpenSuseBootstrapper (UnixBootstrapper):
 
 class ArchBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo pacman -S %s --needed'
+    tool = 'sudo pacman'
+    command = ' -S %s --needed'
+    yes_arg = ' --noconfirm'
     packages = ['intltool', 'cmake', 'doxygen', 'gtk-doc',
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
@@ -166,8 +182,8 @@ class ArchBootstrapper (UnixBootstrapper):
             'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
             'subversion', 'xorg-util-macros', 'ccache']
 
-    def __init__(self, config, offline):
-        UnixBootstrapper.__init__(self, config, offline)
+    def __init__(self, config, offline, assume_yes):
+        UnixBootstrapper.__init__(self, config, offline, assume_yes)
 
         has_multilib = True
         try:
@@ -182,7 +198,9 @@ class ArchBootstrapper (UnixBootstrapper):
 
 class GentooBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo emerge -u %s'
+    tool = 'sudo emerge'
+    command = '-u %s'
+    yes_arg = '' # Does not seem interactive
     packages = ['dev-util/intltool', 'sys-fs/fuse', 'dev-util/cmake',
             'app-doc/doxygen', 'dev-util/gtk-doc', 'sys-devel/libtool',
             'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
