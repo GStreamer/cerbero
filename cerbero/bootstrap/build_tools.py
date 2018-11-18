@@ -77,6 +77,7 @@ class BuildTools (BootstrapperBase, Fetch):
         os.environ.update(self.config._pre_environ)
         config.prefix = self.config.build_tools_prefix
         config.home_dir = self.config.home_dir
+        config.local_sources = self.config.local_sources
         config.load()
 
         config.prefix = self.config.build_tools_prefix
