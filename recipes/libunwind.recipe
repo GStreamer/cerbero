@@ -7,6 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'savannah://.tar.gz'
     tarball_checksum = '9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a'
+    autoreconf = True
 
     files_libs = ['libunwind']
     files_devel = ['include/libunwind-*.h',
