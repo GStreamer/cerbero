@@ -353,11 +353,14 @@ class CookBook (object):
             # filepath attribute was added afterwards
             if not hasattr(st, 'filepath') or not getattr(st, 'filepath'):
                 st.filepath = recipe.__file__
+            # if filepath has changed, force using file_hash(), this will
+            # allow safe relocation of the recipes.
             if recipe.__file__ != st.filepath:
-                self.reset_recipe_status(recipe.name)
+                st.filepath = recipe.__file__
+                st.mtime = 0;
             # Need to check the version too, because the version can be
             # inherited from a different file, f.ex. recipes/custom.py
-            elif recipe.built_version() != st.built_version:
+            if recipe.built_version() != st.built_version:
                 self.reset_recipe_status(recipe.name)
             else:
                 rmtime = os.path.getmtime(recipe.__file__)
