@@ -29,6 +29,7 @@ from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
 from cerbero.utils import _, shell, parse_file
 from cerbero.utils import messages as m
+from cerbero.utils.manifest import Manifest
 from cerbero.build import recipe as crecipe
 
 
@@ -135,6 +136,7 @@ class CookBook (object):
         Reloads the recipes list and updates the cookbook
         '''
         self._load_recipes()
+        self._load_manifest()
         self.save()
 
     def get_recipes_list(self):
@@ -439,3 +441,24 @@ class CookBook (object):
             if not recipe.is_empty():
                 return recipe
         return None
+
+    def _load_manifest(self):
+        manifest_path = self._config.manifest
+
+        if not manifest_path:
+         return
+
+        manifest = Manifest(manifest_path)
+        manifest.parse()
+
+        for project in manifest.projects.values():
+            for recipe in self.recipes.values():
+                if recipe.stype not in [SourceType.GIT,
+                                        SourceType.GIT_TARBALL]:
+                    continue;
+
+                default_fetch = manifest.get_fetch_uri(project, manifest.default_remote)
+                if recipe.remotes['origin'] in [default_fetch,
+                                                default_fetch[:-4]]:
+                    recipe.remotes['origin'] = project.fetch_uri
+                    recipe.commit = project.revision

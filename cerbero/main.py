@@ -83,6 +83,8 @@ class Main(object):
                 help=_('Print timestamps with every message printed'))
         self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))
+        self.parser.add_argument('-m', '--manifest', action='store', type=str, default=None,
+                help=_('Manifest file used to fixate git revisions'))
 
     def parse_arguments(self, args):
         ''' Parse the command line arguments '''
@@ -101,6 +103,8 @@ class Main(object):
         try:
             self.config = config.Config()
             self.config.load(self.args.config)
+            if self.args.manifest:
+                self.config.manifest = self.args.manifest
         except ConfigurationError as exc:
             self.log_error(exc, False)
 
