@@ -5,36 +5,31 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.2.2'
+    version = '1.3.0'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    licenses = [License.LGPLv2_1]
+    tarball_checksum = '645c13a9a5c5b59315f82245737289e071a5441ee40de6e2e45af61e305e1f2c'
+    licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     configure_options = '-DUSE_GNUTLS=ON -DENABLE_CXX11=OFF'
     deps = ['gnutls']
 
-    patches = ['srt/0001-channel.cpp-add-mswsock.h-for-Win32.patch',
-               'srt/0002-common-srt_compat.h-add-time.h-to-suppress-compilati.patch',
-               'srt/0003-srtcore-api.h-change-inet_ntop-to-getnameinfo.patch',
-               'srt/0004-build-support-cross-compiling-by-mingw.patch',
-               'srt/0006-Clean-.pc-to-provide-the-dependecies.patch',
-               'srt/0007-srt_compat.h-Enable-localtime_s-only-if-MSC_VER-1500.patch',
-               'srt/0008-build-Fix-for-MinGW-support.patch',
-               'srt/0009-Fix-include-path-for-wintime.h.patch',
-               'srt/0010-Include-syslog.h-on-Android.patch',
-               'srt/0011-Fix-includes-for-iOS.patch']
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
+    patches = ['srt/0001-Build-Fix-MingW-build.patch',
+               'srt/0002-srt-Fix-MingW-build.patch',
+               'srt/0003-platform_sys-Only-include-inttypes.h-with-MSFT-compi.patch',
+               'srt/0004-MingW-needs-the-explicit-exports-too.patch',
+               'srt/0005-Windows-Only-define-SRT_API-in-one-place.patch',
+               'srt/0001-Allow-building-using-gnustl.patch']
 
     def prepare(self):
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.configure_options += ' -DENABLE_SHARED=OFF '
         if self.config.target_platform == Platform.ANDROID:
-            self.append_env['CXXFLAGS'] = " -frtti -fexceptions `pkg-config --cflags gnustl`"
+            self.append_env['CXXFLAGS'] = " -frtti -fexceptions"
             self.deps += ['gnustl']
-            self.configure_options += " -DPTHREAD_INCLUDE_DIR=/ignoreme -DPTHREAD_LIBRARY=pthread "
+            self.configure_options += ' -DUSE_GNUSTL=ON'
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('srt', 1, 2, 2, self.config.libdir,
+        libtool_la = LibtoolLibrary('srt', 1, 3, 0, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()

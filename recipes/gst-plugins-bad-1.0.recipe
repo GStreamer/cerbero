@@ -17,20 +17,20 @@ class Recipe(custom.GStreamer):
         --disable-pvr --disable-sdl --disable-sndfile \
         --disable-teletextdec --disable-timidity \
         --disable-vdpau --disable-voamrwbenc --disable-wildmidi \
-        --disable-xvid --disable-zbar --disable-sdi --disable-srt'
+        --disable-xvid --disable-zbar --disable-sdi'
     # Explicitly enable plugins
     configure_options += ' --enable-bz2 --enable-assrender \
         --enable-faad --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
         --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp \
-        --enable-decklink --enable-webrtc --enable-dtls'
+        --enable-decklink --enable-webrtc --enable-dtls --enable-srt'
     remotes = {'origin': 'https://anongit.freedesktop.org/git/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'faad2', 'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'openssl',
-            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa']
+            'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa', 'srt']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -237,6 +237,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsdpelem%(mext)s',
              'lib/gstreamer-1.0/libgstsrtp%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtc%(mext)s',
+             'lib/gstreamer-1.0/libgstsrt%(mext)s',
     ]
 
     files_plugins_net_devel = [
@@ -244,6 +245,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsdpelem.a', 'lib/gstreamer-1.0/libgstsdpelem.la',
              'lib/gstreamer-1.0/libgstsrtp.a', 'lib/gstreamer-1.0/libgstsrtp.la',
              'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
+             'lib/gstreamer-1.0/libgstsrt.a', 'lib/gstreamer-1.0/libgstsrt.la',
     ]
 
     files_plugins_net_restricted = [
