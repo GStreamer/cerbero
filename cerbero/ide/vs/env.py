@@ -25,8 +25,8 @@ from cerbero.errors import FatalError
 
 # We only support Visual Studio 2015 as of now
 vcvarsalls = {
-    '2015': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
-    '2017': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
+    'vs14': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
+    'vs15': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
 }
@@ -51,7 +51,7 @@ def get_vcvarsall(version=None):
             path = program_files / path
             # Find the location of the Visual Studio installation
             if path.is_file():
-                return path.as_posix()
+                return path.as_posix(), version
     raise FatalError('Microsoft Visual Studio not found, please file a bug. '
                      'We looked for: ' + ', '.join(versions))
 
@@ -101,7 +101,7 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
 
 def get_msvc_env(arch, target_arch, version=None):
     ret_env = {}
-    vcvarsall = get_vcvarsall(version)
+    vcvarsall, vsver = get_vcvarsall(version)
 
     without_msvc = run_and_get_env('set')
     arg = get_vcvarsall_arg(arch, target_arch)
@@ -118,4 +118,4 @@ def get_msvc_env(arch, target_arch, version=None):
             ret_env[var] = get_envvar_msvc_values(msvc[var], nomsvc[var])
         else:
             ret_env[var] = msvc[var]
-    return ret_env
+    return ret_env, vsver

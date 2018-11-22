@@ -83,7 +83,7 @@ class GenLib(object):
         if platform != Platform.WINDOWS:
             return None, None
         from cerbero.ide.vs.env import get_msvc_env
-        msvc_env = get_msvc_env('x86', target_arch)
+        msvc_env = get_msvc_env('x86', target_arch)[0]
         paths = msvc_env['PATH']
         return shutil.which('lib', path=paths), paths
 
