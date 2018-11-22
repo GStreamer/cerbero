@@ -42,6 +42,40 @@ class Build (object):
     can_msvc = False
     _properties_keys = []
 
+    def setup_toolchain_env_ops(self):
+        if self.config.platform != Platform.WINDOWS:
+            return
+        if self.using_msvc():
+            toolchain_env = self.config.msvc_toolchain_env
+        else:
+            toolchain_env = self.config.mingw_toolchain_env
+        # Set the toolchain environment
+        for var, (val, sep) in toolchain_env.items():
+            # We prepend PATH and replace the rest
+            if var == 'PATH':
+                self.prepend_env(var, val, sep=sep)
+            else:
+                self.set_env(var, val, sep=sep)
+
+    def unset_toolchain_env(self):
+        # These toolchain env vars set by us are for GCC, so unset them if
+        # we're building with MSVC (or cross-compiling with Meson)
+        for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
+                    'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
+            if var in os.environ:
+                # Store it on _old_env so that the value is restored when
+                # we return from self.configure()
+                self._old_env[var] = os.environ[var]
+                del os.environ[var]
+        # Re-add *FLAGS that weren't set by the toolchain config, but instead
+        # were set in the recipe or other places via @modify_environment
+        if self.using_msvc():
+            for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
+                        'LDFLAGS', 'OBJLDFLAGS'):
+                for env_op in self._new_env:
+                    if env_op.var == var:
+                        env_op.execute()
+
     def using_msvc(self):
         if not self.can_msvc:
             return False
@@ -227,6 +261,9 @@ class MakefilesBase (Build, ModifyEnvBase):
     def __init__(self):
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
+
+        self.setup_toolchain_env_ops()
+
         self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
                                                            self.srcdir))
         if self.requires_non_src_build:
@@ -264,6 +301,9 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.requires_non_src_build:
             self.config_sh = os.path.join('../', self.config_sh)
 
+        if self.using_msvc():
+            self.unset_toolchain_env()
+
         shell.call(self.configure_tpl % {'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
             'libdir': to_unixpath(self.config.libdir),
@@ -275,6 +315,8 @@ class MakefilesBase (Build, ModifyEnvBase):
 
     @modify_environment
     def compile(self):
+        if self.using_msvc():
+            self.unset_toolchain_env()
         shell.call(self.make, self.make_dir)
 
     @modify_environment
@@ -487,22 +529,11 @@ class Meson (Build, ModifyEnvBase) :
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
 
+        self.setup_toolchain_env_ops()
+
         cross_props = copy.deepcopy(self.config.meson_cross_properties)
         cross_props.update(self.config.meson_cross_properties or {})
         self.meson_cross_properties = cross_props
-
-        if self.config.platform == Platform.WINDOWS:
-            if self.using_msvc():
-                toolchain_env = self.config.msvc_toolchain_env
-            else:
-                toolchain_env = self.config.mingw_toolchain_env
-            # Set the toolchain environment
-            for var, (val, sep) in toolchain_env.items():
-                # We prepend PATH and replace the rest
-                if var == 'PATH':
-                    self.prepend_env(var, val, sep=sep)
-                else:
-                    self.set_env(var, val, sep=sep)
 
         # Find Meson
         if not self.meson_sh:
@@ -684,9 +715,6 @@ class Meson (Build, ModifyEnvBase) :
             f = self._write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
 
-        # Whether to reset the toolchain env vars set by the cerbero config
-        # and the recipe before building the recipe
-        reset_toolchain_envvars = False
         if self.config.cross_compiling() or self.using_msvc():
             # We export the cross toolchain with env vars, but Meson picks the
             # native toolchain from these, so unset them.
@@ -694,25 +722,9 @@ class Meson (Build, ModifyEnvBase) :
             # NOTE: This means we require a native compiler on the build
             # machine when cross-compiling, which in practice is not a problem
             #
-            # The toolchain env vars set by us are for GCC, so unset them if
-            # we're building with MSVC
-            #
-            # Only unset vars that are read by Meson for now
-            for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
-                        'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
-                if var in os.environ:
-                    # Store it on _old_env so that the value is restored when
-                    # we return from self.configure()
-                    self._old_env[var] = os.environ[var]
-                    del os.environ[var]
-            # Re-add *FLAGS that weren't set by the config, but instead were
-            # set in the recipe or other places via @modify_environment
-            if self.using_msvc():
-                for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
-                            'LDFLAGS', 'OBJLDFLAGS'):
-                    for env_op in self._new_env:
-                        if env_op.var == var:
-                            env_op.execute()
+            # Also, on Windows these toolchain env vars set by us are for GCC,
+            # so unset them if we're building with MSVC
+            self.unset_toolchain_env()
 
         if 'default_library' in self.meson_options:
             raise RuntimeError('Do not set `default_library` in self.meson_options, use self.meson_default_library instead')
