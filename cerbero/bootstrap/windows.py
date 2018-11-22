@@ -185,7 +185,11 @@ class WindowsBootstrapper(BootstrapperBase):
             return libdir.strip()[1:-1]
 
     def fix_mingw_unused(self):
-        msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
+        mingw_get_exe = shutil.which('mingw-get')
+        if not mingw_get_exe:
+            m.warning('mingw-get not found, are you not using an MSYS shell?')
+            return
+        msys_mingw_bindir = Path(mingw_get_exe).parent
         # Fixes checks in configure, where cpp -v is called
         # to get some include dirs (which doesn't looks like a good idea).
         # If we only have the host-prefixed cpp, this problem is gone.
@@ -195,7 +199,10 @@ class WindowsBootstrapper(BootstrapperBase):
         # MSYS's link.exe (for symlinking) overrides MSVC's link.exe (for
         # C linking) in new shells, so rename it. No one uses `link` for
         # symlinks anyway.
-        msys_link_exe = Path(shutil.which('link'))
+        msys_link_exe = shutil.which('link')
+        if not msys_link_exe:
+            return
+        msys_link_exe = Path(msys_link_exe)
         msys_link_bindir = msys_link_exe.parent
         if msys_link_exe.is_file() and 'msys/1.0/bin/link' in msys_link_exe.as_posix():
             os.replace(msys_link_exe, msys_link_bindir / 'link.exe.bck')
