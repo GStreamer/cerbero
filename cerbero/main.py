@@ -35,8 +35,9 @@ import time
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
     ConfigurationError, CerberoException, AbortedError
-from cerbero.utils import _, N_, user_is_root
+from cerbero.utils import _, N_, user_is_root, git
 from cerbero.utils import messages as m
+from cerbero.utils.manifest import Manifest
 
 description = N_('Build and package a set of modules to distribute them in '
                  'a SDK')
@@ -51,6 +52,7 @@ class Main(object):
         self.create_parser()
         self.load_commands()
         self.parse_arguments(args)
+        self.self_update()
         self.init_logging()
         self.load_config()
         self.run_command()
@@ -85,6 +87,9 @@ class Main(object):
                 help=_('Configuration file used for the build'))
         self.parser.add_argument('-m', '--manifest', action='store', type=str, default=None,
                 help=_('Manifest file used to fixate git revisions'))
+        if os.path.basename(sys.argv[0]) == 'cerbero-uninstalled':
+            self.parser.add_argument('--self-update', action='store', type=str, default=None,
+                    help=_('Update cerbero git repository from manifest and exit.'))
 
     def parse_arguments(self, args):
         ''' Parse the command line arguments '''
@@ -92,6 +97,25 @@ class Main(object):
         if len(args) == 0:
             args = ["-h"]
         self.args = self.parser.parse_args(args)
+
+    def self_update(self):
+        '''Update this instance of cerbero git repository'''
+
+        if not self.args.self_update:
+           return
+
+        try:
+            manifest = Manifest(self.args.self_update)
+            manifest.parse()
+            project = manifest.find_project('cerbero')
+            git_dir = os.path.dirname(sys.argv[0])
+            git.add_remote(git_dir, project.remote, project.fetch_uri)
+            git.fetch(git_dir)
+            git.checkout(git_dir, project.revision)
+        except FatalError as ex:
+            self.log_error(_("ERROR: Failed to proceed with self update %s") %
+                    ex)
+        exit(0)
 
     def load_commands(self):
         subparsers = self.parser.add_subparsers(help=_('sub-command help'),
