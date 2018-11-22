@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '1fec931eb5c94279ad219a5b6e0202358e94a93a90cfb1603578c326abfc1238'
     licenses = [License.BSD]
     btype = BuildType.MAKEFILE
-    configure_tpl = "./configure --prefix=%(prefix)s "\
+    configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"
     configure_options = "--enable-pic --as=yasm --disable-unit-tests --size-limit=16384x16384 "\
                         "--enable-postproc --enable-multi-res-encoding --enable-temporal-denoising "\
@@ -22,6 +22,9 @@ class Recipe(recipe.Recipe):
     supports_cache_variables = False
     can_use_configure_cache = False
     make = 'make HAVE_GNU_STRIP=no'
+    # The shell-based build system magically supports Visual Studio with the
+    # power of awesome hacks
+    can_msvc = True
 
     patches = ['libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
                'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
@@ -29,7 +32,8 @@ class Recipe(recipe.Recipe):
                'libvpx/0004-build-Remove-broken-custom-android-toolchain-usage.patch',
                # Taken from AOSP: https://android.googlesource.com/platform/external/libvpx/+/android-o-mr1-iot-release-1.0.3/
                'libvpx/0005-Add-visibility-protected-attribute-for-global-variab.patch',
-               'libvpx/0007-Fix-pkg-config-file-library-list.patch',
+               'libvpx/0006-Fix-pkg-config-file-library-list.patch',
+               'libvpx/0007-Always-generate-a-pkg-config-file-and-don-t-require-.patch'
                ]
 
     files_libs = ['libvpx']
@@ -41,6 +45,7 @@ class Recipe(recipe.Recipe):
 
 
     def prepare (self):
+        compiler = 'gcc'
         if self.config.target_arch == Architecture.X86_64:
             arch = 'x86_64'
         elif self.config.target_arch == Architecture.X86:
@@ -73,7 +78,10 @@ class Recipe(recipe.Recipe):
                 platform = 'win64'
             else:
                 platform = 'win32'
-                self.append_env('CFLAGS', '-mstackrealign')
+                if not self.using_msvc():
+                    self.append_env('CFLAGS', '-mstackrealign')
+            if self.using_msvc():
+                compiler = self.config.msvc_version
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
@@ -103,7 +111,7 @@ class Recipe(recipe.Recipe):
 
         self.configure_options += ' --disable-examples '
 
-        self.configure_options += '--target=%s-%s-gcc ' % (arch, platform)
+        self.configure_options += '--target=%s-%s-%s ' % (arch, platform, compiler)
 
     def configure(self):
         if self.config.target_platform == Platform.ANDROID:
@@ -119,10 +127,19 @@ class Recipe(recipe.Recipe):
             f = os.path.join(self.make_dir, 'vpx_ports')
             m.action("copying %s to %s" % (o, f))
             shutil.copy(o, f)
-        super(recipe.Recipe, self).configure()
+        super().configure()
 
     def install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             for f in ['vpxenc', 'vpxdec', 'libvpx.a']:
                 shell.touch(os.path.join(self.build_dir, f))
-        super(Recipe, self).install()
+        super().install()
+
+    def post_install(self):
+        if self.using_msvc():
+            if self.config.target_arch == Architecture.X86_64:
+                subdir = 'x64'
+            else:
+                subdir = 'Win32'
+            os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
+                       os.path.join(self.config.prefix, 'lib', 'vpx.lib'))
