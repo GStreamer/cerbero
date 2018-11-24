@@ -28,7 +28,7 @@ class Build(Command):
     doc = N_('Build a recipe')
     name = 'build'
 
-    def __init__(self, force=None, no_deps=None):
+    def __init__(self, force=None, no_deps=None, deps_only=False):
             args = [
                 ArgparseArgument('recipe', nargs='*',
                     help=_('name of the recipe to build')),
@@ -56,6 +56,7 @@ class Build(Command):
 
             self.force = force
             self.no_deps = no_deps
+            self.deps_only = deps_only
             Command.__init__(self, args)
 
     def run(self, config, args):
@@ -64,16 +65,18 @@ class Build(Command):
         if self.no_deps is None:
             self.no_deps = args.no_deps
         self.runargs(config, args.recipe, args.missing_files, self.force,
-                     self.no_deps, dry_run=args.dry_run, offline=args.offline)
+                     self.no_deps, dry_run=args.dry_run, offline=args.offline,
+                     deps_only=self.deps_only)
 
     def runargs(self, config, recipes, missing_files=False, force=False,
-                no_deps=False, cookbook=None, dry_run=False, offline=False):
+                no_deps=False, cookbook=None, dry_run=False, offline=False,
+                deps_only=False):
         if cookbook is None:
             cookbook = CookBook(config, offline=offline)
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,
-                    dry_run=dry_run)
+                    dry_run=dry_run, deps_only=deps_only)
         oven.start_cooking()
 
 
@@ -84,6 +87,13 @@ class BuildOne(Build):
     def __init__(self):
         Build.__init__(self, True, True)
 
+class BuildDeps(Build):
+    doc = N_('Build only the dependencies of the specified recipes')
+    name = 'build-deps'
+
+    def __init__(self):
+        Build.__init__(self, no_deps=False, deps_only=True)
 
 register_command(BuildOne)
+register_command(BuildDeps)
 register_command(Build)

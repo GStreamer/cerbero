@@ -49,22 +49,26 @@ class Oven (object):
     '''
     This oven cooks recipes with all their ingredients
 
-    @ivar recipe: A recipe to build
+    @ivar recipes: Recipes to build
     @type: L{cerberos.recipe.recipe}
     @ivar cookbook: Cookbook with the recipes status
     @type: L{cerberos.cookbook.CookBook}
-    @ivar force: Force the build of the recipe
+    @ivar force: Force the build of the recipes
     @type: bool
     @ivar no_deps: Ignore dependencies
     @type: bool
-    @ivar missing_files: check for files missing in the recipe
+    @ivar missing_files: check for files missing in the recipes
     @type missing_files: bool
+    @ivar dry_run: don't actually exectute the commands
+    @type dry_run: bool
+    @ivar deps_only: only build depenencies and not the recipes
+    @type deps_only: bool
     '''
 
     STEP_TPL = '[(%s/%s) %s -> %s ]'
 
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False, dry_run=False):
+                 missing_files=False, dry_run=False, deps_only=False):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -74,22 +78,28 @@ class Oven (object):
         self.missing_files = missing_files
         self.config = cookbook.get_config()
         self.interactive = self.config.interactive
+        self.deps_only = deps_only
         shell.DRY_RUN = dry_run
 
     def start_cooking(self):
         '''
         Cooks the recipe and all its dependencies
         '''
+        recipes = [self.cookbook.get_recipe(x) for x in self.recipes]
+
         if self.no_deps:
-            ordered_recipes = [self.cookbook.get_recipe(x) for x in
-                               self.recipes]
+            ordered_recipes = recipes
         else:
             ordered_recipes = []
             for recipe in self.recipes:
-                recipes = self.cookbook.list_recipe_deps(recipe)
+                deps = self.cookbook.list_recipe_deps(recipe)
                 # remove recipes already scheduled to be built
-                recipes = [x for x in recipes if x not in ordered_recipes]
-                ordered_recipes.extend(recipes)
+                deps = [x for x in deps if x not in ordered_recipes]
+                ordered_recipes.extend(deps)
+
+        if self.deps_only:
+            ordered_recipes = [x for x in ordered_recipes if x not in recipes]
+
         m.message(_("Building the following recipes: %s") %
                   ' '.join([x.name for x in ordered_recipes]))
 
