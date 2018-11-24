@@ -74,3 +74,9 @@ class Recipe(custom.GStreamer):
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
+
+        if self.config.variants.unwind:
+            self.deps += ['libunwind']
+            self.meson_options['libunwind'] = 'enabled'
+        else:
+            self.meson_options['libunwind'] = 'disabled'
