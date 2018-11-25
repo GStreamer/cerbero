@@ -192,7 +192,7 @@ def get_hash(git_dir, commit):
         # Return a fixed string + unix time to trigger a full fetch.
         return 'not-git-' + str(time.time())
     return shell.check_call('%s show -s --pretty=%%H %s' %
-                            (GIT, commit), git_dir)
+                            (GIT, commit), git_dir).rstrip()
 
 
 def local_checkout(git_dir, local_git_dir, commit):
