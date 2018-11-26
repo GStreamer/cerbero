@@ -191,7 +191,7 @@ def get_hash(git_dir, commit):
         # can get called from built_version() when the directory isn't git.
         # Return a fixed string + unix time to trigger a full fetch.
         return 'not-git-' + str(time.time())
-    return shell.check_call('%s show -s --pretty=%%H %s' %
+    return shell.check_call('%s rev-parse %s' %
                             (GIT, commit), git_dir).rstrip()
 
 
