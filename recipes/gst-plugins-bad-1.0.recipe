@@ -353,19 +353,9 @@ class Recipe(custom.GStreamer):
     }
 
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            # FIXME: This will almost certainly fail to build on Windows due to
-            # https://bugzilla.gnome.org/show_bug.cgi?id=770264
-            # See also, gstreamer-1.0-effects.package
-            self.deps.remove('webrtc-audio-processing')
-            self.files_plugins_effects.remove('lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s')
-            self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.a')
-            self.files_plugins_effects_devel.remove('lib/gstreamer-1.0/libgstwebrtcdsp.la')
-            self.meson_options['webrtcdsp'] = 'disabled'
-        else:
-            # webrtc-audio-processing headers require C++11, older GCCs require
-            # explicitly opting in (f.ex., mingw gcc and android)
-            self.meson_options['cpp_std'] = 'gnu++11'
+        # webrtc-audio-processing headers require C++11, older GCCs require
+        # explicitly opting in (f.ex., mingw gcc and android)
+        self.meson_options['cpp_std'] = 'gnu++11'
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi'] = 'enabled'
