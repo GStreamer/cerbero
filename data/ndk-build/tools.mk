@@ -84,6 +84,7 @@ WHOLE_ARCHIVE = -Wl,--whole-archive
 NO_WHOLE_ARCHIVE = -Wl,--no-whole-archive
 libtool-whole-archive = \
   $(eval __tmpvar.archives_paths := ) \
+  $(call __libtool_log, "Libraries to whole archive:" $2)\
   $(foreach lib,$2, \
     $(eval __tmpvar.archives_paths += $(patsubst %.la,%.a,$(call libtool-find-lib,$(patsubst -l%,%,$(lib)))))) \
   $(eval __tmpvar.cmd := $1) \
@@ -107,7 +108,7 @@ libtool-link = \
   $(call __libtool_log, Library Search Paths = $(__libtool.link.Lpath))\
   $(eval __libtool.link.libs := $(call libtool-get-libs,$1))\
   $(call __libtool_log, Libraries = $(__libtool.link.libs))\
-  $(foreach library,$(__libtool.link.libs),$(call libtool-parse-lib,$(library)))\
+  $(foreach library,$(__libtool.link.libs),$(call libtool-parse-lib,$(library),XXX))\
   $(call libtool-gen-link-command)
 
 
@@ -120,6 +121,7 @@ libtool-link = \
 # -----------------------------------------------------------------------------
 # Function : libtool-parse-library
 # Arguments: 1: library name
+#            2: explicitly linked library.  Users should pass an empty value.
 # Returns  : ""
 # Usage    : $(call libtool-parse-library,<libname>)
 # Note     : Tries to find a libtool library for this name in the libraries search
@@ -128,7 +130,14 @@ libtool-link = \
 libtool-parse-lib = \
   $(eval __tmpvar := $(strip $(call libtool-find-lib,$(patsubst -l%,%,$1))))\
   $(if $(__tmpvar), \
-    $(call libtool-parse-file,$(__tmpvar),$(call libtool-name-from-filepath,$(__tmpvar))),\
+    $(eval __tmpvar.name := $(call libtool-name-from-filepath,$(__tmpvar)))\
+    $(if $2,\
+      $(if $(call libtool-lib-processed,$(__tmpvar.name),$(__libtool.link.explicit_libs)), ,\
+        $(eval __libtool.link.explicit_libs += $(__tmpvar.name))\
+      )\
+    )\
+    $(call __libtool_log, Explicitly linked libraries $2 $(__libtool.link.explicit_libs))\
+    $(call libtool-parse-file,$(__tmpvar),$(__tmpvar.name),$2),\
     $(eval __libtool.link.shared_libs += $1)\
     $(call __libtool_log, libtool file not found for "$1" and will be added to the shared libs)\
   )
@@ -154,7 +163,7 @@ libtool-parse-lib = \
 # -----------------------------------------------------------------------------
 libtool-parse-file = \
   $(call __libtool_log, parsing file $1)\
-  $(if $(call libtool-lib-processed,$2),\
+  $(if $(call libtool-lib-processed,$2,$(__libtool_libs.processed)),\
       $(call __libtool_log, library $2 already parsed),\
     $(eval __libtool_libs.$2.old_lib := $(call libtool-get-old-library,$1)) \
     $(eval __libtool_libs.$2.base_dir := $(dir $1)) \
@@ -173,7 +182,7 @@ libtool-parse-file = \
     $(call __libtool_log, $2.deps = $(__libtool_libs.$2.DEPS)) \
     $(eval __libtool_libs.processed += $2) \
     $(call __libtool_log, parsed libraries: $(__libtool_libs.processed))\
-    $(foreach library,$(__libtool_libs.$2.DEPS), $(call libtool-parse-lib,$(library)))\
+    $(foreach library,$(__libtool_libs.$2.DEPS), $(call libtool-parse-lib,$(library),))\
     $(eval __libtool_libs.ordered += $2)\
     $(call __libtool_log, ordered list of libraries: $(__libtool_libs.ordered))\
   )
@@ -197,10 +206,11 @@ libtool-clear-vars = \
   $(eval __libtool.link.Lpath := $(empty))\
   $(eval __libtool.link.command := $(empty))\
   $(eval __libtool.link.libs := $(empty))\
-  $(eval __libtool.link.shared_libs := $(empty))
+  $(eval __libtool.link.shared_libs := $(empty))\
+  $(eval __libtool.link.explicit_libs := $(empty))
 
 libtool-lib-processed = \
-  $(findstring ___$1___, $(foreach lib,$(__libtool_libs.processed), ___$(lib)___))
+  $(findstring ___$1___, $(foreach lib,$2, ___$(lib)___))
 
 libtool-gen-link-command = \
   $(eval __tmpvar.cmd := $(filter-out -L%,$(__libtool.link.command)))\
@@ -228,8 +238,14 @@ libtool-get-all-libs = \
   $(eval __tmpvar.static_libs_reverse := $(empty))\
   $(eval __tmpvar.static_libs := $(empty))\
   $(eval __tmpvar.libs := $(empty))\
+  $(eval __tmpvar.all_exclude_libs := $(empty))\
+  $(eval __tmpvar.exclude_libs := $(empty))\
+  $(call __libtool_log, Explicitly linked libraries $(__libtool.link.explicit_libs))\
   $(foreach library,$(__libtool_libs.ordered),\
     $(eval __tmpvar.static_libs_reverse += $(__libtool_libs.$(library).STATIC_LIB))\
+    $(if $(filter $(library),$(__libtool.link.explicit_libs)), ,\
+      $(eval __tmpvar.all_exclude_libs += $(notdir $(__libtool_libs.$(library).STATIC_LIB)))\
+    )\
     $(foreach dylib,$(__libtool_libs.$(library).LIBS),\
       $(if $(findstring $(dylib), $(__tmpvar.libs)), ,\
         $(eval __tmpvar.libs += $(dylib))\
@@ -239,7 +255,10 @@ libtool-get-all-libs = \
   $(foreach path,$(__tmpvar.static_libs_reverse),\
     $(eval __tmpvar.static_libs := $(path) $(__tmpvar.static_libs))\
   )\
-  $(strip $(__tmpvar.static_libs) $(__tmpvar.libs) )
+  $(foreach lib,$(__tmpvar.all_exclude_libs),\
+    $(eval __tmpvar.exclude_libs += -Wl,--exclude-libs,$(lib))\
+  )\
+  $(strip $(__tmpvar.static_libs) $(__tmpvar.libs) $(__tmpvar.exclude_libs) )
 
 libtool-find-lib = \
   $(eval __tmpvar := $(empty))\

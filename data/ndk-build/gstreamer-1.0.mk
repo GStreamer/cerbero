@@ -82,6 +82,10 @@ GSTREAMER_ANDROID_C           := $(GSTREAMER_BUILD_DIR)/$(GSTREAMER_ANDROID_MODU
 GSTREAMER_ANDROID_C_IN        := $(GSTREAMER_NDK_BUILD_PATH)/gstreamer_android-1.0.c.in
 GSTREAMER_DEPS                := $(GSTREAMER_EXTRA_DEPS) gstreamer-1.0
 GSTREAMER_LD                  := -fuse-ld=gold$(EXE_SUFFIX) -Wl,-soname,lib$(GSTREAMER_ANDROID_MODULE_NAME).so
+# for setting the default GTlsDatabase
+ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
+GSTREAMER_DEPS                += gio-2.0
+endif
 
 ################################
 #  NDK Build Prebuilt library  #
@@ -149,9 +153,9 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 # link at least to gstreamer-1.0 in case the plugins list is empty
 GSTREAMER_ANDROID_LIBS       := $(call pkg-config-get-libs,$(GSTREAMER_DEPS))
 GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
-GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS))
+GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS)) $(GSTREAMER_EXTRA_LIBS)
 # Fix deps for giognutls
-GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed)
+GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed) $(GSTREAMER_EXTRA_LIBS)
 GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_ROOT)/include
 
 # In newer NDK, SYSROOT is replaced by SYSROOT_INC and SYSROOT_LINK, which
