@@ -694,11 +694,9 @@ class Meson (Build, ModifyEnvBase) :
         self._set_introspection_option()
 
         if self.config.variants.debug:
-            buildtype = 'debug'
-        elif self.config.variants.nodebug:
-            buildtype = 'release'
-        else:
             buildtype = 'debugoptimized'
+        else:
+            buildtype = 'release'
 
         meson_cmd = self.meson_tpl % {
             'meson-sh': self.meson_sh,
