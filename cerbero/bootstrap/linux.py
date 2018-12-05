@@ -70,7 +70,7 @@ class DebianBootstrapper (UnixBootstrapper):
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
                 'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev',
                 'libegl1-mesa-dev', 'git', 'subversion', 'xutils-dev',
-                'intltool', 'ccache']
+                'intltool', 'ccache', 'python3-setuptools']
     distro_packages = {
         DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
         DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
