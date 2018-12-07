@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
@@ -384,3 +385,17 @@ class Recipe(custom.GStreamer):
             self.platform_files_plugins_capture[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb%(mext)s')
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.a')
             self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.la')
+
+    def post_install(self):
+        LibtoolLibrary('gstphotography-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gstreamer-1.0']).save()
+        LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gstreamer-1.0', 'gstbase-1.0']).save()
+        LibtoolLibrary('gstadaptivedemux-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gstreamer-1.0', 'gsturidownloader-1.0', 'gstapp-1.0', 'gstbase-1.0']).save()
+        LibtoolLibrary('gstbasecamerabinsrc-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gstreamer-1.0', 'gstapp-1.0', 'gstbase-1.0']).save()
+        LibtoolLibrary('gstisoff-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gstreamer-1.0']).save()
+        super().post_install()
+
