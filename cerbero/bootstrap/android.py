@@ -35,7 +35,7 @@ NDK_CHECKSUMS = {
 
 class AndroidBootstrapper (BootstrapperBase):
 
-    def __init__(self, config, offline):
+    def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix
         url = NDK_BASE_URL % (NDK_VERSION, self.config.platform, self.config.arch)

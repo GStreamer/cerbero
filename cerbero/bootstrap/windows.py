@@ -63,7 +63,7 @@ class WindowsBootstrapper(BootstrapperBase):
     Installs the mingw-w64 compiler toolchain and headers for Directx
     '''
 
-    def __init__(self, config, offline):
+    def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix
         self.perl_prefix = self.config.mingw_perl_prefix

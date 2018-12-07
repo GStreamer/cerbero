@@ -30,7 +30,7 @@ CPANM_CHECKSUM = '22b92506243649a73cfb55c5990cedd24cdbb20b15b4530064d2496d94d164
 class OSXBootstrapper (BootstrapperBase):
 
 
-    def __init__(self, config, offline):
+    def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         url = CPANM_URL_TPL.format(CPANM_VERSION)
         self.fetch_urls.append((url, CPANM_CHECKSUM))
