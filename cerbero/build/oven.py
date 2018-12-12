@@ -124,6 +124,7 @@ class Oven (object):
                 elif action == RecoveryActions.RETRY_STEP:
                     self._cook_recipe(recipe, i, len(ordered_recipes))
                 elif action == RecoveryActions.SKIP:
+                    i += 1
                     continue
                 elif action == RecoveryActions.ABORT:
                     raise AbortedError()
