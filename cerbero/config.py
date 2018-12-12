@@ -96,7 +96,7 @@ class Config (object):
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
-                   'meson_cross_properties', 'manifest']
+                   'meson_cross_properties', 'manifest', 'extra_properties']
 
     def __init__(self):
         self._check_uninstalled()
@@ -367,6 +367,7 @@ class Config (object):
         self.set_property('interactive', True)
         self.set_property('meson_cross_properties', {})
         self.set_property('manifest', None)
+        self.set_property('extra_properties', {})
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
