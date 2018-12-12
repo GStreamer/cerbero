@@ -354,6 +354,8 @@ def remove_list_duplicates(seq):
 
 
 def parse_file(filename, dict):
+    if '__file__' not in dict:
+        dict['__file__'] = filename
     try:
         exec(compile(open(filename).read(), filename, 'exec'), dict)
     except Exception as ex:
