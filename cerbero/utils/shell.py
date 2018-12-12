@@ -239,7 +239,8 @@ def unpack(filepath, output_dir):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-def download_wget(url, destination=None, check_cert=True, overwrite=False):
+def download_wget(url, destination=None, check_cert=True, overwrite=False,
+        tries=2, timeout=5.0):
     '''
     Downloads a file with wget
 
@@ -255,6 +256,9 @@ def download_wget(url, destination=None, check_cert=True, overwrite=False):
 
     if not check_cert:
         cmd += " --no-check-certificate"
+
+    cmd += " --tries=%i" % tries
+    cmd += " --timeout=%f" % timeout
 
     if not overwrite and os.path.exists(destination):
         if LOGFILE is None:
