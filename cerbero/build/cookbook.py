@@ -21,6 +21,7 @@ import os
 import pickle
 import time
 import imp
+import traceback
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
     DistroVersion, License
@@ -434,9 +435,9 @@ class CookBook (object):
                     return r
             except InvalidRecipeError as e:
                 self._invalid_recipes[r.name] = e
-            except Exception as ex:
-                m.warning("Error loading recipe in file %s %s" %
-                          (filepath, ex))
+            except Exception:
+                m.warning("Error loading recipe in file %s" % (filepath))
+                print(traceback.format_exc())
         if self._config.target_arch == Architecture.UNIVERSAL:
             if not recipe.is_empty():
                 return recipe
