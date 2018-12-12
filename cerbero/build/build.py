@@ -40,7 +40,9 @@ class Build (object):
 
     # Whether this recipe's build system can be built with MSVC
     can_msvc = False
-    _properties_keys = []
+
+    def __init__(self):
+        self._properties_keys = []
 
     def setup_toolchain_env_ops(self):
         if self.config.platform != Platform.WINDOWS:

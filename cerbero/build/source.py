@@ -52,9 +52,13 @@ class Source (object):
     @type patches: int
     '''
 
-    patches = []
+    patches = None
     strip = 1
     offline = False
+
+    def __init__(self):
+        if self.patches is None:
+            self.patches = []
 
     def _fetch_env_setup(self):
         # When running git commands, which is the host git, we need to make
@@ -422,7 +426,10 @@ class GitExtractedTarball(Git):
     '''
 
     matches = ['.m4', '.in', 'configure']
-    _files = {}
+
+    def __init__(self):
+        Git.__init__(self)
+        self._files = {}
 
     def extract(self):
         if not Git.extract(self):
