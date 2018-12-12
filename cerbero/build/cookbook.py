@@ -397,16 +397,50 @@ class CookBook (object):
             # which can contain private classes to extend cerbero's recipes
             # and reuse them in our private repository
             try:
-                recipe = self._load_recipe_from_file(f, custom)
+                recipes_from_file = self._load_recipes_from_file(f, custom)
             except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") % f)
-            if recipe is None:
+            if recipes_from_file is None:
                 continue
-            recipes[recipe.name] = recipe
+            for recipe in recipes_from_file:
+                recipes[recipe.name] = recipe
         return recipes
 
-    def _load_recipe_from_file(self, filepath, custom=None):
-        mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
+    def _load_recipes_from_file(self, filepath, custom=None):
+        recipes = []
+        d = {'Platform': Platform, 'Architecture': Architecture,
+                'BuildType': BuildType, 'SourceType': SourceType,
+                'Distro': Distro, 'DistroVersion': DistroVersion,
+                'License': License, 'recipe': crecipe, 'os': os,
+                'BuildSteps': crecipe.BuildSteps,
+                'InvalidRecipeError': InvalidRecipeError,
+                'FatalError': FatalError,
+                'custom': custom, '_': _, 'shell': shell}
+        d_keys = set(list(d.keys()))
+        try:
+            new_d = d.copy ()
+            parse_file(filepath, new_d)
+            # List new objects parsed added to the globals dict
+            diff_vals = [new_d[x] for x in set(new_d.keys()) - d_keys]
+            # Find all objects inheriting from Recipe
+            for recipe_cls in [x for x in diff_vals if self._is_recipe_class(x)]:
+                recipe = self._load_recipe_from_class(recipe_cls, filepath, custom)
+                if recipe is not None:
+                    recipes.append(recipe)
+        except Exception:
+            m.warning("Error loading recipe in file %s" % (filepath))
+            print(traceback.format_exc())
+        return recipes
+
+    def _is_recipe_class(self, cls):
+        # The final check for 'builtins' is to make sure we only take in
+        # account classes defined in the recipe file and not the imported
+        # ones in the, for example base classes that inherit from Recipe
+        return isinstance(cls, type) and \
+            issubclass (cls, crecipe.Recipe) and \
+            cls.__module__ == 'builtins'
+
+    def _load_recipe_from_class(self, recipe_cls, filepath, custom=None):
         if self._config.target_arch == Architecture.UNIVERSAL:
             if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
                 recipe = crecipe.UniversalFlatRecipe(self._config)
@@ -414,21 +448,12 @@ class CookBook (object):
                 recipe = crecipe.UniversalRecipe(self._config)
         for c in list(self._config.arch_config.keys()):
             try:
-                d = {'Platform': Platform, 'Architecture': Architecture,
-                     'BuildType': BuildType, 'SourceType': SourceType,
-                     'Distro': Distro, 'DistroVersion': DistroVersion,
-                     'License': License, 'recipe': crecipe, 'os': os,
-                     'BuildSteps': crecipe.BuildSteps,
-                     'InvalidRecipeError': InvalidRecipeError,
-                     'FatalError': FatalError,
-                     'custom': custom, '_': _, 'shell': shell}
-                parse_file(filepath, d)
                 conf = self._config.arch_config[c]
                 if self._config.target_arch == Architecture.UNIVERSAL:
                     if self._config.target_platform not in [Platform.IOS,
                             Platform.DARWIN]:
                         conf.prefix = os.path.join(self._config.prefix, c)
-                r = d['Recipe'](conf)
+                r = recipe_cls(conf)
                 r.__file__ = os.path.abspath(filepath)
                 self._config.arch_config[c].do_setup_env()
                 r.prepare()
@@ -438,9 +463,6 @@ class CookBook (object):
                     return r
             except InvalidRecipeError as e:
                 self._invalid_recipes[r.name] = e
-            except Exception:
-                m.warning("Error loading recipe in file %s" % (filepath))
-                print(traceback.format_exc())
         if self._config.target_arch == Architecture.UNIVERSAL:
             if not recipe.is_empty():
                 return recipe

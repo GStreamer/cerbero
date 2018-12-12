@@ -18,6 +18,7 @@
 
 import os
 import imp
+import traceback
 from collections import defaultdict
 
 from cerbero.build.cookbook import CookBook
@@ -25,7 +26,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
         License
 from cerbero.packages import package, PackageType
 from cerbero.errors import FatalError, PackageNotFoundError
-from cerbero.utils import _, shell, remove_list_duplicates
+from cerbero.utils import _, shell, remove_list_duplicates, parse_file
 from cerbero.utils import messages as m
 
 
@@ -183,42 +184,59 @@ class PackagesStore (object):
             # m.warning("Error loading package %s" % ex)
             custom = None
         for f in packages:
-            p = self._load_package_from_file(f, custom)
-            if p is None:
+            file_packages = self._load_packages_from_file(f, custom)
+            if file_packages is None:
                 m.warning(_("Could not found a valid package in %s") % f)
                 continue
-            p.__file__ = os.path.abspath(f)
-            packages_dict[p.name] = p
+            for p in file_packages:
+                p.__file__ = os.path.abspath(f)
+                packages_dict[p.name] = p
         return packages_dict
 
-
-    def _load_package_from_file(self, filepath, custom=None):
-        mod_name, file_ext = os.path.splitext(os.path.split(filepath)[-1])
-
+    def _load_packages_from_file(self, filepath, custom=None):
+        packages = []
+        d = {'Platform': Platform, 'Architecture': Architecture,
+             'Distro': Distro, 'DistroVersion': DistroVersion,
+             'License': License, 'package': package,
+             'PackageType': PackageType, 'custom': custom}
+        d_keys = set(list(d.keys()))
         try:
-            d = {'Platform': Platform, 'Architecture': Architecture,
-                 'Distro': Distro, 'DistroVersion': DistroVersion,
-                 'License': License, 'package': package,
-                 'PackageType': PackageType, 'custom': custom}
-            exec(compile(open(filepath).read(), filepath, 'exec'), d)
-            if 'Package' in d:
-                p = d['Package'](self._config, self, self.cookbook)
-            elif 'SDKPackage' in d:
-                p = d['SDKPackage'](self._config, self)
-            elif 'InstallerPackage' in d:
-                p = d['InstallerPackage'](self._config, self)
-            elif 'App' in d:
-                p = d['App'](self._config, self, self.cookbook)
-            else:
-                raise Exception('Package, SDKPackage, InstallerPackage or App '
-                                'class not found')
-            p.prepare()
-            # reload files from package now that we called prepare that
-            # may have changed it
-            p.load_files()
-            return p
-        except Exception as ex:
-            import traceback
+            new_d = d.copy ()
+            parse_file(filepath, new_d)
+            # List new objects parsed added to the globals dict
+            diff_vals = [new_d[x] for x in set(new_d.keys()) - d_keys]
+            # Find all objects inheriting from Package
+            for package_cls in [x for x in diff_vals if self._is_package_class(x)]:
+                pkg = self._load_package_from_file(package_cls, filepath, custom)
+                if pkg is not None:
+                    packages.append(pkg)
+        except Exception:
+            m.warning("Error loading package from file %s" % filepath)
             traceback.print_exc()
-            m.warning("Error loading package %s" % ex)
-        return None
+        return packages
+
+    def _load_package_from_file(self, package_cls, filepath, custom=None):
+        if issubclass (package_cls, package.App):
+            p = package_cls(self._config, self, self.cookbook)
+        elif issubclass (package_cls, package.SDKPackage):
+            p = package_cls(self._config, self)
+        elif issubclass (package_cls, package.InstallerPackage):
+            p = package_cls(self._config, self)
+        elif issubclass (package_cls, package.Package):
+            p = package_cls(self._config, self, self.cookbook)
+        else:
+            raise Exception('Uknown package type %s' % package_cls)
+        p.prepare()
+        # reload files from package now that we called prepare that
+        # may have changed it
+        p.load_files()
+        return p
+
+
+    def _is_package_class(self, cls):
+        # The final check for 'builtins' is to make sure we only take in
+        # account classes defined in the package file and not the imported
+        # ones in the, for example base classes that inherit from PackageBase
+        return isinstance(cls, type) and \
+            issubclass (cls, package.PackageBase) and \
+            cls.__module__ == 'builtins'
