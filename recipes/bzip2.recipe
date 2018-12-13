@@ -1,61 +1,22 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.tools.libtool import LibtoolLibrary
 
-
 class Recipe(recipe.Recipe):
     name = 'bzip2'
     version = '1.0.6'
     licenses = [License.BSD_like]
     stype = SourceType.TARBALL
-    # This URL doesn't support https, so we don't use it
+    btype = BuildType.MESON
+    # bzip2.org is dead
     #url = 'https://bzip.org/%(version)s/bzip2-%(version)s.tar.gz'
     url = 'https://gstreamer.freedesktop.org/src/mirror/bzip2-%(version)s.tar.gz'
     tarball_checksum = 'a2848f34fcd5d6cf47def00461fcb528a0484d8edef8208d6d2e2909dc61d9cd'
-    patches = ['bzip2/0001-Fix-Makefiles-and-add-support-for-Windows-and-OS-X.patch']
+    patches = ['bzip2/add-meson-build-files.patch']
 
     files_libs = ['libbz2']
     files_devel = ['include/bzlib.h']
-
-
-    def prepare (self):
-        self._remove_steps([BuildSteps.CONFIGURE])
-        extension = ''
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            shared_makefile = 'Makefile-libbz2_dylib'
-        elif self.config.target_platform == Platform.WINDOWS:
-            shared_makefile = 'Makefile-libbz2_dll'
-            extension = '.exe'
-        else:
-            shared_makefile = 'Makefile-libbz2_so'
-        self.make = 'make -f %s; make EXT=%s' % (shared_makefile, extension)
-        self.make_install = 'make -f %s install PREFIX=%s; make install EXT=%s PREFIX=%s' % \
-                (shared_makefile, self.config.prefix, extension, self.config.prefix)
 
     def post_install(self):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
-        src = None
-        dst = None
-        dst2 = None
-        libdir = os.path.join(self.config.prefix, 'lib')
-        if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
-            src = 'libbz2.so.1.0.6'
-            dst = 'libbz2.so'
-            dst2 = 'libbz2.so.1.0'
-        elif self.config.target_platform == Platform.DARWIN:
-            src = 'libbz2.1.0.6.dylib'
-            dst = 'libbz2.dylib'
-        elif self.config.target_platform == Platform.IOS:
-            src = 'libbz2.dylib'
-            dst = 'libbz2.so'
-        if src and dst:
-            p = os.path.join(libdir, dst)
-            if os.path.exists(p) or os.path.islink(p):
-                os.remove(p)
-            shell.call('ln -s %s %s' % (src, dst), libdir)
-            if dst2:
-              p = os.path.join(libdir, dst2)
-              if os.path.exists(p) or os.path.islink(p):
-                  os.remove(p)
-              shell.call('ln -s %s %s' % (src, dst2), libdir)
