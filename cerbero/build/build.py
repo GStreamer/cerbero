@@ -545,7 +545,7 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find ninja
         if not self.make:
-            self.make = 'ninja -v'
+            self.make = 'ninja -v -d keeprsp'
         if not self.make_install:
             self.make_install = self.make + ' install'
         if not self.make_check:
