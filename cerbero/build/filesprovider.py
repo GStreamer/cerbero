@@ -43,7 +43,7 @@ def find_shlib_regex(libname, prefix, libdir, ext, regex):
 
 def find_dll_implib(libname, prefix, libdir, ext, regex):
     implibdir = 'lib'
-    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib']
+    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname)]
     dlltool = os.environ.get('DLLTOOL', None)
     if not dlltool:
         raise FatalError('dlltool was not found, check cerbero configuration')
