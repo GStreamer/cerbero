@@ -29,6 +29,6 @@ class Recipe(recipe.Recipe):
             self.deps += ['gnustl']
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('srt', 1, 3, 0, self.config.libdir,
+        libtool_la = LibtoolLibrary('srt', None, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
