@@ -61,6 +61,9 @@ include $(GSTREAMER_NDK_BUILD_PATH)/tools.mk
 # Path for the static GIO modules
 G_IO_MODULES_PATH := $(GSTREAMER_ROOT)/lib/gio/modules
 
+# Path for libc++_shared
+CXX_SHARED_ROOT := $(NDK_ROOT)/sources/cxx-stl/llvm-libc++/libs/$(TARGET_ARCH_ABI)
+
 # Host tools
 ifeq ($(HOST_OS),windows)
     SED := $(GSTREAMER_NDK_BUILD_PATH)/tools/windows/sed
@@ -180,7 +183,7 @@ endif
 # Create the link command
 GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CXX) $(GLOBAL_LDFLAGS) $(TARGET_LDFLAGS) -nostdlib++ -shared --sysroot=$(SYSROOT_GST_LINK) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
-	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) \
+	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) -L$(CXX_SHARED_ROOT) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
 GSTREAMER_ANDROID_CMD        := $(call libtool-whole-archive,$(GSTREAMER_ANDROID_CMD),$(GSTREAMER_ANDROID_WHOLE_AR))
 
