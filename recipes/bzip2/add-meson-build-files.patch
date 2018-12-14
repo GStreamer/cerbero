@@ -425,3 +425,30 @@ index 2dc0dd8..6e4ddf6 100644
 -- 
 2.19.1
 
+From 9984c2128e15d309a85922599d54366387265c57 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 14 Dec 2018 14:29:38 +0530
+Subject: [PATCH] Don't use \ in #include lines
+
+Causes a build failure with MinGW, and is also against the convention
+around path separators in #include lines.
+---
+ bzip2.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bzip2.c b/bzip2.c
+index 6de9d1d..dc626a4 100644
+--- a/bzip2.c
++++ b/bzip2.c
+@@ -128,7 +128,7 @@
+ #if BZ_LCCWIN32
+ #   include <io.h>
+ #   include <fcntl.h>
+-#   include <sys\stat.h>
++#   include <sys/stat.h>
+ 
+ #   define NORETURN       /**/
+ #   define PATH_SEP       '\\'
+-- 
+2.19.1
+
