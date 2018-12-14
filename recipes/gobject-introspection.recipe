@@ -4,16 +4,20 @@ import sys
 
 class Recipe(recipe.Recipe):
     name = 'gobject-introspection'
-    version = '1.54.1'
+    version = '1.56.1'
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'b88ded5e5f064ab58a93aadecd6d58db2ec9d970648534c63807d4f9a7bb877e'
+    tarball_checksum = '5b2875ccff99ff7baab63a34b67f8c920def240e178ff50add809e267d9ea24b'
     licenses = [License.GPLv2Plus]
-    autoreconf = True
-    autoreconf_sh = 'gtkdocize && autoreconf -vfi'
     configure_options = '--with-python=python3'
     deps = ['glib']
-    patches = [name + '/0001-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch']
+    patches = [
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/issues/222
+        name + '/0001-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch',
+        # Taken from upstream, remove on bump
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/merge_requests/73
+        name + '/0002-Fix-non-libtool-build.patch',
+    ]
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
@@ -86,8 +90,8 @@ class Recipe(recipe.Recipe):
                 arch = 'i386'
             else:
                 arch = self.config.target_arch
-            makefileam = os.path.join (self.build_dir, 'Makefile-gir.am')
+            makefilein = os.path.join (self.build_dir, 'Makefile.in')
             replacements = {'glib-2.0/include/glibconfig.h':
                     'glib-2.0/include/%s/glibconfig.h' % arch}
-            shell.replace(makefileam, replacements)
+            shell.replace(makefilein, replacements)
         super(Recipe, self).configure()
