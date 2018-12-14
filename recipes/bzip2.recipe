@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     #url = 'https://bzip.org/%(version)s/bzip2-%(version)s.tar.gz'
     url = 'https://gstreamer.freedesktop.org/src/mirror/bzip2-%(version)s.tar.gz'
     tarball_checksum = 'a2848f34fcd5d6cf47def00461fcb528a0484d8edef8208d6d2e2909dc61d9cd'
+
     patches = [name + '/add-meson-build-files.patch']
 
     files_libs = ['libbz2']
