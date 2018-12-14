@@ -193,7 +193,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
         raise FatalError(_("Error running command: %s") % cmd)
 
     if sys.stdout.encoding:
-        output = output.decode(sys.stdout.encoding)
+        output = output.decode(sys.stdout.encoding, errors='replace')
 
     return output
 

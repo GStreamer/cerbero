@@ -119,7 +119,7 @@ class OSXUniversalGenerator(object):
 
     def get_file_type(self, filepath):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
-        return self._call(cmd)[0:-1] #remove trailing \n
+        return self._call(cmd)[:-1] #remove trailing \n
 
     def _detect_merge_action(self, files_list):
         actions = []
@@ -228,14 +228,7 @@ class OSXUniversalGenerator(object):
 
     def _call(self, cmd, cwd=None):
         cmd = cmd or self.root
-        process = subprocess.Popen(cmd, cwd=cwd,
-            stdout=subprocess.PIPE, shell=True)
-        output, unused_err = process.communicate()
-
-        if sys.stdout.encoding:
-            output = output.decode(sys.stdout.encoding)
-
-        return output
+        return shell.check_call(cmd, cmd_dir=cwd, split=False, shell=True)
 
 
 class Main(object):
