@@ -112,7 +112,7 @@ class Recipe(recipe.Recipe):
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
             ' --libdir=lib' + self.config.lib_suffix + '  no-makedepend '
         if self.config.target_platform == Platform.IOS:
-            config_sh += ' no-shared no-dso '
+            config_sh += ' no-shared no-dso no-async '
         else:
             config_sh += ' shared '
 
