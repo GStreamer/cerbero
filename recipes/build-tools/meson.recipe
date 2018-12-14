@@ -14,6 +14,8 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://github.com/mesonbuild/meson/pull/3939
         'meson/0002-Fix-linking-of-shared-static-libs-with-static-libs.patch',
+        # https://github.com/mesonbuild/meson/issues/4100
+        'meson/0001-Revert-Fail-some-impossible-cross-detections.patch',
     ]
     deps = ['ninja']
 
