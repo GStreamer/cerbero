@@ -52,8 +52,6 @@ class PackageBase(object):
     @type sys_deps_devel: dict
     @cvar ignore_package_prefix: don't use the package prefix set in the config
     @type ignore_package_prefix: bool
-    @cvar relocate_osx_binaries: relocate osx binaries
-    @type relocate_osx_binaries: bool
     @cvar resources_license: filename of the .txt license file
     @type resources_license: str
     @cvar resources_license_unwrapped: filename of the .txt license file
@@ -86,7 +84,6 @@ class PackageBase(object):
     ignore_package_prefix = False
     sys_deps = {}
     sys_deps_devel = {}
-    relocate_osx_binaries = True
     resources_license = 'license.txt'
     resources_license_unwrapped = 'license_unwrapped.txt'
     resources_license_rtf = 'license.txt'

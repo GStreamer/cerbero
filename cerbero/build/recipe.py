@@ -29,6 +29,7 @@ from cerbero.config import Platform
 from cerbero.errors import FatalError
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
+from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_, _
 from cerbero.utils import shell, add_system_libs
 from cerbero.utils import messages as m
@@ -79,6 +80,7 @@ class BuildSteps(object):
     CHECK = (N_('Check'), 'check')
     GEN_LIBFILES = (N_('Gen Library File'), 'gen_library_file')
     MERGE = (N_('Merge universal binaries'), 'merge')
+    RELOCATE_OSX_LIBRARIES = (N_('Relocate OSX libraries'), 'relocate_osx_libraries')
 
     def __new__(klass):
         return [BuildSteps.FETCH, BuildSteps.EXTRACT,
@@ -139,6 +141,8 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
         self._steps = self._default_steps[:]
         if self.config.target_platform == Platform.WINDOWS:
             self._steps.append(BuildSteps.GEN_LIBFILES)
+        if self.config.target_platform == Platform.DARWIN:
+            self._steps.append(BuildSteps.RELOCATE_OSX_LIBRARIES)
         FilesProvider.__init__(self, config)
         try:
             self.stype.__init__(self)
@@ -321,6 +325,25 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
 
             LibtoolLibrary(lib.name, lib.major, lib.minor, lib.micro, lib.libdir,
                       self.config.target_platform, deps=dep_libs).save()
+
+    def relocate_osx_libraries(self):
+        '''
+        Make OSX libraries relocatable
+        '''
+        relocator = OSXRelocator(self.config.prefix, self.config.prefix, True)
+        def get_real_path(fp):
+            return os.path.realpath(os.path.join(self.config.prefix, fp))
+
+        def file_is_relocatable(fp):
+            return fp.split('/')[0] in ['lib', 'bin', 'libexec'] and \
+                    os.path.splitext(fp)[1] not in ['.a', '.pc', '.la']
+
+        # Only relocate files are that are potentially relocatable and
+        # remove duplicates by symbolic links so we relocate libs only
+        # once.
+        for f in set([get_real_path(x) for x in self.files_list() \
+                if file_is_relocatable(x)]):
+            relocator.relocate_file(f)
 
     def post_install(self):
         '''

@@ -31,7 +31,6 @@ from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager,\
     ApplicationBundlePackager
 from cerbero.packages.osx.buildtools import PackageBuild, ProductBuild
-from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import shell, _
 from cerbero.tools import strip
 from cerbero.utils import messages as m
@@ -373,7 +372,6 @@ class ApplicationPackage(PackagerBase):
         self._create_bundle()
         self._create_app_bundle()
         self._strip_binaries()
-        self._relocate_binaries()
         if self.package.osx_create_pkg:
             pkg = self._create_product()
             self._add_applications_link()
@@ -416,18 +414,6 @@ class ApplicationPackage(PackagerBase):
                 s_dir = os.path.join(self.appdir, 'Contents', 'Home', f)
                 s = strip.Strip(self.config, self.package.strip_excludes)
                 s.strip_dir(s_dir)
-
-    def _relocate_binaries(self):
-        if not self.package.relocate_osx_binaries:
-            return
-        prefix = self.config.prefix
-        if prefix[-1] == '/':
-            prefix = prefix[:-1]
-        for path in ['bin', 'lib', 'libexec']:
-            relocator = OSXRelocator(
-                    os.path.join(self.appdir, 'Contents', 'Home', path),
-                    self.config.prefix, '@executable_path/../', True)
-            relocator.relocate()
 
     def _add_applications_link(self):
         # Create link to /Applications

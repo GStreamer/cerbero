@@ -22,7 +22,6 @@ import subprocess
 import shutil
 import tempfile
 import sys
-
 import os.path
 
 from cerbero.utils import shell
@@ -53,6 +52,8 @@ file_types = [
     ('Zip', 'copy'),
     ('empty', 'copy'),
     ('PEM certificate', 'copy'),
+    ('data', 'copy'),
+    ('GVariant Database', 'copy'),
 ]
 
 class OSXUniversalGenerator(object):
@@ -87,6 +88,8 @@ class OSXUniversalGenerator(object):
         self.missing = []
 
     def merge_files(self, filelist, dirs):
+        if len(filelist) == 0:
+            return
         for f in filelist:
             self.do_merge(f, dirs)
 
@@ -104,13 +107,13 @@ class OSXUniversalGenerator(object):
             tmp = tempfile.NamedTemporaryFile(suffix=os.path.basename(f))
             tmp_inputs.append(tmp)
             shutil.copy(f, tmp.name)
-            prefix_to_replace = os.path.abspath(next(get_parent_prefix(f, dirs)))
-            relocator = OSXRelocator (self.output_root, prefix_to_replace, self.output_root,
+            prefix_to_replace = [d for d in dirs if d in f][0]
+            relocator = OSXRelocator (self.output_root, prefix_to_replace,
                                       False)
             # since we are using a temporary file, we must force the library id
             # name to real one and not based on the filename
-            relocator.relocate_file(tmp.name,
-                    id=f.replace(prefix_to_replace, self.output_root))
+            relocator.relocate_file(tmp.name)
+            relocator.change_id(tmp.name, id=f.replace(prefix_to_replace, self.output_root))
         cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
             ' '.join([f.name for f in tmp_inputs]), output)
         self._call(cmd)

@@ -36,34 +36,53 @@ class OSXRelocator(object):
     ID if the file is a shared library.
     '''
 
-    def __init__(self, root, lib_prefix, new_lib_prefix, recursive):
+    def __init__(self, root, lib_prefix, recursive):
         self.root = root
         self.lib_prefix = self._fix_path(lib_prefix)
-        self.new_lib_prefix = self._fix_path(new_lib_prefix)
         self.recursive = recursive
+        self.use_relative_paths = True
 
     def relocate(self):
         self.parse_dir(self.root)
 
-    def relocate_file(self, object_file, id=None):
+    def relocate_dir(self, dirname):
+        self.parse_dir(os.path.join(self.root, dirname))
+
+    def relocate_file(self, object_file):
         self.change_libs_path(object_file)
-        self.change_id(object_file, id)
 
     def change_id(self, object_file, id=None):
-        id = id or object_file.replace(self.lib_prefix, self.new_lib_prefix)
+        id = id or object_file.replace(self.lib_prefix, '@rpath')
         filename = os.path.basename(object_file)
         if not (filename.endswith('so') or filename.endswith('dylib')):
             return
-        cmd = '%s -id %s %s' % (INT_CMD, id, object_file)
-        shell.call(cmd)
+        cmd = '%s -id "%s" "%s"' % (INT_CMD, id, object_file)
+        shell.call(cmd, fail=False)
 
     def change_libs_path(self, object_file):
+        depth = len(object_file.split('/')) - len(self.root.split('/')) - 1
+        p_depth = '/..' * depth
+        rpaths = ['@loader_path' + p_depth, '@executable_path' + p_depth]
+        rpaths += ['@loader_path' + '/../lib', '@executable_path' + '/../lib']
+        if depth > 1:
+            rpaths += ['@loader_path/..', '@executable_path/..']
+        for p in rpaths:
+            cmd = '%s -add_rpath %s "%s"' % (INT_CMD, p, object_file)
+            shell.call(cmd, fail=False)
         for lib in self.list_shared_libraries(object_file):
             if self.lib_prefix in lib:
-                new_lib = lib.replace(self.lib_prefix, self.new_lib_prefix)
-                cmd = '%s -change %s %s %s' % (INT_CMD, lib, new_lib,
+                new_lib = lib.replace(self.lib_prefix, '@rpath')
+                cmd = '%s -change "%s" "%s" "%s"' % (INT_CMD, lib, new_lib,
                                                object_file)
-                shell.call(cmd)
+                shell.call(cmd, fail=False)
+
+    def change_lib_path(self, object_file, old_path, new_path):
+        for lib in self.list_shared_libraries(object_file):
+            if old_path in lib:
+                new_path = lib.replace(old_path, new_path)
+                cmd = '%s -change "%s" "%s" "%s"' % (INT_CMD, lib, new_path,
+                                               object_file)
+                shell.call(cmd, fail=True)
 
     def parse_dir(self, dir_path, filters=None):
         for dirpath, dirnames, filenames in os.walk(dir_path):
@@ -71,17 +90,13 @@ class OSXRelocator(object):
                 if filters is not None and \
                         os.path.splitext(f)[1] not in filters:
                     continue
-                lib = os.path.join(dirpath, f)
-                id = self.library_id_name(lib).replace(
-                        self.lib_prefix, self.new_lib_prefix)
-                self.change_libs_path(lib)
-                self.change_id(lib, id)
+                self.change_libs_path(os.path.join(dirpath, f))
             if not self.recursive:
                 break
 
     @staticmethod
     def list_shared_libraries(object_file):
-        cmd = '%s -L %s' % (OTOOL_CMD, object_file)
+        cmd = '%s -L "%s"' % (OTOOL_CMD, object_file)
         res = shell.check_call(cmd).split('\n')
         # We don't use the first line
         libs = res[1:]
@@ -90,14 +105,6 @@ class OSXRelocator(object):
         # Remove the version info
         libs = [x.split(' ', 1)[0] for x in libs]
         return libs
-
-    @staticmethod
-    def library_id_name(object_file):
-        cmd = '%s -D %s' % (OTOOL_CMD, object_file)
-        res = shell.check_call(cmd).split('\n')[0]
-        # the library name ends with ':'
-        lib_name = res[:-1]
-        return lib_name
 
     def _fix_path(self, path):
         if path.endswith('/'):
@@ -112,7 +119,7 @@ class Main(object):
         # might be run in OS X 10.6 or older, which do not provide the argparse
         # module
         import optparse
-        usage = "usage: %prog [options] directory old_prefix new_prefix"
+        usage = "usage: %prog [options] library_path old_prefix new_prefix"
         description = 'Rellocates object files changing the dependant '\
                       ' dynamic libraries location path with a new one'
         parser = optparse.OptionParser(usage=usage, description=description)
@@ -124,8 +131,8 @@ class Main(object):
         if len(args) != 3:
             parser.print_usage()
             exit(1)
-        relocator = OSXRelocator(args[0], args[1], args[2], options.recursive)
-        relocator.relocate()
+        relocator = OSXRelocator(args[1], args[2], options.recursive)
+        relocator.relocate_file(args[0])
         exit(0)
 
 
