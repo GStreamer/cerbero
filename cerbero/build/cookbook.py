@@ -421,10 +421,16 @@ class CookBook (object):
             new_d = d.copy ()
             parse_file(filepath, new_d)
             # List new objects parsed added to the globals dict
-            diff_vals = [new_d[x] for x in set(new_d.keys()) - d_keys]
+            diff_keys = [x for x in set(new_d.keys()) - d_keys]
             # Find all objects inheriting from Recipe
-            for recipe_cls in [x for x in diff_vals if self._is_recipe_class(x)]:
-                recipe = self._load_recipe_from_class(recipe_cls, filepath, custom)
+            for recipe_cls_key in [x for x in diff_keys if self._is_recipe_class(new_d[x])]:
+                if self._config.target_arch != Architecture.UNIVERSAL:
+                    recipe = self._load_recipe_from_class(
+                        new_d[recipe_cls_key], self._config, filepath, custom)
+                else:
+                    recipe = self._load_universal_recipe(d, new_d[recipe_cls_key],
+                        recipe_cls_key, filepath)
+
                 if recipe is not None:
                     recipes.append(recipe)
         except Exception:
@@ -440,33 +446,42 @@ class CookBook (object):
             issubclass (cls, crecipe.Recipe) and \
             cls.__module__ == 'builtins'
 
-    def _load_recipe_from_class(self, recipe_cls, filepath, custom=None):
-        if self._config.target_arch == Architecture.UNIVERSAL:
-            if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
-                recipe = crecipe.UniversalFlatRecipe(self._config)
-            else:
-                recipe = crecipe.UniversalRecipe(self._config)
+    def _load_recipe_from_class(self, recipe_cls, config, filepath, setup_env=False):
+        try:
+            r = recipe_cls(config)
+            r.__file__ = os.path.abspath(filepath)
+            if setup_env:
+                config.do_setup_env()
+            r.prepare()
+            return r
+        except InvalidRecipeError as e:
+            self._invalid_recipes[r.name] = e
+
+    def _load_universal_recipe(self, globals_dict, recipe_cls,
+            recipe_cls_key, filepath, custom=None):
+        if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
+            recipe = crecipe.UniversalFlatRecipe(self._config)
+        else:
+            recipe = crecipe.UniversalRecipe(self._config)
         for c in list(self._config.arch_config.keys()):
-            try:
-                conf = self._config.arch_config[c]
-                if self._config.target_arch == Architecture.UNIVERSAL:
-                    if self._config.target_platform not in [Platform.IOS,
-                            Platform.DARWIN]:
-                        conf.prefix = os.path.join(self._config.prefix, c)
-                r = recipe_cls(conf)
-                r.__file__ = os.path.abspath(filepath)
-                self._config.arch_config[c].do_setup_env()
-                r.prepare()
-                if self._config.target_arch == Architecture.UNIVERSAL:
-                    recipe.add_recipe(r)
-                else:
-                    return r
-            except InvalidRecipeError as e:
-                self._invalid_recipes[r.name] = e
-        if self._config.target_arch == Architecture.UNIVERSAL:
-            if not recipe.is_empty():
-                return recipe
-        return None
+            conf = self._config.arch_config[c]
+            if self._config.target_platform not in [Platform.IOS,
+                    Platform.DARWIN]:
+                conf.prefix = os.path.join(self._config.prefix, c)
+            # For univeral recipes, we need to parse again the recipe file.
+            # Otherwise, class variables with mutable types like the "deps"
+            # dictionary are reused in new instances
+            if recipe_cls is None:
+                parsed_dict = dict(globals_dict)
+                parse_file(filepath, parsed_dict)
+                recipe_cls = parsed_dict[recipe_cls_key]
+            r = self._load_recipe_from_class(recipe_cls, conf, filepath, True)
+            if r is not None:
+                recipe.add_recipe(r)
+            recipe_cls = None
+        if recipe.is_empty():
+            return None
+        return recipe
 
     def _load_manifest(self):
         manifest_path = self._config.manifest
