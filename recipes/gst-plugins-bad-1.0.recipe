@@ -6,15 +6,35 @@ class Recipe(custom.GStreamer):
     btype = BuildType.MESON
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
-    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'bz2': 'enabled',
+    meson_options = {'examples': 'disabled',
+                     'gtk_doc': 'disabled',
+                     # enabled plugins
+                     'assrender': 'enabled',
+                     'bz2': 'enabled',
+                     'decklink': 'enabled',
+                     'dtls': 'enabled',
+                     'dts': 'enabled',
+                     'hls': 'enabled',
+                     'kate': 'enabled',
+                     'libmms': 'enabled',
+                     'openh264': 'enabled',
+                     'openglmixers': 'enabled',
+                     'openjpeg': 'enabled',
+                     'opus': 'enabled',
+                     'rtmp': 'enabled',
+                     'sbc': 'enabled',
+                     'soundtouch': 'enabled',
+                     'srt': 'enabled',
+                     'spandsp': 'enabled',
+                     'srtp': 'enabled',
+                     'resindvd': 'enabled',
+                     'rsvg': 'enabled',
+                     'voaacenc': 'enabled',
+                     'webrtc': 'enabled',
+                     'webrtcdsp': 'enabled',
+                     # disabled plugins
                      'closedcaption': 'disabled',
-                     'assrender': 'enabled', 'kate': 'enabled', 'openh264': 'enabled',
-                     'opus': 'enabled', 'hls': 'enabled', 'rtmp': 'enabled', 'srtp': 'enabled',
-                     'dts': 'enabled', 'libmms': 'enabled', 'resindvd': 'enabled',
-                     'soundtouch': 'enabled', 'openjpeg': 'enabled', 'voaacenc': 'enabled',
-                     'rsvg': 'enabled', 'openglmixers': 'enabled', 'spandsp': 'enabled',
-                     'decklink': 'enabled', 'webrtc': 'enabled', 'dtls': 'enabled',
-                     'sbc': 'enabled', 'srt': 'enabled', 'webrtcdsp': 'enabled'}
+                    }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
