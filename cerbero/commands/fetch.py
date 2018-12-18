@@ -170,8 +170,8 @@ class FetchCache(Command):
     def get_deps(self, config, args):
         namespace = args.namespace
         branch = args.branch
-        distro = config.distro
-        arch = config.arch
+        distro = config.target_distro
+        arch = config.target_arch
         if distro == Distro.REDHAT:
             distro = 'fedora'
 
