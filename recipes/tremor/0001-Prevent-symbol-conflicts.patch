@@ -1,7 +1,7 @@
-From b879069fd630cf960d87056ce68e16d9ec49b748 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
-Date: Tue, 9 Oct 2012 13:19:58 +0200
-Subject: [PATCH 1/8] Prevent symbol conflicts
+From 5e8eec30b91c2f25ec2e2da23c9923a9e7e4fedf Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Tue, 18 Dec 2018 17:56:46 +1100
+Subject: [PATCH] Prevent symbol conflicts
 
 ---
  Makefile.am      | 2 ++
@@ -22,15 +22,15 @@ index 0a4bb2c..32ca48e 100644
                          synthesis.c info.c \
                          floor1.c floor0.c vorbisfile.c \
 diff --git a/vorbisidec.pc.in b/vorbisidec.pc.in
-index 9c09524..02a134f 100644
+index 56fa656..ce9da86 100644
 --- a/vorbisidec.pc.in
 +++ b/vorbisidec.pc.in
 @@ -11,4 +11,4 @@ Version: @VERSION@
- Requires: ogg
+ Requires.private: ogg
  Conflicts:
  Libs: -L${libdir} -lvorbisidec
 -Cflags: -I${includedir}
 +Cflags: -I${includedir} -Dvorbis_block_init=ivorbis_block_init -D_vorbis_block_alloc=_ivorbis_block_alloc -D_vorbis_block_ripcord=_ivorbis_block_ripcord -Dvorbis_block_clear=ivorbis_block_clear -Dvorbis_dsp_clear=ivorbis_dsp_clear -Dvorbis_synthesis_restart=ivorbis_synthesis_restart -Dvorbis_synthesis_init=ivorbis_synthesis_init -Dvorbis_synthesis_blockin=ivorbis_synthesis_blockin -Dvorbis_synthesis_pcmout=ivorbis_synthesis_pcmout -Dvorbis_synthesis_read=ivorbis_synthesis_read -D_vorbis_apply_window=_ivorbis_apply_window -Dvorbis_comment_init=ivorbis_comment_init -Dvorbis_comment_query=ivorbis_comment_query -Dvorbis_comment_query_count=ivorbis_comment_query_count -Dvorbis_comment_clear=ivorbis_comment_clear -Dvorbis_info_blocksize=ivorbis_info_blocksize -Dvorbis_info_init=ivorbis_info_init -Dvorbis_info_clear=ivorbis_info_clear -Dvorbis_synthesis_idheader=ivorbis_synthesis_idheader -Dvorbis_synthesis_headerin=ivorbis_synthesis_headerin -Dvorbis_staticbook_unpack=ivorbis_staticbook_unpack -Dvorbis_book_decode=ivorbis_book_decode -Dvorbis_book_decodevs_add=ivorbis_book_decodevs_add -Dvorbis_book_decodev_add=ivorbis_book_decodev_add -Dvorbis_book_decodev_set=ivorbis_book_decodev_set -Dvorbis_book_decodevv_add=ivorbis_book_decodevv_add -D_ilog=_iilog -D_make_words=_imake_words -D_book_maptype1_quantvals=_ibook_maptype1_quantvals -D_book_unquantize=_ibook_unquantize -Dvorbis_staticbook_destroy=ivorbis_staticbook_destroy -Dvorbis_book_clear=ivorbis_book_clear -Dvorbis_book_init_decode=ivorbis_book_init_decode -Dmdct_backward=imdct_backward
 -- 
-2.1.4
+2.20.0
 
