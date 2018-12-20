@@ -12,6 +12,8 @@ class Recipe(recipe.Recipe):
     configure_options = "--enable-static --with-icu=no"
     autoreconf = True
 
+    patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch']
+
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']

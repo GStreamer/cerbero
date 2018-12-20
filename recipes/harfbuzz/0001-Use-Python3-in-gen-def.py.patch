@@ -1,0 +1,23 @@
+From ef8e39311dfcf6938b9594af8660b3238c79b9e1 Mon Sep 17 00:00:00 2001
+From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
+Date: Wed, 19 Dec 2018 00:40:00 +0000
+Subject: [PATCH] Use Python3 in gen-def.py
+
+---
+ src/gen-def.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/gen-def.py b/src/gen-def.py
+index ad1606e..f45df80 100755
+--- a/src/gen-def.py
++++ b/src/gen-def.py
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python
++#!/usr/bin/env python3
+ 
+ from __future__ import print_function
+ 
+-- 
+2.19.2
+
+
