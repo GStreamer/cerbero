@@ -454,6 +454,21 @@ def file_hash(path):
     return hashlib.md5(open(path, 'rb').read()).digest()
 
 
+def files_checksum(paths):
+    '''
+    Get the md5 checksum of the files
+
+    @paths: list of paths
+    @type: list
+    @return: the md5 checksum
+    @rtype: str
+    '''
+    m = hashlib.md5()
+    for f in paths:
+        m.update(open(f, 'rb').read())
+    return m.digest()
+
+
 def enter_build_environment(platform, arch, sourcedir=None):
     '''
     Enters to a new shell with the build environment

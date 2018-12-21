@@ -419,6 +419,28 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
         '''
         return os.path.abspath(os.path.join(self.recipe_dir(), path))
 
+    def get_checksum(self):
+        '''
+        Returns the current checksum of the recipe file and other files
+        it depends on, like patches.
+        This checksum is used in the cache to determine if a
+        recipe changed in the last build
+
+        @return: a checksum of the recipe file and its dependencies
+        @rtype: str
+        '''
+        return shell.files_checksum(self._get_files_dependencies())
+
+    def get_mtime(self):
+        '''
+        Returns the recipe last modification time, including the dependent
+        files
+
+        @return: last modification time
+        @rtype: str
+        '''
+        return  max(map(os.path.getmtime, self._get_files_dependencies()))
+
     @property
     def steps(self):
         return self._steps

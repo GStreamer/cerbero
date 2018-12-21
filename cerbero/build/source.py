@@ -115,6 +115,20 @@ class Source (object):
         maj_ver = '.'.join(self.version.split('.')[0:2])
         return string % {'name': name, 'version': self.version, 'maj_ver': maj_ver}
 
+    def _get_files_dependencies(self):
+        '''
+        Subclasses should override this funtion to provide any file that
+        this recipe depends on, including the recipe's file
+
+        @return: the recipe file and other files this recipes depends on
+                 like patches
+        @rtype: list
+        '''
+        files = list(map(self.relative_path, self.patches))
+        if hasattr(self, '__file__'):
+            files.append(self.__file__)
+        return files
+
 
 class CustomSource (Source):
 
