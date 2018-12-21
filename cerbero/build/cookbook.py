@@ -170,9 +170,9 @@ class CookBook (object):
         @param name: name of the recipe
         @type name: str
         '''
-        if name in self._invalid_recipes:
-            raise self._invalid_recipes[name]
         if name not in self.recipes:
+            if name in self._invalid_recipes:
+                raise self._invalid_recipes[name]
             raise RecipeNotFoundError(name)
         return self.recipes[name]
 
