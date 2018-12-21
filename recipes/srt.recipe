@@ -20,7 +20,9 @@ class Recipe(recipe.Recipe):
                'srt/0003-platform_sys-Only-include-inttypes.h-with-MSFT-compi.patch',
                'srt/0004-MingW-needs-the-explicit-exports-too.patch',
                'srt/0005-Windows-Only-define-SRT_API-in-one-place.patch',
-               'srt/0001-Allow-building-using-gnustl.patch']
+               'srt/0001-Allow-building-using-gnustl.patch',
+               'srt/0006-Fix-install_name-in-macOS-using-MACOS_RPATH.patch',
+               ]
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
