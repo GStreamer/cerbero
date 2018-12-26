@@ -18,7 +18,6 @@ class Recipe(custom.GStreamer):
                      'kate': 'enabled',
                      'libmms': 'enabled',
                      'openh264': 'enabled',
-                     'openglmixers': 'enabled',
                      'openjpeg': 'enabled',
                      'opus': 'enabled',
                      'rtmp': 'enabled',
@@ -73,7 +72,6 @@ class Recipe(custom.GStreamer):
 
     files_libs = ['libgstcodecparsers-1.0', 'libgstmpegts-1.0', 'libgsturidownloader-1.0',
                   'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
-                  'libgstbadvideo-1.0',
                   'libgstinsertbin-1.0', 'libgstadaptivedemux-1.0',
                   'libgstplayer-1.0', 'libgstbadaudio-1.0',
                   'libgstisoff-1.0', 'libgstsctp-1.0', 'libgstwebrtc-1.0']
@@ -83,7 +81,6 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/audio',
-        'include/gstreamer-1.0/gst/video',
         'include/gstreamer-1.0/gst/basecamerabinsrc',
         'include/gstreamer-1.0/gst/codecparsers',
         'include/gstreamer-1.0/gst/insertbin',
@@ -95,7 +92,6 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
-        'lib/pkgconfig/gstreamer-bad-video-1.0.pc',
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
@@ -126,7 +122,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspeed%(mext)s',
              'lib/gstreamer-1.0/libgstsoundtouch%(mext)s',
              'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
-             'lib/gstreamer-1.0/libgstcompositor%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
              'lib/gstreamer-1.0/libgstladspa%(mext)s',
              'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
@@ -156,7 +151,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspeed.a', 'lib/gstreamer-1.0/libgstspeed.la',
              'lib/gstreamer-1.0/libgstsoundtouch.a', 'lib/gstreamer-1.0/libgstsoundtouch.la',
              'lib/gstreamer-1.0/libgstvideofiltersbad.a', 'lib/gstreamer-1.0/libgstvideofiltersbad.la',
-             'lib/gstreamer-1.0/libgstcompositor.a', 'lib/gstreamer-1.0/libgstcompositor.la',
              'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
              'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
              'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
@@ -324,13 +318,9 @@ class Recipe(custom.GStreamer):
             ]
     }
 
-    files_plugins_sys = [
-            'lib/gstreamer-1.0/libgstopenglmixers%(mext)s',
-    ]
+    files_plugins_sys = []
 
-    files_plugins_sys_devel = [
-             'lib/gstreamer-1.0/libgstopenglmixers.a', 'lib/gstreamer-1.0/libgstopenglmixers.la',
-    ]
+    files_plugins_sys_devel = []
 
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',

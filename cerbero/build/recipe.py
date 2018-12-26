@@ -242,7 +242,6 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
         lib_to_pcname_map = {
             'gstadaptivedemux-1.0' : None,
             'gstbadaudio-1.0' : 'gstreamer-bad-audio-1.0',
-            'gstbadvideo-1.0' : 'gstreamer-bad-video-1.0',
             'gstbasecamerabinsrc-1.0' : None,
             'gstisoff-1.0' : None,
             'gstphotography-1.0' : None,
