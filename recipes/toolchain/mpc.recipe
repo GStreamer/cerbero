@@ -1,8 +1,0 @@
-# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
-class Recipe(recipe.Recipe):
-    name = 'mpc'
-    version = '0.8.2'
-    licenses = [License.LGPLv2_1Plus]
-    configure_options = "--disable-shared --enable-static"
-    autoreconf = True

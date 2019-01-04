@@ -18,6 +18,7 @@
 
 import os
 import re
+import shlex
 import shutil
 
 from cerbero.enums import Architecture, Platform
@@ -52,7 +53,7 @@ class GenLib(object):
         return defname
 
     def dlltool(self, defname, dllname, outputdir):
-        cmd = [os.environ['DLLTOOL'], '-d', defname, '-l', self.filename, '-D', dllname]
+        cmd = shlex.split(os.environ['DLLTOOL']) + ['-d', defname, '-l', self.filename, '-D', dllname]
         shell.new_call(cmd, outputdir, logfile=self.logfile)
 
     def create(self, libname, dllpath, platform, target_arch, outputdir):

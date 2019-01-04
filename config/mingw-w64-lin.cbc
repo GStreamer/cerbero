@@ -1,8 +1,0 @@
-import os
-from cerbero.config import Platform, Architecture, Distro, DistroVersion
-
-target_arch=Architecture.X86_64
-cache_file='mingw-w64-lin'
-prefix=os.path.expanduser('~/mingw/linux/w64')
-sources=os.path.join(home_dir, 'sources', 'mingw-w64-lin')
-recipes_dir = os.path.join(recipes_dir, 'toolchain')

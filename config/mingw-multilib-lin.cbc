@@ -1,0 +1,8 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_arch=Architecture.X86_64
+cache_file='mingw-multilib-lin'
+prefix=os.path.expanduser('~/mingw/linux/multilib')
+sources=os.path.join(home_dir, 'sources', 'mingw-multilib-lin')
+recipes_dir = os.path.join(recipes_dir, '..', 'recipes-toolchain')

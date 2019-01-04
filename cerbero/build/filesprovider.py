@@ -22,6 +22,7 @@ import glob
 import shutil
 import inspect
 from functools import partial
+import shlex
 from pathlib import Path
 
 from cerbero.config import Platform, LibraryType
@@ -58,7 +59,7 @@ def get_implib_dllname(config, path):
     if not dlltool:
         raise FatalError('dlltool not found, check cerbero configuration')
     try:
-        return shell.check_output([dlltool, '-I', path])
+        return shell.check_output(shlex.split(dlltool) + ['-I', path])
     except FatalError:
         return 0
 

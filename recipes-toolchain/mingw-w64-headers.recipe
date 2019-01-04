@@ -1,0 +1,30 @@
+class Recipe(recipe.Recipe):
+    name = 'mingw-w64-headers'
+    version = 'v6.0.0'
+    licenses = [License.LGPLv2Plus]
+    stype = SourceType.CUSTOM
+    srcdir = 'mingw-w64-headers'
+    configure_options='--enable-sdk=all --enable-secure-api \
+            --with-default-msvcrt=ucrtbase '
+    add_host_build_target = False
+    deps = ['mingw-w64-sources']
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            raise InvalidRecipeError(self)
+        self.host = 'x86_64-w64-mingw32'
+        self._sysroot = os.path.join(self.config.prefix, self.host, 'sysroot')
+        self.configure_options += ' --host=%s' % self.host
+        self.configure_options += ' --with-sysroot=%s ' % self._sysroot
+        self.make_install = 'make install DESTDIR=%s' % self._sysroot
+        self.build_dir = os.path.join(self.config.sources,
+                'mingw-w64-%s' % self.version)
+        self.make_dir = os.path.join(self.build_dir, 'mingw-w64-headers')
+        self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
+                "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
+
+    def post_install(self):
+        if not os.path.exists(os.path.join(self._sysroot, 'mingw')):
+            shell.call('ln -s usr/%(host)s mingw' \
+                    % {'host': self.host}, self._sysroot)
+        super().post_install()

@@ -1,0 +1,17 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'isl'
+    version = '0.20'
+    url = 'https://deb.debian.org/debian/pool/main/i/isl/isl_0.20.orig.tar.xz'
+    tarball_checksum = 'a5596a9fb8a5b365cb612e4b9628735d6e67e9178fae134a816ae195017e77aa'
+    stype = SourceType.TARBALL
+    licenses = [License.LGPLv3Plus]
+    configure_options = '--disable-shared '\
+            '--enable-static ' \
+            '--with-gmp=system '\
+            '--with-clang=no '\
+            '--with-sysroot=$CERBERO_PREFIX'
+    deps = ['gmp']
+

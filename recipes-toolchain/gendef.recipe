@@ -1,0 +1,10 @@
+class Recipe(recipe.Recipe):
+    name = 'gendef'
+    version = 'v6.0.0'
+    licenses = [License.LGPLv2Plus]
+    stype = SourceType.CUSTOM
+    files_bin = ['bin/gendef.exe']
+
+    def prepare(self):
+        self.build_dir = self.config_src_dir = os.path.join(self.config.sources, 'mingw-w64-%s' % self.version)
+        self.make_dir = os.path.join(self.build_dir, 'mingw-w64-tools', 'gendef')

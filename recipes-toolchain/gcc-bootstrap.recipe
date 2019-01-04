@@ -1,0 +1,64 @@
+from cerbero.utils import shell
+
+# This recipe bootstraps an initial compiler that is used
+# for the cross-toolchain to compile the CRT before the
+# real final compiler.
+class Recipe(recipe.Recipe):
+    name = 'gcc-bootstrap'
+    version = '8.2.0'
+    stype = SourceType.CUSTOM
+    licenses = [License.GPLv3Plus]
+    configure_options = '--with-newlib ' \
+                        '--disable-maintainer-mode ' \
+                        '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\' ' \
+                        '--disable-shared ' \
+                        '--disable-libgomp ' \
+                        '--disable-libquadmath ' \
+                        '--disable-libquadmath-support ' \
+                        '--disable-libmudflap ' \
+                        '--disable-libmpx ' \
+                        '--disable-libssp ' \
+                        '--disable-nls ' \
+                        '--enable-threads=no ' \
+                        '--enable-__cxa_atexit ' \
+                        '--enable-lto ' \
+                        '--enable-languages=c ' \
+                        '--enable-multiarch ' \
+                        ''
+    make = 'make configure-gcc configure-libcpp configure-build-libiberty &&' \
+            'make all-libcpp all-build-libiberty && '\
+            'make configure-libdecnumber && '\
+            'make -C libdecnumber libdecnumber.a && '\
+            'make configure-libbacktrace && '\
+            'make -C libbacktrace && '\
+            'make all-gcc all-target-libgcc'
+    make_install = 'make install-gcc install-target-libgcc'
+    use_system_libs = True
+    add_host_build_target = False
+    deps = ['gcc-sources', 'mingw-w64-headers', 'gmp', 'mpfr', 'mpc', 'isl']
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            raise InvalidRecipeError(self)
+        self.set_env('CPP')
+        self._target = 'x86_64-w64-mingw32'
+        sysroot = os.path.join(self.config.prefix, self._target, 'sysroot')
+        self.configure_options += ' --with-sysroot=%s ' % sysroot
+        self.configure_options += ' --with-local-prefix=%s ' % sysroot
+        self.configure_options += ' --target=%s' % self._target
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' --host=%s' % self._target
+        if self.config.target_platform == Platform.WINDOWS:
+            self.allow_parallel_build = False
+        self.build_dir = os.path.join(self.config.sources,
+                'gcc-%s' % self.version)
+        self.make_dir = os.path.join(self.build_dir, 'gcc_build_core')
+        self.config_sh = os.path.join(self.config.sources,
+                'gcc-%s' % self.version, 'configure')
+
+    async def configure(self):
+        try:
+            os.mkdir(self.make_dir)
+        except:
+            pass
+        await super(Recipe, self).configure()

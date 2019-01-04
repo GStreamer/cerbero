@@ -1,0 +1,19 @@
+class Recipe(recipe.Recipe):
+    name = 'mingw-w64-sources'
+    version = 'v6.0.0'
+    licenses = [License.LGPLv2Plus]
+    url = 'https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-%(version)s.tar.bz2'
+    tarball_checksum = '805e11101e26d7897fce7d49cbb140d7bac15f3e085a91e0001e80b2adaf48f0'
+    stype = SourceType.TARBALL
+    btype = BuildType.CUSTOM
+    patches = [
+        'mingw-w64/0001-timeb.h-declare-_ftime32-function-define-_ftime-acco.patch',
+        'mingw-w64/0002-Add-_ftime-aliases-for-all-msvcr-versions.patch',
+        'mingw-w64/0003-move-_fseeki64-and-_ftelli64-functions-from-libmingw.patch',
+        ]
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            raise InvalidRecipeError(self)
+        self.build_dir = os.path.join(self.config.sources,
+                'mingw-w64-%s' % self.version)

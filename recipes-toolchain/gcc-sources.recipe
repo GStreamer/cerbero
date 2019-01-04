@@ -1,0 +1,22 @@
+from cerbero.utils import shell
+
+# This recipes extracts and patches the gcc sources that
+# will be used by gcc-bootstrap and gcc recipes
+class Recipe(recipe.Recipe):
+    name = 'gcc-sources'
+    version = '8.2.0'
+    url = 'https://ftpmirror.gnu.org/gnu/gcc/gcc-8.2.0/gcc-%(version)s.tar.xz'
+    tarball_checksum = '196c3c04ba2613f893283977e6011b2345d1cd1af9abeac58e916b1aab3e0080'
+    stype = SourceType.TARBALL
+    btype = BuildType.CUSTOM
+    licenses = [License.GPLv3Plus]
+    patches = ['gcc/0001-Fix-graphite-build-with-isl-0.20.patch',
+               'gcc/0002-Disable-split-stack-for-non-thread-builds.patch',
+               'gcc/0003-Force-SEH-SJLJ.patch',
+               ]
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            raise InvalidRecipeError(self)
+        self.build_dir = os.path.join(self.config.sources,
+                'gcc-%s' % self.version)

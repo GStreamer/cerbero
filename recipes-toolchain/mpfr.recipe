@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'mpfr'
+    version = '4.0.1'
+    stype = SourceType.TARBALL
+    url = 'https://ftpmirror.gnu.org/gnu/mpfr/mpfr-%(version)s.tar.bz2'
+    tarball_checksum = 'a4d97610ba8579d380b384b225187c250ef88cfe1d5e7226b89519374209b86b'
+    licenses = [License.LGPLv3Plus]
+    configure_options = "--disable-shared --enable-static"
+    deps = ['gmp']

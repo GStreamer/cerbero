@@ -1,0 +1,26 @@
+From f4be86ae6d774aa4df3666ff6f55232b92fbc475 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Thu, 27 Dec 2018 23:51:16 +0100
+Subject: [PATCH] Fix graphite build with isl-0.20
+
+---
+ gcc/graphite.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/gcc/graphite.h b/gcc/graphite.h
+index 4e0e58c..1398668 100644
+--- a/gcc/graphite.h
++++ b/gcc/graphite.h
+@@ -37,6 +37,9 @@ along with GCC; see the file COPYING3.  If not see
+ #include <isl/schedule.h>
+ #include <isl/ast_build.h>
+ #include <isl/schedule_node.h>
++#include <isl/id.h>
++#include <isl/space.h>
++
+ 
+ typedef struct poly_dr *poly_dr_p;
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,13 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform=Platform.WINDOWS
+target_distro=Distro.WINDOWS
+target_distro_version=DistroVersion.WINDOWS_7
+target_arch=Architecture.X86_64
+cache_file='mingw-multilib-win'
+prefix=os.path.expanduser('~/mingw/windows/multilib')
+sources=os.path.join(home_dir, 'sources', 'mingw-multilib-win')
+toolchain_prefix=os.path.expanduser('~/mingw/linux/multilib/')
+recipes_dir = os.path.join(recipes_dir, '..', 'recipes-toolchain')
+build='x86_64-pc-linux-gnu'

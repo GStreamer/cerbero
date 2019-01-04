@@ -1,0 +1,18 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'gmp'
+    version = '6.1.2'
+    url = 'https://gmplib.org/download/gmp/gmp-%(version)s.tar.bz2'
+    tarball_dirname = 'gmp-%(version)s'
+    tarball_checksum = '5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2'
+    stype = SourceType.TARBALL
+    licenses = [License.LGPLv3Plus]
+    configure_options = "--disable-shared --enable-static"
+
+    files_libs = ['libgmp']
+    files_devel = ['include/gmp.h']
+
+    def gen_library_file(self, output_dir=None):
+        return

@@ -11,91 +11,98 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     runtime_dep = True
 
-    files_libs = ['libstdc++', 'libwinpthread', 'libgomp', 'libgcc_s_sjlj-1']
-    files_static = []
+    files_libs = ['libwinpthread-1']
+    files_devel = ['lib/libstdc++.a', 'lib/libstdc++.la']
+    files_satic = []
     files_headers = ['include/GL']
 
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
             raise InvalidRecipeError(self, "Invalid platform")
-        # mingw's static libraries
-        self.mingw_static_files = ['%(host)s/lib/libmingwex.a',
-                                   '%(host)s/lib/libdxerr9.a',
-                                   '%(host)s/lib/libmoldname.a']
-        if self.config.platform == Platform.WINDOWS:
-            self.mingw_static_files += ['%(mingw)s/lib/gcc/%(host)s/4.7.3/libgcc.a']
-        # static build deps
-        if self.config.platform == Platform.WINDOWS:
-            # the native compiler install libraries in 'lib' and
-            # not in the cross prefix
-            mingw = '.'
+        if self.config.target_arch == Architecture.X86:
+            gcclib = 'lib/gcc/x86_64-w64-mingw32/8.2.0/32/'
+            self._ehlib = 'libgcc_s_sjlj-1'
         else:
-            mingw = self.config.host
-        self.mingw_static_files = [f % {'mingw':mingw, 'host':self.config.host} for f in self.mingw_static_files]
-        self.files_static = [os.path.join('lib', os.path.basename(f)) for f in self.mingw_static_files]
+            gcclib = 'lib/gcc/x86_64-w64-mingw32/8.2.0/'
+            self._ehlib = 'libgcc_s_seh-1'
+
+        # mingw's static libraries
+        self.mingw_static_files = ['libmingwex.a',
+                                   'libdxerr9.a',
+                                   'libmoldname.a']
+        self.gcc_static_files = [gcclib + 'libgcc.a',
+                                 gcclib + 'libgcc_eh.a']
+        self.files_static = [os.path.join('lib', os.path.basename(f)) \
+                for f in self.mingw_static_files + self.gcc_static_files]
+
+        self.files_libs.append(self._ehlib)
 
     def install(self):
+        hostroot = os.path.join(self.config.toolchain_prefix, 'x86_64-w64-mingw32')
+        sysroot = os.path.join(hostroot, 'sysroot', 'usr', 'x86_64-w64-mingw32')
         # Copy libstdc++ to the prefix and update the .la files with the
         # the prefix path.
-        if self.config.platform == Platform.WINDOWS:
-            # the native compiler install dll's in 'bin' and
-            # not in the cross prefix
-            binmingw = 'bin'
-            libmingw = 'lib'
+        if self.config.target_arch == Architecture.X86:
+            libmingw = os.path.join(sysroot, 'lib32')
+            if self.config.platform == Platform.WINDOWS:
+                libdir = os.path.join(self.config.toolchain_prefix, 'lib32')
+            else:
+                libdir = os.path.join(hostroot, 'lib32')
         else:
-            binmingw = os.path.join(self.config.host, 'lib')
-            libmingw = os.path.join(self.config.host, 'lib')
+            libtoolchain = os.path.join(hostroot, 'lib')
+            libmingw = os.path.join(sysroot, 'lib')
+            if self.config.platform == Platform.WINDOWS:
+                libdir = os.path.join(self.config.toolchain_prefix, 'lib')
+            else:
+                libdir = os.path.join(hostroot, 'lib')
+
         # copy the dll
         if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
             os.makedirs(os.path.join(self.config.prefix, 'bin'))
         if not os.path.exists(os.path.join(self.config.prefix, 'lib')):
             os.makedirs(os.path.join(self.config.prefix, 'lib'))
-        for f in ['libwinpthread-1']:
+        for f in ['libwinpthread-1.dll']:
             shutil.copy(
-                os.path.join(self.config.toolchain_prefix, 'bin', f + '.dll'),
-                os.path.join(self.config.prefix, 'bin', f + '.dll'))
-        for f in ['libgomp-1', 'libstdc++-6']:
+                os.path.join(libmingw, f),
+                os.path.join(self.config.prefix, 'bin', f))
+        for f in ['libstdc++-6.dll']:
             shutil.copy(
-                os.path.join(self.config.toolchain_prefix, binmingw, f + '.dll'),
-                os.path.join(self.config.prefix, 'bin', f + '.dll'))
-        for f in ['libgcc_s_sjlj-1']:
+                os.path.join(libdir, f),
+                os.path.join(self.config.prefix, 'bin', f))
+        for f in [self._ehlib + '.dll']:
             shutil.copy(
-                os.path.join(self.config.toolchain_prefix, libmingw, f + '.dll'),
-                os.path.join(self.config.prefix, 'bin', f + '.dll'))
+                os.path.join(libdir, f),
+                os.path.join(self.config.prefix, 'bin', f))
         # copy the development libraries
-        for f in ['libstdc++', 'libgomp']:
+        for f, v, d in [
+                ('libstdc++', '', libdir),
+                ('libpthread', '', libmingw),
+                ('libwinpthread', '1', libmingw)]:
             # Copy the dll.a
-            shutil.copy(
-                os.path.join(self.config.toolchain_prefix, libmingw, f + '.dll.a'),
-                os.path.join(self.config.prefix, 'lib', f + '.dll.a'))
+            n_dll_a = f + v + '.dll.a'
+            f_dll_a = os.path.join(d, n_dll_a)
+            if os.path.exists(f_dll_a):
+                shutil.copy(f_dll_a,
+                    os.path.join(self.config.prefix, 'lib', n_dll_a))
+            # Copy the .a
+            f_a = os.path.join(d, f + '.a')
+            if os.path.exists(f_a):
+                shutil.copy(f_a,
+                    os.path.join(self.config.prefix, 'lib', f + '.a'))
             # Copy and update the .la
-            src = os.path.join(self.config.toolchain_prefix, libmingw, f + '.la')
-            dest = os.path.join(self.config.prefix, 'lib', f + '.la')
-            if os.path.exists(dest):
-                os.remove(dest)
-            with open(src, 'r') as f:
-                content = f.readlines()[:-1]
-                content.append("libdir='%s'" % os.path.join(self.config.prefix, 'lib'))
-                with open(dest, 'w+') as d:
-                    d.writelines(content)
-        # copy winpthreads
-        for f in ['libpthread', 'libwinpthread']:
-            shutil.copy(os.path.join(self.config.toolchain_prefix, 'lib', f + '.dll.a'),
-                os.path.join(self.config.prefix, 'lib', f + '.dll.a'))
-            shutil.copy(os.path.join(self.config.toolchain_prefix, 'lib', f + '.a'),
-                os.path.join(self.config.prefix, 'lib', f + '.a'))
-        src = os.path.join(self.config.toolchain_prefix, 'lib', 'libwinpthread' + '.la')
-        dest = os.path.join(self.config.prefix, 'lib', f + '.la')
-        if os.path.exists(dest):
-            os.remove(dest)
-        with open(src, 'r') as f:
-            content = f.readlines()[:-1]
-            content.append("libdir='%s'" % os.path.join(self.config.prefix, 'lib'))
-            with open(dest, 'w+') as d:
-                d.writelines(content)
+            src = os.path.join(d, f + '.la')
+            if os.path.exists(src):
+                dest = os.path.join(self.config.prefix, 'lib', f + '.la')
+                if os.path.exists(dest):
+                    os.remove(dest)
+                with open(src, 'r') as f:
+                    content = f.readlines()[:-1]
+                    content.append("libdir='%s'" % os.path.join(self.config.prefix, 'lib'))
+                    with open(dest, 'w+') as d:
+                        d.writelines(content)
         # install headers and static libraries
         for f in self.files_headers:
-            src = os.path.join(self.config.toolchain_prefix, self.config.host, f)
+            src = os.path.join(sysroot, f)
             dest = os.path.join(self.config.prefix, f)
             if os.path.exists(dest):
                 shutil.rmtree(dest)
@@ -103,7 +110,10 @@ class Recipe(recipe.Recipe):
 
         for f in self.mingw_static_files:
             out_file = os.path.join('lib', os.path.basename(f))
-            self.files_static.append(out_file)
+            shutil.copy(os.path.join(libmingw, f),
+                os.path.join(self.config.prefix, out_file))
+        for f in self.gcc_static_files:
+            out_file = os.path.join('lib', os.path.basename(f))
             shutil.copy(os.path.join(self.config.toolchain_prefix, f),
                 os.path.join(self.config.prefix, out_file))
         # copy the bootstrapped build-tool pkg-config into the prefix so it's

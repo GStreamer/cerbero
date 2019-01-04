@@ -1,11 +1,22 @@
+import shutil
+
+
 class Recipe(recipe.Recipe):
     name = 'binutils'
-    version = '2.22'
+    version = '2.31.1'
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
-    configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
+    url = 'https://ftpmirror.gnu.org/gnu/binutils/binutils-%(version)s.tar.bz2'
+    tarball_checksum = 'ffcc382695bf947da6135e7436b8ed52d991cf270db897190f19d6f9838564d0'
+    stype = SourceType.TARBALL
+    autoreconf = True
+    configure_options = '--enable-ld=yes ' \
+                        '--enable-gold=no ' \
+                        '--disable-sim ' \
+                        '--disable-gdb ' \
+                        '--disable-nls ' \
+                        '--enable-multilib '
     add_host_build_target = False
-
     files_bins = ['addr2line', 'ar', 'as', 'c++filt', 'dlltool', 'dllwrap',
                   'elfedit', 'gprof', 'ld', 'ld.bfd', 'nm', 'objcopy',
                   'objdump', 'ranlib', 'readelf', 'size', 'strings', 'strip',
@@ -33,15 +44,15 @@ class Recipe(recipe.Recipe):
                       '%(host)s/lib32/ldscripts/i386pe.xr',
                       '%(host)s/lib32/ldscripts/i386pe.xu']
     files_lib = ['lib/libiberty.a']
-    files_lang = ['bfd', 'binutils', 'gas', 'gprof', 'ld', 'opcodes']
-
+    files_lang = ['bfd', 'binutils', 'gas', 'gprof',
+                  'ld', 'opcodes']
 
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
-            self.target = 'i686-w64-mingw32'
-        else:
-            self.target = 'x86_64-w64-mingw32'
-        self.configure_options += ' --target=%s' % self.target
+            raise InvalidRecipeError(self)
+        self.target = 'x86_64-w64-mingw32'
+        self.configure_options += ' --target=%s ' % self.target
+        self.configure_options += '--with-sysroot=$CERBERO_PREFIX/%s/sysroot ' % self.target
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --host=%s' % self.target
 
@@ -54,15 +65,23 @@ class Recipe(recipe.Recipe):
         files.extend([x % {'host': 'mingw', 'bext': '%(bext)s'} for x in
                       self.files_binutils])
         self.files_binutils = files
-        # temporary hack to not build info files (requires old texinfo)
-        # Remove when switching to newer version than 2.22
-        self.set_env('MAKEINFO', 'missing')
+
+    async def configure(self):
+        for d in ['bfd', 'opcodes', 'gas', 'binutils', 'gprof', 'ld']:
+            shell.call('autoreconf -ivf', os.path.join(self.build_dir, d))
+        await super().configure()
 
     def post_install(self):
-        import shutil
         # Prefix binaries with the host triplet
         if self.config.target_platform == Platform.WINDOWS:
             for f in self.files_list_by_category('bins'):
                 f = os.path.join(self.config.prefix, f)
-                shutil.move(f.replace(self.target + '-', ''), f)
+                shutil.copy(f.replace(self.target + '-', ''), f)
+        # libtool m4 macros uses non-prefixed 'strings' command.
+        elif self.config.target_platform == Platform.LINUX:
+            bindir = os.path.join(self.config.prefix, 'bin')
+            strings = os.path.join(bindir, 'strings')
+            if os.path.exists(strings):
+                os.remove(strings)
+            shell.call('ln -s %s-strings strings' % self.target, bindir)
         super().post_install()
