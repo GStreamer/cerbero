@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
     make_check = None
     autoreconf = True
-    patches = ['libass/0001-define-IID_Unknown.patch']
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
