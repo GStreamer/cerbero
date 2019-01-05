@@ -86,6 +86,11 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86_64:
                 platform = 'win64'
+                if not self.using_msvc():
+                    # Error: invalid register for .seh_savexmm
+                    # Fix: # https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
+                    # GCC bug: # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
+                    self.append_env('CFLAGS', '-fno-asynchronous-unwind-tables')
             else:
                 platform = 'win32'
                 if not self.using_msvc():
