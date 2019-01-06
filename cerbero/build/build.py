@@ -146,9 +146,11 @@ def modify_environment(func):
         if self.use_system_libs and self.config.allow_system_libs:
             self._add_system_libs()
         self._modify_env()
-        res = func(*args)
-        self._restore_env()
-        return res
+        try:
+            res = func(*args)
+            return res
+        finally:
+            self._restore_env()
 
     call.__name__ = func.__name__
     return call
