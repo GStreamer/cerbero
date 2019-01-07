@@ -23,6 +23,8 @@ class Recipe(recipe.Recipe):
                'srt/0001-Allow-building-using-gnustl.patch',
                'srt/0006-Fix-install_name-in-macOS-using-MACOS_RPATH.patch',
                'srt/0001-Allow-using-public-API-when-building-with-MSVC.patch',
+               # https://github.com/Haivision/srt/pull/528
+               'srt/0007-Fix-build-with-MinGW-v6.0.0.patch',
                ]
 
     def prepare(self):
