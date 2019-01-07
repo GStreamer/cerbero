@@ -9,14 +9,15 @@ class Recipe(recipe.Recipe):
     url = 'xiph://theora/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
     deps = ['libogg', 'libvorbis']
+    autoreconf = True
     allow_parallel_build = False
     patches = ['libtheora/0001-Add-option-to-disable-doc.patch',
-               'libtheora/0002-Update-makefiles.patch',
-               'libtheora/0003-Fix-linking-of-theora-encoder-library.patch',
-               'libtheora/0004-Use-our-automake-version-and-not-an-older-one.patch',
-               'libtheora/0005-Update-Makefile.in-too-to-avoid-needing-to-call-auto.patch',
-               'libtheora/0006-examples-Don-t-use-png_sizeof.patch',
-               'libtheora/0001-build-allow-skipping-configure-in-autogen.sh.patch']
+               'libtheora/0002-Fix-linking-of-theora-encoder-library.patch',
+               'libtheora/0003-Use-our-automake-version-and-not-an-older-one.patch',
+               'libtheora/0004-examples-Don-t-use-png_sizeof.patch',
+               'libtheora/0005-build-allow-skipping-configure-in-autogen.sh.patch',
+               'libtheora/0006-Fix-cross-compilation-build.patch',
+               ]
     configure_options = ' --disable-spec --disable-doc'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']

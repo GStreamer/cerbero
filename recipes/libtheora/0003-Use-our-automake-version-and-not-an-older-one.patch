@@ -1,7 +1,7 @@
-From a5bcb0eaa7fc9ef4136dbee9eeed4a9814ea0c01 Mon Sep 17 00:00:00 2001
+From 641cb8dd2db6a816642d747dee161275b2fd1350 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Fri, 25 Jan 2013 16:35:36 +0100
-Subject: [PATCH 4/6] Use our automake version and not an older one
+Subject: [PATCH 3/6] Use our automake version and not an older one
 
 ---
  Makefile.am | 2 +-
@@ -20,5 +20,5 @@ index d833491..d888e11 100644
  if THEORA_ENABLE_EXAMPLES
  EXAMPLES_DIR = examples
 -- 
-1.8.3.1
+2.7.4
 

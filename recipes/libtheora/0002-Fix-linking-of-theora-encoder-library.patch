@@ -1,7 +1,7 @@
-From b76bd2eedc46aa9c1c2dfbefc473bccf69b8712f Mon Sep 17 00:00:00 2001
+From 1731232552adb44ecf18f3820648fd88e2a3c7db Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Wed, 22 Aug 2012 15:58:57 +0200
-Subject: [PATCH 3/6] Fix linking of theora encoder library
+Subject: [PATCH 2/6] Fix linking of theora encoder library
 
 ---
  lib/Makefile.am | 1 +
@@ -20,5 +20,5 @@ index 89ce261..88c4990 100644
  	internal.c \
  	state.c \
 -- 
-1.8.3.1
+2.7.4
 

@@ -1,7 +1,7 @@
-From 51fe3dbf5429c4d7a37ce348b0947a60f1c36ee6 Mon Sep 17 00:00:00 2001
+From 86f7e95f946dafe99cd3fd7e1d19570191516b8c Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Mon, 7 Oct 2013 13:15:20 +0200
-Subject: [PATCH 6/6] examples: Don't use png_sizeof
+Subject: [PATCH 4/6] examples: Don't use png_sizeof
 
 ---
  examples/png2theora.c | 4 ++--
@@ -24,5 +24,5 @@ index 71a0d0f..ed24c2a 100644
      row_pointers[y] = row_data + y*(3*width);
    }
 -- 
-1.8.3.1
+2.7.4
 

@@ -1,7 +1,7 @@
-From e7e9749c02767fc22cc41b42bda21d0f4cb9e1b1 Mon Sep 17 00:00:00 2001
+From bf1a0a574062f8f119213a12746f4875a4b05c75 Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Tue, 6 Nov 2018 14:56:07 +1100
-Subject: [PATCH] build: allow skipping configure in autogen.sh
+Subject: [PATCH 5/6] build: allow skipping configure in autogen.sh
 
 ---
  autogen.sh | 4 +++-
@@ -20,5 +20,5 @@ index bbca69d..492b9a7 100755
 +  $srcdir/configure --enable-maintainer-mode "$@" && echo
 +fi
 -- 
-2.19.0
+2.7.4
 
