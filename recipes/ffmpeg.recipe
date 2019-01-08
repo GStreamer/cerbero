@@ -8,11 +8,13 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = '0cb40e3b8acaccd0ecb38aa863f66f0c6e02406246556c2992f67bf650fab058'
+    patches = ['ffmpeg/0001-configure-make-windres-option-work.patch',]
 
     btype = BuildType.MAKEFILE
     configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
         --ar="$AR" --as="$CC" --cc="$CC" --ld="$CC" --nm="$NM" --ranlib="$RANLIB" \
-        --strip="$STRIP" --enable-static --enable-pic --enable-shared \
+        --strip="$STRIP" --windres="$RC" \
+        --enable-static --enable-pic --enable-shared \
         --disable-avdevice --disable-postproc --disable-swscale \
         --disable-programs --disable-ffplay --disable-ffprobe --disable-ffmpeg \
         --disable-encoder=flac --disable-protocols --disable-devices \
@@ -78,7 +80,10 @@ class Recipe(recipe.Recipe):
                 # for architecture i386
                 libavextraconf += ' --disable-asm  '
 
-        if self.config.cross_compiling():
+        # On windows, being a multilib toolchain, we have to always configure
+        # the cross-prefix
+        if self.config.cross_compiling() or \
+                self.config.target_platform == Platform.WINDOWS:
             libavextraconf += ' --enable-cross-compile'
             target_os = self.config.target_platform
             if target_os == 'windows':
@@ -88,7 +93,8 @@ class Recipe(recipe.Recipe):
             target_arch = self.config.host.split('-', 1)[0]
             libavextraconf += ' --target-os=' + target_os
             libavextraconf += ' --arch=' + target_arch
-            libavextraconf += ' --cross-prefix={}- '.format(self.config.host)
+            libavextraconf += ' --cross-prefix={} '\
+                    .format(self.config.tools_prefix or self.config.host)
 
         self.configure_options += libavextraconf
         # On Windows, make fails if V=1 is passed with:
@@ -99,12 +105,7 @@ class Recipe(recipe.Recipe):
     async def configure(self):
         await super(recipe.Recipe, self).configure()
         libav_path = self.build_dir
-        if self.config.target_platform == Platform.WINDOWS:
-            # XXX: --windres option doesn't exist, despite --help listing it
-            replacements = {'WINDRES=windres': 'WINDRES=' + self.get_env('WINDRES'),
-                            'DLLTOOL=dlltool': 'DLLTOOL=' + self.get_env('DLLTOOL')}
-            shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
                 replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
                                 'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
