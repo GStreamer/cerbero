@@ -7,3 +7,19 @@ build cerbero fedora x86_64:
   extends: '.build cerbero fedora x86_64'
   dependencies:
     - "cerbero deps fedora x86_64"
+
+cerbero deps cross win32:
+  extends: '.cerbero deps cross win32'
+
+build cerbero cross win32:
+  extends: '.build cerbero cross win32'
+  dependencies:
+    - "cerbero deps cross win32"
+
+cerbero deps cross win64:
+  extends: '.cerbero deps cross win64'
+
+build cerbero cross win64:
+  extends: '.build cerbero cross win64'
+  dependencies:
+    - "cerbero deps cross win64"
