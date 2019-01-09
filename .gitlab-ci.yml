@@ -14,7 +14,7 @@ cerbero deps windows x86:
 build cerbero cross win32:
   extends: '.build cerbero cross win32'
   dependencies:
-    - "cerbero deps cross win32"
+    - "cerbero deps windows x86"
 
 cerbero deps windows x86_64:
   extends: '.cerbero deps cross win64'
@@ -22,4 +22,4 @@ cerbero deps windows x86_64:
 build cerbero cross win64:
   extends: '.build cerbero cross win64'
   dependencies:
-    - "cerbero deps cross win64"
+    - "cerbero deps windows x86_64"
