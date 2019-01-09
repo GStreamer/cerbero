@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 
-    files_devel = ['share/vs/2010', 'lib/libmoldname.a']
+    files_devel = ['share/vs/2010']
 
     def install(self):
         import shutil
@@ -19,16 +19,7 @@ class Recipe(recipe.Recipe):
             os.makedirs(vspropsdir)
         genvsprops = GenVSProps()
         genvsprops.runargs(self.config, vspropsdir, env_var)
-        filename = os.path.basename(self.files_devel[1])
-        if self.config.target_arch == Architecture.X86:
-          mingw_libdir = os.path.join(self.config.toolchain_prefix, 'i686-w64-mingw32', 'lib')
-        elif self.config.target_arch == Architecture.X86_64:
-          mingw_libdir = os.path.join(self.config.toolchain_prefix, 'x86_64-w64-mingw32', 'lib')
-        if not os.path.exists(mingw_libdir):
-            os.makedirs(mingw_libdir)
-        shutil.copy(os.path.join(mingw_libdir, filename),
-                    os.path.join(self.config.prefix, 'lib', filename))
-	# Copy msvc
+        # Copy msvc
         propsdir = os.path.join(self.config.prefix, 'share/vs/2010/msvc')
         if not os.path.exists(propsdir):
             os.makedirs(propsdir)
@@ -36,7 +27,7 @@ class Recipe(recipe.Recipe):
         for f in os.listdir(datapropsdir):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
-	# Copy Wizard files
+        # Copy Wizard files
         propsdir = os.path.join(self.config.prefix, 'share/vs/2010/wizard')
         if not os.path.exists(propsdir):
             os.makedirs(propsdir)
@@ -44,7 +35,7 @@ class Recipe(recipe.Recipe):
         for f in os.listdir(datapropsdir):
             path = os.path.join(datapropsdir, f)
             shutil.copy(path, os.path.join(propsdir, f))
-	# Copy Wizard template files
+        # Copy Wizard template files
         propsdir = os.path.join(self.config.prefix, 'share/vs/2010/gst-template')
         if os.path.exists(propsdir):
             shutil.rmtree(propsdir)
