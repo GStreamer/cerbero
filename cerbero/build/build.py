@@ -424,6 +424,10 @@ class MakefilesBase (Build, ModifyEnvBase):
 class Autotools (MakefilesBase):
     '''
     Build handler for autotools project
+
+    @cvar override_libtool: overrides ltmain.sh to generate a libtool
+                            script with the one built by cerbero.
+    @type override_libtool: boolean
     '''
 
     autoreconf = False
@@ -436,6 +440,7 @@ class Autotools (MakefilesBase):
     can_use_configure_cache = True
     supports_cache_variables = True
     disable_introspection = False
+    override_libtool = True
 
     async def configure(self):
         # Build with PIC for static linking
@@ -462,7 +467,7 @@ class Autotools (MakefilesBase):
         config_datadir = os.path.join(self.config._relative_path('data'), 'autotools')
         cfs = {'config.guess': config_datadir, 'config.sub': config_datadir}
         # ensure our libtool modifications are actually picked up by recipes
-        if self.name != 'libtool':
+        if self.name != 'libtool' and self.override_libtool:
             cfs['ltmain.sh'] = os.path.join(self.config.build_tools_prefix, 'share/libtool/build-aux')
         for cf, srcdir in cfs.items():
             find_cmd = 'find {} -type f -name {}'.format(self.config_src_dir, cf)
