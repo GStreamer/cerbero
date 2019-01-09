@@ -18,7 +18,7 @@
 
 import os
 
-from cerbero.config import Platform
+from cerbero.config import Platform, Architecture
 from cerbero.commands import Command, register_command, build
 from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
@@ -26,6 +26,7 @@ from cerbero.errors import PackageNotFoundError, UsageError
 from cerbero.packages.packager import Packager
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.disttarball import DistTarball
+from cerbero.packages.android import AndroidPackager
 
 
 class Package(Command):
@@ -79,7 +80,11 @@ class Package(Command):
         if p is None:
             raise PackageNotFoundError(args.package[0])
         if args.tarball:
-            pkg = DistTarball(config, p, self.store)
+            if config.target_platform == Platform.ANDROID and \
+               config.target_arch == Architecture.UNIVERSAL:
+                pkg = AndroidPackager(config, p, self.store)
+            else:
+                pkg = DistTarball(config, p, self.store)
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
