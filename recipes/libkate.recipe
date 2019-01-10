@@ -16,7 +16,9 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     def prepare(self):
-        # Tell internal script to call python3 instead of python
-        self.append_env('PYTHON', 'python3')
+        # Tell internal script to call python3 instead of python on non-Windows
+        # platforms since Python 3 is still python.exe on Windows.
+        if self.config.platform != Platform.WINDOWS:
+            self.append_env('PYTHON', 'python3')
         if self.config.target_distro == Distro.ARCH:
             self.append_env('LDFLAGS', '-Wl,-O1,--sort-common,--as-needed,-z,relro')

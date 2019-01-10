@@ -12,12 +12,14 @@ class Recipe(recipe.Recipe):
     configure_options = "--enable-static --with-icu=no"
     autoreconf = True
 
-    patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch']
-
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
+
     def prepare(self):
+        if self.config.platform != Platform.WINDOWS:
+            self.patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch']
+
         if self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:

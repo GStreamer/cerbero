@@ -15,8 +15,7 @@ class Recipe(recipe.Recipe):
     deps = ['libxml2', 'glib', 'glib-networking']
     patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
                'libsoup/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch',
-               'libsoup/0001-configure.ac-Don-t-check-intltool-version.patch',
-               'libsoup/4b924e57-tld-parser-use-Python-3.patch' ]
+               'libsoup/0001-configure.ac-Don-t-check-intltool-version.patch',]
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
@@ -26,6 +25,9 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.LINUX:
             self.configure_options += ' --disable-gtk-doc'
+
+        if self.config.platform != Platform.WINDOWS:
+            self.patches += ['libsoup/4b924e57-tld-parser-use-Python-3.patch']
 
         if self.config.target_platform != Platform.LINUX or \
            self.config.target_distro_version in \
