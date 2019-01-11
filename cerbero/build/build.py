@@ -65,9 +65,11 @@ class Build (object):
         for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
                     'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
             if var in os.environ:
-                # Store it on _old_env so that the value is restored when
-                # we return from self.configure()
-                self._old_env[var] = os.environ[var]
+                # Env vars that are edited by the recipe will be restored by
+                # @modify_environment when we return from the build step but
+                # other env vars won't be, so add those.
+                if var not in self._old_env:
+                    self._old_env[var] = os.environ[var]
                 del os.environ[var]
         # Re-add *FLAGS that weren't set by the toolchain config, but instead
         # were set in the recipe or other places via @modify_environment
