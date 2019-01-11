@@ -4,7 +4,6 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gst-validate'
     btype = BuildType.MESON
-    meson_options = {'gtk_doc': 'disabled'}
     # gst-validate tarball has a different layout than the git repo, just always build from git
     stype = SourceType.GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/gst-devtools'}

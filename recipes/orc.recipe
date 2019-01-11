@@ -8,8 +8,7 @@ class Recipe(recipe.Recipe):
     commit = 'origin/master'
     btype = BuildType.MESON
     licenses = [License.BSD_like]
-    meson_options = {'benchmarks': 'disabled', 'examples': 'disabled',
-                     'gtk_doc': 'disabled', 'tests': 'disabled',
+    meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
                      'tools': 'enabled', 'orc-test': 'enabled'}
 
     files_libs = ['liborc-0.4']

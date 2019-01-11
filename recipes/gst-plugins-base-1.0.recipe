@@ -4,9 +4,15 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-base-1.0'
     btype = BuildType.MESON
-    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled', 'gl': 'enabled',
-                     'pango': 'enabled', 'opus': 'enabled', 'vorbis': 'enabled',
-                     'ogg': 'enabled', 'theora': 'enabled', 'libvisual': 'enabled',
+    meson_options = {# enabled plugins
+                     'gl': 'enabled',
+                     'libvisual': 'enabled',
+                     'ogg': 'enabled',
+                     'opus': 'enabled',
+                     'pango': 'enabled',
+                     'theora': 'enabled',
+                     'vorbis': 'enabled',
+                     # disabled plugins
                      'tremor': 'disabled'}
     deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',

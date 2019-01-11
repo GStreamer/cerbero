@@ -4,7 +4,6 @@ import shutil
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     btype = BuildType.MESON
-    meson_options = {'examples': 'disabled', 'gtk_doc': 'disabled'}
     deps = ['glib']
 
     files_bins = ['gst-inspect-1.0',

@@ -6,9 +6,7 @@ class Recipe(custom.GStreamer):
     btype = BuildType.MESON
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
-    meson_options = {'examples': 'disabled',
-                     'gtk_doc': 'disabled',
-                     # enabled plugins
+    meson_options = {# enabled plugins
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',

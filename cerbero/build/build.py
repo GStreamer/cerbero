@@ -359,6 +359,8 @@ class Autotools (MakefilesBase):
                 os.path.exists(os.path.join(self.config_src_dir, 'configure.ac')):
             self.configure_tpl += " --disable-maintainer-mode "
             self.configure_tpl += " --disable-silent-rules "
+            # Never build gtk-doc documentation
+            self.configure_tpl += " --disable-gtk-doc "
 
         if self.config.variants.gi and not self.disable_introspection:
             self.configure_tpl += " --enable-introspection "
@@ -565,18 +567,17 @@ class Meson (Build, ModifyEnvBase) :
             return 'true' if value else 'false'
         raise AssertionError('Invalid option type {!r}'.format(opt_type))
 
-    def _set_introspection_option(self):
+    def _set_option(self, opt_names, variant_name):
         '''
-        Parse the meson_options.txt file, figure out whether there is an
-        introspection option, figure out the type, and enable/disable it as per
-        the cerbero configuration.
+        Parse the meson_options.txt file, figure out whether any of the provided option names exist,
+        figure out the type, and enable/disable it as per the cerbero configuration.
         '''
         # Don't overwrite if it's already set
-        if 'introspection' in self.meson_options or 'gir' in self.meson_options:
+        if opt_names.intersection(self.meson_options):
             return
         # Error out on invalid usage
         if not os.path.isdir(self.build_dir):
-            raise FatalError('build directory doesn\'t exist yet?')
+            raise FatalError('Build directory doesn\'t exist yet?')
         # Check if the option exists, and if so, what the type is
         meson_options = os.path.join(self.build_dir, 'meson_options.txt')
         if not os.path.isfile(meson_options):
@@ -589,9 +590,9 @@ class Meson (Build, ModifyEnvBase) :
             option_regex = "option\s*\(\s*(?:'(?P<name>[^']+)')\s*,\s*(?P<entry>(?P<identifier>[a-zA-Z0-9]+)\s*:\s*(?:(?P<string>'[^']+')|[^'\),\s]+)\s*,?\s*)+\)"
             for match in re.finditer(option_regex, options, re.MULTILINE):
                 option = match.group(0)
-                # find the 'gir' or 'introspection' option()
+                # find the option(), if it exists
                 opt_name = match.group('name')
-                if opt_name in ('gir', 'introspection'):
+                if opt_name in opt_names:
                     # get the type of the option
                     type_regex = "type\s*:\s*'(?P<type>[^']+)'"
                     ty = re.search (type_regex, option, re.MULTILINE)
@@ -601,8 +602,8 @@ class Meson (Build, ModifyEnvBase) :
                     else:
                         raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
         if opt_name and opt_type:
-            self.meson_options[opt_name] = \
-                    self._get_option_value(opt_type, self.config.variants.gi)
+            value = getattr(self.config.variants, variant_name) if variant_name else False
+            self.meson_options[opt_name] = self._get_option_value(opt_type, value)
 
     def _get_cpu_family(self):
         if Architecture.is_arm(self.config.target_arch):
@@ -694,8 +695,12 @@ class Meson (Build, ModifyEnvBase) :
         else:
             os.makedirs(self.meson_dir)
 
-        # Explicitly enable/disable introspection
-        self._set_introspection_option()
+        # Explicitly enable/disable introspection, same as Autotools
+        self._set_option({'introspection', 'gir'}, 'gi')
+        # Always disable gtk-doc, same as Autotools
+        self._set_option({'gtk_doc'}, None)
+        # Automatically disable examples
+        self._set_option({'examples'}, None)
 
         if self.config.variants.debug:
             buildtype = 'debugoptimized'

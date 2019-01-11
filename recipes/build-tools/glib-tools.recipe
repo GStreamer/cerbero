@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    meson_options = {'gtk_doc': 'false', 'internal_pcre': 'true', 'libmount': 'false',
+    meson_options = {'internal_pcre': 'true', 'libmount': 'false',
                      'dtrace': 'false', 'iconv': 'libc', 'selinux' : 'false'}
     deps = ['libffi', 'zlib']
     patches = ['../glib/glib-2.57-meson-backported-fixes.patch',
