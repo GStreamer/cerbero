@@ -18,10 +18,10 @@ class Recipe(recipe.Recipe):
     # GnuTLS uses error.h, which is a GNU extension only available with glibc
     # bionic-fixup provides that to us for all platforms
     platform_deps = {
-        Platform.WINDOWS: ['bionic-fixup'],
-        Platform.ANDROID: ['bionic-fixup'],
-        Platform.IOS: ['bionic-fixup'],
-        Platform.DARWIN: ['bionic-fixup']
+        Platform.WINDOWS: ['bionic-fixup', 'proxy-libintl'],
+        Platform.ANDROID: ['bionic-fixup', 'proxy-libintl'],
+        Platform.IOS: ['bionic-fixup', 'proxy-libintl'],
+        Platform.DARWIN: ['bionic-fixup', 'proxy-libintl']
     }
     patches = [name + "/0003-Disable-ncrypt-support.patch",
                name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
