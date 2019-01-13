@@ -13,8 +13,6 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     btype = BuildType.CUSTOM
 
-    patches = ['../gettext/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch']
-
     files_devel = [
             'share/aclocal/codeset.m4',
             'share/aclocal/fcntl-o.m4',

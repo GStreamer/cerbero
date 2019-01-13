@@ -18,10 +18,10 @@ class Recipe(recipe.Recipe):
             Platform.DARWIN:  ['sed'],
             Platform.WINDOWS: ['libiconv', 'mingw-runtime', 'automake'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
-    patches = ['../gettext/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
-               '../gettext/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
-               '../gettext/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
-               '../gettext/0001-Fix-linker-error-Cannot-export-rpl_printf.patch' ]
+    patches = [name + '/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
+               name + '/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
+               name + '/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
+               name + '/0001-Fix-linker-error-Cannot-export-rpl_printf.patch' ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
