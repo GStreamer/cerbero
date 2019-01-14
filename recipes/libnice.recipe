@@ -2,10 +2,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.14'
+    version = '0.1.15'
     stype = SourceType.TARBALL
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = 'be120ba95d4490436f0da077ffa8f767bf727b82decf2bf499e39becc027809c'
+    tarball_checksum = 'f7280f3f58f594409c719a03009aa819c599078b410796f408251277807587da'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     configure_options = '--enable-static --enable-static-plugins --enable-shared \
             --with-gstreamer --without-gstreamer-0.10 \
@@ -13,10 +13,7 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'gstreamer-1.0']
     autoreconf = True
     patches = [
-        "libnice/0001-Fix-build-with-android-NDK-r16.patch",
         "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch",
-        "libnice/0001-agent-Redefine-socket-error-messages-for-windows.patch",
-        "libnice/0001-stun-Also-rename-windows-specific-function.patch"
     ]
 
     files_bins = ['stunbdc', 'stund']

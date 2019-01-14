@@ -1,4 +1,4 @@
-From 3196a96a408a90f707dff3f31fa3d05d64aeb68a Mon Sep 17 00:00:00 2001
+From e0583a05ddb65a3c9326266a769678aff82a009a Mon Sep 17 00:00:00 2001
 From: Alessandro Decina <alessandro.d@gmail.com>
 Date: Tue, 13 Oct 2015 12:49:19 +1100
 Subject: [PATCH] nicesrc: spin the agent mainloop in a separate thread
@@ -7,12 +7,12 @@ Don't run the mainloop from the srcpad task, since that can get blocked in the
 pipeline and cause unnecessary STUN retrasmissions (at best) and completely
 block the agent (at worst).
 ---
- gst/gstnicesrc.c | 158 ++++++++++++++++++++++++++++++++-----------------------
+ gst/gstnicesrc.c | 158 +++++++++++++++++++++++++++--------------------
  gst/gstnicesrc.h |   4 +-
  2 files changed, 93 insertions(+), 69 deletions(-)
 
 diff --git a/gst/gstnicesrc.c b/gst/gstnicesrc.c
-index d369e09..eb59fe9 100644
+index 0d39c34..954323c 100644
 --- a/gst/gstnicesrc.c
 +++ b/gst/gstnicesrc.c
 @@ -48,6 +48,14 @@ GST_DEBUG_CATEGORY_STATIC (nicesrc_debug);
@@ -147,7 +147,7 @@ index d369e09..eb59fe9 100644
    GST_OBJECT_UNLOCK (nicesrc);
  }
  
- static gboolean
+-static gboolean
 -gst_nice_src_unlock_idler (gpointer data)
 -{
 -  GstNiceSrc *nicesrc = GST_NICE_SRC (data);
@@ -166,7 +166,7 @@ index d369e09..eb59fe9 100644
 -  return FALSE;
 -}
 -
--static gboolean
+ static gboolean
  gst_nice_src_unlock (GstBaseSrc *src)
  {
    GstNiceSrc *nicesrc = GST_NICE_SRC (src);
@@ -225,8 +225,8 @@ index d369e09..eb59fe9 100644
  
    *buffer = g_queue_pop_head (nicesrc->outbufs);
    GST_OBJECT_UNLOCK (basesrc);
-@@ -331,6 +354,7 @@ gst_nice_src_dispose (GObject *object)
-     g_queue_free (src->outbufs);
+@@ -330,6 +353,7 @@ gst_nice_src_dispose (GObject *object)
+     g_queue_free_full (src->outbufs, (GDestroyNotify) gst_buffer_unref);
    }
    src->outbufs = NULL;
 +  g_cond_clear (&src->outcond);
@@ -249,5 +249,5 @@ index 5d3f554..2d9f674 100644
  
  typedef struct _GstNiceSrcClass GstNiceSrcClass;
 -- 
-2.3.4
+2.20.1
 
