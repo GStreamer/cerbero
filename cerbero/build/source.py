@@ -216,7 +216,7 @@ class BaseTarball(object):
                              .format(fname, checksum, self.tarball_checksum))
         return True
 
-    def extract(self, unpack_dir):
+    def extract_tarball(self, unpack_dir):
         try:
             shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
         except (IOError, EOFError, tarfile.ReadError):
@@ -260,7 +260,7 @@ class Tarball(BaseTarball, Source):
         m.action(_('Extracting tarball to %s') % self.build_dir)
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        super().extract(self.config.sources)
+        self.extract_tarball(self.config.sources)
         if self.tarball_dirname is not None:
             extracted = os.path.join(self.config.sources, self.tarball_dirname)
             # Since we just extracted this, a Windows anti-virus might still

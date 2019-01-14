@@ -64,7 +64,7 @@ class BootstrapperBase (object):
     def extract(self):
         for (url, unpack, unpack_dir) in self.extract_steps:
             if unpack:
-                self.sources[url].extract(unpack_dir)
+                self.sources[url].extract_tarball(unpack_dir)
             else:
                 # Just copy the file as-is
                 fname = os.path.basename(url)
