@@ -20,6 +20,7 @@ import os
 import shutil
 import tarfile
 import urllib
+import urllib2
 import urlparse
 
 from cerbero.config import Platform
@@ -128,7 +129,7 @@ class Tarball (Source):
         try:
             shell.download(self.url, self.download_path, check_cert=cc,
                            overwrite=redownload)
-        except (FatalError, urllib.error.URLError):
+        except (FatalError, urllib2.URLError):
             # Try our mirror
             shell.download(self.mirror_url, self.download_path, check_cert=cc,
                            overwrite=redownload)
