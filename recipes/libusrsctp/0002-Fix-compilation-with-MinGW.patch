@@ -1,0 +1,48 @@
+From 0ad764de15c0ca57d1b75e9b31adf29c62c41218 Mon Sep 17 00:00:00 2001
+From: Orgad Shaneh <orgad.shaneh@audiocodes.com>
+Date: Fri, 14 Dec 2018 08:35:15 +0200
+Subject: [PATCH 2/2] Fix compilation with MinGW
+
+---
+ usrsctplib/netinet/sctp_os_userspace.h | 4 ++--
+ usrsctplib/user_environment.h          | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/usrsctplib/netinet/sctp_os_userspace.h b/usrsctplib/netinet/sctp_os_userspace.h
+index 50b7de2..e51500c 100755
+--- a/usrsctplib/netinet/sctp_os_userspace.h
++++ b/usrsctplib/netinet/sctp_os_userspace.h
+@@ -78,7 +78,7 @@ typedef HANDLE userland_thread_t;
+ #define IPVERSION  4
+ #define MAXTTL     255
+ /* VS2010 comes with stdint.h */
+-#if _MSC_VER >= 1600
++#if !defined(_MSC_VER) || (_MSC_VER >= 1600)
+ #include <stdint.h>
+ #else
+ #define uint64_t   unsigned __int64
+@@ -216,7 +216,7 @@ typedef HANDLE userland_thread_t;
+ 
+ typedef char* caddr_t;
+ 
+-#if _MSC_VER < 1900
++#if defined(_MSC_VER) && (_MSC_VER < 1900)
+ #define snprintf(data, size, format, ...) _snprintf_s(data, size, _TRUNCATE, format, __VA_ARGS__)
+ #endif
+ #define inline __inline
+diff --git a/usrsctplib/user_environment.h b/usrsctplib/user_environment.h
+index 306ff6b..5b6e79f 100755
+--- a/usrsctplib/user_environment.h
++++ b/usrsctplib/user_environment.h
+@@ -62,7 +62,7 @@ extern int ipport_firstauto, ipport_lastauto;
+  */
+ extern int nmbclusters;
+ 
+-#if !defined (__Userspace_os_Windows)
++#if !defined(_MSC_VER)
+ #define min(a,b) ((a)>(b)?(b):(a))
+ #define max(a,b) ((a)>(b)?(a):(b))
+ #endif
+-- 
+2.7.4
+

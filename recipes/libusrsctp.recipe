@@ -40,7 +40,8 @@ class Recipe(recipe.Recipe):
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
-    patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch']
+    patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch',
+               'libusrsctp/0002-Fix-compilation-with-MinGW.patch']
 
     def extract(self):
         super().extract()
