@@ -1,19 +1,21 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
     version = '0.1.15'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
     tarball_checksum = 'f7280f3f58f594409c719a03009aa819c599078b410796f408251277807587da'
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
-    configure_options = '--enable-static --enable-static-plugins --enable-shared \
-            --with-gstreamer --without-gstreamer-0.10 \
-            --enable-compile-warnings=maximum --disable-gtk-doc'
-    deps = ['glib', 'gstreamer-1.0']
-    autoreconf = True
+    meson_options = {'tests' : 'disabled',
+                     'gstreamer' : 'enabled',
+                     'crypto-library' : 'gnutls'}
+    deps = ['glib', 'gstreamer-1.0', 'gnutls']
     patches = [
         "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch",
+        "libnice/0001-meson-install-.pc-file-for-static-gstreamer-plugin.patch",
     ]
 
     files_bins = ['stunbdc', 'stund']
@@ -28,3 +30,8 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstnice.a', 'lib/gstreamer-1.0/libgstnice.la',
     ]
     # FIXME - if_arp.h? (iOS)
+
+    def post_install (self):
+        lib = LibtoolLibrary('gstnice', None, None, None, os.path.join(self.config.libdir, 'gstreamer-1.0'),
+                self.config.target_platform, deps=['nice', 'gio-2.0', 'gthread-2.0', 'gnutls', 'gupnp-igd-1.0', 'gstreamer-base-1.0'])
+        lib.save()
