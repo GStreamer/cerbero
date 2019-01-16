@@ -1,0 +1,25 @@
+From 334a16f55b0542309f6fbfd81a405a6bc231f96d Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Wed, 16 Jan 2019 17:36:41 +0100
+Subject: [PATCH 3/3] Fix build with MinGW and the ucrtbase CRT
+
+---
+ usrsctplib/user_malloc.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/usrsctplib/user_malloc.h b/usrsctplib/user_malloc.h
+index 73904ca..8d4fe82 100755
+--- a/usrsctplib/user_malloc.h
++++ b/usrsctplib/user_malloc.h
+@@ -41,7 +41,7 @@
+ #include <strings.h>
+ #include <stdint.h>
+ #else
+-#if defined(_MSC_VER) && _MSC_VER >= 1600
++#if (defined(_MSC_VER) && _MSC_VER >= 1600) || (defined(__MSVCRT_VERSION__) && __MSVCRT_VERSION__ >= 1400)
+ #include <stdint.h>
+ #elif defined(SCTP_STDINT_INCLUDE)
+ #include SCTP_STDINT_INCLUDE
+-- 
+2.7.4
+

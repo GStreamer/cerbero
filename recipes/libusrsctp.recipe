@@ -41,7 +41,10 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/usrsctp.h']
 
     patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch',
-               'libusrsctp/0002-Fix-compilation-with-MinGW.patch']
+               'libusrsctp/0002-Fix-compilation-with-MinGW.patch',
+               # https://github.com/sctplab/usrsctp/pull/295
+               'libusrsctp/0003-Fix-build-with-MinGW-and-the-ucrtbase-CRT.patch',
+               ]
 
     def extract(self):
         super().extract()
