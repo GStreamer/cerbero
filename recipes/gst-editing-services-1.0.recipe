@@ -11,7 +11,6 @@ class Recipe(custom.GStreamer):
     files_bins = ['ges-launch-1.0']
     files_devel = ['include/gstreamer-1.0/ges', 'lib/pkgconfig/gst-editing-services-1.0.pc']
     files_libs = ['libges-1.0']
-    files_libs_devel = ['lib/libges-1.0.a', 'lib/libges-1.0.la']
     files_typelibs = ['GES-1.0']
 
     files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s' ]

@@ -13,7 +13,6 @@ class Recipe(custom.GStreamer):
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0',
                   'gst-validate-rtsp-server-1.0']
     files_libs = ['libgstvalidate-1.0']
-    files_libs_devel = ['lib/libgstvalidate-1.0.a', 'lib/libgstvalidate-1.0.la']
 
     files_devel = ["include/gstreamer-1.0/gst/validate/*.h"
                    "lib/pkgconfig/gst-validate-1.0.pc"]
