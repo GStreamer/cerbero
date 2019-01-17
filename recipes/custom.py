@@ -12,15 +12,15 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.15.0.1'
-    tagged_for_release = False
+    version = '1.15.1'
+    tagged_for_release = True
     # Always define `commit`, used by gst-validate
     if int(version.split('.')[1]) % 2 == 0:
         # Even version, use the specific branch
-        commit = 'origin/' + '.'.join(version.split('.')[0:2])
+        commit = '1.15.1'
     else:
         # Odd version, use git master
-        commit = 'origin/master'
+        commit = '1.15.1'
 
     if not tagged_for_release:
         # Pre-release version, use git master

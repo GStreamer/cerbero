@@ -4,6 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     btype = BuildType.MESON
+    tarball_checksum = '20f86247d9d72e2e67879b479a643113b71f7d895c41940b9b9caf0b14f2f336'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {# enabled plugins
