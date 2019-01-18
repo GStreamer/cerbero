@@ -105,3 +105,10 @@ class Recipe(recipe.Recipe):
             self.files_static.append(out_file)
             shutil.copy(os.path.join(self.config.toolchain_prefix, f),
                 os.path.join(self.config.prefix, out_file))
+        # copy the build-tool pkg-config into the prefix so it's included in
+        # the Windows binary release
+        if self.config.platform == Platform.WINDOWS:
+            self.files_bins = ['pkg-config']
+            pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
+            bindir = os.path.join(self.config.prefix, 'bin')
+            shutil.copy(pkgconfig, bindir)
