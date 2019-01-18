@@ -49,7 +49,7 @@ License = enums.License
 
 class Variants(object):
 
-    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2', 'sdl',
+    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio']
     __enabled_variants = ['debug', 'python', 'testspackage']
 

@@ -71,16 +71,6 @@ class DebianBootstrapper (UnixBootstrapper):
                 'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev',
                 'libegl1-mesa-dev', 'git', 'subversion', 'xutils-dev',
                 'intltool', 'ccache', 'python3-setuptools']
-    distro_packages = {
-        DistroVersion.DEBIAN_SQUEEZE: ['libgtk2.0-dev'],
-        DistroVersion.UBUNTU_MAVERICK: ['libgtk2.0-dev'],
-        DistroVersion.UBUNTU_LUCID: ['libgtk2.0-dev'],
-        DistroVersion.UBUNTU_NATTY: ['libgtk2.0-dev'],
-        DistroVersion.DEBIAN_WHEEZY: ['libgdk-pixbuf2.0-dev'],
-        DistroVersion.DEBIAN_JESSIE: ['libgdk-pixbuf2.0-dev'],
-        DistroVersion.UBUNTU_ONEIRIC: ['libgdk-pixbuf2.0-dev'],
-        DistroVersion.UBUNTU_PRECISE: ['libgdk-pixbuf2.0-dev'],
-    }
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
