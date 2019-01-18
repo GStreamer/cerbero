@@ -215,9 +215,12 @@ class Recipe(custom.GStreamer):
 
 
     def prepare(self):
-        # The second detail is to work around use of deprecated NSOpenGLPFAFullScreen on OS X 10.10
-        self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1', '-DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1')
-        self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
+        self.append_env('CFLAGS', '-DLIBSOUP_DOES_NOT_STEAL_OUR_CONTEXT=1')
+        # Disable CFRunLoop integration since we enable the Cocoa MainLoop
+        # integration in the GLib recipe
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
+            self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
