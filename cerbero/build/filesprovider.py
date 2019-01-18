@@ -168,12 +168,13 @@ class FilesProvider(object):
 
     def _dylib_plugins(self):
         from cerbero.build.build import BuildType
-        # gstreamer plugins on macOS and iOS use the .dylib extension when built with Meson
         if self.btype != BuildType.MESON:
             return False
         if self.platform not in (Platform.DARWIN, Platform.IOS):
             return False
-        if not self.name.startswith('gst'):
+        # gstreamer plugins on macOS and iOS use the .dylib extension when
+        # built with Meson but modules that use GModule do not
+        if not self.name.startswith('gst') and self.name != 'libnice':
             return False
         return True
 
