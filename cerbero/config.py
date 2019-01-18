@@ -20,6 +20,7 @@ import os
 import sys
 import copy
 import sysconfig
+import itertools
 from pathlib import PurePath, Path
 
 from cerbero import enums
@@ -58,10 +59,15 @@ class Variants(object):
             setattr(self, v, True)
         for v in self.__disabled_variants:
             setattr(self, v, False)
+        allv = self.__enabled_variants + self.__disabled_variants
         for v in variants:
             if v.startswith('no'):
+                if v[2:] not in allv:
+                    m.warning('Variant {} is unknown or obsolete'.format(v[2:]))
                 setattr(self, v[2:], False)
             else:
+                if v not in allv:
+                    m.warning('Variant {} is unknown or obsolete'.format(v))
                 setattr(self, v, True)
 
     def __getattr__(self, name):
@@ -72,6 +78,9 @@ class Variants(object):
                 return object.__getattribute__(self, name)
         except Exception:
             raise AttributeError("%s is not a known variant" % name)
+
+    def __repr__(self):
+        return '<Variants: {}>'.format(self.__dict__)
 
 
 class Config (object):
