@@ -127,7 +127,9 @@ class Config (object):
         c._raw_environ = os.environ.copy()
         return c
 
-    def load(self, filename=None):
+    def load(self, filename=None, variants_override=None):
+        if variants_override is None:
+            variants_override = []
 
         # First load the default configuration
         self.load_defaults()
@@ -189,7 +191,7 @@ class Config (object):
             config._raw_environ = os.environ.copy()
 
         # Build variants before copying any config
-        self.variants = Variants(self.variants)
+        self.variants = Variants(self.variants + variants_override)
         if not self.prefix_is_executable() and self.variants.gi:
             m.warning(_("gobject introspection requires an executable "
                         "prefix, 'gi' variant will be removed"))

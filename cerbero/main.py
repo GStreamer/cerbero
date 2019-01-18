@@ -83,6 +83,10 @@ class Main(object):
         self.parser = argparse.ArgumentParser(description=_(description))
         self.parser.add_argument('-t', '--timestamps', action='store_true', default=False,
                 help=_('Print timestamps with every message printed'))
+        self.parser.add_argument('-v', '--variants', action='store', default=None,
+                # Convert comma-separated string to list
+                type=lambda s: [v for v in s.split(',')],
+                help=_('Configuration file used for the build'))
         self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))
         self.parser.add_argument('-m', '--manifest', action='store', type=str, default=None,
@@ -126,7 +130,7 @@ class Main(object):
         ''' Load the configuration '''
         try:
             self.config = config.Config()
-            self.config.load(self.args.config)
+            self.config.load(self.args.config, self.args.variants)
             if self.args.manifest:
                 self.config.manifest = self.args.manifest
         except ConfigurationError as exc:
