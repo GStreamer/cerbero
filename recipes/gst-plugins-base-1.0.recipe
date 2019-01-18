@@ -231,40 +231,10 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
-        if self.config.variants.cdparanoia:
-            self.deps.append('cdparanoia')
-            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstcdparanoia%(mext)s']
-            self.files_plugins_sys_devel += [
-                'lib/gstreamer-1.0/libgstcdparanoia.a', 'lib/gstreamer-1.0/libgstcdparanoia.la',
-            ]
-            self.meson_options['cdparanoia'] = 'enabled'
-        else:
-            self.meson_options['cdparanoia'] = 'disabled'
-
-        if self.config.variants.x11:
-            self.files_plugins_sys += [
-                 'lib/gstreamer-1.0/libgstximagesink%(mext)s',
-                 'lib/gstreamer-1.0/libgstxvimagesink%(mext)s',
-            ]
-
-            self.files_plugins_sys_devel += [
-                 'lib/gstreamer-1.0/libgstximagesink.a', 'lib/gstreamer-1.0/libgstximagesink.la',
-                 'lib/gstreamer-1.0/libgstxvimagesink.a', 'lib/gstreamer-1.0/libgstxvimagesink.la',
-            ]
-            self.meson_options['x11'] = 'enabled'
-            self.meson_options['xvideo'] = 'enabled'
-        else:
-            self.meson_options['x11'] = 'disabled'
-            self.meson_options['xvideo'] = 'disabled'
-
-        if self.config.variants.alsa:
-            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstalsa%(mext)s']
-            self.files_plugins_sys_devel += [
-                'lib/gstreamer-1.0/libgstalsa.a', 'lib/gstreamer-1.0/libgstalsa.la',
-            ]
-            self.meson_options['alsa'] = 'enabled'
-        else:
-            self.meson_options['alsa'] = 'disabled'
+        self.enable_plugin('cdparanoia', 'sys', 'cdparanoia', dep='cdparanoia')
+        self.enable_plugin('ximagesink', 'sys', 'x11')
+        self.enable_plugin('xvimagesink', 'sys', 'x11', option='xvideo')
+        self.enable_plugin('alsa', 'sys', 'alsa')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

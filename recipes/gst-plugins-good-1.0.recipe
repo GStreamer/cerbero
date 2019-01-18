@@ -233,32 +233,9 @@ class Recipe(custom.GStreamer):
         elif self.config.target_platform == Platform.IOS:
             self.meson_options['osxaudio'] = 'enabled'
 
-        if self.config.variants.v4l2:
-            self.files_plugins_capture += ['lib/gstreamer-1.0/libgstvideo4linux2%(mext)s']
-            self.files_plugins_capture_devel += [
-                'lib/gstreamer-1.0/libgstvideo4linux2.a', 'lib/gstreamer-1.0/libgstvideo4linux2.la',
-            ]
-            self.meson_options['v4l2'] = 'enabled'
-        else:
-            self.meson_options['v4l2'] = 'disabled'
-
-        if self.config.variants.x11:
-            self.files_plugins_capture += ['lib/gstreamer-1.0/libgstximagesrc%(mext)s']
-            self.files_plugins_capture_devel += [
-                'lib/gstreamer-1.0/libgstximagesrc.a', 'lib/gstreamer-1.0/libgstximagesrc.la',
-            ]
-            self.meson_options['x11'] = 'enabled'
-        else:
-            self.meson_options['x11'] = 'disabled'
-
-        if self.config.variants.pulse:
-            self.files_plugins_sys += ['lib/gstreamer-1.0/libgstpulseaudio%(mext)s']
-            self.files_plugins_sys_devel += [
-                'lib/gstreamer-1.0/libgstpulseaudio.a', 'lib/gstreamer-1.0/libgstpulseaudio.la',
-            ]
-            self.meson_options['pulse'] = 'enabled'
-        else:
-            self.meson_options['pulse'] = 'disabled'
+        self.enable_plugin('video4linux2', 'capture', 'v4l2')
+        self.enable_plugin('ximagesrc', 'capture', 'x11')
+        self.enable_plugin('pulseaudio', 'sys', 'pulse')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

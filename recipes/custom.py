@@ -33,6 +33,25 @@ class GStreamer(recipe.Recipe):
         # Always define `commit`, used by gst-validate
         commit = version
 
+    def enable_plugin(self, plugin, category, variant, option=None, dep=None):
+        if option is None:
+            option = variant
+        if getattr(self.config.variants, variant):
+            if dep is not None:
+                self.deps.append(dep)
+            plugin = 'lib/gstreamer-1.0/libgst' + plugin
+            if not hasattr(self, 'files_plugins_' + category):
+                setattr(self, 'files_plugins_' + category, [])
+            f = getattr(self, 'files_plugins_' + category)
+            f += [plugin + '%(mext)s']
+            if not hasattr(self, 'files_plugins_{}_devel'.format(category)):
+                setattr(self, 'files_plugins_{}_devel'.format(category), [])
+            d = getattr(self, 'files_plugins_{}_devel'.format(category))
+            d += [plugin + '.a', plugin + '.la']
+            self.meson_options[option] = 'enabled'
+        else:
+            self.meson_options[option] = 'disabled'
+
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
