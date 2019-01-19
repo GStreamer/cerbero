@@ -21,7 +21,6 @@ import re
 import copy
 import shutil
 import shlex
-import sysconfig
 
 from cerbero.enums import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
@@ -543,11 +542,9 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find Meson
         if not self.meson_sh:
-            # 'Scripts' on Windows and 'bin' on other platforms including MSYS
-            bindir = sysconfig.get_path('scripts', vars={'base':''}).strip('\\/')
             # meson installs `meson.exe` on windows and `meson` on other
             # platforms that read shebangs
-            self.meson_sh = os.path.join(self.config.build_tools_prefix, bindir, 'meson')
+            self.meson_sh = os.path.join(self.config.build_tools_prefix, 'bin', 'meson')
 
         # Find ninja
         if not self.make:

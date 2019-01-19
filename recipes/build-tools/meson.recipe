@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import subprocess
-from pathlib import PurePath
+from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
@@ -31,3 +31,8 @@ class Recipe(recipe.Recipe):
         # Use subprocess.check_call because we don't want to bother with shell quoting
         subprocess.check_call([self.config.python_exe, 'setup.py', 'install', '--prefix', prefix],
                               cwd=self.build_dir)
+        if self.config.platform == Platform.WINDOWS:
+            prefix = Path(self.config.prefix)
+            for f in ('meson.exe', 'meson-script.py'):
+                (prefix / 'Scripts' / f).replace(prefix / 'bin' / f)
+            (prefix / 'Scripts').rmdir()
