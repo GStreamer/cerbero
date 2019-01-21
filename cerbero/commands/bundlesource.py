@@ -41,6 +41,8 @@ class BundleSource(Command):
             ArgparseArgument('--no-bootstrap', action='store_true',
                              default=False,
                              help=_('Don\'t include bootstrep sources')),
+            ArgparseArgument('--offline', action='store_true',
+                default=False, help=_('Use only the source cache, no network')),
         ]
         Command.__init__(self, args)
 
@@ -89,7 +91,7 @@ class BundleSource(Command):
                 bundle_dirs.append(r.repo_dir)
 
         if not args.no_bootstrap:
-            build_tools = BuildTools(config)
+            build_tools = BuildTools(config, args.offline)
             bs_recipes = build_tools.BUILD_TOOLS + \
                          build_tools.PLAT_BUILD_TOOLS.get(config.platform, [])
             b_recipes = []
