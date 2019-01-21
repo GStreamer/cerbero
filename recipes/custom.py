@@ -12,25 +12,26 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.15.1'
-    tagged_for_release = True
-    # Always define `commit`, used by gst-validate
-    if int(version.split('.')[1]) % 2 == 0:
-        # Even version, use the specific branch
-        commit = '1.15.1'
-    else:
-        # Odd version, use git master
-        commit = '1.15.1'
+    version = '1.15.1.1'
+    tagged_for_release = False
 
     if not tagged_for_release:
         # Pre-release version, use git master
         stype = SourceType.GIT
         remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s'}
+        if int(version.split('.')[1]) % 2 == 0:
+            # Even version, use the specific branch
+            commit = 'origin/' + '.'.join(version.split('.')[0:2])
+        else:
+            # Odd version, use git master
+            commit = 'origin/master'
     else:
         # Release version, use tarballs
         stype = SourceType.TARBALL
         url = 'https://gstreamer.freedesktop.org/src/%(name)s/%(name)s-%(version)s.tar.xz'
         tarball_dirname = '%(name)s-%(version)s'
+        # Always define `commit`, used by gst-validate
+        commit = version
 
 
 def list_gstreamer_1_0_plugins_by_category(config):
