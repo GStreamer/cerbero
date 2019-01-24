@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import subprocess
+import shutil
 from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
@@ -35,4 +36,4 @@ class Recipe(recipe.Recipe):
             prefix = Path(self.config.prefix)
             for f in ('meson.exe', 'meson-script.py'):
                 (prefix / 'Scripts' / f).replace(prefix / 'bin' / f)
-            (prefix / 'Scripts').rmdir()
+            shutil.rmtree(prefix / 'Scripts')
