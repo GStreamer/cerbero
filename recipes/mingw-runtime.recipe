@@ -105,9 +105,12 @@ class Recipe(recipe.Recipe):
             self.files_static.append(out_file)
             shutil.copy(os.path.join(self.config.toolchain_prefix, f),
                 os.path.join(self.config.prefix, out_file))
-        # copy the build-tool pkg-config into the prefix so it's included in
-        # the Windows binary release
-        if self.config.platform == Platform.WINDOWS:
+        # copy the bootstrapped build-tool pkg-config into the prefix so it's
+        # included in the Windows binary release. Of course, we shouldn't try
+        # to do this while bootstrapping, so skip if the prefix is the
+        # build-tools prefix.
+        if self.config.platform == Platform.WINDOWS and \
+           self.config.prefix != self.config.build_tools_prefix:
             self.files_bins = ['pkg-config']
             pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
             bindir = os.path.join(self.config.prefix, 'bin')
