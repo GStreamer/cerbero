@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
         shutil.copy(os.path.join(self.build_dir, 'srtp.def'), libdir)
 
     def post_install(self):
-        # XXX: Don't forget to keep this in sync with the library version!
         libtool_la = LibtoolLibrary('srtp', 1, None, None, self.config.libdir,
                                     self.config.target_platform)
         libtool_la.save()
+        super().post_install()

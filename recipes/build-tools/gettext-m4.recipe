@@ -56,3 +56,4 @@ class Recipe(recipe.Recipe):
         for f in ['lib-ld.m4', 'lib-prefix.m4', 'lib-link.m4']:
             shutil.copy(os.path.join(m4dir, f),
                     os.path.join(self.config.prefix, 'share', 'aclocal'))
+        super().post_install()

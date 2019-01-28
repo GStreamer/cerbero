@@ -25,3 +25,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('openjp2', 2, 1, None, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()
+        super().post_install()

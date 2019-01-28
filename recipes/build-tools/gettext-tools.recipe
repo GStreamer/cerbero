@@ -41,3 +41,4 @@ class Recipe(recipe.Recipe):
                     os.replace(str(build_tools_bin / 'msgmerge.exe'),
                                str(build_tools_bin / 'msgmerge.exe.bck'))
                 shutil.copy(str(msys_msgmerge), str(build_tools_bin))
+        super().post_install()

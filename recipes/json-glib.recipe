@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
     files_typelibs = ['Json-1.0']
 
     def post_install (self):
-         lib = LibtoolLibrary('json-glib-1.0', None, None, None, self.config.libdir,
-                 self.config.target_platform, deps=['gio-2.0', 'gobject-2.0', 'glib-2.0', '-lm', '-pthread'])
-         lib.save()
+        lib = LibtoolLibrary('json-glib-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['gio-2.0', 'gobject-2.0', 'glib-2.0', '-lm', '-pthread'])
+        lib.save()
+        super().post_install()

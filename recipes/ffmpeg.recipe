@@ -134,3 +134,4 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('avfilter', None, None, None,
                        self.config.libdir, self.config.target_platform,
                        deps=['avformat', 'avcodec', 'swresample', 'avutil']).save()
+        super().post_install()

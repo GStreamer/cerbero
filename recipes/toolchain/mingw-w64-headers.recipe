@@ -36,6 +36,7 @@ class Recipe(recipe.Recipe):
             os.makedirs(directx_headers)
         shell.call('cp mingw-w64-headers/direct-x/include/* %s' % directx_headers,
                 self.build_dir)
+        super().post_install()
 
     files_headers = [
     'GL/gl.h', 'GL/glaux.h', 'GL/glu.h', 'GL/glext.h'

@@ -56,3 +56,4 @@ class Recipe(recipe.Recipe):
                 if os.path.isfile(f) and not os.path.islink(f) and \
                    fnmatch(f, '*.so.*'):
                     os.chmod(f, 0o755)
+        super().post_install()

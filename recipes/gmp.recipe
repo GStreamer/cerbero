@@ -81,3 +81,4 @@ class Recipe(recipe.Recipe):
                         os.path.join(arch_dir, 'gmp.h'))
             with open(os.path.join(self.config.prefix, 'include', 'gmp.h'), 'w+') as f:
                 f.write(GMP_H_UNVERSAL)
+        super().post_install()

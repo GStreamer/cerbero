@@ -22,3 +22,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('intl', 8, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        super().post_install()

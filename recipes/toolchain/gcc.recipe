@@ -80,3 +80,4 @@ class Recipe(recipe.Recipe):
             if os.path.exists(prefixed_cpp):
                 os.remove(prefixed_cpp)
             shutil.move(cpp, prefixed_cpp)
+        super().post_install()

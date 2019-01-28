@@ -47,3 +47,4 @@ class Recipe(recipe.Recipe):
         lib = LibtoolLibrary('gdk_pixbuf-2.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gobject-2.0', 'gio-2.0', 'tiff', 'jpeg', 'png16'])
         lib.save()
+        super().post_install()

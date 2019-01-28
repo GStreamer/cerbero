@@ -36,3 +36,4 @@ class Recipe(recipe.Recipe):
         lib = LibtoolLibrary('gstnice', None, None, None, os.path.join(self.config.libdir, 'gstreamer-1.0'),
                 self.config.target_platform, deps=['nice', 'gio-2.0', 'gthread-2.0', 'gnutls', 'gupnp-igd-1.0', 'gstreamer-base-1.0'])
         lib.save()
+        super().post_install()

@@ -20,3 +20,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('z', 1, 2, 11, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        super().post_install()

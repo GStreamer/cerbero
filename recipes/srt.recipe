@@ -34,3 +34,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('srt', None, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        super().post_install()

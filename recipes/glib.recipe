@@ -239,3 +239,4 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('gio-2.0', major, minor, micro,
                 self.config.libdir, self.config.target_platform,
                 deps=['gobject-2.0', 'gmodule-2.0', 'z']).save()
+        super().post_install()

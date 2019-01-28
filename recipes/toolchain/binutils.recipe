@@ -65,4 +65,4 @@ class Recipe(recipe.Recipe):
             for f in self.files_list_by_category('bins'):
                 f = os.path.join(self.config.prefix, f)
                 shutil.move(f.replace(self.target + '-', ''), f)
-
+        super().post_install()

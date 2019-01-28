@@ -116,3 +116,4 @@ class Recipe(recipe.Recipe):
                                     self.config.target_platform,
                                     deps=dependency_libs)
         libtool_la.save()
+        super().post_install()

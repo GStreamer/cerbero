@@ -50,3 +50,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('rtmp', soversion, None, None,
                 self.config.libdir, self.config.target_platform, deps)
         libtool_la.save()
+        super().post_install()

@@ -21,3 +21,4 @@ class Recipe(recipe.Recipe):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
+        super().post_install()

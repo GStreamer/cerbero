@@ -34,3 +34,4 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.IOS:
             lib = LibtoolLibrary('orc-test-0.4', None, None, None, self.config.libdir,
                     self.config.target_platform, deps=dependency_libs + ['orc-0.4']).save()
+        super().post_install()

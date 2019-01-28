@@ -42,3 +42,4 @@ class Recipe(recipe.Recipe):
                 self.config.target_platform, deps=['pango-1.0', 'harfbuzz', 'fontconfig', 'expat', 'freetype', 'bz2', 'png16']).save()
         LibtoolLibrary('pangocairo-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['pango-1.0', 'cairo', 'pixman-1', 'pangoft2-1.0']).save()
+        super().post_install()

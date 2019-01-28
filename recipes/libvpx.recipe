@@ -143,3 +143,4 @@ class Recipe(recipe.Recipe):
                 subdir = 'Win32'
             os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
                        os.path.join(self.config.prefix, 'lib', 'vpx.lib'))
+        super().post_install()

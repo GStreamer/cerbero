@@ -93,3 +93,4 @@ class Recipe(recipe.Recipe):
         lib = LibtoolLibrary('graphene-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gobject-2.0', '-lm', '-pthread'])
         lib.save()
+        super().post_install()

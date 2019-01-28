@@ -68,3 +68,4 @@ class Recipe(recipe.Recipe):
         lib = LibtoolLibrary('webrtc_audio_processing', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=dependency_libs)
         lib.save()
+        super().post_install()
