@@ -7,7 +7,7 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'gettext-tools'
     version = '0.19.8.1'
-    licenses = [License.GPLv3]
+    licenses = [License.GPLv3Plus]
     srcdir = 'gettext-tools'
     stype = SourceType.TARBALL
     url = 'gnu://gettext/gettext-%(version)s.tar.xz'

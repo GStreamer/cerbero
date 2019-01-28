@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     version = '3.100'
     name = 'lame'
-    licenses = [License.GPL]
+    licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     configure_options = ' --enable-static --disable-frontend --disable-decoder'
     url = 'sf://.tar.gz'

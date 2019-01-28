@@ -4,7 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'ffmpeg'
     version = '4.0.2'
-    licenses = [License.LGPLv2Plus]
+    licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = '346c51735f42c37e0712e0b3d2f6476c86ac15863e4445d9e823fe396420d056'

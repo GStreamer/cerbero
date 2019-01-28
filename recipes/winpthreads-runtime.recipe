@@ -6,7 +6,7 @@ from cerbero.errors import FatalError
 class Recipe(recipe.Recipe):
     name = 'winpthreads-runtime'
     version = '0.1'
-    licenses = [License.LGPL]
+    licenses = [License.LGPLv2Plus]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 

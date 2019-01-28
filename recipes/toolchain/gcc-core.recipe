@@ -4,7 +4,7 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'gcc-core'
     version = '4.7.3'
-    licenses = [License.GPLv3]
+    licenses = [License.GPLv3Plus]
     configure_options = '--disable-multilib ' \
                         '--with-sysroot=$CERBERO_PREFIX ' \
                         '--enable-fully-dynamic-string ' \

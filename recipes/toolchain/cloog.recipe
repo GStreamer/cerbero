@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'cloog'
     version = '0.18.0'
-    licenses = [License.GPLv2]
+    licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     url = 'https://gcc.gnu.org/pub/gcc/infrastructure/cloog-0.18.0.tar.gz'
     tarball_checksum = '1c4aa8dde7886be9cbe0f9069c334843b21028f61d344a2d685f88cb1dcf2228'

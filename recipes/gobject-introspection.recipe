@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'gnome://'
     tarball_checksum = '5b2875ccff99ff7baab63a34b67f8c920def240e178ff50add809e267d9ea24b'
-    licenses = [License.GPLv2Plus]
+    licenses = [License.LGPLv2Plus]
+    licenses_bins = [License.GPLv2Plus]
     configure_options = '--with-python=python3'
     deps = ['glib']
     patches = [

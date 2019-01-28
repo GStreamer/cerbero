@@ -7,7 +7,7 @@ from cerbero.tools.pkgconfig import PkgConfigWritter
 class Recipe(recipe.Recipe):
     name = 'gnustl'
     version = '0.1'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.LGPLv2_1Plus]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
     runtime_dep = True

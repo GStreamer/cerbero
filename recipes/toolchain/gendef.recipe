@@ -1,7 +1,7 @@
 class Recipe(recipe.Recipe):
     name = 'gendef'
     version = 'v2.0.8'
-    licenses = [License.LGPL]
+    licenses = [License.LGPLv2Plus]
     srcdir = 'mingw-w64-tools/gendef'
     files_bins = ['gendef']
 

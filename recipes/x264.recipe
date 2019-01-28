@@ -5,7 +5,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     version = '20161218-2245'
     name = 'x264'
-    licenses = [License.GPL]
+    licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s"

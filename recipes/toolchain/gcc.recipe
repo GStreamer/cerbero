@@ -3,7 +3,7 @@ import shutil
 class Recipe(recipe.Recipe):
     name = 'gcc'
     version = '4.7.3'
-    licenses = [License.GPLv3]
+    licenses = [License.GPLv2Plus]
     requires_non_src_build = True
     stype = SourceType.CUSTOM
     deps = ['mingw-w64', 'winpthreads']

@@ -9,7 +9,8 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MAKEFILE
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-2.4_p20151223.tar.gz'
     tarball_checksum = 'b066f2583fd20aeb7b9c48535027e28026f8a38bc00d446fc81e09a597f38654'
-    licenses = [License.LGPLv2_1]
+    # Binaries are GPLv2+, but we don't distribute them
+    licenses = [License.LGPLv2_1Plus]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
     patches = [name + '/0001-Fix-support-for-cross-compilation.patch',

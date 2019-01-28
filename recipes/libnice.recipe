@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
     tarball_checksum = 'f7280f3f58f594409c719a03009aa819c599078b410796f408251277807587da'
+    # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     meson_options = {'tests' : 'disabled',
                      'gstreamer' : 'enabled',

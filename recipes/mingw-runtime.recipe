@@ -5,13 +5,14 @@ import shutil
 class Recipe(recipe.Recipe):
     name = 'mingw-runtime'
     version = '0.1'
-    licenses = [License.LGPL]
+    licenses = [License.LGPLv2_1Plus]
+    licenses_bins = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
     runtime_dep = True
 
     files_libs = ['libstdc++', 'libwinpthread', 'libgomp', 'libgcc_s_sjlj-1']
-    files_satic = []
+    files_static = []
     files_headers = ['include/GL']
 
     def prepare(self):

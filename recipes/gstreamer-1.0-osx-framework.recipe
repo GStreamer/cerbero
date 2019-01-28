@@ -5,7 +5,7 @@ from cerbero.ide.xcode.fwlib import DynamicFrameworkLibrary
 class Recipe(recipe.Recipe):
     name = 'gstreamer-1.0-osx-framework'
     version = '0.1'
-    licenses = [License.LGPL]
+    licenses = []
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']

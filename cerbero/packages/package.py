@@ -78,7 +78,7 @@ class PackageBase(object):
     version = '1.0'
     org = 'default'
     uuid = None
-    license = License.GPL
+    license = License.LGPLv2_1Plus
     vendor = 'default'
     url = 'default'
     ignore_package_prefix = False

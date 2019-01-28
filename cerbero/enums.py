@@ -186,30 +186,14 @@ class LicenseDescription:
 
 class License:
     ''' Enumeration of licensesversions '''
-    AFLv2_1 = LicenseDescription('AFL-2.1',
-            'Academic Free License, version 2.1')
     Apachev2 = LicenseDescription('Apache-2.0',
             'Apache License, version 2.0')
     BSD = LicenseDescription('BSD',
             'BSD License')
     BSD_like = LicenseDescription('BSD-like',
             'BSD-like License')
-    CC_BY_SA = LicenseDescription('CC-BY-SA',
-            'Creative Commons Attribution-ShareAlike')
     FreeType = LicenseDescription('FreeType',
             'FreeType License')
-    Jasperv2 = LicenseDescription('Jasper-2.0',
-            'JasPer LicenseVersion 2.0')
-    JPEG = LicenseDescription('JPEG',
-            'JasPer LicenseVersion 2.0')
-    GFDL = LicenseDescription('GFDL',
-            'GNU Free Documentation License')
-    GPL = LicenseDescription('GPL',
-            'GNU General Public License')
-    GPLv1 = LicenseDescription('GPL-1',
-            'GNU General Public License, version 1')
-    GPLv1Plus = LicenseDescription('GPL-1+',
-            'GNU General Public License, version 1 or later')
     GPLv2 = LicenseDescription('GPL-2',
             'GNU General Public License, version 2')
     GPLv2Plus = LicenseDescription('GPL-2+',
@@ -232,17 +216,15 @@ class License:
             'GNU Lesser General Public License, version 3')
     LGPLv3Plus = LicenseDescription('LGPL-3+',
             'GNU Lesser General Public License, version 3 or later')
+    LibPNG = LicenseDescription('LibPNG',
+            'LibPNG License')
     MPLv1_1 = LicenseDescription('MPL-1.1',
             'Mozilla Public License Version 1.1')
     MPLv2 = LicenseDescription('MPL-2',
             'Mozilla Public License Version 2.0')
-    LibPNG = LicenseDescription('LibPNG',
-            'LibPNG License')
     MIT = LicenseDescription('MIT',
             'MIT License')
     OPENSSL = LicenseDescription('OpenSSL',
             'OpenSSL License')
-    PUBLIC_DOMAIN = LicenseDescription('PublicDomain',
-            'Public domain')
     Proprietary = LicenseDescription('Proprietary',
             'Proprietary License')

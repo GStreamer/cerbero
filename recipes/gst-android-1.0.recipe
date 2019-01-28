@@ -7,7 +7,7 @@ from custom import list_gstreamer_1_0_plugins_by_category
 class Recipe(recipe.Recipe):
     name = 'gst-android-1.0'
     version = '0.1'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.LGPLv2_1Plus]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
 

@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://www.freedesktop.org/software/%(name)s/release/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = '84574e1b1f65ca694cb8fb6905309665c0368af18a312357f8ff886ee2f29563'
-    licenses = [License.LGPLv2Plus]
+    licenses = [License.BSD_like]
     deps = ['fontconfig', 'cairo', 'glib']
     configure_options = "--enable-static --with-icu=no"
     autoreconf = True

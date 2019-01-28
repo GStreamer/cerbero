@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
     url = 'gnu://'
     tarball_checksum = '87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912'
     stype = SourceType.TARBALL
-    licenses = [License.LGPLv3Plus]
+    licenses = [License.LGPLv3Plus, License.GPLv2Plus, License.GPLv3Plus]
     tarball_dirname = 'gmp-6.1.2'
 
     files_libs = ['libgmp']

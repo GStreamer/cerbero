@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'vsintegration-1.0'
     version = '0.1'
-    licenses = [License.LGPL]
+    licenses = [License.LGPLv2_1Plus]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
 

@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.40.20'
-    licenses = [License.LGPLv2]
+    licenses = [License.LGPLv2Plus]
     deps = ['libcroco', 'gdk-pixbuf', 'pango', 'cairo']
     autoreconf = True
     autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
@@ -13,6 +13,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
+    licenses_bins = [License.GPLv2Plus]
     files_loader = []
     files_devel = ['include/librsvg-2.0/librsvg/*.h',
                    'lib/pkgconfig/librsvg-2.0.pc',

@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'gperf'
     version = '3.0.4'
-    licenses = [License.GPLv2]
+    licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
     tarball_checksum = '767112a204407e62dbc3106647cf839ed544f3cf5d0f0523aaa2508623aad63e'

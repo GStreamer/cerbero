@@ -6,7 +6,7 @@ from cerbero.utils import shell
 class Recipe(recipe.Recipe):
     name = 'gas-preprocessor'
     version = '0.0.0'
-    licenses = [License.GPLv2]
+    licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
     remotes = {'origin': 'https://github.com/libav/gas-preprocessor'}
     commit = 'f8a2d8c155bda8d925a7ee2ed8315c553a2b865f'

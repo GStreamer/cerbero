@@ -4,7 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'proxy-libintl'
     version = '0.1'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/frida/proxy-libintl/archive/%(version)s.tar.gz'

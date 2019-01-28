@@ -1,7 +1,8 @@
 class Recipe(recipe.Recipe):
     name = 'binutils'
     version = '2.22'
-    licenses = [License.GPL]
+    licenses = [License.LGPLv2Plus]
+    licenses_bins = [License.GPLv2Plus]
     configure_options = '--with-sysroot=$CERBERO_PREFIX --disable-multilib'
     add_host_build_target = False
 

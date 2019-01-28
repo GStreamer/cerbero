@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://download.videolan.org/pub/videolan/libdca/%(version)s/libdca-%(version)s.tar.bz2'
     tarball_checksum = 'dba022e022109a5bacbe122d50917769ff27b64a7bba104bd38ced8de8510642'
-    licenses = [License.GPL]
+    licenses = [License.GPLv2Plus]
     patches = ['libdca/0001-Disable-AC_C_ALWAYS_INLINE.patch']
     autoreconf = True
 

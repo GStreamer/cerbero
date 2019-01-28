@@ -4,7 +4,7 @@ import shutil
 class Recipe(recipe.Recipe):
     name = 'intltool-m4'
     version = '0.51.0'
-    licenses = [License.GPLv2]
+    licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.CUSTOM
     url = 'https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz'

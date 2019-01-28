@@ -14,7 +14,7 @@ DEFINES_TPL = '''\
 class Recipe(recipe.Recipe):
     name = 'gstreamer-ios-templates'
     version = '0.1'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.LGPLv2_1Plus]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
 

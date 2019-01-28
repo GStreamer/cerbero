@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libcroco'
     version = '0.6.12'
-    licenses = [License.LGPLv2_1]
+    licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'gnome://'
     tarball_checksum = 'ddc4b5546c9fb4280a5017e2707fbd4839034ed1aba5b7d4372212f34f84f860'
