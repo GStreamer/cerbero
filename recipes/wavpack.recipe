@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/dbry/WavPack/archive/%(version)s.tar.gz'
     tarball_dirname = 'WavPack-%(version)s'
     tarball_checksum = '1af7eaccbf560271013d4179d98ef6fc681a2bb3603382577eeba73d438785f4'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['COPYING']}]
     autoreconf = True
     configure_options = ' --disable-apps '
 

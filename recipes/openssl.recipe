@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
     version = '1.1.1'
-    licenses = [License.OPENSSL]
+    licenses = [{License.OPENSSL: ['LICENSE']}]
     stype = SourceType.TARBALL
     url = 'https://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
     tarball_checksum = '2836875a0f89c03d0fdf483941512613a50cfb421d6fd94b9f41d7279d586a3d'

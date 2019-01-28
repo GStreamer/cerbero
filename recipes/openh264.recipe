@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '9c07c38d7de00046c9c52b12c76a2af7648b70d05bd5460c8b67f6895738653f'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    licenses = [License.BSD]
+    licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
     patches = ['openh264/0001-openh264-Build-for-8.0-fembed-bitcode.patch',

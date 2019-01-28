@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'xiph://ogg/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '4f3fc6178a533d392064f14776b23c397ed4b9f48f5de297aba73b643f955c08'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['COPYING']}]
     autoreconf = True
     patches = ['libogg/0001-Fix-iOS-build.patch']
 

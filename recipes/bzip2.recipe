@@ -4,7 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     name = 'bzip2'
     version = '1.0.6'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     # bzip2.org is dead

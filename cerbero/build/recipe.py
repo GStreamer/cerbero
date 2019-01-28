@@ -22,7 +22,9 @@ import shutil
 import tempfile
 import time
 from functools import reduce
+from pathlib import Path
 
+from cerbero.enums import LicenseDescription
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.config import Platform
@@ -35,6 +37,7 @@ from cerbero.utils import shell, add_system_libs
 from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
 
+LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
 
 class MetaRecipe(type):
     ''' This metaclass modifies the base classes of a Receipt, adding 2 new
@@ -113,8 +116,39 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     @type runtime_dep: bool
     '''
 
-    name = None
+    # Licenses are declared as an array of License.enums or dicts of the type:
+    #
+    #   {License.enum: ['path-to-license-file-in-source-tree']}
+    #
+    # If the array element is License.enum or if in a dict, the value of
+    # a License.enum key is None, the license does not have any specific
+    # copyright or author info, and the copy inside data/licenses will be
+    # used instead.
+    #
+    # This format is chosen to allow you to declare when a recipe is licensed
+    # under multiple licenses in various combinations. For example:
+    #
+    #  (LICENSE1 && LICENSE2) || (LICENSE3) || (LICENSE4 && LICENSE5)
+    #
+    # can be represented as
+    #
+    #  licenses = [
+    #   License.L1,
+    #   {License.L2: ['l2.txt'], License.L3: ['l3.txt', 'other-info.txt']},
+    #   {License.L4: None, License.Misc: ['some-info.txt']},
+    #  ]
+    #
+    # Reasons for choosing this format:
+    # * Many BSD projects are licensed under multiple BSD licenses, which must be
+    #   followed together.
+    # * Some other projects are licensed under multiple licenses, such as MPL
+    #   || LGPL, and so on.
+    # * Some projects have miscellaneous files with important copyright of
+    #   licensing information
     licenses = []
+
+    # Other recipe metadata
+    name = None
     version = None
     package_name = None
     sources = None
@@ -122,9 +156,16 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     btype = build.BuildType.AUTOTOOLS
     deps = None
     platform_deps = None
-    force = False
     runtime_dep = False
+
+    # Internal properties
+    force = False
     _default_steps = BuildSteps()
+    _licenses_disclaimer = '''\
+DISCLAIMER: THIS LICENSING INFORMATION IS PROVIDED ON A BEST-EFFORT BASIS
+AND IS NOT MEANT TO BE LEGAL ADVICE. PLEASE TALK TO A LAWYER FOR ADVICE ON
+SOFTWARE LICENSE COMPLIANCE.\n\n'''
+    _licenses_terms = 'The {} in this package may be used under the terms of license file(s):\n\n'
 
     def __init__(self, config):
         self.config = config
@@ -345,12 +386,97 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                 if file_is_relocatable(x)]):
             relocator.relocate_file(f)
 
+    def _install_srcdir_license(self, lfiles, install_dir):
+        '''
+        Copy specific licenses from the project's source dir. Used for BSD,
+        MIT, and other licenses which have copyright headers that are important
+        to fulfilling the licensing terms.
+        '''
+        files = []
+        for f in lfiles:
+            fname = f.replace('/', '_')
+            if fname == LICENSE_INFO_FILENAME:
+                raise RuntimeError('{}.recipe: license file collision: {!r}'
+                                   .format(self.name, LICENSE_INFO_FILENAME))
+            dest = str(install_dir / fname)
+            src = os.path.join(self.build_dir, f)
+            shutil.copyfile(src, dest)
+            files.append(fname)
+        return files
+
+    def _install_datadir_license(self, lobj, install_dir):
+        '''
+        Copy generic licenses from the cerbero licenses datadir.
+        '''
+        if lobj.acronym.startswith(('BSD', 'MIT')):
+            raise RuntimeError('{}.recipe: must specify the license file for BSD and MIT licenses'
+                               .format(self.name))
+        fname = lobj.acronym + '.txt'
+        dest = str(install_dir / fname)
+        src = os.path.join(self.config.data_dir, 'licenses', lobj.acronym + '.txt')
+        shutil.copyfile(src, dest)
+        return [fname]
+
+    def _write_license_readme(self, licenses_files, install_dir, applies_to):
+        with open(install_dir / LICENSE_INFO_FILENAME, 'w') as f:
+            f.write(self._licenses_disclaimer)
+            f.write(self._licenses_terms.format(applies_to))
+            f.write('\n(OR)\n'.join([' (AND) '.join(lfiles) for lfiles in licenses_files]))
+
+    def _install_licenses(self, install_dir, licenses):
+        if not install_dir.is_dir():
+            install_dir.mkdir(parents=True)
+        licenses_files = []
+        for each in licenses:
+            lfiles = []
+            if isinstance(each, dict):
+                for lobj, value in each.items():
+                    assert(isinstance(lobj, LicenseDescription))
+                    if value is None:
+                        lfiles += self._install_datadir_license(lobj, install_dir)
+                    else:
+                        assert(isinstance(value, list))
+                        lfiles += self._install_srcdir_license(value, install_dir)
+            elif isinstance(each, LicenseDescription):
+                lfiles = self._install_datadir_license(each, install_dir)
+            else:
+                raise AssertionError('{}.recipe: unknown license array element type'.format(self.name))
+            licenses_files.append(lfiles)
+        return licenses_files
+
+    def install_licenses(self):
+        '''
+        NOTE: This list of licenses is only indicative and is not guaranteed to
+        match the actual licenses and copyright headers you need to display in
+        your application or adhere to during license compliance.
+        '''
+        install_dir = Path(self.config.prefix) / 'share' / 'licenses' / self.name
+        # Install licenses for libraries
+        if isinstance(self.licenses, list):
+            licenses_files = self._install_licenses(install_dir, self.licenses)
+        else:
+            raise AssertionError('{}.recipe: unknown licenses type'.format(self.name))
+        # Only write license info for binaries if different from libraries
+        if not hasattr(self, 'licenses_bins'):
+            self._write_license_readme(licenses_files, install_dir, 'libraries and binaries')
+            return
+        else:
+            self._write_license_readme(licenses_files, install_dir, 'libraries')
+        # Install licenses for binaries
+        install_dir = install_dir / 'bins'
+        if isinstance(self.licenses_bins, list):
+            licenses_files = self._install_licenses(install_dir, self.licenses_bins)
+            self._write_license_readme(licenses_files, install_dir, 'binaries')
+        elif self.licenses_bins is not None:
+            raise AssertionError('{}.recipe: unknown licenses_bins type'.format(self.name))
+
     def post_install(self):
         '''
         Runs post installation steps
         '''
         if self.btype == build.BuildType.MESON and self.name.startswith('gst'):
             self.generate_gst_la_files()
+        self.install_licenses()
 
     def built_version(self):
         '''
@@ -376,6 +502,23 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                 deps.append('gobject-introspection')
         return deps
 
+    @staticmethod
+    def flatten_licenses(licenses):
+        '''
+        self.licenses* can be arrays of LicenseDescription or arrays of dicts
+        with LicenseDescription as keys. Flatten that to just get a list of
+        licenses.
+        '''
+        flattened = []
+        for each in licenses:
+            if isinstance(each, LicenseDescription):
+                flattened.append(each)
+            elif isinstance(each, dict):
+                flattened += each.keys()
+            else:
+                raise AssertionError('Unknown license array element: {!r}'.format(each))
+        return flattened
+
     def list_licenses_by_categories(self, categories):
         licenses = {}
         for c in categories:
@@ -384,18 +527,18 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
                                 'defined' % c)
 
             if not c:
-                licenses[None] = self.licenses
+                licenses[None] = self.flatten_licenses(self.licenses)
                 continue
 
             attr = 'licenses_' + c
             platform_attr = 'platform_licenses_' + c
             if hasattr(self, attr):
-                licenses[c] = getattr(self, attr)
+                licenses[c] = self.flatten_licenses(getattr(self, attr))
             elif hasattr(self, platform_attr):
                 l = getattr(self, platform_attr)
-                licenses[c] = l.get(self.platform, [])
+                licenses[c] = self.flatten_licenses(l.get(self.platform, []))
             else:
-                licenses[c] = self.licenses
+                licenses[c] = self.flatten_licenses(self.licenses)
         return licenses
 
     def gen_library_file(self, output_dir=None):

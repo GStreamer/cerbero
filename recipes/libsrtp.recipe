@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     tarball_checksum = '1a3e7904354d55e45b3c5c024ec0eab1b8fa76fdbf4dd2ea2625dad2b3c6edde'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['LICENSE']}]
     patches = ['libsrtp/0001-Don-t-create-a-symlink-if-there-is-no-SHAREDLIBVERSI.patch',
                'libsrtp/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']
 

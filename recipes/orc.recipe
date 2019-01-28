@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc'}
     commit = 'origin/master'
     btype = BuildType.MESON
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['COPYING']}]
     meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
                      'tools': 'enabled', 'orc-test': 'enabled'}
 

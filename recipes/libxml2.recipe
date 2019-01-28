@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     #url = 'https://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
     url = 'https://gstreamer.freedesktop.org/src/mirror/libxml2-%(version)s.tar.gz'
     tarball_checksum = 'f63c5e7d30362ed28b38bfa1ac6313f9a80230720b7fb6c80575eeab3ff5900c'
-    licenses = [License.MIT]
+    licenses = [{License.MIT: ['COPYING']}]
     deps = [ 'zlib' ]
     autoreconf = True
     patches = ['libxml2/0003-configure-fix-python-dir-prefix.patch']

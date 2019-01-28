@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'libtheora'
     version = '1.1.1'
-    licenses = [License.BSD]
+    licenses = [{License.BSD: ['COPYING'], License.Misc: ['LICENSE']}]
     stype = SourceType.TARBALL
     url = 'xiph://theora/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'

@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'ae2248d9e78747cf9c469dde81ff8f90b56838b707a0637f3f7d4eee90e80234'
     stype = SourceType.TARBALL
     # main library is LGPLv2+ and binaries is GPLv3+ and defined below
-    licenses = [License.LGPLv2Plus]
+    licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE']}]
     configure_options = "--enable-local-libopts --disable-guile --disable-openssl-compatibility \
         --without-p11-kit --enable-static --enable-zlib --enable-shared \
         --disable-doc --disable-tests --with-included-unistring"

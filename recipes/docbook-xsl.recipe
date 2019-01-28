@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'docbook-xsl'
     version = '1.79.1'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['COPYING']}]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'sf://docbook/%(name)s-%(version)s.tar.bz2'

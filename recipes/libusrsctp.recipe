@@ -34,7 +34,7 @@ class Recipe(recipe.Recipe):
     commit = 'f4819e1b177f7bfdd761c147f5a649b9f1a78c06';
     stype = SourceType.GIT
     autoreconf = True
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['LICENSE.md']}]
     configure_options = '--disable-debug --enable-static --enable-shared'
 
     files_libs = ['libusrsctp']

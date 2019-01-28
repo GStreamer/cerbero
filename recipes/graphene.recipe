@@ -27,7 +27,7 @@ class Recipe(recipe.Recipe):
     version = '1.8.2'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
     tarball_checksum = '8c7d895536936e65c7f859f87bd14c258ac7f2c4ec999010e39e658f47c4d2ee'
-    licenses = [License.MIT]
+    licenses = [{License.MIT: ['LICENSE']}]
     # Disable NEON completely, it's broken and experimental
     meson_options = {'arm_neon' : 'false', 'introspection' : 'false' }
 

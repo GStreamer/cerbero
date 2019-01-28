@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
     tarball_checksum = '064b9ebf060c9e77011733ac9dc0e2ce92870b574cca2405e11f5353a683c334'
-    licenses = [License.MIT]
+    licenses = [{License.MIT: ['COPYING']}]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
     autoreconf = True

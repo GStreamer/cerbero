@@ -3,7 +3,7 @@
 class Recipe(recipe.Recipe):
     name = 'libunwind'
     version = '1.1'
-    licenses = [License.MIT]
+    licenses = [{License.MIT: ['COPYING']}]
     stype = SourceType.TARBALL
     url = 'savannah://.tar.gz'
     tarball_checksum = '9dfe0fcae2a866de9d3942c66995e4b460230446887dbdab302d41a8aee8d09a'

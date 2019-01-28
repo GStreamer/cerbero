@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'xiph://vorbis/libvorbis-%(version)s.tar.xz'
     tarball_checksum = 'af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['libogg']
     config_sh = 'rm ltmain.sh && sh autogen.sh'
     patches = ['libvorbis/0001-Fix-linking-on-Android.patch',

@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'sf://'
     tarball_checksum = '23912ec8c9584917ed9b09c5023465d71709dce089be503c7867fec68a93bcd7'
-    licenses = [License.LibPNG]
+    licenses = [{License.LibPNG: ['LICENSE']}]
     deps = ['zlib']
     patches = [name + '/0001-neon-fix-function-export-names-for-iOS-armv7.patch']
 

@@ -5,7 +5,7 @@ from cerbero.utils.shell import which
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
     version = '2.56.1'
-    licenses = [License.LGPLv2Plus]
+    licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'

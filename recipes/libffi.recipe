@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     version = '3.2.9999'
     remotes = {'origin': 'https://github.com/{0}/{0}.git'.format(name)}
     commit = '369ef49f71186fc9d6ab15614488ad466fac3fc1'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['LICENSE']}]
     btype = BuildType.MESON
     patches = [name + '/libffi-port-to-meson-and-msvc.patch']
 

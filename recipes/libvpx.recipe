@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
     tarball_checksum = '1fec931eb5c94279ad219a5b6e0202358e94a93a90cfb1603578c326abfc1238'
-    licenses = [License.BSD]
+    licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
     btype = BuildType.MAKEFILE
     configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s "\
                     "--libdir=%(libdir)s %(options)s"

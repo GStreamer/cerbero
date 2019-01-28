@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'cmake'
     version = '3.7.1'
-    licenses = [License.BSD_like]
+    licenses = [{License.BSD_like: ['Copyright.txt']}]
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
     url = 'https://www.cmake.org/files/v3.7/cmake-%(version)s.tar.gz'
