@@ -194,7 +194,9 @@ class FilesProvider(object):
         if hasattr(self, 'platform_files_bins'):
             for f in self.platform_files_bins.get(self.config.target_platform, []):
                 pdbs.append('bin/{}.pdb'.format(f))
-        self.files_bins_devel = pdbs
+        if not hasattr(self, 'files_bins_devel'):
+            self.files_bins_devel = []
+        self.files_bins_devel += pdbs
 
     def devel_files_list(self):
         '''
