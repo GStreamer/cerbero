@@ -14,10 +14,10 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
     tarball_checksum = 'ae7a42df026550b85daca8389b6a60ba6313b0567f374392e54918588a411e94'
-    licenses = [License.LGPLv2_1Plus]
+    licenses = [License.LGPLv3Plus]
     configure_options = '--enable-shared --enable-public-key'
     deps = ['gmp']
-    patches = ['0001-ios-fix-build-using-.word-for-assembly-constants.patch']
+    patches = [name + '/0001-ios-fix-build-using-.word-for-assembly-constants.patch']
     allow_parallel_build = False
 
     files_bins = ['nettle-hash', 'nettle-lfib-stream', 'nettle-pbkdf2']
