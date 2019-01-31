@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     patches = [name + '/add-meson-build-files.patch']
 
     files_libs = ['libbz2']
-    files_devel = ['include/bzlib.h']
+    files_devel = ['include/bzlib.h', 'lib/pkgconfig/bzip2.pc']
 
     def post_install(self):
         libtool_la = LibtoolLibrary('bz2', 1, 0, 6, self.config.libdir,
