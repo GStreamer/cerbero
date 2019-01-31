@@ -434,9 +434,10 @@ class FilesProvider(object):
         path to the given list of files
         '''
         pyfiles = []
+        files = [f % self.extensions for f in files]
+        files = ['%s/%s' % (self.py_prefix, f) for f in files]
+        files = self._search_files (files)
         for f in files:
-            f = f % self.extensions
-            f = '%s/%s' % (self.py_prefix, f)
             real_name = self._pyfile_get_name(f)
             if real_name:
                 pyfiles.append(real_name)
