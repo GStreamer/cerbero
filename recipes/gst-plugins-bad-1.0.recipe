@@ -22,6 +22,7 @@ class Recipe(custom.GStreamer):
                      'opus': 'enabled',
                      'rtmp': 'enabled',
                      'sbc': 'enabled',
+                     'sctp': 'enabled',
                      'soundtouch': 'enabled',
                      'srt': 'enabled',
                      'spandsp': 'enabled',
@@ -270,6 +271,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsrtp%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtc%(mext)s',
              'lib/gstreamer-1.0/libgstsrt%(mext)s',
+             'lib/gstreamer-1.0/libgstsctp%(mext)s',
     ]
 
     files_plugins_net_devel = [
@@ -278,6 +280,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsrtp.a', 'lib/gstreamer-1.0/libgstsrtp.la',
              'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
              'lib/gstreamer-1.0/libgstsrt.a', 'lib/gstreamer-1.0/libgstsrt.la',
+             'lib/gstreamer-1.0/libgstsctp.a', 'lib/gstreamer-1.0/libgstsctp.la',
     ]
 
     files_plugins_net_restricted = [
