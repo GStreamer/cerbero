@@ -359,7 +359,7 @@ class Config (object):
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
-        stdlibpath = sysconfig.get_path('stdlib', vars={'installed_base': ''})
+        stdlibpath = sysconfig.get_path('stdlib', vars={'installed_base': ''})[1:]
         # Ensure that the path uses / as path separator and not \
         self.set_property('py_prefix', PurePath(stdlibpath).as_posix())
         self.set_property('lib_suffix', '')
