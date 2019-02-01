@@ -57,7 +57,7 @@ def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
         plugins = defaultdict(list)
         for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
-                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0',
+                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'libnice',
                   'gst-libav-1.0', 'gst-editing-services-1.0', 'gst-rtsp-server-1.0']:
             r = cookbook.get_recipe(r)
             for attr_name in dir(r):
