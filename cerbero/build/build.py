@@ -21,6 +21,7 @@ import re
 import copy
 import shutil
 import shlex
+from pathlib import Path
 
 from cerbero.enums import Platform, Architecture, Distro
 from cerbero.utils import shell, to_unixpath, add_system_libs
@@ -44,6 +45,8 @@ class Build (object):
         self._properties_keys = []
 
     def setup_toolchain_env_ops(self):
+        if self.config.qt5_pkgconfigdir:
+            self.append_env('PKG_CONFIG_LIBDIR', self.config.qt5_pkgconfigdir, sep=os.pathsep)
         if self.config.platform != Platform.WINDOWS:
             return
         if self.using_msvc():
@@ -508,6 +511,12 @@ pkgconfig = 'pkg-config'
 {extra_binaries}
 '''
 
+MESON_NATIVE_FILE_TPL = \
+'''
+[binaries]
+{extra_binaries}
+'''
+
 class Meson (Build, ModifyEnvBase) :
     '''
     Build handler for meson project
@@ -610,6 +619,11 @@ class Meson (Build, ModifyEnvBase) :
                 return 'aarch64'
         return self.config.target_arch
 
+    def _get_moc_path(self, qmake_path):
+        qmake = Path(qmake_path)
+        moc_name = qmake.name.replace('qmake', 'moc')
+        return str(qmake.parent / moc_name)
+
     def _write_meson_cross_file(self):
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
@@ -625,6 +639,9 @@ class Meson (Build, ModifyEnvBase) :
             cross_binaries['objc'] = os.environ['OBJC'].split()
         if 'OBJCXX' in os.environ:
             cross_binaries['objcpp'] = os.environ['OBJCXX'].split()
+        if self.config.qt5_qmake_path:
+            cross_binaries['qmake'] = [self.config.qt5_qmake_path]
+            cross_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
 
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
@@ -680,6 +697,23 @@ class Meson (Build, ModifyEnvBase) :
 
         return cross_file
 
+    def _write_meson_native_file(self):
+        native_binaries = {}
+        if self.config.qt5_qmake_path:
+            native_binaries['qmake'] = [self.config.qt5_qmake_path]
+            native_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
+
+        extra_binaries = ''
+        for k, v in native_binaries.items():
+            extra_binaries += '{} = {}\n'.format(k, str(v))
+
+        native_file = os.path.join(self.meson_dir, 'meson-native-file.txt')
+        contents = MESON_NATIVE_FILE_TPL.format(extra_binaries=extra_binaries)
+        with open(native_file, 'w') as f:
+            f.write(contents)
+
+        return native_file
+
     @modify_environment
     def configure(self):
         # self.build_dir is different on each call to configure() when doing universal builds
@@ -726,6 +760,10 @@ class Meson (Build, ModifyEnvBase) :
         if self.config.cross_compiling():
             f = self._write_meson_cross_file()
             meson_cmd += ' --cross-file=' + f
+        else:
+            # We only use native files when not cross-compiling
+            f = self._write_meson_native_file()
+            meson_cmd += ' --native-file=' + f
 
         if self.config.cross_compiling() or self.using_msvc():
             # We export the cross toolchain with env vars, but Meson picks the

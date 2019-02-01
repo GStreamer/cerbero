@@ -26,7 +26,7 @@ class Recipe(custom.GStreamer):
                      'libcaca': 'disabled',
                      'oss': 'disabled',
                      'oss4': 'disabled',
-                     'qt5': 'disabled',
+                     'qt5': 'disabled', # Enabled in prepare()
                      'shout2': 'disabled',
                      'twolame': 'disabled',}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
@@ -236,6 +236,21 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('video4linux2', 'capture', 'v4l2')
         self.enable_plugin('ximagesrc', 'capture', 'x11')
         self.enable_plugin('pulseaudio', 'sys', 'pulse')
+
+        # Enable qt5 plugin if possible and selected
+        can_enable_qt5 = True
+        if self.config.target_platform == Platform.IOS:
+            # iOS Qt5 binaries support arm64 and x86
+            if self.config.target_arch not in (Architecture.ARM64, Architecture.X86_64):
+                can_enable_qt5 = False
+        elif self.config.target_platform == Platform.ANDROID:
+            # Android Qt5 binaries support armv7, arm64, x86
+            if self.config.target_arch == Architecture.X86_64:
+                can_enable_qt5 = False
+        if can_enable_qt5:
+            self.enable_plugin('qmlgl', 'qt5', 'qt5')
+        if self.meson_options['qt5'] != 'disabled':
+            self.meson_options['cpp_std'] = 'c++11'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

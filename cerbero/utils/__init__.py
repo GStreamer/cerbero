@@ -31,6 +31,7 @@ from distutils.version import StrictVersion
 import gettext
 import platform as pplatform
 import re
+from pathlib import Path
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError
@@ -437,3 +438,66 @@ def needs_xcode8_sdk_workaround(config):
         if StrictVersion(config.ios_min_version) < StrictVersion('10.0'):
             return True
     return False
+
+def _qmake_or_pkgdir(qmake):
+    qmake_path = Path(qmake)
+    if not qmake_path.is_file():
+        m.warning('QMAKE={!r} does not exist'.format(str(qmake_path)))
+        return (None, None)
+    pkgdir = (qmake_path.parent.parent / 'lib/pkgconfig')
+    if pkgdir.is_dir():
+        return (pkgdir.as_posix(), qmake_path.as_posix())
+    return (None, qmake_path.as_posix())
+
+def detect_qt5(platform, arch, is_universal):
+    '''
+    Returns both the path to the pkgconfig directory and the path to qmake:
+    (pkgdir, qmake). If `pkgdir` could not be found, it will be None
+
+    Returns (None, None) if nothing was found.
+    '''
+    path = None
+    qt5_prefix = os.environ.get('QT5_PREFIX', None)
+    qmake_path = os.environ.get('QMAKE', None)
+    if not qt5_prefix and not qmake_path:
+        return (None, None)
+    if qt5_prefix and not os.path.isdir(qt5_prefix):
+        m.warning('QT5_PREFIX={!r} does not exist'.format(qt5_prefix))
+        return (None, None)
+    if qmake_path:
+        if is_universal and platform == Platform.ANDROID:
+            if not qt5_prefix:
+                m.warning('Please set QT5_PREFIX if you want to build '
+                          'the Qt5 plugin for android-universal')
+                return (None, None)
+        else:
+            ret = _qmake_or_pkgdir(qmake_path)
+            if ret != (None, None) or not qt5_prefix:
+                return ret
+    # qmake path is invalid, find pkgdir or qmake from qt5 prefix
+    if platform == Platform.ANDROID:
+        if arch == Architecture.ARMv7:
+            ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'android_armv7/bin/qmake'))
+        elif arch == Architecture.ARM64:
+            ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'android_arm64_v8a/bin/qmake'))
+        elif arch == Architecture.X86:
+            ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'android_x86/bin/qmake'))
+        elif arch == Architecture.X86_64:
+            # Qt binaries do not ship a qmake for android_x86_64
+            return (None, None)
+    elif platform == Platform.DARWIN:
+        if arch == Architecture.X86_64:
+            ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'clang_64/bin/qmake'))
+    elif platform == Platform.IOS:
+        ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'ios/bin/qmake'))
+    elif platform == Platform.LINUX:
+        if arch == Architecture.X86_64:
+            ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'gcc_64/bin/qmake'))
+    elif platform == Platform.WINDOWS:
+        # There are several msvc and mingw toolchains to pick from, and we
+        # can't pick it for the user.
+        m.warning('You must set QMAKE instead of QT5_PREFIX on Windows')
+        return (None, None)
+    if ret == (None, None):
+        m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
+    return ret

@@ -26,7 +26,7 @@ from pathlib import PurePath, Path
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
-    shell, parse_file
+    shell, parse_file, detect_qt5
 from cerbero.utils import messages as m
 
 
@@ -51,7 +51,7 @@ License = enums.License
 class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
-                           'gi', 'unwind', 'rpi', 'visualstudio']
+                           'gi', 'unwind', 'rpi', 'visualstudio', 'qt5']
     __enabled_variants = ['debug', 'python', 'testspackage']
 
     def __init__(self, variants):
@@ -105,7 +105,8 @@ class Config (object):
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
-                   'meson_cross_properties', 'manifest', 'extra_properties']
+                   'meson_cross_properties', 'manifest', 'extra_properties',
+                   'qt5_qmake_path', 'qt5_pkgconfigdir']
 
     cookbook = None
 
@@ -188,6 +189,12 @@ class Config (object):
             if self.target_arch == Architecture.UNIVERSAL:
                 config.sources = os.path.join(self.sources, config.target_arch)
                 config.prefix = os.path.join(self.prefix)
+            # qmake_path is different for each arch in android-universal, but
+            # not in ios-universal.
+            qtpkgdir, qmake5 = detect_qt5(config.target_platform, config.target_arch,
+                                          self.target_arch == Architecture.UNIVERSAL)
+            config.set_property('qt5_qmake_path', qmake5)
+            config.set_property('qt5_pkgconfigdir', qtpkgdir)
             config._load_platform_config()
             config._load_last_defaults()
             config._validate_properties()
