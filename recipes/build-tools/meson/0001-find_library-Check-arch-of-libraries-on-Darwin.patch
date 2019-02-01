@@ -1,0 +1,159 @@
+From a4e29ebfc4911fd3139cc76e51dbd44456085886 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 29 Jan 2019 16:12:35 +0530
+Subject: [PATCH 1/2] find_library: Check arch of libraries on Darwin
+
+macOS provides the tool `lipo` to check the archs supported by an
+object (executable, static library, dylib, etc). This is especially
+useful for fat archives, but it also helps with thin archives.
+
+Without this, the linker will fail to link to the library we mistakenly
+'found' like so:
+
+ld: warning: ignoring file /path/to/libfoo.a, missing required architecture armv7 in file /path/to/libfoo.a
+---
+ mesonbuild/backend/ninjabackend.py |  5 +--
+ mesonbuild/compilers/c.py          | 27 ++++++++---
+ mesonbuild/mesonlib.py             | 18 ++++++++
+ run_tests.py                       |  1 +
+ run_unittests.py                   | 72 +++++++++++++++++-------------
+ 5 files changed, 84 insertions(+), 39 deletions(-)
+
+diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
+index 493fc0dd..9b215b2f 100644
+--- a/mesonbuild/backend/ninjabackend.py
++++ b/mesonbuild/backend/ninjabackend.py
+@@ -2347,15 +2347,14 @@ rule FORTRAN_DEP_HACK%s
+         target_args = self.build_target_link_arguments(linker, target.link_whole_targets)
+         return linker.get_link_whole_for(target_args) if len(target_args) else []
+ 
+-    @staticmethod
+     @lru_cache(maxsize=None)
+-    def guess_library_absolute_path(linker, libname, search_dirs, patterns):
++    def guess_library_absolute_path(self, linker, libname, search_dirs, patterns):
+         for d in search_dirs:
+             for p in patterns:
+                 trial = CCompiler._get_trials_from_pattern(p, d, libname)
+                 if not trial:
+                     continue
+-                trial = CCompiler._get_file_from_list(trial)
++                trial = CCompiler._get_file_from_list(self.environment, trial)
+                 if not trial:
+                     continue
+                 # Return the first result
+diff --git a/mesonbuild/compilers/c.py b/mesonbuild/compilers/c.py
+index c0cd0bcd..376de2b1 100644
+--- a/mesonbuild/compilers/c.py
++++ b/mesonbuild/compilers/c.py
+@@ -27,6 +27,7 @@ from . import compilers
+ from ..mesonlib import (
+     EnvironmentException, MesonException, version_compare, Popen_safe, listify,
+     for_windows, for_darwin, for_cygwin, for_haiku, for_openbsd,
++    darwin_get_object_archs
+ )
+ from .c_function_attributes import C_FUNC_ATTRIBUTES
+ 
+@@ -979,10 +980,27 @@ class CCompiler(Compiler):
+         return [f.as_posix()]
+ 
+     @staticmethod
+-    def _get_file_from_list(files):
++    def _get_file_from_list(env, files):
++        '''
++        We just check whether the library exists. We can't do a link check
++        because the library might have unresolved symbols that require other
++        libraries. On macOS we check if the library matches our target
++        architecture.
++        '''
++        if not env.machines.host.is_darwin():
++            for f in files:
++                if os.path.isfile(f):
++                    return f
++        # Run `lipo` and check if the library supports the arch we want
+         for f in files:
+-            if os.path.isfile(f):
++            if not os.path.isfile(f):
++                continue
++            archs = darwin_get_object_archs(f)
++            if archs and env.machines.host.cpu_family in archs:
+                 return f
++            else:
++                mlog.debug('Rejected {}, supports {} but need {}'
++                           .format(f, archs, env.machines.host.cpu_family))
+         return None
+ 
+     @functools.lru_cache()
+@@ -1023,10 +1041,7 @@ class CCompiler(Compiler):
+                 trial = self._get_trials_from_pattern(p, d, libname)
+                 if not trial:
+                     continue
+-                # We just check whether the library exists. We can't do a link
+-                # check because the library might have unresolved symbols that
+-                # require other libraries.
+-                trial = self._get_file_from_list(trial)
++                trial = self._get_file_from_list(env, trial)
+                 if not trial:
+                     continue
+                 return [trial]
+diff --git a/mesonbuild/mesonlib.py b/mesonbuild/mesonlib.py
+index 8454d79d..7155a112 100644
+--- a/mesonbuild/mesonlib.py
++++ b/mesonbuild/mesonlib.py
+@@ -461,6 +461,24 @@ def exe_exists(arglist):
+         pass
+     return False
+ 
++lru_cache(maxsize=None)
++def darwin_get_object_archs(objpath):
++    '''
++    For a specific object (executable, static library, dylib, etc), run `lipo`
++    to fetch the list of archs supported by it. Supports both thin objects and
++    'fat' objects.
++    '''
++    _, stdo, stderr = Popen_safe(['lipo', '-archs', objpath])
++    if not stdo:
++        mlog.debug('lipo {}: {}'.format(objpath, stderr))
++        return None
++    # Convert from lipo-style archs to meson-style CPUs
++    stdo = stdo.replace('i386', 'x86')
++    # Add generic name for armv7 and armv7s
++    if 'armv7' in stdo:
++        stdo += ' arm'
++    return stdo.split()
++
+ def detect_vcs(source_dir):
+     vcs_systems = [
+         dict(name = 'git',        cmd = 'git', repo_dir = '.git', get_rev = 'git describe --dirty=+', rev_regex = '(.*)', dep = '.git/logs/HEAD'),
+-- 
+2.17.2 (Apple Git-113)
+
+
+From 71a0ce7a1f9219dbf9d50d2008f679cd7c18f2a7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 30 Jan 2019 15:30:36 +0530
+Subject: [PATCH 2/2] macos: lipo from older xcode does not support -archs
+
+---
+ mesonbuild/mesonlib.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/mesonbuild/mesonlib.py b/mesonbuild/mesonlib.py
+index 7155a112..2fca187c 100644
+--- a/mesonbuild/mesonlib.py
++++ b/mesonbuild/mesonlib.py
+@@ -468,10 +468,11 @@ def darwin_get_object_archs(objpath):
+     to fetch the list of archs supported by it. Supports both thin objects and
+     'fat' objects.
+     '''
+-    _, stdo, stderr = Popen_safe(['lipo', '-archs', objpath])
++    _, stdo, stderr = Popen_safe(['lipo', '-info', objpath])
+     if not stdo:
+         mlog.debug('lipo {}: {}'.format(objpath, stderr))
+         return None
++    stdo = stdo.rsplit(': ', 1)[1]
+     # Convert from lipo-style archs to meson-style CPUs
+     stdo = stdo.replace('i386', 'x86')
+     # Add generic name for armv7 and armv7s
+-- 
+2.17.2 (Apple Git-113)
+

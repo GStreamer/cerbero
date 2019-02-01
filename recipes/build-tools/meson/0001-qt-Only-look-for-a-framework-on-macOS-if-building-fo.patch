@@ -1,0 +1,31 @@
+From 5ea061ccacb43f81939d8665eb26012c16420c09 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 29 Jan 2019 16:16:45 +0530
+Subject: [PATCH] qt: Only look for a framework on macOS if building for macOS
+
+When building for iOS, the Qt binaries only contain static libraries
+and headers. No framework.
+
+With this, Meson can successfully compile and link to Qt on iOS
+---
+ mesonbuild/dependencies/ui.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/mesonbuild/dependencies/ui.py b/mesonbuild/dependencies/ui.py
+index e23124cc..3f3b75c8 100644
+--- a/mesonbuild/dependencies/ui.py
++++ b/mesonbuild/dependencies/ui.py
+@@ -371,7 +371,9 @@ class QtBaseDependency(ExternalDependency):
+                 continue
+             (k, v) = tuple(line.split(':', 1))
+             qvars[k] = v
+-        if mesonlib.is_osx():
++        # Qt on macOS uses a framework, but Qt for iOS does not
++        if self.env.machines.host.is_darwin() and 'ios' not in qvars['QMAKE_XSPEC']:
++            mlog.debug("Building for macOS, looking for framework")
+             self._framework_detect(qvars, mods, kwargs)
+             return qmake
+         incdir = qvars['QT_INSTALL_HEADERS']
+-- 
+2.17.2 (Apple Git-113)
+
