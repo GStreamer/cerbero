@@ -165,6 +165,9 @@ class Config (object):
                         # fairly light. Things break if they are more complex
                         # as load config can have side effects in global state
                         d = os.path.dirname(filename[0])
+                        for f in filename:
+                            if 'universal' in f:
+                                d = os.path.dirname(f)
                         arch_config[arch]._load_cmd_config([os.path.join(d, config_file)])
             else:
                 raise ConfigurationError('universal_archs must be a list or a dict')
