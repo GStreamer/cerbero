@@ -13,30 +13,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libffi']
     files_devel = ['include/ffi*.h', 'lib/pkgconfig/libffi.pc']
 
-    @staticmethod
-    def _get_arch_suffix(target_arch):
-        if Architecture.is_arm32(target_arch):
-            return 'arm'
-        elif target_arch == Architecture.ARM64:
-            return 'aarch64'
-        return target_arch
-    
     def post_install(self):
-        if self.config.target_platform == Platform.ANDROID and self.config.universal_archs:
-            # For each arch in a universal build, add a dummy header for all
-            # other android arches. This ensures that our Android packaging
-            # succeeds since it requires the same files list for each arch.
-            s = '#error "{}.h is for {} but arch is {}"\n'
-            for arch in self.config.universal_archs:
-                if arch == self.config.target_arch:
-                    continue
-                arch = self._get_arch_suffix(arch)
-                incdir = os.path.join(self.config.prefix, 'include')
-                for name in ('ffi', 'ffitarget'):
-                    hdr = os.path.join(incdir, '{}-{}.h'.format(name, arch))
-                    with open(hdr, 'w') as f:
-                        f.write(s.format(name, self.config.target_arch, arch))
-
         libtool_la = LibtoolLibrary('ffi', 7, None, None, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
