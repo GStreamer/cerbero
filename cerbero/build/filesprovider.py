@@ -90,23 +90,6 @@ def find_pdb_implib(libname, prefix):
             pdbs.append(pdb)
     return pdbs
 
-def flatten_files_list(all_files):
-    """
-    Some files search functions return a list of lists instead of a flat list
-    of files. We flatten it here.
-
-    Specifically, each list is a list of files found for each entry in
-    `recipe.files_libs`.
-    """
-    flattened = []
-    for entry_files in all_files:
-        if isinstance(entry_files, list):
-            for entry_file in entry_files:
-                flattened.append(entry_file)
-        else:
-            flattened.append(entry_files)
-    return flattened
-
 class FilesProvider(object):
     '''
     List files by categories using class attributes named files_$category and
@@ -246,9 +229,11 @@ class FilesProvider(object):
             cat_files = self._list_files_by_category(cat)
             # The library search function returns a dict that is a mapping from
             # library name to filenames, but we only want a list of filenames
-            if not isinstance(cat_files, list):
-                cat_files = flatten_files_list(list(cat_files.values()))
-            files.extend(cat_files)
+            if isinstance(cat_files, dict):
+                for each in cat_files.values():
+                    files.extend(each)
+            else:
+                files.extend(cat_files)
         return sorted(list(set(files)))
 
     def files_list_by_category(self, category):
