@@ -755,13 +755,17 @@ class UniversalFlatRecipe(BaseUniversalRecipe):
         dirs = [os.path.join(self._config.prefix, arch) for arch in self._recipes.keys()]
         generator.merge_files(inputs, dirs)
 
-        # merge the architecture specific files
+        # Collect files that are only in one or more archs, but not all archs
+        arch_files = {}
         for arch in self._recipes.keys():
-            ainputs = list(inputs ^ arch_inputs[arch])
-            output = self._config.prefix
-            generator = OSXUniversalGenerator(output)
-            generator.merge_files(ainputs,
-                    [os.path.join(self._config.prefix, arch)])
+            for f in list(inputs ^ arch_inputs[arch]):
+                if f not in arch_files:
+                    arch_files[f] = {arch}
+                else:
+                    arch_files[f].add(arch)
+        # merge the architecture specific files
+        for f, archs in arch_files.items():
+            generator.merge_files([f], [os.path.join(self._config.prefix, arch) for arch in archs])
 
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
