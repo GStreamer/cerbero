@@ -630,7 +630,7 @@ class MetaUniversalRecipe(type):
             setattr(cls, step, lambda self, name=step: step_func(self, name))
 
 
-class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
+class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
     '''
     Stores similar recipe objects that are going to be built together
 
@@ -643,7 +643,6 @@ class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
         self._config = config
         self._recipes = {}
         self._proxy_recipe = None
-        UniversalFilesProvider.__init__(self, config)
 
     def __str__(self):
         if list(self._recipes.values()):
@@ -665,12 +664,6 @@ class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
     def is_empty(self):
         return len(self._recipes) == 0
 
-    @property
-    def steps(self):
-        if self.is_empty():
-            return []
-        return self._proxy_recipe.steps[:]
-
     def __getattr__(self, name):
         if not self._proxy_recipe:
             raise AttributeError(_("Attribute %s was not found in the "
@@ -684,11 +677,27 @@ class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
             for o in self._recipes.values():
                 setattr(o, name, value)
 
-    def get_for_arch (self, arch, name):
+    def get_for_arch(self, arch, name):
         if arch:
             return getattr (self._recipes[arch], name)
         else:
             return getattr (self, name)
+
+
+class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
+    '''
+    Unversal recipe for Android with subdirs for each architecture
+    '''
+
+    def __init__(self, config):
+        super().__init__(config)
+        UniversalFilesProvider.__init__(self, config)
+
+    @property
+    def steps(self):
+        if self.is_empty():
+            return []
+        return self._proxy_recipe.steps[:]
 
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
@@ -715,14 +724,14 @@ class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
                 raise e
 
 
-class UniversalFlatRecipe(UniversalRecipe):
+class UniversalFlatRecipe(BaseUniversalRecipe):
     '''
     Unversal recipe for iOS and OS X creating flat libraries
     in the target prefix instead of subdirs for each architecture
     '''
 
     def __init__(self, config):
-        UniversalRecipe.__init__(self, config)
+        super().__init__(config)
 
     @property
     def steps(self):
