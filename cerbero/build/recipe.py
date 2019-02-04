@@ -26,7 +26,7 @@ from pathlib import Path
 
 from cerbero.enums import LicenseDescription
 from cerbero.build import build, source
-from cerbero.build.filesprovider import FilesProvider
+from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider
 from cerbero.config import Platform
 from cerbero.errors import FatalError
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
@@ -630,7 +630,7 @@ class MetaUniversalRecipe(type):
             setattr(cls, step, lambda self, name=step: step_func(self, name))
 
 
-class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
+class UniversalRecipe(UniversalFilesProvider, metaclass=MetaUniversalRecipe):
     '''
     Stores similar recipe objects that are going to be built together
 
@@ -643,6 +643,7 @@ class UniversalRecipe(object, metaclass=MetaUniversalRecipe):
         self._config = config
         self._recipes = {}
         self._proxy_recipe = None
+        UniversalFilesProvider.__init__(self, config)
 
     def __str__(self):
         if list(self._recipes.values()):

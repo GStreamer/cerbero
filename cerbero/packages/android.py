@@ -31,32 +31,6 @@ class AndroidPackager(DistTarball):
     def __init__(self, config, package, store):
         DistTarball.__init__(self, config, package, store)
 
-    def files_list(self, package_type, force):
-        if self.config.target_arch != Architecture.UNIVERSAL:
-            # Nothing special to do for normal arches, just chain up
-            return PackagerBase.files_list(self, package_type, force)
-        else:
-            # For the universal architecture, collect files from each
-            # sub-archtecture
-            if package_type == PackageType.DEVEL:
-                files = self.package.devel_files_list()
-            else:
-                files = self.package.files_list()
-
-            all_files = []
-
-            if isinstance(self.config.universal_archs, list):
-                archs = self.config.universal_archs
-            elif isinstance(self.config.universal_archs, dict):
-                archs = list(self.config.universal_archs.keys())
-            else:
-                raise ConfigurationError('universal_archs must be a list or a dict')
-
-            for arch in archs:
-                all_files += [os.path.join(str(arch), f) for f in files]
-
-            return all_files
-
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):
         filenames = []

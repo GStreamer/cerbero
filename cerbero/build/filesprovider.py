@@ -20,6 +20,7 @@ import os
 import re
 import glob
 import inspect
+from functools import partial
 from pathlib import Path
 
 from cerbero.config import Platform
@@ -521,3 +522,53 @@ class FilesProvider(object):
                 _root = _root[1:]
             files.extend([os.path.join(_root, x) for x in filenames])
         return files
+
+
+class UniversalFilesProvider(FilesProvider):
+
+    def __init__(self, config):
+        # Override all search functions with an aggregating search function.
+        for name in dir(FilesProvider):
+            if not name.startswith('_search') or name == '_search_libraries':
+                continue
+            setattr(self, name, partial(self._aggregate_files_search_func, name))
+
+    def _search_libraries(self, *args, **kwargs):
+        # This is handled separately, assert that it's not called directly to avoid bugs
+        raise AssertionError('Should not be called')
+
+    def _aggregate_files_search_func(self, funcname, *args):
+        files = []
+        for r in self._recipes.values():
+            searchfunc = getattr(r, funcname)
+            for f in searchfunc(*args):
+                files.append('{}/{}'.format(r.config.target_arch, f))
+        return files
+
+    def _aggregate_libraries(self, category):
+        files = {}
+        for r in self._recipes.values():
+            for name, rfiles in r._list_files_by_category(category).items():
+                if name not in files:
+                    files[name] = []
+                for f in rfiles:
+                    files[name].append('{}/{}'.format(r.config.target_arch, f))
+        return files
+
+    def _aggregate_files(self, category):
+        files = []
+        for r in self._recipes.values():
+            for f in r._list_files_by_category(category):
+                files.append('{}/{}'.format(r.config.target_arch, f))
+        return files
+
+    # This can't be on the UniversalRecipe class because it must override the
+    # same method on the FilesProvider class.
+    def _list_files_by_category(self, category):
+        '''
+        Reimplement the files provider base function to aggregate files from
+        each target_arch recipe in UniversalRecipe.
+        '''
+        if category == self.LIBS_CAT:
+            return self._aggregate_libraries(category)
+        return self._aggregate_files(category)
