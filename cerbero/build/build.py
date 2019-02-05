@@ -634,7 +634,8 @@ class Meson (Build, ModifyEnvBase) :
         strip = os.environ.get('STRIP', '').split()
         windres = os.environ.get('WINDRES', '').split()
 
-        cross_binaries = {}
+        # We do not use cmake dependency files, speed up the build by disabling it
+        cross_binaries = {'cmake': ['false']}
         if 'OBJC' in os.environ:
             cross_binaries['objc'] = os.environ['OBJC'].split()
         if 'OBJCXX' in os.environ:
@@ -698,7 +699,8 @@ class Meson (Build, ModifyEnvBase) :
         return cross_file
 
     def _write_meson_native_file(self):
-        native_binaries = {}
+        # We do not use cmake dependency files, speed up the build by disabling it
+        native_binaries = {'cmake': ['false']}
         if self.config.qt5_qmake_path:
             native_binaries['qmake'] = [self.config.qt5_qmake_path]
             native_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
