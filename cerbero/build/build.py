@@ -699,6 +699,14 @@ class Meson (Build, ModifyEnvBase) :
         # Automatically disable examples
         self._set_option({'examples'}, None)
 
+        # NOTE: self.tagged_for_release is set in recipes/custom.py
+        is_gstreamer_recipe = hasattr(self, 'tagged_for_release')
+        # Enable -Werror for gstreamer recipes and when running under CI
+        if is_gstreamer_recipe and 'CI' in os.environ:
+            # Let recipes override the value
+            if 'werror' not in self.meson_options:
+                self.meson_options['werror'] = 'true'
+
         if self.config.variants.debug:
             buildtype = 'debugoptimized'
         else:
