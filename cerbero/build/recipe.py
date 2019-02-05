@@ -418,7 +418,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         return [fname]
 
     def _write_license_readme(self, licenses_files, install_dir, applies_to):
-        with open(install_dir / LICENSE_INFO_FILENAME, 'w') as f:
+        with (install_dir / LICENSE_INFO_FILENAME).open('w') as f:
             f.write(self._licenses_disclaimer)
             f.write(self._licenses_terms.format(applies_to))
             f.write('\n(OR)\n'.join([' (AND) '.join(lfiles) for lfiles in licenses_files]))
