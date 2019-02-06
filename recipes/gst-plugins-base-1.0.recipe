@@ -241,3 +241,9 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.meson_options['tremor'] = 'enabled'
+
+        # Our ancient toolchain manages to hang while linking one of the tests
+        # if this is enabled. XXX: Revisit when the toolchain is updated:
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/merge_requests/69
+        if self.config.target_platform == Platform.WINDOWS:
+            self.meson_options['werror'] = 'false'
