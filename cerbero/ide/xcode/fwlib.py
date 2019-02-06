@@ -20,6 +20,7 @@
 import os
 import tempfile
 import shutil
+import subprocess
 from collections import defaultdict
 
 from cerbero.config import Architecture
@@ -104,8 +105,14 @@ class StaticFrameworkLibrary(FrameworkLibrary):
 
         if thin_arch: #should be a fat file, split only to the arch we want
             newname = '%s_%s' % (thin_arch, os.path.basename(lib))
-            shell.call('lipo %s -thin %s -output %s' % (tmplib,
-                           thin_arch, newname), lib_tmpdir)
+            cmd = ['lipo', tmplib, '-thin', thin_arch, '-output', newname]
+            try:
+                subprocess.check_output(cmd, cwd=lib_tmpdir, stderr=subprocess.STDOUT,
+                                        universal_newlines=True)
+            except subprocess.CalledProcessError as e:
+                if 'does not contain the specified architecture' in e.output:
+                    return None
+                raise
             tmplib = os.path.join (lib_tmpdir, newname)
 
         shell.call('ar -x %s' % tmplib, lib_tmpdir)
@@ -183,6 +190,10 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                     lib_tmpdir = self._split_static_lib(lib, thin_arch)
                 else:
                     lib_tmpdir = self._split_static_lib(lib)
+
+                if lib_tmpdir is None:
+                    # arch is not supported in the static lib, skip it
+                    continue
 
                 obj_files = shell.ls_files(['*.o'], lib_tmpdir)
                 target_objs = []

@@ -533,34 +533,42 @@ class UniversalFilesProvider(FilesProvider):
                 continue
             setattr(self, name, partial(self._aggregate_files_search_func, name))
 
+    def get_arch_file(self, arch, f):
+        '''
+        Layout is split into separate arch-specific prefixes (android-universal)
+        '''
+        return '{}/{}'.format(arch, f)
+
     def _search_libraries(self, *args, **kwargs):
         # This is handled separately, assert that it's not called directly to avoid bugs
         raise AssertionError('Should not be called')
 
     def _aggregate_files_search_func(self, funcname, *args):
-        files = []
+        files = set()
         for r in self._recipes.values():
             searchfunc = getattr(r, funcname)
             for f in searchfunc(*args):
-                files.append('{}/{}'.format(r.config.target_arch, f))
-        return files
+                files.add(self.get_arch_file(r.config.target_arch, f))
+        return list(files)
 
     def _aggregate_libraries(self, category):
         files = {}
         for r in self._recipes.values():
             for name, rfiles in r._list_files_by_category(category).items():
                 if name not in files:
-                    files[name] = []
+                    files[name] = set()
                 for f in rfiles:
-                    files[name].append('{}/{}'.format(r.config.target_arch, f))
+                    files[name].add(self.get_arch_file(r.config.target_arch, f))
+        for name in files:
+            files[name] = list(files[name])
         return files
 
     def _aggregate_files(self, category):
-        files = []
+        files = set()
         for r in self._recipes.values():
             for f in r._list_files_by_category(category):
-                files.append('{}/{}'.format(r.config.target_arch, f))
-        return files
+                files.add(self.get_arch_file(r.config.target_arch, f))
+        return list(files)
 
     # This can't be on the UniversalRecipe class because it must override the
     # same method on the FilesProvider class.
@@ -572,3 +580,12 @@ class UniversalFilesProvider(FilesProvider):
         if category == self.LIBS_CAT:
             return self._aggregate_libraries(category)
         return self._aggregate_files(category)
+
+class UniversalFlatFilesProvider(UniversalFilesProvider):
+
+    def get_arch_file(self, arch, f):
+        '''
+        Layout is one common prefix will all arch-specific files merged into it
+        with `lipo` (ios-universal)
+        '''
+        return f
