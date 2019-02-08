@@ -70,11 +70,12 @@ class BuildTools (BootstrapperBase, Fetch):
         self.BUILD_TOOLS += self.config.extra_build_tools
 
     def _setup_env(self):
+        # Start with the original env that cerbero was called with
+        os.environ.clear()
+        os.environ.update(self.config._pre_environ)
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
         config = Config()
-        os.environ.clear()
-        os.environ.update(self.config._pre_environ)
         config.prefix = self.config.build_tools_prefix
         config.home_dir = self.config.home_dir
         config.local_sources = self.config.local_sources
