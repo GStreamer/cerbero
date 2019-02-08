@@ -6,21 +6,15 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.49.0'
+    version = '0.49.2'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = 'fb0395c4ac208eab381cd1a20571584bdbba176eb562a7efa9cb17cace0e1551'
+    tarball_checksum = 'ef9f14326ec1e30d3ba1a26df0f92826ede5a79255ad723af78a2691c37109fd'
     patches = [
         # https://github.com/mesonbuild/meson/pull/3939
         'meson/0002-Fix-linking-of-shared-static-libs-with-static-libs.patch',
-        # https://github.com/mesonbuild/meson/issues/4100, in 0.49.2
-        'meson/0001-Revert-Fail-some-impossible-cross-detections.patch',
-        # https://github.com/mesonbuild/meson/pull/4849, in 0.49.2
-        'meson/0001-qt-Print-the-full-path-of-the-qmake-binary-found.patch',
-        # https://github.com/mesonbuild/meson/pull/4845, in 0.50
-        'meson/0001-qt-Only-look-for-a-framework-on-macOS-if-building-fo.patch',
         # https://github.com/mesonbuild/meson/pull/4846, in 0.50
         'meson/0001-find_library-Check-arch-of-libraries-on-Darwin.patch',
         # https://github.com/mesonbuild/meson/pull/4864, in 0.50
