@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
                'libtheora/0005-build-allow-skipping-configure-in-autogen.sh.patch',
                'libtheora/0006-Fix-cross-compilation-build.patch',
                ]
-    configure_options = ' --disable-spec --disable-doc'
+    configure_options = ' --disable-spec --disable-doc --disable-examples'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
@@ -29,11 +29,8 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
-            self.configure_options += ' --disable-examples'
             self.config_sh = 'sh autogen.sh'
         elif self.config.target_platform == Platform.IOS:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_platform == Platform.DARWIN:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
-        elif self.config.cross_compiling():
-            self.configure_options += ' --disable-examples'

@@ -1,0 +1,40 @@
+From 971ff618f3bb02a3d4eeba97922db37776a8fa0e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Sat, 13 Sep 2014 18:19:23 +0200
+Subject: [PATCH] Don't use -fforce-addr
+
+It does not work with newer clang.
+---
+ configure    | 2 +-
+ configure.ac | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure b/configure
+index 2864b4e..5e41a0d 100755
+--- a/configure
++++ b/configure
+@@ -11895,7 +11895,7 @@ else
+         case $host in
+         *)
+                 DEBUG="-g -Wall -Wno-parentheses -DDEBUG -D__NO_MATH_INLINES"
+-                CFLAGS="-Wall -Wno-parentheses -O3 -fforce-addr -fomit-frame-pointer -finline-functions -funroll-loops"
++                CFLAGS="-Wall -Wno-parentheses -O3 -fomit-frame-pointer -finline-functions -funroll-loops"
+                 PROFILE="-Wall -Wno-parentheses -pg -g -O3 -fno-inline-functions -DDEBUG";;
+         esac
+ fi
+diff --git a/configure.ac b/configure.ac
+index f4918a4..f4cf2a6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -168,7 +168,7 @@ else
+         case $host in 
+         *)
+                 DEBUG="-g -Wall -Wno-parentheses -DDEBUG -D__NO_MATH_INLINES"
+-                CFLAGS="-Wall -Wno-parentheses -O3 -fforce-addr -fomit-frame-pointer -finline-functions -funroll-loops"
++                CFLAGS="-Wall -Wno-parentheses -O3 -fomit-frame-pointer -finline-functions -funroll-loops"
+                 PROFILE="-Wall -Wno-parentheses -pg -g -O3 -fno-inline-functions -DDEBUG";;
+         esac
+ fi
+-- 
+1.9.3 (Apple Git-50)
+
