@@ -477,30 +477,41 @@ def enter_build_environment(platform, arch, sourcedir=None):
 if [ -e ~/.bashrc ]; then
 source ~/.bashrc
 fi
+%s
 PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
 '''
-
-    bashrc = tempfile.NamedTemporaryFile()
-    bashrc.write((BASHRC % (platform, arch)).encode())
-    bashrc.flush()
-
+    MSYSBAT =  '''
+start bash.exe --rcfile %s
+'''
     if sourcedir:
-        os.chdir(sourcedir)
+        sourcedirsh = 'cd ' + sourcedir
+    else:
+        sourcedirsh = ''
 
     if PLATFORM == Platform.WINDOWS:
-        # $MINGW_PREFIX/home/username
-        msys = os.path.join(os.path.expanduser('~'),
-                            '..', '..', 'msys.bat')
-        subprocess.check_call('%s -noxvrt' % msys)
+        msysbatdir = tempfile.mkdtemp()
+        msysbat = os.path.join(msysbatdir, "msys.bat")
+        bashrc = os.path.join(msysbatdir, "bash.rc")
+        with open(msysbat, 'w+') as f:
+            f.write(MSYSBAT % bashrc)
+        with open(bashrc, 'w+') as f:
+            f.write(BASHRC % (sourcedirsh, platform,arch))
+        subprocess.check_call(msysbat, shell=True)
+        # We should remove the temporary directory
+        # but there is a race with the bash process
     else:
+        bashrc = tempfile.NamedTemporaryFile()
+        bashrc.write((BASHRC % (sourcedirsh, platform, arch)).encode())
+        bashrc.flush()
+
         shell = os.environ.get('SHELL', '/bin/bash')
         if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:
             os.execlp(shell, shell, '--rcfile', bashrc.name)
         else:
             os.environ["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
             os.execlp(shell, shell)
+        bashrc.close()
 
-    bashrc.close()
 
 def which(pgm, path=None):
     if path is None:
