@@ -716,13 +716,16 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         for arch, recipe in self._recipes.items():
             config = self._config.arch_config[arch]
             config.do_setup_env()
+            shell.set_logfile_output("%s/%s-%s.log" % (config.logs, recipe.name, step))
             stepfunc = getattr(recipe, step)
 
             # Call the step function
             try:
                 stepfunc()
+                shell.close_logfile_output()
             except FatalError as e:
                 e.arch = arch
+                shell.close_logfile_output(dump=True)
                 raise e
 
 
@@ -802,7 +805,14 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 os.utime(tmp.name, (t, t))
 
             # Call the step function
-            stepfunc()
+            shell.set_logfile_output("%s/%s-%s.log" % (config.logs, recipe.name, step))
+            try:
+                stepfunc()
+                shell.close_logfile_output()
+            except FatalError as e:
+                e.arch = arch
+                shell.close_logfile_output(dump=True)
+                raise e
 
             # Move installed files to the architecture prefix
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:

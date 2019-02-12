@@ -22,6 +22,7 @@ import shutil
 import traceback
 from subprocess import CalledProcessError
 
+from cerbero.config import Architecture
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell
@@ -152,13 +153,17 @@ class Oven (object):
                 stepfunc = getattr(recipe, step)
                 if not stepfunc:
                     raise FatalError(_('Step %s not found') % step)
-                shell.set_logfile_output("%s/%s-%s.log" % (recipe.config.logs, recipe, step))
+                # Universal arch recipes set this themselves to a per-arch value
+                if self.config.target_arch != Architecture.UNIVERSAL:
+                    shell.set_logfile_output("%s/%s-%s.log" % (recipe.config.logs, recipe, step))
                 stepfunc()
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
-                shell.close_logfile_output()
+                if self.config.target_arch != Architecture.UNIVERSAL:
+                    shell.close_logfile_output()
             except FatalError as e:
-                shell.close_logfile_output(dump=True)
+                if self.config.target_arch != Architecture.UNIVERSAL:
+                    shell.close_logfile_output(dump=True)
                 exc_traceback = sys.exc_info()[2]
                 trace = ''
                 # Don't print trace if the FatalError is merely that the
@@ -173,7 +178,8 @@ class Oven (object):
                     trace += e.args[0] + '\n'
                 self._handle_build_step_error(recipe, step, trace, e.arch)
             except Exception:
-                shell.close_logfile_output(dump=True)
+                if self.config.target_arch != Architecture.UNIVERSAL:
+                    shell.close_logfile_output(dump=True)
                 raise BuildStepError(recipe, step, traceback.format_exc())
         self.cookbook.update_build_status(recipe.name, recipe.built_version())
 
