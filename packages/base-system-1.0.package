@@ -19,13 +19,11 @@ class Package(custom.GStreamer, package.Package):
              'json-glib:bins:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['proxy-libintl:libs:lang', 'libiconv:libs:lang',
-            'mingw-runtime', 'bionic-fixup:libs'],
-        Platform.DARWIN: ['proxy-libintl:libs:lang', 'bionic-fixup:libs'],
+        Platform.WINDOWS: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'mingw-runtime'],
+        Platform.DARWIN: ['proxy-libintl:libs:lang'],
         Platform.LINUX: [],
-        Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'gnustl',
-            'bionic-fixup:libs'],
-        Platform.IOS: ['proxy-libintl:libs:lang', 'bionic-fixup:libs']
+        Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'gnustl'],
+        Platform.IOS: ['proxy-libintl:libs:lang']
         }
 
     def prepare(self):
