@@ -21,6 +21,7 @@ import logging
 import shutil
 import tempfile
 import time
+import inspect
 from functools import reduce
 from pathlib import Path
 
@@ -38,6 +39,33 @@ from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
 
 LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
+
+
+def log_step_output(stepfunc):
+    def wrapped(self):
+        step = stepfunc.__name__
+        path = "%s/%s-%s.log" % (self.config.logs, self.name, step)
+        old_logfile = self.logfile # Allow calling build steps recursively
+        self.logfile = open(path, 'w+')
+        try:
+            stepfunc()
+        except FatalError:
+            # Dump contents of log file on error
+            self.logfile.seek(0)
+            while True:
+                data = self.logfile.read()
+                if data:
+                    print(data)
+                else:
+                    break
+            raise
+        # if logfile is empty, remove it
+        pos = self.logfile.tell()
+        self.logfile.close()
+        if pos == 0:
+            os.remove(self.logfile.name)
+        self.logfile = old_logfile
+    return wrapped
 
 class MetaRecipe(type):
     ''' This metaclass modifies the base classes of a Receipt, adding 2 new
@@ -85,10 +113,15 @@ class BuildSteps(object):
     MERGE = (N_('Merge universal binaries'), 'merge')
     RELOCATE_OSX_LIBRARIES = (N_('Relocate OSX libraries'), 'relocate_osx_libraries')
 
-    def __new__(klass):
+    def __new__(cls):
         return [BuildSteps.FETCH, BuildSteps.EXTRACT,
                 BuildSteps.CONFIGURE, BuildSteps.COMPILE, BuildSteps.INSTALL,
                 BuildSteps.POST_INSTALL]
+
+    @classmethod
+    def all_names(cls):
+        members = inspect.getmembers(cls, lambda x: isinstance(x, tuple))
+        return tuple(e[1][1] for e in members)
 
 
 class Recipe(FilesProvider, metaclass=MetaRecipe):
@@ -160,6 +193,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
 
     # Internal properties
     force = False
+    logfile = None
     _default_steps = BuildSteps()
     _licenses_disclaimer = '''\
 DISCLAIMER: THIS LICENSING INFORMATION IS PROVIDED ON A BEST-EFFORT BASIS
@@ -192,12 +226,24 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             # should only work with subclasses that really have Build and
             # Source in bases
             pass
+        self.decorate_build_steps()
 
     def __str__(self):
         return self.name
 
     def __repr__(self):
         return "<Recipe %s>" % self.name
+
+    def decorate_build_steps(self):
+        '''
+        Decorate build step functions with a function that sets self.logfile
+        for each build step for this recipe
+        '''
+        steps = BuildSteps.all_names()
+        for name, m in inspect.getmembers(self, inspect.ismethod):
+            if name not in steps:
+                continue
+            setattr(self, name, log_step_output(m))
 
     def prepare(self):
         '''
@@ -716,16 +762,13 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         for arch, recipe in self._recipes.items():
             config = self._config.arch_config[arch]
             config.do_setup_env()
-            shell.set_logfile_output("%s/%s-%s.log" % (config.logs, recipe.name, step))
             stepfunc = getattr(recipe, step)
 
             # Call the step function
             try:
                 stepfunc()
-                shell.close_logfile_output()
             except FatalError as e:
                 e.arch = arch
-                shell.close_logfile_output(dump=True)
                 raise e
 
 
@@ -805,13 +848,10 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 os.utime(tmp.name, (t, t))
 
             # Call the step function
-            shell.set_logfile_output("%s/%s-%s.log" % (config.logs, recipe.name, step))
             try:
                 stepfunc()
-                shell.close_logfile_output()
             except FatalError as e:
                 e.arch = arch
-                shell.close_logfile_output(dump=True)
                 raise e
 
             # Move installed files to the architecture prefix

@@ -43,64 +43,9 @@ TAR = 'tar'
 
 
 PLATFORM = system_info()[0]
-LOGFILE = None  # open('/tmp/cerbero.log', 'w+')
 DRY_RUN = False
 
 CALL_ENV = None
-
-
-def set_logfile_output(location):
-    '''
-    Sets a file to log
-
-    @param location: path for the log file
-    @type location: str
-    '''
-
-    global LOGFILE
-    if not LOGFILE is None:
-        raise Exception("Logfile was already open. Forgot to call "
-                        "close_logfile_output() ?")
-    LOGFILE = open(location, "w+")
-
-
-def close_logfile_output(dump=False):
-    '''
-    Close the current log file
-
-    @param dump: dump the log file to stdout
-    @type dump: bool
-    '''
-    global LOGFILE
-    if LOGFILE is None:
-        raise Exception("No logfile was open")
-    if dump:
-        LOGFILE.seek(0)
-        while True:
-            data = LOGFILE.read()
-            if data:
-                print(data)
-            else:
-                break
-    # if logfile is empty, remove it
-    pos = LOGFILE.tell()
-    LOGFILE.close()
-    if pos == 0:
-        os.remove(LOGFILE.name)
-    LOGFILE = None
-
-
-class StdOut:
-
-    def __init__(self, stream=sys.stdout):
-        self.stream = stream
-
-    def write(self, data):
-        self.stream.write(data)
-        self.stream.flush()
-
-    def __getattr__(self, attr):
-        return getattr(self.stream, attr)
 
 def console_is_interactive():
     if not os.isatty(sys.stdout.fileno()):
@@ -109,6 +54,11 @@ def console_is_interactive():
         return False
     return True
 
+def log(msg, logfile):
+    if logfile is None:
+        logging.info(msg)
+    else:
+        logfile.write(msg + '\n')
 
 def _fix_mingw_cmd(path):
     reserved = ['/', ' ', '\\', ')', '(', '"']
@@ -129,7 +79,7 @@ def restore_call_env():
     CALL_ENV = None
 
 
-def call(cmd, cmd_dir='.', fail=True, verbose=False):
+def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None):
     '''
     Run a shell command
 
@@ -142,12 +92,14 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
     '''
     global CALL_ENV
     try:
-        if LOGFILE is None:
+        if logfile is None:
             if verbose:
                 m.message("Running command '%s'" % cmd)
+            stream = None
         else:
-            LOGFILE.write("Running command '%s'\n" % cmd)
-            LOGFILE.flush()
+            logfile.write("Running command '%s'\n" % cmd)
+            logfile.flush()
+            stream = logfile
         shell = True
         if PLATFORM == Platform.WINDOWS:
             # windows do not understand ./
@@ -159,7 +111,6 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
             cmd = _fix_mingw_cmd(cmd)
             # Disable shell which uses cmd.exe
             shell = False
-        stream = LOGFILE or sys.stdout
         if DRY_RUN:
             # write to sdterr so it's filtered more easilly
             m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
@@ -169,12 +120,13 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
                 env = CALL_ENV.copy()
             else:
                 env = os.environ.copy()
+
             # Force python scripts to print their output on newlines instead
             # of on exit. Ensures that we get continuous output in log files.
             env['PYTHONUNBUFFERED'] = '1'
-            ret = subprocess.check_call(cmd, cwd=cmd_dir,
-                                       stderr=subprocess.STDOUT,
-                                       stdout=StdOut(stream),
+            ret = subprocess.check_call(cmd, cwd=cmd_dir, bufsize=1,
+                                       stderr=subprocess.STDOUT, stdout=stream,
+                                       universal_newlines=True,
                                        env=env, shell=shell)
     except subprocess.CalledProcessError:
         if fail:
@@ -195,7 +147,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
     try:
         process = subprocess.Popen(cmd, cwd=cmd_dir, env=env,
                                    stdout=subprocess.PIPE,
-                                   stderr=open(os.devnull), shell=shell)
+                                   stderr=subprocess.STDOUT, shell=shell)
         output, unused_err = process.communicate()
         if process.poll() and fail:
             raise Exception()
@@ -208,7 +160,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
     return output
 
 
-def apply_patch(patch, directory, strip=1):
+def apply_patch(patch, directory, strip=1, logfile=None):
     '''
     Apply a patch
 
@@ -219,12 +171,11 @@ def apply_patch(patch, directory, strip=1):
     @param strip: strip
     @type strip: int
     '''
-
-    logging.info("Applying patch %s" % (patch))
+    log("Applying patch {}".format(patch), logfile)
     call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
 
 
-def unpack(filepath, output_dir):
+def unpack(filepath, output_dir, logfile=None):
     '''
     Extracts a tarball
 
@@ -233,7 +184,8 @@ def unpack(filepath, output_dir):
     @param output_dir: output directory
     @type output_dir: str
     '''
-    logging.info("Unpacking %s in %s" % (filepath, output_dir))
+    log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
+
     if filepath.endswith('tar.gz') or filepath.endswith('tgz'):
         tf = tarfile.open(filepath, mode='r:gz')
         tf.extractall(path=output_dir)
@@ -329,19 +281,15 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
             os.remove(destination)
         raise e
 
-def download(url, destination=None, check_cert=True, overwrite=False):
+def download(url, destination=None, check_cert=True, overwrite=False, logfile=None):
     if not overwrite and os.path.exists(destination):
-        if LOGFILE is None:
+        if logfile is None:
             logging.info("File %s already downloaded." % destination)
         return
     else:
         if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
-
-        if LOGFILE:
-            LOGFILE.write("Downloading %s\n" % url)
-        else:
-            logging.info("Downloading %s", url)
+        log("Downloading {}".format(url), logfile)
 
     # wget shipped with msys fails with an SSL error on github URLs
     # https://githubengineering.com/crypto-removal-notice/

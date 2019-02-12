@@ -317,26 +317,26 @@ class MakefilesBase (Build, ModifyEnvBase):
             'target': self.config.target,
             'build': self.config.build,
             'options': self.configure_options},
-            self.make_dir)
+            self.make_dir, logfile=self.logfile)
 
     @modify_environment
     def compile(self):
         if self.using_msvc():
             self.unset_toolchain_env()
-        shell.call(self.make, self.make_dir)
+        shell.call(self.make, self.make_dir, logfile=self.logfile)
 
     @modify_environment
     def install(self):
-        shell.call(self.make_install, self.make_dir)
+        shell.call(self.make_install, self.make_dir, logfile=self.logfile)
 
     @modify_environment
     def clean(self):
-        shell.call(self.make_clean, self.make_dir)
+        shell.call(self.make_clean, self.make_dir, logfile=self.logfile)
 
     @modify_environment
     def check(self):
         if self.make_check:
-            shell.call(self.make_check, self.build_dir)
+            shell.call(self.make_check, self.build_dir, logfile=self.logfile)
 
 
 class Autotools (MakefilesBase):
@@ -370,7 +370,7 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-introspection "
 
         if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.config_src_dir)
+            shell.call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile)
 
         files = shell.check_call('find %s -type f -name config.guess' %
                                  self.config_src_dir).split('\n')
@@ -784,23 +784,23 @@ class Meson (Build, ModifyEnvBase) :
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))
 
-        shell.call(meson_cmd, self.meson_dir)
+        shell.call(meson_cmd, self.meson_dir, logfile=self.logfile)
 
     @modify_environment
     def compile(self):
-        shell.call(self.make, self.meson_dir)
+        shell.call(self.make, self.meson_dir, logfile=self.logfile)
 
     @modify_environment
     def install(self):
-        shell.call(self.make_install, self.meson_dir)
+        shell.call(self.make_install, self.meson_dir, logfile=self.logfile)
 
     @modify_environment
     def clean(self):
-        shell.call(self.make_clean, self.meson_dir)
+        shell.call(self.make_clean, self.meson_dir, logfile=self.logfile)
 
     @modify_environment
     def check(self):
-        shell.call(self.make_check, self.meson_dir)
+        shell.call(self.make_check, self.meson_dir, logfile=self.logfile)
 
 
 class BuildType (object):

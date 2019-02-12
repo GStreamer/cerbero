@@ -38,6 +38,10 @@ URL_TEMPLATES = {
     'xiph': ('https://downloads.xiph.org/releases/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
 }
 
+def get_logfile(instance):
+    # only Recipe has the logfile attr.  Bootstraping doesn't
+    return getattr(instance, 'logfile') if hasattr(instance, 'logfile') else None
+
 class Source (object):
     '''
     Base class for sources handlers
@@ -185,11 +189,11 @@ class BaseTarball(object):
         cc = self.config.platform == Platform.LINUX
         try:
             shell.download(self.url, self.download_path, check_cert=cc,
-                           overwrite=redownload)
+                           overwrite=redownload, logfile=get_logfile(self))
         except (FatalError, urllib.error.URLError):
             # Try our mirror
             shell.download(self.mirror_url, self.download_path, check_cert=cc,
-                           overwrite=redownload)
+                           overwrite=redownload, logfile=get_logfile(self))
         self.verify()
 
     @staticmethod
@@ -222,11 +226,11 @@ class BaseTarball(object):
 
     def extract(self, unpack_dir):
         try:
-            shell.unpack(self.download_path, unpack_dir)
+            shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
         except (IOError, EOFError, tarfile.ReadError):
             m.action(_('Corrupted or partial tarball, redownloading...'))
             self.fetch(redownload=True)
-            shell.unpack(self.download_path, unpack_dir)
+            shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
 
 
 class Tarball(BaseTarball, Source):
@@ -270,14 +274,14 @@ class Tarball(BaseTarball, Source):
             # Since we just extracted this, a Windows anti-virus might still
             # have a lock on files inside it.
             shell.windows_proof_rename(extracted, self.build_dir)
-        git.init_directory(self.build_dir)
+        git.init_directory(self.build_dir, logfile=get_logfile(self))
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
             if self.strip == 1:
-                git.apply_patch(patch, self.build_dir)
+                git.apply_patch(patch, self.build_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.build_dir, self.strip)
+                shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
 
 
 class GitCache (Source):
@@ -316,25 +320,25 @@ class GitCache (Source):
             if not cached_dir and offline:
                 msg = 'Offline mode: git repo for {!r} not found in cached sources ({}) or local sources ({})'
                 raise FatalError(msg.format(self.name, self.config.cached_sources, self.repo_dir))
-            git.init(self.repo_dir)
+            git.init(self.repo_dir, logfile=get_logfile(self))
 
         if os.path.isdir(os.path.join(cached_dir, ".git")):
             for remote, url in self.remotes.items():
-                git.add_remote(self.repo_dir, remote, "file://" + cached_dir)
-            git.fetch(self.repo_dir, fail=False)
+                git.add_remote(self.repo_dir, remote, "file://" + cached_dir, logfile=get_logfile(self))
+            git.fetch(self.repo_dir, fail=False, logfile=get_logfile(self))
         else:
             cached_dir = None
             # add remotes from both upstream and config so user can easily
             # cherry-pick patches between branches
             for remote, url in self.remotes.items():
-                git.add_remote(self.repo_dir, remote, url)
+                git.add_remote(self.repo_dir, remote, url, logfile=get_logfile(self))
             # fetch remote branches
             if not self.offline:
-                git.fetch(self.repo_dir, fail=False)
+                git.fetch(self.repo_dir, fail=False, logfile=get_logfile(self))
         if checkout:
             commit = self.config.recipe_commit(self.name) or self.commit
-            git.checkout(self.repo_dir, commit)
-            git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline)
+            git.checkout(self.repo_dir, commit, logfile=get_logfile(self))
+            git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
 
 
     def built_version(self):
@@ -362,7 +366,7 @@ class LocalTarball (GitCache):
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
         self._find_tarball()
-        shell.unpack(self.tarball_path, self.unpack_dir)
+        shell.unpack(self.tarball_path, self.unpack_dir, logfile=get_logfile(self))
         # apply common patches
         self._apply_patches(self.repo_dir)
         # apply platform patches
@@ -386,7 +390,7 @@ class LocalTarball (GitCache):
                    os.listdir(patches_dir) if x.endswith('.patch')]
         # apply patches
         for patch in patches:
-            shell.apply_patch(self.build_dir, patch)
+            shell.apply_patch(self.build_dir, patch, logfile=get_logfile(self))
 
 
 class Git (GitCache):
@@ -416,16 +420,16 @@ class Git (GitCache):
             os.mkdir(self.build_dir)
 
         # checkout the current version
-        git.local_checkout(self.build_dir, self.repo_dir, self.commit)
+        git.local_checkout(self.build_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
 
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
 
             if self.strip == 1:
-                git.apply_patch(patch, self.build_dir)
+                git.apply_patch(patch, self.build_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.build_dir, self.strip)
+                shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
 
         return True
 
@@ -520,7 +524,7 @@ class Svn(Source):
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
-            shell.apply_patch(patch, self.build_dir, self.strip)
+            shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
 
     def built_version(self):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))

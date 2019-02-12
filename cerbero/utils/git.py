@@ -28,40 +28,41 @@ from cerbero.errors import FatalError
 GIT = 'git'
 
 
-def ensure_user_is_set(git_dir):
+def ensure_user_is_set(git_dir, logfile=None):
     # Set the user configuration for this repository so that Cerbero never warns
     # about it or errors out (it errors out with git-for-windows)
     try:
-      shell.call('%s config user.email' % GIT)
+        shell.call('%s config user.email' % GIT, logfile=logfile)
     except FatalError:
-      shell.call('%s config user.email "cerbero@gstreamer.freedesktop.org"' %
-                 GIT, git_dir)
+        shell.call('%s config user.email "cerbero@gstreamer.freedesktop.org"' %
+                   GIT, git_dir, logfile=logfile)
 
     try:
-      shell.call('%s config user.name' % GIT)
+        shell.call('%s config user.name' % GIT, logfile=logfile)
     except FatalError:
-      shell.call('%s config user.name "Cerbero Build System"' % GIT, git_dir)
+        shell.call('%s config user.name "Cerbero Build System"' %
+                   GIT, git_dir, logfile=logfile)
 
-def init(git_dir):
+def init(git_dir, logfile=None):
     '''
     Initialize a git repository with 'git init'
 
     @param git_dir: path of the git repository
     @type git_dir: str
     '''
-    shell.call('mkdir -p %s' % git_dir)
-    shell.call('%s init' % GIT, git_dir)
-    ensure_user_is_set(git_dir)
+    os.makedirs(git_dir, exist_ok=True)
+    shell.call('%s init' % GIT, git_dir, logfile=logfile)
+    ensure_user_is_set(git_dir, logfile=logfile)
 
 
-def clean(git_dir):
+def clean(git_dir, logfile=None):
     '''
     Clean a git respository with clean -dfx
 
     @param git_dir: path of the git repository
     @type git_dir: str
     '''
-    return shell.call('%s clean -dfx' % GIT, git_dir)
+    return shell.call('%s clean -dfx' % GIT, git_dir, logfile=logfile)
 
 
 def list_tags(git_dir, fail=True):
@@ -82,7 +83,7 @@ def list_tags(git_dir, fail=True):
     return tags
 
 
-def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
+def create_tag(git_dir, tagname, tagdescription, commit, fail=True, logfile=None):
     '''
     Create a tag using commit
 
@@ -99,11 +100,13 @@ def create_tag(git_dir, tagname, tagdescription, commit, fail=True):
     '''
 
     shell.call('%s tag -s %s -m "%s" %s' %
-               (GIT, tagname, tagdescription, commit), git_dir, fail=fail)
-    return shell.call('%s push origin %s' % (GIT, tagname), git_dir, fail=fail)
+               (GIT, tagname, tagdescription, commit), git_dir,
+               fail=fail, logfile=logfile)
+    return shell.call('%s push origin %s' % (GIT, tagname), git_dir,
+                      fail=fail, logfile=logfile)
 
 
-def delete_tag(git_dir, tagname, fail=True):
+def delete_tag(git_dir, tagname, fail=True, logfile=None):
     '''
     Delete a tag
 
@@ -114,10 +117,10 @@ def delete_tag(git_dir, tagname, fail=True):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    return shell.call('%s tag -d %s' % (GIT, tagname), git_dir, fail=fail)
+    return shell.call('%s tag -d %s' % (GIT, tagname), git_dir, fail=fail, logfile=logfile)
 
 
-def fetch(git_dir, fail=True):
+def fetch(git_dir, fail=True, logfile=None):
     '''
     Fetch all refs from all the remotes
 
@@ -126,9 +129,9 @@ def fetch(git_dir, fail=True):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    return shell.call('%s fetch --all' % GIT, git_dir, fail=fail)
+    return shell.call('%s fetch --all' % GIT, git_dir, fail=fail, logfile=logfile)
 
-def submodules_update(git_dir, src_dir=None, fail=True, offline=False):
+def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
     '''
     Update somdules from local directory
 
@@ -150,21 +153,21 @@ def submodules_update(git_dir, src_dir=None, fail=True, offline=False):
                 submodule = c[0][len('submodule.'):-len('.path')]
                 shell.call("%s config --file=.gitmodules submodule.%s.url %s" %
                            (GIT, submodule, os.path.join(src_dir, c[1])),
-                           git_dir)
-    shell.call("%s submodule init" % GIT, git_dir)
+                           git_dir, logfile=logfile)
+    shell.call("%s submodule init" % GIT, git_dir, logfile=logfile)
     if src_dir or not offline:
-        shell.call("%s submodule sync" % GIT, git_dir)
-        shell.call("%s submodule update" % GIT, git_dir, fail=fail)
+        shell.call("%s submodule sync" % GIT, git_dir, logfile=logfile)
+        shell.call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile)
     else:
-        shell.call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail)
+        shell.call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile)
     if src_dir:
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.url'):
                 shell.call("%s config --file=.gitmodules %s  %s" %
-                           (GIT, c[0], c[1]), git_dir)
-        shell.call("%s submodule sync" % GIT, git_dir)
+                           (GIT, c[0], c[1]), git_dir, logfile=logfile)
+        shell.call("%s submodule sync" % GIT, git_dir, logfile=logfile)
 
-def checkout(git_dir, commit):
+def checkout(git_dir, commit, logfile=None):
     '''
     Reset a git repository to a given commit
 
@@ -173,7 +176,7 @@ def checkout(git_dir, commit):
     @param commit: the commit to checkout
     @type commit: str
     '''
-    return shell.call('%s reset --hard %s' % (GIT, commit), git_dir)
+    return shell.call('%s reset --hard %s' % (GIT, commit), git_dir, logfile=logfile)
 
 
 def get_hash(git_dir, commit):
@@ -195,7 +198,7 @@ def get_hash(git_dir, commit):
                             (GIT, commit), git_dir).rstrip()
 
 
-def local_checkout(git_dir, local_git_dir, commit):
+def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     '''
     Clone a repository for a given commit in a different location
 
@@ -209,16 +212,16 @@ def local_checkout(git_dir, local_git_dir, commit):
     # reset to a commit in case it's the first checkout and the masterbranch is
     # missing
     branch_name = 'cerbero_build'
-    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
-    shell.call('%s branch %s' % (GIT, branch_name), local_git_dir, fail=False)
-    shell.call('%s checkout %s' % (GIT, branch_name), local_git_dir)
-    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir)
+    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir, logfile=logfile)
+    shell.call('%s branch %s' % (GIT, branch_name), local_git_dir, fail=False, logfile=logfile)
+    shell.call('%s checkout %s' % (GIT, branch_name), local_git_dir, logfile=logfile)
+    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir, logfile=logfile)
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
-               git_dir)
-    ensure_user_is_set(local_git_dir)
-    submodules_update(git_dir, local_git_dir)
+               git_dir, logfile=logfile)
+    ensure_user_is_set(local_git_dir, logfile=logfile)
+    submodules_update(git_dir, local_git_dir, logfile=logfile)
 
-def add_remote(git_dir, name, url):
+def add_remote(git_dir, name, url, logfile=None):
     '''
     Add a remote to a git repository
 
@@ -230,9 +233,9 @@ def add_remote(git_dir, name, url):
     @type url: str
     '''
     try:
-        shell.call('%s remote add %s %s' % (GIT, name, url), git_dir)
+        shell.call('%s remote add %s %s' % (GIT, name, url), git_dir, logfile=logfile)
     except:
-        shell.call('%s remote set-url %s %s' % (GIT, name, url), git_dir)
+        shell.call('%s remote set-url %s %s' % (GIT, name, url), git_dir, logfile=logfile)
 
 
 def check_line_endings(platform):
@@ -253,7 +256,7 @@ def check_line_endings(platform):
     return False
 
 
-def init_directory(git_dir):
+def init_directory(git_dir, logfile=None):
     '''
     Initialize a git repository with the contents
     of a directory
@@ -261,16 +264,16 @@ def init_directory(git_dir):
     @param git_dir: path of the git repository
     @type git_dir: str
     '''
-    init(git_dir)
+    init(git_dir, logfile=logfile)
     try:
-        shell.call('%s add --force -A .' % GIT, git_dir)
+        shell.call('%s add --force -A .' % GIT, git_dir, logfile=logfile)
         shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT,
-            git_dir)
+            git_dir, logfile=logfile)
     except:
         pass
 
 
-def apply_patch(patch, git_dir):
+def apply_patch(patch, git_dir, logfile=None):
     '''
     Applies a commit patch usign 'git am'
     of a directory
@@ -280,4 +283,4 @@ def apply_patch(patch, git_dir):
     @param patch: path of the patch file
     @type patch: str
     '''
-    shell.call('%s am --ignore-whitespace %s' % (GIT, patch), git_dir)
+    shell.call('%s am --ignore-whitespace %s' % (GIT, patch), git_dir, logfile=logfile)
