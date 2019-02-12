@@ -249,8 +249,7 @@ def unpack(filepath, output_dir):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-def download_wget(url, destination=None, check_cert=True, overwrite=False,
-        tries=2, timeout=10.0):
+def download_wget(url, destination=None, check_cert=True, overwrite=False):
     '''
     Downloads a file with wget
 
@@ -267,27 +266,15 @@ def download_wget(url, destination=None, check_cert=True, overwrite=False,
     if not check_cert:
         cmd += " --no-check-certificate"
 
-    cmd += " --tries=%i" % tries
-    cmd += " --timeout=%f" % timeout
+    cmd += " --tries=2"
+    cmd += " --timeout=10.0"
 
-    if not overwrite and os.path.exists(destination):
-        if LOGFILE is None:
-            logging.info("File %s already downloaded." % destination)
-    else:
-        if not os.path.exists(os.path.dirname(destination)):
-            os.makedirs(os.path.dirname(destination))
-
-        if LOGFILE:
-            LOGFILE.write("Downloading %s\n" % url)
-        else:
-            logging.info("Downloading %s", url)
-        try:
-            call(cmd, path)
-        except FatalError as e:
-            if os.path.exists(destination):
-                os.remove(destination)
-            raise e
-
+    try:
+        call(cmd, path)
+    except FatalError as e:
+        if os.path.exists(destination):
+            os.remove(destination)
+        raise e
 
 def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
     '''
@@ -308,16 +295,6 @@ def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
     if not destination:
         destination = os.path.basename(url)
 
-    if not overwrite and os.path.exists(destination):
-        if LOGFILE is None:
-            logging.info("File %s already downloaded." % destination)
-        return
-    if not os.path.exists(os.path.dirname(destination)):
-        os.makedirs(os.path.dirname(destination))
-    if LOGFILE:
-        LOGFILE.write("Downloading %s\n" % url)
-    else:
-        logging.info("Downloading %s", url)
     try:
         logging.info(destination)
         with open(destination, 'wb') as d:
@@ -327,7 +304,6 @@ def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
         if os.path.exists(destination):
             os.remove(destination)
         raise e
-
 
 def download_curl(url, destination=None, check_cert=True, overwrite=False):
     '''
@@ -346,20 +322,41 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
         cmd += "%s -o %s " % (url, destination)
     else:
         cmd += "-O %s " % url
+    try:
+        call(cmd, path)
+    except FatalError as e:
+        if os.path.exists(destination):
+            os.remove(destination)
+        raise e
 
+def download(url, destination=None, check_cert=True, overwrite=False):
     if not overwrite and os.path.exists(destination):
-        logging.info("File %s already downloaded." % destination)
+        if LOGFILE is None:
+            logging.info("File %s already downloaded." % destination)
+        return
     else:
         if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
 
-        logging.info("Downloading %s", url)
-        try:
-            call(cmd, path)
-        except FatalError as e:
-            if os.path.exists(destination):
-                os.remove(destination)
-            raise e
+        if LOGFILE:
+            LOGFILE.write("Downloading %s\n" % url)
+        else:
+            logging.info("Downloading %s", url)
+
+    # wget shipped with msys fails with an SSL error on github URLs
+    # https://githubengineering.com/crypto-removal-notice/
+    # curl on Windows (if provided externally) is often badly-configured and fails
+    # to download over https, so just always use urllib2 on Windows.
+    if sys.platform.startswith('win'):
+        download_func = download_urllib2
+    elif which('wget'):
+        download_func = download_wget
+    elif which('curl'):
+        download_func = download_curl
+    else:
+        # Fallback. TODO: make this the default and remove curl/wget dependency
+        download_func = download_urllib2
+    return download_func(url, destination, check_cert, overwrite)
 
 
 def _splitter(string, base_url):

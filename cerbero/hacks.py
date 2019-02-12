@@ -127,24 +127,6 @@ def rmtree(path, ignore_errors=False, onerror=None):
 
 shutil.rmtree = rmtree
 
-### OS X Hacks ###
-
-# use cURL to download instead of wget
-
-import cerbero.utils.shell
-# wget shipped with msys fails with an SSL error on github URLs
-# https://githubengineering.com/crypto-removal-notice/
-# curl on Windows (if provided externally) is often badly-configured and fails
-# to download over https, so just always use urllib2 on Windows.
-if sys.platform.startswith('win'):
-    cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
-elif cerbero.utils.shell.which('wget'):
-    cerbero.utils.shell.download = cerbero.utils.shell.download_wget
-elif cerbero.utils.shell.which('curl'):
-    cerbero.utils.shell.download = cerbero.utils.shell.download_curl
-else:
-    # Fallback. TODO: make this the default and remove curl/wget dependency
-    cerbero.utils.shell.download = cerbero.utils.shell.download_urllib2
 
 ### Python ZipFile module bug ###
 # zipfile.ZipFile.extractall() does not preserve permissions
