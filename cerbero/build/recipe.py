@@ -725,6 +725,17 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
             for o in self._recipes.values():
                 setattr(o, name, value)
 
+    def _run_step(self, recipe, step, arch):
+        config = self._config.arch_config[arch]
+        config.do_setup_env()
+        # Call the step function
+        stepfunc = getattr(recipe, step)
+        try:
+            stepfunc(recipe)
+        except FatalError as e:
+            e.arch = arch
+            raise e
+
     def get_for_arch(self, arch, name):
         if arch:
             return getattr (self._recipes[arch], name)
@@ -751,25 +762,11 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            stepfunc = getattr(recipe, step)
-            try:
-                stepfunc()
-            except FatalError as e:
-                e.arch = arch
-                raise e
+            self._run_step(recipe, step, arch)
             return
 
         for arch, recipe in self._recipes.items():
-            config = self._config.arch_config[arch]
-            config.do_setup_env()
-            stepfunc = getattr(recipe, step)
-
-            # Call the step function
-            try:
-                stepfunc()
-            except FatalError as e:
-                e.arch = arch
-                raise e
+            self._run_step(recipe, step, arch)
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -818,9 +815,9 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
 
     def _do_step(self, step):
         if step in BuildSteps.FETCH:
+            arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            stepfunc = getattr(list(self._recipes.values())[0], step)
-            stepfunc()
+            self._run_step(recipe, step, arch)
             return
 
         # For the universal build we need to configure both architectures with
@@ -830,10 +827,6 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         archs_prefix = list(self._recipes.keys())
 
         for arch, recipe in self._recipes.items():
-            config = self._config.arch_config[arch]
-            config.do_setup_env()
-            stepfunc = getattr(recipe, step)
-
             # Create a stamp file to list installed files based on the
             # modification time of this file
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
@@ -848,11 +841,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 os.utime(tmp.name, (t, t))
 
             # Call the step function
-            try:
-                stepfunc()
-            except FatalError as e:
-                e.arch = arch
-                raise e
+            self._run_step(recipe, step, arch)
 
             # Move installed files to the architecture prefix
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
