@@ -413,20 +413,11 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options['applemedia'] = 'enabled'
 
-        if self.config.target_platform in [ Platform.ANDROID, Platform.IOS ]:
-            self.deps.remove('libdvdnav')
-            self.files_plugins_dvd.remove('lib/gstreamer-1.0/libgstresindvd%(mext)s')
-            self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstresindvd.a')
-            self.files_plugins_dvd_devel.remove('lib/gstreamer-1.0/libgstresindvd.la')
-            self.meson_options['resindvd'] = 'disabled'
+        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+            self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
-
-        if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE, DistroVersion.DEBIAN_WHEEZY]:
-            self.platform_files_plugins_capture[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb%(mext)s')
-            self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.a')
-            self.platform_files_plugins_capture_devel[Platform.LINUX].remove('lib/gstreamer-1.0/libgstdvb.la')
 
     def post_install(self):
         LibtoolLibrary('gstphotography-1.0', None, None, None, self.config.libdir,

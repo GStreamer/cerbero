@@ -52,6 +52,21 @@ class GStreamer(recipe.Recipe):
         else:
             self.meson_options[option] = 'disabled'
 
+    def disable_plugin(self, plugin, category, option=None, dep=None):
+        if option is None:
+            option = plugin
+        if dep is not None and dep in self.deps:
+            self.deps.remove(dep)
+        plugin = 'lib/gstreamer-1.0/libgst' + plugin
+        if hasattr(self, 'files_plugins_' + category):
+            f = getattr(self, 'files_plugins_' + category)
+            f.remove(plugin + '%(mext)s')
+        if hasattr(self, 'files_plugins_{}_devel'.format(category)):
+            d = getattr(self, 'files_plugins_{}_devel'.format(category))
+            d.remove(plugin + '.a')
+            d.remove(plugin + '.la')
+        self.meson_options[option] = 'disabled'
+
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
