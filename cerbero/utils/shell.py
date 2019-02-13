@@ -240,7 +240,7 @@ def unpack(filepath, output_dir):
         raise FatalError("Unknown tarball format %s" % filepath)
 
 def download_wget(url, destination=None, check_cert=True, overwrite=False,
-        tries=2, timeout=5.0):
+        tries=2, timeout=10.0):
     '''
     Downloads a file with wget
 
