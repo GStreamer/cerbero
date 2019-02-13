@@ -51,7 +51,8 @@ License = enums.License
 class Variants(object):
 
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
-                           'gi', 'unwind', 'rpi', 'visualstudio', 'qt5']
+                           'gi', 'unwind', 'rpi', 'visualstudio', 'qt5',
+                           'intelmsdk', 'nvcodec']
     __enabled_variants = ['debug', 'python', 'testspackage']
     __all_variants = __enabled_variants + __disabled_variants
 

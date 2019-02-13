@@ -400,6 +400,11 @@ class Recipe(custom.GStreamer):
         # explicitly opting in (f.ex., mingw gcc and android)
         self.meson_options['cpp_std'] = 'gnu++11'
 
+        # Enable hardware codecs if variants are enabled
+        self.enable_plugin('nvenc', 'codecs', 'nvcodec', option='nvenc')
+        self.enable_plugin('nvdec', 'codecs', 'nvcodec', option='nvdec')
+        self.enable_plugin('msdk', 'codecs', 'intelmsdk', option='msdk')
+
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
