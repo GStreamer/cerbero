@@ -1,0 +1,40 @@
+From 1ef89bfa98a50ce097fc12329921afd5f86ab1c9 Mon Sep 17 00:00:00 2001
+From: Nacho Garcia <nacho.garglez@gmail.com>
+Date: Wed, 13 Feb 2019 11:32:39 +0100
+Subject: [PATCH 2/2] Fix build in native Windows do to incorrect \r inserted
+
+Somewhere in the pnglibconf.h generation \r characters
+are being added. This happens with the new toolchain
+in native Windows build.
+---
+ Makefile.am | 1 +
+ Makefile.in | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/Makefile.am b/Makefile.am
+index 08db3e5..ce12b02 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -210,6 +210,7 @@ pnglibconf.h: pnglibconf.out scripts/prefix.out scripts/macro.lst
+ 	   END{print prev}' s=0 pnglibconf.out s=1 scripts/prefix.out\
+ 	   s=2 ${srcdir}/scripts/macro.lst >pnglibconf.tf8
+ 	mv pnglibconf.tf8 $@
++	sed -i -e "s/\r//g" $@
+ 
+ pngprefix.h: scripts/intprefix.out
+ 	rm -f pngprefix.tf1
+diff --git a/Makefile.in b/Makefile.in
+index 79d2b88..e304b2a 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -2268,6 +2268,7 @@ libpng.vers: scripts/vers.out
+ @DO_PNG_PREFIX_FALSE@pnglibconf.h: pnglibconf.out
+ @DO_PNG_PREFIX_FALSE@	rm -f $@
+ @DO_PNG_PREFIX_FALSE@	cp $? $@
++@DO_PNG_PREFIX_FALSE@	sed -i -e "s/\r//g" $@
+ 
+ @DO_PNG_PREFIX_FALSE@pngprefix.h: # is empty
+ @DO_PNG_PREFIX_FALSE@	:>$@
+-- 
+2.18.0.windows.1
+
