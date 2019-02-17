@@ -13,11 +13,12 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '1fec931eb5c94279ad219a5b6e0202358e94a93a90cfb1603578c326abfc1238'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
     btype = BuildType.MAKEFILE
-    configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s "\
+    configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s " \
                     "--libdir=%(libdir)s %(options)s"
-    configure_options = "--enable-pic --as=yasm --disable-unit-tests --size-limit=16384x16384 "\
-                        "--enable-postproc --enable-multi-res-encoding --enable-temporal-denoising "\
-                        "--enable-vp9-temporal-denoising --enable-vp9-postproc "
+    configure_options = "--enable-pic --as=yasm --disable-unit-tests --size-limit=16384x16384 " \
+                        "--enable-postproc --enable-multi-res-encoding --enable-temporal-denoising " \
+                        "--enable-vp9-temporal-denoising --enable-vp9-postproc --disable-tools " \
+                        "--disable-examples --disable-docs "
     add_host_build_target = False
     supports_cache_variables = False
     can_use_configure_cache = False
@@ -37,7 +38,6 @@ class Recipe(recipe.Recipe):
                ]
 
     files_libs = ['libvpx']
-    files_bins = ['vpxenc', 'vpxdec']
     files_devel = ['include/vpx', 'lib/pkgconfig/vpx.pc']
 
     # libvpx does not have check target
@@ -81,7 +81,9 @@ class Recipe(recipe.Recipe):
                 if not self.using_msvc():
                     self.append_env('CFLAGS', '-mstackrealign')
             if self.using_msvc():
-                compiler = self.config.msvc_version
+                # This sets PlatformToolset, which is the SDK to use. We always
+                # use the Windows 10 SDK when building with MSVC.
+                compiler = 'vs15'
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
@@ -131,8 +133,7 @@ class Recipe(recipe.Recipe):
 
     def install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            for f in ['vpxenc', 'vpxdec', 'libvpx.a']:
-                shell.touch(os.path.join(self.build_dir, f))
+            shell.touch(os.path.join(self.build_dir, 'libvpx.a'))
         super().install()
 
     def post_install(self):
