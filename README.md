@@ -134,15 +134,35 @@ MinGW 64-bit System Prefix | `win64.cbc`
 
 Currently no cross targets are supported on Windows.
 
-# Enabling Qt5 support
+
+# Enabling Optional Features with Variants
+
+Cerbero controls optional and platform-specific features with `variants`. You
+can see a full list of available variants by running:
+
+```sh
+$ ./cerbero-uninstalled --list-variants
+```
+
+Some variants are enabled by default while others are not. You can enable
+a particular variant by doing one of the following:
+
+* Either invoke `cerbero-uninstalled` with the `-v` argument, for example:
+
+```sh
+$ cerbero-uninstalled -v variantname [-c ...] package gstreamer-1.0
+```
+
+* Or, edit `~/.cerbero/cerbero.cbc` and add `variants = ['variantname']` at the
+  bottom. Create the file if it doesn't exist.
+
+To explicitly disable a variant, use `novariantname` instead.
+
+## Enabling Qt5 Support
 
 Starting with version 1.15.2, Cerbero has built-in support for building the Qt5
-QML GStreamer plugin. You can toggle that on by enabling the `qt5` variant:
-
-* Invoke `cerbero-uninstalled` as `cerbero-uninstalled -v qt5`, or
-
-* Edit `~/.cerbero/cerbero.cbc` and add `variants = ['qt5']` at the bottom.
-  Create the file if it doesn't exist.
+QML GStreamer plugin. You can toggle that on by
+[enabling the `qt5` variant](#enabling-optional-features-with-variants).
 
 You must also tell Cerbero where your Qt5 installation prefix is. You can do it
 in one of two ways:
@@ -168,6 +188,42 @@ added to the package outputted.
 
 **NOTE:** The package outputted will not contain a copy of the Qt5 libraries in
 it. You must link to them while building your app yourself.
+
+## Enabling Hardware Codec Support
+
+Starting with version 1.15.2, Cerbero has built-in support for building and
+packaging hardware codecs for Intel and Nvidia. If the appropriate variant is
+enabled, the plugin will either be built or Cerbero will error out if that's
+not possible.
+
+### Intel Hardware Codecs
+
+For Intel, the [variant to enable](#enabling-optional-features-with-variants)
+is `intelmsdk` which will build the `msdk` plugin.
+
+You must set the `INTELMEDIASDKROOT` env var to point to your [Intel Media
+SDK](https://software.intel.com/en-us/media-sdk) prefix, or you must have the
+SDK's pkgconfig prefix in `PKG_CONFIG_PATH`
+
+On Windows, `INTELMEDIASDKROOT` automatically set by the installer. On Linux,
+if you need to set this, you must set it to point to the directory that
+contains the mediasdk `include` and `lib64` dirs.
+
+### Nvidia Hardware Codecs
+
+For Nvidia, the [variant to enable](#enabling-optional-features-with-variants)
+is `nvcodec` which will build the `nvenc` and `nvdec` plugins.
+
+If CUDA is not installed into the system prefix, You need to set `CUDA_PATH` to
+point to your [CUDA SDK](https://developer.nvidia.com/cuda-downloads) prefix.
+On Windows, this is done automatically by the installer.
+
+On Windows, with CUDA v10 and newer, you must also set
+`NVIDIA_VIDEO_CODEC_SDK_PATH` to point to your [Video Codec
+SDK](https://developer.nvidia.com/nvidia-video-codec-sdk) prefix. There is no
+installer for this, so you must extract the SDK zip and set the env var to point
+to the path to the extracted folder.
+
 
 # Installing Minimum Requirements on Windows
 
