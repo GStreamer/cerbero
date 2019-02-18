@@ -53,20 +53,20 @@ class Variants(object):
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio', 'qt5']
     __enabled_variants = ['debug', 'python', 'testspackage']
+    __all_variants = __enabled_variants + __disabled_variants
 
     def __init__(self, variants):
         for v in self.__enabled_variants:
             setattr(self, v, True)
         for v in self.__disabled_variants:
             setattr(self, v, False)
-        allv = self.__enabled_variants + self.__disabled_variants
         for v in variants:
             if v.startswith('no'):
-                if v[2:] not in allv:
+                if v[2:] not in self.__all_variants:
                     m.warning('Variant {} is unknown or obsolete'.format(v[2:]))
                 setattr(self, v[2:], False)
             else:
-                if v not in allv:
+                if v not in self.__all_variants:
                     m.warning('Variant {} is unknown or obsolete'.format(v))
                 setattr(self, v, True)
 
@@ -81,6 +81,9 @@ class Variants(object):
 
     def __repr__(self):
         return '<Variants: {}>'.format(self.__dict__)
+
+    def all(self):
+        return sorted(self.__all_variants)
 
 
 class Config (object):

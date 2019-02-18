@@ -55,6 +55,7 @@ class Main(object):
         self.self_update()
         self.init_logging()
         self.load_config()
+        self.list_variants()
         self.run_command()
 
     def check_in_cerbero_shell(self):
@@ -83,10 +84,12 @@ class Main(object):
         self.parser = argparse.ArgumentParser(description=_(description))
         self.parser.add_argument('-t', '--timestamps', action='store_true', default=False,
                 help=_('Print timestamps with every message printed'))
+        self.parser.add_argument('--list-variants', action='store_true', default=False,
+                help=_('List available variants'))
         self.parser.add_argument('-v', '--variants', action='store', default=None,
                 # Convert comma-separated string to list
                 type=lambda s: [v for v in s.split(',')],
-                help=_('Configuration file used for the build'))
+                help=_('Variants to be used for the build'))
         self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))
         self.parser.add_argument('-m', '--manifest', action='store', type=str, default=None,
@@ -101,6 +104,12 @@ class Main(object):
         if len(args) == 0:
             args = ["-h"]
         self.args = self.parser.parse_args(args)
+
+    def list_variants(self):
+        if not self.args.list_variants:
+            return
+        print('Available variants are: ' + ', '.join(self.config.variants.all()))
+        sys.exit(0)
 
     def self_update(self):
         '''Update this instance of cerbero git repository'''
@@ -119,7 +128,7 @@ class Main(object):
         except FatalError as ex:
             self.log_error(_("ERROR: Failed to proceed with self update %s") %
                     ex)
-        exit(0)
+        sys.exit(0)
 
     def load_commands(self):
         subparsers = self.parser.add_subparsers(help=_('sub-command help'),
