@@ -222,6 +222,12 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
+        if self.using_msvc():
+            # plugin is C++, library is Autotools
+            self.disable_plugin('taglib', 'codecs')
+            # gdk-pixbuf and all deps must be ported to MSVC first to fix CRT interop issues
+            self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
+
         if self.config.target_platform == Platform.LINUX:
             self.use_system_libs = True
 

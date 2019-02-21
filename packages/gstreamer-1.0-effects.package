@@ -10,8 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = '4be3f88b-b552-4cd7-aecd-cf935fe270f7'
     deps = ['gstreamer-1.0-core']
 
-    files = ['ladspa:libs', 'soundtouch:libs',
-             'webrtc-audio-processing:libs',
+    files = ['ladspa:libs',
              'gst-plugins-base-1.0:plugins_effects',
              'gst-plugins-good-1.0:plugins_effects',
              'gst-plugins-ugly-1.0:plugins_effects',
@@ -21,3 +20,7 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-good-1.0:plugins_effects_devel',
             'gst-plugins-ugly-1.0:plugins_effects_devel',
             'gst-plugins-bad-1.0:plugins_effects_devel']
+
+    def prepare(self):
+        if not self.config.variants.visualstudio:
+            self.files += ['soundtouch:libs', 'webrtc-audio-processing:libs']

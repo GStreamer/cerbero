@@ -10,12 +10,11 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'fae6046d-5a39-4d54-93ee-3770d2f316f5'
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
-             'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
+             'libffi:libs', 'freetype:libs',
              'glib:libs:lang:bins:schemas', 'orc:libs', 'pango:libs:modules',
-             'libpng:libs', 'tiff:libs', 'libjpeg-turbo:libs',
+             'libpng:libs', 'libjpeg-turbo:libs',
              'libxml2:libs', 'pixman:libs', 'fribidi:libs',
              'zlib:libs', 'bzip2:libs', 'harfbuzz:libs',
-             'libcroco:libs', 'librsvg:libs',
              'json-glib:bins:libs']
 
     platform_files = {
@@ -29,3 +28,6 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         if self.config.variants.gi:
             self.files.append('gobject-introspection:libs:typelibs')
+        if not self.config.variants.visualstudio:
+            # gdk-pixbuf and librsvg plugins
+            self.files += ['tiff:libs', 'gdk-pixbuf:bins:libs:modules:lang', 'libcroco:libs', 'librsvg:libs']

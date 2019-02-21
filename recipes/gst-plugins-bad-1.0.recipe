@@ -398,7 +398,16 @@ class Recipe(custom.GStreamer):
     def prepare(self):
         # webrtc-audio-processing headers require C++11, older GCCs require
         # explicitly opting in (f.ex., mingw gcc and android)
-        self.meson_options['cpp_std'] = 'gnu++11'
+        self.meson_options['cpp_std'] = 'c++11'
+        if self.using_msvc():
+            # plugin is C++, library is Autotools
+            self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
+            # Plugin is C++ and hence webrtc-audio-processing must also be
+            # built with MSVC, it uses Meson but it doesn't build:
+            # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
+            self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
+            # librsvg pulls in gdk-pixbuf, which must be built with MSVC
+            self.disable_plugin('rsvg', 'codecs', dep='librsvg')
 
         # Enable hardware codecs if variants are enabled
         self.enable_plugin('nvenc', 'codecs', 'nvcodec', option='nvenc')
