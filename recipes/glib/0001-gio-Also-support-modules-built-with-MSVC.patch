@@ -1,0 +1,28 @@
+From fb668198e4d165ea46503de9b9cc84e2bceace58 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 20 Feb 2019 20:48:33 +0530
+Subject: [PATCH] gio: Also support modules built with MSVC
+
+GIO modules built with MSVC do not begin with 'lib', but they can
+begin with 'gio'. Without this, you can only load GIO modules built
+with MSVC that are `name.dll`, not `gioname.dll`.
+---
+ gio/giomodule-priv.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gio/giomodule-priv.c b/gio/giomodule-priv.c
+index 41afa54..350c780 100644
+--- a/gio/giomodule-priv.c
++++ b/gio/giomodule-priv.c
+@@ -51,7 +51,7 @@ _g_io_module_extract_name (const char *filename)
+ 
+   if (g_str_has_prefix (bname, "libgio"))
+     prefix_len = 6;
+-  else if (g_str_has_prefix (bname, "lib"))
++  else if (g_str_has_prefix (bname, "lib") || g_str_has_prefix (bname, "gio"))
+     prefix_len = 3;
+   else
+     prefix_len = 0; /* use whole name (minus suffix) as plugin name */
+-- 
+2.20.1.windows.1
+

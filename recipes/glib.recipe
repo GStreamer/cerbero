@@ -53,6 +53,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-meson-Add-macOS-libtool-versioning-to-maintain-ABI-c.patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/273
                'glib/0001-gtlsbackend-add-support-for-setting-the-default-TLS-.patch',
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/686
+               'glib/0001-gio-Also-support-modules-built-with-MSVC.patch',
               ]
 
     files_libs = [
