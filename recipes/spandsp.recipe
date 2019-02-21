@@ -14,7 +14,8 @@ class Recipe(recipe.Recipe):
     patches = [ 'spandsp/0001-spandsp-do-not-compile-has_X86FEATURE-symbols.patch',
                 'spandsp/0002-Define-LIBSPANDSP_EXPORTS-when-building-the-spandsp-.patch',
                 'spandsp/0003-Use-BUILT_SOURCES-to-generate-extra-headers.patch',
-                'spandsp/0001-Don-t-do-a-whereis-which-dance-to-find-which.patch']
+                'spandsp/0001-Don-t-do-a-whereis-which-dance-to-find-which.patch',
+                'spandsp/0001-Make-the-public-API-accessible-from-MSVC.patch',]
 
     files_libs = ['libspandsp']
     files_devel = ['include/spandsp', 'include/spandsp.h', 'lib/pkgconfig/spandsp.pc']
