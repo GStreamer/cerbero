@@ -19,7 +19,7 @@ class Package(custom.GStreamer, package.Package):
              'json-glib:bins:libs']
 
     platform_files = {
-        Platform.WINDOWS: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'mingw-runtime'],
+        Platform.WINDOWS: ['proxy-libintl:libs:lang', 'mingw-runtime'],
         Platform.DARWIN: ['proxy-libintl:libs:lang'],
         Platform.LINUX: [],
         Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'gnustl'],
