@@ -22,7 +22,9 @@ class Recipe(recipe.Recipe):
                # since we can no longer set the certificate path in glib-networking
                name + '/0003-Use-the-GnuTLS-system-trust-by-default.patch',
                name + '/0004-meson-Only-run-gio-querymodules-if-it-s-found.patch',
-               name + '/0001-Don-t-use-the-GCC-ternary-syntax-extension.patch']
+               name + '/0001-Don-t-use-the-GCC-ternary-syntax-extension.patch',
+               # https://gitlab.gnome.org/GNOME/glib-networking/merge_requests/22
+               name + '/0001-tls-modules-Export-load-unload-query-symbols-on-MSVC.patch']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
