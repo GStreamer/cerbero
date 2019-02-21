@@ -22,6 +22,7 @@ class Recipe(recipe.Recipe):
                'srt/0005-Windows-Only-define-SRT_API-in-one-place.patch',
                'srt/0001-Allow-building-using-gnustl.patch',
                'srt/0006-Fix-install_name-in-macOS-using-MACOS_RPATH.patch',
+               'srt/0001-Allow-using-public-API-when-building-with-MSVC.patch',
                ]
 
     def prepare(self):
