@@ -1,0 +1,40 @@
+From 763f245797b03dca0fa0c2bd9e0806a3f62e5b1f Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 22 Feb 2019 02:31:47 +0530
+Subject: [PATCH] Allow consuming the public API using MSVC
+
+---
+ libvisual/lv_thread.h | 2 +-
+ libvisual/lv_time.h   | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/libvisual/lv_thread.h b/libvisual/lv_thread.h
+index da93ab1..f9adc40 100644
+--- a/libvisual/lv_thread.h
++++ b/libvisual/lv_thread.h
+@@ -63,7 +63,7 @@ struct _VisMutex {
+ #ifdef VISUAL_THREAD_MODEL_POSIX
+ 	pthread_mutex_t mutex;		/**< Private used for the pthreads implementation. */
+ #elif defined(VISUAL_THREAD_MODEL_WIN32) /* !VISUAL_THREAD_MODEL_POSIX */
+-
++	int unused;			/* MSVC does not allow empty structs */
+ #elif defined(VISUAL_THREAD_MODEL_GTHREAD) /* !VISUAL_THREAD_MODEL_WIN32 */
+ 	GMutex *mutex;
+ 
+diff --git a/libvisual/lv_time.h b/libvisual/lv_time.h
+index 885448a..028c64d 100644
+--- a/libvisual/lv_time.h
++++ b/libvisual/lv_time.h
+@@ -24,7 +24,9 @@
+ #ifndef _LV_TIME_H
+ #define _LV_TIME_H
+ 
++#ifndef _MSC_VER
+ #include <sys/time.h>
++#endif
+ #include <time.h>
+ 
+ #include <libvisual/lv_common.h>
+-- 
+2.20.1.windows.1
+

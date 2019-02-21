@@ -23,7 +23,8 @@ class Recipe(recipe.Recipe):
                'libvisual/0013-Include-lv_cpu.h-for-visual_cpu_initialize.patch',
                'libvisual/0014-Add-forward-declaration-of-visual_transform_init-as-.patch',
                'libvisual/0015-Include-lv_cpu.h-in-another-place-too.patch',
-               'libvisual/0016-configure.ac-Use-gettext-0.19.patch']
+               'libvisual/0016-configure.ac-Use-gettext-0.19.patch',
+               'libvisual/0001-Allow-consuming-the-public-API-using-MSVC.patch',]
 
     files_libs = ['libvisual-0.4']
     files_devel = ['include/libvisual-0.4', 'lib/pkgconfig/libvisual-0.4.pc']
