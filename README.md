@@ -224,6 +224,28 @@ SDK](https://developer.nvidia.com/nvidia-video-codec-sdk) prefix. There is no
 installer for this, so you must extract the SDK zip and set the env var to point
 to the path to the extracted folder.
 
+## Enabling Visual Studio Support
+
+Starting with version 1.15.2, Cerbero supports building all GStreamer recipes,
+all mandatory dependencies (such as glib, libffi, zlib, etc), and some external
+dependencies with Visual Studio. You must explicitly opt-in to this by [enabling
+the `visualstudio` variant](#enabling-optional-features-with-variants):
+
+```sh
+$ python ./cerbero-uninstalled -v visualstudio package gstreamer-1.0
+```
+
+If you already have a Cerbero build, it is highly recommended to run the `wipe`
+command before switching to building with Visual Studio.
+
+[Some plugins that require external dependencies will be automatically
+disabled](https://gitlab.freedesktop.org/gstreamer/cerbero/issues/121) when
+running in this mode.
+
+Currently, most recipes that use Meson (`btype = BuildType.MESON`) and those
+that have the `can_msvc` recipe property set to `True` are built with Visual
+Studio.
+
 
 # Installing Minimum Requirements on Windows
 
@@ -300,6 +322,9 @@ environment. Things may work or they may break, and you get to keep the pieces.
 
 This is needed for correctly generating import libraries for recipes built with
 MinGW. Both the Community build and the Professional build are supported.
+
+**NOTE**: You must install the latest Windows 10 SDK when installing Visual
+Studio. You do not need any older Windows SDKs.
 
 You can find all versions of Visual Studio at:
 https://visualstudio.microsoft.com/vs/older-downloads/
