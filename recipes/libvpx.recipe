@@ -81,9 +81,7 @@ class Recipe(recipe.Recipe):
                 if not self.using_msvc():
                     self.append_env('CFLAGS', '-mstackrealign')
             if self.using_msvc():
-                # This sets PlatformToolset, which is the SDK to use. We always
-                # use the Windows 10 SDK when building with MSVC.
-                compiler = 'vs15'
+                compiler = self.config.msvc_version
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
