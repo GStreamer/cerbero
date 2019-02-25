@@ -117,8 +117,12 @@ class MergeModulePackager(PackagerBase):
         return path
 
     def _package_name(self, version):
-        return "%s-%s-%s" % (self.package.name, version,
-                             self.config.target_arch)
+        if self.config.variants.visualstudio:
+            platform = 'msvc'
+        else:
+            platform = 'mingw'
+        return "%s-%s-%s-%s" % (self.package.name, platform,
+                self.config.target_arch, version)
 
 
 class MSIPackager(PackagerBase):
@@ -166,8 +170,12 @@ class MSIPackager(PackagerBase):
         return paths
 
     def _package_name(self):
-        return "%s-%s-%s" % (self.package.name, self.config.target_arch,
-                             self.package.version)
+        if self.config.variants.visualstudio:
+            platform = 'msvc'
+        else:
+            platform = 'mingw'
+        return "%s-%s-%s-%s" % (self.package.name, platform,
+                self.config.target_arch, self.package.version)
 
     def _create_msi_installer(self, package_type):
         self.package.set_mode(package_type)

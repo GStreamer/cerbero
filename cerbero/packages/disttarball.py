@@ -21,6 +21,7 @@ import tarfile
 
 import cerbero.utils.messages as m
 from cerbero.utils import _
+from cerbero.enums import Platform
 from cerbero.errors import UsageError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 
@@ -72,9 +73,15 @@ class DistTarball(PackagerBase):
         return filenames
 
     def _get_name(self, package_type, ext='tar.bz2'):
-        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name,
-                self.config.target_platform, self.config.target_arch,
-                self.package.version, package_type, ext)
+        if self.config.target_platform != Platform.WINDOWS:
+            platform = self.config.target_platform
+        elif self.config.variants.visualstudio:
+            platform = 'msvc'
+        else:
+            platform = 'mingw'
+
+        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name, platform,
+                self.config.target_arch, self.package.version, package_type, ext)
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):
