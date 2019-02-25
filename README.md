@@ -323,8 +323,10 @@ environment. Things may work or they may break, and you get to keep the pieces.
 This is needed for correctly generating import libraries for recipes built with
 MinGW. Both the Community build and the Professional build are supported.
 
-**NOTE**: You must install the latest Windows 10 SDK when installing Visual
-Studio. You do not need any older Windows SDKs.
+You must install the latest Windows 10 SDK when installing Visual Studio as
+shown below. You do not need any older Windows SDKs.
+
+![Select the Desktop development with C++ workload](/data/images/vs2017-installer-workloads.png)
 
 You can find all versions of Visual Studio at:
 https://visualstudio.microsoft.com/vs/older-downloads/
