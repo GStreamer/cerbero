@@ -28,6 +28,7 @@ from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
     shell, parse_file, detect_qt5
 from cerbero.utils import messages as m
+from cerbero.ide.vs.env import get_vs_version
 
 
 CONFIG_DIR = os.path.expanduser('~/.cerbero')
@@ -215,6 +216,10 @@ class Config (object):
             c.variants = self.variants
 
         self.do_setup_env()
+
+        if self.variants.visualstudio and self.msvc_version is not None:
+            m.message('Building recipes with Visual Studio {} whenever possible'
+                      .format(get_vs_version(self.msvc_version)))
 
         # Store current os.environ data
         for c in list(self.arch_config.values()):

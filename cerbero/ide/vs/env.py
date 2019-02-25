@@ -20,7 +20,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from cerbero.config import Architecture
+from cerbero.enums import Architecture
 from cerbero.errors import FatalError
 
 # We only support Visual Studio 2015 as of now
@@ -39,6 +39,13 @@ def get_program_files_dir():
         # Windows 32-bit
         return Path(os.environ['PROGRAMFILES'])
     raise FatalError('Could not find path to 32-bit Program Files directory')
+
+def get_vs_version(vcver):
+    if vcver == 'vs14':
+        return '2015'
+    if vcver == 'vs15':
+        return '2017'
+    raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
 def get_vcvarsall(version=None):
     if version is not None:
