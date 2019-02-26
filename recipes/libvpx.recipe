@@ -34,7 +34,8 @@ class Recipe(recipe.Recipe):
                # Taken from AOSP: https://android.googlesource.com/platform/external/libvpx/+/android-o-mr1-iot-release-1.0.3/
                'libvpx/0005-Add-visibility-protected-attribute-for-global-variab.patch',
                'libvpx/0006-Fix-pkg-config-file-library-list.patch',
-               'libvpx/0007-Always-generate-a-pkg-config-file-and-don-t-require-.patch'
+               'libvpx/0007-Always-generate-a-pkg-config-file-and-don-t-require-.patch',
+               'libvpx/0001-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
                ]
 
     files_libs = ['libvpx']
