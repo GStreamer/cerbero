@@ -556,7 +556,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                 m.warning("BUG: Found multiple DLLs for libname {!r}:\n{}".format(libname, '\n'.join(dllpaths)))
                 continue
             if len(dllpaths) == 0:
-                m.warning("Could not create import library for {!r}, no matching DLLs found".format(libname))
+                # libvpx only outputs a static library on Windows
+                if self.name != 'libvpx' or self.config.target_platform != Platform.WINDOWS:
+                    m.warning("Could not create import library for {!r}, no matching DLLs found".format(libname))
                 continue
             try:
                 implib = genlib.create(libname,
