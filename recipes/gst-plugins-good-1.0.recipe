@@ -3,7 +3,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-good-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '2b9fb4c5514981e4f75aa1af20a34bac72a447885763d03da3d23c7e329dc695'
+    tarball_checksum = 'b805962a2d777ff6145f6ca2ca8458499c9e23236cbcc41787c69ac51b02c818'
     meson_options = {# enabled plugins
                      'cairo': 'enabled',
                      'dv': 'enabled',

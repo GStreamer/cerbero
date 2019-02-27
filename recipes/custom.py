@@ -12,8 +12,8 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.15.1.1'
-    tagged_for_release = False
+    version = '1.15.2'
+    tagged_for_release = True
 
     if not tagged_for_release:
         # Pre-release version, use git master
