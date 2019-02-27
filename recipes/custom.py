@@ -18,7 +18,7 @@ class GStreamer(recipe.Recipe):
     if not tagged_for_release:
         # Pre-release version, use git master
         stype = SourceType.GIT
-        remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s'}
+        remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
         if int(version.split('.')[1]) % 2 == 0:
             # Even version, use the specific branch
             commit = 'origin/' + '.'.join(version.split('.')[0:2])
