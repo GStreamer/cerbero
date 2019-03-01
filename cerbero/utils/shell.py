@@ -102,6 +102,13 @@ class StdOut:
     def __getattr__(self, attr):
         return getattr(self.stream, attr)
 
+def console_is_interactive():
+    if not os.isatty(sys.stdout.fileno()):
+        return False
+    if os.environ.get('TERM') == 'dumb':
+        return False
+    return True
+
 
 def _fix_mingw_cmd(path):
     reserved = ['/', ' ', '\\', ')', '(', '"']
