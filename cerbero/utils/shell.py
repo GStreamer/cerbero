@@ -162,6 +162,9 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False):
                 env = CALL_ENV.copy()
             else:
                 env = os.environ.copy()
+            # Force python scripts to print their output on newlines instead
+            # of on exit. Ensures that we get continuous output in log files.
+            env['PYTHONUNBUFFERED'] = '1'
             ret = subprocess.check_call(cmd, cwd=cmd_dir,
                                        stderr=subprocess.STDOUT,
                                        stdout=StdOut(stream),
