@@ -134,7 +134,7 @@ setup(
     license = "LGPL",
     url = "http://gstreamer.freedesktop.org/",
     packages = find_packages(exclude=['tests']),
-    long_description=read('README'),
+    long_description=read('README.md'),
     zip_safe = False,
     include_package_data=True,
     data_files = datafiles(prefix),
