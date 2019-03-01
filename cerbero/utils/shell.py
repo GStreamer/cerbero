@@ -538,3 +538,22 @@ def check_perl_version(needed):
     found = m.group()[1:]
     newer = StrictVersion(found) >= StrictVersion(needed)
     return perl, found, newer
+
+def windows_proof_rename(from_name, to_name):
+    '''
+    On Windows, if you try to rename a file or a directory that you've newly
+    created, an anti-virus may be holding a lock on it, and renaming it will
+    yield a PermissionError. In this case, the only thing we can do is try and
+    try again.
+    '''
+    delays = [0.1, 0.1, 0.2, 0.2, 0.2, 0.5, 0.5, 1, 1, 1, 1, 2]
+    if PLATFORM == Platform.WINDOWS:
+        for d in delays:
+            try:
+                os.rename(from_name, to_name)
+                return
+            except PermissionError:
+                time.sleep(d)
+                continue
+    # Try one last time and throw an error if it fails again
+    os.rename(from_name, to_name)

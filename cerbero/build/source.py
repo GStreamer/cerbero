@@ -266,8 +266,10 @@ class Tarball(BaseTarball, Source):
             shutil.rmtree(self.build_dir)
         super().extract(self.config.sources)
         if self.tarball_dirname is not None:
-            os.rename(os.path.join(self.config.sources, self.tarball_dirname),
-                      self.build_dir)
+            extracted = os.path.join(self.config.sources, self.tarball_dirname)
+            # Since we just extracted this, a Windows anti-virus might still
+            # have a lock on files inside it.
+            shell.windows_proof_rename(extracted, self.build_dir)
         git.init_directory(self.build_dir)
         for patch in self.patches:
             if not os.path.isabs(patch):
