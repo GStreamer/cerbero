@@ -1,0 +1,27 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(custom.GStreamer):
+    name = 'gstreamer-vaapi-1.0'
+    btype = BuildType.MESON
+    meson_options = {# auto enable plugins
+                     'with_encoders': 'auto',
+                     'with_drm': 'auto',
+                     'with_wayland': 'auto'}
+
+    deps = ['gst-plugins-bad-1.0']
+    use_system_libs = True
+
+    files_plugins_codecs = [
+             'lib/gstreamer-1.0/libgstvaapi%(mext)s',
+    ]
+
+    files_plugins_codecs_devel = [
+             'lib/gstreamer-1.0/libgstvaapi.a',
+    ]
+
+    def prepare(self):
+        if self.config.variants.x11:
+            self.meson_options['with_x11'] = 'yes'
+        else:
+            self.meson_options['with_x11'] = 'auto'
