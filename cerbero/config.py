@@ -111,7 +111,8 @@ class Config (object):
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties',
-                   'qt5_qmake_path', 'qt5_pkgconfigdir']
+                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
+                   'msvc_export_for_shell']
 
     cookbook = None
 
@@ -139,6 +140,9 @@ class Config (object):
 
         # First load the default configuration
         self.load_defaults()
+
+        # Ensure that config files know about these variants
+        self.variants += variants_override
 
         # Next parse the main configuration file
         self._load_main_config()
@@ -205,8 +209,10 @@ class Config (object):
             config._validate_properties()
             config._raw_environ = os.environ.copy()
 
+        # Ensure that variants continue to override all other configuration
+        self.variants += variants_override
         # Build variants before copying any config
-        self.variants = Variants(self.variants + variants_override)
+        self.variants = Variants(self.variants)
         if not self.prefix_is_executable() and self.variants.gi:
             m.warning(_("gobject introspection requires an executable "
                         "prefix, 'gi' variant will be removed"))

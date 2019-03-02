@@ -139,6 +139,8 @@ class Main(object):
         ''' Load the configuration '''
         try:
             self.config = config.Config()
+            if self.args.command == 'shell':
+                self.config.for_shell = True
             self.config.load(self.args.config, self.args.variants)
             if self.args.manifest:
                 self.config.manifest = self.args.manifest
