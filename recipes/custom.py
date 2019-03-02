@@ -14,8 +14,11 @@ class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.15.2.1'
     tagged_for_release = False
+    # We want to force the source type to be git when using a manifest else
+    # we won't actually test the commit(s) specified in the manifest
+    using_manifest_force_git = False
 
-    if not tagged_for_release:
+    if not tagged_for_release or using_manifest_force_git:
         # Pre-release version, use git master
         stype = SourceType.GIT
         remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
