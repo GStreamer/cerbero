@@ -19,6 +19,7 @@
 import os
 import subprocess
 from pathlib import Path
+from functools import lru_cache
 
 from cerbero.enums import Architecture
 from cerbero.errors import FatalError
@@ -106,6 +107,7 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
     index = msvc.index(nomsvc)
     return msvc[0:index]
 
+@lru_cache()
 def get_msvc_env(arch, target_arch, version=None):
     ret_env = {}
     vcvarsall, vsver = get_vcvarsall(version)

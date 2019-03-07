@@ -21,6 +21,7 @@ import sys
 import copy
 import sysconfig
 import itertools
+from functools import lru_cache
 from pathlib import PurePath, Path
 
 from cerbero import enums
@@ -613,6 +614,7 @@ class Config (object):
             cache_dir = Path.home() / '.cache'
         return (cache_dir / 'cerbero-sources').as_posix()
 
+    @lru_cache()
     def _perl_version(self):
         try:
             version = shell.check_call("perl -e 'print \"$]\";'")
