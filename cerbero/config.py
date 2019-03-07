@@ -549,14 +549,17 @@ class Config (object):
                 self._parse(config_path, reset=False)
 
     def _load_last_defaults(self):
+        target_platform = self.target_platform
+        if target_platform == Platform.WINDOWS and 'visualstudio' in self.variants:
+            target_platform = 'msvc'
         self.set_property('prefix', os.path.join(self.home_dir, "dist",
-            "%s_%s" % (self.target_platform, self.target_arch)))
+            "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('sources', os.path.join(self.home_dir, "sources",
-            "%s_%s" % (self.target_platform, self.target_arch)))
+            "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('logs', os.path.join(self.home_dir, "logs",
-            "%s_%s" % (self.target_platform, self.target_arch)))
+            "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('cache_file',
-                "%s_%s.cache" % (self.target_platform, self.target_arch))
+                "%s_%s.cache" % (target_platform, self.target_arch))
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
         self.set_property('build_tools_prefix',
