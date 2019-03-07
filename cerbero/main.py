@@ -175,7 +175,11 @@ class Main(object):
 
 
 def main():
-    Main(sys.argv[1:])
+    if 'CERBERO_PROFILING' in os.environ:
+        import cProfile
+        cProfile.runctx('Main(sys.argv[1:])', globals(), locals(), filename='cerbero-profile.log')
+    else:
+        Main(sys.argv[1:])
 
 
 if __name__ == "__main__":
