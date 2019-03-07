@@ -142,11 +142,12 @@ class Config (object):
         # First load the default configuration
         self.load_defaults()
 
-        # Ensure that config files know about these variants
-        self.variants += variants_override
-
         # Next parse the main configuration file
         self._load_main_config()
+
+        # Ensure that Cerbero config files know about these variants, and that
+        # they override the values from the user configuration file above
+        self.variants += variants_override
 
         # Next, if a config file is provided use it to override the settings
         # from the main configuration file
