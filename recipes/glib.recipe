@@ -55,6 +55,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-gtlsbackend-add-support-for-setting-the-default-TLS-.patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/686
                'glib/0001-gio-Also-support-modules-built-with-MSVC.patch',
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/187
+               'glib/0001-meson-use-the-new-python-module-instead-of-the-pytho.patch',
               ]
 
     files_libs = [
