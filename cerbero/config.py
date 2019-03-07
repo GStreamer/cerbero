@@ -523,11 +523,8 @@ class Config (object):
 
     def _load_main_config(self):
         if os.path.exists(DEFAULT_CONFIG_FILE):
+            m.message('Loading default configuration from {}'.format(DEFAULT_CONFIG_FILE))
             self._parse(DEFAULT_CONFIG_FILE)
-        else:
-            msg = _('Using default configuration because %s is missing') % \
-                DEFAULT_CONFIG_FILE
-            m.warning(msg)
 
     def _load_cmd_config(self, filenames):
         if filenames is not None:
