@@ -61,6 +61,8 @@ class Package(Command):
                 default=False, help=_('Keep temporary files for debug')),
             ArgparseArgument('--offline', action='store_true',
                 default=False, help=_('Use only the source cache, no network')),
+            ArgparseArgument('--dry-run', action='store_true',
+                default=False, help=_('Only print the packages that will be built')),
             ])
 
     def run(self, config, args):
@@ -72,9 +74,9 @@ class Package(Command):
                     "--only-build-deps"))
 
         if not args.skip_deps_build:
-            self._build_deps(config, p, args.no_devel, args.offline)
+            self._build_deps(config, p, args.no_devel, args.offline, args.dry_run)
 
-        if args.only_build_deps:
+        if args.only_build_deps or args.dry_run:
             return
 
         if p is None:
@@ -100,10 +102,10 @@ class Package(Command):
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package, has_devel, offline):
+    def _build_deps(self, config, package, has_devel, offline, dry_run):
         build_command = build.Build()
         build_command.runargs(config, package.recipes_dependencies(has_devel),
-            cookbook=self.store.cookbook, offline=offline)
+            cookbook=self.store.cookbook, dry_run=dry_run, offline=offline)
 
 
 register_command(Package)
