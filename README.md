@@ -165,20 +165,17 @@ QML GStreamer plugin. You can toggle that on by
 [enabling the `qt5` variant](#enabling-optional-features-with-variants).
 
 You must also tell Cerbero where your Qt5 installation prefix is. You can do it
-in one of two ways:
+by setting the `QMAKE` environment variable to point to the `qmake` that you
+want to use, f.ex. `/path/to/Qt5.12.0/5.12.0/ios/bin/qmake`
 
-* Set the `QT5_PREFIX` environment variable pointed to your prefix, f.ex.
-  `/path/to/Qt5.12.0/5.12.0`, or
-
-* Set the `QMAKE` environment variable to point to the `qmake` that you want to
-  use, f.ex. `/path/to/Qt5.12.0/5.12.0/ios/bin/qmake`
-
-**NOTE:** You must use `QT5_PREFIX` for Android Universal because it needs to
-select the correct toolchain prefix for each architecture.
+When building for Android Universal, instead of `QMAKE`, you **must** set the
+`QT5_PREFIX` environment variable pointed to the directory inside your prefix
+which contains all the android targets, f.ex. `/path/to/Qt5.12.0/5.12.0`.
 
 Next, run `package`:
 
 ```sh
+$ export QMAKE='/path/to/Qt5.12.0/5.12.0/<target>/bin/qmake'
 $ ./cerbero-uninstalled -v qt5 [-c ...] package gstreamer-1.0
 ```
 
