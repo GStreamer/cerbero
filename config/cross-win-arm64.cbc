@@ -1,0 +1,3 @@
+prefix='c:/gstreamer/1.0/arm64'
+from cerbero.config import Architecture
+target_arch = Architecture.ARM64
