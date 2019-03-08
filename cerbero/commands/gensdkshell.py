@@ -87,14 +87,10 @@ class GenSdkShell(Command):
                 '/usr/local/share:/usr/share' % prefix_env)
         self._putvar('XDG_CONFIG_DIRS',
             '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env)
-        self._putvar('GST_REGISTRY', '${HOME}/.gstreamer-0.10/gstreamer-cerbero-registry', None)
         self._putvar('GST_REGISTRY_1_0', '${HOME}/.cache/gstreamer-1.0/gstreamer-cerbero-registry',
                      None)
-        self._putvar('GST_PLUGIN_SCANNER',
-                '%s/libexec/gstreamer-0.10/gst-plugin-scanner' % prefix_env)
         self._putvar('GST_PLUGIN_SCANNER_1_0',
                 '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env)
-        self._putvar('GST_PLUGIN_SYSTEM_PATH', '%s/lib/gstreamer-0.10' % prefix_env)
         self._putvar('GST_PLUGIN_SYSTEM_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
         self._putvar('PYTHONPATH',  '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'
                 % (prefix_env, py_prefix))
