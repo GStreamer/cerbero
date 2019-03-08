@@ -49,7 +49,9 @@ class Recipe(recipe.Recipe):
                 if gas:
                     self.set_env('AS', gas)
             else:
-                self.set_env('AS', self.get_env('CC'))
+                cc = self.get_env('CC')
+                if cc:
+                    self.set_env('AS', cc)
 
         libavextraconf = ''
         # Arch-specific flags

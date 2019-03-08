@@ -71,7 +71,7 @@ def set_nofile_ulimit():
 class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
-                           'gi', 'unwind', 'rpi', 'visualstudio', 'qt5',
+                           'gi', 'unwind', 'rpi', 'visualstudio', 'uwp', 'qt5',
                            'intelmsdk', 'nvcodec', 'python', 'werror', 'vaapi']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
     __bool_variants = __enabled_variants + __disabled_variants
@@ -105,6 +105,9 @@ class Variants(object):
                 if v not in self.__bool_variants:
                     m.warning('Variant {!r} is unknown or obsolete'.format(v))
                 setattr(self, v, True)
+        # UWP implies Visual Studio
+        if self.uwp:
+            self.visualstudio = True
         # Set auto mapping values based on other values
         if self.vscrt == 'auto':
             self.vscrt = 'md'
@@ -586,6 +589,10 @@ class Config (object):
 
     def cross_compiling(self):
         "Are we building for the host platform or not?"
+        # Building for UWP is always cross-compilation since we can't run the
+        # binaries that we output
+        if self.variants.uwp:
+            return True
         # On Windows, building 32-bit on 64-bit is not cross-compilation since
         # 32-bit Windows binaries run on 64-bit Windows via WOW64.
         if self.platform == Platform.WINDOWS:
@@ -611,6 +618,9 @@ class Config (object):
         """Can the binaries from the target platform can be executed in the
         build env?"""
         if self.target_platform != self.platform:
+            return False
+        # Executables built for UWP cannot be run as-is
+        if self.variants.uwp:
             return False
         if self.target_arch != self.arch:
             if self.target_arch == Architecture.X86 and \
@@ -709,7 +719,10 @@ class Config (object):
         target_platform = self.target_platform
         if target_platform == Platform.WINDOWS and not self.prefix_is_build_tools():
             if default_variants.visualstudio:
-                target_platform = 'msvc'
+                if default_variants.uwp:
+                    target_platform = 'uwp'
+                else:
+                    target_platform = 'msvc'
                 # Debug CRT needs a separate prefix
                 if default_variants.vscrt == 'mdd':
                     target_platform += '-debug'

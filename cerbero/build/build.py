@@ -319,6 +319,13 @@ class Build(object):
             return False
         return True
 
+    def using_uwp(self):
+        if not self.using_msvc():
+            return False
+        if not self.config.variants.uwp:
+            return False
+        return True
+
     async def configure(self):
         '''
         Configures the module

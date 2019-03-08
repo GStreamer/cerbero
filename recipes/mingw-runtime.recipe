@@ -20,6 +20,8 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
             raise InvalidRecipeError(self, "Invalid platform")
+        if self.config.variants.uwp:
+            self.runtime_dep = False
         if self.config.target_arch == Architecture.X86:
             gcclib = 'lib/gcc/x86_64-w64-mingw32/8.2.0/32/'
             self._ehlib = 'libgcc_s_sjlj-1'
