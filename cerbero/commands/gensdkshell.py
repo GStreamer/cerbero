@@ -67,9 +67,13 @@ class GenSdkShell(Command):
             self._env[var] = value
 
     def runargs(self, config, name, output_dir, prefix, libdir,
-                py_prefix, cmd=None, env={}, prefix_env_name='GSTREAMER_ROOT'):
+                py_prefix, cmd=None, env=None, prefix_env_name='GSTREAMER_ROOT'):
         if cmd == None:
             cmd = self.DEFAULT_CMD
+        if env == None:
+            env = {}
+        else:
+            env = env.copy()
         self._env = env
         prefix_env = '${%s}' % prefix_env_name
         libdir = libdir.replace(prefix, prefix_env)
