@@ -77,16 +77,15 @@ class GenSdkShell(Command):
         self._env = env
         prefix_env = '${%s}' % prefix_env_name
         libdir = libdir.replace(prefix, prefix_env)
-        self._putvar('PATH',
-            '%s/bin${PATH:+:$PATH}:/usr/local/bin:/usr/bin:/bin' % prefix_env)
+        self._putvar('PATH', '%s/bin${PATH:+:$PATH}' % prefix_env)
         self._putvar('LD_LIBRARY_PATH',
             '%s${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}' % libdir)
         self._putvar('PKG_CONFIG_PATH',  '%s/lib/pkgconfig:%s/share/pkgconfig'
              '${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}' % (prefix_env, prefix_env))
-        self._putvar('XDG_DATA_DIRS',  '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}:'
-                '/usr/local/share:/usr/share' % prefix_env)
+        self._putvar('XDG_DATA_DIRS',
+                '%s/share${XDG_DATA_DIRS:+:$XDG_DATA_DIRS}' % prefix_env)
         self._putvar('XDG_CONFIG_DIRS',
-            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}:/etc/xdg' % prefix_env)
+            '%s/etc/xdg${XDG_CONFIG_DIRS:+:$XDG_CONFIG_DIRS}' % prefix_env)
         self._putvar('GST_REGISTRY_1_0', '${HOME}/.cache/gstreamer-1.0/gstreamer-cerbero-registry',
                      None)
         self._putvar('GST_PLUGIN_SCANNER_1_0',
