@@ -19,6 +19,7 @@
 import os
 import re
 import glob
+import shutil
 import inspect
 from functools import partial
 from pathlib import Path
@@ -28,7 +29,7 @@ from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
-def find_shlib_regex(libname, prefix, libdir, ext, regex):
+def find_shlib_regex(config, libname, prefix, libdir, ext, regex):
     # Use globbing to find all files that look like they might match
     # this library to narrow down our exact search
     fpath = os.path.join(libdir, '*{0}*{1}*'.format(libname, ext))
@@ -42,21 +43,36 @@ def find_shlib_regex(libname, prefix, libdir, ext, regex):
             matches.append(os.path.join(libdir, fname))
     return matches
 
-def find_dll_implib(libname, prefix, libdir, ext, regex):
-    implibdir = 'lib'
-    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname)]
+def get_implib_dllname(config, path):
+    if config.msvc_toolchain_env:
+        lib_exe = shutil.which('lib', path=config.msvc_toolchain_env['PATH'][0])
+        if not lib_exe:
+            raise FatalError('lib.exe not found, check cerbero configuration')
+        try:
+            ret = shell.check_call([lib_exe, '-list', path])
+        except FatalError:
+            return 0
+        # The last line should contain the dllname
+        return ret.split()[-1]
     dlltool = os.environ.get('DLLTOOL', None)
     if not dlltool:
-        raise FatalError('dlltool was not found, check cerbero configuration')
+        raise FatalError('dlltool not found, check cerbero configuration')
+    try:
+        return shell.check_call([dlltool, '-I', path])
+    except FatalError:
+        return 0
+
+def find_dll_implib(config, libname, prefix, libdir, ext, regex):
+    implibdir = 'lib'
+    implibs = ['lib{}.dll.a'.format(libname), libname + '.lib', 'lib{}.lib'.format(libname)]
     implib_notfound = []
     for implib in implibs:
         path = os.path.join(prefix, implibdir, implib)
         if not os.path.exists(path):
             implib_notfound.append(implib)
             continue
-        try:
-            dllname = shell.check_call([dlltool, '-I', path])
-        except FatalError:
+        dllname = get_implib_dllname(config, path)
+        if dllname == 0:
             continue
         dllname = dllname.strip()
         if dllname == '':
@@ -82,8 +98,8 @@ def find_dll_implib(libname, prefix, libdir, ext, regex):
     # This will trigger an error in _search_libraries()
     return []
 
-def find_pdb_implib(libname, prefix):
-    dlls = find_dll_implib(libname, prefix, 'bin', None, None)
+def find_pdb_implib(config, libname, prefix):
+    dlls = find_dll_implib(config, libname, prefix, 'bin', None, None)
     pdbs = []
     for dll in dlls:
         pdb = dll[:-3] + 'pdb'
@@ -368,8 +384,8 @@ class FilesProvider(object):
         libsmatch = {}
         notfound = []
         for f in files:
-            libsmatch[f] = find_func(f[3:], self.config.prefix, libdir, libext,
-                                     libregex)
+            libsmatch[f] = find_func(self.config, f[3:], self.config.prefix,
+                                     libdir, libext, libregex)
             if not libsmatch[f] and f != 'libvpx':
                 notfound.append(f)
 
@@ -510,7 +526,7 @@ class FilesProvider(object):
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
                 if self.platform == Platform.WINDOWS and self.can_msvc:
-                    devel_libs += find_pdb_implib(x[3:], self.config.prefix)
+                    devel_libs += find_pdb_implib(self.config, x[3:], self.config.prefix)
             devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
         return devel_libs
 
