@@ -79,14 +79,21 @@ def get_vcvarsall_arg(arch, target_arch):
     if arch == Architecture.X86:
         if target_arch == Architecture.X86_64:
             return 'x86_amd64'
+        elif target_arch == Architecture.ARM64:
+            return 'x86_arm64'
         elif target_arch.is_arm():
             return 'x86_arm'
     elif arch == Architecture.X86_64:
         if target_arch == Architecture.X86_64:
             return 'amd64'
-        elif target_arch.is_arm():
+        elif target_arch == Architecture.ARM64:
+            return 'amd64_arm64'
+        elif Architecture.is_arm(target_arch):
             return 'amd64_arm'
-    elif arch.is_arm() and target_arch.is_arm():
+    # FIXME: Does Visual Studio support arm/arm64 as build machines?
+    elif arch == Architecture.ARM64 and target_arch == Architecture.ARM64:
+        return 'arm64'
+    elif Architecture.is_arm(arch) and Architecture.is_arm(target_arch):
             return 'arm'
     raise FatalError('Unsupported arch/target_arch: {0}/{1}'.format(arch, target_arch))
 
