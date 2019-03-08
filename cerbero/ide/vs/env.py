@@ -205,12 +205,14 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
     return msvc[0:index]
 
 @lru_cache()
-def get_msvc_env(arch, target_arch, version=None, vs_install_path=None):
+def get_msvc_env(arch, target_arch, uwp, version=None, vs_install_path=None):
     ret_env = {}
     vcvarsall, vsver = get_vcvarsall(version, vs_install_path)
 
     without_msvc = run_and_get_env('set')
     arg = get_vcvarsall_arg(arch, target_arch)
+    if uwp:
+        arg += ' uwp'
     vcvars_env_cmd = '"{0}" {1} & {2}'.format(vcvarsall, arg, 'set')
     with_msvc = run_and_get_env(vcvars_env_cmd)
 

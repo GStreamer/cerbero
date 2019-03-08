@@ -118,8 +118,8 @@ class GenLib(object):
             return None, None
         try:
             from cerbero.ide.vs.env import get_msvc_env
-            msvc_env = get_msvc_env('x86', target_arch, self.config.vs_install_version,
-                                    self.config.vs_install_path)[0]
+            msvc_env = get_msvc_env('x86', target_arch, False, self.config.vs_install_version,
+                                self.config.vs_install_path)[0]
         except FatalError:
             return None, None
         paths = msvc_env['PATH']
