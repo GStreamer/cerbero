@@ -385,14 +385,11 @@ class CookBook (object):
         recipes = {}
         recipes_files = shell.find_files('*%s' % self.RECIPE_EXT, repo)
         recipes_files.extend(shell.find_files('*/*%s' % self.RECIPE_EXT, repo))
-        try:
-            custom = None
-            m_path = os.path.join(repo, 'custom.py')
-            if os.path.exists(m_path):
-                custom = imp.load_source('custom', m_path)
-                custom.GStreamer.using_manifest_force_git = self._config.manifest is not None
-        except Exception:
-            custom = None
+        custom = None
+        m_path = os.path.join(repo, 'custom.py')
+        if os.path.exists(m_path):
+            custom = imp.load_source('custom', m_path)
+            custom.GStreamer.using_manifest_force_git = self._config.manifest is not None
         for f in recipes_files:
             # Try to load the custom.py module located in the recipes dir
             # which can contain private classes to extend cerbero's recipes
