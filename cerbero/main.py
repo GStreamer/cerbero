@@ -81,14 +81,19 @@ class Main(object):
 
     def create_parser(self):
         ''' Creates the arguments parser '''
+        class VariantAction(argparse.Action):
+            def __call__(self, parser, namespace, value, option_string=None):
+                current = getattr(namespace, self.dest) or []
+                # Convert comma-separated string to list
+                additional = [v for v in value.split(',')]
+                setattr(namespace, self.dest, current + additional)
+
         self.parser = argparse.ArgumentParser(description=_(description))
         self.parser.add_argument('-t', '--timestamps', action='store_true', default=False,
                 help=_('Print timestamps with every message printed'))
         self.parser.add_argument('--list-variants', action='store_true', default=False,
                 help=_('List available variants'))
-        self.parser.add_argument('-v', '--variants', action='store', default=None,
-                # Convert comma-separated string to list
-                type=lambda s: [v for v in s.split(',')],
+        self.parser.add_argument('-v', '--variants', action=VariantAction, default=None,
                 help=_('Variants to be used for the build'))
         self.parser.add_argument('-c', '--config', action='append', type=str, default=None,
                 help=_('Configuration file used for the build'))

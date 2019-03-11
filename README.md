@@ -156,7 +156,19 @@ $ cerbero-uninstalled -v variantname [-c ...] package gstreamer-1.0
 * Or, edit `~/.cerbero/cerbero.cbc` and add `variants = ['variantname']` at the
   bottom. Create the file if it doesn't exist.
 
+Multiple variants can either be separated by a comma or with multiple `-v`
+arguments, for example the following are equivalent:
+
+```sh
+$ cerbero-uninstalled -v variantname1,variantname2 [-c ...] package gstreamer-1.0
+$ cerbero-uninstalled -v variantname1 -v variantname2 [-c ...] package gstreamer-1.0
+```
+
 To explicitly disable a variant, use `novariantname` instead.
+
+In the case of multiple enabling/disable of the same variant, then the last
+condition on the command line will take effect.  e.g. if novariantname is last
+then variantname is disabled.
 
 ## Enabling Qt5 Support
 
