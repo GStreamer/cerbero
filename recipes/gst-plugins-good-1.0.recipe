@@ -224,7 +224,7 @@ class Recipe(custom.GStreamer):
 
         if self.using_msvc():
             # plugin is C++, library is Autotools
-            self.disable_plugin('taglib', 'codecs')
+            self.disable_plugin('taglib', 'codecs', dep='taglib')
             # gdk-pixbuf and all deps must be ported to MSVC first to fix CRT interop issues
             self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
 
