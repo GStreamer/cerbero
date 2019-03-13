@@ -41,10 +41,11 @@ class Recipe(recipe.Recipe):
         # Default AS is $CC, except iOS (set below)
         if Architecture.is_arm(self.config.target_arch):
             if self.config.target_platform == Platform.IOS:
-                if 'GAS' in os.environ:
-                    self.set_env('AS', os.environ['GAS'])
+                gas = self.get_env('GAS')
+                if gas:
+                    self.set_env('AS', gas)
             else:
-                self.set_env('AS', os.environ['CC'])
+                self.set_env('AS', self.get_env('CC'))
 
         libavextraconf = ''
         # Arch-specific flags
@@ -98,8 +99,8 @@ class Recipe(recipe.Recipe):
         libav_path = self.build_dir
         if self.config.target_platform == Platform.WINDOWS:
             # XXX: --windres option doesn't exist, despite --help listing it
-            replacements = {'WINDRES=windres': 'WINDRES=' + os.environ['WINDRES'],
-                            'DLLTOOL=dlltool': 'DLLTOOL=' + os.environ['DLLTOOL']}
+            replacements = {'WINDRES=windres': 'WINDRES=' + self.get_env('WINDRES'),
+                            'DLLTOOL=dlltool': 'DLLTOOL=' + self.get_env('DLLTOOL')}
             shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:

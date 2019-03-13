@@ -450,6 +450,7 @@ class CookBook (object):
             r.__file__ = os.path.abspath(filepath)
             if setup_env:
                 config.do_setup_env()
+            r.env = os.environ.copy()
             r.prepare()
             return r
         except InvalidRecipeError as e:

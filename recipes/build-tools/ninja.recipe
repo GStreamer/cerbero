@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/ninja']
 
     def configure(self):
-        shell.call(self.config.python_exe + ' ./configure.py --bootstrap', self.build_dir)
+        shell.call(self.config.python_exe + ' ./configure.py --bootstrap', self.build_dir, env=self.env)
 
     def install(self):
         ninja = 'ninja'

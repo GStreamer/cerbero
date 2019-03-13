@@ -33,9 +33,9 @@ class Recipe(recipe.Recipe):
         # Generate libraries that aren't copied from the NDK
         v = DistroVersion.get_android_api_version(self.config.target_distro_version)
         if v >= 21:
-            shell.call(" ".join([os.environ['AR'], 'rc', os.path.join(libdir, 'libandroid_support.a')]))
+            shell.call(" ".join([self.get_env('AR'), 'rc', os.path.join(libdir, 'libandroid_support.a')]), env=self.env)
         if self.config.target_arch != Architecture.ARMv7:
-            shell.call(" ".join([os.environ['AR'], 'rc', os.path.join(libdir, 'libunwind.a')]))
+            shell.call(" ".join([self.get_env('AR'), 'rc', os.path.join(libdir, 'libunwind.a')]), env=self.env)
 
     def install(self):
         stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',

@@ -36,7 +36,7 @@ class Recipe(recipe.Recipe):
             self.configure_options = ' --disable-assembly'
         elif self.config.target_platform == Platform.ANDROID:
             # gmp use CFLAGS to compile and link some programs during configure
-            self.append_env('CFLAGS', os.environ['LDFLAGS'])
+            self.append_env('CFLAGS', self.get_env('LDFLAGS'))
 
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('include', '*', 'gmp.h'))
@@ -50,7 +50,7 @@ class Recipe(recipe.Recipe):
             dll_a = os.path.join(self.config.prefix, 'lib', 'libgmp.dll.a')
             implib = os.path.join(self.config.prefix, 'lib', 'libgmp.lib')
             defs_file = os.path.join(self.build_dir, '.libs', 'libgmp-3.dll.def')
-            dlltool = os.environ.get('DLLTOOL', None)
+            dlltool = self.get_env('DLLTOOL')
             if not dlltool:
               raise FatalError('dlltool was not found, check cerbero configuration')
 

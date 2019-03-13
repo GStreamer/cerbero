@@ -17,4 +17,4 @@ class Recipe(recipe.Recipe):
         shutil.copy (os.path.join(self.build_dir, 'gas-preprocessor.pl'),
                      os.path.join(self.config.prefix, 'bin'))
         shell.call ('chmod +x %s' %
-                os.path.join(self.config.prefix, 'bin', 'gas-preprocessor.pl'))
+                os.path.join(self.config.prefix, 'bin', 'gas-preprocessor.pl'), env=self.env)

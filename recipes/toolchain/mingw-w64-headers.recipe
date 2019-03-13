@@ -28,14 +28,14 @@ class Recipe(recipe.Recipe):
         mingwdir = os.path.join('mingw')
         if not os.path.exists(os.path.join(self.config.prefix, mingwdir)):
             shell.call('ln -s %s %s' % (hostdir, mingwdir),
-                    cmd_dir=self.config.prefix, fail=False, )
+                    cmd_dir=self.config.prefix, fail=False, env=self.call)
 
         # Install DirectX headers
         directx_headers = os.path.join(self.config.prefix, self.host, 'include', 'directx')
         if not os.path.exists(directx_headers):
             os.makedirs(directx_headers)
         shell.call('cp mingw-w64-headers/direct-x/include/* %s' % directx_headers,
-                self.build_dir)
+                self.build_dir, env=self.env)
         super().post_install()
 
     files_headers = [

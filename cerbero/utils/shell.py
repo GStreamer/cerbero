@@ -79,7 +79,7 @@ def restore_call_env():
     CALL_ENV = None
 
 
-def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None):
+def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
     Run a shell command
 
@@ -118,6 +118,8 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None):
         else:
             if CALL_ENV is not None:
                 env = CALL_ENV.copy()
+            elif env is not None:
+                env = env.copy()
             else:
                 env = os.environ.copy()
 
@@ -140,6 +142,8 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
     if env is None:
         if CALL_ENV is not None:
             env = CALL_ENV.copy()
+        elif env is not None:
+            env = env.copy()
         else:
             env = os.environ.copy()
     if split and isinstance(cmd, str):

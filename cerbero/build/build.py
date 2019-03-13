@@ -66,13 +66,13 @@ class Build (object):
         # we're building with MSVC (or cross-compiling with Meson)
         for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
                     'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
-            if var in os.environ:
+            if var in self.env:
                 # Env vars that are edited by the recipe will be restored by
                 # @modify_environment when we return from the build step but
                 # other env vars won't be, so add those.
                 if var not in self._old_env:
-                    self._old_env[var] = os.environ[var]
-                del os.environ[var]
+                    self._old_env[var] = self.env[var]
+                del self.env[var]
         # Re-add *FLAGS that weren't set by the toolchain config, but instead
         # were set in the recipe or other places via @modify_environment
         if self.using_msvc():
@@ -80,7 +80,13 @@ class Build (object):
                         'LDFLAGS', 'OBJLDFLAGS'):
                 for env_op in self._new_env:
                     if env_op.var == var:
-                        env_op.execute()
+                        env_op.execute(self.env)
+
+    def get_env(self, var, default=None):
+        if var in self.env:
+            return self.env[var]
+
+        return default
 
     def using_msvc(self):
         if not self.can_msvc:
@@ -155,26 +161,26 @@ class EnvVarOp:
         self.vals = vals
         self.sep = sep
 
-    def set(self):
+    def set(self, env):
         if not self.vals:
             # An empty array means unset the env var
-            if self.var in os.environ:
-                del os.environ[self.var]
+            if self.var in env:
+                del env[self.var]
         else:
-            os.environ[self.var] = self.sep.join(self.vals)
+            env[self.var] = self.sep.join(self.vals)
 
-    def append(self):
-        if self.var not in os.environ:
-            os.environ[self.var] = self.sep.join(self.vals)
+    def append(self, env):
+        if self.var not in env:
+            env[self.var] = self.sep.join(self.vals)
         else:
-            os.environ[self.var] += self.sep + self.sep.join(self.vals)
+            env[self.var] += self.sep + self.sep.join(self.vals)
 
-    def prepend(self):
-        if self.var not in os.environ:
-            os.environ[self.var] = self.sep.join(self.vals)
+    def prepend(self, env):
+        if self.var not in env:
+            env[self.var] = self.sep.join(self.vals)
         else:
-            old = os.environ[self.var]
-            os.environ[self.var] = self.sep.join(self.vals) + self.sep + old
+            old = env[self.var]
+            env[self.var] = self.sep.join(self.vals) + self.sep + old
 
 
 class ModifyEnvBase:
@@ -192,6 +198,7 @@ class ModifyEnvBase:
         self._env_vars = set()
         # Old environment to restore
         self._old_env = {}
+        self.env = {}
 
     def check_reentrancy(self):
         if self._old_env:
@@ -212,6 +219,20 @@ class ModifyEnvBase:
         self._env_vars.add(var)
         self._new_env.append(EnvVarOp('set', var, vals, sep))
 
+    def get_env(self, var, default=None):
+        if not self._old_env:
+            return super(self).get_env(var, default)
+
+        env = self.env.copy()
+
+        for env_op in self._new_env:
+            env_op.execute(env)
+
+        if var in env:
+            return env[var]
+
+        return default
+
     def _modify_env(self):
         '''
         Modifies the build environment by inserting env vars from new_env
@@ -221,20 +242,20 @@ class ModifyEnvBase:
             return
         # Store old env
         for var in self._env_vars:
-            if var in os.environ:
-                self._old_env[var] = os.environ[var]
+            if var in self.env:
+                self._old_env[var] = self.env[var]
         # Modify env
         for env_op in self._new_env:
-            env_op.execute()
+            env_op.execute(self.env)
 
     def _restore_env(self):
         ''' Restores the old environment '''
         for var, val in self._old_env.items():
             if val is None:
-                if var in os.environ:
-                    del os.environ[var]
+                if var in self.env:
+                    del self.env[var]
             else:
-                os.environ[var] = val
+                self.env[var] = val
         self._old_env.clear()
 
     def _add_system_libs(self):
@@ -317,26 +338,26 @@ class MakefilesBase (Build, ModifyEnvBase):
             'target': self.config.target,
             'build': self.config.build,
             'options': self.configure_options},
-            self.make_dir, logfile=self.logfile)
+            self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def compile(self):
         if self.using_msvc():
             self.unset_toolchain_env()
-        shell.call(self.make, self.make_dir, logfile=self.logfile)
+        shell.call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):
-        shell.call(self.make_install, self.make_dir, logfile=self.logfile)
+        shell.call(self.make_install, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
-        shell.call(self.make_clean, self.make_dir, logfile=self.logfile)
+        shell.call(self.make_clean, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
         if self.make_check:
-            shell.call(self.make_check, self.build_dir, logfile=self.logfile)
+            shell.call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
 
 
 class Autotools (MakefilesBase):
@@ -370,10 +391,10 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-introspection "
 
         if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile)
+            shell.call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
 
         files = shell.check_call('find %s -type f -name config.guess' %
-                                 self.config_src_dir).split('\n')
+                                 self.config_src_dir, env=self.env).split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -382,7 +403,7 @@ class Autotools (MakefilesBase):
             shutil.copy(o, f)
 
         files = shell.check_call('find %s -type f -name config.sub' %
-                                 self.config_src_dir).split('\n')
+                                 self.config_src_dir, env=self.env).split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -393,7 +414,7 @@ class Autotools (MakefilesBase):
         # ensure our libtool modifications are actually picked up by recipes
         if self.name != 'libtool':
             files = shell.check_call('find %s -type f -name ltmain.sh' %
-                                     self.config_src_dir).split('\n')
+                                     self.config_src_dir, env=self.env).split('\n')
             files.remove('')
             for f in files:
                 o = os.path.join(self.config.build_tools_prefix, 'share', 'libtool', 'build-aux',
@@ -406,7 +427,7 @@ class Autotools (MakefilesBase):
             # On windows, environment variables are upperscase, but we still
             # need to pass things like am_cv_python_platform in lowercase for
             # configure and autogen.sh
-            for k, v in os.environ.items():
+            for k, v in self.env.items():
                 if k[2:6] == '_cv_':
                     self.configure_tpl += ' %s="%s"' % (k, v)
 
@@ -451,10 +472,10 @@ class CMake (MakefilesBase):
 
     @modify_environment
     def configure(self):
-        cc = os.environ.get('CC', 'gcc')
-        cxx = os.environ.get('CXX', 'g++')
-        cflags = os.environ.get('CFLAGS', '')
-        cxxflags = os.environ.get('CXXFLAGS', '')
+        cc = self.env.get('CC', 'gcc')
+        cxx = self.env.get('CXX', 'g++')
+        cflags = self.env.get('CFLAGS', '')
+        cxxflags = self.env.get('CXXFLAGS', '')
         # FIXME: CMake doesn't support passing "ccache $CC"
         if self.config.use_ccache:
             cc = cc.replace('ccache', '').strip()
@@ -628,33 +649,33 @@ class Meson (Build, ModifyEnvBase) :
         # Take cross toolchain from _old_env because we removed them from the
         # env so meson doesn't detect them as the native toolchain.
         # Same for *FLAGS below.
-        cc = os.environ['CC'].split()
-        cxx = os.environ['CXX'].split()
-        ar = os.environ['AR'].split()
-        strip = os.environ.get('STRIP', '').split()
-        windres = os.environ.get('WINDRES', '').split()
+        cc = self.env['CC'].split()
+        cxx = self.env['CXX'].split()
+        ar = self.env['AR'].split()
+        strip = self.env.get('STRIP', '').split()
+        windres = self.env.get('WINDRES', '').split()
 
         # We do not use cmake dependency files, speed up the build by disabling it
         cross_binaries = {'cmake': ['false']}
-        if 'OBJC' in os.environ:
-            cross_binaries['objc'] = os.environ['OBJC'].split()
-        if 'OBJCXX' in os.environ:
-            cross_binaries['objcpp'] = os.environ['OBJCXX'].split()
+        if 'OBJC' in self.env:
+            cross_binaries['objc'] = self.env['OBJC'].split()
+        if 'OBJCXX' in self.env:
+            cross_binaries['objcpp'] = self.env['OBJCXX'].split()
         if self.config.qt5_qmake_path:
             cross_binaries['qmake'] = [self.config.qt5_qmake_path]
             cross_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
 
         # *FLAGS are only passed to the native compiler, so while
         # cross-compiling we need to pass these through the cross file.
-        c_args = shlex.split(os.environ.get('CFLAGS', ''))
-        cpp_args = shlex.split(os.environ.get('CXXFLAGS', ''))
-        objc_args = shlex.split(os.environ.get('OBJCFLAGS', ''))
-        objcpp_args = shlex.split(os.environ.get('OBJCXXFLAGS', ''))
+        c_args = shlex.split(self.env.get('CFLAGS', ''))
+        cpp_args = shlex.split(self.env.get('CXXFLAGS', ''))
+        objc_args = shlex.split(self.env.get('OBJCFLAGS', ''))
+        objcpp_args = shlex.split(self.env.get('OBJCXXFLAGS', ''))
         # Link args
-        c_link_args = shlex.split(os.environ.get('LDFLAGS', ''))
+        c_link_args = shlex.split(self.env.get('LDFLAGS', ''))
         cpp_link_args = c_link_args
-        if 'OBJLDFLAGS' in os.environ:
-            objc_link_args = shlex.split(os.environ['OBJLDFLAGS'])
+        if 'OBJLDFLAGS' in self.env:
+            objc_link_args = shlex.split(self.env['OBJLDFLAGS'])
         else:
             objc_link_args = c_link_args
         objcpp_link_args = objc_link_args
@@ -784,23 +805,23 @@ class Meson (Build, ModifyEnvBase) :
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))
 
-        shell.call(meson_cmd, self.meson_dir, logfile=self.logfile)
+        shell.call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def compile(self):
-        shell.call(self.make, self.meson_dir, logfile=self.logfile)
+        shell.call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):
-        shell.call(self.make_install, self.meson_dir, logfile=self.logfile)
+        shell.call(self.make_install, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
-        shell.call(self.make_clean, self.meson_dir, logfile=self.logfile)
+        shell.call(self.make_clean, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
-        shell.call(self.make_check, self.meson_dir, logfile=self.logfile)
+        shell.call(self.make_check, self.meson_dir, logfile=self.logfile, env=self.env)
 
 
 class BuildType (object):

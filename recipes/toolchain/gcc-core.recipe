@@ -50,7 +50,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.allow_parallel_build = False
 
-    def configure(self):
+    async def configure(self):
         # Create the winsup directory
         if self.config.target_platform == Platform.WINDOWS:
             winsup = os.path.join(self.build_dir, 'gcc', 'winsup', 'mingw')
@@ -58,5 +58,5 @@ class Recipe(recipe.Recipe):
                 os.makedirs(winsup)
             shell.call('ln -s %s/%s/include include' %
                     (self.config.toolchain_prefix, self.config.host), winsup,
-                    fail=False)
-        super(Recipe, self).configure()
+                    fail=False, env=self.env)
+        await super(Recipe, self).configure()

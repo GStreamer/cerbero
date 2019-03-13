@@ -39,14 +39,15 @@ class Recipe(recipe.Recipe):
             # FIXME : Is disabling asm on ARM (< v7) still needed ?
             enable_asm = False
         elif Architecture.is_arm(self.config.target_arch):
-            if 'CC' in os.environ:
-                AS = [os.environ['CC']]
+            cc = self.get_env('CC')
+            if cc:
+                AS = [cc]
             else:
                 AS = []
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
                 # x264 ships its own gas-preprocessor.pl
-                AS = ['tools/' + os.environ['GAS']]
+                AS = ['tools/' + self.get_env('GAS')]
                 self.patches = ['x264/0001-Disable-fembed-bitcode-incompatible-argument.patch']
             elif self.config.target_arch == Architecture.X86:
                 enable_asm = False
