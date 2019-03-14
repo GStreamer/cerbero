@@ -15,6 +15,8 @@ class Recipe(recipe.Recipe):
     patches = ['../glib/glib-2.57-meson-backported-fixes.patch',
                '../glib/0001-DO-NOT-UPSTREAM-Prototypes-missing-in-Cerbero-s-anci.patch',
                '../glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
+               # XXX: Remove when we upgrade our mingw toolchain
+               'glib-tools/0001-meson-Disable-tests-fail-on-our-ancient-MinGW.patch',
               ]
 
     def prepare(self):
