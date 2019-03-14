@@ -14,7 +14,7 @@ class Recipe(custom.GStreamer):
                   'gst-validate-rtsp-server-1.0']
     files_libs = ['libgstvalidate-1.0']
 
-    files_devel = ["include/gstreamer-1.0/gst/validate/*.h"
+    files_devel = ["include/gstreamer-1.0/gst/validate/*.h",
                    "lib/pkgconfig/gst-validate-1.0.pc"]
 
     files_validate = ["lib/gst-validate-launcher/",
