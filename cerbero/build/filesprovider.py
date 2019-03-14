@@ -504,6 +504,9 @@ class FilesProvider(object):
         return files
 
     def _search_devel_libraries(self):
+        if self.runtime_dep:
+            return []
+
         devel_libs = []
         for category in self.categories:
             if category != self.LIBS_CAT and \
