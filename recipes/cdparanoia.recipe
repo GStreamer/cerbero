@@ -5,6 +5,7 @@ import os
 from fnmatch import fnmatch
 
 from cerbero.build.filesprovider import FilesProvider
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -39,4 +40,10 @@ class Recipe(recipe.Recipe):
                 if os.path.isfile(f) and not os.path.islink(f) and \
                    fnmatch(f, '*.so.*'):
                     os.chmod(f, 0o755)
+
+        LibtoolLibrary('cdda_interface', None, None, None,
+                       self.config.libdir, self.config.target_platform).save()
+        LibtoolLibrary('cdda_paranoia', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps='cdaa_interface').save()
         super().post_install()
