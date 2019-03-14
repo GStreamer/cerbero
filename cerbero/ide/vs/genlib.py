@@ -46,9 +46,10 @@ class GenLib(object):
         bindir, dllname = os.path.split(dllpath)
 
         # Create the .def file
-        shell.call('gendef %s' % dllpath, outputdir)
-
-        defname = dllname.replace('.dll', '.def')
+        defname = libname + '.def'
+        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
+        with open(os.path.join(outputdir, defname), 'w') as f:
+            f.write(def_contents)
 
         # Create the import library
         lib_path, paths = self._get_lib_exe_path(target_arch, platform)
@@ -107,7 +108,9 @@ class GenGnuLib(GenLib):
             self.filename = 'lib{0}.dll.a'.format(libname)
         dllname = os.path.basename(dllpath)
         # Create the .def file
-        shell.call('gendef ' + dllpath, outputdir)
-        defname = dllname.replace('.dll', '.def')
+        defname = libname + '.def'
+        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
+        with open(os.path.join(outputdir, defname), 'w') as f:
+            f.write(def_contents)
         shell.call(self.DLLTOOL_TPL % (defname, self.filename, dllname), outputdir)
         return os.path.join(outputdir, self.filename)
