@@ -212,10 +212,9 @@ class Recipe(custom.GStreamer):
     files_typelibs = [
         'GstAllocators-1.0',
         'GstApp-1.0',
-        'GstFft-1.0',
         'GstGL-1.0',
         'GstPbutils-1.0',
-        'GstRiff-1.0',
+#        'GstRiff-1.0',         Gir disabled due to incompatibilities
         'GstRtp-1.0',
         'GstRtsp-1.0',
         'GstSdp-1.0',
