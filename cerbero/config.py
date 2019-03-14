@@ -112,8 +112,7 @@ class Config (object):
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties',
-                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
-                   'msvc_export_for_shell']
+                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell']
 
     cookbook = None
 
