@@ -22,4 +22,4 @@ class Recipe(recipe.Recipe):
     files_libs = ['libiconv', 'libcharset', ]
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
-    files_lang = ['libiconv']
+#    files_lang = ['libiconv']
