@@ -2,6 +2,7 @@
 from cerbero.errors import FatalError
 from cerbero.utils import shell
 from cerbero.utils import messages as m
+from cerbero.tools.libtool import LibtoolLibrary
 import shutil
 
 class Recipe(recipe.Recipe):
@@ -143,4 +144,6 @@ class Recipe(recipe.Recipe):
                 subdir = 'Win32'
             os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
                        os.path.join(self.config.prefix, 'lib', 'vpx.lib'))
+        LibtoolLibrary('vpx', None, None, None,
+                       self.config.libdir, self.config.target_platform).save()
         super().post_install()
