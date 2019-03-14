@@ -1,5 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import sys
+from pathlib import Path
+
 class Recipe(recipe.Recipe):
     name = 'librsvg'
     version = '2.40.20'
@@ -29,3 +32,14 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.configure_options += ' --disable-Bsymbolic'
+
+    def compile(self):
+        # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
+        # but on Windows Python 3 is `python.exe`. Meson already handles this
+        # for us, but Autotools can't.
+        # NOTE: Remove this when the recipe is ported to Meson.
+        if self.config.platform == Platform.WINDOWS:
+            with (Path(self.build_dir) / 'python3').open('w') as f:
+                python = Path(sys.executable).as_posix()
+                f.write('#!/bin/sh\n"{}" "$@"'.format(python))
+        super().compile()
