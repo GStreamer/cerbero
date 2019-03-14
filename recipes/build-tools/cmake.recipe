@@ -25,15 +25,15 @@ class Recipe(recipe.Recipe):
                 # binutils such as ar and ranlib are prefixed correctly
                 self.configure_tpl += ' -- -DCMAKE_SYSTEM_NAME="Windows"'
 
-    def configure(self):
+    async def configure(self):
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86_64:
                 # Bootstrap needs to be run twice for some dark reason
                 try:
-                    super(recipe.Recipe, self).configure()
+                    await super(recipe.Recipe, self).configure()
                 except:
                     pass
-        super(recipe.Recipe, self).configure()
+        await super(recipe.Recipe, self).configure()
         # Windows XP does not have _mkgmtime64
         shell.replace(os.path.join(self.build_dir, 'CMakeCache.txt'),
             {'HAVE__MKGMTIME64:INTERNAL=1':'HAVE__MKGMTIME64:INTERNAL='})

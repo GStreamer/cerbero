@@ -21,6 +21,8 @@ import re
 import copy
 import shutil
 import shlex
+import asyncio
+import subprocess
 from pathlib import Path
 
 from cerbero.enums import Platform, Architecture, Distro
@@ -95,7 +97,7 @@ class Build (object):
             return False
         return True
 
-    def configure(self):
+    async def configure(self):
         '''
         Configures the module
         '''
@@ -122,7 +124,7 @@ class Build (object):
 
 class CustomBuild(Build):
 
-    def configure(self):
+    async def configure(self):
         pass
 
     def compile(self):
@@ -151,12 +153,31 @@ def modify_environment(func):
     return call
 
 
+def async_modify_environment(func):
+    '''
+    Decorator to modify the build environment
+
+    When called recursively, it only modifies the environment once.
+    '''
+    async def call(*args):
+        self = args[0]
+        if self.use_system_libs and self.config.allow_system_libs:
+            self._add_system_libs()
+        self._modify_env()
+        res = await func(*args)
+        self._restore_env()
+        return res
+
+    call.__name__ = func.__name__
+    return call
+
 class EnvVarOp:
     '''
     An operation to be done on the values of a particular env var
     '''
     def __init__(self, op, var, vals, sep):
         self.execute = getattr(self, op)
+        self.op = op
         self.var = var
         self.vals = vals
         self.sep = sep
@@ -181,6 +202,9 @@ class EnvVarOp:
         else:
             old = env[self.var]
             env[self.var] = self.sep.join(self.vals) + self.sep + old
+
+    def __repr__(self):
+        return "<EnvVarOp " + self.op + " " + self.var + " with " + self.sep.join(self.vals) + ">"
 
 
 class ModifyEnvBase:
@@ -321,8 +345,8 @@ class MakefilesBase (Build, ModifyEnvBase):
             # so add -fembed-bitcode again
             self.append_env('LDFLAGS', *bitcode_ldflags)
 
-    @modify_environment
-    def configure(self):
+    @async_modify_environment
+    async def configure(self):
         if not os.path.exists(self.make_dir):
             os.makedirs(self.make_dir)
         if self.requires_non_src_build:
@@ -331,7 +355,8 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.using_msvc():
             self.unset_toolchain_env()
 
-        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
+        await shell.async_call(self.configure_tpl % {
+            'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
             'libdir': to_unixpath(self.config.libdir),
             'host': self.config.host,
@@ -376,7 +401,7 @@ class Autotools (MakefilesBase):
     supports_cache_variables = True
     disable_introspection = False
 
-    def configure(self):
+    async def configure(self):
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.config_src_dir, 'configure.in')) or\
                 os.path.exists(os.path.join(self.config_src_dir, 'configure.ac')):
@@ -391,10 +416,11 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-introspection "
 
         if self.autoreconf:
-            shell.call(self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
+            await shell.async_call (self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
 
-        files = shell.check_call('find %s -type f -name config.guess' %
-                                 self.config_src_dir, env=self.env).split('\n')
+        files = await shell.async_check_call('find %s -type f -name config.guess' %
+                self.config_src_dir, env=self.env)
+        files = files.split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -402,8 +428,9 @@ class Autotools (MakefilesBase):
             m.action("copying %s to %s" % (o, f))
             shutil.copy(o, f)
 
-        files = shell.check_call('find %s -type f -name config.sub' %
-                                 self.config_src_dir, env=self.env).split('\n')
+        files = await shell.async_check_call('find %s -type f -name config.sub' %
+                self.config_src_dir, env=self.env)
+        files = files.split('\n')
         files.remove('')
         for f in files:
             o = os.path.join(self.config._relative_path('data'), 'autotools',
@@ -413,8 +440,9 @@ class Autotools (MakefilesBase):
 
         # ensure our libtool modifications are actually picked up by recipes
         if self.name != 'libtool':
-            files = shell.check_call('find %s -type f -name ltmain.sh' %
-                                     self.config_src_dir, env=self.env).split('\n')
+            files = await shell.async_check_call('find %s -type f -name ltmain.sh' %
+                    self.config_src_dir, env=self.env)
+            files = files.split('\n')
             files.remove('')
             for f in files:
                 o = os.path.join(self.config.build_tools_prefix, 'share', 'libtool', 'build-aux',
@@ -453,7 +481,7 @@ class Autotools (MakefilesBase):
         # Add at the very end to allow recipes to override defaults
         self.configure_tpl += "  %(options)s "
 
-        MakefilesBase.configure(self)
+        await MakefilesBase.configure(self)
 
 
 class CMake (MakefilesBase):
@@ -470,8 +498,8 @@ class CMake (MakefilesBase):
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
 
-    @modify_environment
-    def configure(self):
+    @async_modify_environment
+    async def configure(self):
         cc = self.env.get('CC', 'gcc')
         cxx = self.env.get('CXX', 'g++')
         cflags = self.env.get('CFLAGS', '')
@@ -508,7 +536,7 @@ class CMake (MakefilesBase):
         if os.path.exists(cmake_files):
             shutil.rmtree(cmake_files)
         self.make += ' VERBOSE=1 '
-        MakefilesBase.configure(self)
+        await MakefilesBase.configure(self)
 
 
 MESON_CROSS_FILE_TPL = \
@@ -737,8 +765,8 @@ class Meson (Build, ModifyEnvBase) :
 
         return native_file
 
-    @modify_environment
-    def configure(self):
+    @async_modify_environment
+    async def configure(self):
         # self.build_dir is different on each call to configure() when doing universal builds
         self.meson_dir = os.path.join(self.build_dir, "_builddir")
         if os.path.exists(self.meson_dir):
@@ -805,7 +833,8 @@ class Meson (Build, ModifyEnvBase) :
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))
 
-        shell.call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
+        #shell.call(meson_cmd, self.meson_dir, logfile=self.logfile)
+        await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def compile(self):

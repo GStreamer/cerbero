@@ -16,11 +16,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libwavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
 
-    def configure(self):
+    async def configure(self):
         shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
             {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
         if self.config.target_arch not in [Architecture.X86, Architecture.X86_64, Architecture.ARMv7, Architecture.ARMv7S] or self.config.target_platform == Platform.IOS:
             self.configure_options += ' --disable-asm '
 
-        super(Recipe, self).configure()
+        await super(Recipe, self).configure()
 

@@ -22,6 +22,7 @@ import shutil
 import tempfile
 import time
 import inspect
+import asyncio
 from functools import reduce
 from pathlib import Path
 
@@ -42,13 +43,15 @@ LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
 
 
 def log_step_output(stepfunc):
-    def wrapped(self):
+    async def wrapped(self):
         step = stepfunc.__name__
         path = "%s/%s-%s.log" % (self.config.logs, self.name, step)
         old_logfile = self.logfile # Allow calling build steps recursively
         self.logfile = open(path, 'w+')
         try:
-            stepfunc()
+            ret = stepfunc()
+            if asyncio.iscoroutine(ret):
+                await ret
         except FatalError:
             # Dump contents of log file on error
             self.logfile.seek(0)
@@ -344,7 +347,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         generated_libs = []
 
         pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
-        env = os.environ.copy()
+        env = self.env.copy()
         env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
         if self.use_system_libs:
             add_system_libs(self.config, env)
@@ -725,13 +728,11 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
             for o in self._recipes.values():
                 setattr(o, name, value)
 
-    def _run_step(self, recipe, step, arch):
-        config = self._config.arch_config[arch]
-        config.do_setup_env()
+    async def _run_step(self, recipe, step, arch):
         # Call the step function
         stepfunc = getattr(recipe, step)
         try:
-            stepfunc(recipe)
+            await stepfunc(recipe)
         except FatalError as e:
             e.arch = arch
             raise e
@@ -759,14 +760,16 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         return self._proxy_recipe.steps[:]
 
     def _do_step(self, step):
+        loop = asyncio.get_event_loop()
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
-            # No, really, let's not download a million times...
-            self._run_step(recipe, step, arch)
+            loop.run_until_complete(self._run_step(recipe, step, arch))
             return
 
+        tasks = []
         for arch, recipe in self._recipes.items():
-            self._run_step(recipe, step, arch)
+            tasks.append(self._run_step(recipe, step, arch))
+        loop.run_until_complete(asyncio.gather(*tasks))
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -814,10 +817,11 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             generator.merge_files([f], [os.path.join(self._config.prefix, arch) for arch in archs])
 
     def _do_step(self, step):
+        loop = asyncio.get_event_loop()
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            self._run_step(recipe, step, arch)
+            loop.run_until_complete(self._run_step(recipe, step, arch))
             return
 
         # For the universal build we need to configure both architectures with
@@ -841,7 +845,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 os.utime(tmp.name, (t, t))
 
             # Call the step function
-            self._run_step(recipe, step, arch)
+            loop.run_until_complete(self._run_step(recipe, step, arch))
 
             # Move installed files to the architecture prefix
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:

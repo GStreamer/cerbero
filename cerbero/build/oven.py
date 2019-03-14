@@ -20,6 +20,7 @@ import sys
 import tempfile
 import shutil
 import traceback
+import asyncio
 from subprocess import CalledProcessError
 
 from cerbero.config import Architecture
@@ -28,6 +29,7 @@ from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell
 from cerbero.utils import messages as m
 
+import inspect
 
 class RecoveryActions(object):
     '''
@@ -153,7 +155,11 @@ class Oven (object):
                 stepfunc = getattr(recipe, step)
                 if not stepfunc:
                     raise FatalError(_('Step %s not found') % step)
-                stepfunc()
+                if asyncio.iscoroutinefunction(stepfunc):
+                    loop = asyncio.get_event_loop()
+                    loop.run_until_complete(stepfunc(recipe))
+                else:
+                    stepfunc()
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
             except FatalError as e:

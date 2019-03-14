@@ -31,8 +31,8 @@ class Recipe(recipe.Recipe):
             shutil.rmtree(self.build_dir)
         super(recipe.Recipe, self).extract()
 
-    def configure(self):
+    async def configure(self):
         shell.touch(os.path.join(self.build_dir, 'doc', 'libtool.1'))
         shell.touch(os.path.join(self.build_dir, 'doc', 'libtoolize.1'))
-        super(recipe.Recipe, self).configure()
+        await super(recipe.Recipe, self).configure()
 

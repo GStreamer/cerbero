@@ -62,7 +62,7 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' --disable-cxx'
             self.files_libs.remove('libgnutlsxx')
 
-    def configure(self):
+    async def configure(self):
         if needs_xcode8_sdk_workaround(self.config):
             # There is no env var that can be set to make the AC_COMPILE_IFELSE
             # macro that checks this evaluate to 'no', so we change the symbol.
@@ -75,4 +75,4 @@ class Recipe(recipe.Recipe):
                 {'#include <stdint.h>':
                  '#include <limits.h>'})
         # Call configure from the base class
-        super(recipe.Recipe, self).configure()
+        await super(recipe.Recipe, self).configure()

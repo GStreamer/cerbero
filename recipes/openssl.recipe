@@ -1,6 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-from cerbero.build.build import modify_environment
+from cerbero.build.build import async_modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell, messages
 from cerbero.errors import FatalError
@@ -94,8 +94,8 @@ class Recipe(recipe.Recipe):
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
             self.make_install = 'make install_dev RANLIB="$RANLIB"'
 
-    @modify_environment
-    def configure(self):
+    @async_modify_environment
+    async def configure(self):
         if self.config.platform == Platform.WINDOWS:
             # Msys ships with a too-old perl, so we modify PATH to use the
             # mingw-perl that was downloaded and installed by bootstrap.

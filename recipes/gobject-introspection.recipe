@@ -86,7 +86,7 @@ class Recipe(recipe.Recipe):
             self.config_sh = "PYTHON=/usr/bin/python3 %s" % self.config_sh
 
     # TODO: catch the share/man stuff like man1/g-ir* ?
-    def configure(self):
+    async def configure(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             if Architecture.is_arm(self.config.target_arch):
                 arch = 'arm'
@@ -98,4 +98,4 @@ class Recipe(recipe.Recipe):
             replacements = {'glib-2.0/include/glibconfig.h':
                     'glib-2.0/include/%s/glibconfig.h' % arch}
             shell.replace(makefilein, replacements)
-        super(Recipe, self).configure()
+        await super(Recipe, self).configure()

@@ -24,11 +24,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libnettle', 'libhogweed']
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
 
-    def configure(self):
+    async def configure(self):
         shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
             {'SUBDIRS = tools testsuite examples':
              'SUBDIRS = tools'})
-        super(recipe.Recipe, self).configure()
+        await super(recipe.Recipe, self).configure()
 
     def post_install(self):
         # Create libtool libraries (.la)

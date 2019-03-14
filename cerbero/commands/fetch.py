@@ -19,6 +19,7 @@
 import os, sys
 import urllib
 import json
+import asyncio
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
@@ -64,7 +65,12 @@ class Fetch(Command):
                     m.message("TARBALL: {} {}".format(recipe.url, recipe.tarball_name))
                 continue
             m.build_step(i + 1, len(fetch_recipes), recipe, 'Fetch')
-            recipe.fetch()
+            stepfunc = getattr(recipe, 'fetch')
+            if asyncio.iscoroutinefunction(stepfunc):
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(stepfunc(recipe))
+            else:
+                stepfunc()
             bv = cookbook.recipe_built_version(recipe.name)
             cv = recipe.built_version()
             if bv != cv:

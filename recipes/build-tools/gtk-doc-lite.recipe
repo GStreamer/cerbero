@@ -39,4 +39,4 @@ class Recipe(recipe.Recipe):
                         '@datarootdir@': '${prefix}/share',
                         '@datadir@': '${datarootdir}'}
         shell.replace(gtkdocize, replacements)
-        shell.call('chmod +x gtkdocize', os.path.join(self.config.prefix, 'bin'), env=shell.call)
+        shell.call('chmod +x gtkdocize', os.path.join(self.config.prefix, 'bin'), env=self.env)

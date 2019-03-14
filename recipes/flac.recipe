@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.autoreconf = True
 
-    def configure(self):
+    async def configure(self):
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.X86:
                 # for missing sys/ucontext.h
@@ -43,4 +43,4 @@ class Recipe(recipe.Recipe):
                     'cpu.c'),
                     {'#  undef USE_OBSOLETE_SIGCONTEXT_FLAVOR':
                      '#define USE_OBSOLETE_SIGCONTEXT_FLAVOR'})
-        super(Recipe, self).configure()
+        await super(Recipe, self).configure()

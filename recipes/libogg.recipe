@@ -15,11 +15,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libogg']
     files_devel = ['include/ogg', 'lib/pkgconfig/ogg.pc', 'share/aclocal/ogg.m4']
 
-    def configure(self):
+    async def configure(self):
         if self.config.target_platform == Platform.IOS:
             if Architecture.is_arm(self.config.target_arch):
                 # These optimizations make the linker think the object file is not
                 # for the arm architecture
                 shell.replace (os.path.join(self.build_dir, 'configure.ac'),
                                {'-O4': '-O2'})
-        super(recipe.Recipe, self).configure()
+        await super(recipe.Recipe, self).configure()

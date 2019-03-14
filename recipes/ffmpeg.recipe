@@ -94,8 +94,8 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             self.make = 'make '
 
-    def configure(self):
-        super(recipe.Recipe, self).configure()
+    async def configure(self):
+        await super(recipe.Recipe, self).configure()
         libav_path = self.build_dir
         if self.config.target_platform == Platform.WINDOWS:
             # XXX: --windres option doesn't exist, despite --help listing it
