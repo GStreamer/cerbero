@@ -4,7 +4,7 @@
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
     version = '0.4.28'
-    remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc'}
+    remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/master'
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
