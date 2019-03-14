@@ -25,7 +25,7 @@ import asyncio
 import subprocess
 from pathlib import Path
 
-from cerbero.enums import Platform, Architecture, Distro
+from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 
@@ -308,6 +308,7 @@ class MakefilesBase (Build, ModifyEnvBase):
     allow_parallel_build = True
     srcdir = '.'
     requires_non_src_build = False
+    library_type = LibraryType.BOTH
 
     def __init__(self):
         Build.__init__(self)
@@ -400,6 +401,7 @@ class Autotools (MakefilesBase):
     can_use_configure_cache = True
     supports_cache_variables = True
     disable_introspection = False
+    library_type = LibraryType.BOTH
 
     async def configure(self):
         # Only use --disable-maintainer mode for real autotools based projects
@@ -497,6 +499,7 @@ class CMake (MakefilesBase):
                     '-DCMAKE_INSTALL_INCLUDEDIR=%(prefix)s/include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
+    library_type = LibraryType.BOTH
 
     @async_modify_environment
     async def configure(self):
@@ -581,10 +584,10 @@ class Meson (Build, ModifyEnvBase) :
     meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
             --default-library=%(default-library)s --buildtype=%(buildtype)s \
             --backend=%(backend)s --wrap-mode=nodownload ..'
-    meson_default_library = 'both'
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
+    library_type = LibraryType.BOTH
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
@@ -797,11 +800,14 @@ class Meson (Build, ModifyEnvBase) :
         else:
             buildtype = 'release'
 
+        if self.library_type == LibraryType.NONE:
+            raise RuntimeException("meson recipes cannot be LibraryType.NONE")
+
         meson_cmd = self.meson_tpl % {
             'meson-sh': self.meson_sh,
             'prefix': self.config.prefix,
             'libdir': 'lib' + self.config.lib_suffix,
-            'default-library': self.meson_default_library,
+            'default-library': self.library_type,
             'buildtype': buildtype,
             'backend': self.meson_backend }
 
@@ -828,7 +834,7 @@ class Meson (Build, ModifyEnvBase) :
             self.unset_toolchain_env()
 
         if 'default_library' in self.meson_options:
-            raise RuntimeError('Do not set `default_library` in self.meson_options, use self.meson_default_library instead')
+            raise RuntimeError('Do not set `default_library` in self.meson_options, use self.library_type instead')
 
         for (key, value) in self.meson_options.items():
             meson_cmd += ' -D%s=%s' % (key, str(value))

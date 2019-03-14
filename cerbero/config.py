@@ -48,6 +48,7 @@ Architecture = enums.Architecture
 Distro = enums.Distro
 DistroVersion = enums.DistroVersion
 License = enums.License
+LibraryType = enums.LibraryType
 
 
 class Variants(object):

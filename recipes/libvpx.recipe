@@ -85,6 +85,7 @@ class Recipe(recipe.Recipe):
                     self.append_env('CFLAGS', '-mstackrealign')
             if self.using_msvc():
                 compiler = self.config.msvc_version
+            self.library_type = LibraryType.STATIC
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
@@ -151,9 +152,7 @@ class Recipe(recipe.Recipe):
             # Fixup the id of the dylib
             vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.5.dylib')
             vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
-            print('install_name_tool', '-id', vpx_lib_with_ver, vpx_lib)
             shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib]))
-            print('install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver)
             shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver]))
 
         super().post_install()

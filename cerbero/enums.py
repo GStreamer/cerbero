@@ -230,3 +230,9 @@ class License:
             'Proprietary License')
     Misc = LicenseDescription('Misc',
             'Miscellaneous license information')
+
+class LibraryType:
+    NONE = 'none'
+    STATIC = 'static'
+    SHARED = 'shared'
+    BOTH = 'both'

@@ -24,7 +24,7 @@ import imp
 import traceback
 
 from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
-    DistroVersion, License
+    DistroVersion, License, LibraryType
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
@@ -413,7 +413,8 @@ class CookBook (object):
                 'BuildSteps': crecipe.BuildSteps,
                 'InvalidRecipeError': InvalidRecipeError,
                 'FatalError': FatalError,
-                'custom': custom, '_': _, 'shell': shell}
+                'custom': custom, '_': _, 'shell': shell,
+                'LibraryType' : LibraryType}
         d_keys = set(list(d.keys()))
         try:
             new_d = d.copy ()

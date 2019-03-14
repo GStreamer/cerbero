@@ -32,6 +32,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options = ' --enable-shared --disable-static'
+            self.library_type = LibraryType.SHARED
         elif self.config.target_platform == Platform.IOS:
             self.configure_options = ' --disable-assembly'
         elif self.config.target_platform == Platform.ANDROID:

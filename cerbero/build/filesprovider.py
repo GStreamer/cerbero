@@ -24,7 +24,7 @@ import inspect
 from functools import partial
 from pathlib import Path
 
-from cerbero.config import Platform
+from cerbero.config import Platform, LibraryType
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
@@ -513,15 +513,23 @@ class FilesProvider(object):
                not category.startswith(self.LIBS_CAT + '_'):
                 continue
 
-            pattern = 'lib/%(f)s.a lib/%(f)s.la '
-            if self.platform == Platform.LINUX:
-                pattern += 'lib/%(f)s.so '
-            elif self.platform == Platform.WINDOWS:
-                pattern += 'lib/%(f)s.dll.a '
-                pattern += 'lib/%(f)s.def '
-                pattern += 'lib/%(fnolib)s.lib '
-            elif self.platform in [Platform.DARWIN, Platform.IOS]:
-                pattern += 'lib/%(f)s.dylib '
+            pattern = ''
+            if self.library_type != LibraryType.NONE and \
+                    (self.platform != Platform.WINDOWS or not self.can_msvc):
+                pattern += 'lib/%(f)s.la '
+
+            if self.library_type in (LibraryType.BOTH, LibraryType.STATIC):
+                pattern += 'lib/%(f)s.a '
+
+            if self.library_type in (LibraryType.BOTH, LibraryType.SHARED):
+                if self.platform == Platform.LINUX:
+                    pattern += 'lib/%(f)s.so '
+                elif self.platform == Platform.WINDOWS:
+                    pattern += 'lib/%(f)s.dll.a '
+                    pattern += 'lib/%(f)s.def '
+                    pattern += 'lib/%(fnolib)s.lib '
+                elif self.platform in [Platform.DARWIN, Platform.IOS]:
+                    pattern += 'lib/%(f)s.dylib '
 
             libsmatch = []
             for x in self._get_category_files_list(category):
