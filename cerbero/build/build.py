@@ -356,15 +356,17 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.using_msvc():
             self.unset_toolchain_env()
 
-        await shell.async_call(self.configure_tpl % {
+        configure_cmd = self.configure_tpl % {
             'config-sh': self.config_sh,
             'prefix': to_unixpath(self.config.prefix),
             'libdir': to_unixpath(self.config.libdir),
             'host': self.config.host,
             'target': self.config.target,
             'build': self.config.build,
-            'options': self.configure_options},
-            self.make_dir, logfile=self.logfile, env=self.env)
+            'options': self.configure_options}
+
+        await shell.async_call(configure_cmd, self.make_dir,
+                               logfile=self.logfile, env=self.env)
 
     @modify_environment
     def compile(self):
@@ -418,37 +420,22 @@ class Autotools (MakefilesBase):
             self.configure_tpl += " --disable-introspection "
 
         if self.autoreconf:
-            await shell.async_call (self.autoreconf_sh, self.config_src_dir, logfile=self.logfile, env=self.env)
+            await shell.async_call(self.autoreconf_sh, self.config_src_dir,
+                                   logfile=self.logfile, env=self.env)
 
-        files = await shell.async_check_call('find %s -type f -name config.guess' %
-                self.config_src_dir, env=self.env)
-        files = files.split('\n')
-        files.remove('')
-        for f in files:
-            o = os.path.join(self.config._relative_path('data'), 'autotools',
-                             'config.guess')
-            m.action("copying %s to %s" % (o, f))
-            shutil.copy(o, f)
-
-        files = await shell.async_check_call('find %s -type f -name config.sub' %
-                self.config_src_dir, env=self.env)
-        files = files.split('\n')
-        files.remove('')
-        for f in files:
-            o = os.path.join(self.config._relative_path('data'), 'autotools',
-                             'config.sub')
-            m.action("copying %s to %s" % (o, f))
-            shutil.copy(o, f)
-
+        # Use our own config.guess and config.sub
+        config_datadir = os.path.join(self.config._relative_path('data'), 'autotools')
+        cfs = {'config.guess': config_datadir, 'config.sub': config_datadir}
         # ensure our libtool modifications are actually picked up by recipes
         if self.name != 'libtool':
-            files = await shell.async_check_call('find %s -type f -name ltmain.sh' %
-                    self.config_src_dir, env=self.env)
+            cfs['ltmain.sh'] = os.path.join(self.config.build_tools_prefix, 'share/libtool/build-aux')
+        for cf, srcdir in cfs.items():
+            find_cmd = 'find {} -type f -name {}'.format(self.config_src_dir, cf)
+            files = await shell.async_call_output(find_cmd, logfile=self.logfile, env=self.env)
             files = files.split('\n')
             files.remove('')
             for f in files:
-                o = os.path.join(self.config.build_tools_prefix, 'share', 'libtool', 'build-aux',
-                                 'ltmain.sh')
+                o = os.path.join(srcdir, cf)
                 m.action("copying %s to %s" % (o, f))
                 shutil.copy(o, f)
 
@@ -519,7 +506,7 @@ class CMake (MakefilesBase):
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Linux '
         if self.config.platform == Platform.WINDOWS:
-            self.configure_options += ' -G\\"Unix Makefiles\\"'
+            self.configure_options += ' -G"Unix Makefiles"'
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -581,9 +568,6 @@ class Meson (Build, ModifyEnvBase) :
     meson_sh = None
     meson_options = None
     meson_cross_properties = None
-    meson_tpl = '%(meson-sh)s --prefix %(prefix)s --libdir %(libdir)s \
-            --default-library=%(default-library)s --buildtype=%(buildtype)s \
-            --backend=%(backend)s --wrap-mode=nodownload ..'
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
@@ -803,24 +787,21 @@ class Meson (Build, ModifyEnvBase) :
         if self.library_type == LibraryType.NONE:
             raise RuntimeException("meson recipes cannot be LibraryType.NONE")
 
-        meson_cmd = self.meson_tpl % {
-            'meson-sh': self.meson_sh,
-            'prefix': self.config.prefix,
-            'libdir': 'lib' + self.config.lib_suffix,
-            'default-library': self.library_type,
-            'buildtype': buildtype,
-            'backend': self.meson_backend }
+        meson_cmd = [self.meson_sh, '--prefix=' + self.config.prefix,
+            '--libdir=lib' + self.config.lib_suffix,
+            '--default-library=' + self.library_type, '--buildtype=' + buildtype,
+            '--backend=' + self.meson_backend, '--wrap-mode=nodownload']
 
         # Don't enable bitcode by passing flags manually, use the option
         if self.config.ios_platform == 'iPhoneOS':
             self.meson_options.update({'b_bitcode': 'true'})
         if self.config.cross_compiling():
             f = self._write_meson_cross_file()
-            meson_cmd += ' --cross-file=' + f
+            meson_cmd += ['--cross-file=' + f]
         else:
             # We only use native files when not cross-compiling
             f = self._write_meson_native_file()
-            meson_cmd += ' --native-file=' + f
+            meson_cmd += ['--native-file=' + f]
 
         if self.config.cross_compiling() or self.using_msvc():
             # We export the cross toolchain with env vars, but Meson picks the
@@ -837,9 +818,8 @@ class Meson (Build, ModifyEnvBase) :
             raise RuntimeError('Do not set `default_library` in self.meson_options, use self.library_type instead')
 
         for (key, value) in self.meson_options.items():
-            meson_cmd += ' -D%s=%s' % (key, str(value))
+            meson_cmd += ['-D%s=%s' % (key, str(value))]
 
-        #shell.call(meson_cmd, self.meson_dir, logfile=self.logfile)
         await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment

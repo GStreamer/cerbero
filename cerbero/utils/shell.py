@@ -70,6 +70,17 @@ def _fix_mingw_cmd(path):
                 l_path[i] = '/'
     return ''.join(l_path)
 
+def _cmd_string_to_array(cmd):
+    if not isinstance(cmd, str):
+        return cmd
+    if PLATFORM == Platform.WINDOWS:
+        # fix paths with backslashes
+        cmd = _fix_mingw_cmd(cmd)
+    # If we've been given a string, run it through sh to get scripts working on
+    # Windows and shell syntax such as && and env var setting working on all
+    # platforms.
+    return ['sh', '-c', cmd]
+
 
 def set_call_env(env):
     global CALL_ENV
@@ -164,7 +175,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
 
     return output
 
-async def async_call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
+async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
     '''
     Run a shell command
 
@@ -172,96 +183,59 @@ async def async_call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, e
     @type cmd: str
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
-    @param fail: whether or not to raise an exception if the command fails
-    @type fail: bool
     '''
-    try:
-        if logfile is None:
-            if verbose:
-                m.message("Running command '%s'" % cmd)
-            stream = None
-        else:
-            logfile.write("Running command '%s'\n" % cmd)
-            logfile.flush()
-            stream = logfile
-        shell = True
-        if PLATFORM == Platform.WINDOWS:
-            # windows do not understand ./
-            if cmd.startswith('./'):
-                cmd = cmd[2:]
-            # run all processes through sh.exe to get scripts working
-            cmd = '%s "%s"' % ('sh -c', cmd)
-            # fix paths with backslashes
-            cmd = _fix_mingw_cmd(cmd)
-            # Disable shell which uses cmd.exe
-            shell = False
-        if DRY_RUN:
-            # write to sdterr so it's filtered more easilly
-            m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
-            ret = 0
-        else:
-            if env:
-                env = env.copy()
-            else:
-                env = os.environ.copy()
+    cmd = _cmd_string_to_array(cmd)
 
-            # Force python scripts to print their output on newlines instead
-            # of on exit. Ensures that we get continuous output in log files.
-            env['PYTHONUNBUFFERED'] = '1'
-            if shell:
-                proc = await asyncio.create_subprocess_shell(cmd, cwd=cmd_dir,
-                                       stderr=subprocess.STDOUT, stdout=stream,
-                                       env=env)
-            else:
-                proc = await asyncio.create_subprocess_exec(cmd, cwd=cmd_dir,
-                                       stderr=subprocess.STDOUT, stdout=stream,
-                                       env=env)
-            await proc.wait()
-            ret = proc.returncode
-    except subprocess.CalledProcessError:
-        if fail:
-            raise FatalError(_("Error running command: %s") % cmd)
-        else:
-            ret = 0
-    return ret
+    if logfile is None:
+        stream = None
+    else:
+        logfile.write("Running command '%s'\n" % cmd)
+        logfile.flush()
+        stream = logfile
 
-async def async_check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
+    if DRY_RUN:
+        # write to sdterr so it's filtered more easilly
+        m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+        return
+
     if env is None:
         env = os.environ.copy()
-    if split and isinstance(cmd, str):
-        cmd = shlex.split(cmd)
-    try:
-        proc = None
-        if shell:
-            if isinstance(cmd, list):
-                proc = await asyncio.create_subprocess_call(*cmd, cwd=cmd_dir,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        env=env)
-            else:
-                proc = await asyncio.create_subprocess_call(cmd, cwd=cmd_dir,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        env=env)
-        else:
-            if isinstance(cmd, list):
-                proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        env=env)
-            else:
-                proc = await asyncio.create_subprocess_exec(cmd, cwd=cmd_dir,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.STDOUT,
-                        env=env)
-        (output, unused_err) = await proc.communicate()
-    except Exception:
-        raise FatalError(_("Error running command: %s") % cmd)
+    # Force python scripts to print their output on newlines instead
+    # of on exit. Ensures that we get continuous output in log files.
+    env['PYTHONUNBUFFERED'] = '1'
+    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
+                           stderr=subprocess.STDOUT, stdout=stream,
+                           env=env)
+    await proc.wait()
+    if proc.returncode != 0:
+        raise FatalError('Running {!r}, returncode {}'.format(cmd, proc.returncode))
+
+
+async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
+    '''
+    Run a shell command and get the output
+
+    @param cmd: the command to run
+    @type cmd: str
+    @param cmd_dir: directory where the command will be run
+    @param cmd_dir: str
+    '''
+    if env is None:
+        env = os.environ.copy()
+    cmd = _cmd_string_to_array(cmd)
+
+    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
+            stdout=subprocess.PIPE, stderr=logfile, env=env)
+    (output, unused_err) = await proc.communicate()
 
     if sys.stdout.encoding:
         output = output.decode(sys.stdout.encoding, errors='replace')
 
+    if proc.returncode != 0:
+        raise FatalError('Running {!r}, returncode {}:\n{}'.format(cmd, proc.returncode, output))
+
     return output
+
 
 def apply_patch(patch, directory, strip=1, logfile=None):
     '''
