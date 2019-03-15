@@ -594,6 +594,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         '''
         Generates library files (.lib or .dll.a) for the DLLs provided by this recipe
         '''
+        # Don't need .lib files for runtime-only deps
+        if self.runtime_dep:
+            return
         if output_dir is None:
             output_dir = os.path.join(self.config.prefix,
                                       'lib' + self.config.lib_suffix)
