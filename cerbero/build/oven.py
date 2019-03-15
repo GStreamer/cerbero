@@ -23,7 +23,7 @@ import traceback
 import asyncio
 from subprocess import CalledProcessError
 
-from cerbero.config import Architecture
+from cerbero.enums import Architecture, Platform
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell
@@ -157,6 +157,12 @@ class Oven (object):
                     raise FatalError(_('Step %s not found') % step)
                 if asyncio.iscoroutinefunction(stepfunc):
                     loop = asyncio.get_event_loop()
+                    # On Windows the default SelectorEventLoop is not available:
+                    # https://docs.python.org/3.5/library/asyncio-subprocess.html#windows-event-loop
+                    if recipe.config.platform == Platform.WINDOWS and \
+                       not isinstance(loop, asyncio.ProactorEventLoop):
+                        loop = asyncio.ProactorEventLoop()
+                        asyncio.set_event_loop(loop)
                     loop.run_until_complete(stepfunc(recipe))
                 else:
                     stepfunc()
