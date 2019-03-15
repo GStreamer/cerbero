@@ -57,6 +57,7 @@ etree.ElementTree.write = write
 ### Windows Hacks ###
 
 # we don't want backlashes in paths as it breaks shell commands
+oldjoin = os.path.join
 oldexpanduser = os.path.expanduser
 oldabspath = os.path.abspath
 oldrealpath = os.path.realpath

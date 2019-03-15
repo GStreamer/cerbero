@@ -31,8 +31,10 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
+from pathlib import PurePath
 from distutils.version import StrictVersion
 
+import cerbero.hacks
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
 from cerbero.utils import messages as m
@@ -224,9 +226,24 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
         env = os.environ.copy()
     cmd = _cmd_string_to_array(cmd)
 
+    if PLATFORM == Platform.WINDOWS:
+        # On Windows, create_subprocess_exec with a PIPE fails while creating
+        # a named pipe using tempfile.mktemp because we override os.path.join
+        # to use / on Windows. Override the tempfile module's reference to the
+        # original implementation, then change it back later so it doesn't leak.
+        # XXX: Get rid of this once we move to Path.as_posix() everywhere
+        tempfile._os.path.join = cerbero.hacks.oldjoin
+        # The tempdir is derived from TMP and TEMP which use / as the path
+        # separator, which fails for the same reason as above. Ensure that \ is
+        # used instead.
+        tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
+
     proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
             stdout=subprocess.PIPE, stderr=logfile, env=env)
     (output, unused_err) = await proc.communicate()
+
+    if PLATFORM == Platform.WINDOWS:
+        os.path.join = cerbero.hacks.join
 
     if sys.stdout.encoding:
         output = output.decode(sys.stdout.encoding, errors='replace')
