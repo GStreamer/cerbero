@@ -67,6 +67,7 @@ class Recipe(recipe.Recipe):
             self.append_env('LDFLAGS', '-stdlib=libc++')
 
         if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += '--enable-shared '
             platform = 'darwin12'
         elif self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.X86 or self.config.target_arch == Architecture.X86_64:
@@ -146,4 +147,13 @@ class Recipe(recipe.Recipe):
                        os.path.join(self.config.prefix, 'lib', 'vpx.lib'))
         LibtoolLibrary('vpx', None, None, None,
                        self.config.libdir, self.config.target_platform).save()
+        if self.config.target_platform == Platform.DARWIN:
+            # Fixup the id of the dylib
+            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.5.dylib')
+            vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
+            print('install_name_tool', '-id', vpx_lib_with_ver, vpx_lib)
+            shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib]))
+            print('install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver)
+            shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver]))
+
         super().post_install()
