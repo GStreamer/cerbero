@@ -23,6 +23,7 @@ import shutil
 from cerbero.enums import Architecture, Platform
 from cerbero.utils import shell, to_unixpath
 from cerbero.utils import messages as m
+from cerbero.errors import FatalError
 
 
 class GenLib(object):
@@ -39,6 +40,18 @@ class GenLib(object):
     def __init__(self, logfile):
         self.logfile = logfile
 
+    def gendef(self, dllpath, outputdir, libname):
+        defname = libname + '.def'
+        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
+        # If the output doesn't contain a 'LIBRARY' directive, gendef errored
+        # out. However, gendef always returns 0 so we need to inspect the
+        # output and guess.
+        if 'LIBRARY' not in def_contents:
+            raise FatalError('gendef failed: ' + def_contents)
+        with open(os.path.join(outputdir, defname), 'w') as f:
+            f.write(def_contents)
+        return defname
+
     def create(self, libname, dllpath, platform, target_arch, outputdir):
         # foo.lib must not start with 'lib'
         if libname.startswith('lib'):
@@ -49,10 +62,7 @@ class GenLib(object):
         bindir, dllname = os.path.split(dllpath)
 
         # Create the .def file
-        defname = libname + '.def'
-        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
-        with open(os.path.join(outputdir, defname), 'w') as f:
-            f.write(def_contents)
+        defname = self.gendef(dllpath, outputdir, libname)
 
         # Create the import library
         lib_path, paths = self._get_lib_exe_path(target_arch, platform)
@@ -111,10 +121,9 @@ class GenGnuLib(GenLib):
             self.filename = 'lib{0}.dll.a'.format(libname)
         dllname = os.path.basename(dllpath)
         # Create the .def file
-        defname = libname + '.def'
-        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
-        with open(os.path.join(outputdir, defname), 'w') as f:
-            f.write(def_contents)
+        defname = self.gendef(dllpath, outputdir, libname)
+
+        # Create the .dll.a file
         shell.call(self.DLLTOOL_TPL % (defname, self.filename, dllname), outputdir,
                    logfile=self.logfile)
         return os.path.join(outputdir, self.filename)
