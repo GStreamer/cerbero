@@ -436,7 +436,7 @@ class Autotools (MakefilesBase):
             files.remove('')
             for f in files:
                 o = os.path.join(srcdir, cf)
-                m.action("copying %s to %s" % (o, f))
+                shell.log("CERBERO: copying %s to %s" % (o, f), self.logfile)
                 shutil.copy(o, f)
 
         if self.config.platform == Platform.WINDOWS and \
