@@ -34,7 +34,6 @@ class GenLib(object):
     '''
 
     DLLTOOL_TPL = '$DLLTOOL -d %s -l %s -D %s'
-    LIB_TPL = '%s /DEF:%s /OUT:%s /MACHINE:%s'
     filename = 'unknown'
 
     def __init__(self, logfile):
@@ -71,20 +70,14 @@ class GenLib(object):
         # Prefer LIB.exe over dlltool:
         # http://sourceware.org/bugzilla/show_bug.cgi?id=12633
         if lib_path is not None:
-            # Spaces msys and shell are a beautiful combination
-            lib_path = to_unixpath(lib_path)
-            lib_path = lib_path.replace('\\', '/')
-            lib_path = lib_path.replace('(', '\\\(').replace(')', '\\\)')
-            lib_path = lib_path.replace(' ', '\\\\ ')
             if target_arch == Architecture.X86:
                 arch = 'x86'
             else:
                 arch = 'x64'
-            old_path = os.environ['PATH']
-            os.environ['PATH'] = paths + ';' + old_path
-            shell.call(self.LIB_TPL % (lib_path, defname, self.filename, arch),
-                       outputdir, logfile=self.logfile)
-            os.environ['PATH'] = old_path
+            env = os.environ.copy()
+            env['PATH'] = paths + ';' + env['PATH']
+            cmd = [lib_path, '/DEF:' + defname, '/OUT:' + self.filename, '/MACHINE:' + arch]
+            shell.new_call(cmd, outputdir, logfile=self.logfile, env=env)
         else:
             m.warning("Using dlltool instead of lib.exe! Resulting .lib files"
                 " will have problems with Visual Studio, see "

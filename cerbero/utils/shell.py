@@ -96,6 +96,7 @@ def restore_call_env():
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
     Run a shell command
+    DEPRECATED: Use new_call and a cmd array wherever possible
 
     @param cmd: the command to run
     @type cmd: str
@@ -186,6 +187,18 @@ def check_output(cmd, cmd_dir=None, logfile=None, env=None):
     if sys.stdout.encoding:
         o = o.decode(sys.stdout.encoding, errors='replace')
     return o
+
+
+def new_call(cmd, cmd_dir=None, logfile=None, env=None):
+    cmd = _cmd_string_to_array(cmd)
+    if logfile:
+        logfile.write('Running command {!r}\n'.format(cmd))
+        logfile.flush()
+    try:
+        subprocess.check_call(cmd, cwd=cmd_dir, env=env,
+                              stdout=logfile, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        raise FatalError('Running command: {!r}\n{}'.format(cmd), str(e))
 
 
 async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
