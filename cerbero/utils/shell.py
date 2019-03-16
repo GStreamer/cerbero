@@ -596,10 +596,10 @@ def which(pgm, path=None):
                 if os.path.exists(pext):
                     return pext
 
-def check_perl_version(needed):
-    perl = which('perl')
+def check_perl_version(needed, env):
+    perl = which('perl', env['PATH'])
     try:
-        out = check_call([perl, '--version'])
+        out = check_output([perl, '--version'], env=env)
     except FatalError:
         return None, None, None
     m = re.search('v[0-9]+\.[0-9]+(\.[0-9]+)?', out)

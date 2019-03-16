@@ -94,14 +94,16 @@ class Recipe(recipe.Recipe):
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
             self.make_install = 'make install_dev RANLIB="$RANLIB"'
 
-    @async_modify_environment
-    async def configure(self):
         if self.config.platform == Platform.WINDOWS:
             # Msys ships with a too-old perl, so we modify PATH to use the
             # mingw-perl that was downloaded and installed by bootstrap.
             openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
             self.prepend_env('PATH', openssl_path, sep=';')
-            perl, found, newer = shell.check_perl_version('5.10.0')
+
+    @async_modify_environment
+    async def configure(self):
+        if self.config.platform == Platform.WINDOWS:
+            perl, found, newer = shell.check_perl_version('5.10.0', env=self.env)
             m = 'please run bootstrap again'
             if newer is None:
                 raise FatalError('Perl not found, ' + m)
@@ -121,7 +123,8 @@ class Recipe(recipe.Recipe):
         # librpmio.so.8, which is used during package generation on Fedora.
         if self.config.target_platform == Platform.LINUX:
             config_sh += ' enable-ssl3 enable-ssl3-method enable-md2 '
-        shell.call(config_sh + self.openssl_platform, self.build_dir, env=self.env)
+        await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
+                               logfile=self.logfile, env=self.env)
 
     def post_install(self):
         # XXX: Don't forget to update this when the soname is bumped!
