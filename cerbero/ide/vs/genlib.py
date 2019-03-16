@@ -33,7 +33,6 @@ class GenLib(object):
     library (.lib)
     '''
 
-    DLLTOOL_TPL = '$DLLTOOL -d %s -l %s -D %s'
     filename = 'unknown'
 
     def __init__(self, logfile):
@@ -51,6 +50,10 @@ class GenLib(object):
         with open(os.path.join(outputdir, defname), 'w') as f:
             f.write(def_contents)
         return defname
+
+    def dlltool(self, defname, dllname, outputdir):
+        cmd = [os.environ['DLLTOOL'], '-d', defname, '-l', self.filename, '-D', dllname]
+        shell.new_call(cmd, outputdir, logfile=self.logfile)
 
     def create(self, libname, dllpath, platform, target_arch, outputdir):
         # foo.lib must not start with 'lib'
@@ -82,8 +85,7 @@ class GenLib(object):
             m.warning("Using dlltool instead of lib.exe! Resulting .lib files"
                 " will have problems with Visual Studio, see "
                 " http://sourceware.org/bugzilla/show_bug.cgi?id=12633")
-            shell.call(self.DLLTOOL_TPL % (defname, self.filename, dllname),
-                       outputdir, logfile=self.logfile)
+            self.dlltool(defname, dllname, outputdir)
         return os.path.join(outputdir, self.filename)
 
     def _get_lib_exe_path(self, target_arch, platform):
@@ -118,6 +120,5 @@ class GenGnuLib(GenLib):
         defname = self.gendef(dllpath, outputdir, libname)
 
         # Create the .dll.a file
-        shell.call(self.DLLTOOL_TPL % (defname, self.filename, dllname), outputdir,
-                   logfile=self.logfile)
+        self.dlltool(defname, dllname, outputdir)
         return os.path.join(outputdir, self.filename)
