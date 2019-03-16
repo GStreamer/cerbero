@@ -14,10 +14,3 @@ class Recipe(recipe.Recipe):
 
     autoreconf_sh = 'aclocal'
     autoreconf = True
-
-    def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            # automake and aclocal are too old on Windows, so don't run this.
-            # It's only needed for Android anyway.
-            self.autoreconf_sh = None
-            self.autoreconf = False
