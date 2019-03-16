@@ -43,10 +43,9 @@ class Recipe(recipe.Recipe):
     patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch']
 
     def extract(self):
-        super(recipe.Recipe, self).extract()
-
+        super().extract()
         for f in ['NEWS', 'README', 'AUTHORS', 'ChangeLog']:
-            print (os.path.join(self.build_dir, f))
+            shell.log(os.path.join(self.build_dir, f), self.logfile)
             shell.touch(os.path.join(self.build_dir, f), True)
         #os.mkdir(os.path.join(self.build_dir, 'm4'))
 
