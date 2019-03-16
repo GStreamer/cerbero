@@ -49,7 +49,7 @@ def get_implib_dllname(config, path):
         if not lib_exe:
             raise FatalError('lib.exe not found, check cerbero configuration')
         try:
-            ret = shell.check_call([lib_exe, '-list', path])
+            ret = shell.check_output([lib_exe, '-list', path])
         except FatalError:
             return 0
         # The last line should contain the dllname
@@ -58,7 +58,7 @@ def get_implib_dllname(config, path):
     if not dlltool:
         raise FatalError('dlltool not found, check cerbero configuration')
     try:
-        return shell.check_call([dlltool, '-I', path])
+        return shell.check_output([dlltool, '-I', path])
     except FatalError:
         return 0
 
