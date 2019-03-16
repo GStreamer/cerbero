@@ -119,7 +119,7 @@ class Oven (object):
                 if action == RecoveryActions.SHELL:
                     shell.enter_build_environment(self.config.target_platform,
                             be.arch, recipe.get_for_arch (be.arch, 'build_dir'))
-                    break
+                    raise be
                 elif action == RecoveryActions.RETRY_ALL:
                     shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
                     self.cookbook.reset_recipe_status(recipe.name)
