@@ -40,6 +40,7 @@ class Build (object):
     @type config: L{cerbero.config.Config}
     '''
 
+    library_type = LibraryType.BOTH
     # Whether this recipe's build system can be built with MSVC
     can_msvc = False
 
@@ -308,7 +309,6 @@ class MakefilesBase (Build, ModifyEnvBase):
     allow_parallel_build = True
     srcdir = '.'
     requires_non_src_build = False
-    library_type = LibraryType.BOTH
 
     def __init__(self):
         Build.__init__(self)
@@ -403,7 +403,6 @@ class Autotools (MakefilesBase):
     can_use_configure_cache = True
     supports_cache_variables = True
     disable_introspection = False
-    library_type = LibraryType.BOTH
 
     async def configure(self):
         # Only use --disable-maintainer mode for real autotools based projects
@@ -486,7 +485,6 @@ class CMake (MakefilesBase):
                     '-DCMAKE_INSTALL_INCLUDEDIR=%(prefix)s/include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
-    library_type = LibraryType.BOTH
 
     @async_modify_environment
     async def configure(self):
@@ -571,7 +569,6 @@ class Meson (Build, ModifyEnvBase) :
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
-    library_type = LibraryType.BOTH
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
