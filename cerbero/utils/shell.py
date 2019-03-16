@@ -153,13 +153,8 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
 
 
 def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
-    if env is None:
-        if CALL_ENV is not None:
-            env = CALL_ENV.copy()
-        elif env is not None:
-            env = env.copy()
-        else:
-            env = os.environ.copy()
+    if env is None and CALL_ENV is not None:
+        env = CALL_ENV.copy()
     if split and isinstance(cmd, str):
         cmd = shlex.split(cmd)
     try:
@@ -200,8 +195,7 @@ async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
         m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
         return
 
-    if env is None:
-        env = os.environ.copy()
+    env = os.environ.copy() if env is None else env.copy()
     # Force python scripts to print their output on newlines instead
     # of on exit. Ensures that we get continuous output in log files.
     env['PYTHONUNBUFFERED'] = '1'
@@ -222,8 +216,6 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    if env is None:
-        env = os.environ.copy()
     cmd = _cmd_string_to_array(cmd)
 
     if PLATFORM == Platform.WINDOWS:
