@@ -85,11 +85,6 @@ def find_dll_implib(config, libname, prefix, libdir, ext, regex):
     path = os.path.join(prefix, libdir, dllname)
     if os.path.exists(path):
         return [os.path.join(libdir, dllname)]
-    # libvpx's build system does not build DLLs on Windows, so it's expected
-    # that the DLL can't be found. Similar code exists in _search_libraries()
-    # XXX: Remove this when libvpx is ported to Meson.
-    if libname == 'vpx':
-        return []
     if len(implib_notfound) == len(implibs):
         m.warning("No import libraries found for {!r}".format(libname))
     else:
@@ -371,6 +366,8 @@ class FilesProvider(object):
               files. We use the libname (the key) in gen_library_file so we
               don't have to guess (incorrectly) based on the dll filename.
         '''
+        if self.library_type == LibraryType.STATIC:
+            return {}
         libdir = self.extensions['sdir']
         libext = self.extensions['srext']
         libregex = self.extensions['sregex']
@@ -386,7 +383,7 @@ class FilesProvider(object):
         for f in files:
             libsmatch[f] = find_func(self.config, f[3:], self.config.prefix,
                                      libdir, libext, libregex)
-            if not libsmatch[f] and f != 'libvpx':
+            if not libsmatch[f]:
                 notfound.append(f)
 
         # It's ok if shared libraries aren't found for iOS, we only want the
@@ -536,8 +533,11 @@ class FilesProvider(object):
                 libsmatch.append(pattern % {'f': x, 'fnolib': x[3:]})
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
-                if self.platform == Platform.WINDOWS and self.can_msvc:
-                    devel_libs += find_pdb_implib(self.config, x[3:], self.config.prefix)
+                if self.platform != Platform.WINDOWS or not self.using_msvc():
+                    continue
+                if self.library_type in (LibraryType.STATIC, LibraryType.NONE):
+                    continue
+                devel_libs += find_pdb_implib(self.config, x[3:], self.config.prefix)
             devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
         return devel_libs
 

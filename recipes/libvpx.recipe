@@ -145,7 +145,7 @@ class Recipe(recipe.Recipe):
             else:
                 subdir = 'Win32'
             os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
-                       os.path.join(self.config.prefix, 'lib', 'vpx.lib'))
+                       os.path.join(self.config.prefix, 'lib', 'libvpx.a'))
         LibtoolLibrary('vpx', None, None, None,
                        self.config.libdir, self.config.target_platform).save()
         if self.config.target_platform == Platform.DARWIN:
