@@ -42,7 +42,8 @@ class GenLib(object):
 
     def gendef(self, dllpath, outputdir, libname):
         defname = libname + '.def'
-        def_contents = shell.check_call('gendef - %s' % dllpath, outputdir)
+        def_contents = shell.check_output('gendef - %s' % dllpath, outputdir,
+                                          logfile=self.logfile)
         # If the output doesn't contain a 'LIBRARY' directive, gendef errored
         # out. However, gendef always returns 0 so we need to inspect the
         # output and guess.

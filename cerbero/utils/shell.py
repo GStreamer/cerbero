@@ -153,6 +153,9 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
 
 
 def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
+    '''
+    DEPRECATED: Use check_output and a cmd array wherever possible
+    '''
     if env is None and CALL_ENV is not None:
         env = CALL_ENV.copy()
     if split and isinstance(cmd, str):
@@ -171,6 +174,19 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
         output = output.decode(sys.stdout.encoding, errors='replace')
 
     return output
+
+
+def check_output(cmd, cmd_dir=None, logfile=None, env=None):
+    cmd = _cmd_string_to_array(cmd)
+    try:
+        o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
+    except (OSError, subprocess.CalledProcessError) as e:
+        raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
+
+    if sys.stdout.encoding:
+        o = o.decode(sys.stdout.encoding, errors='replace')
+    return o
+
 
 async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
     '''
