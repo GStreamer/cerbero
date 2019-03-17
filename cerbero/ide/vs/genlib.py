@@ -46,7 +46,7 @@ class GenLib(object):
         # out. However, gendef always returns 0 so we need to inspect the
         # output and guess.
         if 'LIBRARY' not in def_contents:
-            raise FatalError('gendef failed: ' + def_contents)
+            raise FatalError('gendef failed on {!r}\n{}'.format(dllpath, def_contents))
         with open(os.path.join(outputdir, defname), 'w') as f:
             f.write(def_contents)
         return defname

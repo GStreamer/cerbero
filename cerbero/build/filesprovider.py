@@ -44,7 +44,7 @@ def find_shlib_regex(config, libname, prefix, libdir, ext, regex):
     return matches
 
 def get_implib_dllname(config, path):
-    if config.msvc_toolchain_env:
+    if config.msvc_toolchain_env and path.endswith('.lib'):
         lib_exe = shutil.which('lib', path=config.msvc_toolchain_env['PATH'][0])
         if not lib_exe:
             raise FatalError('lib.exe not found, check cerbero configuration')
@@ -52,8 +52,8 @@ def get_implib_dllname(config, path):
             ret = shell.check_output([lib_exe, '-list', path])
         except FatalError:
             return 0
-        # The last line should contain the dllname
-        return ret.split()[-1]
+        # The last non-empty line should contain the dllname
+        return ret.split('\n')[-2]
     dlltool = os.environ.get('DLLTOOL', None)
     if not dlltool:
         raise FatalError('dlltool not found, check cerbero configuration')
