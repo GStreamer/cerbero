@@ -511,8 +511,7 @@ class FilesProvider(object):
                 continue
 
             pattern = ''
-            if self.library_type != LibraryType.NONE and \
-                    (self.platform != Platform.WINDOWS or not self.can_msvc):
+            if self.library_type != LibraryType.NONE:
                 pattern += 'lib/%(f)s.la '
 
             if self.library_type in (LibraryType.BOTH, LibraryType.STATIC):
