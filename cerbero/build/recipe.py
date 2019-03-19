@@ -420,7 +420,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         '''
         Make OSX libraries relocatable
         '''
-        relocator = OSXRelocator(self.config.prefix, self.config.prefix, True)
+        relocator = OSXRelocator(self.config.prefix, self.config.prefix, True,
+                logfile=self.logfile)
         def get_real_path(fp):
             return os.path.realpath(os.path.join(self.config.prefix, fp))
 
@@ -802,7 +803,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         # merge the common files
         inputs = reduce(lambda x, y: x & y, arch_inputs.values())
         output = self._config.prefix
-        generator = OSXUniversalGenerator(output)
+        generator = OSXUniversalGenerator(output, logfile=self.logfile)
         dirs = [os.path.join(self._config.prefix, arch) for arch in self._recipes.keys()]
         generator.merge_files(inputs, dirs)
 

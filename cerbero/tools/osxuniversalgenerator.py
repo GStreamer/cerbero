@@ -77,7 +77,7 @@ class OSXUniversalGenerator(object):
     LIPO_CMD = 'lipo'
     FILE_CMD = 'file'
 
-    def __init__(self, output_root):
+    def __init__(self, output_root, logfile=None):
         '''
         @output_root: the output directory where the result will be generated
 
@@ -86,6 +86,7 @@ class OSXUniversalGenerator(object):
         if self.output_root.endswith('/'):
             self.output_root = self.output_root[:-1]
         self.missing = []
+        self.logfile = logfile
 
     def merge_files(self, filelist, dirs):
         if len(filelist) == 0:
@@ -109,7 +110,7 @@ class OSXUniversalGenerator(object):
             shutil.copy(f, tmp.name)
             prefix_to_replace = [d for d in dirs if d in f][0]
             relocator = OSXRelocator (self.output_root, prefix_to_replace,
-                                      False)
+                                      False, logfile=self.logfile)
             # since we are using a temporary file, we must force the library id
             # name to real one and not based on the filename
             relocator.relocate_file(tmp.name)
