@@ -335,6 +335,7 @@ def download_wget(url, destination=None, check_cert=True, overwrite=False):
 
     cmd += " --tries=2"
     cmd += " --timeout=10.0"
+    cmd += " --progress=dot:giga"
 
     try:
         call(cmd, path)
