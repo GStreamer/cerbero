@@ -64,6 +64,8 @@ class OSXRelocator(object):
         p_depth = '/..' * depth
         rpaths = ['@loader_path' + p_depth, '@executable_path' + p_depth]
         rpaths += ['@loader_path' + '/../lib', '@executable_path' + '/../lib']
+        if not (object_file.endswith('so') or object_file.endswith('dylib')):
+            return
         if depth > 1:
             rpaths += ['@loader_path/..', '@executable_path/..']
         for p in rpaths:
