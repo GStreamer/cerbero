@@ -89,6 +89,7 @@ class Recipe(recipe.Recipe):
         # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
             platform = 'android'
+            self.library_type = LibraryType.STATIC
             self.append_env('CFLAGS', '-Dandroid_getCpuFamily=vpx_android_getCpuFamily',
                             '-Dandroid_getCpuFeatures=vpx_android_getCpuFeatures',
                             '-Dandroid_getCpuCount=vpx_android_getCpuCount',
