@@ -182,7 +182,9 @@ class Main(object):
 def main():
     if 'CERBERO_PROFILING' in os.environ:
         import cProfile
-        cProfile.runctx('Main(sys.argv[1:])', globals(), locals(), filename='cerbero-profile.log')
+        pfile = 'cerbero-profile.log'
+        print('Outputting profiling information to {!r}'.format(pfile))
+        cProfile.runctx('Main(sys.argv[1:])', globals(), locals(), filename=pfile)
     else:
         Main(sys.argv[1:])
 
