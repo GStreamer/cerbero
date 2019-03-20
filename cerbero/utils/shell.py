@@ -31,7 +31,7 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
-from pathlib import PurePath
+from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
 import cerbero.hacks
@@ -433,12 +433,13 @@ def _splitter(string, base_url):
 
 
 def ls_files(files, prefix):
-    if files == []:
-        return files
-    sfiles = check_call('ls %s' % ' '.join(files),
-                        prefix, True, False, False).split('\n')
-    sfiles.remove('')
-    return list(set(sfiles))
+    if not files:
+        return []
+    sfiles = set()
+    prefix = Path(prefix)
+    for f in ' '.join(files).split():
+        sfiles.update([i.relative_to(prefix).as_posix() for i in prefix.glob(f)])
+    return list(sfiles)
 
 
 def ls_dir(dirpath, prefix):
