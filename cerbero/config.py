@@ -251,6 +251,7 @@ class Config (object):
         for e, v in self.env.items():
             os.environ[e] = v
 
+    @lru_cache(maxsize=None)
     def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables
         includedir = os.path.join(prefix, 'include')
