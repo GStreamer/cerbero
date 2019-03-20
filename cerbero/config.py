@@ -119,7 +119,7 @@ class Config (object):
 
     def __init__(self):
         self._check_uninstalled()
-        self.python_exe = sys.executable
+        self.python_exe = Path(sys.executable).as_posix()
 
         for a in self._properties:
             setattr(self, a, None)

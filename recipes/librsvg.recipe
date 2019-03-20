@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-import sys
 from pathlib import Path
 
 class Recipe(recipe.Recipe):
@@ -40,6 +39,5 @@ class Recipe(recipe.Recipe):
         # NOTE: Remove this when the recipe is ported to Meson.
         if self.config.platform == Platform.WINDOWS:
             with (Path(self.build_dir) / 'python3').open('w') as f:
-                python = Path(sys.executable).as_posix()
-                f.write('#!/bin/sh\n"{}" "$@"'.format(python))
+                f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
         super().compile()
