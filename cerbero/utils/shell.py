@@ -199,7 +199,7 @@ def new_call(cmd, cmd_dir=None, logfile=None, env=None):
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        raise FatalError('Running command: {!r}\n{}'.format(cmd), str(e))
+        raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
 
 
 async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
