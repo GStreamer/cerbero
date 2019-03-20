@@ -492,8 +492,7 @@ class Config (object):
                 self.set_property(key, config[key], True)
 
     def _restore_environment(self):
-        os.environ.clear()
-        os.environ.update(self._raw_environ)
+        os.environ = self._raw_environ.copy()
 
     def _validate_properties(self):
         if not validate_packager(self.packager):
