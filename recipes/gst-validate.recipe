@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(custom.GStreamer):
     name = 'gst-validate'
@@ -33,3 +34,11 @@ class Recipe(custom.GStreamer):
         if self.config.platform != Platform.WINDOWS:
             # validatedefaultinjection plugin isn't built on Windows
             self.files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
+
+    def post_install(self):
+        super().post_install()
+
+        if self.config.target_platform == Platform.LINUX:
+            LibtoolLibrary('gstvalidate-default-overrides-1.0',
+                    None, None, None, self.config.libdir,
+                    self.config.target_platform, deps=['gstvalidate-1.0']).save()
