@@ -29,37 +29,15 @@ class AndroidPackager(DistTarball):
     ''' Creates a distribution tarball for Android '''
 
     def __init__(self, config, package, store):
-        DistTarball.__init__(self, config, package, store)
+        super().__init__(config, package, store)
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):
-        filenames = []
-
         # Filter out some unwanted directories for the development package
         if package_type == PackageType.DEVEL:
             for filt in ['bin/', 'share/aclocal']:
                 files = [x for x in files if not x.startswith(filt)]
-
-        # Create the bz2 file first
-        filename = os.path.join(output_dir, self._get_name(package_type))
-        if os.path.exists(filename):
-            if force:
-                os.remove(filename)
-            else:
-                raise UsageError("File %s already exists" % filename)
-
-        try:
-            with tarfile.open(filename, "w:bz2") as tar:
-                for f in files:
-                    filepath = os.path.join(self.prefix, f)
-                    tar.add(filepath, os.path.join(package_prefix, f))
-        except OSError:
-            os.replace(filename, filename + '.partial')
-            raise
-            
-        filenames.append(filename)
-
-        return  ' '.join(filenames)
+        return super()._create_tarball(output_dir, package_type, files, force, package_prefix)
 
     def _get_name(self, package_type, ext='tar.bz2'):
         if package_type == PackageType.DEVEL:

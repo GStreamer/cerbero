@@ -92,12 +92,14 @@ class DistTarball(PackagerBase):
             else:
                 raise UsageError("File %s already exists" % filename)
 
-        tar = tarfile.open(filename, "w:bz2")
-
-        for f in files:
-            filepath = os.path.join(self.prefix, f)
-            tar.add(filepath, os.path.join(package_prefix, f))
-        tar.close()
+        try:
+            with tarfile.open(filename, "w:bz2") as tar:
+                for f in files:
+                    filepath = os.path.join(self.prefix, f)
+                    tar.add(filepath, os.path.join(package_prefix, f))
+        except OSError:
+            os.replace(filename, filename + '.partial')
+            raise
 
         return filename
 
