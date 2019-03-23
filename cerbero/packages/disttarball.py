@@ -17,12 +17,13 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import shutil
 import tarfile
 
 import cerbero.utils.messages as m
-from cerbero.utils import _
+from cerbero.utils import shell, _
 from cerbero.enums import Platform
-from cerbero.errors import UsageError, EmptyPackageError
+from cerbero.errors import FatalError, UsageError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 
 
@@ -91,7 +92,13 @@ class DistTarball(PackagerBase):
                 os.remove(filename)
             else:
                 raise UsageError("File %s already exists" % filename)
+        if self.config.platform == Platform.WINDOWS:
+            self._write_tarfile(filename, package_prefix, files)
+        else:
+            self._write_tar(filename, package_prefix, files)
+        return filename
 
+    def _write_tarfile(self, filename, package_prefix, files):
         try:
             with tarfile.open(filename, "w:bz2") as tar:
                 for f in files:
@@ -101,7 +108,18 @@ class DistTarball(PackagerBase):
             os.replace(filename, filename + '.partial')
             raise
 
-        return filename
+    def _write_tar(self, filename, package_prefix, files):
+        tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
+        # Use lbzip2 when available for parallel compression
+        if shutil.which('lbzip2'):
+            tar_cmd += ['--use-compress-program=lbzip2']
+        else:
+            tar_cmd += ['--bzip2']
+        try:
+            shell.new_call(tar_cmd + files)
+        except FatalError:
+            os.replace(filename, filename + '.partial')
+            raise
 
 
 class Packager(object):
