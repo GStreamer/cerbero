@@ -31,7 +31,6 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
-from functools import lru_cache
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
@@ -432,18 +431,14 @@ def _splitter(string, base_url):
         except:
             continue
 
-@lru_cache(maxsize=None)
-def ls_files_impl(files, prefix):
+def ls_files(files, prefix):
+    if not files:
+        return []
     sfiles = set()
     prefix = Path(prefix)
     for f in ' '.join(files).split():
         sfiles.update([i.relative_to(prefix).as_posix() for i in prefix.glob(f)])
-    return tuple(sfiles)
-
-def ls_files(files, prefix):
-    if not files:
-        return []
-    return list(ls_files_impl(tuple(files), prefix))
+    return list(tuple(sfiles))
 
 def ls_dir(dirpath, prefix):
     files = []
