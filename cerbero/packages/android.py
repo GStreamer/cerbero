@@ -28,9 +28,6 @@ from cerbero.errors import UsageError
 class AndroidPackager(DistTarball):
     ''' Creates a distribution tarball for Android '''
 
-    def __init__(self, config, package, store):
-        super().__init__(config, package, store)
-
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):
         # Filter out some unwanted directories for the development package
@@ -39,7 +36,10 @@ class AndroidPackager(DistTarball):
                 files = [x for x in files if not x.startswith(filt)]
         return super()._create_tarball(output_dir, package_type, files, force, package_prefix)
 
-    def _get_name(self, package_type, ext='tar.bz2'):
+    def _get_name(self, package_type, ext=None):
+        if ext is None:
+            ext = 'tar.' + self.compress
+
         if package_type == PackageType.DEVEL:
             package_type = ''
         elif package_type == PackageType.RUNTIME:

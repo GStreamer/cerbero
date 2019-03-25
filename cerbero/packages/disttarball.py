@@ -37,6 +37,9 @@ class DistTarball(PackagerBase):
         self.package_prefix = ''
         if self.config.packages_prefix is not None:
             self.package_prefix = '%s-' % self.config.packages_prefix
+        self.compress = config.package_tarball_compression
+        if self.compress not in ('bz2', 'xz'):
+            raise UsageError('Invalid compression type {!r}'.format(self.compress))
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
              split=True, package_prefix=''):
@@ -73,7 +76,10 @@ class DistTarball(PackagerBase):
             filenames.append(devel)
         return filenames
 
-    def _get_name(self, package_type, ext='tar.bz2'):
+    def _get_name(self, package_type, ext=None):
+        if ext is None:
+            ext = 'tar.' + self.compress
+
         if self.config.target_platform != Platform.WINDOWS:
             platform = self.config.target_platform
         elif self.config.variants.visualstudio:
@@ -100,7 +106,7 @@ class DistTarball(PackagerBase):
 
     def _write_tarfile(self, filename, package_prefix, files):
         try:
-            with tarfile.open(filename, "w:bz2") as tar:
+            with tarfile.open(filename, 'w:' + self.compress) as tar:
                 for f in files:
                     filepath = os.path.join(self.prefix, f)
                     tar.add(filepath, os.path.join(package_prefix, f))
@@ -110,11 +116,14 @@ class DistTarball(PackagerBase):
 
     def _write_tar(self, filename, package_prefix, files):
         tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
-        # Use lbzip2 when available for parallel compression
-        if shutil.which('lbzip2'):
-            tar_cmd += ['--use-compress-program=lbzip2']
-        else:
-            tar_cmd += ['--bzip2']
+        if self.compress == 'bz2':
+            # Use lbzip2 when available for parallel compression
+            if shutil.which('lbzip2'):
+                tar_cmd += ['--use-compress-program=lbzip2']
+            else:
+                tar_cmd += ['--bzip2']
+        elif self.compress == 'xz':
+            tar_cmd += ['--use-compress-program=xz --threads=0']
         try:
             shell.new_call(tar_cmd + files)
         except FatalError:

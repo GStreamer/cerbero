@@ -63,6 +63,9 @@ class Package(Command):
                 default=False, help=_('Use only the source cache, no network')),
             ArgparseArgument('--dry-run', action='store_true',
                 default=False, help=_('Only print the packages that will be built')),
+            ArgparseArgument('--xz', action='store_true',
+                default=False, help=_('Use xz instead of bzip2 for compression if '
+                    'creating a tarball')),
             ])
 
     def run(self, config, args):
@@ -78,6 +81,9 @@ class Package(Command):
 
         if args.only_build_deps or args.dry_run:
             return
+
+        if args.xz:
+            config.package_tarball_compression = 'xz'
 
         if p is None:
             raise PackageNotFoundError(args.package[0])

@@ -113,7 +113,8 @@ class Config (object):
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties',
-                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell']
+                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
+                   'package_tarball_compression']
 
     cookbook = None
 
@@ -384,6 +385,7 @@ class Config (object):
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)
         self.set_property('packager', DEFAULT_PACKAGER)
+        self.set_property('package_tarball_compression', 'bz2')
         stdlibpath = sysconfig.get_path('stdlib', vars={'installed_base': ''})[1:]
         # Ensure that the path uses / as path separator and not \
         self.set_property('py_prefix', PurePath(stdlibpath).as_posix())
