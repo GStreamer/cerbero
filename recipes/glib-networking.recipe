@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
 from cerbero.utils.shell import which
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
@@ -29,3 +30,10 @@ class Recipe(recipe.Recipe):
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']
     files_devel = ['lib/gio/modules/libgiognutls.a']
+
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('giognutls', None, None, None,
+                os.path.join(self.config.libdir, 'gio', 'modules'),
+                self.config.target_platform, deps=['gnutls']).save()
+        super().post_install()
