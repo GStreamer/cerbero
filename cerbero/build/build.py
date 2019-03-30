@@ -204,6 +204,21 @@ class EnvVarOp:
             old = env[self.var]
             env[self.var] = self.sep.join(self.vals) + self.sep + old
 
+    def remove(self, env):
+        if self.var not in env:
+            return
+        # Split values taking in account spaces and quotes if the
+        # separator is ' '
+        if self.sep == ' ':
+            old = shlex.split(env[self.var])
+        else:
+            old = env[self.var].split(self.sep)
+        new = [x for x in old if x not in self.vals]
+        if self.sep == ' ':
+            env[self.var] = self.sep.join([shlex.quote(sub) for sub in new])
+        else:
+            env[self.var] = self.sep.join(new)
+
     def __repr__(self):
         return "<EnvVarOp " + self.op + " " + self.var + " with " + self.sep.join(self.vals) + ">"
 
@@ -243,6 +258,22 @@ class ModifyEnvBase:
         self.check_reentrancy()
         self._env_vars.add(var)
         self._new_env.append(EnvVarOp('set', var, vals, sep))
+
+    def remove_env(self, var, *vals, sep=' '):
+        '''
+        Removes a value from and environment variable.
+        eg: self.remove_env('CFLAGS', '-mthumb)
+
+        @ivar var: environment variable to modify
+        @type var: str
+        @ivar vals: values to remove
+        @type vals: list
+        @ivar sep: separator
+        @type sep: str
+        '''
+        self.check_reentrancy()
+        self._env_vars.add(var)
+        self._new_env.append(EnvVarOp('remove', var, vals, sep))
 
     def get_env(self, var, default=None):
         if not self._old_env:
