@@ -444,7 +444,8 @@ class Autotools (MakefilesBase):
             # Never build gtk-doc documentation
             self.configure_tpl += " --disable-gtk-doc "
 
-        if self.config.variants.gi and not self.disable_introspection:
+        if self.config.variants.gi and not self.disable_introspection \
+                and self.use_gobject_introspection():
             self.configure_tpl += " --enable-introspection "
         else:
             self.configure_tpl += " --disable-introspection "
