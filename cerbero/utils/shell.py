@@ -383,7 +383,7 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
     @type destination: str
     '''
     path = None
-    cmd = "curl -L --fail "
+    cmd = "curl -L --fail --retry 2 "
     if not check_cert:
         cmd += " -k "
     if destination is not None:
