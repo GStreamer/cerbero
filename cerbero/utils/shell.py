@@ -450,6 +450,8 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
             return download_func(murl, destination, check_cert, overwrite)
         except Exception as ex:
             errors.append(ex)
+    if len(errors) == 1:
+        raise errors[0]
     raise Exception (errors)
 
 

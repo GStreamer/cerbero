@@ -20,6 +20,8 @@ import os, sys
 import urllib
 import json
 import asyncio
+import tempfile
+import shutil
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
@@ -163,15 +165,22 @@ class FetchCache(Command):
 
         data = urllib.parse.urlencode(values)
         url = "%s?%s" % (url, data)
-        req = urllib.request.Request(url, headers=headers)
 
         m.message("GET %s" % url)
 
+        tmpdir = tempfile.mkdtemp()
+        tmpfile = os.path.join(tmpdir, 'deps.json')
+
         try:
-            resp = urllib.request.urlopen(req);
-            return json.loads(resp.read())
+            shell.download(url, destination=tmpfile)
         except urllib.error.URLError as e:
             raise FatalError(_(e.reason))
+
+        with open(tmpfile, 'r') as f:
+            resp = f.read()
+        shutil.rmtree(tmpdir)
+
+        return json.loads(resp)
 
     def get_deps(self, config, args):
         namespace = args.namespace
