@@ -30,6 +30,7 @@ class Recipe(custom.GStreamer):
                      'resindvd': 'enabled',
                      'rsvg': 'enabled',
                      'voaacenc': 'enabled',
+                     'vulkan': 'enabled',
                      'webrtc': 'enabled',
                      'webrtcdsp': 'enabled',
                      # disabled plugins
@@ -75,7 +76,7 @@ class Recipe(custom.GStreamer):
                   'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
                   'libgstinsertbin-1.0', 'libgstadaptivedemux-1.0',
                   'libgstplayer-1.0', 'libgstbadaudio-1.0',
-                  'libgstisoff-1.0', 'libgstsctp-1.0', 'libgstwebrtc-1.0']
+                  'libgstisoff-1.0', 'libgstsctp-1.0', 'libgstwebrtc-1.0', 'libgstvulkan-1.0']
 
     files_plugins_devel = [
         'include/gstreamer-1.0/gst/mpegts',
@@ -89,6 +90,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/isoff',
         'include/gstreamer-1.0/gst/sctp',
         'include/gstreamer-1.0/gst/webrtc',
+        'include/gstreamer-1.0/gst/vulkan',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
@@ -96,7 +98,8 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
-        'lib/pkgconfig/gstreamer-webrtc-1.0.pc'
+        'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
+        'lib/pkgconfig/gstreamer-vulkan-1.0.pc',
     ]
 
     files_plugins_effects = [
@@ -335,9 +338,13 @@ class Recipe(custom.GStreamer):
             ]
     }
 
-    files_plugins_sys = []
+    files_plugins_sys = [
+        'lib/gstreamer-1.0/libgstvulkan%(mext)s',
+    ]
 
-    files_plugins_sys_devel = []
+    files_plugins_sys_devel = [
+        'lib/gstreamer-1.0/libgstvulkan.a', 'lib/gstreamer-1.0/libgstvulkan.la',
+    ]
 
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
@@ -416,6 +423,12 @@ class Recipe(custom.GStreamer):
     }
 
     def prepare(self):
+        # Disable Cocoa NSApp integration since we enable the Cocoa MainLoop
+        # integration in the GLib recipe
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
+            self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
+            self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
+
         if self.using_msvc():
             # plugin is C++, library is Autotools
             self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
@@ -446,6 +459,11 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options['applemedia'] = 'enabled'
+            self.deps += ['moltenvk']
+
+        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS) or \
+                (self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64):
+            self.disable_plugin('vulkan', 'sys', library_name='vulkan')
 
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')

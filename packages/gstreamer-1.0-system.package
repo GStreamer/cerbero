@@ -18,6 +18,11 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-ugly-1.0:plugins_sys_devel',
             'gst-plugins-bad-1.0:plugins_sys_devel']
 
+    platform_files = {
+      Platform.DARWIN : ['moltenvk:libs'],
+      Platform.IOS : ['moltenvk:libs'],
+    }
+
     def prepare(self):
         if self.config.variants.cdparanoia:
             self.files += ['cdparanoia:libs']

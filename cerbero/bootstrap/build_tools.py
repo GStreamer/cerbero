@@ -35,7 +35,7 @@ class BuildTools (BootstrapperBase, Fetch):
                    'pkg-config', 'orc-tool', 'gettext-m4', 'vala-m4',
                    'gobject-introspection-m4', 'gtk-doc-lite', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'yasm', 'bison', 'flex'],
+        Platform.DARWIN: ['intltool', 'yasm', 'bison', 'flex', 'moltenvk-tools'],
         Platform.WINDOWS: ['intltool', 'yasm'],
         Platform.LINUX: ['intltool-m4'],
     }

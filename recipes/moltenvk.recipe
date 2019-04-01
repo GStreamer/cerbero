@@ -1,0 +1,114 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from cerbero.utils import shell
+
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'moltenvk'
+    version = '1.1.101.0'
+    licenses = [License.Apachev2]
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    files_bins = [
+        'glslangValidator',
+        'glslc',
+        'spirv-as',
+        'spirv-cfg',
+        'spirv-cross',
+        'spirv-dis',
+        'spirv-link',
+        'spirv-opt',
+        'spirv-reduce',
+        'spirv-remap',
+        'spirv-stats',
+        'spirv-val',
+        'vulkaninfo',
+    ]
+
+    files_libs = [
+        'libMoltenVK'
+    ]
+
+    files_devel = [
+        'include/vulkan',
+        'include/MoltenVK',
+        'include/vulkan-portability'
+    ]
+
+    def prepare(self):
+        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+            raise InvalidRecipeError(self, "Invalid platform")
+
+        # no binaries available on iOS
+        if self.config.target_platform == Platform.IOS:
+            self.files_bins = []
+
+        if self.config.target_platform == Platform.DARWIN:
+            self.files_libs += ['libvulkan']
+            self.files_devel += ['etc/vulkan']
+            # no libvulkan.a
+            self.library_type = LibraryType.SHARED
+
+    def install(self):
+        # only copy once for the only architecture supported by the libraries
+        if self.config.target_platform == Platform.DARWIN and self.config.target_arch != Architecture.X86_64:
+            return
+        if self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64:
+            return
+
+        srcdir = self.config.moltenvk_prefix
+
+        if self.config.target_platform == Platform.DARWIN:
+            prefix = self.config.prefix
+        elif self.config.target_platform == Platform.IOS:
+            prefix = os.path.join(self.config.prefix, self.config.target_arch)
+        bindir = os.path.join(prefix, 'bin')
+        libdir = os.path.join(prefix, 'lib')
+
+        to_copy = []
+
+        for bin in self.files_bins:
+            to_copy += [
+                (os.path.join(srcdir, 'macOS', 'bin', bin),
+                 os.path.join(bindir, bin), False)
+            ]
+
+        for d in ('vulkan', 'MoltenVK', 'vulkan-portability'):
+            to_copy += [
+                (os.path.join(srcdir, 'MoltenVK', 'include', d),
+                 os.path.join(prefix, 'include', d), True)
+            ]
+
+        if self.config.target_platform == Platform.DARWIN:
+            to_copy += [
+                (os.path.join(srcdir, 'macOS', 'etc', 'vulkan'),
+                 os.path.join(prefix, 'etc', 'vulkan'), True),
+                (os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.dylib'),
+                 os.path.join(libdir, 'libvulkan.dylib'), False),
+                (os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.1.dylib'),
+                 os.path.join(libdir, 'libvulkan.1.dylib'), False),
+                (os.path.join(srcdir, 'MoltenVK', 'macOS', 'dynamic', 'libMoltenVK.dylib'),
+                 os.path.join(libdir, 'libMoltenVK.dylib'), False),
+                (os.path.join(srcdir, 'MoltenVK', 'macOS', 'static', 'libMoltenVK.a'),
+                 os.path.join(libdir, 'libMoltenVK.a'), False)
+            ]
+        elif self.config.target_platform == Platform.IOS:
+            to_copy += [
+                (os.path.join(srcdir, 'MoltenVK', 'iOS', 'dynamic', 'libMoltenVK.dylib'),
+                         os.path.join(libdir, 'libMoltenVK.dylib'), False),
+                (os.path.join(srcdir, 'MoltenVK', 'iOS', 'static', 'libMoltenVK.a'),
+                         os.path.join(libdir, 'libMoltenVK.a'), False)
+            ]
+
+        for src, dest, is_dir in to_copy:
+            if is_dir:
+                shell.copy_dir(src, dest)
+            else:
+                shutil.copy(src, dest)
+
+        LibtoolLibrary('vulkan', None, None, None, libdir,
+                self.config.target_platform).save()
+        LibtoolLibrary('MoltenVK', None, None, None, libdir,
+                self.config.target_platform).save()

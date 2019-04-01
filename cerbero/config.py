@@ -116,7 +116,7 @@ class Config (object):
                    'meson_cross_properties', 'manifest', 'extra_properties',
                    'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
                    'package_tarball_compression', 'extra_mirrors',
-                   'extra_bootstrap_packages']
+                   'extra_bootstrap_packages', 'moltenvk_prefix']
 
     cookbook = None
 
