@@ -189,6 +189,8 @@ class FetchCache(Command):
         arch = config.target_arch
         if distro == Distro.REDHAT:
             distro = 'fedora'
+        if distro == Distro.OS_X:
+            distro = 'macos'
 
         base_url = self.base_url % namespace
         url = "%s/artifacts/%s/raw/cerbero-build/cerbero-deps.log" % (base_url, branch)
