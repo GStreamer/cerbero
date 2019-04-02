@@ -621,8 +621,8 @@ class Config (object):
     @lru_cache()
     def _perl_version(self):
         try:
-            version = shell.check_call("perl -e 'print \"$]\";'")
-        except:
+            version = shell.check_output("perl -e 'print \"$]\";'")
+        except FatalError:
             m.warning(_("Perl not found, you may need to run bootstrap."))
             version = '0.000000'
         # FIXME: when perl's mayor is >= 10
