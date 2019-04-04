@@ -103,6 +103,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
              'lib/gstreamer-1.0/libgstaiff%(mext)s',
              'lib/gstreamer-1.0/libgstaudiofxbad%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiolatency%(mext)s',
              'lib/gstreamer-1.0/libgstautoconvert%(mext)s',
              'lib/gstreamer-1.0/libgstbayer%(mext)s',
              'lib/gstreamer-1.0/libgstcoloreffects%(mext)s',
@@ -133,6 +134,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaccurip.a', 'lib/gstreamer-1.0/libgstaccurip.la',
              'lib/gstreamer-1.0/libgstaiff.a', 'lib/gstreamer-1.0/libgstaiff.la',
              'lib/gstreamer-1.0/libgstaudiofxbad.a', 'lib/gstreamer-1.0/libgstaudiofxbad.la',
+             'lib/gstreamer-1.0/libgstaudiolatency.a', 'lib/gstreamer-1.0/libgstaudiolatency.la',
              'lib/gstreamer-1.0/libgstautoconvert.a', 'lib/gstreamer-1.0/libgstautoconvert.la',
              'lib/gstreamer-1.0/libgstbayer.a', 'lib/gstreamer-1.0/libgstbayer.la',
              'lib/gstreamer-1.0/libgstcoloreffects.a', 'lib/gstreamer-1.0/libgstcoloreffects.la',
@@ -162,6 +164,7 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs = [
              'lib/gstreamer-1.0/libgstadpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstadpcmenc%(mext)s',
+             'lib/gstreamer-1.0/libgstbz2%(mext)s',
              'lib/gstreamer-1.0/libgstdashdemux%(mext)s',
              'lib/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
              'lib/gstreamer-1.0/libgstdvdspu%(mext)s',
@@ -191,6 +194,7 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs_devel = [
              'lib/gstreamer-1.0/libgstadpcmdec.a', 'lib/gstreamer-1.0/libgstadpcmdec.la',
              'lib/gstreamer-1.0/libgstadpcmenc.a', 'lib/gstreamer-1.0/libgstadpcmenc.la',
+             'lib/gstreamer-1.0/libgstbz2.a', 'lib/gstreamer-1.0/libgstbz2.la',
              'lib/gstreamer-1.0/libgstdashdemux.a', 'lib/gstreamer-1.0/libgstdashdemux.la',
              'lib/gstreamer-1.0/libgstdvbsuboverlay.a', 'lib/gstreamer-1.0/libgstdvbsuboverlay.la',
              'lib/gstreamer-1.0/libgstdvdspu.a', 'lib/gstreamer-1.0/libgstdvdspu.la',
@@ -267,20 +271,22 @@ class Recipe(custom.GStreamer):
 
     files_plugins_net = [
              'lib/gstreamer-1.0/libgstdtls%(mext)s',
+             'lib/gstreamer-1.0/libgstnetsim%(mext)s',
+             'lib/gstreamer-1.0/libgstsctp%(mext)s',
              'lib/gstreamer-1.0/libgstsdpelem%(mext)s',
              'lib/gstreamer-1.0/libgstsrtp%(mext)s',
-             'lib/gstreamer-1.0/libgstwebrtc%(mext)s',
              'lib/gstreamer-1.0/libgstsrt%(mext)s',
-             'lib/gstreamer-1.0/libgstsctp%(mext)s',
+             'lib/gstreamer-1.0/libgstwebrtc%(mext)s',
     ]
 
     files_plugins_net_devel = [
              'lib/gstreamer-1.0/libgstdtls.a', 'lib/gstreamer-1.0/libgstdtls.la',
+             'lib/gstreamer-1.0/libgstnetsim.a', 'lib/gstreamer-1.0/libgstnetsim.la',
+             'lib/gstreamer-1.0/libgstsctp.a', 'lib/gstreamer-1.0/libgstsctp.la',
              'lib/gstreamer-1.0/libgstsdpelem.a', 'lib/gstreamer-1.0/libgstsdpelem.la',
              'lib/gstreamer-1.0/libgstsrtp.a', 'lib/gstreamer-1.0/libgstsrtp.la',
-             'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
              'lib/gstreamer-1.0/libgstsrt.a', 'lib/gstreamer-1.0/libgstsrt.la',
-             'lib/gstreamer-1.0/libgstsctp.a', 'lib/gstreamer-1.0/libgstsctp.la',
+             'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
     ]
 
     files_plugins_net_restricted = [
@@ -339,6 +345,7 @@ class Recipe(custom.GStreamer):
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
+             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d%(mext)s',
@@ -349,13 +356,16 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
+             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
+             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
+             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ]
     }
 
@@ -363,6 +373,7 @@ class Recipe(custom.GStreamer):
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
+             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
@@ -373,13 +384,16 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
+             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
+             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles.a', 'lib/gstreamer-1.0/libgstopensles.la',
+             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ]
     }
 
