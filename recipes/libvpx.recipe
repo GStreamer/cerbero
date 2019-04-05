@@ -148,7 +148,9 @@ class Recipe(recipe.Recipe):
             os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
                        os.path.join(self.config.prefix, 'lib', 'libvpx.a'))
         LibtoolLibrary('vpx', None, None, None,
-                       self.config.libdir, self.config.target_platform).save()
+                       self.config.libdir, self.config.target_platform,
+                       static_only=self.library_type == LibraryType.STATIC).save()
+
         if self.config.target_platform == Platform.DARWIN:
             # Fixup the id of the dylib
             vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.5.dylib')
