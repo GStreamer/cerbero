@@ -22,13 +22,10 @@ import tarfile
 import urllib.request, urllib.parse, urllib.error
 from hashlib import sha256
 
-from cerbero.config import Platform
+from cerbero.config import Platform, DEFAULT_MIRRORS
 from cerbero.utils import git, svn, shell, _
 from cerbero.errors import FatalError, InvalidRecipeError
 import cerbero.utils.messages as m
-
-# Must end in a / for urlparse.urljoin to work correctly
-TARBALL_MIRROR = 'https://gstreamer.freedesktop.org/src/mirror/'
 
 URL_TEMPLATES = {
     'gnome': ('https://download.gnome.org/sources/', '%(name)s/%(maj_ver)s/%(name)s-%(version)s', '.tar.xz'),
@@ -167,7 +164,6 @@ class BaseTarball(object):
         split = list(urllib.parse.urlsplit(self.url))
         split[2] = urllib.parse.quote(split[2])
         self.url = urllib.parse.urlunsplit(split)
-        self.mirror_url = urllib.parse.urljoin(TARBALL_MIRROR, self.tarball_name)
         o = urllib.parse.urlparse(self.url)
         if o.scheme in ('http', 'ftp'):
             raise FatalError('Download URL {!r} must use HTTPS'.format(self.url))
@@ -187,13 +183,9 @@ class BaseTarball(object):
         # Enable certificate checking only on Linux for now
         # FIXME: Add more platforms here after testing
         cc = self.config.platform == Platform.LINUX
-        try:
-            shell.download(self.url, self.download_path, check_cert=cc,
-                           overwrite=redownload, logfile=get_logfile(self))
-        except (FatalError, urllib.error.URLError):
-            # Try our mirror
-            shell.download(self.mirror_url, self.download_path, check_cert=cc,
-                           overwrite=redownload, logfile=get_logfile(self))
+        shell.download(self.url, self.download_path, check_cert=cc,
+            overwrite=redownload, logfile=get_logfile(self),
+            mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS)
         self.verify()
 
     @staticmethod

@@ -397,7 +397,23 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
             os.remove(destination)
         raise e
 
-def download(url, destination=None, check_cert=True, overwrite=False, logfile=None):
+def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None):
+    '''
+    Downloads a file
+
+    @param url: url to download
+    @type: str
+    @param destination: destination where the file will be saved
+    @type destination: str
+    @param check_cert: whether to check certificates or not
+    @type check_cert: bool
+    @param overwrite: whether to overwrite the destination or not
+    @type check_cert: bool
+    @param logfile: path to the file to log instead of stdout
+    @type logfile: str
+    @param mirrors: list of mirrors to use as fallback
+    @type logfile: list
+    '''
     if not overwrite and os.path.exists(destination):
         if logfile is None:
             logging.info("File %s already downloaded." % destination)
@@ -406,6 +422,13 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
         if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
         log("Downloading {}".format(url), logfile)
+
+    urls = [url]
+    if mirrors is not None:
+        filename = os.path.basename(url)
+        # Add a traling '/' the url so that urljoin joins correctly urls
+        # in case users provided it without the trailing '/'
+        urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
     # wget shipped with msys fails with an SSL error on github URLs
     # https://githubengineering.com/crypto-removal-notice/
@@ -420,7 +443,14 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
     else:
         # Fallback. TODO: make this the default and remove curl/wget dependency
         download_func = download_urllib2
-    return download_func(url, destination, check_cert, overwrite)
+
+    errors = []
+    for murl in urls:
+        try:
+            return download_func(murl, destination, check_cert, overwrite)
+        except Exception as ex:
+            errors.append(ex)
+    raise Exception (errors)
 
 
 def _splitter(string, base_url):

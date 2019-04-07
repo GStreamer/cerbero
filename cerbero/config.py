@@ -41,6 +41,7 @@ DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 CERBERO_PREFIX = 'CERBERO_PREFIX'
+DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror/']
 
 
 Platform = enums.Platform
@@ -114,7 +115,7 @@ class Config (object):
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties',
                    'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
-                   'package_tarball_compression']
+                   'package_tarball_compression', 'extra_mirrors']
 
     cookbook = None
 
@@ -411,6 +412,7 @@ class Config (object):
         self.set_property('meson_cross_properties', {})
         self.set_property('manifest', None)
         self.set_property('extra_properties', {})
+        self.set_property('extra_mirrors', [])
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
