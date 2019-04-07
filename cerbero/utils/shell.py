@@ -312,7 +312,7 @@ def download_curl(url, destination=None, recursive=False, check_cert=True, overw
     if recursive:
         raise FatalError(_("cURL doesn't support recursive downloads"))
 
-    cmd = "curl -L "
+    cmd = "curl -L --fail "
     if not check_cert:
         cmd += " -k "
     if destination is not None:
