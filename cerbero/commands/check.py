@@ -16,6 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import asyncio
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
@@ -62,7 +63,11 @@ class Check(Command):
 
             if stepfunc:
                 try:
-                    stepfunc()
+                    if asyncio.iscoroutinefunction(stepfunc):
+                        loop = asyncio.get_event_loop()
+                        loop.run_until_complete(stepfunc(recipe))
+                    else:
+                        stepfunc()
                 except FatalError as e:
                     raise e
                 except Exception as ex:
