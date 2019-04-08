@@ -436,6 +436,8 @@ class Autotools (MakefilesBase):
     disable_introspection = False
 
     async def configure(self):
+        # Build with PIC for static linking
+        self.configure_tpl += ' --with-pic '
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.config_src_dir, 'configure.in')) or\
                 os.path.exists(os.path.join(self.config_src_dir, 'configure.ac')):
@@ -516,7 +518,8 @@ class CMake (MakefilesBase):
                     '-DCMAKE_INSTALL_BINDIR=%(prefix)s/bin ' \
                     '-DCMAKE_INSTALL_INCLUDEDIR=%(prefix)s/include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
-                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
+                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '\
+                    '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true '
 
     @async_modify_environment
     async def configure(self):
