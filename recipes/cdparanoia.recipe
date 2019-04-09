@@ -45,5 +45,5 @@ class Recipe(recipe.Recipe):
                        self.config.libdir, self.config.target_platform).save()
         LibtoolLibrary('cdda_paranoia', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps='cdaa_interface').save()
+                       deps=['cdda_interface']).save()
         super().post_install()
