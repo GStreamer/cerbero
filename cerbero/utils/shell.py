@@ -548,7 +548,7 @@ if [ -e ~/.bashrc ]; then
 source ~/.bashrc
 fi
 %s
-PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]%s'
 '''
     MSYSBAT =  '''
 start bash.exe --rcfile %s
@@ -570,10 +570,10 @@ start bash.exe --rcfile %s
         # We should remove the temporary directory
         # but there is a race with the bash process
     else:
+        ps1 = os.environ.get('PS1', '')
         bashrc = tempfile.NamedTemporaryFile()
-        bashrc.write((BASHRC % (sourcedirsh, platform, arch)).encode())
+        bashrc.write((BASHRC % (sourcedirsh, platform, arch, ps1)).encode())
         bashrc.flush()
-
         shell = os.environ.get('SHELL', '/bin/bash')
         if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:
             os.execlp(shell, shell, '--rcfile', bashrc.name)
