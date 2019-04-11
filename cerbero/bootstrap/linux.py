@@ -45,6 +45,10 @@ class UnixBootstrapper (BootstrapperBase):
             packages = self.packages
             if self.config.distro_version in self.distro_packages:
                 packages += self.distro_packages[self.config.distro_version]
+            extra_packages = self.config.extra_bootstrap_packages.get(
+                self.config.platform, None)
+            if extra_packages:
+                self.packages += extra_packages.get(self.config.distro, [])
             tool = self.tool
             if self.assume_yes:
               tool += ' ' + self.yes_arg;

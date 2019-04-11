@@ -115,7 +115,8 @@ class Config (object):
                    'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
                    'meson_cross_properties', 'manifest', 'extra_properties',
                    'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
-                   'package_tarball_compression', 'extra_mirrors']
+                   'package_tarball_compression', 'extra_mirrors',
+                   'extra_bootstrap_packages']
 
     cookbook = None
 
@@ -413,6 +414,7 @@ class Config (object):
         self.set_property('manifest', None)
         self.set_property('extra_properties', {})
         self.set_property('extra_mirrors', [])
+        self.set_property('extra_bootstrap_packages', {})
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
