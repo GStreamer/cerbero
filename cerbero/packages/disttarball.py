@@ -116,6 +116,8 @@ class DistTarball(PackagerBase):
 
     def _write_tar(self, filename, package_prefix, files):
         tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
+        if package_prefix:
+            tar_cmd += ['--transform=s|^|{}/|'.format(package_prefix)]
         if self.compress == 'bz2':
             # Use lbzip2 when available for parallel compression
             if shutil.which('lbzip2'):
