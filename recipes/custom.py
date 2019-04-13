@@ -13,7 +13,7 @@ from cerbero.utils import shell, to_unixpath
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.15.90.1'
-    tagged_for_release = True
+    tagged_for_release = False
     # We want to force the source type to be git when using a manifest else
     # we won't actually test the commit(s) specified in the manifest
     using_manifest_force_git = False
