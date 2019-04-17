@@ -255,8 +255,6 @@ class Recipe(custom.GStreamer):
                 can_enable_qt5 = False
         if can_enable_qt5:
             self.enable_plugin('qmlgl', 'qt5', 'qt5')
-        if self.meson_options['qt5'] != 'disabled':
-            self.meson_options['cpp_std'] = 'c++11'
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
