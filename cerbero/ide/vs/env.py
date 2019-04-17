@@ -30,6 +30,10 @@ vcvarsalls = {
     'vs15': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
+    'vs16': [r'Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
 }
 
 def get_program_files_dir():
@@ -46,6 +50,8 @@ def get_vs_version(vcver):
         return '2015'
     if vcver == 'vs15':
         return '2017'
+    if vcver == 'vs16':
+        return '2019'
     raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
 def get_vcvarsall(version=None):
