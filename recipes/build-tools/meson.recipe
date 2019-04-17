@@ -17,7 +17,10 @@ class Recipe(recipe.Recipe):
         # https://github.com/mesonbuild/meson/pull/4846, in 0.50
         'meson/0001-find_library-Check-arch-of-libraries-on-Darwin.patch',
         # https://github.com/mesonbuild/meson/pull/4864, in 0.50
-        'meson/0001-macos-lipo-outputs-aarch64-as-arm64-fix-it.patch'
+        'meson/0001-macos-lipo-outputs-aarch64-as-arm64-fix-it.patch',
+        # https://github.com/mesonbuild/meson/pull/5274, fixed in 0.50.1
+        # Not actually in 0.50.1, but it's just not needed in 0.50.*
+        'meson/0001-meson-Add-a-quick-hack-to-support-VS2019.patch',
     ]
     deps = ['ninja']
 
