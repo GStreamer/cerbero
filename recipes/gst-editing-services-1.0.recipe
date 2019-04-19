@@ -20,3 +20,6 @@ class Recipe(custom.GStreamer):
                                'lib/gstreamer-1.0/libgstges.a', 'lib/gstreamer-1.0/libgstges.la']
 
 #    files_python = ['site-packages/ges%(pext)s']
+    
+    # https://gitlab.freedesktop.org/gstreamer/gst-editing-services/merge_requests/68
+    patches = [name + '/0001-meson-Generate-a-pkgconfig-file-for-the-GES-plugin.patch']
