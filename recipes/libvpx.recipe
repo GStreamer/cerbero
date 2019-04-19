@@ -45,8 +45,15 @@ class Recipe(recipe.Recipe):
     # libvpx does not have check target
     make_check = None
 
+    def vpx_using_msvc(self):
+        if not self.using_msvc():
+            return False
+        # libvpx supports VS 2015 and VS 2017
+        if self.config.msvc_version not in ('vs14', 'vs15'):
+            return False
+        return True
 
-    def prepare (self):
+    def prepare(self):
         compiler = 'gcc'
         if self.config.target_arch == Architecture.X86_64:
             arch = 'x86_64'
@@ -83,7 +90,7 @@ class Recipe(recipe.Recipe):
                 platform = 'win32'
                 if not self.using_msvc():
                     self.append_env('CFLAGS', '-mstackrealign')
-            if self.using_msvc():
+            if self.vpx_using_msvc():
                 compiler = self.config.msvc_version
             self.library_type = LibraryType.STATIC
         # FIXME:
@@ -140,7 +147,7 @@ class Recipe(recipe.Recipe):
         super().install()
 
     def post_install(self):
-        if self.using_msvc():
+        if self.vpx_using_msvc():
             if self.config.target_arch == Architecture.X86_64:
                 subdir = 'x64'
             else:
