@@ -6,19 +6,15 @@ from collections import defaultdict
 from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
-from cerbero.config import Platform
-from cerbero.enums import License
+from cerbero.enums import Platform, License
 from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.16.0'
     tagged_for_release = True
-    # We want to force the source type to be git when using a manifest else
-    # we won't actually test the commit(s) specified in the manifest
-    using_manifest_force_git = False
 
-    if not tagged_for_release or using_manifest_force_git:
+    if not tagged_for_release or recipe.Recipe._using_manifest_force_git:
         # Pre-release version, use git master
         stype = SourceType.GIT
         remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}

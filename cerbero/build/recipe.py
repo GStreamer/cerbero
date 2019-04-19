@@ -203,6 +203,8 @@ DISCLAIMER: THIS LICENSING INFORMATION IS PROVIDED ON A BEST-EFFORT BASIS
 AND IS NOT MEANT TO BE LEGAL ADVICE. PLEASE TALK TO A LAWYER FOR ADVICE ON
 SOFTWARE LICENSE COMPLIANCE.\n\n'''
     _licenses_terms = 'The {} in this package may be used under the terms of license file(s):\n\n'
+    # Used in recipes/custom.py. See also: cookbook.py:_load_recipes_from_dir()
+    _using_manifest_force_git = False
 
     def __init__(self, config):
         self.config = config

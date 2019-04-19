@@ -386,14 +386,19 @@ class CookBook (object):
         recipes_files = shell.find_files('*%s' % self.RECIPE_EXT, repo)
         recipes_files.extend(shell.find_files('*/*%s' % self.RECIPE_EXT, repo))
         custom = None
+        # If a manifest is being used or if recipes_commits is defined, disable
+        # usage of tarballs when tagged for release. We need to do this before
+        # `custom.py` is loaded, so we can't set it on the module afterwards.
+        # We need to set it on the parent class.
+        if self._config.manifest or self._config.recipes_commits:
+            crecipe.Recipe._using_manifest_force_git = True
         m_path = os.path.join(repo, 'custom.py')
         if os.path.exists(m_path):
             custom = imp.load_source('custom', m_path)
-            custom.GStreamer.using_manifest_force_git = self._config.manifest is not None
         for f in recipes_files:
-            # Try to load the custom.py module located in the recipes dir
-            # which can contain private classes to extend cerbero's recipes
-            # and reuse them in our private repository
+            # Try to load recipes with the custom.py module located in the
+            # recipes dir which can contain private classes and methods with
+            # common code for gstreamer recipes.
             try:
                 recipes_from_file = self._load_recipes_from_file(f, custom)
             except RecipeNotFoundError:
