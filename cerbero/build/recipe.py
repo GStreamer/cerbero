@@ -344,6 +344,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             'gsturidownloader-1.0' : None,
             'gstrtspserver-1.0' : 'gstreamer-rtsp-server-1.0',
             'gstvalidate-1.0' : 'gst-validate-1.0',
+            'gstvalidate-default-overrides-1.0' : None,
             'ges-1.0' : 'gst-editing-services-1.0',
         }
         generated_libs = []
