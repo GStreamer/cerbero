@@ -102,8 +102,10 @@ class Recipe(custom.GStreamer):
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
              'lib/gstreamer-1.0/libgstaiff%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
              'lib/gstreamer-1.0/libgstaudiofxbad%(mext)s',
              'lib/gstreamer-1.0/libgstaudiolatency%(mext)s',
+             'lib/gstreamer-1.0/libgstaudiomixmatrix%(mext)s',
              'lib/gstreamer-1.0/libgstautoconvert%(mext)s',
              'lib/gstreamer-1.0/libgstbayer%(mext)s',
              'lib/gstreamer-1.0/libgstcoloreffects%(mext)s',
@@ -124,17 +126,20 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsmooth%(mext)s',
              'lib/gstreamer-1.0/libgstspeed%(mext)s',
              'lib/gstreamer-1.0/libgstsoundtouch%(mext)s',
+             'lib/gstreamer-1.0/libgsttimecode%(mext)s',
              'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
+             'lib/gstreamer-1.0/libgstvideoframe_audiolevel%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
              'lib/gstreamer-1.0/libgstladspa%(mext)s',
-             'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
     ]
 
     files_plugins_effects_devel = [
              'lib/gstreamer-1.0/libgstaccurip.a', 'lib/gstreamer-1.0/libgstaccurip.la',
              'lib/gstreamer-1.0/libgstaiff.a', 'lib/gstreamer-1.0/libgstaiff.la',
+             'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
              'lib/gstreamer-1.0/libgstaudiofxbad.a', 'lib/gstreamer-1.0/libgstaudiofxbad.la',
              'lib/gstreamer-1.0/libgstaudiolatency.a', 'lib/gstreamer-1.0/libgstaudiolatency.la',
+             'lib/gstreamer-1.0/libgstaudiomixmatrix.a', 'lib/gstreamer-1.0/libgstaudiomixmatrix.la',
              'lib/gstreamer-1.0/libgstautoconvert.a', 'lib/gstreamer-1.0/libgstautoconvert.la',
              'lib/gstreamer-1.0/libgstbayer.a', 'lib/gstreamer-1.0/libgstbayer.la',
              'lib/gstreamer-1.0/libgstcoloreffects.a', 'lib/gstreamer-1.0/libgstcoloreffects.la',
@@ -155,10 +160,11 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstsmooth.a', 'lib/gstreamer-1.0/libgstsmooth.la',
              'lib/gstreamer-1.0/libgstspeed.a', 'lib/gstreamer-1.0/libgstspeed.la',
              'lib/gstreamer-1.0/libgstsoundtouch.a', 'lib/gstreamer-1.0/libgstsoundtouch.la',
+             'lib/gstreamer-1.0/libgsttimecode.a', 'lib/gstreamer-1.0/libgsttimecode.la',
              'lib/gstreamer-1.0/libgstvideofiltersbad.a', 'lib/gstreamer-1.0/libgstvideofiltersbad.la',
+             'lib/gstreamer-1.0/libgstvideoframe_audiolevel.a', 'lib/gstreamer-1.0/libgstvideoframe_audiolevel.la',
              'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
              'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
-             'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
     ]
 
     files_plugins_codecs = [
