@@ -14,7 +14,9 @@ class Recipe(custom.GStreamer):
     files_libs = ['libges-1.0']
     files_typelibs = ['GES-1.0']
 
-    files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s' ]
-    files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la']
+    files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s',
+                          'lib/gstreamer-1.0/libgstges%(mext)s']
+    files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la',
+                               'lib/gstreamer-1.0/libgstges.a', 'lib/gstreamer-1.0/libgstges.la']
 
 #    files_python = ['site-packages/ges%(pext)s']
