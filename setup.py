@@ -127,7 +127,7 @@ class extended_sdist(setuptools_sdist.sdist):
 
 setup(
     name = "cerbero",
-    version = '1.16.0',
+    version = '1.16.0.1',
     author = "Andoni Morales",
     author_email = "amorales@fluendo.com",
     description = ("Multi platform build system for Open Source projects"),
