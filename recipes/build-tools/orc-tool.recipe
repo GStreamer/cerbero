@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     name = 'orc-tool'
     version = '0.4.29'
 
-    stype = SourceType.TARBALL
+    stype = SourceType.GIT
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
     tarball_checksum = '4f8901f9144b5ec17dffdb33548b5f4c7f8049b0d1023be3462cdd64ec5a3ab2'
