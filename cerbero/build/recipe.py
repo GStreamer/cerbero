@@ -252,10 +252,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         for each build step for this recipe
         '''
         steps = BuildSteps.all_names()
-        for name, m in inspect.getmembers(self, inspect.ismethod):
+        for name, func in inspect.getmembers(self, inspect.ismethod):
             if name not in steps:
                 continue
-            setattr(self, name, log_step_output(m))
+            setattr(self, name, log_step_output(func))
 
     def prepare(self):
         '''
