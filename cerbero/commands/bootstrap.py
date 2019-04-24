@@ -16,11 +16,15 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import asyncio
 
 from cerbero.commands import Command, register_command
-from cerbero.utils import N_, _, ArgparseArgument
+from cerbero.utils import N_, _, ArgparseArgument, determine_num_of_cpus, run_until_complete
+from cerbero.utils import messages as m
 from cerbero.bootstrap.bootstrapper import Bootstrapper
 
+NUMBER_OF_JOBS_IF_UNUSED = 2
+NUMBER_OF_JOBS_IF_USED = 2 * determine_num_of_cpus()
 
 class Bootstrap(Command):
     doc = N_('Bootstrap the build system installing all the dependencies')
@@ -41,9 +45,13 @@ class Bootstrap(Command):
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only,
                 args.offline, args.assume_yes, args.system_only)
+        tasks = []
         for bootstrapper in bootstrappers:
-            bootstrapper.fetch()
-            bootstrapper.extract()
+            tasks.append(bootstrapper.fetch())
+        run_until_complete(tasks)
+
+        for bootstraper in bootstrappers:
+            bootstraper.extract()
             bootstrapper.start()
 
 
@@ -54,15 +62,19 @@ class FetchBootstrap(Command):
     def __init__(self):
         args = [
             ArgparseArgument('--build-tools-only', action='store_true',
-                default=False, help=_('only fetch the build tools'))]
+                default=False, help=_('only fetch the build tools')),
+            ArgparseArgument('--jobs', '-j', action='store', nargs='?', type=int,
+                    const=NUMBER_OF_JOBS_IF_USED, default=NUMBER_OF_JOBS_IF_UNUSED, help=_('number of async jobs'))]
         Command.__init__(self, args)
 
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only,
                 offline=False, assume_yes=False, system_only=False)
+        tasks = []
         for bootstrapper in bootstrappers:
-            bootstrapper.fetch_recipes()
-            bootstrapper.fetch()
+            bootstrapper.fetch_recipes(args.jobs)
+            tasks.append(bootstrapper.fetch())
+        run_until_complete(tasks)
 
 register_command(Bootstrap)
 register_command(FetchBootstrap)

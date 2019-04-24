@@ -31,7 +31,9 @@ from distutils.version import StrictVersion
 import gettext
 import platform as pplatform
 import re
+import asyncio
 from pathlib import Path
+from collections.abc import Iterable
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError
@@ -57,7 +59,7 @@ def user_is_root():
 
 
 def determine_num_of_cpus():
-    ''' Number of virtual or physical CPUs on this system '''
+    ''' Number of virtual or logical CPUs on this system '''
 
     # Python 2.6+
     try:
@@ -515,3 +517,22 @@ def detect_qt5(platform, arch, is_universal):
     if ret == (None, None):
         m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
     return ret
+
+def run_until_complete(tasks):
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    # On Windows the default SelectorEventLoop is not available:
+    # https://docs.python.org/3.5/library/asyncio-subprocess.html#windows-event-loop
+    if sys.platform == 'win32' and \
+       not isinstance(loop, asyncio.ProactorEventLoop):
+        loop = asyncio.ProactorEventLoop()
+        asyncio.set_event_loop(loop)
+
+    if isinstance(tasks, Iterable):
+        loop.run_until_complete(asyncio.gather(*tasks))
+    else:
+        loop.run_until_complete(tasks)

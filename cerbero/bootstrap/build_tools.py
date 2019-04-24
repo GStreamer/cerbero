@@ -106,5 +106,5 @@ class BuildTools (BootstrapperBase, Fetch):
         oven = Oven(self.recipes, self.cookbook)
         oven.start_cooking()
 
-    def fetch_recipes(self):
-        Fetch.fetch(self.cookbook, self.recipes, False, False, False, False)
+    def fetch_recipes(self, jobs):
+        Fetch.fetch(self.cookbook, self.recipes, False, False, False, False, jobs)

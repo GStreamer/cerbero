@@ -35,40 +35,60 @@ from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_, _
-from cerbero.utils import shell, add_system_libs
+from cerbero.utils import shell, add_system_libs, run_until_complete
 from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
 
 LICENSE_INFO_FILENAME = 'README-LICENSE-INFO.txt'
 
 
-def log_step_output(stepfunc):
-    async def wrapped(self):
+def log_step_output(recipe, stepfunc):
+    def open_file():
         step = stepfunc.__name__
-        path = "%s/%s-%s.log" % (self.config.logs, self.name, step)
-        old_logfile = self.logfile # Allow calling build steps recursively
-        self.logfile = open(path, 'w+')
-        try:
-            ret = stepfunc()
-            if asyncio.iscoroutine(ret):
-                await ret
-        except FatalError:
-            # Dump contents of log file on error
-            self.logfile.seek(0)
-            while True:
-                data = self.logfile.read()
-                if data:
-                    print(data)
-                else:
-                    break
-            raise
+        path = "%s/%s-%s.log" % (recipe.config.logs, recipe.name, step)
+        recipe.old_logfile = recipe.logfile # Allow calling build steps recursively
+        recipe.logfile = open(path, 'w+')
+
+    def close_file():
         # if logfile is empty, remove it
-        pos = self.logfile.tell()
-        self.logfile.close()
+        pos = recipe.logfile.tell()
+        recipe.logfile.close()
         if pos == 0:
-            os.remove(self.logfile.name)
-        self.logfile = old_logfile
-    return wrapped
+            os.remove(recipe.logfile.name)
+        recipe.logfile = recipe.old_logfile
+
+    def handle_exception():
+        # Dump contents of log file on error
+        recipe.logfile.seek(0)
+        while True:
+            data = recipe.logfile.read()
+            if data:
+                print(data)
+            else:
+                break
+
+    def wrapped():
+        open_file()
+        try:
+            stepfunc()
+        except FatalError:
+            handle_exception()
+            raise
+        close_file()
+
+    async def async_wrapped():
+        open_file()
+        try:
+            await stepfunc()
+        except FatalError:
+            handle_exception()
+            raise
+        close_file()
+
+    if asyncio.iscoroutinefunction(stepfunc):
+        return async_wrapped
+    else:
+        return wrapped
 
 class MetaRecipe(type):
     ''' This metaclass modifies the base classes of a Receipt, adding 2 new
@@ -255,7 +275,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         for name, func in inspect.getmembers(self, inspect.ismethod):
             if name not in steps:
                 continue
-            setattr(self, name, log_step_output(func))
+            setattr(self, name, log_step_output(self, func))
 
     def prepare(self):
         '''
@@ -752,11 +772,20 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
             for o in self._recipes.values():
                 setattr(o, name, value)
 
-    async def _run_step(self, recipe, step, arch):
+    async def _async_run_step(self, recipe, step, arch):
         # Call the step function
         stepfunc = getattr(recipe, step)
         try:
-            await stepfunc(recipe)
+            await stepfunc()
+        except FatalError as e:
+            e.arch = arch
+            raise e
+
+    def _run_step(self, recipe, step, arch):
+        # Call the step function
+        stepfunc = getattr(recipe, step)
+        try:
+            stepfunc()
         except FatalError as e:
             e.arch = arch
             raise e
@@ -784,16 +813,17 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         return self._proxy_recipe.steps[:]
 
     def _do_step(self, step):
-        loop = asyncio.get_event_loop()
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
-            loop.run_until_complete(self._run_step(recipe, step, arch))
+            run_until_complete(self._async_run_step(recipe, step, arch))
             return
 
-        tasks = []
         for arch, recipe in self._recipes.items():
-            tasks.append(self._run_step(recipe, step, arch))
-        loop.run_until_complete(asyncio.gather(*tasks))
+            stepfunc = getattr(recipe, step)
+            if asyncio.iscoroutinefunction(stepfunc):
+                run_until_complete(self._async_run_step(recipe, step, arch))
+            else:
+                self._run_step(recipe, step, arch)
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -841,11 +871,10 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             generator.merge_files([f], [os.path.join(self._config.prefix, arch) for arch in archs])
 
     def _do_step(self, step):
-        loop = asyncio.get_event_loop()
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            loop.run_until_complete(self._run_step(recipe, step, arch))
+            run_until_complete(self._async_run_step(recipe, step, arch))
             return
 
         # For the universal build we need to configure both architectures with
@@ -869,7 +898,11 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 os.utime(tmp.name, (t, t))
 
             # Call the step function
-            loop.run_until_complete(self._run_step(recipe, step, arch))
+            stepfunc = getattr(recipe, step)
+            if asyncio.iscoroutinefunction(stepfunc):
+                run_until_complete(self._async_run_step(recipe, step, arch))
+            else:
+                self._run_step(recipe, step, arch)
 
             # Move installed files to the architecture prefix
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:

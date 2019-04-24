@@ -19,6 +19,7 @@
 import os
 import time
 import shutil
+import asyncio
 
 from cerbero.config import Platform
 from cerbero.utils import shell
@@ -120,7 +121,7 @@ def delete_tag(git_dir, tagname, fail=True, logfile=None):
     return shell.call('%s tag -d %s' % (GIT, tagname), git_dir, fail=fail, logfile=logfile)
 
 
-def fetch(git_dir, fail=True, logfile=None):
+async def fetch(git_dir, fail=True, logfile=None):
     '''
     Fetch all refs from all the remotes
 
@@ -129,11 +130,12 @@ def fetch(git_dir, fail=True, logfile=None):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    return shell.call('%s fetch --all' % GIT, git_dir, fail=fail, logfile=logfile)
+    cmd = [GIT, 'fetch', '--all']
+    return await shell.async_call(cmd, git_dir, fail, logfile=logfile)
 
-def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
+async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
     '''
-    Update somdules from local directory
+    Update submodules asynchronously from local directory
 
     @param git_dir: path of the git repository
     @type git_dir: str
@@ -156,18 +158,18 @@ def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=N
                            git_dir, logfile=logfile)
     shell.call("%s submodule init" % GIT, git_dir, logfile=logfile)
     if src_dir or not offline:
-        shell.call("%s submodule sync" % GIT, git_dir, logfile=logfile)
-        shell.call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile)
+        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile)
+        await shell.async_call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile)
     else:
-        shell.call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile)
+        await shell.async_call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile)
     if src_dir:
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.url'):
                 shell.call("%s config --file=.gitmodules %s  %s" %
                            (GIT, c[0], c[1]), git_dir, logfile=logfile)
-        shell.call("%s submodule sync" % GIT, git_dir, logfile=logfile)
+        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile)
 
-def checkout(git_dir, commit, logfile=None):
+async def checkout(git_dir, commit, logfile=None):
     '''
     Reset a git repository to a given commit
 
@@ -176,7 +178,8 @@ def checkout(git_dir, commit, logfile=None):
     @param commit: the commit to checkout
     @type commit: str
     '''
-    return shell.call('%s reset --hard %s' % (GIT, commit), git_dir, logfile=logfile)
+    cmd = [GIT, 'reset', '--hard', commit]
+    return await shell.async_call(cmd, git_dir, logfile=logfile)
 
 
 def get_hash(git_dir, commit):
@@ -214,7 +217,7 @@ def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
                git_dir, logfile=logfile)
     ensure_user_is_set(local_git_dir, logfile=logfile)
-    submodules_update(git_dir, local_git_dir, logfile=logfile)
+    asyncio.run(submodules_update(git_dir, local_git_dir, logfile=logfile))
 
 def add_remote(git_dir, name, url, logfile=None):
     '''

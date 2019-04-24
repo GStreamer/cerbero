@@ -31,6 +31,7 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
+import asyncio
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
@@ -46,6 +47,7 @@ TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 
 
 PLATFORM = system_info()[0]
+ASYNC_CALL_SEMAPHORE = asyncio.Semaphore(2)
 DRY_RUN = False
 
 def console_is_interactive():
@@ -96,6 +98,9 @@ def _cmd_string_to_array(cmd, env):
     # platforms.
     return ['sh', '-c', cmd]
 
+def set_max_async_calls(number):
+    global ASYNC_CALL_SEMAPHORE
+    ASYNC_CALL_SEMAPHORE = asyncio.Semaphore(number)
 
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
@@ -202,7 +207,7 @@ def new_call(cmd, cmd_dir=None, logfile=None, env=None):
         raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
 
 
-async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
+async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, env=None):
     '''
     Run a shell command
 
@@ -211,30 +216,35 @@ async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    cmd = _cmd_string_to_array(cmd, env)
+    global ASYNC_CALL_SEMAPHORE
 
-    if logfile is None:
-        stream = None
-    else:
-        logfile.write("Running command '%s'\n" % ' '.join([shlex.quote(c) for c in cmd]))
-        logfile.flush()
-        stream = logfile
+    async with ASYNC_CALL_SEMAPHORE:
+        cmd = _cmd_string_to_array(cmd, env)
 
-    if DRY_RUN:
-        # write to sdterr so it's filtered more easilly
-        m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
-        return
+        if logfile is None:
+            stream = None
+        else:
+            logfile.write("Running command '%s'\n" % ' '.join([shlex.quote(c) for c in cmd]))
+            logfile.flush()
+            stream = logfile
 
-    env = os.environ.copy() if env is None else env.copy()
-    # Force python scripts to print their output on newlines instead
-    # of on exit. Ensures that we get continuous output in log files.
-    env['PYTHONUNBUFFERED'] = '1'
-    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-                           stderr=subprocess.STDOUT, stdout=stream,
-                           env=env)
-    await proc.wait()
-    if proc.returncode != 0:
-        raise FatalError('Running {!r}, returncode {}'.format(cmd, proc.returncode))
+        if DRY_RUN:
+            # write to sdterr so it's filtered more easilly
+            m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+            return
+
+        env = os.environ.copy() if env is None else env.copy()
+        # Force python scripts to print their output on newlines instead
+        # of on exit. Ensures that we get continuous output in log files.
+        env['PYTHONUNBUFFERED'] = '1'
+        proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
+                            stderr=subprocess.STDOUT, stdout=stream,
+                            env=env)
+        await proc.wait()
+        if proc.returncode != 0 and fail:
+            raise FatalError('Running {!r}, returncode {}'.format(cmd, proc.returncode))
+
+        return proc.returncode
 
 
 async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
@@ -246,35 +256,38 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    cmd = _cmd_string_to_array(cmd, env)
+    global ASYNC_CALL_SEMAPHORE
 
-    if PLATFORM == Platform.WINDOWS:
-        import cerbero.hacks
-        # On Windows, create_subprocess_exec with a PIPE fails while creating
-        # a named pipe using tempfile.mktemp because we override os.path.join
-        # to use / on Windows. Override the tempfile module's reference to the
-        # original implementation, then change it back later so it doesn't leak.
-        # XXX: Get rid of this once we move to Path.as_posix() everywhere
-        tempfile._os.path.join = cerbero.hacks.oldjoin
-        # The tempdir is derived from TMP and TEMP which use / as the path
-        # separator, which fails for the same reason as above. Ensure that \ is
-        # used instead.
-        tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
+    async with ASYNC_CALL_SEMAPHORE:
+        cmd = _cmd_string_to_array(cmd, env)
 
-    proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-            stdout=subprocess.PIPE, stderr=logfile, env=env)
-    (output, unused_err) = await proc.communicate()
+        if PLATFORM == Platform.WINDOWS:
+            import cerbero.hacks
+            # On Windows, create_subprocess_exec with a PIPE fails while creating
+            # a named pipe using tempfile.mktemp because we override os.path.join
+            # to use / on Windows. Override the tempfile module's reference to the
+            # original implementation, then change it back later so it doesn't leak.
+            # XXX: Get rid of this once we move to Path.as_posix() everywhere
+            tempfile._os.path.join = cerbero.hacks.oldjoin
+            # The tempdir is derived from TMP and TEMP which use / as the path
+            # separator, which fails for the same reason as above. Ensure that \ is
+            # used instead.
+            tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
 
-    if PLATFORM == Platform.WINDOWS:
-        os.path.join = cerbero.hacks.join
+        proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
+                stdout=subprocess.PIPE, stderr=logfile, env=env)
+        (output, unused_err) = await proc.communicate()
 
-    if sys.stdout.encoding:
-        output = output.decode(sys.stdout.encoding, errors='replace')
+        if PLATFORM == Platform.WINDOWS:
+            os.path.join = cerbero.hacks.join
 
-    if proc.returncode != 0:
-        raise FatalError('Running {!r}, returncode {}:\n{}'.format(cmd, proc.returncode, output))
+        if sys.stdout.encoding:
+            output = output.decode(sys.stdout.encoding, errors='replace')
 
-    return output
+        if proc.returncode != 0:
+            raise FatalError('Running {!r}, returncode {}:\n{}'.format(cmd, proc.returncode, output))
+
+        return output
 
 
 def apply_patch(patch, directory, strip=1, logfile=None):
@@ -320,7 +333,7 @@ def unpack(filepath, output_dir, logfile=None):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-def download_wget(url, destination=None, check_cert=True, overwrite=False):
+async def download_wget(url, destination=None, check_cert=True, overwrite=False):
     '''
     Downloads a file with wget
 
@@ -342,13 +355,13 @@ def download_wget(url, destination=None, check_cert=True, overwrite=False):
     cmd += " --progress=dot:giga"
 
     try:
-        call(cmd, path)
+        await async_call(cmd, path)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)
         raise e
 
-def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
+async def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
     '''
     Download a file with urllib2, which does not rely on external programs
 
@@ -377,7 +390,7 @@ def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
             os.remove(destination)
         raise e
 
-def download_curl(url, destination=None, check_cert=True, overwrite=False):
+async def download_curl(url, destination=None, check_cert=True, overwrite=False):
     '''
     Downloads a file with cURL
 
@@ -395,13 +408,13 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
     else:
         cmd += "-O %s " % url
     try:
-        call(cmd, path)
+        await async_call(cmd, path)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)
         raise e
 
-def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None):
+async def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None):
     '''
     Downloads a file
 
@@ -451,7 +464,7 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
     errors = []
     for murl in urls:
         try:
-            return download_func(murl, destination, check_cert, overwrite)
+            return await download_func(murl, destination, check_cert, overwrite)
         except Exception as ex:
             errors.append(ex)
     if len(errors) == 1:
