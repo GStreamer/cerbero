@@ -68,8 +68,6 @@ class Oven (object):
     @type deps_only: bool
     '''
 
-    STEP_TPL = '[(%s/%s) %s -> %s ]'
-
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
                  missing_files=False, dry_run=False, deps_only=False):
         if isinstance(recipes, Recipe):

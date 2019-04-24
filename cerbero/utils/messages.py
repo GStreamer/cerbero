@@ -22,7 +22,7 @@ import datetime
 
 
 ACTION_TPL = '-----> %s'
-STEP_TPL = '[(%s/%s) %s -> %s ]'
+STEP_TPL = '[(%s/%s) %s -> %s]'
 START_TIME = None
 
 
@@ -30,7 +30,7 @@ def _output(msg, fd):
     global START_TIME
     prefix = ''
     if START_TIME is not None:
-        prefix = str(datetime.timedelta(seconds=int(time.monotonic() - START_TIME)))
+        prefix = str(datetime.timedelta(microseconds=int((time.monotonic() - START_TIME) * 1e6)))
         prefix += ' '
     fd.write(prefix + msg + '\n')
     fd.flush()
