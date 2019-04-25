@@ -87,6 +87,7 @@ class Package(Command):
 
         if p is None:
             raise PackageNotFoundError(args.package[0])
+        p.pre_package()
         if args.tarball:
             if config.target_platform == Platform.ANDROID and \
                config.target_arch == Architecture.UNIVERSAL:
@@ -104,7 +105,7 @@ class Package(Command):
                              args.force, args.keep_temp)
         if None in paths:
             paths.remove(None)
-        p.post_install(paths)
+        paths = p.post_package(paths) or paths
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 

@@ -21,7 +21,7 @@ import os
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import License, Platform
 from cerbero.packages import PackageType
-from cerbero.utils import remove_list_duplicates
+from cerbero.utils import remove_list_duplicates, messages as m
 
 
 class PackageBase(object):
@@ -137,8 +137,25 @@ class PackageBase(object):
         raise NotImplemented("'all_files_list' must be implemented by "
                              "subclasses")
 
-    def post_install(self, paths):
+    def pre_package(self):
+        '''
+        Subclasses can override to to perform actions before packaging
+        '''
         pass
+
+    def post_package(self, paths):
+        '''
+        Subclasses can override to to perform actions after packaging.
+
+        @param paths: list of paths for the files created during packaging
+        @type paths: str
+        @return: list of paths with created files
+        @rtype: list
+        '''
+        if hasattr(self, 'post_install'):
+            m.warning("Package.post_install is deprecated, use Package.post_package instead.")
+            return self.post_install(paths)
+        return paths
 
     def set_mode(self, package_type):
         self.package_mode = package_type
