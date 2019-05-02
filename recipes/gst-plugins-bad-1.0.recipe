@@ -437,6 +437,9 @@ class Recipe(custom.GStreamer):
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
+            if not self.using_msvc():
+                # FIXME: Temporal fix to pass the CI's with the new toolchain
+                self.append_env('CFLAGS', '-Wno-error=switch')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
@@ -462,4 +465,3 @@ class Recipe(custom.GStreamer):
         LibtoolLibrary('gstisoff-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gstreamer-1.0']).save()
         super().post_install()
-
