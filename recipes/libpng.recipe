@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.6.35'
+    version = '1.6.37'
     stype = SourceType.TARBALL
     url = 'sf://'
-    tarball_checksum = '23912ec8c9584917ed9b09c5023465d71709dce089be503c7867fec68a93bcd7'
+    tarball_checksum = '505e70834d35383537b6491e7ae8641f1a4bed1876dbfe361201fc80868d88ca'
     licenses = [{License.LibPNG: ['LICENSE']}]
     deps = ['zlib']
     patches = [name + '/0001-neon-fix-function-export-names-for-iOS-armv7.patch']
