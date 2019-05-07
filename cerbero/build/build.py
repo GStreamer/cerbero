@@ -604,6 +604,7 @@ class Meson (Build, ModifyEnvBase) :
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
+    meson_builddir = "_builddir"
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
@@ -787,7 +788,7 @@ class Meson (Build, ModifyEnvBase) :
     @async_modify_environment
     async def configure(self):
         # self.build_dir is different on each call to configure() when doing universal builds
-        self.meson_dir = os.path.join(self.build_dir, "_builddir")
+        self.meson_dir = os.path.join(self.build_dir, self.meson_builddir)
         if os.path.exists(self.meson_dir):
             # Only remove if it's not empty
             if os.listdir(self.meson_dir):
