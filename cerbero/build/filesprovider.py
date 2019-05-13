@@ -190,7 +190,7 @@ class FilesProvider(object):
         is identical to `self.files_bins`, so we duplicate it here into a devel
         category. It will get included via the 'default' search function.
         '''
-        if not self.using_msvc():
+        if not self.using_msvc() or self.config.variants.nodebug:
             return
         pdbs = []
         if hasattr(self, 'files_bins'):
@@ -309,8 +309,12 @@ class FilesProvider(object):
             fdir, fname = os.path.split(f)
             fmsvc = '{}/{}'.format(fdir, fname[3:])
             if (Path(self.config.prefix) / fmsvc).is_file():
-                # foo.dll, foo.pdb
-                return [fmsvc, fmsvc[:-3] + 'pdb']
+                if self.config.variants.nodebug:
+                    # foo.dll
+                    return [fmsvc]
+                else:
+                    # foo.dll, foo.pdb
+                    return [fmsvc, fmsvc[:-3] + 'pdb']
         raise FatalError('GStreamer plugin {!r} not found'.format(f))
 
     def _search_files(self, files):
@@ -532,7 +536,9 @@ class FilesProvider(object):
                 libsmatch.append(pattern % {'f': x, 'fnolib': x[3:]})
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
-                if self.platform != Platform.WINDOWS or not self.using_msvc():
+                if self.platform != Platform.WINDOWS:
+                    continue
+                if not self.using_msvc() or self.config.variants.nodebug:
                     continue
                 if self.library_type in (LibraryType.STATIC, LibraryType.NONE):
                     continue
