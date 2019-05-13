@@ -137,6 +137,8 @@ class MergeModulePackager(PackagerBase):
             platform = 'msvc'
         else:
             platform = 'mingw'
+        if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
+            platform += '+debug'
         return "%s-%s-%s-%s" % (self.package.name, platform,
                                 self.config.target_arch, version)
 
@@ -191,6 +193,8 @@ class MSIPackager(PackagerBase):
             platform = 'msvc'
         else:
             platform = 'mingw'
+        if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
+            platform += '+debug'
         return "%s-%s-%s-%s" % (self.package.name, platform,
                                 self.config.target_arch, self.package.version)
 
