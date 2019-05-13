@@ -133,7 +133,9 @@ class MergeModulePackager(PackagerBase):
         return path
 
     def _package_name(self, version):
-        if self.config.variants.visualstudio:
+        if self.config.variants.uwp:
+            platform = 'uwp'
+        elif self.config.variants.visualstudio:
             platform = 'msvc'
         else:
             platform = 'mingw'
@@ -189,7 +191,9 @@ class MSIPackager(PackagerBase):
         return paths
 
     def _package_name(self):
-        if self.config.variants.visualstudio:
+        if self.config.variants.uwp:
+            platform = 'uwp'
+        elif self.config.variants.visualstudio:
             platform = 'msvc'
         else:
             platform = 'mingw'
