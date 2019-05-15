@@ -57,6 +57,7 @@ class Recipe(recipe.Recipe):
                'glib/0001-gio-Also-support-modules-built-with-MSVC.patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/187
                'glib/0001-meson-use-the-new-python-module-instead-of-the-pytho.patch',
+               'glib/0001-msvc-set-the-execution-and-source-encoding-to-utf-8..patch',
               ]
 
     files_libs = [
