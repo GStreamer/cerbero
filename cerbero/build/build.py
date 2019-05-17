@@ -519,7 +519,7 @@ class CMake (MakefilesBase):
                     '-DCMAKE_INSTALL_INCLUDEDIR=%(prefix)s/include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '\
-                    '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true '
+                    '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true .'
 
     @async_modify_environment
     async def configure(self):
