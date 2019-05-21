@@ -116,8 +116,12 @@ class DistTarball(PackagerBase):
 
     def _write_tar(self, filename, package_prefix, files):
         tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
+        # ensure we provide a unique list of files to tar to avoid
+        # it creating hard links/copies
+        files = sorted(set(files))
         if package_prefix:
-            tar_cmd += ['--transform=s|^|{}/|'.format(package_prefix)]
+            # Only transform the files (and not symbolic/hard links)
+            tar_cmd += ['--transform', 'flags=r;s|^|{}/|'.format(package_prefix)]
         if self.compress == 'bz2':
             # Use lbzip2 when available for parallel compression
             if shutil.which('lbzip2'):
