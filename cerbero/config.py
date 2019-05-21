@@ -295,6 +295,16 @@ class Config (object):
         # native path separator and must end in a path separator.
         pythonpath = [str(prefix / pypath) + os.sep,
                       str(self.build_tools_prefix / pypath) + os.sep]
+
+        if self.platform == Platform.WINDOWS:
+            # On Windows, pypath doesn't include Python version although some
+            # packages (pycairo, gi, etc...) install themselves using Python
+            # version scheme like on a posix system.
+            # Let's add an extra path to PYTHONPATH for these libraries.
+            pypath = sysconfig.get_path('purelib', 'posix_prefix', {'base': ''})
+            pypath = PurePath(pypath.strip('\\/'))
+            pythonpath.append(str(prefix / pypath) + os.sep)
+
         # Ensure python paths exists because setup.py won't create them
         for path in pythonpath:
             if self.platform == Platform.WINDOWS:
