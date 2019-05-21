@@ -18,6 +18,7 @@
 
 import os
 import sys
+import pathlib
 
 
 ### XML Hacks ###
@@ -64,7 +65,7 @@ oldrealpath = os.path.realpath
 
 
 def join(*args):
-    return '/'.join(args)
+    return pathlib.PurePath(oldjoin(*args)).as_posix()
 
 
 def expanduser(path):
