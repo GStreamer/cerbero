@@ -99,6 +99,9 @@ class Recipe(recipe.Recipe):
             # mingw-perl that was downloaded and installed by bootstrap.
             openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
             self.prepend_env('PATH', openssl_path, sep=';')
+            self.make = self.make.replace('"', '\\"')
+            self.make_install = self.make_install.replace('"', '\\"')
+
 
     @async_modify_environment
     async def configure(self):
