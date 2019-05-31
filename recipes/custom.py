@@ -12,9 +12,9 @@ from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
-    version = '1.14.4'
+    version = '1.14.5'
     # Change to tag when making a release, then back to branch
-    commit = 'origin/1.14'
+    commit = '1.14.5'
 
 def list_gstreamer_1_0_plugins_by_category(config):
         cookbook = CookBook(config)
