@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.WINDOWS, Platform.IOS]:
             self.configure_options += ' --disable-tls-check'
 
-    def compile(self):
+    async def compile(self):
         # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
         # but on Windows Python 3 is `python.exe`. Meson already handles this
         # for us, but Autotools can't.
@@ -47,4 +47,4 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS:
             with (Path(self.build_dir) / 'libsoup/python3').open('w') as f:
                 f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
-        super().compile()
+        await super().compile()

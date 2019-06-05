@@ -104,7 +104,7 @@ class Build (object):
         '''
         raise NotImplemented("'configure' must be implemented by subclasses")
 
-    def compile(self):
+    async def compile(self):
         '''
         Compiles the module
         '''
@@ -128,7 +128,7 @@ class CustomBuild(Build):
     async def configure(self):
         pass
 
-    def compile(self):
+    async def compile(self):
         pass
 
     def install(self):
@@ -402,11 +402,11 @@ class MakefilesBase (Build, ModifyEnvBase):
         await shell.async_call(configure_cmd, self.make_dir,
                                logfile=self.logfile, env=self.env)
 
-    @modify_environment
-    def compile(self):
+    @async_modify_environment
+    async def compile(self):
         if self.using_msvc():
             self.unset_toolchain_env()
-        shell.call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
+        await shell.async_call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):
@@ -866,9 +866,9 @@ class Meson (Build, ModifyEnvBase) :
 
         await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
-    @modify_environment
-    def compile(self):
-        shell.call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
+    @async_modify_environment
+    async def compile(self):
+        await shell.async_call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):

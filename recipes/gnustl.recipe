@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
         v = DistroVersion.get_android_api_version(self.config.target_distro_version)
 
-    def compile(self):
+    async def compile(self):
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)
