@@ -79,7 +79,6 @@ class DebianBootstrapper (UnixBootstrapper):
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
         if self.config.target_platform == Platform.WINDOWS:
-            self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
                 self.checks.append(self.create_debian_arch_check('i386'))
@@ -133,7 +132,6 @@ class RedHatBootstrapper (UnixBootstrapper):
             self.tool = 'yum'
 
         if self.config.target_platform == Platform.WINDOWS:
-            self.packages.append('mingw-w64-tools')
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('glibc.i686')
             if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
