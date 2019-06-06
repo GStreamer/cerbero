@@ -48,10 +48,10 @@ class GenVSProps(Command):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        for pc in PkgConfig.list_all():
+        for pc in PkgConfig.list_all(env=config.env):
             p2v = PkgConfig2VSProps(pc, prefix=config.prefix,
                     inherit_common=True,
-                    prefix_replacement='$(%s)' % prefix)
+                    prefix_replacement='$(%s)' % prefix, env=config.env)
             p2v.create(output_dir)
             m.action('Created %s.props' % pc)
 

@@ -61,21 +61,8 @@ class Source (object):
         if self.patches is None:
             self.patches = []
 
-    def _fetch_env_setup(self):
-        # When running git commands, which is the host git, we need to make
-        # sure it is run in an environment which doesn't pick up the libraries
-        # we build in cerbero
-        env = os.environ.copy()
-        env["LD_LIBRARY_PATH"] = self.config._pre_environ.get("LD_LIBRARY_PATH", "")
-        shell.set_call_env(env)
-
-    def _fetch_env_restore(self):
-        shell.restore_call_env()
-
     def fetch(self, **kwargs):
-        self._fetch_env_setup()
         self.fetch_impl(**kwargs)
-        self._fetch_env_restore()
 
     def fetch_impl(self):
         '''

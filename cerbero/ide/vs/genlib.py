@@ -36,13 +36,14 @@ class GenLib(object):
 
     filename = 'unknown'
 
-    def __init__(self, logfile):
+    def __init__(self, config, logfile):
+        self.config = config
         self.logfile = logfile
 
     def gendef(self, dllpath, outputdir, libname):
         defname = libname + '.def'
         def_contents = shell.check_output('gendef - %s' % dllpath, outputdir,
-                                          logfile=self.logfile)
+                                          logfile=self.logfile, env=self.config.env)
         # If the output doesn't contain a 'LIBRARY' directive, gendef errored
         # out. However, gendef always returns 0 so we need to inspect the
         # output and guess.
@@ -53,8 +54,8 @@ class GenLib(object):
         return defname
 
     def dlltool(self, defname, dllname, outputdir):
-        cmd = shlex.split(os.environ['DLLTOOL']) + ['-d', defname, '-l', self.filename, '-D', dllname]
-        shell.new_call(cmd, outputdir, logfile=self.logfile)
+        cmd = shlex.split(self.config.env['DLLTOOL']) + ['-d', defname, '-l', self.filename, '-D', dllname]
+        shell.new_call(cmd, outputdir, logfile=self.logfile, env=self.config.env)
 
     def create(self, libname, dllpath, platform, target_arch, outputdir):
         # foo.lib must not start with 'lib'
@@ -78,7 +79,7 @@ class GenLib(object):
                 arch = 'x86'
             else:
                 arch = 'x64'
-            env = os.environ.copy()
+            env = self.config.env.copy()
             env['PATH'] = paths + ';' + env['PATH']
             cmd = [lib_path, '/DEF:' + defname, '/OUT:' + self.filename, '/MACHINE:' + arch]
             shell.new_call(cmd, outputdir, logfile=self.logfile, env=env)

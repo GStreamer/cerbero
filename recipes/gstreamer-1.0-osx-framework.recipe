@@ -30,5 +30,5 @@ class Recipe(recipe.Recipe):
                 'gstreamer-insertbin-1.0', 'gstreamer-mpegts-1.0',
                 'gstreamer-player-1.0'
                 ]
-        fwlib = DynamicFrameworkLibrary(install_name, install_name, libs, self.config.target_arch)
+        fwlib = DynamicFrameworkLibrary(install_name, install_name, libs, self.config.target_arch, env=self.env)
         fwlib.create()

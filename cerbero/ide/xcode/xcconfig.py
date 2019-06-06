@@ -37,8 +37,8 @@ class XCConfig(object):
     the libraries that need to be linked.
     '''
 
-    def __init__(self, libraries):
-        self.pkgconfig = PkgConfig(libraries)
+    def __init__(self, libraries, env=None):
+        self.pkgconfig = PkgConfig(libraries, env=env)
 
     def create(self, outfile):
         args = self._fill()

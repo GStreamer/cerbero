@@ -69,10 +69,9 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('glib-tools')
         self.BUILD_TOOLS += self.config.extra_build_tools
 
+        self._setup_env()
+
     def _setup_env(self):
-        # Start with the original env that cerbero was called with
-        os.environ.clear()
-        os.environ.update(self.config._pre_environ)
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
         config = Config()
@@ -104,12 +103,8 @@ class BuildTools (BootstrapperBase, Fetch):
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 
     def start(self):
-        self._setup_env()
         oven = Oven(self.recipes, self.cookbook)
         oven.start_cooking()
-        self.config.do_setup_env()
 
     def fetch_recipes(self):
-        self._setup_env()
         Fetch.fetch(self.cookbook, self.recipes, False, False, False, False)
-        self.config.do_setup_env()

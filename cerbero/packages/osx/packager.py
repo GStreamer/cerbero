@@ -126,7 +126,7 @@ class OSXPackage(PackagerBase, FrameworkHeadersMixin):
         self.install_dir = install_dir or self.package.get_install_dir()
         self.version = version or self.package.version
         self.sdk_version = sdk_version or self.version
-        self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs()
+        self.include_dirs = include_dirs or PkgConfig.list_all_include_dirs(env=self.config.env)
 
         # create the runtime package
         try:
@@ -255,7 +255,7 @@ class ProductPackage(PackagerBase):
         return paths
 
     def _prepare_pack(self):
-        self.include_dirs = PkgConfig.list_all_include_dirs()
+        self.include_dirs = PkgConfig.list_all_include_dirs(env=self.config.env)
         self.tmp = tempfile.mkdtemp()
         self.fw_path = self.tmp
 
@@ -572,7 +572,7 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         static_files = [x for x in files if x.endswith('.a')]
 
         fwlib = StaticFrameworkLibrary(libname, libname, static_files,
-            self.config.target_arch)
+            self.config.target_arch, env=self.config.env)
         fwlib.use_pkgconfig = False
         if self.config.target_arch == Architecture.UNIVERSAL:
             fwlib.universal_archs = self.config.universal_archs

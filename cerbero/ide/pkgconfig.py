@@ -22,6 +22,7 @@ import os
 import sys
 
 from cerbero.errors import FatalError
+from cerbero.utils import shell
 
 class PkgConfig(object):
     '''
@@ -30,9 +31,10 @@ class PkgConfig(object):
 
     cmd = 'pkg-config'
 
-    def __init__(self, libs, inherit=True):
+    def __init__(self, libs, inherit=True, env=None):
         if isinstance(libs, str):
             libs = [libs]
+        self.env = os.environ.copy() if env is None else env.copy()
         self.libs = libs
         self.inherit = inherit
         if not inherit:
@@ -40,7 +42,7 @@ class PkgConfig(object):
             if requires == []:
                 self.inherit = True
             else:
-                self.deps_pkgconfig = PkgConfig(requires)
+                self.deps_pkgconfig = PkgConfig(requires, env=env)
 
     def include_dirs(self):
         res = self._exec('--cflags-only-I', '-I')
@@ -71,15 +73,15 @@ class PkgConfig(object):
         return self._exec('--variable=prefix')
 
     @staticmethod
-    def list_all():
-        res = PkgConfig._call('%s --list-all' % PkgConfig.cmd, '\n')
+    def list_all(env=None):
+        res = PkgConfig._call('%s --list-all' % PkgConfig.cmd, '\n', env=env)
         return [x.split(' ', 1)[0] for x in res]
 
     @staticmethod
-    def list_all_include_dirs():
+    def list_all_include_dirs(env=None):
         include_dirs = []
-        for pc in PkgConfig.list_all():
-            pkgconfig = PkgConfig(pc)
+        for pc in PkgConfig.list_all(env=env):
+            pkgconfig = PkgConfig(pc, env=env)
             d = pkgconfig.include_dirs()
             for p in d:
                 if not os.path.isabs(p):
@@ -96,16 +98,13 @@ class PkgConfig(object):
 
     def _exec(self, mode, delimiter=None):
         cmd = '%s %s %s' % (self.cmd, mode, ' '.join(self.libs))
-        return self._call(cmd, delimiter)
+        return self._call(cmd, delimiter, env=self.env)
 
     @staticmethod
-    def _call(cmd, delimiter=None):
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        output, unused_err = process.communicate()
+    def _call(cmd, delimiter=None, env=None):
+        env = os.environ.copy() if env is None else env.copy()
+        output = shell.check_output(cmd, env=env)
         output = output.strip()
-
-        if sys.stdout.encoding:
-            output = output.decode(sys.stdout.encoding)
 
         if delimiter:
             res = output.split('%s' % delimiter)

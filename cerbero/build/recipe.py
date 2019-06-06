@@ -624,7 +624,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                                       'lib' + self.config.lib_suffix)
         # Generate a GNU import library or an MSVC import library
         genlibcls = GenGnuLib if self.using_msvc() else GenLib
-        genlib = genlibcls(self.logfile)
+        genlib = genlibcls(self.config, self.logfile)
         # Generate the .dll.a or .lib file as needed
         for (libname, dllpaths) in list(self.libraries().items()):
             if len(dllpaths) > 1:

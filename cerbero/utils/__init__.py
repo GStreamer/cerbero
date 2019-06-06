@@ -405,7 +405,10 @@ def add_system_libs(config, new_env):
     if config.sysroot:
         sysroot = config.sysroot
 
-    search_paths = [os.environ['PKG_CONFIG_LIBDIR'],
+    search_paths = []
+    if os.environ.get('PKG_CONFIG_LIBDIR', None):
+       search_paths += [os.environ['PKG_CONFIG_LIBDIR']]
+    search_paths += [
         os.path.join(sysroot, 'usr', libdir, 'pkgconfig'),
         os.path.join(sysroot, 'usr/share/pkgconfig')]
 

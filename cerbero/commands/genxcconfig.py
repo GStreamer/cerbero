@@ -52,7 +52,7 @@ class GenXCodeConfig(Command):
         filename = filename or libraries[0]
         filepath = os.path.join(output_dir, '%s.xcconfig' % filename)
 
-        xcconfig = XCConfig(libraries)
+        xcconfig = XCConfig(libraries, env=config.env)
         xcconfig.create(filepath)
         m.action('Created %s.xcconfig' % filename)
 

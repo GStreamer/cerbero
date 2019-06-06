@@ -430,7 +430,7 @@ class CookBook (object):
             for recipe_cls_key in [x for x in diff_keys if self._is_recipe_class(new_d[x])]:
                 if self._config.target_arch != Architecture.UNIVERSAL:
                     recipe = self._load_recipe_from_class(
-                        new_d[recipe_cls_key], self._config, filepath, custom)
+                        new_d[recipe_cls_key], self._config, filepath)
                 else:
                     recipe = self._load_universal_recipe(d, new_d[recipe_cls_key],
                         recipe_cls_key, filepath)
@@ -450,11 +450,10 @@ class CookBook (object):
             issubclass (cls, crecipe.Recipe) and \
             cls.__module__ == 'builtins'
 
-    def _load_recipe_from_class(self, recipe_cls, config, filepath, setup_env=False):
+    def _load_recipe_from_class(self, recipe_cls, config, filepath):
         try:
-            if setup_env:
-                config.do_setup_env()
-            r = recipe_cls(config, os.environ.copy())
+            config.do_setup_env()
+            r = recipe_cls(config, config.env.copy())
             r.__file__ = os.path.abspath(filepath)
             r.prepare()
             return r
@@ -479,7 +478,7 @@ class CookBook (object):
                 parsed_dict = dict(globals_dict)
                 parse_file(filepath, parsed_dict)
                 recipe_cls = parsed_dict[recipe_cls_key]
-            r = self._load_recipe_from_class(recipe_cls, conf, filepath, True)
+            r = self._load_recipe_from_class(recipe_cls, conf, filepath)
             if r is not None:
                 recipe.add_recipe(r)
             recipe_cls = None

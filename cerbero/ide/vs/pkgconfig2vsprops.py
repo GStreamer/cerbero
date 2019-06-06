@@ -32,13 +32,13 @@ class PkgConfig2VSProps(object):
     generators = {'vs2008': VSProps, 'vs2010': Props}
 
     def __init__(self, libname, target='vs2010', prefix=None,
-            prefix_replacement=None, inherit_common=False):
+            prefix_replacement=None, inherit_common=False, env=None):
 
         if target not in self.generators:
             raise FatalError('Target version must be one of %s' %
                              list(generators.keys()))
 
-        pkgconfig = PkgConfig([libname], False)
+        pkgconfig = PkgConfig([libname], False, env=env)
         requires = pkgconfig.requires()
         include_dirs = pkgconfig.include_dirs()
         libraries_dirs = pkgconfig.libraries_dirs()

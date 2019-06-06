@@ -48,8 +48,6 @@ TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 PLATFORM = system_info()[0]
 DRY_RUN = False
 
-CALL_ENV = None
-
 def console_is_interactive():
     if not os.isatty(sys.stdout.fileno()):
         return False
@@ -84,15 +82,6 @@ def _cmd_string_to_array(cmd):
     return ['sh', '-c', cmd]
 
 
-def set_call_env(env):
-    global CALL_ENV
-    CALL_ENV = env
-
-def restore_call_env():
-    global CALL_ENV
-    CALL_ENV = None
-
-
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
     Run a shell command
@@ -105,7 +94,6 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     @param fail: whether or not to raise an exception if the command fails
     @type fail: bool
     '''
-    global CALL_ENV
     try:
         if logfile is None:
             if verbose:
@@ -131,9 +119,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
             m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
             ret = 0
         else:
-            if CALL_ENV is not None:
-                env = CALL_ENV.copy()
-            elif env is not None:
+            if env is not None:
                 env = env.copy()
             else:
                 env = os.environ.copy()
@@ -157,8 +143,8 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
     '''
     DEPRECATED: Use check_output and a cmd array wherever possible
     '''
-    if env is None and CALL_ENV is not None:
-        env = CALL_ENV.copy()
+    if env is None:
+        env = os.environ.copy()
     if split and isinstance(cmd, str):
         cmd = shlex.split(cmd)
     try:
@@ -167,7 +153,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
                                    stderr=subprocess.STDOUT, shell=shell)
         output, unused_err = process.communicate()
         if process.poll() and fail:
-            raise Exception()
+            raise Exception(output)
     except Exception:
         raise FatalError(_("Error running command: %s") % cmd)
 
@@ -574,7 +560,7 @@ def files_checksum(paths):
     return m.digest()
 
 
-def enter_build_environment(platform, arch, sourcedir=None, bash_completions=None):
+def enter_build_environment(platform, arch, sourcedir=None, bash_completions=None, env=None):
     '''
     Enters to a new shell with the build environment
     '''
@@ -602,6 +588,8 @@ start bash.exe --rcfile %s
 
     ps1 = os.environ.get('PS1', '')
 
+    env = os.environ.copy() if env is None else env
+
     if PLATFORM == Platform.WINDOWS:
         msysbatdir = tempfile.mkdtemp()
         msysbat = os.path.join(msysbatdir, "msys.bat")
@@ -610,7 +598,7 @@ start bash.exe --rcfile %s
             f.write(MSYSBAT % bashrc)
         with open(bashrc, 'w+') as f:
             f.write(BASHRC % (sourcedirsh, platform, arch, ps1, ' '.join(bash_completions)))
-        subprocess.check_call(msysbat, shell=True)
+        subprocess.check_call(msysbat, shell=True, env=env)
         # We should remove the temporary directory
         # but there is a race with the bash process
     else:
@@ -619,10 +607,10 @@ start bash.exe --rcfile %s
         bashrc.flush()
         shell = os.environ.get('SHELL', '/bin/bash')
         if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:
-            os.execlp(shell, shell, '--rcfile', bashrc.name)
+            os.execlpe(shell, shell, '--rcfile', bashrc.name, env)
         else:
-            os.environ["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
-            os.execlp(shell, shell)
+            env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+            os.execlpe(shell, shell, env)
         bashrc.close()
 
 

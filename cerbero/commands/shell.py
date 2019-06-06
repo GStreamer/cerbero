@@ -38,10 +38,13 @@ class Shell(Command):
     def run(self, config, args):
         # Load the cookbook which will parse all recipes and update config.bash_completions
         cookbook = CookBook(config)
+        env = config.env.copy()
         if args.use_system_libs:
-            add_system_libs(config, os.environ)
+            add_system_libs(config, env)
+
         shell.enter_build_environment(config.target_platform,
-                config.target_arch, sourcedir=None, bash_completions=config.bash_completions)
+                config.target_arch, sourcedir=None, env=env,
+                bash_completions=config.bash_completions)
 
 
 register_command(Shell)
