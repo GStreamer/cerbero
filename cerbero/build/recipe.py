@@ -135,6 +135,7 @@ class BuildSteps(object):
     GEN_LIBFILES = (N_('Gen Library File'), 'gen_library_file')
     MERGE = (N_('Merge universal binaries'), 'merge')
     RELOCATE_OSX_LIBRARIES = (N_('Relocate OSX libraries'), 'relocate_osx_libraries')
+    CODE_SIGN = (N_('Codesign build-tools'), 'code_sign')
 
     def __new__(cls):
         return [BuildSteps.FETCH, BuildSteps.EXTRACT,
@@ -250,6 +251,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             self._steps.append(BuildSteps.GEN_LIBFILES)
         if self.config.target_platform == Platform.DARWIN:
             self._steps.append(BuildSteps.RELOCATE_OSX_LIBRARIES)
+        if self.config.target_platform == Platform.DARWIN and \
+                self.config.prefix == self.config.build_tools_prefix:
+            self._steps.append(BuildSteps.CODE_SIGN)
         FilesProvider.__init__(self, config)
         try:
             self.stype.__init__(self)
@@ -465,6 +469,20 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         for f in set([get_real_path(x) for x in self.files_list() \
                 if file_is_relocatable(x)]):
             relocator.relocate_file(f)
+
+    def code_sign(self):
+        '''
+        Codesign OSX build-tools binaries
+        '''
+        def get_real_path(fp):
+            return os.path.realpath(os.path.join(self.config.prefix, fp))
+
+        def file_is_bin(fp):
+            return fp.split('/')[0] in ['bin']
+
+        for f in set([get_real_path(x) for x in self.files_list() \
+                if file_is_bin(x)]):
+            shell.call('codesign -f -s - ' + f, logfile=self.logfile, env=self.env)
 
     def _install_srcdir_license(self, lfiles, install_dir):
         '''

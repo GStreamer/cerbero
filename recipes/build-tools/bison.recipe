@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
 
     patches = ['bison/0001-Fix-build-invalid-instruction-on-macOS-10.3.patch']
 
-    files_bins = ['bison']
+    files_bins = ['bison', 'yacc']
 
     def extract(self):
         if os.path.exists(self.build_dir):

@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/westes/flex/releases/download/v{0}/flex-{0}.tar.gz'.format(version)
     tarball_checksum = '9a01437a1155c799b7dc2508620564ef806ba66250c36bf5f9034b1c207cb2c9'
 
-    files_bins = ['flex', 'flex++', 'lex']
+    files_bins = ['flex', 'flex++']
     patches = ['flex/flex-prevent-to-build-doc.patch']
     autoreconf = True
     platform_deps = {Platform.WINDOWS: ['mingw-gettext']}

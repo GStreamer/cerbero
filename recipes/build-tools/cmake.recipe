@@ -16,7 +16,10 @@ class Recipe(recipe.Recipe):
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
     can_use_configure_cache = False
 
-    files_bins = ['cmake', 'ccmake']
+    files_bins = ['cmake', 'ccmake', 'cpack', 'ctest']
+    platform_files_bins = {
+        Platform.DARWIN : ['cmakexbuild']
+    }
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

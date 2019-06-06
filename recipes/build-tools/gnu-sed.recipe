@@ -10,6 +10,8 @@ class Recipe(recipe.Recipe):
     url = 'gnu://sed/sed-%(version)s.tar.gz'
     tarball_checksum = 'fea0a94d4b605894f3e2d5572e3f96e4413bcad3a085aae7367c2cf07908b2ff'
 
+    files_bins = ['sed']
+
     def prepare(self):
         if needs_xcode8_sdk_workaround(self.config):
             self.set_env('ac_cv_func_mkostemp', 'no')
