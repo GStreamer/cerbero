@@ -110,6 +110,13 @@ class WixBase():
             ret = '%s_%s' % (ret, self.ids[ret])
         return ret
 
+    def _format_dir_id(self, string, path, replace_dots=False):
+        return self._format_id(string, replace_dots) + '_' +\
+            self._format_path_id(path, replace_dots)
+
+    def _format_group_id(self, string, replace_dots=False):
+        return self._format_id(string, replace_dots) + '_group'
+
     def _get_uuid(self):
         return "%s" % uuid.uuid1()
 
@@ -199,6 +206,78 @@ class MergeModule(WixBase):
 
         filepath = os.path.join(self.prefix, filepath)
         p_id = self._format_path_id(filepath, True)
+        if self._with_wine:
+            filepath = to_winepath(filepath)
+        etree.SubElement(component, 'File', Id=p_id, Name=filename,
+                         Source=filepath)
+
+
+class Fragment(WixBase):
+    '''
+    Creates WiX fragment from cerbero packages
+
+    @ivar package: package with the info to build the merge package
+    @type pacakge: L{cerbero.packages.package.Package}
+    '''
+
+    def __init__(self, config, files_list, package):
+        WixBase.__init__(self, config, package)
+        self.files_list = files_list
+        self._dirnodes = {}
+        self._dirids = {}
+
+    def _fill(self):
+        self._add_root()
+        self._add_fragment()
+        self._add_component_group()
+        self._add_root_dir()
+        self._add_files()
+
+    def _add_fragment(self):
+        self.fragment = etree.SubElement(self.root, "Fragment")
+
+    def _add_component_group(self):
+        self.component_group = etree.SubElement(self.fragment, "ComponentGroup",
+                                                Id=self._format_group_id(self.package.name))
+
+    def _add_root_dir(self):
+        self.rdir = etree.SubElement(self.fragment, "DirectoryRef",
+                                     Id='SDKROOTDIR')
+        self._dirnodes[''] = self.rdir
+
+    def _add_files(self):
+        for f in self.files_list:
+            self._add_file(f)
+
+    def _add_directory(self, dirpath):
+        if dirpath in self._dirnodes:
+            return
+
+        parentpath = os.path.split(dirpath)[0]
+        if parentpath == []:
+            parentpath = ['']
+
+        if parentpath not in self._dirnodes:
+            self._add_directory(parentpath)
+
+        parent = self._dirnodes[parentpath]
+        dirid = self._format_dir_id(self.package.name, dirpath)
+        dirnode = etree.SubElement(parent, "Directory",
+                                   Id=dirid,
+                                   Name=os.path.split(dirpath)[1])
+        self._dirnodes[dirpath] = dirnode
+        self._dirids[dirpath] = dirid
+
+    def _add_file(self, filepath):
+        dirpath, filename = os.path.split(filepath)
+        self._add_directory(dirpath)
+        dirid = self._dirids[dirpath]
+
+        component = etree.SubElement(self.component_group, 'Component',
+                                     Id=self._format_dir_id(self.package.name, filepath),
+                                     Guid=self._get_uuid(), Directory=dirid)
+        filepath = os.path.join(self.prefix, filepath)
+        p_id = self._format_dir_id(self.package.name, filepath, True)
         if self._with_wine:
             filepath = to_winepath(filepath)
         etree.SubElement(component, 'File', Id=p_id, Name=filename,
@@ -358,12 +437,14 @@ class MSI(WixBase):
                                              Id=self._format_id(self.package.name + '_app'),
                                              Title=self.package.title, Level='1', Display="expand",
                                              AllowAdvertise="no", ConfigurableDirectory="INSTALLDIR")
-
-        self._add_merge_module(self.package, True, True, [])
-
-        etree.SubElement(self.installdir, 'Merge',
-                         Id=self._package_id(self.package.name), Language='1033',
-                         SourceFile=self.packages_deps[self.package], DiskId='1')
+        if self.package.wix_use_fragment:
+            etree.SubElement(self.main_feature, 'ComponentGroupRef',
+                             Id=self._format_group_id(self.package.name))
+        else:
+            self._add_merge_module(self.package, True, True, [])
+            etree.SubElement(self.installdir, 'Merge',
+                             Id=self._package_id(self.package.name), Language='1033',
+                             SourceFile=self.packages_deps[self.package], DiskId='1')
 
     def _add_merge_modules(self):
         self.main_feature = etree.SubElement(self.product, "Feature",
@@ -387,16 +468,22 @@ class MSI(WixBase):
         for p in req:
             required_packages.extend(self.store.get_package_deps(p, True))
 
-        for package, required, selected in packages:
-            if package in self.packages_deps:
-                self._add_merge_module(package, required, selected,
-                                       required_packages)
+        if not self.package.wix_use_fragment:
+            for package, required, selected in packages:
+                if package in self.packages_deps:
+                    self._add_merge_module(package, required, selected,
+                                           required_packages)
 
-        # Add a merge module ref for all the packages
+        # Add a merge module ref for all the packages or use ComponentGroupRef when using
+        # wix_use_fragment
         for package, path in self.packages_deps.items():
-            etree.SubElement(self.installdir, 'Merge',
-                             Id=self._package_id(package.name), Language='1033',
-                             SourceFile=path, DiskId='1')
+            if self.package.wix_use_fragment:
+                etree.SubElement(self.main_feature, 'ComponentGroupRef',
+                                 Id=self._format_group_id(package.name))
+            else:
+                etree.SubElement(self.installdir, 'Merge',
+                                 Id=self._package_id(package.name), Language='1033',
+                                 SourceFile=path, DiskId='1')
 
     def _add_dir(self, parent, dir_id, name):
         tdir = etree.SubElement(parent, "Directory",

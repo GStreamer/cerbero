@@ -71,6 +71,8 @@ class PackageBase(object):
     @type resources_postinstall = str
     @cvar resources_postremove = filename for the post-remove script
     @type resources_postremove = str
+    @cvar wix_use_fragment = uses fragments instead of merge modules
+    @type resources_postremove = bool
     '''
     name = 'default'
     shortdesc = 'default'
@@ -93,6 +95,7 @@ class PackageBase(object):
     resources_preinstall = 'preinstall'
     resources_postinstall = 'postinstall'
     resources_postremove = 'postremove'
+    wix_use_fragment = False
 
     def __init__(self, config, store):
         self.config = config
