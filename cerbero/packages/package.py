@@ -143,12 +143,15 @@ class PackageBase(object):
         '''
         pass
 
-    def post_package(self, paths):
+    def post_package(self, paths, output_dir):
         '''
-        Subclasses can override to to perform actions after packaging.
+        Subclasses can override it to perform actions after packaging.
 
         @param paths: list of paths for the files created during packaging
         @type paths: str
+        @param output_dir: absolute path of output directory set when
+                           executing package command
+        @type output_dir: str
         @return: list of paths with created files
         @rtype: list
         '''

@@ -97,15 +97,16 @@ class Package(Command):
         else:
             pkg = Packager(config, p, self.store)
         m.action(_("Creating package for %s") % p.name)
+        output_dir = os.path.abspath(args.output_dir)
         if args.tarball:
-            paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
+            paths = pkg.pack(output_dir, args.no_devel,
                              args.force, args.keep_temp, split=not args.no_split)
         else:
-            paths = pkg.pack(os.path.abspath(args.output_dir), args.no_devel,
+            paths = pkg.pack(output_dir, args.no_devel,
                              args.force, args.keep_temp)
         if None in paths:
             paths.remove(None)
-        paths = p.post_package(paths) or paths
+        paths = p.post_package(paths, output_dir) or paths
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
