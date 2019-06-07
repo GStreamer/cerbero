@@ -209,13 +209,8 @@ def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     @param commit: the commit to checkout
     @type commit: false
     '''
-    # reset to a commit in case it's the first checkout and the masterbranch is
-    # missing
     branch_name = 'cerbero_build'
-    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir, logfile=logfile)
-    shell.call('%s branch %s' % (GIT, branch_name), local_git_dir, fail=False, logfile=logfile)
-    shell.call('%s checkout %s' % (GIT, branch_name), local_git_dir, logfile=logfile)
-    shell.call('%s reset --hard %s' % (GIT, commit), local_git_dir, logfile=logfile)
+    shell.call('%s checkout %s -B %s' % (GIT, commit, branch_name), local_git_dir, logfile=logfile)
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
                git_dir, logfile=logfile)
     ensure_user_is_set(local_git_dir, logfile=logfile)
