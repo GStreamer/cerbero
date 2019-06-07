@@ -1,0 +1,23 @@
+From a29c035b28e7109472452d027f51f8e516af3814 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 5 Jun 2019 19:27:30 +0100
+Subject: [PATCH] build: skip tools tests and doc subdirs
+
+We don't need them, but there is no option to disable them, and they cause build failures.
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 12a85d3..0123e0d 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,4 +1,4 @@
+-SUBDIRS=. tools tests doc
++SUBDIRS=. # tools tests doc
+ 
+ OGGDIR=built-streams
+ kateincdir=$(includedir)/kate
+-- 
+2.20.1
+
