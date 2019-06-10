@@ -321,6 +321,9 @@ class ModifyEnvBase:
         Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
         can be found.
         '''
+        # Don't modify env again if already did it once for this function call
+        if self._old_env:
+            return
         new_env = {}
         add_system_libs(self.config, new_env)
         for var, val in new_env.items():
