@@ -121,21 +121,22 @@ class WixBase():
         return "%s" % uuid.uuid1()
 
     def _format_version(self, version):
-        # mayor and minor must be less than 256 on windows,
-        # so 2012.5 must be changed to 20.12.5
+        # The heuristics to generate a valid version can get
+        # very complicated, so we leave it to the user
+        url = "https://docs.microsoft.com/en-us/windows/desktop/Msi/productversion"
         versions = version.split('.')
-        tversions = []
-        for version in versions:
+        if len(versions) > 3:
+            raise FatalError("Invalid version string, the version must have"
+                    "the format major.minor.build.\n{}".format(url))
+        for idx, version in enumerate(versions):
             i = int(version)
-            if i > 9999:
-                raise FatalError("Unsupported version number, mayor and minor "
-                                 "must be less than 9999")
-            elif i > 255:
-                tversions.append(version[:-2])
-                tversions.append(version[-2:])
-            else:
-                tversions.append(version)
-        return '.'.join(tversions)
+            if idx in [0, 1] and i > 255:
+                raise FatalError("Invalid version string, major and minor"
+                        "must have a maximum value of 255.\n{}".format(url))
+            elif idx in [2] and i > 65535:
+                raise FatalError("Invalid version string, build "
+                        "must have a maximum value of 65535\n.{}".format(url))
+        return version
 
 
 class MergeModule(WixBase):
