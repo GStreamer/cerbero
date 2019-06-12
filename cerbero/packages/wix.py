@@ -124,19 +124,16 @@ class WixBase():
         # The heuristics to generate a valid version can get
         # very complicated, so we leave it to the user
         url = "https://docs.microsoft.com/en-us/windows/desktop/Msi/productversion"
-        versions = version.split('.')
-        if len(versions) > 3:
-            raise FatalError("Invalid version string, the version must have"
-                    "the format major.minor.build.\n{}".format(url))
-        for idx, version in enumerate(versions):
-            i = int(version)
+        versions = (version.split(".", 3) + ["0", "0", "0"])[:3]
+        for idx, val in enumerate(versions):
+            i = int(val)
             if idx in [0, 1] and i > 255:
                 raise FatalError("Invalid version string, major and minor"
-                        "must have a maximum value of 255.\n{}".format(url))
+                                 "must have a maximum value of 255.\nSee: {}".format(url))
             elif idx in [2] and i > 65535:
                 raise FatalError("Invalid version string, build "
-                        "must have a maximum value of 65535\n.{}".format(url))
-        return version
+                                 "must have a maximum value of 65535.\nSee: {}".format(url))
+        return ".".join(versions)
 
 
 class MergeModule(WixBase):
