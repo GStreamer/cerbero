@@ -57,7 +57,7 @@ class MergeModulePackager(PackagerBase):
         return paths
 
     def create_merge_module(self, output_dir, package_type, force, version,
-                            keep_temp):
+                            keep_temp, keep_strip_temp_dir=False):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
         if isinstance(self.package, VSTemplatePackage):
@@ -65,9 +65,9 @@ class MergeModulePackager(PackagerBase):
         else:
             mergemodule = MergeModule(self.config, files_list, self.package)
         tmpdir = None
-        # For application packages that requires stripping object files, we need
+        # For packages that requires stripping object files, we need
         # to copy all the files to a new tree and strip them there:
-        if isinstance(self.package, App) and self.package.strip:
+        if self.package.strip:
             tmpdir = tempfile.mkdtemp()
             for f in files_list:
                 src = os.path.join(self.config.prefix, f)
@@ -124,7 +124,10 @@ class MergeModulePackager(PackagerBase):
                         os.remove(f.replace('.wixobj', '.wixpdb'))
                     except:
                         pass
-        if tmpdir:
+
+        if keep_strip_temp_dir:
+            return (path, tmpdir)
+        elif tmpdir:
             shutil.rmtree(tmpdir)
 
         return path
@@ -196,12 +199,13 @@ class MSIPackager(PackagerBase):
         self.packagedeps = self.store.get_package_deps(self.package, True)
         if isinstance(self.package, App):
             self.packagedeps = [self.package]
-        self._create_merge_modules(package_type)
+        tmp_dirs = self._create_merge_modules(package_type)
         config_path = self._create_config()
-        return self._create_msi(config_path)
+        return self._create_msi(config_path, tmp_dirs)
 
     def _create_merge_modules(self, package_type):
         packagedeps = {}
+        tmp_dirs = []
         for package in self.packagedeps:
             package.set_mode(package_type)
             package.wix_use_fragment = self.package.wix_use_fragment
@@ -210,19 +214,22 @@ class MSIPackager(PackagerBase):
             try:
                 path = packager.create_merge_module(self.output_dir,
                                                     package_type, self.force, self.package.version,
-                                                    self.keep_temp)
-                packagedeps[package] = path
+                                                    self.keep_temp, True)
+                packagedeps[package] = path[0]
+                if path[1]:
+                    tmp_dirs.append(path[1])
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
         self.packagedeps = packagedeps
         self.merge_modules[package_type] = list(packagedeps.values())
+        return tmp_dirs
 
     def _create_config(self):
         config = WixConfig(self.config, self.package)
         config_path = config.write(self.output_dir)
         return config_path
 
-    def _create_msi(self, config_path):
+    def _create_msi(self, config_path, tmp_dirs):
         sources = [os.path.join(self.output_dir, "%s.wxs" %
                                 self._package_name())]
         msi = MSI(self.config, self.package, self.packagedeps, config_path,
@@ -262,6 +269,9 @@ class MSIPackager(PackagerBase):
                 except:
                     pass
             os.remove(config_path)
+
+        for tmp_dir in tmp_dirs:
+            shutil.rmtree(tmp_dir)
 
         return path
 
