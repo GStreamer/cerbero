@@ -1,5 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
 import shutil
+from cerbero.utils import shell
+
 
 class Recipe(recipe.Recipe):
     name = 'wix'
@@ -8,6 +11,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip'
     tarball_checksum = '37f0a533b0978a454efb5dc3bd3598becf9660aaf4287e55bf68ca6b527d051d'
     btype = BuildType.CUSTOM
+    winetricks_url = 'https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks'
 
     def extract(self):
         if os.path.exists(self.build_dir):
@@ -17,3 +21,13 @@ class Recipe(recipe.Recipe):
 
     def install(self):
         shell.copy_dir(self.build_dir, os.path.join(self.config.prefix, 'lib', 'wix', 'bin'))
+        if self.config.platform == Platform.LINUX:
+            wine_path = os.path.join(self.config.prefix, 'share', 'wine')
+            shell.download(self.winetricks_url, os.path.join(wine_path, 'winetricks'), True, True)
+            env = {
+                'DISPLAY': '',
+                'HOME': wine_path,
+                'WINEPREFIX': wine_path
+            }
+            shell.new_call(['sh', './winetricks', '-q', 'dotnet40'],
+                           cmd_dir=wine_path, env=env)
