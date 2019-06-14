@@ -79,7 +79,6 @@ class MergeModulePackager(PackagerBase):
             for p in self.package.strip_dirs:
                 s.strip_dir(os.path.join(tmpdir, p))
 
-
         mergemodule = MergeModule(self.config, files_list, self.package)
         if tmpdir:
             mergemodule.prefix = tmpdir
@@ -91,7 +90,7 @@ class MergeModulePackager(PackagerBase):
         for x in ['utils']:
             wixobjs.append(os.path.join(output_dir, "%s.wixobj" % x))
             sources.append(os.path.join(os.path.abspath(self.config.data_dir),
-                           'wix/%s.wxs' % x))
+                                        'wix/%s.wxs' % x))
 
         if self._with_wine:
             wixobjs = [to_winepath(x) for x in wixobjs]
@@ -122,7 +121,7 @@ class MergeModulePackager(PackagerBase):
         else:
             platform = 'mingw'
         return "%s-%s-%s-%s" % (self.package.name, platform,
-                self.config.target_arch, version)
+                                self.config.target_arch, version)
 
 
 class MSIPackager(PackagerBase):
@@ -175,7 +174,7 @@ class MSIPackager(PackagerBase):
         else:
             platform = 'mingw'
         return "%s-%s-%s-%s" % (self.package.name, platform,
-                self.config.target_arch, self.package.version)
+                                self.config.target_arch, self.package.version)
 
     def _create_msi_installer(self, package_type):
         self.package.set_mode(package_type)
@@ -194,8 +193,8 @@ class MSIPackager(PackagerBase):
             packager = MergeModulePackager(self.config, package, self.store)
             try:
                 path = packager.create_merge_module(self.output_dir,
-                           package_type, self.force, self.package.version,
-                           self.keep_temp)
+                                                    package_type, self.force, self.package.version,
+                                                    self.keep_temp)
                 packagedeps[package] = path
             except EmptyPackageError:
                 m.warning("Package %s is empty" % package)
@@ -209,7 +208,7 @@ class MSIPackager(PackagerBase):
 
     def _create_msi(self, config_path):
         sources = [os.path.join(self.output_dir, "%s.wxs" %
-                   self._package_name())]
+                                self._package_name())]
         msi = MSI(self.config, self.package, self.packagedeps, config_path,
                   self.store)
         msi.write(sources[0])
@@ -219,7 +218,7 @@ class MSIPackager(PackagerBase):
         for x in ['utils']:
             wixobjs.append(os.path.join(self.output_dir, "%s.wixobj" % x))
             sources.append(os.path.join(os.path.abspath(self.config.data_dir),
-                           'wix/%s.wxs' % x))
+                                        'wix/%s.wxs' % x))
 
         if self._with_wine:
             wixobjs = [to_winepath(x) for x in wixobjs]
