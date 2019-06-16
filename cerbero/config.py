@@ -331,9 +331,10 @@ class Config (object):
         if self.platform == Platform.LINUX:
             xdgdatadir += ":/usr/share:/usr/local/share"
 
-        ldflags = '-L%s ' % libdir
-        if ldflags not in self.config_env.get('LDFLAGS', ''):
-            ldflags += self.config_env.get('LDFLAGS', '')
+        ldflags = self.config_env.get('LDFLAGS', '')
+        ldflags_libdir = ' -L%s' % libdir
+        if ldflags_libdir not in ldflags:
+            ldflags += ldflags_libdir
 
         path = self.config_env.get('PATH', None)
         path = self._join_path(
