@@ -885,30 +885,26 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
     def merge(self):
         arch_inputs = {}
         for arch, recipe in self._recipes.items():
-            # change the prefix temporarly to the arch prefix where files are
-            # actually installed
-            recipe.config.prefix = os.path.join(self.config.prefix, arch)
             arch_inputs[arch] = set(recipe.files_list())
-            recipe.config.prefix = self._config.prefix
 
         # merge the common files
         inputs = reduce(lambda x, y: x & y, arch_inputs.values())
         output = self._config.prefix
         generator = OSXUniversalGenerator(output, logfile=self.logfile)
-        dirs = [os.path.join(self._config.prefix, arch) for arch in self._recipes.keys()]
+        dirs = [recipe.config.prefix for arch, recipe in self._recipes.items()]
         generator.merge_files(inputs, dirs)
 
         # Collect files that are only in one or more archs, but not all archs
         arch_files = {}
-        for arch in self._recipes.keys():
+        for arch, recipe in self._recipes.items():
             for f in list(inputs ^ arch_inputs[arch]):
                 if f not in arch_files:
-                    arch_files[f] = {arch}
+                    arch_files[f] = {(arch, recipe)}
                 else:
-                    arch_files[f].add(arch)
+                    arch_files[f].add((arch, recipe))
         # merge the architecture specific files
         for f, archs in arch_files.items():
-            generator.merge_files([f], [os.path.join(self._config.prefix, arch) for arch in archs])
+            generator.merge_files([f], [recipe.config.prefix for arch, recipe in archs])
 
     async def _do_step(self, step):
         if step in BuildSteps.FETCH:
@@ -917,27 +913,10 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             await self._async_run_step(recipe, step, arch)
             return
 
-        # For the universal build we need to configure both architectures with
-        # with the same final prefix, but we want to install each architecture
-        # on a different path (eg: /path/to/prefix/x86).
-
         archs_prefix = list(self._recipes.keys())
 
         tasks = []
         for arch, recipe in self._recipes.items():
-            # Create a stamp file to list installed files based on the
-            # modification time of this file
-            if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
-                await asyncio.sleep(2) #wait 2 seconds to make sure new files get the
-                              #proper time difference, this fixes an issue of
-                              #the next recipe to be built listing the previous
-                              #recipe files as their own
-                tmp = tempfile.NamedTemporaryFile()
-                # the modification time resolution depends on the filesystem,
-                # where FAT32 has a resolution of 2 seconds and ext4 1 second
-                t = time.time() - 2
-                os.utime(tmp.name, (t, t))
-
             # Call the step function
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
@@ -948,29 +927,6 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             else:
                 self._run_step(recipe, step, arch)
 
-            # Move installed files to the architecture prefix
-            if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
-                installed_files = shell.find_newer_files(self._config.prefix,
-                                                         tmp.name, True)
-                tmp.close()
-                for f in installed_files:
-
-                    def not_in_prefix(src):
-                        for p in archs_prefix + ['Libraries']:
-                            if src.startswith(p):
-                                return True
-                        return False
-
-                    # skip files that are installed in the arch prefix
-                    if not_in_prefix(f):
-                        continue
-                    src = os.path.join(self._config.prefix, f)
-
-                    dest = os.path.join(self._config.prefix,
-                                        recipe.config.target_arch, f)
-                    if not os.path.exists(os.path.dirname(dest)):
-                        os.makedirs(os.path.dirname(dest))
-                    shutil.move(src, dest)
         if tasks:
             try:
                 await asyncio.gather(*tasks, return_exceptions=False)

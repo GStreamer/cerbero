@@ -468,9 +468,7 @@ class CookBook (object):
             recipe = crecipe.UniversalRecipe(self._config)
         for c in list(self._config.arch_config.keys()):
             conf = self._config.arch_config[c]
-            if self._config.target_platform not in [Platform.IOS,
-                    Platform.DARWIN]:
-                conf.prefix = os.path.join(self._config.prefix, c)
+            conf.prefix = os.path.join(self._config.prefix, c)
             # For univeral recipes, we need to parse again the recipe file.
             # Otherwise, class variables with mutable types like the "deps"
             # dictionary are reused in new instances
