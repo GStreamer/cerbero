@@ -534,7 +534,10 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
             out_dir = os.path.split(out_path)[0]
             if not os.path.exists(out_dir):
                 os.makedirs(out_dir)
-            shutil.copy(f, out_path)
+            if os.path.isdir(f):
+                shell.copy_dir (f, out_path)
+            else:
+                shutil.copy(f, out_path)
 
     def _copy_templates(self, files):
         templates_prefix = 'share/xcode/templates/ios'

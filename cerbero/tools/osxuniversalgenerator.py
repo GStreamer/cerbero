@@ -54,6 +54,7 @@ file_types = [
     ('PEM certificate', 'copy'),
     ('data', 'copy'),
     ('GVariant Database', 'copy'),
+    ('directory', 'recurse'),
 ]
 
 class OSXUniversalGenerator(object):
@@ -94,9 +95,11 @@ class OSXUniversalGenerator(object):
         for f in filelist:
             self.do_merge(f, dirs)
 
-    def merge_dirs(self, input_roots):
-        if not os.path.exists(self.output_root):
-            os.mkdir(self.output_root)
+    def merge_dirs(self, input_roots, output_root=None):
+        if output_root == None:
+            output_root = self.output_root
+        if not os.path.exists(output_root):
+            os.makedirs(output_root)
         self.parse_dirs(input_roots)
 
     def create_universal_file(self, output, inputlist, dirs):
@@ -176,6 +179,8 @@ class OSXUniversalGenerator(object):
             self.create_universal_file(output_file, full_filepaths, dirs)
         elif action == 'skip':
             pass #just pass
+        elif action == 'recurse':
+            self.merge_dirs (full_filepaths, output_file)
         else:
             raise Exception('unexpected action %s' % action)
 
