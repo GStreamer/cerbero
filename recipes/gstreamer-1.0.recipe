@@ -13,14 +13,7 @@ class Recipe(custom.GStreamer):
                   'gst-launch-1.0']
 
     files_libs = ['libgstbase-1.0', 'libgstcontroller-1.0',
-                  'libgstnet-1.0', 'libgstreamer-1.0']
-
-    platform_files_libs = {
-        Platform.LINUX: ['libgstcheck-1.0'],
-        Platform.ANDROID: ['libgstcheck-1.0'],
-        Platform.DARWIN: ['libgstcheck-1.0'],
-        Platform.WINDOWS: ['libgstcheck-1.0'],
-    }
+                  'libgstnet-1.0', 'libgstreamer-1.0', 'libgstcheck-1.0']
 
     files_plugins_core = [
         'lib/gstreamer-1.0/libgstcoreelements%(mext)s',
@@ -41,20 +34,15 @@ class Recipe(custom.GStreamer):
     files_devel = [
             'include/gstreamer-1.0/gst/*.h',
             'include/gstreamer-1.0/gst/base',
+            'include/gstreamer-1.0/gst/check',
             'include/gstreamer-1.0/gst/controller',
             'include/gstreamer-1.0/gst/net',
             'lib/pkgconfig/gstreamer-1.0.pc',
+            'lib/pkgconfig/gstreamer-check-1.0.pc',
             'lib/pkgconfig/gstreamer-base-1.0.pc',
             'lib/pkgconfig/gstreamer-controller-1.0.pc',
             'lib/pkgconfig/gstreamer-net-1.0.pc',
     ]
-
-    platform_files_devel = {
-        Platform.LINUX: ['include/gstreamer-1.0/gst/check', 'lib/pkgconfig/gstreamer-check-1.0.pc', 'share/aclocal/gst-element-check-1.0.m4'],
-        Platform.ANDROID: ['include/gstreamer-1.0/gst/check', 'lib/pkgconfig/gstreamer-check-1.0.pc', 'share/aclocal/gst-element-check-1.0.m4'],
-        Platform.DARWIN: ['include/gstreamer-1.0/gst/check', 'lib/pkgconfig/gstreamer-check-1.0.pc', 'share/aclocal/gst-element-check-1.0.m4'],
-        Platform.WINDOWS: ['include/gstreamer-1.0/gst/check', 'lib/pkgconfig/gstreamer-check-1.0.pc', 'share/aclocal/gst-element-check-1.0.m4'],
-    }
 
     files_lang = ['gstreamer-1.0']
 
