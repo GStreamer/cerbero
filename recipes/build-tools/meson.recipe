@@ -21,6 +21,8 @@ class Recipe(recipe.Recipe):
         # https://github.com/mesonbuild/meson/pull/5274, fixed in 0.50.1
         # Not actually in 0.50.1, but it's just not needed in 0.50.*
         'meson/0001-meson-Add-a-quick-hack-to-support-VS2019.patch',
+        # https://github.com/mesonbuild/meson/pull/5517, in 0.51.1
+        'meson/0001-compilers-Fix-bitcode-and-other-options-for-objc-cod.patch',
     ]
     deps = ['ninja']
 
