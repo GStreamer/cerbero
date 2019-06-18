@@ -372,7 +372,7 @@ class MakefilesBase (Build, ModifyEnvBase):
             self.append_env('ASFLAGS', *bitcode_cflags)
             self.append_env('CFLAGS', *bitcode_cflags)
             self.append_env('CXXFLAGS', *bitcode_cflags)
-            self.append_env('OBCCFLAGS', *bitcode_cflags)
+            self.append_env('OBJCFLAGS', *bitcode_cflags)
             self.append_env('OBJCXXFLAGS', *bitcode_cflags)
             self.append_env('CCASFLAGS', *bitcode_cflags)
             # Autotools only adds LDFLAGS when doing compiler checks,
