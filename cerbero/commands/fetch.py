@@ -241,8 +241,19 @@ class FetchCache(Command):
 
     async def fetch_dep(self, config, dep, namespace):
         try:
-            artifacts_path = "%s/cerbero-deps.tar.gz" % config.home_dir
-            await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
+            try:
+                # try a xz version first
+                artifacts_path = "%s/cerbero-deps.tar.xz" % config.home_dir
+                await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
+            except FatalError:
+                try:
+                    # then try bzip2
+                    artifacts_path = "%s/cerbero-deps.tar.bz2" % config.home_dir
+                    await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
+                except FatalError:
+                    # else fallback to the gzip version
+                    artifacts_path = "%s/cerbero-deps.tar.gz" % config.home_dir
+                    await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
             await shell.unpack(artifacts_path, config.home_dir)
             os.remove(artifacts_path)
             origin = self.build_dir % namespace
