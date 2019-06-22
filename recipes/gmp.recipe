@@ -29,6 +29,9 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
+    autoreconf = True
+
+    patches = ['gmp/0001-fix-cross-compilation-with-wine-installed.patch']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
