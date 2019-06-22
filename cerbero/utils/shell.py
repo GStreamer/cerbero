@@ -23,6 +23,7 @@ import shlex
 import sys
 import os
 import re
+import tarfile
 import zipfile
 import tempfile
 import time
@@ -42,6 +43,7 @@ from cerbero.errors import FatalError
 
 PATCH = 'patch'
 TAR = 'tar'
+TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 
 
 PLATFORM = system_info()[0]
@@ -300,13 +302,17 @@ def unpack(filepath, output_dir, logfile=None):
     '''
     log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
-    if filepath.endswith('tar.gz') or filepath.endswith('tgz') or \
-            filepath.endswith('tar.bz2') or filepath.endswith('tbz2') or \
-            filepath.endswith('tar.bz2') or filepath.endswith('tbz2') or \
-            filepath.endswith('tar.xz'):
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        call("tar -xf {} -C {}".format(filepath, output_dir))
+    # Recent versions of tar are much faster than the tarfile module, but we
+    # can't use tar on Windows because MSYS tar is ancient and buggy.
+    if filepath.endswith(TARBALL_SUFFIXES):
+        if PLATFORM != Platform.WINDOWS:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            call("tar -xf {} -C {}".format(filepath, output_dir))
+        else:
+            cmode = 'bz2' if filepath.endswith('bz2') else filepath[-2:]
+            tf = tarfile.open(filepath, mode='r:' + cmode)
+            tf.extractall(path=output_dir)
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
