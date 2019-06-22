@@ -34,7 +34,6 @@ import urllib.request, urllib.error, urllib.parse
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
-import cerbero.hacks
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath
 from cerbero.utils import messages as m
@@ -249,6 +248,7 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
     cmd = _cmd_string_to_array(cmd)
 
     if PLATFORM == Platform.WINDOWS:
+        import cerbero.hacks
         # On Windows, create_subprocess_exec with a PIPE fails while creating
         # a named pipe using tempfile.mktemp because we override os.path.join
         # to use / on Windows. Override the tempfile module's reference to the
