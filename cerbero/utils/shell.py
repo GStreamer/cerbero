@@ -215,7 +215,7 @@ async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
     if logfile is None:
         stream = None
     else:
-        logfile.write("Running command '%s'\n" % cmd)
+        logfile.write("Running command '%s'\n" % ' '.join([shlex.quote(c) for c in cmd]))
         logfile.flush()
         stream = logfile
 
