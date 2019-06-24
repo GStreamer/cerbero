@@ -51,6 +51,23 @@ DistroVersion = enums.DistroVersion
 License = enums.License
 LibraryType = enums.LibraryType
 
+def set_nofile_ulimit():
+    '''
+    Some newer toolchains such as our GCC 8.2 cross toolchain exceed the
+    1024 file ulimit, so let's increase it.
+    See: https://gitlab.freedesktop.org/gstreamer/cerbero/issues/165
+    '''
+    try:
+        import resource
+    except ModuleNotFoundError:
+        return
+    want = 10240
+    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    if soft < want or hard < want:
+        try:
+            resource.setrlimit(resource.RLIMIT_NOFILE, (want, want))
+        except OSError:
+            print('Failed to increase file ulimit, you may see linker failures')
 
 class Variants(object):
 
@@ -425,6 +442,8 @@ class Config (object):
         self.set_property('extra_properties', {})
         self.set_property('extra_mirrors', [])
         self.set_property('extra_bootstrap_packages', {})
+        # Increase open-files limits
+        set_nofile_ulimit()
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:
