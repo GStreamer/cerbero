@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+import shlex
 from cerbero.build.build import async_modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell, messages
@@ -81,18 +81,25 @@ class Recipe(recipe.Recipe):
                 self.openssl_platform = 'mingw64'
             else:
                 raise NotImplementedError
-        # NOTE: CFLAG and LDFLAG are not typos!
+        cflags = shlex.quote(self.get_env('CFLAGS') + '-fPIC -DOPENSSL_PIC')
+        ldflags = shlex.quote(self.get_env('LDFLAGS') + '-fPIC')
+        ranlib = shlex.quote(self.get_env('RANLIB'))
+        ar = shlex.quote(self.get_env('AR'))
         # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
         # build, and we can't pass arguments via Configure because on Darwin,
         # Configure reads the `-arch x86_64` as meaning that you want to use
         # `x86_64` as the platform, and errors out about a redefined platform.
-        self.make += ' AR="$AR" RANLIB="$RANLIB" CC="$CC $CFLAGS" LD="$LD $LDFLAGS" LDFLAG="$LDFLAGS -fPIC" CFLAG="$CFLAGS -fPIC -DOPENSSL_PIC"'
-        self.make_install = 'make install_sw RANLIB="$RANLIB"'
+        cc = shlex.quote(self.get_env('CC') + ' ' + self.get_env('CFLAGS'))
+        ld = shlex.quote(self.get_env('LD') + ' ' + self.get_env('LDFLAGS'))
+        # NOTE: CFLAG and LDFLAG are not typos!
+        self.make += ' AR={} RANLIB={} CC={} LD={} CFLAG={} LDFLAG={}' \
+                     ''.format(ar, ranlib, cc, ld, cflags, ldflags)
+        self.make_install = 'make install_sw RANLIB={}'.format(ranlib)
 
         # We probably don't need and can't use the tools on these platforms
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
-            self.make_install = 'make install_dev RANLIB="$RANLIB"'
+            self.make_install = 'make install_dev RANLIB={}'.format(ranlib)
 
         if self.config.platform == Platform.WINDOWS:
             # Msys ships with a too-old perl, so we modify PATH to use the
