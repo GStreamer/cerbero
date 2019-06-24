@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shlex
 import shutil
 from cerbero.errors import FatalError
 from cerbero.tools.libtool import LibtoolLibrary
@@ -105,7 +106,11 @@ class Recipe(recipe.Recipe):
     def _gio_flags(self, path1=None, path2=None, use_old_uri_scheme=False):
         flags = []
         def escape(path):
-            return '\\"%s\\"' % path
+            # We want the define the macro to a C string, then we quote it
+            # because it is expanded inside cerbero to set c_args in the cross
+            # file or to pass directly to meson using the env var for native
+            # builds
+            return shlex.quote('"{}"'.format(path))
         if path1 is not None:
             flags.append('-DGST_SDK_GLIB_GIO_DISTRO_GIO_MODULE_PATH=' + escape(path1))
         if path2 is not None:
