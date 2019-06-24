@@ -43,7 +43,6 @@ class Recipe(recipe.Recipe):
             dlldir = os.path.join(self.config.prefix, 'bin')
             real_rtmp_dll = os.path.join(dlldir, 'librtmp-{}.dll'.format(soversion))
             dupe_rtmp_dll = os.path.join(dlldir, 'librtmp.dll')
-            print(dupe_rtmp_dll)
             if os.path.isfile(dupe_rtmp_dll) and os.path.isfile(real_rtmp_dll):
                 os.remove(dupe_rtmp_dll)
         deps = ['gnutls']
