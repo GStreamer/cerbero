@@ -33,6 +33,7 @@ class Recipe(custom.GStreamer):
                      'vulkan': 'enabled',
                      'webrtc': 'enabled',
                      'webrtcdsp': 'enabled',
+                     'zbar': 'enabled',
                      # disabled plugins
                      'curl': 'disabled',
                      'curl-ssh2': 'disabled',
@@ -60,14 +61,13 @@ class Recipe(custom.GStreamer):
                      'vdpau': 'disabled',
                      'voamrwbenc': 'disabled',
                      'wildmidi': 'disabled',
-                     'zbar': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg', 'openssl',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
-            'srt', 'libusrsctp']
+            'srt', 'libusrsctp', 'zbar']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -198,6 +198,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstopenjpeg%(mext)s',
              'lib/gstreamer-1.0/libgstspandsp%(mext)s',
              'lib/gstreamer-1.0/libgstsbc%(mext)s',
+             'lib/gstreamer-1.0/libgstzbar%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
@@ -228,6 +229,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstopenjpeg.a', 'lib/gstreamer-1.0/libgstopenjpeg.la',
              'lib/gstreamer-1.0/libgstspandsp.a', 'lib/gstreamer-1.0/libgstspandsp.la',
              'lib/gstreamer-1.0/libgstsbc.a', 'lib/gstreamer-1.0/libgstsbc.la',
+             'lib/gstreamer-1.0/libgstzbar.a', 'lib/gstreamer-1.0/libgstzbar.la',
     ]
 
     platform_files_plugins_codecs = {
