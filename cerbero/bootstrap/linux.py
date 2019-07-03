@@ -130,6 +130,8 @@ class RedHatBootstrapper (UnixBootstrapper):
 
         if self.config.distro_version < DistroVersion.FEDORA_23:
             self.tool = 'yum'
+        elif self.config.distro_version in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
+            self.tool = 'yum'
 
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
