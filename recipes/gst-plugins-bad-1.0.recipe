@@ -364,6 +364,7 @@ class Recipe(custom.GStreamer):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d%(mext)s',
+             'lib/gstreamer-1.0/libgstd3d11%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
@@ -392,6 +393,7 @@ class Recipe(custom.GStreamer):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
+             'lib/gstreamer-1.0/libgstd3d11.a', 'lib/gstreamer-1.0/libgstd3d11.la',
              'lib/gstreamer-1.0/libgstwasapi.a', 'lib/gstreamer-1.0/libgstwasapi.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
             ],
@@ -449,6 +451,7 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
+            self.meson_options['d3d11'] = 'enabled'
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
