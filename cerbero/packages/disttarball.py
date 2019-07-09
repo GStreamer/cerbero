@@ -19,12 +19,14 @@
 import os
 import shutil
 import tarfile
+import tempfile
 
 import cerbero.utils.messages as m
 from cerbero.utils import shell, _
 from cerbero.enums import Platform
 from cerbero.errors import FatalError, UsageError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
+from cerbero.tools import strip
 
 
 class DistTarball(PackagerBase):
@@ -42,7 +44,7 @@ class DistTarball(PackagerBase):
             raise UsageError('Invalid compression type {!r}'.format(self.compress))
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
-             split=True, package_prefix=''):
+             split=True, package_prefix='', strip_binaries=False):
         try:
             dist_files = self.files_list(PackageType.RUNTIME, force)
         except EmptyPackageError:
@@ -66,8 +68,12 @@ class DistTarball(PackagerBase):
 
         filenames = []
         if dist_files:
-            runtime = self._create_tarball(output_dir, PackageType.RUNTIME,
-                                           dist_files, force, package_prefix)
+            if not strip_binaries:
+                runtime = self._create_tarball(output_dir, PackageType.RUNTIME,
+                                               dist_files, force, package_prefix)
+            else:
+                runtime = self._create_tarball_stripped(output_dir, PackageType.RUNTIME,
+                                                        dist_files, force, package_prefix)
             filenames.append(runtime)
 
         if split and devel and len(devel_files) != 0:
@@ -89,6 +95,33 @@ class DistTarball(PackagerBase):
 
         return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name, platform,
                 self.config.target_arch, self.package.version, package_type, ext)
+
+    def _create_tarball_stripped(self, output_dir, package_type, files, force,
+                                 package_prefix):
+        tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
+
+        if hasattr(self.package, 'strip_excludes'):
+            s = strip.Strip(self.config, self.package.strip_excludes)
+        else:
+            s = strip.Strip(self.config)
+
+        for f in files:
+            orig_file = os.path.join(self.prefix, f)
+            tmp_file = os.path.join(tmpdir, f)
+            tmp_file_dir = os.path.dirname(tmp_file)
+            if not os.path.exists(tmp_file_dir):
+                os.makedirs(tmp_file_dir)
+            shutil.copy(orig_file, tmp_file, follow_symlinks=False)
+            s.strip_file(tmp_file)
+
+        prefix_restore = self.prefix
+        self.prefix = tmpdir
+        tarball = self._create_tarball(output_dir, package_type,
+                                       files, force, package_prefix)
+        self.prefix = prefix_restore
+        shutil.rmtree(tmpdir)
+
+        return tarball
 
     def _create_tarball(self, output_dir, package_type, files, force,
                         package_prefix):
