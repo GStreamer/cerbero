@@ -72,7 +72,13 @@ class PackageBase(object):
     @cvar resources_postremove = filename for the post-remove script
     @type resources_postremove = str
     @cvar wix_use_fragment = uses fragments instead of merge modules
-    @type resources_postremove = bool
+    @type wix_use_fragment = bool
+    @cvar strip: strip binaries for this package
+    @type strip: bool
+    @cvar strip_dirs: directories to strip
+    @type strip: list
+    @cvar strip_excludes: files that won't be stripped
+    @type strip_excludes: list
     '''
     name = 'default'
     shortdesc = 'default'
@@ -96,6 +102,9 @@ class PackageBase(object):
     resources_postinstall = 'postinstall'
     resources_postremove = 'postremove'
     wix_use_fragment = False
+    strip = False
+    strip_dirs = ['bin']
+    strip_excludes = []
 
     def __init__(self, config, store):
         self.config = config
@@ -516,12 +525,6 @@ class App(Package):
     @type command: list
     @cvar wrapper: suffix filename for the main executable wrapper
     @type wrapper: str
-    @cvar strip: strip binaries for this package
-    @type strip: bool
-    @cvar strip_dirs: directories to strip
-    @type strip: list
-    @cvar strip_excludes: files that won't be stripped
-    @type strip_excludes: list
     @cvar resources_info_plist: Info.plist template file
     @type resources_info_plist: string
     @cvar resources_distribution: Distribution XML template file
@@ -539,9 +542,6 @@ class App(Package):
     commands = []  # list of tuples ('CommandName', path/to/binary')
     wrapper = 'app_wrapper.tpl'
     resources_wix_installer = None
-    strip = False
-    strip_dirs = ['bin']
-    strip_excludes = []
     resources_info_plist = 'Info.plist'
     resources_distribution = 'distribution.xml'
     osx_create_dmg = True
