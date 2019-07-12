@@ -61,12 +61,12 @@ def set_nofile_ulimit():
         import resource
     except ModuleNotFoundError:
         return
-    want = 10240
+    want = 2048
     soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
     if soft < want or hard < want:
         try:
             resource.setrlimit(resource.RLIMIT_NOFILE, (want, want))
-        except OSError:
+        except (OSError, ValueError):
             print('Failed to increase file ulimit, you may see linker failures')
 
 class Variants(object):
