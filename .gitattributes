@@ -1,0 +1,4 @@
+*.recipe gitlab-language=python
+*.package gitlab-language=python
+*.config gitlab-language=python
+*.cbc gitlab-language=python
