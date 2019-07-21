@@ -58,7 +58,6 @@ class Recipe(custom.GStreamer):
                      'opencv': 'disabled',
                      'sndfile': 'disabled',
                      'teletext': 'disabled',
-                     'vdpau': 'disabled',
                      'voamrwbenc': 'disabled',
                      'wildmidi': 'disabled',
                     }
