@@ -443,8 +443,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('rsvg', 'codecs', dep='librsvg')
 
         # Enable hardware codecs if variants are enabled
-        self.enable_plugin('nvenc', 'codecs', 'nvcodec', option='nvenc')
-        self.enable_plugin('nvdec', 'codecs', 'nvcodec', option='nvdec')
+        self.enable_plugin('nvcodec', 'codecs', 'nvcodec', option='nvcodec')
         self.enable_plugin('msdk', 'codecs', 'intelmsdk', option='msdk')
 
         if self.config.target_platform == Platform.WINDOWS:

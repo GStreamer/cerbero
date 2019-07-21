@@ -221,17 +221,11 @@ contains the mediasdk `include` and `lib64` dirs.
 ### Nvidia Hardware Codecs
 
 For Nvidia, the [variant to enable](#enabling-optional-features-with-variants)
-is `nvcodec` which will build the `nvenc` and `nvdec` plugins.
+is `nvcodec` which will build the `nvcodec` plugin.
 
 If CUDA is not installed into the system prefix, You need to set `CUDA_PATH` to
 point to your [CUDA SDK](https://developer.nvidia.com/cuda-downloads) prefix.
 On Windows, this is done automatically by the installer.
-
-On Windows, with CUDA v10 and newer, you must also set
-`NVIDIA_VIDEO_CODEC_SDK_PATH` to point to your [Video Codec
-SDK](https://developer.nvidia.com/nvidia-video-codec-sdk) prefix. There is no
-installer for this, so you must extract the SDK zip and set the env var to point
-to the path to the extracted folder.
 
 ## Enabling Visual Studio Support
 
