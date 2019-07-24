@@ -104,7 +104,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.IOS:
             dependency_libs += ['-lc++']
         elif self.config.target_platform == Platform.DARWIN:
-            dependency_libs += ['-lstdc++']
+            dependency_libs += ['-lc++']
         elif self.config.target_platform == Platform.ANDROID:
             dependency_libs += ['gnustl', '-lm']
         elif self.config.target_platform in [Platform.WINDOWS, Platform.LINUX]:
