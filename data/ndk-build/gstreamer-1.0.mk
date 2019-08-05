@@ -162,22 +162,28 @@ GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)
 # https://android.googlesource.com/platform/ndk/+/fa8c1b4338c1bef2813ecee0ee298e9498a1aaa7
 ifdef SYSROOT
     SYSROOT_GST_INC := $(SYSROOT)
-    SYSROOT_GST_LINK := $(SYSROOT)
+    SYSROOT_GST_LINK_ARG := --sysroot=$(SYSROOT)
 else
-    ifdef SYSROOT_INC
-        $(call assert-defined, SYSROOT_LINK)
+    ifdef SYSROOT_LINK
         ifdef SYSROOT_LINK
             SYSROOT_GST_INC := $(SYSROOT_INC)
-            SYSROOT_GST_LINK := $(SYSROOT_LINK)
+            SYSROOT_GST_LINK_ARG := --sysroot=$(SYSROOT_LINK)
         endif
     else
-        SYSROOT_GST_INC := $(NDK_PLATFORMS_ROOT)/$(TARGET_PLATFORM)/arch-$(TARGET_ARCH)
-        SYSROOT_GST_LINK := $(SYSROOT_GST_INC)
+        ifdef SYSROOT_LIB_DIR
+            # https://android.googlesource.com/platform/ndk/+/8afb627a222005272e61d4b222b50c69e760d77d
+            # introduced SYSROOT_LIB_DIR
+            SYSROOT_GST_INC := $(SYSROOT_INC)
+            SYSROOT_GST_LINK_ARG := -L$(SYSROOT_API_LIB_DIR) -L$(SYSROOT_LIB_DIR)
+        else
+            SYSROOT_GST_INC := $(NDK_PLATFORMS_ROOT)/$(TARGET_PLATFORM)/arch-$(TARGET_ARCH)
+            SYSROOT_GST_LINK_ARG := -L$(SYSROOT_GST_INC)
+        endif
     endif
 endif
 
 # Create the link command
-GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CXX) $(GLOBAL_LDFLAGS) $(TARGET_LDFLAGS) -nostdlib++ -shared --sysroot=$(SYSROOT_GST_LINK) \
+GSTREAMER_ANDROID_CMD        := $(call libtool-link,$(TARGET_CXX) $(GLOBAL_LDFLAGS) $(TARGET_LDFLAGS) -nostdlib++ -shared $(SYSROOT_GST_LINK_ARG) \
 	-o $(GSTREAMER_ANDROID_SO) $(GSTREAMER_ANDROID_O) \
 	-L$(GSTREAMER_ROOT)/lib -L$(GSTREAMER_STATIC_PLUGINS_PATH) -L$(CXX_SHARED_ROOT) \
 	$(GSTREAMER_ANDROID_LIBS), $(GSTREAMER_LD)) -Wl,-no-undefined $(GSTREAMER_LD)
