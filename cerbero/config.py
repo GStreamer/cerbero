@@ -176,7 +176,7 @@ class Config (object):
                    'extra_properties', 'qt5_qmake_path', 'qt5_pkgconfigdir',
                    'for_shell', 'package_tarball_compression', 'extra_mirrors',
                    'extra_bootstrap_packages', 'moltenvk_prefix',
-                   'vs_install_path', 'vs_install_version']
+                   'vs_install_path', 'vs_install_version', 'exe_suffix']
 
     cookbook = None
 
@@ -542,6 +542,7 @@ class Config (object):
         # Ensure that the path uses / as path separator and not \
         self.set_property('py_prefix', PurePath(stdlibpath).as_posix())
         self.set_property('lib_suffix', '')
+        self.set_property('exe_suffix', self._get_exe_suffix())
         self.set_property('data_dir', self._find_data_dir())
         self.set_property('environ_dir', self._relative_path('config'))
         self.set_property('recipes_dir', self._relative_path('recipes'))
@@ -798,6 +799,11 @@ class Config (object):
         self.set_property('cache_file', platform_arch + ".cache")
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
+
+    def _get_exe_suffix(self):
+        if self.platform != Platform.WINDOWS:
+            return ''
+        return '.exe'
 
     def _find_data_dir(self):
         if self.uninstalled:
