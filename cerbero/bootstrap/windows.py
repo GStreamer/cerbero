@@ -69,18 +69,18 @@ class MSYSBootstrapper(BootstrapperBase):
         self.prefix = self.config.toolchain_prefix
         # MinGW Perl needed by openssl
         url = MINGW_PERL_TPL.format(PERL_VERSION)
-        self.fetch_urls.append((url, MINGW_PERL_CHECKSUM))
+        self.fetch_urls.append((url, None, MINGW_PERL_CHECKSUM))
         self.extract_steps.append((url, True, self.perl_prefix))
         # Newer versions of binary deps such as intltool. Must be extracted
         # after the MinGW toolchain from above is extracted so that it
         # replaces the older files.
-        self.fetch_urls.append((INTLTOOL_URL, INTLTOOL_CHECKSUM))
+        self.fetch_urls.append((INTLTOOL_URL, None, INTLTOOL_CHECKSUM))
         self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
         # Newer version of xz that supports multithreaded compression. Need
         # to extract to a temporary directory, then overwrite the existing
         # lzma/xz binaries.
         self.xz_tmp_prefix = tempfile.TemporaryDirectory() # cleaned up on exit
-        self.fetch_urls.append((XZ_URL, XZ_CHECKSUM))
+        self.fetch_urls.append((XZ_URL, None, XZ_CHECKSUM))
         self.extract_steps.append((XZ_URL, True, self.xz_tmp_prefix.name))
 
     def start(self, jobs=0):
@@ -185,11 +185,11 @@ class MinGWBootstrapper(BootstrapperBase):
         # MinGW toolchain
         filename, checksum = TOOLCHAIN_PLATFORM[self.config.platform]
         url = TOOLCHAIN_BASE_URL + filename
-        self.fetch_urls.append((url, checksum))
+        self.fetch_urls.append((url, None, checksum))
         self.extract_steps.append((url, True, self.prefix))
         # wglext.h
         url = KHRONOS_WGL_TPL.format(OPENGL_COMMIT)
-        self.fetch_urls.append((url, WGL_CHECKSUM))
+        self.fetch_urls.append((url, None, WGL_CHECKSUM))
         sysroot = os.path.join(self.prefix,
                 'x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32')
         gl_inst_path = os.path.join(sysroot, 'include/GL/')

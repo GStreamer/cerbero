@@ -34,7 +34,7 @@ class OSXBootstrapper (BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         url = CPANM_URL_TPL.format(CPANM_VERSION)
-        self.fetch_urls.append((url, CPANM_CHECKSUM))
+        self.fetch_urls.append((url, None, CPANM_CHECKSUM))
 
     def start(self, jobs=0):
         # skip system package install if not needed

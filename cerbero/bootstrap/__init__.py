@@ -51,9 +51,9 @@ class BootstrapperBase (object):
 
     async def fetch(self):
         'Fetch bootstrap binaries'
-        for (url, checksum) in self.fetch_urls:
+        for (url, name, checksum) in self.fetch_urls:
             source = BootstrapTarball(self.config, self.offline, url, checksum,
-                                      self.config.local_sources)
+                                      self.config.local_sources, tarball_name=name)
             self.sources[url] = source
             await source.fetch()
 
