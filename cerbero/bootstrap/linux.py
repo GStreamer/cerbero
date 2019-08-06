@@ -18,7 +18,7 @@
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_bootstrapper
-from cerbero.config import Platform, Architecture, Distro, DistroVersion
+from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import ConfigurationError
 from cerbero.utils import shell
 
