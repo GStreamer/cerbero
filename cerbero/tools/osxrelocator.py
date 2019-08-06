@@ -63,7 +63,8 @@ class OSXRelocator(object):
     def change_libs_path(self, object_file):
         depth = len(object_file.split('/')) - len(self.root.split('/')) - 1
         p_depth = '/..' * depth
-        rpaths = ['@loader_path' + p_depth, '@executable_path' + p_depth]
+        rpaths = ['.']
+        rpaths += ['@loader_path' + p_depth, '@executable_path' + p_depth]
         rpaths += ['@loader_path' + '/../lib', '@executable_path' + '/../lib']
         if not (object_file.endswith('so') or object_file.endswith('dylib')):
             return
