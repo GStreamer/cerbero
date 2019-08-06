@@ -58,7 +58,10 @@ class OtoolLister(RecursiveLister):
 
     def list_file_deps(self, prefix, path):
         files = shell.check_call('otool -L %s' % path).split('\n')[1:]
-        return [x.split(' ')[0][1:] for x in files if prefix in x]
+        # Shared libraries might be relocated, we look for files with the
+        # prefix or starting with @rpath
+        files = [x.strip().split(' ')[0] for x in files if prefix in x or "@rpath" in x]
+        return [x.replace("@rpath/", prefix) for x in files]
 
 
 class LddLister():
