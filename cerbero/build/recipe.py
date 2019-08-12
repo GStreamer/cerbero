@@ -462,8 +462,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         Copy generic licenses from the cerbero licenses datadir.
         '''
         if lobj.acronym.startswith(('BSD', 'MIT')):
-            raise RuntimeError('{}.recipe: must specify the license file for BSD and MIT licenses'
-                               .format(self.name))
+            msg = '{}.recipe: must specify the license file for BSD and MIT licenses ' \
+                'using a dict of the form: ' \
+                "{License.enum: ['path-to-license-file-in-source-tree']}"
+            raise RuntimeError(msg.format(self.name))
         fname = lobj.acronym + '.txt'
         dest = str(install_dir / fname)
         src = os.path.join(self.config.data_dir, 'licenses', lobj.acronym + '.txt')
