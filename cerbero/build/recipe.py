@@ -453,7 +453,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                                    .format(self.name, LICENSE_INFO_FILENAME))
             dest = str(install_dir / fname)
             src = os.path.join(self.build_dir, f)
-            shutil.copyfile(src, dest)
+            if shell.DRY_RUN:
+                print('Copying {!r} to {!r}'.format(src, dest))
+            else:
+                shutil.copyfile(src, dest)
             files.append(fname)
         return files
 
@@ -472,7 +475,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         fname = lobj.acronym + '.txt'
         dest = str(install_dir / fname)
         src = os.path.join(self.config.data_dir, 'licenses', lobj.acronym + '.txt')
-        shutil.copyfile(src, dest)
+        if shell.DRY_RUN:
+            print('Copying {!r} to {!r}'.format(src, dest))
+        else:
+            shutil.copyfile(src, dest)
         return [fname]
 
     def _write_license_readme(self, licenses_files, install_dir, applies_to):
