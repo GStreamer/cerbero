@@ -18,7 +18,8 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-from cerbero.config import Platform
+from cerbero.enums import Platform
+from cerbero.utils import shell
 from cerbero.errors import FatalError
 
 def get_libtool_versions(version, soversion=0):
@@ -149,6 +150,9 @@ libdir='%(libdir)s'
 
     def save(self):
         path = os.path.join(self.libdir, self.laname)
+        if shell.DRY_RUN:
+            print('Creating {}'.format(path))
+            return
         with open(path, 'w') as f:
             f.write(self.LIBTOOL_TPL % self.libtool_vars)
 
