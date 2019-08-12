@@ -26,7 +26,7 @@ import asyncio
 from functools import reduce
 from pathlib import Path
 
-from cerbero.enums import LicenseDescription, LibraryType
+from cerbero.enums import License, LicenseDescription, LibraryType
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalFlatFilesProvider
 from cerbero.config import Platform
@@ -461,6 +461,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         '''
         Copy generic licenses from the cerbero licenses datadir.
         '''
+        if lobj == License.Proprietary:
+            # No license file needed, binaries will not be publicly redistributed
+            return
         if lobj.acronym.startswith(('BSD', 'MIT')):
             msg = '{}.recipe: must specify the license file for BSD and MIT licenses ' \
                 'using a dict of the form: ' \
