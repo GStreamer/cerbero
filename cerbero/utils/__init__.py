@@ -220,6 +220,8 @@ def system_info():
                 distro_version = DistroVersion.DEBIAN_STRETCH
             elif d[1].startswith('10.') or d[1].startswith('buster'):
                 distro_version = DistroVersion.DEBIAN_BUSTER
+            elif d[1].startswith('11.') or d[1].startswith('bullseye'):
+                distro_version = DistroVersion.DEBIAN_BULLSEYE
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:
