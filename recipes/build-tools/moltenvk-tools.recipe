@@ -4,14 +4,14 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'moltenvk-tools'
-    version = '1.1.101.0'
+    version = '1.1.114.0'
     licenses = [License.Apachev2]
     stype = SourceType.TARBALL
     tarball_dirname = "vulkansdk-macos-%(version)s"
     # Mirrored because lunarg.com has an extremely small download limit
     # url = 'https://sdk.lunarg.com/sdk/download/%(version)s/mac/' + tarball_dirname + '.tar.gz'
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/' + tarball_dirname + '.tar.gz'
-    tarball_checksum = 'b175849a1c609b561ef2406ced3f2e408af2970725a45f49547d03cefd5bbc39'
+    tarball_checksum = 'db5df93d10b7f689daad9a455baa4eeacb36826edc8270b45585559a4fbb5569'
     btype = BuildType.CUSTOM
 
     files_bins = [
@@ -25,7 +25,6 @@ class Recipe(recipe.Recipe):
         'spirv-opt',
         'spirv-reduce',
         'spirv-remap',
-        'spirv-stats',
         'spirv-val',
     ]
 
