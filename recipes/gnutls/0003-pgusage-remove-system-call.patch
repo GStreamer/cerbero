@@ -1,7 +1,7 @@
-From 4e18a60eb7fed0edf0d113861efd9044197abae7 Mon Sep 17 00:00:00 2001
+From 4e127a78874f3762baaa12749f6f0b289099ae1a Mon Sep 17 00:00:00 2001
 From: Nicola Murino <nicola.murino@gmail.com>
 Date: Mon, 23 Oct 2017 16:18:06 +0200
-Subject: [PATCH] pgusage: remove system call
+Subject: [PATCH 3/5] pgusage: remove system call
 
 system is undefined on iOS and we don't need it anyway
 ---
@@ -22,5 +22,5 @@ index 3d229c1..da8e9ab 100644
  
      case PAGER_STATE_CHILD:
 -- 
-2.14.2
+2.23.0.rc1
 

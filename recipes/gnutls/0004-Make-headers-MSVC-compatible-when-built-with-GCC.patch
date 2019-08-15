@@ -1,29 +1,29 @@
-From 8065707bfdc4d478c3f717dc82d7569ca2606cef Mon Sep 17 00:00:00 2001
+From aae7f4fc6632b38bcaa4ff553b7b9bbb54e63493 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 19 Jun 2018 10:56:23 +0530
-Subject: [PATCH] Make headers MSVC-compatible when built with GCC
+Subject: [PATCH 4/5] Make headers MSVC-compatible when built with GCC
 
-configure.ac has the right compiler check for this, but it means that
-peopel can't use a header configured with GCC to compile with MSVC.
+Make sure people can use the header when compiling with MSVC.
 ---
- lib/includes/gnutls/gnutls.h.in | 4 ++++
- 1 file changed, 4 insertions(+)
+ lib/includes/gnutls/gnutls.h.in | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/lib/includes/gnutls/gnutls.h.in b/lib/includes/gnutls/gnutls.h.in
-index ff8eddd..faf5b04 100644
+index f5a5a66..471e935 100644
 --- a/lib/includes/gnutls/gnutls.h.in
 +++ b/lib/includes/gnutls/gnutls.h.in
-@@ -45,6 +45,10 @@
- /* *INDENT-OFF* */
- @DEFINE_SSIZE_T@
- /* *INDENT-ON* */
-+# ifdef _MSC_VER
-+#  include <basetsd.h>
-+#  define ssize_t SSIZE_T
-+# endif
- #endif
- /* Get time_t. */
- #include <time.h>
+@@ -40,6 +40,11 @@
+ /* Get ssize_t. */
+ #include <sys/types.h>
+ 
++#ifdef _MSC_VER
++#include <basetsd.h>
++#define ssize_t SSIZE_T
++#endif
++
+ /* Get size_t. */
+ #include <stddef.h>
+ 
 -- 
-2.12.2.windows.2
+2.23.0.rc1
 
