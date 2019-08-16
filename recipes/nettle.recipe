@@ -10,10 +10,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '3.4'
+    version = '3.4.1'
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
-    tarball_checksum = 'ae7a42df026550b85daca8389b6a60ba6313b0567f374392e54918588a411e94'
+    tarball_checksum = 'f941cf1535cd5d1819be5ccae5babef01f6db611f9b5a777bae9c7604b8a92ad'
     licenses = [License.LGPLv3Plus, License.GPLv2Plus, License.GPLv3Plus]
     configure_options = '--enable-shared --enable-public-key'
     deps = ['gmp']
