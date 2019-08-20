@@ -25,6 +25,7 @@ import shutil
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
+from cerbero.enums import LibraryType
 from cerbero.errors import FatalError
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates, git, shell
@@ -82,7 +83,7 @@ class Fetch(Command):
                 if full_reset or not cookbook.recipe_needs_build(recipe.name):
                     to_rebuild.append(recipe)
                     cookbook.reset_recipe_status(recipe.name)
-                    if reset_rdeps:
+                    if recipe.library_type == LibraryType.STATIC or reset_rdeps:
                         for r in cookbook.list_recipe_reverse_deps(recipe.name):
                             to_rebuild.append(r)
                             cookbook.reset_recipe_status(r.name)

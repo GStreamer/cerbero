@@ -23,7 +23,7 @@ import traceback
 import asyncio
 from subprocess import CalledProcessError
 
-from cerbero.enums import Architecture, Platform
+from cerbero.enums import Architecture, Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell
@@ -107,6 +107,7 @@ class Oven (object):
                   ' '.join([x.name for x in ordered_recipes]))
 
         i = 1
+        self._static_libraries_built = []
         for recipe in ordered_recipes:
             try:
                 self._cook_recipe(recipe, i, len(ordered_recipes))
@@ -134,6 +135,11 @@ class Oven (object):
             i += 1
 
     def _cook_recipe(self, recipe, count, total):
+        # A Recipe depending on a static library that has been rebuilt
+        # also needs to be rebuilt to pick up the latest build.
+        if recipe.library_type != LibraryType.STATIC:
+            if len(set(self._static_libraries_built) & set(recipe.deps)) != 0:
+                self.cookbook.reset_recipe_status(recipe.name)
         if not self.cookbook.recipe_needs_build(recipe.name) and \
                 not self.force:
             m.build_step(count, total, recipe.name, _("already built"))
@@ -185,6 +191,8 @@ class Oven (object):
             except Exception:
                 raise BuildStepError(recipe, step, traceback.format_exc())
         self.cookbook.update_build_status(recipe.name, recipe.built_version())
+        if recipe.library_type == LibraryType.STATIC:
+            self._static_libraries_built.append(recipe.name)
 
         if self.missing_files:
             self._print_missing_files(recipe, tmp)
