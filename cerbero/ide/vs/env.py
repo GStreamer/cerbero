@@ -33,7 +33,8 @@ vcvarsalls = {
     'vs16': [r'Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat',
              r'Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
+             r'Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat',
+             r'Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat'],
 }
 
 def get_program_files_dir():
