@@ -466,7 +466,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         '''
         if lobj == License.Proprietary:
             # No license file needed, binaries will not be publicly redistributed
-            return
+            return []
         if lobj.acronym.startswith(('BSD', 'MIT')):
             msg = '{}.recipe: must specify the license file for BSD and MIT licenses ' \
                 'using a dict of the form: ' \
