@@ -1,0 +1,15 @@
+import os
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform = Platform.LINUX
+target_distro = Distro.DEBIAN
+target_arch = Architecture.ARM64
+variants = ['noalsa', 'nox11', 'nopulse', 'nocdparanoia', 'nosdl',
+            'nov4l2', 'notestspackage', 'nopython']
+
+extra_bootstrap_packages = {
+    Platform.LINUX : {
+        Distro.DEBIAN: ['gcc-aarch64-linux-gnu', 'g++-aarch64-linux-gnu'],
+        Distro.REDHAT: ['gcc-aarch64-linux-gnu', 'g++-aarch64-linux-gnu']
+    }
+}
