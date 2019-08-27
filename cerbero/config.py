@@ -125,7 +125,7 @@ class Config (object):
                    'build_tools_prefix', 'build_tools_sources',
                    'build_tools_cache', 'home_dir', 'recipes_commits',
                    'recipes_remotes', 'ios_platform', 'extra_build_tools',
-                   'distro_packages_install', 'interactive',
+                   'distro_packages_install', 'interactive', 'bash_completions',
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
@@ -442,6 +442,7 @@ class Config (object):
         self.set_property('extra_properties', {})
         self.set_property('extra_mirrors', [])
         self.set_property('extra_bootstrap_packages', {})
+        self.set_property('bash_completions', set())
         # Increase open-files limits
         set_nofile_ulimit()
 

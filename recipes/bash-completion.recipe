@@ -1,0 +1,14 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'bash-completion'
+    version = '2.9'
+    licenses = [License.GPLv2Plus]
+    stype = SourceType.TARBALL
+    url = 'https://github.com/scop/bash-completion/releases/download/2.9/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'd48fe378e731062f479c5f8802ffa9d3c40a275a19e6e0f6f6cc4b90fa12b2f5'
+
+    def prepare(self):
+      if self.config.target_platform not in [Platform.LINUX]:
+        raise InvalidRecipeError(self, "Invalid platform")

@@ -574,7 +574,7 @@ def files_checksum(paths):
     return m.digest()
 
 
-def enter_build_environment(platform, arch, sourcedir=None):
+def enter_build_environment(platform, arch, sourcedir=None, bash_completions=None):
     '''
     Enters to a new shell with the build environment
     '''
@@ -584,6 +584,11 @@ source ~/.bashrc
 fi
 %s
 PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]%s'
+BASH_COMPLETION_SCRIPTS="%s"
+BASH_COMPLETION_PATH="$CERBERO_PREFIX/share/bash-completion/completions"
+for f in $BASH_COMPLETION_SCRIPTS; do
+  [ -f "$BASH_COMPLETION_PATH/$f" ] && . "$BASH_COMPLETION_PATH/$f"
+done
 '''
     MSYSBAT =  '''
 start bash.exe --rcfile %s
@@ -592,6 +597,8 @@ start bash.exe --rcfile %s
         sourcedirsh = 'cd ' + sourcedir
     else:
         sourcedirsh = ''
+    if bash_completions is None:
+        bash_completions = set()
 
     ps1 = os.environ.get('PS1', '')
 
@@ -602,13 +609,13 @@ start bash.exe --rcfile %s
         with open(msysbat, 'w+') as f:
             f.write(MSYSBAT % bashrc)
         with open(bashrc, 'w+') as f:
-            f.write(BASHRC % (sourcedirsh, platform, arch, ps1))
+            f.write(BASHRC % (sourcedirsh, platform, arch, ps1, ' '.join(bash_completions)))
         subprocess.check_call(msysbat, shell=True)
         # We should remove the temporary directory
         # but there is a race with the bash process
     else:
         bashrc = tempfile.NamedTemporaryFile()
-        bashrc.write((BASHRC % (sourcedirsh, platform, arch, ps1)).encode())
+        bashrc.write((BASHRC % (sourcedirsh, platform, arch, ps1, ' '.join(bash_completions))).encode())
         bashrc.flush()
         shell = os.environ.get('SHELL', '/bin/bash')
         if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:

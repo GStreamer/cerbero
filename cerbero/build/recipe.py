@@ -150,6 +150,8 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     @type platform_deps: dict
     @cvar runtime_dep: runtime dep common to all recipes
     @type runtime_dep: bool
+    @cvar bash_completions: list of bash completion scripts for shell
+    @type bash_completions: list
     '''
 
     # Licenses are declared as an array of License.enums or dicts of the type:
@@ -193,6 +195,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     deps = None
     platform_deps = None
     runtime_dep = False
+    bash_completions = None
 
     # Internal properties
     force = False
@@ -217,6 +220,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
         self.deps = self.deps or []
+        if self.bash_completions and config.target_platform in [Platform.LINUX]:
+            config.bash_completions.update(self.bash_completions)
+            self.deps.append('bash-completion')
         self.platform_deps = self.platform_deps or {}
         self._steps = self._default_steps[:]
         if self.config.target_platform == Platform.WINDOWS:

@@ -19,6 +19,7 @@
 import os
 
 from cerbero.commands import Command, register_command
+from cerbero.build.cookbook import CookBook
 from cerbero.utils import _, N_, shell, ArgparseArgument, add_system_libs
 
 class Shell(Command):
@@ -35,10 +36,12 @@ class Shell(Command):
         Command.__init__(self, args)
 
     def run(self, config, args):
+        # Load the cookbook which will parse all recipes and update config.bash_completions
+        cookbook = CookBook(config)
         if args.use_system_libs:
             add_system_libs(config, os.environ)
         shell.enter_build_environment(config.target_platform,
-                config.target_arch)
+                config.target_arch, sourcedir=None, bash_completions=config.bash_completions)
 
 
 register_command(Shell)
