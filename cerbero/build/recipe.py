@@ -209,7 +209,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
     # Used in recipes/custom.py. See also: cookbook.py:_load_recipes_from_dir()
     _using_manifest_force_git = False
 
-    def __init__(self, config):
+    def __init__(self, config, env):
         self.config = config
         if self.package_name is None:
             self.package_name = "%s-%s" % (self.name, self.version)
@@ -220,6 +220,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
         self.deps = self.deps or []
+        self.env = env.copy()
         if self.bash_completions and config.target_platform in [Platform.LINUX]:
             config.bash_completions.update(self.bash_completions)
             self.deps.append('bash-completion')

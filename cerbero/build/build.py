@@ -143,8 +143,6 @@ def modify_environment(func):
     '''
     def call(*args):
         self = args[0]
-        if self.use_system_libs and self.config.allow_system_libs:
-            self._add_system_libs()
         self._modify_env()
         try:
             res = func(*args)
@@ -164,8 +162,6 @@ def async_modify_environment(func):
     '''
     async def call(*args):
         self = args[0]
-        if self.use_system_libs and self.config.allow_system_libs:
-            self._add_system_libs()
         self._modify_env()
         res = await func(*args)
         self._restore_env()
@@ -240,42 +236,35 @@ class ModifyEnvBase:
         self._env_vars = set()
         # Old environment to restore
         self._old_env = {}
-        self.env = {}
+
+        class ModifyEnvFuncWrapper(object):
+            def __init__(this, target, method):
+                this.target = target
+                this.method = method
+
+            def __call__(this, var, *vals, sep=' ', when='later'):
+                op = EnvVarOp(this.method, var, vals, sep)
+                if when == 'later':
+                    this.target.check_reentrancy()
+                    this.target._env_vars.add(var)
+                    this.target._new_env.append(op)
+                elif when == 'now-with-restore':
+                    this.target._save_env_var(var)
+                    op.execute(this.target.env)
+                elif when == 'now':
+                    op.execute(this.target.env)
+                else:
+                    raise RuntimeError('Unknown when value: ' + when)
+
+            def __repr__(this):
+                return "<ModifyEnvFuncWrapper " + this.method + " for " + repr(this.target) + "  at " + str(hex(id(this))) + ">"
+
+        for i in ('append', 'prepend', 'set', 'remove'):
+            setattr(self, i + '_env', ModifyEnvFuncWrapper(self, i))
 
     def check_reentrancy(self):
         if self._old_env:
             raise RuntimeError('Do not modify the env inside @modify_environment, it will have no effect')
-
-    def append_env(self, var, *vals, sep=' '):
-        self.check_reentrancy()
-        self._env_vars.add(var)
-        self._new_env.append(EnvVarOp('append', var, vals, sep))
-
-    def prepend_env(self, var, *vals, sep=' '):
-        self.check_reentrancy()
-        self._env_vars.add(var)
-        self._new_env.append(EnvVarOp('prepend', var, vals, sep))
-
-    def set_env(self, var, *vals, sep=' '):
-        self.check_reentrancy()
-        self._env_vars.add(var)
-        self._new_env.append(EnvVarOp('set', var, vals, sep))
-
-    def remove_env(self, var, *vals, sep=' '):
-        '''
-        Removes a value from and environment variable.
-        eg: self.remove_env('CFLAGS', '-mthumb)
-
-        @ivar var: environment variable to modify
-        @type var: str
-        @ivar vals: values to remove
-        @type vals: list
-        @ivar sep: separator
-        @type sep: str
-        '''
-        self.check_reentrancy()
-        self._env_vars.add(var)
-        self._new_env.append(EnvVarOp('remove', var, vals, sep))
 
     def get_env(self, var, default=None):
         if not self._old_env:
@@ -291,6 +280,14 @@ class ModifyEnvBase:
 
         return default
 
+    def _save_env_var (self, var):
+        # Will only store the first 'save'.
+        if var not in self._old_env:
+            if var in self.env:
+                self._old_env[var] = self.env[var]
+            else:
+                self._old_env[var] = None
+
     def _modify_env(self):
         '''
         Modifies the build environment by inserting env vars from new_env
@@ -300,8 +297,7 @@ class ModifyEnvBase:
             return
         # Store old env
         for var in self._env_vars:
-            if var in self.env:
-                self._old_env[var] = self.env[var]
+            self._save_env_var (var)
         # Modify env
         for env_op in self._new_env:
             env_op.execute(self.env)
@@ -316,18 +312,32 @@ class ModifyEnvBase:
                 self.env[var] = val
         self._old_env.clear()
 
-    def _add_system_libs(self):
+    def maybe_add_system_libs(self, step=''):
         '''
         Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
         can be found.
         '''
-        # Don't modify env again if already did it once for this function call
-        if self._old_env:
-            return
+        # Note: this is expected to be called with the environment already
+        # modified using @{async_,}modify_environment
+
+        # don't add system libs unless explicitly asked for
+        if not self.use_system_libs or not self.config.allow_system_libs:
+            return;
+
+        # this only works because add_system_libs() does very little
+        # this is a possible source of env conflicts
         new_env = {}
         add_system_libs(self.config, new_env)
+
+        if step != 'configure':
+            # gobject-introspection gets the paths to internal libraries all
+            # wrong if we add system libraries during compile.  We should only
+            # need PKG_CONFIG_PATH during configure so just unset it everywhere
+            # else we will get linker errors compiling introspection binaries
+            if 'PKG_CONFIG_PATH' in new_env:
+                del new_env['PKG_CONFIG_PATH']
         for var, val in new_env.items():
-            self.set_env(var, val)
+            self.set_env(var, val, when='now-with-restore')
 
 
 class MakefilesBase (Build, ModifyEnvBase):
@@ -363,24 +373,24 @@ class MakefilesBase (Build, ModifyEnvBase):
             self.make += ' -j%d' % self.config.num_of_cpus
 
         # Make sure user's env doesn't mess up with our build.
-        self.set_env('MAKEFLAGS')
+        self.set_env('MAKEFLAGS', when='now')
         # Disable site config, which is set on openSUSE
-        self.set_env('CONFIG_SITE')
+        self.set_env('CONFIG_SITE', when='now')
         # Only add this for non-meson recipes, and only for iPhoneOS
         if self.config.ios_platform == 'iPhoneOS':
             bitcode_cflags = ['-fembed-bitcode']
             # NOTE: Can't pass -bitcode_bundle to Makefile projects because we
             # can't control what options they pass while linking dylibs
             bitcode_ldflags = bitcode_cflags #+ ['-Wl,-bitcode_bundle']
-            self.append_env('ASFLAGS', *bitcode_cflags)
-            self.append_env('CFLAGS', *bitcode_cflags)
-            self.append_env('CXXFLAGS', *bitcode_cflags)
-            self.append_env('OBJCFLAGS', *bitcode_cflags)
-            self.append_env('OBJCXXFLAGS', *bitcode_cflags)
-            self.append_env('CCASFLAGS', *bitcode_cflags)
+            self.append_env('ASFLAGS', *bitcode_cflags, when='now')
+            self.append_env('CFLAGS', *bitcode_cflags, when='now')
+            self.append_env('CXXFLAGS', *bitcode_cflags, when='now')
+            self.append_env('OBJCFLAGS', *bitcode_cflags, when='now')
+            self.append_env('OBJCXXFLAGS', *bitcode_cflags, when='now')
+            self.append_env('CCASFLAGS', *bitcode_cflags, when='now')
             # Autotools only adds LDFLAGS when doing compiler checks,
             # so add -fembed-bitcode again
-            self.append_env('LDFLAGS', *bitcode_ldflags)
+            self.append_env('LDFLAGS', *bitcode_ldflags, when='now')
 
     @async_modify_environment
     async def configure(self):
@@ -402,6 +412,8 @@ class MakefilesBase (Build, ModifyEnvBase):
             'options': self.configure_options,
             'build_dir': to_unixpath(self.build_dir)}
 
+        self.maybe_add_system_libs(step='configure')
+
         await shell.async_call(configure_cmd, self.make_dir,
                                logfile=self.logfile, env=self.env)
 
@@ -409,19 +421,23 @@ class MakefilesBase (Build, ModifyEnvBase):
     async def compile(self):
         if self.using_msvc():
             self.unset_toolchain_env()
+        self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):
+        self.maybe_add_system_libs(step='install')
         shell.call(self.make_install, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
+        self.maybe_add_system_libs(step='clean')
         shell.call(self.make_clean, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
         if self.make_check:
+            self.maybe_add_system_libs(step='check')
             shell.call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
 
 
@@ -868,22 +884,27 @@ class Meson (Build, ModifyEnvBase) :
         for (key, value) in self.meson_options.items():
             meson_cmd += ['-D%s=%s' % (key, str(value))]
 
+        self.maybe_add_system_libs(step='configure')
         await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @async_modify_environment
     async def compile(self):
+        self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def install(self):
+        self.maybe_add_system_libs(step='install')
         shell.call(self.make_install, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
+        self.maybe_add_system_libs(step='clean')
         shell.call(self.make_clean, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
+        self.maybe_add_system_libs(step='check')
         shell.call(self.make_check, self.meson_dir, logfile=self.logfile, env=self.env)
 
 

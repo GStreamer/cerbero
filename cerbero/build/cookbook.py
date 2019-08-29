@@ -452,11 +452,10 @@ class CookBook (object):
 
     def _load_recipe_from_class(self, recipe_cls, config, filepath, setup_env=False):
         try:
-            r = recipe_cls(config)
-            r.__file__ = os.path.abspath(filepath)
             if setup_env:
                 config.do_setup_env()
-            r.env = os.environ.copy()
+            r = recipe_cls(config, os.environ.copy())
+            r.__file__ = os.path.abspath(filepath)
             r.prepare()
             return r
         except InvalidRecipeError as e:
