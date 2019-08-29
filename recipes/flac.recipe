@@ -34,6 +34,9 @@ class Recipe(recipe.Recipe):
                 self.configure_options += ' --disable-asm-optimizations'
         if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
             self.autoreconf = True
+        if self.config.target_platform == Platform.WINDOWS:
+            # Newer MinGW requires this define for sscanf in stdio.h
+            self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
 
     async def configure(self):
         if self.config.target_platform == Platform.ANDROID:
@@ -43,7 +46,4 @@ class Recipe(recipe.Recipe):
                     'cpu.c'),
                     {'#  undef USE_OBSOLETE_SIGCONTEXT_FLAVOR':
                      '#define USE_OBSOLETE_SIGCONTEXT_FLAVOR'})
-        elif self.config.target_platform == Platform.WINDOWS:
-            # Newer MinGW requires this define for sscanf in stdio.h
-            self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
         await super(Recipe, self).configure()
