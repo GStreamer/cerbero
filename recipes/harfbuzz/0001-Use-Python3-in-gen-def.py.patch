@@ -15,7 +15,7 @@ index ad1606e..f45df80 100755
 -#!/usr/bin/env python
 +#!/usr/bin/env python3
  
- from __future__ import print_function
+ from __future__ import print_function, division, absolute_import
  
 -- 
 2.19.2
