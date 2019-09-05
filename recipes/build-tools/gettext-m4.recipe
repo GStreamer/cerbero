@@ -3,11 +3,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'gettext-m4'
-    version = '0.19.8.1'
+    version = '0.20.1'
     stype = SourceType.TARBALL
     url = 'gnu://gettext/gettext-%(version)s.tar.xz'
     tarball_dirname = 'gettext-%(version)s'
-    tarball_checksum = '105556dbc5c3fbbc2aa0edb46d22d055748b6f5c7cd7a8d99f8e7eb84e938be4'
+    tarball_checksum = '53f02fbbec9e798b0faaf7c73272f83608e835c6288dd58be6c9bb54624a3800'
     # only libraries are LGPLv2+, tools are GPLv3+ and defined below
     licenses = [License.LGPLv2Plus]
     autoreconf = True

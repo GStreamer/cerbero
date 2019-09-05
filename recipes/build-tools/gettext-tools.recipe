@@ -6,22 +6,19 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gettext-tools'
-    version = '0.19.8.1'
+    version = '0.20.1'
     licenses = [License.GPLv3Plus]
-    srcdir = 'gettext-tools'
+    #srcdir = 'gettext-tools'
     stype = SourceType.TARBALL
     url = 'gnu://gettext/gettext-%(version)s.tar.xz'
     tarball_dirname = 'gettext-%(version)s'
-    tarball_checksum = '105556dbc5c3fbbc2aa0edb46d22d055748b6f5c7cd7a8d99f8e7eb84e938be4'
+    tarball_checksum = '53f02fbbec9e798b0faaf7c73272f83608e835c6288dd58be6c9bb54624a3800'
 
     platform_deps = {
             Platform.DARWIN:  ['sed'],
             Platform.WINDOWS: ['libiconv', 'mingw-runtime', 'automake'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
-    patches = [name + '/0001-Fix-linker-error-redefinition-of-vasprintf.patch',
-               name + '/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
-               name + '/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
-               name + '/0001-Fix-linker-error-Cannot-export-rpl_printf.patch' ]
+    patches = [name + '/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch' ]
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
