@@ -5,27 +5,17 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.3.1'
+    version = '1.3.4'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    tarball_checksum = 'f202801d9e53cd8854fccc1ca010272076c32c318396c8f61fb9a61807c3dbea'
+    tarball_checksum = 'd3ddf3ad89eb93a4dbf44046775eb63e04780cc536781490d65321d78d4b19de'
     licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    configure_options = '-DUSE_GNUTLS=ON -DENABLE_CXX11=OFF'
+    configure_options = '-DUSE_ENCLIB=gnutls -DENABLE_CXX11=OFF'
     deps = ['gnutls']
 
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
-    patches = ['srt/0002-srt-Fix-MingW-build.patch',
-               'srt/0003-platform_sys-Only-include-inttypes.h-with-MSFT-compi.patch',
-               'srt/0004-MingW-needs-the-explicit-exports-too.patch',
-               'srt/0005-Windows-Only-define-SRT_API-in-one-place.patch',
-               'srt/0001-Allow-building-using-gnustl.patch',
-               'srt/0006-Fix-install_name-in-macOS-using-MACOS_RPATH.patch',
-               'srt/0001-Allow-using-public-API-when-building-with-MSVC.patch',
-               # https://github.com/Haivision/srt/pull/528
-               'srt/0007-Fix-build-with-MinGW-v6.0.0.patch',
-               ]
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
