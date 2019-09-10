@@ -3,12 +3,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'ffmpeg'
-    version = '4.1.1'
+    version = '4.2'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.bz2'
-    tarball_checksum = '0cb40e3b8acaccd0ecb38aa863f66f0c6e02406246556c2992f67bf650fab058'
-    patches = ['ffmpeg/0001-configure-make-windres-option-work.patch',]
+    tarball_checksum = '306bde5f411e9ee04352d1d3de41bd3de986e42e2af2a4c44052dce1ada26fb8'
+    patches = []
 
     btype = BuildType.MAKEFILE
     configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
