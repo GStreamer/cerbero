@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'speex'
-    version = '1.2rc2'
+    version = '1.2.0'
     stype = SourceType.TARBALL
     url = 'xiph://.tar.gz'
-    tarball_checksum = 'caa27c7247ff15c8521c2ae0ea21987c9e9710a8f2d3448e8b79da9806bce891'
+    tarball_checksum = 'eaae8af0ac742dc7d542c9439ac72f1f385ce838392dc849cae4536af9210094'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['libogg']
     allow_parallel_build = False
