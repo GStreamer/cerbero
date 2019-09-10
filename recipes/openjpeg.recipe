@@ -5,13 +5,13 @@ import shutil
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
-    version = '2.3.0'
+    version = '2.3.1'
     name = 'openjpeg'
     licenses = [{License.BSD: ['LICENSE.txt']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://github.com/uclouvain/openjpeg/archive/v%(version)s.tar.gz'
-    tarball_checksum = '3dc787c1bb6023ba846c2a0d9b1f6e179f1cd255172bde9eb75b01f1e6c7d71a'
+    tarball_checksum = '63f5a4713ecafc86de51bfad89cc07bb788e9bba24ebbf0c4ca637621aadb6a9'
     configure_options = ' -DBUILD_CODEC:bool=off -DBUILD_PKGCONFIG_FILES:bool=on '
 
     files_libs = ['libopenjp2']
