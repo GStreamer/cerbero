@@ -4,12 +4,12 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'flac'
-    version = '1.3.2'
+    version = '1.3.3'
     # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
     licenses = [{License.BSD_like: ['COPYING.Xiph']}]
     stype = SourceType.TARBALL
     url = 'xiph://'
-    tarball_checksum = '91cfc3ed61dc40f47f050a109b08610667d73477af6ef36dcad31c31a4a8d53f'
+    tarball_checksum = '213e82bd716c9de6db2f98bcadbc4c24c7e2efe8c75939a1a84e28539c4e1748'
     deps = ['libogg']
     configure_options = ' --disable-cpplibs --enable-static'
 
@@ -17,7 +17,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libFLAC']
 
     files_bins = ['flac', 'metaflac']
-    tarball_checksum = '91cfc3ed61dc40f47f050a109b08610667d73477af6ef36dcad31c31a4a8d53f'
     licenses_bins = [License.GPLv2Plus]
 
     files_devel = [
