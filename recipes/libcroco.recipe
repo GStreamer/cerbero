@@ -2,12 +2,13 @@
 
 class Recipe(recipe.Recipe):
     name = 'libcroco'
-    version = '0.6.12'
+    version = '0.6.13'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'ddc4b5546c9fb4280a5017e2707fbd4839034ed1aba5b7d4372212f34f84f860'
+    tarball_checksum = '767ec234ae7aa684695b3a735548224888132e063f92db585759b422570621d4'
     deps = ['libxml2', 'glib', 'gdk-pixbuf']
+    autoreconf = True
 
     files_libs = ['libcroco-0.6']
     files_bins = ['csslint-0.6']
