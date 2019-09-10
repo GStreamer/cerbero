@@ -1,0 +1,25 @@
+From 93ecf704a16f8bb4023e80e3c4f338c7a2fd4025 Mon Sep 17 00:00:00 2001
+From: Edward Hervey <edward@centricular.com>
+Date: Fri, 6 Sep 2019 12:12:16 +0200
+Subject: [PATCH] include: Use stdint on mac/ios
+
+---
+ include/ogg/os_types.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/ogg/os_types.h b/include/ogg/os_types.h
+index eb8a322..6aeecae 100644
+--- a/include/ogg/os_types.h
++++ b/include/ogg/os_types.h
+@@ -70,7 +70,7 @@
+ 
+ #elif (defined(__APPLE__) && defined(__MACH__)) /* MacOS X Framework build */
+ 
+-#  include <sys/types.h>
++#  include <stdint.h>
+    typedef int16_t ogg_int16_t;
+    typedef uint16_t ogg_uint16_t;
+    typedef int32_t ogg_int32_t;
+-- 
+2.21.0
+
