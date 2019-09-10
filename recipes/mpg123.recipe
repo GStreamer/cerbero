@@ -2,10 +2,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'mpg123'
-    version = '1.25.10'
+    version = '1.25.12'
     stype = SourceType.TARBALL
     url = 'sf://.tar.bz2'
-    tarball_checksum = '6c1337aee2e4bf993299851c70b7db11faec785303cfca3a5c3eb5f329ba7023'
+    tarball_checksum = '1ffec7c9683dfb86ea9040d6a53d6ea819ecdda215df347f79def08f1fe731d1'
     licenses = [License.LGPLv2_1Plus]
     autoreconf = True
     configure_options = '--with-audio=dummy --enable-static'
