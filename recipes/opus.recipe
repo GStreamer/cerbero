@@ -3,11 +3,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'opus'
-    version = '1.3'
+    version = '1.3.1'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
     url = 'xiph://.tar.gz'
-    tarball_checksum = '4f3d69aefdf2dbaf9825408e452a8a414ffc60494c70633560700398820dc550'
+    tarball_checksum = '65b58e1e25b2a114157014736a3d9dfeaad8d41be1c8179866f144a2fb44ff9d'
 
     patches = ['opus/0001-celt-Force-stack-alignment-for-functions-using-__m12.patch']
 
