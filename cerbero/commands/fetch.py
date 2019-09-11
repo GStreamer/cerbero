@@ -191,6 +191,8 @@ class FetchCache(Command):
             distro = 'fedora'
         if distro == Distro.OS_X:
             distro = 'macos'
+        if config.cross_compiling():
+            distro = 'cross-' + distro
 
         base_url = self.base_url % namespace
         url = "%s/artifacts/%s/raw/cerbero-build/cerbero-deps.log" % (base_url, branch)
