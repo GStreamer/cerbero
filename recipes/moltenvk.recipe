@@ -59,10 +59,7 @@ class Recipe(recipe.Recipe):
 
         srcdir = self.config.moltenvk_prefix
 
-        if self.config.target_platform == Platform.DARWIN:
-            prefix = self.config.prefix
-        elif self.config.target_platform == Platform.IOS:
-            prefix = os.path.join(self.config.prefix, self.config.target_arch)
+        prefix = self.config.prefix
         bindir = os.path.join(prefix, 'bin')
         libdir = os.path.join(prefix, 'lib')
 
