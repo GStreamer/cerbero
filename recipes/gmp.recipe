@@ -63,7 +63,7 @@ class Recipe(recipe.Recipe):
                 os.remove(implib)
             if os.path.exists(dll_a):
                 os.remove(dll_a)
-            shell.check_call(shlex.split(dlltool) + ['-D', dllname, '-d',
+            shell.new_call(shlex.split(dlltool) + ['-D', dllname, '-d',
                 defs_file, '-l', dll_a], env=self.env)
             os.replace(src, dll)
             gmp_la = os.path.join(self.config.prefix, 'lib', 'libgmp.la')

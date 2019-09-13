@@ -70,9 +70,24 @@ def _fix_mingw_cmd(path):
                 l_path[i] = '/'
     return ''.join(l_path)
 
-def _cmd_string_to_array(cmd):
-    if not isinstance(cmd, str):
+def _resolve_cmd(cmd, env):
+    '''
+    On Windows, we can't pass the PATH variable through the env= kwarg to
+    subprocess.* and expect it to use that value to search for the command,
+    because Python uses CreateProcess directly. Unlike execvpe, CreateProcess
+    does not use the PATH env var in the env supplied to search for the
+    executable. Hence, we need to search for it manually.
+    '''
+    if PLATFORM != Platform.WINDOWS or env is None or 'PATH' not in env:
         return cmd
+    if not os.path.isabs(cmd[0]):
+        cmd[0] = shutil.which(cmd[0], path=env['PATH'])
+    return cmd
+
+def _cmd_string_to_array(cmd, env):
+    if isinstance(cmd, list):
+        return _resolve_cmd(cmd, env)
+    assert(isinstance(cmd, str))
     if PLATFORM == Platform.WINDOWS:
         # fix paths with backslashes
         cmd = _fix_mingw_cmd(cmd)
@@ -164,7 +179,7 @@ def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None)
 
 
 def check_output(cmd, cmd_dir=None, logfile=None, env=None):
-    cmd = _cmd_string_to_array(cmd)
+    cmd = _cmd_string_to_array(cmd, env)
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
     except (OSError, subprocess.CalledProcessError) as e:
@@ -176,7 +191,7 @@ def check_output(cmd, cmd_dir=None, logfile=None, env=None):
 
 
 def new_call(cmd, cmd_dir=None, logfile=None, env=None):
-    cmd = _cmd_string_to_array(cmd)
+    cmd = _cmd_string_to_array(cmd, env)
     if logfile:
         logfile.write('Running command {!r}\n'.format(cmd))
         logfile.flush()
@@ -196,7 +211,7 @@ async def async_call(cmd, cmd_dir='.', logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    cmd = _cmd_string_to_array(cmd)
+    cmd = _cmd_string_to_array(cmd, env)
 
     if logfile is None:
         stream = None
@@ -231,7 +246,7 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    cmd = _cmd_string_to_array(cmd)
+    cmd = _cmd_string_to_array(cmd, env)
 
     if PLATFORM == Platform.WINDOWS:
         import cerbero.hacks
