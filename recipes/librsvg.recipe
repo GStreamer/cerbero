@@ -31,7 +31,8 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.configure_options += ' --disable-Bsymbolic'
-        if self.config.target_platform == Platform.IOS:
+        # Fails on cross-ios and cross-win32
+        if self.config.cross_compiling():
             self.configure_options += ' --disable-pixbuf-loader'
 
     async def compile(self):
