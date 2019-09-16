@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE']}]
     configure_options = "--enable-local-libopts --disable-guile --disable-openssl-compatibility \
         --without-p11-kit --enable-static --enable-zlib --enable-shared \
-        --disable-doc --disable-tests --with-included-unistring"
+        --disable-doc --disable-tests --disable-nls --with-included-unistring"
     deps = ['zlib', 'nettle', 'libtasn1']
     platform_deps = {
         Platform.WINDOWS: ['proxy-libintl'],
