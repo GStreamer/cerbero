@@ -9,6 +9,9 @@ components would produce duplicate symbols and fail to link.
 
 Done using:
 for f in `git grep -h '^.globl' lib/accelerated/ | sed -e 's/^\.globl\s*//' | env LC_COLLATE=C sort` ; do sed -i -e s/\\b$f\\b/_gnutls_$f/g `git ls-files lib/accelerated`; done
+
+And then:
+sed -i -e 's/_gnutls__/__gnutls_/g' lib/accelerated/x86/coff/*.s
 ---
  lib/accelerated/aarch64/aes-aarch64.h         |  10 +-
  lib/accelerated/aarch64/aes-cbc-aarch64.c     |   8 +-
@@ -1037,11 +1040,11 @@ index c58ea23..4f9a86f 100644
  	ret
 -.globl	_vpaes_set_encrypt_key
 -.def	_vpaes_set_encrypt_key;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__vpaes_set_encrypt_key
-+.def	_gnutls__vpaes_set_encrypt_key;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_vpaes_set_encrypt_key
++.def	__gnutls_vpaes_set_encrypt_key;	.scl	2;	.type	32;	.endef
  .align	16
 -_vpaes_set_encrypt_key:
-+_gnutls__vpaes_set_encrypt_key:
++__gnutls_vpaes_set_encrypt_key:
  .L_vpaes_set_encrypt_key_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1051,11 +1054,11 @@ index c58ea23..4f9a86f 100644
  	ret
 -.globl	_vpaes_set_decrypt_key
 -.def	_vpaes_set_decrypt_key;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__vpaes_set_decrypt_key
-+.def	_gnutls__vpaes_set_decrypt_key;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_vpaes_set_decrypt_key
++.def	__gnutls_vpaes_set_decrypt_key;	.scl	2;	.type	32;	.endef
  .align	16
 -_vpaes_set_decrypt_key:
-+_gnutls__vpaes_set_decrypt_key:
++__gnutls_vpaes_set_decrypt_key:
  .L_vpaes_set_decrypt_key_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1065,11 +1068,11 @@ index c58ea23..4f9a86f 100644
  	ret
 -.globl	_vpaes_encrypt
 -.def	_vpaes_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__vpaes_encrypt
-+.def	_gnutls__vpaes_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_vpaes_encrypt
++.def	__gnutls_vpaes_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_vpaes_encrypt:
-+_gnutls__vpaes_encrypt:
++__gnutls_vpaes_encrypt:
  .L_vpaes_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1079,11 +1082,11 @@ index c58ea23..4f9a86f 100644
  	ret
 -.globl	_vpaes_decrypt
 -.def	_vpaes_decrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__vpaes_decrypt
-+.def	_gnutls__vpaes_decrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_vpaes_decrypt
++.def	__gnutls_vpaes_decrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_vpaes_decrypt:
-+_gnutls__vpaes_decrypt:
++__gnutls_vpaes_decrypt:
  .L_vpaes_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1093,11 +1096,11 @@ index c58ea23..4f9a86f 100644
  	ret
 -.globl	_vpaes_cbc_encrypt
 -.def	_vpaes_cbc_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__vpaes_cbc_encrypt
-+.def	_gnutls__vpaes_cbc_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_vpaes_cbc_encrypt
++.def	__gnutls_vpaes_cbc_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_vpaes_cbc_encrypt:
-+_gnutls__vpaes_cbc_encrypt:
++__gnutls_vpaes_cbc_encrypt:
  .L_vpaes_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1217,11 +1220,11 @@ index c6aa1a1..d8c3c0b 100644
  .text
 -.globl	_aesni_encrypt
 -.def	_aesni_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_encrypt
-+.def	_gnutls__aesni_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_encrypt
++.def	__gnutls_aesni_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_encrypt:
-+_gnutls__aesni_encrypt:
++__gnutls_aesni_encrypt:
  .L_aesni_encrypt_begin:
  	movl	4(%esp),%eax
  	movl	12(%esp),%edx
@@ -1231,11 +1234,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_decrypt
 -.def	_aesni_decrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_decrypt
-+.def	_gnutls__aesni_decrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_decrypt
++.def	__gnutls_aesni_decrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_decrypt:
-+_gnutls__aesni_decrypt:
++__gnutls_aesni_decrypt:
  .L_aesni_decrypt_begin:
  	movl	4(%esp),%eax
  	movl	12(%esp),%edx
@@ -1245,11 +1248,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ecb_encrypt
 -.def	_aesni_ecb_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ecb_encrypt
-+.def	_gnutls__aesni_ecb_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ecb_encrypt
++.def	__gnutls_aesni_ecb_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ecb_encrypt:
-+_gnutls__aesni_ecb_encrypt:
++__gnutls_aesni_ecb_encrypt:
  .L_aesni_ecb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1259,11 +1262,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ccm64_encrypt_blocks
 -.def	_aesni_ccm64_encrypt_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ccm64_encrypt_blocks
-+.def	_gnutls__aesni_ccm64_encrypt_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ccm64_encrypt_blocks
++.def	__gnutls_aesni_ccm64_encrypt_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ccm64_encrypt_blocks:
-+_gnutls__aesni_ccm64_encrypt_blocks:
++__gnutls_aesni_ccm64_encrypt_blocks:
  .L_aesni_ccm64_encrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1273,11 +1276,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ccm64_decrypt_blocks
 -.def	_aesni_ccm64_decrypt_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ccm64_decrypt_blocks
-+.def	_gnutls__aesni_ccm64_decrypt_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ccm64_decrypt_blocks
++.def	__gnutls_aesni_ccm64_decrypt_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ccm64_decrypt_blocks:
-+_gnutls__aesni_ccm64_decrypt_blocks:
++__gnutls_aesni_ccm64_decrypt_blocks:
  .L_aesni_ccm64_decrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1287,11 +1290,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ctr32_encrypt_blocks
 -.def	_aesni_ctr32_encrypt_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ctr32_encrypt_blocks
-+.def	_gnutls__aesni_ctr32_encrypt_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ctr32_encrypt_blocks
++.def	__gnutls_aesni_ctr32_encrypt_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ctr32_encrypt_blocks:
-+_gnutls__aesni_ctr32_encrypt_blocks:
++__gnutls_aesni_ctr32_encrypt_blocks:
  .L_aesni_ctr32_encrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1301,11 +1304,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_xts_encrypt
 -.def	_aesni_xts_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_xts_encrypt
-+.def	_gnutls__aesni_xts_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_xts_encrypt
++.def	__gnutls_aesni_xts_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_xts_encrypt:
-+_gnutls__aesni_xts_encrypt:
++__gnutls_aesni_xts_encrypt:
  .L_aesni_xts_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1315,11 +1318,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_xts_decrypt
 -.def	_aesni_xts_decrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_xts_decrypt
-+.def	_gnutls__aesni_xts_decrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_xts_decrypt
++.def	__gnutls_aesni_xts_decrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_xts_decrypt:
-+_gnutls__aesni_xts_decrypt:
++__gnutls_aesni_xts_decrypt:
  .L_aesni_xts_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1329,11 +1332,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ocb_encrypt
 -.def	_aesni_ocb_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ocb_encrypt
-+.def	_gnutls__aesni_ocb_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ocb_encrypt
++.def	__gnutls_aesni_ocb_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ocb_encrypt:
-+_gnutls__aesni_ocb_encrypt:
++__gnutls_aesni_ocb_encrypt:
  .L_aesni_ocb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1343,11 +1346,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_ocb_decrypt
 -.def	_aesni_ocb_decrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_ocb_decrypt
-+.def	_gnutls__aesni_ocb_decrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_ocb_decrypt
++.def	__gnutls_aesni_ocb_decrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_ocb_decrypt:
-+_gnutls__aesni_ocb_decrypt:
++__gnutls_aesni_ocb_decrypt:
  .L_aesni_ocb_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1357,11 +1360,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_cbc_encrypt
 -.def	_aesni_cbc_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_cbc_encrypt
-+.def	_gnutls__aesni_cbc_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_cbc_encrypt
++.def	__gnutls_aesni_cbc_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_cbc_encrypt:
-+_gnutls__aesni_cbc_encrypt:
++__gnutls_aesni_cbc_encrypt:
  .L_aesni_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1371,11 +1374,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_set_encrypt_key
 -.def	_aesni_set_encrypt_key;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_set_encrypt_key
-+.def	_gnutls__aesni_set_encrypt_key;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_set_encrypt_key
++.def	__gnutls_aesni_set_encrypt_key;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_set_encrypt_key:
-+_gnutls__aesni_set_encrypt_key:
++__gnutls_aesni_set_encrypt_key:
  .L_aesni_set_encrypt_key_begin:
  	movl	4(%esp),%eax
  	movl	8(%esp),%ecx
@@ -1384,11 +1387,11 @@ index c6aa1a1..d8c3c0b 100644
  	ret
 -.globl	_aesni_set_decrypt_key
 -.def	_aesni_set_decrypt_key;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__aesni_set_decrypt_key
-+.def	_gnutls__aesni_set_decrypt_key;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_aesni_set_decrypt_key
++.def	__gnutls_aesni_set_decrypt_key;	.scl	2;	.type	32;	.endef
  .align	16
 -_aesni_set_decrypt_key:
-+_gnutls__aesni_set_decrypt_key:
++__gnutls_aesni_set_decrypt_key:
  .L_aesni_set_decrypt_key_begin:
  	movl	4(%esp),%eax
  	movl	8(%esp),%ecx
@@ -1602,11 +1605,11 @@ index 41f87b1..208053b 100644
  .text
 -.globl	_padlock_capability
 -.def	_padlock_capability;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_capability
-+.def	_gnutls__padlock_capability;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_capability
++.def	__gnutls_padlock_capability;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_capability:
-+_gnutls__padlock_capability:
++__gnutls_padlock_capability:
  .L_padlock_capability_begin:
  	pushl	%ebx
  	pushfl
@@ -1616,11 +1619,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_key_bswap
 -.def	_padlock_key_bswap;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_key_bswap
-+.def	_gnutls__padlock_key_bswap;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_key_bswap
++.def	__gnutls_padlock_key_bswap;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_key_bswap:
-+_gnutls__padlock_key_bswap:
++__gnutls_padlock_key_bswap:
  .L_padlock_key_bswap_begin:
  	movl	4(%esp),%edx
  	movl	240(%edx),%ecx
@@ -1630,11 +1633,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_verify_context
 -.def	_padlock_verify_context;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_verify_context
-+.def	_gnutls__padlock_verify_context;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_verify_context
++.def	__gnutls_padlock_verify_context;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_verify_context:
-+_gnutls__padlock_verify_context:
++__gnutls_padlock_verify_context:
  .L_padlock_verify_context_begin:
  	movl	4(%esp),%edx
  	leal	.Lpadlock_saved_context,%eax
@@ -1644,22 +1647,22 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_reload_key
 -.def	_padlock_reload_key;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_reload_key
-+.def	_gnutls__padlock_reload_key;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_reload_key
++.def	__gnutls_padlock_reload_key;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_reload_key:
-+_gnutls__padlock_reload_key:
++__gnutls_padlock_reload_key:
  .L_padlock_reload_key_begin:
  	pushfl
  	popfl
  	ret
 -.globl	_padlock_aes_block
 -.def	_padlock_aes_block;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_aes_block
-+.def	_gnutls__padlock_aes_block;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_aes_block
++.def	__gnutls_padlock_aes_block;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_aes_block:
-+_gnutls__padlock_aes_block:
++__gnutls_padlock_aes_block:
  .L_padlock_aes_block_begin:
  	pushl	%edi
  	pushl	%esi
@@ -1669,11 +1672,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_ecb_encrypt
 -.def	_padlock_ecb_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_ecb_encrypt
-+.def	_gnutls__padlock_ecb_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_ecb_encrypt
++.def	__gnutls_padlock_ecb_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_ecb_encrypt:
-+_gnutls__padlock_ecb_encrypt:
++__gnutls_padlock_ecb_encrypt:
  .L_padlock_ecb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1683,11 +1686,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_cbc_encrypt
 -.def	_padlock_cbc_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_cbc_encrypt
-+.def	_gnutls__padlock_cbc_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_cbc_encrypt
++.def	__gnutls_padlock_cbc_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_cbc_encrypt:
-+_gnutls__padlock_cbc_encrypt:
++__gnutls_padlock_cbc_encrypt:
  .L_padlock_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1697,11 +1700,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_cfb_encrypt
 -.def	_padlock_cfb_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_cfb_encrypt
-+.def	_gnutls__padlock_cfb_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_cfb_encrypt
++.def	__gnutls_padlock_cfb_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_cfb_encrypt:
-+_gnutls__padlock_cfb_encrypt:
++__gnutls_padlock_cfb_encrypt:
  .L_padlock_cfb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1711,11 +1714,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_ofb_encrypt
 -.def	_padlock_ofb_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_ofb_encrypt
-+.def	_gnutls__padlock_ofb_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_ofb_encrypt
++.def	__gnutls_padlock_ofb_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_ofb_encrypt:
-+_gnutls__padlock_ofb_encrypt:
++__gnutls_padlock_ofb_encrypt:
  .L_padlock_ofb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1725,11 +1728,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_ctr32_encrypt
 -.def	_padlock_ctr32_encrypt;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_ctr32_encrypt
-+.def	_gnutls__padlock_ctr32_encrypt;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_ctr32_encrypt
++.def	__gnutls_padlock_ctr32_encrypt;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_ctr32_encrypt:
-+_gnutls__padlock_ctr32_encrypt:
++__gnutls_padlock_ctr32_encrypt:
  .L_padlock_ctr32_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -1739,11 +1742,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_xstore
 -.def	_padlock_xstore;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_xstore
-+.def	_gnutls__padlock_xstore;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_xstore
++.def	__gnutls_padlock_xstore;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_xstore:
-+_gnutls__padlock_xstore:
++__gnutls_padlock_xstore:
  .L_padlock_xstore_begin:
  	pushl	%edi
  	movl	8(%esp),%edi
@@ -1753,11 +1756,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_sha1_oneshot
 -.def	_padlock_sha1_oneshot;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_sha1_oneshot
-+.def	_gnutls__padlock_sha1_oneshot;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_sha1_oneshot
++.def	__gnutls_padlock_sha1_oneshot;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_sha1_oneshot:
-+_gnutls__padlock_sha1_oneshot:
++__gnutls_padlock_sha1_oneshot:
  .L_padlock_sha1_oneshot_begin:
  	pushl	%edi
  	pushl	%esi
@@ -1767,11 +1770,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_sha1_blocks
 -.def	_padlock_sha1_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_sha1_blocks
-+.def	_gnutls__padlock_sha1_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_sha1_blocks
++.def	__gnutls_padlock_sha1_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_sha1_blocks:
-+_gnutls__padlock_sha1_blocks:
++__gnutls_padlock_sha1_blocks:
  .L_padlock_sha1_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -1781,11 +1784,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_sha256_oneshot
 -.def	_padlock_sha256_oneshot;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_sha256_oneshot
-+.def	_gnutls__padlock_sha256_oneshot;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_sha256_oneshot
++.def	__gnutls_padlock_sha256_oneshot;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_sha256_oneshot:
-+_gnutls__padlock_sha256_oneshot:
++__gnutls_padlock_sha256_oneshot:
  .L_padlock_sha256_oneshot_begin:
  	pushl	%edi
  	pushl	%esi
@@ -1795,11 +1798,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_sha256_blocks
 -.def	_padlock_sha256_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_sha256_blocks
-+.def	_gnutls__padlock_sha256_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_sha256_blocks
++.def	__gnutls_padlock_sha256_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_sha256_blocks:
-+_gnutls__padlock_sha256_blocks:
++__gnutls_padlock_sha256_blocks:
  .L_padlock_sha256_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -1809,11 +1812,11 @@ index 41f87b1..208053b 100644
  	ret
 -.globl	_padlock_sha512_blocks
 -.def	_padlock_sha512_blocks;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__padlock_sha512_blocks
-+.def	_gnutls__padlock_sha512_blocks;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_padlock_sha512_blocks
++.def	__gnutls_padlock_sha512_blocks;	.scl	2;	.type	32;	.endef
  .align	16
 -_padlock_sha512_blocks:
-+_gnutls__padlock_sha512_blocks:
++__gnutls_padlock_sha512_blocks:
  .L_padlock_sha512_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -2166,11 +2169,11 @@ index 30f9ded..d594410 100644
  .text
 -.globl	_sha1_block_data_order
 -.def	_sha1_block_data_order;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__sha1_block_data_order
-+.def	_gnutls__sha1_block_data_order;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_sha1_block_data_order
++.def	__gnutls_sha1_block_data_order;	.scl	2;	.type	32;	.endef
  .align	16
 -_sha1_block_data_order:
-+_gnutls__sha1_block_data_order:
++__gnutls_sha1_block_data_order:
  .L_sha1_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -2202,11 +2205,11 @@ index 05cd61d..58daf37 100644
  .text
 -.globl	_sha256_block_data_order
 -.def	_sha256_block_data_order;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__sha256_block_data_order
-+.def	_gnutls__sha256_block_data_order;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_sha256_block_data_order
++.def	__gnutls_sha256_block_data_order;	.scl	2;	.type	32;	.endef
  .align	16
 -_sha256_block_data_order:
-+_gnutls__sha256_block_data_order:
++__gnutls_sha256_block_data_order:
  .L_sha256_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -2238,11 +2241,11 @@ index 72a7f73..32c757a 100644
  .text
 -.globl	_sha512_block_data_order
 -.def	_sha512_block_data_order;	.scl	2;	.type	32;	.endef
-+.globl	_gnutls__sha512_block_data_order
-+.def	_gnutls__sha512_block_data_order;	.scl	2;	.type	32;	.endef
++.globl	__gnutls_sha512_block_data_order
++.def	__gnutls_sha512_block_data_order;	.scl	2;	.type	32;	.endef
  .align	16
 -_sha512_block_data_order:
-+_gnutls__sha512_block_data_order:
++__gnutls_sha512_block_data_order:
  .L_sha512_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -2690,10 +2693,10 @@ index aaf0bab..1dc9c00 100644
 -.size	aesni_cbc_encrypt,.-.L_aesni_cbc_encrypt_begin
 -.type	_aesni_set_encrypt_key,@function
 +.size	_gnutls_aesni_cbc_encrypt,.-.L_aesni_cbc_encrypt_begin
-+.type	_gnutls__aesni_set_encrypt_key,@function
++.type	__gnutls_aesni_set_encrypt_key,@function
  .align	16
 -_aesni_set_encrypt_key:
-+_gnutls__aesni_set_encrypt_key:
++__gnutls_aesni_set_encrypt_key:
  	pushl	%ebp
  	pushl	%ebx
  	testl	%eax,%eax
@@ -2704,7 +2707,7 @@ index aaf0bab..1dc9c00 100644
 -.size	_aesni_set_encrypt_key,.-_aesni_set_encrypt_key
 -.globl	aesni_set_encrypt_key
 -.type	aesni_set_encrypt_key,@function
-+.size	_gnutls__aesni_set_encrypt_key,.-_gnutls__aesni_set_encrypt_key
++.size	__gnutls_aesni_set_encrypt_key,.-__gnutls_aesni_set_encrypt_key
 +.globl	_gnutls_aesni_set_encrypt_key
 +.type	_gnutls_aesni_set_encrypt_key,@function
  .align	16
@@ -2715,7 +2718,7 @@ index aaf0bab..1dc9c00 100644
  	movl	8(%esp),%ecx
  	movl	12(%esp),%edx
 -	call	_aesni_set_encrypt_key
-+	call	_gnutls__aesni_set_encrypt_key
++	call	__gnutls_aesni_set_encrypt_key
  	ret
 -.size	aesni_set_encrypt_key,.-.L_aesni_set_encrypt_key_begin
 -.globl	aesni_set_decrypt_key
@@ -2731,7 +2734,7 @@ index aaf0bab..1dc9c00 100644
  	movl	8(%esp),%ecx
  	movl	12(%esp),%edx
 -	call	_aesni_set_encrypt_key
-+	call	_gnutls__aesni_set_encrypt_key
++	call	__gnutls_aesni_set_encrypt_key
  	movl	12(%esp),%edx
  	shll	$4,%ecx
  	testl	%eax,%eax
@@ -3842,10 +3845,10 @@ index 4be8992..e0adc61 100644
  	movdqu	%xmm3,(%edx)
  	ret
 -.globl	_vpaes_set_encrypt_key
-+.globl	_gnutls__vpaes_set_encrypt_key
++.globl	__gnutls_vpaes_set_encrypt_key
  .align	4
 -_vpaes_set_encrypt_key:
-+_gnutls__vpaes_set_encrypt_key:
++__gnutls_vpaes_set_encrypt_key:
  L_vpaes_set_encrypt_key_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -3854,10 +3857,10 @@ index 4be8992..e0adc61 100644
  	popl	%ebp
  	ret
 -.globl	_vpaes_set_decrypt_key
-+.globl	_gnutls__vpaes_set_decrypt_key
++.globl	__gnutls_vpaes_set_decrypt_key
  .align	4
 -_vpaes_set_decrypt_key:
-+_gnutls__vpaes_set_decrypt_key:
++__gnutls_vpaes_set_decrypt_key:
  L_vpaes_set_decrypt_key_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -3866,10 +3869,10 @@ index 4be8992..e0adc61 100644
  	popl	%ebp
  	ret
 -.globl	_vpaes_encrypt
-+.globl	_gnutls__vpaes_encrypt
++.globl	__gnutls_vpaes_encrypt
  .align	4
 -_vpaes_encrypt:
-+_gnutls__vpaes_encrypt:
++__gnutls_vpaes_encrypt:
  L_vpaes_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -3878,10 +3881,10 @@ index 4be8992..e0adc61 100644
  	popl	%ebp
  	ret
 -.globl	_vpaes_decrypt
-+.globl	_gnutls__vpaes_decrypt
++.globl	__gnutls_vpaes_decrypt
  .align	4
 -_vpaes_decrypt:
-+_gnutls__vpaes_decrypt:
++__gnutls_vpaes_decrypt:
  L_vpaes_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -3890,10 +3893,10 @@ index 4be8992..e0adc61 100644
  	popl	%ebp
  	ret
 -.globl	_vpaes_cbc_encrypt
-+.globl	_gnutls__vpaes_cbc_encrypt
++.globl	__gnutls_vpaes_cbc_encrypt
  .align	4
 -_vpaes_cbc_encrypt:
-+_gnutls__vpaes_cbc_encrypt:
++__gnutls_vpaes_cbc_encrypt:
  L_vpaes_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -3906,11 +3909,11 @@ index 3d5c652..a78c3e9 100644
  
  
 -.globl	_vpaes_set_encrypt_key
-+.globl	_gnutls__vpaes_set_encrypt_key
++.globl	__gnutls_vpaes_set_encrypt_key
  
  .p2align	4
 -_vpaes_set_encrypt_key:
-+_gnutls__vpaes_set_encrypt_key:
++__gnutls_vpaes_set_encrypt_key:
  
  	movl	%esi,%eax
  	shrl	$5,%eax
@@ -3919,11 +3922,11 @@ index 3d5c652..a78c3e9 100644
  
  
 -.globl	_vpaes_set_decrypt_key
-+.globl	_gnutls__vpaes_set_decrypt_key
++.globl	__gnutls_vpaes_set_decrypt_key
  
  .p2align	4
 -_vpaes_set_decrypt_key:
-+_gnutls__vpaes_set_decrypt_key:
++__gnutls_vpaes_set_decrypt_key:
  
  	movl	%esi,%eax
  	shrl	$5,%eax
@@ -3932,11 +3935,11 @@ index 3d5c652..a78c3e9 100644
  
  
 -.globl	_vpaes_encrypt
-+.globl	_gnutls__vpaes_encrypt
++.globl	__gnutls_vpaes_encrypt
  
  .p2align	4
 -_vpaes_encrypt:
-+_gnutls__vpaes_encrypt:
++__gnutls_vpaes_encrypt:
  
  	movdqu	(%rdi),%xmm0
  	call	_vpaes_preheat
@@ -3945,11 +3948,11 @@ index 3d5c652..a78c3e9 100644
  
  
 -.globl	_vpaes_decrypt
-+.globl	_gnutls__vpaes_decrypt
++.globl	__gnutls_vpaes_decrypt
  
  .p2align	4
 -_vpaes_decrypt:
-+_gnutls__vpaes_decrypt:
++__gnutls_vpaes_decrypt:
  
  	movdqu	(%rdi),%xmm0
  	call	_vpaes_preheat
@@ -3958,11 +3961,11 @@ index 3d5c652..a78c3e9 100644
  
  
 -.globl	_vpaes_cbc_encrypt
-+.globl	_gnutls__vpaes_cbc_encrypt
++.globl	__gnutls_vpaes_cbc_encrypt
  
  .p2align	4
 -_vpaes_cbc_encrypt:
-+_gnutls__vpaes_cbc_encrypt:
++__gnutls_vpaes_cbc_encrypt:
  
  	xchgq	%rcx,%rdx
  	subq	$16,%rcx
@@ -3975,11 +3978,11 @@ index d540930..e479e8f 100644
  	.byte	0xf3,0xc3
  
 -.globl	_aesni_gcm_decrypt
-+.globl	_gnutls__aesni_gcm_decrypt
++.globl	__gnutls_aesni_gcm_decrypt
  
  .p2align	5
 -_aesni_gcm_decrypt:
-+_gnutls__aesni_gcm_decrypt:
++__gnutls_aesni_gcm_decrypt:
  
  	xorq	%r10,%r10
  	cmpq	$0x60,%rdx
@@ -3988,11 +3991,11 @@ index d540930..e479e8f 100644
  
  
 -.globl	_aesni_gcm_encrypt
-+.globl	_gnutls__aesni_gcm_encrypt
++.globl	__gnutls_aesni_gcm_encrypt
  
  .p2align	5
 -_aesni_gcm_encrypt:
-+_gnutls__aesni_gcm_encrypt:
++__gnutls_aesni_gcm_encrypt:
  
  	xorq	%r10,%r10
  	cmpq	$288,%rdx
@@ -4005,10 +4008,10 @@ index ee50089..a7048fe 100644
  #
  .text
 -.globl	_aesni_encrypt
-+.globl	_gnutls__aesni_encrypt
++.globl	__gnutls_aesni_encrypt
  .align	4
 -_aesni_encrypt:
-+_gnutls__aesni_encrypt:
++__gnutls_aesni_encrypt:
  L_aesni_encrypt_begin:
  	movl	4(%esp),%eax
  	movl	12(%esp),%edx
@@ -4017,10 +4020,10 @@ index ee50089..a7048fe 100644
  	pxor	%xmm2,%xmm2
  	ret
 -.globl	_aesni_decrypt
-+.globl	_gnutls__aesni_decrypt
++.globl	__gnutls_aesni_decrypt
  .align	4
 -_aesni_decrypt:
-+_gnutls__aesni_decrypt:
++__gnutls_aesni_decrypt:
  L_aesni_decrypt_begin:
  	movl	4(%esp),%eax
  	movl	12(%esp),%edx
@@ -4029,10 +4032,10 @@ index ee50089..a7048fe 100644
  .byte	102,15,56,223,248
  	ret
 -.globl	_aesni_ecb_encrypt
-+.globl	_gnutls__aesni_ecb_encrypt
++.globl	__gnutls_aesni_ecb_encrypt
  .align	4
 -_aesni_ecb_encrypt:
-+_gnutls__aesni_ecb_encrypt:
++__gnutls_aesni_ecb_encrypt:
  L_aesni_ecb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4041,10 +4044,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_ccm64_encrypt_blocks
-+.globl	_gnutls__aesni_ccm64_encrypt_blocks
++.globl	__gnutls_aesni_ccm64_encrypt_blocks
  .align	4
 -_aesni_ccm64_encrypt_blocks:
-+_gnutls__aesni_ccm64_encrypt_blocks:
++__gnutls_aesni_ccm64_encrypt_blocks:
  L_aesni_ccm64_encrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4053,10 +4056,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_ccm64_decrypt_blocks
-+.globl	_gnutls__aesni_ccm64_decrypt_blocks
++.globl	__gnutls_aesni_ccm64_decrypt_blocks
  .align	4
 -_aesni_ccm64_decrypt_blocks:
-+_gnutls__aesni_ccm64_decrypt_blocks:
++__gnutls_aesni_ccm64_decrypt_blocks:
  L_aesni_ccm64_decrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4065,10 +4068,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_ctr32_encrypt_blocks
-+.globl	_gnutls__aesni_ctr32_encrypt_blocks
++.globl	__gnutls_aesni_ctr32_encrypt_blocks
  .align	4
 -_aesni_ctr32_encrypt_blocks:
-+_gnutls__aesni_ctr32_encrypt_blocks:
++__gnutls_aesni_ctr32_encrypt_blocks:
  L_aesni_ctr32_encrypt_blocks_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4077,10 +4080,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_xts_encrypt
-+.globl	_gnutls__aesni_xts_encrypt
++.globl	__gnutls_aesni_xts_encrypt
  .align	4
 -_aesni_xts_encrypt:
-+_gnutls__aesni_xts_encrypt:
++__gnutls_aesni_xts_encrypt:
  L_aesni_xts_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4089,10 +4092,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_xts_decrypt
-+.globl	_gnutls__aesni_xts_decrypt
++.globl	__gnutls_aesni_xts_decrypt
  .align	4
 -_aesni_xts_decrypt:
-+_gnutls__aesni_xts_decrypt:
++__gnutls_aesni_xts_decrypt:
  L_aesni_xts_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4101,10 +4104,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_ocb_encrypt
-+.globl	_gnutls__aesni_ocb_encrypt
++.globl	__gnutls_aesni_ocb_encrypt
  .align	4
 -_aesni_ocb_encrypt:
-+_gnutls__aesni_ocb_encrypt:
++__gnutls_aesni_ocb_encrypt:
  L_aesni_ocb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4113,10 +4116,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_ocb_decrypt
-+.globl	_gnutls__aesni_ocb_decrypt
++.globl	__gnutls_aesni_ocb_decrypt
  .align	4
 -_aesni_ocb_decrypt:
-+_gnutls__aesni_ocb_decrypt:
++__gnutls_aesni_ocb_decrypt:
  L_aesni_ocb_decrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4125,10 +4128,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_cbc_encrypt
-+.globl	_gnutls__aesni_cbc_encrypt
++.globl	__gnutls_aesni_cbc_encrypt
  .align	4
 -_aesni_cbc_encrypt:
-+_gnutls__aesni_cbc_encrypt:
++__gnutls_aesni_cbc_encrypt:
  L_aesni_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4137,10 +4140,10 @@ index ee50089..a7048fe 100644
  	popl	%ebp
  	ret
 -.globl	_aesni_set_encrypt_key
-+.globl	_gnutls__aesni_set_encrypt_key
++.globl	__gnutls_aesni_set_encrypt_key
  .align	4
 -_aesni_set_encrypt_key:
-+_gnutls__aesni_set_encrypt_key:
++__gnutls_aesni_set_encrypt_key:
  L_aesni_set_encrypt_key_begin:
  	movl	4(%esp),%eax
  	movl	8(%esp),%ecx
@@ -4148,10 +4151,10 @@ index ee50089..a7048fe 100644
  	call	__aesni_set_encrypt_key
  	ret
 -.globl	_aesni_set_decrypt_key
-+.globl	_gnutls__aesni_set_decrypt_key
++.globl	__gnutls_aesni_set_decrypt_key
  .align	4
 -_aesni_set_decrypt_key:
-+_gnutls__aesni_set_decrypt_key:
++__gnutls_aesni_set_decrypt_key:
  L_aesni_set_decrypt_key_begin:
  	movl	4(%esp),%eax
  	movl	8(%esp),%ecx
@@ -4164,11 +4167,11 @@ index f6145f1..8341788 100644
  .text	
  
 -.globl	_aesni_encrypt
-+.globl	_gnutls__aesni_encrypt
++.globl	__gnutls_aesni_encrypt
  
  .p2align	4
 -_aesni_encrypt:
-+_gnutls__aesni_encrypt:
++__gnutls_aesni_encrypt:
  
  	movups	(%rdi),%xmm2
  	movl	240(%rdx),%eax
@@ -4177,11 +4180,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_decrypt
-+.globl	_gnutls__aesni_decrypt
++.globl	__gnutls_aesni_decrypt
  
  .p2align	4
 -_aesni_decrypt:
-+_gnutls__aesni_decrypt:
++__gnutls_aesni_decrypt:
  
  	movups	(%rdi),%xmm2
  	movl	240(%rdx),%eax
@@ -4190,11 +4193,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_ecb_encrypt
-+.globl	_gnutls__aesni_ecb_encrypt
++.globl	__gnutls_aesni_ecb_encrypt
  
  .p2align	4
 -_aesni_ecb_encrypt:
-+_gnutls__aesni_ecb_encrypt:
++__gnutls_aesni_ecb_encrypt:
  
  	andq	$-16,%rdx
  	jz	L$ecb_ret
@@ -4203,11 +4206,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_ccm64_encrypt_blocks
-+.globl	_gnutls__aesni_ccm64_encrypt_blocks
++.globl	__gnutls_aesni_ccm64_encrypt_blocks
  
  .p2align	4
 -_aesni_ccm64_encrypt_blocks:
-+_gnutls__aesni_ccm64_encrypt_blocks:
++__gnutls_aesni_ccm64_encrypt_blocks:
  	movl	240(%rcx),%eax
  	movdqu	(%r8),%xmm6
  	movdqa	L$increment64(%rip),%xmm9
@@ -4216,11 +4219,11 @@ index f6145f1..8341788 100644
  	.byte	0xf3,0xc3
  
 -.globl	_aesni_ccm64_decrypt_blocks
-+.globl	_gnutls__aesni_ccm64_decrypt_blocks
++.globl	__gnutls_aesni_ccm64_decrypt_blocks
  
  .p2align	4
 -_aesni_ccm64_decrypt_blocks:
-+_gnutls__aesni_ccm64_decrypt_blocks:
++__gnutls_aesni_ccm64_decrypt_blocks:
  	movl	240(%rcx),%eax
  	movups	(%r8),%xmm6
  	movdqu	(%r9),%xmm3
@@ -4229,11 +4232,11 @@ index f6145f1..8341788 100644
  	.byte	0xf3,0xc3
  
 -.globl	_aesni_ctr32_encrypt_blocks
-+.globl	_gnutls__aesni_ctr32_encrypt_blocks
++.globl	__gnutls_aesni_ctr32_encrypt_blocks
  
  .p2align	4
 -_aesni_ctr32_encrypt_blocks:
-+_gnutls__aesni_ctr32_encrypt_blocks:
++__gnutls_aesni_ctr32_encrypt_blocks:
  
  	cmpq	$1,%rdx
  	jne	L$ctr32_bulk
@@ -4242,11 +4245,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_xts_encrypt
-+.globl	_gnutls__aesni_xts_encrypt
++.globl	__gnutls_aesni_xts_encrypt
  
  .p2align	4
 -_aesni_xts_encrypt:
-+_gnutls__aesni_xts_encrypt:
++__gnutls_aesni_xts_encrypt:
  
  	leaq	(%rsp),%r11
  
@@ -4255,11 +4258,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_xts_decrypt
-+.globl	_gnutls__aesni_xts_decrypt
++.globl	__gnutls_aesni_xts_decrypt
  
  .p2align	4
 -_aesni_xts_decrypt:
-+_gnutls__aesni_xts_decrypt:
++__gnutls_aesni_xts_decrypt:
  
  	leaq	(%rsp),%r11
  
@@ -4268,11 +4271,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_ocb_encrypt
-+.globl	_gnutls__aesni_ocb_encrypt
++.globl	__gnutls_aesni_ocb_encrypt
  
  .p2align	5
 -_aesni_ocb_encrypt:
-+_gnutls__aesni_ocb_encrypt:
++__gnutls_aesni_ocb_encrypt:
  
  	leaq	(%rsp),%rax
  	pushq	%rbx
@@ -4281,11 +4284,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_ocb_decrypt
-+.globl	_gnutls__aesni_ocb_decrypt
++.globl	__gnutls_aesni_ocb_decrypt
  
  .p2align	5
 -_aesni_ocb_decrypt:
-+_gnutls__aesni_ocb_decrypt:
++__gnutls_aesni_ocb_decrypt:
  
  	leaq	(%rsp),%rax
  	pushq	%rbx
@@ -4294,11 +4297,11 @@ index f6145f1..8341788 100644
  	.byte	0xf3,0xc3
  
 -.globl	_aesni_cbc_encrypt
-+.globl	_gnutls__aesni_cbc_encrypt
++.globl	__gnutls_aesni_cbc_encrypt
  
  .p2align	4
 -_aesni_cbc_encrypt:
-+_gnutls__aesni_cbc_encrypt:
++__gnutls_aesni_cbc_encrypt:
  
  	testq	%rdx,%rdx
  	jz	L$cbc_ret
@@ -4307,11 +4310,11 @@ index f6145f1..8341788 100644
  
  
 -.globl	_aesni_set_decrypt_key
-+.globl	_gnutls__aesni_set_decrypt_key
++.globl	__gnutls_aesni_set_decrypt_key
  
  .p2align	4
 -_aesni_set_decrypt_key:
-+_gnutls__aesni_set_decrypt_key:
++__gnutls_aesni_set_decrypt_key:
  
  .byte	0x48,0x83,0xEC,0x08
  
@@ -4320,11 +4323,11 @@ index f6145f1..8341788 100644
  L$SEH_end_set_decrypt_key:
  
 -.globl	_aesni_set_encrypt_key
-+.globl	_gnutls__aesni_set_encrypt_key
++.globl	__gnutls_aesni_set_encrypt_key
  
  .p2align	4
 -_aesni_set_encrypt_key:
-+_gnutls__aesni_set_encrypt_key:
++__gnutls_aesni_set_encrypt_key:
  __aesni_set_encrypt_key:
  
  .byte	0x48,0x83,0xEC,0x08
@@ -4337,10 +4340,10 @@ index 367962c..7559632 100644
  .file	"devel/perlasm/e_padlock-x86.s"
  .text
 -.globl	_padlock_capability
-+.globl	_gnutls__padlock_capability
++.globl	__gnutls_padlock_capability
  .align	4
 -_padlock_capability:
-+_gnutls__padlock_capability:
++__gnutls_padlock_capability:
  L_padlock_capability_begin:
  	pushl	%ebx
  	pushfl
@@ -4349,10 +4352,10 @@ index 367962c..7559632 100644
  	popl	%ebx
  	ret
 -.globl	_padlock_key_bswap
-+.globl	_gnutls__padlock_key_bswap
++.globl	__gnutls_padlock_key_bswap
  .align	4
 -_padlock_key_bswap:
-+_gnutls__padlock_key_bswap:
++__gnutls_padlock_key_bswap:
  L_padlock_key_bswap_begin:
  	movl	4(%esp),%edx
  	movl	240(%edx),%ecx
@@ -4361,10 +4364,10 @@ index 367962c..7559632 100644
  	jnz	L001bswap_loop
  	ret
 -.globl	_padlock_verify_context
-+.globl	_gnutls__padlock_verify_context
++.globl	__gnutls_padlock_verify_context
  .align	4
 -_padlock_verify_context:
-+_gnutls__padlock_verify_context:
++__gnutls_padlock_verify_context:
  L_padlock_verify_context_begin:
  	movl	4(%esp),%edx
  	leal	Lpadlock_saved_context-L002verify_pic_point,%eax
@@ -4373,19 +4376,19 @@ index 367962c..7559632 100644
  	movl	%edx,(%eax)
  	ret
 -.globl	_padlock_reload_key
-+.globl	_gnutls__padlock_reload_key
++.globl	__gnutls_padlock_reload_key
  .align	4
 -_padlock_reload_key:
-+_gnutls__padlock_reload_key:
++__gnutls_padlock_reload_key:
  L_padlock_reload_key_begin:
  	pushfl
  	popfl
  	ret
 -.globl	_padlock_aes_block
-+.globl	_gnutls__padlock_aes_block
++.globl	__gnutls_padlock_aes_block
  .align	4
 -_padlock_aes_block:
-+_gnutls__padlock_aes_block:
++__gnutls_padlock_aes_block:
  L_padlock_aes_block_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4394,10 +4397,10 @@ index 367962c..7559632 100644
  	popl	%edi
  	ret
 -.globl	_padlock_ecb_encrypt
-+.globl	_gnutls__padlock_ecb_encrypt
++.globl	__gnutls_padlock_ecb_encrypt
  .align	4
 -_padlock_ecb_encrypt:
-+_gnutls__padlock_ecb_encrypt:
++__gnutls_padlock_ecb_encrypt:
  L_padlock_ecb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4406,10 +4409,10 @@ index 367962c..7559632 100644
  	popl	%ebp
  	ret
 -.globl	_padlock_cbc_encrypt
-+.globl	_gnutls__padlock_cbc_encrypt
++.globl	__gnutls_padlock_cbc_encrypt
  .align	4
 -_padlock_cbc_encrypt:
-+_gnutls__padlock_cbc_encrypt:
++__gnutls_padlock_cbc_encrypt:
  L_padlock_cbc_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4418,10 +4421,10 @@ index 367962c..7559632 100644
  	popl	%ebp
  	ret
 -.globl	_padlock_cfb_encrypt
-+.globl	_gnutls__padlock_cfb_encrypt
++.globl	__gnutls_padlock_cfb_encrypt
  .align	4
 -_padlock_cfb_encrypt:
-+_gnutls__padlock_cfb_encrypt:
++__gnutls_padlock_cfb_encrypt:
  L_padlock_cfb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4430,10 +4433,10 @@ index 367962c..7559632 100644
  	popl	%ebp
  	ret
 -.globl	_padlock_ofb_encrypt
-+.globl	_gnutls__padlock_ofb_encrypt
++.globl	__gnutls_padlock_ofb_encrypt
  .align	4
 -_padlock_ofb_encrypt:
-+_gnutls__padlock_ofb_encrypt:
++__gnutls_padlock_ofb_encrypt:
  L_padlock_ofb_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4442,10 +4445,10 @@ index 367962c..7559632 100644
  	popl	%ebp
  	ret
 -.globl	_padlock_ctr32_encrypt
-+.globl	_gnutls__padlock_ctr32_encrypt
++.globl	__gnutls_padlock_ctr32_encrypt
  .align	4
 -_padlock_ctr32_encrypt:
-+_gnutls__padlock_ctr32_encrypt:
++__gnutls_padlock_ctr32_encrypt:
  L_padlock_ctr32_encrypt_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4454,10 +4457,10 @@ index 367962c..7559632 100644
  	popl	%ebp
  	ret
 -.globl	_padlock_xstore
-+.globl	_gnutls__padlock_xstore
++.globl	__gnutls_padlock_xstore
  .align	4
 -_padlock_xstore:
-+_gnutls__padlock_xstore:
++__gnutls_padlock_xstore:
  L_padlock_xstore_begin:
  	pushl	%edi
  	movl	8(%esp),%edi
@@ -4466,10 +4469,10 @@ index 367962c..7559632 100644
  L053ret:
  	ret
 -.globl	_padlock_sha1_oneshot
-+.globl	_gnutls__padlock_sha1_oneshot
++.globl	__gnutls_padlock_sha1_oneshot
  .align	4
 -_padlock_sha1_oneshot:
-+_gnutls__padlock_sha1_oneshot:
++__gnutls_padlock_sha1_oneshot:
  L_padlock_sha1_oneshot_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4478,10 +4481,10 @@ index 367962c..7559632 100644
  	popl	%edi
  	ret
 -.globl	_padlock_sha1_blocks
-+.globl	_gnutls__padlock_sha1_blocks
++.globl	__gnutls_padlock_sha1_blocks
  .align	4
 -_padlock_sha1_blocks:
-+_gnutls__padlock_sha1_blocks:
++__gnutls_padlock_sha1_blocks:
  L_padlock_sha1_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4490,10 +4493,10 @@ index 367962c..7559632 100644
  	popl	%edi
  	ret
 -.globl	_padlock_sha256_oneshot
-+.globl	_gnutls__padlock_sha256_oneshot
++.globl	__gnutls_padlock_sha256_oneshot
  .align	4
 -_padlock_sha256_oneshot:
-+_gnutls__padlock_sha256_oneshot:
++__gnutls_padlock_sha256_oneshot:
  L_padlock_sha256_oneshot_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4502,10 +4505,10 @@ index 367962c..7559632 100644
  	popl	%edi
  	ret
 -.globl	_padlock_sha256_blocks
-+.globl	_gnutls__padlock_sha256_blocks
++.globl	__gnutls_padlock_sha256_blocks
  .align	4
 -_padlock_sha256_blocks:
-+_gnutls__padlock_sha256_blocks:
++__gnutls_padlock_sha256_blocks:
  L_padlock_sha256_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4514,10 +4517,10 @@ index 367962c..7559632 100644
  	popl	%edi
  	ret
 -.globl	_padlock_sha512_blocks
-+.globl	_gnutls__padlock_sha512_blocks
++.globl	__gnutls_padlock_sha512_blocks
  .align	4
 -_padlock_sha512_blocks:
-+_gnutls__padlock_sha512_blocks:
++__gnutls_padlock_sha512_blocks:
  L_padlock_sha512_blocks_begin:
  	pushl	%edi
  	pushl	%esi
@@ -4530,11 +4533,11 @@ index a73d7a6..d367a6a 100644
  #
  .text	
 -.globl	_padlock_capability
-+.globl	_gnutls__padlock_capability
++.globl	__gnutls_padlock_capability
  
  .p2align	4
 -_padlock_capability:
-+_gnutls__padlock_capability:
++__gnutls_padlock_capability:
  	movq	%rbx,%r8
  	xorl	%eax,%eax
  	cpuid
@@ -4543,11 +4546,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_key_bswap
-+.globl	_gnutls__padlock_key_bswap
++.globl	__gnutls_padlock_key_bswap
  
  .p2align	4
 -_padlock_key_bswap:
-+_gnutls__padlock_key_bswap:
++__gnutls_padlock_key_bswap:
  	movl	240(%rdi),%edx
  L$bswap_loop:
  	movl	(%rdi),%eax
@@ -4556,11 +4559,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_verify_context
-+.globl	_gnutls__padlock_verify_context
++.globl	__gnutls_padlock_verify_context
  
  .p2align	4
 -_padlock_verify_context:
-+_gnutls__padlock_verify_context:
++__gnutls_padlock_verify_context:
  	movq	%rdi,%rdx
  	pushf
  	leaq	L$padlock_saved_context(%rip),%rax
@@ -4569,22 +4572,22 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_reload_key
-+.globl	_gnutls__padlock_reload_key
++.globl	__gnutls_padlock_reload_key
  
  .p2align	4
 -_padlock_reload_key:
-+_gnutls__padlock_reload_key:
++__gnutls_padlock_reload_key:
  	pushf
  	popf
  	.byte	0xf3,0xc3
  
  
 -.globl	_padlock_aes_block
-+.globl	_gnutls__padlock_aes_block
++.globl	__gnutls_padlock_aes_block
  
  .p2align	4
 -_padlock_aes_block:
-+_gnutls__padlock_aes_block:
++__gnutls_padlock_aes_block:
  	movq	%rbx,%r8
  	movq	$1,%rcx
  	leaq	32(%rdx),%rbx
@@ -4593,22 +4596,22 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_xstore
-+.globl	_gnutls__padlock_xstore
++.globl	__gnutls_padlock_xstore
  
  .p2align	4
 -_padlock_xstore:
-+_gnutls__padlock_xstore:
++__gnutls_padlock_xstore:
  	movl	%esi,%edx
  .byte	0x0f,0xa7,0xc0		
  	.byte	0xf3,0xc3
  
  
 -.globl	_padlock_sha1_oneshot
-+.globl	_gnutls__padlock_sha1_oneshot
++.globl	__gnutls_padlock_sha1_oneshot
  
  .p2align	4
 -_padlock_sha1_oneshot:
-+_gnutls__padlock_sha1_oneshot:
++__gnutls_padlock_sha1_oneshot:
  	movq	%rdx,%rcx
  	movq	%rdi,%rdx
  	movups	(%rdi),%xmm0
@@ -4617,11 +4620,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_sha1_blocks
-+.globl	_gnutls__padlock_sha1_blocks
++.globl	__gnutls_padlock_sha1_blocks
  
  .p2align	4
 -_padlock_sha1_blocks:
-+_gnutls__padlock_sha1_blocks:
++__gnutls_padlock_sha1_blocks:
  	movq	%rdx,%rcx
  	movq	%rdi,%rdx
  	movups	(%rdi),%xmm0
@@ -4630,11 +4633,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_sha256_oneshot
-+.globl	_gnutls__padlock_sha256_oneshot
++.globl	__gnutls_padlock_sha256_oneshot
  
  .p2align	4
 -_padlock_sha256_oneshot:
-+_gnutls__padlock_sha256_oneshot:
++__gnutls_padlock_sha256_oneshot:
  	movq	%rdx,%rcx
  	movq	%rdi,%rdx
  	movups	(%rdi),%xmm0
@@ -4643,11 +4646,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_sha256_blocks
-+.globl	_gnutls__padlock_sha256_blocks
++.globl	__gnutls_padlock_sha256_blocks
  
  .p2align	4
 -_padlock_sha256_blocks:
-+_gnutls__padlock_sha256_blocks:
++__gnutls_padlock_sha256_blocks:
  	movq	%rdx,%rcx
  	movq	%rdi,%rdx
  	movups	(%rdi),%xmm0
@@ -4656,11 +4659,11 @@ index a73d7a6..d367a6a 100644
  
  
 -.globl	_padlock_sha512_blocks
-+.globl	_gnutls__padlock_sha512_blocks
++.globl	__gnutls_padlock_sha512_blocks
  
  .p2align	4
 -_padlock_sha512_blocks:
-+_gnutls__padlock_sha512_blocks:
++__gnutls_padlock_sha512_blocks:
  	movq	%rdx,%rcx
  	movq	%rdi,%rdx
  	movups	(%rdi),%xmm0
@@ -4669,11 +4672,11 @@ index a73d7a6..d367a6a 100644
  	.byte	0xf3,0xc3
  
 -.globl	_padlock_ecb_encrypt
-+.globl	_gnutls__padlock_ecb_encrypt
++.globl	__gnutls_padlock_ecb_encrypt
  
  .p2align	4
 -_padlock_ecb_encrypt:
-+_gnutls__padlock_ecb_encrypt:
++__gnutls_padlock_ecb_encrypt:
  	pushq	%rbp
  	pushq	%rbx
  
@@ -4682,11 +4685,11 @@ index a73d7a6..d367a6a 100644
  	.byte	0xf3,0xc3
  
 -.globl	_padlock_cbc_encrypt
-+.globl	_gnutls__padlock_cbc_encrypt
++.globl	__gnutls_padlock_cbc_encrypt
  
  .p2align	4
 -_padlock_cbc_encrypt:
-+_gnutls__padlock_cbc_encrypt:
++__gnutls_padlock_cbc_encrypt:
  	pushq	%rbp
  	pushq	%rbx
  
@@ -4695,11 +4698,11 @@ index a73d7a6..d367a6a 100644
  	.byte	0xf3,0xc3
  
 -.globl	_padlock_cfb_encrypt
-+.globl	_gnutls__padlock_cfb_encrypt
++.globl	__gnutls_padlock_cfb_encrypt
  
  .p2align	4
 -_padlock_cfb_encrypt:
-+_gnutls__padlock_cfb_encrypt:
++__gnutls_padlock_cfb_encrypt:
  	pushq	%rbp
  	pushq	%rbx
  
@@ -4708,11 +4711,11 @@ index a73d7a6..d367a6a 100644
  	.byte	0xf3,0xc3
  
 -.globl	_padlock_ofb_encrypt
-+.globl	_gnutls__padlock_ofb_encrypt
++.globl	__gnutls_padlock_ofb_encrypt
  
  .p2align	4
 -_padlock_ofb_encrypt:
-+_gnutls__padlock_ofb_encrypt:
++__gnutls_padlock_ofb_encrypt:
  	pushq	%rbp
  	pushq	%rbx
  
@@ -4721,11 +4724,11 @@ index a73d7a6..d367a6a 100644
  	.byte	0xf3,0xc3
  
 -.globl	_padlock_ctr32_encrypt
-+.globl	_gnutls__padlock_ctr32_encrypt
++.globl	__gnutls_padlock_ctr32_encrypt
  
  .p2align	4
 -_padlock_ctr32_encrypt:
-+_gnutls__padlock_ctr32_encrypt:
++__gnutls_padlock_ctr32_encrypt:
  	pushq	%rbp
  	pushq	%rbx
  
@@ -4738,11 +4741,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_gmult_4bit
-+.globl	_gnutls__gcm_gmult_4bit
++.globl	__gnutls_gcm_gmult_4bit
  
  .p2align	4
 -_gcm_gmult_4bit:
-+_gnutls__gcm_gmult_4bit:
++__gnutls_gcm_gmult_4bit:
  
  	pushq	%rbx
  
@@ -4751,11 +4754,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_ghash_4bit
-+.globl	_gnutls__gcm_ghash_4bit
++.globl	__gnutls_gcm_ghash_4bit
  
  .p2align	4
 -_gcm_ghash_4bit:
-+_gnutls__gcm_ghash_4bit:
++__gnutls_gcm_ghash_4bit:
  
  	pushq	%rbx
  
@@ -4764,11 +4767,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_init_clmul
-+.globl	_gnutls__gcm_init_clmul
++.globl	__gnutls_gcm_init_clmul
  
  .p2align	4
 -_gcm_init_clmul:
-+_gnutls__gcm_init_clmul:
++__gnutls_gcm_init_clmul:
  
  L$_init_clmul:
  	movdqu	(%rsi),%xmm2
@@ -4777,11 +4780,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_gmult_clmul
-+.globl	_gnutls__gcm_gmult_clmul
++.globl	__gnutls_gcm_gmult_clmul
  
  .p2align	4
 -_gcm_gmult_clmul:
-+_gnutls__gcm_gmult_clmul:
++__gnutls_gcm_gmult_clmul:
  
  L$_gmult_clmul:
  	movdqu	(%rdi),%xmm0
@@ -4790,11 +4793,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_ghash_clmul
-+.globl	_gnutls__gcm_ghash_clmul
++.globl	__gnutls_gcm_ghash_clmul
  
  .p2align	5
 -_gcm_ghash_clmul:
-+_gnutls__gcm_ghash_clmul:
++__gnutls_gcm_ghash_clmul:
  
  L$_ghash_clmul:
  	movdqa	L$bswap_mask(%rip),%xmm10
@@ -4803,11 +4806,11 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_init_avx
-+.globl	_gnutls__gcm_init_avx
++.globl	__gnutls_gcm_init_avx
  
  .p2align	5
 -_gcm_init_avx:
-+_gnutls__gcm_init_avx:
++__gnutls_gcm_init_avx:
  
  	vzeroupper
  
@@ -4816,21 +4819,21 @@ index 5fd3216..65ce83d 100644
  
  
 -.globl	_gcm_gmult_avx
-+.globl	_gnutls__gcm_gmult_avx
++.globl	__gnutls_gcm_gmult_avx
  
  .p2align	5
 -_gcm_gmult_avx:
-+_gnutls__gcm_gmult_avx:
++__gnutls_gcm_gmult_avx:
  
  	jmp	L$_gmult_clmul
  
  
 -.globl	_gcm_ghash_avx
-+.globl	_gnutls__gcm_ghash_avx
++.globl	__gnutls_gcm_ghash_avx
  
  .p2align	5
 -_gcm_ghash_avx:
-+_gnutls__gcm_ghash_avx:
++__gnutls_gcm_ghash_avx:
  
  	vzeroupper
  
@@ -4843,10 +4846,10 @@ index 985d4af..ed20e5a 100644
  #
  .text
 -.globl	_sha1_block_data_order
-+.globl	_gnutls__sha1_block_data_order
++.globl	__gnutls_sha1_block_data_order
  .align	4
 -_sha1_block_data_order:
-+_gnutls__sha1_block_data_order:
++__gnutls_sha1_block_data_order:
  L_sha1_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4859,11 +4862,11 @@ index a576acc..9503f19 100644
  
  
 -.globl	_sha1_block_data_order
-+.globl	_gnutls__sha1_block_data_order
++.globl	__gnutls_sha1_block_data_order
  
  .p2align	4
 -_sha1_block_data_order:
-+_gnutls__sha1_block_data_order:
++__gnutls_sha1_block_data_order:
  
  	movl	__gnutls_x86_cpuid_s+0(%rip),%r9d
  	movl	__gnutls_x86_cpuid_s+4(%rip),%r8d
@@ -4876,10 +4879,10 @@ index 8d25710..c42d6bf 100644
  #
  .text
 -.globl	_sha256_block_data_order
-+.globl	_gnutls__sha256_block_data_order
++.globl	__gnutls_sha256_block_data_order
  .align	4
 -_sha256_block_data_order:
-+_gnutls__sha256_block_data_order:
++__gnutls_sha256_block_data_order:
  L_sha256_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4892,11 +4895,11 @@ index fd0c247..34f354f 100644
  
  
 -.globl	_sha256_block_data_order
-+.globl	_gnutls__sha256_block_data_order
++.globl	__gnutls_sha256_block_data_order
  
  .p2align	4
 -_sha256_block_data_order:
-+_gnutls__sha256_block_data_order:
++__gnutls_sha256_block_data_order:
  
  	leaq	__gnutls_x86_cpuid_s(%rip),%r11
  	movl	0(%r11),%r9d
@@ -4909,10 +4912,10 @@ index 4e60bb4..b9e486c 100644
  #
  .text
 -.globl	_sha512_block_data_order
-+.globl	_gnutls__sha512_block_data_order
++.globl	__gnutls_sha512_block_data_order
  .align	4
 -_sha512_block_data_order:
-+_gnutls__sha512_block_data_order:
++__gnutls_sha512_block_data_order:
  L_sha512_block_data_order_begin:
  	pushl	%ebp
  	pushl	%ebx
@@ -4925,11 +4928,11 @@ index 8bf1616..bc1e6aa 100644
  
  
 -.globl	_sha512_block_data_order
-+.globl	_gnutls__sha512_block_data_order
++.globl	__gnutls_sha512_block_data_order
  
  .p2align	4
 -_sha512_block_data_order:
-+_gnutls__sha512_block_data_order:
++__gnutls_sha512_block_data_order:
  
  	leaq	__gnutls_x86_cpuid_s(%rip),%r11
  	movl	0(%r11),%r9d
