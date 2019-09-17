@@ -25,7 +25,8 @@ class Recipe(recipe.Recipe):
                name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
                name + "/0001-pgusage-remove-system-call.patch",
                name + "/0001-asm-rename-some-assembly-functions-to-not-conflict-w.patch",
-               name + "/0001-Make-headers-MSVC-compatible-when-built-with-GCC.patch",]
+               name + "/0001-Make-headers-MSVC-compatible-when-built-with-GCC.patch",
+               name + "/0001-vasnprintf-Don-t-use-n-on-Android.patch",]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

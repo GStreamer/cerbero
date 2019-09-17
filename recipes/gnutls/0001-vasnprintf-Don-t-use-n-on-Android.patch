@@ -1,0 +1,42 @@
+From 279479cbad40e1ed364152b43ffdc85b0cc858b4 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 17 Sep 2019 17:09:00 +0530
+Subject: [PATCH] vasnprintf: Don't use %n on Android
+
+See: https://gitlab.com/gnutls/gnutls/issues/653
+
+This is fixed in GnuTLS 3.6.x
+---
+ gl/vasnprintf.c     | 2 +-
+ src/gl/vasnprintf.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/gl/vasnprintf.c b/gl/vasnprintf.c
+index 7f75b9d55..5b2d85fb7 100644
+--- a/gl/vasnprintf.c
++++ b/gl/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__) || defined(__ANDROID__))
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+diff --git a/src/gl/vasnprintf.c b/src/gl/vasnprintf.c
+index f85c69d56..3a4aef68b 100644
+--- a/src/gl/vasnprintf.c
++++ b/src/gl/vasnprintf.c
+@@ -4858,7 +4858,7 @@ VASNPRINTF (DCHAR_T *resultbuf, size_t *lengthp,
+ #endif
+                   *fbp = dp->conversion;
+ #if USE_SNPRINTF
+-# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__))
++# if !(((__GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)) && !defined __UCLIBC__) || ((defined _WIN32 || defined __WIN32__) && ! defined __CYGWIN__) || defined(__ANDROID__))
+                 fbp[1] = '%';
+                 fbp[2] = 'n';
+                 fbp[3] = '\0';
+-- 
+2.21.0
+
