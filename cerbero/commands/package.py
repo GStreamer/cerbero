@@ -66,6 +66,9 @@ class Package(Command):
             ArgparseArgument('--xz', action='store_true',
                 default=False, help=_('Use xz instead of bzip2 for compression if '
                     'creating a tarball')),
+            ArgparseArgument('--jobs', '-j', action='store', type=int,
+                default=0, help=_('How many recipes to build concurrently. '
+                    '0 = number of CPUs.')),
             ])
 
     def run(self, config, args):
@@ -77,7 +80,7 @@ class Package(Command):
                     "--only-build-deps"))
 
         if not args.skip_deps_build:
-            self._build_deps(config, p, args.no_devel, args.offline, args.dry_run)
+            self._build_deps(config, p, args.no_devel, args.offline, args.dry_run, args.jobs)
 
         if args.only_build_deps or args.dry_run:
             return
@@ -111,10 +114,11 @@ class Package(Command):
         m.action(_("Package successfully created in %s") %
                  ' '.join([os.path.abspath(x) for x in paths]))
 
-    def _build_deps(self, config, package, has_devel, offline, dry_run):
+    def _build_deps(self, config, package, has_devel, offline, dry_run, jobs):
         build_command = build.Build()
         build_command.runargs(config, package.recipes_dependencies(has_devel),
-            cookbook=self.store.cookbook, dry_run=dry_run, offline=offline)
+            cookbook=self.store.cookbook, dry_run=dry_run, offline=offline,
+            jobs=jobs)
 
 
 register_command(Package)

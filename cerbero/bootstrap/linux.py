@@ -37,7 +37,7 @@ class UnixBootstrapper (BootstrapperBase):
         BootstrapperBase.__init__(self, config, offline)
         self.assume_yes = assume_yes
 
-    def start(self):
+    def start(self, jobs=0):
         for c in self.checks:
             c()
 

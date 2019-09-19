@@ -39,20 +39,25 @@ class Bootstrap(Command):
             ArgparseArgument('--offline', action='store_true',
                 default=False, help=_('Use only the source cache, no network')),
             ArgparseArgument('-y', '--assume-yes', action='store_true',
-                default=False, help=('Automatically say yes to prompts and run non-interactively'))]
+                default=False, help=('Automatically say yes to prompts and run non-interactively')),
+            ArgparseArgument('--jobs', '-j', action='store', type=int,
+                default=0, help=_('How many recipes to build concurrently. '
+                        '0 = number of CPUs.'))]
         Command.__init__(self, args)
 
     def run(self, config, args):
         bootstrappers = Bootstrapper(config, args.build_tools_only,
                 args.offline, args.assume_yes, args.system_only)
         tasks = []
+        async def bootstrap_fetch_extract(bs):
+            await bs.fetch()
+            await bs.extract()
         for bootstrapper in bootstrappers:
-            tasks.append(bootstrapper.fetch())
+            tasks.append(bootstrap_fetch_extract(bootstrapper))
         run_until_complete(tasks)
 
         for bootstrapper in bootstrappers:
-            bootstrapper.extract()
-            bootstrapper.start()
+            bootstrapper.start(jobs=args.jobs)
 
 
 class FetchBootstrap(Command):

@@ -35,7 +35,7 @@ from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_, _
-from cerbero.utils import shell, add_system_libs, run_until_complete
+from cerbero.utils import shell, add_system_libs
 from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
 
@@ -740,7 +740,11 @@ class MetaUniversalRecipe(type):
     def __init__(cls, name, bases, ns):
         step_func = ns.get('_do_step')
         for _, step in BuildSteps():
-            setattr(cls, step, lambda self, name=step: step_func(self, name))
+            async def doit(recipe, step_name=step):
+                ret = step_func(recipe, step_name)
+                if asyncio.iscoroutine(ret):
+                    await ret
+            setattr(cls, step, doit)
 
 
 class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
@@ -830,18 +834,35 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
             return []
         return self._proxy_recipe.steps[:]
 
-    def _do_step(self, step):
-        if step in BuildSteps.FETCH:
+    async def _do_step(self, step):
+        if step == BuildSteps.FETCH[1]:
             arch, recipe = list(self._recipes.items())[0]
-            run_until_complete(self._async_run_step(recipe, step, arch))
+            await self._async_run_step(recipe, step, arch)
             return
 
+        tasks = []
         for arch, recipe in self._recipes.items():
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                run_until_complete(self._async_run_step(recipe, step, arch))
+                if step in (BuildSteps.CONFIGURE[1], BuildSteps.EXTRACT[1]):
+                    tasks.append(asyncio.create_task(self._async_run_step(recipe, step, arch)))
+                else:
+                    await self._async_run_step(recipe, step, arch)
             else:
                 self._run_step(recipe, step, arch)
+        if tasks:
+            try:
+                await asyncio.gather(*tasks, return_exceptions=False)
+            except Exception as e:
+                [task.cancel() for task in tasks]
+                ret = await asyncio.gather(*tasks, return_exceptions=True)
+                # we want to find the actuall exception rather than one
+                # that may be returned from task.cancel()
+                if not isinstance(e, asyncio.CancelledError):
+                    raise e
+                for e in ret:
+                    if not isinstance(e, asyncio.CancelledError):
+                        raise e
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -888,11 +909,11 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         for f, archs in arch_files.items():
             generator.merge_files([f], [os.path.join(self._config.prefix, arch) for arch in archs])
 
-    def _do_step(self, step):
+    async def _do_step(self, step):
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
             # No, really, let's not download a million times...
-            run_until_complete(self._async_run_step(recipe, step, arch))
+            await self._async_run_step(recipe, step, arch)
             return
 
         # For the universal build we need to configure both architectures with
@@ -905,7 +926,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             # Create a stamp file to list installed files based on the
             # modification time of this file
             if step in [BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]]:
-                time.sleep(2) #wait 2 seconds to make sure new files get the
+                await asyncio.sleep(2) #wait 2 seconds to make sure new files get the
                               #proper time difference, this fixes an issue of
                               #the next recipe to be built listing the previous
                               #recipe files as their own
@@ -918,7 +939,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             # Call the step function
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                run_until_complete(self._async_run_step(recipe, step, arch))
+                await self._async_run_step(recipe, step, arch)
             else:
                 self._run_step(recipe, step, arch)
 

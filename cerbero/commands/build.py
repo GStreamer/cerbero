@@ -41,6 +41,9 @@ class Build(Command):
                     help=_('only print commands instead of running them ')),
                 ArgparseArgument('--offline', action='store_true',
                     default=False, help=_('Use only the source cache, no network')),
+                ArgparseArgument('--jobs', '-j', action='store', type=int,
+                    default=0, help=_('How many recipes to build concurrently. '
+                        '0 = number of CPUs.')),
                 ]
             if force is None:
                 args.append(
@@ -66,17 +69,17 @@ class Build(Command):
             self.no_deps = args.no_deps
         self.runargs(config, args.recipe, args.missing_files, self.force,
                      self.no_deps, dry_run=args.dry_run, offline=args.offline,
-                     deps_only=self.deps_only)
+                     deps_only=self.deps_only, jobs=args.jobs)
 
     def runargs(self, config, recipes, missing_files=False, force=False,
                 no_deps=False, cookbook=None, dry_run=False, offline=False,
-                deps_only=False):
+                deps_only=False, jobs=None):
         if cookbook is None:
             cookbook = CookBook(config, offline=offline)
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,
-                    dry_run=dry_run, deps_only=deps_only)
+                    dry_run=dry_run, deps_only=deps_only, jobs=jobs)
         oven.start_cooking()
 
 

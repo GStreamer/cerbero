@@ -26,7 +26,7 @@ from subprocess import CalledProcessError
 from cerbero.enums import Architecture, Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
-from cerbero.utils import _, N_, shell, run_until_complete
+from cerbero.utils import _, N_, shell, run_until_complete, determine_num_of_cpus
 from cerbero.utils import messages as m
 
 import inspect
@@ -69,7 +69,7 @@ class Oven (object):
     '''
 
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False, dry_run=False, deps_only=False):
+                 missing_files=False, dry_run=False, deps_only=False, jobs=None):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -81,6 +81,11 @@ class Oven (object):
         self.interactive = self.config.interactive
         self.deps_only = deps_only
         shell.DRY_RUN = dry_run
+        self._build_lock = asyncio.Semaphore(2)
+        self._install_lock = asyncio.Lock()
+        self.jobs = jobs
+        if not self.jobs:
+            self.jobs = determine_num_of_cpus()
 
     def start_cooking(self):
         '''
@@ -104,40 +109,183 @@ class Oven (object):
         m.message(_("Building the following recipes: %s") %
                   ' '.join([x.name for x in ordered_recipes]))
 
-        i = 1
         self._static_libraries_built = []
-        for recipe in ordered_recipes:
-            try:
-                self._cook_recipe(recipe, i, len(ordered_recipes))
-            except BuildStepError as be:
-                if not self.interactive:
-                    raise be
-                msg = be.msg
-                msg += _("Select an action to proceed:")
-                action = shell.prompt_multiple(msg, RecoveryActions())
-                if action == RecoveryActions.SHELL:
-                    shell.enter_build_environment(self.config.target_platform,
-                            be.arch, recipe.get_for_arch (be.arch, 'build_dir'), env=recipe.config.env)
-                    raise be
-                elif action == RecoveryActions.RETRY_ALL:
-                    shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
-                    self.cookbook.reset_recipe_status(recipe.name)
-                    self._cook_recipe(recipe, i, len(ordered_recipes))
-                elif action == RecoveryActions.RETRY_STEP:
-                    self._cook_recipe(recipe, i, len(ordered_recipes))
-                elif action == RecoveryActions.SKIP:
-                    i += 1
-                    continue
-                elif action == RecoveryActions.ABORT:
-                    raise AbortedError()
-            i += 1
+        run_until_complete(self._cook_recipes(ordered_recipes))
 
-    def _cook_recipe(self, recipe, count, total):
+    async def _cook_recipes(self, recipes):
+        recipes = set(recipes)
+        built_recipes = set()       # recipes we have successfully built
+        building_recipes = set()    # recipes that are queued or are in progress
+
+        def all_deps_without_recipe(recipe_name):
+            return set((dep.name for dep in self.cookbook.list_recipe_deps(recipe_name) if recipe_name != dep.name))
+
+        all_deps = set()
+        for recipe in recipes:
+            [all_deps.add(dep) for dep in all_deps_without_recipe(recipe.name)]
+
+        # handle the 'buildone' case by adding all the recipe deps to the built
+        # list if they are not in the recipe list
+        if self.no_deps:
+            [built_recipes.add(dep) for dep in (all_deps - set((r.name for r in recipes)))]
+        else:
+            [recipes.add(self.cookbook.get_recipe(dep)) for dep in all_deps]
+
+        # final targets.  The set of recipes with no reverse dependencies
+        recipe_targets = set((r.name for r in recipes)) - all_deps
+
+        # precompute the deps for each recipe
+        recipe_deps = {}
+        for r in set(set((r.name for r in recipes)) | all_deps):
+            deps = all_deps_without_recipe(r)
+            recipe_deps[r] = deps
+
+        def find_recipe_dep_path(from_name, to_name):
+            # returns a list of recipe names in reverse order that describes
+            # the path for building @from_name
+            # None if there is no path
+            if from_name == to_name:
+                return [to_name]
+            for dep in recipe_deps[from_name]:
+                val = find_recipe_dep_path(dep, to_name)
+                if val:
+                    return [from_name] + val
+
+        def find_longest_path(to_recipes):
+            # return the longest path from the targets to one of @to_recipes
+            def yield_path_lengths():
+                for f in recipe_targets:
+                    for t in to_recipes:
+                        path = find_recipe_dep_path(f, t)
+                        if path:
+                            yield len(path)
+            return max((l for l in yield_path_lengths()))
+
+        def find_buildable_recipes():
+            # This is a dumb algorithm that only looks for all available
+            # recipes that can be built.  We use a priority queue for
+            # the smarts.
+            for recipe in recipes:
+                if recipe.name in built_recipes:
+                    continue
+                if recipe.name in building_recipes:
+                    continue
+
+                if len(all_deps_without_recipe(recipe.name)) == 0:
+                    yield recipe
+                    continue
+
+                built_deps = set((dep for dep in all_deps_without_recipe(recipe.name) if dep in built_recipes))
+                if len(built_deps) > 0 and built_deps == set(all_deps_without_recipe(recipe.name)):
+                    # we have a new dep buildable
+                    yield recipe
+
+        class MutableInt:
+            def __init__(self):
+                self.i = 0
+
+        counter = MutableInt()
+        tasks = []
+
+        loop = asyncio.get_event_loop()
+        queue = asyncio.PriorityQueue(loop=loop)
+
+        class RecipePriority:
+            # can't use a tuple as Recipe doens't implement __lt__() as
+            # required by PriorityQueue
+            def __init__(self, recipe):
+                self.recipe = recipe
+                self.path_length = find_longest_path((recipe.name,))
+
+            def __lt__(self, other):
+                # return lower for larger path lengths
+                return self.path_length > other.path_length
+
+        main_task = asyncio.current_task()
+        async def shutdown(loop):
+            # a little heavy handed but we need to do this otherwise some
+            # tasks will continue even after an exception is thrown
+            kill_tasks = [t for t in asyncio.all_tasks() if t not in (main_task, asyncio.current_task())]
+            [task.cancel() for task in kill_tasks]
+            await asyncio.gather(*kill_tasks, return_exceptions=True)
+
+        async def cook_recipe_worker(queue):
+            # the main worker task
+            while True:
+                recipe_d = await queue.get()
+                recipe = recipe_d.recipe
+                counter.i += 1
+                await self._cook_recipe_with_prompt(recipe, counter.i, len(recipes))
+                built_recipes.add(recipe.name)
+                building_recipes.remove(recipe.name)
+                for buildable in find_buildable_recipes ():
+                    building_recipes.add(buildable.name)
+                    queue.put_nowait(RecipePriority(buildable))
+                queue.task_done()
+
+        # push the initial set of recipes that have no dependencies to start
+        # building
+        for recipe in find_buildable_recipes ():
+            building_recipes.add(recipe.name)
+            queue.put_nowait(RecipePriority(recipe))
+
+        for i in range(self.jobs):
+            task = asyncio.create_task(cook_recipe_worker(queue))
+            tasks.append(task)
+
+        class QueueDone(Exception):
+            pass
+
+        async def queue_done(queue):
+            # This is how we exit the asyncio.wait once everything is done
+            # as otherwise asyncio.wait will wait for our tasks to complete
+            while built_recipes & recipe_targets != recipe_targets:
+                await queue.join()
+            raise QueueDone()
+
+        task = asyncio.create_task (queue_done(queue))
+        tasks.append(task)
+        try:
+            await asyncio.gather(*tasks, return_exceptions=False)
+        except asyncio.CancelledError:
+            pass
+        except QueueDone:
+            await shutdown(loop)
+        except Exception:
+            await shutdown(loop)
+            raise
+
+    async def _cook_recipe_with_prompt(self, recipe, count, total):
+        try:
+            await self._cook_recipe(recipe, count, total)
+        except BuildStepError as be:
+            if not self.interactive:
+                raise be
+            msg = be.msg
+            msg += _("Select an action to proceed:")
+            action = shell.prompt_multiple(msg, RecoveryActions())
+            if action == RecoveryActions.SHELL:
+                shell.enter_build_environment(self.config.target_platform,
+                        be.arch, recipe.get_for_arch (be.arch, 'build_dir'), env=recipe.config.env)
+                raise be
+            elif action == RecoveryActions.RETRY_ALL:
+                shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
+                self.cookbook.reset_recipe_status(recipe.name)
+                await self._cook_recipe(recipe, count, total)
+            elif action == RecoveryActions.RETRY_STEP:
+                await self._cook_recipe(recipe, count, total)
+            elif action == RecoveryActions.SKIP:
+                pass
+            elif action == RecoveryActions.ABORT:
+                raise AbortedError()
+
+    async def _cook_recipe(self, recipe, count, total):
         # A Recipe depending on a static library that has been rebuilt
         # also needs to be rebuilt to pick up the latest build.
         if recipe.library_type != LibraryType.STATIC:
             if len(set(self._static_libraries_built) & set(recipe.deps)) != 0:
                 self.cookbook.reset_recipe_status(recipe.name)
+
         if not self.cookbook.recipe_needs_build(recipe.name) and \
                 not self.force:
             m.build_step(count, total, recipe.name, _("already built"))
@@ -149,22 +297,45 @@ class Oven (object):
 
         recipe.force = self.force
         for desc, step in recipe.steps:
-            m.build_step(count, total, recipe.name, step)
             # check if the current step needs to be done
             if self.cookbook.step_done(recipe.name, step) and not self.force:
+                m.build_step(count, total, recipe.name, step)
                 m.action(_("Step done"))
                 continue
             try:
                 # call step function
                 stepfunc = getattr(recipe, step)
                 if not stepfunc:
+                    m.build_step(count, total, recipe.name, step)
                     raise FatalError(_('Step %s not found') % step)
-                if asyncio.iscoroutinefunction(stepfunc):
-                    run_until_complete(stepfunc())
+
+                lock = None
+                if step == BuildSteps.COMPILE[1] \
+                        and hasattr(recipe, "allow_parallel_build") \
+                        and recipe.allow_parallel_build:
+                    # only allow a limited number of recipes that can fill all
+                    # CPU cores to execute concurrently.  Any recipe that does
+                    # not support parallel builds will always be executed
+                    lock = self._build_lock
+                if step in (BuildSteps.INSTALL[1], BuildSteps.POST_INSTALL[1]):
+                    # only allow a single install to occur
+                    lock = self._install_lock
+
+                if lock:
+                    async with lock:
+                        m.build_step(count, total, recipe.name, step)
+                        ret = stepfunc()
+                        if asyncio.iscoroutine(ret):
+                            await ret
                 else:
-                    stepfunc()
+                    m.build_step(count, total, recipe.name, step)
+                    ret = stepfunc()
+                    if asyncio.iscoroutine(ret):
+                        await ret
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
+            except asyncio.CancelledError:
+                raise
             except FatalError as e:
                 exc_traceback = sys.exc_info()[2]
                 trace = ''

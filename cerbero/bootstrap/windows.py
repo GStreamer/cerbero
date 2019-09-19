@@ -97,7 +97,7 @@ class WindowsBootstrapper(BootstrapperBase):
                 self.fetch_urls.append((url, checksum))
                 self.extract_steps.append((url, True, self.prefix))
 
-    def start(self):
+    def start(self, jobs=0):
         if not git.check_line_endings(self.config.platform):
             raise ConfigurationError("git is configured to use automatic line "
                     "endings conversion. You can fix it running:\n"

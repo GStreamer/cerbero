@@ -61,10 +61,10 @@ class BootstrapperBase (object):
         'Fetch build-tools recipes; only called by fetch-bootstrap'
         pass
 
-    def extract(self):
+    async def extract(self):
         for (url, unpack, unpack_dir) in self.extract_steps:
             if unpack:
-                self.sources[url].extract_tarball(unpack_dir)
+                await self.sources[url].extract_tarball(unpack_dir)
             else:
                 # Just copy the file as-is
                 fname = os.path.basename(url)
