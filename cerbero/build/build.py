@@ -46,44 +46,6 @@ class Build (object):
     def __init__(self):
         self._properties_keys = []
 
-    def setup_toolchain_env_ops(self):
-        if self.config.qt5_pkgconfigdir:
-            self.append_env('PKG_CONFIG_LIBDIR', self.config.qt5_pkgconfigdir, sep=os.pathsep)
-        if self.config.platform != Platform.WINDOWS:
-            return
-        if self.using_msvc():
-            toolchain_env = self.config.msvc_toolchain_env
-        else:
-            toolchain_env = self.config.mingw_toolchain_env
-        # Set the toolchain environment
-        for var, (val, sep) in toolchain_env.items():
-            # We prepend PATH and replace the rest
-            if var == 'PATH':
-                self.prepend_env(var, val, sep=sep)
-            else:
-                self.set_env(var, val, sep=sep)
-
-    def unset_toolchain_env(self):
-        # These toolchain env vars set by us are for GCC, so unset them if
-        # we're building with MSVC (or cross-compiling with Meson)
-        for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
-                    'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
-            if var in self.env:
-                # Env vars that are edited by the recipe will be restored by
-                # @modify_environment when we return from the build step but
-                # other env vars won't be, so add those.
-                if var not in self._old_env:
-                    self._old_env[var] = self.env[var]
-                del self.env[var]
-        # Re-add *FLAGS that weren't set by the toolchain config, but instead
-        # were set in the recipe or other places via @modify_environment
-        if self.using_msvc():
-            for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
-                        'LDFLAGS', 'OBJLDFLAGS'):
-                for env_op in self._new_env:
-                    if env_op.var == var:
-                        env_op.execute(self.env)
-
     def get_env(self, var, default=None):
         if var in self.env:
             return self.env[var]
@@ -219,7 +181,10 @@ class EnvVarOp:
             env[self.var] = self.sep.join(new)
 
     def __repr__(self):
-        return "<EnvVarOp " + self.op + " " + self.var + " with " + self.sep.join(self.vals) + ">"
+        vals = "None"
+        if self.sep:
+            vals = self.sep.join(self.vals)
+        return "<EnvVarOp " + self.op + " " + self.var + " with " + vals + ">"
 
 
 class ModifyEnvBase:
@@ -244,6 +209,8 @@ class ModifyEnvBase:
                 this.method = method
 
             def __call__(this, var, *vals, sep=' ', when='later'):
+                if vals == (None,):
+                    vals = None
                 op = EnvVarOp(this.method, var, vals, sep)
                 if when == 'later':
                     this.target.check_reentrancy()
@@ -262,6 +229,41 @@ class ModifyEnvBase:
 
         for i in ('append', 'prepend', 'set', 'remove'):
             setattr(self, i + '_env', ModifyEnvFuncWrapper(self, i))
+
+    def setup_toolchain_env_ops(self):
+        if self.config.qt5_pkgconfigdir:
+            self.append_env('PKG_CONFIG_LIBDIR', self.config.qt5_pkgconfigdir, sep=os.pathsep)
+        if self.config.platform != Platform.WINDOWS:
+            return
+        if self.using_msvc():
+            toolchain_env = self.config.msvc_toolchain_env
+        else:
+            toolchain_env = self.config.mingw_toolchain_env
+        # Set the toolchain environment
+        for var, (val, sep) in toolchain_env.items():
+            # We prepend PATH and replace the rest
+            if var == 'PATH':
+                self.prepend_env(var, val, sep=sep)
+            else:
+                self.set_env(var, val, sep=sep)
+
+    def unset_toolchain_env(self):
+        # These toolchain env vars set by us are for GCC, so unset them if
+        # we're building with MSVC (or cross-compiling with Meson)
+        for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
+                    'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
+            if var in self.env:
+                # Env vars that are edited by the recipe will be restored by
+                # @modify_environment when we return from the build step but
+                # other env vars won't be, so add those.
+                self.set_env (var, None, when='now-with-restore')
+        # Re-add *FLAGS that weren't set by the toolchain config, but instead
+        # were set in the recipe or other places via @modify_environment
+        if self.using_msvc():
+            for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
+                        'LDFLAGS', 'OBJLDFLAGS'):
+                if var in self._new_env:
+                    self.set_env (var, self._new_env[var], when='now')
 
     def check_reentrancy(self):
         if self._old_env:
