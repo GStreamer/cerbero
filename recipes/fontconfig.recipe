@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     def prepare(self):
+        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
+            self.deps.append('libiconv')
         if needs_xcode8_sdk_workaround(self.config):
             self.set_env('ac_cv_func_mkostemp', 'no')
         if self.config.target_platform == Platform.WINDOWS:

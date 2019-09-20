@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'https://pkgconfig.freedesktop.org/releases/pkg-config-%(version)s.tar.gz'
     tarball_checksum = '6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591'
     configure_options = '--with-internal-glib --disable-host-tool '
+    deps = ['libtool']
 
     files_bins = ['pkg-config']
     files_share = ['share/aclocal/pkg.m4']

@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     meson_options = {'internal_pcre': 'true', 'libmount': 'false',
                      'dtrace': 'false', 'iconv': 'libc', 'selinux' : 'false'}
-    deps = ['libffi', 'zlib']
+    deps = ['libffi-tools', 'zlib-tools', 'pkg-config', 'meson', 'gettext-tools']
     patches = ['../glib/glib-2.57-meson-backported-fixes.patch',
                '../glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
                # XXX: Remove when we upgrade our mingw toolchain
@@ -33,6 +33,8 @@ class Recipe(recipe.Recipe):
         # Other platforms don't provide libiconv, so we build it
         else:
             self.meson_options.update({'iconv': 'gnu'})
+            self.deps.append('libiconv')
+
         if self.config.target_platform == Platform.WINDOWS:
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings

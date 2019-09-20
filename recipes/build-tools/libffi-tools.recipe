@@ -1,0 +1,14 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libffi-tools'
+    version = '3.2.9999'
+    remotes = {'origin': 'https://github.com/libffi/libffi.git'.format(name)}
+    commit = '369ef49f71186fc9d6ab15614488ad466fac3fc1'
+    licenses = [{License.BSD_like: ['LICENSE']}]
+    btype = BuildType.MESON
+    patches = ['../libffi/libffi-port-to-meson-and-msvc.patch']
+    deps = ['meson']
+
+    files_libs = ['libffi']
+    files_devel = ['include/ffi*.h', 'lib/pkgconfig/libffi.pc']

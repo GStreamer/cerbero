@@ -9,7 +9,6 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/ninja-build/ninja/archive/v%(version)s.tar.gz'
     tarball_checksum = '5d7ec75828f8d3fd1a0c2f31b5b0cea780cdfe1031359228c428c1a48bfcd5b9'
     patches = ['ninja/0001-configure.py-Look-for-cl.exe-before-assuming-MSVC.patch']
-    deps = []
 
     files_bin = ['bin/ninja']
 
@@ -21,5 +20,8 @@ class Recipe(recipe.Recipe):
         ninja = 'ninja'
         if self.platform == Platform.WINDOWS:
             ninja += '.exe'
+        bindir = os.path.join (self.config.prefix, "bin")
+        if not os.path.exists(bindir):
+            os.makedirs(bindir)
         os.replace(os.path.join(self.build_dir, ninja),
-                   os.path.join (self.config.prefix, "bin", ninja))
+                   os.path.join(bindir, ninja))

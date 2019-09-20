@@ -10,6 +10,10 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
+        'gst-plugins-ugly-1.0', 'gst-plugins-bad-1.0', 'gst-libav-1.0',
+        'gst-validate', 'gst-rtsp-server-1.0', 'gst-editing-services-1.0'
+    ]
 
     files_devel = [
             'share/gst-android/ndk-build/gstreamer_android-1.0.c.in',

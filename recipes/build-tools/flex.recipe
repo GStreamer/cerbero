@@ -12,3 +12,4 @@ class Recipe(recipe.Recipe):
     patches = ['flex/flex-prevent-to-build-doc.patch']
     autoreconf = True
     platform_deps = {Platform.WINDOWS: ['mingw-gettext']}
+    deps = ['automake', 'autoconf', 'gettext-tools']
