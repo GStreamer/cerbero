@@ -161,9 +161,11 @@ def async_modify_environment(func):
     '''
     async def call(*args):
         self = args[0]
-        self._modify_env()
-        res = await func(*args)
-        self._restore_env()
+        try:
+            self._modify_env()
+            res = await func(*args)
+        finally:
+            self._restore_env()
         return res
 
     call.__name__ = func.__name__
