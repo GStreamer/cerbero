@@ -100,6 +100,7 @@ class DistroVersion:
     FEDORA_28 = 'fedora_28'
     FEDORA_29 = 'fedora_29'
     FEDORA_30 = 'fedora_30'
+    FEDORA_31 = 'fedora_31'
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
     # Amazon Linux seems to be RedHat/CentOS-based
