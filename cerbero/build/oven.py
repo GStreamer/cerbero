@@ -28,6 +28,8 @@ from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell, run_until_complete, determine_num_of_cpus
 from cerbero.utils import messages as m
+from cerbero.utils.shell import BuildStatusPrinter
+from cerbero.build.recipe import BuildSteps
 
 import inspect
 
@@ -109,6 +111,8 @@ class Oven (object):
         m.message(_("Building the following recipes: %s") %
                   ' '.join([x.name for x in ordered_recipes]))
 
+        steps = [step[1] for step in recipes[0]._steps]
+        self._build_status_printer = BuildStatusPrinter(steps, self.interactive)
         self._static_libraries_built = []
         run_until_complete(self._cook_recipes(ordered_recipes))
 
@@ -130,6 +134,7 @@ class Oven (object):
             [built_recipes.add(dep) for dep in (all_deps - set((r.name for r in recipes)))]
         else:
             [recipes.add(self.cookbook.get_recipe(dep)) for dep in all_deps]
+        self._build_status_printer.total = len(recipes)
 
         # final targets.  The set of recipes with no reverse dependencies
         recipe_targets = set((r.name for r in recipes)) - all_deps
@@ -261,6 +266,7 @@ class Oven (object):
         except BuildStepError as be:
             if not self.interactive:
                 raise be
+            print()
             msg = be.msg
             msg += _("Select an action to proceed:")
             action = shell.prompt_multiple(msg, RecoveryActions())
@@ -288,7 +294,7 @@ class Oven (object):
 
         if not self.cookbook.recipe_needs_build(recipe.name) and \
                 not self.force:
-            m.build_step(count, total, recipe.name, _("already built"))
+            self._build_status_printer.already_built(count, total, recipe.name)
             return
 
         if self.missing_files:
@@ -299,14 +305,13 @@ class Oven (object):
         for desc, step in recipe.steps:
             # check if the current step needs to be done
             if self.cookbook.step_done(recipe.name, step) and not self.force:
-                m.build_step(count, total, recipe.name, step)
-                m.action(_("Step done"))
+                self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
                 continue
             try:
                 # call step function
                 stepfunc = getattr(recipe, step)
                 if not stepfunc:
-                    m.build_step(count, total, recipe.name, step)
+                    self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
                     raise FatalError(_('Step %s not found') % step)
 
                 lock = None
@@ -323,15 +328,17 @@ class Oven (object):
 
                 if lock:
                     async with lock:
-                        m.build_step(count, total, recipe.name, step)
+                        self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
                         ret = stepfunc()
                         if asyncio.iscoroutine(ret):
                             await ret
+                        self._build_status_printer.remove_recipe(recipe.name)
                 else:
-                    m.build_step(count, total, recipe.name, step)
+                    self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
                     ret = stepfunc()
                     if asyncio.iscoroutine(ret):
                         await ret
+                    self._build_status_printer.remove_recipe(recipe.name)
                 # update status successfully
                 self.cookbook.update_step_status(recipe.name, step)
             except asyncio.CancelledError:
@@ -352,6 +359,7 @@ class Oven (object):
                 self._handle_build_step_error(recipe, step, trace, e.arch)
             except Exception:
                 raise BuildStepError(recipe, step, traceback.format_exc())
+        self._build_status_printer.built(count, total, recipe.name)
         self.cookbook.update_build_status(recipe.name, recipe.built_version())
         if recipe.library_type == LibraryType.STATIC:
             self._static_libraries_built.append(recipe.name)

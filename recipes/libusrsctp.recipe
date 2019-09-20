@@ -26,6 +26,7 @@
 
 import shutil
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 class Recipe(recipe.Recipe):
     name = 'libusrsctp'
@@ -49,7 +50,7 @@ class Recipe(recipe.Recipe):
     async def extract(self):
         await super().extract()
         for f in ['NEWS', 'README', 'AUTHORS', 'ChangeLog']:
-            shell.log(os.path.join(self.build_dir, f), self.logfile)
+            m.log(os.path.join(self.build_dir, f), self.logfile)
             shell.touch(os.path.join(self.build_dir, f), True)
         #os.mkdir(os.path.join(self.build_dir, 'm4'))
 

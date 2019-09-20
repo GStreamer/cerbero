@@ -161,7 +161,7 @@ class BaseTarball(object):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.download_dir))
             self.verify()
-            m.action(_('Found %s at %s') % (self.url, self.download_path))
+            m.action(_('Found %s at %s') % (self.url, self.download_path), logfile=get_logfile(self))
             return
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
@@ -194,7 +194,7 @@ class BaseTarball(object):
         if checksum != self.tarball_checksum:
             movedto = fname + '.failed-checksum'
             os.replace(fname, movedto)
-            m.action(_('Checksum failed, tarball %s moved to %s') % (fname, movedto))
+            m.action(_('Checksum failed, tarball %s moved to %s') % (fname, movedto), logfile=get_logfile(self))
             if not fatal:
                 return False
             raise FatalError('Checksum for {} is {!r} instead of {!r}'
@@ -205,7 +205,7 @@ class BaseTarball(object):
         try:
             await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
         except (IOError, EOFError, tarfile.ReadError):
-            m.action(_('Corrupted or partial tarball, redownloading...'))
+            m.action(_('Corrupted or partial tarball, redownloading...'), logfile=get_logfile(self))
             await self.fetch(redownload=True)
             await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
 
@@ -236,13 +236,13 @@ class Tarball(BaseTarball, Source):
                                    self.package_name, self.tarball_name)
         if not redownload and os.path.isfile(cached_file) and self.verify(cached_file, fatal=False):
             m.action(_('Copying cached tarball from %s to %s instead of %s') %
-                     (cached_file, self.download_path, self.url))
+                     (cached_file, self.download_path, self.url), logfile=get_logfile(self))
             shutil.copy(cached_file, self.download_path)
             return
         await super().fetch(redownload=redownload)
 
     async def extract(self):
-        m.action(_('Extracting tarball to %s') % self.build_dir)
+        m.action(_('Extracting tarball to %s') % self.build_dir, logfile=get_logfile(self))
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
         await self.extract_tarball(self.config.sources)
@@ -474,7 +474,7 @@ class Svn(Source):
             if os.path.exists(self.repo_dir):
                 shutil.rmtree(self.repo_dir)
             m.action(_('Copying cached repo from %s to %s instead of %s') %
-                     (cached_dir, self.repo_dir, self.url))
+                     (cached_dir, self.repo_dir, self.url), logfile=get_logfile(self))
             shell.copy_dir(cached_dir, self.repo_dir)
             return
 

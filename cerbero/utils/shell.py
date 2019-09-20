@@ -31,6 +31,7 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
+import collections
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
@@ -49,19 +50,6 @@ PLATFORM = system_info()[0]
 CPU_BOUND_SEMAPHORE = CerberoSemaphore(determine_num_of_cpus())
 NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(2)
 DRY_RUN = False
-
-def console_is_interactive():
-    if not os.isatty(sys.stdout.fileno()):
-        return False
-    if os.environ.get('TERM') == 'dumb':
-        return False
-    return True
-
-def log(msg, logfile):
-    if logfile is None:
-        logging.info(msg)
-    else:
-        logfile.write(msg + '\n')
 
 def _fix_mingw_cmd(path):
     reserved = ['/', ' ', '\\', ')', '(', '"']
@@ -307,7 +295,7 @@ def apply_patch(patch, directory, strip=1, logfile=None):
     @param strip: strip
     @type strip: int
     '''
-    log("Applying patch {}".format(patch), logfile)
+    m.log("Applying patch {}".format(patch), logfile)
     call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
 
 
@@ -320,7 +308,7 @@ async def unpack(filepath, output_dir, logfile=None):
     @param output_dir: output directory
     @type output_dir: str
     '''
-    log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
+    m.log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
     # Recent versions of tar are much faster than the tarfile module, but we
     # can't use tar on Windows because MSYS tar is ancient and buggy.
@@ -444,7 +432,7 @@ async def download(url, destination=None, check_cert=True, overwrite=False, logf
     else:
         if not os.path.exists(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
-        log("Downloading {}".format(url), logfile)
+        m.log("Downloading {}".format(url), logfile)
 
     urls = [url]
     if mirrors is not None:
@@ -692,3 +680,54 @@ def windows_proof_rename(from_name, to_name):
                 continue
     # Try one last time and throw an error if it fails again
     os.rename(from_name, to_name)
+
+
+class BuildStatusPrinter:
+    def __init__(self, steps, interactive):
+        self.steps = steps[:]
+        self.step_to_recipe = collections.defaultdict(list)
+        self.recipe_to_step = {}
+        self.total = 0
+        self.count = 0
+        self.interactive = interactive
+
+    def remove_recipe(self, recipe_name):
+        if recipe_name in self.recipe_to_step:
+            self.step_to_recipe[self.recipe_to_step[recipe_name]].remove(recipe_name)
+            del self.recipe_to_step[recipe_name]
+        self.output_status_line()
+
+    def built(self, count, total, recipe_name):
+        self.count += 1
+        if self.interactive:
+            m.build_step(self.count, self.total, recipe_name, _("built"))
+        self.remove_recipe(recipe_name)
+
+    def already_built(self, count, total, recipe_name):
+        self.count += 1
+        if self.interactive:
+            m.build_step(self.count, self.total, recipe_name, _("already built"))
+        else:
+            m.build_step(count, total, recipe_name, _("already built"))
+        self.output_status_line()
+
+    def update_recipe_step(self, count, total, recipe_name, step):
+        if not self.interactive:
+            m.build_step(count, total, recipe_name, step)
+            return
+        self.remove_recipe(recipe_name)
+        self.step_to_recipe[step].append(recipe_name)
+        self.recipe_to_step[recipe_name] = step
+        self.output_status_line()
+
+    def generate_status_line(self):
+        s = "[(" + str(self.count) + "/" + str(self.total) + ")"
+        for step in self.steps:
+            if self.step_to_recipe[step]:
+                s += " " + str(step).upper() + ": " + ", ".join(self.step_to_recipe[step])
+        s += "]"
+        return s
+
+    def output_status_line(self):
+        if self.interactive:
+            m.output_status(self.generate_status_line())

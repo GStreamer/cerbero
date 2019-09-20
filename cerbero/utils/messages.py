@@ -17,40 +17,103 @@
 # Boston, MA 02111-1307, USA.
 
 import sys
+import os
 import time
 import datetime
+import logging
+import shutil
 
 
 ACTION_TPL = '-----> %s'
 STEP_TPL = '[(%s/%s) %s -> %s]'
 START_TIME = None
+SHELL_CLEAR_LINE = "\r\033[K"
+SHELL_MOVE_UP = "\033[F"
 
 
-def _output(msg, fd):
+def console_is_interactive():
+    if not os.isatty(sys.stdout.fileno()):
+        return False
+    if os.environ.get('TERM') == 'dumb':
+        return False
+    return True
+
+
+def log(msg, logfile):
+    if logfile is None:
+        logging.info(msg)
+    else:
+        logfile.write(msg + '\n')
+
+class StdoutManager:
+    def __init__(self):
+        self.status_line = ""
+        self.clear_lines = 0
+
+    def output(self, msg):
+        self.clear_status()
+        sys.stdout.write(msg)
+        sys.stdout.flush()
+        self.status_line = ""
+        self.clear_lines = 0
+
+    def clear_status (self):
+        if console_is_interactive():
+            clear_prev_status = SHELL_CLEAR_LINE + "".join((SHELL_CLEAR_LINE + SHELL_MOVE_UP for i in range(self.clear_lines)))
+            sys.stdout.write(clear_prev_status)
+            sys.stdout.flush()
+
+    def output_status(self, status):
+        self.clear_status()
+        sys.stdout.write(status)
+        sys.stdout.flush()
+        self.status_line = status
+        self.clear_lines = len (status) // shutil.get_terminal_size().columns
+
+STDOUT = StdoutManager()
+
+def prepend_time(end=' '):
     global START_TIME
-    prefix = ''
+    s = ''
     if START_TIME is not None:
-        prefix = str(datetime.timedelta(microseconds=int((time.monotonic() - START_TIME) * 1e6)))
-        prefix += ' '
-    fd.write(prefix + msg + '\n')
-    fd.flush()
+        s += str(datetime.timedelta(microseconds=int((time.monotonic() - START_TIME) * 1e6)))
+        s += end
+    return s
+
+def output(msg, fd, end='\n'):
+    prefix = prepend_time()
+    if fd == sys.stdout:
+        STDOUT.output(prefix + msg + end)
+    else:
+        fd.write(prefix + msg + end)
+        fd.flush()
+
+def output_status(msg):
+    prefix = prepend_time()
+    STDOUT.output_status(prefix + msg)
 
 
-def message(msg):
-    _output(msg, sys.stdout)
+def message(msg, logfile=None):
+    if logfile is None:
+        output(msg, sys.stdout)
+    else:
+        log(msg, logfile)
 
 
-def error(msg):
-    _output(msg, sys.stderr)
+def error(msg, logfile=None):
+    STDOUT.clear_status()
+    output(msg, sys.stderr)
+    if logfile is not None:
+        log(msg, logfile=logfile)
 
 
-def warning(msg):
-    error("WARNING: %s" % msg)
+def warning(msg, logfile=None):
+    error("WARNING: %s" % msg, logfile=logfile)
 
 
-def action(msg):
-    message(ACTION_TPL % msg)
+def action(msg, logfile=None):
+    message(ACTION_TPL % msg, logfile=logfile)
 
 
-def build_step(count, total, recipe, step):
-    message(STEP_TPL % (count, total, recipe, step))
+def build_step(count, total, recipe, step, logfile=None):
+    message(STEP_TPL % (count, total, recipe, step), logfile=logfile)

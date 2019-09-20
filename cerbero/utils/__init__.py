@@ -345,7 +345,7 @@ def validate_packager(packager):
     return bool(re.match(expr, packager))
 
 
-def copy_files(origdir, destdir, files, extensions, target_platform):
+def copy_files(origdir, destdir, files, extensions, target_platform, logfile=None):
     for f in files:
         f = f % extensions
         install_dir = os.path.dirname(os.path.join(destdir, f))
@@ -358,7 +358,7 @@ def copy_files(origdir, destdir, files, extensions, target_platform):
             relprefix = destdir[1:]
         orig = os.path.join(origdir, relprefix, f)
         dest = os.path.join(destdir, f)
-        m.action("copying %s to %s" % (orig, dest))
+        m.action("copying %s to %s" % (orig, dest), logfile=logfile)
         try:
             shutil.copy(orig, dest)
         except IOError:

@@ -457,7 +457,7 @@ class Config (object):
         self.set_property('recipes_remotes', {})
         self.set_property('extra_build_tools', [])
         self.set_property('distro_packages_install', True)
-        self.set_property('interactive', shell.console_is_interactive())
+        self.set_property('interactive', m.console_is_interactive())
         self.set_property('meson_cross_properties', {})
         self.set_property('manifest', None)
         self.set_property('extra_properties', {})

@@ -30,6 +30,7 @@ from cerbero.errors import FatalError
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates, git, shell, determine_num_of_cpus, run_until_complete
 from cerbero.utils import messages as m
+from cerbero.utils.shell import BuildStatusPrinter
 from cerbero.build.source import Tarball
 from cerbero.config import Distro
 
@@ -66,6 +67,15 @@ class Fetch(Command):
         shell.set_max_non_cpu_bound_calls(jobs)
         to_rebuild = []
         tasks = []
+        printer = BuildStatusPrinter (('fetch',), cookbook.get_config().interactive)
+        printer.total = len(fetch_recipes)
+
+        async def fetch_print_wrapper(recipe_name, stepfunc):
+            printer.update_recipe_step(printer.count, printer.total, recipe_name, 'fetch')
+            await stepfunc()
+            printer.count += 1
+            printer.remove_recipe(recipe_name)
+
         for i in range(len(fetch_recipes)):
             recipe = fetch_recipes[i]
             if print_only:
@@ -75,10 +85,12 @@ class Fetch(Command):
                 continue
             stepfunc = getattr(recipe, 'fetch')
             if asyncio.iscoroutinefunction(stepfunc):
-                tasks.append(stepfunc())
+                tasks.append(fetch_print_wrapper(recipe.name, stepfunc))
             else:
-                m.build_step(i + 1, len(fetch_recipes), recipe, 'fetch started')
+                printer.update_recipe_step(printer.count, printer.total, recipe_name, 'fetch')
                 stepfunc()
+                printer.count += 1
+                printer.remove_recipe(recipe_name)
             bv = cookbook.recipe_built_version(recipe.name)
             cv = recipe.built_version()
             if bv != cv:
