@@ -40,7 +40,7 @@ class Shell(Command):
         cookbook = CookBook(config)
         env = config.env.copy()
         if args.use_system_libs:
-            add_system_libs(config, env)
+            add_system_libs(config, env, config.env)
 
         shell.enter_build_environment(config.target_platform,
                 config.target_arch, sourcedir=None, env=env,

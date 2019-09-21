@@ -391,7 +391,7 @@ def get_wix_prefix():
         raise FatalError("The required packaging tool 'WiX' was not found")
     return escape_path(to_unixpath(wix_prefix))
 
-def add_system_libs(config, new_env):
+def add_system_libs(config, new_env, old_env=None):
     '''
     Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
     can be found.
@@ -407,9 +407,12 @@ def add_system_libs(config, new_env):
     if config.sysroot:
         sysroot = config.sysroot
 
+    if not old_env:
+        old_env = os.environ
+
     search_paths = []
-    if os.environ.get('PKG_CONFIG_LIBDIR', None):
-       search_paths += [os.environ['PKG_CONFIG_LIBDIR']]
+    if old_env.get('PKG_CONFIG_LIBDIR', None):
+       search_paths += [old_env['PKG_CONFIG_LIBDIR']]
     search_paths += [
         os.path.join(sysroot, 'usr', libdir, 'pkgconfig'),
         os.path.join(sysroot, 'usr/share/pkgconfig')]

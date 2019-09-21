@@ -360,7 +360,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         env = self.env.copy()
         env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
         if self.use_system_libs:
-            add_system_libs(self.config, env)
+            add_system_libs(self.config, env, self.env)
 
         # retrieve the list of files we need to generate
         for f in self.devel_files_list():

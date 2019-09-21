@@ -327,7 +327,7 @@ class ModifyEnvBase:
         # this only works because add_system_libs() does very little
         # this is a possible source of env conflicts
         new_env = {}
-        add_system_libs(self.config, new_env)
+        add_system_libs(self.config, new_env, self.env)
 
         if step != 'configure':
             # gobject-introspection gets the paths to internal libraries all
