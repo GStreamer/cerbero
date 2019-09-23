@@ -36,7 +36,7 @@ from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
 from cerbero.enums import Platform
-from cerbero.utils import _, system_info, to_unixpath
+from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
@@ -47,7 +47,8 @@ TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 
 
 PLATFORM = system_info()[0]
-ASYNC_CALL_SEMAPHORE = asyncio.Semaphore(2)
+CPU_BOUND_SEMAPHORE = asyncio.Semaphore(determine_num_of_cpus())
+NON_CPU_BOUND_SEMAPHORE = asyncio.Semaphore(2)
 DRY_RUN = False
 
 def console_is_interactive():
@@ -98,9 +99,13 @@ def _cmd_string_to_array(cmd, env):
     # platforms.
     return ['sh', '-c', cmd]
 
-def set_max_async_calls(number):
-    global ASYNC_CALL_SEMAPHORE
-    ASYNC_CALL_SEMAPHORE = asyncio.Semaphore(number)
+def set_max_cpu_bound_calls(number):
+    global CPU_BOUND_SEMAPHORE
+    CPU_BOUND_SEMAPHORE = asyncio.Semaphore(number)
+
+def set_max_non_cpu_bound_calls(number):
+    global NON_CPU_BOUND_SEMAPHORE
+    NON_CPU_BOUND_SEMAPHORE = asyncio.Semaphore(number)
 
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
@@ -207,7 +212,7 @@ def new_call(cmd, cmd_dir=None, logfile=None, env=None):
         raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
 
 
-async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, env=None):
+async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, env=None):
     '''
     Run a shell command
 
@@ -216,9 +221,10 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    global ASYNC_CALL_SEMAPHORE
+    global CPU_BOUND_SEMAPHORE, NON_CPU_BOUND_SEMAPHORE
+    semaphore = CPU_BOUND_SEMAPHORE if cpu_bound else NON_CPU_BOUND_SEMAPHORE
 
-    async with ASYNC_CALL_SEMAPHORE:
+    async with semaphore:
         cmd = _cmd_string_to_array(cmd, env)
 
         if logfile is None:
@@ -247,7 +253,7 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, env=None):
         return proc.returncode
 
 
-async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
+async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env=None):
     '''
     Run a shell command and get the output
 
@@ -256,9 +262,10 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, env=None):
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
     '''
-    global ASYNC_CALL_SEMAPHORE
+    global CPU_BOUND_SEMAPHORE, NON_CPU_BOUND_SEMAPHORE
+    semaphore = CPU_BOUND_SEMAPHORE if cpu_bound else NON_CPU_BOUND_SEMAPHORE
 
-    async with ASYNC_CALL_SEMAPHORE:
+    async with semaphore:
         cmd = _cmd_string_to_array(cmd, env)
 
         if PLATFORM == Platform.WINDOWS:
@@ -355,7 +362,7 @@ async def download_wget(url, destination=None, check_cert=True, overwrite=False)
     cmd += " --progress=dot:giga"
 
     try:
-        await async_call(cmd, path)
+        await async_call(cmd, path, cpu_bound=False)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)
@@ -408,7 +415,7 @@ async def download_curl(url, destination=None, check_cert=True, overwrite=False)
     else:
         cmd += "-O %s " % url
     try:
-        await async_call(cmd, path)
+        await async_call(cmd, path, cpu_bound=False)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)

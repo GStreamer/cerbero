@@ -131,7 +131,7 @@ async def fetch(git_dir, fail=True, logfile=None):
     @type fail: false
     '''
     cmd = [GIT, 'fetch', '--all']
-    return await shell.async_call(cmd, git_dir, fail, logfile=logfile)
+    return await shell.async_call(cmd, git_dir, fail, logfile=logfile, cpu_bound=False)
 
 async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
     '''
@@ -158,16 +158,16 @@ async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, log
                            git_dir, logfile=logfile)
     shell.call("%s submodule init" % GIT, git_dir, logfile=logfile)
     if src_dir or not offline:
-        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile)
-        await shell.async_call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile)
+        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile, cpu_bound=False)
+        await shell.async_call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile, cpu_bound=False)
     else:
-        await shell.async_call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile)
+        await shell.async_call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile, cpu_bound=False)
     if src_dir:
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.url'):
                 shell.call("%s config --file=.gitmodules %s  %s" %
                            (GIT, c[0], c[1]), git_dir, logfile=logfile)
-        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile)
+        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile, cpu_bound=False)
 
 async def checkout(git_dir, commit, logfile=None):
     '''
@@ -179,7 +179,7 @@ async def checkout(git_dir, commit, logfile=None):
     @type commit: str
     '''
     cmd = [GIT, 'reset', '--hard', commit]
-    return await shell.async_call(cmd, git_dir, logfile=logfile)
+    return await shell.async_call(cmd, git_dir, logfile=logfile, cpu_bound=False)
 
 
 def get_hash(git_dir, commit):

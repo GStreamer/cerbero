@@ -63,7 +63,7 @@ class Fetch(Command):
             fetch_recipes = remove_list_duplicates (fetch_recipes)
         m.message(_("Fetching the following recipes using %s async job(s): %s") %
                   (jobs, ' '.join([x.name for x in fetch_recipes])))
-        shell.set_max_async_calls(jobs)
+        shell.set_max_non_cpu_bound_calls(jobs)
         to_rebuild = []
         tasks = []
         for i in range(len(fetch_recipes)):
