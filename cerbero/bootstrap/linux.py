@@ -74,7 +74,7 @@ class DebianBootstrapper (UnixBootstrapper):
                 'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
                 'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev',
                 'libegl1-mesa-dev', 'git', 'subversion', 'xutils-dev',
-                'intltool', 'ccache', 'python3-setuptools']
+                'intltool', 'ccache', 'python3-setuptools', 'libssl-dev']
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -123,7 +123,7 @@ class RedHatBootstrapper (UnixBootstrapper):
                 'docbook-utils-pdf', 'glib-networking', 'help2man',
                 'dbus-devel', 'glib2-devel', 'libXrandr-devel',
                 'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
-                'mesa-libEGL-devel', 'ccache']
+                'mesa-libEGL-devel', 'ccache', 'openssl-devel']
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -162,7 +162,8 @@ class OpenSuseBootstrapper (UnixBootstrapper):
             'libX11-devel', 'alsa-devel', 'libXi-devel', 'Mesa-devel',
             'Mesa-libGLESv3-devel',
             'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
-            'docbook-utils', 'glib-networking', 'git', 'subversion', 'ccache']
+            'docbook-utils', 'glib-networking', 'git', 'subversion', 'ccache',
+            'openssl-devel']
 
 class ArchBootstrapper (UnixBootstrapper):
 
@@ -174,7 +175,7 @@ class ArchBootstrapper (UnixBootstrapper):
             'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
             'docbook-xsl', 'transfig', 'libxrender',
             'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
-            'subversion', 'xorg-util-macros', 'ccache']
+            'subversion', 'xorg-util-macros', 'ccache', 'openssl']
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -202,7 +203,8 @@ class GentooBootstrapper (UnixBootstrapper):
             'sys-devel/gettext', 'media-libs/alsa-lib', 'media-sound/pulseaudio',
             'dev-lang/yasm', 'dev-util/gperf', 'app-text/docbook-xsl-stylesheets',
             'media-gfx/transfig', 'x11-libs/libXrender', 'x11-libs/libXv',
-            'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking']
+            'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking',
+            'dev-libs/openssl']
 
 class NoneBootstrapper (BootstrapperBase):
 
