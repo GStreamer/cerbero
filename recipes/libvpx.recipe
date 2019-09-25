@@ -50,6 +50,10 @@ class Recipe(recipe.Recipe):
             return False
         # libvpx supports VS 2015 and VS 2017
         if self.config.msvc_version not in ('vs14', 'vs15'):
+            # If we're not going to be using MSVC, remove its flags
+            for cflag in self.config.msvc_toolchain_env['CFLAGS']:
+                if cflag:
+                    self.remove_env('CFLAGS', cflag)
             return False
         return True
 
