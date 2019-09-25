@@ -200,7 +200,7 @@ def get_hash(git_dir, commit):
                             (GIT, commit), git_dir).rstrip()
 
 
-def local_checkout(git_dir, local_git_dir, commit, logfile=None):
+async def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     '''
     Clone a repository for a given commit in a different location
 
@@ -216,7 +216,7 @@ def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
                git_dir, logfile=logfile)
     ensure_user_is_set(local_git_dir, logfile=logfile)
-    run_until_complete(submodules_update(git_dir, local_git_dir, logfile=logfile))
+    await submodules_update(git_dir, local_git_dir, logfile=logfile)
 
 def add_remote(git_dir, name, url, logfile=None):
     '''

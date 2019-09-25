@@ -26,10 +26,10 @@ class Recipe(recipe.Recipe):
         'share/aclocal/ltversion.m4',
         'share/aclocal/lt~obsolete.m4']
 
-    def extract(self):
+    async def extract(self):
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        super(recipe.Recipe, self).extract()
+        await super(recipe.Recipe, self).extract()
 
     async def configure(self):
         shell.touch(os.path.join(self.build_dir, 'doc', 'libtool.1'))

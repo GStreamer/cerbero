@@ -46,8 +46,8 @@ class Recipe(recipe.Recipe):
                'libusrsctp/0003-Fix-build-with-MinGW-and-the-ucrtbase-CRT.patch',
                ]
 
-    def extract(self):
-        super().extract()
+    async def extract(self):
+        await super().extract()
         for f in ['NEWS', 'README', 'AUTHORS', 'ChangeLog']:
             shell.log(os.path.join(self.build_dir, f), self.logfile)
             shell.touch(os.path.join(self.build_dir, f), True)

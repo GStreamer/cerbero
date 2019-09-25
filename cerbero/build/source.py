@@ -70,7 +70,7 @@ class Source (object):
         '''
         raise NotImplemented("'fetch' must be implemented by subclasses")
 
-    def extract(self):
+    async def extract(self):
         '''
         Extracts the sources
         '''
@@ -123,7 +123,7 @@ class CustomSource (Source):
     async def fetch(self):
         pass
 
-    def extract(self):
+    async def extract(self):
         pass
 
 
@@ -201,13 +201,13 @@ class BaseTarball(object):
                              .format(fname, checksum, self.tarball_checksum))
         return True
 
-    def extract_tarball(self, unpack_dir):
+    async def extract_tarball(self, unpack_dir):
         try:
-            shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
+            await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
         except (IOError, EOFError, tarfile.ReadError):
             m.action(_('Corrupted or partial tarball, redownloading...'))
-            run_until_complete(self.fetch(redownload=True))
-            shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
+            await self.fetch(redownload=True)
+            await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
 
 
 class Tarball(BaseTarball, Source):
@@ -241,11 +241,11 @@ class Tarball(BaseTarball, Source):
             return
         await super().fetch(redownload=redownload)
 
-    def extract(self):
+    async def extract(self):
         m.action(_('Extracting tarball to %s') % self.build_dir)
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        self.extract_tarball(self.config.sources)
+        await self.extract_tarball(self.config.sources)
         if self.tarball_dirname is not None:
             extracted = os.path.join(self.config.sources, self.tarball_dirname)
             # Since we just extracted this, a Windows anti-virus might still
@@ -339,11 +339,11 @@ class LocalTarball (GitCache):
         self.package_name = self.package_name
         self.unpack_dir = self.config.sources
 
-    def extract(self):
+    async def extract(self):
         if not os.path.exists(self.build_dir):
             os.mkdir(self.build_dir)
         self._find_tarball()
-        shell.unpack(self.tarball_path, self.unpack_dir, logfile=get_logfile(self))
+        await shell.unpack(self.tarball_path, self.unpack_dir, logfile=get_logfile(self))
         # apply common patches
         self._apply_patches(self.repo_dir)
         # apply platform patches
@@ -383,7 +383,7 @@ class Git (GitCache):
         # For forced commits in the config
         self.commit = self.config.recipe_commit(self.name) or self.commit
 
-    def extract(self):
+    async def extract(self):
         if os.path.exists(self.build_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit)
@@ -397,7 +397,7 @@ class Git (GitCache):
             os.mkdir(self.build_dir)
 
         # checkout the current version
-        git.local_checkout(self.build_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
+        await git.local_checkout(self.build_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
 
         for patch in self.patches:
             if not os.path.isabs(patch):
@@ -428,8 +428,8 @@ class GitExtractedTarball(Git):
         Git.__init__(self)
         self._files = {}
 
-    def extract(self):
-        if not Git.extract(self):
+    async def extract(self):
+        if not await Git.extract(self):
             return False
         for match in self.matches:
             self._files[match] = []
@@ -492,7 +492,7 @@ class Svn(Source):
             await svn.checkout(self.url, self.repo_dir)
         await svn.update(self.repo_dir, self.revision)
 
-    def extract(self):
+    async def extract(self):
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
 
