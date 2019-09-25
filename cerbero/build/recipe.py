@@ -844,7 +844,7 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         for arch, recipe in self._recipes.items():
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                if step in (BuildSteps.CONFIGURE[1], BuildSteps.EXTRACT[1]):
+                if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
                     tasks.append(asyncio.create_task(self._async_run_step(recipe, step, arch)))
                 else:
                     await self._async_run_step(recipe, step, arch)
@@ -861,7 +861,8 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
                 if not isinstance(e, asyncio.CancelledError):
                     raise e
                 for e in ret:
-                    if not isinstance(e, asyncio.CancelledError):
+                    if isinstance(e, Exception) \
+                       and not isinstance(e, asyncio.CancelledError):
                         raise e
 
 
@@ -922,6 +923,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
 
         archs_prefix = list(self._recipes.keys())
 
+        tasks = []
         for arch, recipe in self._recipes.items():
             # Create a stamp file to list installed files based on the
             # modification time of this file
@@ -939,7 +941,10 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             # Call the step function
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                await self._async_run_step(recipe, step, arch)
+                if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
+                    tasks.append(asyncio.create_task(self._async_run_step(recipe, step, arch)))
+                else:
+                    await self._async_run_step(recipe, step, arch)
             else:
                 self._run_step(recipe, step, arch)
 
@@ -966,3 +971,17 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                     if not os.path.exists(os.path.dirname(dest)):
                         os.makedirs(os.path.dirname(dest))
                     shutil.move(src, dest)
+        if tasks:
+            try:
+                await asyncio.gather(*tasks, return_exceptions=False)
+            except Exception as e:
+                [task.cancel() for task in tasks]
+                ret = await asyncio.gather(*tasks, return_exceptions=True)
+                # we want to find the actuall exception rather than one
+                # that may be returned from task.cancel()
+                if not isinstance(e, asyncio.CancelledError):
+                    raise e
+                for e in ret:
+                    if isinstance(e, Exception) \
+                       and not isinstance(e, asyncio.CancelledError):
+                        raise e
