@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
 
     files_library = ['lib/GStreamer']
 
-    def install(self):
+    async def install(self):
         install_name = os.path.join(self.config.prefix, 'lib', 'GStreamer')
         libs = [ # GStreamer core
                 'gstreamer-1.0', 'gstreamer-base-1.0',

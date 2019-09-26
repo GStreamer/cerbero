@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
 
     files_devel = ['share/vs/2010']
 
-    def install(self):
+    async def install(self):
         import shutil
         from cerbero.commands.genvsprops import GenVSProps
         env_var = ('GSTREAMER_1_0_ROOT_%s' % self.config.target_arch).upper()

@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
                    'share/gtk-doc/data/gtk-doc.make',
                    'share/gtk-doc/data/gtk-doc.notmpl.make']
 
-    def install(self):
+    async def install(self):
         from cerbero.utils import shell
         import shutil
         aclocal_dir = os.path.join(self.config.prefix, 'share', 'aclocal')
@@ -39,4 +39,4 @@ class Recipe(recipe.Recipe):
                         '@datarootdir@': '${prefix}/share',
                         '@datadir@': '${datarootdir}'}
         shell.replace(gtkdocize, replacements)
-        shell.call('chmod +x gtkdocize', os.path.join(self.config.prefix, 'bin'), env=self.env)
+        await shell.async_call('chmod +x gtkdocize', os.path.join(self.config.prefix, 'bin'), env=self.env)

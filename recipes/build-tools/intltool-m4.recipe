@@ -12,6 +12,6 @@ class Recipe(recipe.Recipe):
 
     files_devel = ['share/aclocal/intltool.m4']
 
-    def install(self):
+    async def install(self):
         m4 = os.path.join(self.build_dir.replace('-m4', ''), 'intltool.m4')
         shutil.copy(m4, os.path.join(self.config.prefix, 'share', 'aclocal', 'intltool.m4'))

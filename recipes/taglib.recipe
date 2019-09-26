@@ -32,8 +32,8 @@ class Recipe(recipe.Recipe):
             self.append_env('CXXFLAGS', '-frtti')
         self.configure_options += ' -DZLIB_ROOT=%s ' % self.config.prefix
 
-    def install(self):
-        super(recipe.Recipe, self).install()
+    async def install(self):
+        await super(recipe.Recipe, self).install()
         shutil.move(
                 os.path.join(self.config.prefix, 'lib', 'libtag_static.a'),
                 os.path.join(self.config.prefix, 'lib', 'libtag.a'))

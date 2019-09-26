@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libwinpthread']
 
-    def install(self):
+    async def install(self):
         if self.config.platform == Platform.WINDOWS:
             binmingw = 'bin'
         else:

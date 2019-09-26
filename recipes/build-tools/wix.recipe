@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
         os.makedirs(self.build_dir)
         await shell.unpack(self.download_path, self.build_dir)
 
-    def install(self):
+    async def install(self):
         shell.copy_dir(self.build_dir, os.path.join(self.config.prefix, 'lib', 'wix', 'bin'))
         if self.config.platform == Platform.LINUX:
             wine_path = os.path.join(self.config.prefix, 'share', 'wine')
@@ -29,5 +29,5 @@ class Recipe(recipe.Recipe):
                 'HOME': wine_path,
                 'WINEPREFIX': wine_path
             }
-            shell.new_call(['sh', './winetricks', '-q', 'dotnet40'],
+            await shell.async_call(['sh', './winetricks', '-q', 'dotnet40'],
                            cmd_dir=wine_path, env=env)

@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
         shell.new_call([self.config.python_exe, 'configure.py', '--bootstrap'],
                        self.build_dir, logfile=self.logfile, env=self.env)
 
-    def install(self):
+    async def install(self):
         ninja = 'ninja'
         if self.platform == Platform.WINDOWS:
             ninja += '.exe'

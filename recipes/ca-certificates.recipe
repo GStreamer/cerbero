@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
             'etc/ssl/certs/ca-certificates.crt',
             ]
 
-    def install(self):
+    async def install(self):
         dst_dir = os.path.join(self.config.prefix, 'etc', 'ssl', 'certs')
         if not os.path.exists(dst_dir):
             os.makedirs(dst_dir)

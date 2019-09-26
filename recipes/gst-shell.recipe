@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
 
     files_shell = ['bin/gst-shell', 'share/gstreamer/gst-env']
 
-    def install(self):
+    async def install(self):
         from cerbero.commands.gensdkshell import GenSdkShell
         name = self.files_shell[0]
         prefix = self.config.prefix

@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/fontconfig',
             ]
 
-    def install(self):
+    async def install(self):
         ndk_build_dir_dst = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
         if not os.path.exists(ndk_build_dir_dst):
             os.makedirs(ndk_build_dir_dst)

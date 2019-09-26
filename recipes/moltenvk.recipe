@@ -50,7 +50,7 @@ class Recipe(recipe.Recipe):
             # no libvulkan.a
             self.library_type = LibraryType.SHARED
 
-    def install(self):
+    async def install(self):
         # only copy once for the only architecture supported by the libraries
         if self.config.target_platform == Platform.DARWIN and self.config.target_arch != Architecture.X86_64:
             return
@@ -105,6 +105,8 @@ class Recipe(recipe.Recipe):
             if is_dir:
                 shell.copy_dir(src, dest)
             else:
+                if not os.path.exists(os.path.dirname(dest)):
+                    os.makedirs(os.path.dirname(dest))
                 shutil.copy(src, dest)
 
         LibtoolLibrary('vulkan', None, None, None, libdir,

@@ -22,8 +22,8 @@ class Recipe(recipe.Recipe):
         self.set_env('ac_cv_lib_pcap_pcap_create', 'no')
         self.make += ' all shared_library'
 
-    def install(self):
-        super(Recipe, self).install()
+    async def install(self):
+        await super(Recipe, self).install()
         libdir = os.path.join(self.config.prefix,
                               'lib' + self.config.lib_suffix)
         shutil.copy(os.path.join(self.build_dir, 'srtp.def'), libdir)

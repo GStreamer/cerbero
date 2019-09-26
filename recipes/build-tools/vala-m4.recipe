@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['share/aclocal/vala.m4', 'share/aclocal/vapigen.m4',
                    'share/vala/Makefile.vapigen']
 
-    def install(self):
+    async def install(self):
         shutil.copy(os.path.join(self.build_dir, 'vapigen', 'vapigen.m4'),
                         os.path.join(self.config.prefix, 'share',
                                      'aclocal', 'vapigen.m4'))

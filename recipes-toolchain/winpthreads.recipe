@@ -82,6 +82,7 @@ class Recipe(recipe.Recipe):
         shell.call(self.make, self.build_dir_32)
         shell.call(self.make, self.build_dir_64)
 
+    @modify_environment
     def install(self):
         src_winpthread_dll = "%s/usr/%s/bin/libwinpthread-1.dll" % \
                 (self.sysroot, self.host)

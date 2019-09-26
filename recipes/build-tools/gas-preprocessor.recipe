@@ -11,10 +11,10 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://github.com/libav/gas-preprocessor'}
     commit = 'f8a2d8c155bda8d925a7ee2ed8315c553a2b865f'
 
-    def install(self):
+    async def install(self):
         if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
             os.makedirs(os.path.join(self.config.prefix, 'bin'))
         shutil.copy (os.path.join(self.build_dir, 'gas-preprocessor.pl'),
                      os.path.join(self.config.prefix, 'bin'))
-        shell.call ('chmod +x %s' %
+        await shell.async_call ('chmod +x %s' %
                 os.path.join(self.config.prefix, 'bin', 'gas-preprocessor.pl'), env=self.env)

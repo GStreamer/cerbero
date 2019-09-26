@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
             'share/xcode/templates/ios/',
             ]
 
-    def install(self):
+    async def install(self):
         share_dir = os.path.join(self.config.prefix, 'share', 'xcode',
                                  'templates', 'ios')
         shell.copy_dir(os.path.join(self.config.data_dir, 'xcode',

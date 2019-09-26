@@ -33,13 +33,13 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/meson']
     files_python = []
 
-    def install(self):
+    async def install(self):
         # setup.py barfs if using posix paths on Windows
         if self.config.platform == Platform.WINDOWS:
             prefix = str(PurePath(self.config.prefix))
         else:
             prefix = self.config.prefix
-        shell.new_call([self.config.python_exe, 'setup.py', 'install', '--prefix', prefix],
+        await shell.async_call([self.config.python_exe, 'setup.py', 'install', '--prefix', prefix],
                        cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
         if self.config.platform == Platform.WINDOWS:
             prefix = Path(self.config.prefix)

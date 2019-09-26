@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
 
     files_catalog = ['etc/catalog.xml']
 
-    def install(self):
+    async def install(self):
         etc_path =  os.path.join(self.config.prefix, 'etc')
         if not os.path.exists(etc_path):
             os.makedirs(etc_path)

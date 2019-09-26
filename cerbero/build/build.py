@@ -71,7 +71,7 @@ class Build (object):
         '''
         raise NotImplemented("'make' must be implemented by subclasses")
 
-    def install(self):
+    async def install(self):
         '''
         Installs the module
         '''
@@ -92,7 +92,7 @@ class CustomBuild(Build):
     async def compile(self):
         pass
 
-    def install(self):
+    async def install(self):
         pass
 
 
@@ -427,10 +427,10 @@ class MakefilesBase (Build, ModifyEnvBase):
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
-    @modify_environment
-    def install(self):
+    @async_modify_environment
+    async def install(self):
         self.maybe_add_system_libs(step='install')
-        shell.call(self.make_install, self.make_dir, logfile=self.logfile, env=self.env)
+        await shell.async_call(self.make_install, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):
@@ -895,10 +895,10 @@ class Meson (Build, ModifyEnvBase) :
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
 
-    @modify_environment
-    def install(self):
+    @async_modify_environment
+    async def install(self):
         self.maybe_add_system_libs(step='install')
-        shell.call(self.make_install, self.meson_dir, logfile=self.logfile, env=self.env)
+        await shell.async_call(self.make_install, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def clean(self):

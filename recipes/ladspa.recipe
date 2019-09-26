@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/ladspa.h']
     library_type = LibraryType.NONE
 
-    def install(self):
+    async def install(self):
         include_path =  os.path.join(self.config.prefix, 'include')
         if not os.path.exists(include_path):
             os.makedirs(include_path)

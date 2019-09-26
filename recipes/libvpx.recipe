@@ -146,10 +146,10 @@ class Recipe(recipe.Recipe):
             shutil.copy(o, f)
         await super().configure()
 
-    def install(self):
+    async def install(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             shell.touch(os.path.join(self.build_dir, 'libvpx.a'))
-        super().install()
+        await super().install()
 
     def post_install(self):
         if self.using_msvc():

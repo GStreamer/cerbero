@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             raise InvalidRecipeError(self, "Invalid platform")
 
-    def install(self):
+    async def install(self):
         srcdir = self.config.moltenvk_prefix
         prefix = self.config.prefix
 

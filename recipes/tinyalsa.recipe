@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX and self.config.target_platform != Platform.ANDROID:
             raise InvalidRecipeError(self, "Invalid platform")
 
-    def install(self):
+    async def install(self):
         include_path = os.path.join(self.config.prefix, 'include', 'tinyalsa')
         library_path = os.path.join(self.config.prefix, 'lib')
 
