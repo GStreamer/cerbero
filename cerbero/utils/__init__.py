@@ -558,3 +558,41 @@ def run_until_complete(tasks):
         loop.run_until_complete(asyncio.gather(*tasks))
     else:
         loop.run_until_complete(tasks)
+
+async def run_tasks(tasks, done_async=None):
+    """
+    Runs @tasks until completion or until @done_async returns
+    """
+    class QueueDone(Exception):
+        pass
+
+    if done_async:
+        async def queue_done():
+            # This is how we exit the asyncio.wait once everything is done
+            # as otherwise asyncio.wait will wait for our tasks to complete
+            await done_async
+            raise QueueDone()
+
+        task = asyncio.create_task (queue_done())
+        tasks.append(task)
+
+    async def shutdown():
+        [task.cancel() for task in tasks]
+        ret = await asyncio.gather(*tasks, return_exceptions=True)
+        # we want to find any actual exception rather than one
+        # that may be returned from task.cancel()
+        for e in ret:
+            if isinstance(e, Exception) \
+               and not isinstance(e, asyncio.CancelledError) \
+               and not isinstance(e, QueueDone):
+                raise e
+
+    try:
+        await asyncio.gather(*tasks, return_exceptions=False)
+    except asyncio.CancelledError:
+        pass
+    except QueueDone:
+        await shutdown()
+    except Exception:
+        await shutdown()
+        raise

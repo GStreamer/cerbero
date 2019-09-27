@@ -26,7 +26,7 @@ from subprocess import CalledProcessError
 from cerbero.enums import Architecture, Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
-from cerbero.utils import _, N_, shell, run_until_complete, determine_num_of_cpus
+from cerbero.utils import _, N_, shell, run_until_complete, run_tasks, determine_num_of_cpus
 from cerbero.utils import messages as m
 from cerbero.utils.shell import BuildStatusPrinter
 from cerbero.build.recipe import BuildSteps
@@ -234,14 +234,6 @@ class Oven (object):
                 # return lower for larger path lengths
                 return self.inverse_priority > other.inverse_priority
 
-        main_task = asyncio.current_task()
-        async def shutdown(loop):
-            # a little heavy handed but we need to do this otherwise some
-            # tasks will continue even after an exception is thrown
-            kill_tasks = [t for t in asyncio.all_tasks() if t not in (main_task, asyncio.current_task())]
-            [task.cancel() for task in kill_tasks]
-            await asyncio.gather(*kill_tasks, return_exceptions=True)
-
         def recipe_next_step (recipe, step):
             if step is None:
                 return recipe.steps[0][1]
@@ -352,29 +344,13 @@ class Oven (object):
             task = asyncio.create_task(cook_recipe_worker())
             tasks.append(task)
 
-        class QueueDone(Exception):
-            pass
-
-        async def queue_done(queue):
-            # This is how we exit the asyncio.wait once everything is done
-            # as otherwise asyncio.wait will wait for our tasks to complete
+        async def recipes_done():
             while built_recipes & recipe_targets != recipe_targets:
                 await queue.join()
                 await compile_queue.join()
                 await install_queue.join()
-            raise QueueDone()
 
-        task = asyncio.create_task (queue_done(queue))
-        tasks.append(task)
-        try:
-            await asyncio.gather(*tasks, return_exceptions=False)
-        except asyncio.CancelledError:
-            pass
-        except QueueDone:
-            await shutdown(loop)
-        except Exception:
-            await shutdown(loop)
-            raise
+        await run_tasks(tasks, recipes_done())
 
     async def _cook_recipe_step_with_prompt (self, recipe, step, count, total):
         try:

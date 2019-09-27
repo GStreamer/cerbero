@@ -35,7 +35,7 @@ from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 from cerbero.utils import N_, _
-from cerbero.utils import shell, add_system_libs
+from cerbero.utils import shell, add_system_libs, run_tasks
 from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
 
@@ -851,19 +851,7 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
             else:
                 self._run_step(recipe, step, arch)
         if tasks:
-            try:
-                await asyncio.gather(*tasks, return_exceptions=False)
-            except Exception as e:
-                [task.cancel() for task in tasks]
-                ret = await asyncio.gather(*tasks, return_exceptions=True)
-                # we want to find the actuall exception rather than one
-                # that may be returned from task.cancel()
-                if not isinstance(e, asyncio.CancelledError):
-                    raise e
-                for e in ret:
-                    if isinstance(e, Exception) \
-                       and not isinstance(e, asyncio.CancelledError):
-                        raise e
+            await run_tasks (tasks)
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -928,16 +916,4 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                 self._run_step(recipe, step, arch)
 
         if tasks:
-            try:
-                await asyncio.gather(*tasks, return_exceptions=False)
-            except Exception as e:
-                [task.cancel() for task in tasks]
-                ret = await asyncio.gather(*tasks, return_exceptions=True)
-                # we want to find the actuall exception rather than one
-                # that may be returned from task.cancel()
-                if not isinstance(e, asyncio.CancelledError):
-                    raise e
-                for e in ret:
-                    if isinstance(e, Exception) \
-                       and not isinstance(e, asyncio.CancelledError):
-                        raise e
+            await run_tasks(tasks)
