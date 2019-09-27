@@ -89,11 +89,11 @@ class OSXUniversalGenerator(object):
         self.missing = []
         self.logfile = logfile
 
-    def merge_files(self, filelist, dirs):
+    async def merge_files(self, filelist, dirs):
         if len(filelist) == 0:
             return
         for f in filelist:
-            self.do_merge(f, dirs)
+            await self.do_merge(f, dirs)
 
     def merge_dirs(self, input_roots, output_root=None):
         if output_root == None:
@@ -102,7 +102,7 @@ class OSXUniversalGenerator(object):
             os.makedirs(output_root)
         self.parse_dirs(input_roots)
 
-    def create_universal_file(self, output, inputlist, dirs):
+    async def create_universal_file(self, output, inputlist, dirs):
         tmp_inputs = []
         # relocate all files with the prefix of the merged file.
         # which must be done before merging them.
@@ -128,7 +128,7 @@ class OSXUniversalGenerator(object):
         cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
         return self._call(cmd)[:-1] #remove trailing \n
 
-    def _detect_merge_action(self, files_list):
+    async def _detect_merge_action(self, files_list):
         actions = []
         for f in files_list:
             if not os.path.exists(f):
@@ -158,9 +158,9 @@ class OSXUniversalGenerator(object):
                              % (str(ftype), str(files_list)))
         return actions[0]
 
-    def do_merge(self, filepath, dirs):
+    async def do_merge(self, filepath, dirs):
         full_filepaths = [os.path.join(d, filepath) for d in dirs]
-        action = self._detect_merge_action(full_filepaths)
+        action = await self._detect_merge_action(full_filepaths)
 
         #pick the first file as the base one in case of copying/linking
         current_file = full_filepaths[0]
@@ -176,7 +176,7 @@ class OSXUniversalGenerator(object):
         elif action == 'merge':
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            self.create_universal_file(output_file, full_filepaths, dirs)
+            await self.create_universal_file(output_file, full_filepaths, dirs)
         elif action == 'skip':
             pass #just pass
         elif action == 'recurse':
@@ -187,9 +187,19 @@ class OSXUniversalGenerator(object):
     def parse_dirs(self, dirs, filters=None):
         self.missing = []
 
+        queue = asyncio.Queue()
+        async def parse_dirs_worker():
+            while True:
+                current_file, dirs = await queue.get()
+                await self.do_merge(current_file, dirs)
+                queue.task_done()
+        async def queue_done():
+            await queue.join()
+
         dir_path = dirs[0]
         if dir_path.endswith('/'):
             dir_path = dir_path[:-1]
+
         for dirpath, dirnames, filenames in os.walk(dir_path):
             current_dir = ''
             token = ' '
@@ -202,7 +212,16 @@ class OSXUniversalGenerator(object):
                 if filters is not None and os.path.splitext(f)[1] not in filters:
                     continue
                 current_file = os.path.join(current_dir, f)
-                self.do_merge(current_file, dirs)
+                queue.put_nowait ((current_file, dirs))
+
+        async def parse_dirs_main():
+            tasks = []
+            for i in range(4):
+                tasks.append(asyncio.create_task (parse_dirs_worker()))
+            await run_tasks (tasks, queue_done())
+
+        print ("parsing dirs")
+        run_until_complete(parse_dirs_main())
 
     def _copy(self, src, dest):
         if not os.path.exists(os.path.dirname(dest)):

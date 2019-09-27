@@ -870,7 +870,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             return []
         return self._proxy_recipe.steps[:] + [BuildSteps.MERGE]
 
-    def merge(self):
+    async def merge(self):
         arch_inputs = {}
         for arch, recipe in self._recipes.items():
             arch_inputs[arch] = set(recipe.files_list())
@@ -880,7 +880,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         output = self._config.prefix
         generator = OSXUniversalGenerator(output, logfile=self.logfile)
         dirs = [recipe.config.prefix for arch, recipe in self._recipes.items()]
-        generator.merge_files(inputs, dirs)
+        await generator.merge_files(inputs, dirs)
 
         # Collect files that are only in one or more archs, but not all archs
         arch_files = {}
@@ -892,7 +892,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
                     arch_files[f].add((arch, recipe))
         # merge the architecture specific files
         for f, archs in arch_files.items():
-            generator.merge_files([f], [recipe.config.prefix for arch, recipe in archs])
+            await generator.merge_files([f], [recipe.config.prefix for arch, recipe in archs])
 
     async def _do_step(self, step):
         if step in BuildSteps.FETCH:
