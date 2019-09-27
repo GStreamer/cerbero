@@ -31,7 +31,6 @@ import glob
 import shutil
 import hashlib
 import urllib.request, urllib.error, urllib.parse
-import asyncio
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 

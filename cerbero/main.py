@@ -31,12 +31,11 @@ import logging
 import traceback
 import os
 import time
-import asyncio
 
 from cerbero import config, commands
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
     ConfigurationError, CerberoException, AbortedError
-from cerbero.utils import _, N_, user_is_root, git
+from cerbero.utils import _, N_, user_is_root, git, run_until_complete
 from cerbero.utils import messages as m
 from cerbero.utils.manifest import Manifest
 
@@ -129,8 +128,8 @@ class Main(object):
             project = manifest.find_project('cerbero')
             git_dir = os.path.dirname(sys.argv[0])
             git.add_remote(git_dir, project.remote, project.fetch_uri)
-            asyncio.run(git.fetch(git_dir))
-            asyncio.run(git.checkout(git_dir, project.revision))
+            run_until_complete(git.fetch(git_dir))
+            run_until_complete(git.checkout(git_dir, project.revision))
         except FatalError as ex:
             self.log_error(_("ERROR: Failed to proceed with self update %s") %
                     ex)

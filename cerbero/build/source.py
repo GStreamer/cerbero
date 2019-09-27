@@ -21,10 +21,9 @@ import shutil
 import tarfile
 import urllib.request, urllib.parse, urllib.error
 from hashlib import sha256
-import asyncio
 
 from cerbero.config import Platform, DEFAULT_MIRRORS
-from cerbero.utils import git, svn, shell, _
+from cerbero.utils import git, svn, shell, _, run_until_complete
 from cerbero.errors import FatalError, InvalidRecipeError
 import cerbero.utils.messages as m
 
@@ -207,7 +206,7 @@ class BaseTarball(object):
             shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
         except (IOError, EOFError, tarfile.ReadError):
             m.action(_('Corrupted or partial tarball, redownloading...'))
-            asyncio.run(self.fetch(redownload=True))
+            run_until_complete(self.fetch(redownload=True))
             shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
 
 

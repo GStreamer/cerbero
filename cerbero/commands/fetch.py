@@ -259,7 +259,7 @@ class FetchCache(Command):
         if not args.skip_fetch:
             dep = self.find_dep(deps, sha)
             if dep:
-                asyncio.run(self.fetch_dep(config, dep, args.namespace))
+                run_until_complete(self.fetch_dep(config, dep, args.namespace))
         if args.job_id:
             self.update_log(config, args, deps, sha)
 

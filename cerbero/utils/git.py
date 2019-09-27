@@ -19,10 +19,9 @@
 import os
 import time
 import shutil
-import asyncio
 
 from cerbero.config import Platform
-from cerbero.utils import shell
+from cerbero.utils import shell, run_until_complete
 from cerbero.errors import FatalError
 
 
@@ -217,7 +216,7 @@ def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
                git_dir, logfile=logfile)
     ensure_user_is_set(local_git_dir, logfile=logfile)
-    asyncio.run(submodules_update(git_dir, local_git_dir, logfile=logfile))
+    run_until_complete(submodules_update(git_dir, local_git_dir, logfile=logfile))
 
 def add_remote(git_dir, name, url, logfile=None):
     '''
