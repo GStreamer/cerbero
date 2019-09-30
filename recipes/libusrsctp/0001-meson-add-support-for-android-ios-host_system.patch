@@ -1,0 +1,34 @@
+From d813ec9a45690f2687bf30745a255d86d5e1a15b Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Mon, 30 Sep 2019 16:16:51 +1000
+Subject: [PATCH] meson: add support for android/ios host_system
+
+---
+ meson.build | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 763edf93..71850940 100644
+--- a/meson.build
++++ b/meson.build
+@@ -56,7 +56,7 @@ add_project_arguments([
+ 
+ # OS-specific settings
+ system = host_machine.system()
+-if system == 'linux'
++if ['linux', 'android'].contains(system)
+     add_project_arguments([
+         '-D__Userspace_os_Linux',
+         '-D_GNU_SOURCE',
+@@ -68,7 +68,7 @@ elif system == 'freebsd'
+     ] + compiler.get_supported_arguments([
+         '-Wno-address-of-packed-member',
+     ]), language: 'c')
+-elif system == 'darwin'
++elif ['darwin', 'ios'].contains(system)
+     add_project_arguments([
+             '-D__Userspace_os_Darwin',
+             '-U__APPLE__',
+-- 
+2.23.0
+

@@ -32,27 +32,17 @@ class Recipe(recipe.Recipe):
     name = 'libusrsctp'
     version = 'master'
     remotes = { 'origin': 'https://github.com/sctplab/usrsctp.git' };
-    commit = 'f4819e1b177f7bfdd761c147f5a649b9f1a78c06';
+    commit = 'a572e1eaf5f7a6df08bcfb90529a8f6c20c7113d';
     stype = SourceType.GIT
-    autoreconf = True
+    btype = BuildType.MESON
     licenses = [{License.BSD_like: ['LICENSE.md']}]
-    configure_options = '--disable-debug --enable-static --enable-shared'
 
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
-    patches = ['libusrsctp/0001-auto-Fix-build-for-mingw.patch',
-               'libusrsctp/0002-Fix-compilation-with-MinGW.patch',
-               # https://github.com/sctplab/usrsctp/pull/295
-               'libusrsctp/0003-Fix-build-with-MinGW-and-the-ucrtbase-CRT.patch',
+    patches = [name + '/0001-meson-add-support-for-android-ios-host_system.patch',
+               name + '/0001-build-include-ifaddrs.c-definition-for-android.patch',
                ]
-
-    async def extract(self):
-        await super().extract()
-        for f in ['NEWS', 'README', 'AUTHORS', 'ChangeLog']:
-            m.log(os.path.join(self.build_dir, f), self.logfile)
-            shell.touch(os.path.join(self.build_dir, f), True)
-        #os.mkdir(os.path.join(self.build_dir, 'm4'))
 
     async def configure(self):
         usrsctplib_path = os.path.join(self.build_dir, 'usrsctplib')
@@ -63,9 +53,7 @@ class Recipe(recipe.Recipe):
                         usrsctplib_path)
             shutil.copy(os.path.join(recipe_path, "ifaddrs.h"),
                         usrsctplib_path)
-            shell.replace(os.path.join(usrsctplib_path, 'Makefile.am'),
-                          {'sctp_os_userspace.h':
-                           'sctp_os_userspace.h ifaddrs.c ifaddrs.h'})
+            self.meson_options['sctp_build_programs'] = 'false'
         elif self.config.target_platform == Platform.IOS:
             def copyreplacetree(src, dst):
                 if os.path.exists(dst):
