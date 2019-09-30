@@ -518,7 +518,16 @@ def detect_qt5(platform, arch, is_universal):
         m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
     return ret
 
-def run_until_complete(tasks):
+# asyncio.Semaphore classes set their working event loop internally on
+# creation, so we need to ensure the proper loop has already been set by then.
+# This is especially important if we create global semaphores that are
+# initialized at the very beginning, since on Windows, the default
+# SelectorEventLoop is not available.
+def CerberoSemaphore(value=1):
+    get_event_loop() # this ensures the proper event loop is already created
+    return asyncio.Semaphore(value)
+
+def get_event_loop():
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -531,6 +540,11 @@ def run_until_complete(tasks):
        not isinstance(loop, asyncio.ProactorEventLoop):
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
+
+    return loop
+
+def run_until_complete(tasks):
+    loop = get_event_loop()
 
     if isinstance(tasks, Iterable):
         loop.run_until_complete(asyncio.gather(*tasks))

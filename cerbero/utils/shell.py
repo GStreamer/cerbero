@@ -35,7 +35,7 @@ from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
 from cerbero.enums import Platform
-from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus
+from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus, CerberoSemaphore
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
@@ -46,8 +46,8 @@ TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 
 
 PLATFORM = system_info()[0]
-CPU_BOUND_SEMAPHORE = asyncio.Semaphore(determine_num_of_cpus())
-NON_CPU_BOUND_SEMAPHORE = asyncio.Semaphore(2)
+CPU_BOUND_SEMAPHORE = CerberoSemaphore(determine_num_of_cpus())
+NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(2)
 DRY_RUN = False
 
 def console_is_interactive():
@@ -100,11 +100,11 @@ def _cmd_string_to_array(cmd, env):
 
 def set_max_cpu_bound_calls(number):
     global CPU_BOUND_SEMAPHORE
-    CPU_BOUND_SEMAPHORE = asyncio.Semaphore(number)
+    CPU_BOUND_SEMAPHORE = CerberoSemaphore(number)
 
 def set_max_non_cpu_bound_calls(number):
     global NON_CPU_BOUND_SEMAPHORE
-    NON_CPU_BOUND_SEMAPHORE = asyncio.Semaphore(number)
+    NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(number)
 
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     '''
