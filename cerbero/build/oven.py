@@ -21,6 +21,7 @@ import tempfile
 import shutil
 import traceback
 import asyncio
+import collections
 from subprocess import CalledProcessError
 
 from cerbero.enums import Architecture, Platform, LibraryType
@@ -84,7 +85,6 @@ class Oven (object):
         self.deps_only = deps_only
         shell.DRY_RUN = dry_run
         self._build_lock = asyncio.Semaphore(2)
-        self._extract_lock = asyncio.Lock()
         self._install_lock = asyncio.Lock()
         self.jobs = jobs
         if not self.jobs:
@@ -201,14 +201,7 @@ class Oven (object):
         class MutableInt:
             def __init__(self):
                 self.i = 0
-
         counter = MutableInt()
-        tasks = []
-
-        loop = asyncio.get_event_loop()
-        queue = asyncio.PriorityQueue(loop=loop)
-        compile_queue = asyncio.PriorityQueue(loop=loop)
-        install_queue = asyncio.PriorityQueue(loop=loop)
 
         class RecipeStepPriority:
             # can't use a tuple as Recipe doens't implement __lt__() as
@@ -235,7 +228,8 @@ class Oven (object):
                 return self.inverse_priority > other.inverse_priority
 
         def recipe_next_step (recipe, step):
-            if step is None:
+            assert (step is not None)
+            if step is "init":
                 return recipe.steps[0][1]
             found_current = False
             for _, s in recipe.steps:
@@ -249,106 +243,141 @@ class Oven (object):
             building_recipes.remove(recipe.name)
             for buildable in find_buildable_recipes ():
                 building_recipes.add(buildable.name)
-                queue.put_nowait(RecipeStepPriority(buildable, 0, None))
+                default_queue.put_nowait(RecipeStepPriority(buildable, 0, "init"))
 
-        async def cook_recipe_worker():
-            # the main worker task
+        async def cook_recipe_worker(q, steps):
             while True:
-                recipe_d = await queue.get()
+                recipe_d = await q.get()
                 recipe = recipe_d.recipe
                 step = recipe_d.step
                 count = recipe_d.count
-                next_step = None
-                recipe_already_built = False
-                lock = None
 
-                if step is None:
+                if step is "init":
                     counter.i += 1
                     count = counter.i
-                    recipe_already_built = self._cook_start_recipe (recipe, count, len(recipes))
-                    if recipe_already_built:
+                    if self._cook_start_recipe (recipe, count, len(recipes)):
                         add_buildable_recipes(recipe)
-                        queue.task_done()
+                        q.task_done()
                         continue
-                    step = recipe_next_step(recipe, None)
-                if step == BuildSteps.EXTRACT[1]:
-                    lock = self._extract_lock
+                    step = recipe_next_step (recipe, step)
 
-                if lock:
-                    async with lock:
-                        await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
-                else:
-                    await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
-                next_step = recipe_next_step (recipe, step)
+                lock = locks[step]
+                if step == BuildSteps.COMPILE[1]:
+                    if not hasattr(recipe, "allow_parallel_build") \
+                       or not recipe.allow_parallel_build:
+                        # only allow a limited number of recipes that can fill all
+                        # CPU cores to execute concurrently.  Any recipe that does
+                        # not support parallel builds will always be executed
+                        lock = None
 
-                if next_step == BuildSteps.COMPILE[1]:
-                    compile_queue.put_nowait(RecipeStepPriority(recipe, count, next_step))
-                elif next_step is not None:
-                    queue.put_nowait(RecipeStepPriority(recipe, count, next_step))
-                queue.task_done()
-
-        async def cook_recipe_compile_worker():
-            while True:
-                recipe_d = await compile_queue.get()
-                recipe = recipe_d.recipe
-                step = recipe_d.step
-                count = recipe_d.count
-
-                lock = None
-                if step == BuildSteps.COMPILE[1] \
-                   and hasattr(recipe, "allow_parallel_build") \
-                   and recipe.allow_parallel_build:
-                    # only allow a limited number of recipes that can fill all
-                    # CPU cores to execute concurrently.  Any recipe that does
-                    # not support parallel builds will always be executed
-                    lock = self._build_lock
-                if lock:
-                    async with lock:
-                        await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
-                else:
-                    await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
-
-                install_queue.put_nowait(RecipeStepPriority(recipe, count, BuildSteps.INSTALL[1]))
-                compile_queue.task_done()
-
-        async def cook_recipe_install_worker():
-            while True:
-                recipe_d = await install_queue.get()
-                recipe = recipe_d.recipe
-                step = recipe_d.step
-                count = recipe_d.count
-
-                async with self._install_lock:
-                    # run the remaining steps until completion
-                    while step is not None:
+                async def build_recipe_steps(step):
+                    # run the steps
+                    while step in steps:
                         await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
                         step = recipe_next_step (recipe, step)
+                    return step
 
+                if lock:
+                    async with lock:
+                        step = await build_recipe_steps(step)
+                else:
+                    step = await build_recipe_steps(step)
+
+                if step is None:
                     self._cook_finish_recipe (recipe, counter.i, len(recipes))
-                add_buildable_recipes(recipe)
-                install_queue.task_done()
+                    add_buildable_recipes(recipe)
+                    next_queue = None
+                else:
+                    next_queue = queues[step]
+
+                q.task_done()
+                if next_queue:
+                    next_queue.put_nowait(RecipeStepPriority(recipe, count, step))
+
+        # all the steps we are performing
+        all_steps = ["init"] + [s[1] for s in next(iter(recipes)).steps]
+
+        # async queues used for each step
+        loop = asyncio.get_event_loop()
+        default_queue = asyncio.PriorityQueue(loop=loop)
+        queues = {step : default_queue for step in all_steps}
+
+        # find the install steps for ensuring consistency between all of them
+        install_steps = []
+        step = BuildSteps.INSTALL[1]
+        while step:
+            install_steps.append(step)
+            step = recipe_next_step(next(iter(recipes)), step)
+
+        # allocate jobs
+        job_allocation = collections.defaultdict(lambda : 0)
+        if self.jobs > 4:
+            queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue(loop=loop)
+            job_allocation[BuildSteps.COMPILE[1]] = min(2, self.jobs - 3)
+        if self.jobs > 5:
+            job_allocation[BuildSteps.COMPILE[1]] = 3
+        if self.jobs > 7:
+            install_queue = asyncio.PriorityQueue(loop=loop)
+            for step in install_steps:
+                queues[step] = install_queue
+            job_allocation[BuildSteps.INSTALL[1]] = 1
+        if self.jobs > 8:
+            job_allocation[BuildSteps.EXTRACT[1]] = 1
+            queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(loop=loop)
+        if self.jobs > 9:
+            job_allocation[BuildSteps.FETCH[1]] = 1
+            queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(loop=loop)
+
+        # async locks used to synchronize step execution
+        locks = collections.defaultdict(lambda : None)
+
+        # create the jobs
+        tasks = []
+        used_jobs = 0
+        used_steps = []
+        install_done = False
+        for step, count in job_allocation.items():
+            if count <= 0:
+                continue
+            if step in install_steps:
+                # special case install as that also needs to be sequential
+                # through all the steps after
+                if install_done:
+                    continue
+                tasks.append(asyncio.create_task(cook_recipe_worker(queues[step], install_steps)))
+                used_steps.extend(install_steps)
+                install_done = True
+            else:
+                for i in range(count):
+                    tasks.append(asyncio.create_task(cook_recipe_worker(queues[step], [step])))
+                used_steps.append(step)
+            used_jobs += count
+        general_jobs = self.jobs - used_jobs
+        assert (general_jobs > 0)
+
+        if job_allocation[BuildSteps.INSTALL[1]] == 0 and general_jobs > 1:
+            locks[BuildSteps.INSTALL[1]] = self._install_lock
+        if job_allocation[BuildSteps.COMPILE[1]] > 2 or job_allocation[BuildSteps.COMPILE[1]] == 0 and general_jobs > 2:
+            locks[BuildSteps.COMPILE[1]] = self._build_lock
+
+        job_allocation_msg = ", ".join([str(step) + ": " + str(count) for step, count in job_allocation.items() if count > 0])
+        if used_jobs > 0:
+            job_allocation_msg += ", and "
+        m.output ("Building using " + str(self.jobs) + " job(s) with the following job subdivisions: " + job_allocation_msg + str(self.jobs - used_jobs) + " general job(s)", sys.stdout)
+
+        for i in range(self.jobs - used_jobs):
+            tasks.append(asyncio.create_task(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
+
+        async def recipes_done():
+            while built_recipes & recipe_targets != recipe_targets:
+                for q in queues.values():
+                    await q.join()
 
         # push the initial set of recipes that have no dependencies to start
         # building
         for recipe in find_buildable_recipes ():
             building_recipes.add(recipe.name)
-            queue.put_nowait(RecipeStepPriority(recipe, 0, None))
-
-        # a single install task
-        tasks.append(asyncio.create_task(cook_recipe_install_worker()))
-        # 1 extra build task for the non-parallel builds
-        for i in range(min(max(1, self.jobs-2), 3)):
-            tasks.append(asyncio.create_task(cook_recipe_compile_worker()))
-        # rest normal tasks
-        for i in range(max(1, self.jobs-3)):
-            task = asyncio.create_task(cook_recipe_worker())
-            tasks.append(task)
-
-        async def recipes_done():
-            while built_recipes & recipe_targets != recipe_targets:
-                await queue.join()
-                await compile_queue.join()
-                await install_queue.join()
+            default_queue.put_nowait(RecipeStepPriority(recipe, 0, "init"))
 
         await run_tasks(tasks, recipes_done())
 
