@@ -149,6 +149,7 @@ class DistroVersion:
     IOS_12_2 = 'ios_12_2'
     IOS_12_3 = 'ios_12_3'
     IOS_12_4 = 'ios_12_4'
+    # further ios versions are generated automatically
     ANDROID_GINGERBREAD = 'android_09_gingerbread'  # API Level 9
     ANDROID_ICE_CREAM_SANDWICH = 'android_14_ice_cream_sandwich'  # API Level 14
     ANDROID_JELLY_BEAN = 'android_16_jelly_bean'  # API Level 16
@@ -178,6 +179,12 @@ class DistroVersion:
             return 24
         else:
             raise FatalError("DistroVersion not supported")
+
+    @staticmethod
+    def get_ios_sdk_version(version):
+        if not version.startswith('ios_'):
+            raise FatalError('Not an iOS version: ' + version)
+        return [int(s) for s in version[4:].split('_')]
 
 class LicenseDescription:
 
