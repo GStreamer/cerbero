@@ -1,0 +1,35 @@
+From 4797ee1f567b83c1b3004ce1963f37a4ecdff3f3 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Tue, 1 Oct 2019 20:07:12 +1000
+Subject: [PATCH] build: disable failing compile/link checks on any stderr
+ output
+
+ld for ios will output a warning when passing the same min ios platform:
+
+ld: warning: passed two min versions (10.0.0, 10.0) for platform iOS. Using 10.0.
+
+and will cause every link check to fail
+---
+ build/aclocal.cairo.m4 | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/build/aclocal.cairo.m4 b/build/aclocal.cairo.m4
+index 44ba5fd..7f91ea4 100644
+--- a/build/aclocal.cairo.m4
++++ b/build/aclocal.cairo.m4
+@@ -106,9 +106,9 @@ AC_DEFUN([CAIRO_CC_TRY_LINK_WITH_ENV_SILENT],[dnl
+ 		[cairo_cc_stderr=`test -f conftest.err && cat conftest.err`
+ 		 cairo_cc_flag=no])
+ 
+-	if test "x$cairo_cc_stderr" != "x"; then
+-		cairo_cc_flag=no
+-	fi
++#	if test "x$cairo_cc_stderr" != "x"; then
++#		cairo_cc_flag=no
++#	fi
+ 
+ 	if test "x$cairo_cc_flag" = "xyes"; then
+ 		ifelse([$3], , :, [$3])
+-- 
+2.21.0 (Apple Git-122)
+

@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
     patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
                'cairo/0001-Disable-building-of-the-tests.patch',
+               'cairo/0001-build-disable-failing-compile-link-checks-on-any-std.patch',
                ]
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
