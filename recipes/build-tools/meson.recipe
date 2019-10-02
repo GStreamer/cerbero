@@ -25,6 +25,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-compilers-Fix-bitcode-and-other-options-for-objc-cod.patch',
         # Not needed with 0.50, code changed
         'meson/0001-ninja-backend-Quote-args-to-compiler-rules.patch',
+        # https://github.com/mesonbuild/meson/pull/5475
+        'meson/0001-environment-better-xcode-11-clang-detection.patch',
     ]
     deps = ['ninja']
 

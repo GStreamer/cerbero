@@ -1,0 +1,35 @@
+From 0654ad1347b282f59ae4d008733aca221a15a92d Mon Sep 17 00:00:00 2001
+From: Dan Kegel <dank@kegel.com>
+Date: Tue, 11 Jun 2019 09:21:39 -0700
+Subject: [PATCH] environment: better xcode 11 clang detection
+
+Fixes #5474
+---
+ mesonbuild/environment.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mesonbuild/environment.py b/mesonbuild/environment.py
+index 6d86daf..4cf2e05 100644
+--- a/mesonbuild/environment.py
++++ b/mesonbuild/environment.py
+@@ -797,7 +797,7 @@ class Environment:
+                 compiler_type = self.get_gnu_compiler_type(defines)
+                 version = self.get_gnu_version_from_defines(defines)
+                 return GnuObjCCompiler(ccache + compiler, version, compiler_type, is_cross, exe_wrap, defines)
+-            if out.startswith('Apple LLVM'):
++            if out.startswith('Apple LLVM') or out.startswith('Apple clang'):
+                 return ClangObjCCompiler(ccache + compiler, version, CompilerType.CLANG_OSX, is_cross, exe_wrap)
+             if out.startswith('clang'):
+                 return ClangObjCCompiler(ccache + compiler, version, CompilerType.CLANG_STANDARD, is_cross, exe_wrap)
+@@ -824,7 +824,7 @@ class Environment:
+                 compiler_type = self.get_gnu_compiler_type(defines)
+                 version = self.get_gnu_version_from_defines(defines)
+                 return GnuObjCPPCompiler(ccache + compiler, version, compiler_type, is_cross, exe_wrap, defines)
+-            if out.startswith('Apple LLVM'):
++            if out.startswith('Apple LLVM') or out.startswith('Apple clang'):
+                 return ClangObjCPPCompiler(ccache + compiler, version, CompilerType.CLANG_OSX, is_cross, exe_wrap)
+             if out.startswith('clang'):
+                 return ClangObjCPPCompiler(ccache + compiler, version, CompilerType.CLANG_STANDARD, is_cross, exe_wrap)
+-- 
+2.21.0 (Apple Git-122)
+
