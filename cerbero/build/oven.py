@@ -379,7 +379,11 @@ class Oven (object):
             building_recipes.add(recipe.name)
             default_queue.put_nowait(RecipeStepPriority(recipe, 0, "init"))
 
-        await run_tasks(tasks, recipes_done())
+        try:
+            await run_tasks(tasks, recipes_done())
+            m.output(_("All done!"), sys.stdout)
+        except Exception as e:
+            raise e
 
     async def _cook_recipe_step_with_prompt (self, recipe, step, count, total):
         try:
