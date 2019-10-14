@@ -126,6 +126,7 @@ class DistroVersion:
     OS_X_SIERRA = 'osx_sierra'
     OS_X_HIGH_SIERRA = 'osx_high_sierra'
     OS_X_MOJAVE = 'osx_mojave'
+    OS_X_CATALINA = 'osx_catalina'
     IOS_8_0 = 'ios_08_0'
     IOS_8_1 = 'ios_08_1'
     IOS_8_2 = 'ios_08_2'
