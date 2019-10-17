@@ -339,11 +339,11 @@ class Recipe(custom.GStreamer):
             ]
     }
 
-    files_plugins_sys = [
+    files_plugins_vulkan = [
         'lib/gstreamer-1.0/libgstvulkan%(mext)s',
     ]
 
-    files_plugins_sys_devel = [
+    files_plugins_vulkan_devel = [
         'lib/gstreamer-1.0/libgstvulkan.a', 'lib/gstreamer-1.0/libgstvulkan.la',
     ]
 
@@ -463,10 +463,12 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options['applemedia'] = 'enabled'
             self.deps += ['moltenvk']
+        if self.config.target_platform in (Platform.ANDROID):
+            self.deps += ['vulkan-android']
 
-        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS) or \
+        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID) or \
                 (self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64):
-            self.disable_plugin('vulkan', 'sys', library_name='vulkan')
+            self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
