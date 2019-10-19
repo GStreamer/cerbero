@@ -57,10 +57,6 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86:
               # libav internally aligns stacks, while Android doesn't
                 libavextraconf += " --extra-cflags='-mstackrealign'"
-            elif self.config.target_arch in [Architecture.ARM, Architecture.ARMv7]:
-                # Fails to link into an android App
-                # https://github.com/android-ndk/ndk/issues/337
-                libavextraconf += " --disable-neon"
             if self.config.target_arch in [Architecture.X86]:
                 # Fails to link into an android app with relocation warnings
                 # in the custom assembly
