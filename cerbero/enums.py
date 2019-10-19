@@ -87,6 +87,7 @@ class DistroVersion:
     UBUNTU_XENIAL = 'ubuntu_16_04_xenial'
     UBUNTU_ARTFUL = 'ubuntu_17_10_artful'
     UBUNTU_BIONIC = 'ubuntu_18_04_bionic'
+    UBUNTU_COSMIC = 'ubuntu_18_10_cosmic'
     UBUNTU_DISCO = 'ubuntu_19_04_disco'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'

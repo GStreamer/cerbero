@@ -210,6 +210,8 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_ARTFUL
             elif d[2] in ['bionic', 'tara', 'tessa']:
                 distro_version = DistroVersion.UBUNTU_BIONIC
+            elif d[2] in ['cosmic']:
+                distro_version = DistroVersion.UBUNTU_COSMIC
             elif d[2] in ['disco']:
                 distro_version = DistroVersion.UBUNTU_DISCO
             elif d[1].startswith('6.'):
