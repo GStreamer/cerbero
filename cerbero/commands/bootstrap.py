@@ -50,8 +50,8 @@ class Bootstrap(Command):
             tasks.append(bootstrapper.fetch())
         run_until_complete(tasks)
 
-        for bootstraper in bootstrappers:
-            bootstraper.extract()
+        for bootstrapper in bootstrappers:
+            bootstrapper.extract()
             bootstrapper.start()
 
 
