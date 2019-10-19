@@ -165,6 +165,7 @@ class DistroVersion:
     ANDROID_NOUGAT_MR1 = 'android_25_nougat_mr1' # API Level 25
     ANDROID_OREO = 'android_26_oreo' # API Level 26
     ANDROID_OREO_MR1 = 'android_27_oreo_mr1' # API Level 27
+    ANDROID_PIE = 'android_28_pie' # API Level 28
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
@@ -193,6 +194,8 @@ class DistroVersion:
             return 26
         elif version == DistroVersion.ANDROID_OREO_MR1:
             return 27
+        elif version == DistroVersion.ANDROID_PIE:
+            return 28
         else:
             raise FatalError("DistroVersion not supported")
 
