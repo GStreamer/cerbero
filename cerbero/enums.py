@@ -159,6 +159,7 @@ class DistroVersion:
     ANDROID_JELLY_BEAN = 'android_16_jelly_bean'  # API Level 16
     ANDROID_KITKAT = 'android_19_kitkat'  # API Level 19
     ANDROID_LOLLIPOP = 'android_21_lollipop' # API Level 21
+    ANDROID_LOLLIPOP_MR1 = 'android_22_lollipop_mr1' # API Level 22
     ANDROID_MARSHMALLOW = 'android_23_marshmallow' # API Level 23
     ANDROID_NOUGAT = 'android_24_nougat' # API Level 24
     NONE_UCLIBC = 'none_uclibc'
@@ -177,6 +178,8 @@ class DistroVersion:
             return 19
         elif version == DistroVersion.ANDROID_LOLLIPOP:
             return 21
+        elif version == DistroVersion.ANDROID_LOLLIPOP_MR1:
+            return 22
         elif version == DistroVersion.ANDROID_MARSHMALLOW:
             return 23
         elif version == DistroVersion.ANDROID_NOUGAT:
