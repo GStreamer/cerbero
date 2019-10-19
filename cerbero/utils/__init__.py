@@ -214,6 +214,8 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_COSMIC
             elif d[2] in ['disco']:
                 distro_version = DistroVersion.UBUNTU_DISCO
+            elif d[2] in ['eoan']:
+                distro_version = DistroVersion.UBUNTU_EOAN
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
             elif d[1].startswith('7.') or d[1].startswith('wheezy'):

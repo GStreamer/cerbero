@@ -89,6 +89,7 @@ class DistroVersion:
     UBUNTU_BIONIC = 'ubuntu_18_04_bionic'
     UBUNTU_COSMIC = 'ubuntu_18_10_cosmic'
     UBUNTU_DISCO = 'ubuntu_19_04_disco'
+    UBUNTU_EOAN = 'ubuntu_19_10_eoan'
     FEDORA_16 = 'fedora_16'
     FEDORA_17 = 'fedora_17'
     FEDORA_18 = 'fedora_18'
