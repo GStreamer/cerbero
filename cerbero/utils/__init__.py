@@ -208,7 +208,7 @@ def system_info():
                 distro_version = DistroVersion.UBUNTU_XENIAL
             elif d[2] in ['artful']:
                 distro_version = DistroVersion.UBUNTU_ARTFUL
-            elif d[2] in ['bionic', 'tara', 'tessa']:
+            elif d[2] in ['bionic', 'tara', 'tessa', 'tina']:
                 distro_version = DistroVersion.UBUNTU_BIONIC
             elif d[2] in ['disco']:
                 distro_version = DistroVersion.UBUNTU_DISCO
