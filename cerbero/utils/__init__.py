@@ -264,6 +264,8 @@ def system_info():
                 distro_version = DistroVersion.REDHAT_6
             elif d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
+            elif d[1].startswith('8.'):
+                distro_version = DistroVersion.REDHAT_8
             elif d[1] == 'amazon':
                 distro_version = DistroVersion.AMAZON_LINUX
             else:
