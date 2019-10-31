@@ -15,9 +15,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '53f02fbbec9e798b0faaf7c73272f83608e835c6288dd58be6c9bb54624a3800'
 
     deps = ['automake', 'autoconf', 'm4', 'libtool']
-    platform_deps = {
-            Platform.DARWIN:  ['sed'],
-            Platform.WINDOWS: ['libiconv', 'mingw-runtime', 'automake'],}
+    platform_deps = {Platform.DARWIN:  ['sed'],
+                     Platform.WINDOWS: ['libiconv'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
     patches = [name + '/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch',
                name + '/0001-gnulib-tests-undef-MinGW-s-dummy-pthread_sigmask-def.patch',]
