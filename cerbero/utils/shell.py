@@ -690,6 +690,10 @@ class BuildStatusPrinter:
         self.total = 0
         self.count = 0
         self.interactive = interactive
+        # FIXME: Default MSYS shell doesn't handle ANSI escape sequences correctly
+        if os.environ.get('TERM') == 'cygwin':
+            m.message('Running under MSYS: reverting to basic build status output')
+            self.interactive = False
 
     def remove_recipe(self, recipe_name):
         if recipe_name in self.recipe_to_step:
