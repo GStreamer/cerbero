@@ -85,11 +85,8 @@ class DebianBootstrapper (UnixBootstrapper):
         if self.config.target_platform == Platform.LINUX:
             self.packages.append('chrpath')
             self.packages.append('libfuse-dev')
-        if self.config.distro_version in [DistroVersion.DEBIAN_SQUEEZE,
-                DistroVersion.UBUNTU_MAVERICK, DistroVersion.UBUNTU_LUCID]:
+        if self.config.distro_version == DistroVersion.DEBIAN_SQUEEZE:
             self.packages.remove('glib-networking')
-        if self.config.distro_version in [DistroVersion.UBUNTU_LUCID]:
-            self.packages.remove('autopoint')
 
     def create_debian_arch_check(self, arch):
         def check_arch():
