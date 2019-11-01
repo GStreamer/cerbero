@@ -23,3 +23,8 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
 #    files_lang = ['libiconv']
+
+    def prepare(self):
+        # Don't artificially force a libtool dependency when compiling as a build tool
+        if self.config.prefix == self.config.build_tools_prefix:
+            self.override_libtool = False
