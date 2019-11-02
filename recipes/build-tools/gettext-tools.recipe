@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'gettext-%(version)s'
     tarball_checksum = '53f02fbbec9e798b0faaf7c73272f83608e835c6288dd58be6c9bb54624a3800'
 
-    deps = ['automake', 'autoconf', 'm4', 'libtool']
+    deps = ['automake', 'autoconf', 'm4']
     platform_deps = {Platform.DARWIN:  ['sed'],
                      Platform.WINDOWS: ['libiconv'],}
     configure_options = ' --disable-java --disable-csharp --disable-native-java --without-csv'
@@ -27,6 +27,7 @@ class Recipe(recipe.Recipe):
         'msginit', 'msgmerge', 'msgunfmt', 'msguniq', 'recode-sr-latin',
         'xgettext'
     ]
+    override_libtool = False
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
