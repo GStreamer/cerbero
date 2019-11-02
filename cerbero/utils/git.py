@@ -213,7 +213,7 @@ def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     shell.call('%s checkout %s -B %s' % (GIT, commit, branch_name), local_git_dir, logfile=logfile)
     shell.call('%s clone %s -s -b %s .' % (GIT, local_git_dir, branch_name),
                git_dir, logfile=logfile)
-    ensure_user_is_set(local_git_dir, logfile=logfile)
+    ensure_user_is_set(git_dir, logfile=logfile)
     submodules_update(git_dir, local_git_dir, logfile=logfile)
 
 def add_remote(git_dir, name, url, logfile=None):
