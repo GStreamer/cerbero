@@ -387,7 +387,8 @@ class Config (object):
                'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
                'MONO_GAC_PREFIX': prefix,
                'GSTREAMER_ROOT': prefix,
-               'CERBERO_PREFIX': self.prefix
+               'CERBERO_PREFIX': self.prefix,
+               'CERBERO_HOST_SOURCES': self.sources
                }
 
         # merge the config env with this new env
