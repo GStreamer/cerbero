@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MAKEFILE
     configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s " \
                     "--libdir=%(libdir)s %(options)s"
-    configure_options = "--enable-pic --as=yasm --disable-unit-tests --size-limit=16384x16384 " \
+    configure_options = "--enable-pic --as=nasm --disable-unit-tests --size-limit=16384x16384 " \
                         "--enable-postproc --enable-multi-res-encoding --enable-temporal-denoising " \
                         "--enable-vp9-temporal-denoising --enable-vp9-postproc --disable-tools " \
                         "--disable-examples --disable-docs "
@@ -120,7 +120,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
             self.config_sh = 'LD=$CC ./configure'
-            self.configure_options.replace('--as=yasm', '')
+            self.configure_options.replace('--as=nasm', '')
             self.configure_options += ' --sdk-path=%s ' % self.config.toolchain_prefix
         else:
             self.configure_options += '--enable-shared '
@@ -144,6 +144,10 @@ class Recipe(recipe.Recipe):
             f = os.path.join(self.make_dir, 'vpx_ports')
             m.action("copying %s to %s" % (o, f), logfile=self.logfile)
             shutil.copy(o, f)
+        elif self.using_msvc():
+            # Visual Studio solution hard-codes yasm
+            shell.replace(os.path.join(self.build_dir, 'build/make/gen_msvs_vcxproj.sh'),
+                          {'yasm ': 'nasm ', '-Xvc -g cv8': '-Xvc -g -F cv8'})
         await super().configure()
 
     async def install(self):

@@ -24,21 +24,12 @@ class Recipe(recipe.Recipe):
         # clang x86-32 fails at generating proper asm PIC code
         # See bug https://bugzilla.gnome.org/show_bug.cgi?id=727079
         enable_asm = True
-        AS = ['yasm']
+        AS = ['nasm']
 
         arch = self.config.target_arch
         if self.config.target_arch == Architecture.X86:
             arch = 'i686'
-        if self.config.target_platform == Platform.DARWIN:
-            if self.config.target_arch == Architecture.X86:
-                AS = ['yasm', '-O2', '-f', 'macho', '-DPREFIX']
-                enable_asm = False
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --enable-win32thread'
-        if self.config.target_arch == Architecture.ARM:
-            # FIXME : Is disabling asm on ARM (< v7) still needed ?
-            enable_asm = False
-        elif Architecture.is_arm(self.config.target_arch):
+        if Architecture.is_arm(self.config.target_arch):
             cc = self.get_env('CC')
             if cc:
                 AS = [cc]

@@ -84,11 +84,6 @@ class Recipe(recipe.Recipe):
             shell.replace(os.path.join(self.build_dir, 'Makefile'),
                           # Fix hard-coded prefix
                           {'PREFIX=/usr/local': "PREFIX=" + self.config.prefix})
-        shell.replace(os.path.join(self.build_dir, 'build',
-                                   'x86-common.mk'),
-                      # Use yasm instead of nasm, since that's what Cerbero
-                      # ships with
-                      {'ASM = nasm': "ASM = yasm"})
 
         if self.config.target_platform == Platform.IOS and self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
             shell.replace(os.path.join(self.build_dir, 'build',

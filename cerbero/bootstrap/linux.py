@@ -62,7 +62,7 @@ class DebianBootstrapper (UnixBootstrapper):
     command = 'install %s'
     yes_arg = '-y'
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
-                'autopoint', 'make', 'cmake', 'bison', 'flex', 'yasm',
+                'autopoint', 'make', 'cmake', 'bison', 'flex', 'nasm',
                 'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
                 'libpulse-dev', 'python3-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
@@ -109,7 +109,7 @@ class RedHatBootstrapper (UnixBootstrapper):
     command = 'install %s'
     yes_arg = '-y'
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
-                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm',
+                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'nasm',
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
                 'texinfo-tex', 'texlive-dvips', 'docbook-style-xsl',
                 'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
@@ -154,7 +154,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
     command = 'install %s'
     yes_arg = '-y'
     packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
-            'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'yasm',
+            'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'nasm',
             'gtk-doc', 'curl', 'doxygen', 'texinfo',
             'texlive', 'docbook-xsl-stylesheets',
             'transfig', 'intltool', 'patterns-openSUSE-devel_rpm_build',
@@ -173,7 +173,7 @@ class ArchBootstrapper (UnixBootstrapper):
     yes_arg = ' --noconfirm'
     packages = ['intltool', 'cmake', 'doxygen', 'gtk-doc',
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
-            'curl', 'gettext', 'alsa-lib', 'yasm', 'gperf',
+            'curl', 'gettext', 'alsa-lib', 'nasm', 'gperf',
             'docbook-xsl', 'transfig', 'libxrender',
             'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
             'subversion', 'xorg-util-macros', 'ccache', 'openssl']
@@ -202,7 +202,7 @@ class GentooBootstrapper (UnixBootstrapper):
             'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
             'sys-devel/autoconf', 'sys-devel/make', 'net-misc/curl',
             'sys-devel/gettext', 'media-libs/alsa-lib', 'media-sound/pulseaudio',
-            'dev-lang/yasm', 'dev-util/gperf', 'app-text/docbook-xsl-stylesheets',
+            'dev-lang/nasm', 'dev-util/gperf', 'app-text/docbook-xsl-stylesheets',
             'media-gfx/transfig', 'x11-libs/libXrender', 'x11-libs/libXv',
             'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking',
             'dev-libs/openssl']

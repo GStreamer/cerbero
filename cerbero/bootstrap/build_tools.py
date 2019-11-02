@@ -35,8 +35,8 @@ class BuildTools (BootstrapperBase, Fetch):
                    'pkg-config', 'orc-tool', 'gettext-m4', 'vala-m4',
                    'gobject-introspection-m4', 'gtk-doc-lite', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'yasm', 'bison', 'flex', 'moltenvk-tools'],
-        Platform.WINDOWS: ['intltool', 'yasm'],
+        Platform.DARWIN: ['intltool', 'nasm', 'bison', 'flex', 'moltenvk-tools'],
+        Platform.WINDOWS: ['intltool', 'nasm'],
         Platform.LINUX: ['intltool-m4'],
     }
 
@@ -50,14 +50,14 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('gperf')
             self.BUILD_TOOLS.append('cmake')
         if self.config.platform == Platform.LINUX:
-            if self.config.distro_version == DistroVersion.UBUNTU_LUCID or \
-                self.config.distro_version == DistroVersion.DEBIAN_SQUEEZE or \
-                self.config.distro_version == DistroVersion.DEBIAN_WHEEZY:
-                # x264 requires yasm >= 1.2
-                self.BUILD_TOOLS.append('yasm')
             if self.config.distro_version in [DistroVersion.REDHAT_6,
                                               DistroVersion.AMAZON_LINUX]:
                 self.BUILD_TOOLS.append('cmake')
+            # dav1d requires nasm >=2.13.02
+            if self.config.distro_version.startswith('ubuntu') and self.config.distro_version < DistroVersion.UBUNTU_BIONIC:
+                self.BUILD_TOOLS.append('nasm')
+            elif self.config.distro_version.startswith('debian') and self.config.distro_version < DistroVersion.DEBIAN_BUSTER:
+                self.BUILD_TOOLS.append('nasm')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.target_platform != Platform.LINUX and not \
