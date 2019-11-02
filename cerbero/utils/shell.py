@@ -586,13 +586,13 @@ def enter_build_environment(platform, arch, sourcedir=None, bash_completions=Non
     '''
     Enters to a new shell with the build environment
     '''
-    BASHRC =  '''
-if [ -e ~/.bashrc ]; then
-source ~/.bashrc
+    SHELLRC =  '''
+if [ -e ~/{rc_file} ]; then
+source ~/{rc_file}
 fi
-%s
-PS1='\[\033[01;32m\][cerbero-%s-%s]\[\033[00m\]%s '
-BASH_COMPLETION_SCRIPTS="%s"
+{sourcedirsh}
+{prompt}
+BASH_COMPLETION_SCRIPTS="{bash_completions}"
 BASH_COMPLETION_PATH="$CERBERO_PREFIX/share/bash-completion/completions"
 for f in $BASH_COMPLETION_SCRIPTS; do
   [ -f "$BASH_COMPLETION_PATH/$f" ] && . "$BASH_COMPLETION_PATH/$f"
@@ -607,10 +607,25 @@ start bash.exe --rcfile %s
         sourcedirsh = ''
     if bash_completions is None:
         bash_completions = set()
-
-    ps1 = os.environ.get('PS1', '')
+    bash_completions = ' '.join(bash_completions)
 
     env = os.environ.copy() if env is None else env
+
+    shell = os.environ.get('SHELL', '/bin/bash')
+    if 'zsh' in shell:
+        rc_file = '.zshrc'
+        rc_opt = '--rcs'
+        prompt = os.environ.get('PROMPT', '')
+        prompt = 'PROMPT="%{{$fg[green]%}}[cerbero-{platform}-{arch}]%{{$reset_color%}} $PROMPT"'.format(
+            platform=platform, arch=arch)
+    else:
+        rc_file = '.bashrc'
+        rc_opt = '--rcfile'
+        prompt = os.environ.get('PS1', '')
+        prompt = 'PS1="\[\033[01;32m\][cerbero-{platform}-{arch}]\[\033[00m\] $PS1"'.format(
+            platform=platform, arch=arch)
+    shellrc = SHELLRC.format(rc_file=rc_file, sourcedirsh=sourcedirsh,
+        prompt=prompt, bash_completions=bash_completions)
 
     if PLATFORM == Platform.WINDOWS:
         msysbatdir = tempfile.mkdtemp()
@@ -619,21 +634,26 @@ start bash.exe --rcfile %s
         with open(msysbat, 'w+') as f:
             f.write(MSYSBAT % bashrc)
         with open(bashrc, 'w+') as f:
-            f.write(BASHRC % (sourcedirsh, platform, arch, ps1, ' '.join(bash_completions)))
+            f.write(shellrc)
         subprocess.check_call(msysbat, shell=True, env=env)
         # We should remove the temporary directory
         # but there is a race with the bash process
     else:
-        bashrc = tempfile.NamedTemporaryFile()
-        bashrc.write((BASHRC % (sourcedirsh, platform, arch, ps1, ' '.join(bash_completions))).encode())
-        bashrc.flush()
-        shell = os.environ.get('SHELL', '/bin/bash')
-        if os.system("%s --rcfile %s -c echo 'test' > /dev/null 2>&1" % (shell, bashrc.name)) == 0:
-            os.execlpe(shell, shell, '--rcfile', bashrc.name, env)
-        else:
-            env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+        tmp = tempfile.TemporaryDirectory()
+        rc_tmp = open(os.path.join(tmp.name, rc_file), 'w+')
+        rc_tmp.write(shellrc)
+        rc_tmp.flush()
+        if 'zsh' in shell:
+            env["ZDOTDIR"] = tmp.name
             os.execlpe(shell, shell, env)
-        bashrc.close()
+        else:
+            # Check if the shell supports passing the rcfile
+            if os.system("%s %s %s -c echo 'test' > /dev/null 2>&1" % (shell, rc_opt, rc_tmp.name)) == 0:
+                os.execlpe(shell, shell, rc_opt, rc_tmp.name, env)
+            else:
+                env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+                os.execlpe(shell, shell, env)
+        tmp.close()
 
 
 def which(pgm, path=None):
