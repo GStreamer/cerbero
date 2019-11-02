@@ -84,11 +84,18 @@ class Oven (object):
         self.interactive = self.config.interactive
         self.deps_only = deps_only
         shell.DRY_RUN = dry_run
-        self._build_lock = asyncio.Semaphore(2)
-        self._install_lock = asyncio.Lock()
         self.jobs = jobs
         if not self.jobs:
             self.jobs = determine_num_of_cpus()
+        if self.config.platform == Platform.WINDOWS:
+            self._build_lock = asyncio.Semaphore(self.jobs / 2)
+        else:
+            self._build_lock = asyncio.Semaphore(2)
+        # Can't install in parallel because of the risk of two recipes writing
+        # to the same file at the same time. TODO: Need to use DESTDIR + prefix
+        # merging + file list tracking for collision detection before we can
+        # enable this.
+        self._install_lock = asyncio.Lock()
 
     def start_cooking(self):
         '''
