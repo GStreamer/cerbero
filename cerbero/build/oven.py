@@ -313,7 +313,7 @@ class Oven (object):
         job_allocation = collections.defaultdict(lambda : 0)
         if self.jobs > 4:
             queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue(loop=loop)
-            job_allocation[BuildSteps.COMPILE[1]] = min(2, self.jobs - 3)
+            job_allocation[BuildSteps.COMPILE[1]] = 2
         if self.jobs > 5:
             job_allocation[BuildSteps.COMPILE[1]] = 3
         if self.jobs > 7:
