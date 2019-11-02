@@ -11,8 +11,6 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'ccf536620a45458d26ba83887a983b96827001e92a13847b45e4925cc8913178'
     patches = ['libiconv/0001-Use-correct-autotools-versions.patch',
                'libiconv/0002-lib-Only-rename-locale_charset-for-libiconv-not-libc.patch',]
-#               'libiconv/0002-Add-support-for-Android.patch',
-#               'libiconv/0003-stdint-fix-build-with-Android-s-Bionic-fox-x86.patch',
 
     configure_options = '--disable-nls --enable-static'
     autoreconf_sh = './autogen.sh --skip-gnulib && autoreconf -fiv'
@@ -22,7 +20,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libiconv', 'libcharset', ]
     files_devel = ['include/iconv.h', 'include/libcharset.h',
                    'include/localcharset.h' ]
-#    files_lang = ['libiconv']
 
     def prepare(self):
         # Don't artificially force a libtool dependency when compiling as a build tool
