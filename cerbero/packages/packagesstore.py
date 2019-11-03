@@ -132,7 +132,7 @@ class PackagesStore (object):
         @rtype: list
         '''
         deps = self.get_package_deps(package_name)
-        return [self.cookbok.get_recipe(x) for x in deps]
+        return [self.cookbook.get_recipe(x) for x in deps]
 
     def _list_metapackage_deps(self, metapackage):
 
