@@ -575,7 +575,7 @@ async def run_tasks(tasks, done_async=None):
             await done_async
             raise QueueDone()
 
-        task = asyncio.create_task (queue_done())
+        task = asyncio.ensure_future (queue_done())
         tasks.append(task)
 
     async def shutdown():

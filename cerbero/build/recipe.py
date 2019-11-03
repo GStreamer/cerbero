@@ -845,7 +845,7 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
                 if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
-                    tasks.append(asyncio.create_task(self._async_run_step(recipe, step, arch)))
+                    tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
                 else:
                     await self._async_run_step(recipe, step, arch)
             else:
@@ -909,7 +909,7 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
                 if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
-                    tasks.append(asyncio.create_task(self._async_run_step(recipe, step, arch)))
+                    tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
                 else:
                     await self._async_run_step(recipe, step, arch)
             else:

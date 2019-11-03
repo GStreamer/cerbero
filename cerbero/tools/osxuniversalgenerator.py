@@ -217,7 +217,7 @@ class OSXUniversalGenerator(object):
         async def parse_dirs_main():
             tasks = []
             for i in range(4):
-                tasks.append(asyncio.create_task (parse_dirs_worker()))
+                tasks.append(asyncio.ensure_future (parse_dirs_worker()))
             await run_tasks (tasks, queue_done())
 
         print ("parsing dirs")

@@ -291,15 +291,15 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             await self._check_duplicated_symbols(lib, tmpdir)
 
         async def split_join_task():
-            tasks = [asyncio.create_task(join_library_worker(join_queues[arch], arch)) for arch in archs]
-            [tasks.append(asyncio.create_task(split_library_worker())) for i in range(len(archs))]
+            tasks = [asyncio.ensure_future(join_library_worker(join_queues[arch], arch)) for arch in archs]
+            [tasks.append(asyncio.ensure_future(split_library_worker())) for i in range(len(archs))]
             async def split_join_queues_done():
                 await split_queue.join()
                 for arch in archs:
                     await join_queues[arch].join()
             await run_tasks(tasks, split_join_queues_done())
 
-            tasks = [asyncio.create_task(post_join_worker(thin_arch)) for thin_arch in archs]
+            tasks = [asyncio.ensure_future(post_join_worker(thin_arch)) for thin_arch in archs]
             await run_tasks(tasks)
         run_until_complete(split_join_task())
 

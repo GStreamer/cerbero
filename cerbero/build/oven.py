@@ -351,12 +351,12 @@ class Oven (object):
                 # through all the steps after
                 if install_done:
                     continue
-                tasks.append(asyncio.create_task(cook_recipe_worker(queues[step], install_steps)))
+                tasks.append(asyncio.ensure_future(cook_recipe_worker(queues[step], install_steps)))
                 used_steps.extend(install_steps)
                 install_done = True
             else:
                 for i in range(count):
-                    tasks.append(asyncio.create_task(cook_recipe_worker(queues[step], [step])))
+                    tasks.append(asyncio.ensure_future(cook_recipe_worker(queues[step], [step])))
                 used_steps.append(step)
             used_jobs += count
         general_jobs = self.jobs - used_jobs
@@ -373,7 +373,7 @@ class Oven (object):
         m.output ("Building using " + str(self.jobs) + " job(s) with the following job subdivisions: " + job_allocation_msg + str(self.jobs - used_jobs) + " general job(s)", sys.stdout)
 
         for i in range(self.jobs - used_jobs):
-            tasks.append(asyncio.create_task(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
+            tasks.append(asyncio.ensure_future(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
 
         async def recipes_done():
             while built_recipes & recipe_targets != recipe_targets:
