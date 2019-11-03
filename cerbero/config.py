@@ -58,7 +58,7 @@ def set_nofile_ulimit():
     '''
     try:
         import resource
-    except ModuleNotFoundError:
+    except ImportError:
         return
     want = 2048
     soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
