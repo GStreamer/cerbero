@@ -295,7 +295,8 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             [tasks.append(asyncio.create_task(split_library_worker())) for i in range(len(archs))]
             async def split_join_queues_done():
                 await split_queue.join()
-                [await join_queues[arch].join() for arch in archs]
+                for arch in archs:
+                    await join_queues[arch].join()
             await run_tasks(tasks, split_join_queues_done())
 
             tasks = [asyncio.create_task(post_join_worker(thin_arch)) for thin_arch in archs]
