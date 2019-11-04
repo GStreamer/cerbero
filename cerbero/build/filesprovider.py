@@ -124,6 +124,8 @@ class FilesProvider(object):
     # major, minor, micro. We don't use {m,n} here because we want to capture
     # all the matches.
     _SO_REGEX = r'^lib{}\.so(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?$'
+    # Like _SO_REGEX but only libs with version number.
+    _LINUX_SO_REGEX = r'^lib{}\.so(\.[0-9]+)(\.[0-9]+)?(\.[0-9]+)?$'
     _DYLIB_REGEX = r'^lib{}(\.[0-9]+)?(\.[0-9]+)?(\.[0-9]+)?\.dylib$'
 
     # Extension Glob Legend:
@@ -137,7 +139,7 @@ class FilesProvider(object):
     EXTENSIONS = {
         Platform.WINDOWS: {'bext': '.exe', 'sregex': _DLL_REGEX, 'sdir': 'bin',
             'mext': '.dll', 'smext': '.a', 'pext': '.pyd', 'srext': '.dll'},
-        Platform.LINUX: {'bext': '', 'sregex': _SO_REGEX, 'sdir': 'lib',
+        Platform.LINUX: {'bext': '', 'sregex': _LINUX_SO_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
         Platform.ANDROID: {'bext': '', 'sregex': _SO_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
