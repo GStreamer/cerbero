@@ -5,9 +5,9 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.3.4'
+    version = '1.4.0'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    tarball_checksum = 'd3ddf3ad89eb93a4dbf44046775eb63e04780cc536781490d65321d78d4b19de'
+    tarball_checksum = 'c2ba0bb9382ab42f9eebac831dc021e7da26b2971aaeb30a891dd24297bd929c'
     licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
