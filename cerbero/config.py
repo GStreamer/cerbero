@@ -332,9 +332,13 @@ class Config (object):
             xdgdatadir += ":/usr/share:/usr/local/share"
 
         ldflags = self.config_env.get('LDFLAGS', '')
-        ldflags_libdir = ' -L%s' % libdir
+        ldflags_libdir = '-L%s ' % libdir
         if ldflags_libdir not in ldflags:
-            ldflags += ldflags_libdir
+            # Ensure there's no leading whitespace in LDFLAGS
+            if ldflags:
+                ldflags += ' ' + ldflags_libdir
+            else:
+                ldflags = ldflags_libdir
 
         path = self.config_env.get('PATH', None)
         path = self._join_path(
