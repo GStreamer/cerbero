@@ -298,7 +298,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         return [x for x in elems if x not in used and (used.append(x) or True)]
 
     def _get_la_deps_from_pc (self, laname, pcname, env):
-        ret = shell.check_call('pkg-config --libs-only-l --static ' + pcname, env=env)
+        ret = shell.check_output(['pkg-config', '--libs-only-l', '--static', pcname], env=env, logfile=self.logfile)
         # Don't add the library itself to the list of dependencies
         return ['lib' + lib[2:] for lib in self._get_unique_ordered(ret.split()) if lib[2:] != laname[3:]]
 
