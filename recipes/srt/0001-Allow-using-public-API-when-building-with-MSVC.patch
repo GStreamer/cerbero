@@ -1,0 +1,25 @@
+From 90011e287ccfcb5f5d0ac152a49d60db5887eef5 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 20 Feb 2019 01:34:55 +0530
+Subject: [PATCH] Allow using public API when building with MSVC
+
+* pthread.h is not actually used anywhere in the public API
+---
+ srtcore/logging_api.h     | 1 -
+ 1 files changed, 1 deletions(-)
+
+diff --git a/srtcore/logging_api.h b/srtcore/logging_api.h
+index 74ae792..82c6316 100644
+--- a/srtcore/logging_api.h
++++ b/srtcore/logging_api.h
+@@ -24,7 +24,6 @@ written by
+ #include <iostream>
+ #endif
+ 
+-#include <pthread.h>
+ #ifdef _WIN32
+ #include "win/syslog_defs.h"
+ #else
+-- 
+2.20.1.windows.1
+
