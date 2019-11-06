@@ -49,6 +49,7 @@ class UnixBootstrapper (BootstrapperBase):
                 self.config.platform, None)
             if extra_packages:
                 self.packages += extra_packages.get(self.config.distro, [])
+                self.packages += extra_packages.get(self.config.distro_version, [])
             tool = self.tool
             if self.assume_yes:
               tool += ' ' + self.yes_arg;
