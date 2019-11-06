@@ -837,6 +837,8 @@ class Meson (Build, ModifyEnvBase) :
 
         # Explicitly enable/disable introspection, same as Autotools
         self._set_option({'introspection', 'gir'}, 'gi')
+        # Control python support using the variant
+        self._set_option({'python'}, 'python')
         # Always disable gtk-doc, same as Autotools
         self._set_option({'gtk_doc'}, None)
         # Automatically disable examples
