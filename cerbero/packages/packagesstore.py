@@ -122,18 +122,6 @@ class PackagesStore (object):
         '''
         self._packages[package.name] = package
 
-    def get_package_recipes_deps(self, package_name):
-        '''
-        Gets the list of recipes needed to create this package
-
-        @param name: name of the package
-        @type name: str
-        @return: a list with the recipes required to build this package
-        @rtype: list
-        '''
-        deps = self.get_package_deps(package_name)
-        return [self.cookbook.get_recipe(x) for x in deps]
-
     def _list_metapackage_deps(self, metapackage):
 
         def get_package_deps(package_name, visited=[], depslist=[]):
