@@ -40,11 +40,13 @@ class Recipe(recipe.Recipe):
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
-    patches = [# https://github.com/sctplab/usrsctp/pull/402
+    patches = [# https://github.com/sctplab/usrsctp/pull/401
+               name + '/0001-meson-Dependencies-go-on-the-shared-library.patch',
+               # https://github.com/sctplab/usrsctp/pull/402
                name + '/0001-meson-add-support-for-android-ios-host_system.patch',
                name + '/0001-build-include-ifaddrs.c-definition-for-android.patch',
-               # https://github.com/sctplab/usrsctp/pull/401
-               name + '/0001-meson-Dependencies-go-on-the-shared-library.patch',]
+               # https://github.com/sctplab/usrsctp/pull/403
+               name + '/0001-meson-Add-support-for-building-on-Android.patch',]
 
     def prepare(self):
         if self.using_msvc():
@@ -54,11 +56,6 @@ class Recipe(recipe.Recipe):
         usrsctplib_path = os.path.join(self.build_dir, 'usrsctplib')
         recipe_path = os.path.join(self.config.recipes_dir, self.name)
         if self.config.target_platform == Platform.ANDROID:
-            # ifaddrs is a GNU extension that isn't available on Android
-            shutil.copy(os.path.join(recipe_path, "ifaddrs.c"),
-                        usrsctplib_path)
-            shutil.copy(os.path.join(recipe_path, "ifaddrs.h"),
-                        usrsctplib_path)
             self.meson_options['sctp_build_programs'] = 'false'
         elif self.config.target_platform == Platform.IOS:
             def copyreplacetree(src, dst):
