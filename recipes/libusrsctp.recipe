@@ -40,9 +40,15 @@ class Recipe(recipe.Recipe):
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
-    patches = [name + '/0001-meson-add-support-for-android-ios-host_system.patch',
+    patches = [# https://github.com/sctplab/usrsctp/pull/402
+               name + '/0001-meson-add-support-for-android-ios-host_system.patch',
                name + '/0001-build-include-ifaddrs.c-definition-for-android.patch',
-               ]
+               # https://github.com/sctplab/usrsctp/pull/401
+               name + '/0001-meson-Dependencies-go-on-the-shared-library.patch',]
+
+    def prepare(self):
+        if self.using_msvc():
+            self.library_type = LibraryType.SHARED
 
     async def configure(self):
         usrsctplib_path = os.path.join(self.build_dir, 'usrsctplib')

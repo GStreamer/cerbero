@@ -1,0 +1,32 @@
+From d0cd18a91a3c61f3535ecff41d228331faf8d6ce Mon Sep 17 00:00:00 2001
+From: Cerbero <cerbero@gstreamer.freedesktop.org>
+Date: Fri, 8 Nov 2019 22:42:42 +0530
+Subject: [PATCH 3/3] meson: Dependencies go on the shared library
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 7185094..44ea174 100644
+--- a/meson.build
++++ b/meson.build
+@@ -188,7 +188,6 @@ if compiler.get_id() == 'msvc' and get_option('default_library') == 'shared'
+     find_program('dumpbin')
+ 
+     usrsctp_static = static_library('usrsctp-static', sources,
+-        dependencies: dependencies,
+         include_directories: include_dirs)
+ 
+    usrsctp_def = custom_target('usrsctp.def',
+@@ -199,6 +198,7 @@ if compiler.get_id() == 'msvc' and get_option('default_library') == 'shared'
+ 
+     usrsctp = shared_library('usrsctp',
+         link_whole: usrsctp_static,
++        dependencies: dependencies,
+         vs_module_defs: usrsctp_def,
+         install: true,
+         version: meson.project_version())
+-- 
+2.24.0.windows.1
+
