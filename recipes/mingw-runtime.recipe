@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     runtime_dep = True
 
+    files_bins = []
     files_libs = ['libwinpthread-1', 'libstdc++-6']
     files_devel = ['lib/libstdc++.a', 'lib/libstdc++.la']
     files_satic = []
@@ -36,6 +37,9 @@ class Recipe(recipe.Recipe):
                 for f in self.mingw_static_files + self.gcc_static_files]
 
         self.files_libs.append(self._ehlib)
+        if self.config.platform == Platform.WINDOWS and \
+           self.config.prefix != self.config.build_tools_prefix:
+            self.files_bins += ['pkg-config']
 
     async def install(self):
         hostroot = os.path.join(self.config.toolchain_prefix, 'x86_64-w64-mingw32')
@@ -122,7 +126,6 @@ class Recipe(recipe.Recipe):
         # build-tools prefix.
         if self.config.platform == Platform.WINDOWS and \
            self.config.prefix != self.config.build_tools_prefix:
-            self.files_bins = ['pkg-config']
             pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
             bindir = os.path.join(self.config.prefix, 'bin')
             shutil.copy(pkgconfig, bindir)
