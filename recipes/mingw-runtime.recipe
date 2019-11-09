@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     runtime_dep = True
 
+    files_bins = []
     files_libs = ['libstdc++', 'libwinpthread', 'libgomp', 'libgcc_s_sjlj-1']
     files_static = []
     files_headers = ['include/GL']
@@ -33,6 +34,9 @@ class Recipe(recipe.Recipe):
             mingw = self.config.host
         self.mingw_static_files = [f % {'mingw':mingw, 'host':self.config.host} for f in self.mingw_static_files]
         self.files_static = [os.path.join('lib', os.path.basename(f)) for f in self.mingw_static_files]
+        if self.config.platform == Platform.WINDOWS and \
+           self.config.prefix != self.config.build_tools_prefix:
+            self.files_bins += ['pkg-config']
 
     def install(self):
         # Copy libstdc++ to the prefix and update the .la files with the
@@ -112,7 +116,6 @@ class Recipe(recipe.Recipe):
         # build-tools prefix.
         if self.config.platform == Platform.WINDOWS and \
            self.config.prefix != self.config.build_tools_prefix:
-            self.files_bins = ['pkg-config']
             pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
             bindir = os.path.join(self.config.prefix, 'bin')
             shutil.copy(pkgconfig, bindir)
