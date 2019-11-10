@@ -36,7 +36,9 @@ class Recipe(recipe.Recipe):
                # https://github.com/ebassi/graphene/pull/128
                'graphene/0001-Fix-implicit-conversion-error-when-compiling-with-MS.patch',
                # https://github.com/ebassi/graphene/pull/130
-               'graphene/0001-bench-Fix-MSVC-build-error-on-32-bit-Windows.patch']
+               'graphene/0001-bench-Fix-MSVC-build-error-on-32-bit-Windows.patch',
+               # https://github.com/ebassi/graphene/pull/173
+               'graphene/0001-meson-Don-t-error-with-MSVC-C4819-warning.patch']
 
     deps = ['glib']
 

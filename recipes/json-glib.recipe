@@ -11,6 +11,8 @@ class Recipe(recipe.Recipe):
     url = 'gnome://'
     tarball_checksum = '720c5f4379513dc11fd97dc75336eb0c0d3338c53128044d9fabec4374f4bc47'
     deps = ['glib']
+    patches = [# https://gitlab.gnome.org/GNOME/json-glib/merge_requests/17
+               'json-glib/0001-meson-Don-t-error-with-MSVC-C4819-warning.patch']
 
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']

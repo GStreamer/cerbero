@@ -1,0 +1,28 @@
+From 90a659a22280e8a2dcf4a9330dfbaa182cb6f256 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Thu, 14 Nov 2019 12:12:11 +0900
+Subject: [PATCH] meson: Don't error with MSVC C4819 warning
+
+The compiler warning C4819 (encoding related warning) is a trivial
+thing on non-English locale system. Instead of error out,
+explicitly specify encoding as "utf-8".
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 69c3896..f84d865 100644
+--- a/meson.build
++++ b/meson.build
+@@ -74,7 +74,7 @@ if cc.get_id() == 'msvc'
+     '-we4049', # terminating line number emission
+     '-we4053', # an expression of type void was used as an operand
+     '-we4071', # no function prototype given
+-    '-we4819', # the file contains a character that cannot be represented in the current code page
++    '/utf-8',  # Set the input and exec encoding to utf-8
+   ]
+ elif cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+   test_cflags = [
+-- 
+2.17.1
+
