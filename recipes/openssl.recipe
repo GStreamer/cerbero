@@ -10,11 +10,11 @@ class Recipe(recipe.Recipe):
     # Note: openssl helpfully moves tarballs somewhere else (old/x.y.z/)
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
-    version = '1.1.1c'
+    version = '1.1.1d'
     licenses = [{License.OPENSSL: ['LICENSE']}]
     stype = SourceType.TARBALL
     url = 'https://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
-    tarball_checksum = 'f6fb3079ad15076154eda9413fed42877d668e7069d9b87396d0804fdb3f4c90'
+    tarball_checksum = '1e3a91bc1f9dfce01af26026f856e064eab4c8ee0a8f457b5ae30b40b8b711f2'
     deps = ['zlib']
     # Parallel make fails randomly due to undefined macros, probably races
     allow_parallel_build = False
@@ -117,6 +117,9 @@ class Recipe(recipe.Recipe):
             # Note: disable 'no-devcryptoeng' when we finally target the
             # *real* ios configuration targets
             config_sh += ' no-shared no-dso no-async no-devcryptoeng '
+            # Undefined symbols in aesni_* in libcrypto.a only on x86_64
+            if self.config.target_arch == Architecture.X86_64:
+                config_sh += ' no-asm '
         else:
             config_sh += ' shared '
 
