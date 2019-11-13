@@ -37,16 +37,17 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['LICENSE.md']}]
 
+    # We do not need the socket API since we will wrap inside a DTLS packet
+    # anyway, because we use SCTP for WebRTC data channels.
+    meson_options = {'sctp_inet': 'false', 'sctp_inet6': 'false'}
+
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
     patches = [# https://github.com/sctplab/usrsctp/pull/401
                name + '/0001-meson-Dependencies-go-on-the-shared-library.patch',
                # https://github.com/sctplab/usrsctp/pull/402
-               name + '/0001-meson-add-support-for-android-ios-host_system.patch',
-               name + '/0001-build-include-ifaddrs.c-definition-for-android.patch',
-               # https://github.com/sctplab/usrsctp/pull/403
-               name + '/0001-meson-Add-support-for-building-on-Android.patch',]
+               name + '/0001-meson-add-support-for-android-ios-host_system.patch',]
 
     def prepare(self):
         if self.using_msvc():
