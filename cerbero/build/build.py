@@ -257,13 +257,21 @@ class ModifyEnvBase:
                 # @modify_environment when we return from the build step but
                 # other env vars won't be, so add those.
                 self.set_env (var, None, when='now-with-restore')
+
+            if self.using_msvc():
+                # Restore msvc toolchain env which should be preserved
+                for key, (val, sep) in self.config.msvc_toolchain_env.items():
+                    if var == key:
+                        self.set_env(var, val, sep=sep, when='now')
+                        break
+
         # Re-add *FLAGS that weren't set by the toolchain config, but instead
         # were set in the recipe or other places via @modify_environment
         if self.using_msvc():
             for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
                         'LDFLAGS', 'OBJLDFLAGS'):
                 if var in self._new_env:
-                    self.set_env (var, self._new_env[var], when='now')
+                    self.append_env (var, self._new_env[var], when='now')
 
     def check_reentrancy(self):
         if self._old_env:
