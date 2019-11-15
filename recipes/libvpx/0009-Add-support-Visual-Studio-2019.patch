@@ -1,0 +1,91 @@
+From a1321a6e6972920a286a581e68b0f2c5dc581803 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha.yang@navercorp.com>
+Date: Fri, 15 Nov 2019 19:29:02 +0900
+Subject: [PATCH 9/9] Add support Visual Studio 2019
+
+Apply the commit manually
+https://chromium.googlesource.com/webm/libvpx/+/daefbf2a6f5a2a9334355845396fa5f2fdccbaa5
+---
+ build/make/gen_msvs_sln.sh     | 5 ++++-
+ build/make/gen_msvs_vcxproj.sh | 7 +++++--
+ configure                      | 2 ++
+ 3 files changed, 11 insertions(+), 3 deletions(-)
+
+diff --git a/build/make/gen_msvs_sln.sh b/build/make/gen_msvs_sln.sh
+index 401223a..7c995ed 100644
+--- a/build/make/gen_msvs_sln.sh
++++ b/build/make/gen_msvs_sln.sh
+@@ -215,7 +215,7 @@ for opt in "$@"; do
+     ;;
+     --ver=*) vs_ver="$optval"
+              case $optval in
+-             10|11|12|14|15)
++             10|11|12|14|15|16)
+              ;;
+              *) die Unrecognized Visual Studio Version in $opt
+              ;;
+@@ -246,6 +246,9 @@ case "${vs_ver:-10}" in
+     15) sln_vers="12.00"
+        sln_vers_str="Visual Studio 2017"
+     ;;
++    16) sln_vers="12.00"
++       sln_vers_str="Visual Studio 2019"
++    ;;
+ esac
+ sfx=vcxproj
+ 
+diff --git a/build/make/gen_msvs_vcxproj.sh b/build/make/gen_msvs_vcxproj.sh
+index 9a9e939..01339d3 100644
+--- a/build/make/gen_msvs_vcxproj.sh
++++ b/build/make/gen_msvs_vcxproj.sh
+@@ -168,7 +168,7 @@ for opt in "$@"; do
+         --ver=*)
+             vs_ver="$optval"
+             case "$optval" in
+-                10|11|12|14|15)
++                10|11|12|14|15|16)
+                 ;;
+                 *) die Unrecognized Visual Studio Version in $opt
+                 ;;
+@@ -218,7 +218,7 @@ guid=${guid:-`generate_uuid`}
+ asm_use_custom_step=false
+ uses_asm=${uses_asm:-false}
+ case "${vs_ver:-11}" in
+-    10|11|12|14|15)
++    10|11|12|14|15|16)
+        asm_use_custom_step=$uses_asm
+     ;;
+ esac
+@@ -353,6 +353,9 @@ generate_vcxproj() {
+             if [ "$vs_ver" = "15" ]; then
+                 tag_content PlatformToolset v141
+             fi
++            if [ "$vs_ver" = "16" ]; then
++                tag_content PlatformToolset v142
++            fi
+             tag_content CharacterSet Unicode
+             if [ "$config" = "Release" ]; then
+                 tag_content WholeProgramOptimization true
+diff --git a/configure b/configure
+index 05072b9..f9f6c89 100644
+--- a/configure
++++ b/configure
+@@ -141,6 +141,7 @@ all_platforms="${all_platforms} x86-win32-vs11"
+ all_platforms="${all_platforms} x86-win32-vs12"
+ all_platforms="${all_platforms} x86-win32-vs14"
+ all_platforms="${all_platforms} x86-win32-vs15"
++all_platforms="${all_platforms} x86-win32-vs16"
+ all_platforms="${all_platforms} x86_64-android-gcc"
+ all_platforms="${all_platforms} x86_64-darwin9-gcc"
+ all_platforms="${all_platforms} x86_64-darwin10-gcc"
+@@ -160,6 +161,7 @@ all_platforms="${all_platforms} x86_64-win64-vs11"
+ all_platforms="${all_platforms} x86_64-win64-vs12"
+ all_platforms="${all_platforms} x86_64-win64-vs14"
+ all_platforms="${all_platforms} x86_64-win64-vs15"
++all_platforms="${all_platforms} x86_64-win64-vs16"
+ all_platforms="${all_platforms} generic-gnu"
+ 
+ # all_targets is a list of all targets that can be configured
+-- 
+2.20.1.windows.1
+

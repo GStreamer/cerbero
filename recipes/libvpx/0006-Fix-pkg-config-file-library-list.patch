@@ -1,7 +1,7 @@
-From 60fb5626411d3b1cd261195e0268e6228a206243 Mon Sep 17 00:00:00 2001
+From 919901e0db38c0e7902271732741328e4c231903 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 31 Aug 2018 13:13:30 +0530
-Subject: [PATCH 6/7] Fix pkg-config file library list
+Subject: [PATCH 6/9] Fix pkg-config file library list
 
 -lm was duplicated, and -lpthread should never be used. It should be
 -pthread.
@@ -26,5 +26,5 @@ index a3e2f9d..b983aed 100644
  	$(qexec)echo 'Cflags: -I$${includedir}' >> $@
  INSTALL-LIBS-yes += $(LIBSUBDIR)/pkgconfig/vpx.pc
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

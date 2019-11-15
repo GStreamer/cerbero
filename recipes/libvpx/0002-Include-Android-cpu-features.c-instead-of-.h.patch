@@ -1,7 +1,7 @@
-From 0d50941e94552332805e511549e730da3ec440c1 Mon Sep 17 00:00:00 2001
+From e1050ce096752bdd3cd4060f41df425402d86999 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Tue, 9 Oct 2012 13:48:12 +0200
-Subject: [PATCH 2/7] Include Android cpu-features.c instead of .h
+Subject: [PATCH 2/9] Include Android cpu-features.c instead of .h
 
 ---
  vpx_ports/arm_cpudetect.c | 2 +-
@@ -21,5 +21,5 @@ index 4f9d480..8675c09 100644
  int arm_cpu_caps(void) {
    int flags;
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

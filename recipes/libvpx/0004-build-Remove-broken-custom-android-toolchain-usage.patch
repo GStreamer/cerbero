@@ -1,7 +1,7 @@
-From a3ec4e88b8a481aab5d2551774f74884312e280f Mon Sep 17 00:00:00 2001
+From bd4ae964fcd9600690c75f50afdf9126022c7fcb Mon Sep 17 00:00:00 2001
 From: Edward Hervey <bilboed@bilboed.com>
 Date: Sat, 14 Feb 2015 15:08:37 +0100
-Subject: [PATCH 4/7] build: Remove (broken) custom android toolchain usage
+Subject: [PATCH 4/9] build: Remove (broken) custom android toolchain usage
 
 Amazed no one complained earlier, it was always picking the arm
 toolchain.
@@ -49,5 +49,5 @@ index cf1dd6a..e57df6f 100644
              enable_feature pic
              soft_enable realtime_only
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

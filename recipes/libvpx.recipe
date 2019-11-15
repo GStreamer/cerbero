@@ -36,7 +36,9 @@ class Recipe(recipe.Recipe):
                'libvpx/0005-Add-visibility-protected-attribute-for-global-variab.patch',
                'libvpx/0006-Fix-pkg-config-file-library-list.patch',
                'libvpx/0007-Always-generate-a-pkg-config-file-and-don-t-require-.patch',
-               'libvpx/0001-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
+               'libvpx/0008-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
+               # Supported after 1.8.1 release, drop patch then
+               'libvpx/0009-Add-support-Visual-Studio-2019.patch',
                ]
 
     files_libs = ['libvpx']
@@ -44,18 +46,6 @@ class Recipe(recipe.Recipe):
 
     # libvpx does not have check target
     make_check = None
-
-    def vpx_using_msvc(self):
-        if not self.using_msvc():
-            return False
-        # libvpx supports VS 2015 and VS 2017
-        if self.config.msvc_version not in ('vs14', 'vs15'):
-            # If we're not going to be using MSVC, remove its flags
-            for cflag in self.config.msvc_toolchain_env['CFLAGS']:
-                if cflag:
-                    self.remove_env('CFLAGS', cflag)
-            return False
-        return True
 
     def prepare(self):
         compiler = 'gcc'
@@ -94,7 +84,7 @@ class Recipe(recipe.Recipe):
                 platform = 'win32'
                 if not self.using_msvc():
                     self.append_env('CFLAGS', '-mstackrealign')
-            if self.vpx_using_msvc():
+            if self.using_msvc():
                 compiler = self.config.msvc_version
             self.library_type = LibraryType.STATIC
         # FIXME:
@@ -151,7 +141,7 @@ class Recipe(recipe.Recipe):
         super().install()
 
     def post_install(self):
-        if self.vpx_using_msvc():
+        if self.using_msvc():
             if self.config.target_arch == Architecture.X86_64:
                 subdir = 'x64'
             else:

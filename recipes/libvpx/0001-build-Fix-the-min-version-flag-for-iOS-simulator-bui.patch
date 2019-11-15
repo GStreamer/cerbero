@@ -1,7 +1,7 @@
-From 98a988673027ee18a294e2366d16d8a0c9996e35 Mon Sep 17 00:00:00 2001
+From 57d6b23dabc50f2cb62a8f59ad57353925f0a967 Mon Sep 17 00:00:00 2001
 From: Arun Raghavan <arun@centricular.com>
 Date: Fri, 20 Feb 2015 16:38:58 +0530
-Subject: [PATCH 1/7] build: Fix the min version flag for iOS simulator builds
+Subject: [PATCH 1/9] build: Fix the min version flag for iOS simulator builds
 
 ---
  build/make/configure.sh | 4 ++--
@@ -23,5 +23,5 @@ index 683b430..cf1dd6a 100644
        if [ -d "${iossim_sdk_dir}" ]; then
          add_cflags  "-isysroot ${iossim_sdk_dir}"
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

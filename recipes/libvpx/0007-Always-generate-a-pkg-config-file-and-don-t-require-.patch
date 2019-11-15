@@ -1,7 +1,7 @@
-From e638afc4750ec31a675691cd31bf620d220087a8 Mon Sep 17 00:00:00 2001
+From 57d7d4c9c8d7b44f402969be058ff80e7622c660 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 22 Nov 2018 22:28:07 +0530
-Subject: [PATCH 7/7] Always generate a pkg-config file and don't require
+Subject: [PATCH 7/9] Always generate a pkg-config file and don't require
  latest bash
 
 Shell script uses `declare -n` but our bash is too old to support
@@ -46,5 +46,5 @@ index b983aed..4e8fc28 100644
  #
  # Rule to make assembler configuration file from C configuration file
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

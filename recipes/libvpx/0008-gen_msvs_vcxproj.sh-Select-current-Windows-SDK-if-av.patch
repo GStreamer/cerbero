@@ -1,7 +1,8 @@
-From 882bf3cdd9d75e49f94933a103986d00c5c0b89b Mon Sep 17 00:00:00 2001
+From 97dff2a6b03fdaba98dd7329487ba9b1de8edabe Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 26 Feb 2019 19:16:19 +0530
-Subject: [PATCH] gen_msvs_vcxproj.sh: Select current Windows SDK if available
+Subject: [PATCH 8/9] gen_msvs_vcxproj.sh: Select current Windows SDK if
+ available
 
 If WindowsTargetPlatformVersion is omitted, Visual Studio defaults to
 the Windows 8.1 SDK. This is obviously wrong since we always use the
@@ -11,7 +12,7 @@ latest Windows 10 SDK. Force the project file to do so.
  1 file changed, 3 insertions(+)
 
 diff --git a/build/make/gen_msvs_vcxproj.sh b/build/make/gen_msvs_vcxproj.sh
-index 171d0b9..788a462 100644
+index 171d0b9..9a9e939 100644
 --- a/build/make/gen_msvs_vcxproj.sh
 +++ b/build/make/gen_msvs_vcxproj.sh
 @@ -295,6 +295,9 @@ generate_vcxproj() {

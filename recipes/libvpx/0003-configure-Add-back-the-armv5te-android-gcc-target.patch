@@ -1,7 +1,7 @@
-From 5fd2fae327763b60abe32019bdc01381b2fcdfe0 Mon Sep 17 00:00:00 2001
+From 0cdacb06b277a3b0e508a35593ba76095ba8a0bd Mon Sep 17 00:00:00 2001
 From: Arun Raghavan <arun@centricular.com>
 Date: Sun, 22 Feb 2015 21:20:50 +0530
-Subject: [PATCH 3/7] configure: Add back the armv5te-android-gcc target
+Subject: [PATCH 3/9] configure: Add back the armv5te-android-gcc target
 
 We need this to be able to build for pre-armv7 Android devices.
 ---
@@ -21,5 +21,5 @@ index e5a74c6..05072b9 100644
  all_platforms="${all_platforms} mips32-linux-gcc"
  all_platforms="${all_platforms} mips64-linux-gcc"
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 

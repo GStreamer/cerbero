@@ -1,7 +1,7 @@
-From e6d40bf04cecc9b84f9ed46597e8cc4ab558cade Mon Sep 17 00:00:00 2001
+From b222bb1f6b719205b27654b860ad2c0e3f3ccd2c Mon Sep 17 00:00:00 2001
 From: Rahul Chaudhry <rahulchaudhry@google.com>
 Date: Tue, 9 May 2017 12:00:58 -0700
-Subject: [PATCH 5/7] Add visibility="protected" attribute for global variables
+Subject: [PATCH 5/9] Add visibility="protected" attribute for global variables
  referenced in asm files.
 
 During aosp builds with binutils-2.27, we're seeing linker error
@@ -73,5 +73,5 @@ index bfef783..35751ce 100644
  #define __builtin_prefetch(x)
  #endif
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 
