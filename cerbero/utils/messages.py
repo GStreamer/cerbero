@@ -58,7 +58,7 @@ class StdoutManager:
         self.clear_lines = 0
 
     def clear_status (self):
-        if console_is_interactive():
+        if console_is_interactive() and sys.platform != 'win32':
             clear_prev_status = SHELL_CLEAR_LINE + "".join((SHELL_CLEAR_LINE + SHELL_MOVE_UP for i in range(self.clear_lines)))
             sys.stdout.write(clear_prev_status)
             sys.stdout.flush()
