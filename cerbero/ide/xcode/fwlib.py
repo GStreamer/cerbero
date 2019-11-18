@@ -27,6 +27,7 @@ import collections
 from collections import defaultdict
 
 from cerbero.config import Distro, Architecture
+from cerbero.errors import FatalError
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.utils import shell, run_tasks, run_until_complete
 from cerbero.utils import messages as m

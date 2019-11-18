@@ -25,6 +25,7 @@ import subprocess
 from pathlib import Path
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
+from cerbero.errors import FatalError
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 

@@ -3,7 +3,6 @@ import shlex
 from cerbero.build.build import async_modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell, messages
-from cerbero.errors import FatalError
 
 class Recipe(recipe.Recipe):
     name = 'openssl'

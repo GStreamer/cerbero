@@ -1,7 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shlex
 import shutil
-from cerbero.errors import FatalError
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.tools.libtool import get_libtool_versions
 
@@ -141,7 +140,7 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.WINDOWS:
             self.meson_options.update({'iconv': 'native'})
         # Other platforms don't provide libiconv, so we build it
-        else: 
+        else:
             self.deps.append('libiconv')
             self.meson_options.update({'iconv': 'gnu'})
 
