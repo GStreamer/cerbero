@@ -28,7 +28,7 @@ from cerbero.enums import Architecture, Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell, run_until_complete, run_tasks, determine_num_of_cpus
-from cerbero.utils import messages as m
+from cerbero.utils import add_system_libs, messages as m
 from cerbero.utils.shell import BuildStatusPrinter
 from cerbero.build.recipe import BuildSteps
 
@@ -403,8 +403,11 @@ class Oven (object):
             msg += _("Select an action to proceed:")
             action = shell.prompt_multiple(msg, RecoveryActions())
             if action == RecoveryActions.SHELL:
+                environ = recipe.config.env.copy()
+                if recipe.use_system_libs:
+                    add_system_libs(recipe.config, environ, environ)
                 shell.enter_build_environment(self.config.target_platform,
-                        be.arch, recipe.get_for_arch (be.arch, 'build_dir'), env=recipe.config.env)
+                        be.arch, recipe.get_for_arch (be.arch, 'build_dir'), env=environ)
                 raise be
             elif action == RecoveryActions.RETRY_ALL:
                 shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
