@@ -32,7 +32,8 @@ from functools import reduce
 SPEC_TPL = '''
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
-%%define debug_package %%{nil}
+%%undefine _debugsource_packages
+%%undefine _debuginfo_subpackages
 
 Name:           %(p_prefix)s%(name)s
 Version:        %(version)s
