@@ -243,7 +243,7 @@ class FetchCache(Command):
             raise FatalError(_("fetch-cache is only available with "
                         "cerbero-uninstalled"))
 
-        git_dir = os.path.dirname(sys.argv[0])
+        git_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
         sha = git.get_hash(git_dir, args.commit)
         deps = self.get_deps(config, args)
         if not args.skip_fetch:
