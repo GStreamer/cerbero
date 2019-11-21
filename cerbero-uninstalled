@@ -1,9 +1,53 @@
-#!/usr/bin/env python3
-import sys
-import os
+#!/bin/sh
+#
+# This file is an abomination. It executes as both a shell script and a python
+# script, and does the same thing in both cases.
+#
+# This is needed because on Windows, python3 is actually `py -3` since all
+# Python installations have `python.exe`. We used to use `python3` in the
+# shebang, but then Windows folks couldn't use `./cerbero-uninstalled` and had
+# to call `py -3 ./cerbero-uninstalled` or `python ./cerbero-uninstalled`
+# depending on their python installation.
+#
+# Now we automatically use `py -3` or `python3` depending on the system.
+#
+# For backwards-compatibility, we now support all those variants.
 
-os.environ['CERBERO_UNINSTALLED']='1'
-sys.path.insert(0, os.path.dirname(__file__))
+"""":
+ARGS=$@
+
+case "$MSYSTEM" in
+    *MINGW*) PYTHON="py -3";;
+    *) PYTHON="python3";;
+esac
+
+native_pwd() {
+    if [ -n "$MSYSTEM" ]; then
+        # Get the win32 PWD, instead of the Cygwin one
+        pwd -W || echo $PWD
+    else
+        echo $PWD
+    fi
+}
+
+$PYTHON -c """
+import os
+import sys
+import shlex
+
+os.environ['CERBERO_UNINSTALLED'] = '1'
+
+# __file__ is not set when we're called with -c
+if '__file__' in locals():
+    curdir = os.path.dirname(__file__)
+else:
+    curdir = '`native_pwd`'
+sys.path.insert(0, os.path.abspath(curdir))
+
+# Need to set sys.argv since we can't pass args when called with -c
+if sys.argv == ['-c']:
+    sys.argv = ['$0'] + shlex.split('$ARGS')
 
 from cerbero.main import main
 main()
+#"""

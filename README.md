@@ -46,8 +46,6 @@ Despite the presence of `setup.py` this tool does not need installation. It is i
 cerbero-uninstalled script, which should be invoked as `./cerbero-uninstalled`, or you can add
 the cerbero directory in your path and invoke it as `cerbero-uninstalled`.
 
-On Windows it should be invoked as "python ./cerbero-uninstalled".
-
 ### Bootstrap
 
 Before using cerbero for the first time, you will need to run the bootstrap
