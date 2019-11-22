@@ -571,8 +571,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         # Get the list of static libraries
         static_files = [x for x in files if x.endswith('.a')]
 
-        fwlib = StaticFrameworkLibrary(libname, libname, static_files,
-            self.config.target_arch)
+        fwlib = StaticFrameworkLibrary(self.config.ios_min_version, self.config.target_distro,
+            libname, libname, static_files, self.config.target_arch)
         fwlib.use_pkgconfig = False
         if self.config.target_arch == Architecture.UNIVERSAL:
             fwlib.universal_archs = self.config.universal_archs

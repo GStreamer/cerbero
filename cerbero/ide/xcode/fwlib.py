@@ -23,7 +23,7 @@ import shutil
 import subprocess
 from collections import defaultdict
 
-from cerbero.config import Architecture
+from cerbero.config import Distro, Architecture
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.utils import shell
 from cerbero.utils import messages as m
@@ -37,8 +37,10 @@ class FrameworkLibrary(object):
     but full paths can be used too with use_pkgconfig=False
     '''
 
-    def __init__(self, libname, install_name, libraries, arch):
+    def __init__(self, min_version, target, libname, install_name, libraries, arch):
         self.libname = libname
+        self.min_version = min_version
+        self.target = target
         self.install_name = install_name
         self.libraries = libraries
         self.arch = arch
@@ -78,9 +80,15 @@ class FrameworkLibrary(object):
 
 class DynamicFrameworkLibrary(FrameworkLibrary):
     def _create_framework_library(self, libraries):
-        libraries = ' '.join(['-Wl,-reexport_library %s' % x for x in libraries])
-        shell.call('clang -dynamiclib -o %s -arch %s -install_name %s %s' %
-                   (self.libname, self.arch, self.install_name, libraries))
+        cmdline  = ['clang', '-dynamiclib', '-o', self.libname, '-arch', self.arch]
+        if self.target == Distro.OS_X:
+            cmdline += ['-mmacosx-version-min=%s' % self.min_version]
+
+        cmdline += ['-install_name', self.install_name]
+        for lib in libraries:
+            cmdline += ['-Wl,-reexport_library', lib]
+
+        shell.new_call(cmdline)
 
     def _get_lib_file_name(self, lib):
         return 'lib%s.dylib' % lib
