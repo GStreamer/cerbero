@@ -368,7 +368,7 @@ class FilesProvider(object):
         '''
         if self.library_type == LibraryType.STATIC:
             return {}
-        libdir = self.extensions['sdir']
+        libdir = self.extensions['sdir'] + self.config.lib_suffix
         libext = self.extensions['srext']
         libregex = self.extensions['sregex']
         if libregex:
