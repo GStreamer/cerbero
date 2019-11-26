@@ -1,0 +1,38 @@
+From dd8fc003d4c3c0e622b61885367c29a1ddd27af9 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 26 Nov 2019 23:45:19 +0530
+Subject: [PATCH] giomodule: gio modules are no longer installed in bindir on
+ MSVC
+
+Ever since the port to Meson, gio modules (f.ex., by glib-networking)
+are installed inside libdir both for MinGW and MSVC.
+---
+ gio/giomodule.c | 9 ---------
+ 1 file changed, 9 deletions(-)
+
+diff --git a/gio/giomodule.c b/gio/giomodule.c
+index 10c608b..2b3dfb1 100644
+--- a/gio/giomodule.c
++++ b/gio/giomodule.c
+@@ -1076,18 +1076,9 @@ get_gio_module_dir (void)
+       gchar *install_dir;
+ 
+       install_dir = g_win32_get_package_installation_directory_of_module (gio_dll);
+-#ifdef _MSC_VER
+-      /* On Visual Studio builds we have all the libraries and binaries in bin
+-       * so better load the gio modules from bin instead of lib
+-       */
+-      module_dir = g_build_filename (install_dir,
+-                                     "bin", "gio", "modules",
+-                                     NULL);
+-#else
+       module_dir = g_build_filename (install_dir,
+                                      "lib", "gio", "modules",
+                                      NULL);
+-#endif
+       g_free (install_dir);
+ #else
+       module_dir = g_strdup (GIO_MODULE_DIR);
+-- 
+2.23.0
+
