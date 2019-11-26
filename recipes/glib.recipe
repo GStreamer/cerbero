@@ -57,6 +57,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-gio-Also-support-modules-built-with-MSVC.patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/187
                'glib/0001-meson-use-the-new-python-module-instead-of-the-pytho.patch',
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/1254
+               'glib/0001-giomodule-gio-modules-are-no-longer-installed-in-bin.patch',
               ]
 
     files_libs = [
