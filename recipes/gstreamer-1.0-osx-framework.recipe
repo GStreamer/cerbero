@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
+    files_bins = ['pkg-config']
     files_library = ['lib/GStreamer']
 
     async def _get_installed_gst_libs(self):
@@ -41,3 +42,9 @@ class Recipe(recipe.Recipe):
             raise FatalError('No gstreamer libraries were found in the prefix!')
         fwlib = DynamicFrameworkLibrary(self.config.min_osx_sdk_version, self.config.target_distro, install_name, install_name, libs, self.config.target_arch, env=self.env)
         fwlib.create()
+        # Copy pkg-config binary for projects that can't use the framework,
+        # f.ex., the gstreamer rust bindings. This binary is standalone, so we
+        # do not need to mangle the install_name entries.
+        pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config')
+        bindir = os.path.join(self.config.prefix, 'bin')
+        shutil.copy(pkgconfig, bindir)
