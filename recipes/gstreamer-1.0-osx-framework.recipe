@@ -1,34 +1,42 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+import re
+from cerbero.utils.shell import check_output
 from cerbero.ide.xcode.fwlib import DynamicFrameworkLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gstreamer-1.0-osx-framework'
     version = '0.1'
-    licenses = []
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
     files_library = ['lib/GStreamer']
 
+    def _get_installed_gst_libs(self):
+        args = [self.env['PKG_CONFIG'], '--list-all']
+        out = check_output(args, logfile=self.logfile)
+        gstlibs = []
+        gstlib_regex = re.compile(r'^(gstreamer-.*1\.0)\s+')
+        for line in out.split('\n'):
+            m = gstlib_regex.search(line)
+            # Not a gstreamer pkgconfig file
+            if not m:
+                continue
+            gstlib = m.groups()[0]
+            # Not a gstreamer library pkgconfig file
+            if 'gstreamer-plugins-' in gstlib:
+                continue
+            # The gst-rtsp-server library should not be in this; only core,
+            # base, and bad libraries are allowed.
+            if 'rtsp-server' in gstlib:
+                continue
+            gstlibs.append(gstlib)
+        return gstlibs
+
     def install(self):
         install_name = os.path.join(self.config.prefix, 'lib', 'GStreamer')
-        libs = [ # GStreamer core
-                'gstreamer-1.0', 'gstreamer-base-1.0',
-                'gstreamer-controller-1.0', 'gstreamer-net-1.0',
-                # gst-plugins-base
-                'gstreamer-allocators-1.0', 'gstreamer-app-1.0',
-                'gstreamer-audio-1.0', 'gstreamer-fft-1.0',
-                'gstreamer-pbutils-1.0', 'gstreamer-riff-1.0',
-                'gstreamer-rtp-1.0', 'gstreamer-rtsp-1.0',
-                'gstreamer-sdp-1.0', 'gstreamer-tag-1.0',
-                'gstreamer-video-1.0', 'gstreamer-gl-1.0',
-                # gst-plugins-bad
-                'gstreamer-bad-audio-1.0',
-                'gstreamer-codecparsers-1.0',
-                'gstreamer-insertbin-1.0', 'gstreamer-mpegts-1.0',
-                'gstreamer-player-1.0'
-                ]
+        libs = self._get_installed_gst_libs()
+        if not libs:
+            raise FatalError('No gstreamer libraries were found in the prefix!')
         fwlib = DynamicFrameworkLibrary(self.config.min_osx_sdk_version, self.config.target_distro, install_name, install_name, libs, self.config.target_arch)
         fwlib.create()
