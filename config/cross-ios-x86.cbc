@@ -1,5 +1,0 @@
-from cerbero.config import Platform, Architecture, Distro, DistroVersion
-
-target_platform=Platform.IOS
-target_arch=Architecture.X86
-target_distro=Distro.IOS
