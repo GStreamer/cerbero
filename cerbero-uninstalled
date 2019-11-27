@@ -26,7 +26,7 @@ native_pwd() {
         # Get the win32 PWD, instead of the Cygwin one
         pwd -W || echo $PWD
     else
-        echo $PWD
+        echo `dirname "$0"`
     fi
 }
 
