@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # This file is an abomination. It executes as both a shell script and a python
 # script, and does the same thing in both cases.
@@ -14,6 +14,8 @@
 # For backwards-compatibility, we now support all those variants.
 
 """":
+set -e
+
 ARGS=$@
 
 case "$MSYSTEM" in
@@ -21,12 +23,38 @@ case "$MSYSTEM" in
     *) PYTHON="python3";;
 esac
 
-native_pwd() {
+# Use `msysmnt` to get a list of MSYS mount points that the MinGW shell uses.
+# That's our reference point for translating from MSYS paths to Win32 paths.
+# We assume that the MSYS mount point directories are only in the filesystem
+# root. This will break if people add their own custom mount points beyond what
+# MSYS automatically creates, which is highly unlikely.
+msys_dir_to_win32() {
+    local msys_path stripped_path mount_point path mounted_path
+    # Convert /c or /mingw etc to /c/ or /mingw/ etc; gives us a necessary
+    # anchor to split the path into components
+    msys_path="$1/"
+    # Strip leading slash
+    stripped_path="${msys_path#/}"
+    # Get the first path component, which may be a mount point
+    mount_point="/${stripped_path%%/*}"
+    # Get the path inside the mountp oint
+    path="/${stripped_path#*/}"
+    mounted_path="$(msysmnt | sed -n "s|\(.*\) on $mount_point type.*|\1|p")"
+    # If it's not a mounted path (like /c or /tmp or /mingw), then it's in the
+    # general MSYS root mount
+    if [[ -z $mounted_path ]]; then
+        mounted_path="$(msysmnt | sed -n "s|\(.*\) on / type.*|\1|p")"
+        path="$1"
+    fi
+    echo ${mounted_path}${path}
+}
+
+get_scriptdir() {
     if [ -n "$MSYSTEM" ]; then
-        # Get the win32 PWD, instead of the Cygwin one
-        pwd -W || echo $PWD
+        # Get the win32 path, instead of the Cygwin one
+        msys_dir_to_win32 "$(dirname $0)"
     else
-        echo `dirname "$0"`
+        dirname "$0"
     fi
 }
 
@@ -41,7 +69,7 @@ os.environ['CERBERO_UNINSTALLED'] = '1'
 if '__file__' in locals():
     curdir = os.path.dirname(__file__)
 else:
-    curdir = '`native_pwd`'
+    curdir = '`get_scriptdir`'
 sys.path.insert(0, os.path.abspath(curdir))
 
 # Need to set sys.argv since we can't pass args when called with -c
