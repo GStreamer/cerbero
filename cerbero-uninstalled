@@ -1,7 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 #
 # This file is an abomination. It executes as both a shell script and a python
 # script, and does the same thing in both cases.
+#
+# Note that this script uses bash syntax but the shebang is `#!/bin/sh` on
+# purpose. This is because the bash code only runs on MSYS and `/bin/sh` is
+# bash there. macOS will stop shipping bash at some point (post-Catalina), so
+# we should not use `#!/bin/bash` as the shebang. Current code is compatible
+# on non-MSYS platforms with: bash, dash, zsh.
 #
 # This is needed because on Windows, python3 is actually `py -3` since all
 # Python installations have `python.exe`. We used to use `python3` in the
@@ -14,9 +20,9 @@
 # For backwards-compatibility, we now support all those variants.
 
 """":
-set -e
 
 ARGS=$@
+SCRIPTDIR="`dirname $0`"
 
 case "$MSYSTEM" in
     *MINGW*) PYTHON="py -3";;
@@ -28,7 +34,16 @@ esac
 # We assume that the MSYS mount point directories are only in the filesystem
 # root. This will break if people add their own custom mount points beyond what
 # MSYS automatically creates, which is highly unlikely.
+#
+# /d -> d:/
+# /c -> c:/
+# /d/projects/cerbero -> d:/projects/cerbero/
+# /home/USERNAME/cerbero -> C:\MinGW\msys\1.0/home/USERNAME/
+# /mingw -> C:\MinGW/
+# /mingw/bin/foobar -> C:\MinGW\bin/foobar/
+# /tmp/baz -> C:\Users\USERNAME\AppData\Local\Temp/baz/
 msys_dir_to_win32() {
+    set -e
     local msys_path stripped_path mount_point path mounted_path
     # Convert /c or /mingw etc to /c/ or /mingw/ etc; gives us a necessary
     # anchor to split the path into components
@@ -52,9 +67,9 @@ msys_dir_to_win32() {
 get_scriptdir() {
     if [ -n "$MSYSTEM" ]; then
         # Get the win32 path, instead of the Cygwin one
-        msys_dir_to_win32 "$(dirname $0)"
+        msys_dir_to_win32 "$SCRIPTDIR"
     else
-        dirname "$0"
+        echo $SCRIPTDIR
     fi
 }
 
