@@ -6,11 +6,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.7.0'
+    version = 'v1.8.1'
     stype = SourceType.TARBALL
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
-    tarball_checksum = '1fec931eb5c94279ad219a5b6e0202358e94a93a90cfb1603578c326abfc1238'
+    tarball_checksum = 'df19b8f24758e90640e1ab228ab4a4676ec3df19d23e4593375e6f3847dee03e'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
     btype = BuildType.MAKEFILE
     configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s " \
@@ -27,30 +27,24 @@ class Recipe(recipe.Recipe):
     # power of awesome hacks
     can_msvc = True
 
-    patches = ['libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
-               'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
-               'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
-               'libvpx/0004-build-Remove-broken-custom-android-toolchain-usage.patch',
-               # Taken from AOSP: https://android.googlesource.com/platform/external/libvpx/+/android-o-mr1-iot-release-1.0.3/
-               'libvpx/0005-Add-visibility-protected-attribute-for-global-variab.patch',
-               'libvpx/0006-Fix-pkg-config-file-library-list.patch',
-               'libvpx/0007-Always-generate-a-pkg-config-file-and-don-t-require-.patch',
-               'libvpx/0001-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
-               ]
+    patches = [
+        'libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
+        'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
+        'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
+        'libvpx/0004-Fix-pkg-config-file-library-list.patch',
+        'libvpx/0005-Always-generate-a-pkg-config-file.patch',
+        'libvpx/0006-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
+        # From upstream git master, remove on bump
+        'libvpx/0007-remove-old-visual-studio-remnants.patch',
+        # From upstream git master, remove on bump
+        'libvpx/0008-support-visual-studio-2019-vs16.patch',
+    ]
 
     files_libs = ['libvpx']
     files_devel = ['include/vpx', 'lib/pkgconfig/vpx.pc']
 
     # libvpx does not have check target
     make_check = None
-
-    def using_msvc(self):
-        if not super(Recipe, self).using_msvc():
-            return False
-        # libvpx supports VS 2015 and VS 2017
-        if self.config.msvc_version not in ('vs14', 'vs15'):
-            return False
-        return True
 
     def prepare(self):
         compiler = 'gcc'
@@ -118,12 +112,15 @@ class Recipe(recipe.Recipe):
                 arch = 'armv5te'
             elif self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
-            self.config_sh = 'LD=$CC ./configure'
+            # Build system passes gcc arguments to $LD
+            self.set_env('LD', self.get_env('CC'))
             self.configure_options.replace('--as=nasm', '')
-            self.configure_options += ' --sdk-path=%s ' % self.config.toolchain_prefix
         else:
             self.configure_options += '--enable-shared '
             platform = 'linux'
+            # Build system passes gcc arguments (f.ex., -m64) to $LD when
+            # checking for libraries (f.ex. -lpthread)
+            self.set_env('LD', self.get_env('CC'))
 
         self.configure_options += ' --disable-examples '
 
@@ -168,7 +165,7 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             # Fixup the id of the dylib
-            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.5.dylib')
+            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.6.dylib')
             vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
             shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib]))
             shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver]))

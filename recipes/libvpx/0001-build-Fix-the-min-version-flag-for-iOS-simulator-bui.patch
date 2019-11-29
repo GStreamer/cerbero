@@ -1,18 +1,18 @@
-From 98a988673027ee18a294e2366d16d8a0c9996e35 Mon Sep 17 00:00:00 2001
+From 4bf901b3891a7c767d42f6c49756dd0bbe833ea1 Mon Sep 17 00:00:00 2001
 From: Arun Raghavan <arun@centricular.com>
 Date: Fri, 20 Feb 2015 16:38:58 +0530
-Subject: [PATCH 1/7] build: Fix the min version flag for iOS simulator builds
+Subject: [PATCH 1/8] build: Fix the min version flag for iOS simulator builds
 
 ---
  build/make/configure.sh | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/build/make/configure.sh b/build/make/configure.sh
-index 683b430..cf1dd6a 100644
+index 472e7de..4f3b32b 100644
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
-@@ -886,8 +886,8 @@ process_common_toolchain() {
-       add_ldflags "-mmacosx-version-min=10.12"
+@@ -932,8 +932,8 @@ process_common_toolchain() {
+       add_ldflags "-mmacosx-version-min=10.13"
        ;;
      *-iphonesimulator-*)
 -      add_cflags  "-miphoneos-version-min=${IOS_VERSION_MIN}"
@@ -23,5 +23,5 @@ index 683b430..cf1dd6a 100644
        if [ -d "${iossim_sdk_dir}" ]; then
          add_cflags  "-isysroot ${iossim_sdk_dir}"
 -- 
-2.18.0.windows.1
+2.20.1.windows.1
 
