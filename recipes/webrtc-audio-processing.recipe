@@ -41,7 +41,9 @@ class Recipe(recipe.Recipe):
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/merge_requests/1
                 'webrtc-audio-processing/0001-Initial-meson-build-files.patch',
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/merge_requests/2
-                'webrtc-audio-processing/0001-build-meson-fix-compilation-on-arm64.patch',]
+                'webrtc-audio-processing/0001-build-meson-fix-compilation-on-arm64.patch',
+                # https://gitlab.freedesktop.org/gstreamer/cerbero/issues/216
+                'webrtc-audio-processing/0001-Disable-SSE2-codepaths-on-x86-windows.patch',]
 
     files_libs = ['libwebrtc_audio_processing']
     files_devel = ['include/webrtc_audio_processing', 'lib/pkgconfig/webrtc-audio-processing.pc']

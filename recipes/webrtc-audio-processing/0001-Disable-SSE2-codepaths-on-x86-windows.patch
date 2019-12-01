@@ -1,0 +1,26 @@
+From 5109cdef1f2bb0a07304159b20bb1bb832c48909 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sun, 1 Dec 2019 16:11:24 +0530
+Subject: [PATCH] Disable SSE2 codepaths on x86 windows
+
+Closes https://gitlab.freedesktop.org/gstreamer/cerbero/issues/216
+---
+ webrtc/system_wrappers/source/cpu_features.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/webrtc/system_wrappers/source/cpu_features.cc b/webrtc/system_wrappers/source/cpu_features.cc
+index 49840eb..6000d6d 100644
+--- a/webrtc/system_wrappers/source/cpu_features.cc
++++ b/webrtc/system_wrappers/source/cpu_features.cc
+@@ -47,7 +47,7 @@ static inline void __cpuid(int cpu_info[4], int info_type) {
+ #endif  // _MSC_VER
+ #endif  // WEBRTC_ARCH_X86_FAMILY
+ 
+-#if defined(WEBRTC_ARCH_X86_FAMILY)
++#if defined(WEBRTC_ARCH_X86_FAMILY) && !(defined(_WIN32) && defined(WEBRTC_ARCH_X86))
+ // Actual feature detection for x86.
+ static int GetCPUInfo(CPUFeature feature) {
+   int cpu_info[4];
+-- 
+2.23.0
+
