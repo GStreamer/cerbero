@@ -1,7 +1,7 @@
-From 765ceaa719afa93cad006ad7f569658ffbce12b2 Mon Sep 17 00:00:00 2001
+From 84ffa12097e5654ebf9ba957df076c4dcf147c02 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Mon, 30 Apr 2018 11:45:25 -0400
-Subject: [PATCH 2/5] srt: Fix MingW build
+Subject: [PATCH 1/8] srt: Fix MingW build
 
 ---
  CMakeLists.txt       | 6 +++++-
@@ -11,10 +11,10 @@ Subject: [PATCH 2/5] srt: Fix MingW build
  4 files changed, 21 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 3b5cfde..6014376 100644
+index daec198..fec872c 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -320,7 +320,7 @@ if (${ENABLE_PROFILE} AND HAVE_COMPILER_GNU_COMPAT)
+@@ -338,7 +338,7 @@ if (${ENABLE_PROFILE} AND HAVE_COMPILER_GNU_COMPAT)
  endif()
  
  if (MINGW)
@@ -23,7 +23,7 @@ index 3b5cfde..6014376 100644
  	# XXX CONSIDER THIS. It came from a merged previous master version
  	# and was under an if(NOT MINGW)...elseif(THREADS_FOUND) condition.
  	# Might be that the current form still suffices; resolve this and remove comment.
-@@ -443,6 +443,8 @@ if (srt_libspec_shared)
+@@ -461,6 +461,8 @@ if (srt_libspec_shared)
  	target_link_libraries(${TARGET_srt}_shared PRIVATE ${SSL_LIBRARIES})
  	if (MICROSOFT)
  		target_link_libraries(${TARGET_srt}_shared PRIVATE ws2_32.lib)
@@ -32,7 +32,7 @@ index 3b5cfde..6014376 100644
  	endif()
  endif()
  
-@@ -467,6 +469,8 @@ if (srt_libspec_static)
+@@ -485,6 +487,8 @@ if (srt_libspec_static)
  	target_link_libraries(${TARGET_srt}_static PRIVATE ${SSL_LIBRARIES})
  	if (MICROSOFT)
  		target_link_libraries(${TARGET_srt}_static PRIVATE ws2_32.lib)
@@ -42,7 +42,7 @@ index 3b5cfde..6014376 100644
  endif()
  
 diff --git a/srtcore/api.h b/srtcore/api.h
-index 61a1465..820ac4d 100644
+index e6e9d3f..0ab1726 100644
 --- a/srtcore/api.h
 +++ b/srtcore/api.h
 @@ -271,13 +271,16 @@ inline std::string SockaddrToString(const sockaddr* sadr)
@@ -72,7 +72,7 @@ index 61a1465..820ac4d 100644
      output << ":" << ntohs(((sockaddr_in*)sadr)->sin_port); // TRICK: sin_port and sin6_port have the same offset and size
      return output.str();
 diff --git a/srtcore/srt.h b/srtcore/srt.h
-index 08249d6..a34136e 100644
+index 636a7ed..bff01a0 100644
 --- a/srtcore/srt.h
 +++ b/srtcore/srt.h
 @@ -36,6 +36,14 @@ written by
@@ -113,5 +113,5 @@ index 702324e..6def89d 100644
  	if (rr == 0)
  		return tms;
 -- 
-2.17.0
+2.23.0
 

@@ -16,13 +16,14 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
-    patches = ['srt/0002-srt-Fix-MingW-build.patch',
-               'srt/0003-platform_sys-Only-include-inttypes.h-with-MSFT-compi.patch',
-               'srt/0004-MingW-needs-the-explicit-exports-too.patch',
-               'srt/0005-Windows-Only-define-SRT_API-in-one-place.patch',
-               'srt/0001-Allow-building-using-gnustl.patch',
+    patches = ['srt/0001-srt-Fix-MingW-build.patch',
+               'srt/0002-platform_sys-Only-include-inttypes.h-with-MSFT-compi.patch',
+               'srt/0003-MingW-needs-the-explicit-exports-too.patch',
+               'srt/0004-Windows-Only-define-SRT_API-in-one-place.patch',
+               'srt/0005-Allow-building-using-gnustl.patch',
                'srt/0006-Fix-install_name-in-macOS-using-MACOS_RPATH.patch',
-               'srt/0001-Allow-using-public-API-when-building-with-MSVC.patch',
+               'srt/0007-Allow-using-public-API-when-building-with-MSVC.patch',
+               'srt/0008-Don-t-use-CTimer-in-CUDTUnited-s-constructor.patch',
                ]
 
     def prepare(self):

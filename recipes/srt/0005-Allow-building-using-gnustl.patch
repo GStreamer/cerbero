@@ -1,17 +1,17 @@
-From cd531977c4d20950c22410ebcf1338dd5d0f19e6 Mon Sep 17 00:00:00 2001
+From 067c52a405b87953435077584c94c07658c6f53f Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Sun, 28 Oct 2018 02:10:42 +1100
-Subject: [PATCH] Allow building using gnustl
+Subject: [PATCH 5/8] Allow building using gnustl
 
 ---
  CMakeLists.txt | 14 +++++++++++---
  1 file changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 6014376..478a763 100644
+index fec872c..c31576b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -86,6 +86,7 @@ option(ENABLE_GETNAMEINFO "In-logs sockaddr-to-string should do rev-dns" OFF)
+@@ -87,6 +87,7 @@ option(ENABLE_GETNAMEINFO "In-logs sockaddr-to-string should do rev-dns" OFF)
  option(USE_GNUTLS "Should use gnutls instead of openssl" OFF)
  option(ENABLE_C_DEPS "Extra library dependencies in srt.pc for C language" OFF)
  option(USE_STATIC_LIBSTDCXX "Should use static rather than shared libstdc++" OFF)
@@ -19,7 +19,7 @@ index 6014376..478a763 100644
  
  set(TARGET_srt "srt" CACHE STRING "The name for the haisrt library")
  
-@@ -203,6 +204,12 @@ endif()
+@@ -204,6 +205,12 @@ endif()
  
  message (STATUS "SSL libraries: ${SSL_LIBRARIES}")
  
@@ -32,7 +32,7 @@ index 6014376..478a763 100644
  # Detect if the compiler is GNU compatable for flags
  set(HAVE_COMPILER_GNU_COMPAT 0)
  foreach (gnid GNU Intel Clang AppleClang)
-@@ -440,7 +447,7 @@ if (srt_libspec_shared)
+@@ -458,7 +465,7 @@ if (srt_libspec_shared)
  	set_property(TARGET ${TARGET_srt}_shared PROPERTY OUTPUT_NAME ${TARGET_srt})
      set_target_properties (${TARGET_srt}_shared PROPERTIES VERSION ${SRT_VERSION} SOVERSION ${SRT_VERSION_MAJOR})
  	list (APPEND INSTALL_TARGETS ${TARGET_srt}_shared)
@@ -41,7 +41,7 @@ index 6014376..478a763 100644
  	if (MICROSOFT)
  		target_link_libraries(${TARGET_srt}_shared PRIVATE ws2_32.lib)
  	elseif (MINGW)
-@@ -466,7 +473,7 @@ if (srt_libspec_static)
+@@ -484,7 +491,7 @@ if (srt_libspec_static)
  	endif()
  
  	list (APPEND INSTALL_TARGETS ${TARGET_srt}_static)
@@ -50,7 +50,7 @@ index 6014376..478a763 100644
  	if (MICROSOFT)
  		target_link_libraries(${TARGET_srt}_static PRIVATE ws2_32.lib)
  	elseif (MINGW)
-@@ -488,7 +495,7 @@ endif()
+@@ -506,7 +513,7 @@ endif()
  
  target_include_directories(haicrypt_virtual PRIVATE  ${SSL_INCLUDE_DIRS})
  
@@ -59,7 +59,7 @@ index 6014376..478a763 100644
  
  if (MICROSOFT)
  	set (SRT_LIBS_PRIVATE ${SRT_LIBS_PRIVATE} ws2_32.lib)
-@@ -647,6 +654,7 @@ macro(srt_make_application name)
+@@ -665,6 +672,7 @@ macro(srt_make_application name)
  	set_target_properties(${name} PROPERTIES COMPILE_FLAGS "${CFLAGS_CXX_STANDARD} ${EXTRA_stransmit}" ${FORCE_RPATH})
  
  	target_link_libraries(${name} ${srt_link_library})
@@ -68,5 +68,5 @@ index 6014376..478a763 100644
  
  macro(srt_add_application name sources)
 -- 
-2.19.0
+2.23.0
 

@@ -1,7 +1,7 @@
-From e132d1d403695e7ad89cb4a7d0d9a25e5504df6f Mon Sep 17 00:00:00 2001
+From 8fe36a114593c56cadcb96caa73c2ad5a07c9709 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Mon, 30 Apr 2018 15:57:59 -0400
-Subject: [PATCH 3/5] platform_sys: Only include inttypes.h with MSFT compilers
+Subject: [PATCH 2/8] platform_sys: Only include inttypes.h with MSFT compilers
 
 ---
  srtcore/platform_sys.h | 2 +-
@@ -23,5 +23,5 @@ index 33c4d9b..ce546d2 100644
     #endif
  #else
 -- 
-2.17.0
+2.23.0
 

@@ -1,14 +1,14 @@
-From e8d991de8f8208df1aca804cc14c6ac5efca3ac6 Mon Sep 17 00:00:00 2001
+From ec704c2b1fe9f0027d4218e821f204e8082e0367 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Tue, 1 May 2018 09:39:59 -0400
-Subject: [PATCH 4/5] MingW needs the explicit exports too
+Subject: [PATCH 3/8] MingW needs the explicit exports too
 
 ---
  srtcore/srt.h | 4 ----
  1 file changed, 4 deletions(-)
 
 diff --git a/srtcore/srt.h b/srtcore/srt.h
-index a34136e..1abfe29 100644
+index bff01a0..1c6121f 100644
 --- a/srtcore/srt.h
 +++ b/srtcore/srt.h
 @@ -44,7 +44,6 @@ written by
@@ -30,5 +30,5 @@ index a34136e..1abfe29 100644
     #define SRT_API __attribute__ ((visibility("default")))
  #endif
 -- 
-2.17.0
+2.23.0
 

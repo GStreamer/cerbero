@@ -1,7 +1,7 @@
-From 88efee58c3378b32d4ec54e18fb32a7c3541b4e7 Mon Sep 17 00:00:00 2001
+From a0518156887490fb5172b90da870f97f63bc1864 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Olivier=20Cr=C3=AAte?= <olivier.crete@collabora.com>
 Date: Wed, 2 May 2018 14:13:40 -0400
-Subject: [PATCH 5/5] Windows: Only define SRT_API in one place
+Subject: [PATCH 4/8] Windows: Only define SRT_API in one place
 
 ---
  srtcore/srt.h        | 26 +++++++++++++-------------
@@ -9,7 +9,7 @@ Subject: [PATCH 5/5] Windows: Only define SRT_API in one place
  2 files changed, 13 insertions(+), 31 deletions(-)
 
 diff --git a/srtcore/srt.h b/srtcore/srt.h
-index 1abfe29..a80db75 100644
+index 1c6121f..79113cb 100644
 --- a/srtcore/srt.h
 +++ b/srtcore/srt.h
 @@ -37,12 +37,12 @@ written by
@@ -84,5 +84,5 @@ index 6def89d..4d70616 100644
     // https://msdn.microsoft.com/en-us/library/tcxf1dw6.aspx
     // printf() Format for ssize_t
 -- 
-2.17.0
+2.23.0
 

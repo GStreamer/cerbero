@@ -1,0 +1,195 @@
+From 70d1e68043a36d298431cd7531298a3c12adce92 Mon Sep 17 00:00:00 2001
+From: Maxim Sharabayko <maxlovic@gmail.com>
+Date: Tue, 18 Dec 2018 10:42:28 +0100
+Subject: [PATCH 8/8] Don't use CTimer in CUDTUnited's constructor
+
+s_UDTUnited is a static instance of CUDTUnited with dynamic
+initialization (calling this constructor), while CTimer has a static
+member s_ullCPUFrequency with dynamic initialization. The order of
+initialization is not guaranteed.
+
+https://github.com/Haivision/srt/pull/522
+---
+ srtcore/api.cpp     | 12 ++++++--
+ srtcore/api.h       |  2 +-
+ srtcore/channel.cpp |  7 +++--
+ srtcore/common.cpp  | 71 +++++++++++++++++++++++----------------------
+ 4 files changed, 51 insertions(+), 41 deletions(-)
+
+diff --git a/srtcore/api.cpp b/srtcore/api.cpp
+index ad797f1..63b4080 100644
+--- a/srtcore/api.cpp
++++ b/srtcore/api.cpp
+@@ -141,7 +141,13 @@ m_GCThread(),
+ m_ClosedSockets()
+ {
+    // Socket ID MUST start from a random value
+-   srand((unsigned int)CTimer::getTime());
++   // Note. Don't use CTimer here, because s_UDTUnited is a static instance of CUDTUnited
++   // with dynamic initialization (calling this constructor), while CTimer has
++   // a static member s_ullCPUFrequency with dynamic initialization.
++   // The order of initialization is not guaranteed.
++   timeval t;
++   gettimeofday(&t, 0);
++   srand((unsigned int)t.tv_usec);
+    m_SocketIDGenerator = 1 + (int)((1 << 30) * (double(rand()) / RAND_MAX));
+ 
+    pthread_mutex_init(&m_ControlLock, NULL);
+@@ -530,7 +536,7 @@ SRT_SOCKSTATUS CUDTUnited::getStatus(const SRTSOCKET u)
+     // protects the m_Sockets structure
+     CGuard cg(m_ControlLock);
+ 
+-    map<SRTSOCKET, CUDTSocket*>::iterator i = m_Sockets.find(u);
++    map<SRTSOCKET, CUDTSocket*>::const_iterator i = m_Sockets.find(u);
+ 
+     if (i == m_Sockets.end())
+     {
+@@ -539,7 +545,7 @@ SRT_SOCKSTATUS CUDTUnited::getStatus(const SRTSOCKET u)
+ 
+         return SRTS_NONEXIST;
+     }
+-    CUDTSocket* s = i->second;
++    const CUDTSocket* s = i->second;
+ 
+     if (s->m_pUDT->m_bBroken)
+         return SRTS_BROKEN;
+diff --git a/srtcore/api.h b/srtcore/api.h
+index 0ab1726..ecd951a 100644
+--- a/srtcore/api.h
++++ b/srtcore/api.h
+@@ -73,7 +73,7 @@ public:
+    CUDTSocket();
+    ~CUDTSocket();
+ 
+-   SRT_SOCKSTATUS m_Status;                       //< current socket state
++   SRT_SOCKSTATUS m_Status;                  //< current socket state
+ 
+    uint64_t m_TimeStamp;                     //< time when the socket is closed
+ 
+diff --git a/srtcore/channel.cpp b/srtcore/channel.cpp
+index e4af2c6..d4ce983 100644
+--- a/srtcore/channel.cpp
++++ b/srtcore/channel.cpp
+@@ -162,7 +162,8 @@ void CChannel::open(const sockaddr* addr)
+       if (0 != ::getaddrinfo(NULL, "0", &hints, &res))
+          throw CUDTException(MJ_SETUP, MN_NORES, NET_ERROR);
+ 
+-      if (0 != ::bind(m_iSocket, res->ai_addr, res->ai_addrlen))
++      // On Windows ai_addrlen has type size_t (unsigned), while bind takes int.
++      if (0 != ::bind(m_iSocket, res->ai_addr, (socklen_t) res->ai_addrlen))
+          throw CUDTException(MJ_SETUP, MN_NORES, NET_ERROR);
+       memcpy(&m_BindAddr, res->ai_addr, res->ai_addrlen);
+       m_BindAddr.len = res->ai_addrlen;
+@@ -400,8 +401,8 @@ int CChannel::sendto(const sockaddr* addr, CPacket& packet) const
+ 
+    if (packet.isControl())
+    {
+-      for (int l = 0, n = packet.getLength() / 4; l < n; ++ l)
+-         *((uint32_t *)packet.m_pcData + l) = ntohl(*((uint32_t *)packet.m_pcData + l));
++      for (ptrdiff_t i = 0, n = packet.getLength() / 4; i < n; ++i)
++         *((uint32_t *)packet.m_pcData + i) = htonl(*((uint32_t *)packet.m_pcData + i));
+    }
+ 
+    return res;
+diff --git a/srtcore/common.cpp b/srtcore/common.cpp
+index 77eed0b..f35b90b 100644
+--- a/srtcore/common.cpp
++++ b/srtcore/common.cpp
+@@ -124,13 +124,11 @@ void CTimer::rdtsc(uint64_t &x)
+       asm ("rdtsc" : "=a" (lval), "=d" (hval));
+       x = hval;
+       x = (x << 32) | lval;
+-   #elif defined(WIN32)
+-      //HANDLE hCurThread = ::GetCurrentThread(); 
+-      //DWORD_PTR dwOldMask = ::SetThreadAffinityMask(hCurThread, 1); 
+-      BOOL ret = QueryPerformanceCounter((LARGE_INTEGER *)&x);
+-      //SetThreadAffinityMask(hCurThread, dwOldMask);
+-      if (!ret)
+-         x = getTime() * s_ullCPUFrequency;
++    #elif defined(_WIN32)
++      // This function should not fail, because we checked the QPC
++      // when calling to QueryPerformanceFrequency. If it failed,
++      // the m_bUseMicroSecond was set to true.
++      QueryPerformanceCounter((LARGE_INTEGER *)&x);
+    #elif defined(OSX) || (TARGET_OS_IOS == 1) || (TARGET_OS_TV == 1)
+       x = mach_absolute_time();
+    #else
+@@ -143,27 +141,27 @@ uint64_t CTimer::readCPUFrequency()
+ {
+    uint64_t frequency = 1;  // 1 tick per microsecond.
+ 
+-   #if defined(IA32) || defined(IA64) || defined(AMD64)
+-      uint64_t t1, t2;
+-
+-      rdtsc(t1);
+-      timespec ts;
+-      ts.tv_sec = 0;
+-      ts.tv_nsec = 100000000;
+-      nanosleep(&ts, NULL);
+-      rdtsc(t2);
+-
+-      // CPU clocks per microsecond
+-      frequency = (t2 - t1) / 100000;
+-   #elif defined(WIN32)
+-      int64_t ccf;
+-      if (QueryPerformanceFrequency((LARGE_INTEGER *)&ccf))
+-         frequency = ccf / 1000000;
+-   #elif defined(OSX) || (TARGET_OS_IOS == 1) || (TARGET_OS_TV == 1)
+-      mach_timebase_info_data_t info;
+-      mach_timebase_info(&info);
+-      frequency = info.denom * 1000ULL / info.numer;
+-   #endif
++#if defined(IA32) || defined(IA64) || defined(AMD64)
++    uint64_t t1, t2;
++
++    rdtsc(t1);
++    timespec ts;
++    ts.tv_sec = 0;
++    ts.tv_nsec = 100000000;
++    nanosleep(&ts, NULL);
++    rdtsc(t2);
++
++    // CPU clocks per microsecond
++    frequency = (t2 - t1) / 100000;
++#elif defined(_WIN32)
++    LARGE_INTEGER counts_per_sec;
++    if (QueryPerformanceFrequency(&counts_per_sec))
++        frequency = counts_per_sec.QuadPart / 1000000;
++#elif defined(OSX) || (TARGET_OS_IOS == 1) || (TARGET_OS_TV == 1)
++    mach_timebase_info_data_t info;
++    mach_timebase_info(&info);
++    frequency = info.denom * uint64_t(1000) / info.numer;
++#endif
+ 
+    // Fall back to microsecond if the resolution is not high enough.
+    if (frequency < 10)
+@@ -250,15 +248,20 @@ uint64_t CTimer::getTime()
+ 
+     //For other systems without microsecond level resolution, add to this conditional compile
+ #if defined(OSX) || (TARGET_OS_IOS == 1) || (TARGET_OS_TV == 1)
+-    uint64_t x;
+-    rdtsc(x);
+-    return x / s_ullCPUFrequency;
+-    //Specific fix may be necessary if rdtsc is not available either.
+-#else
++    // Otherwise we will have an infinite recursive functions calls
++    if (m_bUseMicroSecond == false)
++    {
++        uint64_t x;
++        rdtsc(x);
++        return x / s_ullCPUFrequency;
++    }
++    // Specific fix may be necessary if rdtsc is not available either.
++    // Going further on Apple platforms might cause issue, fixed with PR #301.
++    // But it is very unlikely for the latest platforms.
++#endif
+     timeval t;
+     gettimeofday(&t, 0);
+     return t.tv_sec * 1000000ULL + t.tv_usec;
+-#endif
+ }
+ 
+ void CTimer::triggerEvent()
+-- 
+2.23.0
+

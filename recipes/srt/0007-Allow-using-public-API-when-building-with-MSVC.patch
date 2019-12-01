@@ -1,7 +1,7 @@
-From 90011e287ccfcb5f5d0ac152a49d60db5887eef5 Mon Sep 17 00:00:00 2001
+From 7cf2b84ed275ae4dc76d8cf7853cc499a72cff39 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 20 Feb 2019 01:34:55 +0530
-Subject: [PATCH] Allow using public API when building with MSVC
+Subject: [PATCH 7/8] Allow using public API when building with MSVC
 
 * pthread.h is not actually used anywhere in the public API
 
@@ -53,5 +53,5 @@ index ce546d2..b5cd910 100644
     #include <ws2tcpip.h>
     #include <ws2ipdef.h>
 -- 
-2.20.1.windows.1
+2.23.0
 

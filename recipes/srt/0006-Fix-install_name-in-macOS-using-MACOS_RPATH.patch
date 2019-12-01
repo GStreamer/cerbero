@@ -1,7 +1,7 @@
-From c92a30054a4db6cdeaa7f1fb9e4bc5718c177a75 Mon Sep 17 00:00:00 2001
+From b65c7df165759e3de4cbcae26fdad097b3d07c15 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Fri, 4 Jan 2019 11:51:26 +0100
-Subject: [PATCH] Fix install_name in macOS using MACOS_RPATH
+Subject: [PATCH 6/8] Fix install_name in macOS using MACOS_RPATH
 
 Instead of librst.1.dylib use @rpath/libsrt.1.dylib
 This is also the recommended setting as per CMP0042 policy
@@ -34,5 +34,5 @@ index c31576b..2acfa41 100644
  endif()
  
 -- 
-2.14.1
+2.23.0
 
