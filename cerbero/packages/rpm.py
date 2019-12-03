@@ -21,6 +21,7 @@ import shutil
 import tempfile
 
 from cerbero.config import Architecture
+from cerbero.enums import Distro, DistroVersion
 from cerbero.errors import FatalError, EmptyPackageError
 from cerbero.packages import PackageType
 from cerbero.packages.linux import LinuxPackager
@@ -237,8 +238,13 @@ class RPMPackager(LinuxPackager):
         else:
             raise FatalError(_('Architecture %s not supported') % \
                              self.config.target_arch)
-        shell.call('rpmbuild -bb --buildroot %s/buildroot --target %s %s' % (tmpdir,
-            target, self.spec_path))
+
+        extra_options = ''
+        if self._rpmbuild_support_nodebuginfo():
+            extra_options = '--nodebuginfo'
+
+        shell.call('rpmbuild -bb %s --buildroot %s/buildroot --target %s %s' % (
+            extra_options, tmpdir, target, self.spec_path))
 
         paths = []
         for d in os.listdir(packagedir):
@@ -249,6 +255,20 @@ class RPMPackager(LinuxPackager):
                 paths.append(out_path)
                 shutil.move(os.path.join(packagedir, d, f), output_dir)
         return paths
+
+    def _rpmbuild_support_nodebuginfo(self):
+        if not self.config.distro == Distro.REDHAT:
+            return False
+
+        if ("fedora" in self.config.distro_version
+           and self.config.distro_version > DistroVersion.FEDORA_26):
+            return True
+
+        if ("redhat" in self.config.distro_version
+           and self.config.distro_version > DistroVersion.REDHAT_7):
+            return True
+
+        return False
 
     def _get_meta_requires(self, package_type):
         devel_suffix = ''
