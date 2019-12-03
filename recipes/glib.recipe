@@ -59,6 +59,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-meson-use-the-new-python-module-instead-of-the-pytho.patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/1254
                'glib/0001-giomodule-gio-modules-are-no-longer-installed-in-bin.patch',
+               # https://gitlab.gnome.org/GNOME/glib/merge_requests/1265
+               'glib/0001-build-don-t-check-for-protected-visibility.patch',
               ]
 
     files_libs = [
