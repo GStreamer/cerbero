@@ -24,6 +24,9 @@ class Recipe(recipe.Recipe):
     files_libs = ['libnettle', 'libhogweed']
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
 
+    def prepare(self):
+        self.append_env('CFLAGS', '-std=c99')        
+
     async def configure(self):
         shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
             {'SUBDIRS = tools testsuite examples':
