@@ -45,6 +45,11 @@ esac
 msys_dir_to_win32() {
     set -e
     local msys_path stripped_path mount_point path mounted_path
+    # If the path is already a native path, just return that
+    if [[ $1 == ?':/'* ]] || [[ $1 == ?':\\'* ]]; then
+      echo $1
+      return
+    fi
     # Convert /c or /mingw etc to /c/ or /mingw/ etc; gives us a necessary
     # anchor to split the path into components
     msys_path="$1/"
