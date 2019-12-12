@@ -534,6 +534,9 @@ class Config (object):
             return False
         return True
 
+    def prefix_is_build_tools(self):
+        return self.build_tools_prefix == self.prefix
+
     def target_distro_version_gte(self, distro_version):
         assert distro_version.startswith(self.target_distro + "_")
         return self.target_distro_version >= distro_version

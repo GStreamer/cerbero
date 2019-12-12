@@ -241,6 +241,11 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         self.build_dir = os.path.join(self.config.sources, self.package_name)
         self.build_dir = os.path.abspath(self.build_dir)
         self.deps = self.deps or []
+        if self.config.prefix_is_build_tools():
+            if self.btype == build.BuildType.MESON:
+                self.deps.append('meson')
+            elif self.btype == build.BuildType.CMAKE:
+                self.deps.append('cmake')
         self.env = env.copy()
         if self.bash_completions and config.target_platform in [Platform.LINUX]:
             config.bash_completions.update(self.bash_completions)

@@ -16,7 +16,6 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
-    deps = ['meson']
     meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
                      'tools': 'enabled', 'orc-test': 'enabled'}
 
