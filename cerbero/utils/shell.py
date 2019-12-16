@@ -71,7 +71,10 @@ def _resolve_cmd(cmd, env):
     if PLATFORM != Platform.WINDOWS or env is None or 'PATH' not in env:
         return cmd
     if not os.path.isabs(cmd[0]):
-        cmd[0] = shutil.which(cmd[0], path=env['PATH'])
+        resolved_cmd = shutil.which(cmd[0], path=env['PATH'])
+        if not resolved_cmd:
+            raise FatalError('Could not find {!r} in PATH {!r}'.format(cmd[0], env['PATH']))
+        cmd[0] = resolved_cmd
     return cmd
 
 def _cmd_string_to_array(cmd, env):
