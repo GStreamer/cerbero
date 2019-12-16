@@ -378,7 +378,6 @@ async def download_urllib2(url, destination=None, check_cert=True, overwrite=Fal
         destination = os.path.basename(url)
 
     try:
-        logging.info(destination)
         with open(destination, 'wb') as d:
             f = urllib.request.urlopen(url, context=ctx)
             d.write(f.read())
