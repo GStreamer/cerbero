@@ -42,6 +42,24 @@ class GenLib(object):
         self.gendef_bin = shlex.split(self.config.env['GENDEF'])
         self.dlltool_bin = shlex.split(self.config.env['DLLTOOL'])
 
+    def _fix_broken_def_output(self, contents):
+        if self.config.target_arch != Architecture.X86:
+            return contents
+        out = ''
+        broken_entry_re = re.compile(r'([a-zA-Z_]+@[0-9]+)@[0-9]+')
+        for line in contents.split(os.linesep):
+            line = self._fix_broken_entry(line, broken_entry_re)
+            out += line + os.linesep
+        return out
+
+    def _fix_broken_entry(self, line, regex):
+        if line.startswith(';'):
+            return line
+        m = regex.match(line)
+        if not m:
+            return line
+        return m.groups()[0]
+
     def gendef(self, dllpath, outputdir, libname):
         defname = libname + '.def'
         def_contents = shell.check_output(self.gendef_bin + ['-', dllpath], outputdir,
@@ -52,7 +70,7 @@ class GenLib(object):
         if 'LIBRARY' not in def_contents:
             raise FatalError('gendef failed on {!r}\n{}'.format(dllpath, def_contents))
         with open(os.path.join(outputdir, defname), 'w') as f:
-            f.write(def_contents)
+            f.write(self._fix_broken_def_output(def_contents))
         return defname
 
     def dlltool(self, defname, dllname, outputdir):
