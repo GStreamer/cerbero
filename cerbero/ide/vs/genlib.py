@@ -22,7 +22,7 @@ import shlex
 import shutil
 
 from cerbero.enums import Architecture, Platform
-from cerbero.utils import shell, to_unixpath
+from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
@@ -39,10 +39,12 @@ class GenLib(object):
     def __init__(self, config, logfile):
         self.config = config
         self.logfile = logfile
+        self.gendef_bin = shlex.split(self.config.env['GENDEF'])
+        self.dlltool_bin = shlex.split(self.config.env['DLLTOOL'])
 
     def gendef(self, dllpath, outputdir, libname):
         defname = libname + '.def'
-        def_contents = shell.check_output('gendef - %s' % dllpath, outputdir,
+        def_contents = shell.check_output(self.gendef_bin + ['-', dllpath], outputdir,
                                           logfile=self.logfile, env=self.config.env)
         # If the output doesn't contain a 'LIBRARY' directive, gendef errored
         # out. However, gendef always returns 0 so we need to inspect the
@@ -54,7 +56,7 @@ class GenLib(object):
         return defname
 
     def dlltool(self, defname, dllname, outputdir):
-        cmd = shlex.split(self.config.env['DLLTOOL']) + ['-d', defname, '-l', self.filename, '-D', dllname]
+        cmd = self.dlltool_bin + ['-d', defname, '-l', self.filename, '-D', dllname]
         shell.new_call(cmd, outputdir, logfile=self.logfile, env=self.config.env)
 
     def create(self, libname, dllpath, platform, target_arch, outputdir):
