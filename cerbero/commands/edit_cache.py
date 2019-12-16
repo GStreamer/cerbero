@@ -52,8 +52,9 @@ class EditCache(Command):
         for attr in self.recipe_attributes:
             attr_nargs = '*' if isinstance(getattr(self.recipe_status, attr), list) else None
             attr_type = type(getattr(self.recipe_status, attr))
+            arg_type = str if attr_type == bool or attr_type == list else attr_type
             arguments.append(
-                ArgparseArgument('--' + attr, nargs=attr_nargs, type=str if attr_type == bool else attr_type,
+                ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type,
                                  help=_('Modify ' + attr))
             )
         Command.__init__(self, arguments)
@@ -66,7 +67,7 @@ class EditCache(Command):
         is_modifying = False or args.touch or args.reset
         if not is_modifying:
             for attr in self.recipe_attributes:
-                if getattr(args, attr):
+                if getattr(args, attr) is not None:
                     is_modifying = True
                     break
 
@@ -96,7 +97,7 @@ class EditCache(Command):
 
                     for attr in self.recipe_attributes:
                         var = getattr(args, attr)
-                        if var:
+                        if var is not None:
                             if isinstance(getattr(self.recipe_status, attr), bool):
                                 if var.lower() == 'true':
                                     var = True
