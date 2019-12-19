@@ -218,7 +218,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.UBUNTU_XENIAL
             elif d[2] in ['artful']:
                 distro_version = DistroVersion.UBUNTU_ARTFUL
-            elif d[2] in ['bionic', 'tara', 'tessa', 'tina']:
+            elif d[2] in ['bionic', 'tara', 'tessa', 'tina', 'tricia']:
                 distro_version = DistroVersion.UBUNTU_BIONIC
             elif d[2] in ['cosmic']:
                 distro_version = DistroVersion.UBUNTU_COSMIC
