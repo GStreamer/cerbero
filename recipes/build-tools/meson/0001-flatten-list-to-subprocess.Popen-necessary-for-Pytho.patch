@@ -1,0 +1,27 @@
+From e2a64cd698efde820ccf77c7912cfc5ebf89d2cd Mon Sep 17 00:00:00 2001
+From: "Michael Hirsch, Ph.D" <scivision@users.noreply.github.com>
+Date: Sun, 1 Sep 2019 13:40:05 -0400
+Subject: [PATCH] flatten list to subprocess.Popen, necessary for Python 3.8
+
+---
+ mesonbuild/backend/ninjabackend.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
+index 1afb073..312f6ef 100644
+--- a/mesonbuild/backend/ninjabackend.py
++++ b/mesonbuild/backend/ninjabackend.py
+@@ -185,8 +185,8 @@ int dummy;
+         # and locale dependent. Any attempt at converting it to
+         # Python strings leads to failure. We _must_ do this detection
+         # in raw byte mode and write the result in raw bytes.
+-        pc = subprocess.Popen([compiler.get_exelist(),
+-                               '/showIncludes', '/c', 'incdetect.c'],
++        pc = subprocess.Popen(compiler.get_exelist() +
++                              ['/showIncludes', '/c', 'incdetect.c'],
+                               cwd=self.environment.get_scratch_dir(),
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+         (stdo, _) = pc.communicate()
+-- 
+2.24.1.windows.2
+
