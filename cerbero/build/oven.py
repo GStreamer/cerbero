@@ -236,7 +236,7 @@ class Oven (object):
 
         def recipe_next_step (recipe, step):
             assert (step is not None)
-            if step is "init":
+            if step == "init":
                 return recipe.steps[0][1]
             found_current = False
             for _, s in recipe.steps:
@@ -259,7 +259,7 @@ class Oven (object):
                 step = recipe_d.step
                 count = recipe_d.count
 
-                if step is "init":
+                if step == "init":
                     counter.i += 1
                     count = counter.i
                     if self._cook_start_recipe (recipe, count, len(recipes)):

@@ -111,7 +111,7 @@ class DistributionXML(object):
     def _set(self, node, **kwargs):
         for key in sorted(kwargs.keys()):
             value = kwargs[key]
-            if value is None or value is '':
+            if value is None or value == '':
                 continue
             node.set(key, value)
 
