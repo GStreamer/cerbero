@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-environment-better-xcode-11-clang-detection.patch',
         # https://github.com/mesonbuild/meson/pull/5872
         'meson/0001-flatten-list-to-subprocess.Popen-necessary-for-Pytho.patch',
+        # Already fixed differently upstream: https://github.com/mesonbuild/meson/pull/4445
+        'meson/0001-modules-windows-Allow-passing-arguments-to-WINDRES.patch',
     ]
     deps = ['ninja']
 

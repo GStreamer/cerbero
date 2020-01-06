@@ -1,0 +1,36 @@
+From 8028667b913407836ad4a13ec922cd88b8653500 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 6 Jan 2020 15:38:18 +0530
+Subject: [PATCH] modules/windows: Allow passing arguments to WINDRES
+
+Already fixed upstream with the envconfig rewrite:
+https://github.com/mesonbuild/meson/pull/4445
+---
+ mesonbuild/modules/windows.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/mesonbuild/modules/windows.py b/mesonbuild/modules/windows.py
+index d185d89..1b40418 100644
+--- a/mesonbuild/modules/windows.py
++++ b/mesonbuild/modules/windows.py
+@@ -15,6 +15,7 @@
+ import enum
+ import os
+ import re
++import shlex
+ 
+ from .. import mlog
+ from .. import mesonlib, build
+@@ -56,7 +57,8 @@ class WindowsModule(ExtensionModule):
+             if 'WINDRES' in os.environ:
+                 # Pick-up env var WINDRES if set. This is often used for
+                 # specifying an arch-specific windres.
+-                rescomp = ExternalProgram('windres', command=os.environ.get('WINDRES'), silent=True)
++                windres = shlex.split(os.environ['WINDRES'])
++                rescomp = ExternalProgram('windres', command=windres, silent=True)
+ 
+         if not rescomp or not rescomp.found():
+             # Take windres from the config file after the environment, which is
+-- 
+2.24.1.windows.2
+
