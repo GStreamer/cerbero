@@ -31,39 +31,19 @@ from cerbero.utils import messages as m
 class Recipe(recipe.Recipe):
     name = 'libusrsctp'
     version = 'master'
-    remotes = { 'origin': 'https://github.com/sctplab/usrsctp.git' };
-    commit = 'a572e1eaf5f7a6df08bcfb90529a8f6c20c7113d';
+    remotes = {'origin': 'https://github.com/sctplab/usrsctp.git'}
+    commit = 'f668bb69123fdbd0dd027b590536d89118964dca'
     stype = SourceType.GIT
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['LICENSE.md']}]
 
     # We do not need the socket API since we will wrap inside a DTLS packet
     # anyway, because we use SCTP for WebRTC data channels.
-    meson_options = {'sctp_inet': 'false', 'sctp_inet6': 'false'}
+    meson_options = {'sctp_inet': 'false', 'sctp_inet6': 'false', 'sctp_build_programs': 'false'}
 
     files_libs = ['libusrsctp']
     files_devel = ['include/usrsctp.h']
 
-    patches = [# https://github.com/sctplab/usrsctp/pull/401
-               name + '/0001-meson-Dependencies-go-on-the-shared-library.patch',
-               # https://github.com/sctplab/usrsctp/pull/402
-               name + '/0001-meson-add-support-for-android-ios-host_system.patch',]
-
     def prepare(self):
         if self.using_msvc():
             self.library_type = LibraryType.SHARED
-
-    async def configure(self):
-        usrsctplib_path = os.path.join(self.build_dir, 'usrsctplib')
-        recipe_path = os.path.join(self.config.recipes_dir, self.name)
-        if self.config.target_platform == Platform.ANDROID:
-            self.meson_options['sctp_build_programs'] = 'false'
-        elif self.config.target_platform == Platform.IOS:
-            def copyreplacetree(src, dst):
-                if os.path.exists(dst):
-                    shutil.rmtree(dst)
-                shutil.copytree(src, dst)
-            copyreplacetree(os.path.join(recipe_path, "net"),
-                        os.path.join(usrsctplib_path, "net"))
-            self.append_env("CPPFLAGS", "-I %s" % os.path.join(usrsctplib_path, "platform"))
-        await super(recipe.Recipe, self).configure()
