@@ -343,17 +343,15 @@ async def download_wget(url, destination=None, check_cert=True, overwrite=False,
     @param destination: destination where the file will be saved
     @type destination: str
     '''
-    cmd = "wget %s " % url
+    cmd = ['wget', url]
     path = None
     if destination is not None:
-        cmd += "-O %s " % destination
+        cmd += ['-O', destination]
 
     if not check_cert:
-        cmd += " --no-check-certificate"
+        cmd += ['--no-check-certificate']
 
-    cmd += " --tries=2"
-    cmd += " --timeout=20.0"
-    cmd += " --progress=dot:giga"
+    cmd += ['--tries=2', '--timeout=20.0', '--progress=dot:giga']
 
     try:
         await async_call(cmd, path, cpu_bound=False, logfile=logfile)
@@ -400,13 +398,13 @@ async def download_curl(url, destination=None, check_cert=True, overwrite=False,
     @type destination: str
     '''
     path = None
-    cmd = "curl -L --fail --retry 2 "
+    cmd = ['curl', '-L', '--fail', '--retry', '2']
     if not check_cert:
-        cmd += " -k "
+        cmd += ['-k']
     if destination is not None:
-        cmd += "%s -o %s " % (url, destination)
+        cmd += [url, '-o', destination]
     else:
-        cmd += "-O %s " % url
+        cmd += ['-O', url]
     try:
         await async_call(cmd, path, cpu_bound=False, logfile=logfile)
     except FatalError as e:
