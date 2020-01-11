@@ -32,7 +32,7 @@ import gettext
 import platform as pplatform
 import re
 import asyncio
-from pathlib import Path
+from pathlib import Path, PureWindowsPath, PurePath
 from collections.abc import Iterable
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
@@ -82,10 +82,8 @@ def to_unixpath(path):
 
 
 def to_winepath(path):
-        path = path.replace('/', '\\\\')
-        # wine maps the filesystem root '/' to 'z:\'
-        path = 'z:\\%s' % path
-        return path
+    # wine maps the filesystem root '/' to 'z:\'
+    return str(PureWindowsPath('z:') / PurePath(path))
 
 
 def fix_winpath(path):
