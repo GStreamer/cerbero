@@ -347,11 +347,18 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstaudiovisualizers.a', 'lib/gstreamer-1.0/libgstaudiovisualizers.la',
     ]
 
+    files_plugins_sys = [
+        'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
+    ]
+
+    files_plugins_sys_devel = [
+        'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
+    ]
+
     platform_files_plugins_sys = {
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
-             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d%(mext)s',
@@ -362,16 +369,13 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
-             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
              'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles%(mext)s',
-             'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
             ]
     }
 
@@ -379,7 +383,6 @@ class Recipe(custom.GStreamer):
         Platform.LINUX: [
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
-             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
@@ -390,16 +393,13 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
              'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
-             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
              'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
-             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ],
         Platform.ANDROID: [
              'lib/gstreamer-1.0/libgstopensles.a', 'lib/gstreamer-1.0/libgstopensles.la',
-             'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
             ]
     }
 
