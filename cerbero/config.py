@@ -26,8 +26,8 @@ from pathlib import PurePath, Path
 
 from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.utils import _, system_info, validate_packager, to_unixpath,\
-    shell, parse_file, detect_qt5
+from cerbero.utils import _, system_info, validate_packager, shell
+from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
 from cerbero.utils import messages as m
 from cerbero.ide.vs.env import get_vs_version
 
@@ -270,6 +270,27 @@ class Config (object):
 
         self.env = self.get_env(self.prefix, libdir, self.py_prefix)
 
+    def get_wine_runtime_env(self, prefix, env):
+        '''
+        When we're creating a cross-winXX shell, these runtime environment
+        variables are only useful if the built binaries will be run using Wine,
+        so convert them to values that can be understood by programs running
+        under Wine.
+        '''
+        runtime_env = (
+            'GI_TYPELIB_PATH',
+            'XDG_DATA_DIRS',
+            'XDG_CONFIG_DIRS',
+            'GST_PLUGIN_PATH',
+            'GST_PLUGIN_PATH_1_0',
+            'GST_REGISTRY',
+            'GST_REGISTRY_1_0',
+        )
+        for each in runtime_env:
+            env[each] = to_winepath(env[each])
+        env['WINEPATH'] = to_winepath(os.path.join(prefix, 'bin'))
+        return env
+
     @lru_cache(maxsize=None)
     def get_env(self, prefix, libdir, py_prefix):
         # Get paths for environment variables
@@ -416,6 +437,9 @@ class Config (object):
         for k in self.config_env.keys():
             if k not in env:
                 new_env[k] = self.config_env[k]
+
+        if self.target_platform == Platform.WINDOWS and self.platform != Platform.WINDOWS:
+            new_env = self.get_wine_runtime_env(prefix, new_env)
 
         return new_env
 
