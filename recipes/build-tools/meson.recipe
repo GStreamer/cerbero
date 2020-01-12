@@ -31,6 +31,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-flatten-list-to-subprocess.Popen-necessary-for-Pytho.patch',
         # Already fixed differently upstream: https://github.com/mesonbuild/meson/pull/4445
         'meson/0001-modules-windows-Allow-passing-arguments-to-WINDRES.patch',
+        # https://github.com/mesonbuild/meson/pull/6451, in 0.54.*
+        'meson/0001-vs-Write-out-checksums-but-not-timestamps.patch',
     ]
     deps = ['ninja']
 
