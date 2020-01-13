@@ -213,8 +213,6 @@ class Config (object):
         # Finally fill the missing gaps in the config
         self._load_last_defaults()
 
-        self._load_platform_config()
-
         # And validate properties
         self._validate_properties()
 
