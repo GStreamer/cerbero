@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
         # https://github.com/mesonbuild/meson/pull/5872
         'meson/0001-flatten-list-to-subprocess.Popen-necessary-for-Pytho.patch',
         # https://github.com/mesonbuild/meson/pull/6451, in 0.54.*
-        'meson/0001-vs-Write-out-checksums-but-not-timestamps.patch',
+        'meson/0001-vs-Write-out-checksums.patch',
         # https://github.com/mesonbuild/meson/pull/6459, in 0.53.1
         'meson/0001-find_program-Ignore-programs-in-the-WindowsApps-dire.patch',
     ]

@@ -1,7 +1,7 @@
 From cba72ac0d542ec5ece716d945b9072dc0a80a9ca Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sun, 12 Jan 2020 19:45:16 +0530
-Subject: [PATCH] vs: Write out checksums but not timestamps
+Subject: [PATCH] vs: Write out checksums
 
 This is upstream in 0.54.x:
 https://github.com/mesonbuild/meson/pull/6451
@@ -21,7 +21,7 @@ index d47694e..ea9b728 100644
  
      def get_linker_always_args(self):
 -        return ['/nologo']
-+        return ['/nologo', '/release', '/Brepro']
++        return ['/nologo', '/release']
  
      def get_linker_output_args(self, outputname):
          return ['/OUT:' + outputname]
