@@ -32,7 +32,7 @@ class Recipe(recipe.Recipe):
         # Already fixed differently upstream: https://github.com/mesonbuild/meson/pull/4445
         'meson/0001-modules-windows-Allow-passing-arguments-to-WINDRES.patch',
         # https://github.com/mesonbuild/meson/pull/6451, in 0.54.*
-        'meson/0001-vs-Write-out-checksums-but-not-timestamps.patch',
+        'meson/0001-vs-Write-out-checksums.patch',
         # https://github.com/mesonbuild/meson/pull/6459, in 0.53.1
         'meson/0001-find_program-Ignore-programs-in-the-WindowsApps-dire.patch',
     ]
