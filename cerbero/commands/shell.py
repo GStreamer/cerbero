@@ -37,7 +37,10 @@ class Shell(Command):
 
     def run(self, config, args):
         # Load the cookbook which will parse all recipes and update config.bash_completions
-        cookbook = CookBook(config)
+        # We don't care about errors while loading recipes, which can happen
+        # just because of the current configuration not matching what the
+        # recipe supports
+        cookbook = CookBook(config, skip_errors=True)
         env = config.env.copy()
         if args.use_system_libs:
             add_system_libs(config, env, config.env)

@@ -89,7 +89,7 @@ class CookBook (object):
 
     RECIPE_EXT = '.recipe'
 
-    def __init__(self, config, load=True, offline=False):
+    def __init__(self, config, load=True, offline=False, skip_errors=False):
         self.offline = offline
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
@@ -104,7 +104,7 @@ class CookBook (object):
         if not os.path.exists(config.recipes_dir):
             raise FatalError(_("Recipes dir %s not found") %
                              config.recipes_dir)
-        self.update()
+        self.update(skip_errors)
 
     def set_config(self, config):
         '''
@@ -136,11 +136,11 @@ class CookBook (object):
         '''
         self.status = status
 
-    def update(self):
+    def update(self, skip_errors):
         '''
         Reloads the recipes list and updates the cookbook
         '''
-        self._load_recipes()
+        self._load_recipes(skip_errors)
         self._load_manifest()
         self.save()
 
@@ -339,12 +339,12 @@ class CookBook (object):
                     file_hash=recipe.get_checksum())
         return self.status[recipe_name]
 
-    def _load_recipes(self):
+    def _load_recipes(self, skip_errors):
         self.recipes = {}
         recipes = defaultdict(dict)
         recipes_repos = self._config.get_recipes_repos()
         for reponame, (repodir, priority) in recipes_repos.items():
-            recipes[int(priority)].update(self._load_recipes_from_dir(repodir))
+            recipes[int(priority)].update(self._load_recipes_from_dir(repodir, skip_errors))
         # Add recipes by asceding pripority
         for key in sorted(recipes.keys()):
             self.recipes.update(recipes[key])
@@ -382,7 +382,7 @@ class CookBook (object):
                     else:
                         self.reset_recipe_status(recipe.name)
 
-    def _load_recipes_from_dir(self, repo):
+    def _load_recipes_from_dir(self, repo, skip_errors):
         recipes = {}
         recipes_files = shell.find_files('*%s' % self.RECIPE_EXT, repo)
         recipes_files.extend(shell.find_files('*/*%s' % self.RECIPE_EXT, repo))
@@ -401,7 +401,7 @@ class CookBook (object):
             # recipes dir which can contain private classes and methods with
             # common code for gstreamer recipes.
             try:
-                recipes_from_file = self._load_recipes_from_file(f, custom)
+                recipes_from_file = self._load_recipes_from_file(f, skip_errors, custom)
             except RecipeNotFoundError:
                 m.warning(_("Could not found a valid recipe in %s") % f)
             if recipes_from_file is None:
@@ -410,7 +410,7 @@ class CookBook (object):
                 recipes[recipe.name] = recipe
         return recipes
 
-    def _load_recipes_from_file(self, filepath, custom=None):
+    def _load_recipes_from_file(self, filepath, skip_errors, custom):
         recipes = []
         d = {'Platform': Platform, 'Architecture': Architecture,
                 'BuildType': BuildType, 'SourceType': SourceType,
@@ -439,8 +439,9 @@ class CookBook (object):
                 if recipe is not None:
                     recipes.append(recipe)
         except Exception:
-            m.warning("Error loading recipe in file %s" % (filepath))
-            print(traceback.format_exc())
+            if not skip_errors:
+                m.warning("Error loading recipe in file %s" % (filepath))
+                print(traceback.format_exc())
         return recipes
 
     def _is_recipe_class(self, cls):
