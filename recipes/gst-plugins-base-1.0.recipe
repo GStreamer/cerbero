@@ -7,6 +7,9 @@ class Recipe(custom.GStreamer):
     tarball_checksum = '4093aa7b51e28fb24dfd603893fead8d1b7782f088b05ed0f22a21ef176fb5ae'
     meson_options = {# enabled plugins
                      'gl': 'enabled',
+                     'gl-graphene': 'enabled',
+                     'gl-png': 'enabled',
+                     'gl-jpeg': 'enabled',
                      'libvisual': 'enabled',
                      'ogg': 'enabled',
                      'opus': 'enabled',
