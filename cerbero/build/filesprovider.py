@@ -301,11 +301,15 @@ class FilesProvider(object):
         # Plugin template is always libfoo%(mext)s
         if not f.startswith('lib'):
             raise AssertionError('Plugin files must start with "lib": {!r}'.format(f))
-        # Plugin DLLs are required to be libfoo.dll (mingw) or foo.dll (msvc)
-        if (Path(self.config.prefix) / f).is_file():
-            # libfoo.dll
-            return [f]
-        if self.using_msvc():
+        # The actual filenames we select are stricter to avoid picking up the
+        # wrong DLLs in case the prefix is dirty.
+        if not self.using_msvc():
+            # Plugin DLLs are required to be libfoo.dll when the recipe uses MinGW
+            if (Path(self.config.prefix) / f).is_file():
+                # libfoo.dll
+                return [f]
+        else:
+            # Plugin DLLs are required to be foo.dll when the recipe uses MSVC
             fdir, fname = os.path.split(f)
             fmsvc = '{}/{}'.format(fdir, fname[3:])
             if (Path(self.config.prefix) / fmsvc).is_file():
