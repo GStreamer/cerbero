@@ -408,7 +408,7 @@ class Config (object):
             path = self._join_path(bindir, path)
 
         ld_library_path = os.path.join(self.build_tools_prefix, 'lib')
-        if not self.cross_compiling():
+        if self.prefix_is_executable():
             ld_library_path = self._join_path(libdir, ld_library_path)
         if self.extra_lib_path is not None:
             ld_library_path = self._join_path(ld_library_path, self.extra_lib_path)
