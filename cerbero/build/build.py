@@ -85,18 +85,6 @@ class Build (object):
         pass
 
 
-class CustomBuild(Build):
-
-    async def configure(self):
-        pass
-
-    async def compile(self):
-        pass
-
-    async def install(self):
-        pass
-
-
 def modify_environment(func):
     '''
     Decorator to modify the build environment
@@ -350,6 +338,22 @@ class ModifyEnvBase:
                 del new_env['PKG_CONFIG_PATH']
         for var, val in new_env.items():
             self.set_env(var, val, when='now-with-restore')
+
+
+class CustomBuild(Build, ModifyEnvBase):
+
+    def __init__(self):
+        Build.__init__(self)
+        ModifyEnvBase.__init__(self)
+
+    async def configure(self):
+        pass
+
+    async def compile(self):
+        pass
+
+    async def install(self):
+        pass
 
 
 class MakefilesBase (Build, ModifyEnvBase):
