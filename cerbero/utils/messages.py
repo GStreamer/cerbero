@@ -68,7 +68,9 @@ class StdoutManager:
         sys.stdout.write(status)
         sys.stdout.flush()
         self.status_line = status
-        self.clear_lines = len (status) // shutil.get_terminal_size().columns
+
+        if console_is_interactive():
+            self.clear_lines = len (status) // shutil.get_terminal_size().columns
 
 STDOUT = StdoutManager()
 
