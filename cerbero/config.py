@@ -211,9 +211,11 @@ class Config (object):
 
             self.arch_config = arch_config
 
-        # Finally fill the missing gaps in the config
+        # Fill the defaults in the config which depend on the configuration we
+        # loaded above
         self._load_last_defaults()
-
+        # Load the platform-specific (linux|windows|android|darwin).config
+        self._load_platform_config()
         # And validate properties
         self._validate_properties()
 
@@ -227,9 +229,11 @@ class Config (object):
                                           self.target_arch == Architecture.UNIVERSAL)
             config.set_property('qt5_qmake_path', qmake5)
             config.set_property('qt5_pkgconfigdir', qtpkgdir)
-            config._load_platform_config()
-            config._load_last_defaults()
-            config._validate_properties()
+            # We already called these functions on `self` above
+            if config is not self:
+                config._load_last_defaults()
+                config._load_platform_config()
+                config._validate_properties()
 
         # Ensure that variants continue to override all other configuration
         self.variants += variants_override
