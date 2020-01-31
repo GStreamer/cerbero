@@ -46,6 +46,13 @@ class Packager (object):
                 "version %s, using generic packager for distro %s" % (v, d)))
             v = None
 
+        if d == Distro.DEBIAN:
+            m.warning('Creation of Debian packages is currently broken, please see '
+                      'https://gitlab.freedesktop.org/gstreamer/cerbero/issues/56\n'
+                      'Creating tarballs instead...')
+            d = Distro.NONE
+            v = None
+
         if d == Distro.WINDOWS and config.cross_compiling():
             try:
                 get_wix_prefix()
