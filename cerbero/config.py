@@ -32,10 +32,10 @@ from cerbero.utils import messages as m
 from cerbero.ide.vs.env import get_vs_version
 
 
-CONFIG_DIR = os.path.expanduser('~/.cerbero')
 CONFIG_EXT = 'cbc'
-DEFAULT_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
-DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, DEFAULT_CONFIG_FILENAME)
+USER_CONFIG_DIR = os.path.expanduser('~/.cerbero')
+USER_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
+USER_CONFIG_FILE = os.path.join(USER_CONFIG_DIR, USER_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
 DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = "Default <default@change.me>"
@@ -166,15 +166,16 @@ class Config (object):
         # First load the default configuration
         self.load_defaults()
 
-        # Next parse the main configuration file
-        self._load_main_config()
+        # Next parse the user configuration file USER_CONFIG_FILE
+        # which overrides the defaults
+        self._load_user_config()
 
         # Ensure that Cerbero config files know about these variants, and that
         # they override the values from the user configuration file above
         self.variants += variants_override
 
         # Next, if a config file is provided use it to override the settings
-        # from the main configuration file
+        # again (set the target, f.ex.)
         self._load_cmd_config(filename)
 
         # Create a copy of the config for each architecture in case we are
@@ -581,16 +582,18 @@ class Config (object):
             separator = ':'
         return "%s%s%s" % (path1, separator, path2)
 
-    def _load_main_config(self):
-        if os.path.exists(DEFAULT_CONFIG_FILE):
-            m.message('Loading default configuration from {}'.format(DEFAULT_CONFIG_FILE))
-            self._parse(DEFAULT_CONFIG_FILE)
+    def _load_user_config(self):
+        if os.path.exists(USER_CONFIG_FILE):
+            m.message('Loading default configuration from {}'.format(USER_CONFIG_FILE))
+            self._parse(USER_CONFIG_FILE)
 
     def _load_cmd_config(self, filenames):
         if filenames is not None:
             for f in filenames:
+                # Check if the config specified is a complete path, else search
+                # in the user config directory
                 if not os.path.exists(f):
-                    f = os.path.join(CONFIG_DIR, f + "." + CONFIG_EXT)
+                    f = os.path.join(USER_CONFIG_DIR, f + "." + CONFIG_EXT)
 
                 if os.path.exists(f):
                     self._parse(f, reset=False)

@@ -23,7 +23,7 @@ import time
 import imp
 import traceback
 
-from cerbero.config import CONFIG_DIR, Platform, Architecture, Distro,\
+from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro,\
     DistroVersion, License, LibraryType
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
@@ -35,7 +35,7 @@ from cerbero.build import recipe as crecipe
 
 
 COOKBOOK_NAME = 'cookbook'
-COOKBOOK_FILE = os.path.join(CONFIG_DIR, COOKBOOK_NAME)
+USER_COOKBOOK_FILE = os.path.join(USER_CONFIG_DIR, COOKBOOK_NAME)
 
 
 class RecipeStatus (object):
@@ -285,7 +285,7 @@ class CookBook (object):
         if config.cache_file is not None:
             return os.path.join(config.home_dir, config.cache_file)
         else:
-            return COOKBOOK_FILE
+            return USER_COOKBOOK_FILE
 
     def _restore_cache(self):
         try:
