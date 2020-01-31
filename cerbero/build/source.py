@@ -160,7 +160,7 @@ class BaseTarball(object):
             if not os.path.isfile(self.download_path):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.download_dir))
-            self.verify()
+            self.verify(self.download_path)
             m.action(_('Found %s at %s') % (self.url, self.download_path), logfile=get_logfile(self))
             return
         if not os.path.exists(self.download_dir):
@@ -171,7 +171,7 @@ class BaseTarball(object):
         await shell.download(self.url, self.download_path, check_cert=cc,
             overwrite=redownload, logfile=get_logfile(self),
             mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS)
-        self.verify()
+        self.verify(self.download_path)
 
     @staticmethod
     def _checksum(fname):
@@ -183,9 +183,7 @@ class BaseTarball(object):
                 h.update(block)
         return h.hexdigest()
 
-    def verify(self, fname=None, fatal=True):
-        if fname is None:
-            fname = self.download_path
+    def verify(self, fname, fatal=True):
         checksum = self._checksum(fname)
         if self.tarball_checksum is None:
             raise FatalError('tarball_checksum is missing in {}.recipe for tarball {}\n'
