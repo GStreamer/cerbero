@@ -202,12 +202,17 @@ class BaseTarball(object):
         return True
 
     async def extract_tarball(self, unpack_dir):
+        fname = self.download_path
+        logfile = get_logfile(self)
         try:
-            await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
+            await shell.unpack(fname, unpack_dir, logfile=logfile)
         except (IOError, EOFError, tarfile.ReadError):
-            m.action(_('Corrupted or partial tarball, redownloading...'), logfile=get_logfile(self))
+            movedto = fname + '.failed-extract'
+            os.replace(fname, movedto)
+            m.action('Corrupted or partial tarball {} moved to {}, redownloading...'.format(fname, movedto),
+                     logfile=logfile)
             await self.fetch(redownload=True)
-            await shell.unpack(self.download_path, unpack_dir, logfile=get_logfile(self))
+            await shell.unpack(fname, unpack_dir, logfile=logfile)
 
 
 class Tarball(BaseTarball, Source):
