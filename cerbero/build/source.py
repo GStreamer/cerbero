@@ -18,13 +18,14 @@
 
 import os
 import shutil
+import zipfile
 import tarfile
 import urllib.request, urllib.parse, urllib.error
 from hashlib import sha256
 
 from cerbero.config import Platform, DEFAULT_MIRRORS
 from cerbero.utils import git, svn, shell, _, run_until_complete
-from cerbero.errors import FatalError, InvalidRecipeError
+from cerbero.errors import FatalError, CommandError, InvalidRecipeError
 import cerbero.utils.messages as m
 
 URL_TEMPLATES = {
@@ -204,7 +205,7 @@ class BaseTarball(object):
         logfile = get_logfile(self)
         try:
             await shell.unpack(fname, unpack_dir, logfile=logfile)
-        except (IOError, EOFError, tarfile.ReadError):
+        except (CommandError, tarfile.ReadError, zipfile.BadZipFile):
             movedto = fname + '.failed-extract'
             os.replace(fname, movedto)
             m.action('Corrupted or partial tarball {} moved to {}, redownloading...'.format(fname, movedto),

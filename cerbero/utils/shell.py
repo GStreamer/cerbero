@@ -38,7 +38,7 @@ from distutils.version import StrictVersion
 from cerbero.enums import Platform
 from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus, CerberoSemaphore
 from cerbero.utils import messages as m
-from cerbero.errors import FatalError
+from cerbero.errors import CommandError, FatalError
 
 
 PATCH = 'patch'
@@ -146,9 +146,12 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
                                        stderr=subprocess.STDOUT, stdout=stream,
                                        universal_newlines=True,
                                        env=env, shell=shell)
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
         if fail:
-            raise FatalError(_("Error running command: %s") % cmd)
+            msg = ''
+            if stream:
+                msg = 'Output in logfile {}'.format(logfile.name)
+            raise CommandError(msg, cmd, e.returncode)
         else:
             ret = 0
     return ret
@@ -182,8 +185,11 @@ def check_output(cmd, cmd_dir=None, logfile=None, env=None):
     cmd = _cmd_string_to_array(cmd, env)
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
-    except (OSError, subprocess.CalledProcessError) as e:
-        raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
+    except subprocess.CalledProcessError as e:
+        msg = e.output
+        if logfile:
+            msg += '\nstderr in logfile {}'.format(logfile.name)
+        raise CommandError(msg, cmd, e.returncode)
 
     if sys.stdout.encoding:
         o = o.decode(sys.stdout.encoding, errors='replace')
@@ -199,7 +205,10 @@ def new_call(cmd, cmd_dir=None, logfile=None, env=None):
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        raise FatalError('Running command: {!r}\n{}'.format(cmd, str(e)))
+        msg = ''
+        if stream:
+            msg = 'Output in logfile {}'.format(logfile.name)
+        raise CommandError(msg, cmd, e.returncode)
 
 
 async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, env=None):
@@ -238,7 +247,10 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, 
                             env=env)
         await proc.wait()
         if proc.returncode != 0 and fail:
-            raise FatalError('Running {!r}, returncode {}'.format(cmd, proc.returncode))
+            msg = ''
+            if stream:
+                msg = 'Output in logfile {}'.format(logfile.name)
+            raise CommandError(msg, cmd, proc.returncode)
 
         return proc.returncode
 
@@ -282,7 +294,7 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
             output = output.decode(sys.stdout.encoding, errors='replace')
 
         if proc.returncode != 0:
-            raise FatalError('Running {!r}, returncode {}:\n{}'.format(cmd, proc.returncode, output))
+            raise CommandError(output, cmd, proc.returncode)
 
         return output
 

@@ -43,8 +43,11 @@ class FatalError(CerberoException):
         self.arch = arch
         CerberoException.__init__(self, msg)
 
-class CommandError(CerberoException):
+class CommandError(FatalError):
     header = 'Command Error: '
+    def __init__(self, msg, cmd, returncode):
+        msg = 'Running {!r} returned {}\n{}'.format(cmd, returncode, msg or '')
+        FatalError.__init__(self, msg)
 
 
 class BuildStepError(CerberoException):
