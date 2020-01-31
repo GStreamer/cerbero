@@ -210,6 +210,9 @@ class BaseTarball(object):
             os.replace(fname, movedto)
             m.action('Corrupted or partial tarball {} moved to {}, redownloading...'.format(fname, movedto),
                      logfile=logfile)
+            if self.offline:
+                # Can't fetch in offline mode
+                raise
             await self.fetch(redownload=True)
             await shell.unpack(fname, unpack_dir, logfile=logfile)
 
@@ -298,7 +301,7 @@ class GitCache (Source):
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
 
         if not os.path.exists(self.repo_dir):
-            if not cached_dir and offline:
+            if not cached_dir and self.offline:
                 msg = 'Offline mode: git repo for {!r} not found in cached sources ({}) or local sources ({})'
                 raise FatalError(msg.format(self.name, self.config.cached_sources, self.repo_dir))
             git.init(self.repo_dir, logfile=get_logfile(self))
