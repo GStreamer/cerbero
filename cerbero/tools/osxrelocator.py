@@ -100,8 +100,7 @@ class OSXRelocator(object):
 
     @staticmethod
     def list_shared_libraries(object_file):
-        cmd = '%s -L "%s"' % (OTOOL_CMD, object_file)
-        res = shell.check_call(cmd).split('\n')
+        res = shell.check_output([OTOOL_CMD, '-L', object_file]).splitlines()
         # We don't use the first line
         libs = res[1:]
         # Remove the first character tabulation

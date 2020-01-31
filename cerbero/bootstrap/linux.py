@@ -91,10 +91,10 @@ class DebianBootstrapper (UnixBootstrapper):
 
     def create_debian_arch_check(self, arch):
         def check_arch():
-            native_arch = shell.check_call('dpkg --print-architecture')
+            native_arch = shell.check_output(['dpkg', '--print-architecture'])
             if native_arch == arch:
                 return
-            foreign_archs = shell.check_call('dpkg --print-foreign-architectures')
+            foreign_archs = shell.check_output(['dpkg', '--print-foreign-architectures'])
             if arch in foreign_archs.split():
                 return
             raise ConfigurationError(('Architecture %s is missing from your setup. ' + \

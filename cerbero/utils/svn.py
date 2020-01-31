@@ -52,7 +52,7 @@ def checkout_file(url, out_path):
     @param out_path: output path
     @type revision: str
     '''
-    shell.call('svn export --force %s %s' % (url, out_path))
+    shell.new_call(['svn', 'export', '--force', url, out_path])
 
 
 def revision(repo):
@@ -62,7 +62,7 @@ def revision(repo):
     @param repo: the path to the repository
     @type  repo: str
     '''
-    rev = shell.check_call('svnversion', repo).split('\n')[0]
+    rev = shell.check_output(['svnversion'], cmd_dir=repo).splitlines()[0]
     if rev[-1] == 'M':
         rev = rev[:-1]
     return rev

@@ -55,11 +55,10 @@ class DebugPackages(Command):
             m.message("%r" % duplicates)
 
     def find_orphan_files(self, allfiles, prefix, excludes=[]):
-        cmd = 'find . -type f %s'
-        exc = ["\\( ! -name '%s' \\)" % x for x in excludes]
-        cmd = cmd % ' '.join(exc)
-
-        distfiles = shell.check_call(cmd, prefix).split('\n')
+        cmd = ['find', '.', '-type', 'f']
+        for x in excludes:
+            cmd += ['(', '!', '-name', x, ')']
+        distfiles = shell.check_output(cmd, cmd_dir=prefix).splitlines()
         # remove './' from the list of files
         distfiles = [f[2:] for f in distfiles]
         orphan = sorted(list((set(distfiles) - set(allfiles))))

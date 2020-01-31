@@ -157,35 +157,13 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     return ret
 
 
-def check_call(cmd, cmd_dir=None, shell=False, split=True, fail=False, env=None):
-    '''
-    DEPRECATED: Use check_output and a cmd array wherever possible
-    '''
-    if env is None:
-        env = os.environ.copy()
-    if split and isinstance(cmd, str):
-        cmd = shlex.split(cmd)
-    try:
-        process = subprocess.Popen(cmd, cwd=cmd_dir, env=env,
-                                   stdout=subprocess.PIPE,
-                                   stderr=subprocess.STDOUT, shell=shell)
-        output, unused_err = process.communicate()
-        if process.poll() and fail:
-            raise Exception(output)
-    except Exception:
-        raise FatalError(_("Error running command: %s") % cmd)
-
-    if sys.stdout.encoding:
-        output = output.decode(sys.stdout.encoding, errors='replace')
-
-    return output
-
-
-def check_output(cmd, cmd_dir=None, logfile=None, env=None):
+def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     cmd = _cmd_string_to_array(cmd, env)
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
     except subprocess.CalledProcessError as e:
+        if not fail:
+            return e.output
         msg = e.output
         if logfile:
             msg += '\nstderr in logfile {}'.format(logfile.name)

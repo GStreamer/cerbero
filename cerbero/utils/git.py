@@ -65,7 +65,7 @@ def clean(git_dir, logfile=None):
     return shell.call('%s clean -dfx' % GIT, git_dir, logfile=logfile)
 
 
-def list_tags(git_dir, fail=True):
+def list_tags(git_dir):
     '''
     List all tags
 
@@ -76,14 +76,10 @@ def list_tags(git_dir, fail=True):
     @return: list of tag names (str)
     @rtype: list
     '''
-    tags = shell.check_call('%s tag -l' % GIT, git_dir, fail=fail)
-    tags = tags.strip()
-    if tags:
-        tags = tags.split('\n')
-    return tags
+    return shell.check_output([GIT, 'tag', '-l'], cmd_dir=git_dir).strip().splitlines()
 
 
-def create_tag(git_dir, tagname, tagdescription, commit, fail=True, logfile=None):
+def create_tag(git_dir, tagname, tagdescription, commit, logfile=None):
     '''
     Create a tag using commit
 
@@ -99,14 +95,13 @@ def create_tag(git_dir, tagname, tagdescription, commit, fail=True, logfile=None
     @type fail: false
     '''
 
-    shell.call('%s tag -s %s -m "%s" %s' %
-               (GIT, tagname, tagdescription, commit), git_dir,
-               fail=fail, logfile=logfile)
-    return shell.call('%s push origin %s' % (GIT, tagname), git_dir,
-                      fail=fail, logfile=logfile)
+    shell.new_call([GIT, 'tag', '-s', tagname, '-m', tagdescription, commit],
+                   cmd_dir=git_dir, logfile=logfile)
+    return shell.new_call([GIT, 'push', 'origin', tagname], cmd_dir=git_dir,
+                          logfile=logfile)
 
 
-def delete_tag(git_dir, tagname, fail=True, logfile=None):
+def delete_tag(git_dir, tagname, logfile=None):
     '''
     Delete a tag
 
@@ -117,7 +112,7 @@ def delete_tag(git_dir, tagname, fail=True, logfile=None):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    return shell.call('%s tag -d %s' % (GIT, tagname), git_dir, fail=fail, logfile=logfile)
+    return shell.new_call([GIT, '-d', tagname], cmd_dir=git_dir, logfile=logfile)
 
 
 async def fetch(git_dir, fail=True, logfile=None):
@@ -130,7 +125,7 @@ async def fetch(git_dir, fail=True, logfile=None):
     @type fail: false
     '''
     cmd = [GIT, 'fetch', '--all']
-    return await shell.async_call(cmd, git_dir, fail, logfile=logfile, cpu_bound=False)
+    return await shell.async_call(cmd, cmd_dir=git_dir, fail=fail, logfile=logfile, cpu_bound=False)
 
 async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
     '''
@@ -146,27 +141,30 @@ async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, log
     @type offline: false
     '''
     if src_dir:
-        config = shell.check_call('%s config --file=.gitmodules --list' % GIT,
-                                  git_dir)
-        config_array = [s.split('=', 1) for s in config.split('\n')]
+        config = shell.check_output([GIT, 'config', '--file=.gitmodules', '--list'],
+                                    fail=False, cmd_dir=git_dir, logfile=logfile)
+        config_array = [s.split('=', 1) for s in config.splitlines()]
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.path'):
                 submodule = c[0][len('submodule.'):-len('.path')]
-                shell.call("%s config --file=.gitmodules submodule.%s.url %s" %
-                           (GIT, submodule, os.path.join(src_dir, c[1])),
-                           git_dir, logfile=logfile)
-    shell.call("%s submodule init" % GIT, git_dir, logfile=logfile)
+                shell.new_call([GIT, 'config', '--file=.gitmodules', 'submodule.{}.url'.format(submodule),
+                                os.path.join(src_dir, c[1])], cmd_dir=git_dir, logfile=logfile)
+    shell.new_call([GIT, 'submodule', 'init'], cmd_dir=git_dir, logfile=logfile)
     if src_dir or not offline:
-        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile, cpu_bound=False)
-        await shell.async_call("%s submodule update" % GIT, git_dir, fail=fail, logfile=logfile, cpu_bound=False)
+        await shell.async_call([GIT, 'submodule', 'sync'], cmd_dir=git_dir, logfile=logfile,
+                               cpu_bound=False)
+        await shell.async_call([GIT, 'submodule', 'update'], cmd_dir=git_dir, fail=fail,
+                               logfile=logfile, cpu_bound=False)
     else:
-        await shell.async_call("%s submodule update --no-fetch" % GIT, git_dir, fail=fail, logfile=logfile, cpu_bound=False)
+        await shell.async_call([GIT, 'submodule', 'update', '--no-fetch'], cmd_dir=git_dir,
+                               fail=fail, logfile=logfile, cpu_bound=False)
     if src_dir:
         for c in config_array:
             if c[0].startswith('submodule.') and c[0].endswith('.url'):
-                shell.call("%s config --file=.gitmodules %s  %s" %
-                           (GIT, c[0], c[1]), git_dir, logfile=logfile)
-        await shell.async_call("%s submodule sync" % GIT, git_dir, logfile=logfile, cpu_bound=False)
+                shell.new_call([GIT, 'config', '--file=.gitmodules', c[0], c[1]],
+                               cmd_dir=git_dir, logfile=logfile)
+        await shell.async_call([GIT, 'submodule', 'sync'], cmd_dir=git_dir, logfile=logfile,
+                               cpu_bound=False)
 
 async def checkout(git_dir, commit, logfile=None):
     '''
@@ -196,8 +194,7 @@ def get_hash(git_dir, commit):
         # can get called from built_version() when the directory isn't git.
         # Return a fixed string + unix time to trigger a full fetch.
         return 'not-git-' + str(time.time())
-    return shell.check_call('%s rev-parse %s' %
-                            (GIT, commit), git_dir).rstrip()
+    return shell.check_output([GIT, 'rev-parse', commit], cmd_dir=git_dir).rstrip()
 
 
 async def local_checkout(git_dir, local_git_dir, commit, logfile=None):
@@ -247,7 +244,7 @@ def check_line_endings(platform):
     '''
     if platform != Platform.WINDOWS:
         return True
-    val = shell.check_call('git config --get core.autocrlf')
+    val = shell.check_output([GIT, 'config', '--get', 'core.autocrlf'], fail=False)
     if ('false' in val.lower()):
         return True
     return False

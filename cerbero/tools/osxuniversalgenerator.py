@@ -118,15 +118,13 @@ class OSXUniversalGenerator(object):
             # name to real one and not based on the filename
             relocator.relocate_file(tmp.name)
             relocator.change_id(tmp.name, id=f.replace(prefix_to_replace, self.output_root))
-        cmd = '%s -create %s -output %s' % (self.LIPO_CMD,
-            ' '.join([f.name for f in tmp_inputs]), output)
-        self._call(cmd)
+        cmd = [self.LIPO_CMD, '-create'] + [f.name for f in tmp_inputs] + ['-output', output]
+        shell.new_call(cmd)
         for tmp in tmp_inputs:
             tmp.close()
 
     def get_file_type(self, filepath):
-        cmd = '%s -bh "%s"' % (self.FILE_CMD, filepath)
-        return self._call(cmd)[:-1] #remove trailing \n
+        return shell.check_output([self.FILE_CMD, '-bh', filepath])[:-1] #remove trailing \n
 
     async def _detect_merge_action(self, files_list):
         actions = []
@@ -253,10 +251,6 @@ class OSXUniversalGenerator(object):
         rel_path = os.path.relpath(os.path.dirname(target), os.path.dirname(dest))
         dest_target = os.path.join(rel_path, os.path.basename(target))
         os.symlink(dest_target, dest)
-
-    def _call(self, cmd, cwd=None):
-        cmd = cmd or self.root
-        return shell.check_call(cmd, cmd_dir=cwd, split=False, shell=True)
 
 
 class Main(object):

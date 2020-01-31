@@ -47,7 +47,9 @@ class RecursiveLister():
 class ObjdumpLister(RecursiveLister):
 
     def list_file_deps(self, prefix, path):
-        files = shell.check_call('LC_ALL=C objdump -xw %s' % path).splitlines()
+        env = os.environ.copy()
+        env['LC_ALL'] = 'C'
+        files = shell.check_output(['objdump', '-xw', path], env=env).splitlines()
         prog = re.compile(r"(?i)^.*DLL[^:]*: (\S+\.dll)$")
         files = [prog.sub(r"\1", x) for x in files if prog.match(x) is not None]
         files = [os.path.join(prefix, 'bin', x) for x in files if
@@ -58,7 +60,7 @@ class ObjdumpLister(RecursiveLister):
 class OtoolLister(RecursiveLister):
 
     def list_file_deps(self, prefix, path):
-        files = shell.check_call('otool -L %s' % path).split('\n')[1:]
+        files = shell.check_output(['otool', '-L', path]).splitlines()[1:]
         # Shared libraries might be relocated, we look for files with the
         # prefix or starting with @rpath
         files = [x.strip().split(' ')[0] for x in files if prefix in x or "@rpath" in x]
@@ -68,7 +70,7 @@ class OtoolLister(RecursiveLister):
 class LddLister():
 
     def list_deps(self, prefix,  path):
-        files = shell.check_call('ldd %s' % path).split('\n')
+        files = shell.check_output(['ldd', path]).splitlines()
         return [x.split(' ')[2] for x in files if prefix in x]
 
 
