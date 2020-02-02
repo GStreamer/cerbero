@@ -44,6 +44,7 @@ from cerbero.errors import CommandError, FatalError
 PATCH = 'patch'
 TAR = 'tar'
 TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
+SUBPROCESS_EXCEPTIONS = (FileNotFoundError, PermissionError, subprocess.CalledProcessError)
 
 
 PLATFORM = system_info()[0]
@@ -146,7 +147,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
                                        stderr=subprocess.STDOUT, stdout=stream,
                                        universal_newlines=True,
                                        env=env, shell=shell)
-    except subprocess.CalledProcessError as e:
+    except SUBPROCESS_EXCEPTIONS as e:
         if fail:
             msg = ''
             if stream:
@@ -161,7 +162,7 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     cmd = _cmd_string_to_array(cmd, env)
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
-    except subprocess.CalledProcessError as e:
+    except SUBPROCESS_EXCEPTIONS as e:
         if not fail:
             return e.output
         msg = e.output
@@ -182,7 +183,7 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     try:
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as e:
+    except SUBPROCESS_EXCEPTIONS as e:
         if not fail:
             return e.returncode
         msg = ''
