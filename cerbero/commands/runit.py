@@ -33,7 +33,7 @@ class Run(Command):
             ])
 
     def run(self, config, args):
-        sys.exit(shell.new_call(args.cmd, fail=False))
+        sys.exit(shell.new_call(args.cmd, fail=False, env=config.env))
 
 
 register_command(Run)
