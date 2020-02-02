@@ -174,7 +174,7 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     return o
 
 
-def new_call(cmd, cmd_dir=None, logfile=None, env=None):
+def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
         logfile.write('Running command {!r}\n'.format(cmd))
@@ -183,10 +183,13 @@ def new_call(cmd, cmd_dir=None, logfile=None, env=None):
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
+        if not fail:
+            return e.returncode
         msg = ''
         if stream:
             msg = 'Output in logfile {}'.format(logfile.name)
         raise CommandError(msg, cmd, e.returncode)
+    return 0
 
 
 async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, env=None):
