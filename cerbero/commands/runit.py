@@ -18,6 +18,7 @@
 
 
 import sys
+import argparse
 from cerbero.commands import Command, register_command
 from cerbero.utils import _, N_, ArgparseArgument, shell
 
@@ -28,7 +29,7 @@ class Run(Command):
 
     def __init__(self):
         Command.__init__(self,
-            [ArgparseArgument('cmd', nargs='+',
+            [ArgparseArgument('cmd', nargs=argparse.REMAINDER,
                              help=_('command to run')),
             ])
 
