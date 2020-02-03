@@ -152,7 +152,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
             msg = ''
             if stream:
                 msg = 'Output in logfile {}'.format(logfile.name)
-            raise CommandError(msg, cmd, e.returncode)
+            raise CommandError(msg, cmd, getattr(e, 'returncode', -1))
         else:
             ret = 0
     return ret
@@ -163,12 +163,12 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
     except SUBPROCESS_EXCEPTIONS as e:
+        msg = getattr(e, 'output', '')
         if not fail:
-            return e.output
-        msg = e.output
+            return msg
         if logfile:
             msg += '\nstderr in logfile {}'.format(logfile.name)
-        raise CommandError(msg, cmd, e.returncode)
+        raise CommandError(msg, cmd, getattr(e, 'returncode', -1))
 
     if sys.stdout.encoding:
         o = o.decode(sys.stdout.encoding, errors='replace')
@@ -184,12 +184,18 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
     except SUBPROCESS_EXCEPTIONS as e:
+        returncode = getattr(e, 'returncode', -1)
         if not fail:
-            return e.returncode
+            stream = logfile or sys.stderr
+            if isinstance(e, FileNotFoundError):
+                stream.write('{}: file not found\n'.format(cmd[0]))
+            if isinstance(e, PermissionError):
+                stream.write('{!r}: permission error\n'.format(cmd))
+            return returncode
         msg = ''
         if stream:
             msg = 'Output in logfile {}'.format(logfile.name)
-        raise CommandError(msg, cmd, e.returncode)
+        raise CommandError(msg, cmd, returncode)
     return 0
 
 
