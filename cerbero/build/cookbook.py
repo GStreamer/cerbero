@@ -460,7 +460,7 @@ class CookBook (object):
             r.prepare()
             return r
         except InvalidRecipeError as e:
-            self._invalid_recipes[r.name] = e
+            self._invalid_recipes[recipe_cls.name] = e
 
     def _load_universal_recipe(self, globals_dict, recipe_cls,
             recipe_cls_key, filepath, custom=None):
