@@ -62,6 +62,10 @@ class Source (object):
         if self.patches is None:
             self.patches = []
 
+        if not self.version:
+            raise InvalidRecipeError(
+                self, _("'version' attribute is missing in the recipe"))
+
     async def fetch(self, **kwargs):
         self.fetch_impl(**kwargs)
 
@@ -223,7 +227,7 @@ class Tarball(BaseTarball, Source):
         Source.__init__(self)
         if not self.url:
             raise InvalidRecipeError(
-                _("'url' attribute is missing in the recipe"))
+                self, _("'url' attribute is missing in the recipe"))
         self.url = self.expand_url_template(self.url)
         self.url = self.replace_name_and_version(self.url)
         if self.tarball_name is not None:
