@@ -9,8 +9,6 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.gz'.format(version)
     tarball_checksum = '008a05a4ed341483d8399c8071d57a39853cf025412b32da277e76ad8226e158'
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
-    make_check = None
-    autoreconf = True
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
