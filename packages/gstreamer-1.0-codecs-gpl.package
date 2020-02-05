@@ -19,3 +19,8 @@ class Package(custom.GStreamer, package.Package):
              'gst-plugins-good-1.0:plugins_codecs_gpl_devel',
              'gst-plugins-bad-1.0:plugins_codecs_gpl_devel',
              'gst-plugins-ugly-1.0:plugins_codecs_gpl_devel']
+
+    def prepare(self):
+        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
+            # Needed by libass
+            self.files.append('libiconv:libs')
