@@ -179,7 +179,7 @@ async def checkout(git_dir, commit, logfile=None):
     return await shell.async_call(cmd, git_dir, logfile=logfile, cpu_bound=False)
 
 
-def get_hash(git_dir, commit):
+def get_hash(git_dir, commit, logfile=None):
     '''
     Get a commit hash from a valid commit.
     Can be used to check if a commit exists
@@ -194,7 +194,8 @@ def get_hash(git_dir, commit):
         # can get called from built_version() when the directory isn't git.
         # Return a fixed string + unix time to trigger a full fetch.
         return 'not-git-' + str(time.time())
-    return shell.check_output([GIT, 'rev-parse', commit], cmd_dir=git_dir).rstrip()
+    return shell.check_output([GIT, 'rev-parse', commit], cmd_dir=git_dir,
+                              logfile=logfile).rstrip()
 
 
 async def local_checkout(git_dir, local_git_dir, commit, logfile=None):

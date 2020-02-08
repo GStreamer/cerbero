@@ -330,7 +330,7 @@ class GitCache (Source):
 
 
     def built_version(self):
-        return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit))
+        return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self)))
 
 
 class LocalTarball (GitCache):
@@ -397,8 +397,8 @@ class Git (GitCache):
     async def extract(self):
         if os.path.exists(self.build_dir):
             try:
-                commit_hash = git.get_hash(self.repo_dir, self.commit)
-                checkout_hash = git.get_hash(self.build_dir, 'HEAD')
+                commit_hash = git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self))
+                checkout_hash = git.get_hash(self.build_dir, 'HEAD', logfile=get_logfile(self))
                 if commit_hash == checkout_hash and not self.patches:
                     return False
             except Exception:
