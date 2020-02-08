@@ -158,10 +158,14 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     return ret
 
 
-def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
+def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=False):
     cmd = _cmd_string_to_array(cmd, env)
+    stderr = logfile
+    if quiet and not logfile:
+        stderr = subprocess.DEVNULL
+
     try:
-        o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=logfile)
+        o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=stderr)
     except SUBPROCESS_EXCEPTIONS as e:
         msg = getattr(e, 'output', '')
         if not fail:
