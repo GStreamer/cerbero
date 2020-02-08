@@ -449,10 +449,10 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
         try:
             return download_func(murl, destination, check_cert, overwrite)
         except Exception as ex:
-            errors.append(ex)
+            errors.append((murl, ex))
     if len(errors) == 1:
-        raise errors[0]
-    raise Exception (errors)
+        errors = errors[0]
+    raise FatalError('Failed to download {!r}: {!r}'.format(url, errors))
 
 
 def _splitter(string, base_url):
