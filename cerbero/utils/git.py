@@ -195,7 +195,7 @@ def get_hash(git_dir, commit, logfile=None):
         # Return a fixed string + unix time to trigger a full fetch.
         return 'not-git-' + str(time.time())
     return shell.check_output([GIT, 'rev-parse', commit], cmd_dir=git_dir,
-                              logfile=logfile).rstrip()
+                              fail=False, logfile=logfile).rstrip()
 
 
 async def local_checkout(git_dir, local_git_dir, commit, logfile=None):
