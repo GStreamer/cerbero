@@ -469,7 +469,7 @@ async def download(url, destination=None, check_cert=True, overwrite=False, logf
             errors.append((murl, ex))
     if len(errors) == 1:
         errors = errors[0]
-    raise CommandError('Failed to download {!r}: {!r}'.format(url, errors))
+    raise FatalError('Failed to download {!r}: {!r}'.format(url, errors))
 
 
 def _splitter(string, base_url):
