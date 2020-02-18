@@ -99,9 +99,8 @@ class Main(object):
                 help=_('Configuration file used for the build'))
         self.parser.add_argument('-m', '--manifest', action='store', type=str, default=None,
                 help=_('Manifest file used to fixate git revisions'))
-        if os.path.basename(sys.argv[0]) == 'cerbero-uninstalled':
-            self.parser.add_argument('--self-update', action='store', type=str, default=None,
-                    help=_('Update cerbero git repository from manifest and exit.'))
+        self.parser.add_argument('--self-update', action='store', type=str, default=None,
+                                 help=_('Update cerbero git repository from manifest and exit.'))
 
     def parse_arguments(self, args):
         ''' Parse the command line arguments '''
