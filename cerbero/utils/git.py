@@ -124,7 +124,7 @@ async def fetch(git_dir, fail=True, logfile=None):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    cmd = [GIT, 'fetch', '--all']
+    cmd = [GIT, 'fetch', '--all', '--tags']
     return await shell.async_call(cmd, cmd_dir=git_dir, fail=fail, logfile=logfile, cpu_bound=False)
 
 async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
