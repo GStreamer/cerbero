@@ -129,7 +129,7 @@ def fetch(git_dir, fail=True, logfile=None):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    return shell.call('%s fetch --all' % GIT, git_dir, fail=fail, logfile=logfile)
+    return shell.call('%s fetch --all --tags' % GIT, git_dir, fail=fail, logfile=logfile)
 
 def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
     '''
