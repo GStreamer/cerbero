@@ -3,7 +3,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
-    version = '20161218-2245'
+    version = '20191217-2245'
     name = 'x264'
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
                         '--disable-strip --disable-lavf'
     url = 'https://download.videolan.org/pub/x264/snapshots/x264-snapshot-%(version)s-stable.tar.bz2'
     tarball_dirname= 'x264-snapshot-%(version)s-stable'
-    tarball_checksum = 'd4d4fb146fbe64efb0f02d149118a0e93f575417011e4ff898a5079d548b9950'
+    tarball_checksum = 'b2495c8f2930167d470994b1ce02b0f4bfb24b3317ba36ba7f112e9809264160'
 
     files_libs = ['libx264']
     files_bins = ['x264']
