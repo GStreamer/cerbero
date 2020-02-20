@@ -127,12 +127,12 @@ GSTREAMER_PLUGINS_LIBS       := $(foreach plugin, $(GSTREAMER_PLUGINS), -lgst$(p
 GSTREAMER_PLUGINS_CLASSES    := $(strip \
 			$(subst $(GSTREAMER_NDK_BUILD_PATH),, \
 			$(foreach plugin,$(GSTREAMER_PLUGINS), \
-			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)$(plugin)/*.java))))
+			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)/$(plugin)/*.java))))
 
 GSTREAMER_PLUGINS_WITH_CLASSES := $(strip \
 			$(subst $(GSTREAMER_NDK_BUILD_PATH),, \
 			$(foreach plugin, $(GSTREAMER_PLUGINS), \
-			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)$(plugin)))))
+			$(wildcard $(GSTREAMER_NDK_BUILD_PATH)/$(plugin)))))
 
 # Generate the plugins' declaration strings
 GSTREAMER_PLUGINS_DECLARE    := $(foreach plugin, $(GSTREAMER_PLUGINS), \
