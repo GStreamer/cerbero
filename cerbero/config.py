@@ -420,8 +420,6 @@ class Config (object):
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': ld_library_path,
                'LDFLAGS': ldflags,
-               'C_INCLUDE_PATH': includedir,
-               'CPLUS_INCLUDE_PATH': includedir,
                'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
@@ -447,6 +445,12 @@ class Config (object):
                'CERBERO_HOST_SOURCES': self.sources
                }
 
+        # Some autotools recipes will call the native (non-cross) compiler to
+        # build generators, and we don't want it to use these. We will set the
+        # include paths using CFLAGS, etc, when cross-compiling.
+        if not self.cross_compiling():
+            env['C_INCLUDE_PATH'] = includedir
+            env['CPLUS_INCLUDE_PATH'] = includedir
 
         # On Windows, we have a toolchain env that we need to set, but only
         # when running as a shell
@@ -592,7 +596,8 @@ class Config (object):
         return self.target_distro_version >= distro_version
 
     def _parse(self, filename, reset=True):
-        config = {'os': os, '__file__': filename, 'env' : self.config_env}
+        config = {'os': os, '__file__': filename, 'env' : self.config_env,
+                  'cross': self.cross_compiling()}
         if not reset:
             for prop in self._properties:
                 if hasattr(self, prop):
