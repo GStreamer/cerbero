@@ -5,27 +5,17 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.56.1'
+    version = '2.62.3'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'df47b0e0a037d2dcf6b1846cbdf68dd4b3cc055e026bb40c4a55f19f29f635c8'
+    tarball_checksum = '8ca1f86f23a76b5c7640624f7d5490705c78e81375e1741c9a1c41ce7f8f7ff7'
     meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
                      'gnome_proxy_support': 'false', 'pkcs11_support': 'false',
                      # Also build static modules on all platforms
                      'static_modules': 'true'}
     deps = ['glib', 'gnutls']
-    # These patches are upstream, remove on bump
-    patches = [name + '/0001-meson-Use-.so-for-modules-on-macOS-instead-of-dylib.patch',
-               name + '/0002-meson-Unbreak-the-non-macOS-builds.patch',
-               # XXX: This patch may require changes to gnutls's system trust
-               # since we can no longer set the certificate path in glib-networking
-               name + '/0003-Use-the-GnuTLS-system-trust-by-default.patch',
-               name + '/0004-meson-Only-run-gio-querymodules-if-it-s-found.patch',
-               name + '/0001-Don-t-use-the-GCC-ternary-syntax-extension.patch',
-               # https://gitlab.gnome.org/GNOME/glib-networking/merge_requests/22
-               name + '/0001-tls-modules-Export-load-unload-query-symbols-on-MSVC.patch']
 
     files_misc = ['lib/gio/modules/libgiognutls%(mext)s']
     files_lang = ['glib-networking']

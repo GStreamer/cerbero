@@ -2,37 +2,20 @@
 
 class Recipe(recipe.Recipe):
     name = 'glib-tools'
-    version = '2.56.1'
+    version = '2.62.5'
     stype = SourceType.TARBALL
     url = 'gnome://glib/%(maj_ver)s/glib-%(version)s.tar.xz'
     tarball_dirname = 'glib-%(version)s'
-    tarball_checksum = '40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d'
+    tarball_checksum = 'b8d1cdafa46658b63d7512efbe2cd21bd36cd7be83140e44930c47b79f82452e'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'internal_pcre': 'true', 'libmount': 'false',
-                     'dtrace': 'false', 'iconv': 'libc', 'selinux' : 'false'}
+                     'dtrace': 'false', 'iconv': 'auto', 'selinux' : 'disabled'}
     deps = ['libffi', 'zlib', 'pkg-config', 'meson', 'gettext-tools']
-    patches = ['../glib/glib-2.57-meson-backported-fixes.patch',
-               '../glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
-               # XXX: Remove when we upgrade our mingw toolchain
-               'glib-tools/0001-meson-Disable-tests-fail-on-our-ancient-MinGW.patch',
-              ]
 
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
-            # Disable valgrind code on non-Linux, in the best case it just
-            # gives us compiler errors :)
-            self.append_env('CFLAGS', '-DNVALGRIND=1')
-            self.meson_options.update({'xattr': 'false'})
-        # macOS provides libiconv as a separate library
-        if self.config.target_platform == Platform.DARWIN:
-            self.meson_options.update({'iconv': 'native'})
-        # linux and BSD provide iconv as a part of libc
-        elif self.config.target_platform == Platform.LINUX:
-            self.meson_options.update({'iconv': 'libc'})
-        # Other platforms don't provide libiconv, so we build it
-        else:
-            self.meson_options.update({'iconv': 'gnu'})
+        # Android only provides libiconv with API level >=28 (Pie and newer)
+        if self.config.target_platform == Platform.ANDROID:
             self.deps.append('libiconv')
 
         if self.config.target_platform == Platform.WINDOWS:

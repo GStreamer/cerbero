@@ -10,30 +10,6 @@ Subject: [PATCH 09/13] Implementation of Cocoa event loop integration in
  glib/gmain.c     | 985 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
  3 files changed, 991 insertions(+), 2 deletions(-)
 
-diff --git a/glib/Makefile.am b/glib/Makefile.am
-index d755853..611eb5b 100644
---- a/glib/Makefile.am
-+++ b/glib/Makefile.am
-@@ -44,6 +44,10 @@ AM_CPPFLAGS = 				\
- 	-DGLIB_COMPILATION 		\
- 	-DPCRE_STATIC
- 
-+if OS_COCOA
-+AM_CPPFLAGS += -xobjective-c
-+endif
-+
- AM_CFLAGS = $(GLIB_WARN_CFLAGS)
- 
- MIRRORING_TAB_SOURCE = 				\
-@@ -353,7 +357,7 @@ pcre_inc =
- endif
- 
- libglib_2_0_la_CFLAGS = $(AM_CFLAGS) $(GLIB_HIDDEN_VISIBILITY_CFLAGS) $(LIBSYSTEMD_CFLAGS)
--libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD) $(LIBSYSTEMD_LIBS)
-+libglib_2_0_la_LIBADD = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ @ICONV_LIBS@ @G_LIBS_EXTRA@ $(pcre_lib) $(G_THREAD_LIBS_EXTRA) $(G_THREAD_LIBS_FOR_GTHREAD) $(LIBSYSTEMD_LIBS) $(COCOA_LIBS)
- libglib_2_0_la_DEPENDENCIES = libcharset/libcharset.la $(printf_la) @GIO@ @GSPAWN@ @PLATFORMDEP@ $(glib_win32_res) $(glib_def)
- 
- libglib_2_0_la_LDFLAGS = $(GLIB_LINK_FLAGS) \
 diff --git a/glib/gmain.c b/glib/gmain.c
 index 27c0234..2a88474 100644
 --- a/glib/gmain.c
@@ -1102,16 +1078,6 @@ index ea9bf41..9f3e087 100644
  if host_system == 'windows'
    glib_win_rc = configure_file(
      input: 'glib.rc.in',
-@@ -238,7 +246,8 @@ libglib = library('glib-2.0',
-   include_directories : configinc,
-   link_with : [charset_lib, gnulib_lib],
-   dependencies : [pcre, thread_dep, libintl, librt] + libiconv + platform_deps,
--  c_args : ['-DG_LOG_DOMAIN="GLib"', '-DGLIB_COMPILATION'] + pcre_static_args + glib_hidden_visibility_args
-+  c_args : ['-DG_LOG_DOMAIN="GLib"', '-DGLIB_COMPILATION'] + pcre_static_args + glib_hidden_visibility_args,
-+  objc_args : ['-DG_LOG_DOMAIN="GLib"', '-DGLIB_COMPILATION'] + pcre_static_args + glib_hidden_visibility_args
- )
- 
- libglib_dep = declare_dependency(
 -- 
 2.14.3 (Apple Git-98)
 

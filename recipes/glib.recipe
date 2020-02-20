@@ -22,13 +22,14 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.56.1'
+    version = '2.62.5'
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = '40ef3f44f2c651c7a31aedee44259809b6f03d3d20be44545cd7d177221c0b8d'
+    tarball_checksum = 'b8d1cdafa46658b63d7512efbe2cd21bd36cd7be83140e44930c47b79f82452e'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    meson_options = {'internal_pcre': 'true', 'libmount': 'false', 'dtrace': 'false'}
+    meson_options = {'internal_pcre': 'true', 'libmount': 'false', 'dtrace': 'false',
+                     'iconv': 'auto'}
     deps = ['libffi', 'zlib']
 
     patches = ["glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
@@ -36,31 +37,10 @@ class Recipe(recipe.Recipe):
                "glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               'glib/0013-gmain-Fix-erroneous-if-condition-when-dtrace-is-disa.patch',
-               # All these patches are upstream and can be removed on version bump
-               'glib/glib-2.57-meson-backported-fixes.patch',
-               'glib/0001-meson-Add-exception-for-atomic-ops-test-for-Android.patch',
-               'glib/0001-gengiotypefuncs.py-Read-and-parse-files-in-binary-mo.patch',
-               'glib/0001-Use-a-real-test-for-G_HAVE_GNUC_VISIBILITY.patch',
-               'glib/0001-Revert-Revert-Rename-objective-c-files-from-c-to-m.patch',
-               'glib/0002-Revert-Revert-Meson-Fix-cocoa-and-carbon-support.patch',
-               'glib/0003-Fix-missing-osx-files-when-running-make-dist.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/280
-               'glib/0001-meson-Always-set-G_MODULE_SUFFIX-to-so-on-macOS.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/282
-               'glib/0001-meson-Add-macOS-libtool-versioning-to-maintain-ABI-c.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/273
-               'glib/0001-gtlsbackend-add-support-for-setting-the-default-TLS-.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/686
-               'glib/0001-gio-Also-support-modules-built-with-MSVC.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/187
-               'glib/0001-meson-use-the-new-python-module-instead-of-the-pytho.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/25
-               'glib/0001-msvc-set-the-execution-and-source-encoding-to-utf-8..patch',
                # https://gitlab.gnome.org/GNOME/glib/merge_requests/1254
                'glib/0001-giomodule-gio-modules-are-no-longer-installed-in-bin.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/1265
-               'glib/0001-build-don-t-check-for-protected-visibility.patch',
+               # https://github.com/mesonbuild/meson/issues/6257
+               'glib/0001-meson-host_system-is-ios-inside-cerbero.patch',
               ]
 
     files_libs = [
@@ -134,19 +114,9 @@ class Recipe(recipe.Recipe):
             self.meson_options.update({'xattr': 'false'})
             self.deps.append('proxy-libintl')
 
-        # macOS and iOS provide libiconv as a separate library
-        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
-            self.meson_options.update({'iconv': 'native'})
-        # linux and BSD provide iconv as a part of libc
-        elif self.config.target_platform == Platform.LINUX:
-            self.meson_options.update({'iconv': 'libc'})
-        # On Windows, glib uses an internal copy of libiconv
-        elif self.config.target_platform == Platform.WINDOWS:
-            self.meson_options.update({'iconv': 'native'})
-        # Other platforms don't provide libiconv, so we build it
-        else:
+        # Android only provides libiconv with API level >=28 (Pie and newer)
+        if self.config.target_platform == Platform.ANDROID:
             self.deps.append('libiconv')
-            self.meson_options.update({'iconv': 'gnu'})
 
         if self.config.target_platform == Platform.WINDOWS:
             # Want secure versions of stdlib functions. Glib already defines
@@ -173,7 +143,7 @@ class Recipe(recipe.Recipe):
             path1 = '/usr/lib/gio/modules'
             path2 = None
             use_old_uri_scheme = False
-            self.meson_options.update({'selinux': 'false'})
+            self.meson_options.update({'selinux': 'disabled'})
             # Old Debian/Ubuntu
             if self.config.target_distro_version in [DistroVersion.DEBIAN_SQUEEZE,
                                                      DistroVersion.UBUNTU_LUCID,
