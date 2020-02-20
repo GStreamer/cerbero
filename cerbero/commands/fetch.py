@@ -76,8 +76,7 @@ class Fetch(Command):
             printer.count += 1
             printer.remove_recipe(recipe_name)
 
-        for i in range(len(fetch_recipes)):
-            recipe = fetch_recipes[i]
+        for recipe in fetch_recipes:
             if print_only:
                 # For now just print tarball URLs
                 if isinstance(recipe, Tarball):
@@ -87,10 +86,17 @@ class Fetch(Command):
             if asyncio.iscoroutinefunction(stepfunc):
                 tasks.append(fetch_print_wrapper(recipe.name, stepfunc))
             else:
-                printer.update_recipe_step(printer.count, printer.total, recipe_name, 'fetch')
+                printer.update_recipe_step(printer.count, printer.total, recipe.name, 'fetch')
                 stepfunc()
                 printer.count += 1
-                printer.remove_recipe(recipe_name)
+                printer.remove_recipe(recipe.name)
+
+        run_until_complete(tasks)
+        m.message("All async fetch jobs finished")
+
+        # Checking the current built version against the fetched one
+        # needs to be done *after* actually fetching
+        for recipe in fetch_recipes:
             bv = cookbook.recipe_built_version(recipe.name)
             cv = recipe.built_version()
             if bv != cv:
@@ -105,8 +111,6 @@ class Fetch(Command):
                             to_rebuild.append(r)
                             cookbook.reset_recipe_status(r.name)
 
-        run_until_complete(tasks)
-        m.message("All async fetch jobs finished")
         if to_rebuild:
             to_rebuild = sorted(list(set(to_rebuild)), key=lambda r:r.name)
             m.message(_("These recipes have been updated and will "
