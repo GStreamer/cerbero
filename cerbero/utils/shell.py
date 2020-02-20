@@ -197,7 +197,7 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
                 stream.write('{!r}: permission error\n'.format(cmd))
             return returncode
         msg = ''
-        if stream:
+        if logfile:
             msg = 'Output in logfile {}'.format(logfile.name)
         raise CommandError(msg, cmd, returncode)
     return 0
