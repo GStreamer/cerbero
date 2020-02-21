@@ -16,6 +16,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             # This flag should be removed in 0.24
             self.append_env('CFLAGS', '-std=c99')
+            # zbar incorrectly passes CPPFLAGS to WINDRES, which then barfs on
+            # args it can't understand
+            self.set_env('CPPFLAGS', '')
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             self.autoreconf = True
-
