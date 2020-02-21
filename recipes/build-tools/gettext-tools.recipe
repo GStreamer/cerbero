@@ -36,8 +36,10 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         if self.config.platform == Platform.WINDOWS:
             # The msgmerge built by us randomly hangs on Windows when called
-            # during configure, so replace it with the msgmerge from MSYS-MinGW
-            # which works fine.
+            # during configure, so move it away. msgmerge from MSYS-MinGW
+            # will be picked up instead which works fine.
+            # NOTE: We cannot copy it into build_tools/bin because then it will
+            # try to pick up libintl-8.dll from the windows_x86 prefix.
             build_tools_bin = Path(self.config.build_tools_prefix) / 'bin'
             msys_mingw_bindir = Path(shutil.which('mingw-get')).parent
             msys_msgmerge = msys_mingw_bindir / 'msgmerge.exe'
@@ -45,5 +47,4 @@ class Recipe(recipe.Recipe):
                 if (build_tools_bin / 'msgmerge.exe').is_file():
                     os.replace(str(build_tools_bin / 'msgmerge.exe'),
                                str(build_tools_bin / 'msgmerge.exe.bck'))
-                shutil.copy(str(msys_msgmerge), str(build_tools_bin))
         super().post_install()
