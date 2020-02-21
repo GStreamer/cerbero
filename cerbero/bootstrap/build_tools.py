@@ -58,6 +58,10 @@ class BuildTools (BootstrapperBase, Fetch):
                 self.BUILD_TOOLS.append('nasm')
             elif self.config.distro_version.startswith('debian') and self.config.distro_version < DistroVersion.DEBIAN_BUSTER:
                 self.BUILD_TOOLS.append('nasm')
+            elif self.config.distro_version in [DistroVersion.REDHAT_6,
+                                                DistroVersion.REDHAT_7,
+                                                DistroVersion.AMAZON_LINUX]:
+                self.BUILD_TOOLS.append('nasm')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.target_platform != Platform.LINUX and not \
