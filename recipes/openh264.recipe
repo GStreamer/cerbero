@@ -44,6 +44,9 @@ class Recipe(recipe.Recipe):
             make += ' NDKROOT=' + self.config.toolchain_prefix
             if self.config.target_arch == Architecture.X86:
                 make += ' ARCH=x86'
+                # According to https://github.com/cisco/openh264/issues/2263 
+                # to fix text relocations
+                make += ' ENABLEPIC=Yes'
             elif self.config.target_arch == Architecture.ARM64:
                 make += ' ARCH=arm64'
             elif self.config.target_arch == Architecture.X86_64:
