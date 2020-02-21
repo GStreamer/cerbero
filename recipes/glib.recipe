@@ -33,7 +33,6 @@ class Recipe(recipe.Recipe):
 
     patches = ["glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
                "glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
-               "glib/0005-Blacklist-the-bamf-GIO-module.patch",
                "glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
                "glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
                'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
