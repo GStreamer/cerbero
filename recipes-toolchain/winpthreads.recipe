@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
         self.host = 'x86_64-w64-mingw32'
         self.sysroot = os.path.join(self.config.prefix, self.host, 'sysroot')
         self.configure_options += ' --with-sysroot=%s ' % self.sysroot
-        self.make_install = 'make install DESTDIR=%s' % self.sysroot
+        self.make_install = ['make', 'install', 'DESTDIR=' + self.sysroot]
         self.build_dir = os.path.join(self.config.sources,
                 'mingw-w64-%s' % self.version)
         self.make_dir = os.path.join(self.config.sources,
@@ -62,7 +62,7 @@ class Recipe(recipe.Recipe):
                 "RCFLAGS='-F pe-i386' DLLTOOLFLAGS='-m i386'"
         host = 'i386-w64-mingw32'
         libdir = "/usr/%s/lib32" % self.host
-        shell.call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
+        shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
                 (flags, libdir, libdir, host, host, self.configure_options),
                 self.build_dir_32)
 
@@ -74,13 +74,13 @@ class Recipe(recipe.Recipe):
                 "LD=x86_64-w64-mingw32-ld LDFLAGS=' -m64' CFLAGS=' -m64' CXXFLAGS=' -m64' "
         host = 'x86_64-w64-mingw32'
         libdir = "/usr/%s/lib" % self.host
-        shell.call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
+        shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
                 (flags, libdir, libdir, host, host, self.configure_options),
                 self.build_dir_64)
 
     def compile(self):
-        shell.call(self.make, self.build_dir_32)
-        shell.call(self.make, self.build_dir_64)
+        shell.new_call(self.make, self.build_dir_32)
+        shell.new_call(self.make, self.build_dir_64)
 
     @modify_environment
     def install(self):
@@ -88,11 +88,11 @@ class Recipe(recipe.Recipe):
                 (self.sysroot, self.host)
         libdir = "%s/usr/%s/lib32/" % (self.sysroot, self.host)
         dest_winpthread_dll = os.path.join(libdir, "libwinpthread-1.dll")
-        shell.call(self.make_install, self.build_dir_32)
+        shell.new_call(self.make_install, self.build_dir_32)
         if os.path.exists(dest_winpthread_dll):
             os.remove(dest_winpthread_dll)
         shutil.move(src_winpthread_dll, dest_winpthread_dll)
-        shell.call(self.make_install, self.build_dir_64)
+        shell.new_call(self.make_install, self.build_dir_64)
         libdir = "%s/usr/%s/lib/" % (self.sysroot, self.host)
         dest_winpthread_dll = os.path.join(libdir, "libwinpthread-1.dll")
         if os.path.exists(dest_winpthread_dll):

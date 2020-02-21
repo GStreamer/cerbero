@@ -19,57 +19,56 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         make = self.make
         if self.config.target_platform == Platform.IOS:
-            make += ' OS=ios '
+            make += ['OS=ios']
             if self.config.target_arch == Architecture.X86:
-                make += ' ARCH=i386'
+                make += ['ARCH=i386']
             elif self.config.target_arch == Architecture.X86_64:
-                make += ' ARCH=x86_64'
+                make += ['ARCH=x86_64']
             elif self.config.target_arch == Architecture.ARMv7:
-                make += ' ARCH=armv7'
+                make += ['ARCH=armv7']
             elif self.config.target_arch == Architecture.ARMv7S:
-                make += ' ARCH=armv7s'
+                make += ['ARCH=armv7s']
             elif self.config.target_arch == Architecture.ARM:
-                make += ' ARCH=arm APP_ABI=armeabi'
+                make += ['ARCH=arm', 'APP_ABI=armeabi']
             elif self.config.target_arch == Architecture.ARM64:
-                make += ' ARCH=arm64'
+                make += ['ARCH=arm64']
         elif self.config.target_platform == Platform.DARWIN:
-            make += ' OS=darwin '
+            make += ['OS=darwin']
             if self.config.target_arch == Architecture.X86:
-                make += ' ARCH=x86'
+                make += ['ARCH=x86']
             elif self.config.target_arch == Architecture.X86_64:
-                make += ' ARCH=x86_64'
+                make += ['ARCH=x86_64']
         elif self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            make += ' OS=android TARGET=android-' + str(v) + ' NDKLEVEL=' + str(v)
-            make += ' NDKROOT=' + self.config.toolchain_prefix
+            make += ['OS=android', 'TARGET=android-' + str(v), 'NDKLEVEL=' + str(v)]
+            make += ['NDKROOT=' + self.config.toolchain_prefix]
             if self.config.target_arch == Architecture.X86:
-                make += ' ARCH=x86'
                 # According to https://github.com/cisco/openh264/issues/2263 
-                # to fix text relocations
-                make += ' ENABLEPIC=Yes'
+                # need to pass ENABLEPIC=Yes to fix text relocations
+                make += ['ARCH=x86', 'ENABLEPIC=Yes']
             elif self.config.target_arch == Architecture.ARM64:
-                make += ' ARCH=arm64'
+                make += ['ARCH=arm64']
             elif self.config.target_arch == Architecture.X86_64:
-                make += ' ARCH=x86_64'
+                make += ['ARCH=x86_64']
         elif self.config.target_platform == Platform.WINDOWS:
-            make += ' OS=mingw_nt'
+            make += ['OS=mingw_nt']
             if self.config.target_arch == Architecture.X86:
-                make += ' ARCH=x86'
+                make += ['ARCH=x86']
             elif self.config.target_arch == Architecture.X86_64:
-                make += ' ARCH=x86_64'
+                make += ['ARCH=x86_64']
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_arch == Architecture.ARMv7:
-                make += ' ARCH=armv7'
+                make += ['ARCH=armv7']
             elif self.config.target_arch == Architecture.ARMv7S:
-                make += ' ARCH=armv7s'
+                make += ['ARCH=armv7s']
             elif self.config.target_arch == Architecture.ARM:
-                make += ' ARCH=arm APP_ABI=armeabi'
+                make += ['ARCH=arm', 'APP_ABI=armeabi']
             elif self.config.target_arch == Architecture.ARM64:
-                make += ' ARCH=arm64'
+                make += ['ARCH=arm64']
 
-        self.make = make + ' libraries'
+        self.make = make + ['libraries']
         # `make install` also needs the exact same parameters as `make`
-        self.make_install = make + ' install'
+        self.make_install = make + ['install']
 
     def configure(self):
         if self.config.platform == Platform.WINDOWS:

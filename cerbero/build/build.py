@@ -364,13 +364,15 @@ class MakefilesBase (Build, ModifyEnvBase):
     config_sh = ''
     configure_tpl = ''
     configure_options = ''
-    make = 'make V=1'
-    make_install = 'make install'
+    make = None
+    make_install = None
     make_check = None
-    make_clean = 'make clean'
+    make_clean = None
     allow_parallel_build = True
     srcdir = '.'
     requires_non_src_build = False
+    # recipes often use shell constructs
+    config_sh_needs_shell = True
 
     def __init__(self):
         Build.__init__(self)
@@ -384,9 +386,14 @@ class MakefilesBase (Build, ModifyEnvBase):
             self.make_dir = os.path.join (self.config_src_dir, "cerbero-build-dir")
         else:
             self.make_dir = self.config_src_dir
+
+        self.make = self.make or ['make', 'V=1']
+        self.make_install = self.make_install or ['make', 'install']
+        self.make_clean = self.make_clean or ['make', 'clean']
+
         if self.config.allow_parallel_build and self.allow_parallel_build \
                 and self.config.num_of_cpus > 1:
-            self.make += ' -j%d' % self.config.num_of_cpus
+            self.make += ['-j%d' % self.config.num_of_cpus]
 
         # Make sure user's env doesn't mess up with our build.
         self.set_env('MAKEFLAGS', when='now')
@@ -423,16 +430,31 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.using_msvc():
             self.unset_toolchain_env()
 
-        configure_cmd = self.configure_tpl % {
+        substs = {
             'config-sh': self.config_sh,
-            'prefix': to_unixpath(self.config.prefix),
-            'libdir': to_unixpath(self.config.libdir),
+            'prefix': self.config.prefix,
+            'libdir': self.config.libdir,
             'host': self.config.host,
             'target': self.config.target,
             'build': self.config.build,
             'options': self.configure_options,
-            'build_dir': to_unixpath(self.build_dir),
-            'make_dir': to_unixpath(self.make_dir)}
+            'build_dir': self.build_dir,
+            'make_dir': self.make_dir,
+        }
+
+        # Construct a command list when possible
+        if not self.config_sh_needs_shell:
+            configure_cmd = []
+            for arg in self.configure_tpl.split():
+                if arg == '%(options)s':
+                    options = self.configure_options
+                    if isinstance(options, str):
+                        options = options.split()
+                    configure_cmd += options
+                else:
+                    configure_cmd.append(arg % substs)
+        else:
+            configure_cmd = self.configure_tpl % substs
 
         self.maybe_add_system_libs(step='configure')
 
@@ -486,12 +508,15 @@ class Autotools (MakefilesBase):
     config_sh = './configure'
     configure_tpl = "%(config-sh)s --prefix %(prefix)s "\
                     "--libdir %(libdir)s"
-    make_check = 'make check'
     add_host_build_target = True
     can_use_configure_cache = True
     supports_cache_variables = True
     disable_introspection = False
     override_libtool = True
+
+    def __init__(self):
+        MakefilesBase.__init__(self)
+        self.make_check = self.make_check or ['make', 'check']
 
     @async_modify_environment
     async def configure(self):
@@ -570,6 +595,7 @@ class CMake (MakefilesBase):
     Build handler for cmake projects
     '''
 
+    config_sh_needs_shell = False
     config_sh = 'cmake'
     configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s ' \
                     '-H%(build_dir)s ' \
@@ -599,24 +625,29 @@ class CMake (MakefilesBase):
         cc = cc.split(' ')[0]
         cxx = cxx.split(' ')[0]
 
+        if self.configure_options:
+            self.configure_options = self.configure_options.split()
+
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
+            self.configure_options += ['-DCMAKE_SYSTEM_NAME=Windows']
         elif self.config.target_platform == Platform.ANDROID:
-            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Linux '
+            self.configure_options += ['-DCMAKE_SYSTEM_NAME=Linux']
         if self.config.platform == Platform.WINDOWS:
-            self.configure_options += ' -G"Unix Makefiles"'
+            self.configure_options += ['-G', 'Unix Makefiles']
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             r = re.compile(r".*-isysroot ([^ ]+) .*")
             sysroot = r.match(cflags).group(1)
-            self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
+            self.configure_options += ['-DCMAKE_OSX_SYSROOT=' + sysroot]
 
-        self.configure_options += ' -DCMAKE_C_COMPILER=%s ' % cc
-        self.configure_options += ' -DCMAKE_CXX_COMPILER=%s ' % cxx
-        self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
-        self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
-        self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        self.configure_options += [
+            '-DCMAKE_C_COMPILER=' + cc,
+            '-DCMAKE_CXX_COMPILER=' + cxx,
+            '-DCMAKE_C_FLAGS=' + cflags,
+            '-DCMAKE_CXX_FLAGS=' + cxxflags,
+            '-DLIB_SUFFIX=' + self.config.lib_suffix,
+        ]
 
         cmake_cache = os.path.join(self.make_dir, 'CMakeCache.txt')
         cmake_files = os.path.join(self.make_dir, 'CMakeFiles')
@@ -624,7 +655,7 @@ class CMake (MakefilesBase):
             os.remove(cmake_cache)
         if os.path.exists(cmake_files):
             shutil.rmtree(cmake_files)
-        self.make += ' VERBOSE=1 '
+        self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
 
 
@@ -662,6 +693,7 @@ class Meson (Build, ModifyEnvBase) :
     make_install = None
     make_check = None
     make_clean = None
+
     meson_sh = None
     meson_options = None
     meson_cross_properties = None
@@ -690,13 +722,13 @@ class Meson (Build, ModifyEnvBase) :
 
         # Find ninja
         if not self.make:
-            self.make = 'ninja -v -d keeprsp'
+            self.make = ['ninja', '-v', '-d', 'keeprsp']
         if not self.make_install:
-            self.make_install = self.make + ' install'
+            self.make_install = self.make + ['install']
         if not self.make_check:
-            self.make_check = self.make + ' test'
+            self.make_check = self.make + ['test']
         if not self.make_clean:
-            self.make_clean = self.make + ' clean'
+            self.make_clean = self.make + ['clean']
 
     @staticmethod
     def _get_option_value(opt_type, value):

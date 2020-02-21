@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shlex
 from cerbero.build.build import async_modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.utils import shell, messages
@@ -17,6 +16,8 @@ class Recipe(recipe.Recipe):
     deps = ['zlib']
     # Parallel make fails randomly due to undefined macros, probably races
     allow_parallel_build = False
+    # Configure script is perl, not shell
+    config_sh_needs_shell = False
 
     files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
@@ -52,7 +53,7 @@ class Recipe(recipe.Recipe):
             else:
                 raise NotImplementedError
 
-            self.make += ' CROSS_SYSROOT="{0}"'.format(self.config.sysroot)
+            self.make += ['CROSS_SYSROOT=' + self.config.sysroot]
         elif self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
                 self.openssl_platform = 'darwin-i386-cc'
@@ -80,33 +81,31 @@ class Recipe(recipe.Recipe):
                 self.openssl_platform = 'mingw64'
             else:
                 raise NotImplementedError
-        cflags = shlex.quote(self.get_env('CFLAGS') + '-fPIC -DOPENSSL_PIC')
-        ldflags = shlex.quote(self.get_env('LDFLAGS') + '-fPIC')
-        ranlib = shlex.quote(self.get_env('RANLIB'))
-        ar = shlex.quote(self.get_env('AR'))
+        cflags = self.get_env('CFLAGS') + '-fPIC -DOPENSSL_PIC'
+        ldflags = self.get_env('LDFLAGS') + '-fPIC'
+        ranlib = self.get_env('RANLIB')
+        ar = self.get_env('AR')
         # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
         # build, and we can't pass arguments via Configure because on Darwin,
         # Configure reads the `-arch x86_64` as meaning that you want to use
         # `x86_64` as the platform, and errors out about a redefined platform.
-        cc = shlex.quote(self.get_env('CC') + ' ' + self.get_env('CFLAGS'))
-        ld = shlex.quote(self.get_env('LD') + ' ' + self.get_env('LDFLAGS'))
+        cc = self.get_env('CC') + ' ' + self.get_env('CFLAGS')
+        ld = self.get_env('LD') + ' ' + self.get_env('LDFLAGS')
         # NOTE: CFLAG and LDFLAG are not typos!
-        self.make += ' AR={} RANLIB={} CC={} LD={} CFLAG={} LDFLAG={}' \
-                     ''.format(ar, ranlib, cc, ld, cflags, ldflags)
-        self.make_install = 'make install_sw RANLIB={}'.format(ranlib)
+        self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld,
+                      'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
+        self.make_install = ['make', 'install_sw', 'RANLIB=' + ranlib]
 
         # We probably don't need and can't use the tools on these platforms
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
-            self.make += ' build_libs openssl.pc libssl.pc libcrypto.pc'
-            self.make_install = 'make install_dev RANLIB={}'.format(ranlib)
+            self.make += ['build_libs', 'openssl.pc', 'libssl.pc', 'libcrypto.pc']
+            self.make_install = ['make', 'install_dev', 'RANLIB=' + ranlib]
 
         if self.config.platform == Platform.WINDOWS:
             # Msys ships with a too-old perl, so we modify PATH to use the
             # mingw-perl that was downloaded and installed by bootstrap.
             openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
             self.prepend_env('PATH', openssl_path, sep=';')
-            self.make = self.make.replace('"', '\\"')
-            self.make_install = self.make_install.replace('"', '\\"')
 
 
     @async_modify_environment

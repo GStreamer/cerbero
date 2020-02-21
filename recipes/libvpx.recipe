@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
     add_host_build_target = False
     supports_cache_variables = False
     can_use_configure_cache = False
-    make = 'make HAVE_GNU_STRIP=no'
+    make = ['make', 'HAVE_GNU_STRIP=no']
     # The shell-based build system magically supports Visual Studio with the
     # power of awesome hacks
     can_msvc = True

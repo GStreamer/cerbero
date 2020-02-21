@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     name = 'libsrtp'
     version = '2.2.0'
     stype = SourceType.TARBALL
+    make = ['make', 'all', 'shared_library']
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     tarball_checksum = '44fd7497bce78767e96b54a11bca520adb2ad32effd515f04bce602b60a1a50b'
     licenses = [{License.BSD_like: ['LICENSE']}]
@@ -19,7 +20,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # Don't accidentially build with pcap support
         self.set_env('ac_cv_lib_pcap_pcap_create', 'no')
-        self.make += ' all shared_library'
 
     async def install(self):
         await super(Recipe, self).install()

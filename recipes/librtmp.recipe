@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-import shlex
 from cerbero.tools.libtool import LibtoolLibrary
 
 
@@ -28,14 +27,14 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             system = 'posix'
         # LDFLAGS are passed via XLDFLAGS, and are needed for at least Android
-        cc = shlex.quote(self.get_env('CC'))
-        ld = shlex.quote(self.get_env('LD'))
-        prefix = shlex.quote(self.config.prefix)
-        cflags = shlex.quote(self.get_env('CFLAGS'))
-        ldflags = shlex.quote(self.get_env('LDFLAGS'))
-        self.make += ' SYS={} prefix={} CRYPTO=GNUTLS XCFLAGS={} XLDFLAGS={} CC={} LD={}' \
-                    ''.format(system, prefix, cflags, ldflags, cc, ld)
-        self.make_install = self.make + ' install'
+        cc = self.get_env('CC')
+        ld = self.get_env('LD')
+        prefix = self.config.prefix
+        cflags = self.get_env('CFLAGS')
+        ldflags = self.get_env('LDFLAGS')
+        self.make += ['SYS=' + system, 'prefix=' + prefix, 'CRYPTO=GNUTLS', 'XCFLAGS=' + cflags,
+                      'XLDFLAGS=' + ldflags, 'CC=' + cc, 'LD=' + ld]
+        self.make_install = self.make + ['install']
 
     def post_install(self):
         soversion = 1
