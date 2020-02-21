@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
     patches = ['fontconfig/0003-configure-Allow-static-build.patch',
                'fontconfig/0001-Do-not-build-tests-on-windows.patch',
                'fontconfig/0001-Don-t-use-_mktemp_s-which-is-not-available-in-XP.patch',
-               'fontconfig/0004-Fix-cross-compilation-by-passing-CPPFLAGS-to-CPP.patch'
+               'fontconfig/0004-Fix-cross-compilation-by-passing-CPPFLAGS-to-CPP.patch',
+	       'fontconfig/0001-fcatomic-Fix-EXC_BAD_ACCESS-on-iOS-ARM64.patch',
                ]
 
     files_libs = ['libfontconfig']
