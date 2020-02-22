@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
-    version = '2.38.0'
+    version = '2.40.0'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'dd50973c7757bcde15de6bcd3a6d462a445efd552604ae6435a0532fbbadae47'
+    tarball_checksum = '1582595099537ca8ff3b99c6804350b4c058bb8ad67411bbaae024ee7cead4e6'
     meson_options = {'docs' : 'false',
                      'man' : 'false',
                      'installed_tests' : 'false',
@@ -17,11 +17,6 @@ class Recipe(recipe.Recipe):
                      'gio_sniffing' : 'false',
                      'x11' : 'false'}
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
-
-    patches = ['gdk-pixbuf/0001-meson-add-option-for-disabling-GIO-sniffing.patch',
-               'gdk-pixbuf/0001-meson-Don-t-generate-the-loader-cache-when-cross-com.patch',
-               'gdk-pixbuf/0001-meson-don-t-build-tests-or-the-thumbnailer-if-cross-.patch',
-               'gdk-pixbuf/0001-build-add-enum-generation-header-to-sources-of-built.patch']
 
     files_libs = ['libgdk_pixbuf-2.0']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
