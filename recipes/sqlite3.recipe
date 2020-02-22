@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+
+class Recipe(recipe.Recipe):
+    name = 'sqlite3'
+    version = '3310100'
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'https://sqlite.org/2020/sqlite-amalgamation-%(version)s.zip'
+    tarball_dirname = 'sqlite-amalgamation-%(version)s'
+    tarball_checksum = 'f3c79bc9f4162d0b06fa9fe09ee6ccd23bb99ce310b792c5145f87fbcc30efca'
+    licenses = [License.PublicDomain]
+
+    patches = [name + '/0001-Add-Meson-build-files-based-on-wrapdb.patch']
+
+    files_libs = ['libsqlite3']
+    files_devel = ['include/sqlite3.h', 'lib/pkgconfig/sqlite3.pc']
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('sqlite3', 0, 0, 0, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

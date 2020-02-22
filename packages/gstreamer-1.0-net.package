@@ -10,9 +10,9 @@ class Package(custom.GStreamer, package.Package):
     uuid = '2f9ca3f5-3b3b-4b4d-8cc9-6c08f21af807'
     deps = ['gstreamer-1.0-core', 'base-crypto']
 
-    files = ['libsoup:libs', 'libsrtp:libs', 'libnice:libs', 'libnice:plugins_net',
-            'srt:libs', 'libusrsctp:libs', 'gst-plugins-base-1.0:plugins_net',
-            'gst-plugins-good-1.0:plugins_net',
+    files = ['libsoup:libs', 'libpsl:libs', 'sqlite3:libs', 'libsrtp:libs',
+            'libnice:libs', 'libnice:plugins_net', 'srt:libs', 'libusrsctp:libs',
+            'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
             'gst-rtsp-server-1.0:libs:typelibs:plugins_net']
     files_devel = ['libnice:plugins_net_devel',

@@ -1,0 +1,20 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libpsl'
+    version = '0.21.0'
+    licenses = [{License.MIT: ['COPYING']}]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'https://github.com/rockdaboot/libpsl/releases/download/libpsl-%(version)s/libpsl-%(version)s.tar.gz'
+    tarball_checksum = '41bd1c75a375b85c337b59783f5deb93dbb443fb0a52d257f403df7bd653ee12'
+    meson_options = {'runtime': 'no', 'builtin': 'no'}
+
+    patches = ['libpsl/0001-Initial-import-of-meson-build-files-from-upstream.patch']
+
+    files_libs = ['libpsl']
+    files_devel = ['include/libpsl.h', 'lib/pkgconfig/libpsl.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.IOS:
+            self.patches += ['libpsl/0002-meson-Do-not-build-tests-on-iOS.patch']

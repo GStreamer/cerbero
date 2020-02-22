@@ -254,6 +254,7 @@ class License:
             'OpenSSL License')
     Proprietary = LicenseDescription('Proprietary',
             'Proprietary License')
+    PublicDomain = LicenseDescription('PublicDomain', 'Public Domain')
     Misc = LicenseDescription('Misc',
             'Miscellaneous license information')
 

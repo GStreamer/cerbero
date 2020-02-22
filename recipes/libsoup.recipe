@@ -1,50 +1,26 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-from pathlib import Path
-
 class Recipe(recipe.Recipe):
     name = 'libsoup'
-    version = '2.60.3'
+    version = '2.68.3'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '1b0dc762f23abe4e0d29b77370e539fd35f31d8e8e0318d6ddccff395be68a22'
-    autoreconf = True
-    autoreconf_sh = 'gtkdocize && autoreconf --force --install --verbose'
-    configure_options = '--without-gnome --disable-more-warnings --disable-vala --with-gssapi=no \
-                         --disable-always-build-tests --disable-glibtest --disable-installed-tests'
-    deps = ['libxml2', 'glib', 'glib-networking']
-    patches = ['libsoup/0001-Rip-out-sqlite-based-cookie-storage.patch',
-               'libsoup/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch',
-               'libsoup/0001-configure.ac-Don-t-check-intltool-version.patch',]
+    tarball_checksum = '534bb08e35b0ff3702f3adfde87d3441e27c12f9f5ec351f056fe04cba02bafb'
+    meson_options = {'gnome': 'false', 'vapi': 'disabled', 'tls_check': 'false'}
+    deps = ['libxml2', 'glib', 'glib-networking', 'libpsl']
+
+    # sqlite ships with the system on macOS and iOS. Android also ships with
+    # sqlite3, but it's not available from the NDK; only from Java.
+    # We also build it on Linux to avoid the potential for bugs with
+    # use_system_libs and to support cross-linux.
+    platform_deps = {
+        Platform.ANDROID: ['sqlite3'],
+        Platform.WINDOWS: ['sqlite3'],
+        Platform.LINUX: ['sqlite3'],
+    }
 
     files_libs = ['libsoup-2.4']
     files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
     files_typelibs = ['Soup-2.4']
-
-
-    def prepare(self):
-        if self.config.target_platform != Platform.LINUX:
-            self.configure_options += ' --disable-gtk-doc'
-
-        if self.config.platform != Platform.WINDOWS:
-            self.patches += ['libsoup/4b924e57-tld-parser-use-Python-3.patch']
-
-        if self.config.target_platform != Platform.LINUX or \
-           self.config.target_distro_version in \
-                [DistroVersion.DEBIAN_SQUEEZE,
-                 DistroVersion.UBUNTU_MAVERICK,
-                 DistroVersion.UBUNTU_LUCID]:
-            self.deps += [ 'glib-networking' ]
-        if self.config.target_platform in [Platform.WINDOWS, Platform.IOS]:
-            self.configure_options += ' --disable-tls-check'
-
-    async def compile(self):
-        # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
-        # but on Windows Python 3 is `python.exe`. Meson already handles this
-        # for us, but Autotools can't.
-        # NOTE: Remove this when the recipe is ported to Meson.
-        if self.config.platform == Platform.WINDOWS:
-            with (Path(self.build_dir) / 'libsoup/python3').open('w') as f:
-                f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
-        await super().compile()

@@ -1,0 +1,73 @@
+From 95eae741192272a62cbdb84608f8bc175081b9ea Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 25 Feb 2020 21:46:18 +0530
+Subject: [PATCH] Add Meson build files based on wrapdb
+
+This is based on meson build files from branch 3250100 revision 1 of
+wrapdb: https://wrapdb.mesonbuild.com/sqlite
+---
+ LICENSE.build | 19 +++++++++++++++++++
+ meson.build   | 25 +++++++++++++++++++++++++
+ 2 files changed, 44 insertions(+)
+ create mode 100644 LICENSE.build
+ create mode 100644 meson.build
+
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..ec28804
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2018 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..b3b7c66
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,25 @@
++project('sqlite3', 'c', version : '3310100', license : 'pd')
++
++
++thread_dep = dependency('threads')
++
++cc = meson.get_compiler('c')
++libdl = cc.find_library('dl', required: false)
++libm = cc.find_library('m', required: false)
++
++
++sqinc = include_directories('.')
++sqlib = library('sqlite3', 'sqlite3.c', include_directories: sqinc,
++    dependencies : [thread_dep, libdl, libm],
++    install: true)
++
++install_headers('sqlite3.h')
++
++sqlite_dep = declare_dependency(link_with : sqlib,
++    include_directories : sqinc)
++
++pkg = import('pkgconfig')
++pkg.generate(name: 'sqlite3',
++             description: 'An embedded SQL database engine',
++             version: meson.project_version(),
++             libraries: sqlib)
+-- 
+2.24.1
+
