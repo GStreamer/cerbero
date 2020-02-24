@@ -7,7 +7,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(recipe.Recipe):
     version = '2.3.1'
     name = 'openjpeg'
-    licenses = [{License.BSD: ['LICENSE.txt']}]
+    licenses = [{License.BSD: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://github.com/uclouvain/openjpeg/archive/v%(version)s.tar.gz'
