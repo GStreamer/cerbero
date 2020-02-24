@@ -25,16 +25,32 @@ from cerbero.enums import Architecture
 from cerbero.errors import FatalError
 
 # We only support Visual Studio 2015 as of now
-vcvarsalls = {
-    'vs14': [r'Microsoft Visual Studio 14.0\VC\vcvarsall.bat'],
-    'vs15': [r'Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2017\Professional\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2017\Enterprise\VC\Auxiliary\Build\vcvarsall.bat'],
-    'vs16': [r'Microsoft Visual Studio\2019\Preview\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2019\Professional\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat',
-             r'Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvarsall.bat'],
+VCVARSALLS = {
+    'vs14': (
+        (
+            r'Microsoft Visual Studio 14.0',
+        ),
+        r'VC\vcvarsall.bat'
+    ),
+    'vs15': (
+        (
+            r'Microsoft Visual Studio\2017\Community',
+            r'Microsoft Visual Studio\2017\Professional',
+            r'Microsoft Visual Studio\2017\Enterprise',
+            r'Microsoft Visual Studio\2017\Preview',
+        ),
+        r'VC\Auxiliary\Build\vcvarsall.bat'
+    ),
+    'vs16': (
+        (
+            r'Microsoft Visual Studio\2019\Community',
+            r'Microsoft Visual Studio\2019\Professional',
+            r'Microsoft Visual Studio\2019\Enterprise',
+            r'Microsoft Visual Studio\2019\BuildTools',
+            r'Microsoft Visual Studio\2019\Preview',
+        ),
+        r'VC\Auxiliary\Build\vcvarsall.bat'
+    ),
 }
 
 def get_program_files_dir():
@@ -46,7 +62,7 @@ def get_program_files_dir():
         return Path(os.environ['PROGRAMFILES'])
     raise FatalError('Could not find path to 32-bit Program Files directory')
 
-def get_vs_version(vcver):
+def get_vs_year_version(vcver):
     if vcver == 'vs14':
         return '2015'
     if vcver == 'vs15':
@@ -55,20 +71,43 @@ def get_vs_version(vcver):
         return '2019'
     raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
-def get_vcvarsall(version=None):
-    if version is not None:
-        versions = [version]
+def _get_custom_vs_install(vs_version, vs_install_path):
+    path = Path(vs_install_path)
+    if not path.is_dir():
+        raise FatalError('vs_install_path {!r} is not a directory'.format(path))
+    suffix = VCVARSALLS[vs_version][1]
+    path = path / suffix
+    if not path.is_file():
+        raise FatalError('Can\'t find vcvarsall.bat inside vs_install_path {!r}'.format(path))
+    return path.as_posix(), vs_version
+
+def get_vcvarsall(vs_version, vs_install_path):
+    known_vs_versions = sorted(VCVARSALLS.keys(), reverse=True)
+    if vs_version:
+        if vs_version not in VCVARSALLS:
+            raise FatalError('Requested Visual Studio version {} is not one of: '
+                             '{}'.format(vs_version, ', '.join(known_vs_versions)))
+    # Do we want to use a specific known Visual Studio installation?
+    if vs_install_path:
+        assert(vs_version)
+        return _get_custom_vs_install(vs_version, vs_install_path)
+    # Start searching.
+    if vs_version:
+        vs_versions = [vs_version]
     else:
-        versions = sorted(vcvarsalls.keys(), reverse=True)
+        # If no specific version was requested, look for all known versions and
+        # pick the newest one found.
+        vs_versions = known_vs_versions
     program_files = get_program_files_dir()
-    for version in versions:
-        for path in vcvarsalls[version]:
-            path = program_files / path
+    for vs_version in vs_versions:
+        prefixes, suffix = VCVARSALLS[vs_version]
+        for prefix in prefixes:
+            path = program_files / prefix / suffix
             # Find the location of the Visual Studio installation
             if path.is_file():
-                return path.as_posix(), version
-    raise FatalError('Microsoft Visual Studio not found, please file a bug. '
-                     'We looked for: ' + ', '.join(versions))
+                return path.as_posix(), vs_version
+    raise FatalError('Microsoft Visual Studio not found. If you installed it, '
+                     'please file a bug. We looked for: ' + ', '.join(versions))
 
 def append_path(var, path, sep=';'):
     if var and not var.endswith(sep):
@@ -122,9 +161,9 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
     return msvc[0:index]
 
 @lru_cache()
-def get_msvc_env(arch, target_arch, version=None):
+def get_msvc_env(arch, target_arch, version=None, vs_install_path=None):
     ret_env = {}
-    vcvarsall, vsver = get_vcvarsall(version)
+    vcvarsall, vsver = get_vcvarsall(version, vs_install_path)
 
     without_msvc = run_and_get_env('set')
     arg = get_vcvarsall_arg(arch, target_arch)

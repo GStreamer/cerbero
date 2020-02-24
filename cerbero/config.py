@@ -29,7 +29,7 @@ from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
 from cerbero.utils import messages as m
-from cerbero.ide.vs.env import get_vs_version
+from cerbero.ide.vs.env import get_vs_year_version
 
 
 CONFIG_EXT = 'cbc'
@@ -132,7 +132,8 @@ class Config (object):
                    'meson_cross_properties', 'manifest', 'extra_properties',
                    'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
                    'package_tarball_compression', 'extra_mirrors',
-                   'extra_bootstrap_packages', 'moltenvk_prefix']
+                   'extra_bootstrap_packages', 'moltenvk_prefix',
+                   'vs_install_path', 'vs_install_version']
 
     cookbook = None
 
@@ -259,7 +260,9 @@ class Config (object):
 
         if self.can_use_msvc():
             m.message('Building recipes with Visual Studio {} whenever possible'
-                      .format(get_vs_version(self.msvc_version)))
+                      .format(get_vs_year_version(self.msvc_version)))
+            if self.vs_install_path:
+                m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
 
         # Store current os.environ data
         for c in list(self.arch_config.values()):
@@ -663,6 +666,9 @@ class Config (object):
         target_platform = self.target_platform
         if target_platform == Platform.WINDOWS and 'visualstudio' in self.variants:
             target_platform = 'msvc'
+            # Check for invalid configuration of a custom Visual Studio path
+            if self.vs_install_path and not self.vs_install_version:
+                raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
         self.set_property('prefix', os.path.join(self.home_dir, "dist",
             "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('sources', os.path.join(self.home_dir, "sources",
