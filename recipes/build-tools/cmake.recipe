@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'cmake'
-    version = '3.7.1'
+    version = '3.16.4'
     licenses = [{License.BSD_like: ['Copyright.txt']}]
     btype = BuildType.MAKEFILE
     stype = SourceType.TARBALL
-    url = 'https://www.cmake.org/files/v3.7/cmake-%(version)s.tar.gz'
-    tarball_checksum = '449a5bce64dbd4d5b9517ebd1a1248ed197add6ad27934478976fd5f1f9330e1'
+    url = 'https://github.com/Kitware/CMake/releases/download/v%(version)s/cmake-%(version)s.tar.gz'
+    tarball_checksum = '9bcc8c114d9da603af9512083ed7d4a39911d16105466beba165ba8fe939ac2c'
     deps = ['autoconf']
 
     add_host_build_target = False
@@ -16,9 +16,9 @@ class Recipe(recipe.Recipe):
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
     can_use_configure_cache = False
 
-    files_bins = ['cmake', 'ccmake', 'cpack', 'ctest']
+    files_bins = ['cmake', 'ctresalloc', 'cpack', 'ctest']
     platform_files_bins = {
-        Platform.DARWIN : ['cmakexbuild']
+        Platform.DARWIN : ['ccmake']
     }
 
     def prepare(self):
