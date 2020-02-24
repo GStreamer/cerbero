@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s"
     can_use_configure_cache = False
 
-    files_bins = ['cmake', 'ctresalloc', 'cpack', 'ctest']
+    files_bins = ['cmake', 'cpack', 'ctest']
     platform_files_bins = {
         Platform.DARWIN : ['ccmake']
     }
