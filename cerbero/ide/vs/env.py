@@ -23,6 +23,7 @@ from functools import lru_cache
 
 from cerbero.enums import Architecture
 from cerbero.errors import FatalError
+from cerbero.utils.shell import check_output
 
 # We only support Visual Studio 2015 as of now
 VCVARSALLS = {
@@ -81,6 +82,31 @@ def _get_custom_vs_install(vs_version, vs_install_path):
         raise FatalError('Can\'t find vcvarsall.bat inside vs_install_path {!r}'.format(path))
     return path.as_posix(), vs_version
 
+def _get_vswhere_vs_install(vswhere, vs_versions):
+    import json
+    vswhere_exe = str(vswhere)
+    # Get a list of installation paths for all installed Visual Studio
+    # instances, from VS 2013 to the latest one, sorted from newest to
+    # oldest, and including preview releases.
+    # Will not include BuildTools installations.
+    out = check_output([vswhere_exe, '-legacy', '-prerelease', '-format',
+                        'json', '-utf8', '-sort'])
+    installs = json.loads(out)
+    program_files = get_program_files_dir()
+    for install in installs:
+        version = install['installationVersion']
+        vs_version = 'vs' + version.split('.', maxsplit=1)[0]
+        if vs_version not in vs_versions:
+            continue
+        prefix = install['installationPath']
+        suffix = VCVARSALLS[vs_version][1]
+        path = program_files / prefix / suffix
+        # Find the location of the Visual Studio installation
+        if path.is_file():
+            return path.as_posix(), vs_version
+    raise FatalError('vswhere.exe could not find Visual Studio installation(s). '
+                     'Looked for version(s): ' + ', '.join(vs_versions))
+
 def get_vcvarsall(vs_version, vs_install_path):
     known_vs_versions = sorted(VCVARSALLS.keys(), reverse=True)
     if vs_version:
@@ -99,6 +125,16 @@ def get_vcvarsall(vs_version, vs_install_path):
         # pick the newest one found.
         vs_versions = known_vs_versions
     program_files = get_program_files_dir()
+    # Try to find using vswhere.exe
+    # vswhere is installed by Visual Studio 2017 and newer into a fixed
+    # location, and can also be installed separately. For others:
+    # - Visual Studio 2013 (can be found by vswhere -legacy, but we don't use it)
+    # - Visual Studio 2015 (can be found by vswhere -legacy)
+    # - Visual Studio 2019 Build Tools (cannot be found by vswhere)
+    vswhere = program_files / 'Microsoft Visual Studio' / 'Installer' / 'vswhere.exe'
+    if vswhere.is_file():
+        return _get_vswhere_vs_install(vswhere, vs_versions)
+    # Look in the default locations if vswhere.exe is not available.
     for vs_version in vs_versions:
         prefixes, suffix = VCVARSALLS[vs_version]
         for prefix in prefixes:
