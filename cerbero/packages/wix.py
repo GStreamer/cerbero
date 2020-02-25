@@ -557,7 +557,8 @@ class MSI(WixBase):
                                             Id='RegistryInstallDir', Guid=self._get_uuid())
             regkey = etree.SubElement(regcomponent, 'RegistryKey',
                                       Id='RegistryInstallDirRoot',
-                                      Action='createAndRemoveOnUninstall',
+                                      ForceCreateOnInstall='yes',
+                                      ForceDeleteOnUninstall='yes',
                                       Key=self._registry_key(name),
                                       Root=self.REG_ROOT)
             etree.SubElement(regkey, 'RegistryValue',
