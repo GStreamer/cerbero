@@ -124,7 +124,15 @@ async def fetch(git_dir, fail=True, logfile=None):
     @param fail: raise an error if the command failed
     @type fail: false
     '''
-    cmd = [GIT, 'fetch', '--all', '--tags']
+    # git 1.9 introduced the possibility to fetch both branches and tags at the
+    # same time when using --tags: https://stackoverflow.com/a/20608181.
+    # centOS 7 ships with git 1.8.3.1, hence for old git versions, we need to
+    # run two separate commands.
+    cmd = [GIT, 'fetch', '--all']
+    ret = await shell.async_call(cmd, cmd_dir=git_dir, fail=fail, logfile=logfile, cpu_bound=False)
+    if ret != 0:
+        return ret
+    cmd.append('--tags')
     return await shell.async_call(cmd, cmd_dir=git_dir, fail=fail, logfile=logfile, cpu_bound=False)
 
 async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
