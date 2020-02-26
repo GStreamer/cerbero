@@ -99,20 +99,31 @@ class WixBase():
         # For directories starting with a number
         return '_' + ret
 
+    def _make_unique_id(self, id):
+        # Wix Id length is limited to 72 characters which can be short
+        # for some files paths. To guaranty Id unicity we add a number
+        # at the end of duplicated Id, so we're gonna limit our max length
+        # to 68 characters to reserve until 3 digits for that purpose.
+        id = id[:68]
+        if id not in self.ids:
+            self.ids[id] = 0
+        else:
+            self.ids[id] += 1
+        if self.ids[id] != 0:
+            id = '%s_%s' % (id, self.ids[id])
+        return id
+
     def _format_path_id(self, path, replace_dots=False):
         ret = self._format_id(os.path.split(path)[1], replace_dots)
         ret = ret.lower()
-        if ret not in self.ids:
-            self.ids[ret] = 0
-        else:
-            self.ids[ret] += 1
-        if self.ids[ret] != 0:
-            ret = '%s_%s' % (ret, self.ids[ret])
+        ret = self._make_unique_id(ret)
         return ret
 
     def _format_dir_id(self, string, path, replace_dots=False):
-        return self._format_id(string, replace_dots) + '_' +\
+        ret = self._format_id(string, replace_dots) + '_' +\
             self._format_path_id(path, replace_dots)
+        ret = self._make_unique_id(ret)
+        return ret
 
     def _format_group_id(self, string, replace_dots=False):
         return self._format_id(string, replace_dots) + '_group'
