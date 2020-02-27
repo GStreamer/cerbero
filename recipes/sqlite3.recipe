@@ -17,6 +17,10 @@ class Recipe(recipe.Recipe):
     files_libs = ['libsqlite3']
     files_devel = ['include/sqlite3.h', 'lib/pkgconfig/sqlite3.pc']
 
+    def prepare(self):
+        if self.using_msvc():
+            self.append_env('CFLAGS', '-DSQLITE_API=__declspec(dllexport)')
+
     def post_install(self):
         libtool_la = LibtoolLibrary('sqlite3', 0, 0, 0, self.config.libdir,
                 self.config.target_platform)
