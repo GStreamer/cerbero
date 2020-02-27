@@ -259,8 +259,9 @@ class ModifyEnvBase:
         if self.using_msvc():
             for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
                         'LDFLAGS', 'OBJLDFLAGS'):
-                if var in self._new_env:
-                    self.append_env (var, self._new_env[var], when='now')
+                for each in self._new_env:
+                    if var == each.var:
+                        each.execute(self.env)
 
     def check_reentrancy(self):
         if self._old_env:
