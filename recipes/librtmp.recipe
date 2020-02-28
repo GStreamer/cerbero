@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'librtmp'
-    version = '2.4_p20151223'
+    version = '2.4_p20200229'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
-    url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-2.4_p20151223.tar.gz'
-    tarball_checksum = 'b066f2583fd20aeb7b9c48535027e28026f8a38bc00d446fc81e09a597f38654'
+    url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-%(version)s.tar.xz'
+    tarball_checksum = 'ac4ebe131254da6f49d17b77df42b1419155fb09d38d8a8bf785fdc16bfca418'
     # Binaries are GPLv2+, but we don't distribute them
     licenses = [License.LGPLv2_1Plus]
     srcdir = 'librtmp'
@@ -22,9 +22,9 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
             system = 'mingw'
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             system = 'darwin'
-        if self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
+        elif self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
             system = 'posix'
         # LDFLAGS are passed via XLDFLAGS, and are needed for at least Android
         cc = self.get_env('CC')
