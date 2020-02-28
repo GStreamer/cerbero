@@ -577,15 +577,25 @@ def get_event_loop():
     return loop
 
 def run_until_complete(tasks):
+    '''
+    Runs one or many tasks, blocking until all of them have finished.
+    @param tasks: A single Future or a list of Futures to run
+    @type tasks: Future or list of Futures
+    @return: the result of the asynchronous task execution (if only
+             one task) or a list of all results in case of multiple
+             tasks. Result is None if operation is cancelled.
+    @rtype: any type or list of any types in case of multiple tasks
+    '''
     loop = get_event_loop()
 
     try:
         if isinstance(tasks, Iterable):
-            loop.run_until_complete(asyncio.gather(*tasks))
+            result = loop.run_until_complete(asyncio.gather(*tasks))
         else:
-            loop.run_until_complete(tasks)
+            result = loop.run_until_complete(tasks)
+        return result
     except asyncio.CancelledError:
-        pass
+        return None
 
 async def run_tasks(tasks, done_async=None):
     """
