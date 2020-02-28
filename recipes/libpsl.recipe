@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
+
 class Recipe(recipe.Recipe):
     name = 'libpsl'
     version = '0.21.0'
@@ -25,3 +27,9 @@ class Recipe(recipe.Recipe):
         # all, or to have an option to disable building of tests.
         if self.config.target_platform == Platform.IOS:
             self.patches += ['libpsl/0002-meson-Do-not-build-tests-on-iOS.patch']
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('psl', 0, 0, 0, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
+        super().post_install()
