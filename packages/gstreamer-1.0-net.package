@@ -31,5 +31,3 @@ class Package(custom.GStreamer, package.Package):
             self.files += ['glib-networking']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
-        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
-            self.files += ['openssl:libs']

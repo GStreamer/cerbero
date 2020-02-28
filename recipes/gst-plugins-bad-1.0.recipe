@@ -15,6 +15,7 @@ class Recipe(custom.GStreamer):
                      'dtls': 'enabled',
                      'dts': 'enabled',
                      'hls': 'enabled',
+                     'hls-crypto': 'openssl',
                      'kate': 'enabled',
                      'libmms': 'enabled',
                      'openh264': 'enabled',
@@ -62,7 +63,7 @@ class Recipe(custom.GStreamer):
                      'wildmidi': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'libkate', 'zlib', 'openh264', 'opus', 'nettle', 'librtmp',
+            'libkate', 'zlib', 'openh264', 'opus', 'librtmp',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
@@ -473,6 +474,8 @@ class Recipe(custom.GStreamer):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
 
+        # dtls plugin needs openssl, and we pick up the system openssl if on
+        # Linux and not cross-compiling.
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
 

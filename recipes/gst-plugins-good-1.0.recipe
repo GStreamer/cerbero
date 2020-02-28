@@ -33,6 +33,7 @@ class Recipe(custom.GStreamer):
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
             'libvpx', 'libdv', 'cairo']
+    use_system_libs = True
 
 
     files_lang = ['gst-plugins-good-1.0']
@@ -227,9 +228,6 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('taglib', 'codecs', dep='taglib')
             # gdk-pixbuf and all deps must be ported to MSVC first to fix CRT interop issues
             self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
-
-        if self.config.target_platform == Platform.LINUX:
-            self.use_system_libs = True
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['directsound'] = 'enabled'

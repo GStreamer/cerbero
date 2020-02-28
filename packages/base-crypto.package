@@ -10,12 +10,13 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'b3a6046d-5a39-4d54-93ee-3770d2f316f5'
     deps = ['base-system-1.0']
 
-    files = ['gmp:libs', 'gnutls:libs:libs_extra:lang',
-             'libtasn1:libs', 'nettle:libs']
-
     platform_files_devel = {
         Platform.ANDROID: ['ca-certificates:etc'],
         Platform.IOS: ['ca-certificates:etc'],
         Platform.DARWIN: ['ca-certificates:etc'],
         Platform.WINDOWS: ['ca-certificates:etc']
     }
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
+            self.files += ['openssl:libs']

@@ -1,0 +1,37 @@
+From 60f152e7992eff8f5af37010786296c3a23429ff Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 29 Feb 2020 04:06:38 +0530
+Subject: [PATCH 4/6] Port to newer MSVC
+
+Patch by TheStormN at vcpkg:
+https://github.com/microsoft/vcpkg/commit/78ae618d8ec3bad4e9dc45f3a382a513ffd09065#diff-d8ac097af7de65c924d1e566a5ef554a
+
+Latest version of patch is called `fix_strncasecmp.patch` at:
+https://github.com/microsoft/vcpkg/tree/master/ports/librtmp
+---
+ librtmp/rtmp_sys.h | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/librtmp/rtmp_sys.h b/librtmp/rtmp_sys.h
+index 85d7e53..543e126 100644
+--- a/librtmp/rtmp_sys.h
++++ b/librtmp/rtmp_sys.h
+@@ -28,11 +28,13 @@
+ #include <ws2tcpip.h>
+ 
+ #ifdef _MSC_VER	/* MSVC */
++#if _MSC_VER < 1900
+ #define snprintf _snprintf
+-#define strcasecmp stricmp
+-#define strncasecmp strnicmp
+ #define vsnprintf _vsnprintf
+ #endif
++#define strcasecmp _stricmp
++#define strncasecmp _strnicmp
++#endif
+ 
+ #define GetSockError()	WSAGetLastError()
+ #define SetSockError(e)	WSASetLastError(e)
+-- 
+2.24.1
+

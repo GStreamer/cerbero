@@ -1,7 +1,7 @@
-From d2cd2913d17e9c7b48916e769206aec02629d2f3 Mon Sep 17 00:00:00 2001
+From 0a61174452da1914a35f00513b5b7256208bca4e Mon Sep 17 00:00:00 2001
 From: Olivier Crete <olivier.crete@collabora.com>
 Date: Fri, 27 Apr 2018 14:12:57 -0400
-Subject: [PATCH 2/2] ios: Remove flags incompatible with -fembed-bitcode
+Subject: [PATCH 2/6] ios: Remove flags incompatible with -fembed-bitcode
 
 ---
  librtmp/Makefile | 4 ++--
@@ -23,5 +23,5 @@ index f4e2a0b..159f0e3 100644
  SO_LDFLAGS=$(SO_LDFLAGS_$(SYS))
  
 -- 
-2.15.1 (Apple Git-101)
+2.24.1
 

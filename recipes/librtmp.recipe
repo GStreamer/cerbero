@@ -10,16 +10,30 @@ class Recipe(recipe.Recipe):
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-%(version)s.tar.xz'
     tarball_checksum = 'ac4ebe131254da6f49d17b77df42b1419155fb09d38d8a8bf785fdc16bfca418'
     # Binaries are GPLv2+, but we don't distribute them
-    licenses = [License.LGPLv2_1Plus]
+    licenses = [License.LGPLv2_1Plus, {License.MIT: ['LICENSE-vcpkg-changes.txt']}]
     srcdir = 'librtmp'
     tarball_dirname = 'rtmpdump-%(version)s'
-    patches = [name + '/0001-Fix-support-for-cross-compilation.patch',
-               name + '/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']
-    deps = ['gnutls', 'nettle']
+    patches = [
+        # Our patches, upstream is non-existent
+        name + '/0001-Fix-support-for-cross-compilation.patch',
+        name + '/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch',
+        # vcpkg patches, porting to openssl and fixing windows bugs, since
+        # upstream is non-existent
+        name + '/0003-Port-to-openssl-1.1.1.patch',
+        name + '/0004-Port-to-newer-MSVC.patch',
+        name + '/0005-Fix-debug-build.patch',
+        name + '/0006-Add-license-for-vcpkg-changes.patch',
+    ]
+    # openssl on Linux
+    use_system_libs = True
     files_libs = ['librtmp']
-    files_devel = ['include/librtmp/', 'lib/pkgconfig/librtmp.pc' ]
+    files_devel = ['include/librtmp', 'lib/pkgconfig/librtmp.pc']
 
     def prepare(self):
+        # Pick system openssl if on Linux and not cross-compiling
+        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
+            self.deps.append('openssl')
+
         if self.config.target_platform == Platform.WINDOWS:
             system = 'mingw'
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -32,7 +46,7 @@ class Recipe(recipe.Recipe):
         prefix = self.config.prefix
         cflags = self.get_env('CFLAGS')
         ldflags = self.get_env('LDFLAGS')
-        self.make += ['SYS=' + system, 'prefix=' + prefix, 'CRYPTO=GNUTLS', 'XCFLAGS=' + cflags,
+        self.make += ['SYS=' + system, 'prefix=' + prefix, 'CRYPTO=OPENSSL', 'XCFLAGS=' + cflags,
                       'XLDFLAGS=' + ldflags, 'CC=' + cc, 'LD=' + ld]
         self.make_install = self.make + ['install']
 
@@ -46,7 +60,7 @@ class Recipe(recipe.Recipe):
             dupe_rtmp_dll = os.path.join(dlldir, 'librtmp.dll')
             if os.path.isfile(dupe_rtmp_dll) and os.path.isfile(real_rtmp_dll):
                 os.remove(dupe_rtmp_dll)
-        deps = ['gnutls']
+        deps = ['ssl', 'crypto']
         libtool_la = LibtoolLibrary('rtmp', soversion, None, None,
                 self.config.libdir, self.config.target_platform, deps)
         libtool_la.save()

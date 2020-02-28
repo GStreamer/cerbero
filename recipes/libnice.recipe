@@ -13,9 +13,10 @@ class Recipe(recipe.Recipe):
     meson_options = {'tests' : 'disabled',
                      'gupnp' : 'disabled',
                      'gstreamer' : 'enabled',
-                     'crypto-library' : 'gnutls'}
-    deps = ['glib', 'gstreamer-1.0', 'gnutls']
-    patches = []
+                     'crypto-library' : 'openssl'}
+    deps = ['glib', 'gstreamer-1.0']
+    # openssl on Linux
+    use_system_libs = True
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
@@ -30,8 +31,12 @@ class Recipe(recipe.Recipe):
     ]
     # FIXME - if_arp.h? (iOS)
 
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
+            self.deps.append('openssl')
+
     def post_install (self):
-        nice_deps = ['gio-2.0', 'gthread-2.0', 'gnutls']
+        nice_deps = ['gio-2.0', 'gthread-2.0', 'ssl', 'crypto']
         lib = LibtoolLibrary('nice', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=nice_deps)
         lib.save()

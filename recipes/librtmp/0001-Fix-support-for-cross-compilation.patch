@@ -1,7 +1,7 @@
-From 62a500033bd745684c3fd1802b3cf755755451c7 Mon Sep 17 00:00:00 2001
+From 93bc9da0b9082e2a640f9eb560015739b2e16cdf Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 14 Oct 2014 21:02:51 +0530
-Subject: [PATCH] Fix support for cross-compilation
+Subject: [PATCH 1/6] Fix support for cross-compilation
 
 ---
  librtmp/Makefile | 15 ++++++++-------
@@ -48,5 +48,5 @@ index 2c1c790..f4e2a0b 100644
  LIB_POLARSSL=-lpolarssl $(LIBZ)
  PRIVATE_LIBS=$(LIBS_$(SYS))
 -- 
-1.9.3
+2.24.1
 
