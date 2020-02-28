@@ -12,7 +12,11 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'f3c79bc9f4162d0b06fa9fe09ee6ccd23bb99ce310b792c5145f87fbcc30efca'
     licenses = [License.PublicDomain]
 
-    patches = [name + '/0001-Add-Meson-build-files-based-on-wrapdb.patch']
+    patches = [
+        # TODO: Upstream this to wrapdb
+        name + '/0001-Add-Meson-build-files-based-on-wrapdb.patch',
+        name + '/0001-meson-Use-the-same-library-versioning-as-autoconf-li.patch',
+    ]
 
     files_libs = ['libsqlite3']
     files_devel = ['include/sqlite3.h', 'lib/pkgconfig/sqlite3.pc']

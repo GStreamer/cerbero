@@ -1,0 +1,25 @@
+From 23576538dc214e83e0b4e73ae2ab2b1c63172ca3 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 28 Feb 2020 13:57:32 +0530
+Subject: [PATCH] meson: Use the same library versioning as autoconf/libtool
+
+---
+ meson.build | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index b3b7c66..476ae4b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -11,6 +11,8 @@ libm = cc.find_library('m', required: false)
+ sqinc = include_directories('.')
+ sqlib = library('sqlite3', 'sqlite3.c', include_directories: sqinc,
+     dependencies : [thread_dep, libdl, libm],
++    # ABI compatibility with autotools/libtool
++    version: '0.8.6',
+     install: true)
+ 
+ install_headers('sqlite3.h')
+-- 
+2.24.1
+
