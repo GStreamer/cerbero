@@ -417,6 +417,15 @@ def add_system_libs(config, new_env, old_env=None):
     arch = config.target_arch
     libdir = 'lib'
 
+    # Only use this when compiling on Linux for Linux and not cross-compiling
+    # to some other Linux
+    if config.platform != Platform.LINUX:
+        return
+    if config.target_platform != Platform.LINUX:
+        return
+    if config.cross_compiling():
+        return
+
     if arch == Architecture.X86_64:
         if config.distro == Distro.REDHAT or config.distro == Distro.SUSE:
             libdir = 'lib64'
