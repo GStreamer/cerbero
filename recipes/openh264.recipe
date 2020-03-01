@@ -4,17 +4,19 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'openh264'
-    version = '1.7.0'
+    version = '2.0.0'
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
-    tarball_checksum = '9c07c38d7de00046c9c52b12c76a2af7648b70d05bd5460c8b67f6895738653f'
+    tarball_checksum = '73c35f80cc487560d11ecabb6d31ad828bd2f59d412f9cd726cc26bfaf4561fd'
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
-    patches = ['openh264/0001-openh264-Build-for-8.0-fembed-bitcode.patch',
+    patches = [
+               'openh264/0001-openh264-Build-for-iOS-SDK-11.0.patch',
                'openh264/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch',
-               'openh264/0001-android-build-switch-to-using-the-c-_shared-c-librar.patch']
+               'openh264/0001-android-build-switch-to-using-the-c-_shared-c-librar.patch'
+               ]
 
     def prepare(self):
         make = self.make

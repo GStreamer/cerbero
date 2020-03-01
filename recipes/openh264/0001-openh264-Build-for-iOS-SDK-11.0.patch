@@ -1,14 +1,14 @@
-From 2fa9af08f511f2ff8e12e894d08bd492f027ac13 Mon Sep 17 00:00:00 2001
-From: Olivier Crete <olivier.crete@collabora.com>
-Date: Fri, 27 Apr 2018 13:56:15 -0400
-Subject: [PATCH 1/2] openh264: Build for 8.0 -fembed-bitcode
+From b033dc4e14d168fb073787626eb20b4b3eedf240 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Tue, 10 Mar 2020 12:23:44 +1100
+Subject: [PATCH] openh264: Build for iOS SDK 11.0
 
 ---
  build/platform-ios.mk | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/build/platform-ios.mk b/build/platform-ios.mk
-index 4f219e3..37d43a6 100644
+index f04b5c5..8501eed 100644
 --- a/build/platform-ios.mk
 +++ b/build/platform-ios.mk
 @@ -7,7 +7,7 @@ SDKTYPE = iPhoneSimulator
@@ -16,10 +16,10 @@ index 4f219e3..37d43a6 100644
  SDKTYPE = iPhoneOS
  endif
 -SDK_MIN = 5.1
-+SDK_MIN = 8.0
++SDK_MIN = 11.0
  
- SDKROOT = $(shell xcrun --sdk $(shell echo $(SDKTYPE) | tr A-Z a-z) --show-sdk-path)
+ SDKROOT := $(shell xcrun --sdk $(shell echo $(SDKTYPE) | tr A-Z a-z) --show-sdk-path)
  CFLAGS += -arch $(ARCH) -isysroot $(SDKROOT) -miphoneos-version-min=$(SDK_MIN) -DAPPLE_IOS -fembed-bitcode
 -- 
-2.15.1 (Apple Git-101)
+2.25.1
 

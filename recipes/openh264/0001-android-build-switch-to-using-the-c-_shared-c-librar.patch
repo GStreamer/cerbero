@@ -1,38 +1,26 @@
-From 06e0faea595546306c7195e8cec8a04b1b264267 Mon Sep 17 00:00:00 2001
+From c3372cf9ef5d9ae8bddb20073ebfba2d9d2f5a66 Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Fri, 19 Oct 2018 16:42:54 +1100
 Subject: [PATCH] android/build: switch to using the c++_shared c++ library
 
 It's the only stl available starting from NDK r18
 ---
- Makefile                                                      | 2 +-
- build/platform-android.mk                                     | 4 ++--
- codec/build/android/dec/jni/Application.mk                    | 4 ++--
- codec/build/android/dec/src/com/wels/dec/WelsDecTest.java     | 2 +-
- codec/build/android/enc/jni/Application.mk                    | 4 ++--
- codec/build/android/enc/src/com/wels/enc/WelsEncTest.java     | 2 +-
- test/build/android/jni/Application.mk                         | 4 ++--
- .../android/src/com/cisco/codec/unittest/MainActivity.java    | 2 +-
- 8 files changed, 12 insertions(+), 12 deletions(-)
+ build/platform-android.mk | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 8096467..9e62e48 100644
---- a/Makefile
-+++ b/Makefile
-@@ -31,7 +31,7 @@ PROJECT_NAME=openh264
- MODULE_NAME=gmpopenh264
- GMP_API_BRANCH=Firefox39
- CCASFLAGS=$(CFLAGS)
--STATIC_LDFLAGS=-lstdc++
-+STATIC_LDFLAGS=`pkg-config --libs gnustl`
- 
- SHAREDLIB_MAJORVERSION=4
- FULL_VERSION := 1.7.0
 diff --git a/build/platform-android.mk b/build/platform-android.mk
-index 646740d..d5dbdb6 100644
+index 6f6ce34..4db2be0 100644
 --- a/build/platform-android.mk
 +++ b/build/platform-android.mk
-@@ -54,9 +54,9 @@ endif
+@@ -49,6 +49,7 @@ CFLAGS += -isystem $(NDKROOT)/sysroot/usr/include -isystem $(NDKROOT)/sysroot/us
+ CXXFLAGS += -fno-rtti -fno-exceptions
+ LDFLAGS += --sysroot=$(SYSROOT)
+ SHLDFLAGS = -Wl,--no-undefined -Wl,-z,relro -Wl,-z,now -Wl,-soname,lib$(PROJECT_NAME).so
++STATIC_LDFLAGS=`pkg-config --libs gnustl`
+ 
+ ifeq ($(NDK_TOOLCHAIN_VERSION), clang)
+   HOST_OS = $(shell uname -s | tr [A-Z] [a-z])
+@@ -82,9 +83,9 @@ endif
  endif
  
  STL_INCLUDES = \
@@ -44,72 +32,6 @@ index 646740d..d5dbdb6 100644
  
  GTEST_INCLUDES = $(STL_INCLUDES)
  CODEC_UNITTEST_INCLUDES = $(STL_INCLUDES)
-diff --git a/codec/build/android/dec/jni/Application.mk b/codec/build/android/dec/jni/Application.mk
-index 48ca94b..de25486 100644
---- a/codec/build/android/dec/jni/Application.mk
-+++ b/codec/build/android/dec/jni/Application.mk
-@@ -1,2 +1,2 @@
--APP_STL := stlport_shared
--APP_PLATFORM := android-12
-+APP_STL := c++_shared
-+APP_PLATFORM := android-16
-diff --git a/codec/build/android/dec/src/com/wels/dec/WelsDecTest.java b/codec/build/android/dec/src/com/wels/dec/WelsDecTest.java
-index f44c227..ff508e7 100644
---- a/codec/build/android/dec/src/com/wels/dec/WelsDecTest.java
-+++ b/codec/build/android/dec/src/com/wels/dec/WelsDecTest.java
-@@ -140,7 +140,7 @@ public class WelsDecTest extends Activity {
-   static {
-     try {
-       System.loadLibrary ("openh264");
--      System.loadLibrary ("stlport_shared");
-+      System.loadLibrary ("c++_shared");
-       System.loadLibrary ("welsdecdemo");
-       Log.v (TAG, "Load libwelsdec successful");
-     } catch (Exception e) {
-diff --git a/codec/build/android/enc/jni/Application.mk b/codec/build/android/enc/jni/Application.mk
-index 48ca94b..de25486 100644
---- a/codec/build/android/enc/jni/Application.mk
-+++ b/codec/build/android/enc/jni/Application.mk
-@@ -1,2 +1,2 @@
--APP_STL := stlport_shared
--APP_PLATFORM := android-12
-+APP_STL := c++_shared
-+APP_PLATFORM := android-16
-diff --git a/codec/build/android/enc/src/com/wels/enc/WelsEncTest.java b/codec/build/android/enc/src/com/wels/enc/WelsEncTest.java
-index 19b7842..5d11382 100644
---- a/codec/build/android/enc/src/com/wels/enc/WelsEncTest.java
-+++ b/codec/build/android/enc/src/com/wels/enc/WelsEncTest.java
-@@ -161,7 +161,7 @@ public class WelsEncTest extends Activity {
-   static {
-     try {
-       System.loadLibrary ("openh264");
--      System.loadLibrary ("stlport_shared");
-+      System.loadLibrary ("c++_shared");
-       System.loadLibrary ("welsencdemo");
-       Log.v (TAG, "Load libwelsencdemo.so successful");
-     } catch (Exception e) {
-diff --git a/test/build/android/jni/Application.mk b/test/build/android/jni/Application.mk
-index 48ca94b..de25486 100644
---- a/test/build/android/jni/Application.mk
-+++ b/test/build/android/jni/Application.mk
-@@ -1,2 +1,2 @@
--APP_STL := stlport_shared
--APP_PLATFORM := android-12
-+APP_STL := c++_shared
-+APP_PLATFORM := android-16
-diff --git a/test/build/android/src/com/cisco/codec/unittest/MainActivity.java b/test/build/android/src/com/cisco/codec/unittest/MainActivity.java
-index a7fb6f2..335fbf6 100644
---- a/test/build/android/src/com/cisco/codec/unittest/MainActivity.java
-+++ b/test/build/android/src/com/cisco/codec/unittest/MainActivity.java
-@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
- 
-   static {
-     try {
--      System.loadLibrary ("stlport_shared");
-+      System.loadLibrary ("c++_shared");
-       //System.loadLibrary("openh264");
-       System.loadLibrary ("ut");
-       System.loadLibrary ("utDemo");
 -- 
-2.19.0
+2.25.1
 

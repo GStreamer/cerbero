@@ -1,20 +1,20 @@
-From 8e7895df76c32ac95a24dd073213a799b57c2e0d Mon Sep 17 00:00:00 2001
+From 8aacdde0c49d70b0f5d80a618e1ee5b4683174a1 Mon Sep 17 00:00:00 2001
 From: Olivier Crete <olivier.crete@collabora.com>
 Date: Fri, 27 Apr 2018 14:05:16 -0400
-Subject: [PATCH 2/2] ios: Remove flags incompatible with -fembed-bitcode
+Subject: [PATCH] ios: Remove flags incompatible with -fembed-bitcode
 
 ---
  build/platform-darwin.mk | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/build/platform-darwin.mk b/build/platform-darwin.mk
-index a4583a1..e6fe9d8 100644
+index 6c7b244..9629471 100644
 --- a/build/platform-darwin.mk
 +++ b/build/platform-darwin.mk
 @@ -5,8 +5,7 @@ SHAREDLIBSUFFIXFULLVER=$(FULL_VERSION).$(SHAREDLIBSUFFIX)
  SHAREDLIBSUFFIXMAJORVER=$(SHAREDLIB_MAJORVERSION).$(SHAREDLIBSUFFIX)
- CURRENT_VERSION := 1.7.0
- COMPATIBILITY_VERSION := 1.7.0
+ CURRENT_VERSION := 2.0.0
+ COMPATIBILITY_VERSION := 2.0.0
 -SHLDFLAGS = -dynamiclib -twolevel_namespace -undefined dynamic_lookup \
 -	-fno-common -headerpad_max_install_names -install_name \
 +SHLDFLAGS = -dynamiclib -twolevel_namespace -fno-common -install_name \
@@ -22,5 +22,5 @@ index a4583a1..e6fe9d8 100644
  SHARED = -dynamiclib
  SHARED += -current_version $(CURRENT_VERSION) -compatibility_version $(COMPATIBILITY_VERSION)
 -- 
-2.15.1 (Apple Git-101)
+2.25.1
 
