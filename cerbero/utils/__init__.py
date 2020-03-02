@@ -564,10 +564,13 @@ def get_event_loop():
 def run_until_complete(tasks):
     loop = get_event_loop()
 
-    if isinstance(tasks, Iterable):
-        loop.run_until_complete(asyncio.gather(*tasks))
-    else:
-        loop.run_until_complete(tasks)
+    try:
+        if isinstance(tasks, Iterable):
+            loop.run_until_complete(asyncio.gather(*tasks))
+        else:
+            loop.run_until_complete(tasks)
+    except asyncio.CancelledError:
+        pass
 
 async def run_tasks(tasks, done_async=None):
     """
@@ -586,23 +589,31 @@ async def run_tasks(tasks, done_async=None):
         task = asyncio.ensure_future (queue_done())
         tasks.append(task)
 
-    async def shutdown():
-        [task.cancel() for task in tasks]
-        ret = await asyncio.gather(*tasks, return_exceptions=True)
+    async def shutdown(abnormal=True):
+        tasks_minus_current = [t for t in tasks]
+        [task.cancel() for task in tasks_minus_current]
+        ret = await asyncio.gather(*tasks_minus_current, return_exceptions=True)
         # we want to find any actual exception rather than one
         # that may be returned from task.cancel()
+        cancelled = None
         for e in ret:
+            if isinstance(e, asyncio.CancelledError):
+                cancelled = e
             if isinstance(e, Exception) \
                and not isinstance(e, asyncio.CancelledError) \
                and not isinstance(e, QueueDone):
                 raise e
+        if abnormal and cancelled:
+            # use cancelled as a last resort we would prefer to throw any
+            # other exception but only if something abnormal happened
+            raise cancelled
 
     try:
         await asyncio.gather(*tasks, return_exceptions=False)
     except asyncio.CancelledError:
-        pass
+        raise
     except QueueDone:
-        await shutdown()
+        await shutdown(abnormal=False)
     except Exception:
         await shutdown()
         raise
