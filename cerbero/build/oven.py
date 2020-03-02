@@ -50,6 +50,8 @@ class RecoveryActions(object):
                 RecoveryActions.RETRY_STEP, RecoveryActions.SKIP,
                 RecoveryActions.ABORT]
 
+class RetryRecipeError(Exception):
+    pass
 
 class Oven (object):
     '''
@@ -122,6 +124,7 @@ class Oven (object):
         steps = [step[1] for step in recipes[0].steps]
         self._build_status_printer = BuildStatusPrinter(steps, self.interactive)
         self._static_libraries_built = []
+
         run_until_complete(self._cook_recipes(ordered_recipes))
 
     async def _cook_recipes(self, recipes):
@@ -284,11 +287,14 @@ class Oven (object):
                         step = recipe_next_step (recipe, step)
                     return step
 
-                if lock:
-                    async with lock:
+                try:
+                    if lock:
+                        async with lock:
+                            step = await build_recipe_steps(step)
+                    else:
                         step = await build_recipe_steps(step)
-                else:
-                    step = await build_recipe_steps(step)
+                except RetryRecipeError:
+                    step = "init"
 
                 if step is None:
                     self._cook_finish_recipe (recipe, counter.i, len(recipes))
@@ -412,7 +418,8 @@ class Oven (object):
             elif action == RecoveryActions.RETRY_ALL:
                 shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
                 self.cookbook.reset_recipe_status(recipe.name)
-                await self._cook_recipe_step(recipe, step, count, total)
+                # propagate up to the task manager to retry the recipe entirely
+                raise RetryRecipeError()
             elif action == RecoveryActions.RETRY_STEP:
                 await self._cook_recipe_step(recipe, step, count, total)
             elif action == RecoveryActions.SKIP:
