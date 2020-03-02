@@ -559,6 +559,12 @@ def get_event_loop():
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
 
+    # Avoid spammy BlockingIOError warnings with older python versions
+    if sys.platform != 'win32' and \
+       sys.version_info < (3, 8, 0):
+        asyncio.set_child_watcher(asyncio.FastChildWatcher())
+        asyncio.get_child_watcher().attach_loop(loop)
+
     return loop
 
 def run_until_complete(tasks):
