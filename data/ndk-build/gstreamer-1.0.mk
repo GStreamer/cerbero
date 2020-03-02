@@ -153,8 +153,6 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 GSTREAMER_ANDROID_LIBS       := $(call pkg-config-get-libs,$(GSTREAMER_DEPS))
 GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
 GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS)) $(GSTREAMER_EXTRA_LIBS)
-# Fix deps for giognutls
-GSTREAMER_ANDROID_LIBS       := $(call fix-deps,-lgiognutls, -lhogweed) $(GSTREAMER_EXTRA_LIBS)
 GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_ROOT)/include
 
 # In newer NDK, SYSROOT is replaced by SYSROOT_INC and SYSROOT_LINK, which
