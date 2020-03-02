@@ -671,11 +671,14 @@ class Config (object):
 
     def _load_last_defaults(self):
         target_platform = self.target_platform
-        if target_platform == Platform.WINDOWS and 'visualstudio' in self.variants:
-            target_platform = 'msvc'
-            # Check for invalid configuration of a custom Visual Studio path
-            if self.vs_install_path and not self.vs_install_version:
-                raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
+        if target_platform == Platform.WINDOWS:
+            if 'visualstudio' in self.variants:
+                target_platform = 'msvc'
+                # Check for invalid configuration of a custom Visual Studio path
+                if self.vs_install_path and not self.vs_install_version:
+                    raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
+            else:
+                target_platform = 'mingw'
         self.set_property('prefix', os.path.join(self.home_dir, "dist",
             "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('sources', os.path.join(self.home_dir, "sources",
