@@ -5,16 +5,12 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.53.1'
+    version = '0.53.2'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = 'ec1ba33eea701baca2c1607dac458152dc8323364a51fdef6babda2623413b04'
-    patches = [
-        # https://github.com/mesonbuild/meson/pull/6668
-        'meson/0001-macOS-Remove-more-unused-linkerlike-args.patch',
-    ]
+    tarball_checksum = '3e8f830f33184397c2eb0b651ec502adb63decb28978bdc84b3558d71284c21f'
 
     deps = ['ninja']
 
