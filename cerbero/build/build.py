@@ -22,6 +22,7 @@ import copy
 import shutil
 import shlex
 import subprocess
+import asyncio
 from pathlib import Path
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
@@ -93,34 +94,30 @@ def modify_environment(func):
     '''
     def call(*args):
         self = args[0]
-        self._modify_env()
         try:
+            self._modify_env()
             res = func(*args)
             return res
         finally:
             self._restore_env()
 
-    call.__name__ = func.__name__
-    return call
-
-
-def async_modify_environment(func):
-    '''
-    Decorator to modify the build environment
-
-    When called recursively, it only modifies the environment once.
-    '''
-    async def call(*args):
+    async def async_call(*args):
         self = args[0]
         try:
             self._modify_env()
             res = await func(*args)
+            return res
         finally:
             self._restore_env()
-        return res
 
-    call.__name__ = func.__name__
-    return call
+    if asyncio.iscoroutinefunction(func):
+        ret = async_call
+    else:
+        ret = call
+
+    ret.__name__ = func.__name__
+    return ret
+
 
 class EnvVarOp:
     '''
