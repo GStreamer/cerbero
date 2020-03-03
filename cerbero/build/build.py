@@ -418,7 +418,7 @@ class MakefilesBase (Build, ModifyEnvBase):
         Base configure method
 
         When called from a method in deriverd class, that method has to be
-        decorated with async_modify_environment decorator.
+        decorated with modify_environment decorator.
         '''
         if not os.path.exists(self.make_dir):
             os.makedirs(self.make_dir)
@@ -459,14 +459,14 @@ class MakefilesBase (Build, ModifyEnvBase):
         await shell.async_call(configure_cmd, self.make_dir,
                                logfile=self.logfile, env=self.env)
 
-    @async_modify_environment
+    @modify_environment
     async def compile(self):
         if self.using_msvc():
             self.unset_toolchain_env()
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
-    @async_modify_environment
+    @modify_environment
     async def install(self):
         self.maybe_add_system_libs(step='install')
         await shell.async_call(self.make_install, self.make_dir, logfile=self.logfile, env=self.env)
@@ -487,7 +487,7 @@ class Makefile (MakefilesBase):
     '''
     Build handler for Makefile project
     '''
-    @async_modify_environment
+    @modify_environment
     async def configure(self):
         await MakefilesBase.configure(self)
 
@@ -516,7 +516,7 @@ class Autotools (MakefilesBase):
         MakefilesBase.__init__(self)
         self.make_check = self.make_check or ['make', 'check']
 
-    @async_modify_environment
+    @modify_environment
     async def configure(self):
         # Build with PIC for static linking
         self.configure_tpl += ' --with-pic '
@@ -610,7 +610,7 @@ class CMake (MakefilesBase):
         MakefilesBase.__init__(self)
         self.make_dir = os.path.join(self.build_dir, '_builddir')
 
-    @async_modify_environment
+    @modify_environment
     async def configure(self):
         cc = self.env.get('CC', 'gcc')
         cxx = self.env.get('CXX', 'g++')
@@ -887,7 +887,7 @@ class Meson (Build, ModifyEnvBase) :
 
         return native_file
 
-    @async_modify_environment
+    @modify_environment
     async def configure(self):
         # self.build_dir is different on each call to configure() when doing universal builds
         self.meson_dir = os.path.join(self.build_dir, self.meson_builddir)
@@ -956,12 +956,12 @@ class Meson (Build, ModifyEnvBase) :
         self.maybe_add_system_libs(step='configure')
         await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
 
-    @async_modify_environment
+    @modify_environment
     async def compile(self):
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.meson_dir, logfile=self.logfile, env=self.env)
 
-    @async_modify_environment
+    @modify_environment
     async def install(self):
         self.maybe_add_system_libs(step='install')
         await shell.async_call(self.make_install, self.meson_dir, logfile=self.logfile, env=self.env)
