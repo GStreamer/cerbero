@@ -11,6 +11,12 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
     tarball_checksum = '3e8f830f33184397c2eb0b651ec502adb63decb28978bdc84b3558d71284c21f'
+    patches = [
+        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6612
+        'meson/0001-depfixer-Cache-searching-of-install_name_tool.patch',
+        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6612
+        'meson/0001-depfixer-Ignore-more-extensions-that-cant-need.patch',
+    ]
 
     deps = ['ninja']
 

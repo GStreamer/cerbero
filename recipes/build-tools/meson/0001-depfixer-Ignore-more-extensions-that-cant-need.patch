@@ -1,0 +1,42 @@
+From 59cb72b108f2b04f331068ccec0da437368fb59b Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 12 Feb 2020 03:12:52 +0530
+Subject: [PATCH] depfixer: Ignore more extensions that can't need RPATH fixes
+
+Generated headers, PDB files, import libraries, etc.
+
+Speed-up in gst-build on Windows:
+
+```
+meson install
+before: 5.4 seconds
+after:  5.1 seconds
+
+meson install --only-changed
+before: 2.7 seconds
+after:  1.6 seconds
+```
+---
+ mesonbuild/scripts/depfixer.py | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/mesonbuild/scripts/depfixer.py b/mesonbuild/scripts/depfixer.py
+index 969f1cc86f..5ba3a97281 100644
+--- a/mesonbuild/scripts/depfixer.py
++++ b/mesonbuild/scripts/depfixer.py
+@@ -432,11 +432,10 @@ def fix_jar(fname):
+ 
+ def fix_rpath(fname, new_rpath, final_path, install_name_mappings, verbose=True):
+     global INSTALL_NAME_TOOL
+-    # Static libraries never have rpaths
+-    if fname.endswith('.a'):
+-        return
+-    # DLLs and EXE never have rpaths
+-    if fname.endswith('.dll') or fname.endswith('.exe'):
++    # Static libraries, import libraries, debug information, headers, etc
++    # never have rpaths
++    # DLLs and EXE currently do not need runtime path fixing
++    if fname.endswith(('.a', '.lib', '.pdb', '.h', '.hpp', '.dll', '.exe')):
+         return
+     try:
+         if fname.endswith('.jar'):
