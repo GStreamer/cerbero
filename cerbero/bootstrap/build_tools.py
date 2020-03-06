@@ -50,17 +50,13 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('gperf')
             self.BUILD_TOOLS.append('cmake')
         if self.config.platform == Platform.LINUX:
-            if self.config.distro_version in [DistroVersion.REDHAT_6,
-                                              DistroVersion.AMAZON_LINUX]:
-                self.BUILD_TOOLS.append('cmake')
             # dav1d requires nasm >=2.13.02
-            if self.config.distro_version.startswith('ubuntu') and self.config.distro_version < DistroVersion.UBUNTU_BIONIC:
-                self.BUILD_TOOLS.append('nasm')
-            elif self.config.distro_version.startswith('debian') and self.config.distro_version < DistroVersion.DEBIAN_BUSTER:
-                self.BUILD_TOOLS.append('nasm')
-            elif self.config.distro_version in [DistroVersion.REDHAT_6,
-                                                DistroVersion.REDHAT_7,
-                                                DistroVersion.AMAZON_LINUX]:
+            # We require cmake 3.10 for out-of-source-tree builds.
+            # RHEL 8, Ubuntu 18.04, and Debian Buster are fine.
+            if self.config.distro_version in (DistroVersion.REDHAT_6, DistroVersion.REDHAT_7,
+                                              DistroVersion.AMAZON_LINUX, DistroVersion.UBUNTU_XENIAL,
+                                              DistroVersion.DEBIAN_STRETCH):
+                self.BUILD_TOOLS.append('cmake')
                 self.BUILD_TOOLS.append('nasm')
         if self.config.target_platform == Platform.IOS:
             self.BUILD_TOOLS.append('gas-preprocessor')
