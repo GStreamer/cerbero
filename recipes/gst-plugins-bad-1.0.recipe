@@ -72,11 +72,19 @@ class Recipe(custom.GStreamer):
 
     files_lang = ['gst-plugins-bad-1.0']
 
-    files_libs = ['libgstcodecparsers-1.0', 'libgstmpegts-1.0', 'libgsturidownloader-1.0',
-                  'libgstbasecamerabinsrc-1.0', 'libgstphotography-1.0',
-                  'libgstinsertbin-1.0', 'libgstadaptivedemux-1.0',
-                  'libgstplayer-1.0', 'libgstbadaudio-1.0',
-                  'libgstisoff-1.0', 'libgstsctp-1.0', 'libgstwebrtc-1.0', 'libgstvulkan-1.0']
+    files_libs = ['libgstcodecparsers-1.0',
+                  'libgstmpegts-1.0',
+                  'libgsturidownloader-1.0',
+                  'libgstbasecamerabinsrc-1.0',
+                  'libgstphotography-1.0',
+                  'libgstinsertbin-1.0',
+                  'libgstadaptivedemux-1.0',
+                  'libgstplayer-1.0',
+                  'libgstbadaudio-1.0',
+                  'libgstisoff-1.0',
+                  'libgstsctp-1.0',
+                  'libgstwebrtc-1.0',
+                  'libgstvulkan-1.0']
 
     files_plugins_devel = [
         'include/gstreamer-1.0/gst/mpegts',
