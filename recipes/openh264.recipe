@@ -8,94 +8,17 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     tarball_checksum = '73c35f80cc487560d11ecabb6d31ad828bd2f59d412f9cd726cc26bfaf4561fd'
     stype = SourceType.TARBALL
-    btype = BuildType.MAKEFILE
+    btype = BuildType.MESON
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
     patches = [
-               'openh264/0001-openh264-Build-for-iOS-SDK-11.0.patch',
-               'openh264/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch',
-               'openh264/0001-android-build-switch-to-using-the-c-_shared-c-librar.patch'
+                # https://github.com/cisco/openh264/commit/d4518b3f184d538c03c3c15d3b64b5a41ebfa529
+                name + "/0001-meson-build-Bump-soname-version-to-5.patch",
+                # https://github.com/cisco/openh264/pull/3247
+                name + "/0001-meson-add-support-for-android-ios-macos.patch",
+                name + "/0001-depend-on-gnustl-for-android.patch",
                ]
-
-    def prepare(self):
-        make = self.make
-        if self.config.target_platform == Platform.IOS:
-            make += ['OS=ios']
-            if self.config.target_arch == Architecture.X86:
-                make += ['ARCH=i386']
-            elif self.config.target_arch == Architecture.X86_64:
-                make += ['ARCH=x86_64']
-            elif self.config.target_arch == Architecture.ARMv7:
-                make += ['ARCH=armv7']
-            elif self.config.target_arch == Architecture.ARMv7S:
-                make += ['ARCH=armv7s']
-            elif self.config.target_arch == Architecture.ARM:
-                make += ['ARCH=arm', 'APP_ABI=armeabi']
-            elif self.config.target_arch == Architecture.ARM64:
-                make += ['ARCH=arm64']
-        elif self.config.target_platform == Platform.DARWIN:
-            make += ['OS=darwin']
-            if self.config.target_arch == Architecture.X86:
-                make += ['ARCH=x86']
-            elif self.config.target_arch == Architecture.X86_64:
-                make += ['ARCH=x86_64']
-        elif self.config.target_platform == Platform.ANDROID:
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            make += ['OS=android', 'TARGET=android-' + str(v), 'NDKLEVEL=' + str(v)]
-            make += ['NDKROOT=' + self.config.toolchain_prefix]
-            if self.config.target_arch == Architecture.X86:
-                # According to https://github.com/cisco/openh264/issues/2263 
-                # need to pass ENABLEPIC=Yes to fix text relocations
-                make += ['ARCH=x86', 'ENABLEPIC=Yes']
-            elif self.config.target_arch == Architecture.ARM64:
-                make += ['ARCH=arm64']
-            elif self.config.target_arch == Architecture.X86_64:
-                make += ['ARCH=x86_64']
-        elif self.config.target_platform == Platform.WINDOWS:
-            make += ['OS=mingw_nt']
-            if self.config.target_arch == Architecture.X86:
-                make += ['ARCH=x86']
-            elif self.config.target_arch == Architecture.X86_64:
-                make += ['ARCH=x86_64']
-        elif self.config.target_platform == Platform.LINUX:
-            if self.config.target_arch == Architecture.ARMv7:
-                make += ['ARCH=armv7']
-            elif self.config.target_arch == Architecture.ARMv7S:
-                make += ['ARCH=armv7s']
-            elif self.config.target_arch == Architecture.ARM:
-                make += ['ARCH=arm', 'APP_ABI=armeabi']
-            elif self.config.target_arch == Architecture.ARM64:
-                make += ['ARCH=arm64']
-
-        self.make = make + ['libraries']
-        # `make install` also needs the exact same parameters as `make`
-        self.make_install = make + ['install']
-
-    def configure(self):
-        if self.config.platform == Platform.WINDOWS:
-            # Convert c:/foo to /c/foo for this build system. It will add the
-            # initial / by itself, /c:/foo does not work and and //c is not
-            # the same as /c on Windows. //c/foo is a network path.
-            if not self.config.prefix.startswith('/') and self.config.prefix[1] == ':':
-                p = "/" + self.config.prefix[0] + self.config.prefix[2:]
-            else:
-                p = self.config.prefix
-            shell.replace(os.path.join(self.build_dir, 'Makefile'),
-                          # Fix hard-coded prefix
-                          {'PREFIX=/usr/local': "PREFIX=" + p})
-        else:
-            shell.replace(os.path.join(self.build_dir, 'Makefile'),
-                          # Fix hard-coded prefix
-                          {'PREFIX=/usr/local': "PREFIX=" + self.config.prefix})
-
-        if self.config.target_platform == Platform.IOS and self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
-            shell.replace(os.path.join(self.build_dir, 'build',
-                                       'platform-ios.mk'),
-                          # Use correct compiler flag for iOS simulator
-                          {'-miphoneos-version-min': '-mios-simulator-version-min'})
-
-        # No configure script
 
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!

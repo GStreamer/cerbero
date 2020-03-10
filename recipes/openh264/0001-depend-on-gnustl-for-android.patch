@@ -1,0 +1,40 @@
+From f6bf68f9778294dd6b9a78870a31ab8e578d5862 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Tue, 10 Mar 2020 14:05:18 +1100
+Subject: [PATCH] depend on gnustl for android
+
+HACK for cerbero environment
+---
+ meson.build | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 1afb712..a649f75 100644
+--- a/meson.build
++++ b/meson.build
+@@ -95,8 +95,10 @@ if ['linux', 'android', 'ios', 'darwin'].contains(system)
+     error ('FIXME: unhandled CPU family @0@ for @1@'.format(cpu_family, system))
+   endif
+ 
+-  if ['ios', 'darwin', 'android'].contains(system)
++  if ['ios', 'darwin'].contains(system)
+     cpp_lib = '-lc++'
++  elif system == 'android'
++    cpp_lib = ''
+   endif
+ elif system == 'windows'
+   if cpu_family == 'x86'
+@@ -123,6 +125,10 @@ if ['x86', 'x86_64'].contains(cpu_family)
+       '-o', '@OUTPUT@'] + asm_args)
+ endif
+ 
++if system == 'android'
++  deps += dependency('gnustl')
++endif
++
+ api_headers = []
+ api_header_deps = []
+ 
+-- 
+2.25.1
+
