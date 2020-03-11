@@ -218,8 +218,8 @@ async def local_checkout(git_dir, local_git_dir, commit, logfile=None):
     @type commit: false
     '''
     branch_name = 'cerbero_build'
-    shell.new_call([GIT, 'checkout', commit, '-B', branch_name], local_git_dir, logfile=logfile)
-    shell.new_call([GIT, 'clone', local_git_dir, '-s', '-b', branch_name, '.'],
+    await shell.async_call([GIT, 'checkout', commit, '-B', branch_name], local_git_dir, logfile=logfile)
+    await shell.async_call([GIT, 'clone', local_git_dir, '-s', '-b', branch_name, '.'],
                git_dir, logfile=logfile)
     ensure_user_is_set(git_dir, logfile=logfile)
     await submodules_update(git_dir, local_git_dir, logfile=logfile)
