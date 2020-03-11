@@ -112,7 +112,7 @@ class GenSdkShell(Command):
 
             with open(filepath, 'w+') as f:
                 f.write(SCRIPT_TPL % (envstr, cmd))
-            shell.call("chmod +x %s" % filepath)
+            shell.new_call(['chmod', '+x', filepath])
         except IOError as ex:
             raise FatalError(_("Error creating script: %s" % ex))
 

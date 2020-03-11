@@ -279,7 +279,7 @@ class DebianPackager(LinuxPackager):
                         shutil.copyfileobj(open(package_shlibs_path, 'r'), f)
                 f.close()
 
-        shell.call('dpkg-buildpackage -rfakeroot -us -uc -D -b', srcdir)
+        shell.new_call(['dpkg-buildpackage', '-rfakeroot', '-us', '-uc', '-D', '-b'], srcdir)
 
         # we may only have a generated shlibs file if at least we have
         # runtime files

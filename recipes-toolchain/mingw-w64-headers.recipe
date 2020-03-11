@@ -25,6 +25,5 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         if not os.path.exists(os.path.join(self._sysroot, 'mingw')):
-            shell.call('ln -s usr/%(host)s mingw' \
-                    % {'host': self.host}, self._sysroot)
+            shell.symlink('usr/%(host)s' % {'host': self.host}, 'mingw', self._sysroot)
         super().post_install()

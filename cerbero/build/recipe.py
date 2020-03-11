@@ -487,7 +487,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
 
         for f in set([get_real_path(x) for x in self.files_list() \
                 if file_is_bin(x)]):
-            shell.call('codesign -f -s - ' + f, logfile=self.logfile, env=self.env)
+            shell.new_call(['codesign', '-f', '-s', '-', f], logfile=self.logfile, env=self.env)
 
     def _install_srcdir_license(self, lfiles, install_dir):
         '''

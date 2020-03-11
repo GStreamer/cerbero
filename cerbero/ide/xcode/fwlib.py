@@ -218,7 +218,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
         split_queue = asyncio.Queue()
         join_queues = collections.defaultdict(asyncio.Queue)
         for thin_arch in archs:
-            shell.call ('mkdir -p %s' % thin_arch, tmpdir, env=self.env)
+            os.makedirs (os.path.join (tmpdir, thin_arch))
 
         status = BuildStatusPrinter(archs, m.console_is_interactive())
         for lib in libraries:

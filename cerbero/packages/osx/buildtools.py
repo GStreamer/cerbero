@@ -50,13 +50,13 @@ class PackageBuild(object):
                 'install-location': destination}
         if scripts_path is not None:
             args['scripts'] = scripts_path
-        shell.call(self._cmd_with_args(args, output_file))
+        shell.new_call(self._cmd_with_args(args, output_file))
 
     def _cmd_with_args(self, args, output):
-        args_str = ''
+        args_arr = []
         for k, v in args.items():
-            args_str += " --%s '%s'" % (k, v)
-        return '%s %s %s' % (self.CMD, args_str, output)
+            args_arr += ['--%s' % (k,), '%s' % (v,)]
+        return [self.CMD] + args_arr + [output]
 
 
 class ProductBuild (object):
@@ -65,11 +65,10 @@ class ProductBuild (object):
     CMD = 'productbuild'
 
     def create_app_package(self, app_bundle, output):
-        shell.call("%s --component %s /Applications %s"
-                % (self.CMD, app_bundle, output))
+        shell.new_call([self.CMD, '--component', app_bundle, '/Applications', output])
 
     def create_package(self, distribution, output, package_path=None):
-        cmd = "%s --distribution %s %s" % (self.CMD, distribution, output)
+        cmd = [self.CMD, '--distribution', distribution, output]
         for p in package_path:
-            cmd += ' --package-path %s' % p
-        shell.call(cmd)
+            cmd += ['--package-path', p]
+        shell.new_call(cmd)

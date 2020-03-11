@@ -66,12 +66,11 @@ class MSBuild(object):
         if self.properties['Platform'] == 'Win32':
             os.environ['PATH'] = '%s;%s' % (os.environ['PATH'], vs_path)
         try:
-            shell.call('msbuild.exe %s %s /target:%s' %
-                       (self.solution, properties, command), msbuildpath)
+            shell.new_call(['msbuild.exe', self.solution, *properties, '/target:%s' %
+                       (command,)], msbuildpath)
         finally:
             os.environ['PATH'] = old_path
 
     def _format_properties(self):
-        props = ['/property:%s=%s' % (k, v) for k, v in
+        return ['/property:%s=%s' % (k, v) for k, v in
                  self.properties.items()]
-        return ' '.join(props)

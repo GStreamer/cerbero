@@ -243,7 +243,7 @@ class RPMPackager(LinuxPackager):
         if self._rpmbuild_support_nodebuginfo():
             extra_options = '--nodebuginfo'
 
-        shell.call('rpmbuild -bb %s --buildroot %s/buildroot --target %s %s' % (
+        shell.new_call('rpmbuild -bb %s --buildroot %s/buildroot --target %s %s' % (
             extra_options, tmpdir, target, self.spec_path))
 
         paths = []

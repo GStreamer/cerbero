@@ -43,9 +43,9 @@ class OSXBootstrapper (BootstrapperBase):
 
     def _install_perl_deps(self):
         cpanm_installer = os.path.join(self.config.local_sources, 'cpanm')
-        shell.call('chmod +x %s' % cpanm_installer)
+        shell.new_call(['chmod', '+x', cpanm_installer])
         # Install XML::Parser, required for intltool
-        shell.call("sudo %s XML::Parser" % cpanm_installer)
+        shell.new_call(['sudo', cpanm_installer, 'XML::Parser'])
 
 
 def register_all():

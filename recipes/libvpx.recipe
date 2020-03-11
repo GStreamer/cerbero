@@ -167,7 +167,7 @@ class Recipe(recipe.Recipe):
             # Fixup the id of the dylib
             vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.6.dylib')
             vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
-            shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib]))
-            shell.call(' '.join(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver]))
+            shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib])
+            shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver])
 
         super().post_install()

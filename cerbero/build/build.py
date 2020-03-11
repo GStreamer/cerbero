@@ -474,13 +474,13 @@ class MakefilesBase (Build, ModifyEnvBase):
     @modify_environment
     def clean(self):
         self.maybe_add_system_libs(step='clean')
-        shell.call(self.make_clean, self.make_dir, logfile=self.logfile, env=self.env)
+        shell.new_call(self.make_clean, self.make_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
         if self.make_check:
             self.maybe_add_system_libs(step='check')
-            shell.call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
+            shell.new_call(self.make_check, self.build_dir, logfile=self.logfile, env=self.env)
 
 
 class Makefile (MakefilesBase):
@@ -969,12 +969,12 @@ class Meson (Build, ModifyEnvBase) :
     @modify_environment
     def clean(self):
         self.maybe_add_system_libs(step='clean')
-        shell.call(self.make_clean, self.meson_dir, logfile=self.logfile, env=self.env)
+        shell.new_call(self.make_clean, self.meson_dir, logfile=self.logfile, env=self.env)
 
     @modify_environment
     def check(self):
         self.maybe_add_system_libs(step='check')
-        shell.call(self.make_check, self.meson_dir, logfile=self.logfile, env=self.env)
+        shell.new_call(self.make_check, self.meson_dir, logfile=self.logfile, env=self.env)
 
 
 class BuildType (object):

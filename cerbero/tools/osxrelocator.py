@@ -57,8 +57,8 @@ class OSXRelocator(object):
         filename = os.path.basename(object_file)
         if not (filename.endswith('so') or filename.endswith('dylib')):
             return
-        cmd = '%s -id "%s" "%s"' % (INT_CMD, id, object_file)
-        shell.call(cmd, fail=False, logfile=self.logfile)
+        cmd = [INT_CMD, '-id', id, object_file]
+        shell.new_call(cmd, fail=False, logfile=self.logfile)
 
     def change_libs_path(self, object_file):
         depth = len(object_file.split('/')) - len(self.root.split('/')) - 1
@@ -71,22 +71,20 @@ class OSXRelocator(object):
         if depth > 1:
             rpaths += ['@loader_path/..', '@executable_path/..']
         for p in rpaths:
-            cmd = '%s -add_rpath %s "%s"' % (INT_CMD, p, object_file)
-            shell.call(cmd, fail=False)
+            cmd = [INT_CMD, '-add_rpath', p, object_file]
+            shell.new_call(cmd, fail=False)
         for lib in self.list_shared_libraries(object_file):
             if self.lib_prefix in lib:
                 new_lib = lib.replace(self.lib_prefix, '@rpath')
-                cmd = '%s -change "%s" "%s" "%s"' % (INT_CMD, lib, new_lib,
-                                               object_file)
-                shell.call(cmd, fail=False, logfile=self.logfile)
+                cmd = [INT_CMD, '-change', lib, new_lib, object_file]
+                shell.new_call(cmd, fail=False, logfile=self.logfile)
 
     def change_lib_path(self, object_file, old_path, new_path):
         for lib in self.list_shared_libraries(object_file):
             if old_path in lib:
                 new_path = lib.replace(old_path, new_path)
-                cmd = '%s -change "%s" "%s" "%s"' % (INT_CMD, lib, new_path,
-                                               object_file)
-                shell.call(cmd, fail=True, logfile=self.logfile)
+                cmd = [INT_CMD, '-change', lib, new_path, object_path]
+                shell.new_call(cmd, fail=True, logfile=self.logfile)
 
     def parse_dir(self, dir_path, filters=None):
         for dirpath, dirnames, filenames in os.walk(dir_path):

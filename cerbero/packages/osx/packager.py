@@ -343,8 +343,8 @@ class ProductPackage(PackagerBase):
             for p in paths:
                 shutil.copy(p, workdir)
             # Create Disk Image
-            cmd = 'hdiutil create %s -ov -srcfolder %s' % (dmg_file, workdir)
-            shell.call(cmd)
+            cmd = ['hdiutil', 'create', dmg_file, '-ov', '-srcfolder', workdir]
+            shell.new_call(cmd)
         finally:
             shutil.rmtree(workdir)
 
@@ -418,7 +418,7 @@ class ApplicationPackage(PackagerBase):
     def _add_applications_link(self):
         # Create link to /Applications
         applications_link = os.path.join(self.approot, 'Applications')
-        shell.call('ln -s /Applications %s' % applications_link)
+        shell.symlink('/Applications', applications_link)
 
     def _package_name(self, suffix):
         return '%s-%s-%s%s' % (self.package.name, self.package.version,
@@ -464,9 +464,8 @@ class ApplicationPackage(PackagerBase):
         dmg_file = os.path.join(self.output_dir, '%s-%s-%s.dmg' % (
             self.package.app_name, self.package.version, self.config.target_arch))
         # Create Disk Image
-        cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
-                (dmg_file, self.package.app_name, self.approot)
-        shell.call(cmd)
+        cmd = ['hdiutil', 'create', dmg_file, '-volname', self.package.app_name, '-ov', '-srcfolder', self.approot]
+        shell.new_call(cmd)
         return dmg_file
 
 
@@ -596,9 +595,8 @@ class IOSPackage(ProductPackage, FrameworkHeadersMixin):
         shutil.move(pkg_path, dmg_dir)
 
         # Create Disk Image
-        cmd = 'hdiutil create %s -volname %s -ov -srcfolder %s' % \
-            (dmg_file, self.package.name, dmg_dir)
-        shell.call(cmd)
+        cmd = ['hdiutil', 'create', dmg_file, '-volname', self.package.name, '-ov', '-srcfolder', dmg_dir]
+        shell.new_call(cmd)
         return dmg_file
 
 class Packager(object):

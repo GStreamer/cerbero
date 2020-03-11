@@ -302,7 +302,7 @@ class Candle(object):
 
     def compile(self, source, output_dir):
         self.options['source'] = source
-        shell.call(self.cmd % self.options, output_dir)
+        shell.new_call(self.cmd % self.options, output_dir)
         return os.path.join(output_dir, source, '.msm')
 
 
@@ -330,11 +330,11 @@ class Light(object):
             self.options['ext'] = 'msm'
         else:
             self.options['ext'] = 'msi'
-        shell.call(self.cmd % self.options, output_dir)
+        shell.new_call(self.cmd % self.options, output_dir)
         msi_file_path = os.path.join(output_dir,
                                      '%(msi)s.%(ext)s' % self.options)
         if self.options['wine'] == 'wine':
-            shell.call('chmod 0755 {}'.format(msi_file_path))
+            shell.new_call(['chmod', '0755', msi_file_path])
         return msi_file_path
 
 

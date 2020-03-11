@@ -68,7 +68,7 @@ class Recipe(recipe.Recipe):
 
     async def configure(self):
         for d in ['bfd', 'opcodes', 'gas', 'binutils', 'gprof', 'ld']:
-            shell.call('autoreconf -ivf', os.path.join(self.build_dir, d))
+            shell.new_call(['autoreconf', '-ivf'], os.path.join(self.build_dir, d))
         await super().configure()
 
     def post_install(self):
@@ -83,5 +83,5 @@ class Recipe(recipe.Recipe):
             strings = os.path.join(bindir, 'strings')
             if os.path.exists(strings):
                 os.remove(strings)
-            shell.call('ln -s %s-strings strings' % self.target, bindir)
+            shell.symlink('%s-strings' % self.target, 'strings', bindir)
         super().post_install()

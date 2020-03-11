@@ -705,6 +705,20 @@ def windows_proof_rename(from_name, to_name):
     # Try one last time and throw an error if it fails again
     os.rename(from_name, to_name)
 
+def symlink(src, dst, working_dir=None):
+    prev_wd = os.getcwd()
+    if working_dir:
+        os.chdir(working_dir)
+    try:
+        os.symlink(src, dst)
+    except OSError:
+        # if symlinking fails, copy instead
+        if os.path.isdir(src):
+            copy_dir(src, dst)
+        else:
+            shutil.copy(src, dst)
+    finally:
+        os.chdir(prev_wd)
 
 class BuildStatusPrinter:
     def __init__(self, steps, interactive):

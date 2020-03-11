@@ -137,7 +137,7 @@ class WindowsBootstrapper(BootstrapperBase):
             # Otherwise we simply remove the directory and link back the sysroot
             else:
                 shutil.rmtree(mingwdir)
-            shell.call('ln -s usr/x86_64-w64-mingw32 mingw', sysroot)
+            shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
             # In cross-compilation gcc does not create a prefixed cpp
             cpp_exe = os.path.join(self.prefix, 'bin', 'cpp.exe')
             host_cpp_exe = os.path.join(self.prefix, 'bin', 'x86_64-w64-mingw32-cpp.exe')
@@ -160,7 +160,7 @@ class WindowsBootstrapper(BootstrapperBase):
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
-            shell.call('mingw-get install %s' % dep)
+            shell.new_call(['mingw-get', 'install', dep])
 
     def fix_bin_deps(self):
         # replace /opt/perl/bin/perl in intltool

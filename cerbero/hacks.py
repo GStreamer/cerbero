@@ -96,7 +96,7 @@ if sys.platform.startswith('win'):
 import stat
 import shutil
 from shutil import rmtree as shutil_rmtree
-from cerbero.utils.shell import call as shell_call
+from cerbero.utils.shell import new_call as shell_call
 
 def rmtree(path, ignore_errors=False, onerror=None):
     '''

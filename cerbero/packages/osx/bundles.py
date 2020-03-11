@@ -126,7 +126,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         vdir = os.path.join('Versions', self.package.sdk_version) #, arch_dir)
         rdir = '%s/Resources/' % vdir
-        shell.call ('mkdir -p %s' % rdir, tmp)
+        os.makedirs (os.path.join(tmp, rdir), exist_ok=True if target_dir else False)
 
         links = {'Versions/Current': '%s' % self.package.sdk_version,
                  'Resources': 'Versions/Current/Resources',
@@ -150,15 +150,14 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         # Create all links
         for dest, src in links.items():
-            shell.call ('ln -s %s %s' % (src, dest), tmp)
+            shell.symlink (src, dest, tmp)
         inner_tmp = os.path.join(tmp, vdir)
         for dest, src in inner_links.items():
-            shell.call ('ln -s %s %s' % (src, dest), inner_tmp)
+            shell.symlink (src, dest, inner_tmp)
 
         # Copy the framework library to Versions/$VERSION/$ARCH/Framework
         if self.package.osx_framework_library is not None \
                 and os.path.exists(os.path.join(self.config.prefix, link)):
-            shell.call ('mkdir -p %s' % vdir, tmp)
             shutil.copy(os.path.join(self.config.prefix, link),
                         os.path.join(tmp, vdir, name))
         return tmp
@@ -212,7 +211,7 @@ class ApplicationBundlePackager(object):
                     continue
                 with open(filename, 'w') as f:
                     f.write(wrapper)
-                shell.call('chmod +x %s' % filename)
+                shell.new_call(['chmod', '+x', filename])
             else:
                 # FIXME: We need to copy the binary instead of linking, because
                 # beeing a different path, @executable_path will be different

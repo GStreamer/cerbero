@@ -21,6 +21,7 @@ from cerbero.bootstrap.bootstrapper import register_bootstrapper
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import ConfigurationError
 from cerbero.utils import shell
+from cerbero.utils import messages as m
 
 import subprocess
 
@@ -54,7 +55,9 @@ class UnixBootstrapper (BootstrapperBase):
             if self.assume_yes:
               tool += ' ' + self.yes_arg;
             tool += ' ' + self.command;
-            shell.call(tool % ' '.join(self.packages))
+            cmd = tool % ' '.join(self.packages)
+            m.message("Running command '%s'" % cmd)
+            shell.new_call(cmd)
 
 
 class DebianBootstrapper (UnixBootstrapper):
@@ -184,8 +187,8 @@ class ArchBootstrapper (UnixBootstrapper):
 
         has_multilib = True
         try:
-          subprocess.check_output(["pacman", "-Sp", "gcc-multilib"])
-        except subprocess.CalledProcessError:
+          shell.check_output (["pacman", "-Sp", "gcc-multilib"])
+        except CommandError:
           has_multilib = False
 
         if self.config.arch == Architecture.X86_64 and has_multilib:
