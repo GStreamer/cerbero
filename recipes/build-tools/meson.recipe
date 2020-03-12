@@ -16,6 +16,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-depfixer-Cache-searching-of-install_name_tool.patch',
         # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6612
         'meson/0001-depfixer-Ignore-more-extensions-that-cant-need.patch',
+        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6753
+        'meson/0001-build-type-option-parsing-bugs.patch',
     ]
 
     deps = ['ninja']

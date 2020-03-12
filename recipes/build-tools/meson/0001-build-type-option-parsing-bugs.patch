@@ -1,0 +1,280 @@
+From fbc5486f6ee9a3c0a26786fe3555e48ec682443f Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 7 Mar 2020 00:17:06 +0530
+Subject: [PATCH 1/4] coredata: Convert all option parsing to OrderedDict()
+
+This ensures that options are always parsed in the order in which they
+were specified on the command-line, even with Python 3.5, and
+non-CPython implementations compatible with CPython 3.5 and 3.6.
+
+Closes https://github.com/mesonbuild/meson/issues/6742
+---
+ mesonbuild/coredata.py | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/mesonbuild/coredata.py b/mesonbuild/coredata.py
+index 521d14952e..fdd8cab288 100644
+--- a/mesonbuild/coredata.py
++++ b/mesonbuild/coredata.py
+@@ -668,7 +668,7 @@ def is_cross_build(self) -> bool:
+         return len(self.cross_files) > 0
+ 
+     def strip_build_option_names(self, options):
+-        res = {}
++        res = OrderedDict()
+         for k, v in options.items():
+             if k.startswith('build.'):
+                 k = k.split('.', 1)[1]
+@@ -741,7 +741,7 @@ def set_default_options(self, default_options, subproject, env):
+         # Language and backend specific options will be set later when adding
+         # languages and setting the backend (builtin options must be set first
+         # to know which backend we'll use).
+-        options = {}
++        options = OrderedDict()
+ 
+         # Some options default to environment variables if they are
+         # unset, set those now. These will either be overwritten
+@@ -861,7 +861,7 @@ def write_cmd_line_file(build_dir, options):
+     filename = get_cmd_line_file(build_dir)
+     config = CmdLineFileParser()
+ 
+-    properties = {}
++    properties = OrderedDict()
+     if options.cross_file:
+         properties['cross_file'] = options.cross_file
+     if options.native_file:
+@@ -941,7 +941,7 @@ def register_builtin_arguments(parser):
+                         help='Set the value of an option, can be used several times to set multiple options.')
+ 
+ def create_options_dict(options):
+-    result = {}
++    result = OrderedDict()
+     for o in options:
+         try:
+             (key, value) = o.split('=', 1)
+@@ -1026,7 +1026,7 @@ def prefixed_default(self, name: str, prefix: str = '') -> T.Any:
+         return self.default
+ 
+     def add_to_argparse(self, name: str, parser: argparse.ArgumentParser, prefix: str, help_suffix: str) -> None:
+-        kwargs = {}
++        kwargs = OrderedDict()
+ 
+         c = self._argparse_choices()
+         b = self._argparse_action()
+
+From b809a1b9b7d91bb12ab970ecf4b8613799c3cb54 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 7 Mar 2020 00:34:05 +0530
+Subject: [PATCH 2/4] coredata: Set default options as cmdline args that
+ override each other
+
+The previous code was assuming that options do not depend on each
+other, and that you can set defaults using `dict.setdefault()`. This
+is not true for `buildtype` + `optimization`/`debug`, so we add
+defaults + overrides in the right order and use the options parsing
+code later to compute the values.
+
+Includes a test.
+
+Closes https://github.com/mesonbuild/meson/issues/6752
+---
+ mesonbuild/coredata.py                  | 21 +++++++++++++--------
+ run_unittests.py                        | 18 ++++++++++++++++++
+ test cases/common/1 trivial/meson.build |  2 +-
+ 3 files changed, 32 insertions(+), 9 deletions(-)
+
+diff --git a/mesonbuild/coredata.py b/mesonbuild/coredata.py
+index fdd8cab288..a0df24ded3 100644
+--- a/mesonbuild/coredata.py
++++ b/mesonbuild/coredata.py
+@@ -718,13 +718,8 @@ def set_options(self, options, *, subproject='', warn_unknown=True):
+             self.copy_build_options_from_regular_ones()
+ 
+     def set_default_options(self, default_options, subproject, env):
+-        # Set defaults first from conf files (cross or native), then
+-        # override them as nec as necessary.
+-        for k, v in env.paths.host:
+-            if v is not None:
+-                env.cmd_line_options.setdefault(k, v)
+-
+-        # Set default options as if they were passed to the command line.
++        cmd_line_options = OrderedDict()
++        # Set project default_options as if they were passed to the cmdline.
+         # Subprojects can only define default for user options.
+         from . import optinterpreter
+         for k, v in default_options.items():
+@@ -734,7 +729,17 @@ def set_default_options(self, default_options, subproject, env):
+                 if optinterpreter.is_invalid_name(k, log=False):
+                     continue
+                 k = subproject + ':' + k
+-            env.cmd_line_options.setdefault(k, v)
++            cmd_line_options[k] = v
++
++        # Override project default_options using conf files (cross or native)
++        for k, v in env.paths.host:
++            if v is not None:
++                cmd_line_options[k] = v
++
++        # Override all the above defaults using the command-line arguments
++        # actually passed to us
++        cmd_line_options.update(env.cmd_line_options)
++        env.cmd_line_options = cmd_line_options
+ 
+         # Create a subset of cmd_line_options, keeping only options for this
+         # subproject. Also take builtin options if it's the main project.
+diff --git a/run_unittests.py b/run_unittests.py
+index 9ebece6a53..97fc6070b0 100755
+--- a/run_unittests.py
++++ b/run_unittests.py
+@@ -3809,6 +3809,24 @@ def test_buildtype_setting(self):
+         self.assertEqual(opts['debug'], True)
+         self.assertEqual(opts['optimization'], '0')
+ 
++        # Command-line parsing of buildtype settings should be the same as
++        # setting with `meson configure`.
++        #
++        # Setting buildtype should set optimization/debug
++        self.new_builddir()
++        self.init(testdir, extra_args=['-Dbuildtype=debugoptimized'])
++        opts = self.get_opts_as_dict()
++        self.assertEqual(opts['debug'], True)
++        self.assertEqual(opts['optimization'], '2')
++        self.assertEqual(opts['buildtype'], 'debugoptimized')
++        # Setting optimization/debug should set buildtype
++        self.new_builddir()
++        self.init(testdir, extra_args=['-Doptimization=2', '-Ddebug=true'])
++        opts = self.get_opts_as_dict()
++        self.assertEqual(opts['debug'], True)
++        self.assertEqual(opts['optimization'], '2')
++        self.assertEqual(opts['buildtype'], 'debugoptimized')
++
+     @skipIfNoPkgconfig
+     @unittest.skipIf(is_windows(), 'Help needed with fixing this test on windows')
+     def test_native_dep_pkgconfig(self):
+diff --git a/test cases/common/1 trivial/meson.build b/test cases/common/1 trivial/meson.build
+index c476c37a0f..fb1142cb93 100644
+--- a/test cases/common/1 trivial/meson.build	
++++ b/test cases/common/1 trivial/meson.build	
+@@ -1,7 +1,7 @@
+ # Comment on the first line
+ project('trivial test',
+   # Comment inside a function call + array for language list
+-  ['c'],
++  ['c'], default_options: ['buildtype=debug'],
+   meson_version : '>=0.52.0')
+ #this is a comment
+ sources = 'trivial.c'
+
+From 344f0680b34cf8e06333a17e10bbba92bffc3f5f Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 7 Mar 2020 00:18:40 +0530
+Subject: [PATCH 3/4] coredata: Passing an option is supposed to set it, not
+ flip the default
+
+With the current logic passing `--debug` will actually be parsed as
+`-Ddebug=false`, which is absolutely not what is expected.
+
+There is no case in which the presence of a boolean option in `--foo`
+form will mean 'I want feature foo disabled', regardless of the
+*default* value of that option.
+
+Also includes a test.
+
+Closes https://github.com/mesonbuild/meson/issues/4686
+---
+ mesonbuild/coredata.py | 7 ++++---
+ run_unittests.py       | 8 ++++++++
+ 2 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/mesonbuild/coredata.py b/mesonbuild/coredata.py
+index a0df24ded3..344da4cc56 100644
+--- a/mesonbuild/coredata.py
++++ b/mesonbuild/coredata.py
+@@ -1001,9 +1001,10 @@ def init_option(self, name: str, value: T.Optional[T.Any], prefix: str) -> _U:
+         return self.opt_type(self.description, **keywords)
+ 
+     def _argparse_action(self) -> T.Optional[str]:
+-        if self.default is True:
+-            return 'store_false'
+-        elif self.default is False:
++        # If the type is a boolean, the presence of the argument in --foo form
++        # is to enable it. Disabling happens by using -Dfoo=false, which is
++        # parsed under `args.projectoptions` and does not hit this codepath.
++        if isinstance(self.default, bool):
+             return 'store_true'
+         return None
+ 
+diff --git a/run_unittests.py b/run_unittests.py
+index 97fc6070b0..aee1b63eea 100755
+--- a/run_unittests.py
++++ b/run_unittests.py
+@@ -3826,6 +3826,14 @@ def test_buildtype_setting(self):
+         self.assertEqual(opts['debug'], True)
+         self.assertEqual(opts['optimization'], '2')
+         self.assertEqual(opts['buildtype'], 'debugoptimized')
++        # Setting both buildtype and debug on the command-line should work
++        # Also test that --debug is parsed as -Ddebug=true
++        self.new_builddir()
++        self.init(testdir, extra_args=['-Dbuildtype=debugoptimized', '--debug'])
++        opts = self.get_opts_as_dict()
++        self.assertEqual(opts['debug'], True)
++        self.assertEqual(opts['optimization'], '2')
++        self.assertEqual(opts['buildtype'], 'debugoptimized')
+ 
+     @skipIfNoPkgconfig
+     @unittest.skipIf(is_windows(), 'Help needed with fixing this test on windows')
+
+From 3adaa68d1dbefe9a39fe0038b16ddf019b4c59ad Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 7 Mar 2020 01:49:30 +0530
+Subject: [PATCH 4/4] coredata: Warn on usage of both -Dbuildtype and
+ -Doptimization/-Ddebug
+
+It may not be obvious to users that these two ways to set build-types
+override each other and specifying both is redundant, and conflicts
+are resolved based on whichever is specified later.
+
+Closes https://github.com/mesonbuild/meson/issues/6742
+---
+ docs/markdown/Builtin-options.md | 1 +
+ mesonbuild/coredata.py           | 7 +++++++
+ run_unittests.py                 | 7 ++++---
+ 3 files changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/mesonbuild/coredata.py b/mesonbuild/coredata.py
+index 344da4cc56..6f75534d64 100644
+--- a/mesonbuild/coredata.py
++++ b/mesonbuild/coredata.py
+@@ -718,6 +718,13 @@ def set_options(self, options, *, subproject='', warn_unknown=True):
+             self.copy_build_options_from_regular_ones()
+ 
+     def set_default_options(self, default_options, subproject, env):
++        # Warn if the user is using two different ways of setting build-type
++        # options that override each other
++        if 'buildtype' in env.cmd_line_options and \
++           ('optimization' in env.cmd_line_options or 'debug' in env.cmd_line_options):
++            mlog.warning('Recommend using either -Dbuildtype or -Doptimization + -Ddebug. '
++                         'Using both is redundant since they override each other. '
++                         'See: https://mesonbuild.com/Builtin-options.html#build-type-options')
+         cmd_line_options = OrderedDict()
+         # Set project default_options as if they were passed to the cmdline.
+         # Subprojects can only define default for user options.
+diff --git a/run_unittests.py b/run_unittests.py
+index aee1b63eea..8c7407c44f 100755
+--- a/run_unittests.py
++++ b/run_unittests.py
+@@ -3826,10 +3826,11 @@ def test_buildtype_setting(self):
+         self.assertEqual(opts['debug'], True)
+         self.assertEqual(opts['optimization'], '2')
+         self.assertEqual(opts['buildtype'], 'debugoptimized')
+-        # Setting both buildtype and debug on the command-line should work
+-        # Also test that --debug is parsed as -Ddebug=true
++        # Setting both buildtype and debug on the command-line should work, and
++        # should warn not to do that. Also test that --debug is parsed as -Ddebug=true
+         self.new_builddir()
+-        self.init(testdir, extra_args=['-Dbuildtype=debugoptimized', '--debug'])
++        out = self.init(testdir, extra_args=['-Dbuildtype=debugoptimized', '--debug'])
++        self.assertRegex(out, 'Recommend using either.*buildtype.*debug.*redundant')
+         opts = self.get_opts_as_dict()
+         self.assertEqual(opts['debug'], True)
+         self.assertEqual(opts['optimization'], '2')
