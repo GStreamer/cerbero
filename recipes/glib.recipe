@@ -41,6 +41,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-giomodule-gio-modules-are-no-longer-installed-in-bin.patch',
                # https://github.com/mesonbuild/meson/issues/6257
                'glib/0001-meson-host_system-is-ios-inside-cerbero.patch',
+               # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415,
+               'glib/0001-meson-Don-t-use-assert-in-test-code.patch',
               ]
 
     files_libs = [
