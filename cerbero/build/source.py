@@ -333,54 +333,6 @@ class GitCache (Source):
         return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self)))
 
 
-class LocalTarball (GitCache):
-    '''
-    Source handler for cerbero's local sources, a local git repository with
-    the release tarball and a set of patches
-    '''
-
-    BRANCH_PREFIX = 'sdk'
-
-    def __init__(self):
-        GitCache.__init__(self)
-        self.commit = "%s/%s-%s" % ('origin',
-                                    self.BRANCH_PREFIX, self.version)
-        self.platform_patches_dir = os.path.join(self.repo_dir,
-                                                 self.config.platform)
-        self.package_name = self.package_name
-        self.unpack_dir = self.config.sources
-
-    async def extract(self):
-        if not os.path.exists(self.build_dir):
-            os.mkdir(self.build_dir)
-        self._find_tarball()
-        await shell.unpack(self.tarball_path, self.unpack_dir, logfile=get_logfile(self))
-        # apply common patches
-        self._apply_patches(self.repo_dir)
-        # apply platform patches
-        self._apply_patches(self.platform_patches_dir)
-
-    def _find_tarball(self):
-        tarball = [x for x in os.listdir(self.repo_dir) if
-                   x.startswith(self.package_name)]
-        if len(tarball) != 1:
-            raise FatalError(_("The local repository %s do not have a "
-                             "valid tarball") % self.repo_dir)
-        self.tarball_path = os.path.join(self.repo_dir, tarball[0])
-
-    def _apply_patches(self, patches_dir):
-        if not os.path.isdir(patches_dir):
-            # FIXME: Add logs
-            return
-
-        # list patches in this directory
-        patches = [os.path.join(patches_dir, x) for x in
-                   os.listdir(patches_dir) if x.endswith('.patch')]
-        # apply patches
-        for patch in patches:
-            shell.apply_patch(self.build_dir, patch, logfile=get_logfile(self))
-
-
 class Git (GitCache):
     '''
     Source handler for git repositories
@@ -522,7 +474,6 @@ class SourceType (object):
 
     CUSTOM = CustomSource
     TARBALL = Tarball
-    LOCAL_TARBALL = LocalTarball
     GIT = Git
     GIT_TARBALL = GitExtractedTarball
     SVN = Svn
