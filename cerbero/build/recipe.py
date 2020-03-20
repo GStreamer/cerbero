@@ -751,7 +751,8 @@ class MetaUniversalRecipe(type):
                 ret = step_func(recipe, step_name)
                 if asyncio.iscoroutine(ret):
                     await ret
-            setattr(cls, step, doit)
+            if step_func:
+                setattr(cls, step, doit)
 
 
 class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
@@ -801,23 +802,40 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
             for o in self._recipes.values():
                 setattr(o, name, value)
 
-    async def _async_run_step(self, recipe, step, arch):
-        # Call the step function
-        stepfunc = getattr(recipe, step)
-        try:
-            await stepfunc()
-        except FatalError as e:
-            e.arch = arch
-            raise e
+    @property
+    def steps(self):
+        if self.is_empty():
+            return []
+        return self._proxy_recipe.steps[:]
 
-    def _run_step(self, recipe, step, arch):
-        # Call the step function
-        stepfunc = getattr(recipe, step)
-        try:
-            stepfunc()
-        except FatalError as e:
-            e.arch = arch
-            raise e
+    async def _do_step(self, step):
+
+        async def _async_run_step(recipe, step, arch):
+            # Call the step function
+            stepfunc = getattr(recipe, step)
+            try:
+                ret = stepfunc()
+                if asyncio.iscoroutine (ret):
+                    await ret
+            except FatalError as e:
+                e.arch = arch
+                raise e
+
+        if step == BuildSteps.FETCH[1]:
+            arch, recipe = list(self._recipes.items())[0]
+            await _async_run_step(recipe, step, arch)
+            return
+
+        tasks = []
+        for arch, recipe in self._recipes.items():
+            if step in (BuildSteps.CONFIGURE[1],) \
+               or (step == BuildSteps.EXTRACT[1] \
+                   and self.stype in (source.SourceType.TARBALL,)):
+                tasks.append(asyncio.ensure_future(_async_run_step(recipe, step, arch)))
+            else:
+                await _async_run_step(recipe, step, arch)
+        if tasks:
+            await run_tasks (tasks)
 
     def get_for_arch(self, arch, name):
         if arch:
@@ -834,37 +852,6 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
     def __init__(self, config):
         super().__init__(config)
         UniversalFilesProvider.__init__(self, config)
-
-    @property
-    def steps(self):
-        if self.is_empty():
-            return []
-        return self._proxy_recipe.steps[:]
-
-    async def _do_step(self, step):
-        if step == BuildSteps.FETCH[1]:
-            arch, recipe = list(self._recipes.items())[0]
-            stepfunc = getattr(recipe, step)
-            if asyncio.iscoroutinefunction(stepfunc):
-                await self._async_run_step(recipe, step, arch)
-            else:
-                self._run_step(recipe, step, arch)
-            return
-
-        tasks = []
-        for arch, recipe in self._recipes.items():
-            stepfunc = getattr(recipe, step)
-            if asyncio.iscoroutinefunction(stepfunc):
-                if step in (BuildSteps.CONFIGURE[1],) \
-                   or (step == BuildSteps.EXTRACT[1] \
-                       and self.stype in (source.SourceType.TARBALL,)):
-                    tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
-                else:
-                    await self._async_run_step(recipe, step, arch)
-            else:
-                self._run_step(recipe, step, arch)
-        if tasks:
-            await run_tasks (tasks)
 
 
 class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
@@ -906,32 +893,3 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
         # merge the architecture specific files
         for f, archs in arch_files.items():
             await generator.merge_files([f], [recipe.config.prefix for arch, recipe in archs])
-
-    async def _do_step(self, step):
-        if step in BuildSteps.FETCH:
-            arch, recipe = list(self._recipes.items())[0]
-            stepfunc = getattr(recipe, step)
-            if asyncio.iscoroutinefunction(stepfunc):
-                await self._async_run_step(recipe, step, arch)
-            else:
-                self._run_step(recipe, step, arch)
-            return
-
-        archs_prefix = list(self._recipes.keys())
-
-        tasks = []
-        for arch, recipe in self._recipes.items():
-            # Call the step function
-            stepfunc = getattr(recipe, step)
-            if asyncio.iscoroutinefunction(stepfunc):
-                if step in (BuildSteps.CONFIGURE[1],) \
-                   or (step == BuildSteps.EXTRACT[1] \
-                       and self.stype in (source.SourceType.TARBALL,)):
-                    tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
-                else:
-                    await self._async_run_step(recipe, step, arch)
-            else:
-                self._run_step(recipe, step, arch)
-
-        if tasks:
-            await run_tasks(tasks)
