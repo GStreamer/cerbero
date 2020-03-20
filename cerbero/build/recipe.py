@@ -844,14 +844,20 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
     async def _do_step(self, step):
         if step == BuildSteps.FETCH[1]:
             arch, recipe = list(self._recipes.items())[0]
-            await self._async_run_step(recipe, step, arch)
+            stepfunc = getattr(recipe, step)
+            if asyncio.iscoroutinefunction(stepfunc):
+                await self._async_run_step(recipe, step, arch)
+            else:
+                self._run_step(recipe, step, arch)
             return
 
         tasks = []
         for arch, recipe in self._recipes.items():
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
+                if step in (BuildSteps.CONFIGURE[1],) \
+                   or (step == BuildSteps.EXTRACT[1] \
+                       and self.stype in (source.SourceType.TARBALL,)):
                     tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
                 else:
                     await self._async_run_step(recipe, step, arch)
@@ -904,8 +910,11 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
     async def _do_step(self, step):
         if step in BuildSteps.FETCH:
             arch, recipe = list(self._recipes.items())[0]
-            # No, really, let's not download a million times...
-            await self._async_run_step(recipe, step, arch)
+            stepfunc = getattr(recipe, step)
+            if asyncio.iscoroutinefunction(stepfunc):
+                await self._async_run_step(recipe, step, arch)
+            else:
+                self._run_step(recipe, step, arch)
             return
 
         archs_prefix = list(self._recipes.keys())
@@ -915,7 +924,9 @@ class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
             # Call the step function
             stepfunc = getattr(recipe, step)
             if asyncio.iscoroutinefunction(stepfunc):
-                if step in (BuildSteps.EXTRACT[1], BuildSteps.CONFIGURE[1]):
+                if step in (BuildSteps.CONFIGURE[1],) \
+                   or (step == BuildSteps.EXTRACT[1] \
+                       and self.stype in (source.SourceType.TARBALL,)):
                     tasks.append(asyncio.ensure_future(self._async_run_step(recipe, step, arch)))
                 else:
                     await self._async_run_step(recipe, step, arch)
