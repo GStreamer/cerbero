@@ -10,7 +10,8 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/frida/proxy-libintl/archive/%(version)s.tar.gz'
     tarball_checksum = '202d90855943091b11ac91863ff5884f0eaf80318a32dc8504fcfdafc65992ed'
     patches = [name + '/0001-libintl.h-Fix-detection-with-AM_GNU_GETTEXT.patch',
-               name + '/0001-meson-Use-same-library-versioning-on-macOS-as-gettex.patch',]
+               name + '/0001-meson-Use-same-library-versioning-on-macOS-as-gettex.patch',
+               name + '/0001-Rename-symbols-for-compatibility-with-gettext.patch',]
 
     files_libs = ['libintl']
     files_devel = [
