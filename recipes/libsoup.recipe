@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'gnome://'
     tarball_checksum = '534bb08e35b0ff3702f3adfde87d3441e27c12f9f5ec351f056fe04cba02bafb'
-    meson_options = {'gnome': 'false', 'vapi': 'disabled', 'tls_check': 'false'}
+    meson_options = {'gnome': 'false', 'vapi': 'disabled', 'tls_check': 'false', 'tests' : 'false'}
     deps = ['libxml2', 'glib', 'glib-networking', 'libpsl']
 
     # sqlite ships with the system on macOS and iOS. Android also ships with
