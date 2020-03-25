@@ -53,6 +53,9 @@ class RecoveryActions(object):
 class RetryRecipeError(Exception):
     pass
 
+class SkipRecipeError(Exception):
+    pass
+
 class Oven (object):
     '''
     This oven cooks recipes with all their ingredients
@@ -295,6 +298,8 @@ class Oven (object):
                         step = await build_recipe_steps(step)
                 except RetryRecipeError:
                     step = "init"
+                except SkipRecipeError:
+                    step = None
 
                 if step is None:
                     self._cook_finish_recipe (recipe, counter.i, len(recipes))
@@ -423,7 +428,8 @@ class Oven (object):
             elif action == RecoveryActions.RETRY_STEP:
                 await self._cook_recipe_step(recipe, step, count, total)
             elif action == RecoveryActions.SKIP:
-                pass
+                # propagate up to the task manager to retry the recipe entirely
+                raise SkipRecipeError()
             elif action == RecoveryActions.ABORT:
                 raise AbortedError()
 
