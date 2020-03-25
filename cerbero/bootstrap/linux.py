@@ -23,13 +23,14 @@ from cerbero.errors import ConfigurationError
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 
+import shlex
 import subprocess
 
 class UnixBootstrapper (BootstrapperBase):
 
-    tool = ''
-    command = ''
-    yes_arg = ''
+    tool = []
+    command = []
+    yes_arg = []
     checks = []
     packages = []
     distro_packages = {}
@@ -53,9 +54,9 @@ class UnixBootstrapper (BootstrapperBase):
                 self.packages += extra_packages.get(self.config.distro_version, [])
             tool = self.tool
             if self.assume_yes:
-              tool += ' ' + self.yes_arg;
-            tool += ' ' + self.command;
-            cmd = tool % ' '.join(self.packages)
+                tool += self.yes_arg;
+            tool += self.command;
+            cmd = tool + self.packages
             m.message("Running command '%s'" % cmd)
             shell.new_call(cmd)
 
@@ -109,9 +110,9 @@ class DebianBootstrapper (UnixBootstrapper):
 
 class RedHatBootstrapper (UnixBootstrapper):
 
-    tool = 'dnf'
-    command = 'install %s'
-    yes_arg = '-y'
+    tool = ['dnf']
+    command = ['install']
+    yes_arg = ['-y']
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
                 'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'nasm',
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -130,11 +131,11 @@ class RedHatBootstrapper (UnixBootstrapper):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
 
         if self.config.distro_version < DistroVersion.FEDORA_23:
-            self.tool = 'yum'
+            self.tool = ['yum']
         elif self.config.distro_version in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
-            self.tool = 'yum'
+            self.tool = ['yum']
         elif self.config.distro_version == DistroVersion.REDHAT_8:
-            self.tool = 'yum --enablerepo=PowerTools'
+            self.tool = ['yum', '--enablerepo=PowerTools']
             # See https://bugzilla.redhat.com/show_bug.cgi?id=1757002
             self.packages.remove('docbook-utils-pdf')
 
@@ -148,15 +149,15 @@ class RedHatBootstrapper (UnixBootstrapper):
             self.packages.append('fuse-devel')
         # Use sudo to gain root access on everything except RHEL
         if self.config.distro_version == DistroVersion.REDHAT_6:
-            self.tool = 'su -c "' + self.tool + '"'
+            self.tool = ['su', '-c', shlex.join(self.tool)]
         else:
-            self.tool = 'sudo ' + self.tool
+            self.tool = ['sudo'] + self.tool
 
 class OpenSuseBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo zypper'
-    command = 'install %s'
-    yes_arg = '-y'
+    tool = ['sudo', 'zypper']
+    command = ['install']
+    yes_arg = ['-y']
     packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
             'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'nasm',
             'gtk-doc', 'curl', 'doxygen', 'texinfo',
@@ -172,9 +173,9 @@ class OpenSuseBootstrapper (UnixBootstrapper):
 
 class ArchBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo pacman'
-    command = ' -S %s --needed'
-    yes_arg = ' --noconfirm'
+    tool = ['sudo', 'pacman']
+    command = ['-S', '--needed']
+    yes_arg = ['--noconfirm']
     packages = ['intltool', 'cmake', 'doxygen', 'gtk-doc',
             'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
             'curl', 'gettext', 'alsa-lib', 'nasm', 'gperf',
@@ -198,9 +199,9 @@ class ArchBootstrapper (UnixBootstrapper):
 
 class GentooBootstrapper (UnixBootstrapper):
 
-    tool = 'sudo emerge'
-    command = '-u %s'
-    yes_arg = '' # Does not seem interactive
+    tool = ['sudo', 'emerge']
+    command = ['-u']
+    yes_arg = [] # Does not seem interactive
     packages = ['dev-util/intltool', 'sys-fs/fuse', 'dev-util/cmake',
             'app-doc/doxygen', 'dev-util/gtk-doc', 'sys-devel/libtool',
             'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
