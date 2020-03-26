@@ -18,13 +18,7 @@
 
 from cerbero import hacks
 
-try:
-    import argparse
-except ImportError as e:
-    print("Could not import argparse. Try installing it with "\
-          "'sudo easy_install argparse")
-    raise e
-
+import argparse
 import sys
 import errno
 import logging
