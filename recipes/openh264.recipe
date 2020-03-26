@@ -4,20 +4,20 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'openh264'
-    version = '2.0.0'
+    version = '2.1.0'
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
-    tarball_checksum = '73c35f80cc487560d11ecabb6d31ad828bd2f59d412f9cd726cc26bfaf4561fd'
+    tarball_checksum = '27f185d478066bad0c8837f4554cd8d69cca1d55d5f3dc6a43a8cef1fe6c005f'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
     patches = [
-                # https://github.com/cisco/openh264/commit/d4518b3f184d538c03c3c15d3b64b5a41ebfa529
-                name + "/0001-meson-build-Bump-soname-version-to-5.patch",
                 # https://github.com/cisco/openh264/pull/3247
                 name + "/0001-meson-add-support-for-android-ios-macos.patch",
                 name + "/0001-depend-on-gnustl-for-android.patch",
+                # https://github.com/cisco/openh264/pull/3256
+                name + "/0001-meson-disable-tests-automatically-it-gtest-is-not-fo.patch",
                ]
 
     def post_install(self):

@@ -1,4 +1,4 @@
-From 06a37c4b2ab6b0ba8084d574104f401c66601180 Mon Sep 17 00:00:00 2001
+From b302338291c762bfde28ba0085af59709c46ccc3 Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Tue, 10 Mar 2020 12:06:56 +1100
 Subject: [PATCH 1/2] meson: add support for android, ios, macos
@@ -74,11 +74,11 @@ index d7d15a6..7f8acb6 100644
 +  include_directories: [inc, casm_inc],
    dependencies: deps)
 diff --git a/codec/decoder/meson.build b/codec/decoder/meson.build
-index f93837e..2991df6 100644
+index e4d123c..1131022 100644
 --- a/codec/decoder/meson.build
 +++ b/codec/decoder/meson.build
-@@ -21,13 +21,27 @@ cpp_sources = [
-   'plus/src/welsDecoderExt.cpp',
+@@ -22,13 +22,27 @@ cpp_sources = [
+   'core/src/wels_decoder_thread.cpp',
  ]
  
 -asm_sources = [
@@ -231,7 +231,7 @@ index b7560e3..d38dfb1 100644
 +  include_directories: [inc, processing_inc, casm_inc],
    dependencies: deps)
 diff --git a/meson.build b/meson.build
-index 72a36a4..1afb712 100644
+index dc677ef..d6231b8 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -36,8 +36,6 @@ encoder_inc = include_directories([
@@ -337,9 +337,9 @@ index 72a36a4..1afb712 100644
  
  api_headers = []
  api_header_deps = []
-@@ -126,18 +155,21 @@ foreach t : ['', '-static']
-   pkgconf = configuration_data()
+@@ -127,18 +156,21 @@ foreach t : ['', '-static']
    pkgconf.set('prefix', join_paths(get_option('prefix')))
+   pkgconf.set('libdir', '${prefix}/@0@'.format(get_option('libdir')))
    pkgconf.set('VERSION', meson.project_version())
 +  pkglibs = cpp_lib
 +  if libm_dep.found()
@@ -366,5 +366,5 @@ index 72a36a4..1afb712 100644
      input: 'openh264.pc.in',
      output: 'openh264@0@.pc'.format(t),
 -- 
-2.25.1
+2.25.2
 
