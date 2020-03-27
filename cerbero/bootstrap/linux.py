@@ -33,7 +33,6 @@ class UnixBootstrapper (BootstrapperBase):
     yes_arg = []
     checks = []
     packages = []
-    distro_packages = {}
 
     def __init__(self, config, offline, assume_yes):
         BootstrapperBase.__init__(self, config, offline)
@@ -44,9 +43,6 @@ class UnixBootstrapper (BootstrapperBase):
             c()
 
         if self.config.distro_packages_install:
-            packages = self.packages
-            if self.config.distro_version in self.distro_packages:
-                packages += self.distro_packages[self.config.distro_version]
             extra_packages = self.config.extra_bootstrap_packages.get(
                 self.config.platform, None)
             if extra_packages:
@@ -57,7 +53,7 @@ class UnixBootstrapper (BootstrapperBase):
                 tool += self.yes_arg;
             tool += self.command;
             cmd = tool + self.packages
-            m.message("Running command '%s'" % cmd)
+            m.message("Running command '%s'" % ' '.join(cmd))
             shell.new_call(cmd)
 
 
