@@ -21,7 +21,7 @@ class Recipe(recipe.Recipe):
         dst_dir = os.path.join(self.config.prefix, 'etc', 'ssl', 'certs')
         if not os.path.exists(dst_dir):
             os.makedirs(dst_dir)
-        src_dir = os.path.join(self.config.recipes_dir, 'ca-certificates')
+        src_dir = os.path.join(self.recipe_dir(), self.name)
         for f in self.files_etc:
             fname = os.path.basename(f)
             s = os.path.join(src_dir, fname)
