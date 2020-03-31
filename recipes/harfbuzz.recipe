@@ -16,9 +16,12 @@ class Recipe(recipe.Recipe):
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
 
+    patches = ['harfbuzz/0001-build-checkout-for-gnustl-for-android.patch']
+
     def prepare(self):
         if self.config.platform != Platform.WINDOWS:
-            self.patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch']
+            self.patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch',
+                'harfbuzz/0001-build-checkout-for-gnustl-for-android.patch']
 
         if self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
