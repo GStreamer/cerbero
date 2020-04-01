@@ -15,7 +15,6 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     configure_options = '-DWITH_MP4=ON -DWITH_ASF=ON -DBUILD_SHARED_LIBS=1 -DBUILD_STATIC_LIBS=1 -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
     btype = BuildType.CMAKE
-    platform_deps = {Platform.ANDROID: ['gnustl']}
     patches = ['taglib/0001-Link-with-correct-STL-on-Android.patch',
                'taglib/0002-Build-a-static-and-non-static-version.patch',
               ]
