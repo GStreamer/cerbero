@@ -1,0 +1,51 @@
+From 05c9e7b3130fb746ffedd0f516b38c30c0e5f189 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Thu, 2 Apr 2020 15:11:06 +1100
+Subject: [PATCH] meson: run python script against the meson version of python
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Avoids using a python that may not exist in a python3 only distribution:
+
+/usr/bin/env: ‘python’: No such file or directory
+---
+ src/meson.build   | 2 +-
+ tests/meson.build | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index 50a272e..433487c 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -3,7 +3,7 @@ psl_make_dafsa = find_program('psl-make-dafsa')
+ suffixes_dafsa_h = custom_target('suffixes_dafsa.h',
+   input : psl_file,
+   output : 'suffixes_dafsa.h',
+-  command : [psl_make_dafsa, '--output-format=cxx+', '@INPUT@', '@OUTPUT@'])
++  command : [python, psl_make_dafsa, '--output-format=cxx+', '@INPUT@', '@OUTPUT@'])
+ 
+ sources = [
+   'lookup_string_in_fixed_set.c',
+diff --git a/tests/meson.build b/tests/meson.build
+index b0508a1..f37ce30 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -1,12 +1,12 @@
+ psl_dafsa = custom_target('psl.dafsa',
+   input : psl_file,
+   output : 'psl.dafsa',
+-  command : [psl_make_dafsa, '--output-format=binary', '@INPUT@', '@OUTPUT@'])
++  command : [python, psl_make_dafsa, '--output-format=binary', '@INPUT@', '@OUTPUT@'])
+ 
+ psl_ascii_dafsa = custom_target('psl_ascii.dafsa',
+   input : psl_file,
+   output : 'psl_ascii.dafsa',
+-  command : [psl_make_dafsa, '--output-format=binary', '--encoding=ascii', '@INPUT@', '@OUTPUT@'])
++  command : [python, psl_make_dafsa, '--output-format=binary', '--encoding=ascii', '@INPUT@', '@OUTPUT@'])
+ 
+ tests_cargs = [
+   '-DHAVE_CONFIG_H',
+-- 
+2.26.0
+
