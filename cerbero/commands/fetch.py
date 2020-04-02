@@ -241,19 +241,8 @@ class FetchCache(Command):
 
     async def fetch_dep(self, config, dep, namespace):
         try:
-            try:
-                # try a xz version first
-                artifacts_path = "%s/cerbero-deps.tar.xz" % config.home_dir
-                await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
-            except FatalError:
-                try:
-                    # then try bzip2
-                    artifacts_path = "%s/cerbero-deps.tar.bz2" % config.home_dir
-                    await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
-                except FatalError:
-                    # else fallback to the gzip version
-                    artifacts_path = "%s/cerbero-deps.tar.gz" % config.home_dir
-                    await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
+            artifacts_path = "%s/cerbero-deps.tar.xz" % config.home_dir
+            await shell.download(dep['url'], artifacts_path, check_cert=True, overwrite=True)
             await shell.unpack(artifacts_path, config.home_dir)
             os.remove(artifacts_path)
             origin = self.build_dir % namespace
@@ -269,7 +258,7 @@ class FetchCache(Command):
 
     def update_log(self, config, args, deps, sha):
         base_url = self.base_url % args.namespace
-        url = "%s/%s/artifacts/raw/cerbero-deps.tar.gz" % (base_url, args.job_id)
+        url = "%s/%s/artifacts/raw/cerbero-deps.tar.xz" % (base_url, args.job_id)
         deps.insert(0, {'commit': sha, 'url': url})
         deps = deps[0:self.log_size]
         with open("%s/cerbero-deps.log" % config.home_dir, 'w') as outfile:
