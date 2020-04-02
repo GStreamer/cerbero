@@ -151,7 +151,7 @@ G_IO_MODULES_LOAD            := $(foreach module, $(G_IO_MODULES), \
 # Get the full list of libraries
 # link at least to gstreamer-1.0 in case the plugins list is empty
 GSTREAMER_ANDROID_LIBS       := $(call pkg-config-get-libs,$(GSTREAMER_DEPS))
-GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) -llog -lz
+GSTREAMER_ANDROID_LIBS       += $(GSTREAMER_PLUGINS_LIBS) $(G_IO_MODULES_LIBS) $(GSTREAMER_EXTRA_LIBS) -llog -lz
 GSTREAMER_ANDROID_WHOLE_AR   := $(call pkg-config-get-libs-no-deps,$(GSTREAMER_DEPS)) $(GSTREAMER_EXTRA_LIBS)
 GSTREAMER_ANDROID_CFLAGS     := $(call pkg-config-get-includes,$(GSTREAMER_DEPS)) -I$(GSTREAMER_ROOT)/include
 
