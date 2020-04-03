@@ -106,7 +106,8 @@ class Main(object):
     def list_variants(self):
         if not self.args.list_variants:
             return
-        print('Available variants are: ' + ', '.join(self.config.variants.all()))
+        print('Available boolean variants are: ' + ', '.join(self.config.variants.bools()))
+        print('Available mapping variants are: ' + ', '.join(self.config.variants.mappings()))
         sys.exit(0)
 
     def self_update(self):

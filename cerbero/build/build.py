@@ -947,6 +947,9 @@ class Meson (Build, ModifyEnvBase) :
             '--default-library=' + self.library_type, '-Doptimization=' + opt,
             '--backend=' + self.meson_backend, '--wrap-mode=nodownload']
 
+        if self.using_msvc():
+            meson_cmd.append('-Db_vscrt=' + self.config.variants.vscrt)
+
         # Don't enable bitcode by passing flags manually, use the option
         if self.config.ios_platform == 'iPhoneOS':
             self.meson_options.update({'b_bitcode': 'true'})

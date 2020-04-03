@@ -69,42 +69,68 @@ def set_nofile_ulimit():
             print('Failed to increase file ulimit, you may see linker failures')
 
 class Variants(object):
-
+    # Variants that are booleans, and are unset when prefixed with 'no'
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio', 'qt5',
                            'intelmsdk', 'nvcodec', 'python', 'werror', 'vaapi']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
-    __all_variants = __enabled_variants + __disabled_variants
+    __bool_variants = __enabled_variants + __disabled_variants
+    # Variants that are `key: (values)`, with the first value in the tuple
+    # being the default
+    __mapping_variants = {'vscrt': ('auto', 'md', 'mdd')}
 
     def __init__(self, variants):
+        # Set default values
         for v in self.__enabled_variants:
             setattr(self, v, True)
         for v in self.__disabled_variants:
             setattr(self, v, False)
+        for v, choices in self.__mapping_variants.items():
+            setattr(self, v, choices[0])
+        # Set the configured values
         for v in variants:
-            if v.startswith('no'):
-                if v[2:] not in self.__all_variants:
-                    m.warning('Variant {} is unknown or obsolete'.format(v[2:]))
+            if '=' in v:
+                key, value = v.split('=', 1)
+                key = key.replace('-', '_')
+                if key not in self.__mapping_variants:
+                    raise AttributeError('Mapping variant {!r} is unknown'.format(key))
+                if value not in self.__mapping_variants[key]:
+                    raise AttributeError('Mapping variant {!r} value {!r} is unknown'.format(key, value))
+                setattr(self, key, value)
+            elif v.startswith('no'):
+                if v[2:] not in self.__bool_variants:
+                    m.warning('Variant {!r} is unknown or obsolete'.format(v[2:]))
                 setattr(self, v[2:], False)
             else:
-                if v not in self.__all_variants:
-                    m.warning('Variant {} is unknown or obsolete'.format(v))
+                if v not in self.__bool_variants:
+                    m.warning('Variant {!r} is unknown or obsolete'.format(v))
                 setattr(self, v, True)
+        # Set auto mapping values based on other values
+        if self.vscrt == 'auto':
+            self.vscrt = 'md'
+            if self.debug and not self.optimization:
+                self.vscrt = 'mdd'
+
+    def __setattr__(self, attr, value):
+            if '-' in attr:
+                raise AssertionError('Variant name {!r} must not contain \'-\''.format(attr))
+            super().__setattr__(attr, value)
 
     def __getattr__(self, name):
-        try:
-            if name.startswith('no'):
-                return not object.__getattribute__(self, name[2:])
-            else:
-                return object.__getattribute__(self, name)
-        except Exception:
-            raise AttributeError("%s is not a known variant" % name)
+        if name.startswith('no') and name[2:] in self.bools():
+            return not getattr(self, name[2:])
+        if name in self.bools() or name in self.mappings():
+            return getattr(self, name)
+        raise AttributeError('No such variant called {!r}'.format(name))
 
     def __repr__(self):
         return '<Variants: {}>'.format(self.__dict__)
 
-    def all(self):
-        return sorted(self.__all_variants)
+    def bools(self):
+        return sorted(self.__bool_variants)
+
+    def mappings(self):
+        return sorted(self.__mapping_variants)
 
 
 class Config (object):
