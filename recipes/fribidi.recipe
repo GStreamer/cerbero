@@ -11,8 +11,12 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '6a64f2a687f5c4f203a46fa659f43dd43d1f8b845df8d723107e8a7e6158e4ce'
     licenses = [License.LGPLv2_1Plus]
     deps = ['glib']
-    # Taken from upstream master, remove on bump
-    patches = ['fribidi/0001-Build-generator-executables-natively.patch']
+    patches = [
+        # Taken from upstream master, remove on bump
+        'fribidi/0001-Build-generator-executables-natively.patch',
+        # https://github.com/fribidi/fribidi/pull/143
+        'fribidi/0001-meson-Use-the-debug-option-directly-instead-of-build.patch',
+    ]
 
     files_libs = ['libfribidi']
     files_bins = ['fribidi']

@@ -17,6 +17,8 @@ class Recipe(recipe.Recipe):
         'libpsl/0001-Initial-import-of-meson-build-files-from-upstream.patch',
         # https://github.com/rockdaboot/libpsl/pull/148
         'libpsl/0001-meson-Use-libtool-library-versioning-same-as-autotoo.patch',
+        # https://github.com/rockdaboot/libpsl/pull/151
+        'libpsl/0001-meson-Use-the-b_vscrt-option-for-selecting-the-CRT.patch',
     ]
 
     files_libs = ['libpsl']

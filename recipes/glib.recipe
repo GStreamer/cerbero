@@ -43,6 +43,8 @@ class Recipe(recipe.Recipe):
                'glib/0001-meson-host_system-is-ios-inside-cerbero.patch',
                # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415,
                'glib/0001-meson-Don-t-use-assert-in-test-code.patch',
+               # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1433
+               'glib/0001-meson-fix-buildtype-args-and-vscrt-usage.patch',
               ]
 
     files_libs = [

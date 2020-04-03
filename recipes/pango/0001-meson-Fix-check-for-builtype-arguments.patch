@@ -1,0 +1,51 @@
+From a2e37c9cb83ff2b95184527ed594f2b9a829404e Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 3 Apr 2020 17:17:17 +0530
+Subject: [PATCH] meson: Fix check for builtype arguments
+
+`get_option('buildtype')` will return `'custom'` for most combinations
+of `-Doptimization` and `-Ddebug`, but those two will always be set
+correctly if only `-Dbuildtype` is set. So we should look at those
+options directly.
+
+For the two-way mapping between `buildtype` and `optimization`
++ `debug`, see this table:
+https://mesonbuild.com/Builtin-options.html#build-type-options
+---
+ meson.build | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index d4cff2af..e8cb1cef 100644
+--- a/meson.build
++++ b/meson.build
+@@ -172,17 +172,19 @@ foreach h: checked_headers
+   endif
+ endforeach
+ 
+-buildtype = get_option('buildtype')
+-if buildtype.startswith('debug')
+-  pango_debug_cflags = [ '-DPANGO_ENABLE_DEBUG', ]
+-elif buildtype == 'release'
+-  pango_debug_cflags = [ '-DG_DISABLE_CAST_CHECKS', ]
++# Use debug/optimization flags to determine whether to enable debug or disable
++# cast checks
++pango_debug_cflags = []
++if get_option('debug')
++  pango_debug_cflags = [ '-DPANGO_ENABLE_DEBUG' ]
++  message('Enabling various debug infrastructure')
++elif get_option('optimization') in ['2', '3', 's']
++  pango_debug_cflags = [ '-DG_DISABLE_CAST_CHECKS' ]
++  message('Disabling cast checks')
+   # TODO: We may want a configuration argument to add `G_DISABLE_CHECKS`
+   # and `G_DISABLE_ASSERT` from the build, for specific build environments.
+   # On the other hand, those who need these symbols can inject them in their
+   # build as well.
+-else
+-  pango_debug_cflags = []
+ endif
+ 
+ # Dependencies
+-- 
+2.26.0
+

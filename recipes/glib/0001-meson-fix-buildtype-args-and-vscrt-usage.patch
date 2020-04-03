@@ -1,0 +1,105 @@
+From e7cfe62e7383c332355fc71ff0f63d23c8149d60 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 5 Mar 2020 00:36:50 +0530
+Subject: [PATCH 1/2] meson: Fix check for builtype arguments
+
+`get_option('buildtype')` will return `'custom'` for most combinations
+of `-Doptimization` and `-Ddebug`, but those two will always be set
+correctly if only `-Dbuildtype` is set. So we should look at those
+options directly.
+
+For the two-way mapping between `buildtype` and `optimization`
++ `debug`, see this table:
+https://mesonbuild.com/Builtin-options.html#build-type-options
+---
+ meson.build | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 36be4ab05..ab4d487ba 100644
+--- a/meson.build
++++ b/meson.build
+@@ -214,11 +214,15 @@ glibconfig_conf.set('glib_os', glib_os)
+ # for dependencies that don't normally come with pkg-config files for Visual Studio builds
+ buildtype = get_option('buildtype')
+ 
++# Use debug/optimization flags to determine whether to enable debug or disable
++# cast checks
+ glib_debug_cflags = []
+-if buildtype.startswith('debug')
++if get_option('debug')
+   glib_debug_cflags += ['-DG_ENABLE_DEBUG']
+-elif buildtype == 'release'
++  message('Enabling various debug infrastructure')
++elif get_option('optimization') in ['2', '3', 's']
+   glib_debug_cflags += ['-DG_DISABLE_CAST_CHECKS']
++  message('Disabling cast checks')
+ endif
+ 
+ add_project_arguments(glib_debug_cflags, language: 'c')
+-- 
+2.26.0
+
+
+From b462e2c80ce77b7edc4a90b20a14c8bf1d9f5492 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 12 Mar 2020 17:42:27 +0530
+Subject: [PATCH 2/2] meson: Use the b_vscrt option for selecting the CRT
+
+This option has been available since 0.48, and we should use it
+instead of only guessing based on buildtype.
+---
+ gio/tests/meson.build |  2 +-
+ meson.build           | 16 ++++++++++++----
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/gio/tests/meson.build b/gio/tests/meson.build
+index 788cf978b..755033be8 100644
+--- a/gio/tests/meson.build
++++ b/gio/tests/meson.build
+@@ -105,7 +105,7 @@ if not dbus1_dep.found()
+     # MSVC: Search for the DBus library by the configuration, which corresponds
+     # to the output of CMake builds of DBus.  Note that debugoptimized
+     # is really a Release build with .PDB files.
+-    if buildtype == 'debug'
++    if vs_crt == 'debug'
+       dbus1_dep = cc.find_library('dbus-1d', required : false)
+     else
+       dbus1_dep = cc.find_library('dbus-1', required : false)
+diff --git a/meson.build b/meson.build
+index ab4d487ba..1e3ba4d38 100644
+--- a/meson.build
++++ b/meson.build
+@@ -210,9 +210,17 @@ else
+ endif
+ glibconfig_conf.set('glib_os', glib_os)
+ 
+-# We need to know the build type to determine what .lib files we need on Visual Studio
+-# for dependencies that don't normally come with pkg-config files for Visual Studio builds
+-buildtype = get_option('buildtype')
++# We need to know the CRT being used to determine what .lib files we need on
++# Visual Studio for dependencies that don't normally come with pkg-config files
++vs_crt = 'release'
++vs_crt_opt = get_option('b_vscrt')
++if vs_crt_opt in ['mdd', 'mtd']
++  vs_crt = 'debug'
++elif vs_crt_opt == 'from_buildtype'
++  if get_option('buildtype') == 'debug'
++    vs_crt = 'debug'
++  endif
++endif
+ 
+ # Use debug/optimization flags to determine whether to enable debug or disable
+ # cast checks
+@@ -1852,7 +1860,7 @@ else
+     # MSVC: Search for the PCRE library by the configuration, which corresponds
+     # to the output of CMake builds of PCRE.  Note that debugoptimized
+     # is really a Release build with .PDB files.
+-      if buildtype == 'debug'
++      if vs_crt == 'debug'
+         pcre = cc.find_library('pcred', required : false)
+       else
+         pcre = cc.find_library('pcre', required : false)
+-- 
+2.26.0
+
