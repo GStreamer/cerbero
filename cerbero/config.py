@@ -246,9 +246,12 @@ class Config (object):
 
             self.arch_config = arch_config
 
+        # Parse the currently-known list of variants and use it to set the last
+        # defaults
+        default_variants = Variants(self.variants)
         # Fill the defaults in the config which depend on the configuration we
         # loaded above
-        self._load_last_defaults()
+        self._load_last_defaults(default_variants)
         # Load the platform-specific (linux|windows|android|darwin).config
         self._load_platform_config()
         # And validate properties
@@ -266,7 +269,7 @@ class Config (object):
             config.set_property('qt5_pkgconfigdir', qtpkgdir)
             # We already called these functions on `self` above
             if config is not self:
-                config._load_last_defaults()
+                config._load_last_defaults(default_variants)
                 config._load_platform_config()
                 config._validate_properties()
 
@@ -695,11 +698,14 @@ class Config (object):
             if os.path.exists(config_path):
                 self._parse(config_path, reset=False)
 
-    def _load_last_defaults(self):
+    def _load_last_defaults(self, default_variants):
         target_platform = self.target_platform
         if target_platform == Platform.WINDOWS:
-            if 'visualstudio' in self.variants:
+            if default_variants.visualstudio:
                 target_platform = 'msvc'
+                # Debug CRT needs a separate prefix
+                if default_variants.vscrt == 'mdd':
+                    target_platform += '-debug'
                 # Check for invalid configuration of a custom Visual Studio path
                 if self.vs_install_path and not self.vs_install_version:
                     raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
