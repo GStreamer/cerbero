@@ -5,19 +5,13 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.53.2'
+    version = '0.54.0'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = '3e8f830f33184397c2eb0b651ec502adb63decb28978bdc84b3558d71284c21f'
+    tarball_checksum = 'dde5726d778112acbd4a67bb3633ab2ee75d33d1e879a6283a7b4a44c3363c27'
     patches = [
-        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6612
-        'meson/0001-depfixer-Cache-searching-of-install_name_tool.patch',
-        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6612
-        'meson/0001-depfixer-Ignore-more-extensions-that-cant-need.patch',
-        # Remove this on bump to 0.54, https://github.com/mesonbuild/meson/pull/6753
-        'meson/0001-build-type-option-parsing-bugs.patch',
         # Remove this on bump to 0.54.1, https://github.com/mesonbuild/meson/pull/6896
         'meson/0001-qt-dependency-Pick-debug-libraries-based-on-b_vscrt.patch',
     ]
