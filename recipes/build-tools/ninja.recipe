@@ -13,7 +13,7 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/ninja']
 
     def configure(self):
-        shell.new_call([self.config.python_exe, 'configure.py', '--bootstrap'],
+        shell.new_call([self.config.python_exe, 'configure.py', '--bootstrap', '--verbose'],
                        self.build_dir, logfile=self.logfile, env=self.env)
 
     async def install(self):
