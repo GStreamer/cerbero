@@ -31,6 +31,14 @@ from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import messages as m
 
 
+def get_optimization_from_config(config):
+    if config.variants.optimization:
+        if config.target_platform in (Platform.ANDROID, Platform.IOS):
+            return 's'
+        return '2'
+    return '0'
+
+
 class Build (object):
     '''
     Base class for build handlers
@@ -215,6 +223,18 @@ class ModifyEnvBase:
 
         for i in ('append', 'prepend', 'set', 'remove'):
             setattr(self, i + '_env', ModifyEnvFuncWrapper(self, i))
+        # Setup buildtype args; previously this was done by platform config files
+        # Except when using Meson or MSVC
+        if not isinstance(self, Meson) and not self.using_msvc():
+            self.setup_buildtype_env_ops()
+
+    def setup_buildtype_env_ops(self):
+        buildtype_args = '-Wall '
+        if self.config.variants.debug:
+            buildtype_args += '-g '
+        buildtype_args += '-O{} '.format(get_optimization_from_config(self.config))
+        for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS'):
+            self.append_env(var, buildtype_args)
 
     def setup_toolchain_env_ops(self):
         if self.config.qt5_pkgconfigdir:
@@ -916,17 +936,15 @@ class Meson (Build, ModifyEnvBase) :
             if 'werror' not in self.meson_options:
                 self.meson_options['werror'] = 'true'
 
-        if self.config.variants.debug:
-            buildtype = 'debugoptimized'
-        else:
-            buildtype = 'release'
+        debug = 'true' if self.config.variants.debug else 'false'
+        opt = get_optimization_from_config(self.config)
 
         if self.library_type == LibraryType.NONE:
             raise RuntimeException("meson recipes cannot be LibraryType.NONE")
 
         meson_cmd = [self.meson_sh, '--prefix=' + self.config.prefix,
-            '--libdir=lib' + self.config.lib_suffix,
-            '--default-library=' + self.library_type, '--buildtype=' + buildtype,
+            '--libdir=lib' + self.config.lib_suffix, '-Ddebug=' + debug,
+            '--default-library=' + self.library_type, '-Doptimization=' + opt,
             '--backend=' + self.meson_backend, '--wrap-mode=nodownload']
 
         # Don't enable bitcode by passing flags manually, use the option
