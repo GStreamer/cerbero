@@ -699,8 +699,15 @@ class Config (object):
                 self._parse(config_path, reset=False)
 
     def _load_last_defaults(self, default_variants):
+        # Set build tools defaults
+        self.set_property('build_tools_prefix',
+                os.path.join(self.home_dir, 'build-tools'))
+        self.set_property('build_tools_sources',
+                os.path.join(self.home_dir, 'sources', 'build-tools'))
+        self.set_property('build_tools_cache', 'build-tools.cache')
+        # Set target platform defaults
         target_platform = self.target_platform
-        if target_platform == Platform.WINDOWS:
+        if target_platform == Platform.WINDOWS and not self.prefix_is_build_tools():
             if default_variants.visualstudio:
                 target_platform = 'msvc'
                 # Debug CRT needs a separate prefix
@@ -725,11 +732,6 @@ class Config (object):
                 "%s_%s.cache" % (target_platform, self.target_arch))
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
-        self.set_property('build_tools_prefix',
-                os.path.join(self.home_dir, 'build-tools'))
-        self.set_property('build_tools_sources',
-                os.path.join(self.home_dir, 'sources', 'build-tools'))
-        self.set_property('build_tools_cache', 'build-tools.cache')
 
     def _find_data_dir(self):
         if self.uninstalled:
