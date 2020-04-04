@@ -87,6 +87,11 @@ class Variants(object):
             setattr(self, v, False)
         for v, choices in self.__mapping_variants.items():
             setattr(self, v, choices[0])
+        self.override(variants)
+
+    def override(self, variants):
+        if not isinstance(variants, list):
+            variants = [variants]
         # Set the configured values
         for v in variants:
             if '=' in v:
@@ -201,16 +206,15 @@ class Config (object):
         if variants_override is None:
             variants_override = []
 
+        # Initialize variants
+        self.variants = Variants(variants_override)
+
         # First load the default configuration
         self.load_defaults()
 
         # Next parse the user configuration file USER_CONFIG_FILE
         # which overrides the defaults
         self._load_user_config()
-
-        # Ensure that Cerbero config files know about these variants, and that
-        # they override the values from the user configuration file above
-        self.variants += variants_override
 
         # Next, if a config file is provided use it to override the settings
         # again (set the target, f.ex.)
@@ -231,10 +235,6 @@ class Config (object):
                 # config again in the universal config.
                 for arch, config_file in list(self.universal_archs.items()):
                     arch_config[arch] = self._copy(arch)
-                    # Allow the config to detect whether this config is
-                    # running under a universal setup and some
-                    # paths/configuration need to change
-                    arch_config[arch].variants += ['universal']
                     if config_file is not None:
                         # This works because the override config files are
                         # fairly light. Things break if they are more complex
@@ -249,12 +249,9 @@ class Config (object):
 
             self.arch_config = arch_config
 
-        # Parse the currently-known list of variants and use it to set the last
-        # defaults
-        default_variants = Variants(self.variants)
         # Fill the defaults in the config which depend on the configuration we
         # loaded above
-        self._load_last_defaults(default_variants)
+        self._load_last_defaults()
         # Load the platform-specific (linux|windows|android|darwin).config
         self._load_platform_config()
         # And validate properties
@@ -272,14 +269,12 @@ class Config (object):
             config.set_property('qt5_pkgconfigdir', qtpkgdir)
             # We already called these functions on `self` above
             if config is not self:
-                config._load_last_defaults(default_variants)
+                config._load_last_defaults()
                 config._load_platform_config()
                 config._validate_properties()
 
         # Ensure that variants continue to override all other configuration
-        self.variants += variants_override
-        # Build variants before copying any config
-        self.variants = Variants(self.variants)
+        self.variants.override(variants_override)
         if not self.prefix_is_executable() and self.variants.gi:
             m.warning(_("gobject introspection requires an executable "
                         "prefix, 'gi' variant will be removed"))
@@ -542,7 +537,7 @@ class Config (object):
         self.set_property('external_recipes', {})
         self.set_property('external_packages', {})
         self.set_property('universal_archs', None)
-        self.set_property('variants', [])
+        self.set_property('variants', None)
         self.set_property('build_tools_prefix', None)
         self.set_property('build_tools_sources', None)
         self.set_property('build_tools_cache', None)
@@ -708,7 +703,7 @@ class Config (object):
             if os.path.exists(config_path):
                 self._parse(config_path, reset=False)
 
-    def _load_last_defaults(self, default_variants):
+    def _load_last_defaults(self):
         # Set build tools defaults
         self.set_property('build_tools_prefix',
                 os.path.join(self.home_dir, 'build-tools'))
@@ -718,13 +713,13 @@ class Config (object):
         # Set target platform defaults
         target_platform = self.target_platform
         if target_platform == Platform.WINDOWS and not self.prefix_is_build_tools():
-            if default_variants.visualstudio:
-                if default_variants.uwp:
+            if self.variants.visualstudio:
+                if self.variants.uwp:
                     target_platform = 'uwp'
                 else:
                     target_platform = 'msvc'
                 # Debug CRT needs a separate prefix
-                if default_variants.vscrt == 'mdd':
+                if self.variants.vscrt == 'mdd':
                     target_platform += '-debug'
                 # Check for invalid configuration of a custom Visual Studio path
                 if self.vs_install_path and not self.vs_install_version:

@@ -6,4 +6,4 @@ target_distro = Distro.ANDROID
 target_distro_version = DistroVersion.ANDROID_JELLY_BEAN
 target_arch = Architecture.X86
 
-#variants = ['nodebug']
+#variants.override('nodebug')

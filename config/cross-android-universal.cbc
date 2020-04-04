@@ -15,5 +15,5 @@ universal_archs = {
             Architecture.X86_64: "cross-android-x86-64.cbc",
         }
 
-#variants = ['nodebug']
+#variants.override('nodebug')
 allow_parallel_build = True

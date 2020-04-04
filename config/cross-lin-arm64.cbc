@@ -4,8 +4,8 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion
 target_platform = Platform.LINUX
 target_distro = Distro.DEBIAN
 target_arch = Architecture.ARM64
-variants = ['noalsa', 'nox11', 'nopulse', 'nocdparanoia', 'nosdl',
-            'nov4l2', 'notestspackage', 'nopython']
+variants.override(['noalsa', 'nox11', 'nopulse', 'nocdparanoia', 'nosdl',
+                   'nov4l2', 'notestspackage', 'nopython'])
 
 extra_bootstrap_packages = {
     Platform.LINUX : {
