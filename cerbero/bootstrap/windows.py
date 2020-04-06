@@ -121,15 +121,13 @@ class WindowsBootstrapper(BootstrapperBase):
             os.makedirs(etc_path)
 
     def fix_mingw(self):
-        # Tar does not create correctly the mingw symlink
+        # On Windows, if the user is not allowed to create symbolic links or if
+        # the Python version is older than 3.8, tarfile creates an empty
+        # directory instead of creating a symlink. This affects the `mingw`
+        # dir which is supposed to be a symlink to `usr/x86_64-w64-mingw32`
         sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32/sysroot')
         mingwdir = os.path.join(sysroot, 'mingw')
-        # The first time the toolchain is extracted it creates a file with
-        # symlink
-        if not os.path.isdir(mingwdir):
-            os.remove(mingwdir)
-        # Otherwise we simply remove the directory and link back the sysroot
-        else:
+        if not os.path.islink(mingwdir) and os.path.isdir(mingwdir):
             shutil.rmtree(mingwdir)
         shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
         # In cross-compilation gcc does not create a prefixed cpp
