@@ -711,6 +711,10 @@ def symlink(src, dst, working_dir=None):
         os.chdir(working_dir)
     try:
         os.symlink(src, dst)
+    except FileExistsError:
+        # Explicitly raise this, since FileExistsError is a subclass of OSError
+        # and would incorrectly trigger a copy below.
+        raise
     except OSError:
         # if symlinking fails, copy instead
         if os.path.isdir(src):
