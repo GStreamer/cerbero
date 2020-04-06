@@ -1,0 +1,30 @@
+From 0c11bf19df70c6ea025bc565d97bdd79adf582b2 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 6 Apr 2020 20:18:45 +0530
+Subject: [PATCH] meson: Fix running of psl-make-dafsa on Windows
+
+`find_program()` evaluates to `python psl-make-dafsa` on Windows, so
+running it with `python` evaluates to `python python psl-make-dafsa`,
+causing this error on Windows:
+
+```
+"c:/python38/python.exe" "python" "C:/projects/repos/libpsl/src/psl-make-dafsa" "--output-format=binary" "C:/projects/repos/libpsl/list/public_suffix_list.dat" "tests/psl.dafsa"
+c:/python38/python.exe: can't open file 'python': [Errno 2] No such file or directory
+```
+---
+ src/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index 433487c..1403b6d 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1,4 +1,4 @@
+-psl_make_dafsa = find_program('psl-make-dafsa')
++psl_make_dafsa = files('psl-make-dafsa')
+ 
+ suffixes_dafsa_h = custom_target('suffixes_dafsa.h',
+   input : psl_file,
+-- 
+2.26.0.windows.1
+
