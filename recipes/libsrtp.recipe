@@ -12,7 +12,11 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
     tarball_checksum = '44fd7497bce78767e96b54a11bca520adb2ad32effd515f04bce602b60a1a50b'
     licenses = [{License.BSD_like: ['LICENSE']}]
-    patches = ['libsrtp/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch']#
+    patches = [
+        'libsrtp/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch',
+        # https://github.com/cisco/libsrtp/pull/486
+        'libsrtp/0001-Fix-building-with-gcc-10.patch',
+    ]
 
     files_libs = ['libsrtp2']
     files_devel = ['include/srtp2', 'lib/pkgconfig/libsrtp2.pc']
