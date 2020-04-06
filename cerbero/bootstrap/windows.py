@@ -103,8 +103,8 @@ class WindowsBootstrapper(BootstrapperBase):
                     "endings conversion. You can fix it running:\n"
                     "$git config core.autocrlf false")
         self.check_dirs()
-        self.fix_mingw()
         if self.platform == Platform.WINDOWS:
+            self.fix_mingw()
             self.fix_openssl_mingw_perl()
             self.fix_bin_deps()
             # FIXME: This uses the network
@@ -121,27 +121,21 @@ class WindowsBootstrapper(BootstrapperBase):
             os.makedirs(etc_path)
 
     def fix_mingw(self):
-        if self.arch == Architecture.X86:
-            try:
-                shutil.rmtree('/mingw/lib')
-            except Exception:
-                pass
-        if self.platform == Platform.WINDOWS:
-            # Tar does not create correctly the mingw symlink
-            sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32/sysroot')
-            mingwdir = os.path.join(sysroot, 'mingw')
-            # The first time the toolchain is extracted it creates a file with
-            # symlink
-            if not os.path.isdir(mingwdir):
-                os.remove(mingwdir)
-            # Otherwise we simply remove the directory and link back the sysroot
-            else:
-                shutil.rmtree(mingwdir)
-            shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
-            # In cross-compilation gcc does not create a prefixed cpp
-            cpp_exe = os.path.join(self.prefix, 'bin', 'cpp.exe')
-            host_cpp_exe = os.path.join(self.prefix, 'bin', 'x86_64-w64-mingw32-cpp.exe')
-            shutil.copyfile(cpp_exe, host_cpp_exe)
+        # Tar does not create correctly the mingw symlink
+        sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32/sysroot')
+        mingwdir = os.path.join(sysroot, 'mingw')
+        # The first time the toolchain is extracted it creates a file with
+        # symlink
+        if not os.path.isdir(mingwdir):
+            os.remove(mingwdir)
+        # Otherwise we simply remove the directory and link back the sysroot
+        else:
+            shutil.rmtree(mingwdir)
+        shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
+        # In cross-compilation gcc does not create a prefixed cpp
+        cpp_exe = os.path.join(self.prefix, 'bin', 'cpp.exe')
+        host_cpp_exe = os.path.join(self.prefix, 'bin', 'x86_64-w64-mingw32-cpp.exe')
+        shutil.copyfile(cpp_exe, host_cpp_exe)
 
     def fix_openssl_mingw_perl(self):
         '''
