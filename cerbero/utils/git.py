@@ -133,6 +133,8 @@ async def fetch(git_dir, fail=True, logfile=None):
     if ret != 0:
         return ret
     cmd.append('--tags')
+    # To avoid "would clobber existing tag" error
+    cmd.append('-f')
     return await shell.async_call(cmd, cmd_dir=git_dir, fail=fail, logfile=logfile, cpu_bound=False)
 
 async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, logfile=None):
