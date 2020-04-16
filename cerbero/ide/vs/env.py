@@ -39,6 +39,7 @@ VCVARSALLS = {
             r'Microsoft Visual Studio\2017\Community',
             r'Microsoft Visual Studio\2017\Professional',
             r'Microsoft Visual Studio\2017\Enterprise',
+            r'Microsoft Visual Studio\2017\BuildTools',
             r'Microsoft Visual Studio\2017\Preview',
         ),
         r'VC\Auxiliary\Build\vcvarsall.bat'
