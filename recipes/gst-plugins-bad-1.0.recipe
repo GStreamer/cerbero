@@ -445,16 +445,6 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
-        if self.using_msvc():
-            # plugin is C++, library is Autotools
-            self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
-            # Plugin is C++ and hence webrtc-audio-processing must also be
-            # built with MSVC, it uses Meson but it doesn't build:
-            # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
-            self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
-            # librsvg pulls in gdk-pixbuf, which must be built with MSVC
-            self.disable_plugin('rsvg', 'codecs', dep='librsvg')
-
         # Enable hardware codecs if variants are enabled
         self.enable_plugin('nvcodec', 'codecs', 'nvcodec', option='nvcodec')
         self.enable_plugin('msdk', 'codecs', 'intelmsdk', option='msdk')
@@ -466,6 +456,17 @@ class Recipe(custom.GStreamer):
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
+            if self.using_msvc():
+                # plugin is C++, library is Autotools
+                self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
+                # Plugin is C++ and hence webrtc-audio-processing must also be
+                # built with MSVC, it uses Meson but it doesn't build:
+                # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
+                self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
+                # librsvg pulls in gdk-pixbuf, which must be built with MSVC
+                self.disable_plugin('rsvg', 'codecs', dep='librsvg')
+                if self.config.msvc_version == 'vs14':
+                    self.disable_plugin('d3d11', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
