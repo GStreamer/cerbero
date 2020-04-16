@@ -15,6 +15,8 @@ class Recipe(recipe.Recipe):
     tarball_dirname= 'x264-snapshot-%(version)s-stable'
     tarball_checksum = 'b2495c8f2930167d470994b1ce02b0f4bfb24b3317ba36ba7f112e9809264160'
 
+    patches = ['x264/0001-configure-Force-pkgconfig-file-to-have-relative-valu.patch']
+
     files_libs = ['libx264']
     files_bins = ['x264']
     files_devel = ['lib/pkgconfig/x264.pc', 'include/x264.h',
