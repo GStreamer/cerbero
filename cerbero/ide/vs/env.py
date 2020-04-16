@@ -82,6 +82,9 @@ def _get_custom_vs_install(vs_version, vs_install_path):
         raise FatalError('Can\'t find vcvarsall.bat inside vs_install_path {!r}'.format(path))
     return path.as_posix(), vs_version
 
+def _sort_vs_installs(installs):
+    return sorted(installs, reverse=True, key=lambda x: x['installationVersion'])
+
 def _get_vswhere_vs_install(vswhere, vs_versions):
     import json
     vswhere_exe = str(vswhere)
@@ -90,8 +93,8 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
     # oldest, and including preview releases.
     # Will not include BuildTools installations.
     out = check_output([vswhere_exe, '-legacy', '-prerelease', '-format',
-                        'json', '-utf8', '-sort'])
-    installs = json.loads(out)
+                        'json', '-utf8'])
+    installs = _sort_vs_installs(json.loads(out))
     program_files = get_program_files_dir()
     for install in installs:
         version = install['installationVersion']
@@ -132,7 +135,7 @@ def get_vcvarsall(vs_version, vs_install_path):
     # - Visual Studio 2015 (can be found by vswhere -legacy)
     # - Visual Studio 2019 Build Tools (cannot be found by vswhere)
     vswhere = program_files / 'Microsoft Visual Studio' / 'Installer' / 'vswhere.exe'
-    if vswhere.is_file():
+    if vswhere.is_file() and False:
         return _get_vswhere_vs_install(vswhere, vs_versions)
     # Look in the default locations if vswhere.exe is not available.
     for vs_version in vs_versions:
