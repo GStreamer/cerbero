@@ -24,6 +24,7 @@ from functools import lru_cache
 from cerbero.enums import Architecture
 from cerbero.errors import FatalError
 from cerbero.utils.shell import check_output
+from cerbero.utils import messages as m
 
 # We only support Visual Studio 2015 as of now
 VCVARSALLS = {
@@ -107,8 +108,9 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
         # Find the location of the Visual Studio installation
         if path.is_file():
             return path.as_posix(), vs_version
-    raise FatalError('vswhere.exe could not find Visual Studio installation(s). '
-                     'Looked for version(s): ' + ', '.join(vs_versions))
+    m.warning('vswhere.exe could not find Visual Studio version(s) {}. Falling '
+              'back to manual searching...' .format(', '.join(vs_versions)))
+    return None
 
 def get_vcvarsall(vs_version, vs_install_path):
     known_vs_versions = sorted(VCVARSALLS.keys(), reverse=True)
@@ -135,8 +137,10 @@ def get_vcvarsall(vs_version, vs_install_path):
     # - Visual Studio 2015 (can be found by vswhere -legacy)
     # - Visual Studio 2019 Build Tools (cannot be found by vswhere)
     vswhere = program_files / 'Microsoft Visual Studio' / 'Installer' / 'vswhere.exe'
-    if vswhere.is_file() and False:
-        return _get_vswhere_vs_install(vswhere, vs_versions)
+    if vswhere.is_file():
+        ret = _get_vswhere_vs_install(vswhere, vs_versions)
+        if ret is not None:
+            return ret
     # Look in the default locations if vswhere.exe is not available.
     for vs_version in vs_versions:
         prefixes, suffix = VCVARSALLS[vs_version]
@@ -146,7 +150,7 @@ def get_vcvarsall(vs_version, vs_install_path):
             if path.is_file():
                 return path.as_posix(), vs_version
     raise FatalError('Microsoft Visual Studio not found. If you installed it, '
-                     'please file a bug. We looked for: ' + ', '.join(versions))
+                     'please file a bug. We looked for: ' + ', '.join(vs_versions))
 
 def append_path(var, path, sep=';'):
     if var and not var.endswith(sep):
