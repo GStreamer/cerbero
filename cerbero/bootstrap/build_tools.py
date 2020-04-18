@@ -86,6 +86,8 @@ class BuildTools (BootstrapperBase, Fetch):
         config.external_recipes = self.config.external_recipes
         config.extra_mirrors = self.config.extra_mirrors
         config.cached_sources = self.config.cached_sources
+        config.vs_install_path = self.config.vs_install_path
+        config.vs_install_version = self.config.vs_install_version
 
         if config.toolchain_prefix and not os.path.exists(config.toolchain_prefix):
             os.makedirs(config.toolchain_prefix)
