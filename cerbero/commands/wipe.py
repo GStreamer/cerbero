@@ -52,7 +52,8 @@ class Wipe(Command):
         if args.build_tools:
             to_remove.append(os.path.join(config.home_dir, config.build_tools_cache))
             to_remove.append(config.build_tools_prefix)
-            to_remove.append(config.build_tools_sources)
+            if not args.keep_sources:
+                to_remove.append(config.build_tools_sources)
 
         if args.force:
             self.wipe(to_remove)
