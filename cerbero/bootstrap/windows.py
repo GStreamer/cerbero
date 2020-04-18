@@ -100,8 +100,8 @@ class WindowsBootstrapper(BootstrapperBase):
     def start(self, jobs=0):
         if not git.check_line_endings(self.config.platform):
             raise ConfigurationError("git is configured to use automatic line "
-                    "endings conversion. You can fix it running:\n"
-                    "$git config core.autocrlf false")
+                    "endings conversion. Please change that by running:\n"
+                    "`git config --global core.autocrlf false` inside the MSYS shell")
         self.check_dirs()
         if self.platform == Platform.WINDOWS:
             self.fix_mingw()
