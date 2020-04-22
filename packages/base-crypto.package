@@ -10,19 +10,15 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'b3a6046d-5a39-4d54-93ee-3770d2f316f5'
     deps = ['base-system-1.0']
 
-    # On macOS and Windows people use the runtime package in deployments, and
-    # ca-certs will be picked up from there.
-    platform_files = {
-        Platform.DARWIN: ['ca-certificates:etc'],
-        Platform.WINDOWS: ['ca-certificates:etc'],
-    }
-    # On iOS and Android people copy the ca-certs from the devel package into
-    # their app's asset
-    platform_files_devel = {
-        Platform.ANDROID: ['ca-certificates:etc'],
-        Platform.IOS: ['ca-certificates:etc'],
-    }
-
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.files += ['openssl:libs']
+            # On macOS, Windows, and Linux, people use the runtime package in
+            # deployments and ca-certs will be picked up from there. On iOS
+            # and Android people copy the ca-certs from the devel package into
+            # their app's asset
+            if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+                platform_files = self.platform_files_devel
+            else:
+                platform_files = self.platform_files
+            platform_files[self.config.target_platform] = ['ca-certificates:etc']
