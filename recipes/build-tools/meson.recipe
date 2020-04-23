@@ -16,6 +16,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-qt-dependency-Pick-debug-libraries-based-on-b_vscrt.patch',
         # https://github.com/mesonbuild/meson/pull/7138
         'meson/0001-ui-qt-use-new-directory-layout-for-qt-on-android.patch',
+        # https://github.com/mesonbuild/meson/pull/7021
+        'meson/0001-meson-Allow-cross-compile-without-a-native-compiler.patch',
     ]
 
     deps = ['ninja']
