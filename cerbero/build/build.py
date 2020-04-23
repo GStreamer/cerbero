@@ -229,6 +229,14 @@ class ModifyEnvBase:
         if self._old_env:
             raise RuntimeError('Do not modify the env inside @modify_environment, it will have no effect')
 
+    @modify_environment
+    def get_recipe_env(self):
+        '''
+        Used in oven.py to start a shell prompt with the correct env on recipe
+        build failure
+        '''
+        return self.env.copy()
+
     def _save_env_var(self, var):
         # Will only store the first 'save'.
         if var not in self._old_env:

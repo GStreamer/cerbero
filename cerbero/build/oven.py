@@ -414,7 +414,7 @@ class Oven (object):
             msg += _("Select an action to proceed:")
             action = shell.prompt_multiple(msg, RecoveryActions())
             if action == RecoveryActions.SHELL:
-                environ = recipe.config.env.copy()
+                environ = recipe.get_recipe_env()
                 if recipe.use_system_libs:
                     add_system_libs(recipe.config, environ, environ)
                 shell.enter_build_environment(self.config.target_platform,
