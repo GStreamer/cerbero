@@ -84,3 +84,5 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
         if self.config.target_platform == Platform.IOS:
             self.resources_postinstall = 'post_install_ios'
             #self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']
+        if self.config.variants.python and self.config.variants.gi:
+            self.packages += [('gstreamer-1.0-python', False, True)]

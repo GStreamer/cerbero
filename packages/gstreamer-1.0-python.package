@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Package(custom.GStreamer, package.Package):
+    name = 'gstreamer-1.0-python'
+    shortdesc = 'GStreamer 1.0 Python bindings'
+    longdesc = 'GStreamer 1.0 Python bindings'
+    uuid = 'fde33a12-887c-48b5-ae65-52f7379ba863'
+    deps = ['gstreamer-1.0-core']
+
+    files = [
+        'gobject-introspection:python',
+        'gst-python-1.0:python:plugins:libs',
+        'pycairo:python:libs',
+        'pygobject:python:libs',
+        'json-glib:typelibs',
+        'harfbuzz:typelibs',
+        'pango:typelibs',
+        'libsoup:typelibs',
+        'gdk-pixbuf:typelibs',
+    ]
+
+    def prepare(self):
+        self.shortdesc += f" (Python {self.config.get_python_version()})"
+        self.longdesc += f" (Python {self.config.get_python_version()})"
