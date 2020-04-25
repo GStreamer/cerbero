@@ -1,0 +1,43 @@
+From d644364cd0d7d69959e44a958499052b24acbed7 Mon Sep 17 00:00:00 2001
+From: Michael Catanzaro <mcatanzaro@gnome.org>
+Date: Tue, 7 Apr 2020 15:24:54 -0500
+Subject: [PATCH] Bump ABI to version 6
+
+bbcc2cb changed the size of SBufferInfo, so we need to bump from ABI
+version 5 to version 6.
+
+Fixes #3264
+---
+ Makefile    | 2 +-
+ meson.build | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index bf398d79..5a1666b2 100644
+--- a/Makefile
++++ b/Makefile
+@@ -35,7 +35,7 @@ CCASFLAGS=$(CFLAGS)
+ STATIC_LDFLAGS=-lstdc++
+ STRIP ?= strip
+ 
+-SHAREDLIB_MAJORVERSION=5
++SHAREDLIB_MAJORVERSION=6
+ FULL_VERSION := 2.1.0
+ 
+ ifeq (,$(wildcard $(SRC_PATH)gmp-api))
+diff --git a/meson.build b/meson.build
+index dc677ef2..4cd3baa2 100644
+--- a/meson.build
++++ b/meson.build
+@@ -4,7 +4,7 @@ project('openh264', ['c', 'cpp'],
+   default_options : [ 'warning_level=1',
+                       'buildtype=debugoptimized' ])
+ 
+-major_version = '5'
++major_version = '6'
+ 
+ cpp = meson.get_compiler('cpp')
+ 
+-- 
+2.26.1.windows.1
+
