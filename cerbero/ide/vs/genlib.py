@@ -33,7 +33,7 @@ class GenLib(object):
     using 'gendef' to create a .def file and then libtool to create the import
     library (.lib)
     '''
-
+    warned_dlltool = False
     filename = 'unknown'
 
     def __init__(self, config, logfile):
@@ -104,9 +104,11 @@ class GenLib(object):
             cmd = [lib_path, '/DEF:' + defname, '/OUT:' + self.filename, '/MACHINE:' + arch]
             shell.new_call(cmd, outputdir, logfile=self.logfile, env=env)
         else:
-            m.warning("Using dlltool instead of lib.exe! Resulting .lib files"
-                " will have problems with Visual Studio, see "
-                " http://sourceware.org/bugzilla/show_bug.cgi?id=12633")
+            if not GenLib.warned_dlltool:
+                m.warning("Using dlltool instead of lib.exe! All generated .lib "
+                          "files will have problems with Visual Studio, see "
+                          "http://sourceware.org/bugzilla/show_bug.cgi?id=12633")
+                GenLib.warned_dlltool = True
             self.dlltool(defname, dllname, outputdir)
         return os.path.join(outputdir, self.filename)
 
