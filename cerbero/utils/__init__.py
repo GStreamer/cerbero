@@ -659,3 +659,24 @@ async def run_tasks(tasks, done_async=None):
     except Exception:
         await shutdown()
         raise
+
+
+class EnvVar:
+    @staticmethod
+    def is_path(var):
+        return var in ('LD_LIBRARY_PATH', 'PATH', 'MANPATH', 'INFOPATH',
+                'PKG_CONFIG_PATH', 'PKG_CONFIG_LIBDIR', 'GI_TYPELIB_PATH',
+                'XDG_DATA_DIRS', 'XDG_CONFIG_DIRS', 'GST_PLUGIN_PATH',
+                'GST_PLUGIN_PATH_1_0', 'PYTHONPATH', 'MONO_PATH', 'LIB',
+                'INCLUDE', 'PATHEXT')
+
+    @staticmethod
+    def is_arg(var):
+        return var in ('CFLAGS', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS',
+                'OBJCFLAGS', 'OBJCXXFLAGS', 'CCASFLAGS')
+
+    @staticmethod
+    def is_cmd(var):
+        return var in ('AR', 'AS', 'CC', 'CPP', 'CXX', 'DLLTOOL', 'GENDEF',
+                'LD', 'NM', 'OBJC', 'OBJCOPY', 'OBJCXX', 'PERL', 'PYTHON',
+                'RANLIB', 'RC', 'STRIP', 'WIDNRES')

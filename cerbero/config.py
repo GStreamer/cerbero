@@ -28,6 +28,7 @@ from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
+from cerbero.utils import EnvVar
 from cerbero.utils import messages as m
 from cerbero.ide.vs.env import get_vs_year_version
 
@@ -188,15 +189,6 @@ class Config (object):
         c.target_arch = arch
         return c
 
-    def _is_env_multipath_key(self, key):
-        return key in ('LD_LIBRARY_PATH', 'PATH', 'MANPATH', 'INFOPATH',
-            'PKG_CONFIG_PATH', 'PKG_CONFIG_LIBDIR', 'GI_TYPELIB_PATH',
-             'XDG_DATA_DIRS', 'XDG_CONFIG_DIRS', 'GST_PLUGIN_PATH',
-             'GST_PLUGIN_PATH_1_0', 'PYTHONPATH', 'MONO_PATH')
-
-    def _is_env_multivalue_key(self, key):
-        return key in ('CFLAGS', 'CXXFLAGS', 'LDFLAGS', 'OBJCFLAGS', 'OBJCXXFLAGS')
-
     def can_use_msvc(self):
         if self.variants.visualstudio and self.msvc_version is not None:
             return True
@@ -345,10 +337,12 @@ class Config (object):
             old_v = old_env[k]
             if new_v == old_v:
                 ret_env[k] = new_v
-            elif self._is_env_multipath_key(k):
+            elif EnvVar.is_path(k):
                 ret_env[k] = self._join_path(new_v, old_v)
-            elif self._is_env_multivalue_key(k):
+            elif EnvVar.is_arg(k):
                 ret_env[k] = self._join_values(new_v, old_v)
+            elif EnvVar.is_cmd(k):
+                ret_env[k] = new_v
             else:
                 raise FatalError("Don't know how to combine the environment "
                     "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v))
