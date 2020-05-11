@@ -39,61 +39,6 @@ def get_optimization_from_config(config):
     return '0'
 
 
-class Build (object):
-    '''
-    Base class for build handlers
-
-    @ivar recipe: the parent recipe
-    @type recipe: L{cerbero.recipe.Recipe}
-    @ivar config: cerbero's configuration
-    @type config: L{cerbero.config.Config}
-    '''
-
-    library_type = LibraryType.BOTH
-    # Whether this recipe's build system can be built with MSVC
-    can_msvc = False
-
-    def __init__(self):
-        self._properties_keys = []
-
-    def get_env(self, var, default=None):
-        if var in self.env:
-            return self.env[var]
-
-        return default
-
-    def using_msvc(self):
-        if not self.can_msvc:
-            return False
-        if not self.config.variants.visualstudio:
-            return False
-        return True
-
-    async def configure(self):
-        '''
-        Configures the module
-        '''
-        raise NotImplemented("'configure' must be implemented by subclasses")
-
-    async def compile(self):
-        '''
-        Compiles the module
-        '''
-        raise NotImplemented("'make' must be implemented by subclasses")
-
-    async def install(self):
-        '''
-        Installs the module
-        '''
-        raise NotImplemented("'install' must be implemented by subclasses")
-
-    def check(self):
-        '''
-        Runs any checks on the module
-        '''
-        pass
-
-
 def modify_environment(func):
     '''
     Decorator to modify the build environment
@@ -284,21 +229,7 @@ class ModifyEnvBase:
         if self._old_env:
             raise RuntimeError('Do not modify the env inside @modify_environment, it will have no effect')
 
-    def get_env(self, var, default=None):
-        if not self._old_env:
-            return super(self).get_env(var, default)
-
-        env = self.env.copy()
-
-        for env_op in self._new_env:
-            env_op.execute(env)
-
-        if var in env:
-            return env[var]
-
-        return default
-
-    def _save_env_var (self, var):
+    def _save_env_var(self, var):
         # Will only store the first 'save'.
         if var not in self._old_env:
             if var in self.env:
@@ -356,6 +287,61 @@ class ModifyEnvBase:
                 del new_env['PKG_CONFIG_PATH']
         for var, val in new_env.items():
             self.set_env(var, val, when='now-with-restore')
+
+
+class Build(object):
+    '''
+    Base class for build handlers
+
+    @ivar recipe: the parent recipe
+    @type recipe: L{cerbero.recipe.Recipe}
+    @ivar config: cerbero's configuration
+    @type config: L{cerbero.config.Config}
+    '''
+
+    library_type = LibraryType.BOTH
+    # Whether this recipe's build system can be built with MSVC
+    can_msvc = False
+
+    def __init__(self):
+        self._properties_keys = []
+
+    @modify_environment
+    def get_env(self, var, default=None):
+        if var in self.env:
+            return self.env[var]
+        return default
+
+    def using_msvc(self):
+        if not self.can_msvc:
+            return False
+        if not self.config.variants.visualstudio:
+            return False
+        return True
+
+    async def configure(self):
+        '''
+        Configures the module
+        '''
+        raise NotImplemented("'configure' must be implemented by subclasses")
+
+    async def compile(self):
+        '''
+        Compiles the module
+        '''
+        raise NotImplemented("'make' must be implemented by subclasses")
+
+    async def install(self):
+        '''
+        Installs the module
+        '''
+        raise NotImplemented("'install' must be implemented by subclasses")
+
+    def check(self):
+        '''
+        Runs any checks on the module
+        '''
+        pass
 
 
 class CustomBuild(Build, ModifyEnvBase):
