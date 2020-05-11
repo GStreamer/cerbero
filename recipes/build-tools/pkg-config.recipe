@@ -8,11 +8,15 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://pkgconfig.freedesktop.org/releases/pkg-config-%(version)s.tar.gz'
     tarball_checksum = '6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591'
-    configure_options = '--with-internal-glib --disable-host-tool --enable-define-prefix '
+    configure_options = '--with-internal-glib --disable-host-tool '
     override_libtool = False
 
     files_bins = ['pkg-config']
     files_share = ['share/aclocal/pkg.m4']
 
     def prepare(self):
+        # --define-prefix is too unreliable on Debian-like distros that have
+        # pkgconfig in /usr/lib/x86_64-linux-gnu etc. instead of in /usr/lib
+        if self.config.platform != Platform.LINUX:
+            self.configure_options += '--enable-define-prefix '
         self.append_env('CFLAGS', '-Wno-error=format-nonliteral')
