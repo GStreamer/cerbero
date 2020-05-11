@@ -206,8 +206,9 @@ class ModifyEnvBase:
                                       self.config.mingw_env_for_build_system.items())
         # Set the toolchain environment
         for var, val in toolchain_env:
-            # We prepend PATH and replace the rest
-            if var == 'PATH':
+            # PATH and LDFLAGS are already set in self.env by config.py, so we
+            # need to prepend those.
+            if var in ('PATH', 'LDFLAGS'):
                 self.prepend_env(var, val.get(), sep=val.sep)
             else:
                 self.set_env(var, val.get(), sep=val.sep)
