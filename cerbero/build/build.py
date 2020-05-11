@@ -173,10 +173,6 @@ class ModifyEnvBase:
 
         for i in ('append', 'prepend', 'set', 'remove'):
             setattr(self, i + '_env', ModifyEnvFuncWrapper(self, i))
-        # Setup buildtype args; previously this was done by platform config files
-        # Except when using Meson or MSVC
-        if not isinstance(self, Meson) and not self.using_msvc():
-            self.setup_buildtype_env_ops()
 
     def setup_buildtype_env_ops(self):
         buildtype_args = '-Wall '
@@ -395,6 +391,8 @@ class MakefilesBase (Build, ModifyEnvBase):
         ModifyEnvBase.__init__(self)
 
         self.setup_toolchain_env_ops()
+        if not self.using_msvc():
+            self.setup_buildtype_env_ops()
 
         self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
                                                            self.srcdir))
