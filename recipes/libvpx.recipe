@@ -77,6 +77,10 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv6'
         elif self.config.target_platform == Platform.WINDOWS:
+            # XXX: If we set CC when using msvc, libvpx runs configure checks that
+            # fail while linking. If we unset it, it's correctly auto-detected.
+            if self.using_msvc():
+                self.set_env('CC')
             if self.config.target_arch == Architecture.X86_64:
                 platform = 'win64'
                 if not self.using_msvc():
