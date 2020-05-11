@@ -10,6 +10,10 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/fribidi/fribidi/releases/download/v%(version)s/fribidi-%(version)s.tar.bz2'
     tarball_checksum = '6a64f2a687f5c4f203a46fa659f43dd43d1f8b845df8d723107e8a7e6158e4ce'
     licenses = [License.LGPLv2_1Plus]
+
+    # gen.tab/gen-unicode-version needs to be built and run during compilation
+    meson_needs_build_machine_compiler = True
+
     deps = ['glib']
     patches = [
         # Taken from upstream master, remove on bump

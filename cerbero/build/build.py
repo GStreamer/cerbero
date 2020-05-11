@@ -710,6 +710,8 @@ class Meson (Build, ModifyEnvBase) :
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
+    # Build files require a build machine compiler when cross-compiling
+    meson_needs_build_machine_compiler = False
     meson_builddir = "_builddir"
 
     def __init__(self):
@@ -916,6 +918,48 @@ class Meson (Build, ModifyEnvBase) :
                 extra_properties=extra_properties)
         return contents
 
+    def _get_meson_native_file_contents(self):
+        '''
+        Get a toolchain configuration that points to the build machine's
+        toolchain. On Windows, this is the MinGW toolchain that we ship. On
+        Linux and macOS, this is the system-wide compiler.
+        '''
+        false = ['false']
+        if self.config.platform == Platform.WINDOWS:
+            cc = self.config.mingw_env_for_build_system['CC']
+            cxx = self.config.mingw_env_for_build_system['CXX']
+            ar = self.config.mingw_env_for_build_system['AR']
+            objc = cc
+            objcxx = cxx
+        elif self.config.platform == Platform.DARWIN:
+            cc = ['clang']
+            cxx = ['clang++']
+            ar = ['ar']
+            objc = cc
+            objcxx = cxx
+        else:
+            cc = ['cc']
+            cxx = ['c++']
+            ar = ['ar']
+            objc = false
+            objcxx = false
+        # We do not use cmake dependency files, speed up the build by disabling it
+        extra_binaries = 'cmake = {}'.format(str(false))
+        contents = MESON_FILE_TPL.format(
+                system=self.config.platform,
+                cpu=self.config.arch,
+                cpu_family=self.config.arch,
+                endian='little',
+                CC=cc,
+                CXX=cxx,
+                OBJC=objc,
+                OBJCXX=objcxx,
+                AR=ar,
+                PKG_CONFIG=false,
+                extra_binaries=extra_binaries,
+                extra_properties='')
+        return contents
+
     def _get_meson_dummy_file_contents(self):
         '''
         Get a toolchain configuration that points to `false` for everything.
@@ -1002,7 +1046,10 @@ class Meson (Build, ModifyEnvBase) :
         # Else, write contents to a native file.
         if self.config.cross_compiling():
             meson_cmd += ['--cross-file', self._write_meson_file(contents, 'meson-cross-file.txt')]
-            contents = self._get_meson_dummy_file_contents()
+            if self.meson_needs_build_machine_compiler:
+                contents = self._get_meson_native_file_contents()
+            else:
+                contents = self._get_meson_dummy_file_contents()
         meson_cmd += ['--native-file', self._write_meson_file(contents, 'meson-native-file.txt')]
 
         if 'default_library' in self.meson_options:
