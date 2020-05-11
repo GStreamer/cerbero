@@ -1,7 +1,7 @@
 From 697e809e646f59b6c1a70231e74553dd1ce18b72 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 28 Mar 2016 20:34:48 +0530
-Subject: [PATCH 01/21] Port to the Meson build system
+Subject: [PATCH 01/32] Port to the Meson build system
 
 Also fixes some inconsistency between usage of #ifdef and #if inside C macros
 Include support for universal builds and multilib builds via suffixed
@@ -768,13 +768,13 @@ index 0000000..de53c42
 +  soversion : '6',
 +  install : true)
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From edaa2f7f5726efa2efe33335493e81e6715d7a82 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 16 Apr 2016 02:57:14 +0530
-Subject: [PATCH 02/21] Export all public function symbols when building on
+Subject: [PATCH 02/32] Export all public function symbols when building on
  MSVC
 
 ---
@@ -986,13 +986,13 @@ index d5bb2e8..f137bc4 100644
  
  # NOTE: host = "cross" or "target"
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From faa2744c7f05a742dd972d38564d89a74cb8a802 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 27 Feb 2017 17:42:55 +0530
-Subject: [PATCH 03/21] Rebase against latest master, and fix MSVC support
+Subject: [PATCH 03/32] Rebase against latest master, and fix MSVC support
 
 * Reinstate win32 MSVC support from the last-known-good commit:
   20562ac0427c3578250d04c6e34fb0127d4551cf
@@ -2761,13 +2761,13 @@ index 0000000..4d20de4
 +_TEXT ENDS
 +END
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From a8d87e3694f65c03afc80048f8a76ea9405553a9 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 28 Feb 2017 03:09:47 +0530
-Subject: [PATCH 04/21] meson: Use add_project_arguments for global args
+Subject: [PATCH 04/32] meson: Use add_project_arguments for global args
 
 Allows use as a subproject
 ---
@@ -2788,13 +2788,13 @@ index f137bc4..5eaae56 100644
  ffi_conf = configuration_data()
  
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 8394da157611b992fe6f666b324fb56b92deed27 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 28 Feb 2017 03:18:59 +0530
-Subject: [PATCH 05/21] meson: Declare a dependency for ffi_lib
+Subject: [PATCH 05/32] meson: Declare a dependency for ffi_lib
 
 Allows usage of the library via subprojects
 ---
@@ -2813,13 +2813,13 @@ index b747948..bebd3e6 100644
 +ffi_dep = declare_dependency(link_with : ffi_lib,
 +  include_directories : ffiinc)
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 28c32ffe5944ec06778c93ab815e82b198a67a50 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 1 Mar 2017 12:45:54 +0530
-Subject: [PATCH 06/21] meson: Fix include paths when used as a subproject
+Subject: [PATCH 06/32] meson: Fix include paths when used as a subproject
 
 We can't just blindly assume that everything will be relative to the
 build root. Must use paths relative to the current source/build dir.
@@ -2853,13 +2853,13 @@ index bebd3e6..9a9feba 100644
          input : preproc,
          output : obj_name,
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From ef501d66033d3d7e83cbb6e0f7c4c90a0d9b69b8 Mon Sep 17 00:00:00 2001
 From: Ignacio Casal Quinteiro <qignacio@amazon.com>
 Date: Sat, 30 Dec 2017 06:57:44 +0530
-Subject: [PATCH 07/21] Use C89 declarations for x86 MSVC code
+Subject: [PATCH 07/32] Use C89 declarations for x86 MSVC code
 
 Fixes building with VS2013 which only supports C89.
 
@@ -2903,13 +2903,13 @@ index 006c95d..939642f 100644
  #ifdef X86_WIN64
        if (z > FFI_SIZEOF_ARG
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 86cdeb020ef91331ecd22a03f5f9fe325945a721 Mon Sep 17 00:00:00 2001
 From: Mathieu Duponchelle <mathieu@centricular.com>
 Date: Thu, 15 Mar 2018 19:08:30 +0100
-Subject: [PATCH 08/21] ffiold_msvc.c: ALIGN was renamed to FFI_ALIGN
+Subject: [PATCH 08/32] ffiold_msvc.c: ALIGN was renamed to FFI_ALIGN
 
 ---
  src/x86/ffiold-msvc.c | 10 +++++-----
@@ -2958,13 +2958,13 @@ index 939642f..fa8ef5d 100644
        z = (*p_arg)->size;
  
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 53291b332b1bc061a3409d3b60c38f313609b98e Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Fri, 16 Mar 2018 15:10:04 +1100
-Subject: [PATCH 09/21] x86/win64: disable runtime stack frame checks with msvc
+Subject: [PATCH 09/32] x86/win64: disable runtime stack frame checks with msvc
  around built assembly
 
 MSVC can add truntime code that checks if a stack frame is mismanaged
@@ -3005,13 +3005,13 @@ index f787525..88bb3a3 100644
  void
  EFI64(ffi_call)(ffi_cif *cif, void (*fn)(void), void *rvalue, void **avalue)
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From f8aff9ca61424f3b1ad6efef927eef49323e6306 Mon Sep 17 00:00:00 2001
 From: Matthew Waters <matthew@centricular.com>
 Date: Fri, 16 Mar 2018 22:33:35 +1100
-Subject: [PATCH 10/21] win64: fix msvc specific compiler check
+Subject: [PATCH 10/32] win64: fix msvc specific compiler check
 
 It's _MSC_VER not _MSVC_VER
 ---
@@ -3041,13 +3041,13 @@ index 88bb3a3..c91c72a 100644
  #endif
  
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 464b3a6dd294910fec84f3d139431926e1d0927f Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 28 Aug 2018 12:27:02 +0530
-Subject: [PATCH 11/21] meson: Rename 'debug' to 'ffi-debug'
+Subject: [PATCH 11/32] meson: Rename 'debug' to 'ffi-debug'
 
 'debug' is a reserved keyword and starting with meson 0.48 using it as
 a user option causes an error:
@@ -3097,13 +3097,13 @@ index 9a9feba..ed5c184 100644
  endif
  
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 51d74d8af8844bfc11e4b753cbfa8d0941af0daf Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 29 Aug 2018 15:19:46 +0530
-Subject: [PATCH 12/21] meson: Use same library versioning on macOS as
+Subject: [PATCH 12/32] meson: Use same library versioning on macOS as
  Autotools
 
 Requires Meson 0.48, but that isn't released yet. It will just be
@@ -3126,13 +3126,13 @@ index ed5c184..2e12d5e 100644
  
  ffi_dep = declare_dependency(link_with : ffi_lib,
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 28b2a0c1f9dc594fcd11a3556cd3b95b035e76fd Mon Sep 17 00:00:00 2001
 From: Xavier Claessens <xavier.claessens@collabora.com>
 Date: Fri, 28 Sep 2018 21:58:24 -0400
-Subject: [PATCH 13/21] Meson: Add support for aarch64
+Subject: [PATCH 13/32] Meson: Add support for aarch64
 
 ---
  include/meson.build | 4 ++--
@@ -3197,13 +3197,13 @@ index 2e12d5e..1f5fd25 100644
    error('Unsupported system "@0@" or cpu family "@1@"'.format(host_system, host_cpu_family))
  endif
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 337e1e84365a2adfbb46f278327d8ad75fd3aa3d Mon Sep 17 00:00:00 2001
 From: Xavier Claessens <xavier.claessens@collabora.com>
 Date: Sun, 21 Oct 2018 13:43:26 -0400
-Subject: [PATCH 14/21] meson: Fix warnings with more recent version of meson
+Subject: [PATCH 14/32] meson: Fix warnings with more recent version of meson
 
 ---
  include/meson.build |  4 ++--
@@ -3280,13 +3280,13 @@ index 1f5fd25..a2117b3 100644
  ffi_dep = declare_dependency(link_with : ffi_lib,
    include_directories : ffiinc)
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 7c5bab255f685a9574eff2ca7a99e169066f7ee8 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sun, 21 Oct 2018 23:19:46 +0530
-Subject: [PATCH 15/21] meson: Bump version to 3.2.9999 for release
+Subject: [PATCH 15/32] meson: Bump version to 3.2.9999 for release
 
 Let's make a release so people can use a tarball instead of a git
 repository.
@@ -3310,13 +3310,13 @@ index ce14cb8..0f090e3 100644
          default_options : ['buildtype=debugoptimized',
                             'warning_level=1'])
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 478c22a6716f603fc6a63c865bed957564039d79 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 23 Oct 2018 02:01:58 +0530
-Subject: [PATCH 16/21] meson: Add support for Linux and Android ARM
+Subject: [PATCH 16/32] meson: Add support for Linux and Android ARM
 
 ---
  meson.build     | 13 ++++++-------
@@ -3428,13 +3428,13 @@ index a2117b3..d0575fb 100644
  
  # Used in ffi.h.in to generate ffi-$arch.h
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 06b1b10db3946d3a0803374609c40a1810820485 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 23 Oct 2018 02:23:09 +0530
-Subject: [PATCH 17/21] meson: Whitespace fix
+Subject: [PATCH 17/32] meson: Whitespace fix
 
 ---
  meson.build | 4 ++--
@@ -3456,13 +3456,13 @@ index e03cfc4..481902e 100644
      endif
    endif
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From b71dd59c0188d93543d595a423635d6466a11bc4 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 23 Oct 2018 02:46:58 +0530
-Subject: [PATCH 18/21] meson: Rework target detection if/else ladder
+Subject: [PATCH 18/32] meson: Rework target detection if/else ladder
 
 Most arches other than x86 actually have the same code for all OSes,
 f.ex., arm and aarch64, so invert the ladder.
@@ -3575,13 +3575,13 @@ index d0575fb..6b7a668 100644
  ffi_conf.set('TARGET', TARGET)
  ffi_conf.set('VERSION', meson.project_version())
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 8546ef68ec11c4aa64e44c44c74729b2c2171e8e Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 23 Oct 2018 02:49:59 +0530
-Subject: [PATCH 19/21] meson: Add support for macOS
+Subject: [PATCH 19/32] meson: Add support for macOS
 
 iOS is already supported through the arm/aarch64 codepaths.
 ---
@@ -3610,13 +3610,13 @@ index 6b7a668..e2e0a2e 100644
        asm_sources = ['sysv.S']
      else
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 067e0bdc4ca2d5db40c004f3c81ca5a75d1232dd Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 27 Oct 2018 23:37:36 +0100
-Subject: [PATCH 20/21] meson: Check for hidden visibility support in the
+Subject: [PATCH 20/32] meson: Check for hidden visibility support in the
  compiler
 
 ---
@@ -3689,13 +3689,13 @@ index 0000000..1a1b76b
 +print('.hidden not found in the outputted assembly')
 +sys.exit(1)
 -- 
-2.17.1
+2.26.1.windows.1
 
 
 From 69454167fa9b1719854416e9df482b9232a51c93 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sun, 28 Oct 2018 15:07:17 +0000
-Subject: [PATCH 21/21] meson: Add iOS x86, x86_64, and armv7 support
+Subject: [PATCH 21/32] meson: Add iOS x86, x86_64, and armv7 support
 
 x86* are used by the iPhone simulator
 
@@ -3763,5 +3763,1278 @@ index e2e0a2e..a1cad36 100644
        else
          TARGET = 'X86'
 -- 
-2.17.1
+2.26.1.windows.1
+
+
+From 952b8f9bdde8f748347318ac5e7439ab22e1f3e3 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 8 Mar 2019 13:35:56 +0530
+Subject: [PATCH 22/32] ffi.h: Support cross-building to Windows ARM64
+
+---
+ include/ffi_noarch.h.meson | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/ffi_noarch.h.meson b/include/ffi_noarch.h.meson
+index 9994c8d..23bcd9c 100644
+--- a/include/ffi_noarch.h.meson
++++ b/include/ffi_noarch.h.meson
+@@ -10,7 +10,7 @@
+ #include "@HEADER@-x86_64.h"
+ #elif defined(__arm__) || defined(_M_ARM)
+ #include "@HEADER@-arm.h"
+-#elif defined(__aarch64__)
++#elif defined(__aarch64__) || defined(_M_ARM64)
+ #include "@HEADER@-aarch64.h"
+ #elif defined(__powerpc__) || defined(_M_PPC)
+ #include "@HEADER@-powerpc.h"
+-- 
+2.26.1.windows.1
+
+
+From 33c6ec3e0e54e97bfaf67e41f2e7d9a2464057ed Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 17 Jul 2019 14:20:23 +0530
+Subject: [PATCH 23/32] meson: ffi-debug option was broken
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 475b8dd..9a8edf7 100644
+--- a/meson.build
++++ b/meson.build
+@@ -176,7 +176,7 @@ endif
+ 
+ # User options
+ if get_option('ffi-debug')
+-  ffi_conf.set('FFI_DEBUG')
++  ffi_conf.set('FFI_DEBUG', 1)
+ endif
+ if not get_option('raw_api')
+   ffi_conf.set('FFI_NO_RAW_API', 1)
+-- 
+2.26.1.windows.1
+
+
+From 5d9a19f90d1af20f3e4e744cde73ae547bfafa00 Mon Sep 17 00:00:00 2001
+From: Jordan Petridis <jpetridis@gnome.org>
+Date: Thu, 11 Jul 2019 07:11:07 +0300
+Subject: [PATCH 24/32] Add Windows CI for msvc 2017 and msys2
+
+Currently the container is based upon a windows 1607 image
+and requires a runner with a server/hyper-v 1607 host
+to be able to execute.
+
+There are plan on moving the runner to a 1807 later.
+---
+ .gitlab-ci.yml | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 53 insertions(+)
+ create mode 100644 .gitlab-ci.yml
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+new file mode 100644
+index 0000000..b39770c
+--- /dev/null
++++ b/.gitlab-ci.yml
+@@ -0,0 +1,53 @@
++variables:
++  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v6'
++
++.build windows:
++  image: $WINDOWS_IMAGE
++  stage: 'build'
++  tags:
++    - 'docker'
++    - 'windows'
++    - '1607'
++  variables:
++    # Uncomment the following key if need to pass custom args, as well with the
++    # $env:MESON_ARGS line in the `script:` blocks
++    # MESON_ARGS: >-
++    #   -Dfoo=enabled
++    #   -Dbar=false
++    # Make sure any failure in PowerShell scripts is fatal
++    ErrorActionPreference: 'Stop'
++    WarningPreference: 'Stop'
++  before_script:
++    - pip3 install -U meson
++  script:
++    # For some reason, options are separated by newline instead of space, so we
++    # have to replace them first.
++    # - $env:MESON_ARGS = $env:MESON_ARGS.replace("`n"," ")
++
++    # Gitlab executes PowerShell in docker, but VsDevCmd.bat is a batch script.
++    # Environment variables substitutions is done by PowerShell before calling
++    # cmd.exe, that's why we use $env:FOO instead of %FOO%
++    - cmd.exe /C "C:\BuildTools\Common7\Tools\VsDevCmd.bat -host_arch=amd64 -arch=$env:ARCH &&
++        meson build $env:MESON_ARGS &&
++        ninja -C build"
++
++vs2017 amd64:
++  extends: '.build windows'
++  variables:
++    ARCH: 'amd64'
++
++vs2017 x86:
++  extends: '.build windows'
++  variables:
++    ARCH: 'x86'
++
++msys2:
++  extends: '.build windows'
++  script:
++    # For some reason, options are separated by newline instead of space, so we
++    # have to replace them first.
++    # - $env:MESON_ARGS = $env:MESON_ARGS.replace("`n"," ")
++
++    - $env:PATH += ";C:\msys64\usr\bin;C:\msys64\mingw64/bin;C:\msys64\mingw32/bin"
++    - C:\msys64\usr\bin\bash -c "meson build $env:MESON_ARGS &&
++        ninja -C build"
+\ No newline at end of file
+-- 
+2.26.1.windows.1
+
+
+From 6fec0c2044f7559f95cd908c089d8ed1b7dc0f40 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 16 May 2019 04:13:54 +0530
+Subject: [PATCH 25/32] meson: Fix ASM visibility attribute for Darwin
+
+---
+ fficonfig.h.meson | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/fficonfig.h.meson b/fficonfig.h.meson
+index a882290..f6001a2 100644
+--- a/fficonfig.h.meson
++++ b/fficonfig.h.meson
+@@ -148,7 +148,11 @@
+ 
+ #ifdef HAVE_HIDDEN_VISIBILITY_ATTRIBUTE
+ #ifdef LIBFFI_ASM
++#ifdef __APPLE__
++#define FFI_HIDDEN(name) .private_extern name
++#else
+ #define FFI_HIDDEN(name) .hidden name
++#endif
+ #else
+ #define FFI_HIDDEN __attribute__ ((visibility ("hidden")))
+ #endif
+-- 
+2.26.1.windows.1
+
+
+From e3616c3292d3321b127ee3877ce89f53c64e0977 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 16 May 2019 04:16:54 +0530
+Subject: [PATCH 26/32] meson: Disable some unused mmap and alloca checks
+
+---
+ meson.build | 37 +++++++++++++++++++------------------
+ 1 file changed, 19 insertions(+), 18 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 9a8edf7..71fb2a8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -123,27 +123,28 @@ if host_cpu_family == 'x86_64' and cc.get_id() != 'msvc'
+ endif
+ 
+ # Check mmap()
+-if cc.has_function('mmap')
+-  ffi_conf.set('HAVE_MMAP', 1)
+-endif
+-ffi_conf.set('HAVE_MMAP_FILE', 1) # Works everywhere
+-ffi_conf.set('HAVE_MMAP_DEV_ZERO',
+-  host_system != 'windows' and host_system != 'darwin')
+-mmap_anon = '''#include <sys/types.h>
+-#include <sys/mman.h>
+-#include <unistd.h>
+-
+-#ifndef MAP_ANONYMOUS
+-#define MAP_ANONYMOUS MAP_ANON
++# XXX: All these are unused
++#if cc.has_function('mmap')
++#  ffi_conf.set('HAVE_MMAP', 1)
+ #endif
+-
+-int n = MAP_ANONYMOUS;
+-'''
+-ffi_conf.set('HAVE_MMAP_ANON',
+-  cc.compiles(mmap_anon, name : 'mmap anonymous'))
++#ffi_conf.set('HAVE_MMAP_FILE', 1) # Works everywhere
++#ffi_conf.set('HAVE_MMAP_DEV_ZERO',
++#  host_system != 'windows' and host_system != 'darwin')
++#mmap_anon = '''#include <sys/types.h>
++##include <sys/mman.h>
++##include <unistd.h>
++#
++##ifndef MAP_ANONYMOUS
++##define MAP_ANONYMOUS MAP_ANON
++##endif
++#
++#int n = MAP_ANONYMOUS;
++#'''
++#ffi_conf.set('HAVE_MMAP_ANON',
++#  cc.compiles(mmap_anon, name : 'mmap anonymous'))
+ 
+ # Misc functions
+-ffi_conf.set('HAVE_ALLOCA', cc.has_function('alloca'))
++#ffi_conf.set('HAVE_ALLOCA', cc.has_function('alloca')) # XXX: unused
+ ffi_conf.set10('HAVE_MEMCPY', cc.has_function('memcpy'))
+ ffi_conf.set('HAVE_MKOSTEMP', cc.has_function('mkostemp'))
+ 
+-- 
+2.26.1.windows.1
+
+
+From 98eef3ec08dd7d101b96569fed48ed9188ae0423 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 16 May 2019 04:18:06 +0530
+Subject: [PATCH 27/32] meson: Fix some MSVC assembly feature checks
+
+These should really be configure checks, but they require inspecting
+the compiled output, which we can't with meson.
+---
+ meson.build | 20 +++++++++-----------
+ 1 file changed, 9 insertions(+), 11 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 71fb2a8..2711e9c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -92,17 +92,15 @@ else
+ endif
+ 
+ # Exception handling frame
+-if cc.get_id() == 'gcc' or cc.get_id() == 'clang'
+-  # FIXME: Actually check for this instead of hard-coding it
+-  # Also, check if this is actually correct
+-  if host_cpu_family == 'x86_64'
+-    message('.eh_frame is hard-coded to not be ro')
+-    ffi_conf.set('EH_FRAME_FLAGS', '"aw"')
+-  else
+-    message('.eh_frame is hard-coded to ro')
+-    ffi_conf.set('HAVE_RO_EH_FRAME', 1)
+-    ffi_conf.set('EH_FRAME_FLAGS', '"a"')
+-  endif
++# FIXME: Actually check for this instead of hard-coding it
++# Also, check if this is actually correct
++if host_cpu_family == 'x86_64'
++  message('.eh_frame is hard-coded to not be ro')
++  ffi_conf.set('EH_FRAME_FLAGS', '"aw"')
++else
++  message('.eh_frame is hard-coded to ro')
++  ffi_conf.set('HAVE_RO_EH_FRAME', 1)
++  ffi_conf.set('EH_FRAME_FLAGS', '"a"')
+ endif
+ 
+ if ['arm', 'aarch64'].contains(host_cpu_family) and host_system == 'darwin'
+-- 
+2.26.1.windows.1
+
+
+From b3e5c93de44f9724470e7463d8594f40b3dcb310 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 16 May 2019 04:19:45 +0530
+Subject: [PATCH 28/32] aarch64: Fix some MSVC compiler warnings with explicit
+ casts
+
+---
+ src/aarch64/ffi.c | 10 +++++-----
+ src/prep_cif.c    |  2 +-
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/aarch64/ffi.c b/src/aarch64/ffi.c
+index 4400b61..5966753 100644
+--- a/src/aarch64/ffi.c
++++ b/src/aarch64/ffi.c
+@@ -588,8 +588,8 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *orig_rvalue,
+   /* Allocate consectutive stack for everything we'll need.  */
+   context = alloca (sizeof(struct call_context) + stack_bytes + 32 + rsize);
+   stack = context + 1;
+-  frame = stack + stack_bytes;
+-  rvalue = (rsize ? frame + 32 : orig_rvalue);
++  frame = (void*)((uintptr_t)stack + (uintptr_t)stack_bytes);
++  rvalue = (rsize ? (void*)((uintptr_t)frame + 32) : orig_rvalue);
+ 
+   arg_init (&state);
+   for (i = 0, nargs = cif->nargs; i < nargs; i++)
+@@ -681,7 +681,7 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *orig_rvalue,
+ 		       X registers, then the argument is copied into
+ 		       consecutive X registers.  */
+ 		    dest = &context->x[state.ngrn];
+-		    state.ngrn += n;
++		    state.ngrn += (unsigned int)n;
+ 		  }
+ 		else
+ 		  {
+@@ -874,7 +874,7 @@ ffi_closure_SYSV_inner (ffi_cif *cif,
+ 	      if (state.nsrn + n <= N_V_ARG_REG)
+ 		{
+ 		  void *reg = &context->v[state.nsrn];
+-		  state.nsrn += n;
++		  state.nsrn += (unsigned int)n;
+ 
+ 		  /* Eeek! We need a pointer to the structure, however the
+ 		     homogeneous float elements are being passed in individual
+@@ -906,7 +906,7 @@ ffi_closure_SYSV_inner (ffi_cif *cif,
+ 	      if (state.ngrn + n <= N_X_ARG_REG)
+ 		{
+ 		  avalue[i] = &context->x[state.ngrn];
+-		  state.ngrn += n;
++		  state.ngrn += (unsigned int)n;
+ 		}
+ 	      else
+ 		{
+diff --git a/src/prep_cif.c b/src/prep_cif.c
+index fe05453..702ca27 100644
+--- a/src/prep_cif.c
++++ b/src/prep_cif.c
+@@ -199,7 +199,7 @@ ffi_status FFI_HIDDEN ffi_prep_cif_core(ffi_cif *cif, ffi_abi abi,
+ 	    bytes = 6*4;
+ #endif
+ 
+-	  bytes += STACK_ARG_SIZE((*ptr)->size);
++	  bytes += (unsigned int)STACK_ARG_SIZE((*ptr)->size);
+ 	}
+ #endif
+     }
+-- 
+2.26.1.windows.1
+
+
+From b7b98d1883987367f23b4fe4a817b8d0b2279c8d Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 16 May 2019 04:20:41 +0530
+Subject: [PATCH 29/32] aarch64: Add support for the arm64 WinRT target
+
+Code copied from https://github.com/libffi/libffi/pull/486, cleaned
+up and split into separate commits with Meson support.
+
+Author is ossdev07 <ossdev@puresoftware.com>
+---
+ include/ffi.h.in           |   1 +
+ src/aarch64/ffi.c          |  56 +++++
+ src/aarch64/ffitarget.h    |  11 +-
+ src/aarch64/win64_armasm.S | 504 +++++++++++++++++++++++++++++++++++++
+ src/closures.c             |  12 +-
+ src/meson.build            |  22 +-
+ src/prep_cif.c             |   3 +
+ 7 files changed, 598 insertions(+), 11 deletions(-)
+ create mode 100644 src/aarch64/win64_armasm.S
+
+diff --git a/include/ffi.h.in b/include/ffi.h.in
+index ac79f2f..1fca797 100644
+--- a/include/ffi.h.in
++++ b/include/ffi.h.in
+@@ -218,6 +218,7 @@ typedef struct {
+   ffi_type *rtype;
+   unsigned bytes;
+   unsigned flags;
++  unsigned isVariadic;
+ #ifdef FFI_EXTRA_CIF_FIELDS
+   FFI_EXTRA_CIF_FIELDS;
+ #endif
+diff --git a/src/aarch64/ffi.c b/src/aarch64/ffi.c
+index 5966753..ea04f27 100644
+--- a/src/aarch64/ffi.c
++++ b/src/aarch64/ffi.c
+@@ -26,6 +26,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+ #include <ffi.h>
+ #include <ffi_common.h>
+ #include "internal.h"
++#ifdef _M_ARM64
++#include <windows.h> /* FlushInstructionCache */
++#endif
+ 
+ /* Force FFI_TYPE_LONGDOUBLE to be different than FFI_TYPE_DOUBLE;
+    all further uses in this file will refer to the 128-bit type.  */
+@@ -74,6 +77,8 @@ ffi_clear_cache (void *start, void *end)
+   sys_icache_invalidate (start, (char *)end - (char *)start);
+ #elif defined (__GNUC__)
+   __builtin___clear_cache (start, end);
++#elif defined (_M_ARM64)
++  FlushInstructionCache(GetCurrentProcess(), start, (char*)end - (char*)start);
+ #else
+ #error "Missing builtin to flush instruction cache"
+ #endif
+@@ -315,6 +320,9 @@ extend_integer_type (void *source, int type)
+     }
+ }
+ 
++#if defined(_MSC_VER)
++void extend_hfa_type (void *dest, void *src, int h);
++#else
+ static void
+ extend_hfa_type (void *dest, void *src, int h)
+ {
+@@ -368,7 +376,11 @@ extend_hfa_type (void *dest, void *src, int h)
+     : "r"(f * 12), "r"(dest), "r"(src)
+     : "memory", "v16", "v17", "v18", "v19");
+ }
++#endif
+ 
++#if defined(_MSC_VER)
++void* compress_hfa_type (void *dest, void *src, int h);
++#else
+ static void *
+ compress_hfa_type (void *dest, void *reg, int h)
+ {
+@@ -437,6 +449,7 @@ compress_hfa_type (void *dest, void *reg, int h)
+     }
+   return dest;
+ }
++#endif
+ 
+ /* Either allocate an appropriate register for the argument type, or if
+    none are available, allocate a stack slot and return a pointer
+@@ -651,6 +664,22 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *orig_rvalue,
+ 	    if (h)
+ 	      {
+ 		int elems = 4 - (h & 3);
++#ifdef _M_ARM64 /* for handling armasm calling convention */
++                if (cif->isVariadic)
++                  {
++                    if (state.ngrn + elems <= N_X_ARG_REG)
++                      {
++                        dest = &context->x[state.ngrn];
++                        state.ngrn += elems;
++                        extend_hfa_type(dest, a, h);
++                        break;
++                      }
++                    state.nsrn = N_X_ARG_REG;
++                    dest = allocate_to_stack(&state, stack, ty->alignment, s);
++                  }
++                else
++                  {
++#endif /* for handling armasm calling convention */
+ 	        if (state.nsrn + elems <= N_V_ARG_REG)
+ 		  {
+ 		    dest = &context->v[state.nsrn];
+@@ -660,6 +689,9 @@ ffi_call_int (ffi_cif *cif, void (*fn)(void), void *orig_rvalue,
+ 		  }
+ 		state.nsrn = N_V_ARG_REG;
+ 		dest = allocate_to_stack (&state, stack, ty->alignment, s);
++#ifdef _M_ARM64 /* for handling armasm calling convention */
++	      }
++#endif /* for handling armasm calling convention */
+ 	      }
+ 	    else if (s > 16)
+ 	      {
+@@ -871,6 +903,27 @@ ffi_closure_SYSV_inner (ffi_cif *cif,
+ 	  if (h)
+ 	    {
+ 	      n = 4 - (h & 3);
++#ifdef _M_ARM64  /* for handling armasm calling convention */
++              if (cif->isVariadic)
++                {
++                  if (state.ngrn + n <= N_X_ARG_REG)
++                    {
++                      void *reg = &context->x[state.ngrn];
++                      state.ngrn += (unsigned int)n;
++		      /* Eeek! See below. */
++                      avalue[i] = compress_hfa_type(reg, reg, h);
++                    }
++                  else
++                    {
++                      state.ngrn = N_X_ARG_REG;
++                      state.nsrn = N_V_ARG_REG;
++                      avalue[i] = allocate_to_stack(&state, stack,
++                             ty->alignment, s);
++                    }
++                }
++              else
++                {
++#endif  /* for handling armasm calling convention */
+ 	      if (state.nsrn + n <= N_V_ARG_REG)
+ 		{
+ 		  void *reg = &context->v[state.nsrn];
+@@ -891,6 +944,9 @@ ffi_closure_SYSV_inner (ffi_cif *cif,
+ 		  avalue[i] = allocate_to_stack (&state, stack,
+ 						 ty->alignment, s);
+ 		}
++#ifdef _M_ARM64  /* for handling armasm calling convention */
++                }
++#endif  /* for handling armasm calling convention */
+ 	    }
+ 	  else if (s > 16)
+ 	    {
+diff --git a/src/aarch64/ffitarget.h b/src/aarch64/ffitarget.h
+index 65086cd..32c4f08 100644
+--- a/src/aarch64/ffitarget.h
++++ b/src/aarch64/ffitarget.h
+@@ -32,6 +32,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
+ #define FFI_SIZEOF_JAVA_RAW  4
+ typedef unsigned long long ffi_arg;
+ typedef signed long long ffi_sarg;
++#elif defined(_M_ARM64)
++#define FFI_SIZEOF_ARG 8
++typedef unsigned long long ffi_arg;
++typedef signed long long ffi_sarg;
+ #else
+ typedef unsigned long ffi_arg;
+ typedef signed long ffi_sarg;
+@@ -70,12 +74,15 @@ typedef enum ffi_abi
+ #if defined (__APPLE__)
+ #define FFI_TARGET_SPECIFIC_VARIADIC
+ #define FFI_EXTRA_CIF_FIELDS unsigned aarch64_nfixedargs
+-#else
+-/* iOS reserves x18 for the system.  Disable Go closures until
++#elif !defined(_M_ARM64)
++/* iOS and Windows reserve x18 for the system.  Disable Go closures until
+    a new static chain is chosen.  */
+ #define FFI_GO_CLOSURES 1
+ #endif
+ 
++#ifndef _M_ARM64
++/* No complex type on Windows */
+ #define FFI_TARGET_HAS_COMPLEX_TYPE
++#endif
+ 
+ #endif
+diff --git a/src/aarch64/win64_armasm.S b/src/aarch64/win64_armasm.S
+new file mode 100644
+index 0000000..2ea9250
+--- /dev/null
++++ b/src/aarch64/win64_armasm.S
+@@ -0,0 +1,504 @@
++/* Copyright (c) 2009, 2010, 2011, 2012 ARM Ltd.
++Permission is hereby granted, free of charge, to any person obtaining
++a copy of this software and associated documentation files (the
++``Software''), to deal in the Software without restriction, including
++without limitation the rights to use, copy, modify, merge, publish,
++distribute, sublicense, and/or sell copies of the Software, and to
++permit persons to whom the Software is furnished to do so, subject to
++the following conditions:
++The above copyright notice and this permission notice shall be
++included in all copies or substantial portions of the Software.
++THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
++EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
++IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
++CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
++TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
++SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.  */
++
++#define LIBFFI_ASM
++#include <fficonfig.h>
++#include <ffi.h>
++#include <ffi_cfi.h>
++#include "internal.h"
++
++	OPT	2 /*disable listing */
++/* For some macros to add unwind information */
++#include "ksarm64.h"
++	OPT	1 /*re-enable listing */
++
++#define BE(X)	0
++#define PTR_REG(n)      x##n
++#define PTR_SIZE	8
++
++	IMPORT ffi_closure_SYSV_inner
++	EXPORT	ffi_call_SYSV
++	EXPORT	ffi_closure_SYSV_V
++	EXPORT	ffi_closure_SYSV
++	EXPORT	extend_hfa_type
++	EXPORT	compress_hfa_type
++#ifdef FFI_GO_CLOSURES
++	EXPORT	ffi_go_closure_SYSV_V
++	EXPORT	ffi_go_closure_SYSV
++#endif
++
++	TEXTAREA, ALLIGN=8
++
++/* ffi_call_SYSV
++   extern void ffi_call_SYSV (void *stack, void *frame,
++			      void (*fn)(void), void *rvalue,
++			      int flags, void *closure);
++   Therefore on entry we have:
++   x0 stack
++   x1 frame
++   x2 fn
++   x3 rvalue
++   x4 flags
++   x5 closure
++*/
++
++	NESTED_ENTRY ffi_call_SYSV
++	/* Use a stack frame allocated by our caller. */
++	PROLOG_NOP	stp	x29, x30, [x1, #32]
++    /* For unwind information, Windows has to store fp and lr  */
++	PROLOG_SAVE_REG_PAIR	x29, x30, #-32!
++
++	mov	x29, x1
++	mov	sp, x0
++
++	mov	x9, x2			/* save fn */
++	mov	x8, x3			/* install structure return */
++#ifdef FFI_GO_CLOSURES
++	/*mov	x18, x5			install static chain */
++#endif
++	stp	x3, x4, [x29, #16]	/* save rvalue and flags */
++
++	/* Load the vector argument passing registers, if necessary.  */
++	tbz	x4, #AARCH64_FLAG_ARG_V_BIT, ffi_call_SYSV_L1
++	ldp	q0, q1, [sp, #0]
++	ldp	q2, q3, [sp, #32]
++	ldp	q4, q5, [sp, #64]
++	ldp	q6, q7, [sp, #96]
++
++ffi_call_SYSV_L1
++	/* Load the core argument passing registers, including
++	   the structure return pointer.  */
++	ldp     x0, x1, [sp, #16*N_V_ARG_REG + 0]
++	ldp     x2, x3, [sp, #16*N_V_ARG_REG + 16]
++	ldp     x4, x5, [sp, #16*N_V_ARG_REG + 32]
++	ldp     x6, x7, [sp, #16*N_V_ARG_REG + 48]
++
++	/* Deallocate the context, leaving the stacked arguments.  */
++	add	sp, sp, #CALL_CONTEXT_SIZE
++
++	blr     x9			/* call fn */
++
++	ldp	x3, x4, [x29, #16]	/* reload rvalue and flags */
++
++	/* Partially deconstruct the stack frame. */
++	mov     sp, x29
++	ldp     x29, x30, [x29, #32]
++
++	/* Save the return value as directed.  */
++	adr	x5, ffi_call_SYSV_return
++	and	w4, w4, #AARCH64_RET_MASK
++	add	x5, x5, x4, lsl #3
++	br	x5
++
++	/* Note that each table entry is 2 insns, and thus 8 bytes.
++	   For integer data, note that we're storing into ffi_arg
++	   and therefore we want to extend to 64 bits; these types
++	   have two consecutive entries allocated for them.  */
++	ALIGN 4
++ffi_call_SYSV_return
++	ret				/* VOID */
++	nop
++	str	x0, [x3]		/* INT64 */
++	ret
++	stp	x0, x1, [x3]		/* INT128 */
++	ret
++	brk	#1000			/* UNUSED */
++	ret
++	brk	#1000			/* UNUSED */
++	ret
++	brk	#1000			/* UNUSED */
++	ret
++	brk	#1000			/* UNUSED */
++	ret
++	brk	#1000			/* UNUSED */
++	ret
++	st4	{ v0.s, v1.s, v2.s, v3.s }[0], [x3]	/* S4 */
++	ret
++	st3	{ v0.s, v1.s, v2.s }[0], [x3]	/* S3 */
++	ret
++	stp	s0, s1, [x3]		/* S2 */
++	ret
++	str	s0, [x3]		/* S1 */
++	ret
++	st4	{ v0.d, v1.d, v2.d, v3.d }[0], [x3]	/* D4 */
++	ret
++	st3	{ v0.d, v1.d, v2.d }[0], [x3]	/* D3 */
++	ret
++	stp	d0, d1, [x3]		/* D2 */
++	ret
++	str	d0, [x3]		/* D1 */
++	ret
++	str	q3, [x3, #48]		/* Q4 */
++	nop
++	str	q2, [x3, #32]		/* Q3 */
++	nop
++	stp	q0, q1, [x3]		/* Q2 */
++	ret
++	str	q0, [x3]		/* Q1 */
++	ret
++	uxtb	w0, w0			/* UINT8 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++	uxth	w0, w0			/* UINT16 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++	mov	w0, w0			/* UINT32 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++	sxtb	x0, w0			/* SINT8 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++	sxth	x0, w0			/* SINT16 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++	sxtw	x0, w0			/* SINT32 */
++	str	x0, [x3]
++	ret				/* reserved */
++	nop
++
++
++	NESTED_END ffi_call_SYSV
++
++
++/* ffi_closure_SYSV
++   Closure invocation glue. This is the low level code invoked directly by
++   the closure trampoline to setup and call a closure.
++   On entry x17 points to a struct ffi_closure, x16 has been clobbered
++   all other registers are preserved.
++   We allocate a call context and save the argument passing registers,
++   then invoked the generic C ffi_closure_SYSV_inner() function to do all
++   the real work, on return we load the result passing registers back from
++   the call context.
++*/
++
++#define ffi_closure_SYSV_FS (8*2 + CALL_CONTEXT_SIZE + 64)
++
++	NESTED_ENTRY	ffi_closure_SYSV_V
++	PROLOG_SAVE_REG_PAIR	x29, x30, #-ffi_closure_SYSV_FS!
++
++	/* Save the argument passing vector registers.  */
++	stp	q0, q1, [sp, #16 + 0]
++	stp	q2, q3, [sp, #16 + 32]
++	stp	q4, q5, [sp, #16 + 64]
++	stp	q6, q7, [sp, #16 + 96]
++
++	b	ffi_closure_SYSV_save_argument
++	NESTED_END	ffi_closure_SYSV_V
++
++	NESTED_ENTRY	ffi_closure_SYSV
++	PROLOG_SAVE_REG_PAIR	x29, x30, #-ffi_closure_SYSV_FS!
++
++ffi_closure_SYSV_save_argument
++	/* Save the argument passing core registers.  */
++	stp     x0, x1, [sp, #16 + 16*N_V_ARG_REG + 0]
++	stp     x2, x3, [sp, #16 + 16*N_V_ARG_REG + 16]
++	stp     x4, x5, [sp, #16 + 16*N_V_ARG_REG + 32]
++	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
++
++	/* Load ffi_closure_inner arguments.  */
++	ldp	PTR_REG(0), PTR_REG(1), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET]	/* load cif, fn */
++	ldr	PTR_REG(2), [x17, #FFI_TRAMPOLINE_CLOSURE_OFFSET+PTR_SIZE*2]	/* load user_data */
++
++do_closure
++	add	x3, sp, #16							/* load context */
++	add	x4, sp, #ffi_closure_SYSV_FS		/* load stack */
++	add	x5, sp, #16+CALL_CONTEXT_SIZE		/* load rvalue */
++	mov	x6, x8					/* load struct_rval */
++
++	bl	ffi_closure_SYSV_inner
++
++	/* Load the return value as directed.  */
++	adr	x1, ffi_closure_SYSV_return_base
++	and	w0, w0, #AARCH64_RET_MASK
++	add	x1, x1, x0, lsl #3
++	add	x3, sp, #16+CALL_CONTEXT_SIZE
++	br	x1
++
++	/* Note that each table entry is 2 insns, and thus 8 bytes.  */
++	ALIGN	8
++ffi_closure_SYSV_return_base
++	b	ffi_closure_SYSV_epilog			/* VOID */
++	nop
++	ldr	x0, [x3]		/* INT64 */
++	b	ffi_closure_SYSV_epilog
++	ldp	x0, x1, [x3]		/* INT128 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* UNUSED */
++	nop
++	brk	#1000			/* UNUSED */
++	nop
++	brk	#1000			/* UNUSED */
++	nop
++	brk	#1000			/* UNUSED */
++	nop
++	brk	#1000			/* UNUSED */
++	nop
++	ldr	s3, [x3, #12]		/* S4 */
++	nop
++	ldr	s2, [x3, #8]		/* S3 */
++	nop
++	ldp	s0, s1, [x3]		/* S2 */
++	b	ffi_closure_SYSV_epilog
++	ldr	s0, [x3]		/* S1 */
++	b	ffi_closure_SYSV_epilog
++	ldr	d3, [x3, #24]		/* D4 */
++	nop
++	ldr	d2, [x3, #16]		/* D3 */
++	nop
++	ldp	d0, d1, [x3]		/* D2 */
++	b	ffi_closure_SYSV_epilog
++	ldr	d0, [x3]		/* D1 */
++	b	ffi_closure_SYSV_epilog
++	ldr	q3, [x3, #48]		/* Q4 */
++	nop
++	ldr	q2, [x3, #32]		/* Q3 */
++	nop
++	ldp	q0, q1, [x3]		/* Q2 */
++	b	ffi_closure_SYSV_epilog
++	ldr	q0, [x3]		/* Q1 */
++	b	ffi_closure_SYSV_epilog
++	ldrb	w0, [x3, #BE(7)]	/* UINT8 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* reserved */
++	nop
++	ldrh	w0, [x3, #BE(6)]	/* UINT16 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* reserved */
++	nop
++	ldr	w0, [x3, #BE(4)]	/* UINT32 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* reserved */
++	nop
++	ldrsb	x0, [x3, #BE(7)]	/* SINT8 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* reserved */
++	nop
++	ldrsh	x0, [x3, #BE(6)]	/* SINT16 */
++	b	ffi_closure_SYSV_epilog
++	brk	#1000			/* reserved */
++	nop
++	ldrsw	x0, [x3, #BE(4)]	/* SINT32 */
++	nop
++					/* reserved */
++
++ffi_closure_SYSV_epilog
++	EPILOG_RESTORE_REG_PAIR	x29, x30, #ffi_closure_SYSV_FS!
++	EPILOG_RETURN
++	NESTED_END	ffi_closure_SYSV
++
++
++#ifdef FFI_GO_CLOSURES
++	NESTED_ENTRY	ffi_go_closure_SYSV_V
++	PROLOG_SAVE_REG_PAIR	x29, x30, #-ffi_closure_SYSV_FS!
++
++	/* Save the argument passing vector registers.  */
++	stp	q0, q1, [sp, #16 + 0]
++	stp	q2, q3, [sp, #16 + 32]
++	stp	q4, q5, [sp, #16 + 64]
++	stp	q6, q7, [sp, #16 + 96]
++	b	ffi_go_closure_SYSV_save_argument
++	NESTED_END	ffi_go_closure_SYSV_V
++
++	NESTED_ENTRY	ffi_go_closure_SYSV
++	PROLOG_SAVE_REG_PAIR	x29, x30, #-ffi_closure_SYSV_FS!
++
++ffi_go_closure_SYSV_save_argument
++	/* Save the argument passing core registers.  */
++	stp     x0, x1, [sp, #16 + 16*N_V_ARG_REG + 0]
++	stp     x2, x3, [sp, #16 + 16*N_V_ARG_REG + 16]
++	stp     x4, x5, [sp, #16 + 16*N_V_ARG_REG + 32]
++	stp     x6, x7, [sp, #16 + 16*N_V_ARG_REG + 48]
++
++	/* Load ffi_closure_inner arguments.  */
++	ldp	PTR_REG(0), PTR_REG(1), [x18, #PTR_SIZE]/* load cif, fn */
++	mov	x2, x18					/* load user_data */
++	b	do_closure
++	NESTED_END	ffi_go_closure_SYSV
++
++#endif /* FFI_GO_CLOSURES */
++
++
++/* void extend_hfa_type (void *dest, void *src, int h) */
++
++	LEAF_ENTRY	extend_hfa_type
++
++	adr	x3, extend_hfa_type_jump_base
++	and	w2, w2, #AARCH64_RET_MASK
++	sub	x2, x2, #AARCH64_RET_S4
++	add	x3, x3, x2, lsl #4
++	br	x3
++
++	ALIGN	4
++extend_hfa_type_jump_base
++	ldp	s16, s17, [x1]		/* S4 */
++	ldp	s18, s19, [x1, #8]
++	b	extend_hfa_type_store_4
++	nop
++
++	ldp	s16, s17, [x1]		/* S3 */
++	ldr	s18, [x1, #8]
++	b	extend_hfa_type_store_3
++	nop
++
++	ldp	s16, s17, [x1]		/* S2 */
++	b	extend_hfa_type_store_2
++	nop
++	nop
++
++	ldr	s16, [x1]		/* S1 */
++	b	extend_hfa_type_store_1
++	nop
++	nop
++
++	ldp	d16, d17, [x1]		/* D4 */
++	ldp	d18, d19, [x1, #16]
++	b       extend_hfa_type_store_4
++	nop
++
++	ldp     d16, d17, [x1]		/* D3 */
++	ldr     d18, [x1, #16]
++	b	extend_hfa_type_store_3
++	nop
++
++	ldp	d16, d17, [x1]		/* D2 */
++	b	extend_hfa_type_store_2
++	nop
++	nop
++
++	ldr	d16, [x1]		/* D1 */
++	b	extend_hfa_type_store_1
++	nop
++	nop
++
++	ldp	q16, q17, [x1]		/* Q4 */
++	ldp	q18, q19, [x1, #16]
++	b	extend_hfa_type_store_4
++	nop
++
++	ldp	q16, q17, [x1]		/* Q3 */
++	ldr	q18, [x1, #16]
++	b	extend_hfa_type_store_3
++	nop
++
++	ldp	q16, q17, [x1]		/* Q2 */
++	b	extend_hfa_type_store_2
++	nop
++	nop
++
++	ldr	q16, [x1]		/* Q1 */
++	b	extend_hfa_type_store_1
++
++extend_hfa_type_store_4
++	str	q19, [x0, #48]
++extend_hfa_type_store_3
++	str	q18, [x0, #32]
++extend_hfa_type_store_2
++	str	q17, [x0, #16]
++extend_hfa_type_store_1
++	str	q16, [x0]
++	ret
++
++	LEAF_END	extend_hfa_type
++
++
++/* void compress_hfa_type (void *dest, void *reg, int h) */
++
++	LEAF_ENTRY	compress_hfa_type
++
++	adr	x3, compress_hfa_type_jump_base
++	and	w2, w2, #AARCH64_RET_MASK
++	sub	x2, x2, #AARCH64_RET_S4
++	add	x3, x3, x2, lsl #4
++	br	x3
++
++	ALIGN	4
++compress_hfa_type_jump_base
++	ldp	q16, q17, [x1]		/* S4 */
++	ldp	q18, q19, [x1, #32]
++	st4	{ v16.s, v17.s, v18.s, v19.s }[0], [x0]
++	ret
++
++	ldp	q16, q17, [x1]		/* S3 */
++	ldr	q18, [x1, #32]
++	st3	{ v16.s, v17.s, v18.s }[0], [x0]
++	ret
++
++	ldp	q16, q17, [x1]		/* S2 */
++	st2	{ v16.s, v17.s }[0], [x0]
++	ret
++	nop
++
++	ldr	q16, [x1]		/* S1 */
++	st1	{ v16.s }[0], [x0]
++	ret
++	nop
++
++	ldp	q16, q17, [x1]		/* D4 */
++	ldp	q18, q19, [x1, #32]
++	st4	{ v16.d, v17.d, v18.d, v19.d }[0], [x0]
++	ret
++
++	ldp	q16, q17, [x1]		/* D3 */
++	ldr	q18, [x1, #32]
++	st3	{ v16.d, v17.d, v18.d }[0], [x0]
++	ret
++
++	ldp	q16, q17, [x1]		/* D2 */
++	st2	{ v16.d, v17.d }[0], [x0]
++	ret
++	nop
++
++	ldr	q16, [x1]		/* D1 */
++	st1	{ v16.d }[0], [x0]
++	ret
++	nop
++
++	ldp	q16, q17, [x1]		/* Q4 */
++	ldp	q18, q19, [x1, #32]
++	b	compress_hfa_type_store_q4
++	nop
++
++	ldp	q16, q17, [x1]		/* Q3 */
++	ldr	q18, [x1, #32]
++	b	compress_hfa_type_store_q3
++	nop
++
++	ldp	q16, q17, [x1]		/* Q2 */
++	stp	q16, q17, [x0]
++	ret
++	nop
++
++	ldr	q16, [x1]		/* Q1 */
++	str	q16, [x0]
++	ret
++
++compress_hfa_type_store_q4
++	str	q19, [x0, #48]
++compress_hfa_type_store_q3
++	str	q18, [x0, #32]
++	stp	q16, q17, [x0]
++	ret
++
++	LEAF_END	compress_hfa_type
++
++	END
+\ No newline at end of file
+diff --git a/src/closures.c b/src/closures.c
+index 15e6e0f..ae97524 100644
+--- a/src/closures.c
++++ b/src/closures.c
+@@ -122,7 +122,7 @@ ffi_closure_free (void *ptr)
+ #  define FFI_MMAP_EXEC_WRIT 1
+ #  define HAVE_MNTENT 1
+ # endif
+-# if defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)
++# if defined(X86_WIN32) || defined(X86_WIN64) || defined(_M_ARM64) || defined(__OS2__)
+ /* Windows systems may have Data Execution Protection (DEP) enabled, 
+    which requires the use of VirtualMalloc/VirtualFree to alloc/free
+    executable memory. */
+@@ -385,7 +385,7 @@ ffi_closure_free (void *ptr)
+ #endif
+ #include <string.h>
+ #include <stdio.h>
+-#if !defined(X86_WIN32) && !defined(X86_WIN64)
++#if !defined(X86_WIN32) && !defined(X86_WIN64) && !defined(_M_ARM64)
+ #ifdef HAVE_MNTENT
+ #include <mntent.h>
+ #endif /* HAVE_MNTENT */
+@@ -511,11 +511,11 @@ static int dlmalloc_trim(size_t) MAYBE_UNUSED;
+ static size_t dlmalloc_usable_size(void*) MAYBE_UNUSED;
+ static void dlmalloc_stats(void) MAYBE_UNUSED;
+ 
+-#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
++#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(_M_ARM64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
+ /* Use these for mmap and munmap within dlmalloc.c.  */
+ static void *dlmmap(void *, size_t, int, int, int, off_t);
+ static int dlmunmap(void *, size_t);
+-#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
++#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(_M_ARM64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
+ 
+ #define mmap dlmmap
+ #define munmap dlmunmap
+@@ -525,7 +525,7 @@ static int dlmunmap(void *, size_t);
+ #undef mmap
+ #undef munmap
+ 
+-#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
++#if !(defined(X86_WIN32) || defined(X86_WIN64) || defined(_M_ARM64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX)
+ 
+ /* A mutex used to synchronize access to *exec* variables in this file.  */
+ static pthread_mutex_t open_temp_exec_file_mutex = PTHREAD_MUTEX_INITIALIZER;
+@@ -896,7 +896,7 @@ segment_holding_code (mstate m, char* addr)
+ }
+ #endif
+ 
+-#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
++#endif /* !(defined(X86_WIN32) || defined(X86_WIN64) || defined(_M_ARM64) || defined(__OS2__)) || defined (__CYGWIN__) || defined(__INTERIX) */
+ 
+ /* Allocate a chunk of memory with the given size.  Returns a pointer
+    to the writable address, and sets *CODE to the executable
+diff --git a/src/meson.build b/src/meson.build
+index a1cad36..19e71da 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -55,7 +55,11 @@ elif host_cpu_family == 'aarch64'
+   arch_subdir = 'aarch64'
+   TARGET = 'AARCH64'
+   c_sources = ['ffi.c']
+-  asm_sources = ['sysv.S']
++  if cc.get_id() == 'msvc'
++    asm_sources = ['win64_armasm.S']
++  else
++    asm_sources = ['sysv.S']
++  endif
+ elif host_cpu_family == 'arm'
+   arch_subdir = 'arm'
+   TARGET = 'ARM'
+@@ -85,7 +89,19 @@ if cc.get_id() == 'msvc'
+   # then through the assembler, and then link the objects into the target.
+   # FIXME: Add native support in Meson for this.
+   cl = find_program('cl')
+-  ml = find_program('ml', 'ml64')
++  if host_cpu_family.startswith('x86')
++    assembler_args = [find_program('ml', 'ml64'), '/Fo', '@OUTPUT@', '/c', '@INPUT@']
++    if get_option('buildtype').startswith('debug')
++      assembler_args += ['/Zi', '/Zd']
++    endif
++  elif host_cpu_family == 'aarch64'
++    assembler_args = [find_program('armasm64'), '-o', '@OUTPUT@', '@INPUT@']
++    if get_option('buildtype').startswith('debug')
++      assembler_args += ['-g']
++    endif
++  else
++    error('Unsupported MSVC target: ' + host_cpu_family)
++  endif
+   ffi_asm_objs = []
+   foreach asm_source : ffi_asm_sources
+     incflags = ['/I' + join_paths(meson.current_source_dir(), '..'),
+@@ -103,7 +119,7 @@ if cc.get_id() == 'msvc'
+     ffi_asm_objs += custom_target(obj_name,
+         input : preproc,
+         output : obj_name,
+-        command : [ml, '/Fo', '@OUTPUT@', '/c', '@INPUT@'])
++        command : assembler_args)
+   endforeach
+   ffi_asm_sources = ffi_asm_objs
+ endif
+diff --git a/src/prep_cif.c b/src/prep_cif.c
+index 702ca27..528f07d 100644
+--- a/src/prep_cif.c
++++ b/src/prep_cif.c
+@@ -130,6 +130,9 @@ ffi_status FFI_HIDDEN ffi_prep_cif_core(ffi_cif *cif, ffi_abi abi,
+ 
+   cif->flags = 0;
+ 
++#ifdef _M_ARM64
++  cif->isVariadic = isvariadic;
++#endif
+ #if HAVE_LONG_DOUBLE_VARIANT
+   ffi_prep_types (abi);
+ #endif
+-- 
+2.26.1.windows.1
+
+
+From f348bfb7217784aa2fc95a3f823a09ba297b35e7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 15 Jan 2020 00:43:44 +0530
+Subject: [PATCH 30/32] gitlab ci: Update windows runner tag
+
+And the image being used.
+---
+ .gitlab-ci.yml | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+index b39770c..4bd39f7 100644
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@ -1,5 +1,5 @@
+ variables:
+-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v6'
++  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v8'
+ 
+ .build windows:
+   image: $WINDOWS_IMAGE
+@@ -7,7 +7,7 @@ variables:
+   tags:
+     - 'docker'
+     - 'windows'
+-    - '1607'
++    - '1809'
+   variables:
+     # Uncomment the following key if need to pass custom args, as well with the
+     # $env:MESON_ARGS line in the `script:` blocks
+@@ -48,6 +48,11 @@ msys2:
+     # have to replace them first.
+     # - $env:MESON_ARGS = $env:MESON_ARGS.replace("`n"," ")
+ 
+-    - $env:PATH += ";C:\msys64\usr\bin;C:\msys64\mingw64/bin;C:\msys64\mingw32/bin"
++    - $env:PATH += ";C:\msys64\usr\bin;C:\msys64\mingw64\bin;C:\msys64\mingw32\bin"
++    # XXX: Copied from https://gitlab.freedesktop.org/gstreamer/gst-ci/blob/master/gitlab/ci_template.yml#L487
++    # For some reason docker build hangs if this is included in the image, needs more troubleshooting
++    - C:\msys64\usr\bin\bash -c "pacman-key --init && pacman-key --populate msys2 && pacman-key --refresh-keys || true"
++    - C:\msys64\usr\bin\bash -c "pacman -Syuu --noconfirm"
++    - C:\msys64\usr\bin\bash -c "pacman -Sy --noconfirm --needed mingw-w64-x86_64-toolchain ninja"
+     - C:\msys64\usr\bin\bash -c "meson build $env:MESON_ARGS &&
+-        ninja -C build"
+\ No newline at end of file
++        ninja -C build"
+-- 
+2.26.1.windows.1
+
+
+From c26f70e71117d87ef9d0b9e885730c8ca503d79f Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 7 Apr 2020 01:44:22 +0530
+Subject: [PATCH 31/32] meson: Only look for ml64 when building for Windows
+ 64-bit
+
+VS 2015 adds its VC bindir to PATH by default, so `ml` will get picked
+up if you have VS 2017 installed and enter a VS 2017 x64 command
+prompt. This will lead to build failures.
+---
+ src/meson.build | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index 19e71da..212bf22 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -90,7 +90,14 @@ if cc.get_id() == 'msvc'
+   # FIXME: Add native support in Meson for this.
+   cl = find_program('cl')
+   if host_cpu_family.startswith('x86')
+-    assembler_args = [find_program('ml', 'ml64'), '/Fo', '@OUTPUT@', '/c', '@INPUT@']
++    if host_cpu_family == 'x86'
++      ml = find_program('ml')
++    elif host_cpu_family == 'x86_64'
++      ml = find_program('ml64')
++    else
++      error('Unknown cpu_family: ' + host_cpu_family)
++    endif
++    assembler_args = [ml, '/Fo', '@OUTPUT@', '/c', '@INPUT@']
+     if get_option('buildtype').startswith('debug')
+       assembler_args += ['/Zi', '/Zd']
+     endif
+-- 
+2.26.1.windows.1
+
+
+From 2103c3181183a80287e85671b957f69c012d9a28 Mon Sep 17 00:00:00 2001
+From: Jordan Petridis <jpetridis@gnome.org>
+Date: Thu, 9 Apr 2020 21:13:22 +0300
+Subject: [PATCH 32/32] ci: udpate the windows docker image
+
+rebuild of the image cause the previous one couldn't
+run 32bit binaries due to a secutiry patch apprently
+
+https://support.microsoft.com/en-us/help/4542617/you-might-encounter-issues-when-using-windows-server-containers-with-t
+---
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+index 4bd39f7..1125d20 100644
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@ -1,5 +1,5 @@
+ variables:
+-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v8'
++  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v10'
+ 
+ .build windows:
+   image: $WINDOWS_IMAGE
+-- 
+2.26.1.windows.1
 
