@@ -876,6 +876,12 @@ class Meson (Build, ModifyEnvBase) :
 
         # Try to detect build tools in the remaining env vars
         for name, tool in build_env.items():
+            # Autoconf env vars, incorrectly detected as a build tool because of 'yes'
+            if name.startswith('ac_cv'):
+                continue
+            # Files are always executable on Windows
+            if name in ('HISTFILE', 'GST_REGISTRY_1_0'):
+                continue
             if tool and shutil.which(tool[0]):
                 binaries[name.lower()] = tool
 
