@@ -17,8 +17,9 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import shutil
 import sys
+import shlex
+import shutil
 try:
     import sysconfig
 except:
@@ -673,10 +674,90 @@ class EnvVar:
     @staticmethod
     def is_arg(var):
         return var in ('CFLAGS', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS',
-                'OBJCFLAGS', 'OBJCXXFLAGS', 'CCASFLAGS')
+                'OBJCFLAGS', 'OBJCXXFLAGS', 'OBJLDFLAGS', 'CCASFLAGS')
 
     @staticmethod
     def is_cmd(var):
         return var in ('AR', 'AS', 'CC', 'CPP', 'CXX', 'DLLTOOL', 'GENDEF',
                 'LD', 'NM', 'OBJC', 'OBJCOPY', 'OBJCXX', 'PERL', 'PYTHON',
-                'RANLIB', 'RC', 'STRIP', 'WIDNRES')
+                'RANLIB', 'RC', 'STRIP', 'WINDRES')
+
+
+class EnvValue(list):
+    '''
+    Env var value (list of strings) with an associated separator
+    '''
+
+    def __init__(self, sep, *values):
+        self.sep = sep
+        super().__init__(*values)
+
+    def get(self):
+        return str.join(self.sep, self)
+
+    @staticmethod
+    def from_key(key, value):
+        if EnvVar.is_path(key):
+            return EnvValuePath(value)
+        if EnvVar.is_arg(key):
+            return EnvValueArg(value)
+        if EnvVar.is_cmd(key):
+            return EnvValueCmd(value)
+        return EnvValueSingle(value)
+
+
+class EnvValueSingle(EnvValue):
+    '''
+    Env var with a single value
+    '''
+
+    def __init__(self, *values):
+        if len(values) == 1:
+            if not isinstance(values[0], list):
+                values = ([values[0]],)
+            elif len(values[0]) > 1:
+                raise ValueError('EnvValue can only have a single value, not multiple')
+        super().__init__(None, *values)
+
+    def __iadd__(self, new):
+        if len(self) != 0:
+            raise ValueError('In-place add not allowed for EnvValue {!r}'.format(self))
+        return super().__iadd__(new)
+
+    def get(self):
+        return self[0]
+
+
+class EnvValueArg(EnvValue):
+    '''
+    Env var containing a list of quoted arguments separated by space
+    '''
+
+    def __init__(self, *values):
+        if len(values) == 1 and not isinstance(values[0], list):
+            values = (shlex.split(values[0]),)
+        super().__init__(' ', *values)
+
+    def get(self):
+        return ' '.join([shlex.quote(x) for x in self])
+
+
+class EnvValueCmd(EnvValueArg):
+    '''
+    Env var containing a command and a list of arguments separated by space
+    '''
+
+    def __iadd__(self, new):
+        if isinstance(new, EnvValueCmd):
+            raise ValueError('In-place add not allowed for EnvValueCmd {!r} and EnvValueCmd {!r}'.format(self, new))
+        return super().__iadd__(new)
+
+
+class EnvValuePath(EnvValue):
+    '''
+    Env var containing a list of paths separated by os.pathsep, which is `:` or `;`
+    '''
+    def __init__(self, *values):
+        if len(values) == 1 and not isinstance(values[0], list):
+            values = (values[0].split(os.pathsep),)
+        super().__init__(os.pathsep, *values)

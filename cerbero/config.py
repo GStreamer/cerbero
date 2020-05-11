@@ -28,7 +28,7 @@ from cerbero import enums
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
-from cerbero.utils import EnvVar
+from cerbero.utils import EnvVar, EnvValue
 from cerbero.utils import messages as m
 from cerbero.ide.vs.env import get_vs_year_version
 
@@ -163,10 +163,11 @@ class Config (object):
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
                    'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
-                   'msvc_version', 'msvc_toolchain_env', 'mingw_toolchain_env',
-                   'meson_cross_properties', 'manifest', 'extra_properties',
-                   'qt5_qmake_path', 'qt5_pkgconfigdir', 'for_shell',
-                   'package_tarball_compression', 'extra_mirrors',
+                   'msvc_env_for_toolchain', 'mingw_env_for_toolchain',
+                   'msvc_env_for_build_system', 'mingw_env_for_build_system',
+                   'msvc_version', 'meson_properties', 'manifest',
+                   'extra_properties', 'qt5_qmake_path', 'qt5_pkgconfigdir',
+                   'for_shell', 'package_tarball_compression', 'extra_mirrors',
                    'extra_bootstrap_packages', 'moltenvk_prefix',
                    'vs_install_path', 'vs_install_version']
 
@@ -328,9 +329,9 @@ class Config (object):
         ret_env = {}
         for k in new_env.keys():
             new_v = new_env[k]
-            if isinstance(new_v, list):
-                # Toolchain env is in a different format
-                new_v = new_v[0]
+            # Must not accidentally use this with EnvValue objects
+            if isinstance(new_v, EnvValue):
+                raise AssertionError('{!r}: {!r}'.format(k, new_v))
             if k not in old_env or k in override_env:
                 ret_env[k] = new_v
                 continue
@@ -475,15 +476,6 @@ class Config (object):
             env['C_INCLUDE_PATH'] = includedir
             env['CPLUS_INCLUDE_PATH'] = includedir
 
-        # On Windows, we have a toolchain env that we need to set, but only
-        # when running as a shell
-        if self.platform == Platform.WINDOWS and self.for_shell:
-            if self.can_use_msvc():
-                toolchain_env = self.msvc_toolchain_env
-            else:
-                toolchain_env = self.mingw_toolchain_env
-            env = self._merge_env(env, toolchain_env)
-
         # merge the config env with this new env
         # LDFLAGS and PATH were already merged above
         new_env = self._merge_env(self.config_env, env, override_env=('LDFLAGS', 'PATH'))
@@ -540,7 +532,7 @@ class Config (object):
         self.set_property('extra_build_tools', [])
         self.set_property('distro_packages_install', True)
         self.set_property('interactive', m.console_is_interactive())
-        self.set_property('meson_cross_properties', {})
+        self.set_property('meson_properties', {})
         self.set_property('manifest', None)
         self.set_property('extra_properties', {})
         self.set_property('extra_mirrors', [])
@@ -626,7 +618,7 @@ class Config (object):
         return self.target_distro_version >= distro_version
 
     def _parse(self, filename, reset=True):
-        config = {'os': os, '__file__': filename, 'env' : self.config_env,
+        config = {'os': os, '__file__': filename, 'env': self.config_env,
                   'cross': self.cross_compiling()}
         if not reset:
             for prop in self._properties:

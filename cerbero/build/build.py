@@ -24,10 +24,12 @@ import shlex
 import subprocess
 import asyncio
 from pathlib import Path
+from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.errors import FatalError
 from cerbero.utils import shell, to_unixpath, add_system_libs
+from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
 
 
@@ -89,7 +91,10 @@ class EnvVarOp:
             if self.var in env:
                 del env[self.var]
         else:
-            env[self.var] = self.sep.join(self.vals)
+            if len(self.vals) == 1:
+                env[self.var] = self.vals[0]
+            else:
+                env[self.var] = self.sep.join(self.vals)
 
     def append(self, env):
         if self.var not in env:
@@ -184,46 +189,37 @@ class ModifyEnvBase:
     def setup_toolchain_env_ops(self):
         if self.config.qt5_pkgconfigdir:
             self.append_env('PKG_CONFIG_LIBDIR', self.config.qt5_pkgconfigdir, sep=os.pathsep)
-        if self.config.platform != Platform.WINDOWS:
+        if self.config.target_platform != Platform.WINDOWS:
             return
-        if self.using_msvc():
-            toolchain_env = self.config.msvc_toolchain_env
+
+        if isinstance(self, Meson):
+            if self.using_msvc():
+                toolchain_env = self.config.msvc_env_for_toolchain.items()
+            else:
+                toolchain_env = self.config.mingw_env_for_toolchain.items()
         else:
-            toolchain_env = self.config.mingw_toolchain_env
+            if self.using_msvc():
+                toolchain_env = chain(self.config.msvc_env_for_toolchain.items(),
+                                      self.config.msvc_env_for_build_system.items())
+            else:
+                toolchain_env = chain(self.config.mingw_env_for_toolchain.items(),
+                                      self.config.mingw_env_for_build_system.items())
         # Set the toolchain environment
-        for var, (val, sep) in toolchain_env.items():
+        for var, val in toolchain_env:
             # We prepend PATH and replace the rest
             if var == 'PATH':
-                self.prepend_env(var, val, sep=sep)
+                self.prepend_env(var, val.get(), sep=val.sep)
             else:
-                self.set_env(var, val, sep=sep)
+                self.set_env(var, val.get(), sep=val.sep)
 
     def unset_toolchain_env(self):
-        # These toolchain env vars set by us are for GCC, so unset them if
-        # we're building with MSVC (or cross-compiling with Meson)
         for var in ('CC', 'CXX', 'OBJC', 'OBJCXX', 'AR', 'WINDRES', 'STRIP',
                     'CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS', 'LDFLAGS'):
             if var in self.env:
                 # Env vars that are edited by the recipe will be restored by
                 # @modify_environment when we return from the build step but
                 # other env vars won't be, so add those.
-                self.set_env (var, None, when='now-with-restore')
-
-            if self.using_msvc():
-                # Restore msvc toolchain env which should be preserved
-                for key, (val, sep) in self.config.msvc_toolchain_env.items():
-                    if var == key:
-                        self.set_env(var, val, sep=sep, when='now')
-                        break
-
-        # Re-add *FLAGS that weren't set by the toolchain config, but instead
-        # were set in the recipe or other places via @modify_environment
-        if self.using_msvc():
-            for var in ('CFLAGS', 'CXXFLAGS', 'CPPFLAGS', 'OBJCFLAGS',
-                        'LDFLAGS', 'OBJLDFLAGS'):
-                for each in self._new_env:
-                    if var == each.var:
-                        each.execute(self.env)
+                self.set_env(var, None, when='now-with-restore')
 
     def check_reentrancy(self):
         if self._old_env:
@@ -254,7 +250,7 @@ class ModifyEnvBase:
             return
         # Store old env
         for var in self._env_vars:
-            self._save_env_var (var)
+            self._save_env_var(var)
         # Modify env
         for env_op in self._new_env:
             env_op.execute(self.env)
@@ -446,9 +442,6 @@ class MakefilesBase (Build, ModifyEnvBase):
         if self.requires_non_src_build:
             self.config_sh = os.path.join('../', self.config_sh)
 
-        if self.using_msvc():
-            self.unset_toolchain_env()
-
         substs = {
             'config-sh': self.config_sh,
             'prefix': self.config.prefix,
@@ -482,8 +475,6 @@ class MakefilesBase (Build, ModifyEnvBase):
 
     @modify_environment
     async def compile(self):
-        if self.using_msvc():
-            self.unset_toolchain_env()
         self.maybe_add_system_libs(step='compile')
         await shell.async_call(self.make, self.make_dir, logfile=self.logfile, env=self.env)
 
@@ -677,8 +668,7 @@ class CMake (MakefilesBase):
         self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
 
-
-MESON_CROSS_FILE_TPL = \
+MESON_FILE_TPL = \
 '''
 [host_machine]
 system = '{system}'
@@ -692,14 +682,10 @@ endian = '{endian}'
 [binaries]
 c = {CC}
 cpp = {CXX}
+objc = {OBJC}
+objcpp = {OBJCXX}
 ar = {AR}
-pkgconfig = 'pkg-config'
-{extra_binaries}
-'''
-
-MESON_NATIVE_FILE_TPL = \
-'''
-[binaries]
+pkgconfig = {PKG_CONFIG}
 {extra_binaries}
 '''
 
@@ -715,7 +701,6 @@ class Meson (Build, ModifyEnvBase) :
 
     meson_sh = None
     meson_options = None
-    meson_cross_properties = None
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
@@ -728,10 +713,6 @@ class Meson (Build, ModifyEnvBase) :
         ModifyEnvBase.__init__(self)
 
         self.setup_toolchain_env_ops()
-
-        cross_props = copy.deepcopy(self.config.meson_cross_properties)
-        cross_props.update(self.config.meson_cross_properties or {})
-        self.meson_cross_properties = cross_props
 
         # Find Meson
         if not self.meson_sh:
@@ -795,7 +776,7 @@ class Meson (Build, ModifyEnvBase) :
             value = getattr(self.config.variants, variant_name) if variant_name else False
             self.meson_options[opt_name] = self._get_option_value(opt_type, value)
 
-    def _get_cpu_family(self):
+    def _get_target_cpu_family(self):
         if Architecture.is_arm(self.config.target_arch):
             if Architecture.is_arm32(self.config.target_arch):
                 return 'arm'
@@ -808,105 +789,150 @@ class Meson (Build, ModifyEnvBase) :
         moc_name = qmake.name.replace('qmake', 'moc')
         return str(qmake.parent / moc_name)
 
-    def _write_meson_cross_file(self):
-        # Take cross toolchain from _old_env because we removed them from the
-        # env so meson doesn't detect them as the native toolchain.
-        # Same for *FLAGS below.
-        if self.using_msvc():
-            cc = ['cl']
-            cxx = ['cl']
-            ar = ['lib']
-        else:
-            cc = self.env['CC'].split()
-            cxx = self.env['CXX'].split()
-            ar = self.env['AR'].split()
-        strip = self.env.get('STRIP', '').split()
-        windres = self.env.get('WINDRES', '').split()
+    def _get_meson_target_file_contents(self):
+        '''
+        Get the toolchain configuration for the target machine. This will
+        either go into a cross file or a native file depending on whether we're
+        cross-compiling or not.
+        '''
+        def merge_env(old_env, new_env):
+            ret_env = {}
+            # Set/merge new values
+            for k, new_v in new_env.items():
+                new_v = EnvValue.from_key(k, new_v)
+                if k not in old_env:
+                    ret_env[k] = new_v
+                    continue
+                old_v = old_env[k]
+                assert(isinstance(old_v, EnvValue))
+                if isinstance(old_v, (EnvValueSingle, EnvValueCmd)) or (new_v == old_v):
+                    ret_env[k] = new_v
+                elif isinstance(old_v, (EnvValuePath, EnvValueArg)):
+                    ret_env[k] = new_v + old_v
+                else:
+                    raise FatalError("Don't know how to combine the environment "
+                        "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v))
+            # Set remaining old values
+            for k in old_env.keys():
+                if k not in new_env:
+                    ret_env[k] = old_env[k]
+            return ret_env
 
-        # We do not use cmake dependency files, speed up the build by disabling it
-        cross_binaries = {'cmake': ['false']}
-        if 'STRIP' in self.env:
-            cross_binaries['strip'] = self.env['STRIP'].split()
-        if 'WINDRES' in self.env:
-            cross_binaries['windres'] = self.env['WINDRES'].split()
-        if 'OBJC' in self.env:
-            cross_binaries['objc'] = self.env['OBJC'].split()
-        if 'OBJCXX' in self.env:
-            cross_binaries['objcpp'] = self.env['OBJCXX'].split()
-        if self.config.qt5_qmake_path:
-            cross_binaries['qmake'] = [self.config.qt5_qmake_path]
-            cross_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
-
-        # *FLAGS are only passed to the native compiler, so while
-        # cross-compiling we need to pass these through the cross file.
-        c_args = shlex.split(self.env.get('CFLAGS', ''))
-        cpp_args = shlex.split(self.env.get('CXXFLAGS', ''))
-        objc_args = shlex.split(self.env.get('OBJCFLAGS', ''))
-        objcpp_args = shlex.split(self.env.get('OBJCXXFLAGS', ''))
-        # Link args
-        c_link_args = shlex.split(self.env.get('LDFLAGS', ''))
-        cpp_link_args = c_link_args
-        if 'OBJLDFLAGS' in self.env:
-            objc_link_args = shlex.split(self.env['OBJLDFLAGS'])
+        # Extract toolchain config for the build system from the appropriate
+        # config env dict. Start with `self.env`, since it contains toolchain
+        # config set by the recipe and when building for target platforms other
+        # than Windows, it also contains build tools and the env for the
+        # toolchain set by config/*.config.
+        #
+        # On Windows, the toolchain config is `self.config.msvc_env_for_build_system`
+        # or `self.config.mingw_env_for_build_system` depending on which toolchain
+        # this recipe will use.
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.using_msvc():
+                build_env = dict(self.config.msvc_env_for_build_system)
+            else:
+                build_env = dict(self.config.mingw_env_for_build_system)
         else:
-            objc_link_args = c_link_args
-        objcpp_link_args = objc_link_args
+            build_env = {}
+        # Override/merge toolchain env with recipe env and return a new dict
+        # with values as EnvValue objects
+        build_env = merge_env(build_env, self.env)
+
+        cc = build_env.pop('CC')
+        cxx = build_env.pop('CXX')
+        objc = build_env.pop('OBJC', [])
+        objcxx = build_env.pop('OBJCXX', [])
+        ar = build_env.pop('AR')
+        # We currently don't set the pre-processor or the linker when building with meson
+        build_env.pop('CPP', None)
+        build_env.pop('LD', None)
 
         # Operate on a copy of the recipe properties to avoid accumulating args
         # from all archs when doing universal builds
-        cross_properties = copy.deepcopy(self.meson_cross_properties)
-        for args in ('c_args', 'cpp_args', 'objc_args', 'objcpp_args',
-                     'c_link_args', 'cpp_link_args', 'objc_link_args',
-                     'objcpp_link_args'):
-            if args in cross_properties:
-                cross_properties[args] += locals()[args]
+        props = {}
+        build_env.pop('CPP', None) # Meson does not read this
+        build_env.pop('CPPFLAGS', None) # Meson does not read this, and it's duplicated in *FLAGS
+        props['c_args'] = build_env.pop('CFLAGS', [])
+        props['cpp_args'] = build_env.pop('CXXFLAGS', [])
+        props['objc_args'] = build_env.pop('OBJCFLAGS', [])
+        props['objcpp_args'] = build_env.pop('OBJCXXFLAGS', [])
+        # Link args
+        props['c_link_args'] = build_env.pop('LDFLAGS', [])
+        props['cpp_link_args'] = props['c_link_args']
+        props['objc_link_args'] = build_env.pop('OBJLDFLAGS', props['c_link_args'])
+        props['objcpp_link_args'] = props['objc_link_args']
+        for key, value in self.config.meson_properties.items():
+            if key not in props:
+                props[key] = value
             else:
-                cross_properties[args] = locals()[args]
+                props[key] += value
+
+        # We do not use cmake dependency files, speed up the build by disabling it
+        binaries = {'cmake': ['false']}
+        # Get qmake and moc paths
+        if self.config.qt5_qmake_path:
+            binaries['qmake'] = [self.config.qt5_qmake_path]
+            binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
+
+        # Try to detect build tools in the remaining env vars
+        for name, tool in build_env.items():
+            if tool and shutil.which(tool[0]):
+                binaries[name.lower()] = tool
 
         extra_properties = ''
-        for k, v in cross_properties.items():
+        for k, v in props.items():
             extra_properties += '{} = {}\n'.format(k, str(v))
 
         extra_binaries = ''
-        for k, v in cross_binaries.items():
+        for k, v in binaries.items():
             extra_binaries += '{} = {}\n'.format(k, str(v))
 
-        # Create a cross-info file that tells Meson and GCC how to cross-compile
-        # this project
-        cross_file = os.path.join(self.meson_dir, 'meson-cross-file.txt')
-        contents = MESON_CROSS_FILE_TPL.format(
+        contents = MESON_FILE_TPL.format(
                 system=self.config.target_platform,
                 cpu=self.config.target_arch,
-                cpu_family=self._get_cpu_family(),
-                # Assume all ARM sub-archs are in little endian mode
+                cpu_family=self._get_target_cpu_family(),
+                # Assume all supported target archs are little endian
                 endian='little',
                 CC=cc,
                 CXX=cxx,
+                OBJC=objc,
+                OBJCXX=objcxx,
                 AR=ar,
+                PKG_CONFIG="'pkg-config'",
                 extra_binaries=extra_binaries,
                 extra_properties=extra_properties)
-        with open(cross_file, 'w') as f:
-            f.write(contents)
+        return contents
 
-        return cross_file
-
-    def _write_meson_native_file(self):
+    def _get_meson_dummy_file_contents(self):
+        '''
+        Get a toolchain configuration that points to `false` for everything.
+        This forces Meson to not detect a build-machine (native) compiler when
+        cross-compiling.
+        '''
+        # Tell meson to not use a native compiler for anything
+        false = ['false']
         # We do not use cmake dependency files, speed up the build by disabling it
-        native_binaries = {'cmake': ['false']}
-        if self.config.qt5_qmake_path:
-            native_binaries['qmake'] = [self.config.qt5_qmake_path]
-            native_binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
+        extra_binaries = 'cmake = {}'.format(str(false))
+        contents = MESON_FILE_TPL.format(
+                system=self.config.platform,
+                cpu=self.config.arch,
+                cpu_family=self.config.arch,
+                endian='little',
+                CC=false,
+                CXX=false,
+                OBJC=false,
+                OBJCXX=false,
+                AR=false,
+                PKG_CONFIG=false,
+                extra_binaries=extra_binaries,
+                extra_properties='')
+        return contents
 
-        extra_binaries = ''
-        for k, v in native_binaries.items():
-            extra_binaries += '{} = {}\n'.format(k, str(v))
-
-        native_file = os.path.join(self.meson_dir, 'meson-native-file.txt')
-        contents = MESON_NATIVE_FILE_TPL.format(extra_binaries=extra_binaries)
-        with open(native_file, 'w') as f:
+    def _write_meson_file(self, contents, fname):
+        fpath = os.path.join(self.meson_dir, fname)
+        with open(fpath, 'w') as f:
             f.write(contents)
-
-        return native_file
+        return fpath
 
     @modify_environment
     async def configure(self):
@@ -954,26 +980,32 @@ class Meson (Build, ModifyEnvBase) :
         # Don't enable bitcode by passing flags manually, use the option
         if self.config.ios_platform == 'iPhoneOS':
             self.meson_options.update({'b_bitcode': 'true'})
-        if self.config.cross_compiling():
-            meson_cmd += ['--cross-file', self._write_meson_cross_file()]
-        meson_cmd += ['--native-file', self._write_meson_native_file()]
 
-        if self.config.cross_compiling() or self.using_msvc():
-            # We export the cross toolchain with env vars, but Meson picks the
-            # native toolchain from these, so unset them.
-            # FIXME: https://bugzilla.gnome.org/show_bug.cgi?id=791670
-            # NOTE: This means we require a native compiler on the build
-            # machine when cross-compiling, which in practice is not a problem
-            #
-            # Also, on Windows these toolchain env vars set by us are for GCC,
-            # so unset them if we're building with MSVC
-            self.unset_toolchain_env()
+        # Get platform config in the form of a meson native/cross file
+        contents = self._get_meson_target_file_contents()
+        # If cross-compiling, write contents to the cross file and get contents for
+        # a native file that will cause all native compiler detection to fail.
+        #
+        # Else, write contents to a native file.
+        if self.config.cross_compiling():
+            meson_cmd += ['--cross-file', self._write_meson_file(contents, 'meson-cross-file.txt')]
+            contents = self._get_meson_dummy_file_contents()
+        meson_cmd += ['--native-file', self._write_meson_file(contents, 'meson-native-file.txt')]
 
         if 'default_library' in self.meson_options:
             raise RuntimeError('Do not set `default_library` in self.meson_options, use self.library_type instead')
 
         for (key, value) in self.meson_options.items():
             meson_cmd += ['-D%s=%s' % (key, str(value))]
+
+        # We export the target toolchain with env vars, but that confuses Meson
+        # when cross-compiling (it will pick the env vars for the build
+        # machine). We always set this using the cross file or native file as
+        # applicable, so always unset these.
+        # FIXME: We need an argument for meson that tells it to not pick up the
+        # toolchain from the env.
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/issues/48
+        self.unset_toolchain_env()
 
         self.maybe_add_system_libs(step='configure')
         await shell.async_call(meson_cmd, self.meson_dir, logfile=self.logfile, env=self.env)
