@@ -875,6 +875,7 @@ class Meson (Build, ModifyEnvBase) :
             binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
 
         # Try to detect build tools in the remaining env vars
+        build_tool_paths = build_env['PATH'].get()
         for name, tool in build_env.items():
             # Autoconf env vars, incorrectly detected as a build tool because of 'yes'
             if name.startswith('ac_cv'):
@@ -882,7 +883,7 @@ class Meson (Build, ModifyEnvBase) :
             # Files are always executable on Windows
             if name in ('HISTFILE', 'GST_REGISTRY_1_0'):
                 continue
-            if tool and shutil.which(tool[0]):
+            if tool and shutil.which(tool[0], path=build_tool_paths):
                 binaries[name.lower()] = tool
 
         extra_properties = ''
