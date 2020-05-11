@@ -9,8 +9,9 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '43997a3939b6ccdf2f669b50fdb8a4d3205374728c2923ddc2354c65260214f8'
     autoreconf = True
 
+    patches = ['libunwind/0001-Fix-compilation-with--fno-common.patch']
+
     files_libs = ['libunwind']
     files_devel = ['include/libunwind-*.h',
                    'include/unwind.h',
                    'lib/pkgconfig/libunwind-*.pc']
-    autoreconf = True
