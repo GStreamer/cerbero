@@ -116,13 +116,10 @@ class GenLib(object):
         # No Visual Studio tools while cross-compiling
         if platform != Platform.WINDOWS:
             return None, None
-        try:
-            from cerbero.ide.vs.env import get_msvc_env
-            msvc_env = get_msvc_env('x86', target_arch, False, self.config.vs_install_version,
-                                self.config.vs_install_path)[0]
-        except FatalError:
+        # Visual Studio not installed
+        if 'PATH' not in self.config.msvc_env_for_toolchain:
             return None, None
-        paths = msvc_env['PATH']
+        paths = self.config.msvc_env_for_toolchain['PATH'].get()
         return shutil.which('lib', path=paths), paths
 
 class GenGnuLib(GenLib):
