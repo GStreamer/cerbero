@@ -40,7 +40,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.ARM64:
                 self.openssl_platform = 'BSD-generic64'
             else:
-                raise NotImplementedError
+                raise InvalidRecipeError(self, "Unknown iOS platform")
         elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch == Architecture.ARM:
                 self.openssl_platform = 'android-arm'
@@ -53,7 +53,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86_64:
                 self.openssl_platform = 'android-x86_64'
             else:
-                raise NotImplementedError
+                raise InvalidRecipeError(self, "Unknown Android platform")
 
             self.make += ['CROSS_SYSROOT=' + self.config.sysroot]
         elif self.config.target_platform == Platform.DARWIN:
@@ -62,7 +62,7 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.X86_64:
                 self.openssl_platform = 'darwin64-x86_64-cc'
             else:
-                raise NotImplementedError
+                raise InvalidRecipeError(self, "Unknown macOS platform")
         elif self.config.target_platform == Platform.LINUX:
             if self.config.target_arch == Architecture.X86:
                 self.openssl_platform = 'linux-elf'
@@ -75,14 +75,14 @@ class Recipe(recipe.Recipe):
             elif self.config.target_arch == Architecture.ARM64:
                 self.openssl_platform = 'linux-aarch64'
             else:
-                raise NotImplementedError
+                raise InvalidRecipeError(self, "Unknown Linux platform")
         elif self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86:
                 self.openssl_platform = 'mingw'
             elif self.config.target_arch == Architecture.X86_64:
                 self.openssl_platform = 'mingw64'
             else:
-                raise NotImplementedError
+                raise InvalidRecipeError(self, "Unknown Windows platform")
         cflags = self.get_env('CFLAGS') + '-fPIC -DOPENSSL_PIC'
         ldflags = self.get_env('LDFLAGS') + '-fPIC'
         ranlib = self.get_env('RANLIB')
