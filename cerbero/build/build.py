@@ -97,17 +97,24 @@ class EnvVarOp:
                 env[self.var] = self.sep.join(self.vals)
 
     def append(self, env):
-        if self.var not in env:
-            env[self.var] = self.sep.join(self.vals)
+        # Avoid appending trailing space
+        val = self.sep.join(self.vals)
+        if not val:
+            return
+        if self.var not in env or not env[self.var]:
+            env[self.var] = val
         else:
-            env[self.var] += self.sep + self.sep.join(self.vals)
+            env[self.var] += self.sep + val
 
     def prepend(self, env):
-        if self.var not in env:
-            env[self.var] = self.sep.join(self.vals)
+        # Avoid prepending a leading space
+        val = self.sep.join(self.vals)
+        if not val:
+            return
+        if self.var not in env or not env[self.var]:
+            env[self.var] = val
         else:
-            old = env[self.var]
-            env[self.var] = self.sep.join(self.vals) + self.sep + old
+            env[self.var] = val + self.sep + env[self.var]
 
     def remove(self, env):
         if self.var not in env:
