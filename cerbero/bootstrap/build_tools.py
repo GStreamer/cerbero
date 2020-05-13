@@ -81,6 +81,8 @@ class BuildTools (BootstrapperBase, Fetch):
         config.build_tools_prefix = self.config.build_tools_prefix
         config.sources = self.config.build_tools_sources
         config.build_tools_sources = self.config.build_tools_sources
+        config.logs = self.config.build_tools_logs
+        config.build_tools_logs = self.config.build_tools_logs
         config.cache_file = self.config.build_tools_cache
         config.build_tools_cache = self.config.build_tools_cache
         config.external_recipes = self.config.external_recipes
@@ -95,6 +97,8 @@ class BuildTools (BootstrapperBase, Fetch):
             os.makedirs(config.prefix)
         if not os.path.exists(config.sources):
             os.makedirs(config.sources)
+        if not os.path.exists(config.logs):
+            os.makedirs(config.logs)
 
         config.do_setup_env()
         self.cookbook = CookBook(config, offline=self.offline)

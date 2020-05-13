@@ -156,7 +156,7 @@ class Config (object):
                    'data_dir', 'min_osx_sdk_version', 'external_recipes',
                    'external_packages', 'use_ccache', 'force_git_commit',
                    'universal_archs', 'osx_target_sdk_version', 'variants',
-                   'build_tools_prefix', 'build_tools_sources',
+                   'build_tools_prefix', 'build_tools_sources', 'build_tools_logs',
                    'build_tools_cache', 'home_dir', 'recipes_commits',
                    'recipes_remotes', 'ios_platform', 'extra_build_tools',
                    'distro_packages_install', 'interactive', 'bash_completions',
@@ -695,6 +695,8 @@ class Config (object):
                 os.path.join(self.home_dir, 'build-tools'))
         self.set_property('build_tools_sources',
                 os.path.join(self.home_dir, 'sources', 'build-tools'))
+        self.set_property('build_tools_logs',
+                os.path.join(self.home_dir, 'logs', 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools.cache')
         # Set target platform defaults
         target_platform = self.target_platform
