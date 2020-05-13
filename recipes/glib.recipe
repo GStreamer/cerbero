@@ -46,6 +46,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-meson-host_system-can-be-ios-when-cross-compiling.patch',
         'glib/0002-meson-Autodetect-when-building-for-iOS.patch',
         'glib/0003-meson-Only-look-for-_NSGetEnviron-when-building-for-.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1522
+        'glib/0001-meson-Fix-gnulib-printf-checks.patch',
     ]
 
     files_libs = [
@@ -77,7 +79,7 @@ class Recipe(recipe.Recipe):
         'include/glib-2.0',
         'share/aclocal/glib-2.0.m4',
         'share/aclocal/glib-gettext.m4'
-        ]
+    ]
     platform_files_devel = {
         Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
         Platform.LINUX: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
@@ -127,6 +129,38 @@ class Recipe(recipe.Recipe):
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
             self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
+            # TODO: upstream
+            if self.config.variants.uwp:
+                # gdbus is completely disabled at present
+                self.files_bins.remove('gdbus')
+                self.files_bins_devel.remove('bin/gdbus.pdb')
+                self.patches += [
+                    # Ready to upstream
+                    'glib/uwp/0001-gio-Remove-broken-support-for-XP.patch',
+                    'glib/uwp/0002-win_iconv-Use-LoadPackagedLibrary-when-building-UWP-.patch',
+                    'glib/uwp/0003-glib-getpid-is-available-on-Win32-but-not-WinRT.patch',
+                    'glib/uwp/0004-goption-Do-not-call-GetCommandlineW-on-UWP.patch',
+                    'glib/uwp/0005-gmodule-Fix-some-more-WinRT-incompatibilities.patch',
+                    'glib/uwp/0006-gutils-Can-t-fetch-the-username-on-UWP.patch',
+                    'glib/uwp/0007-gutils-GetWindowsDirectory-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0008-glocalfile-File-user-info-is-not-supported-on-WinRT.patch',
+                    'glib/uwp/0009-gwin32-Stub-out-all-version-checking-on-WinRT.patch',
+                    'glib/uwp/0010-gutils-GetModuleHandle-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0011-gsocket-if_nametoindex-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0012-gio-ginetaddress-Fix-build-on-WinRT.patch',
+                    # Need some more work
+                    'glib/uwp/0013-WIP-UPSTREAM-glib-Specify-noreturn-prototype-for-MSV.patch',
+                    'glib/uwp/0014-WIP-gspawn-Do-not-allow-spawning-or-making-pipes-on-.patch',
+                    'glib/uwp/0015-WIP-glib-giowin32-Disallow-invalid-usage-of-GIOChann.patch',
+                    'glib/uwp/0016-WIP-glocalfile-Trash-as-a-concept-does-not-exist-on-.patch',
+                    'glib/uwp/0020-WIP-glib-Implement-get_special_folder-for-UWP-apps.patch',
+                    'glib/uwp/0021-WIP-gtimezone-Partially-port-to-WinRT.patch',
+                    # Need a lot more work
+                    'glib/uwp/0017-TODO-gdate-gstdio-Abort-when-trying-to-use-unsupport.patch',
+                    'glib/uwp/0018-gio-Disable-win32-API-and-modules-when-unavailable-o.patch',
+                    'glib/uwp/0019-TODO-gdbus-Completely-disable-when-building-for-WinR.patch',
+                    'glib/uwp/0022-TODO-gio-gcontenttype-Needs-porting-to-WinRT-model.patch',
+                ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
             arch = self.config.target_arch

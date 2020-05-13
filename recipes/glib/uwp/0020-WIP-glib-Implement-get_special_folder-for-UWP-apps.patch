@@ -1,0 +1,297 @@
+From c2a0037899b3e233e337b500dc338e56ae9399e7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 19 Aug 2019 13:24:40 +0530
+Subject: [PATCH 20/22] WIP: glib: Implement get_special_folder for UWP apps
+
+---
+ glib/gutils-winrt-private.h | 77 ++++++++++++++++++++++++++++++
+ glib/gutils-winrt.cpp       | 95 +++++++++++++++++++++++++++++++++++++
+ glib/gutils.c               | 38 ++++++++++++++-
+ glib/meson.build            |  3 ++
+ meson.build                 |  3 +-
+ 5 files changed, 214 insertions(+), 2 deletions(-)
+ create mode 100644 glib/gutils-winrt-private.h
+ create mode 100644 glib/gutils-winrt.cpp
+
+diff --git a/glib/gutils-winrt-private.h b/glib/gutils-winrt-private.h
+new file mode 100644
+index 0000000..643c201
+--- /dev/null
++++ b/glib/gutils-winrt-private.h
+@@ -0,0 +1,77 @@
++/* GLIB - Library of useful routines for C programming
++ * Copyright (C) 2019 Nirbheek Chauhan
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#ifndef __G_UTILS_WINRT_PRIVATE_H__
++#define __G_UTILS_WINRT_PRIVATE_H__
++
++#include <glib/gtypes.h>
++
++G_BEGIN_DECLS
++
++/* These are defined in ShlObj_core.h and aren't available when targeting UWP.
++ * However, we use these defines internally so redefine them for simplicity */
++#ifndef CSIDL_LOCAL_APPDATA
++#define CSIDL_LOCAL_APPDATA             0x001c
++#endif
++#ifndef CSIDL_INTERNET_CACHE
++#define CSIDL_INTERNET_CACHE            0x0020
++#endif
++#ifndef CSIDL_COMMON_APPDATA
++#define CSIDL_COMMON_APPDATA            0x0023
++#endif
++#ifndef CSIDL_COMMON_DOCUMENTS
++#define CSIDL_COMMON_DOCUMENTS          0x002e
++#endif
++#ifndef CSIDL_DESKTOPDIRECTORY
++#define CSIDL_DESKTOPDIRECTORY          0x0010
++#endif
++#ifndef CSIDL_PERSONAL
++#define CSIDL_PERSONAL                  0x0005
++#endif
++#ifndef CSIDL_MYDOCUMENTS
++#define CSIDL_MYDOCUMENTS               CSIDL_PERSONAL
++#endif
++#ifndef CSIDL_MYMUSIC
++#define CSIDL_MYMUSIC                   0x000d
++#endif
++#ifndef CSIDL_MYPICTURES
++#define CSIDL_MYPICTURES                0x0027
++#endif
++#ifndef CSIDL_MYVIDEO
++#define CSIDL_MYVIDEO                   0x000e
++#endif
++#ifndef CSIDL_TEMPLATES
++#define CSIDL_TEMPLATES                 0x0015
++#endif
++#ifndef CSIDL_PROFILE
++#define CSIDL_PROFILE                   0x0028
++#endif
++
++enum GUtilsWinRTStorageFolderID
++{
++  G_UTILS_WINRT_LOCAL_FOLDER,
++  G_UTILS_WINRT_LOCAL_CACHE_FOLDER,
++  G_UTILS_WINRT_TEMPORARY_FOLDER,
++  G_UTILS_WINRT_SHARED_LOCAL_FOLDER,
++  G_UTILS_WINRT_ROAMING_FOLDER,
++};
++
++gchar * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
++
++G_END_DECLS
++
++#endif /* __G_UTILS_WINRT_PRIVATE_H__ */
+diff --git a/glib/gutils-winrt.cpp b/glib/gutils-winrt.cpp
+new file mode 100644
+index 0000000..30a3b20
+--- /dev/null
++++ b/glib/gutils-winrt.cpp
+@@ -0,0 +1,95 @@
++/* GLIB - Library of useful routines for C programming
++ * Copyright (C) 2019 Nirbheek Chauhan
++ *
++ * This library is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU Lesser General Public
++ * License as published by the Free Software Foundation; either
++ * version 2.1 of the License, or (at your option) any later version.
++ *
++ * This library is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
++ * Lesser General Public License for more details.
++ *
++ * You should have received a copy of the GNU Lesser General Public
++ * License along with this library; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include "config.h"
++#include "glib-private.h"
++
++#include <winrt/Windows.Storage.h>
++
++#include "gutils-winrt-private.h"
++
++using namespace winrt;
++using namespace Windows::Storage;
++
++static gchar *
++from_hstring (winrt::hstring s)
++{
++  return g_strdup (winrt::to_string(s).c_str());
++}
++
++/* LocalFolder is backed up to the cloud */
++static gchar *
++get_app_data_local_folder (void)
++{
++  ApplicationData app_data { Windows::Storage::ApplicationData::Current() };
++  return from_hstring (app_data.LocalFolder().Path());
++}
++
++/* LocalCacheFolder is NOT backed up to the cloud */
++static gchar *
++get_app_data_local_cache_folder (void)
++{
++  ApplicationData app_data { Windows::Storage::ApplicationData::Current() };
++  return from_hstring (app_data.LocalCacheFolder().Path());
++}
++
++/* RoamingFolder is continuously synchronized between devices
++ * See: https://docs.microsoft.com/en-us/windows/uwp/design/app-settings/store-and-retrieve-app-data#roaming-data */
++static gchar *
++get_app_data_roaming_folder (void)
++{
++  ApplicationData app_data { Windows::Storage::ApplicationData::Current() };
++  return from_hstring (app_data.RoamingFolder().Path());
++}
++
++/* TemporaryFolder is for temporary files, of course */
++static gchar *
++get_app_data_temporary_folder (void)
++{
++  ApplicationData app_data { Windows::Storage::ApplicationData::Current() };
++  return from_hstring (app_data.TemporaryFolder().Path());
++}
++
++/* There is only one location for shared app data. Requires a group policy
++ * setting to be enabled.
++ * See: https://docs.microsoft.com/gl-es/uwp/api/windows.storage.applicationdata.sharedlocalfolder#remarks */
++static gchar *
++get_app_data_shared_local_folder (void)
++{
++  ApplicationData app_data { Windows::Storage::ApplicationData::Current() };
++  return from_hstring (app_data.SharedLocalFolder().Path());
++}
++
++extern "C" gchar *
++g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id)
++{
++  switch (folder_id) {
++    case G_UTILS_WINRT_LOCAL_FOLDER:
++      return get_app_data_local_folder ();
++    case G_UTILS_WINRT_LOCAL_CACHE_FOLDER:
++      return get_app_data_local_cache_folder ();
++    case G_UTILS_WINRT_TEMPORARY_FOLDER:
++      return get_app_data_temporary_folder ();
++    case G_UTILS_WINRT_SHARED_LOCAL_FOLDER:
++      return get_app_data_shared_local_folder ();
++    case G_UTILS_WINRT_ROAMING_FOLDER:
++      return get_app_data_roaming_folder ();
++    default:
++      g_assert_not_reached ();
++      g_abort ();
++  }
++}
+diff --git a/glib/gutils.c b/glib/gutils.c
+index b5ec664..95eb3f1 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -96,6 +96,10 @@
+ #  include <direct.h>
+ #  include <shlobj.h>
+ #  include <process.h>
++   /* WinRT implementations for CSIDL folders */
++#  ifdef G_WINAPI_ONLY_APP
++#    include "gutils-winrt-private.h"
++#  endif
+ #endif
+ 
+ #ifdef HAVE_CODESET
+@@ -551,11 +555,12 @@ static  gchar  **g_user_special_dirs = NULL;
+ static gchar *
+ get_special_folder (int csidl)
+ {
++  gchar *retval = NULL;
++#ifndef G_WINAPI_ONLY_APP
+   wchar_t path[MAX_PATH+1];
+   HRESULT hr;
+   LPITEMIDLIST pidl = NULL;
+   BOOL b;
+-  gchar *retval = NULL;
+ 
+   hr = SHGetSpecialFolderLocation (NULL, csidl, &pidl);
+   if (hr == S_OK)
+@@ -565,6 +570,37 @@ get_special_folder (int csidl)
+ 	retval = g_utf16_to_utf8 (path, -1, NULL, NULL, NULL);
+       CoTaskMemFree (pidl);
+     }
++#else
++  enum GUtilsWinRTStorageFolderID fid;
++
++  switch (csidl) {
++    case CSIDL_LOCAL_APPDATA:
++      fid = G_UTILS_WINRT_LOCAL_FOLDER;
++      break;
++    case CSIDL_INTERNET_CACHE:
++      fid = G_UTILS_WINRT_TEMPORARY_FOLDER;
++      break;
++    case CSIDL_COMMON_APPDATA:
++    case CSIDL_COMMON_DOCUMENTS:
++      fid = G_UTILS_WINRT_SHARED_LOCAL_FOLDER;
++      break;
++    /* User data locations are all inaccessible without an async call to get
++     * permissions, so return the next best thing: the app's local data dir */
++    case CSIDL_DESKTOPDIRECTORY:
++    case CSIDL_PERSONAL:
++    case CSIDL_MYMUSIC:
++    case CSIDL_MYPICTURES:
++    case CSIDL_MYVIDEO:
++    case CSIDL_TEMPLATES:
++    case CSIDL_PROFILE:
++      fid = G_UTILS_WINRT_LOCAL_FOLDER;
++      break;
++    default:
++      g_assert_not_reached ();
++      g_abort ();
++  }
++  retval = g_utils_winrt_get_storage_folder (fid);
++#endif
+   return retval;
+ }
+ 
+diff --git a/glib/meson.build b/glib/meson.build
+index d3c2de4..ef96772 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -315,6 +315,9 @@ if host_system == 'windows'
+   glib_win_res = windows.compile_resources(glib_win_rc)
+   glib_sources += [glib_win_res]
+   glib_sources += files('gwin32.c', 'gspawn-win32.c', 'giowin32.c')
++  if glib_conf.has('G_WINAPI_ONLY_APP')
++    glib_sources += files('gutils-winrt.cpp')
++  endif
+   platform_deps = [winsock2, cc.find_library('winmm')]
+   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
+     glib_sources += files('dirent/wdirent.c')
+diff --git a/meson.build b/meson.build
+index 7203a3f..f511446 100644
+--- a/meson.build
++++ b/meson.build
+@@ -5,7 +5,8 @@ project('glib', 'c', 'cpp',
+   default_options : [
+     'buildtype=debugoptimized',
+     'warning_level=1',
+-    'c_std=gnu89'
++    'c_std=gnu89',
++    'cpp_std=c++17',
+   ]
+ )
+ 
+-- 
+2.27.0.windows.1
+

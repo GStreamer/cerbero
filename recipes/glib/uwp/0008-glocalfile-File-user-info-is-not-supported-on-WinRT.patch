@@ -1,0 +1,34 @@
+From 32981ab5faf88b6420b7f1e0da8335ac1267b0cb Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 3 Jun 2020 05:04:10 +0530
+Subject: [PATCH 08/22] glocalfile: File user info is not supported on WinRT
+
+You can only access files inside your app's directories using the
+standard stdio functions, so this is moot and also unavailable API.
+---
+ gio/glocalfileinfo.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/gio/glocalfileinfo.c b/gio/glocalfileinfo.c
+index 487f8cc..c42be80 100644
+--- a/gio/glocalfileinfo.c
++++ b/gio/glocalfileinfo.c
+@@ -1426,6 +1426,7 @@ win32_get_file_user_info (const gchar  *filename,
+ 			  gchar       **user_name, 
+ 			  gchar       **real_name)
+ {
++#ifndef G_WINAPI_ONLY_APP
+   PSECURITY_DESCRIPTOR psd = NULL;
+   DWORD sd_size = 0; /* first call calculates the size required */
+   
+@@ -1508,6 +1509,7 @@ win32_get_file_user_info (const gchar  *filename,
+       g_free (psd);
+     }
+   g_free (wfilename);
++#endif /* !G_WINAPI_ONLY_APP */
+ }
+ #endif /* G_OS_WIN32 */
+ 
+-- 
+2.27.0.windows.1
+

@@ -1,0 +1,54 @@
+From b2dd332d7353f2a9fb0316778a980dfd484e3c5a Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 8 Jun 2020 06:39:07 +0530
+Subject: [PATCH 10/22] gutils: GetModuleHandle is not available on WinRT
+
+We're also using these DLLs for fetching user profile dirs which are
+not accessible under WinRT anyway, so just ifdef that out.
+---
+ glib/gutils.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/glib/gutils.c b/glib/gutils.c
+index f4baa4d..b5ec664 100644
+--- a/glib/gutils.c
++++ b/glib/gutils.c
+@@ -1531,7 +1531,7 @@ load_user_special_dirs (void)
+ 						    DWORD dwFlags,
+ 						    HANDLE hToken,
+ 						    PWSTR *ppszPath);
+-  t_SHGetKnownFolderPath p_SHGetKnownFolderPath;
++  t_SHGetKnownFolderPath p_SHGetKnownFolderPath = NULL;
+ 
+   static const GUID FOLDERID_Downloads =
+     { 0x374de290, 0x123f, 0x4565, { 0x91, 0x64, 0x39, 0xc4, 0x92, 0x5e, 0x46, 0x7b } };
+@@ -1540,8 +1540,10 @@ load_user_special_dirs (void)
+ 
+   wchar_t *wcp;
+ 
++#ifndef G_WINAPI_ONLY_APP
+   p_SHGetKnownFolderPath = (t_SHGetKnownFolderPath) GetProcAddress (GetModuleHandle ("shell32.dll"),
+ 								    "SHGetKnownFolderPath");
++#endif
+ 
+   g_user_special_dirs[G_USER_DIRECTORY_DESKTOP] = get_special_folder (CSIDL_DESKTOPDIRECTORY);
+   g_user_special_dirs[G_USER_DIRECTORY_DOCUMENTS] = get_special_folder (CSIDL_PERSONAL);
+@@ -1879,6 +1881,7 @@ get_module_for_address (gconstpointer address)
+   if (!address)
+     return NULL;
+ 
++#ifndef G_WINAPI_ONLY_APP
+   if (!beenhere)
+     {
+       p_GetModuleHandleExA =
+@@ -1886,6 +1889,7 @@ get_module_for_address (gconstpointer address)
+ 					       "GetModuleHandleExA");
+       beenhere = TRUE;
+     }
++#endif
+ 
+   if (p_GetModuleHandleExA == NULL ||
+       !(*p_GetModuleHandleExA) (GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT |
+-- 
+2.27.0.windows.1
+

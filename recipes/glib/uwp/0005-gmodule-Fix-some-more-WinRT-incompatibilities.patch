@@ -1,0 +1,119 @@
+From 3624c8d6e80d44e7b91650a3edef61f285e27fc0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 3 Jun 2020 03:01:42 +0530
+Subject: [PATCH 05/22] gmodule: Fix some more WinRT incompatibilities
+
+Testing with Windows SDK 10.0.18362 revealed more errors; some of
+which weren't around with the last SDK version I tested with.
+---
+ gmodule/gmodule-win32.c | 45 +++++++++++++++++++++++++++--------------
+ 1 file changed, 30 insertions(+), 15 deletions(-)
+
+diff --git a/gmodule/gmodule-win32.c b/gmodule/gmodule-win32.c
+index 795dc09..da22db9 100644
+--- a/gmodule/gmodule-win32.c
++++ b/gmodule/gmodule-win32.c
+@@ -70,7 +70,6 @@ _g_module_open (const gchar *file_name,
+ {
+   HINSTANCE handle;
+   wchar_t *wfilename;
+-  DWORD old_mode;
+   BOOL success;
+ #ifdef G_WITH_CYGWIN
+   gchar tmp[MAX_PATH];
+@@ -80,21 +79,27 @@ _g_module_open (const gchar *file_name,
+ #endif
+   wfilename = g_utf8_to_utf16 (file_name, -1, NULL, NULL, NULL);
+ 
+-  /* suppress error dialog */
+-  success = SetThreadErrorMode (SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS, &old_mode);
+-  if (!success)
+-    set_error ("");
+-
++#ifdef G_WINAPI_ONLY_APP
+   /* When building for UWP, load app asset DLLs instead of filesystem DLLs.
+-   * Needs MSVC, Windows 8 and newer, and is only usable from apps. */
+-#if _WIN32_WINNT >= 0x0602 && defined(G_WINAPI_ONLY_APP)
++   * We don't need to suppress any error dialogs, and the API for doing so is
++   * not available */
+   handle = LoadPackagedLibrary (wfilename, 0);
+ #else
+-  handle = LoadLibraryW (wfilename);
++  {
++    DWORD old_mode;
++
++    /* suppress error dialog */
++    success = SetThreadErrorMode (SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS, &old_mode);
++    if (!success)
++      set_error ("");
++
++    handle = LoadLibraryW (wfilename);
++
++    if (success)
++      SetThreadErrorMode (old_mode, NULL);
++  }
+ #endif
+ 
+-  if (success)
+-    SetThreadErrorMode (old_mode, NULL);
+   g_free (wfilename);
+       
+   if (!handle)
+@@ -121,6 +126,12 @@ _g_module_close (gpointer handle,
+       set_error ("");
+ }
+ 
++/* Under UWP, Module32Next and Module32First are not available since we're
++ * not allowed to search in the address space of arbitrary loaded DLLs.
++ * GetModuleHandle() is also not allowed; you can only get the handle of
++ * a library loaded using LoadPackagedLibrary() */
++#ifndef G_WINAPI_ONLY_APP
++
+ static gpointer
+ find_in_any_module_using_toolhelp (const gchar *symbol_name)
+ {
+@@ -129,9 +140,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
+ 
+   gpointer p = NULL;
+ 
+-  /* Under UWP, Module32Next and Module32First are not available since we're
+-   * not allowed to search in the address space of arbitrary loaded DLLs */
+-#if !defined(G_WINAPI_ONLY_APP)
+   if ((snapshot = CreateToolhelp32Snapshot (TH32CS_SNAPMODULE, 0)) == (HANDLE) -1)
+     return NULL;
+ 
+@@ -146,7 +154,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
+     }
+ 
+   CloseHandle (snapshot);
+-#endif
+ 
+   return p;
+ }
+@@ -161,6 +168,7 @@ find_in_any_module (const gchar *symbol_name)
+   else
+     return result;
+ }
++#endif /* !G_WINAPI_ONLY_APP */
+ 
+ static gpointer
+ _g_module_symbol (gpointer     handle,
+@@ -170,8 +178,15 @@ _g_module_symbol (gpointer     handle,
+   
+   if (handle == null_module_handle)
+     {
++#ifdef G_WINAPI_ONLY_APP
++      g_critical ("Cannot get symbol '%s' from the current process since "
++                  "GLib was built for Universal Windows Platform apps",
++                  symbol_name);
++      p = NULL;
++#else
+       if ((p = GetProcAddress (GetModuleHandle (NULL), symbol_name)) == NULL)
+ 	p = find_in_any_module (symbol_name);
++#endif
+     }
+   else
+     p = GetProcAddress (handle, symbol_name);
+-- 
+2.27.0.windows.1
+

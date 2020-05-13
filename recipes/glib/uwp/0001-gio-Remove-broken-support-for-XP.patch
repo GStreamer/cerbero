@@ -1,0 +1,290 @@
+From f0a3bb580f0c4672f16947d16e19b60bc08376c7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 3 Jun 2020 05:58:41 +0530
+Subject: [PATCH 01/22] gio: Remove broken support for XP
+
+We now require Windows 7 or newer, and the networking code hasn't
+worked in a long time since we directly use symbols from iphlapi.dll
+now.
+---
+ docs/reference/gio/gio-sections-common.txt |  1 -
+ gio/ginetaddress.c                         |  7 ----
+ gio/glocalfile.c                           | 46 ++--------------------
+ gio/gnetworking.c                          | 37 -----------------
+ gio/gnetworking.h.in                       |  6 +--
+ gio/gsocket.c                              |  5 ---
+ gio/gwin32networking.h                     | 42 --------------------
+ gio/meson.build                            |  9 +----
+ 8 files changed, 6 insertions(+), 147 deletions(-)
+ delete mode 100644 gio/gwin32networking.h
+
+diff --git a/docs/reference/gio/gio-sections-common.txt b/docs/reference/gio/gio-sections-common.txt
+index bb483b0..c6a62e0 100644
+--- a/docs/reference/gio/gio-sections-common.txt
++++ b/docs/reference/gio/gio-sections-common.txt
+@@ -4495,7 +4495,6 @@ CMSG_LEN
+ CMSG_SPACE
+ GLIB_ALIGN_TO_SIZEOF
+ T_SRV
+-ws2funcs
+ </SECTION>
+ 
+ <SECTION>
+diff --git a/gio/ginetaddress.c b/gio/ginetaddress.c
+index 787c757..747a7f1 100644
+--- a/gio/ginetaddress.c
++++ b/gio/ginetaddress.c
+@@ -31,13 +31,6 @@
+ #include "glibintl.h"
+ #include "gnetworkingprivate.h"
+ 
+-#ifdef G_OS_WIN32
+-/* Ensure Windows XP runtime compatibility, while using
+- * inet_pton() and inet_ntop() if available
+- */
+-#include "gwin32networking.h"
+-#endif
+-
+ struct _GInetAddressPrivate
+ {
+   GSocketFamily family;
+diff --git a/gio/glocalfile.c b/gio/glocalfile.c
+index 62f30b5..af68a59 100644
+--- a/gio/glocalfile.c
++++ b/gio/glocalfile.c
+@@ -825,36 +825,6 @@ get_mount_info (GFileInfo             *fs_info,
+ 
+ #ifdef G_OS_WIN32
+ 
+-static gboolean
+-is_xp_or_later (void)
+-{
+-  static int result = -1;
+-
+-  if (result == -1)
+-    {
+-#ifndef _MSC_VER    
+-      OSVERSIONINFOEX ver_info = {0};
+-      DWORDLONG cond_mask = 0;
+-      int op = VER_GREATER_EQUAL;
+-
+-      ver_info.dwOSVersionInfoSize = sizeof ver_info;
+-      ver_info.dwMajorVersion = 5;
+-      ver_info.dwMinorVersion = 1;
+-
+-      VER_SET_CONDITION (cond_mask, VER_MAJORVERSION, op);
+-      VER_SET_CONDITION (cond_mask, VER_MINORVERSION, op);
+-
+-      result = VerifyVersionInfo (&ver_info,
+-				  VER_MAJORVERSION | VER_MINORVERSION, 
+-				  cond_mask) != 0;
+-#else
+-      result = ((DWORD)(LOBYTE (LOWORD (GetVersion ())))) >= 5;  
+-#endif
+-    }
+-
+-  return result;
+-}
+-
+ static wchar_t *
+ get_volume_for_path (const char *path)
+ {
+@@ -913,18 +883,10 @@ get_filesystem_readonly (GFileInfo  *info,
+ 
+   if (rootdir)
+     {
+-      if (is_xp_or_later ())
+-        {
+-          DWORD flags;
+-          if (GetVolumeInformationW (rootdir, NULL, 0, NULL, NULL, &flags, NULL, 0))
+-	    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
+-					       (flags & FILE_READ_ONLY_VOLUME) != 0);
+-        }
+-      else
+-        {
+-          if (GetDriveTypeW (rootdir) == DRIVE_CDROM)
+-	    g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY, TRUE);
+-        }
++      DWORD flags;
++      if (GetVolumeInformationW (rootdir, NULL, 0, NULL, NULL, &flags, NULL, 0))
++        g_file_info_set_attribute_boolean (info, G_FILE_ATTRIBUTE_FILESYSTEM_READONLY,
++                                           (flags & FILE_READ_ONLY_VOLUME) != 0);
+     }
+ 
+   g_free (rootdir);
+diff --git a/gio/gnetworking.c b/gio/gnetworking.c
+index fea4309..05507fe 100644
+--- a/gio/gnetworking.c
++++ b/gio/gnetworking.c
+@@ -22,13 +22,6 @@
+ 
+ #include "gnetworking.h"
+ 
+-#ifdef G_OS_WIN32
+-/* For Windows XP run-time compatibility */
+-#include "gwin32networking.h"
+-
+-GWin32WinsockFuncs ws2funcs = {0};
+-#endif
+-
+ /**
+  * SECTION:gnetworking
+  * @title: gnetworking.h
+@@ -73,40 +66,10 @@ g_networking_init (void)
+   if (g_once_init_enter (&inited))
+     {
+       WSADATA wsadata;
+-      HMODULE ws2dll, iphlpapidll;
+ 
+       if (WSAStartup (MAKEWORD (2, 0), &wsadata) != 0)
+         g_error ("Windows Sockets could not be initialized");
+ 
+-      /* We want to use these functions if they are available, but
+-       * still need to make sure the code still runs on Windows XP
+-       */
+-      ws2dll = LoadLibraryW (L"ws2_32.dll");
+-      iphlpapidll = LoadLibraryW (L"iphlpapi.dll");
+-
+-      if (ws2dll != NULL)
+-        {
+-          ws2funcs.pInetNtop =
+-            (PFN_InetNtop) GetProcAddress (ws2dll, "inet_ntop");
+-          ws2funcs.pInetPton =
+-            (PFN_InetPton) GetProcAddress (ws2dll, "inet_pton");
+-          FreeLibrary (ws2dll);
+-        }
+-      else
+-        {
+-          ws2funcs.pInetNtop = NULL;
+-          ws2funcs.pInetPton = NULL;
+-        }
+-
+-      if (iphlpapidll != NULL)
+-        {
+-          ws2funcs.pIfNameToIndex =
+-            (PFN_IfNameToIndex) GetProcAddress (iphlpapidll, "if_nametoindex");
+-          FreeLibrary (iphlpapidll);
+-        }
+-      else
+-        ws2funcs.pIfNameToIndex = NULL;
+-      
+       g_once_init_leave (&inited, 1);
+     }
+ #endif
+diff --git a/gio/gnetworking.h.in b/gio/gnetworking.h.in
+index f9582b9..2fa95ff 100644
+--- a/gio/gnetworking.h.in
++++ b/gio/gnetworking.h.in
+@@ -22,15 +22,11 @@
+ #include <glib.h>
+ 
+ #ifdef G_OS_WIN32
+-
+-#ifndef _WIN32_WINNT
+-#define _WIN32_WINNT 0x0501
+-#endif
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
+ #include <windns.h>
+ #include <mswsock.h>
+-@WSPIAPI_INCLUDE@
++#include <wspiapi.h>
+ #include <iphlpapi.h>
+ #undef interface
+ 
+diff --git a/gio/gsocket.c b/gio/gsocket.c
+index 66073af..5ef650c 100644
+--- a/gio/gsocket.c
++++ b/gio/gsocket.c
+@@ -76,11 +76,6 @@
+ #include "glibintl.h"
+ #include "gioprivate.h"
+ 
+-#ifdef G_OS_WIN32
+-/* For Windows XP runtime compatibility, but use the system's if_nametoindex() if available */
+-#include "gwin32networking.h"
+-#endif
+-
+ /**
+  * SECTION:gsocket
+  * @short_description: Low-level socket object
+diff --git a/gio/gwin32networking.h b/gio/gwin32networking.h
+deleted file mode 100644
+index 9e1396c..0000000
+--- a/gio/gwin32networking.h
++++ /dev/null
+@@ -1,42 +0,0 @@
+-/* GIO - GLib Input, Output and Streaming Library
+- *
+- * Copyright (C) 2015 Chun-wei Fan
+- *
+- * This library is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU Lesser General Public
+- * License as published by the Free Software Foundation; either
+- * version 2.1 of the License, or (at your option) any later version.
+- *
+- * This library is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+- * Lesser General Public License for more details.
+- *
+- * You should have received a copy of the GNU Lesser General
+- * Public License along with this library; if not, see <http://www.gnu.org/licenses/>.
+- */
+-
+-#ifndef __G_WIN32_NETWORKING_H__
+-#define __G_WIN32_NETWORKING_H__
+-
+-G_BEGIN_DECLS
+-
+-/* Check if more ANSI-compliant Winsock2 functions are provided */
+-/* For run-time compatibility with Windows XP, remove when XP support dropped */
+-
+-typedef INT (WSAAPI *PFN_InetPton) (INT, PCTSTR, PVOID);
+-typedef PCTSTR (WSAAPI *PFN_InetNtop) (INT, PVOID, PTSTR, size_t);
+-typedef NET_IFINDEX (WINAPI *PFN_IfNameToIndex) (PCSTR);
+-
+-typedef struct _GWin32WinsockFuncs
+-{
+-  PFN_InetPton pInetPton;
+-  PFN_InetNtop pInetNtop;
+-  PFN_IfNameToIndex pIfNameToIndex;
+-} GWin32WinsockFuncs;
+-
+-extern GWin32WinsockFuncs ws2funcs;
+-
+-G_END_DECLS /* __G_WIN32_NETWORKING_H__ */
+-
+-#endif
+diff --git a/gio/meson.build b/gio/meson.build
+index 3535788..a7dd536 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -10,15 +10,9 @@ gio_c_args += glib_hidden_visibility_args
+ 
+ gnetworking_h_conf = configuration_data()
+ 
+-gnetworking_h_wspiapi_include = ''
+ gnetworking_h_nameser_compat_include = ''
+ 
+-if host_system == 'windows'
+-  # <wspiapi.h> in the Windows SDK and in mingw-w64 has wrappers for
+-  # inline workarounds for getaddrinfo, getnameinfo and freeaddrinfo if
+-  # they aren't present at run-time (on Windows 2000).
+-  gnetworking_h_wspiapi_include = '#include <wspiapi.h>'
+-elif not host_system.contains('android')
++if host_system != 'windows' and not host_system.contains('android')
+   # Don't check for C_IN on Android since it does not define it in public
+   # headers, we define it ourselves wherever necessary
+   if not cc.compiles('''#include <sys/types.h>
+@@ -168,7 +162,6 @@ if host_system.contains('android')
+   endif
+ endif
+ 
+-gnetworking_h_conf.set('WSPIAPI_INCLUDE', gnetworking_h_wspiapi_include)
+ gnetworking_h_conf.set('NAMESER_COMPAT_INCLUDE', gnetworking_h_nameser_compat_include)
+ 
+ gnetworking_h = configure_file(input : 'gnetworking.h.in',
+-- 
+2.27.0.windows.1
+

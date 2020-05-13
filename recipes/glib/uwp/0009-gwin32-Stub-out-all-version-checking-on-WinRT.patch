@@ -1,0 +1,237 @@
+From a545436c794ac323ce27aa5d29c9f2aec419a3ef Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 3 Jun 2020 04:45:42 +0530
+Subject: [PATCH 09/22] gwin32: Stub out all version checking on WinRT
+
+Also remove all `WINAPI_FAMILY == 2` conditionals. That code is
+equivalent to `G_WINAPI_FAMILY_APP` being defined, and we now no
+longer run any version checking in that case.
+---
+ glib/gwin32.c | 72 +++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 47 insertions(+), 25 deletions(-)
+
+diff --git a/glib/gwin32.c b/glib/gwin32.c
+index 2f2fe05..d3bcbcd 100644
+--- a/glib/gwin32.c
++++ b/glib/gwin32.c
+@@ -37,34 +37,18 @@
+ #include <wchar.h>
+ #include <errno.h>
+ #include <fcntl.h>
++#include <ctype.h>
+ 
+ #define STRICT			/* Strict typing, please */
+ #include <windows.h>
+ #undef STRICT
++
+ #ifndef G_WITH_CYGWIN
+ #include <direct.h>
+ #endif
+-#include <errno.h>
+-#include <ctype.h>
+-#if defined(_MSC_VER) || defined(__DMC__)
+-#  include <io.h>
+-#endif /* _MSC_VER || __DMC__ */
+-
+-#define MODERN_API_FAMILY 2
+-
+-#if WINAPI_FAMILY == MODERN_API_FAMILY
+-/* This is for modern UI Builds, where we can't use LoadLibraryW()/GetProcAddress() */
+-/* ntddk.h is found in the WDK, and MinGW */
+-#include <ntddk.h>
+ 
+ #ifdef _MSC_VER
+-#pragma comment (lib, "ntoskrnl.lib")
+-#endif
+-#elif defined(__MINGW32__) && !defined(__MINGW64_VERSION_MAJOR)
+-/* mingw-w64 must use winternl.h, but not MinGW */
+-#include <ntdef.h>
+-#else
+-#include <winternl.h>
++#include <io.h>
+ #endif
+ 
+ #include "glib.h"
+@@ -125,6 +109,11 @@ g_win32_getlocale (void)
+       || ((ev = getenv ("LANG")) != NULL && ev[0] != '\0'))
+     return g_strdup (ev);
+ 
++#ifdef G_WINAPI_ONLY_APP
++  g_critical ("g_win32_getlocale() has not been fully implemented: "
++              "GLib was built for Universal Windows Platform apps");
++  return g_strdup ("C");
++#else
+   lcid = GetThreadLocale ();
+ 
+   if (!GetLocaleInfo (lcid, LOCALE_SISO639LANGNAME, iso639, sizeof (iso639)) ||
+@@ -174,6 +163,7 @@ g_win32_getlocale (void)
+       break;
+     }
+   return g_strconcat (iso639, "_", iso3166, script, NULL);
++#endif
+ }
+ 
+ /**
+@@ -309,6 +299,9 @@ g_win32_get_package_installation_directory_of_module (gpointer hmodule)
+   return retval;
+ }
+ 
++/* Package directories do not make sense on UWP, and the required API is also
++ * not available */
++#ifndef G_WINAPI_ONLY_APP
+ static gchar *
+ get_package_directory_from_module (const gchar *module_name)
+ {
+@@ -357,6 +350,7 @@ get_package_directory_from_module (const gchar *module_name)
+ 
+   return g_strdup (fn);
+ }
++#endif /* !G_WINAPI_ONLY_APP */
+ 
+ /**
+  * g_win32_get_package_installation_directory:
+@@ -423,11 +417,17 @@ g_win32_get_package_installation_directory (const gchar *package,
+   if (package != NULL)
+       g_warning ("Passing a non-NULL package to g_win32_get_package_installation_directory() is deprecated and it is ignored.");
+ 
++#ifdef G_WINAPI_ONLY_APP
++  g_warning ("g_win32_get_package_installation_directory() will not work since "
++             "GLib was built for Universal Windows Platform apps");
++#else
++
+   if (dll_name != NULL)
+     result = get_package_directory_from_module (dll_name);
+ 
+   if (result == NULL)
+     result = get_package_directory_from_module (NULL);
++#endif
+ 
+   return result;
+ }
+@@ -510,17 +510,25 @@ g_win32_check_windows_version (const gint major,
+                                const gint spver,
+                                const GWin32OSType os_type)
+ {
++#ifdef G_WINAPI_ONLY_APP
++  /* RtlGetVersion is not available when building for UWP, but we only support
++   * Windows 10 in that case, so we can hard-code the results */
++  if (os_type == G_WIN32_OS_SERVER || major > 10)
++    return FALSE;
++  if (major == 10 && minor > 0)
++    return FALSE;
++  return TRUE;
++#else
+   OSVERSIONINFOEXW osverinfo;
+   gboolean is_ver_checked = FALSE;
+   gboolean is_type_checked = FALSE;
+ 
+-#if WINAPI_FAMILY != MODERN_API_FAMILY
+   /* For non-modern UI Apps, use the LoadLibraryW()/GetProcAddress() thing */
+   typedef NTSTATUS (WINAPI fRtlGetVersion) (PRTL_OSVERSIONINFOEXW);
+ 
+   fRtlGetVersion *RtlGetVersion;
+   HMODULE hmodule;
+-#endif
++
+   /* We Only Support Checking for XP or later */
+   g_return_val_if_fail (major >= 5 && (major <=6 || major == 10), FALSE);
+   g_return_val_if_fail ((major >= 5 && minor >= 1) || major >= 6, FALSE);
+@@ -528,13 +536,11 @@ g_win32_check_windows_version (const gint major,
+   /* Check for Service Pack Version >= 0 */
+   g_return_val_if_fail (spver >= 0, FALSE);
+ 
+-#if WINAPI_FAMILY != MODERN_API_FAMILY
+   hmodule = LoadLibraryW (L"ntdll.dll");
+   g_return_val_if_fail (hmodule != NULL, FALSE);
+ 
+   RtlGetVersion = (fRtlGetVersion *) GetProcAddress (hmodule, "RtlGetVersion");
+   g_return_val_if_fail (RtlGetVersion != NULL, FALSE);
+-#endif
+ 
+   memset (&osverinfo, 0, sizeof (OSVERSIONINFOEXW));
+   osverinfo.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
+@@ -576,11 +582,10 @@ g_win32_check_windows_version (const gint major,
+         }
+     }
+ 
+-#if WINAPI_FAMILY != MODERN_API_FAMILY
+   FreeLibrary (hmodule);
+-#endif
+ 
+   return is_ver_checked && is_type_checked;
++#endif /* !G_WINAPI_ONLY_APP */
+ }
+ 
+ /**
+@@ -612,8 +617,14 @@ g_win32_get_windows_version (void)
+ {
+   static gsize windows_version;
+ 
++#ifdef G_WINAPI_ONLY_APP
++  /* GetVersion() is not available when building for UWP, so just always return
++   * 62 as documented above */
++  windows_version = 0x00000206;
++#else
+   if (g_once_init_enter (&windows_version))
+     g_once_init_leave (&windows_version, GetVersion ());
++#endif
+ 
+   return windows_version;
+ }
+@@ -703,6 +714,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+ 
+   retval = special_wchar_to_locale_enoding (wname);
+ 
++#ifndef G_WINAPI_ONLY_APP
+   if (retval == NULL)
+     {
+       /* Conversion failed, so check if there is a 8.3 version, and use that. */
+@@ -711,6 +723,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+       if (GetShortPathNameW (wname, wshortname, G_N_ELEMENTS (wshortname)))
+         retval = special_wchar_to_locale_enoding (wshortname);
+     }
++#endif
+ 
+   g_free (wname);
+ 
+@@ -758,6 +771,10 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+ gchar **
+ g_win32_get_command_line (void)
+ {
++#ifdef G_WINAPI_ONLY_APP
++  g_error ("g_win32_get_command_line() is not available since "
++           "GLib was built for Universal Windows Platform apps");
++#else
+   gchar **result;
+   LPWSTR *args;
+   gint i, n;
+@@ -771,6 +788,7 @@ g_win32_get_command_line (void)
+ 
+   LocalFree (args);
+   return result;
++#endif
+ }
+ 
+ #ifdef G_OS_WIN32
+@@ -1216,14 +1234,18 @@ g_crash_handler_win32_init (void)
+   if (getenv ("G_DEBUGGER") == NULL && getenv("G_VEH_CATCH") == NULL)
+     return;
+ 
++#ifndef G_WINAPI_ONLY_APP
+   WinVEH_handle = AddVectoredExceptionHandler (0, &g_win32_veh_handler);
++#endif
+ }
+ 
+ void
+ g_crash_handler_win32_deinit (void)
+ {
++#ifndef G_WINAPI_ONLY_APP
+   if (WinVEH_handle != NULL)
+     RemoveVectoredExceptionHandler (WinVEH_handle);
++#endif
+ 
+   WinVEH_handle = NULL;
+ }
+-- 
+2.27.0.windows.1
+

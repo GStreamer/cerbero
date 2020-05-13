@@ -1,0 +1,97 @@
+From 151d38bef42b10607f19214548571ceecc7deade Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 3 Jun 2020 02:28:15 +0530
+Subject: [PATCH 17/22] TODO: gdate, gstdio: Abort when trying to use
+ unsupported APIs
+
+---
+ glib/gdate.c  | 10 +++++++++-
+ glib/gstdio.c | 14 ++++++++++++++
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/glib/gdate.c b/glib/gdate.c
+index 26b3f59..fa17ca7 100644
+--- a/glib/gdate.c
++++ b/glib/gdate.c
+@@ -2152,7 +2152,7 @@ g_date_order (GDate *date1,
+     }
+ }
+ 
+-#ifdef G_OS_WIN32
++#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
+ static void
+ append_month_name (GArray     *result,
+ 		   LCID        lcid,
+@@ -2630,7 +2630,15 @@ g_date_strftime (gchar       *s,
+       s[0] = '\0';
+       return 0;
+     }
++#ifdef G_WINAPI_ONLY_APP
++  /* TODO: GetThreadLocale, GetLocaleInfoW, GetTimeFormatW, GetDateFormatW need
++   * to be replaced with Windows.Globalization.* */
++  g_error ("g_date_strftime() is not available since "
++           "GLib was built for Universal Windows Platform apps");
++#else
+   return win32_strftime_helper (d, format, &tm, s, slen);
++#endif
++
+ #else
+ 
+   locale_format = g_locale_from_utf8 (format, -1, NULL, &locale_format_len, &error);
+diff --git a/glib/gstdio.c b/glib/gstdio.c
+index e9c3f1b..f291337 100644
+--- a/glib/gstdio.c
++++ b/glib/gstdio.c
+@@ -236,7 +236,11 @@ _g_win32_fill_statbuf_from_handle_info (const wchar_t              *filename,
+      * Return value of 0 gives us 0 - 1 = -1,
+      * which is the "no idea" value for st_dev.
+      */
++#ifdef G_WINAPI_ONLY_APP
++    statbuf->st_dev = -1;
++#else
+     statbuf->st_dev = _getdrive () - 1;
++#endif
+ 
+   statbuf->st_rdev = statbuf->st_dev;
+   /* Theoretically, it's possible to set it for ext-FS. No idea how.
+@@ -466,6 +470,10 @@ _g_win32_readlink_utf16_raw (const gunichar2  *filename,
+   /* To read symlink target we need to open the file as a reparse
+    * point and use DeviceIoControl() on it.
+    */
++#ifdef G_WINAPI_ONLY_APP
++  g_error ("g_win32_readlink_utf8() is partially unavailable since ",
++           "GLib was built for Universal Windows Platform apps");
++#else
+   h = CreateFileW (filename,
+                    FILE_READ_EA,
+                    FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+@@ -487,6 +495,7 @@ _g_win32_readlink_utf16_raw (const gunichar2  *filename,
+   CloseHandle (h);
+ 
+   return to_copy;
++#endif
+ }
+ 
+ /* Read the link data from a symlink/mountpoint represented
+@@ -604,6 +613,10 @@ _g_win32_stat_utf16_no_trailing_slashes (const gunichar2    *filename,
+   if (is_directory)
+     open_flags |= FILE_FLAG_BACKUP_SEMANTICS;
+ 
++#ifdef G_WINAPI_ONLY_APP
++  g_error ("g_win32_stat_utf8() is partially unavailable since ",
++           "GLib was built for Universal Windows Platform apps");
++#else
+   file_handle = CreateFileW (filename, FILE_READ_ATTRIBUTES | FILE_READ_EA,
+                              FILE_SHARE_READ|FILE_SHARE_WRITE|FILE_SHARE_DELETE,
+                              NULL, OPEN_EXISTING,
+@@ -616,6 +629,7 @@ _g_win32_stat_utf16_no_trailing_slashes (const gunichar2    *filename,
+       errno = w32_error_to_errno (error_code);
+       return -1;
+     }
++#endif
+ 
+   succeeded_so_far = GetFileInformationByHandle (file_handle,
+                                                  &handle_info);
+-- 
+2.27.0.windows.1
+

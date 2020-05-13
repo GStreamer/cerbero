@@ -1,0 +1,152 @@
+From b43ef664802e103011d3f85c40c7d600aeb8f5c2 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 14 Aug 2019 14:34:21 +0530
+Subject: [PATCH 15/22] WIP: glib/giowin32: Disallow invalid usage of
+ GIOChannels on UWP
+
+Win32 window handles and consoles do not exist on UWP apps, and the
+corresponding APIs are not allowed. They cause an error when running
+the Windows App Certification Kit.
+
+Abort when `g_io_channel_win32_new_messages()` is called, and mark all
+vfuncs used by it with `g_assert_not_reached()`. Similar changes are
+needed in `g_io_channel_win32_make_pollfd()` and in `g_poll()`.
+---
+ glib/giowin32.c | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+
+diff --git a/glib/giowin32.c b/glib/giowin32.c
+index 3e38e2a..020c44a 100644
+--- a/glib/giowin32.c
++++ b/glib/giowin32.c
+@@ -823,9 +823,15 @@ g_io_win32_check (GSource *source)
+   switch (channel->type)
+     {
+     case G_IO_WIN32_WINDOWS_MESSAGES:
++#ifndef G_WINAPI_ONLY_APP
+       if (channel->debug)
+ 	g_print (" MSG\n");
+       return (PeekMessage (&msg, channel->hwnd, 0, 0, PM_NOREMOVE));
++#else
++      /* Win32 Window handles are not available on UWP */
++      g_assert_not_reached ();
++      g_abort ();
++#endif
+ 
+     case G_IO_WIN32_FILE_DESC:
+       if (channel->debug)
+@@ -841,6 +847,7 @@ g_io_win32_check (GSource *source)
+       return ((watch->pollfd.revents | buffer_condition) & watch->condition);
+ 
+     case G_IO_WIN32_CONSOLE:
++#ifndef G_WINAPI_ONLY_APP
+       if (channel->debug)
+ 	g_print (" CON\n");
+       if (watch->channel->is_writeable)
+@@ -864,6 +871,11 @@ g_io_win32_check (GSource *source)
+ 	    }
+         }
+       return FALSE;
++#else
++      /* There is no console on UWP apps */
++      g_assert_not_reached ();
++      g_abort ();
++#endif
+ 
+     case G_IO_WIN32_SOCKET:
+       if (channel->debug)
+@@ -1038,6 +1050,7 @@ g_io_win32_msg_read (GIOChannel *channel,
+ 
+   *bytes_read = 0;
+ 
++#ifndef G_WINAPI_ONLY_APP
+   if (count < sizeof (MSG))
+     {
+       g_set_error_literal (err, G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_INVAL,
+@@ -1055,6 +1068,12 @@ g_io_win32_msg_read (GIOChannel *channel,
+   *bytes_read = sizeof (MSG);
+ 
+   return G_IO_STATUS_NORMAL;
++#else
++  /* Win32 Window handles are not available on UWP, so we can't read messages
++   * from them either, and PeekMessage is not allowed. */
++  g_assert_not_reached ();
++  g_abort ();
++#endif
+ }
+ 
+ static GIOStatus
+@@ -1069,6 +1088,7 @@ g_io_win32_msg_write (GIOChannel  *channel,
+ 
+   *bytes_written = 0;
+ 
++#ifndef G_WINAPI_ONLY_APP
+   if (count != sizeof (MSG))
+     {
+       g_set_error_literal (err, G_IO_CHANNEL_ERROR, G_IO_CHANNEL_ERROR_INVAL,
+@@ -1091,6 +1111,12 @@ g_io_win32_msg_write (GIOChannel  *channel,
+   *bytes_written = sizeof (MSG);
+ 
+   return G_IO_STATUS_NORMAL;
++#else
++  /* Win32 Window handles are not available on UWP, so we can't write messages
++   * to them either, and PostMessage is not allowed. */
++  g_assert_not_reached ();
++  g_abort ();
++#endif
+ }
+ 
+ static GIOStatus
+@@ -1974,6 +2000,7 @@ g_io_channel_win32_new_messages (gsize hwnd)
+ g_io_channel_win32_new_messages (guint hwnd)
+ #endif
+ {
++#ifndef G_WINAPI_ONLY_APP
+   GIOWin32Channel *win32_channel = g_new (GIOWin32Channel, 1);
+   GIOChannel *channel = (GIOChannel *)win32_channel;
+ 
+@@ -1993,6 +2020,13 @@ g_io_channel_win32_new_messages (guint hwnd)
+   channel->is_seekable = FALSE;
+ 
+   return channel;
++#else
++  /* Win32 Window handles are not available on UWP, so we can't create
++   * a channel to handle messages from them. Even IsWindow is not allowed. */
++  g_warning ("Cannot create a GIOChannel to handle win32 window messages "
++      "since glib was built for Universal Windows Platform apps.\n");
++  g_abort ();
++#endif
+ }
+ 
+ static GIOChannel *
+@@ -2200,7 +2234,13 @@ g_io_channel_win32_make_pollfd (GIOChannel   *channel,
+       break;
+ 
+     case G_IO_WIN32_CONSOLE:
++#ifndef G_WINAPI_ONLY_APP
+       fd->fd = _get_osfhandle (win32_channel->fd);
++#else
++      /* There is no console on UWP apps */
++      g_assert_not_reached ();
++      g_abort ();
++#endif
+       break;
+ 
+     case G_IO_WIN32_SOCKET:
+@@ -2208,7 +2248,13 @@ g_io_channel_win32_make_pollfd (GIOChannel   *channel,
+       break;
+       
+     case G_IO_WIN32_WINDOWS_MESSAGES:
++#ifndef G_WINAPI_ONLY_APP
+       fd->fd = G_WIN32_MSG_HANDLE;
++#else
++      /* Win32 Window handles are not available on UWP */
++      g_assert_not_reached ();
++      g_abort ();
++#endif
+       break;
+ 
+     default:
+-- 
+2.27.0.windows.1
+

@@ -1,0 +1,46 @@
+From 2d1a5a8a6b7e3403ed7b03605659b81967dd9afb Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 14 Aug 2019 10:42:45 +0530
+Subject: [PATCH 02/22] win_iconv: Use LoadPackagedLibrary when building UWP
+ apps
+
+LoadLibrary is not available at all when building with
+`-DWINAPI_FAMILY=WINAPI_FAMILY_APP`.
+---
+ glib/win_iconv.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/glib/win_iconv.c b/glib/win_iconv.c
+index 605e5f0..3cc2464 100644
+--- a/glib/win_iconv.c
++++ b/glib/win_iconv.c
+@@ -60,6 +60,12 @@
+ #define FLAG_TRANSLIT           2 /* //TRANSLIT */
+ #define FLAG_IGNORE             4 /* //IGNORE */
+ 
++/* Default family is DESKTOP_APP which is DESKTOP | APP
++ * We want to know when we're only building for apps */
++#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) && !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
++#define G_WINAPI_ONLY_APP
++#endif
++
+ typedef unsigned char uchar;
+ typedef unsigned short ushort;
+ typedef unsigned int uint;
+@@ -729,7 +735,13 @@ load_mlang(void)
+     HMODULE h;
+     if (ConvertINetString != NULL)
+         return TRUE;
++  /* When building for UWP, load app asset DLLs instead of filesystem DLLs.
++   * Needs MSVC, Windows 8 and newer, and is only usable from apps. */
++#if _WIN32_WINNT >= 0x0602 && defined(G_WINAPI_ONLY_APP)
++    h = LoadPackagedLibrary(TEXT("mlang.dll"), 0);
++#else
+     h = LoadLibrary(TEXT("mlang.dll"));
++#endif
+     if (!h)
+         return FALSE;
+     ConvertINetString = (CONVERTINETSTRING)GetProcAddressA(h, "ConvertINetString");
+-- 
+2.27.0.windows.1
+

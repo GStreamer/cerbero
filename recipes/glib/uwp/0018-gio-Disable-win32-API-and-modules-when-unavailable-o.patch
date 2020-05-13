@@ -1,0 +1,259 @@
+From 948ef6bb40150ab8776fa59c5d15fe9c85701fd7 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 16 Aug 2019 13:56:39 +0530
+Subject: [PATCH 18/22] gio: Disable win32 API and modules when unavailable on
+ WinRT
+
+The modules listed below are useless on a UWP app:
+
+* gwin32filemonitor
+* gwin32volumemonitor
+* gwinhttpvfs
+
+The following APIs are also useless:
+
+* gwin32mount
+* gwin32registrykey
+
+Don't build them at all so that apps get errors at build time instead
+of runtime.
+
+TODO: the following need to be ported to new WinRT APIs:
+
+* gwin32networkmonitor (giomodule)
+* gthreadedresolver (API)
+* gwin32appinfo.c (currently stubbed out)
+---
+ gio/gappinfo.h  |  5 +++++
+ gio/giomodule.c | 32 +++++++++++++++++---------------
+ gio/gresolver.c |  7 +++++--
+ gio/meson.build | 34 ++++++++++++++++++++--------------
+ 4 files changed, 47 insertions(+), 31 deletions(-)
+
+diff --git a/gio/gappinfo.h b/gio/gappinfo.h
+index d26d048..b02a310 100644
+--- a/gio/gappinfo.h
++++ b/gio/gappinfo.h
+@@ -262,6 +262,11 @@ GLIB_AVAILABLE_IN_2_50
+ gboolean  g_app_info_launch_default_for_uri_finish (GAsyncResult         *result,
+                                                     GError              **error);
+ 
++#ifdef G_WINAPI_ONLY_APP
++#define g_app_info_get_default_for_type(x,y) NULL
++#define g_app_info_get_default_for_uri_scheme(x) NULL
++#define g_app_info_get_all() NULL
++#endif
+ 
+ /**
+  * GAppLaunchContext:
+diff --git a/gio/giomodule.c b/gio/giomodule.c
+index aacfa71..e8f4bf5 100644
+--- a/gio/giomodule.c
++++ b/gio/giomodule.c
+@@ -1009,14 +1009,10 @@ G_LOCK_DEFINE_STATIC (loaded_dirs);
+ extern GType g_fen_file_monitor_get_type (void);
+ extern GType g_inotify_file_monitor_get_type (void);
+ extern GType g_kqueue_file_monitor_get_type (void);
+-extern GType g_win32_file_monitor_get_type (void);
+ 
+ extern GType _g_unix_volume_monitor_get_type (void);
+ extern GType _g_local_vfs_get_type (void);
+ 
+-extern GType _g_win32_volume_monitor_get_type (void);
+-extern GType _g_winhttp_vfs_get_type (void);
+-
+ extern GType _g_dummy_proxy_resolver_get_type (void);
+ extern GType _g_dummy_tls_backend_get_type (void);
+ extern GType g_network_monitor_base_get_type (void);
+@@ -1040,6 +1036,11 @@ extern GType g_cocoa_notification_backend_get_type (void);
+ #ifdef G_PLATFORM_WIN32
+ extern GType g_win32_notification_backend_get_type (void);
+ 
++#ifndef G_WINAPI_ONLY_APP
++extern GType g_win32_file_monitor_get_type (void);
++extern GType _g_win32_volume_monitor_get_type (void);
++extern GType _g_winhttp_vfs_get_type (void);
++
+ #include <windows.h>
+ extern GType _g_win32_network_monitor_get_type (void);
+ 
+@@ -1064,6 +1065,7 @@ DllMain (HINSTANCE hinstDLL,
+ 
+ #endif
+ 
++/* Currently only used in gdbusprivate.c */
+ void *
+ _g_io_win32_get_module (void)
+ {
+@@ -1074,7 +1076,9 @@ _g_io_win32_get_module (void)
+   return gio_dll;
+ }
+ 
+-#endif
++#endif /* !G_WINAPI_ONLY_APP */
++
++#endif /* G_PLATFORM_WIN32 */
+ 
+ void
+ _g_io_modules_ensure_extension_points_registered (void)
+@@ -1140,7 +1144,7 @@ get_gio_module_dir (void)
+   module_dir = g_strdup (g_getenv ("GIO_MODULE_DIR"));
+   if (module_dir == NULL)
+     {
+-#ifdef G_OS_WIN32
++#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
+       gchar *install_dir;
+ 
+       install_dir = g_win32_get_package_installation_directory_of_module (gio_dll);
+@@ -1225,10 +1229,15 @@ _g_io_modules_ensure_loaded (void)
+       g_type_ensure (g_fen_file_monitor_get_type ());
+ #endif
+ #ifdef G_OS_WIN32
++      g_type_ensure (g_win32_notification_backend_get_type ());
++#ifndef G_WINAPI_ONLY_APP
++      g_type_ensure (_g_win32_network_monitor_get_type ());
+       g_type_ensure (_g_win32_volume_monitor_get_type ());
+-      g_type_ensure (g_win32_file_monitor_get_type ());
++      g_type_ensure (_g_winhttp_vfs_get_type ());
+       g_type_ensure (g_registry_backend_get_type ());
+-#endif
++      g_type_ensure (g_win32_file_monitor_get_type ());
++#endif /* !G_WINAPI_ONLY_APP */
++#endif /* G_OS_WIN32 */
+ #ifdef HAVE_COCOA
+       g_type_ensure (g_nextstep_settings_backend_get_type ());
+       g_type_ensure (g_osx_app_info_get_type ());
+@@ -1243,10 +1252,6 @@ _g_io_modules_ensure_loaded (void)
+ #endif
+ #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
+       g_type_ensure (g_cocoa_notification_backend_get_type ());
+-#endif
+-#ifdef G_OS_WIN32
+-      g_type_ensure (g_win32_notification_backend_get_type ());
+-      g_type_ensure (_g_winhttp_vfs_get_type ());
+ #endif
+       g_type_ensure (_g_local_vfs_get_type ());
+       g_type_ensure (_g_dummy_proxy_resolver_get_type ());
+@@ -1260,9 +1265,6 @@ _g_io_modules_ensure_loaded (void)
+ #ifdef HAVE_NETLINK
+       g_type_ensure (_g_network_monitor_netlink_get_type ());
+       g_type_ensure (_g_network_monitor_nm_get_type ());
+-#endif
+-#ifdef G_OS_WIN32
+-      g_type_ensure (_g_win32_network_monitor_get_type ());
+ #endif
+     }
+ 
+diff --git a/gio/gresolver.c b/gio/gresolver.c
+index 732d217..9c2dcec 100644
+--- a/gio/gresolver.c
++++ b/gio/gresolver.c
+@@ -198,20 +198,23 @@ static GResolver *default_resolver;
+  * with it. #GResolver may use its reference count as a hint about how
+  * many threads it should allocate for concurrent DNS resolutions.
+  *
+- * Returns: (transfer full): the default #GResolver.
++ * Returns: (allow-none) (transfer full): the default #GResolver.
+  *
+  * Since: 2.22
+  */
+ GResolver *
+ g_resolver_get_default (void)
+ {
+-  GResolver *ret;
++  GResolver *ret = NULL;
+ 
++  /* FIXME: Implement the default threaded resolver for WinRT */
++#ifndef G_WINAPI_ONLY_APP
+   G_LOCK (default_resolver);
+   if (!default_resolver)
+     default_resolver = g_object_new (G_TYPE_THREADED_RESOLVER, NULL);
+   ret = g_object_ref (default_resolver);
+   G_UNLOCK (default_resolver);
++#endif
+ 
+   return ret;
+ }
+diff --git a/gio/meson.build b/gio/meson.build
+index a7dd536..0463dfd 100644
+--- a/gio/meson.build
++++ b/gio/meson.build
+@@ -281,7 +281,7 @@ settings_sources = files(
+   'gsettings.c',
+ )
+ 
+-if host_system == 'windows'
++if host_system == 'windows' and not glib_conf.has('G_WINAPI_ONLY_APP')
+   settings_sources += files('gregistrysettingsbackend.c')
+ endif
+ 
+@@ -439,23 +439,27 @@ if host_system != 'windows'
+     )
+   endif
+ else
+-  appinfo_sources += files('gwin32appinfo.c')
+   contenttype_sources += files('gcontenttype-win32.c')
+-  platform_deps += [cc.find_library('shlwapi'),
+-                    cc.find_library('dnsapi'),
+-                    iphlpapi_dep,
+-                    winsock2]
+   win32_sources += files(
+-    'gwin32registrykey.c',
+-    'gwin32mount.c',
+-    'gwin32volumemonitor.c',
+     'gwin32inputstream.c',
+     'gwin32outputstream.c',
+-    'gwin32networkmonitor.c',
+-    'gwin32networkmonitor.h',
+     'gwin32notificationbackend.c',
+   )
+ 
++  if not glib_conf.has('G_WINAPI_ONLY_APP')
++    platform_deps += [cc.find_library('shlwapi'),
++                      cc.find_library('dnsapi'),
++                      iphlpapi_dep,
++                      winsock2]
++    appinfo_sources += files('gwin32appinfo.c')
++    win32_sources += files(
++      'gwin32mount.c',
++      'gwin32registrykey.c',
++      'gwin32volumemonitor.c',
++      'gwin32networkmonitor.c'
++    )
++  endif
++
+   gio_win_rc = configure_file(
+     input: 'gio.rc.in',
+     output: 'gio.rc',
+@@ -568,8 +572,6 @@ gio_sources = files(
+   'gtcpwrapperconnection.c',
+   'gthemedicon.c',
+   'gthreadedsocketservice.c',
+-  'gthreadedresolver.c',
+-  'gthreadedresolver.h',
+   'gtlsbackend.c',
+   'gtlscertificate.c',
+   'gtlsclientconnection.c',
+@@ -592,6 +594,10 @@ gio_sources = files(
+   'gliststore.c',
+ )
+ 
++if not glib_conf.has('G_WINAPI_ONLY_APP')
++  gio_sources += files('gthreadedresolver.c')
++endif
++
+ gio_sources += appinfo_sources
+ gio_sources += contenttype_sources
+ gio_sources += gdbus_daemon_sources
+@@ -766,7 +772,7 @@ if have_func_kqueue and have_func_kevent
+   internal_objects += [kqueue_lib.extract_all_objects()]
+ endif
+ 
+-if host_system == 'windows'
++if host_system == 'windows' and not glib_conf.has('G_WINAPI_ONLY_APP')
+   subdir('win32')
+   internal_deps += [ giowin32_lib ]
+   internal_objects += [giowin32_lib.extract_all_objects()]
+-- 
+2.27.0.windows.1
+

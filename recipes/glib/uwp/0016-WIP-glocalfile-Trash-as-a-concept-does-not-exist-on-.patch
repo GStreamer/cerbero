@@ -1,0 +1,61 @@
+From acf4f0678063b31c4c3bc236530c17eec3aac903 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 16 Aug 2019 12:49:16 +0530
+Subject: [PATCH 16/22] WIP: glocalfile: Trash as a concept does not exist on
+ UWP
+
+And the functions we use to implement `g_local_file_trash()` and
+friends are not available on UWP either, so just return errors when
+those are called.
+---
+ gio/glocalfile.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/gio/glocalfile.c b/gio/glocalfile.c
+index af68a59..4d167fa 100644
+--- a/gio/glocalfile.c
++++ b/gio/glocalfile.c
+@@ -835,6 +835,7 @@ get_volume_for_path (const char *path)
+   wpath = g_utf8_to_utf16 (path, -1, NULL, NULL, NULL);
+   result = g_new (wchar_t, MAX_PATH);
+ 
++#ifndef G_WINAPI_ONLY_APP
+   if (!GetVolumePathNameW (wpath, result, MAX_PATH))
+     {
+       char *msg = g_win32_error_message (GetLastError ());
+@@ -844,6 +845,10 @@ get_volume_for_path (const char *path)
+       g_free (wpath);
+       return NULL;
+     }
++#else
++  g_critical ("Cannot run GetVolumePathNameW on UWP");
++  return NULL;
++#endif
+ 
+   len = wcslen (result);
+   if (len > 0 && result[len-1] != L'\\')
+@@ -2230,6 +2235,13 @@ g_local_file_trash (GFile         *file,
+ 		    GCancellable  *cancellable,
+ 		    GError       **error)
+ {
++#ifdef G_WINAPI_ONLY_APP
++  /* File trash as a concept is not available on UWP */
++  g_set_io_error (error,
++                  _("Unable to trash file %s"),
++                  file, ENOSYS);
++  return FALSE;
++#else
+   GLocalFile *local = G_LOCAL_FILE (file);
+   SHFILEOPSTRUCTW op = {0};
+   gboolean success;
+@@ -2263,6 +2275,7 @@ g_local_file_trash (GFile         *file,
+ 
+   g_free (wfilename);
+   return success;
++#endif
+ }
+ #endif /* G_OS_WIN32 */
+ 
+-- 
+2.27.0.windows.1
+
