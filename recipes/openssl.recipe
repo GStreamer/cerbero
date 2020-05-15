@@ -113,7 +113,7 @@ class Recipe(recipe.Recipe):
     @modify_environment
     async def configure(self):
         if self.config.platform == Platform.WINDOWS:
-            perl, found, newer = shell.check_perl_version('5.10.0', env=self.env)
+            perl, found, newer = shell.check_tool_version('perl','5.10.0', env=self.env)
             m = 'please run bootstrap again'
             if newer is None:
                 raise FatalError('Perl not found, ' + m)

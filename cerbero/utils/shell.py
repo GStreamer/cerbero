@@ -673,18 +673,22 @@ def which(pgm, path=None):
                 if os.path.exists(pext):
                     return pext
 
-def check_perl_version(needed, env):
-    perl = which('perl', env['PATH'])
+def check_tool_version(tool_name, needed, env):
+    found = False
+    newer = False
+    if env is None:
+        env = os.environ.copy()
+    tool = which(tool_name, env['PATH'])
     try:
-        out = check_output([perl, '--version'], env=env)
+        out = check_output([tool, '--version'], env=env)
     except FatalError:
-        return None, None, None
+        return None, False, False
     m = re.search('v[0-9]+\.[0-9]+(\.[0-9]+)?', out)
-    if not m:
-        raise FatalError('Could not detect perl version')
-    found = m.group()[1:]
-    newer = StrictVersion(found) >= StrictVersion(needed)
-    return perl, found, newer
+    if m:
+        found = m.group()[1:]
+        newer = StrictVersion(found) >= StrictVersion(needed)
+
+    return tool, found, newer
 
 def windows_proof_rename(from_name, to_name):
     '''
