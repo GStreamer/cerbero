@@ -36,7 +36,7 @@ from pathlib import Path, PureWindowsPath, PurePath
 from collections.abc import Iterable
 
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, CommandError
 from cerbero.utils import messages as m
 
 _ = gettext.gettext
@@ -512,10 +512,18 @@ def detect_qt5(platform, arch, is_universal):
         m.warning('QT5_PREFIX={!r} does not exist'.format(qt5_prefix))
         return (None, None)
     if qmake_path:
-        if is_universal and platform == Platform.ANDROID:
+        try:
+            qt_version = shell.check_output([qmake_path, '-query', 'QT_VERSION']).strip()
+            qt_version = [int(v) for v in qt_version.split('.')]
+        except CommandError as e:
+            m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake_path), str(e)))
+            qt_version = [0, 0]
+        if len(qt_version) >= 2 and qt_version[:2] < [5, 14] and \
+           is_universal and platform == Platform.ANDROID:
+            # require QT5_PREFIX before Qt 5.14 with android universal
             if not qt5_prefix:
                 m.warning('Please set QT5_PREFIX if you want to build '
-                          'the Qt5 plugin for android-universal')
+                          'the Qt5 plugin for android-universal with Qt < 5.14')
                 return (None, None)
         else:
             ret = _qmake_or_pkgdir(qmake_path)
@@ -523,6 +531,11 @@ def detect_qt5(platform, arch, is_universal):
                 return ret
     # qmake path is invalid, find pkgdir or qmake from qt5 prefix
     if platform == Platform.ANDROID:
+        # Qt => 5.14
+        ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'android/bin/qmake'))
+        if ret != (None, None):
+            return ret
+        # Qt < 5.14
         if arch == Architecture.ARMv7:
             ret = _qmake_or_pkgdir(os.path.join(qt5_prefix, 'android_armv7/bin/qmake'))
         elif arch == Architecture.ARM64:

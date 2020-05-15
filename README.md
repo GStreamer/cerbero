@@ -178,9 +178,10 @@ You must also tell Cerbero where your Qt5 installation prefix is. You can do it
 by setting the `QMAKE` environment variable to point to the `qmake` that you
 want to use, f.ex. `/path/to/Qt5.12.0/5.12.0/ios/bin/qmake`
 
-When building for Android Universal, instead of `QMAKE`, you **must** set the
-`QT5_PREFIX` environment variable pointed to the directory inside your prefix
-which contains all the android targets, f.ex. `/path/to/Qt5.12.0/5.12.0`.
+When building for Android Universal with Qt < 5.14, instead of `QMAKE`, you
+**must** set the `QT5_PREFIX` environment variable pointed to the directory
+inside your prefix which contains all the android targets, f.ex.
+`/path/to/Qt5.12.0/5.12.0`.
 
 Next, run `package`:
 
