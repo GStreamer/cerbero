@@ -622,7 +622,7 @@ class CMake (MakefilesBase):
                     '-DCMAKE_INSTALL_INCLUDEDIR=include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
                     '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '\
-                    '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true . '
+                    '-DCMAKE_POSITION_INDEPENDENT_CODE:BOOL=true '
 
     def __init__(self):
         MakefilesBase.__init__(self)
