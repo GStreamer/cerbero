@@ -14,6 +14,8 @@ class Recipe(recipe.Recipe):
     patches = [
         # Remove this on bump to 0.54.1, https://github.com/mesonbuild/meson/pull/6896
         'meson/0001-qt-dependency-Pick-debug-libraries-based-on-b_vscrt.patch',
+        # https://github.com/mesonbuild/meson/pull/7138
+        'meson/0001-ui-qt-use-new-directory-layout-for-qt-on-android.patch',
     ]
 
     deps = ['ninja']
