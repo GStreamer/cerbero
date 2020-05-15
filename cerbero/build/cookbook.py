@@ -278,6 +278,32 @@ class CookBook (object):
         recipe = self.get_recipe(recipe_name)
         return [r for r in list(self.recipes.values()) if recipe.name in r.deps]
 
+    def get_closest_recipe (self, name):
+        '''
+        Gets the closest recipe name from name in
+        the cookbook if only one recipe name
+        matches.
+
+        @param recipe_name: name of the recipe
+        @type recipe_name: str
+        @return: the closest recipe name
+        @rtype: str
+        '''
+        recipe_name = ''
+        for r in self.recipes:
+          if name == r:
+            return name
+          if name in r:
+            if recipe_name:
+              m.message("Name '%s' matches two or more recipes: [%s, %s]" % (name, r, recipe_name))
+              return ''
+            else:
+              recipe_name = r
+        if recipe_name and name != recipe_name:
+          m.message("Found a recipe name %s for name %s " % (recipe_name, name))
+
+        return recipe_name
+
     def _runtime_deps (self):
         return [x.name for x in list(self.recipes.values()) if x.runtime_dep]
 

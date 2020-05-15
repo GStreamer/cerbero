@@ -128,7 +128,14 @@ class FetchRecipes(Fetch):
 
     def run(self, config, args):
         cookbook = CookBook(config)
-        return self.fetch(cookbook, args.recipes, args.no_deps,
+        recipes = []
+        for recipe in args.recipes:
+          found = cookbook.get_closest_recipe(recipe)
+          if found:
+            recipes.append(found)
+          else:
+            recipes.append(recipe)
+        return self.fetch(cookbook, recipes, args.no_deps,
                           args.reset_rdeps, args.full_reset, args.print_only, args.jobs)
 
 

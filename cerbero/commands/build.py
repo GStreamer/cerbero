@@ -71,11 +71,19 @@ class Build(Command):
                      self.no_deps, dry_run=args.dry_run, offline=args.offline,
                      deps_only=self.deps_only, jobs=args.jobs)
 
-    def runargs(self, config, recipes, missing_files=False, force=False,
+    def runargs(self, config, fuzzy_recipes, missing_files=False, force=False,
                 no_deps=False, cookbook=None, dry_run=False, offline=False,
                 deps_only=False, jobs=None):
         if cookbook is None:
             cookbook = CookBook(config, offline=offline)
+
+        recipes = []
+        for recipe in fuzzy_recipes:
+          found = cookbook.get_closest_recipe(recipe)
+          if found:
+            recipes.append(found)
+          else:
+            recipes.append(recipe)
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,
