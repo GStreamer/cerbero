@@ -258,8 +258,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             self.repo_dir = os.path.join(self.config.local_sources,
                     self.package_name)
         self.repo_dir = os.path.abspath(self.repo_dir)
-        self.build_dir = os.path.join(self.config.sources, self.package_name)
-        self.build_dir = os.path.abspath(self.build_dir)
+        self.build_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
+        self.config_src_dir = self.build_dir
         self.deps = self.deps or []
         if self.config.prefix_is_build_tools():
             if self.btype == build.BuildType.MESON:

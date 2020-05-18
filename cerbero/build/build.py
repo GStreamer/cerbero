@@ -405,12 +405,11 @@ class MakefilesBase (Build, ModifyEnvBase):
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
 
-        self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
-                                                           self.srcdir))
         if self.requires_non_src_build:
             self.make_dir = os.path.join (self.config_src_dir, "cerbero-build-dir")
         else:
-            self.make_dir = self.config_src_dir
+            self.make_dir = os.path.abspath(os.path.join(self.config_src_dir,
+                                                           self.srcdir))
 
         self.make = self.make or ['make', 'V=1']
         self.make_install = self.make_install or ['make', 'install']
@@ -618,8 +617,8 @@ class CMake (MakefilesBase):
     config_sh_needs_shell = False
     config_sh = 'cmake'
     configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s ' \
-                    '-H%(build_dir)s ' \
-                    '-B%(make_dir)s ' \
+                    '-H%(make_dir)s ' \
+                    '-B%(build_dir)s ' \
                     '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s ' \
                     '-DCMAKE_INSTALL_LIBDIR=lib ' \
                     '-DCMAKE_INSTALL_BINDIR=bin ' \
@@ -630,7 +629,8 @@ class CMake (MakefilesBase):
 
     def __init__(self):
         MakefilesBase.__init__(self)
-        self.make_dir = os.path.join(self.build_dir, '_builddir')
+        self.build_dir = os.path.join(self.build_dir, '_builddir')
+
 
     @modify_environment
     async def configure(self):
@@ -679,6 +679,8 @@ class CMake (MakefilesBase):
             shutil.rmtree(cmake_files)
         self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
+        # as build_dir is different from source dir, makefile location will be in build_dir.
+        self.make_dir = self.build_dir
 
 MESON_FILE_TPL = \
 '''
