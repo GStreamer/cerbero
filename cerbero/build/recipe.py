@@ -522,7 +522,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                 raise RuntimeError('{}.recipe: license file collision: {!r}'
                                    .format(self.name, LICENSE_INFO_FILENAME))
             dest = str(install_dir / fname)
-            src = os.path.join(self.build_dir, f)
+
+            src = os.path.join(self.config_src_dir, f)
             if shell.DRY_RUN:
                 print('Copying {!r} to {!r}'.format(src, dest))
             else:
