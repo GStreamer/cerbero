@@ -647,6 +647,8 @@ class CMake (MakefilesBase):
 
         if self.configure_options:
             self.configure_options = self.configure_options.split()
+        else:
+            self.configure_options = []
 
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ['-DCMAKE_SYSTEM_NAME=Windows']
