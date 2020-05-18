@@ -285,15 +285,14 @@ class Tarball(BaseTarball, Source):
             # Since we just extracted this, a Windows anti-virus might still
             # have a lock on files inside it.
             shell.windows_proof_rename(extracted, self.build_dir)
-
-        git.init_directory(self.build_dir, logfile=get_logfile(self))
+        git.init_directory(self.config_src_dir, logfile=get_logfile(self))
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
             if self.strip == 1:
-                git.apply_patch(patch, self.build_dir, logfile=get_logfile(self))
+                git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
+                shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
 
 
 class GitCache (Source):
