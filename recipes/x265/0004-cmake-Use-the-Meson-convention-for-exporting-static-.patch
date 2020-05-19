@@ -1,0 +1,62 @@
+From c6977f20af4799d0dbe3f60b0dbe5670dadc94b1 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 26 Sep 2024 23:30:07 -0300
+Subject: [PATCH 4/5] cmake: Use the Meson convention for exporting static
+ libraries
+
+---
+ source/CMakeLists.txt | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index 687625636..37c5aa8dc 100755
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -651,8 +651,9 @@ if(ENABLE_HDR10_PLUS)
+ else()
+     add_library(x265-static STATIC $<TARGET_OBJECTS:encoder> $<TARGET_OBJECTS:common> ${ASM_OBJS})
+ endif()
+-if(NOT MSVC)
+-    set_target_properties(x265-static PROPERTIES OUTPUT_NAME x265)
++set_target_properties(x265-static PROPERTIES OUTPUT_NAME x265)
++if(MSVC)
++    set_target_properties(x265-static PROPERTIES SUFFIX ".a")
+ endif()
+ if(EXTRA_LIB)
+     target_link_libraries(x265-static ${EXTRA_LIB})
+@@ -734,11 +735,7 @@ if(ENABLE_SHARED)
+     if(SVTHEVC_FOUND)
+         target_link_libraries(x265-shared ${SVT_HEVC_LIBRARY})
+     endif(SVTHEVC_FOUND)
+-    if(MSVC)
+-        set_target_properties(x265-shared PROPERTIES OUTPUT_NAME libx265)
+-    else()
+-        set_target_properties(x265-shared PROPERTIES OUTPUT_NAME x265)
+-    endif()
++    set_target_properties(x265-shared PROPERTIES OUTPUT_NAME x265)
+     if(UNIX)
+         set_target_properties(x265-shared PROPERTIES VERSION ${X265_BUILD})
+         if(APPLE)
+@@ -792,6 +789,8 @@ if(X265_LATEST_TAG)
+     endif(PLIBLIST)
+ 
+     # Produce a pkg-config file
++    # Correct for MSVC output name
++    set(OUTPUT_NAME "x265")
+     configure_file("x265.pc.in" "x265.pc" @ONLY)
+     install(FILES       "${CMAKE_CURRENT_BINARY_DIR}/x265.pc"
+             DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
+@@ -842,6 +841,10 @@ if(ENABLE_CLI)
+             # The CLI cannot link to the shared library on Windows, it
+             # requires internal APIs not exported from the DLL
+             target_link_libraries(cli x265-static ${PLATFORM_LIBS})
++            # Block race condition in x265.ilk (MSVC linker database)
++            if (ENABLE_SHARED)
++                add_dependencies(cli x265-shared)
++            endif()
+         else()
+             target_link_libraries(cli x265-shared ${PLATFORM_LIBS})
+         endif()
+-- 
+2.44.0.windows.1
+

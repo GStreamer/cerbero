@@ -11,7 +11,7 @@ class Package(custom.GStreamer, package.Package):
     deps = ['gstreamer-1.0-core']
 
     files = ['a52dec:libs', 'opencore-amr:libs',
-             'libdca:libs', 'vo-aacenc:libs', 'x264:libs',
+             'libdca:libs', 'vo-aacenc:libs', 'x264:libs', 'x265:libs',
              'gst-plugins-ugly-1.0:plugins_codecs_restricted',
              'gst-plugins-bad-1.0:plugins_codecs_restricted']
     files_devel = ['gst-plugins-ugly-1.0:plugins_codecs_restricted_devel',

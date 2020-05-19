@@ -1,0 +1,20 @@
+ # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+
+class Recipe(recipe.Recipe):
+    name = 'x265-src'
+    version = '3.6'
+    stype = SourceType.TARBALL
+    url = 'https://bitbucket.org/multicoreware/x265_git/downloads/x265_3.6.tar.gz'
+    tarball_checksum = '663531f341c5389f460d730e62e10a4fcca3428ca2ca109693867bc5fe2e2807'
+    tarball_dirname = 'x265_%(version)s'
+    licenses = [{License.GPLv2Plus: ['COPYING']}]
+    btype = BuildType.CUSTOM
+
+    patches = [
+        'x265/0001-add-android-support.patch',
+        'x265/0002-install-shared-library-without-tag.patch',
+        'x265/0003-cmake-Use-GNUInstallDirs-to-remove-uncertainty.patch',
+        'x265/0004-cmake-Use-the-Meson-convention-for-exporting-static-.patch',
+        'x265/0005-cmake-Disable-version-detection-using-git.patch',
+    ]

@@ -1,0 +1,34 @@
+From c5bc999974ea77de4928bdd66a497f456a11c39a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
+Date: Tue, 26 May 2020 17:12:19 +0200
+Subject: [PATCH 2/3] install shared library without tag
+
+---
+ source/CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/source/CMakeLists.txt b/source/CMakeLists.txt
+index f322101ee..11a545356 100755
+--- a/source/CMakeLists.txt
++++ b/source/CMakeLists.txt
+@@ -751,7 +751,7 @@ if(ENABLE_SHARED)
+         endif()
+     endif()
+     set_target_properties(x265-shared PROPERTIES SOVERSION ${X265_BUILD})
+-    if(X265_LATEST_TAG)
++    #if(X265_LATEST_TAG)
+         if(WINDOWS)
+             set_target_properties(x265-shared PROPERTIES VERSION ${X265_LATEST_TAG})
+         endif()
+@@ -760,7 +760,7 @@ if(ENABLE_SHARED)
+                 LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+                 ARCHIVE DESTINATION ${LIB_INSTALL_DIR}
+                 RUNTIME DESTINATION ${BIN_INSTALL_DIR})
+-    endif()
++    #endif()
+     if(ENABLE_HDR10_PLUS)
+         install(TARGETS hdr10plus-shared
+             LIBRARY DESTINATION ${LIB_INSTALL_DIR}
+-- 
+2.44.0.windows.1
+

@@ -330,7 +330,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstmpegpsmux%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmpegtsmux%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstvoaacenc%(mext)s'
+             '%(libdir)s/gstreamer-1.0/libgstvoaacenc%(mext)s',
     ]
 
     files_plugins_codecs_restricted_devel = [
@@ -517,6 +517,8 @@ class Recipe(custom.GStreamer):
 
         self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
         self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
+
+        self.enable_plugin('x265', 'codecs', dep='x265')
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi2'] = 'disabled'

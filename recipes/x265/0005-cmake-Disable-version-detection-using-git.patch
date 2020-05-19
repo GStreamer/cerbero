@@ -1,0 +1,31 @@
+From 0dd189824101b0a200a00925a46edfe9b7dfb5e9 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sun, 13 Oct 2024 03:12:59 +0530
+Subject: [PATCH 5/5] cmake: Disable version detection using git
+
+We make our own git repo in cerbero from the source tarball, which is
+different from cmake's git repo.
+---
+ source/cmake/Version.cmake | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/source/cmake/Version.cmake b/source/cmake/Version.cmake
+index 3bbf42f..c904c0e 100644
+--- a/source/cmake/Version.cmake
++++ b/source/cmake/Version.cmake
+@@ -51,11 +51,7 @@ find_package(Git QUIET) #No restrictions on Git versions used, any versions from
+ if(GIT_FOUND)
+     find_program(GIT_EXECUTABLE git)
+     message(STATUS "GIT_EXECUTABLE ${GIT_EXECUTABLE}")
+-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../.git)
+-        set(GIT_ARCHETYPE "0")
+-    elseif(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../x265Version.txt)
+-        set(GIT_ARCHETYPE "1")
+-    endif()
++    set(GIT_ARCHETYPE "1")
+ endif(GIT_FOUND)
+ if(HG_ARCHETYPE)
+     #Read the lines of the archive summary file to extract the version
+-- 
+2.45.2
+
