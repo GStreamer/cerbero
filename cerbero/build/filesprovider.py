@@ -24,6 +24,7 @@ import inspect
 from functools import partial
 import shlex
 from pathlib import Path
+import sysconfig
 
 from cerbero.config import Platform, LibraryType
 from cerbero.utils import shell
@@ -157,7 +158,13 @@ class FilesProvider(object):
         self.extensions = self.EXTENSIONS[self.platform].copy()
         if self._dylib_plugins():
             self.extensions['mext'] = '.dylib'
-        self.py_prefix = config.py_prefix
+        if config.platform == Platform.WINDOWS:
+            # On Windows, py_prefix doesn't include Python version although some
+            # packages (pycairo, gi, etc...) install themselves using Python
+            # version scheme like on a posix system.
+            self.py_prefix = sysconfig.get_path('stdlib', 'posix_prefix', vars={'installed_base': ''})[1:]
+        else:
+            self.py_prefix = config.py_prefix
         self.add_files_bins_devel()
         self.add_license_files()
         self.categories = self._files_categories()
@@ -427,7 +434,7 @@ class FilesProvider(object):
         if os.path.exists(os.path.join(self.config.prefix, f)):
             return f
         else:
-            pydir = os.path.basename(os.path.normpath(self.config.py_prefix))
+            pydir = os.path.basename(os.path.normpath(self.py_prefix))
             pyversioname = re.sub("python|\.", '', pydir)
             cpythonname = "cpython-" + pyversioname
 
