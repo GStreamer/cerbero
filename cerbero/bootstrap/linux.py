@@ -64,7 +64,8 @@ class DebianBootstrapper (UnixBootstrapper):
     yes_arg = ['-y']
     packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
                 'autopoint', 'make', 'cmake', 'bison', 'flex', 'nasm',
-                'pkg-config', 'gtk-doc-tools', 'libxv-dev', 'libx11-dev',
+                'pkg-config', 'gtk-doc-tools', 'libxv-dev',
+                'libx11-dev', 'libx11-xcb-dev',
                 'libpulse-dev', 'python3-dev', 'texinfo', 'gettext',
                 'build-essential', 'pkg-config', 'doxygen', 'curl',
                 'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
