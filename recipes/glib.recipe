@@ -22,30 +22,29 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.62.5'
+    version = '2.62.6'
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'b8d1cdafa46658b63d7512efbe2cd21bd36cd7be83140e44930c47b79f82452e'
+    tarball_checksum = '104fa26fbefae8024ff898330c671ec23ad075c1c0bce45c325c6d5657d58b9c'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'internal_pcre': 'true', 'libmount': 'false', 'dtrace': 'false',
                      'iconv': 'auto'}
     deps = ['libffi', 'zlib']
 
-    patches = ["glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch",
-               "glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch",
-               "glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch",
-               "glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch",
-               'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-               # https://gitlab.gnome.org/GNOME/glib/merge_requests/1254
-               'glib/0001-giomodule-gio-modules-are-no-longer-installed-in-bin.patch',
-               # https://github.com/mesonbuild/meson/issues/6257
-               'glib/0001-meson-host_system-is-ios-inside-cerbero.patch',
-               # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415,
-               'glib/0001-meson-Don-t-use-assert-in-test-code.patch',
-               # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1433
-               'glib/0001-meson-fix-buildtype-args-and-vscrt-usage.patch',
-              ]
+    patches = [
+        'glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch',
+        'glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch',
+        'glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
+        'glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
+        'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
+        # https://github.com/mesonbuild/meson/issues/6257
+        'glib/0001-meson-host_system-is-ios-inside-cerbero.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415,
+        'glib/0001-meson-Don-t-use-assert-in-test-code.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1433
+        'glib/0001-meson-fix-buildtype-args-and-vscrt-usage.patch',
+    ]
 
     files_libs = [
         'libglib-2.0', 'libgio-2.0', 'libgmodule-2.0', 'libgobject-2.0',
