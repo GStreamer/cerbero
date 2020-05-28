@@ -1,0 +1,35 @@
+From 3c78d0cec68740231d6d2baac64f9a3584f67ee1 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 29 May 2020 00:31:35 +0530
+Subject: [PATCH 2/3] meson: Autodetect when building for iOS
+
+Instead of relying on `system` to be set correctly in the
+cross-compile file, detect when we're building for iOS/watchOS/tvOS.
+---
+ meson.build | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index f9fb01e20..51554ef62 100644
+--- a/meson.build
++++ b/meson.build
+@@ -33,6 +33,16 @@ endif
+ 
+ host_system = host_machine.system()
+ 
++if host_system == 'darwin'
++  ios_test_code = '''#include <TargetConditionals.h>
++  #if ! TARGET_OS_IPHONE
++  #error "Not iOS/tvOS/watchOS/iPhoneSimulator"
++  #endif'''
++  if cc.compiles(ios_test_code, name : 'building for iOS')
++    host_system = 'ios'
++  endif
++endif
++
+ glib_version = meson.project_version()
+ glib_api_version = '2.0'
+ version_arr = glib_version.split('.')
+-- 
+2.26.2
+
