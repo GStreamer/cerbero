@@ -9,4 +9,4 @@ class Package(custom.GStreamer, package.Package):
     longdesc = 'GStreamer 1.0 devtools'
     deps = ['gstreamer-1.0-core', 'gstreamer-1.0-net']
 
-    files = ['gst-validate']
+    files = ['gst-devtools-1.0']

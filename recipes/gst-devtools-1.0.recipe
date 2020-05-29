@@ -3,13 +3,10 @@ from cerbero.utils import shell
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(custom.GStreamer):
-    name = 'gst-validate'
+    name = 'gst-devtools-1.0'
     btype = BuildType.MESON
-    meson_options = {'debug_viewer': 'false'}
-    # gst-validate tarball has a different layout than the git repo, just always build from git
-    stype = SourceType.GIT
-    remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/gst-devtools.git'}
-    srcdir = 'validate'
+    meson_options = {'debug_viewer': 'disabled'}
+    tarball_checksum = '0000000000000000000000000000000000000000000000000000000000000000'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'json-glib', 'gst-rtsp-server-1.0']
 
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0',

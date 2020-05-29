@@ -1,1 +1,2 @@
-include: "https://gitlab.freedesktop.org/gstreamer/gst-ci/raw/master/gitlab/ci_template.yml"
+# FIXME: revert to include: "https://gitlab.freedesktop.org/gstreamer/gst-ci/raw/master/gitlab/ci_template.yml"
+include: "https://gitlab.freedesktop.org/tpm/gst-ci/raw/validate-tarball-devtools/gitlab/ci_template.yml"
