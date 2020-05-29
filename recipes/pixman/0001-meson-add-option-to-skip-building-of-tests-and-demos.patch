@@ -1,0 +1,44 @@
+From 77b6675d8340085a1434ad5672f77d44728a7782 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 30 May 2020 11:42:22 +0100
+Subject: [PATCH 1/2] meson: add option to skip building of tests and demos
+
+---
+ meson.build       | 7 +++++--
+ meson_options.txt | 5 +++++
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 1cec227..a247183 100644
+--- a/meson.build
++++ b/meson.build
+@@ -528,8 +528,11 @@ version_conf.set('PIXMAN_VERSION_MICRO', split[2])
+ add_project_arguments('-DHAVE_CONFIG_H', language : ['c'])
+ 
+ subdir('pixman')
+-subdir('test')
+-subdir('demos')
++
++if not get_option('tests').disabled()
++  subdir('test')
++  subdir('demos')
++endif
+ 
+ pkg = import('pkgconfig')
+ pkg.generate(
+diff --git a/meson_options.txt b/meson_options.txt
+index 79ff4a3..781e258 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -101,3 +101,8 @@ option(
+   type : 'feature',
+   description : 'Use libpng'
+ )
++option(
++  'tests',
++  type : 'feature',
++  description : 'Build tests and demos'
++)
+-- 
+2.26.1
+

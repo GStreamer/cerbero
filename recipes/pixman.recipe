@@ -3,16 +3,25 @@
 from cerbero.utils import messages as m
 import shutil
 
+from cerbero.tools.libtool import LibtoolLibrary
+
 class Recipe(recipe.Recipe):
     name = 'pixman'
     version = '0.40.0'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'https://cairographics.org/releases/pixman-%(version)s.tar.gz'
     tarball_checksum = '6d200dec3740d9ec4ec8d1180e25779c00bc749f94278c8b9021f5534db223fc'
+    meson_options = {'openmp': 'disabled',
+                     'gtk': 'disabled',
+                     'libpng': 'disabled',
+                     'tests' : 'disabled'}
     licenses = [{License.MIT: ['COPYING']}]
-    autoreconf = True
-    patches = ['pixman/0001-Fix-build-on-Android.patch',
-               'pixman/0002-Enable-CPU-detection-on-Android.patch'
+    patches = [
+        # https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/36
+        'pixman/0001-meson-add-option-to-skip-building-of-tests-and-demos.patch',
+        # https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/37
+        'pixman/0002-meson-add-cpu-features-path-option-for-Android.patch'
     ]
 
     files_libs = ['libpixman-1']
@@ -23,12 +32,13 @@ class Recipe(recipe.Recipe):
         # More info : https://github.com/Homebrew/homebrew/issues/41056
         if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ] and \
            self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
-            self.configure_options = '--disable-mmx'
+            self.meson_options['mmx'] = 'disabled'
         if self.config.target_platform == Platform.IOS:
             self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
-            self.configure_options = '--disable-arm-iwmmxt'
+            self.meson_options['iwmmxt'] = 'disabled'
+            self.meson_options['cpu-features-path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
             # Prevent symbol conflicts
             self.append_env('CFLAGS',
                 '-Dandroid_getCpuFamily=pixman_android_getCpuFamily',
@@ -40,15 +50,10 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
 
-    async def configure(self):
-        if self.config.target_platform == Platform.ANDROID:
-            cpufeatures_path = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
-            o = os.path.join(cpufeatures_path, 'cpu-features.h')
-            f = os.path.join(self.make_dir, 'pixman')
-            m.action("copying %s to %s" % (o, f), logfile=self.logfile)
-            shutil.copy(o, f)
-            o = os.path.join(cpufeatures_path, 'cpu-features.c')
-            f = os.path.join(self.make_dir, 'pixman')
-            m.action("copying %s to %s" % (o, f), logfile=self.logfile)
-            shutil.copy(o, f)
-        await super(recipe.Recipe, self).configure()
+    def post_install(self):
+        pixman_deps = []
+        # Meson does not generate la files
+        LibtoolLibrary('pixman-1', None, None, None,
+                self.config.libdir, self.config.target_platform,
+                deps=pixman_deps).save()
+        super().post_install()
