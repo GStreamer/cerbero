@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
-    version = '2.6.1'
+    version = '2.6.7'
     stype = SourceType.TARBALL
-    url = 'https://www.freedesktop.org/software/%(name)s/release/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = 'c651fb3faaa338aeb280726837c2384064cdc17ef40539228d88a1260960844f'
+    url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = '49e481d06cdff97bf68d99fa26bdf785331f411614485d892ea4c78eb479b218'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib']
     configure_options = "--enable-static --with-icu=no"
@@ -19,10 +19,6 @@ class Recipe(recipe.Recipe):
     patches = ['harfbuzz/0001-build-checkout-for-gnustl-for-android.patch']
 
     def prepare(self):
-        if self.config.platform != Platform.WINDOWS:
-            self.patches = ['harfbuzz/0001-Use-Python3-in-gen-def.py.patch',
-                'harfbuzz/0001-build-checkout-for-gnustl-for-android.patch']
-
         if self.config.target_platform == Platform.ANDROID:
             v = DistroVersion.get_android_api_version(self.config.target_distro_version)
             if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
