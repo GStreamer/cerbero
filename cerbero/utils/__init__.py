@@ -186,7 +186,7 @@ Terminating.''', file=sys.stderr)
                                     version = v.strip('"')
                         d = (name, version, '');
 
-        if d[0] in ['Ubuntu', 'debian', 'LinuxMint']:
+        if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint']:
             distro = Distro.DEBIAN
             if d[2] in ['maverick', 'isadora']:
                 distro_version = DistroVersion.UBUNTU_MAVERICK
@@ -238,6 +238,8 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_BUSTER
             elif d[1].startswith('11.') or d[1].startswith('bullseye'):
                 distro_version = DistroVersion.DEBIAN_BULLSEYE
+            elif d[1] == 'unstable' and d[2] == 'sid':
+                distro_version = DistroVersion.DEBIAN_SID
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:
