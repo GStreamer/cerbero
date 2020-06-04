@@ -74,6 +74,7 @@ class DistroVersion:
     DEBIAN_STRETCH = 'debian_09_stretch'
     DEBIAN_BUSTER = 'debian_10_buster'
     DEBIAN_BULLSEYE = 'debian_11_bullseye'
+    DEBIAN_SID = 'debian_99_sid'
     UBUNTU_LUCID = 'ubuntu_10_04_lucid'
     UBUNTU_MAVERICK = 'ubuntu_10_10_maverick'
     UBUNTU_NATTY = 'ubuntu_11_04_natty'
