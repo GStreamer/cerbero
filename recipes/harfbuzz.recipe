@@ -1,29 +1,37 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
     version = '2.6.7'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '49e481d06cdff97bf68d99fa26bdf785331f411614485d892ea4c78eb479b218'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib']
-    configure_options = "--enable-static --with-icu=no"
-    autoreconf = True
+    meson_options = {'icu': 'disabled',
+                     'glib': 'enabled',
+                     'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
+                     'gobject': 'disabled',
+                     'icu_builtin': 'false',
+                     'introspection': 'disabled',
+                     'tests': 'disabled'}
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
 
-    patches = ['harfbuzz/0001-build-checkout-for-gnustl-for-android.patch']
+    patches = []
 
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
-                # FIXME: HACK to make projects using mmap compile with NDK 16
-                # we fail to compile with -D_FILE_OFFSET_BITS=64
-                # because we don't use clang and we use a platform < 21 (Lollipop)
-                # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.set_env('ac_cv_func_mmap', 'no')
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('harfbuzz', None, None, None,
+                self.config.libdir, self.config.target_platform,
+                deps=['glib-2.0', 'freetype', 'fontconfig']).save()
+        LibtoolLibrary('harfbuzz-subset', None, None, None,
+                self.config.libdir, self.config.target_platform,
+                deps=['harfbuzz']).save()
+        super().post_install()
+
