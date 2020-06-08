@@ -11,12 +11,14 @@ class Recipe(custom.GStreamer):
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',
+                     'dash': 'enabled',
                      'decklink': 'enabled',
                      'dtls': 'enabled',
                      'dts': 'enabled',
                      'hls': 'enabled',
                      'hls-crypto': 'openssl',
                      'kate': 'enabled',
+                     'ladspa': 'auto', # lrdf is optional
                      'libmms': 'enabled',
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
@@ -64,7 +66,7 @@ class Recipe(custom.GStreamer):
                      'wildmidi': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'libkate', 'zlib', 'openh264', 'opus', 'librtmp',
+            'libkate', 'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
