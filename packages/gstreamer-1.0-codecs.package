@@ -44,3 +44,10 @@ class Package(custom.GStreamer, package.Package):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed by zbar library
             self.files.append('libiconv:libs')
+
+        if self.config.variants.uwp:
+            self.files = [
+                'libvpx:libs', 'openh264:libs',
+                'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
+                'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
+            ]

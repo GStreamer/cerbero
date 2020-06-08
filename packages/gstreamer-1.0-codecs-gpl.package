@@ -24,3 +24,6 @@ class Package(custom.GStreamer, package.Package):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed by libass
             self.files.append('libiconv:libs')
+
+        if self.config.variants.uwp:
+            self.files.remove('libass:libs')

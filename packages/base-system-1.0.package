@@ -27,3 +27,10 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         if self.config.variants.gi:
             self.files.append('gobject-introspection:libs:typelibs')
+
+        if self.config.variants.uwp:
+            self.platform_files[Platform.WINDOWS] = ['proxy-libintl:libs:lang']
+            self.files = [
+                'libffi:libs', 'zlib:libs', 'glib:libs:lang:schemas', 'orc:libs',
+                'bzip2:libs', 'json-glib:libs',
+            ]

@@ -17,3 +17,7 @@ class Package(custom.GStreamer, package.Package):
     files_devel = ['gst-plugins-ugly-1.0:plugins_net_restricted_devel',
             'gst-plugins-bad-1.0:plugins_net_restricted_devel']
 
+    def prepare(self):
+        if self.config.variants.uwp:
+            self.files.remove('libmms:libs')
+            self.files.remove('librtmp:libs')

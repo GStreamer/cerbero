@@ -11,7 +11,7 @@ class Package(custom.GStreamer, package.Package):
     deps = ['gstreamer-1.0-core', 'base-crypto']
 
     files = ['libsoup:libs', 'libpsl:libs', 'sqlite3:libs', 'libsrtp:libs',
-            'libnice:libs', 'libnice:plugins_net', 'srt:libs', 'libusrsctp:libs',
+            'libnice:libs:plugins_net', 'srt:libs', 'libusrsctp:libs',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
             'gst-rtsp-server-1.0:libs:typelibs:plugins_net']
@@ -31,3 +31,11 @@ class Package(custom.GStreamer, package.Package):
             self.files += ['glib-networking']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
+
+        if self.config.variants.uwp:
+            self.files = [
+                'glib-networking', 'libsrtp:libs', 'libusrsctp:libs',
+                'libnice:libs:plugins_net', 'gst-plugins-base-1.0:plugins_net',
+                'gst-plugins-good-1.0:plugins_net', 'gst-plugins-ugly-1.0:plugins_net',
+                'gst-plugins-bad-1.0:plugins_net', 'gst-rtsp-server-1.0:libs:plugins_net',
+            ]

@@ -59,9 +59,20 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
 
 
     def prepare(self):
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            p = ['gstreamer-1.0-dvd']
-            self.packages = [ x for x in self.packages if x[0] not in p]
+        if self.config.variants.uwp:
+            self.platform_packages[Platform.WINDOWS] = []
+
+        if self.config.variants.visualstudio or \
+           self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+            discard = ['gstreamer-1.0-dvd']
+            if self.config.variants.uwp:
+                # Need to remove it here too, platform_packages gets added to
+                # packages somewhere
+                discard += ['vsintegration-1.0']
+                # ffmpeg recipe hasn't been ported to meson yet
+                discard += ['gstreamer-1.0-libav']
+            self.packages = [x for x in self.packages if x[0] not in discard]
+
         if self.config.target_platform == Platform.IOS:
             self.resources_postinstall = 'post_install_ios'
             #self.user_resources = ['share/gst-sdk/tutorials/xcode iOS']
