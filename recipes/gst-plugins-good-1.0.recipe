@@ -224,10 +224,6 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
-        if self.using_msvc():
-            # plugin is C++, library is Autotools
-            self.disable_plugin('taglib', 'codecs', dep='taglib')
-
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['directsound'] = 'enabled'
         elif self.config.target_platform == Platform.DARWIN:
@@ -252,6 +248,26 @@ class Recipe(custom.GStreamer):
                 can_enable_qt5 = False
         if can_enable_qt5:
             self.enable_plugin('qmlgl', 'qt5', 'qt5', option='qt5')
+
+        if self.using_msvc():
+            # plugin is C++, library is Autotools
+            self.disable_plugin('taglib', 'codecs', dep='taglib')
+
+        if self.using_uwp():
+            # Uses unavailable APIs
+            self.disable_plugin('directsound', 'sys')
+            # External deps that haven't been ported to UWP
+            self.disable_plugin('cairo', 'effects', dep='cairo')
+            self.disable_plugin('dv', 'codecs', dep='libdv')
+            self.disable_plugin('flac', 'codecs', dep='flac')
+            self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
+            self.disable_plugin('jpeg', 'codecs', dep='libjpeg-turbo')
+            self.disable_plugin('lame', 'codecs', dep='lame')
+            self.disable_plugin('mpg123', 'codecs', dep='mpg123')
+            self.disable_plugin('png', 'codecs', dep='libpng')
+            self.disable_plugin('soup', 'net', dep='libsoup')
+            self.disable_plugin('speex', 'codecs', dep='speex')
+            self.disable_plugin('wavpack', 'codecs', dep='wavpack')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
