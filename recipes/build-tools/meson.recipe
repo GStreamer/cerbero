@@ -18,6 +18,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-ui-qt-use-new-directory-layout-for-qt-on-android.patch',
         # https://github.com/mesonbuild/meson/pull/7021
         'meson/0001-meson-Allow-cross-compile-without-a-native-compiler.patch',
+        # https://github.com/mesonbuild/meson/pull/7272
+        'meson/0001-Add-UNIX-large-file-support-for-MinGW.patch',
     ]
 
     deps = ['ninja']
