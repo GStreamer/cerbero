@@ -48,8 +48,14 @@ class Recipe(custom.GStreamer):
     files_lang = ['gst-plugins-ugly-1.0']
 
     def prepare(self):
-        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if self.using_msvc() or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('dvdread', 'dvd', dep='libdvdread')
+
+        if self.using_msvc():
+            self.disable_plugin('a52dec', 'codecs_restricted', dep='a52dec')
+            self.disable_plugin('amrnb', 'codecs_restricted', dep='opencore-amr')
+            self.disable_plugin('amrwbdec', 'codecs_restricted', dep='opencore-amr')
+            self.disable_plugin('x264', 'codecs_restricted', dep='x264')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
