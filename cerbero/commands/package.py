@@ -90,18 +90,23 @@ class Package(Command):
 
         if p is None:
             raise PackageNotFoundError(args.package[0])
+
         p.pre_package()
+        packager_class = Packager
         if args.tarball:
             if config.target_platform == Platform.ANDROID and \
                config.target_arch == Architecture.UNIVERSAL:
-                pkg = AndroidPackager(config, p, self.store)
+                packager_class = AndroidPackager
             else:
-                pkg = DistTarball(config, p, self.store)
-        else:
-            pkg = Packager(config, p, self.store)
+                packager_class = DistTarball
+        elif config.variants.uwp:
+            m.warning('Forcing tarball output for UWP package since MSIs are broken')
+            packager_class = DistTarball
+
         m.action(_("Creating package for %s") % p.name)
+        pkg = packager_class(config, p, self.store)
         output_dir = os.path.abspath(args.output_dir)
-        if args.tarball:
+        if isinstance(pkg, DistTarball):
             paths = pkg.pack(output_dir, args.no_devel, args.force,
                              args.keep_temp, split=not args.no_split,
                              strip_binaries=p.strip)
