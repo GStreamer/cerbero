@@ -90,6 +90,9 @@ class GStreamer(recipe.Recipe):
             self.files_plugins_devel.remove(pcname)
             includedir = 'include/gstreamer-1.0/gst/' + library_name
             self.files_plugins_devel.remove(includedir)
+            libincdir = 'lib/gstreamer-1.0/include/gst/' + library_name
+            if libincdir in self.files_plugins_devel:
+                self.files_plugins_devel.remove(libincdir)
         self.meson_options[option] = 'disabled'
 
 
