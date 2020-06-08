@@ -31,6 +31,8 @@ class Recipe(recipe.Recipe):
         'meson/0001-vs-Write-out-checksums.patch',
         # https://github.com/mesonbuild/meson/pull/6459, in 0.53.1
         'meson/0001-find_program-Ignore-programs-in-the-WindowsApps-dire.patch',
+        # https://github.com/mesonbuild/meson/pull/7272, in 0.55
+        'meson/0001-compilers-Add-UNIX-large-file-support-for-MinGW.patch',
     ]
     deps = ['ninja']
 

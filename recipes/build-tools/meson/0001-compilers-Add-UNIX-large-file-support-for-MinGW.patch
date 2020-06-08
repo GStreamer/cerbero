@@ -1,0 +1,30 @@
+From bf57c43a68fa23ae0ec9e27e201e68a70a19e5d1 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Mon, 8 Jun 2020 21:24:54 +0900
+Subject: [PATCH] compilers: Add UNIX large file support for MinGW
+
+MinGW gcc supports _FILE_OFFSET_BITS=64 and we need to set it for
+MinGW as well
+
+Backported-by: Nirbheek Chauhan <nirbheek@centricular.com>
+---
+ mesonbuild/compilers/compilers.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mesonbuild/compilers/compilers.py b/mesonbuild/compilers/compilers.py
+index e27ae2b3b..51c85885f 100644
+--- a/mesonbuild/compilers/compilers.py
++++ b/mesonbuild/compilers/compilers.py
+@@ -1368,7 +1368,8 @@ def get_largefile_args(compiler):
+     '''
+     Enable transparent large-file-support for 32-bit UNIX systems
+     '''
+-    if get_compiler_is_linuxlike(compiler):
++    ctype = getattr(compiler, 'compiler_type', '')
++    if get_compiler_is_linuxlike(compiler) or (ctype and ctype.name.endswith('MINGW')):
+         # Enable large-file support unconditionally on all platforms other
+         # than macOS and Windows. macOS is now 64-bit-only so it doesn't
+         # need anything special, and Windows doesn't have automatic LFS.
+-- 
+2.26.2
+
