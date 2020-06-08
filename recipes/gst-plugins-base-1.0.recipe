@@ -206,8 +206,23 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('xvimagesink', 'sys', 'x11', option='xvideo')
         self.enable_plugin('alsa', 'sys', 'alsa')
 
-        if self.config.variants.nodebug:
-            self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
-
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.meson_options['tremor'] = 'enabled'
+
+        if self.using_uwp():
+            # All these except libvisual can be ported to Meson/UWP
+            self.disable_plugin('opengl', 'sys', 'gl', library_name='gl')
+            self.disable_plugin('libvisual', 'vis', dep='libvisual')
+            self.disable_plugin('ogg', 'codecs', dep='libogg')
+            self.disable_plugin('opus', 'codecs', dep='opus')
+            self.disable_plugin('pango', 'core', dep='pango')
+            self.disable_plugin('theora', 'codecs', dep='libtheora')
+            self.disable_plugin('vorbis', 'codecs', dep='libvorbis')
+            self.meson_options['gl-graphene'] = 'disabled'
+            self.meson_options['gl-png'] = 'disabled'
+            self.meson_options['gl-jpeg'] = 'disabled'
+            for dep in ('graphene', 'libpng', 'libjpeg-turbo'):
+                self.deps.remove(dep)
+
+        if self.config.variants.nodebug:
+            self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
