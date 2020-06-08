@@ -28,7 +28,8 @@ class Recipe(custom.GStreamer):
                      'oss4': 'disabled',
                      'qt5': 'disabled', # Enabled in prepare()
                      'shout2': 'disabled',
-                     'twolame': 'disabled',}
+                     'twolame': 'disabled',
+                     'waveform': 'disabled',}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
