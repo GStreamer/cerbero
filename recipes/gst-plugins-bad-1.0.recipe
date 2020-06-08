@@ -485,13 +485,41 @@ class Recipe(custom.GStreamer):
                 (self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64):
             self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
-        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if self.using_msvc() or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
 
         # dtls plugin needs openssl, and we pick up the system openssl if on
         # Linux and not cross-compiling.
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
+
+        if self.using_uwp():
+            self.enable_plugin('wasapi2', 'sys', 'uwp')
+            # Uses unavailable APIs
+            self.disable_plugin('d3d', 'sys', option='d3dvideosink')
+            self.disable_plugin('decklink', 'sys')
+            self.disable_plugin('directsoundsrc', 'capture', option='directsound')
+            self.disable_plugin('wasapi', 'sys')
+            self.disable_plugin('winscreencap', 'capture')
+            self.disable_plugin('winks', 'capture')
+            # External deps that haven't been ported to UWP
+            self.disable_plugin('assrender', 'codecs_gpl', dep='libass')
+            self.disable_plugin('closedcaption', 'effects', dep='pango')
+            self.disable_plugin('dash', 'codecs', dep='libxml2')
+            self.disable_plugin('dtsdec', 'codecs_restricted', option='dts', dep='libdca')
+            self.disable_plugin('kate', 'codecs', dep='libkate')
+            self.disable_plugin('ladspa', 'effects', dep='ladspa')
+            self.disable_plugin('mms', 'net_restricted', option='libmms', dep='libmms')
+            self.disable_plugin('openjpeg', 'codecs', dep='openjpeg')
+            self.disable_plugin('opusparse', 'codecs', option='opus', dep='opus')
+            self.disable_plugin('rtmp', 'net_restricted', option='rtmp', dep='librtmp')
+            self.disable_plugin('sbc', 'codecs', dep='sbc')
+            self.disable_plugin('spandsp', 'codecs', dep='spandsp')
+            self.disable_plugin('smoothstreaming', 'codecs', dep='libxml2')
+            self.disable_plugin('srt', 'net', dep='srt')
+            self.disable_plugin('rsvg', 'codecs', dep='librsvg')
+            self.disable_plugin('voaacenc', 'codecs_restricted', dep='vo-aacenc')
+            self.disable_plugin('zbar', 'codecs', dep='zbar')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
