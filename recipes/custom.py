@@ -59,6 +59,9 @@ class GStreamer(recipe.Recipe):
                 return
         platform_files_category = 'platform_' + files_category
         if hasattr(self, platform_files_category):
+            pf = getattr(self, platform_files_category)
+            if self.config.target_platform not in pf:
+                raise FatalError('plugin {!r} not found in category {!r}'.format(entry, files_category))
             pfc = getattr(self, platform_files_category)[self.config.target_platform]
             if entry in pfc:
                 pfc.remove(entry)
