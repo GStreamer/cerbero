@@ -6,7 +6,7 @@ from collections import defaultdict
 from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
-from cerbero.enums import Platform, License
+from cerbero.enums import Platform, License, FatalError
 from cerbero.utils import shell, to_unixpath
 
 class GStreamer(recipe.Recipe):
