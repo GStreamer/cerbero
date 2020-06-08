@@ -18,7 +18,7 @@ class Recipe(custom.GStreamer):
                      'vorbis': 'enabled',
                      # disabled plugins
                      'tremor': 'disabled'}
-    deps = ['glib', 'gstreamer-1.0', 'libxml2', 'libogg', 'pango', 'libtheora',
+    deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora',
             'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
@@ -152,9 +152,13 @@ class Recipe(custom.GStreamer):
             'lib/gstreamer-1.0/libgsttcp.a', 'lib/gstreamer-1.0/libgsttcp.la',
     ]
 
-    files_plugins_sys = []
+    files_plugins_sys = [
+            'lib/gstreamer-1.0/libgstopengl%(mext)s',
+    ]
 
-    files_plugins_sys_devel = []
+    files_plugins_sys_devel = [
+             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
+    ]
 
     platform_files_plugins_codecs = {
         Platform.ANDROID: [
@@ -171,42 +175,6 @@ class Recipe(custom.GStreamer):
             ],
         Platform.IOS: [
              'lib/gstreamer-1.0/libgstivorbisdec.a', 'lib/gstreamer-1.0/libgstivorbisdec.la',
-            ]
-    }
-
-    platform_files_plugins_sys = {
-        Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-            ],
-        Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-            ],
-        Platform.DARWIN: [
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-            ],
-        Platform.IOS: [
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-            ],
-        Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstopengl%(mext)s',
-            ]
-    }
-
-    platform_files_plugins_sys_devel = {
-        Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
-            ],
-        Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
-            ],
-        Platform.DARWIN: [
-             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
-            ],
-        Platform.IOS: [
-             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
-            ],
-        Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstopengl.a', 'lib/gstreamer-1.0/libgstopengl.la',
             ]
     }
 
