@@ -455,6 +455,7 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('mediafoundation', 'sys', 'visualstudio', option='mediafoundation')
 
         if self.config.target_platform == Platform.WINDOWS:
+            self.meson_options['wasapi2'] = 'disabled'
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['d3d11'] = 'enabled'
