@@ -683,9 +683,9 @@ def check_tool_version(tool_name, needed, env):
         out = check_output([tool, '--version'], env=env)
     except FatalError:
         return None, False, False
-    m = re.search('v[0-9]+\.[0-9]+(\.[0-9]+)?', out)
+    m = re.search('([0-9]+\.[0-9]+(\.[0-9]+)?)', out)
     if m:
-        found = m.group()[1:]
+        found = m.groups()[0]
         newer = StrictVersion(found) >= StrictVersion(needed)
 
     return tool, found, newer
