@@ -1,0 +1,34 @@
+From 5c5959292e59650051418a7db487ac07ef701700 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 9 Jun 2020 18:21:10 +0530
+Subject: [PATCH 2/3] windows-makefile.tmpl: Fix ONECORE build
+
+setargv.obj is not buildable:
+
+```
+        link /nologo /debug /subsystem:console /opt:ref /NODEFAULTLIB:kernel32.lib /nologo /debug /out:apps\openssl.exe @C:/Users/nirbheek/AppData/Local/Temp\nm76E2.tmp
+LINK : fatal error LNK1181: cannot open input file 'setargv.obj'
+NMAKE : fatal error U1077: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\link.EXE"' : return code '0x49d'
+Stop.
+NMAKE : fatal error U1077: '"c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.25.28610\bin\HostX64\x64\nmake.exe"' : return code '0x2'
+Stop.
+```
+---
+ Configurations/windows-makefile.tmpl | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+index ca05fa4..e573f58 100644
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -752,7 +752,6 @@ $bin$exeext: $deps
+ 	IF EXIST $bin$exeext.manifest DEL /F /Q $bin$exeext.manifest
+ 	\$(LD) \$(LDFLAGS) \$(BIN_LDFLAGS) \$(LDOUTFLAG)$bin$exeext @<<
+ $objs
+-setargv.obj
+ $linklibs\$(BIN_EX_LIBS)
+ <<
+ 	IF EXIST $bin$exeext.manifest \\
+-- 
+2.27.0.windows.1
+

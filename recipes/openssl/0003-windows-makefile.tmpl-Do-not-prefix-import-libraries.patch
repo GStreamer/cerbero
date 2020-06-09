@@ -1,0 +1,28 @@
+From 1802e7c87fd9a6ba76e04b32ba258079ee94b2d4 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 9 Jun 2020 18:55:35 +0530
+Subject: [PATCH 3/3] windows-makefile.tmpl: Do not prefix import libraries
+ with 'lib'
+
+We want ssl.lib and crypto.lib, which matches libssl.dll.a and
+libcrypto.dll.a since all of them can be found by GCC with -lfoo
+---
+ Configurations/windows-makefile.tmpl | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+index e573f58..c70f821 100644
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -48,7 +48,7 @@
+  sub shlib_import {
+      my $lib = shift;
+      return () if $disabled{shared} || $lib =~ /\.a$/;
+-     return $lib . $shlibextimport;
++     return substr($lib, 3) . $shlibextimport;
+  }
+ 
+  sub dso {
+-- 
+2.27.0.windows.1
+

@@ -18,85 +18,126 @@ class Recipe(recipe.Recipe):
     allow_parallel_build = False
     # Configure script is perl, not shell
     config_sh_needs_shell = False
+    # Can build for MSVC and UWP
+    can_msvc = True
 
-    patches = ['openssl/0001-Load-ca-certificate.crt-from-PREFIX-etc-ssl-on-macOS.patch']
+    patches = [
+        # Portable prefix with SSL certs
+        'openssl/0001-Load-ca-certificate.crt-from-PREFIX-etc-ssl-on-macOS.patch',
+        # MSVC and UWP support
+        'openssl/0001-windows-makefile.tmpl-Generate-and-install-pkgconfig.patch',
+        'openssl/0002-windows-makefile.tmpl-Fix-ONECORE-build.patch',
+        'openssl/0003-windows-makefile.tmpl-Do-not-prefix-import-libraries.patch'
+    ]
 
     files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc',
                    'lib/pkgconfig/libssl.pc', 'lib/pkgconfig/libcrypto.pc']
 
-    def prepare(self):
+    def _get_openssl_platform(self):
         # map platforms
         if self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.ARMv7:
-                self.openssl_platform = 'BSD-generic32'
-            elif self.config.target_arch == Architecture.ARMv7S:
-                self.openssl_platform = 'BSD-generic32'
-            elif self.config.target_arch == Architecture.X86:
-                self.openssl_platform = 'BSD-generic32'
-            elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'BSD-generic64'
-            elif self.config.target_arch == Architecture.ARM64:
-                self.openssl_platform = 'BSD-generic64'
-            else:
-                raise InvalidRecipeError(self, "Unknown iOS platform")
-        elif self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch == Architecture.ARM:
-                self.openssl_platform = 'android-arm'
-            elif self.config.target_arch == Architecture.ARMv7:
-                self.openssl_platform = 'android-arm'
-            elif self.config.target_arch == Architecture.ARM64:
-                self.openssl_platform = 'android-arm64'
-            elif self.config.target_arch == Architecture.X86:
-                self.openssl_platform = 'android-x86'
-            elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'android-x86_64'
-            else:
-                raise InvalidRecipeError(self, "Unknown Android platform")
-
+                return 'BSD-generic32'
+            if self.config.target_arch == Architecture.ARMv7S:
+                return 'BSD-generic32'
+            if self.config.target_arch == Architecture.X86:
+                return 'BSD-generic32'
+            if self.config.target_arch == Architecture.X86_64:
+                return 'BSD-generic64'
+            if self.config.target_arch == Architecture.ARM64:
+                return 'BSD-generic64'
+            raise InvalidRecipeError(self, "Unknown iOS platform")
+        if self.config.target_platform == Platform.ANDROID:
             self.make += ['CROSS_SYSROOT=' + self.config.sysroot]
-        elif self.config.target_platform == Platform.DARWIN:
+            if self.config.target_arch == Architecture.ARM:
+                return 'android-arm'
+            if self.config.target_arch == Architecture.ARMv7:
+                return 'android-arm'
+            if self.config.target_arch == Architecture.ARM64:
+                return 'android-arm64'
             if self.config.target_arch == Architecture.X86:
-                self.openssl_platform = 'darwin-i386-cc'
-            elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'darwin64-x86_64-cc'
-            else:
-                raise InvalidRecipeError(self, "Unknown macOS platform")
-        elif self.config.target_platform == Platform.LINUX:
+                return 'android-x86'
+            if self.config.target_arch == Architecture.X86_64:
+                return 'android-x86_64'
+            raise InvalidRecipeError(self, "Unknown Android platform")
+        if self.config.target_platform == Platform.DARWIN:
             if self.config.target_arch == Architecture.X86:
-                self.openssl_platform = 'linux-elf'
-            elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'linux-x86_64'
-            elif self.config.target_arch == Architecture.ARM:
-                self.openssl_platform = 'linux-armv4'
-            elif self.config.target_arch == Architecture.ARMv7:
-                self.openssl_platform = 'linux-armv4'
-            elif self.config.target_arch == Architecture.ARM64:
-                self.openssl_platform = 'linux-aarch64'
-            else:
-                raise InvalidRecipeError(self, "Unknown Linux platform")
-        elif self.config.target_platform == Platform.WINDOWS:
+                return 'darwin-i386-cc'
+            if self.config.target_arch == Architecture.X86_64:
+                return 'darwin64-x86_64-cc'
+            raise InvalidRecipeError(self, "Unknown macOS platform")
+        if self.config.target_platform == Platform.LINUX:
             if self.config.target_arch == Architecture.X86:
-                self.openssl_platform = 'mingw'
-            elif self.config.target_arch == Architecture.X86_64:
-                self.openssl_platform = 'mingw64'
+                return 'linux-elf'
+            if self.config.target_arch == Architecture.X86_64:
+                return 'linux-x86_64'
+            if self.config.target_arch == Architecture.ARM:
+                return 'linux-armv4'
+            if self.config.target_arch == Architecture.ARMv7:
+                return 'linux-armv4'
+            if self.config.target_arch == Architecture.ARM64:
+                return 'linux-aarch64'
+            raise InvalidRecipeError(self, "Unknown Linux platform")
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.using_uwp():
+                if self.config.target_arch == Architecture.X86:
+                    return 'VC-WIN32-ONECORE'
+                if self.config.target_arch == Architecture.X86_64:
+                    return 'VC-WIN64A-ONECORE'
+                if self.config.target_arch == Architecture.ARM:
+                    return 'VC-WIN32-ARM'
+                if self.config.target_arch == Architecture.ARMv7:
+                    return 'VC-WIN32-ARM'
+                if self.config.target_arch == Architecture.ARM64:
+                    return 'VC-WIN64-ARM'
+            elif self.using_msvc():
+                if self.config.target_arch == Architecture.X86:
+                    return 'VC-WIN32'
+                if self.config.target_arch == Architecture.X86_64:
+                    return 'VC-WIN64A'
             else:
-                raise InvalidRecipeError(self, "Unknown Windows platform")
-        cflags = self.get_env('CFLAGS') + '-fPIC -DOPENSSL_PIC'
-        ldflags = self.get_env('LDFLAGS') + '-fPIC'
-        ranlib = self.get_env('RANLIB')
-        ar = self.get_env('AR')
-        # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
-        # build, and we can't pass arguments via Configure because on Darwin,
-        # Configure reads the `-arch x86_64` as meaning that you want to use
-        # `x86_64` as the platform, and errors out about a redefined platform.
-        cc = self.get_env('CC') + ' ' + self.get_env('CFLAGS')
-        ld = self.get_env('LD') + ' ' + self.get_env('LDFLAGS')
-        # NOTE: CFLAG and LDFLAG are not typos!
-        self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld,
-                      'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
-        self.make_install = ['make', 'install_sw', 'RANLIB=' + ranlib]
+                if self.config.target_arch == Architecture.X86:
+                    return 'mingw'
+                if self.config.target_arch == Architecture.X86_64:
+                    return 'mingw64'
+            raise InvalidRecipeError(self, "Unknown Windows platform")
+        raise InvalidRecipeError(self, "Unknown target platform {}"
+                                 .format(self.config.target_platform))
+
+    def prepare(self):
+        self.openssl_platform = self._get_openssl_platform()
+        cflags = self.get_env('CFLAGS')
+        ldflags = self.get_env('LDFLAGS')
+
+        if self.using_msvc():
+            # Gets converted to C:/MinGW/msys/1.0/utf-8 by MSYS somehow, so
+            # just remove it. We only need this for gstreamer sources anyway.
+            cflags = cflags.replace('/utf-8', '')
+            # If we don't unset these, they override values set by openssl's makefile
+            self.set_env('CFLAGS')
+            self.set_env('CPPFLAGS')
+            self.set_env('CXXFLAGS')
+            self.set_env('LDFLAGS')
+            # Building with MSVC uses nmake, not make
+            self.make = ['nmake', 'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
+            self.make_install = ['nmake', 'install_sw']
+        else:
+            cflags += '-fPIC -DOPENSSL_PIC'
+            ldflags += '-fPIC'
+            ranlib = self.get_env('RANLIB')
+            ar = self.get_env('AR')
+            # Need to add CFLAGS to CC because CFLAG is not used everywhere in the
+            # build, and we can't pass arguments via Configure because on Darwin,
+            # Configure reads the `-arch x86_64` as meaning that you want to use
+            # `x86_64` as the platform, and errors out about a redefined platform.
+            cc = self.get_env('CC') + ' ' + self.get_env('CFLAGS')
+            ld = self.get_env('LD') + ' ' + self.get_env('LDFLAGS')
+            # NOTE: CFLAG and LDFLAG are not typos!
+            self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld,
+                          'CFLAG=' + cflags, 'LDFLAG=' + ldflags]
+            self.make_install = ['make', 'install_sw', 'RANLIB=' + ranlib]
 
         # We probably don't need and can't use the tools on these platforms
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
@@ -108,12 +149,17 @@ class Recipe(recipe.Recipe):
             # mingw-perl that was downloaded and installed by bootstrap.
             openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
             self.prepend_env('PATH', openssl_path, sep=';')
-            # Ensure that Perl's Filei/Spec.pm uses forward-slashes. These vars
-            # are automatically set by the MSYS terminal, but they might get
-            # overriden by something, which will cause Perl to use backward
-            # slashes and fail `Configurations/unix-checker.pm` on configure.
+            # Ensure that our Perl's File/Spec.pm uses backward slashes when
+            # building for MSVC and forward-slashes when building for MinGW.
+            # The vars for the MinGW case are automatically set by the MSYS
+            # terminal, but they might get overriden by something, which will
+            # cause Perl to use backward slashes and fail
+            # `Configurations/unix-checker.pm` on configure.
             self.set_env('MSYSTEM', 'MINGW32')
-            self.set_env('TERM', 'cygwin')
+            if self.using_msvc():
+                self.set_env('TERM', 'dumb')
+            else:
+                self.set_env('TERM', 'cygwin')
 
 
     @modify_environment

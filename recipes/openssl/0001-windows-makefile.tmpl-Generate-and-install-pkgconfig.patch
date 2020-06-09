@@ -1,0 +1,95 @@
+From 96881a7b26d569b08dc5847204856ebb5fc532f9 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 9 Jun 2020 15:14:32 +0530
+Subject: [PATCH] windows-makefile.tmpl: Generate and install pkgconfig files
+
+Copied from unix-makefile.tmpl
+---
+ Configurations/windows-makefile.tmpl | 50 +++++++++++++++++++++++++++-
+ 1 file changed, 49 insertions(+), 1 deletion(-)
+
+diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
+index 8ef70b8..bc1e199 100644
+--- a/Configurations/windows-makefile.tmpl
++++ b/Configurations/windows-makefile.tmpl
+@@ -314,7 +314,7 @@ PROCESSOR= {- $config{processor} -}
+ {- dependmagic('build_programs'); -}: build_programs_nodep
+ 
+ build_generated: $(GENERATED_MANDATORY)
+-build_libs_nodep: $(LIBS) {- join(" ",map { shlib_import($_) } @{$unified_info{libraries}}) -}
++build_libs_nodep: libcrypto.pc libssl.pc openssl.pc $(LIBS) {- join(" ",map { shlib_import($_) } @{$unified_info{libraries}}) -}
+ build_engines_nodep: $(ENGINES)
+ build_programs_nodep: $(PROGRAMS) $(SCRIPTS)
+ 
+@@ -371,6 +371,7 @@ clean: libclean
+ 	-del /Q /S /F engines\*.lib engines\*.exp
+ 	-del /Q /S /F apps\*.lib apps\*.rc apps\*.res apps\*.exp
+ 	-del /Q /S /F test\*.exp
++	-del /Q /S /F openssl.pc libcrypto.pc libssl.pc
+ 	-rmdir /Q /S test\test-runs
+ 
+ distclean: clean
+@@ -426,6 +427,14 @@ install_dev: install_runtime_libs
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_LIBS) "$(libdir)"
+ 	@if "$(SHLIBS)"=="" \
+ 	 "$(PERL)" "$(SRCDIR)\util\copy.pl" ossl_static.pdb "$(libdir)"
++	@ : {- output_on() if $disabled{shared}; "" -}
++	@$(PERL) $(SRCDIR)\util\mkdir-p.pl "$(DESTDIR)$(libdir)\pkgconfig"
++	@$(ECHO) "install libcrypto.pc -> $(DESTDIR)$(libdir)\pkgconfig\libcrypto.pc"
++	@"$(PERL)" "$(SRCDIR)\util\copy.pl" libcrypto.pc "$(DESTDIR)$(libdir)\pkgconfig"
++	@$(ECHO) "install libssl.pc -> $(DESTDIR)$(libdir)\pkgconfig\libssl.pc"
++	@"$(PERL)" "$(SRCDIR)\util\copy.pl" libssl.pc "$(DESTDIR)$(libdir)\pkgconfig"
++	@$(ECHO) "install openssl.pc -> $(DESTDIR)$(libdir)\pkgconfig\openssl.pc"
++	@"$(PERL)" "$(SRCDIR)\util\copy.pl" openssl.pc "$(DESTDIR)$(libdir)\pkgconfig"
+ 
+ uninstall_dev:
+ 
+@@ -472,6 +481,45 @@ install_html_docs:
+ uninstall_html_docs:
+ 
+ # Building targets ###################################################
++#
++libcrypto.pc libssl.pc openssl.pc: configdata.pm
++libcrypto.pc:
++	@$(ECHO) "prefix=$(INSTALLTOP)" > libcrypto.pc
++	@$(ECHO) "exec_prefix=$${prefix}" >> libcrypto.pc
++	@$(ECHO) "libdir=$${exec_prefix}/$(LIBDIR)" >> libcrypto.pc
++	@$(ECHO) "includedir=$${prefix}/include" >> libcrypto.pc
++	@$(ECHO) "enginesdir=$${libdir}/engines-{- $sover_dirname -}" >> libcrypto.pc
++	@$(ECHO) "" >> libcrypto.pc
++	@$(ECHO) "Name: OpenSSL-libcrypto" >> libcrypto.pc
++	@$(ECHO) "Description: OpenSSL cryptography library" >> libcrypto.pc
++	@$(ECHO) "Version: $(VERSION)" >> libcrypto.pc
++	@$(ECHO) "Libs: -L$${libdir} -lcrypto" >> libcrypto.pc
++	@$(ECHO) "Libs.private: $(LIB_EX_LIBS)" >> libcrypto.pc
++	@$(ECHO) "Cflags: -I$${includedir}" >> libcrypto.pc
++
++libssl.pc:
++	@$(ECHO) "prefix=$(INSTALLTOP)" > libssl.pc
++	@$(ECHO) "exec_prefix=$${prefix}" >> libssl.pc
++	@$(ECHO) "libdir=$${exec_prefix}/$(LIBDIR)" >> libssl.pc
++	@$(ECHO) "includedir=$${prefix}/include" >> libssl.pc
++	@$(ECHO) "" >> libssl.pc
++	@$(ECHO) "Name: OpenSSL-libssl" >> libssl.pc
++	@$(ECHO) "Description: Secure Sockets Layer and cryptography libraries" >> libssl.pc
++	@$(ECHO) "Version: $(VERSION)" >> libssl.pc
++	@$(ECHO) "Requires.private: libcrypto" >> libssl.pc
++	@$(ECHO) "Libs: -L$${libdir} -lssl" >> libssl.pc
++	@$(ECHO) "Cflags: -I$${includedir}" >> libssl.pc
++
++openssl.pc:
++	@$(ECHO) "prefix=$(INSTALLTOP)" > openssl.pc
++	@$(ECHO) "exec_prefix=$${prefix}" >> openssl.pc
++	@$(ECHO) "libdir=$${exec_prefix}/$(LIBDIR)" >> openssl.pc
++	@$(ECHO) "includedir=$${prefix}/include" >> openssl.pc
++	@$(ECHO) "" >> openssl.pc
++	@$(ECHO) "Name: OpenSSL" >> openssl.pc
++	@$(ECHO) "Description: Secure Sockets Layer and cryptography libraries and tools" >> openssl.pc
++	@$(ECHO) "Version: $(VERSION)" >> openssl.pc
++	@$(ECHO) "Requires: libssl libcrypto" >> openssl.pc
+ 
+ configdata.pm: "$(SRCDIR)\Configure" {- join(" ", map { '"'.$_.'"' } @{$config{build_file_templates}}, @{$config{build_infos}}, @{$config{conf_files}}) -}
+ 	@$(ECHO) "Detected changed: $?"
+-- 
+2.27.0.windows.1
+
