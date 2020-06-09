@@ -19,11 +19,12 @@ class Recipe(recipe.Recipe):
                      'introspection': 'disabled',
                      'tests': 'disabled'}
 
+    # https://github.com/harfbuzz/harfbuzz/pull/2458
+    patches = ['harfbuzz/0001-meson-Export-symbols-for-a-DLL-when-not-building-sta.patch']
+
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
-
-    patches = []
 
     def post_install(self):
         # Meson does not generate la files
@@ -34,4 +35,3 @@ class Recipe(recipe.Recipe):
                 self.config.libdir, self.config.target_platform,
                 deps=['harfbuzz']).save()
         super().post_install()
-
