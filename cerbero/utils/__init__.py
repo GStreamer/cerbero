@@ -188,43 +188,47 @@ Terminating.''', file=sys.stderr)
 
         if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint']:
             distro = Distro.DEBIAN
-            if d[2] in ['maverick', 'isadora']:
+            distro_version = d[2].lower()
+            split_str = d[2].split()
+            if split_str:
+                distro_version = split_str[0].lower()
+            if distro_version in ['maverick', 'isadora']:
                 distro_version = DistroVersion.UBUNTU_MAVERICK
-            elif d[2] in ['lucid', 'julia']:
+            elif distro_version in ['lucid', 'julia']:
                 distro_version = DistroVersion.UBUNTU_LUCID
-            elif d[2] in ['natty', 'katya']:
+            elif distro_version in ['natty', 'katya']:
                 distro_version = DistroVersion.UBUNTU_NATTY
-            elif d[2] in ['oneiric', 'lisa']:
+            elif distro_version in ['oneiric', 'lisa']:
                 distro_version = DistroVersion.UBUNTU_ONEIRIC
-            elif d[2] in ['precise', 'maya']:
+            elif distro_version in ['precise', 'maya']:
                 distro_version = DistroVersion.UBUNTU_PRECISE
-            elif d[2] in ['quantal', 'nadia']:
+            elif distro_version in ['quantal', 'nadia']:
                 distro_version = DistroVersion.UBUNTU_QUANTAL
-            elif d[2] in ['raring', 'olivia']:
+            elif distro_version in ['raring', 'olivia']:
                 distro_version = DistroVersion.UBUNTU_RARING
-            elif d[2] in ['saucy', 'petra']:
+            elif distro_version in ['saucy', 'petra']:
                 distro_version = DistroVersion.UBUNTU_SAUCY
-            elif d[2] in ['trusty', 'qiana', 'rebecca']:
+            elif distro_version in ['trusty', 'qiana', 'rebecca']:
                 distro_version = DistroVersion.UBUNTU_TRUSTY
-            elif d[2] in ['utopic']:
+            elif distro_version in ['utopic']:
                 distro_version = DistroVersion.UBUNTU_UTOPIC
-            elif d[2] in ['vivid']:
+            elif distro_version in ['vivid']:
                 distro_version = DistroVersion.UBUNTU_VIVID
-            elif d[2] in ['wily']:
+            elif distro_version in ['wily']:
                 distro_version = DistroVersion.UBUNTU_WILY
-            elif d[2] in ['xenial', 'sarah', 'serena', 'sonya', 'sylvia']:
+            elif distro_version in ['xenial', 'sarah', 'serena', 'sonya', 'sylvia']:
                 distro_version = DistroVersion.UBUNTU_XENIAL
-            elif d[2] in ['artful']:
+            elif distro_version in ['artful']:
                 distro_version = DistroVersion.UBUNTU_ARTFUL
-            elif d[2] in ['bionic', 'tara', 'tessa']:
+            elif distro_version in ['bionic', 'tara', 'tessa', 'tina', 'tricia']:
                 distro_version = DistroVersion.UBUNTU_BIONIC
-            elif d[2] in ['cosmic']:
+            elif distro_version in ['cosmic']:
                 distro_version = DistroVersion.UBUNTU_COSMIC
-            elif d[2] in ['disco']:
+            elif distro_version in ['disco']:
                 distro_version = DistroVersion.UBUNTU_DISCO
-            elif d[2] in ['eoan']:
+            elif distro_version in ['eoan']:
                 distro_version = DistroVersion.UBUNTU_EOAN
-            elif d[2] in ['focal']:
+            elif distro_version in ['focal']:
                 distro_version = DistroVersion.UBUNTU_FOCAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
