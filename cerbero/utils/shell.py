@@ -679,6 +679,8 @@ def check_tool_version(tool_name, needed, env):
     if env is None:
         env = os.environ.copy()
     tool = which(tool_name, env['PATH'])
+    if not tool:
+        return None, False, False
     try:
         out = check_output([tool, '--version'], env=env)
     except FatalError:
