@@ -749,31 +749,39 @@ class BuildStatusPrinter:
             del self.recipe_to_step[recipe_name]
         self.output_status_line()
 
-    def built(self, count, total, recipe_name):
+    def built(self, count, recipe_name):
         self.count += 1
         if self.interactive:
-            m.build_step(self.count, self.total, recipe_name, _("built"))
+            m.build_recipe_done(self.count, self.total, recipe_name, _("built"))
         self.remove_recipe(recipe_name)
 
-    def already_built(self, count, total, recipe_name):
+    def already_built(self, count, recipe_name):
         self.count += 1
         if self.interactive:
-            m.build_step(self.count, self.total, recipe_name, _("already built"))
+            m.build_recipe_done(self.count, self.total, recipe_name, _("already built"))
         else:
-            m.build_step(count, total, recipe_name, _("already built"))
+            m.build_recipe_done(count, self.total, recipe_name, _("already built"))
         self.output_status_line()
 
-    def update_recipe_step(self, count, total, recipe_name, step):
-        if not self.interactive:
-            m.build_step(count, total, recipe_name, step)
-            return
+    def _get_completion_percent (self):
+        one_recipe = 100. / float (self.total)
+        one_step = one_recipe / len (self.steps)
+        completed = float(self.count) * one_recipe
+        for i, step in enumerate (self.steps):
+            completed += len(self.step_to_recipe[step]) * (i+1) * one_step
+        return int(completed)
+
+    def update_recipe_step(self, count, recipe_name, step):
         self.remove_recipe(recipe_name)
         self.step_to_recipe[step].append(recipe_name)
         self.recipe_to_step[recipe_name] = step
-        self.output_status_line()
+        if not self.interactive:
+            m.build_step(count, self.total, self._get_completion_percent(), recipe_name, step)
+        else:
+            self.output_status_line()
 
     def generate_status_line(self):
-        s = "[(" + str(self.count) + "/" + str(self.total) + ")"
+        s = "[(" + str(self.count) + "/" + str(self.total) + " @ " + str(self._get_completion_percent()) + "%)"
         for step in self.steps:
             if self.step_to_recipe[step]:
                 s += " " + str(step).upper() + ": " + ", ".join(self.step_to_recipe[step])

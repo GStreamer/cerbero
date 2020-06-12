@@ -268,7 +268,7 @@ class Oven (object):
                 if step == "init":
                     counter.i += 1
                     count = counter.i
-                    if self._cook_start_recipe (recipe, count, len(recipes)):
+                    if self._cook_start_recipe (recipe, count):
                         add_buildable_recipes(recipe)
                         q.task_done()
                         continue
@@ -286,7 +286,7 @@ class Oven (object):
                 async def build_recipe_steps(step):
                     # run the steps
                     while step in steps:
-                        await self._cook_recipe_step_with_prompt (recipe, step, count, len(recipes))
+                        await self._cook_recipe_step_with_prompt (recipe, step, count)
                         step = recipe_next_step (recipe, step)
                     return step
 
@@ -302,7 +302,7 @@ class Oven (object):
                     step = None
 
                 if step is None:
-                    self._cook_finish_recipe (recipe, counter.i, len(recipes))
+                    self._cook_finish_recipe (recipe, counter.i)
                     add_buildable_recipes(recipe)
                     next_queue = None
                 else:
@@ -403,9 +403,9 @@ class Oven (object):
         except Exception as e:
             raise e
 
-    async def _cook_recipe_step_with_prompt (self, recipe, step, count, total):
+    async def _cook_recipe_step_with_prompt (self, recipe, step, count):
         try:
-            await self._cook_recipe_step(recipe, step, count, total)
+            await self._cook_recipe_step(recipe, step, count)
         except BuildStepError as be:
             if not self.interactive:
                 raise be
@@ -426,26 +426,26 @@ class Oven (object):
                 # propagate up to the task manager to retry the recipe entirely
                 raise RetryRecipeError()
             elif action == RecoveryActions.RETRY_STEP:
-                await self._cook_recipe_step(recipe, step, count, total)
+                await self._cook_recipe_step(recipe, step, count)
             elif action == RecoveryActions.SKIP:
                 # propagate up to the task manager to retry the recipe entirely
                 raise SkipRecipeError()
             elif action == RecoveryActions.ABORT:
                 raise AbortedError()
 
-    async def _cook_recipe_step (self, recipe, step, count, total):
+    async def _cook_recipe_step (self, recipe, step, count):
        # check if the current step needs to be done
         if self.cookbook.step_done(recipe.name, step) and not self.force:
-            self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
+            self._build_status_printer.update_recipe_step(count, recipe.name, step)
             return
         try:
             # call step function
             stepfunc = getattr(recipe, step)
             if not stepfunc:
-                self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
+                self._build_status_printer.update_recipe_step(count, recipe.name, step)
                 raise FatalError(_('Step %s not found') % step)
 
-            self._build_status_printer.update_recipe_step(count, total, recipe.name, step)
+            self._build_status_printer.update_recipe_step(count, recipe.name, step)
             ret = stepfunc()
             if asyncio.iscoroutine(ret):
                 await ret
@@ -471,7 +471,7 @@ class Oven (object):
         except Exception:
             raise BuildStepError(recipe, step, traceback.format_exc())
 
-    def _cook_start_recipe(self, recipe, count, total):
+    def _cook_start_recipe(self, recipe, count):
         # A Recipe depending on a static library that has been rebuilt
         # also needs to be rebuilt to pick up the latest build.
         if recipe.library_type != LibraryType.STATIC:
@@ -480,7 +480,7 @@ class Oven (object):
 
         if not self.cookbook.recipe_needs_build(recipe.name) and \
                 not self.force:
-            self._build_status_printer.already_built(count, total, recipe.name)
+            self._build_status_printer.already_built(count, recipe.name)
             return True
 
         if self.missing_files:
@@ -490,8 +490,8 @@ class Oven (object):
         recipe.force = self.force
         return False
 
-    def _cook_finish_recipe(self, recipe, count, total):
-        self._build_status_printer.built(count, total, recipe.name)
+    def _cook_finish_recipe(self, recipe, count):
+        self._build_status_printer.built(count, recipe.name)
         self.cookbook.update_build_status(recipe.name, recipe.built_version())
         if recipe.library_type == LibraryType.STATIC:
             self._static_libraries_built.append(recipe.name)

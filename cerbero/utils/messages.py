@@ -25,7 +25,8 @@ import shutil
 
 
 ACTION_TPL = '-----> %s'
-STEP_TPL = '[(%s/%s) %s -> %s]'
+DONE_STEP_TPL = '[(%s/%s) %s -> %s]'
+STEP_TPL = '[(%s/%s @ %d%%) %s -> %s]'
 START_TIME = None
 SHELL_CLEAR_LINE = "\r\033[K"
 SHELL_MOVE_UP = "\033[F"
@@ -117,5 +118,8 @@ def action(msg, logfile=None):
     message(ACTION_TPL % msg, logfile=logfile)
 
 
-def build_step(count, total, recipe, step, logfile=None):
-    message(STEP_TPL % (count, total, recipe, step), logfile=logfile)
+def build_step(recipe_i, total_recipes, completion_percent, recipe, step, logfile=None):
+    message(STEP_TPL % (recipe_i, total_recipes, completion_percent, recipe, step), logfile=logfile)
+
+def build_recipe_done (recipe_i, total_recipes, recipe, msg, logfile=None):
+    message(DONE_STEP_TPL % (recipe_i, total_recipes, recipe, msg), logfile=logfile)
