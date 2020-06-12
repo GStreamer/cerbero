@@ -34,7 +34,7 @@ class GStreamer(recipe.Recipe):
 
     def enable_plugin(self, plugin, category, variant, option=None, dep=None):
         if option is None:
-            option = variant
+            option = plugin
         if getattr(self.config.variants, variant):
             if dep is not None:
                 self.deps.append(dep)

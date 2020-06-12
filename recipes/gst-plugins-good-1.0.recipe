@@ -236,9 +236,9 @@ class Recipe(custom.GStreamer):
         elif self.config.target_platform == Platform.IOS:
             self.meson_options['osxaudio'] = 'enabled'
 
-        self.enable_plugin('video4linux2', 'capture', 'v4l2')
-        self.enable_plugin('ximagesrc', 'capture', 'x11')
-        self.enable_plugin('pulseaudio', 'sys', 'pulse')
+        self.enable_plugin('video4linux2', 'capture', 'v4l2', option='v4l2')
+        self.enable_plugin('ximagesrc', 'capture', 'x11', option='x11')
+        self.enable_plugin('pulseaudio', 'sys', 'pulse', option='pulse')
 
         # Enable qt5 plugin if possible and selected
         can_enable_qt5 = True
@@ -251,7 +251,7 @@ class Recipe(custom.GStreamer):
             if self.config.target_arch == Architecture.X86_64:
                 can_enable_qt5 = False
         if can_enable_qt5:
-            self.enable_plugin('qmlgl', 'qt5', 'qt5')
+            self.enable_plugin('qmlgl', 'qt5', 'qt5', option='qt5')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')

@@ -448,11 +448,11 @@ class Recipe(custom.GStreamer):
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
         # Enable hardware codecs if variants are enabled
-        self.enable_plugin('nvcodec', 'codecs', 'nvcodec', option='nvcodec')
-        self.enable_plugin('msdk', 'codecs', 'intelmsdk', option='msdk')
+        self.enable_plugin('nvcodec', 'codecs', 'nvcodec')
+        self.enable_plugin('msdk', 'codecs', 'intelmsdk')
 
         # MediaFoundation can only be built with MSVC
-        self.enable_plugin('mediafoundation', 'sys', 'visualstudio', option='mediafoundation')
+        self.enable_plugin('mediafoundation', 'sys', 'visualstudio')
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi2'] = 'disabled'
