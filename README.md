@@ -356,6 +356,11 @@ or desktop. If it is not, create a shortcut on the desktop to `C:\MinGW\msys\1.0
 The path to your `$HOME` must not contain spaces. If your Windows username
 contains spaces, you can create a new directory in `/home` and execute:
 
+If you are using Windows 10, it is also highly recommended to enable "Developer
+Mode" in Windows Settings as shown below.
+
+![Enable Developer Mode in Windows Settings](/data/images/windows-settings-developer-mode.png)
+
 ```cmd
 $ echo 'export HOME=/home/newdir' > ~/.profile
 ```
