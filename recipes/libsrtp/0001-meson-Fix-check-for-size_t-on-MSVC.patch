@@ -1,0 +1,34 @@
+From c2ae09fefd5cafce07b24cc3fc0bfbb3d84f415d Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 12 Jun 2020 17:34:10 +0530
+Subject: [PATCH] meson: Fix check for size_t on MSVC
+
+We need to include crtdefs.h for the definition of size_t. See:
+
+https://docs.microsoft.com/en-us/cpp/c-runtime-library/standard-types
+---
+ meson.build | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index a9581b2..5ee2763 100644
+--- a/meson.build
++++ b/meson.build
+@@ -76,7 +76,13 @@ foreach type : ['int8_t', 'uint8_t', 'int16_t', 'uint16_t', 'int32_t', 'uint32_t
+   cdata.set('HAVE_' + type.to_upper().underscorify(), true)
+ endforeach
+ 
+-if not cc.has_type('size_t', prefix: '#include <sys/types.h>')
++size_t_prefix = '''
++#ifdef _WIN32
++#include <crtdefs.h>
++#endif
++#include <sys/types.h>
++'''
++if not cc.has_type('size_t', prefix: size_t_prefix)
+   cdata.set('size_t', 'unsigned int')
+ endif
+ 
+-- 
+2.27.0.windows.1
+

@@ -24,6 +24,7 @@ class Recipe(recipe.Recipe):
         # https://gitlab.freedesktop.org/gstreamer/meson-ports/libsrtp
         # https://github.com/cisco/libsrtp/pull/495
         'libsrtp/libsrtp-meson-port.patch',
+        'libsrtp/0001-meson-Fix-check-for-size_t-on-MSVC.patch',
         # https://github.com/cisco/libsrtp/pull/486
         'libsrtp/0001-Fix-building-with-gcc-10.patch',
     ]
