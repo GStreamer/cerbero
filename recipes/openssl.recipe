@@ -99,6 +99,12 @@ class Recipe(recipe.Recipe):
             # mingw-perl that was downloaded and installed by bootstrap.
             openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
             self.prepend_env('PATH', openssl_path, sep=';')
+            # Ensure that Perl's Filei/Spec.pm uses forward-slashes. These vars
+            # are automatically set by the MSYS terminal, but they might get
+            # overriden by something, which will cause Perl to use backward
+            # slashes and fail `Configurations/unix-checker.pm` on configure.
+            self.set_env('MSYSTEM', 'MINGW32')
+            self.set_env('TERM', 'cygwin')
 
     @async_modify_environment
     async def configure(self):
