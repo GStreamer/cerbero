@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.GPLv2Plus]
     btype = BuildType.CUSTOM
     remotes = {'origin': 'https://github.com/libav/gas-preprocessor'}
-    commit = 'f8a2d8c155bda8d925a7ee2ed8315c553a2b865f'
+    commit = 'd09971fad329d32df19f5bbafe88cf2f0ed04ed7'
 
     async def install(self):
         if not os.path.exists(os.path.join(self.config.prefix, 'bin')):
