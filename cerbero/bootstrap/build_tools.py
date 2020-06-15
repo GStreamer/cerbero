@@ -18,38 +18,35 @@
 
 import os
 
-from cerbero.config import Config, Platform, DistroVersion
+from cerbero.config import Config
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
 from cerbero.utils import _, shell
 from cerbero.errors import FatalError, ConfigurationError
+from cerbero.enums import Platform, Architecture, DistroVersion
 
 
 class BuildTools (BootstrapperBase, Fetch):
 
-    # XXX: Remove vala-m4 and introspection-m4 once all GNOME recipes are
-    # ported to Meson, and revisit gtk-doc-lite too.
-    BUILD_TOOLS = ['automake', 'autoconf', 'm4', 'libtool', 'gettext-tools',
-                   'pkg-config', 'orc-tool', 'gettext-m4', 'vala-m4',
-                   'gobject-introspection-m4', 'gtk-doc-lite', 'meson']
+    BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
+                   'orc-tool', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'nasm', 'bison', 'flex', 'moltenvk-tools'],
-        Platform.WINDOWS: ['intltool', 'nasm'],
+        Platform.DARWIN: ['intltool', 'gettext-m4', 'gperf', 'bison', 'flex',
+                          'moltenvk-tools', 'gettext-tools', 'm4'],
+        # MSYS already ships with bison, flex, m4 on Windows
+        Platform.WINDOWS: ['intltool', 'gettext-m4', 'gperf', 'nasm',
+                           'gettext-tools'],
         Platform.LINUX: ['intltool-m4'],
     }
 
     def __init__(self, config, offline):
         BootstrapperBase.__init__(self, config, offline)
 
-        if self.config.platform == Platform.WINDOWS:
-            self.BUILD_TOOLS.remove('m4')
-            self.BUILD_TOOLS.append('gperf')
-        if self.config.platform == Platform.DARWIN:
-            self.BUILD_TOOLS.append('gperf')
-            self.BUILD_TOOLS.append('cmake')
-        if self.config.platform == Platform.LINUX:
+        # On Windows, we always build nasm ourselves, and we tell the user to
+        # install CMake using the installer.
+        if self.config.platform in (Platform.LINUX, Platform.DARWIN):
             # dav1d requires nasm >=2.13.02
             # We require cmake > 3.10.2 for out-of-source-tree builds.
             tool, found, newer = shell.check_tool_version('cmake' ,'3.10.2', env=None)
@@ -59,6 +56,7 @@ class BuildTools (BootstrapperBase, Fetch):
             if not newer:
               self.BUILD_TOOLS.append('nasm')
         if self.config.target_platform == Platform.IOS:
+            # Used by ffmpeg and x264
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():
