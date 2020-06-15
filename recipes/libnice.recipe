@@ -15,8 +15,6 @@ class Recipe(recipe.Recipe):
                      'gstreamer' : 'enabled',
                      'crypto-library' : 'openssl'}
     deps = ['glib', 'gstreamer-1.0']
-    # openssl on Linux
-    use_system_libs = True
 
     patches = [
         # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/150
@@ -39,6 +37,9 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
+        else:
+            # openssl on Linux
+            self.use_system_libs = True
 
     def post_install (self):
         nice_deps = ['gio-2.0', 'gthread-2.0', 'ssl', 'crypto']
