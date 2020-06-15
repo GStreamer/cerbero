@@ -1,0 +1,259 @@
+From 154633f97720858e97b49bc343fb3cac2d3d391a Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 17 Jun 2020 21:38:03 +0530
+Subject: [PATCH 2/2] meson: Add support for Windows ARM and ARM64
+
+Also don't require nasm when we don't need it.
+---
+ codec/common/meson.build     | 14 +++++++--
+ codec/decoder/meson.build    | 14 +++++++--
+ codec/encoder/meson.build    | 14 +++++++--
+ codec/processing/meson.build | 14 +++++++--
+ meson.build                  | 55 ++++++++++++++++++++++++++++++++----
+ 5 files changed, 97 insertions(+), 14 deletions(-)
+
+diff --git a/codec/common/meson.build b/codec/common/meson.build
+index 8d29ec1..f6043d3 100644
+--- a/codec/common/meson.build
++++ b/codec/common/meson.build
+@@ -33,21 +33,31 @@ if cpu_family in ['x86', 'x86_64']
+   ]
+   objs_asm += asm_gen.process(asm_sources)
+ elif cpu_family == 'arm'
+-  cpp_sources += [
++  asm_sources = [
+     'arm/copy_mb_neon.S',
+     'arm/deblocking_neon.S',
+     'arm/expand_picture_neon.S',
+     'arm/intra_pred_common_neon.S',
+     'arm/mc_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ elif cpu_family == 'aarch64'
+-  cpp_sources += [
++  asm_sources = [
+     'arm64/copy_mb_aarch64_neon.S',
+     'arm64/deblocking_aarch64_neon.S',
+     'arm64/expand_picture_aarch64_neon.S',
+     'arm64/intra_pred_common_aarch64_neon.S',
+     'arm64/mc_aarch64_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ else
+   error('Unsupported cpu_family @0@'.format(cpu_family))
+ endif
+diff --git a/codec/decoder/meson.build b/codec/decoder/meson.build
+index 3218342..e741ee9 100644
+--- a/codec/decoder/meson.build
++++ b/codec/decoder/meson.build
+@@ -30,15 +30,25 @@ if cpu_family in ['x86', 'x86_64']
+   ]
+   objs_asm = asm_gen.process(asm_sources)
+ elif cpu_family == 'arm'
+-  cpp_sources += [
++  asm_sources = [
+     'core/arm/block_add_neon.S',
+     'core/arm/intra_pred_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ elif cpu_family == 'aarch64'
+-  cpp_sources += [
++  asm_sources = [
+     'core/arm64/block_add_aarch64_neon.S',
+     'core/arm64/intra_pred_aarch64_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ else
+   error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+diff --git a/codec/encoder/meson.build b/codec/encoder/meson.build
+index fcb9275..1d988b8 100644
+--- a/codec/encoder/meson.build
++++ b/codec/encoder/meson.build
+@@ -47,7 +47,7 @@ if cpu_family in ['x86', 'x86_64']
+   ]
+   objs_asm = asm_gen.process(asm_sources)
+ elif cpu_family == 'arm'
+-  cpp_sources += [
++  asm_sources = [
+     'core/arm/intra_pred_neon.S',
+     'core/arm/intra_pred_sad_3_opt_neon.S',
+     'core/arm/memory_neon.S',
+@@ -55,8 +55,13 @@ elif cpu_family == 'arm'
+     'core/arm/reconstruct_neon.S',
+     'core/arm/svc_motion_estimation.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ elif cpu_family == 'aarch64'
+-  cpp_sources += [
++  asm_sources = [
+     'core/arm64/intra_pred_aarch64_neon.S',
+     'core/arm64/intra_pred_sad_3_opt_aarch64_neon.S',
+     'core/arm64/memory_aarch64_neon.S',
+@@ -64,6 +69,11 @@ elif cpu_family == 'aarch64'
+     'core/arm64/reconstruct_aarch64_neon.S',
+     'core/arm64/svc_motion_estimation_aarch64_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ else
+   error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+diff --git a/codec/processing/meson.build b/codec/processing/meson.build
+index 07f4879..ea49ab6 100644
+--- a/codec/processing/meson.build
++++ b/codec/processing/meson.build
+@@ -27,19 +27,29 @@ if cpu_family in ['x86', 'x86_64']
+   ]
+   objs_asm = asm_gen.process(asm_sources)
+ elif cpu_family == 'arm'
+-  cpp_sources += [
++  asm_sources = [
+     'src/arm/adaptive_quantization.S',
+     'src/arm/down_sample_neon.S',
+     'src/arm/pixel_sad_neon.S',
+     'src/arm/vaa_calc_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ elif cpu_family == 'aarch64'
+-  cpp_sources += [
++  asm_sources = [
+ 	'src/arm64/adaptive_quantization_aarch64_neon.S',
+ 	'src/arm64/down_sample_aarch64_neon.S',
+ 	'src/arm64/pixel_sad_aarch64_neon.S',
+ 	'src/arm64/vaa_calc_aarch64_neon.S',
+   ]
++  if system == 'windows'
++    objs_asm = asm_gen.process(asm_sources)
++  else
++    cpp_sources += asm_sources
++  endif
+ else
+   error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+diff --git a/meson.build b/meson.build
+index e5b7b45..f405bca 100644
+--- a/meson.build
++++ b/meson.build
+@@ -36,8 +36,6 @@ encoder_inc = include_directories([
+   join_paths('codec', 'encoder', 'plus', 'inc'),
+ ])
+ 
+-nasm = find_program('nasm', 'nasm.exe')
+-
+ system = host_machine.system()
+ cpu_family = host_machine.cpu_family()
+ 
+@@ -92,7 +90,7 @@ if ['linux', 'android', 'ios', 'darwin'].contains(system)
+     add_project_arguments('-DHAVE_NEON_ARM64', language: 'cpp')
+     casm_inc = include_directories(join_paths('codec', 'common', 'arm64'))
+   else
+-    error ('FIXME: unhandled CPU family @0@ for @1@'.format(cpu_family, system))
++    error('FIXME: unhandled CPU family @0@ for @1@'.format(cpu_family, system))
+   endif
+ 
+   if ['ios', 'darwin'].contains(system)
+@@ -104,18 +102,35 @@ elif system == 'windows'
+   if cpu_family == 'x86'
+     asm_format = 'win32'
+     asm_args += ['-DPREFIX', '-DX86_32']
++    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+   elif cpu_family == 'x86_64'
+     asm_format = 'win64'
+     asm_args += ['-DWIN64']
++    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
++  elif cpu_family == 'arm'
++    if cpp.get_argument_syntax() != 'msvc'
++      error('Windows ARM is currently only supported with Visual Studio-like compilers')
++    endif
++    asm_format = 'armasm'
++    asm_args += ['-nologo', '-DHAVE_NEON', '-ignore', '4509']
++    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm', '')
++  elif cpu_family == 'aarch64'
++    if cpp.get_argument_syntax() != 'msvc'
++      error('Windows ARM64 is currently only supported with Visual Studio-like compilers')
++    endif
++    asm_format = 'armasm'
++    asm_args += ['-nologo', '-DHAVE_NEON_AARCH64']
++    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm64', '')
+   else
+-    error ('FIXME: unhandled CPU family @0@ for Windows'.format(cpu_family))
++    error('FIXME: unhandled CPU family @0@ for Windows'.format(cpu_family))
+   endif
+-  asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+ else
+-  error ('FIXME: Unhandled system @0@'.format(system))
++  error('FIXME: Unhandled system @0@'.format(system))
+ endif
+ 
+ if cpu_family in ['x86', 'x86_64']
++  nasm = find_program('nasm')
++
+   asm_gen = generator(nasm,
+     output : '@BASENAME@.o',
+     arguments : [
+@@ -123,6 +138,34 @@ if cpu_family in ['x86', 'x86_64']
+       '-i', asm_inc,
+       '@INPUT@',
+       '-o', '@OUTPUT@'] + asm_args)
++elif system == 'windows'
++  gasprep = find_program('gas-preprocessor.pl')
++  if  cpu_family == 'arm'
++    asm_gen = generator(gasprep,
++      output : '@BASENAME@.obj',
++      arguments : [
++        '-as-type', asm_format,
++        '-force-thumb',
++        '--',
++        'armasm',
++        '-I' + asm_inc] + asm_args + [
++        '@INPUT@',
++        '-c', '-o', '@OUTPUT@'])
++  elif cpu_family == 'aarch64'
++    asm_gen = generator(gasprep,
++      output : '@BASENAME@.obj',
++      arguments : [
++        '-as-type', asm_format,
++        '-arch', 'aarch64',
++        '--',
++        'armasm64',
++        '-I' + asm_inc] + asm_args + [
++        '@INPUT@',
++        '-c', '-o', '@OUTPUT@'])
++  else
++    # Windows only supports x86, x86_64, arm, arm64
++    error('unreachable code')
++  endif
+ endif
+ 
+ if system == 'android'
+-- 
+2.27.0.windows.1
+

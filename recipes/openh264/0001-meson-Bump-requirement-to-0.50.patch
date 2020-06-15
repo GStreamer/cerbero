@@ -1,0 +1,105 @@
+From 767f0ab74ed6f795353f5968614978c9d7fbcabb Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 17 Jun 2020 21:35:33 +0530
+Subject: [PATCH 1/2] meson: Bump requirement to 0.50
+
+Fixes a warning about usage of the `install:` kwarg in configure_file,
+and means we can use the `in` kwarg. Also move to `copy: true` to fix
+the warning around usage of an empty `configuration_data()` to copy
+files as a hack.
+---
+ codec/common/meson.build     | 2 +-
+ codec/decoder/meson.build    | 2 +-
+ codec/encoder/meson.build    | 2 +-
+ codec/processing/meson.build | 2 +-
+ include/wels/meson.build     | 2 +-
+ meson.build                  | 4 ++--
+ 6 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/codec/common/meson.build b/codec/common/meson.build
+index 7f8acb6..8d29ec1 100644
+--- a/codec/common/meson.build
++++ b/codec/common/meson.build
+@@ -18,7 +18,7 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if ['x86', 'x86_64'].contains(cpu_family)
++if cpu_family in ['x86', 'x86_64']
+   asm_sources = [
+     'x86/cpuid.asm',
+     'x86/dct.asm',
+diff --git a/codec/decoder/meson.build b/codec/decoder/meson.build
+index 1131022..3218342 100644
+--- a/codec/decoder/meson.build
++++ b/codec/decoder/meson.build
+@@ -23,7 +23,7 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if ['x86', 'x86_64'].contains(cpu_family)
++if cpu_family in ['x86', 'x86_64']
+   asm_sources = [
+     'core/x86/dct.asm',
+     'core/x86/intra_pred.asm',
+diff --git a/codec/encoder/meson.build b/codec/encoder/meson.build
+index 5f46854..fcb9275 100644
+--- a/codec/encoder/meson.build
++++ b/codec/encoder/meson.build
+@@ -34,7 +34,7 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if ['x86', 'x86_64'].contains(cpu_family)
++if cpu_family in ['x86', 'x86_64']
+   asm_sources = [
+     'core/x86/coeff.asm',
+     'core/x86/dct.asm',
+diff --git a/codec/processing/meson.build b/codec/processing/meson.build
+index d38dfb1..07f4879 100644
+--- a/codec/processing/meson.build
++++ b/codec/processing/meson.build
+@@ -19,7 +19,7 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if ['x86', 'x86_64'].contains(cpu_family)
++if cpu_family in ['x86', 'x86_64']
+   asm_sources = [
+     'src/x86/denoisefilter.asm',
+     'src/x86/downsample_bilinear.asm',
+diff --git a/include/wels/meson.build b/include/wels/meson.build
+index 1b00492..aa078ae 100644
+--- a/include/wels/meson.build
++++ b/include/wels/meson.build
+@@ -4,5 +4,5 @@ foreach header : api_headers
+   api_header_deps += configure_file(
+     input : header[1],
+     output : header[0],
+-    configuration : configuration_data())
++    copy: true)
+ endforeach
+diff --git a/meson.build b/meson.build
+index f8f9a05..e5b7b45 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,6 +1,6 @@
+ project('openh264', ['c', 'cpp'],
+   version : '2.1.1',
+-  meson_version : '>= 0.47',
++  meson_version : '>= 0.50',
+   default_options : [ 'warning_level=1',
+                       'buildtype=debugoptimized' ])
+ 
+@@ -115,7 +115,7 @@ else
+   error ('FIXME: Unhandled system @0@'.format(system))
+ endif
+ 
+-if ['x86', 'x86_64'].contains(cpu_family)
++if cpu_family in ['x86', 'x86_64']
+   asm_gen = generator(nasm,
+     output : '@BASENAME@.o',
+     arguments : [
+-- 
+2.27.0.windows.1
+

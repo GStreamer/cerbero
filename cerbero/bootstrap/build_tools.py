@@ -55,8 +55,8 @@ class BuildTools (BootstrapperBase, Fetch):
             tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None)
             if not newer:
               self.BUILD_TOOLS.append('nasm')
-        if self.config.target_platform == Platform.IOS:
-            # Used by ffmpeg and x264
+        if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
+            # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():
