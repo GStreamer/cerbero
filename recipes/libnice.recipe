@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.15'
+    version = '0.1.17'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = 'f7280f3f58f594409c719a03009aa819c599078b410796f408251277807587da'
+    tarball_checksum = '1952a0dec58b5c9ccc3f25193df4e2d1244cb382cac611b71e25afcd7b069526'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     meson_options = {'tests' : 'disabled',
@@ -16,8 +16,9 @@ class Recipe(recipe.Recipe):
                      'crypto-library' : 'gnutls'}
     deps = ['glib', 'gstreamer-1.0', 'gnutls']
     patches = [
-        "libnice/0001-nicesrc-spin-the-agent-mainloop-in-a-separate-thread.patch",
-        "libnice/0001-meson-install-.pc-file-for-static-gstreamer-plugin.patch",
+        # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/150
+        'libnice/0001-stund-Use-lowercase-winsock2.h.patch',
+        'libnice/0001-meson-We-don-t-need-gtkdoc-reduce-meson-req.patch',
     ]
 
     files_bins = ['stunbdc', 'stund']

@@ -1,0 +1,24 @@
+From 164a4059ea4c7c11d600d3f2598b3eadf2710f46 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 9 Oct 2020 02:00:21 +0530
+Subject: [PATCH] meson: We don't need gtkdoc, reduce meson req
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 0004d91..b3b9005 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,6 +1,6 @@
+ project('libnice', 'c',
+   version: '0.1.17',
+-  meson_version : '>= 0.52',
++  meson_version : '>= 0.49',
+   default_options : ['warning_level=1', 'buildtype=debugoptimized'])
+ 
+ nice_version = meson.project_version()
+-- 
+2.26.2
+
