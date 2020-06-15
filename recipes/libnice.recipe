@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.16'
+    version = '0.1.17'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '06b678066f94dde595a4291588ed27acd085ee73775b8c4e8399e28c01eeefdf'
+    tarball_checksum = '1952a0dec58b5c9ccc3f25193df4e2d1244cb382cac611b71e25afcd7b069526'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     meson_options = {'tests' : 'disabled',
@@ -17,6 +17,11 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'gstreamer-1.0']
     # openssl on Linux
     use_system_libs = True
+
+    patches = [
+        # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/150
+        'libnice/0001-stund-Use-lowercase-winsock2.h.patch'
+    ]
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
