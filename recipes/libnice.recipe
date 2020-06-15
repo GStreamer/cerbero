@@ -18,7 +18,10 @@ class Recipe(recipe.Recipe):
 
     patches = [
         # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/150
-        'libnice/0001-stund-Use-lowercase-winsock2.h.patch'
+        'libnice/0001-stund-Use-lowercase-winsock2.h.patch',
+        # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/151
+        'libnice/0001-rand-Use-crypto-libs-instead-of-CryptGenRandom.patch',
+        'libnice/0002-meson-Fix-typos-in-crypto-library-detection.patch',
     ]
 
     files_bins = ['stunbdc', 'stund']
