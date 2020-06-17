@@ -1,0 +1,2589 @@
+From 61297be2b6f86bcea2cae37998b785060ebf761b Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 18 Jul 2020 11:19:55 +0530
+Subject: [PATCH 1/6] silk: Fix incorrect ifdef in debug.c
+
+---
+ silk/debug.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/silk/debug.c b/silk/debug.c
+index 71e69cc6..4f02912b 100644
+--- a/silk/debug.c
++++ b/silk/debug.c
+@@ -37,14 +37,13 @@ POSSIBILITY OF SUCH DAMAGE.
+ 
+ #if SILK_TIC_TOC
+ 
+-#ifdef _WIN32
+-
+ #if (defined(_WIN32) || defined(_WINCE))
+ #include <windows.h>    /* timer */
+ #else   /* Linux or Mac*/
+ #include <sys/time.h>
+ #endif
+ 
++#ifdef _WIN32
+ unsigned long silk_GetHighResolutionTime(void) /* O  time in usec*/
+ {
+     /* Returns a time counter in microsec   */
+-- 
+2.27.0.windows.1
+
+
+From 70ca3953074121f2334180d3613524a7da2a0ae9 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 18 Jul 2020 19:16:52 +0530
+Subject: [PATCH 2/6] celt: Fix broken SSE pre-processor check due to typo
+
+This broke 5 years ago in 43120f00758219a784f952754f33b9788a8d731b
+---
+ celt/x86/pitch_sse.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/celt/x86/pitch_sse.h b/celt/x86/pitch_sse.h
+index e5f87ab5..f7a014b6 100644
+--- a/celt/x86/pitch_sse.h
++++ b/celt/x86/pitch_sse.h
+@@ -91,7 +91,7 @@ opus_val32 celt_inner_prod_sse2(
+     int               N);
+ #endif
+ 
+-#if defined(OPUS_X86_MAY_HAVE_SSE2) && !defined(FIXED_POINT)
++#if defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT)
+ opus_val32 celt_inner_prod_sse(
+     const opus_val16 *x,
+     const opus_val16 *y,
+-- 
+2.27.0.windows.1
+
+
+From c057d93b1a0fe2ab0e6cb40ae2b91e83ef380451 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 20 Jul 2020 16:19:07 +0530
+Subject: [PATCH 3/6] Fix size_t -> int conversion warning with MSVC build
+
+../src/repacketizer_demo.c(122): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+../src/repacketizer_demo.c(138): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+../src/repacketizer_demo.c(140): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+---
+ src/repacketizer_demo.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/repacketizer_demo.c b/src/repacketizer_demo.c
+index dc05c1b3..66ae3bb4 100644
+--- a/src/repacketizer_demo.c
++++ b/src/repacketizer_demo.c
+@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
+       for (i=0;i<nb_packets;i++)
+       {
+          unsigned char ch[4];
+-         err = fread(ch, 1, 4, fin);
++         err = (int) fread(ch, 1, 4, fin);
+          len[i] = char_to_int(ch);
+          /*fprintf(stderr, "in len = %d\n", len[i]);*/
+          if (len[i]>1500 || len[i]<0)
+@@ -135,9 +135,9 @@ int main(int argc, char *argv[])
+              }
+              break;
+          }
+-         err = fread(ch, 1, 4, fin);
++         err = (int) fread(ch, 1, 4, fin);
+          rng[i] = char_to_int(ch);
+-         err = fread(packets[i], 1, len[i], fin);
++         err = (int) fread(packets[i], 1, len[i], fin);
+          if (feof(fin))
+          {
+             eof = 1;
+-- 
+2.27.0.windows.1
+
+
+From 0807f33050c0cf1c0ceace7ae1b3ec4a2629e2a3 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Sat, 18 Jul 2020 11:18:23 +0530
+Subject: [PATCH 4/6] Replace WIN32 with _WIN32 everywhere
+
+_WIN32 is defined on all Windows platforms by every compiler that
+targets Windows. We do not need WIN32 at all.
+---
+ celt/stack_alloc.h        | 4 ++--
+ include/opus_defines.h    | 2 +-
+ silk/debug.c              | 4 ++--
+ win32/VS2015/common.props | 2 +-
+ 4 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/celt/stack_alloc.h b/celt/stack_alloc.h
+index 2b51c8d8..ae40e2a1 100644
+--- a/celt/stack_alloc.h
++++ b/celt/stack_alloc.h
+@@ -40,7 +40,7 @@
+ #endif
+ 
+ #ifdef USE_ALLOCA
+-# ifdef WIN32
++# ifdef _WIN32
+ #  include <malloc.h>
+ # else
+ #  ifdef HAVE_ALLOCA_H
+@@ -102,7 +102,7 @@
+ 
+ #define VARDECL(type, var) type *var
+ 
+-# ifdef WIN32
++# ifdef _WIN32
+ #  define ALLOC(var, size, type) var = ((type*)_alloca(sizeof(type)*(size)))
+ # else
+ #  define ALLOC(var, size, type) var = ((type*)alloca(sizeof(type)*(size)))
+diff --git a/include/opus_defines.h b/include/opus_defines.h
+index d141418b..ceee5b84 100644
+--- a/include/opus_defines.h
++++ b/include/opus_defines.h
+@@ -64,7 +64,7 @@ extern "C" {
+ /**Export control for opus functions */
+ 
+ #ifndef OPUS_EXPORT
+-# if defined(WIN32)
++# if defined(_WIN32)
+ #  if defined(OPUS_BUILD) && defined(DLL_EXPORT)
+ #   define OPUS_EXPORT __declspec(dllexport)
+ #  else
+diff --git a/silk/debug.c b/silk/debug.c
+index 4f02912b..eb0c36ef 100644
+--- a/silk/debug.c
++++ b/silk/debug.c
+@@ -67,7 +67,7 @@ unsigned long GetHighResolutionTime(void) /* O  time in usec*/
+ int           silk_Timer_nTimers = 0;
+ int           silk_Timer_depth_ctr = 0;
+ char          silk_Timer_tags[silk_NUM_TIMERS_MAX][silk_NUM_TIMERS_MAX_TAG_LEN];
+-#ifdef WIN32
++#ifdef _WIN32
+ LARGE_INTEGER silk_Timer_start[silk_NUM_TIMERS_MAX];
+ #else
+ unsigned long silk_Timer_start[silk_NUM_TIMERS_MAX];
+@@ -78,7 +78,7 @@ opus_int64     silk_Timer_sum[silk_NUM_TIMERS_MAX];
+ opus_int64     silk_Timer_max[silk_NUM_TIMERS_MAX];
+ opus_int64     silk_Timer_depth[silk_NUM_TIMERS_MAX];
+ 
+-#ifdef WIN32
++#ifdef _WIN32
+ void silk_TimerSave(char *file_name)
+ {
+     if( silk_Timer_nTimers > 0 )
+diff --git a/win32/VS2015/common.props b/win32/VS2015/common.props
+index 6c757d8b..f6e920b6 100644
+--- a/win32/VS2015/common.props
++++ b/win32/VS2015/common.props
+@@ -23,7 +23,7 @@
+       <CompileAsManaged>false</CompileAsManaged>
+       <CompileAsWinRT>false</CompileAsWinRT>
+       <AdditionalIncludeDirectories>..\..;..\..\include;..\..\silk;..\..\celt;..\..\win32;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+-      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions>HAVE_CONFIG_H;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+       <OpenMPSupport>false</OpenMPSupport>
+     </ClCompile>
+-- 
+2.27.0.windows.1
+
+
+From b60d190675850c9259f68109dc3f4ff5e9d3f46b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 19 Mar 2016 15:40:22 +0000
+Subject: [PATCH 5/6] meson: add meson build
+
+Tested on Linux with gcc on Debian sid and on Windows
+with Visual Studio 2017.
+
+ARM assembly code paths pretty much untested so far.
+Same for OS/X build and Windows/MSVC build.
+---
+ celt/meson.build       |  87 ++++++
+ celt/tests/meson.build |  25 ++
+ doc/Doxyfile.in        |   3 +
+ doc/meson.build        |  36 +++
+ include/meson.build    |  13 +
+ meson.build            | 608 +++++++++++++++++++++++++++++++++++++++++
+ meson_options.txt      |  18 ++
+ silk/meson.build       | 179 ++++++++++++
+ silk/tests/meson.build |  10 +
+ src/meson.build        |  61 +++++
+ tests/meson.build      |  21 ++
+ 11 files changed, 1061 insertions(+)
+ create mode 100644 celt/meson.build
+ create mode 100644 celt/tests/meson.build
+ create mode 100644 doc/meson.build
+ create mode 100644 include/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 silk/meson.build
+ create mode 100644 silk/tests/meson.build
+ create mode 100644 src/meson.build
+ create mode 100644 tests/meson.build
+
+diff --git a/celt/meson.build b/celt/meson.build
+new file mode 100644
+index 00000000..498fcde3
+--- /dev/null
++++ b/celt/meson.build
+@@ -0,0 +1,87 @@
++celt_sources = [
++  'bands.c',
++  'celt.c',
++  'celt_encoder.c',
++  'celt_decoder.c',
++  'cwrs.c',
++  'entcode.c',
++  'entdec.c',
++  'entenc.c',
++  'kiss_fft.c',
++  'laplace.c',
++  'mathops.c',
++  'mdct.c',
++  'modes.c',
++  'pitch.c',
++  'celt_lpc.c',
++  'quant_bands.c',
++  'rate.c',
++  'vq.c',
++]
++
++if may_have_sse
++  celt_sources += [
++    'x86/x86cpu.c',
++    'x86/x86_celt_map.c',
++    'x86/pitch_sse.c',
++  ]
++endif
++
++if may_have_sse2
++  celt_sources += [
++    'x86/pitch_sse2.c',
++    'x86/vq_sse2.c',
++  ]
++endif
++
++if may_have_sse4_1
++  celt_sources += [
++    'x86/celt_lpc_sse4_1.c',
++    'x86/pitch_sse4_1.c',
++  ]
++endif
++
++opus_armasm_lib = []
++
++if host_machine.cpu_family() == 'arm' # was: cpu_arm # FIXME: should only be used if intrinsics or asm is enabled
++  celt_sources +=  [
++    'arm/armcpu.c',
++    'arm/arm_celt_map.c',
++  ]
++  if may_have_neon
++    celt_sources += [
++      'arm/celt_neon_intr.c',
++    ]
++  endif
++  if have_arm_ne10
++    celt_sources += [
++    'arm/celt_ne10_fft.c',
++    'arm/celt_ne10_mdct.c',
++  ]
++  endif
++  if opus_arm_external_asm
++    # FIXME: arm2gnu.pl stuff?
++    celt_sources_arm_asm = [
++      'arm/celt_pitch_xcorr_arm.s',
++    ]
++    celt_arm_armopts_s = configure_file(input: 'arm/armopts.s.in',
++      output: 'arm/armopts.s',
++      configuration: opus_conf)
++    opus_armasm_lib = static_library('opus-armasm',
++      celt_arm_armopts_s, celt_sources_arm_asm,
++      install: false)
++  endif
++endif
++
++celt_c_args = []
++if host_machine.system() == 'windows'
++  celt_c_args += ['-DDLL_EXPORT']
++endif
++
++celt_lib = static_library('opus-celt',
++  celt_sources,
++  c_args: opus_c_args + celt_c_args,
++  include_directories: opus_includes,
++  link_with: opus_armasm_lib,
++  dependencies: libm,
++  install: false)
+diff --git a/celt/tests/meson.build b/celt/tests/meson.build
+new file mode 100644
+index 00000000..f6d08d62
+--- /dev/null
++++ b/celt/tests/meson.build
+@@ -0,0 +1,25 @@
++tests = [
++  'test_unit_types',
++  'test_unit_mathops',
++  'test_unit_entropy',
++  'test_unit_laplace',
++  'test_unit_dft',
++  'test_unit_mdct',
++  'test_unit_rotation',
++  'test_unit_cwrs32',
++]
++
++test_args = []
++if cc.get_id() == 'msvc'
++  test_args += ['/wd4305'] # trunction from double to float in mathops
++endif
++
++foreach test_name : tests
++  exe = executable(test_name, '@0@.c'.format(test_name),
++                   include_directories : opus_includes,
++                   c_args : opus_c_args + test_args,
++                   link_with : [opus_armasm_lib, celt_lib],
++                   dependencies : libm,
++                   install : false)
++  test(test_name, exe)
++endforeach
+diff --git a/doc/Doxyfile.in b/doc/Doxyfile.in
+index 6d25f1fb..6eef650b 100644
+--- a/doc/Doxyfile.in
++++ b/doc/Doxyfile.in
+@@ -335,3 +335,6 @@ PREDEFINED             = OPUS_EXPORT= \
+ # configure time.
+ #
+ HAVE_DOT               = @HAVE_DOT@
++
++# move docs to the correct place
++OUTPUT_DIRECTORY       = @top_builddir@/doc
+diff --git a/doc/meson.build b/doc/meson.build
+new file mode 100644
+index 00000000..8f967a51
+--- /dev/null
++++ b/doc/meson.build
+@@ -0,0 +1,36 @@
++top_srcdir = meson.source_root()
++top_builddir = meson.build_root()
++
++have_dot = find_program('dot', required: false).found()
++
++doxyfile_conf = configuration_data()
++doxyfile_conf.set('VERSION', opus_version)
++doxyfile_conf.set('HAVE_DOT', have_dot)
++doxyfile_conf.set('top_srcdir', top_srcdir)
++doxyfile_conf.set('top_builddir', top_builddir)
++
++doxyfile = configure_file(input: 'Doxyfile.in',
++  output: 'Doxyfile',
++  configuration: doxyfile_conf,
++  install: false)
++
++docdir = join_paths(get_option('datadir'), get_option('docdir'))
++
++doc_inputs = [
++  'customdoxygen.css',
++  'footer.html',
++  'header.html',
++  'opus_logo.svg',
++  top_srcdir + '/include/opus.h',
++  top_srcdir + '/include/opus_multistream.h',
++  top_srcdir + '/include/opus_defines.h',
++  top_srcdir + '/include/opus_types.h',
++  top_srcdir + '/include/opus_custom.h',
++]
++
++custom_target('doc',
++  input: [ doxyfile ] + doc_inputs,
++  output: [ 'html' ],
++  command: [ doxygen, doxyfile ],
++  install_dir: docdir,
++  install: true)
+diff --git a/include/meson.build b/include/meson.build
+new file mode 100644
+index 00000000..9f41b03a
+--- /dev/null
++++ b/include/meson.build
+@@ -0,0 +1,13 @@
++opus_headers = [
++  'opus.h',
++  'opus_multistream.h',
++  'opus_types.h',
++  'opus_defines.h',
++]
++
++if opt_custom_modes
++  opus_headers += ['opus_custom.h']
++endif
++
++install_headers(opus_headers, subdir: 'opus')
++
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 00000000..c18e9a50
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,608 @@
++# Based on git v1.2.1-35-geee68982
++project('opus', 'c',
++  version: '1.2.1',
++  meson_version: '>= 0.47.0',
++  default_options: ['warning_level=1',
++                    'c_std=gnu99',
++                    'buildtype=debugoptimized'])
++
++cc = meson.get_compiler('c')
++
++opus_includes = include_directories('.', 'include', 'celt', 'silk')
++opus_public_includes = include_directories('include')
++
++add_project_arguments('-DOPUS_BUILD', language: 'c')
++add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
++
++if host_machine.system() == 'windows'
++  add_project_arguments('-DWIN32', language: 'c')
++  if cc.get_id() == 'msvc'
++    add_project_arguments('-D_CRT_SECURE_NO_WARNINGS', language: 'c')
++  endif
++endif
++
++# Check for extra compiler args
++additional_c_args = []
++if cc.get_id() != 'msvc'
++  additional_c_args += [
++    '-fvisibility=hidden',
++    '-Wall',
++    '-Wextra',
++    '-Wcast-align',
++    '-Wnested-externs',
++    '-Wshadow',
++    '-Wstrict-prototypes',
++  ]
++endif
++
++foreach arg : additional_c_args
++  if cc.has_argument(arg)
++    add_project_arguments(arg, language: 'c')
++  endif
++endforeach
++
++# Windows MSVC warnings
++if cc.get_id() == 'msvc'
++  # Ignore several spurious warnings.
++  # If a warning is completely useless and spammy, use '/wdXXXX' to suppress it
++  # If a warning is harmless but hard to fix, use '/woXXXX' so it's shown once
++  # NOTE: Only add warnings here if you are sure they're spurious
++  add_project_arguments('/wd4035', '/wd4715', '/wd4116', '/wd4046', '/wd4068',
++    '/wd4820', '/wd4244', '/wd4255', '/wd4668',
++    #'/FImsvc_recommended_pragmas.h',
++    language : 'c')
++endif
++
++opus_c_args = []
++
++# FIXME: CURRENT_VERSION from git script, so e.g. 1.1.1-rc-71-gc43b1bc
++opus_version = meson.project_version()
++
++opus_conf = configuration_data()
++opus_conf.set('PACKAGE_BUGREPORT', '"opus@xiph.org"')
++opus_conf.set('PACKAGE_NAME', '"opus"')
++opus_conf.set('PACKAGE_STRING', '"opus @0@"'.format(opus_version))
++opus_conf.set('PACKAGE_TARNAME', '"opus"')
++opus_conf.set('PACKAGE_URL', '""')
++opus_conf.set('PACKAGE_VERSION', '"@0@"'.format(opus_version))
++
++# FIXME: optional Ne10 dependency
++have_arm_ne10 = false
++
++libm = cc.find_library('m', required : false)
++
++opus_conf.set('HAVE_LRINTF', cc.has_function('lrintf', prefix: '#include <math.h>', dependencies: libm))
++opus_conf.set('HAVE_LRINT', cc.has_function('lrint', prefix: '#include <math.h>', dependencies: libm))
++opus_conf.set('HAVE___MALLOC_HOOK', cc.has_function('__malloc_hook', prefix: '#include <malloc.h>'))
++
++# Check for restrict keyword
++restrict_tmpl = '''
++typedef int * int_ptr;
++int foo (int_ptr @0@ ip, int * @0@ baz[]) {
++  return ip[0];
++}
++int main (int argc, char ** argv) {
++  int s[1];
++  int * @0@ t = s;
++  t[0] = 0;
++  return foo(t, (void *)0);
++}'''
++# Define restrict to the equivalent of the C99 restrict keyword, or to
++# nothing if this is not supported.  Do not define if restrict is
++# supported directly.
++if not cc.compiles(restrict_tmpl.format('restrict'), name : 'restrict keyword')
++  if cc.compiles(restrict_tmpl.format('__restrict'), name : '__restrict')
++    opus_conf.set('restrict', '__restrict')
++  elif cc.compiles(restrict_tmpl.format('__restrict__'), name : '__restrict__')
++    opus_conf.set('restrict', '__restrict')
++  elif cc.compiles(restrict_tmpl.format('_Restrict'), name : '_Restrict')
++    opus_conf.set('restrict', '_Restrict')
++  else
++    opus_conf.set('restrict', '/**/')
++  endif
++endif
++
++# Check for C99 variable-size arrays, or alloca() as fallback
++msg_c99_var_arrays = 'no'
++msg_use_alloca = 'no'
++if false and cc.compiles('''static int x;
++                  char some_func (void) {
++                    char a[++x];
++                    a[sizeof a - 1] = 0;
++                    int N;
++                    return a[0];
++                  }''', name : 'C99 variable-size arrays')
++  opus_conf.set('VAR_ARRAYS', 1)
++  msg_c99_var_arrays = 'yes'
++  msg_use_alloca = 'no (using C99 variable-size arrays instead)'
++elif cc.compiles('''#include <alloca.h>
++                    void some_func (void) {
++                      int foo=10;
++                      int * array = alloca(foo);
++                    }''', name : 'alloca (alloca.h)')
++  opus_conf.set('USE_ALLOCA', true)
++  opus_conf.set('HAVE_ALLOCA_H', true)
++  msg_use_alloca = 'yes'
++elif cc.compiles('''#include <malloc.h>
++                    #include <stdlib.h>
++                    void some_func (void) {
++                      int foo=10;
++                      int * array = alloca(foo);
++                    }''', name : 'alloca (std)')
++  opus_conf.set('USE_ALLOCA', true)
++  msg_use_alloca = 'yes'
++endif
++
++opts = [
++  [ 'fixed-point', 'FIXED_POINT' ],
++  [ 'fixed-point-debug', 'FIXED_DEBUG' ],
++  [ 'custom-modes', 'CUSTOM_MODES' ],
++  [ 'float-approx', 'FLOAT_APPROX' ],
++  [ 'assertions', 'ENABLE_ASSERTIONS' ],
++  [ 'fuzzing', 'FUZZING' ],
++]
++
++foreach opt : opts
++  # we assume these are all boolean options
++  opt_foo = get_option(opt[0])
++  if opt_foo
++    opus_conf.set(opt[1], 1)
++  endif
++  set_variable('opt_' + opt[0].underscorify(), opt_foo)
++endforeach
++
++enable_asm = not get_option('disable-asm')
++enable_rtcd = not get_option('disable-rtcd')
++enable_intrinsics = get_option('enable-intrinsics')
++disable_extra_programs = get_option('disable-extra-programs')
++disable_tests = get_option('disable-tests')
++
++disable_float_api = not get_option('float-api')
++if disable_float_api
++  opus_conf.set('DISABLE_FLOAT_API', 1)
++endif
++
++# This is for the description in the pkg-config .pc file
++if opt_fixed_point
++  pc_build = 'fixed-point'
++else
++  pc_build = 'floating-point'
++endif
++if opt_custom_modes
++  pc_build = pc_build + ', custom modes'
++endif
++
++rtcd_support = 'no'
++cpu_arm = false # FIXME: check, unused
++opus_arm_external_asm = false
++
++asm_tmpl = '''
++int main (int argc, char ** argv) {
++  __asm__("@0@");
++  return 0;
++}'''
++
++asm_optimization='none'
++if enable_asm
++  inline_optimization='No inline ASM for your platform, please send patches'
++  # Currently we only have asm for fixed-point
++  if host_machine.cpu_family() == 'arm' and opt_fixed_point
++    cpu_arm = true
++    opus_conf.set('OPUS_ARM_ASM', true)
++
++    # Check if compiler supports gcc-style inline assembly
++    if cc.compiles('''#ifdef __GNUC_MINOR__
++                      #if (__GNUC__ * 1000 + __GNUC_MINOR__) < 3004
++                      #error GCC before 3.4 has critical bugs compiling inline assembly
++                      #endif
++                      #endif
++                      __asm__ (""::)''',
++                   name :  'Compiler supports gcc-style inline assembly')
++      inline_optimization = 'ARM'
++
++      opus_conf.set('OPUS_ARM_INLINE_ASM', 1)
++
++      # AS_ASM_ARM_EDSP
++      if cc.compiles(asm_tmpl.format('qadd r3,r3,r3'),
++                     name : 'Assembler supports EDSP instructions on ARM')
++        opus_conf.set('OPUS_ARM_INLINE_EDSP', 1)
++        inline_optimization = inline_optimization + ' (ESDP)'
++      endif
++
++      # AS_ASM_ARM_MEDIA
++      if cc.compiles(asm_tmpl.format('shadd8 r3,r3,r3'),
++                     name : 'Assembler supports ARMv6 media instructions on ARM')
++        opus_conf.set('OPUS_ARM_INLINE_MEDIA', 1)
++        inline_optimization = inline_optimization + ' (Media)'
++      endif
++
++      # AS_ASM_ARM_NEON
++      if cc.compiles(asm_tmpl.format('vorr d0,d0,d0'),
++                     name : 'Assembler supports NEON instructions on ARM')
++        opus_conf.set('OPUS_ARM_INLINE_NEON', 1)
++        inline_optimization = inline_optimization + ' (NEON)'
++      endif
++    else
++      inline_optimization = 'disabled'
++    endif
++
++    # We need Perl to translate RVCT-syntax asm to gas syntax
++    # FIXME: for now we just error out if no perl is found
++    perl = find_program('perl', required : true)
++    if perl.found()
++      opus_arm_external_asm = true
++      asm_optimization = 'ARM'
++
++      opus_arm_presume_edsp = opus_conf.has('OPUS_ARM_INLINE_EDSP')
++      opus_arm_may_have_edsp = opus_arm_presume_edsp
++
++      opus_arm_presume_media = opus_conf.has('OPUS_ARM_INLINE_MEDIA')
++      opus_arm_may_have_media = opus_arm_presume_media
++
++      opus_arm_presume_neon = opus_conf.has('OPUS_ARM_INLINE_NEON')
++      opus_arm_may_have_neon = opus_arm_presume_neon
++
++      if enable_rtcd
++        if not opus_arm_may_have_edsp
++          message('Trying to force-enable armv5e EDSP instructions...')
++          # AS_ASM_ARM_EDSP_FORCE
++          opus_arm_may_have_edsp = cc.compiles(asm_tmpl.format('.arch armv5te\n.object_arch armv4t\nqadd r3,r3,r3'),
++                                               name : 'Assembler supports EDSP instructions on ARM (forced)')
++        endif
++        if not opus_arm_may_have_media
++          message('Trying to force-enable ARMv6 media instructions...')
++          opus_arm_may_have_media = cc.compiles(asm_tmpl.format('.arch armv6\n.object_arch armv4t\nshadd8 r3,r3,r3'),
++                                                name : 'Assembler supports ARMv6 media instructions on ARM (forced)')
++        endif
++        if not opus_arm_may_have_neon
++          message('Trying to force-enable NEON instructions...')
++          opus_arm_may_have_neon = cc.compiles(asm_tmpl.format('.arch armv7-a\n.fpu neon\n.object_arch armv4t\nvorr d0,d0,d0'),
++                                               name : 'Assembler supports NEON instructions on ARM (forced)')
++        endif
++      endif
++
++      rtcd_support = ''
++      if opus_arm_may_have_edsp
++        opus_conf.set('OPUS_ARM_MAY_HAVE_EDSP', 1)
++        if opus_arm_presume_edsp
++          opus_conf.set('OPUS_ARM_PRESUME_EDSP', 1)
++          asm_optimization = asm_optimization + ' (EDSP)'
++        else
++          rtcd_support = rtcd_support + ' (EDSP)'
++        endif
++      endif
++      if opus_arm_may_have_media
++        opus_conf.set('OPUS_ARM_MAY_HAVE_MEDIA', 1)
++        if opus_arm_presume_media
++          opus_conf.set('OPUS_ARM_PRESUME_MEDIA', 1)
++          asm_optimization = asm_optimization + ' (Media)'
++        else
++          rtcd_support = rtcd_support + ' (Media)'
++        endif
++      endif
++      if opus_arm_may_have_neon
++        opus_conf.set('OPUS_ARM_MAY_HAVE_NEON', 1)
++        if opus_arm_presume_neon
++          opus_conf.set('OPUS_ARM_PRESUME_NEON', 1)
++          asm_optimization = asm_optimization + ' (NEON)'
++        else
++          rtcd_support = rtcd_support + ' (NEON)'
++        endif
++      endif
++
++      # Make sure turning on RTCD gets us at least one instruction set
++      if rtcd_support != ''
++        rtcd_support = 'ARM ' + rtcd_support
++      else
++        rtcd_support = 'no'
++      endif
++
++      # Check for apple-style tools
++      if cc.compiles('''#ifndef __APPLE__
++                        #error not apple
++                        #endif''', name : 'Apple-style tools')
++        arm2gnu_params = '--apple' # FIXME: use somewhere
++      else
++        arm2gnu_params = ''
++      endif
++    endif # found perl
++  endif # arm + enable fixed point
++else # enable asm
++  inline_optimization='disabled'
++  asm_optimization='disabled'
++endif
++
++intrinsics_foo='''
++m4_define([DEFAULT_ARM_NEON_INTR_CFLAGS], [-mfpu=neon])
++# With GCC on ARM32 softfp architectures (e.g. Android, or older Ubuntu) you need to specify
++# -mfloat-abi=softfp for -mfpu=neon to work.  However, on ARM32 hardfp architectures (e.g. newer Ubuntu),
++# this option will break things.
++
++# As a heuristic, if host matches arm*eabi* but not arm*hf*, it's probably soft-float.
++m4_define([DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS], [-mfpu=neon -mfloat-abi=softfp])
++
++AS_CASE([$host],
++	[arm*hf*], [AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_INTR_CFLAGS")],
++	[arm*eabi*], [AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS")],
++	[AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_INTR_CFLAGS")])
++
++AC_ARG_VAR([ARM_NEON_INTR_CFLAGS], [C compiler flags to compile ARM NEON intrinsics @<:@default=]DEFAULT_ARM_NEON_INTR_CFLAGS / DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS[@:>@])
++
++AS_VAR_SET_IF([ARM_NEON_INTR_CFLAGS], [], [AS_VAR_SET([ARM_NEON_INTR_CFLAGS], ["$RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS"])])
++'''
++
++may_have_sse = false
++may_have_sse2 = false
++may_have_sse4_1 = false
++may_have_avx = false
++
++may_have_neon = false  # FIXME: merge with / fixup opus_arm_may_have_neon
++
++if enable_intrinsics
++  intrinsics_support = ''
++  rtcd_support = ''
++  if host_machine.cpu_family().startswith('arm')
++foo1_arm='''
++   AS_CASE([$host_cpu],
++   [arm*],
++   [
++      cpu_arm=yes
++      OPUS_CHECK_INTRINSICS(
++         [ARM Neon],
++         [$ARM_NEON_INTR_CFLAGS],
++         [OPUS_ARM_MAY_HAVE_NEON_INTR],
++         [OPUS_ARM_PRESUME_NEON_INTR],
++         [[#include <arm_neon.h>
++         ]],
++         [[
++            static float32x4_t A0, A1, SUMM;
++            SUMM = vmlaq_f32(SUMM, A0, A1);
++         ]]
++      )
++      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
++          [
++             OPUS_ARM_NEON_INTR_CFLAGS="$ARM_NEON_INTR_CFLAGS"
++             AC_SUBST([OPUS_ARM_NEON_INTR_CFLAGS])
++          ]
++      )
++
++      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"],
++      [
++         AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON_INTR], 1, [Compiler supports ARMv7 Neon Intrinsics])
++         intrinsics_support="$intrinsics_support (Neon_Intrinsics)"
++
++         AS_IF([test x"enable_rtcd" != x"" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
++            [rtcd_support="$rtcd_support (ARMv7_Neon_Intrinsics)"])
++
++         AS_IF([test x"$OPUS_ARM_PRESUME_NEON_INTR" = x"1"],
++            [AC_DEFINE([OPUS_ARM_PRESUME_NEON_INTR], 1, [Define if binary requires NEON intrinsics support])])
++
++         OPUS_PATH_NE10()
++         AS_IF([test x"$NE10_LIBS" != x""],
++         [
++              intrinsics_support="$intrinsics_support (NE10)"
++              AS_IF([test x"enable_rtcd" != x"" \
++               && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
++                 [rtcd_support="$rtcd_support (NE10)"])
++         ])
++
++         AS_IF([test x"$rtcd_support" = x""],
++            [rtcd_support=no])
++
++         AS_IF([test x"$intrinsics_support" = x""],
++            [intrinsics_support=no],
++            [intrinsics_support="arm$intrinsics_support"])
++      ],
++      [
++         AC_MSG_WARN([Compiler does not support ARM intrinsics])
++         intrinsics_support=no
++      ])
++   ],
++'''
++  elif host_machine.cpu_family().startswith('x86')
++    # FIXME: allow external override/specification of the flags
++    x86_intrinsics = [
++      [ 'SSE', 'xmmintrin.h', '__m128', '_mm_setzero_ps()', '-msse' ],
++      [ 'SSE2', 'emmintrin.h', '__m128i', '_mm_setzero_si128()', '-msse2' ],
++      [ 'SSE4.1', 'smmintrin.h', '__m128i', '_mm_setzero_si128(); mtest = _mm_cmpeq_epi64(mtest, mtest)', '-msse4.1' ],
++      [ 'AVX', 'immintrin.h', '__m256', '_mm256_setzero_ps()', '-mavx' ],
++    ]
++
++    foreach intrin : x86_intrinsics
++      intrin_check = '''#include <@0@>
++                        int main (int argc, char ** argv) {
++                          static @1@ mtest;
++                          mtest = @2@;
++                          return *((unsigned char *) &mtest) != 0;
++                        }'''.format(intrin.get(1),intrin.get(2),intrin.get(3))
++      intrin_name = intrin.get(0)
++      intrin_link_args = intrin.get(4)
++      if cc.links(intrin_check, name : 'if compiler supports @0@ intrinsics'.format(intrin_name))
++        may_have_intrin = true
++        presume_intrin = true
++      else
++        presume_intrin = false
++        if cc.links(intrin_check,
++                    args : intrin_link_args,
++                    name : 'if compiler supports @0@ intrinsics with @1@'.format(intrin_name,intrin_link_args))
++          may_have_intrin = true
++          # FIXME: add args to some var and use it later
++        else
++          may_have_intrin = false
++        endif
++      endif
++      set_variable('may_have_' + intrin_name.to_lower().underscorify(), may_have_intrin)
++      # FIXME: unused: set_variable('presume_' + intrin_name.to_lower().underscorify(), presume_intrin)
++      if may_have_intrin
++        intrinsics_support = intrinsics_support + ' ' + intrin_name
++        opus_conf.set('OPUS_X86_MAY_HAVE_' + intrin_name.underscorify(), 1)
++        if presume_intrin
++          opus_conf.set('OPUS_X86_PRESUME_' + intrin_name.underscorify(), 1)
++        else
++          rtcd_support = rtcd_support + ' ' + intrin_name
++          opus_c_args += [ intrin_link_args ]
++        endif
++      else
++        message('Warning: Compiler does not support @0@ intrinsics'.format(intrin_name))
++      endif
++    endforeach
++
++    if intrinsics_support == ''
++      intrinsics_support = 'no'
++    else
++      intrinsics_support = 'x86' + intrinsics_support
++    endif
++
++    if rtcd_support == ''
++      rtcd_support = 'no'
++    else
++      rtcd_support = 'x86' + rtcd_support
++    endif
++
++    if enable_rtcd and rtcd_support != 'no'
++      get_cpuid_by_asm = false
++      cpuid_asm_code = '''
++        #include <stdio.h>
++        int main (int argc, char ** argv) {
++          unsigned int CPUInfo0;
++          unsigned int CPUInfo1;
++          unsigned int CPUInfo2;
++          unsigned int CPUInfo3;
++          unsigned int InfoType;
++          __asm__ __volatile__ (
++            "cpuid":
++            "=a" (CPUInfo0),
++            "=b" (CPUInfo1),
++            "=c" (CPUInfo2),
++            "=d" (CPUInfo3) :
++            "a" (InfoType), "c" (0)
++          );
++          return 0;
++        }'''
++      cpuid_c_code = '''
++        #include <cpuid.h>
++        int main (int argc, char ** argv) {
++          unsigned int CPUInfo0;
++          unsigned int CPUInfo1;
++          unsigned int CPUInfo2;
++          unsigned int CPUInfo3;
++          unsigned int InfoType;
++          __get_cpuid(InfoType, &CPUInfo0, &CPUInfo1, &CPUInfo2, &CPUInfo3);
++          return 0;
++        }'''
++      if cc.links(cpuid_asm_code, name : 'Get X86 CPU info via inline assembly')
++        opus_conf.set('CPU_INFO_BY_ASM', 1)
++      elif cc.links(cpuid_c_code, name : 'Get X86 CPU info via C method')
++        opus_conf.set('CPU_INFO_BY_C', 1)
++      else
++        error('No supported Get CPU Info method, please disable intrinsics')
++      endif
++    endif
++  else
++    message('Warning: No intrinsics support for your architecture (@0@)'.format(host_machine.get_cpu()))
++    intrinsics_support = 'no'
++  endif
++else
++  intrinsics_support = 'no'
++endif
++
++if enable_rtcd
++  if rtcd_support != 'no'
++    opus_conf.set('OPUS_HAVE_RTCD', 1)
++  endif
++else
++  rtcd_support = 'disabled'
++endif
++
++subdir('include')
++subdir('silk')
++subdir('celt')
++subdir('src')
++
++configure_file(output: 'config.h', configuration: opus_conf)
++
++if not disable_tests
++  subdir('celt/tests')
++  subdir('silk/tests')
++  subdir('tests')
++endif
++
++# pkg-config files
++# FIXME: use pkg-config import module instead?
++pkgconf = configuration_data()
++
++pkgconf.set('prefix', join_paths(get_option('prefix')))
++pkgconf.set('exec_prefix', '${prefix}')
++pkgconf.set('libdir', '${prefix}/@0@'.format(get_option('libdir')))
++pkgconf.set('includedir', '${prefix}/@0@'.format(get_option('includedir')))
++pkgconf.set('VERSION', opus_version)
++pkgconf.set('PC_BUILD', pc_build)
++if libm.found()
++  pkgconf.set('LIBM', '-lm')
++endif
++
++pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
++
++configure_file(input : 'opus.pc.in',
++  output : 'opus.pc',
++  configuration : pkgconf,
++  install_dir : pkg_install_dir)
++
++# The uninstalled one has hardcoded libtool + static lib stuff, skip it for now
++#configure_file(input : 'opus-uninstalled.pc.in',
++#  output : 'opus-uninstalled.pc',
++#  configuration : pkgconf,
++#  install : false)
++
++doxygen = find_program('doxygen', required: get_option('docs'))
++have_doxygen = doxygen.found()
++if have_doxygen
++  msg_doc = 'yes'
++  subdir('doc')
++else
++  if get_option('docs').disabled()
++    msg_doc = 'disabled'
++  else
++    msg_doc = 'not found'
++  endif
++endif
++
++# FIXME: use bool.to_string('yes', 'no') here once meson 0.31 is out
++# FIXME: only print the ninja help if ninja is used as backend
++msg_c99_lrintf = opus_conf.has('HAVE_LRINTF').to_string()
++message('''
++------------------------------------------------------------------------
++  opus @0@:  Automatic configuration OK.
++
++    Compiler support:
++
++      C99 var arrays: ................ @1@
++      C99 lrintf: .................... @2@
++      Use alloca: .................... @3@
++
++    General configuration:
++
++      Floating point support: ........ @4@
++      Fast float approximations: ..... @5@
++      Fixed point debugging: ......... @6@
++      Inline Assembly Optimizations: . @7@
++      External Assembly Optimizations: @8@
++      Intrinsics Optimizations.......: @9@
++      Run-time CPU detection: ........ @10@
++      Custom modes: .................. @11@
++      Assertion checking: ............ @12@
++      Fuzzing: ....................... @13@
++
++      API documentation: ............. @14@
++      Extra programs: ................ @15@
++      Tests: ......................... @16@
++------------------------------------------------------------------------
++
++ Type "ninja; ninja install" to compile and install
++ Type "ninja test" to run the test suite
++'''.format(meson.project_version(), msg_c99_var_arrays, msg_c99_lrintf,
++  msg_use_alloca, not opt_fixed_point, opt_float_approx,
++  opt_fixed_point_debug, inline_optimization, asm_optimization,
++  intrinsics_support, rtcd_support, opt_custom_modes,
++  opt_assertions, opt_fuzzing, msg_doc,
++  not disable_extra_programs, not disable_tests))
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 00000000..21322ac5
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,18 @@
++option('fixed-point', type : 'boolean', value : false, description : 'Compile without floating point (for machines without a fast enough FPU')
++option('fixed-point-debug', type : 'boolean', value : false, description : 'Debug fixed-point implementation')
++option('float-api', type : 'boolean', value : true, description : 'Compile with or without the floating point API (for machines with no float library')
++option('custom-modes', type : 'boolean', value : false, description : 'Enable non-Opus modes, e.g. 44.1 kHz & 2^n frames')
++option('float-approx', type : 'boolean', value : false, description : 'Enable fast approximations for floating point (not supported on all platforms)')
++option('disable-asm', type : 'boolean', value : false, description : 'Disable assembly optimizations')
++option('disable-rtcd', type : 'boolean', value : false, description : 'Disable run-time CPU capabilities detection')
++option('enable-intrinsics', type : 'boolean', value : false, description : 'Enable intrinsics optimizations for ARM(float) X86(fixed)')
++option('disable-extra-programs', type : 'boolean', value : false, description : 'Do not build extra programs (demo and tests)')
++option('assertions', type : 'boolean', value : false, description : 'Enable additional software error checking')
++option('fuzzing', type : 'boolean', value : false, description : 'Causes the encoder to make random decisions')
++option('disable-tests', type : 'boolean', value : false, description : 'Do not build tests')
++
++# feature options
++option('docs', type: 'feature', value: 'auto', description: 'Build API documentation')
++
++# other options
++option('docdir', type: 'string', value: 'doc/opus', description: 'Directory to install documentation into (default: DATADIR/doc/opus')
+diff --git a/silk/meson.build b/silk/meson.build
+new file mode 100644
+index 00000000..1a1a0954
+--- /dev/null
++++ b/silk/meson.build
+@@ -0,0 +1,179 @@
++silk_sources = [
++  'CNG.c',
++  'code_signs.c',
++  'init_decoder.c',
++  'decode_core.c',
++  'decode_frame.c',
++  'decode_parameters.c',
++  'decode_indices.c',
++  'decode_pulses.c',
++  'decoder_set_fs.c',
++  'dec_API.c',
++  'enc_API.c',
++  'encode_indices.c',
++  'encode_pulses.c',
++  'gain_quant.c',
++  'interpolate.c',
++  'LP_variable_cutoff.c',
++  'NLSF_decode.c',
++  'NSQ.c',
++  'NSQ_del_dec.c',
++  'PLC.c',
++  'shell_coder.c',
++  'tables_gain.c',
++  'tables_LTP.c',
++  'tables_NLSF_CB_NB_MB.c',
++  'tables_NLSF_CB_WB.c',
++  'tables_other.c',
++  'tables_pitch_lag.c',
++  'tables_pulses_per_block.c',
++  'VAD.c',
++  'control_audio_bandwidth.c',
++  'quant_LTP_gains.c',
++  'VQ_WMat_EC.c',
++  'HP_variable_cutoff.c',
++  'NLSF_encode.c',
++  'NLSF_VQ.c',
++  'NLSF_unpack.c',
++  'NLSF_del_dec_quant.c',
++  'process_NLSFs.c',
++  'stereo_LR_to_MS.c',
++  'stereo_MS_to_LR.c',
++  'check_control_input.c',
++  'control_SNR.c',
++  'init_encoder.c',
++  'control_codec.c',
++  'A2NLSF.c',
++  'ana_filt_bank_1.c',
++  'biquad_alt.c',
++  'bwexpander_32.c',
++  'bwexpander.c',
++  'debug.c',
++  'decode_pitch.c',
++  'inner_prod_aligned.c',
++  'lin2log.c',
++  'log2lin.c',
++  'LPC_analysis_filter.c',
++  'LPC_inv_pred_gain.c',
++  'table_LSF_cos.c',
++  'NLSF2A.c',
++  'NLSF_stabilize.c',
++  'NLSF_VQ_weights_laroia.c',
++  'pitch_est_tables.c',
++  'resampler.c',
++  'resampler_down2_3.c',
++  'resampler_down2.c',
++  'resampler_private_AR2.c',
++  'resampler_private_down_FIR.c',
++  'resampler_private_IIR_FIR.c',
++  'resampler_private_up2_HQ.c',
++  'resampler_rom.c',
++  'sigm_Q15.c',
++  'sort.c',
++  'sum_sqr_shift.c',
++  'stereo_decode_pred.c',
++  'stereo_encode_pred.c',
++  'stereo_find_predictor.c',
++  'stereo_quant_pred.c',
++  'LPC_fit.c',
++]
++
++silk_sources_sse4_1 = [
++  'x86/NSQ_sse4_1.c',
++  'x86/NSQ_del_dec_sse4_1.c',
++  'x86/x86_silk_map.c',
++  'x86/VAD_sse4_1.c',
++  'x86/VQ_WMat_EC_sse4_1.c',
++]
++
++silk_sources_fixed = [
++  'fixed/LTP_analysis_filter_FIX.c',
++  'fixed/LTP_scale_ctrl_FIX.c',
++  'fixed/corrMatrix_FIX.c',
++  'fixed/encode_frame_FIX.c',
++  'fixed/find_LPC_FIX.c',
++  'fixed/find_LTP_FIX.c',
++  'fixed/find_pitch_lags_FIX.c',
++  'fixed/find_pred_coefs_FIX.c',
++  'fixed/noise_shape_analysis_FIX.c',
++  'fixed/process_gains_FIX.c',
++  'fixed/regularize_correlations_FIX.c',
++  'fixed/residual_energy16_FIX.c',
++  'fixed/residual_energy_FIX.c',
++  'fixed/warped_autocorrelation_FIX.c',
++  'fixed/apply_sine_window_FIX.c',
++  'fixed/autocorr_FIX.c',
++  'fixed/burg_modified_FIX.c',
++  'fixed/k2a_FIX.c',
++  'fixed/k2a_Q16_FIX.c',
++  'fixed/pitch_analysis_core_FIX.c',
++  'fixed/vector_ops_FIX.c',
++  'fixed/schur64_FIX.c',
++  'fixed/schur_FIX.c',
++]
++
++silk_sources_fixed_sse4_1 = [
++  'fixed/x86/vector_ops_FIX_sse4_1.c',
++  'fixed/x86/burg_modified_FIX_sse4_1.c',
++]
++
++silk_sources_float = [
++  'float/apply_sine_window_FLP.c',
++  'float/corrMatrix_FLP.c',
++  'float/encode_frame_FLP.c',
++  'float/find_LPC_FLP.c',
++  'float/find_LTP_FLP.c',
++  'float/find_pitch_lags_FLP.c',
++  'float/find_pred_coefs_FLP.c',
++  'float/LPC_analysis_filter_FLP.c',
++  'float/LTP_analysis_filter_FLP.c',
++  'float/LTP_scale_ctrl_FLP.c',
++  'float/noise_shape_analysis_FLP.c',
++  'float/process_gains_FLP.c',
++  'float/regularize_correlations_FLP.c',
++  'float/residual_energy_FLP.c',
++  'float/warped_autocorrelation_FLP.c',
++  'float/wrappers_FLP.c',
++  'float/autocorrelation_FLP.c',
++  'float/burg_modified_FLP.c',
++  'float/bwexpander_FLP.c',
++  'float/energy_FLP.c',
++  'float/inner_product_FLP.c',
++  'float/k2a_FLP.c',
++  'float/LPC_inv_pred_gain_FLP.c',
++  'float/pitch_analysis_core_FLP.c',
++  'float/scale_copy_vector_FLP.c',
++  'float/scale_vector_FLP.c',
++  'float/schur_FLP.c',
++  'float/sort_FLP.c',
++]
++
++if opt_fixed_point
++  silk_sources += silk_sources_fixed
++  if may_have_sse4_1
++    silk_sources += silk_sources_sse4_1
++    silk_sources += silk_sources_fixed_sse4_1
++  endif
++else
++  silk_sources += silk_sources_float
++  if may_have_sse4_1
++    silk_sources += silk_sources_sse4_1
++  endif
++endif
++
++if host_machine.cpu_family() == 'arm' # was: cpu_arm # FIXME: should only be used if intrinsics or asm is enabled
++  silk_sources += silk_sources_arm
++endif
++
++silk_c_args = []
++if host_machine.system() == 'windows'
++  silk_c_args += ['-DDLL_EXPORT']
++endif
++
++silk_lib = static_library('opus-silk',
++  silk_sources,
++  c_args: opus_c_args + silk_c_args,
++  include_directories: [opus_includes, include_directories('float', 'fixed')],
++  #link_with: opus_armasm_lib,
++  dependencies: libm,
++  install: false)
+diff --git a/silk/tests/meson.build b/silk/tests/meson.build
+new file mode 100644
+index 00000000..06cefe40
+--- /dev/null
++++ b/silk/tests/meson.build
+@@ -0,0 +1,10 @@
++exe = executable('test_unit_LPC_inv_pred_gain',
++  'test_unit_LPC_inv_pred_gain.c', '../LPC_inv_pred_gain.c',
++  include_directories: opus_includes,
++  c_args: opus_c_args,
++  link_with: [opus_armasm_lib, celt_lib, silk_lib],
++  dependencies: libm,
++  install: false)
++
++test(test_name, exe)
++
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 00000000..8fc463e1
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,61 @@
++opus_sources = [
++  'opus.c',
++  'opus_decoder.c',
++  'opus_encoder.c',
++  'opus_multistream.c',
++  'opus_multistream_encoder.c',
++  'opus_multistream_decoder.c',
++  'repacketizer.c',
++]
++
++opus_sources_float = [
++  'analysis.c',
++  'mlp.c',
++  'mlp_data.c',
++]
++
++if not disable_float_api
++  opus_sources += opus_sources_float
++endif
++
++opus_lib_c_args = []
++if host_machine.system() == 'windows'
++  opus_lib_c_args += ['-DDLL_EXPORT']
++endif
++
++opus_lib = library('opus',
++  opus_sources,
++# FIXME  version : libversion,
++# FIXME soversion : soversion,
++  c_args: opus_c_args + opus_lib_c_args,
++  include_directories: opus_includes,
++  link_with: [celt_lib, silk_lib],
++  dependencies: libm,
++  install: true)
++
++opus_dep = declare_dependency(link_with: opus_lib,
++  include_directories: opus_public_includes)
++
++# Extra uninstalled Opus programs
++if not disable_extra_programs
++  extra_programs = ['opus_compare', 'opus_demo', 'repacketizer_demo']
++
++  foreach prog : extra_programs
++    executable(prog, '@0@.c'.format(prog),
++               include_directories: opus_includes,
++               c_args: opus_c_args,
++               link_with: opus_lib,
++               dependencies: libm,
++               install: false)
++  endforeach
++
++  if opt_custom_modes
++    executable('opus_custom_demo', '../celt/opus_custom_demo.c',
++               include_directories: opus_includes,
++               c_args: opus_c_args,
++               link_with: opus_lib,
++               dependencies: libm,
++               install: false)
++  endif
++
++endif # not disable_extra_programs
+diff --git a/tests/meson.build b/tests/meson.build
+new file mode 100644
+index 00000000..9026ac30
+--- /dev/null
++++ b/tests/meson.build
+@@ -0,0 +1,21 @@
++# Tests that link to libopus
++opus_tests = [
++  ['test_opus_api'],
++  ['test_opus_decode'],
++  ['test_opus_encode', 'opus_encode_regressions.c', 120],
++  ['test_opus_padding'],
++  ['test_opus_projection'],
++]
++
++foreach t : opus_tests
++  test_name = t.get(0)
++  extra_srcs = t.get(1, [])
++  timeout = t.get(2, 30)
++  exe = executable(test_name, '@0@.c'.format(test_name), extra_srcs,
++    include_directories: opus_includes,
++    c_args: opus_c_args,
++    link_with: opus_lib,
++    dependencies: libm,
++    install: false)
++  test(test_name, exe, timeout: timeout)
++endforeach
+-- 
+2.27.0.windows.1
+
+
+From d1f655dbb9c4dad61f3fdd173adb3de97459e016 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 18 Jun 2020 00:16:17 +0530
+Subject: [PATCH 6/6] meson: Update to latest git, finish support for ARM,
+ general cleanups
+
+* Fix build of opus_projection test
+
+Needs the projection API to actually be built, and it needs to link
+directly to the objects. This is also what the Makefile does.
+
+At the same time, use kwargs: to set the test timeout so we don't need
+to hard-code the default value.
+
+Both these require a meson version bump.
+
+* Set the libversion and darwin_versions to match the LT_VERSION
+
+Now our binaries have the same ABI / soversion as the Autotools build.
+
+* Reorganize intrinsics and rtcd support
+
+* Add summary() support
+
+* Increase warning_level instead of passing -Wextra
+
+* Add missing stdint.h check
+---
+ celt/meson.build       |  86 ++++---
+ celt/tests/meson.build |   4 +-
+ include/meson.build    |   1 +
+ meson.build            | 561 ++++++++++++++++++++++-------------------
+ meson_options.txt      |  20 +-
+ silk/meson.build       |  48 +++-
+ silk/tests/meson.build |   4 +-
+ src/meson.build        |  19 +-
+ tests/meson.build      |  27 +-
+ 9 files changed, 431 insertions(+), 339 deletions(-)
+
+diff --git a/celt/meson.build b/celt/meson.build
+index 498fcde3..8afc2ab8 100644
+--- a/celt/meson.build
++++ b/celt/meson.build
+@@ -19,69 +19,83 @@ celt_sources = [
+   'vq.c',
+ ]
+ 
+-if may_have_sse
+-  celt_sources += [
+-    'x86/x86cpu.c',
+-    'x86/x86_celt_map.c',
+-    'x86/pitch_sse.c',
+-  ]
+-endif
++celt_sse_sources = [
++  'x86/x86cpu.c',
++  'x86/x86_celt_map.c',
++  'x86/pitch_sse.c',
++]
+ 
+-if may_have_sse2
+-  celt_sources += [
+-    'x86/pitch_sse2.c',
+-    'x86/vq_sse2.c',
+-  ]
+-endif
++celt_sse2_sources = [
++  'x86/pitch_sse2.c',
++  'x86/vq_sse2.c',
++]
+ 
+-if may_have_sse4_1
+-  celt_sources += [
+-    'x86/celt_lpc_sse4_1.c',
+-    'x86/pitch_sse4_1.c',
+-  ]
+-endif
++celt_sse4_1_sources = [
++  'x86/celt_lpc_sse4_1.c',
++  'x86/pitch_sse4_1.c',
++]
+ 
+-opus_armasm_lib = []
++celt_neon_intr_sources = [
++  'arm/celt_neon_intr.c',
++  'arm/pitch_neon_intr.c',
++]
+ 
+-if host_machine.cpu_family() == 'arm' # was: cpu_arm # FIXME: should only be used if intrinsics or asm is enabled
++celt_static_libs = []
++
++foreach intr_name : ['sse', 'sse2', 'sse4_1', 'neon_intr']
++  have_intr = get_variable('have_' + intr_name)
++  if not have_intr
++    continue
++  endif
++
++  intr_sources = get_variable('celt_@0@_sources'.format(intr_name))
++  intr_args = get_variable('opus_@0@_args'.format(intr_name), [])
++  celt_static_libs += static_library('celt_' + intr_name, intr_sources,
++      c_args: intr_args,
++      include_directories: opus_includes,
++      install: false)
++endforeach
++
++have_arm_intrinsics_or_asm = have_arm_ne10
++if (intrinsics_support.length() + asm_optimization.length() + inline_optimization.length()) > 0
++  have_arm_intrinsics_or_asm = true
++endif
++
++if host_cpu_family in ['arm', 'aarch64'] and have_arm_intrinsics_or_asm
+   celt_sources +=  [
+     'arm/armcpu.c',
+     'arm/arm_celt_map.c',
+   ]
+-  if may_have_neon
+-    celt_sources += [
+-      'arm/celt_neon_intr.c',
+-    ]
+-  endif
+   if have_arm_ne10
+     celt_sources += [
+-    'arm/celt_ne10_fft.c',
+-    'arm/celt_ne10_mdct.c',
++    'arm/celt_fft_ne10.c',
++    'arm/celt_mdct_ne10.c',
+   ]
+   endif
+   if opus_arm_external_asm
+-    # FIXME: arm2gnu.pl stuff?
+-    celt_sources_arm_asm = [
+-      'arm/celt_pitch_xcorr_arm.s',
+-    ]
++    arm2gnu = [find_program('arm/arm2gnu.pl')] + arm2gnu_args
++    celt_sources_arm_asm = configure_file(input: 'arm/celt_pitch_xcorr_arm.s',
++      output: '@BASENAME@-gnu.S',
++      command: arm2gnu + ['@INPUT@'],
++      capture: true)
+     celt_arm_armopts_s = configure_file(input: 'arm/armopts.s.in',
+       output: 'arm/armopts.s',
+       configuration: opus_conf)
+-    opus_armasm_lib = static_library('opus-armasm',
++    celt_static_libs += static_library('celt-armasm',
+       celt_arm_armopts_s, celt_sources_arm_asm,
+       install: false)
+   endif
+ endif
+ 
+ celt_c_args = []
+-if host_machine.system() == 'windows'
++if host_system == 'windows'
+   celt_c_args += ['-DDLL_EXPORT']
+ endif
+ 
+ celt_lib = static_library('opus-celt',
+   celt_sources,
+-  c_args: opus_c_args + celt_c_args,
++  c_args: celt_c_args,
+   include_directories: opus_includes,
+-  link_with: opus_armasm_lib,
++  link_whole: celt_static_libs,
+   dependencies: libm,
+   install: false)
+diff --git a/celt/tests/meson.build b/celt/tests/meson.build
+index f6d08d62..3088d195 100644
+--- a/celt/tests/meson.build
++++ b/celt/tests/meson.build
+@@ -17,8 +17,8 @@ endif
+ foreach test_name : tests
+   exe = executable(test_name, '@0@.c'.format(test_name),
+                    include_directories : opus_includes,
+-                   c_args : opus_c_args + test_args,
+-                   link_with : [opus_armasm_lib, celt_lib],
++                   c_args : test_args,
++                   link_with : [celt_lib, celt_static_libs],
+                    dependencies : libm,
+                    install : false)
+   test(test_name, exe)
+diff --git a/include/meson.build b/include/meson.build
+index 9f41b03a..78c5c76d 100644
+--- a/include/meson.build
++++ b/include/meson.build
+@@ -1,6 +1,7 @@
+ opus_headers = [
+   'opus.h',
+   'opus_multistream.h',
++  'opus_projection.h',
+   'opus_types.h',
+   'opus_defines.h',
+ ]
+diff --git a/meson.build b/meson.build
+index c18e9a50..c7d8ad11 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,12 +1,18 @@
+-# Based on git v1.2.1-35-geee68982
++# Based on git v1.3.1-64-g484af258
++# FIXME: use update_version to set version:
+ project('opus', 'c',
+-  version: '1.2.1',
+-  meson_version: '>= 0.47.0',
+-  default_options: ['warning_level=1',
++  version: '1.3.1',
++  meson_version: '>=0.54.0',
++  default_options: ['warning_level=2',
+                     'c_std=gnu99',
+                     'buildtype=debugoptimized'])
+ 
++libversion = '0.8.0'
++macosversion = '9.0.0'
++
+ cc = meson.get_compiler('c')
++host_system = host_machine.system()
++host_cpu_family = host_machine.cpu_family()
+ 
+ opus_includes = include_directories('.', 'include', 'celt', 'silk')
+ opus_public_includes = include_directories('include')
+@@ -14,25 +20,32 @@ opus_public_includes = include_directories('include')
+ add_project_arguments('-DOPUS_BUILD', language: 'c')
+ add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
+ 
+-if host_machine.system() == 'windows'
+-  add_project_arguments('-DWIN32', language: 'c')
+-  if cc.get_id() == 'msvc'
++if host_system == 'windows'
++  if cc.get_argument_syntax() == 'msvc'
+     add_project_arguments('-D_CRT_SECURE_NO_WARNINGS', language: 'c')
+   endif
+ endif
+ 
++if cc.get_argument_syntax() == 'gnu'
++  add_project_arguments('-D_FORTIFY_SOURCE=2', language: 'c')
++endif
++
+ # Check for extra compiler args
+ additional_c_args = []
+-if cc.get_id() != 'msvc'
++if cc.get_argument_syntax() != 'msvc'
+   additional_c_args += [
+     '-fvisibility=hidden',
+-    '-Wall',
+-    '-Wextra',
+     '-Wcast-align',
+     '-Wnested-externs',
+     '-Wshadow',
+     '-Wstrict-prototypes',
+   ]
++
++  # On Windows, -fstack-protector-strong adds a libssp-0.dll dependency and
++  # prevents static linking
++  if host_system != 'windows'
++    additional_c_args += ['-fstack-protector-strong']
++  endif
+ endif
+ 
+ foreach arg : additional_c_args
+@@ -49,12 +62,9 @@ if cc.get_id() == 'msvc'
+   # NOTE: Only add warnings here if you are sure they're spurious
+   add_project_arguments('/wd4035', '/wd4715', '/wd4116', '/wd4046', '/wd4068',
+     '/wd4820', '/wd4244', '/wd4255', '/wd4668',
+-    #'/FImsvc_recommended_pragmas.h',
+     language : 'c')
+ endif
+ 
+-opus_c_args = []
+-
+ # FIXME: CURRENT_VERSION from git script, so e.g. 1.1.1-rc-71-gc43b1bc
+ opus_version = meson.project_version()
+ 
+@@ -74,6 +84,7 @@ libm = cc.find_library('m', required : false)
+ opus_conf.set('HAVE_LRINTF', cc.has_function('lrintf', prefix: '#include <math.h>', dependencies: libm))
+ opus_conf.set('HAVE_LRINT', cc.has_function('lrint', prefix: '#include <math.h>', dependencies: libm))
+ opus_conf.set('HAVE___MALLOC_HOOK', cc.has_function('__malloc_hook', prefix: '#include <malloc.h>'))
++opus_conf.set('HAVE_STDINT_H', cc.check_header('stdint.h'))
+ 
+ # Check for restrict keyword
+ restrict_tmpl = '''
+@@ -103,9 +114,8 @@ if not cc.compiles(restrict_tmpl.format('restrict'), name : 'restrict keyword')
+ endif
+ 
+ # Check for C99 variable-size arrays, or alloca() as fallback
+-msg_c99_var_arrays = 'no'
+-msg_use_alloca = 'no'
+-if false and cc.compiles('''static int x;
++msg_use_alloca = false
++if cc.compiles('''static int x;
+                   char some_func (void) {
+                     char a[++x];
+                     a[sizeof a - 1] = 0;
+@@ -113,8 +123,7 @@ if false and cc.compiles('''static int x;
+                     return a[0];
+                   }''', name : 'C99 variable-size arrays')
+   opus_conf.set('VAR_ARRAYS', 1)
+-  msg_c99_var_arrays = 'yes'
+-  msg_use_alloca = 'no (using C99 variable-size arrays instead)'
++  msg_use_alloca = 'NO (using C99 variable-size arrays instead)'
+ elif cc.compiles('''#include <alloca.h>
+                     void some_func (void) {
+                       int foo=10;
+@@ -122,7 +131,7 @@ elif cc.compiles('''#include <alloca.h>
+                     }''', name : 'alloca (alloca.h)')
+   opus_conf.set('USE_ALLOCA', true)
+   opus_conf.set('HAVE_ALLOCA_H', true)
+-  msg_use_alloca = 'yes'
++  msg_use_alloca = true
+ elif cc.compiles('''#include <malloc.h>
+                     #include <stdlib.h>
+                     void some_func (void) {
+@@ -130,7 +139,7 @@ elif cc.compiles('''#include <malloc.h>
+                       int * array = alloca(foo);
+                     }''', name : 'alloca (std)')
+   opus_conf.set('USE_ALLOCA', true)
+-  msg_use_alloca = 'yes'
++  msg_use_alloca = true
+ endif
+ 
+ opts = [
+@@ -139,7 +148,9 @@ opts = [
+   [ 'custom-modes', 'CUSTOM_MODES' ],
+   [ 'float-approx', 'FLOAT_APPROX' ],
+   [ 'assertions', 'ENABLE_ASSERTIONS' ],
++  [ 'hardening', 'ENABLE_HARDENING' ],
+   [ 'fuzzing', 'FUZZING' ],
++  [ 'check-asm', 'OPUS_CHECK_ASM' ],
+ ]
+ 
+ foreach opt : opts
+@@ -151,11 +162,11 @@ foreach opt : opts
+   set_variable('opt_' + opt[0].underscorify(), opt_foo)
+ endforeach
+ 
+-enable_asm = not get_option('disable-asm')
+-enable_rtcd = not get_option('disable-rtcd')
+-enable_intrinsics = get_option('enable-intrinsics')
+-disable_extra_programs = get_option('disable-extra-programs')
+-disable_tests = get_option('disable-tests')
++opt_asm = get_option('asm')
++opt_rtcd = get_option('rtcd')
++opt_intrinsics = get_option('intrinsics')
++extra_programs = get_option('extra-programs')
++opt_tests = get_option('tests')
+ 
+ disable_float_api = not get_option('float-api')
+ if disable_float_api
+@@ -172,8 +183,7 @@ if opt_custom_modes
+   pc_build = pc_build + ', custom modes'
+ endif
+ 
+-rtcd_support = 'no'
+-cpu_arm = false # FIXME: check, unused
++rtcd_support = []
+ opus_arm_external_asm = false
+ 
+ asm_tmpl = '''
+@@ -182,12 +192,11 @@ int main (int argc, char ** argv) {
+   return 0;
+ }'''
+ 
+-asm_optimization='none'
+-if enable_asm
+-  inline_optimization='No inline ASM for your platform, please send patches'
+-  # Currently we only have asm for fixed-point
+-  if host_machine.cpu_family() == 'arm' and opt_fixed_point
+-    cpu_arm = true
++asm_optimization = []
++inline_optimization = []
++if not opt_asm.disabled()
++  # Currently we only have inline asm for fixed-point
++  if host_cpu_family == 'arm' and opt_fixed_point
+     opus_conf.set('OPUS_ARM_ASM', true)
+ 
+     # Check if compiler supports gcc-style inline assembly
+@@ -197,41 +206,41 @@ if enable_asm
+                       #endif
+                       #endif
+                       __asm__ (""::)''',
+-                   name :  'Compiler supports gcc-style inline assembly')
+-      inline_optimization = 'ARM'
++                   name : 'compiler supports gcc-style inline assembly')
+ 
+       opus_conf.set('OPUS_ARM_INLINE_ASM', 1)
+ 
+       # AS_ASM_ARM_EDSP
+       if cc.compiles(asm_tmpl.format('qadd r3,r3,r3'),
+-                     name : 'Assembler supports EDSP instructions on ARM')
++                     name : 'assembler supports EDSP instructions on ARM')
+         opus_conf.set('OPUS_ARM_INLINE_EDSP', 1)
+-        inline_optimization = inline_optimization + ' (ESDP)'
++        inline_optimization += ['ESDP']
+       endif
+ 
+       # AS_ASM_ARM_MEDIA
+       if cc.compiles(asm_tmpl.format('shadd8 r3,r3,r3'),
+-                     name : 'Assembler supports ARMv6 media instructions on ARM')
++                     name : 'assembler supports ARMv6 media instructions on ARM')
+         opus_conf.set('OPUS_ARM_INLINE_MEDIA', 1)
+-        inline_optimization = inline_optimization + ' (Media)'
++        inline_optimization += ['Media']
+       endif
+ 
+       # AS_ASM_ARM_NEON
+       if cc.compiles(asm_tmpl.format('vorr d0,d0,d0'),
+-                     name : 'Assembler supports NEON instructions on ARM')
++                     name : 'assembler supports NEON instructions on ARM')
+         opus_conf.set('OPUS_ARM_INLINE_NEON', 1)
+-        inline_optimization = inline_optimization + ' (NEON)'
++        inline_optimization += ['NEON']
+       endif
+-    else
+-      inline_optimization = 'disabled'
+     endif
+ 
+     # We need Perl to translate RVCT-syntax asm to gas syntax
+-    # FIXME: for now we just error out if no perl is found
+-    perl = find_program('perl', required : true)
++    perl = find_program('perl', required: get_option('asm'))
+     if perl.found()
+       opus_arm_external_asm = true
+-      asm_optimization = 'ARM'
++      # opus_arm_presume_* mean we can and will use those instructions
++      # directly without doing runtime CPU detection.
++      # opus_arm_may_have_* mean we can emit those instructions, but we can
++      # only use them after runtime detection.
++      # The same rules apply for x86 assembly and intrinsics.
+ 
+       opus_arm_presume_edsp = opus_conf.has('OPUS_ARM_INLINE_EDSP')
+       opus_arm_may_have_edsp = opus_arm_presume_edsp
+@@ -242,7 +251,7 @@ if enable_asm
+       opus_arm_presume_neon = opus_conf.has('OPUS_ARM_INLINE_NEON')
+       opus_arm_may_have_neon = opus_arm_presume_neon
+ 
+-      if enable_rtcd
++      if not opt_rtcd.disabled()
+         if not opus_arm_may_have_edsp
+           message('Trying to force-enable armv5e EDSP instructions...')
+           # AS_ASM_ARM_EDSP_FORCE
+@@ -261,146 +270,142 @@ if enable_asm
+         endif
+       endif
+ 
+-      rtcd_support = ''
+       if opus_arm_may_have_edsp
+         opus_conf.set('OPUS_ARM_MAY_HAVE_EDSP', 1)
+         if opus_arm_presume_edsp
+           opus_conf.set('OPUS_ARM_PRESUME_EDSP', 1)
+-          asm_optimization = asm_optimization + ' (EDSP)'
++          asm_optimization += ['EDSP']
+         else
+-          rtcd_support = rtcd_support + ' (EDSP)'
++          rtcd_support += ['EDSP']
+         endif
+       endif
+       if opus_arm_may_have_media
+         opus_conf.set('OPUS_ARM_MAY_HAVE_MEDIA', 1)
+         if opus_arm_presume_media
+           opus_conf.set('OPUS_ARM_PRESUME_MEDIA', 1)
+-          asm_optimization = asm_optimization + ' (Media)'
++          asm_optimization += ['Media']
+         else
+-          rtcd_support = rtcd_support + ' (Media)'
++          rtcd_support += ['Media']
+         endif
+       endif
+       if opus_arm_may_have_neon
+         opus_conf.set('OPUS_ARM_MAY_HAVE_NEON', 1)
+         if opus_arm_presume_neon
+           opus_conf.set('OPUS_ARM_PRESUME_NEON', 1)
+-          asm_optimization = asm_optimization + ' (NEON)'
++          asm_optimization += ['NEON']
+         else
+-          rtcd_support = rtcd_support + ' (NEON)'
++          rtcd_support += ['NEON']
+         endif
+       endif
+ 
+-      # Make sure turning on RTCD gets us at least one instruction set
+-      if rtcd_support != ''
+-        rtcd_support = 'ARM ' + rtcd_support
++      if cc.get_define('__APPLE__')
++        arm2gnu_args = ['--apple']
+       else
+-        rtcd_support = 'no'
++        arm2gnu_args = []
+       endif
++    endif # found perl
++  else # arm + enable fixed point
++    if opt_asm.enabled()
++      error('asm option is enabled, but no assembly support for ' + host_cpu_family)
++    endif
++  endif
++endif # enable asm
++
++# Check whether we require assembly and we support assembly on this arch,
++# but none were detected. Can happen because of incorrect compiler flags, such
++# as missing -mfloat-abi=softfp on ARM32 softfp architectures.
++if opt_asm.enabled() and (asm_optimization.length() + inline_optimization.length()) == 0
++  error('asm option was enabled, but no assembly support was detected')
++endif
+ 
+-      # Check for apple-style tools
+-      if cc.compiles('''#ifndef __APPLE__
+-                        #error not apple
+-                        #endif''', name : 'Apple-style tools')
+-        arm2gnu_params = '--apple' # FIXME: use somewhere
++# XXX: NEON has hardfp vs softfp compiler configuration issues
++# When targeting ARM32 softfp, we sometimes need to explicitly pass
++# -mfloat-abi=softfp to enable NEON. F.ex., on Android. It should
++# be set in the cross file.
++arm_neon_intr_link_args = ['-mfpu=neon']
++
++have_sse = false
++have_sse2 = false
++have_sse4_1 = false
++have_avx = false # no avx opus code yet
++have_neon_intr = false
++
++intrinsics_support = []
++if not opt_intrinsics.disabled()
++  if host_cpu_family in ['arm', 'aarch64']
++    # Check for ARMv7/AArch64 neon intrinsics
++    intrin_check = '''
++    #include <arm_neon.h>
++      int main (void) {
++        static float32x4_t A0, A1, SUMM;
++        SUMM = vmlaq_f32(SUMM, A0, A1);
++        return (int)vgetq_lane_f32(SUMM, 0);
++      }'''
++    intrin_name = 'ARMv7/AArch64 NEON'
++    if cc.links(intrin_check,
++                name: 'compiler supports @0@ intrinsics'.format(intrin_name))
++      opus_arm_presume_neon_intr = true
++      opus_arm_may_have_neon_intr = true
++    else
++      opus_arm_presume_neon_intr = false
++      if cc.links(intrin_check,
++                  args: arm_neon_intr_link_args,
++                  name: 'compiler supports @0@ intrinsics with @1@'.format(intrin_name, ' '.join(arm_neon_intr_link_args)))
++        opus_arm_may_have_neon_intr = true
+       else
+-        arm2gnu_params = ''
++        opus_arm_may_have_neon_intr = false
+       endif
+-    endif # found perl
+-  endif # arm + enable fixed point
+-else # enable asm
+-  inline_optimization='disabled'
+-  asm_optimization='disabled'
+-endif
++    endif
+ 
+-intrinsics_foo='''
+-m4_define([DEFAULT_ARM_NEON_INTR_CFLAGS], [-mfpu=neon])
+-# With GCC on ARM32 softfp architectures (e.g. Android, or older Ubuntu) you need to specify
+-# -mfloat-abi=softfp for -mfpu=neon to work.  However, on ARM32 hardfp architectures (e.g. newer Ubuntu),
+-# this option will break things.
+-
+-# As a heuristic, if host matches arm*eabi* but not arm*hf*, it's probably soft-float.
+-m4_define([DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS], [-mfpu=neon -mfloat-abi=softfp])
+-
+-AS_CASE([$host],
+-	[arm*hf*], [AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_INTR_CFLAGS")],
+-	[arm*eabi*], [AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS")],
+-	[AS_VAR_SET([RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS], "DEFAULT_ARM_NEON_INTR_CFLAGS")])
+-
+-AC_ARG_VAR([ARM_NEON_INTR_CFLAGS], [C compiler flags to compile ARM NEON intrinsics @<:@default=]DEFAULT_ARM_NEON_INTR_CFLAGS / DEFAULT_ARM_NEON_SOFTFP_INTR_CFLAGS[@:>@])
+-
+-AS_VAR_SET_IF([ARM_NEON_INTR_CFLAGS], [], [AS_VAR_SET([ARM_NEON_INTR_CFLAGS], ["$RESOLVED_DEFAULT_ARM_NEON_INTR_CFLAGS"])])
+-'''
+-
+-may_have_sse = false
+-may_have_sse2 = false
+-may_have_sse4_1 = false
+-may_have_avx = false
+-
+-may_have_neon = false  # FIXME: merge with / fixup opus_arm_may_have_neon
+-
+-if enable_intrinsics
+-  intrinsics_support = ''
+-  rtcd_support = ''
+-  if host_machine.cpu_family().startswith('arm')
+-foo1_arm='''
+-   AS_CASE([$host_cpu],
+-   [arm*],
+-   [
+-      cpu_arm=yes
+-      OPUS_CHECK_INTRINSICS(
+-         [ARM Neon],
+-         [$ARM_NEON_INTR_CFLAGS],
+-         [OPUS_ARM_MAY_HAVE_NEON_INTR],
+-         [OPUS_ARM_PRESUME_NEON_INTR],
+-         [[#include <arm_neon.h>
+-         ]],
+-         [[
+-            static float32x4_t A0, A1, SUMM;
+-            SUMM = vmlaq_f32(SUMM, A0, A1);
+-         ]]
+-      )
+-      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
+-          [
+-             OPUS_ARM_NEON_INTR_CFLAGS="$ARM_NEON_INTR_CFLAGS"
+-             AC_SUBST([OPUS_ARM_NEON_INTR_CFLAGS])
+-          ]
+-      )
+-
+-      AS_IF([test x"$OPUS_ARM_MAY_HAVE_NEON_INTR" = x"1"],
+-      [
+-         AC_DEFINE([OPUS_ARM_MAY_HAVE_NEON_INTR], 1, [Compiler supports ARMv7 Neon Intrinsics])
+-         intrinsics_support="$intrinsics_support (Neon_Intrinsics)"
+-
+-         AS_IF([test x"enable_rtcd" != x"" && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
+-            [rtcd_support="$rtcd_support (ARMv7_Neon_Intrinsics)"])
+-
+-         AS_IF([test x"$OPUS_ARM_PRESUME_NEON_INTR" = x"1"],
+-            [AC_DEFINE([OPUS_ARM_PRESUME_NEON_INTR], 1, [Define if binary requires NEON intrinsics support])])
+-
+-         OPUS_PATH_NE10()
+-         AS_IF([test x"$NE10_LIBS" != x""],
+-         [
+-              intrinsics_support="$intrinsics_support (NE10)"
+-              AS_IF([test x"enable_rtcd" != x"" \
+-               && test x"$OPUS_ARM_PRESUME_NEON_INTR" != x"1"],
+-                 [rtcd_support="$rtcd_support (NE10)"])
+-         ])
+-
+-         AS_IF([test x"$rtcd_support" = x""],
+-            [rtcd_support=no])
+-
+-         AS_IF([test x"$intrinsics_support" = x""],
+-            [intrinsics_support=no],
+-            [intrinsics_support="arm$intrinsics_support"])
+-      ],
+-      [
+-         AC_MSG_WARN([Compiler does not support ARM intrinsics])
+-         intrinsics_support=no
+-      ])
+-   ],
+-'''
+-  elif host_machine.cpu_family().startswith('x86')
+-    # FIXME: allow external override/specification of the flags
++    if opus_arm_may_have_neon_intr
++      have_neon_intr = true
++      intrinsics_support += [intrin_name]
++      opus_conf.set('OPUS_ARM_MAY_HAVE_NEON_INTR', 1)
++      if opus_arm_presume_neon_intr
++        opus_conf.set('OPUS_ARM_PRESUME_NEON_INTR', 1)
++      else
++        rtcd_support += [intrin_name]
++        opus_neon_intr_args = arm_neon_intr_link_args
++      endif
++    else
++      message('Compiler does not support @0@ intrinsics'.format(intrin_name))
++    endif
++
++    # Check for aarch64 neon intrinsics
++    intrin_check = '''
++    #include <arm_neon.h>
++      int main (void) {
++        static int32_t IN;
++        static int16_t OUT;
++        OUT = vqmovns_s32(IN);
++      }'''
++    intrin_name = 'AArch64 NEON'
++    if cc.links(intrin_check,
++                name: 'compiler supports @0@ intrinsics'.format(intrin_name))
++      opus_arm_presume_aarch64_neon_intr = true
++      opus_arm_may_have_aarch64_neon_intr = true
++    else
++      opus_arm_presume_aarch64_neon_intr = false
++      if cc.links(intrin_check,
++                  args: arm_neon_intr_link_args,
++                  name: 'compiler supports @0@ intrinsics with @1@'.format(intrin_name, ' '.join(arm_neon_intr_link_args)))
++        opus_arm_may_have_aarch64_neon_intr = true
++      else
++        opus_arm_may_have_aarch64_neon_intr = false
++      endif
++    endif
++
++    if opus_arm_may_have_aarch64_neon_intr
++      intrinsics_support += [intrin_name]
++      opus_conf.set('OPUS_X86_MAY_HAVE_AARCH64_NEON_INTR', 1)
++      if opus_arm_presume_aarch64_neon_intr
++        opus_conf.set('OPUS_X86_PRESUME_AARCH64_NEON_INTR', 1)
++      endif
++    else
++      message('Compiler does not support @0@ intrinsics'.format(intrin_name))
++    endif
++  elif host_cpu_family in ['x86', 'x86_64']
++    # XXX: allow external override/specification of the flags
+     x86_intrinsics = [
+       [ 'SSE', 'xmmintrin.h', '__m128', '_mm_setzero_ps()', '-msse' ],
+       [ 'SSE2', 'emmintrin.h', '__m128i', '_mm_setzero_si128()', '-msse2' ],
+@@ -414,69 +419,69 @@ foo1_arm='''
+                           static @1@ mtest;
+                           mtest = @2@;
+                           return *((unsigned char *) &mtest) != 0;
+-                        }'''.format(intrin.get(1),intrin.get(2),intrin.get(3))
+-      intrin_name = intrin.get(0)
+-      intrin_link_args = intrin.get(4)
+-      if cc.links(intrin_check, name : 'if compiler supports @0@ intrinsics'.format(intrin_name))
++                        }'''.format(intrin[1],intrin[2],intrin[3])
++      intrin_name = intrin[0]
++      intrin_args = intrin[4]
++      if cc.links(intrin_check, name : 'compiler supports @0@ intrinsics'.format(intrin_name))
+         may_have_intrin = true
+         presume_intrin = true
+       else
+         presume_intrin = false
+         if cc.links(intrin_check,
+-                    args : intrin_link_args,
+-                    name : 'if compiler supports @0@ intrinsics with @1@'.format(intrin_name,intrin_link_args))
++                    args : intrin_args,
++                    name : 'compiler supports @0@ intrinsics with @1@'.format(intrin_name, intrin_args))
+           may_have_intrin = true
+-          # FIXME: add args to some var and use it later
+         else
+           may_have_intrin = false
+         endif
+       endif
+-      set_variable('may_have_' + intrin_name.to_lower().underscorify(), may_have_intrin)
+-      # FIXME: unused: set_variable('presume_' + intrin_name.to_lower().underscorify(), presume_intrin)
+       if may_have_intrin
+-        intrinsics_support = intrinsics_support + ' ' + intrin_name
++        intrinsics_support += [intrin_name]
++        intrin_lower_name = intrin_name.to_lower().underscorify()
++        set_variable('have_' + intrin_lower_name, true)
+         opus_conf.set('OPUS_X86_MAY_HAVE_' + intrin_name.underscorify(), 1)
+         if presume_intrin
+           opus_conf.set('OPUS_X86_PRESUME_' + intrin_name.underscorify(), 1)
+         else
+-          rtcd_support = rtcd_support + ' ' + intrin_name
+-          opus_c_args += [ intrin_link_args ]
++          rtcd_support += [intrin_name]
++          set_variable('opus_@0@_args'.format(intrin_lower_name), intrin_args)
+         endif
+       else
+-        message('Warning: Compiler does not support @0@ intrinsics'.format(intrin_name))
++        message('Compiler does not support @0@ intrinsics'.format(intrin_name))
+       endif
+     endforeach
+ 
+-    if intrinsics_support == ''
+-      intrinsics_support = 'no'
+-    else
+-      intrinsics_support = 'x86' + intrinsics_support
+-    endif
+-
+-    if rtcd_support == ''
+-      rtcd_support = 'no'
+-    else
+-      rtcd_support = 'x86' + rtcd_support
+-    endif
+-
+-    if enable_rtcd and rtcd_support != 'no'
++    if not opt_rtcd.disabled()
+       get_cpuid_by_asm = false
+       cpuid_asm_code = '''
+         #include <stdio.h>
+         int main (int argc, char ** argv) {
+-          unsigned int CPUInfo0;
+-          unsigned int CPUInfo1;
+-          unsigned int CPUInfo2;
+-          unsigned int CPUInfo3;
+-          unsigned int InfoType;
+-          __asm__ __volatile__ (
+-            "cpuid":
+-            "=a" (CPUInfo0),
+-            "=b" (CPUInfo1),
+-            "=c" (CPUInfo2),
+-            "=d" (CPUInfo3) :
+-            "a" (InfoType), "c" (0)
+-          );
++                 unsigned int CPUInfo0;
++                 unsigned int CPUInfo1;
++                 unsigned int CPUInfo2;
++                 unsigned int CPUInfo3;
++                 unsigned int InfoType;
++                #if defined(__i386__) && defined(__PIC__)
++                 __asm__ __volatile__ (
++                 "xchg %%ebx, %1\n"
++                 "cpuid\n"
++                 "xchg %%ebx, %1\n":
++                 "=a" (CPUInfo0),
++                 "=r" (CPUInfo1),
++                 "=c" (CPUInfo2),
++                 "=d" (CPUInfo3) :
++                 "a" (InfoType), "c" (0)
++                );
++               #else
++                 __asm__ __volatile__ (
++                 "cpuid":
++                 "=a" (CPUInfo0),
++                 "=b" (CPUInfo1),
++                 "=c" (CPUInfo2),
++                 "=d" (CPUInfo3) :
++                 "a" (InfoType), "c" (0)
++                );
++               #endif
+           return 0;
+         }'''
+       cpuid_c_code = '''
+@@ -490,28 +495,55 @@ foo1_arm='''
+           __get_cpuid(InfoType, &CPUInfo0, &CPUInfo1, &CPUInfo2, &CPUInfo3);
+           return 0;
+         }'''
++      cpuid_msvc_code = '''
++        #include <intrin.h>
++        int main (void) {
++          int CPUInfo, InfoType;
++          __cpuid(&CPUInfo, InfoType);
++        }'''
+       if cc.links(cpuid_asm_code, name : 'Get X86 CPU info via inline assembly')
+         opus_conf.set('CPU_INFO_BY_ASM', 1)
+       elif cc.links(cpuid_c_code, name : 'Get X86 CPU info via C method')
+         opus_conf.set('CPU_INFO_BY_C', 1)
++      elif cc.get_define('_MSC_VER') != '' and cc.links(cpuid_msvc_code)
++        message('Getting X86 CPU info via __cpuid')
+       else
+-        error('No supported Get CPU Info method, please disable intrinsics')
++        if opt_intrinsics.enabled() and opt_rtcd.enabled()
++          error('intrinsics and rtcd options are enabled, but no Get CPU Info method detected')
++        endif
++        warning('Get CPU Info method not detected, no rtcd for intrinsics')
+       endif
+-    endif
++    endif # opt_rtcd
+   else
+-    message('Warning: No intrinsics support for your architecture (@0@)'.format(host_machine.get_cpu()))
+-    intrinsics_support = 'no'
++    if opt_intrinsics.enabled()
++      error('intrinsics option enabled, but no intrinsics support for ' + host_machine.get_cpu())
++    endif
++    warning('No intrinsics support for ' + host_machine.get_cpu())
+   endif
+-else
+-  intrinsics_support = 'no'
+ endif
+ 
+-if enable_rtcd
+-  if rtcd_support != 'no'
++# Check whether we require intrinsics and we support intrinsics on this arch,
++# but none were detected. Can happen because of incorrect compiler flags, such
++# as missing -mfloat-abi=softfp on ARM32 softfp architectures.
++if opt_intrinsics.enabled() and intrinsics_support.length() == 0
++  error('intrinsics option was enabled, but none were detected')
++endif
++
++if opt_rtcd.disabled()
++  rtcd_support = 'disabled'
++else
++  if rtcd_support.length() > 0
+     opus_conf.set('OPUS_HAVE_RTCD', 1)
++  else
++    if intrinsics_support.length() == 0
++      rtcd_support = 'none'
++      if opt_rtcd.enabled()
++        error('rtcd option is enabled, but no support for intrinsics or assembly is available')
++      endif
++    else
++      rtcd_support = 'not needed'
++    endif
+   endif
+-else
+-  rtcd_support = 'disabled'
+ endif
+ 
+ subdir('include')
+@@ -521,7 +553,7 @@ subdir('src')
+ 
+ configure_file(output: 'config.h', configuration: opus_conf)
+ 
+-if not disable_tests
++if not opt_tests.disabled()
+   subdir('celt/tests')
+   subdir('silk/tests')
+   subdir('tests')
+@@ -537,9 +569,7 @@ pkgconf.set('libdir', '${prefix}/@0@'.format(get_option('libdir')))
+ pkgconf.set('includedir', '${prefix}/@0@'.format(get_option('includedir')))
+ pkgconf.set('VERSION', opus_version)
+ pkgconf.set('PC_BUILD', pc_build)
+-if libm.found()
+-  pkgconf.set('LIBM', '-lm')
+-endif
++pkgconf.set('LIBM', libm.found() ? '-lm' : '')
+ 
+ pkg_install_dir = '@0@/pkgconfig'.format(get_option('libdir'))
+ 
+@@ -555,54 +585,65 @@ configure_file(input : 'opus.pc.in',
+ #  install : false)
+ 
+ doxygen = find_program('doxygen', required: get_option('docs'))
+-have_doxygen = doxygen.found()
+-if have_doxygen
+-  msg_doc = 'yes'
++if doxygen.found()
+   subdir('doc')
+-else
+-  if get_option('docs').disabled()
+-    msg_doc = 'disabled'
+-  else
+-    msg_doc = 'not found'
+-  endif
+ endif
+ 
+-# FIXME: use bool.to_string('yes', 'no') here once meson 0.31 is out
+-# FIXME: only print the ninja help if ninja is used as backend
+-msg_c99_lrintf = opus_conf.has('HAVE_LRINTF').to_string()
+-message('''
+-------------------------------------------------------------------------
+-  opus @0@:  Automatic configuration OK.
+-
+-    Compiler support:
+-
+-      C99 var arrays: ................ @1@
+-      C99 lrintf: .................... @2@
+-      Use alloca: .................... @3@
+-
+-    General configuration:
+-
+-      Floating point support: ........ @4@
+-      Fast float approximations: ..... @5@
+-      Fixed point debugging: ......... @6@
+-      Inline Assembly Optimizations: . @7@
+-      External Assembly Optimizations: @8@
+-      Intrinsics Optimizations.......: @9@
+-      Run-time CPU detection: ........ @10@
+-      Custom modes: .................. @11@
+-      Assertion checking: ............ @12@
+-      Fuzzing: ....................... @13@
+-
+-      API documentation: ............. @14@
+-      Extra programs: ................ @15@
+-      Tests: ......................... @16@
+-------------------------------------------------------------------------
+-
+- Type "ninja; ninja install" to compile and install
+- Type "ninja test" to run the test suite
+-'''.format(meson.project_version(), msg_c99_var_arrays, msg_c99_lrintf,
+-  msg_use_alloca, not opt_fixed_point, opt_float_approx,
+-  opt_fixed_point_debug, inline_optimization, asm_optimization,
+-  intrinsics_support, rtcd_support, opt_custom_modes,
+-  opt_assertions, opt_fuzzing, msg_doc,
+-  not disable_extra_programs, not disable_tests))
++summary(
++  {
++    'C99 var arrays': opus_conf.has('VAR_ARRAYS'),
++    'C99 lrintf': opus_conf.has('HAVE_LRINTF'),
++    'Use alloca': msg_use_alloca,
++  },
++  section: 'Compiler support',
++  bool_yn: true,
++  list_sep: ', ',
++)
++
++# Parse optimization status
++foreach status : [['inline_optimization', opt_asm],
++                  ['asm_optimization', opt_asm],
++                  ['intrinsics_support', opt_intrinsics]]
++  res = status[0]
++  opt = status[1]
++  resval = get_variable(res)
++  if opt.disabled()
++    set_variable(res, 'disabled')
++  elif resval.length() == 0
++    if host_cpu_family not in ['arm', 'aarch64', 'x86', 'x86_64']
++      set_variable(res, 'No optimizations for your platform, please send patches')
++    else
++      set_variable(res, 'none')
++    endif
++  endif
++endforeach
++
++summary(
++  {
++    'Floating point support': not opt_fixed_point,
++    'Fast float approximations': opt_float_approx,
++    'Fixed point debugging': opt_fixed_point_debug,
++    'Inline assembly optimizations': inline_optimization,
++    'External assembly optimizations': asm_optimization,
++    'Intrinsics optimizations': intrinsics_support,
++    'Run-time CPU detection': rtcd_support,
++  },
++  section: 'Optimizations',
++  bool_yn: true,
++  list_sep: ', ',
++)
++summary(
++  {
++    'Custom modes': opt_custom_modes,
++    'Assertions': opt_assertions,
++    'Hardening': opt_hardening,
++    'Fuzzing': opt_fuzzing,
++    'Check ASM': opt_check_asm,
++    'API documentation': doxygen.found(),
++    'Extra programs': not extra_programs.disabled(),
++    'Tests': not opt_tests.disabled(),
++  },
++  section: 'General configuration',
++  bool_yn: true,
++  list_sep: ', ',
++)
+diff --git a/meson_options.txt b/meson_options.txt
+index 21322ac5..360ff263 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1,17 +1,21 @@
++# Optimizations
+ option('fixed-point', type : 'boolean', value : false, description : 'Compile without floating point (for machines without a fast enough FPU')
+ option('fixed-point-debug', type : 'boolean', value : false, description : 'Debug fixed-point implementation')
+ option('float-api', type : 'boolean', value : true, description : 'Compile with or without the floating point API (for machines with no float library')
+-option('custom-modes', type : 'boolean', value : false, description : 'Enable non-Opus modes, e.g. 44.1 kHz & 2^n frames')
+ option('float-approx', type : 'boolean', value : false, description : 'Enable fast approximations for floating point (not supported on all platforms)')
+-option('disable-asm', type : 'boolean', value : false, description : 'Disable assembly optimizations')
+-option('disable-rtcd', type : 'boolean', value : false, description : 'Disable run-time CPU capabilities detection')
+-option('enable-intrinsics', type : 'boolean', value : false, description : 'Enable intrinsics optimizations for ARM(float) X86(fixed)')
+-option('disable-extra-programs', type : 'boolean', value : false, description : 'Do not build extra programs (demo and tests)')
+-option('assertions', type : 'boolean', value : false, description : 'Enable additional software error checking')
++option('rtcd', type : 'feature', value : 'auto', description : 'Run-time CPU capabilities detection')
++option('asm', type : 'feature', value : 'auto', description : 'Assembly optimizations for ARM (fixed-point)')
++option('intrinsics', type : 'feature', value : 'auto', description : 'Intrinsics optimizations for ARM NEON or x86')
++
++option('custom-modes', type : 'boolean', value : false, description : 'Enable non-Opus modes, e.g. 44.1 kHz & 2^n frames')
++option('extra-programs', type : 'feature', value : 'auto', description : 'Extra programs (demo and tests)')
++option('assertions', type : 'boolean', value : false, description : 'Additional software error checking')
++option('hardening', type : 'boolean', value : true, description : 'Run-time checks that are cheap and safe for use in production')
+ option('fuzzing', type : 'boolean', value : false, description : 'Causes the encoder to make random decisions')
+-option('disable-tests', type : 'boolean', value : false, description : 'Do not build tests')
++option('check-asm', type : 'boolean', value : false, description : 'Run bit-exactness checks between optimized and c implementations')
+ 
+-# feature options
++# common feature options
++option('tests', type : 'feature', value : 'auto', description : 'Build tests')
+ option('docs', type: 'feature', value: 'auto', description: 'Build API documentation')
+ 
+ # other options
+diff --git a/silk/meson.build b/silk/meson.build
+index 1a1a0954..210887ec 100644
+--- a/silk/meson.build
++++ b/silk/meson.build
+@@ -86,6 +86,18 @@ silk_sources_sse4_1 = [
+   'x86/VQ_WMat_EC_sse4_1.c',
+ ]
+ 
++silk_sources_neon_intr = [
++  'arm/arm_silk_map.c',
++  'arm/biquad_alt_neon_intr.c',
++  'arm/LPC_inv_pred_gain_neon_intr.c',
++  'arm/NSQ_del_dec_neon_intr.c',
++  'arm/NSQ_neon.c',
++]
++
++silk_sources_fixed_neon_intr = [
++  'fixed/arm/warped_autocorrelation_FIX_neon_intr.c',
++]
++
+ silk_sources_fixed = [
+   'fixed/LTP_analysis_filter_FIX.c',
+   'fixed/LTP_scale_ctrl_FIX.c',
+@@ -150,20 +162,30 @@ silk_sources_float = [
+ 
+ if opt_fixed_point
+   silk_sources += silk_sources_fixed
+-  if may_have_sse4_1
+-    silk_sources += silk_sources_sse4_1
+-    silk_sources += silk_sources_fixed_sse4_1
+-  endif
+ else
+   silk_sources += silk_sources_float
+-  if may_have_sse4_1
+-    silk_sources += silk_sources_sse4_1
+-  endif
+ endif
+ 
+-if host_machine.cpu_family() == 'arm' # was: cpu_arm # FIXME: should only be used if intrinsics or asm is enabled
+-  silk_sources += silk_sources_arm
+-endif
++silk_includes = [opus_includes, include_directories('float', 'fixed')]
++silk_static_libs = []
++
++foreach intr_name : ['sse4_1', 'neon_intr']
++  have_intr = get_variable('have_' + intr_name)
++  if not have_intr
++    continue
++  endif
++
++  intr_sources = get_variable('silk_sources_' + intr_name)
++  if opt_fixed_point
++    intr_sources += get_variable('silk_sources_fixed_' + intr_name)
++  endif
++
++  intr_args = get_variable('opus_@0@_args'.format(intr_name), [])
++  silk_static_libs += static_library('silk_' + intr_name, intr_sources,
++      c_args: intr_args,
++      include_directories: silk_includes,
++      install: false)
++endforeach
+ 
+ silk_c_args = []
+ if host_machine.system() == 'windows'
+@@ -172,8 +194,8 @@ endif
+ 
+ silk_lib = static_library('opus-silk',
+   silk_sources,
+-  c_args: opus_c_args + silk_c_args,
+-  include_directories: [opus_includes, include_directories('float', 'fixed')],
+-  #link_with: opus_armasm_lib,
++  c_args: silk_c_args,
++  include_directories: silk_includes,
++  link_whole: silk_static_libs,
+   dependencies: libm,
+   install: false)
+diff --git a/silk/tests/meson.build b/silk/tests/meson.build
+index 06cefe40..b7c70f75 100644
+--- a/silk/tests/meson.build
++++ b/silk/tests/meson.build
+@@ -1,10 +1,8 @@
+ exe = executable('test_unit_LPC_inv_pred_gain',
+   'test_unit_LPC_inv_pred_gain.c', '../LPC_inv_pred_gain.c',
+   include_directories: opus_includes,
+-  c_args: opus_c_args,
+-  link_with: [opus_armasm_lib, celt_lib, silk_lib],
++  link_with: [celt_lib, celt_static_libs, silk_lib, silk_static_libs],
+   dependencies: libm,
+   install: false)
+ 
+ test(test_name, exe)
+-
+diff --git a/src/meson.build b/src/meson.build
+index 8fc463e1..f21e4277 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1,10 +1,13 @@
+ opus_sources = [
++  'mapping_matrix.c',
+   'opus.c',
+   'opus_decoder.c',
+   'opus_encoder.c',
+   'opus_multistream.c',
+   'opus_multistream_encoder.c',
+   'opus_multistream_decoder.c',
++  'opus_projection_encoder.c',
++  'opus_projection_decoder.c',
+   'repacketizer.c',
+ ]
+ 
+@@ -25,9 +28,9 @@ endif
+ 
+ opus_lib = library('opus',
+   opus_sources,
+-# FIXME  version : libversion,
+-# FIXME soversion : soversion,
+-  c_args: opus_c_args + opus_lib_c_args,
++  version: libversion,
++  darwin_versions: macosversion,
++  c_args: opus_lib_c_args,
+   include_directories: opus_includes,
+   link_with: [celt_lib, silk_lib],
+   dependencies: libm,
+@@ -37,13 +40,10 @@ opus_dep = declare_dependency(link_with: opus_lib,
+   include_directories: opus_public_includes)
+ 
+ # Extra uninstalled Opus programs
+-if not disable_extra_programs
+-  extra_programs = ['opus_compare', 'opus_demo', 'repacketizer_demo']
+-
+-  foreach prog : extra_programs
++if not extra_programs.disabled()
++  foreach prog : ['opus_compare', 'opus_demo', 'repacketizer_demo']
+     executable(prog, '@0@.c'.format(prog),
+                include_directories: opus_includes,
+-               c_args: opus_c_args,
+                link_with: opus_lib,
+                dependencies: libm,
+                install: false)
+@@ -52,10 +52,9 @@ if not disable_extra_programs
+   if opt_custom_modes
+     executable('opus_custom_demo', '../celt/opus_custom_demo.c',
+                include_directories: opus_includes,
+-               c_args: opus_c_args,
+                link_with: opus_lib,
+                dependencies: libm,
+                install: false)
+   endif
+ 
+-endif # not disable_extra_programs
++endif
+diff --git a/tests/meson.build b/tests/meson.build
+index 9026ac30..5f3ac9df 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -1,7 +1,7 @@
+ # Tests that link to libopus
+ opus_tests = [
+   ['test_opus_api'],
+-  ['test_opus_decode'],
++  ['test_opus_decode', [], 60],
+   ['test_opus_encode', 'opus_encode_regressions.c', 120],
+   ['test_opus_padding'],
+   ['test_opus_projection'],
+@@ -10,12 +10,25 @@ opus_tests = [
+ foreach t : opus_tests
+   test_name = t.get(0)
+   extra_srcs = t.get(1, [])
+-  timeout = t.get(2, 30)
++
++  test_kwargs = {}
++  if t.length() > 2
++    test_kwargs += {'timeout': t[2]}
++  endif
++
++  exe_kwargs = {}
++  # This test uses private symbols
++  if test_name == 'test_opus_projection'
++    exe_kwargs = {
++      'link_with': [celt_lib, silk_lib],
++      'objects': opus_lib.extract_all_objects(),
++    }
++  endif
++
+   exe = executable(test_name, '@0@.c'.format(test_name), extra_srcs,
+     include_directories: opus_includes,
+-    c_args: opus_c_args,
+-    link_with: opus_lib,
+-    dependencies: libm,
+-    install: false)
+-  test(test_name, exe, timeout: timeout)
++    dependencies: [libm, opus_dep],
++    install: false,
++    kwargs: exe_kwargs)
++  test(test_name, exe, kwargs: test_kwargs)
+ endforeach
+-- 
+2.27.0.windows.1
+

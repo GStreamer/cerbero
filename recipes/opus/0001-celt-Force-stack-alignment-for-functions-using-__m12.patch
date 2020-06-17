@@ -15,11 +15,14 @@ diff --git a/celt/x86/pitch_sse.c b/celt/x86/pitch_sse.c
 index 20e7312..3eee8da 100644
 --- a/celt/x86/pitch_sse.c
 +++ b/celt/x86/pitch_sse.c
-@@ -40,6 +40,16 @@
+@@ -40,6 +40,19 @@
  #include <xmmintrin.h>
  #include "arch.h"
  
 +#ifdef _WIN32
++#ifdef _MSC_VER
++#define __attribute__(x)
++#endif
 +void xcorr_kernel_sse(const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4], int len) __attribute__((force_align_arg_pointer));
 +void dual_inner_prod_sse(const opus_val16 *x, const opus_val16 *y01, const opus_val16 *y02,
 +      int N, opus_val32 *xy1, opus_val32 *xy2) __attribute__((force_align_arg_pointer));

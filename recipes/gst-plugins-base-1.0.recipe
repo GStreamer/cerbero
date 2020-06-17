@@ -213,7 +213,6 @@ class Recipe(custom.GStreamer):
             # All these except libvisual can be ported to Meson/UWP
             self.disable_plugin('libvisual', 'vis', dep='libvisual')
             self.disable_plugin('ogg', 'codecs', dep='libogg')
-            self.disable_plugin('opus', 'codecs', dep='opus')
             self.disable_plugin('pango', 'core', dep='pango')
             self.disable_plugin('theora', 'codecs', dep='libtheora')
             self.disable_plugin('vorbis', 'codecs', dep='libvorbis')

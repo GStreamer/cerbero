@@ -47,7 +47,7 @@ class Package(custom.GStreamer, package.Package):
 
         if self.config.variants.uwp:
             self.files = [
-                'libvpx:libs', 'openh264:libs',
+                'libvpx:libs', 'openh264:libs', 'opus:libs',
                 'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
                 'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
             ]
