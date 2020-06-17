@@ -34,6 +34,7 @@ class Recipe(recipe.Recipe):
         'libvpx/0004-Fix-pkg-config-file-library-list.patch',
         'libvpx/0005-Always-generate-a-pkg-config-file.patch',
         'libvpx/0006-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
+        'libvpx/0001-configure-Add-support-for-vs16-arm-arm64.patch',
         # From upstream git master, remove on bump
         'libvpx/0007-remove-old-visual-studio-remnants.patch',
         # From upstream git master, remove on bump
@@ -81,7 +82,7 @@ class Recipe(recipe.Recipe):
             # fail while linking. If we unset it, it's correctly auto-detected.
             if self.using_msvc():
                 self.set_env('CC')
-            if self.config.target_arch == Architecture.X86_64:
+            if self.config.target_arch in (Architecture.X86_64, Architecture.ARM64):
                 platform = 'win64'
                 if not self.using_msvc():
                     # Error: invalid register for .seh_savexmm
@@ -160,8 +161,14 @@ class Recipe(recipe.Recipe):
         if self.using_msvc():
             if self.config.target_arch == Architecture.X86_64:
                 subdir = 'x64'
-            else:
+            elif self.config.target_arch == Architecture.X86:
                 subdir = 'Win32'
+            elif self.config.target_arch == Architecture.ARM64:
+                subdir = 'ARM64'
+            elif Architecture.is_arm32(self.config.target_arch):
+                subdir = 'ARM'
+            else:
+                raise FatalError('Unsupported target arch: ' + self.config.target_arch)
             os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
                        os.path.join(self.config.prefix, 'lib', 'libvpx.a'))
         LibtoolLibrary('vpx', None, None, None,
