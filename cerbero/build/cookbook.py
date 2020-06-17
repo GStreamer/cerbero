@@ -291,16 +291,16 @@ class CookBook (object):
         '''
         recipe_name = ''
         for r in self.recipes:
-          if name == r:
-            return name
-          if name in r:
-            if recipe_name:
-              m.message("Name '%s' matches two or more recipes: [%s, %s]" % (name, r, recipe_name))
-              return ''
-            else:
-              recipe_name = r
+            if name == r:
+                return name
+            if name in r:
+                if recipe_name:
+                    m.message("Name '%s' matches two or more recipes: [%s, %s]" % (name, r, recipe_name))
+                    return ''
+                else:
+                    recipe_name = r
         if recipe_name and name != recipe_name:
-          m.message("Found a recipe name %s for name %s " % (recipe_name, name))
+            m.message("Found a recipe name %s for name %s " % (recipe_name, name))
 
         return recipe_name
 
