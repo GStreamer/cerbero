@@ -301,7 +301,8 @@ class CookBook (object):
                     return ''
                 recipe_name = r
 
-        m.message("Found a recipe name %s matching name %s" % (recipe_name, name))
+        if recipe_name:
+            m.message("Found a recipe %s matching name %s" % (recipe_name, name))
 
         return recipe_name
 
