@@ -1,7 +1,7 @@
-From b01e6245757c4b3298bf351bdffe97bc414e10df Mon Sep 17 00:00:00 2001
+From cc4e337a928ce083684128e68a3d8e7ee93479f4 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 16 Aug 2019 11:16:56 +0530
-Subject: [PATCH 06/22] gutils: Can't fetch the username on UWP
+Subject: [PATCH] gutils: Can't fetch the username on UWP
 
 GetUserName is not allowed, and the replacement API requires explicit
 user consent and an app permission, which is not something we can do
@@ -9,18 +9,18 @@ implicitly.
 
 https://docs.microsoft.com/en-us/uwp/api/windows.system.userprofile.userinformation#remarks
 ---
- glib/gutils.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ glib/gutils.c    | 5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
 
 diff --git a/glib/gutils.c b/glib/gutils.c
-index 988d0a5..f4794b4 100644
+index 988d0a5..146e5df 100644
 --- a/glib/gutils.c
 +++ b/glib/gutils.c
 @@ -705,6 +705,7 @@ g_get_user_database_entry (void)
  
  #ifdef G_OS_WIN32
        {
-+#if defined(_DEBUG) || !defined(G_WINAPI_ONLY_APP)
++#if !defined(G_WINAPI_ONLY_APP)
          guint len = UNLEN+1;
          wchar_t buffer[UNLEN+1];
  
