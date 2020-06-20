@@ -1,21 +1,33 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
-import shutil
 from collections import defaultdict
 
 from cerbero.build import recipe
 from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
-from cerbero.enums import Platform, License, FatalError
-from cerbero.utils import shell, to_unixpath
+from cerbero.enums import License, FatalError
+
+def running_on_cerbero_ci():
+    return os.environ.get('CI_PROJECT_NAME', '') == 'cerbero'
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
     version = '1.17.1'
     tagged_for_release = True
 
-    if not tagged_for_release or recipe.Recipe._using_manifest_force_git:
-        # Pre-release version, use git master
+    # Decide what stype to use
+    use_git = True
+    if tagged_for_release:
+        # If we're using a manifest, that means we want to use the specified
+        # commits and remotes.
+        use_git = recipe.Recipe._using_manifest_force_git
+        # If we're tagged for release and we're running on Cerbero CI, we want
+        # to use the release tarballs even if a manifest is specified, because
+        # we want to test that the tarballs work.
+        if running_on_cerbero_ci():
+            use_git = False
+
+    if use_git:
         stype = SourceType.GIT
         remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
         if int(version.split('.')[1]) % 2 == 0:
@@ -25,12 +37,9 @@ class GStreamer(recipe.Recipe):
             # Odd version, use git master
             commit = 'origin/master'
     else:
-        # Release version, use tarballs
         stype = SourceType.TARBALL
         url = 'https://gstreamer.freedesktop.org/src/%(name)s/%(name)s-%(version)s.tar.xz'
         tarball_dirname = '%(name)s-%(version)s'
-        # Always define `commit`, used by gst-validate
-        commit = version
 
     def enable_plugin(self, plugin, category, variant, option=None, dep=None):
         if option is None:
