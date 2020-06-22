@@ -848,8 +848,8 @@ class Meson (Build, ModifyEnvBase) :
 
         cc = build_env.pop('CC')
         cxx = build_env.pop('CXX')
-        objc = build_env.pop('OBJC', [])
-        objcxx = build_env.pop('OBJCXX', [])
+        objc = build_env.pop('OBJC', ['false'])
+        objcxx = build_env.pop('OBJCXX', ['false'])
         ar = build_env.pop('AR')
         # We currently don't set the pre-processor or the linker when building with meson
         build_env.pop('CPP', None)
@@ -929,8 +929,8 @@ class Meson (Build, ModifyEnvBase) :
             cc = self.config.mingw_env_for_build_system['CC']
             cxx = self.config.mingw_env_for_build_system['CXX']
             ar = self.config.mingw_env_for_build_system['AR']
-            objc = cc
-            objcxx = cxx
+            objc = false
+            objcxx = false
         elif self.config.platform == Platform.DARWIN:
             cc = ['clang']
             cxx = ['clang++']

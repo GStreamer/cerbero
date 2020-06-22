@@ -485,7 +485,7 @@ class Recipe(custom.GStreamer):
                 (self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64):
             self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
-        if self.using_msvc() or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+        if self.using_uwp() or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
 
         # dtls plugin needs openssl, and we pick up the system openssl if on
