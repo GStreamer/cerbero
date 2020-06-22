@@ -338,11 +338,7 @@ class Config (object):
             old_v = old_env[k]
             if new_v == old_v:
                 ret_env[k] = new_v
-            elif EnvVar.is_path(k):
-                ret_env[k] = self._join_path(new_v, old_v)
-            elif EnvVar.is_arg(k):
-                ret_env[k] = self._join_values(new_v, old_v)
-            elif EnvVar.is_cmd(k):
+            elif EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k):
                 ret_env[k] = new_v
             else:
                 raise FatalError("Don't know how to combine the environment "
