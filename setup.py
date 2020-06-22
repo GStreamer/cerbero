@@ -18,10 +18,10 @@ def read(fname):
 # Utility function to parse directories
 def parse_dir(dirpath, extension=None):
     if os.path.exists('.git'):
-        files = shell.check_call('git ls-files %s' % dirpath).split('\n')
+        files = shell.check_output(['git', 'ls-files', dirpath]).split('\n')
         files.remove('')
     else:
-        files = shell.check_call('find %s -type f' % dirpath).split('\n')
+        files = shell.check_output(['find', dirpath, '-type', 'f']).split('\n')
         files.remove('')
     if extension is None:
         return files

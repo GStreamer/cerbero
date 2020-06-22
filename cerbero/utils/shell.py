@@ -497,12 +497,10 @@ def ls_dir(dirpath, prefix):
     return files
 
 
-def find_newer_files(prefix, compfile, include_link=False):
-    include_links = include_link and '-L' or ''
-    cmd = 'find %s * -type f -cnewer %s' % (include_links, compfile)
-    sfiles = check_call(cmd, prefix, True, False, False).split('\n')
-    sfiles.remove('')
-    return sfiles
+def find_newer_files(prefix, compfile):
+    cmd = ['find', '.', '-type', 'f', '-cnewer', compfile]
+    out = check_call(cmd, cmd_dir=prefix, fail=False)
+    return out.strip().split('\n')
 
 
 def replace(filepath, replacements):
