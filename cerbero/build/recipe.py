@@ -377,7 +377,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             'gstbasecamerabinsrc-1.0' : None,
             'gstcodecs-1.0' : None,
             'gstisoff-1.0' : None,
-            'gstphotography-1.0' : None,
             'gsturidownloader-1.0' : None,
             'gstrtspserver-1.0' : 'gstreamer-rtsp-server-1.0',
             'gstvalidate-1.0' : 'gst-validate-1.0',

@@ -111,6 +111,7 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
+        'lib/pkgconfig/gstreamer-photography-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
@@ -531,8 +532,6 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
 
     def post_install(self):
-        LibtoolLibrary('gstphotography-1.0', None, None, None, self.config.libdir,
-                self.config.target_platform, deps=['gstreamer-1.0']).save()
         LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gstreamer-1.0', 'gstbase-1.0']).save()
         LibtoolLibrary('gstadaptivedemux-1.0', None, None, None, self.config.libdir,
