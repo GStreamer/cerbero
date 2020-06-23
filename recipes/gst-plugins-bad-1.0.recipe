@@ -75,43 +75,45 @@ class Recipe(custom.GStreamer):
 
     files_lang = ['gst-plugins-bad-1.0']
 
-    files_libs = ['libgstcodecparsers-1.0',
-                  'libgstcodecs-1.0',
-                  'libgstmpegts-1.0',
-                  'libgsturidownloader-1.0',
-                  'libgstbasecamerabinsrc-1.0',
-                  'libgstphotography-1.0',
-                  'libgstinsertbin-1.0',
-                  'libgstadaptivedemux-1.0',
-                  'libgstplayer-1.0',
-                  'libgstbadaudio-1.0',
-                  'libgstisoff-1.0',
-                  'libgstsctp-1.0',
-                  'libgstwebrtc-1.0',
-                  'libgstvulkan-1.0']
+    files_libs = [
+        'libgstadaptivedemux-1.0',
+        'libgstbadaudio-1.0',
+        'libgstbasecamerabinsrc-1.0',
+        'libgstcodecparsers-1.0',
+        'libgstcodecs-1.0',
+        'libgstinsertbin-1.0',
+        'libgstisoff-1.0',
+        'libgstmpegts-1.0',
+        'libgstphotography-1.0',
+        'libgstplayer-1.0',
+        'libgstsctp-1.0',
+        'libgsturidownloader-1.0',
+        'libgstvulkan-1.0',
+        'libgstwebrtc-1.0',
+    ]
 
     files_plugins_devel = [
-        'include/gstreamer-1.0/gst/mpegts',
-        'include/gstreamer-1.0/gst/player',
-        'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/audio',
+        'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/basecamerabinsrc',
         'include/gstreamer-1.0/gst/codecparsers',
         'include/gstreamer-1.0/gst/insertbin',
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/isoff',
+        'include/gstreamer-1.0/gst/mpegts',
+        'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/sctp',
-        'include/gstreamer-1.0/gst/webrtc',
         'include/gstreamer-1.0/gst/vulkan',
-        'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
-        'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
-        'lib/pkgconfig/gstreamer-player-1.0.pc',
+        'include/gstreamer-1.0/gst/webrtc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
+        'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
+        'lib/pkgconfig/gstreamer-player-1.0.pc',
+        'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
-        'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
         'lib/pkgconfig/gstreamer-vulkan-1.0.pc',
+        'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
     ]
 
     files_plugins_effects = [
@@ -431,8 +433,8 @@ class Recipe(custom.GStreamer):
     files_typelibs = [
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
-        'GstPlayer-1.0'
-        ]
+        'GstPlayer-1.0',
+    ]
 
     platform_files_codecs_devel = {
         Platform.ANDROID: [
