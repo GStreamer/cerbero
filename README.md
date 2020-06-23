@@ -121,16 +121,40 @@ iOS Universal          | `cross-ios-universal.cbc`
 iOS ARM64              | `cross-ios-arm64.cbc`
 iOS ARMv7              | `cross-ios-armv7.cbc`
 iOS x86                | `cross-ios-x86.cbc`
-iOS x86_64              | `cross-ios-x86-64.cbc`
+iOS x86_64             | `cross-ios-x86-64.cbc`
 
 #### Windows Targets
 
-Target                     | Config file
-:--------------------------|:-----------
-MinGW 32-bit System Prefix | `win32.cbc`
-MinGW 64-bit System Prefix | `win64.cbc`
+On Windows, config files are used to select the architecture and variants are
+used to select the toolchain (MinGW, MSVC, UWP):
 
-Currently no cross targets are supported on Windows.
+Target                            | Config file           | Variant
+:---------------------------------|:----------------------|:-------
+MinGW x86                         | `win32.cbc`           |
+MinGW x86_64                      | `win64.cbc`           |
+MSVC x86                          | `win32.cbc`           | visualstudio
+MSVC x86_64                       | `win64.cbc`           | visualstudio
+Universal Windows Platform x86    | `win32.cbc`           | uwp
+Universal Windows Platform x86_64 | `win64.cbc`           | uwp
+Universal Windows Platform ARM64  | `cross-win-arm64.cbc` | uwp
+
+Example usage:
+
+```sh
+# Target MinGW 32-bit
+$ ./cerbero-uninstalled -c config/win32.cbc package gstreamer-1.0
+
+# Target MSVC 32-bit
+$ ./cerbero-uninstalled -c config/win64.cbc -v visualstudio package gstreamer-1.0
+
+# Target Universal Windows Platform, x86_64
+$ ./cerbero-uninstalled -c config/win64.cbc -v uwp package gstreamer-1.0
+
+# Target Universal Windows Platform, Cross ARM64
+$ ./cerbero-uninstalled -c config/cross-win-arm64.cbc -v uwp package gstreamer-1.0
+```
+
+Note: Universal Windows Platform targets are currently experimental.
 
 
 # Enabling Optional Features with Variants
@@ -148,7 +172,7 @@ a particular variant by doing one of the following:
 * Either invoke `cerbero-uninstalled` with the `-v` argument, for example:
 
 ```sh
-$ cerbero-uninstalled -v variantname [-c ...] package gstreamer-1.0
+$ ./cerbero-uninstalled -v variantname [-c ...] package gstreamer-1.0
 ```
 
 * Or, edit `~/.cerbero/cerbero.cbc` and add `variants = ['variantname']` at the
@@ -158,8 +182,8 @@ Multiple variants can either be separated by a comma or with multiple `-v`
 arguments, for example the following are equivalent:
 
 ```sh
-$ cerbero-uninstalled -v variantname1,variantname2 [-c ...] package gstreamer-1.0
-$ cerbero-uninstalled -v variantname1 -v variantname2 [-c ...] package gstreamer-1.0
+$ ./cerbero-uninstalled -v variantname1,variantname2 [-c ...] package gstreamer-1.0
+$ ./cerbero-uninstalled -v variantname1 -v variantname2 [-c ...] package gstreamer-1.0
 ```
 
 To explicitly disable a variant, use `novariantname` instead.
