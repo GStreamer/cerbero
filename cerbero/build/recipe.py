@@ -375,6 +375,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             'gstadaptivedemux-1.0' : None,
             'gstbadaudio-1.0' : 'gstreamer-bad-audio-1.0',
             'gstbasecamerabinsrc-1.0' : None,
+            'gstcodecs-1.0' : None,
             'gstisoff-1.0' : None,
             'gstphotography-1.0' : None,
             'gsturidownloader-1.0' : None,
