@@ -87,6 +87,7 @@ class Recipe(custom.GStreamer):
         'libgstphotography-1.0',
         'libgstplayer-1.0',
         'libgstsctp-1.0',
+        'libgsttranscoder-1.0',
         'libgsturidownloader-1.0',
         'libgstvulkan-1.0',
         'libgstwebrtc-1.0',
@@ -103,6 +104,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/mpegts',
         'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/sctp',
+        'include/gstreamer-1.0/gst/transcoder',
         'include/gstreamer-1.0/gst/vulkan',
         'include/gstreamer-1.0/gst/webrtc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
@@ -112,6 +114,7 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
+        'lib/pkgconfig/gstreamer-transcoder-1.0.pc',
         'lib/pkgconfig/gstreamer-vulkan-1.0.pc',
         'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
     ]
@@ -434,6 +437,7 @@ class Recipe(custom.GStreamer):
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
         'GstPlayer-1.0',
+        'GstTranscoder-1.0',
     ]
 
     platform_files_codecs_devel = {
