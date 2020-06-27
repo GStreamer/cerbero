@@ -32,12 +32,13 @@ import hashlib
 import urllib2
 from distutils.version import StrictVersion
 
-from cerbero.enums import Platform
+from cerbero.enums import CERBERO_VERSION, Platform
 from cerbero.utils import _, system_info, to_unixpath
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
 
 
+USER_AGENT = 'GStreamer Cerbero/' + CERBERO_VERSION
 PATCH = 'patch'
 TAR = 'tar'
 
@@ -222,7 +223,7 @@ def download_wget(url, destination=None, recursive=False, check_cert=True, overw
     @param destination: destination where the file will be saved
     @type destination: str
     '''
-    cmd = "wget %s " % url
+    cmd = "wget --user-agent '{}' {} ".format(USER_AGENT, url)
     path = None
     if recursive:
         cmd += "-r "
@@ -291,7 +292,9 @@ def download_urllib2(url, destination=None, recursive=False, check_cert=True, ov
     try:
         logging.info(destination)
         with open(destination, 'wb') as d:
-            f = urllib2.urlopen(url, context=ctx)
+            req = urllib2.Request(url)
+            req.add_header('User-Agent', USER_AGENT)
+            f = urllib2.urlopen(req, context=ctx)
             d.write(f.read())
     except urllib2.HTTPError, e:
         if os.path.exists(destination):
@@ -312,7 +315,7 @@ def download_curl(url, destination=None, recursive=False, check_cert=True, overw
     if recursive:
         raise FatalError(_("cURL doesn't support recursive downloads"))
 
-    cmd = "curl -L --fail "
+    cmd = "curl -L --fail --retry 2 --user-agent '{}' ".format(USER_AGENT)
     if not check_cert:
         cmd += " -k "
     if destination is not None:

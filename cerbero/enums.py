@@ -17,6 +17,9 @@
 # Boston, MA 02111-1307, USA.
 
 
+# Safest place to define this since this file imports very few modules
+CERBERO_VERSION = '1.14.5'
+
 class Platform:
     ''' Enumeration of supported platforms '''
     LINUX = 'linux'
