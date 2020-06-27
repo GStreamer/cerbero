@@ -4,6 +4,7 @@ import shutil
 from setuptools import setup, find_packages
 from setuptools.command import sdist as setuptools_sdist
 from cerbero.utils import shell
+from cerbero.enums import CERBERO_VERSION
 from distutils.dir_util import copy_tree
 import distutils.log
 
@@ -127,7 +128,7 @@ class extended_sdist(setuptools_sdist.sdist):
 
 setup(
     name = "cerbero",
-    version = '1.17.1.1',
+    version = CERBERO_VERSION,
     author = "Andoni Morales",
     author_email = "amorales@fluendo.com",
     description = ("Multi platform build system for Open Source projects"),

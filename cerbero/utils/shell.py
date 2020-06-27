@@ -35,12 +35,13 @@ import collections
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
-from cerbero.enums import Platform
+from cerbero.enums import CERBERO_VERSION, Platform
 from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus, CerberoSemaphore
 from cerbero.utils import messages as m
 from cerbero.errors import CommandError, FatalError
 
 
+USER_AGENT = 'GStreamer Cerbero/' + CERBERO_VERSION
 PATCH = 'patch'
 TAR = 'tar'
 TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
@@ -343,7 +344,7 @@ async def download_wget(url, destination=None, check_cert=True, overwrite=False,
     @param destination: destination where the file will be saved
     @type destination: str
     '''
-    cmd = ['wget', url]
+    cmd = ['wget', '--user-agent', USER_AGENT, url]
     path = None
     if destination is not None:
         cmd += ['-O', destination]
@@ -381,7 +382,9 @@ async def download_urllib2(url, destination=None, check_cert=True, overwrite=Fal
 
     try:
         with open(destination, 'wb') as d:
-            f = urllib.request.urlopen(url, context=ctx)
+            req = urllib.request.Request(url)
+            req.add_header('User-Agent', USER_AGENT)
+            f = urllib.request.urlopen(req, context=ctx)
             d.write(f.read())
     except urllib.error.HTTPError as e:
         if os.path.exists(destination):
@@ -398,7 +401,7 @@ async def download_curl(url, destination=None, check_cert=True, overwrite=False,
     @type destination: str
     '''
     path = None
-    cmd = ['curl', '-L', '--fail', '--retry', '2']
+    cmd = ['curl', '-L', '--fail', '--retry', '2', '--user-agent', USER_AGENT]
     if not check_cert:
         cmd += ['-k']
     if destination is not None:
