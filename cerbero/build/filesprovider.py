@@ -148,6 +148,9 @@ class FilesProvider(object):
         Platform.IOS: {'bext': '', 'sregex': _DYLIB_REGEX, 'sdir': 'lib',
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.dylib'}}
 
+    # Match static gstreamer plugins, GIO modules, etc.
+    _FILES_STATIC_PLUGIN_REGEX = re.compile(r'lib/.+/lib(gst|)([^/.]+)\.a')
+
     def __init__(self, config):
         self.config = config
         self.platform = config.target_platform
@@ -300,43 +303,46 @@ class FilesProvider(object):
                                        self._searchfuncs['default'])
         return search(self._get_category_files_list(category))
 
-    def _find_plugin_dll_files(self, f):
-        # Plugin template is always libfoo%(mext)s
-        if not f.startswith('lib'):
-            raise AssertionError('Plugin files must start with "lib": {!r}'.format(f))
-        # The actual filenames we select are stricter to avoid picking up the
-        # wrong DLLs in case the prefix is dirty.
-        if not self.using_msvc():
-            # Plugin DLLs are required to be libfoo.dll when the recipe uses MinGW
-            if (Path(self.config.prefix) / f).is_file():
-                # libfoo.dll
-                return [f]
-        else:
-            # Plugin DLLs are required to be foo.dll when the recipe uses MSVC
-            fdir, fname = os.path.split(f)
-            fmsvc = '{}/{}'.format(fdir, fname[3:])
-            if (Path(self.config.prefix) / fmsvc).is_file():
-                if self.config.variants.nodebug:
-                    # foo.dll
-                    return [fmsvc]
-                else:
-                    # foo.dll, foo.pdb
-                    return [fmsvc, fmsvc[:-3] + 'pdb']
-        raise FatalError('GStreamer plugin {!r} not found'.format(f))
+    def _search_pdb_files(self, static_lib_f, name):
+        # Plugin DLLs are required to be foo.dll when the recipe uses MSVC, and
+        # will be in the same directory as the .a static plugin/library
+        fdir = os.path.dirname(static_lib_f)
+        fdll = '{}/{}.dll'.format(fdir, name)
+        if not (Path(self.config.prefix) / fdll).is_file():
+            # XXX: Make this an error when we have MSVC CI
+            m.warning('static library {} does not have a corresponding dll?'.format(static_lib_f))
+            return []
+        return ['{}/{}.pdb'.format(fdir, name)]
+
+    @staticmethod
+    def _get_msvc_dll(f):
+        f = Path(f)
+        return str(f.with_name(f.name[3:]))
 
     def _search_files(self, files):
         '''
         Search plugin files and arbitrary files in the prefix, doing the
         extension replacements, globbing, and listing directories
+
+        FIXME: Curently plugins are also searched using this, but there should
+        be a separate system for those.
         '''
         # replace extensions
         files_expanded = [f % self.extensions for f in files]
         fs = []
         for f in files_expanded:
-            if not f.endswith('.dll'):
+            if f.endswith('.dll') and self.using_msvc():
+                fs.append(self._get_msvc_dll(f))
+            else:
                 fs.append(f)
-                continue
-            fs += self._find_plugin_dll_files(f)
+            # Look for a PDB file and add it
+            if self.using_msvc() and self.config.variants.debug:
+                # We try to find a pdb file corresponding to the plugin's .a
+                # file instead of the .dll because we want it to go into the
+                # devel package, not the runtime package.
+                m = self._FILES_STATIC_PLUGIN_REGEX.match(f)
+                if m:
+                    fs += self._search_pdb_files(f, ''.join(m.groups()))
         # fill directories
         dirs = [x for x in fs if
                 os.path.isdir(os.path.join(self.config.prefix, x))]
