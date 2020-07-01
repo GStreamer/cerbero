@@ -1,0 +1,75 @@
+From 408e7fa36fbc46e128b680d7b7bf49f694c1aee0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 30 Jun 2020 17:12:54 +0530
+Subject: [PATCH 3/4] orc: Fix some warnings on MSVC and enable --werror
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/42>
+---
+ .gitlab-ci.yml           | 4 ++--
+ examples/example2.c      | 2 +-
+ orc/orcemulateopcodes.c  | 4 ++--
+ testsuite/memcpy_speed.c | 6 +++---
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/examples/example2.c b/examples/example2.c
+index c2d03e4..8382771 100644
+--- a/examples/example2.c
++++ b/examples/example2.c
+@@ -21,7 +21,7 @@ main (int argc, char *argv[])
+   }
+ 
+   /* Call a function that uses Orc */
+-  audio_add_mono_to_stereo_scaled_s16 (c, a, b, volume*4096, N);
++  audio_add_mono_to_stereo_scaled_s16 (c, a, b, (int) (volume*4096), N);
+ 
+   /* Print the results */
+   for(i=0;i<N;i++){
+diff --git a/orc/orcemulateopcodes.c b/orc/orcemulateopcodes.c
+index a0f1aa8..ff09dd2 100644
+--- a/orc/orcemulateopcodes.c
++++ b/orc/orcemulateopcodes.c
+@@ -4896,7 +4896,7 @@ emulate_convlf (OrcOpcodeExecutor *ex, int offset, int n)
+     /* 0: loadl */
+     var32 = ptr4[i];
+     /* 1: convlf */
+-    var33.f = var32.i;
++    var33.f = (float) var32.i;
+     /* 2: storel */
+     ptr0[i] = var33;
+   }
+@@ -5279,7 +5279,7 @@ emulate_convdl (OrcOpcodeExecutor *ex, int offset, int n)
+     /* 1: convdl */
+     {
+        int tmp;
+-       tmp = var32.f;
++       tmp = (int) var32.f;
+        if (tmp == 0x80000000 && !(var32.i & ORC_UINT64_C(0x8000000000000000))) tmp = 0x7fffffff;
+        var33.i = tmp;
+     }
+diff --git a/testsuite/memcpy_speed.c b/testsuite/memcpy_speed.c
+index 4cf1c39..9f4f247 100644
+--- a/testsuite/memcpy_speed.c
++++ b/testsuite/memcpy_speed.c
+@@ -95,16 +95,16 @@ main(int argc, char *argv[])
+ #endif
+   orc_get_data_cache_sizes (&level1, &level2, &level3);
+   if (level3 > 0) {
+-    max = (log(level3)/M_LN2 - 6.0) * 10 + 20;
++    max = (int) ((log(level3)/M_LN2 - 6.0) * 10 + 20);
+   } else if (level2 > 0) {
+-    max = (log(level2)/M_LN2 - 6.0) * 10 + 20;
++    max = (int) ((log(level2)/M_LN2 - 6.0) * 10 + 20);
+   } else {
+     max = 140;
+   }
+ 
+   for(i=0;i<max;i+=2){
+     double x = i*0.1 + 6.0;
+-    int size = pow(2.0, x);
++    int size = (int) pow(2.0, x);
+ 
+     if (size > MAX_SIZE_TO_CHECK) {
+       printf ("Stopping test, exceeding maximum size to check (%d, could do above %d)\n",
+-- 
+2.26.2
+

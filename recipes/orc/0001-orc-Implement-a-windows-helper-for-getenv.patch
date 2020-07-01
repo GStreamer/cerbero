@@ -1,0 +1,143 @@
+From e990f2e17a1eb6c195583db15b25dd1bba88dfa9 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 30 Jun 2020 15:30:35 +0530
+Subject: [PATCH 1/4] orc: Implement a windows helper for getenv()
+
+On Windows, getenv() is deprecated and does not work in all cases. On
+the Universal Windows Platform (UWP) it always returns NULL. Add
+a wrapper orc_getenv() that calls GetEnvironmentVariable on Windows.
+
+Also change semantics to always make a copy before returning.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/42>
+---
+ orc/orc.c         | 42 ++++++++++++++++++++++++++++++++++++++++++
+ orc/orccompiler.c |  5 +++--
+ orc/orcdebug.c    |  6 ++++--
+ orc/orcinternal.h |  2 ++
+ 4 files changed, 51 insertions(+), 4 deletions(-)
+
+diff --git a/orc/orc.c b/orc/orc.c
+index 2acf522..7b4808c 100644
+--- a/orc/orc.c
++++ b/orc/orc.c
+@@ -5,6 +5,11 @@
+ #include <string.h>
+ #include <stdlib.h>
+ 
++#ifdef _WIN32
++#include <windows.h>
++#include <processenv.h>
++#endif
++
+ #include <orc/orcprogram.h>
+ #include <orc/orcdebug.h>
+ #include <orc/orconce.h>
+@@ -83,3 +88,40 @@ orc_version_string (void)
+ {
+   return (const char *) VERSION;
+ }
++
++/* getenv() is deprecated on Windows and always returns NULL on UWP */
++#ifdef _WIN32
++char*
++_orc_getenv (const char *key)
++{
++  int len;
++  char check[1], *value;
++
++  /* Get the len */
++  len = GetEnvironmentVariableA (key, check, 1);
++  if (len == 0)
++    /* env var is not set or is "" (empty string) */
++    return NULL;
++
++  /* max size of len is 32767, cannot overflow */
++  value = malloc (sizeof (value) * len);
++
++  if (GetEnvironmentVariableA (key, value, len) != (len - 1)) {
++    free (value);
++    return NULL;
++  }
++
++  return value;
++}
++#else
++char*
++_orc_getenv (const char *key)
++{
++  char *value = getenv (key);
++
++  if (value)
++    value = strdup (value);
++
++  return value;
++}
++#endif
+diff --git a/orc/orccompiler.c b/orc/orccompiler.c
+index 8d92cbe..de2555d 100644
+--- a/orc/orccompiler.c
++++ b/orc/orccompiler.c
+@@ -51,11 +51,12 @@ int _orc_compiler_flag_randomize;
+ void
+ _orc_compiler_init (void)
+ {
+-  const char *envvar;
++  char *envvar;
+ 
+-  envvar = getenv ("ORC_CODE");
++  envvar = _orc_getenv ("ORC_CODE");
+   if (envvar != NULL) {
+     _orc_compiler_flag_list = strsplit (envvar, ',');
++    free (envvar);
+   }
+ 
+   _orc_compiler_flag_backup = orc_compiler_flag_check ("backup");
+diff --git a/orc/orcdebug.c b/orc/orcdebug.c
+index 2e69464..1cefd07 100644
+--- a/orc/orcdebug.c
++++ b/orc/orcdebug.c
+@@ -29,6 +29,7 @@
+ #include "config.h"
+ #endif
+ #include <orc/orcdebug.h>
++#include <orc/orcinternal.h>
+ 
+ #include <stdio.h>
+ #include <string.h>
+@@ -55,9 +56,9 @@ static OrcDebugPrintFunc _orc_debug_print_func = orc_debug_print_valist;
+ void
+ _orc_debug_init(void)
+ {
+-  const char *envvar;
++  char *envvar;
+ 
+-  envvar = getenv ("ORC_DEBUG");
++  envvar = _orc_getenv ("ORC_DEBUG");
+   if (envvar != NULL) {
+     char *end = NULL;
+     int level;
+@@ -65,6 +66,7 @@ _orc_debug_init(void)
+     if (end > envvar) {
+       _orc_debug_level = level;
+     }
++    free (envvar);
+   }
+ 
+   ORC_INFO ("orc-" VERSION " debug init");
+diff --git a/orc/orcinternal.h b/orc/orcinternal.h
+index cd778c3..b86f698 100644
+--- a/orc/orcinternal.h
++++ b/orc/orcinternal.h
+@@ -36,6 +36,8 @@ extern const char *_orc_cpu_name;
+ 
+ void orc_compiler_emit_invariants (OrcCompiler *compiler);
+ int orc_program_has_float (OrcCompiler *compiler);
++
++char* _orc_getenv (const char *var);
+ #endif
+ 
+ ORC_END_DECLS
+-- 
+2.26.2
+
