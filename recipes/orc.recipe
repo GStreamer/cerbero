@@ -3,12 +3,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.29'
+    version = '0.4.31'
 
-    stype = SourceType.GIT
+    stype = SourceType.TARBALL
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
-    tarball_checksum = '4f8901f9144b5ec17dffdb33548b5f4c7f8049b0d1023be3462cdd64ec5a3ab2'
+    tarball_checksum = 'a0ab5f10a6a9ae7c3a6b4218246564c3bf00d657cbdf587e6d34ec3ef0616075'
     # These properties are only used when stype is GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/master'
