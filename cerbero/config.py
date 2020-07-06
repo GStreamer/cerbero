@@ -710,10 +710,6 @@ class Config (object):
                     raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
             else:
                 target_platform = 'mingw'
-            # If the cmd config set the prefix, append the variant modifier to
-            # it so that we don't clobber different toolchain builds
-            if self.prefix is not None:
-                self.prefix += '.' + target_platform
         self.set_property('prefix', os.path.join(self.home_dir, "dist",
             "%s_%s" % (target_platform, self.target_arch)))
         self.set_property('sources', os.path.join(self.home_dir, "sources",

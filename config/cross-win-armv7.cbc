@@ -1,3 +1,2 @@
-prefix='c:/gstreamer/1.0/armv7'
 from cerbero.config import Architecture
 target_arch = Architecture.ARMv7

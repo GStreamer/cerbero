@@ -1,3 +1,2 @@
-prefix='c:/gstreamer/1.0/x86'
 from cerbero.config import Architecture
 target_arch = Architecture.X86
