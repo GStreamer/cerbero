@@ -141,11 +141,21 @@ class BaseTarball(object):
 
     @cvar tarball_checksum: sha256 checksum for the tarball
     @type tarball_checksum: str
+
+    @cvar tarball_name: the name to save the url as
+    @type tarball_name: str
+
+    @cvar tarball_dirname: the directory that the tarball contents will extract to
+    @type tarball_dirname: str
+
+    @cvar tarball_is_bomb: the tarball is a tarbomb and will extract contents into the current directory
+    @type tarball_is_bomb: bool
     '''
 
     url = None
     tarball_name = None
     tarball_dirname = None
+    tarball_is_bomb = False
     tarball_checksum = None
 
     def __init__(self):
@@ -256,12 +266,18 @@ class Tarball(BaseTarball, Source):
         m.action(_('Extracting tarball to %s') % self.build_dir, logfile=get_logfile(self))
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
-        await self.extract_tarball(self.config.sources)
+
+        unpack_dir = self.config.sources
+        if self.tarball_is_bomb:
+            unpack_dir = self.build_dir
+        await self.extract_tarball(unpack_dir)
+
         if self.tarball_dirname is not None:
-            extracted = os.path.join(self.config.sources, self.tarball_dirname)
+            extracted = os.path.join(unpack_dir, self.tarball_dirname)
             # Since we just extracted this, a Windows anti-virus might still
             # have a lock on files inside it.
             shell.windows_proof_rename(extracted, self.build_dir)
+
         git.init_directory(self.build_dir, logfile=get_logfile(self))
         for patch in self.patches:
             if not os.path.isabs(patch):
