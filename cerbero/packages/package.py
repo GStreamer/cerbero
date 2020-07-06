@@ -446,7 +446,10 @@ class MetaPackage(PackageBase):
                         platform_attr_name)
                 if self.config.target_platform in platform_attr:
                     platform_list = platform_attr[self.config.target_platform]
-                    ret.extend(platform_list)
+                    # Add to packages list, but do not duplicate
+                    for p in platform_list:
+                        if p not in ret:
+                            ret.append(p)
             return ret
         else:
             return PackageBase.__getattribute__(self, name)
