@@ -1,0 +1,60 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from pathlib import Path
+
+class Recipe(recipe.Recipe):
+    # https://www.nuget.org/packages/ANGLE.WindowsStore.Servo/
+    name = 'angle-uwp'
+    version = '2.1.19'
+    licenses = [{License.BSD_like: ['LICENSE']}]
+    btype = BuildType.CUSTOM
+    stype = SourceType.TARBALL
+    url = 'https://www.nuget.org/api/v2/package/ANGLE.WindowsStore.Servo/%(version)s'
+    tarball_name = '%(name)s-%(version)s.zip'
+    tarball_is_bomb = True
+    tarball_checksum = '37a1e6931b698882fc038553fd24f5bcfdd304c96ce2e9abe4faa46e620403db'
+
+    files_libs = ['libEGL', 'libGLESv2']
+    files_headers = ['include/EGL', 'include/GLES', 'include/GLES2', 'include/GLES3', 'include/KHR']
+
+    can_msvc = True
+
+    def prepare(self):
+        if not self.config.variants.uwp:
+            raise InvalidRecipeError(self, "ANGLE recipe currently only supports UWP")
+
+        if not self.config.target_arch in (Architecture.ARM64, Architecture.X86_64):
+            raise InvalidRecipeError(self, "ANGLE recipe currently only supports ARM64 and x86_64")
+
+        if self.config.variants.vscrt == 'mdd':
+            self.url += '-debug'
+            self.tarball_name = '{}-{}-debug.zip'.format(self.name, self.version)
+            self.tarball_checksum = 'c2ef31f10245403ca1ab6ab2d42ded96e35de89ffad2b071bb09a7af182cdce9'
+
+    def install(self):
+        bindir = Path(self.config.prefix) / 'bin'
+        bdir = Path(self.build_dir)
+        if self.config.target_arch == Architecture.ARM64:
+            dlldir = bdir / 'bin/UAP/ARM64'
+        elif self.config.target_arch == Architecture.X86_64:
+            dlldir = bdir / 'bin/UAP/x64'
+        else:
+            raise AssertionError
+
+        # Copy libraries
+        if not bindir.is_dir():
+            bindir.mkdir(parents=True, exist_ok=True)
+        for f in self.files_libs:
+            impname = f[3:] + '.lib'
+            shutil.copy2(str(dlldir / (f + '.dll')), bindir)
+            shutil.copy2(str(dlldir / (f + '.dll.pdb')), bindir)
+            # Copy import library and change the name from libfoo.lib to foo.lib
+            shutil.copy2(str(dlldir / (f + '.lib')),
+                    os.path.join(self.config.libdir, impname))
+
+        # Copy headers
+        for d in self.files_headers:
+            dst = Path(self.config.prefix) / d
+            if dst.exists():
+                shutil.rmtree(str(dst))
+            shutil.copytree(str(bdir / d), str(dst))
