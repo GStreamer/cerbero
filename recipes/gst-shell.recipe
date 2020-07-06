@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.CUSTOM
     stype = SourceType.CUSTOM
+    can_msvc = True
 
     files_shell = ['bin/gst-shell', 'share/gstreamer/gst-env']
 

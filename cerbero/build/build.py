@@ -328,10 +328,14 @@ class Build(object):
         return True
 
     def using_uwp(self):
-        if not self.using_msvc():
-            return False
         if not self.config.variants.uwp:
             return False
+        # When the uwp variant is enabled, we must never select recipes that
+        # don't have can_msvc = True
+        if not self.can_msvc:
+            raise RuntimeError("Tried to build a recipe that can't use MSVC when using UWP")
+        if not self.config.variants.visualstudio:
+            raise RuntimeError("visualstudio variant wasn't set when uwp variant was set")
         return True
 
     async def configure(self):
