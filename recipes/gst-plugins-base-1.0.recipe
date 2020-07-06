@@ -211,13 +211,21 @@ class Recipe(custom.GStreamer):
 
         if self.using_uwp():
             # All these except libvisual can be ported to Meson/UWP
-            self.disable_plugin('opengl', 'sys', 'gl', library_name='gl')
             self.disable_plugin('libvisual', 'vis', dep='libvisual')
             self.disable_plugin('ogg', 'codecs', dep='libogg')
             self.disable_plugin('opus', 'codecs', dep='opus')
             self.disable_plugin('pango', 'core', dep='pango')
             self.disable_plugin('theora', 'codecs', dep='libtheora')
             self.disable_plugin('vorbis', 'codecs', dep='libvorbis')
+            if self.config.target_arch in (Architecture.ARM64, Architecture.X86_64):
+                self.deps.append('angle-uwp')
+                # To avoid complicating winrt vs win32 detection,
+                # explicitly select api/platform/winsys
+                self.meson_options['gl_api'] = 'gles2'
+                self.meson_options['gl_platform'] = 'egl'
+                self.meson_options['gl_winsys'] = 'winrt'
+            else:
+                self.disable_plugin('opengl', 'sys', 'gl', library_name='gl')
             self.meson_options['gl-graphene'] = 'disabled'
             self.meson_options['gl-png'] = 'disabled'
             self.meson_options['gl-jpeg'] = 'disabled'
