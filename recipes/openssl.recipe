@@ -190,6 +190,15 @@ class Recipe(recipe.Recipe):
         # librpmio.so.8, which is used during package generation on Fedora.
         if self.config.target_platform == Platform.LINUX:
             config_sh += ' enable-ssl3 enable-ssl3-method enable-md2 '
+
+        if self.using_msvc():
+            if self.config.variants.vscrt == 'md':
+                config_sh += ' --release '
+            elif self.config.variants.vscrt == 'mdd':
+                config_sh += ' --debug '
+            else:
+                raise AssertionError
+
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)
 
