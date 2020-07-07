@@ -29,3 +29,5 @@ class Package(custom.GStreamer, package.Package):
 
         if self.config.variants.uwp:
             self.files.remove('graphene:libs')
+            self.files.append('angle-uwp:libs')
+            self.files_devel.append('angle-uwp:headers')
