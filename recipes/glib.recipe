@@ -137,6 +137,7 @@ class Recipe(recipe.Recipe):
                 self.patches += [
                     # Ready to upstream
                     'glib/uwp/0001-glib-Never-use-MessageBox-on-UWP-apps.patch',
+                    'glib/uwp/0001-gpoll-UWP-does-not-need-to-poll-a-msg_fd.patch',
                     'glib/uwp/0001-gio-Remove-broken-support-for-XP.patch',
                     'glib/uwp/0002-win_iconv-Use-LoadPackagedLibrary-when-building-UWP-.patch',
                     'glib/uwp/0003-glib-getpid-is-available-on-Win32-but-not-WinRT.patch',
