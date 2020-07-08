@@ -1,0 +1,57 @@
+From c17b1751f3758890a8a5837466e4ddc1e6f2f3f0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 8 Jul 2020 23:23:04 +0530
+Subject: [PATCH 2/2] win-onecore: Build with /APPCONTAINER for UWP compat
+
+When targeting the win-onecore configuration, we must link with
+/APPCONTAINER which is a requirement for submitting apps to the
+Windows Store.
+
+Without this, the Windows App Certificate Kit will reject the app:
+https://docs.microsoft.com/en-us/cpp/build/reference/appcontainer-windows-store-app
+---
+ Configurations/50-win-onecore.conf | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/Configurations/50-win-onecore.conf b/Configurations/50-win-onecore.conf
+index c595279..fb2d961 100644
+--- a/Configurations/50-win-onecore.conf
++++ b/Configurations/50-win-onecore.conf
+@@ -16,13 +16,14 @@ my %targets = (
+         # /NODEFAULTLIB:kernel32.lib is needed, because MSVCRT.LIB has
+         # hidden reference to kernel32.lib, but we don't actually want
+         # it in "onecore" build.
+-        lflags          => add("/NODEFAULTLIB:kernel32.lib"),
++        # /APPCONTAINER is needed for Universal Windows Platform compat
++        lflags          => add("/NODEFAULTLIB:kernel32.lib /APPCONTAINER"),
+         defines         => add("OPENSSL_SYS_WIN_CORE"),
+         ex_libs         => "onecore.lib",
+     },
+     "VC-WIN64A-ONECORE" => {
+         inherit_from    => [ "VC-WIN64A" ],
+-        lflags          => add("/NODEFAULTLIB:kernel32.lib"),
++        lflags          => add("/NODEFAULTLIB:kernel32.lib /APPCONTAINER"),
+         defines         => add("OPENSSL_SYS_WIN_CORE"),
+         ex_libs         => "onecore.lib",
+     },
+@@ -48,7 +49,7 @@ my %targets = (
+         defines         => add("_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE",
+                                "OPENSSL_SYS_WIN_CORE"),
+         bn_ops          => "BN_LLONG RC4_CHAR EXPORT_VAR_AS_FN",
+-        lflags          => add("/NODEFAULTLIB:kernel32.lib"),
++        lflags          => add("/NODEFAULTLIB:kernel32.lib /APPCONTAINER"),
+         ex_libs         => "onecore.lib",
+         multilib        => "-arm",
+     },
+@@ -57,7 +58,7 @@ my %targets = (
+         defines         => add("_ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE",
+                                "OPENSSL_SYS_WIN_CORE"),
+         bn_ops          => "SIXTY_FOUR_BIT RC4_CHAR EXPORT_VAR_AS_FN",
+-        lflags          => add("/NODEFAULTLIB:kernel32.lib"),
++        lflags          => add("/NODEFAULTLIB:kernel32.lib /APPCONTAINER"),
+         ex_libs         => "onecore.lib",
+         multilib        => "-arm64",
+     },
+-- 
+2.26.2
+

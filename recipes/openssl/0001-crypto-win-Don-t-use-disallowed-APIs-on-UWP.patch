@@ -1,0 +1,51 @@
+From f198066024d3371be78819b18e737caf63a26aa0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 8 Jul 2020 23:10:34 +0530
+Subject: [PATCH 1/2] crypto/win: Don't use disallowed APIs on UWP
+
+CreateFiber and ConvertThreadToFiber are not allowed in Windows Store
+(Universal Windows Platform) apps since they have been replaced by
+their Ex variants which have a new dwFlags parameter.
+
+This flag allows the fiber to do floating-point arithmetic in the
+fiber on x86, which would silently cause corruption otherwise since
+the floating-point state is not switched by default.
+
+Switch to these "new" APIs which were added in Vista.
+
+See: https://docs.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createfiberex#parameters
+---
+ crypto/async/arch/async_win.c | 2 +-
+ crypto/async/arch/async_win.h | 3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/crypto/async/arch/async_win.c b/crypto/async/arch/async_win.c
+index 1f360d8..30aa018 100644
+--- a/crypto/async/arch/async_win.c
++++ b/crypto/async/arch/async_win.c
+@@ -34,7 +34,7 @@ void async_local_cleanup(void)
+ 
+ int async_fibre_init_dispatcher(async_fibre *fibre)
+ {
+-    fibre->fibre = ConvertThreadToFiber(NULL);
++    fibre->fibre = ConvertThreadToFiberEx(NULL, FIBER_FLAG_FLOAT_SWITCH);
+     if (fibre->fibre == NULL) {
+         fibre->converted = 0;
+         fibre->fibre = GetCurrentFiber();
+diff --git a/crypto/async/arch/async_win.h b/crypto/async/arch/async_win.h
+index 61cfdd7..9f09caa 100644
+--- a/crypto/async/arch/async_win.h
++++ b/crypto/async/arch/async_win.h
+@@ -27,7 +27,8 @@ typedef struct async_fibre_st {
+ # define async_fibre_swapcontext(o,n,r) \
+         (SwitchToFiber((n)->fibre), 1)
+ # define async_fibre_makecontext(c) \
+-        ((c)->fibre = CreateFiber(0, async_start_func_win, 0))
++        ((c)->fibre = CreateFiberEx(0, 0, FIBER_FLAG_FLOAT_SWITCH, \
++                async_start_func_win, 0))
+ # define async_fibre_free(f)             (DeleteFiber((f)->fibre))
+ 
+ int async_fibre_init_dispatcher(async_fibre *fibre);
+-- 
+2.26.2
+

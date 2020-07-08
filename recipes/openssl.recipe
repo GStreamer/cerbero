@@ -27,7 +27,10 @@ class Recipe(recipe.Recipe):
         # MSVC and UWP support
         'openssl/0001-windows-makefile.tmpl-Generate-and-install-pkgconfig.patch',
         'openssl/0002-windows-makefile.tmpl-Fix-ONECORE-build.patch',
-        'openssl/0003-windows-makefile.tmpl-Do-not-prefix-import-libraries.patch'
+        'openssl/0003-windows-makefile.tmpl-Do-not-prefix-import-libraries.patch',
+        # https://github.com/openssl/openssl/pull/12400
+        'openssl/0001-crypto-win-Don-t-use-disallowed-APIs-on-UWP.patch',
+        'openssl/0002-win-onecore-Build-with-APPCONTAINER-for-UWP-compat.patch',
     ]
 
     files_bins = ['openssl']
