@@ -22,6 +22,11 @@ class Recipe(recipe.Recipe):
         # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/151
         'libnice/0001-rand-Use-crypto-libs-instead-of-CryptGenRandom.patch',
         'libnice/0002-meson-Fix-typos-in-crypto-library-detection.patch',
+        # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/154
+        'libnice/0001-interfaces-Add-debug-logging-to-sockaddr_to_string.patch',
+        'libnice/0002-interfaces-Port-to-GetBestInterfaceEx-for-UWP-compat.patch',
+        'libnice/0003-interfaces-Remove-unused-win32-code.patch',
+        'libnice/0004-interfaces-Fix-fetching-of-interfaces-on-Win32.patch',
     ]
 
     files_bins = ['stunbdc', 'stund']
