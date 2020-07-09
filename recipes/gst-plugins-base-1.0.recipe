@@ -217,7 +217,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('pango', 'core', dep='pango')
             self.disable_plugin('theora', 'codecs', dep='libtheora')
             self.disable_plugin('vorbis', 'codecs', dep='libvorbis')
-            if self.config.target_arch in (Architecture.ARM64, Architecture.X86_64):
+            if self.config.target_arch in (Architecture.ARM64, Architecture.X86_64, Architecture.X86):
                 self.deps.append('angle-uwp')
                 # To avoid complicating winrt vs win32 detection,
                 # explicitly select api/platform/winsys
