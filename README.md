@@ -279,6 +279,8 @@ Studio.
 
 # Installing Minimum Requirements on Windows
 
+**IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows) requires a 64-bit operating system. The toolchain is only available for 64-bit and it can produce 32-bit or 64-bit binaries.
+
 These steps are necessary for using Cerbero on Windows.
 
 #### Install Python 3.5 or newer (either 32-bit or 64-bit)
@@ -342,7 +344,7 @@ installed at `C:\MinGW`.
 Cerbero from inside that**.
 
 **NOTE**: Cerbero does not use the MinGW compiler toolchain shipped with MSYS.
-We download our own custom GCC toolchain during [bootstrap](#Bootstrap).
+We download our own custom [GCC toolchain](docs/toolchains.md#gcc-mingw) during [bootstrap](#Bootstrap).
 
 **NOTE**: MSYS is not the same as [MSYS2](https://www.msys2.org/), and the
 GStreamer project does not support running Cerbero inside the MSYS2

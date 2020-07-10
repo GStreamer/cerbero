@@ -249,6 +249,7 @@ class Config (object):
         self._load_platform_config()
         # And validate properties
         self._validate_properties()
+        self._check_windows_is_x86_64()
 
         for config in list(self.arch_config.values()):
             if self.target_arch == Architecture.UNIVERSAL:
@@ -634,6 +635,11 @@ class Config (object):
         if not validate_packager(self.packager):
             raise FatalError(_('packager "%s" must be in the format '
                                '"Name <email>"') % self.packager)
+
+    def _check_windows_is_x86_64(self):
+         if self.target_platform == Platform.WINDOWS and \
+                self.arch == Architecture.X86:
+            raise ConfigurationError('The GCC/MinGW toolchain requires an x86 64-bit OS.')
 
     def _check_uninstalled(self):
         self.uninstalled = int(os.environ.get(CERBERO_UNINSTALLED, 0)) == 1
