@@ -48,10 +48,8 @@ KHRONOS_WGL_TPL = 'https://raw.githubusercontent.com/KhronosGroup/OpenGL-Registr
 WGL_CHECKSUM = '8961c809d180e3590fca32053341fe3a83394edcb936f7699f0045feadb16115'
 
 # Extra binary dependencies
-GNOME_FTP = 'https://download.gnome.org/binaries/win32/'
-WINDOWS_BIN_DEPS = [
-    ('intltool/0.40/intltool_0.40.4-1_win32.zip',
-     '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33')]
+INTLTOOL_URL = 'https://download.gnome.org/binaries/win32/intltool/0.40/intltool_0.40.4-1_win32.zip'
+INTLTOOL_CHECKSUM = '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33'
 
 # MSYS packages needed
 MINGWGET_DEPS = ['msys-flex', 'msys-bison', 'msys-perl']
@@ -92,10 +90,8 @@ class WindowsBootstrapper(BootstrapperBase):
             # Newer versions of binary deps such as intltool. Must be extracted
             # after the MinGW toolchain from above is extracted so that it
             # replaces the older files.
-            for dep, checksum in WINDOWS_BIN_DEPS:
-                url = GNOME_FTP + dep
-                self.fetch_urls.append((url, checksum))
-                self.extract_steps.append((url, True, self.prefix))
+            self.fetch_urls.append((INTLTOOL_URL, INTLTOOL_CHECKSUM))
+            self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
 
     def start(self, jobs=0):
         if not git.check_line_endings(self.config.platform):
@@ -107,8 +103,7 @@ class WindowsBootstrapper(BootstrapperBase):
             self.fix_mingw()
             self.fix_openssl_mingw_perl()
             self.fix_bin_deps()
-            # FIXME: This uses the network
-            self.install_mingwget_deps()
+            self.install_mingwget_deps() # FIXME: This uses the network
             self.fix_mingw_unused()
 
     def check_dirs(self):
