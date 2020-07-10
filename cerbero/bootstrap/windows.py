@@ -50,6 +50,8 @@ WGL_CHECKSUM = '8961c809d180e3590fca32053341fe3a83394edcb936f7699f0045feadb16115
 # Extra binary dependencies
 INTLTOOL_URL = 'https://download.gnome.org/binaries/win32/intltool/0.40/intltool_0.40.4-1_win32.zip'
 INTLTOOL_CHECKSUM = '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33'
+XZ_URL = 'https://tukaani.org/xz/xz-5.2.5-windows.zip'
+XZ_CHECKSUM = 'd83b82ca75dfab39a13dda364367b34970c781a9df4d41264db922ac3a8f622d'
 
 # MSYS packages needed
 MINGWGET_DEPS = ['msys-flex', 'msys-bison', 'msys-perl']
@@ -92,6 +94,12 @@ class WindowsBootstrapper(BootstrapperBase):
             # replaces the older files.
             self.fetch_urls.append((INTLTOOL_URL, INTLTOOL_CHECKSUM))
             self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
+            # Newer version of xz that supports multithreaded compression. Need
+            # to extract to a temporary directory, then overwrite the existing
+            # lzma/xz binaries.
+            self.xz_tmp_prefix = tempfile.TemporaryDirectory() # cleaned up on exit
+            self.fetch_urls.append((XZ_URL, XZ_CHECKSUM))
+            self.extract_steps.append((XZ_URL, True, self.xz_tmp_prefix.name))
 
     def start(self, jobs=0):
         if not git.check_line_endings(self.config.platform):
@@ -105,6 +113,7 @@ class WindowsBootstrapper(BootstrapperBase):
             self.fix_bin_deps()
             self.install_mingwget_deps() # FIXME: This uses the network
             self.fix_mingw_unused()
+            self.install_xz()
 
     def check_dirs(self):
         if not os.path.exists(self.perl_prefix):
@@ -148,6 +157,15 @@ class WindowsBootstrapper(BootstrapperBase):
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
             shell.new_call(['mingw-get', 'install', dep])
+
+    def install_xz(self):
+        msys_xz = shutil.which('xz')
+        if not msys_xz:
+            m.warning('xz not found, are you not using an MSYS shell?')
+        msys_bindir = os.path.dirname(msys_xz)
+        src = os.path.join(self.xz_tmp_prefix.name, 'bin_x86-64')
+        for b in ('xz.exe', 'xzdec.exe', 'lzmadec.exe', 'lzmainfo.exe'):
+            shutil.copy2(os.path.join(src, b), os.path.join(msys_bindir, b))
 
     def fix_bin_deps(self):
         # replace /opt/perl/bin/perl in intltool
