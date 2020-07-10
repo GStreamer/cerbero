@@ -63,9 +63,9 @@ class Package(Command):
                 default=False, help=_('Use only the source cache, no network')),
             ArgparseArgument('--dry-run', action='store_true',
                 default=False, help=_('Only print the packages that will be built')),
-            ArgparseArgument('--xz', action='store_true',
-                default=False, help=_('Use xz instead of bzip2 for compression if '
-                    'creating a tarball')),
+            ArgparseArgument('--compress-method', type=str,
+                choices=['default', 'xz', 'bz2'], default='default',
+                help=_('Select compression method for tarballs')),
             ArgparseArgument('--jobs', '-j', action='store', type=int,
                 default=0, help=_('How many recipes to build concurrently. '
                     '0 = number of CPUs.')),
@@ -85,8 +85,9 @@ class Package(Command):
         if args.only_build_deps or args.dry_run:
             return
 
-        if args.xz:
-            config.package_tarball_compression = 'xz'
+        if args.compress_method != 'default':
+            m.message('Forcing tarball compression method as ' + args.compress_method)
+            config.package_tarball_compression = args.compress_method
 
         if p is None:
             raise PackageNotFoundError(args.package[0])
