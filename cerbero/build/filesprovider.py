@@ -317,6 +317,11 @@ class FilesProvider(object):
                 return [fmsvc, fmsvc[:-3] + 'pdb']
         raise FatalError('GStreamer plugin {!r} not found'.format(f))
 
+    @staticmethod
+    def _get_plugin_pc(f):
+        f = Path(f)
+        return str(f.parent / 'pkgconfig' / (f.name[3:-3] + '.pc'))
+
     def _search_files(self, files):
         '''
         Search plugin files and arbitrary files in the prefix, doing the
@@ -326,10 +331,15 @@ class FilesProvider(object):
         files_expanded = [f % self.extensions for f in files]
         fs = []
         for f in files_expanded:
-            if not f.endswith('.dll'):
-                fs.append(f)
+            if f.endswith('.dll'):
+                fs += self._find_plugin_dll_files(f)
                 continue
-            fs += self._find_plugin_dll_files(f)
+            fs.append(f)
+            # For plugins, the .la file is generated using the .pc file, but we
+            # don't add the .pc to files_devel. It has the same name, so we can
+            # add it using the .la entry.
+            if f.startswith('lib/gstreamer-1.0/') and f.endswith('.la'):
+                fs.append(self._get_plugin_pc(f))
         # fill directories
         dirs = [x for x in fs if
                 os.path.isdir(os.path.join(self.config.prefix, x))]
