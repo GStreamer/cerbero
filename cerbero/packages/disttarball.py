@@ -137,20 +137,34 @@ class DistTarball(PackagerBase):
             else:
                 raise UsageError("File %s already exists" % filename)
         if self.config.platform == Platform.WINDOWS:
-            self._write_tarfile(filename, package_prefix, files)
+            self._write_tar_windows(filename, package_prefix, files)
         else:
             self._write_tar(filename, package_prefix, files)
         return filename
 
-    def _write_tarfile(self, filename, package_prefix, files):
+    def _write_tar_windows(self, filename, package_prefix, files):
+        # MSYS tar is very old and creates broken archives, so we use Python's
+        # tarfile module instead. However, tarfile's compression is very slow,
+        # so we create an uncompressed tarball and then compress it using bzip2
+        # or xz as appropriate.
+        tar_filename = os.path.splitext(filename)[0]
+        if os.path.exists(tar_filename):
+            os.remove(tar_filename)
         try:
-            with tarfile.open(filename, 'w:' + self.compress) as tar:
+            with tarfile.open(tar_filename, 'w') as tar:
                 for f in files:
                     filepath = os.path.join(self.prefix, f)
                     tar.add(filepath, os.path.join(package_prefix, f))
         except OSError:
-            os.replace(filename, filename + '.partial')
+            os.replace(tar_filename, tar_filename + '.partial')
             raise
+        # Compress the tarball
+        compress_cmd = ['-z', '-f', tar_filename]
+        if self.compress == 'bz2':
+            compress_cmd = ['bzip2'] + compress_cmd
+        elif self.compress == 'xz':
+            compress_cmd = ['xz', '--threads', '0'] + compress_cmd
+        shell.new_call(compress_cmd)
 
     def _write_tar(self, filename, package_prefix, files):
         tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
@@ -168,6 +182,8 @@ class DistTarball(PackagerBase):
                 tar_cmd += ['--bzip2']
         elif self.compress == 'xz':
             tar_cmd += ['--use-compress-program=xz --threads=0']
+        else:
+            raise AssertionError("Unknown tar compression: {}".format(self.compress))
         try:
             shell.new_call(tar_cmd + files)
         except FatalError:
