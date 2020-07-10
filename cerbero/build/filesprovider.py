@@ -319,6 +319,11 @@ class FilesProvider(object):
         f = Path(f)
         return str(f.with_name(f.name[3:]))
 
+    @staticmethod
+    def _get_plugin_pc(f):
+        f = Path(f)
+        return str(f.parent / 'pkgconfig' / (f.name[3:-3] + '.pc'))
+
     def _search_files(self, files):
         '''
         Search plugin files and arbitrary files in the prefix, doing the
@@ -343,6 +348,11 @@ class FilesProvider(object):
                 m = self._FILES_STATIC_PLUGIN_REGEX.match(f)
                 if m:
                     fs += self._search_pdb_files(f, ''.join(m.groups()))
+            # For plugins, the .la file is generated using the .pc file, but we
+            # don't add the .pc to files_devel. It has the same name, so we can
+            # add it using the .la entry.
+            if f.startswith('lib/gstreamer-1.0/') and f.endswith('.la'):
+                fs.append(self._get_plugin_pc(f))
         # fill directories
         dirs = [x for x in fs if
                 os.path.isdir(os.path.join(self.config.prefix, x))]
