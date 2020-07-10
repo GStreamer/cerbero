@@ -186,7 +186,7 @@ Terminating.''', file=sys.stderr)
                                     version = v.strip('"')
                         d = (name, version, '');
 
-        if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint']:
+        if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint', 'Linux Mint']:
             distro = Distro.DEBIAN
             distro_version = d[2].lower()
             split_str = d[2].split()
@@ -228,7 +228,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.UBUNTU_DISCO
             elif distro_version in ['eoan']:
                 distro_version = DistroVersion.UBUNTU_EOAN
-            elif distro_version in ['focal']:
+            elif distro_version in ['focal', 'ulyana']:
                 distro_version = DistroVersion.UBUNTU_FOCAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
