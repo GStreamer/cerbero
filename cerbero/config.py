@@ -111,10 +111,7 @@ class Variants(object):
                 if v not in self.__bool_variants:
                     m.warning('Variant {!r} is unknown or obsolete'.format(v))
                 setattr(self, v, True)
-        # UWP implies Visual Studio
-        if self.uwp:
-            self.visualstudio = True
-        # Set auto mapping values based on other values
+        # Auto-set vscrt variant if it wasn't set explicitly
         if self.vscrt == 'auto':
             self.vscrt = 'md'
             if self.debug and not self.optimization:
@@ -124,6 +121,9 @@ class Variants(object):
             if '-' in attr:
                 raise AssertionError('Variant name {!r} must not contain \'-\''.format(attr))
             super().__setattr__(attr, value)
+            # UWP implies Visual Studio
+            if attr == 'uwp' and value:
+                self.visualstudio = True
 
     def __getattr__(self, name):
         if name.startswith('no') and name[2:] in self.bools():
