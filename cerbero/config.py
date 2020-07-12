@@ -299,7 +299,9 @@ class Config (object):
 
     def do_setup_env(self):
         self._create_path(self.prefix)
-        self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+        # dict universal arches do not have an active prefix
+        if not isinstance(self.universal_archs, dict):
+            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
         self._create_path(os.path.join(
             self.build_tools_prefix, 'share', 'aclocal'))
         self._create_path(os.path.join(
@@ -412,7 +414,9 @@ class Config (object):
                 # undesirable since our libdir is 'lib'. Windows APIs are
                 # case-preserving case-insensitive.
                 path = path.lower()
-            self._create_path(path)
+            # dict universal arches do not have an active prefix
+            if not isinstance(self.universal_archs, dict):
+                self._create_path(path)
         pythonpath = os.pathsep.join(pythonpath)
 
         if self.platform == Platform.LINUX:
