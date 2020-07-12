@@ -128,15 +128,16 @@ iOS x86_64             | `cross-ios-x86-64.cbc`
 On Windows, config files are used to select the architecture and variants are
 used to select the toolchain (MinGW, MSVC, UWP):
 
-Target                            | Config file           | Variant
-:---------------------------------|:----------------------|:-------
-MinGW x86                         | `win32.cbc`           |
-MinGW x86_64                      | `win64.cbc`           |
-MSVC x86                          | `win32.cbc`           | visualstudio
-MSVC x86_64                       | `win64.cbc`           | visualstudio
-Universal Windows Platform x86    | `win32.cbc`           | uwp
-Universal Windows Platform x86_64 | `win64.cbc`           | uwp
-Universal Windows Platform ARM64  | `cross-win-arm64.cbc` | uwp
+Target          | Config file               | Variant
+:---------------|:--------------------------|:-------
+MinGW x86       | `win32.cbc`               |
+MinGW x86_64    | `win64.cbc`               |
+MSVC x86        | `win32.cbc`               | visualstudio
+MSVC x86_64     | `win64.cbc`               | visualstudio
+UWP x86         | `win32.cbc`               | uwp
+UWP x86_64      | `win64.cbc`               | uwp
+UWP ARM64       | `cross-win-arm64.cbc`     | uwp
+UWP Universal   | `cross-uwp-universal.cbc  | (implicitly uwp)
 
 Example usage:
 
@@ -147,15 +148,15 @@ $ ./cerbero-uninstalled -c config/win32.cbc package gstreamer-1.0
 # Target MSVC 32-bit
 $ ./cerbero-uninstalled -c config/win64.cbc -v visualstudio package gstreamer-1.0
 
-# Target Universal Windows Platform, x86_64
+# Target UWP, x86_64
 $ ./cerbero-uninstalled -c config/win64.cbc -v uwp package gstreamer-1.0
 
-# Target Universal Windows Platform, Cross ARM64
+# Target UWP, Cross ARM64
 $ ./cerbero-uninstalled -c config/cross-win-arm64.cbc -v uwp package gstreamer-1.0
+
+# Target UWP, All Supported Arches
+$ ./cerbero-uninstalled -c config/cross-uwp-universal.cbc package gstreamer-1.0
 ```
-
-Note: Universal Windows Platform targets are currently experimental.
-
 
 # Enabling Optional Features with Variants
 
@@ -358,7 +359,13 @@ MinGW. Both the Community build and the Professional build are supported.
 You must install the latest Windows 10 SDK when installing Visual Studio as
 shown below. You do not need any older Windows SDKs.
 
-![Select the Desktop development with C++ workload](/data/images/vs2017-installer-workloads.png)
+![Select the 'Desktop development with C++' workload](/data/images/vs2017-installer-workloads.png)
+
+If you want to build for UWP (aka Universal Windows Platform), you have to use
+VS 2017 or newer, and you must *also* select the Universal Windows Platform
+workload:
+
+![Select both 'Desktop development with C++' and 'Universal Windows Platform development' workloads](/data/images/vs-installer-uwp-workload.png)
 
 You can find all versions of Visual Studio at:
 https://visualstudio.microsoft.com/vs/older-downloads/

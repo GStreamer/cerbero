@@ -1,0 +1,13 @@
+from cerbero.config import Platform, Architecture
+
+target_platform = Platform.WINDOWS
+variants.uwp = True
+# NOTE: This gets overridden in the arch-specific cbc files
+target_arch = Architecture.UNIVERSAL
+
+universal_archs = {
+    # Path is relative to this file
+    Architecture.ARM64:  "cross-win-arm64.cbc",
+    Architecture.X86:    "win32.cbc",
+    Architecture.X86_64: "win64.cbc",
+}

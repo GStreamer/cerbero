@@ -285,12 +285,17 @@ class Config (object):
             if self.vs_install_path:
                 m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
 
+        m.message('Install prefix will be {}'.format(self.prefix))
         # Store current os.environ data
+        arches = []
+        if isinstance(self.universal_archs, dict):
+            arches = self.arch_config.keys()
         for c in list(self.arch_config.values()):
             self._create_path(c.local_sources)
             self._create_path(c.sources)
             self._create_path(c.logs)
-        m.message('Install prefix will be {}'.format(self.prefix))
+        if arches:
+            m.message('Building the following arches: ' + ' '.join(arches))
 
     def do_setup_env(self):
         self._create_path(self.prefix)
