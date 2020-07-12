@@ -101,7 +101,8 @@ class Package(Command):
             else:
                 packager_class = DistTarball
         elif config.variants.uwp:
-            m.warning('Forcing tarball output for UWP package since MSIs are broken')
+            m.warning('Forcing single-tarball output for UWP package since MSIs are broken')
+            args.no_split = True
             packager_class = DistTarball
 
         m.action(_("Creating package for %s") % p.name)
