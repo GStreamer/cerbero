@@ -131,11 +131,7 @@ class RedHatBootstrapper (UnixBootstrapper):
                 self.packages.append('libncurses-compat-libs.i686')
         if user_is_root():
             return
-        # Use sudo to gain root access on everything except RHEL
-        if self.config.distro_version == DistroVersion.REDHAT_6:
-            self.tool = ['su', '-c', shlex.join(self.tool)]
-        else:
-            self.tool = ['sudo'] + self.tool
+        self.tool = ['sudo'] + self.tool
 
 class OpenSuseBootstrapper (UnixBootstrapper):
 
