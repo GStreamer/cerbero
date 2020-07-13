@@ -24,25 +24,16 @@ class Recipe(recipe.Recipe):
     name = 'graphene'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    version = '1.8.2'
+    version = '1.10.2'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
-    tarball_checksum = '8c7d895536936e65c7f859f87bd14c258ac7f2c4ec999010e39e658f47c4d2ee'
-    licenses = [{License.MIT: ['LICENSE']}]
-    # Disable NEON completely, it's broken and experimental
-    meson_options = {'arm_neon' : 'false', 'introspection' : 'false' }
-
-    patches = [
-        # https://github.com/ebassi/graphene/pull/127
-        'graphene/0001-meson-fix-HAVE_INIT_ONCE-declaration.patch',
-        # https://github.com/ebassi/graphene/pull/128
-        'graphene/0001-Fix-implicit-conversion-error-when-compiling-with-MS.patch',
-        # https://github.com/ebassi/graphene/pull/130
-        'graphene/0001-bench-Fix-MSVC-build-error-on-32-bit-Windows.patch',
-        # https://github.com/ebassi/graphene/pull/173
-        'graphene/0001-meson-Don-t-error-with-MSVC-C4819-warning.patch',
-        # https://github.com/ebassi/graphene/pull/183
-        'graphene/0001-meson-Fix-check-for-builtype-arguments.patch',
-    ]
+    tarball_checksum = '87c682291fa38a131aaf9aaee17d053d7bd4ea5309d305a356619c95784b9b4d'
+    licenses = [{License.MIT: ['LICENSE.txt']}]
+    meson_options = {
+        # XXX: check whether neon support works better
+        'arm_neon' : 'false',
+        'introspection' : 'false',
+        'installed_tests': 'false',
+    }
 
     deps = ['glib']
 
