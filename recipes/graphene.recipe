@@ -81,8 +81,8 @@ class Recipe(recipe.Recipe):
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
-            shutil.copyfile(os.path.join(self.meson_dir, 'src', 'graphene-config.h'),
-                        os.path.join(arch_dir, 'graphene-config.h'))
+            shutil.copyfile(os.path.join(self.meson_dir, 'include', 'graphene-config.h'),
+                            os.path.join(arch_dir, 'graphene-config.h'))
             with open(os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
                                    'include', 'graphene-config.h'), 'w+') as f:
                 f.write(GRAPHENE_CONFIG_UNVERSAL)

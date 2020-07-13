@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
         # https://github.com/cisco/openh264/pull/3247
         name + "/0001-meson-add-support-for-android-ios-macos.patch",
         name + "/0001-depend-on-gnustl-for-android.patch",
-        # Depend on the above patches, submit after they're merged
+        # https://github.com/cisco/openh264/pull/3301
         name + "/0001-meson-Bump-requirement-to-0.50.patch",
         name + "/0002-meson-Add-support-for-Windows-ARM-and-ARM64.patch",
     ]
