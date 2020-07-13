@@ -1,0 +1,52 @@
+From 4e02230540f1448c2d57a8ee77fd5c46c5b3e98c Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 13 Jul 2020 17:47:29 +0530
+Subject: [PATCH] Add meson build file from wrapdb
+
+https://wrapdb.mesonbuild.com/v1/projects/sqlite/3310100/1/get_wrap
+---
+ meson.build | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
+ create mode 100644 meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..061fc1d
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,32 @@
++project('sqlite', 'c', version : '3320300', license : 'pd')
++
++
++thread_dep = dependency('threads')
++
++cc = meson.get_compiler('c')
++dl_dep = cc.find_library('dl', required : false)
++m_dep = cc.find_library('m', required: false)
++
++sqlite_args = []
++if cc.get_id() == 'msvc' and get_option('default_library') != 'static'
++  sqlite_args += ['-DSQLITE_API=__declspec(dllexport)']
++endif
++
++sqinc = include_directories('.')
++sqlib = library('sqlite3', 'sqlite3.c', include_directories: sqinc,
++    c_args : sqlite_args,
++    dependencies : [thread_dep, dl_dep, m_dep],
++    # ABI compatibility with autotools/libtool
++    version: '0.8.6',
++    install: true)
++
++install_headers('sqlite3.h')
++
++sqlite_dep = declare_dependency(link_with : sqlib,
++    include_directories : sqinc)
++
++pkg = import('pkgconfig')
++pkg.generate(name: 'sqlite3',
++             description: 'An embedded SQL database engine',
++             version: meson.project_version(),
++             libraries: sqlib)
+-- 
+2.26.2
+
