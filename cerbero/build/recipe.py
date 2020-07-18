@@ -57,15 +57,35 @@ def log_step_output(recipe, stepfunc):
             os.remove(recipe.logfile.name)
         recipe.logfile = recipe.old_logfile
 
+    def get_all_prev_steps_logfiles():
+        current_step = stepfunc.__name__
+        logfiles = []
+        for step in recipe._steps:
+            step = step[1]
+            if step == current_step:
+                break
+            path = "%s/%s-%s.log" % (recipe.config.logs, recipe.name, step)
+            try:
+                logfiles.append(open(path, 'r'))
+            except OSError:
+                continue
+        return logfiles
+
     def handle_exception():
-        # Dump contents of log file on error
+        '''
+        Dump contents of log files for current and previous steps on error
+        '''
+        logfiles = get_all_prev_steps_logfiles()
+        # log file of current step
         recipe.logfile.seek(0)
-        while True:
-            data = recipe.logfile.read()
+        logfiles.append(recipe.logfile)
+        # Print all
+        for logfile in logfiles:
+            data = logfile.read()
+            logfile.close()
+            m.action('Contents of {}:'.format(logfile.name))
             if data:
                 print(data)
-            else:
-                break
 
     def wrapped():
         open_file()
