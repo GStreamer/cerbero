@@ -44,17 +44,6 @@ class BuildTools (BootstrapperBase, Fetch):
     def __init__(self, config, offline):
         BootstrapperBase.__init__(self, config, offline)
 
-        # On Windows, we always build nasm ourselves, and we tell the user to
-        # install CMake using the installer.
-        if self.config.platform in (Platform.LINUX, Platform.DARWIN):
-            # dav1d requires nasm >=2.13.02
-            # We require cmake > 3.10.2 for out-of-source-tree builds.
-            tool, found, newer = shell.check_tool_version('cmake' ,'3.10.2', env=None)
-            if not newer:
-              self.BUILD_TOOLS.append('cmake')
-            tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None)
-            if not newer:
-              self.BUILD_TOOLS.append('nasm')
         if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
             # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
@@ -63,8 +52,25 @@ class BuildTools (BootstrapperBase, Fetch):
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
         self.BUILD_TOOLS += self.config.extra_build_tools
-
         self._setup_env()
+
+    def check_build_tools(self):
+        '''
+        Check whether the build tools we have are new enough, and if not, build
+        them ourselves. On Windows, we always build nasm ourselves, and we tell
+        the user to install CMake using the installer.
+        '''
+        ret = []
+        if self.config.platform in (Platform.LINUX, Platform.DARWIN):
+            # need cmake > 3.10.2 for out-of-source-tree builds.
+            tool, found, newer = shell.check_tool_version('cmake' ,'3.10.2', env=None)
+            if not newer:
+                ret.append('cmake')
+            # dav1d requires nasm >=2.13.02
+            tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None)
+            if not newer:
+                ret.append('nasm')
+        return ret
 
     def _setup_env(self):
         # Use a common prefix for the build tools for all the configurations
@@ -104,6 +110,9 @@ class BuildTools (BootstrapperBase, Fetch):
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 
     def start(self, jobs=0):
+        # Check and these at the last minute because we may have installed them
+        # in system bootstrap
+        self.recipes += self.check_build_tools()
         oven = Oven(self.recipes, self.cookbook, jobs=jobs)
         oven.start_cooking()
 
