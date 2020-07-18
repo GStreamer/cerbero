@@ -64,8 +64,6 @@ class Bootstrapper (object):
             if d not in bootstrappers:
                 raise FatalError(_("No bootstrapper for the distro %s" % d))
             if v not in bootstrappers[d]:
-                # Be tolerant with the distro version
-                m.warning(_("No bootstrapper for the distro version %s" % v))
                 v = None
 
             bs.insert(0, bootstrappers[d][v](config, offline, assume_yes))
