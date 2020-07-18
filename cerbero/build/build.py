@@ -661,7 +661,7 @@ class Meson (Build, ModifyEnvBase) :
             return
         opt_name = None
         opt_type = None
-        with open(meson_options, 'r') as f:
+        with open(meson_options, 'r', encoding='utf-8') as f:
             options = f.read()
             # iterate over all option()s individually
             option_regex = "option\s*\(\s*(?:'(?P<name>[^']+)')\s*,\s*(?P<entry>(?P<identifier>[a-zA-Z0-9]+)\s*:\s*(?:(?P<string>'[^']+')|[^'\),\s]+)\s*,?\s*)+\)"
@@ -765,7 +765,7 @@ class Meson (Build, ModifyEnvBase) :
                 WINDRES=windres,
                 extra_binaries=extra_binaries,
                 extra_properties=extra_properties)
-        with open(cross_file, 'w') as f:
+        with open(cross_file, 'w', encoding='utf-8') as f:
             f.write(contents)
 
         return cross_file
@@ -783,7 +783,7 @@ class Meson (Build, ModifyEnvBase) :
 
         native_file = os.path.join(self.meson_dir, 'meson-native-file.txt')
         contents = MESON_NATIVE_FILE_TPL.format(extra_binaries=extra_binaries)
-        with open(native_file, 'w') as f:
+        with open(native_file, 'w', encoding='utf-8') as f:
             f.write(contents)
 
         return native_file
