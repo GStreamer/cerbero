@@ -62,21 +62,17 @@ class DebianBootstrapper (UnixBootstrapper):
     tool = ['sudo', 'apt-get']
     command = ['install']
     yes_arg = ['-y']
-    packages = ['autotools-dev', 'automake', 'autoconf', 'libtool', 'g++',
-                'autopoint', 'make', 'cmake', 'bison', 'flex', 'nasm',
-                'pkg-config', 'gtk-doc-tools', 'libxv-dev',
-                'libx11-dev', 'libx11-xcb-dev',
-                'libpulse-dev', 'python3-dev', 'texinfo', 'gettext',
-                'build-essential', 'pkg-config', 'doxygen', 'curl',
-                'libxext-dev', 'libxi-dev', 'x11proto-record-dev',
-                'libxrender-dev', 'libgl1-mesa-dev', 'libxfixes-dev',
-                'libxdamage-dev', 'libxcomposite-dev', 'libasound2-dev',
-                'libxml-simple-perl', 'dpkg-dev', 'debhelper',
-                'build-essential', 'devscripts', 'fakeroot', 'transfig',
-                'gperf', 'libdbus-glib-1-dev', 'wget', 'glib-networking',
-                'libxtst-dev', 'libxrandr-dev', 'libglu1-mesa-dev',
-                'libegl1-mesa-dev', 'git', 'subversion', 'xutils-dev',
-                'intltool', 'ccache', 'python3-setuptools', 'libssl-dev']
+    packages = [
+        'autotools-dev', 'automake', 'autoconf', 'libtool', 'g++', 'autopoint',
+        'make', 'cmake', 'bison', 'flex', 'nasm', 'pkg-config', 'libxv-dev',
+        'libx11-dev', 'libx11-xcb-dev', 'libpulse-dev', 'python3-dev',
+        'gettext', 'build-essential', 'pkg-config', 'libxext-dev', 'libxi-dev',
+        'x11proto-record-dev', 'libxrender-dev', 'libgl1-mesa-dev',
+        'libxfixes-dev', 'libxdamage-dev', 'libxcomposite-dev',
+        'libasound2-dev', 'build-essential', 'gperf', 'wget', 'libxtst-dev',
+        'libxrandr-dev', 'libglu1-mesa-dev', 'libegl1-mesa-dev', 'git',
+        'xutils-dev', 'intltool', 'ccache', 'python3-setuptools', 'libssl-dev'
+    ]
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -84,11 +80,6 @@ class DebianBootstrapper (UnixBootstrapper):
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
                 self.checks.append(self.create_debian_arch_check('i386'))
-        if self.config.target_platform == Platform.LINUX:
-            self.packages.append('chrpath')
-            self.packages.append('libfuse-dev')
-        if self.config.distro_version == DistroVersion.DEBIAN_SQUEEZE:
-            self.packages.remove('glib-networking')
 
     def create_debian_arch_check(self, arch):
         def check_arch():
@@ -110,19 +101,16 @@ class RedHatBootstrapper (UnixBootstrapper):
     tool = ['dnf']
     command = ['install']
     yes_arg = ['-y']
-    packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
-                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'nasm',
-                'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
-                'texinfo-tex', 'texlive-dvips', 'docbook-style-xsl',
-                'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
-                'python3-devel', 'libXrender-devel', 'pulseaudio-libs-devel',
-                'libXv-devel', 'mesa-libGL-devel', 'libXcomposite-devel',
-                'alsa-lib-devel', 'perl-ExtUtils-MakeMaker', 'libXi-devel',
-                'perl-XML-Simple', 'gperf', 'gdk-pixbuf2-devel', 'wget',
-                'docbook-utils-pdf', 'glib-networking', 'help2man',
-                'dbus-devel', 'glib2-devel', 'libXrandr-devel',
-                'libXtst-devel', 'git', 'subversion', 'xorg-x11-util-macros',
-                'mesa-libEGL-devel', 'ccache', 'openssl-devel']
+    packages = [
+        'gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool', 'gettext-devel',
+        'make', 'cmake', 'bison', 'flex', 'nasm', 'pkgconfig', 'curl',
+        'intltool', 'rpm-build', 'redhat-rpm-config', 'python3-devel',
+        'libXrender-devel', 'pulseaudio-libs-devel', 'libXv-devel',
+        'mesa-libGL-devel', 'libXcomposite-devel', 'perl-ExtUtils-MakeMaker',
+        'libXi-devel', 'perl-XML-Simple', 'gperf', 'wget', 'libXrandr-devel',
+        'libXtst-devel', 'git', 'xorg-x11-util-macros', 'mesa-libEGL-devel',
+        'ccache', 'openssl-devel'
+    ]
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -141,9 +129,6 @@ class RedHatBootstrapper (UnixBootstrapper):
                 self.packages.append('glibc.i686')
             if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
                 self.packages.append('libncurses-compat-libs.i686')
-        if self.config.target_platform == Platform.LINUX:
-            self.packages.append('chrpath')
-            self.packages.append('fuse-devel')
         # Use sudo to gain root access on everything except RHEL
         if self.config.distro_version == DistroVersion.REDHAT_6:
             self.tool = ['su', '-c', shlex.join(self.tool)]
@@ -155,30 +140,27 @@ class OpenSuseBootstrapper (UnixBootstrapper):
     tool = ['sudo', 'zypper']
     command = ['install']
     yes_arg = ['-y']
-    packages = ['gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool',
-            'gettext-tools', 'make', 'cmake', 'bison', 'flex', 'nasm',
-            'gtk-doc', 'curl', 'doxygen', 'texinfo',
-            'texlive', 'docbook-xsl-stylesheets',
-            'transfig', 'intltool', 'patterns-openSUSE-devel_rpm_build',
-            'python3-devel', 'xorg-x11-libXrender-devel', 'libpulse-devel',
-            'xorg-x11-libXv-devel', 'Mesa-libGL-devel', 'libXcomposite-devel',
-            'libX11-devel', 'alsa-devel', 'libXi-devel', 'Mesa-devel',
-            'Mesa-libGLESv3-devel',
-            'perl-XML-Simple', 'gperf', 'gdk-pixbuf-devel', 'wget',
-            'docbook-utils', 'glib-networking', 'git', 'subversion', 'ccache',
-            'openssl-devel']
+    packages = [
+        'gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool', 'gettext-tools',
+        'make', 'cmake', 'bison', 'flex', 'nasm', 'intltool',
+        'patterns-openSUSE-devel_rpm_build', 'python3-devel',
+        'xorg-x11-libXrender-devel', 'libpulse-devel', 'xorg-x11-libXv-devel',
+        'Mesa-libGL-devel', 'libXcomposite-devel', 'libX11-devel',
+        'alsa-devel', 'libXi-devel', 'Mesa-devel', 'Mesa-libGLESv3-devel',
+        'gperf', 'wget', 'git', 'ccache', 'openssl-devel'
+    ]
 
 class ArchBootstrapper (UnixBootstrapper):
 
     tool = ['sudo', 'pacman']
     command = ['-S', '--needed']
     yes_arg = ['--noconfirm']
-    packages = ['intltool', 'cmake', 'doxygen', 'gtk-doc',
-            'libtool', 'bison', 'flex', 'automake', 'autoconf', 'make',
-            'curl', 'gettext', 'alsa-lib', 'nasm', 'gperf',
-            'docbook-xsl', 'transfig', 'libxrender',
-            'libxv', 'mesa', 'python3', 'wget', 'glib-networking', 'git',
-            'subversion', 'xorg-util-macros', 'ccache', 'openssl']
+    packages = [
+        'intltool', 'cmake', 'libtool', 'bison', 'flex', 'automake',
+        'autoconf', 'make', 'gettext', 'nasm', 'gperf', 'libxrender', 'libxv',
+        'mesa', 'python3', 'wget', 'git', 'xorg-util-macros', 'ccache',
+        'openssl'
+    ]
 
     def __init__(self, config, offline, assume_yes):
         UnixBootstrapper.__init__(self, config, offline, assume_yes)
@@ -199,15 +181,14 @@ class GentooBootstrapper (UnixBootstrapper):
     tool = ['sudo', 'emerge']
     command = ['-u']
     yes_arg = [] # Does not seem interactive
-    packages = ['dev-util/intltool', 'sys-fs/fuse', 'dev-util/cmake',
-            'app-doc/doxygen', 'dev-util/gtk-doc', 'sys-devel/libtool',
-            'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
-            'sys-devel/autoconf', 'sys-devel/make', 'net-misc/curl',
-            'sys-devel/gettext', 'media-libs/alsa-lib', 'media-sound/pulseaudio',
-            'dev-lang/nasm', 'dev-util/gperf', 'app-text/docbook-xsl-stylesheets',
-            'media-gfx/transfig', 'x11-libs/libXrender', 'x11-libs/libXv',
-            'media-libs/mesa', 'net-misc/wget', 'net-libs/glib-networking',
-            'dev-libs/openssl']
+    packages = [
+        'dev-util/intltool', 'dev-util/cmake', 'sys-devel/libtool',
+        'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
+        'sys-devel/autoconf', 'sys-devel/make', 'sys-devel/gettext',
+        'media-sound/pulseaudio', 'dev-lang/nasm', 'dev-util/gperf',
+        'x11-libs/libXrender', 'x11-libs/libXv', 'media-libs/mesa',
+        'net-misc/wget', 'dev-libs/openssl'
+    ]
 
 class NoneBootstrapper (BootstrapperBase):
 
