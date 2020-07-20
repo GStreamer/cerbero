@@ -270,12 +270,8 @@ def init_directory(git_dir, logfile=None):
     @type git_dir: str
     '''
     init(git_dir, logfile=logfile)
-    try:
-        shell.new_call([GIT, 'add', '--force', '-A', '.'], git_dir, logfile=logfile)
-        shell.call('%s commit -m "Initial commit" > /dev/null 2>&1' % GIT,
-            git_dir, logfile=logfile)
-    except:
-        pass
+    shell.new_call([GIT, 'add', '--force', '-A', '.'], git_dir, logfile=logfile)
+    shell.new_call([GIT, 'commit', '-m', 'Initial commit'], git_dir, logfile=logfile)
 
 
 def apply_patch(patch, git_dir, logfile=None):

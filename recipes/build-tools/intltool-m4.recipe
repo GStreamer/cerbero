@@ -9,9 +9,10 @@ class Recipe(recipe.Recipe):
     btype = BuildType.CUSTOM
     url = 'https://launchpad.net/intltool/trunk/0.51.0/+download/intltool-0.51.0.tar.gz'
     tarball_checksum = '67c74d94196b153b774ab9f89b2fa6c6ba79352407037c8c14d5aeb334e959cd'
+    tarball_dirname = 'intltool-%(version)s'
 
     files_devel = ['share/aclocal/intltool.m4']
 
     async def install(self):
-        m4 = os.path.join(self.build_dir.replace('-m4', ''), 'intltool.m4')
+        m4 = os.path.join(self.build_dir, 'intltool.m4')
         shutil.copy(m4, os.path.join(self.config.prefix, 'share', 'aclocal', 'intltool.m4'))
