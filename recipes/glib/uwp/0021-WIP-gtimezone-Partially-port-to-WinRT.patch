@@ -22,7 +22,7 @@ index e3fec1b..e4f87f2 100644
 --- a/glib/gtimezone.c
 +++ b/glib/gtimezone.c
 @@ -39,11 +39,14 @@
- #include "gdate.h"
+ #include "genviron.h"
  
  #ifdef G_OS_WIN32
 -

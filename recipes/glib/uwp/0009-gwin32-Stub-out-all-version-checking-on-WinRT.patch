@@ -53,7 +53,7 @@ index 2f2fe05..d3bcbcd 100644
  
  #include "glib.h"
 @@ -125,6 +109,11 @@ g_win32_getlocale (void)
-       || ((ev = getenv ("LANG")) != NULL && ev[0] != '\0'))
+       || ((ev = g_getenv ("LANG")) != NULL && ev[0] != '\0'))
      return g_strdup (ev);
  
 +#ifdef G_WINAPI_ONLY_APP
@@ -214,7 +214,7 @@ index 2f2fe05..d3bcbcd 100644
  
  #ifdef G_OS_WIN32
 @@ -1216,14 +1234,18 @@ g_crash_handler_win32_init (void)
-   if (getenv ("G_DEBUGGER") == NULL && getenv("G_VEH_CATCH") == NULL)
+   if (g_getenv ("G_DEBUGGER") == NULL && g_getenv("G_VEH_CATCH") == NULL)
      return;
  
 +#ifndef G_WINAPI_ONLY_APP

@@ -48,6 +48,8 @@ class Recipe(recipe.Recipe):
         'glib/0003-meson-Only-look-for-_NSGetEnviron-when-building-for-.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1522
         'glib/0001-meson-Fix-gnulib-printf-checks.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1579
+        'glib/0001-glib-Use-g_getenv-everywhere-instead-of-getenv.patch'
     ]
 
     files_libs = [
