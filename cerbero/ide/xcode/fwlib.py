@@ -85,7 +85,8 @@ class FrameworkLibrary(object):
 
 class DynamicFrameworkLibrary(FrameworkLibrary):
     def _create_framework_library(self, libraries):
-        cmdline  = ['clang', '-dynamiclib', '-o', self.libname, '-arch', self.arch]
+        cmdline  = ['clang', '-headerpad_max_install_names', '-dynamiclib',
+                    '-o', self.libname, '-arch', self.arch]
         if self.target == Distro.OS_X:
             cmdline += ['-mmacosx-version-min=%s' % self.min_version]
 
