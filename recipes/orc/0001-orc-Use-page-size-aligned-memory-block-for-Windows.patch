@@ -1,0 +1,92 @@
+From 4a2ae3c669d05cb7bed77a06d05475be8d9c1adb Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Tue, 28 Jul 2020 18:00:09 +0900
+Subject: [PATCH] orc: Use page size aligned memory block for Windows
+
+VirtualProtect will change protection attribute of all memory range
+which belong to the same page range.
+---
+ orc/orccodemem.c  |  6 +++++-
+ orc/orccompiler.c | 28 +++++++++++++++++++++++-----
+ 2 files changed, 28 insertions(+), 6 deletions(-)
+
+diff --git a/orc/orccodemem.c b/orc/orccodemem.c
+index aded186..0f09749 100644
+--- a/orc/orccodemem.c
++++ b/orc/orccodemem.c
+@@ -32,6 +32,9 @@
+ 
+ #define SIZE 65536
+ 
++/* See _orc_compiler_init() */
++extern int _orc_codemem_alignment;
++
+ typedef struct _OrcCodeRegion OrcCodeRegion;
+ 
+ struct _OrcCodeRegion {
+@@ -163,7 +166,8 @@ orc_code_allocate_codemem (OrcCode *code, int size)
+ {
+   OrcCodeRegion *region;
+   OrcCodeChunk *chunk;
+-  int aligned_size = (size + 15) & (~15);
++  int aligned_size =
++      (size + _orc_codemem_alignment) & (~_orc_codemem_alignment);
+ 
+   chunk = orc_code_region_get_free_chunk (aligned_size);
+   region = chunk->region;
+diff --git a/orc/orccompiler.c b/orc/orccompiler.c
+index 9c1dc3c..7f7b4d4 100644
+--- a/orc/orccompiler.c
++++ b/orc/orccompiler.c
+@@ -57,10 +57,17 @@ int _orc_compiler_flag_emulate;
+ int _orc_compiler_flag_debug;
+ int _orc_compiler_flag_randomize;
+ 
++/* For Windows */
++int _orc_codemem_alignment;
++
+ void
+ _orc_compiler_init (void)
+ {
+   char *envvar;
++#ifdef HAVE_CODEMEM_VIRTUALALLOC
++  size_t page_size;
++  SYSTEM_INFO info;
++#endif
+ 
+   envvar = _orc_getenv ("ORC_CODE");
+   if (envvar != NULL) {
+@@ -73,14 +80,25 @@ _orc_compiler_init (void)
+   _orc_compiler_flag_debug = orc_compiler_flag_check ("debug");
+   _orc_compiler_flag_randomize = orc_compiler_flag_check ("randomize");
+ 
+-#if defined(HAVE_CODEMEM_VIRTUALALLOC) && defined(ORC_WINAPI_ONLY_APP)
++  /* 16 bytes alignment by default */
++  _orc_codemem_alignment = 15;
++
++#ifdef HAVE_CODEMEM_VIRTUALALLOC
++  GetNativeSystemInfo(&info);
++  page_size = info.dwPageSize;
++
++  /* Protection attribute change via VirtualProtect will be applied per
++   * page memory unit. So we should split code memory with page aligned range.
++   * Otherwise the protection attribute of previously generated executable code
++   * memory can be affected by later generated one.
++   */
++  _orc_codemem_alignment = info.dwPageSize - 1;
++#endif
++
++#ifdef ORC_WINAPI_ONLY_APP
+   if (!_orc_compiler_flag_backup && !_orc_compiler_flag_emulate) {
+     int can_jit = FALSE;
+-    size_t page_size;
+-    SYSTEM_INFO info;
+-    GetNativeSystemInfo(&info);
+ 
+-    page_size = info.dwPageSize;
+     /* If backup code is not enabled and emulation is not enabled, that means
+      * we will do JIT compilation and call orc_code_region_allocate_codemem().
+      * When targeting Windows Store apps, the codeGeneration capability must
+-- 
+2.17.1
+

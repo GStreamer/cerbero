@@ -27,6 +27,8 @@ class Recipe(recipe.Recipe):
         'orc/0001-orc-Implement-a-windows-helper-for-getenv.patch',
         'orc/0002-orccodemem-Add-support-for-Universal-Windows-Platfor.patch',
         'orc/0003-orc-Fix-some-warnings-on-MSVC-and-enable-werror.patch',
+        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/48
+        'orc/0001-orc-Use-page-size-aligned-memory-block-for-Windows.patch',
     ]
 
     def prepare(self):
