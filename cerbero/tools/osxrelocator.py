@@ -55,7 +55,7 @@ class OSXRelocator(object):
     def change_id(self, object_file, id=None):
         id = id or object_file.replace(self.lib_prefix, '@rpath')
         filename = os.path.basename(object_file)
-        if not (filename.endswith('so') or filename.endswith('dylib')):
+        if not self._is_mach_o_file(filename):
             return
         cmd = [INT_CMD, '-id', id, object_file]
         shell.new_call(cmd, fail=False, logfile=self.logfile)
@@ -66,7 +66,7 @@ class OSXRelocator(object):
         rpaths = ['.']
         rpaths += ['@loader_path' + p_depth, '@executable_path' + p_depth]
         rpaths += ['@loader_path' + '/../lib', '@executable_path' + '/../lib']
-        if not (object_file.endswith('so') or object_file.endswith('dylib')):
+        if not self._is_mach_o_file(object_file):
             return
         if depth > 1:
             rpaths += ['@loader_path/..', '@executable_path/..']
@@ -111,6 +111,11 @@ class OSXRelocator(object):
         if path.endswith('/'):
             return path[:-1]
         return path
+
+    def _is_mach_o_file(self, filename):
+        return os.path.splitext(filename)[1] in ['.dylib', '.so'] or \
+                shell.check_output(['file', '-bh', filename]).startswith('Mach-O')
+
 
 
 class Main(object):
