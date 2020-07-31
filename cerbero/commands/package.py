@@ -101,7 +101,10 @@ class Package(Command):
             else:
                 packager_class = DistTarball
         elif config.variants.uwp:
-            m.warning('Forcing single-tarball output for UWP package since MSIs are broken')
+            # Split devel/runtime packages are useless for UWP since we will
+            # need both when building the package, and all needed runtime DLLs
+            # are packaged with the app as assets.
+            m.warning('Forcing single-tarball output for UWP package')
             args.no_split = True
             packager_class = DistTarball
 

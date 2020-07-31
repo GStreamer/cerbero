@@ -512,8 +512,9 @@ class MSI(WixBase):
             installdir = self._add_dir(self.target_dir, 'INSTALLDIR',
                                        self.package.get_install_dir())
             versiondir = self._add_dir(installdir, "Version", self.package.sdk_version)
-            archdir = self._add_dir(versiondir, 'Architecture',
-                                    self.config.target_arch)
+            # archdir has to be toolchain-specific: mingw_x86_64, uwp-debug_arm64, etc
+            platform_arch = self.config._get_toolchain_target_platform_arch()
+            archdir = self._add_dir(versiondir, 'Architecture', platform_arch)
             self.installdir = self._add_dir(archdir, 'SDKROOTDIR', '.')
 
     def _package_id(self, package_name):
@@ -551,8 +552,11 @@ class MSI(WixBase):
     def _add_sdk_root_env_variable(self):
         envcomponent = etree.SubElement(self.installdir, 'Component',
                                         Id='EnvironmentVariables', Guid=self._get_uuid())
+        # archdir has to be toolchain-specific: mingw_x86_64, uwp-debug_arm64, etc
+        platform_arch = self.config._get_toolchain_target_platform_arch()
+        root_env_var = self.package.get_root_env_var(platform_arch)
         env = etree.SubElement(envcomponent, 'Environment', Id="SdkRootEnv",
-                               Action="set", Part="all", Name=self.package.get_root_env_var(),
+                               Action="set", Part="all", Name=root_env_var,
                                Permanent="no", Value='[SDKROOTDIR]')
         etree.SubElement(self.main_feature, 'ComponentRef',
                          Id='EnvironmentVariables')

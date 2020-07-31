@@ -700,6 +700,26 @@ class Config (object):
             if os.path.exists(config_path):
                 self._parse(config_path, reset=False)
 
+    def _get_toolchain_target_platform_arch(self):
+        platform_arch = '{}_' + self.target_arch
+        if self.target_platform != Platform.WINDOWS or self.prefix_is_build_tools():
+            return platform_arch.format(self.target_platform)
+        if not self.variants.visualstudio:
+            return platform_arch.format('mingw')
+        # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
+        if self.variants.uwp:
+            target_platform = 'uwp'
+        else:
+            target_platform = 'msvc'
+        # Debug CRT needs a separate prefix
+        if self.variants.vscrt == 'mdd':
+            target_platform += '-debug'
+        # Check for invalid configuration of a custom Visual Studio path
+        if self.vs_install_path and not self.vs_install_version:
+            raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
+
+        return platform_arch.format(target_platform)
+
     def _load_last_defaults(self):
         # Set build tools defaults
         self.set_property('build_tools_prefix',
@@ -710,29 +730,11 @@ class Config (object):
                 os.path.join(self.home_dir, 'logs', 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools.cache')
         # Set target platform defaults
-        target_platform = self.target_platform
-        if target_platform == Platform.WINDOWS and not self.prefix_is_build_tools():
-            if self.variants.visualstudio:
-                if self.variants.uwp:
-                    target_platform = 'uwp'
-                else:
-                    target_platform = 'msvc'
-                # Debug CRT needs a separate prefix
-                if self.variants.vscrt == 'mdd':
-                    target_platform += '-debug'
-                # Check for invalid configuration of a custom Visual Studio path
-                if self.vs_install_path and not self.vs_install_version:
-                    raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
-            else:
-                target_platform = 'mingw'
-        self.set_property('prefix', os.path.join(self.home_dir, "dist",
-            "%s_%s" % (target_platform, self.target_arch)))
-        self.set_property('sources', os.path.join(self.home_dir, "sources",
-            "%s_%s" % (target_platform, self.target_arch)))
-        self.set_property('logs', os.path.join(self.home_dir, "logs",
-            "%s_%s" % (target_platform, self.target_arch)))
-        self.set_property('cache_file',
-                "%s_%s.cache" % (target_platform, self.target_arch))
+        platform_arch = self._get_toolchain_target_platform_arch()
+        self.set_property('prefix', os.path.join(self.home_dir, "dist", platform_arch))
+        self.set_property('sources', os.path.join(self.home_dir, "sources", platform_arch))
+        self.set_property('logs', os.path.join(self.home_dir, "logs", platform_arch))
+        self.set_property('cache_file', platform_arch + ".cache")
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
 

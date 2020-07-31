@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import re
 
 from cerbero.build.filesprovider import FilesProvider
 from cerbero.enums import License, Platform
@@ -478,14 +479,16 @@ class SDKPackage(MetaPackage):
 
     '''
 
+    # Can be overriden by the package file, f.ex.
+    # packages/gstreamer-1.0/gstreamer-1.0.package
     root_env_var = 'CERBERO_SDK_ROOT_%(arch)s'
     osx_framework_library = None
 
     def __init__(self, config, store):
         MetaPackage.__init__(self, config, store)
 
-    def get_root_env_var(self):
-        return (self.root_env_var % {'arch': self.config.target_arch}).upper()
+    def get_root_env_var(self, arch):
+        return (self.root_env_var % {'arch': re.sub(r'[^a-zA-Z0-9]', '_', arch)}).upper()
 
 
 class InstallerPackage(MetaPackage):
