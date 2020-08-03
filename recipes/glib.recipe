@@ -137,10 +137,12 @@ class Recipe(recipe.Recipe):
                 self.files_bins.remove('gdbus')
                 self.files_bins_devel.remove('bin/gdbus.pdb')
                 self.patches += [
+                    # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1583
+                    'glib/uwp/0001-gio-Remove-broken-support-for-XP.patch',
                     # Ready to upstream
+                    'glib/uwp/0001-gio-Disable-generic-DNS-record-lookup-on-UWP.patch',
                     'glib/uwp/0001-glib-Never-use-MessageBox-on-UWP-apps.patch',
                     'glib/uwp/0001-gpoll-UWP-does-not-need-to-poll-a-msg_fd.patch',
-                    'glib/uwp/0001-gio-Remove-broken-support-for-XP.patch',
                     'glib/uwp/0002-win_iconv-Use-LoadPackagedLibrary-when-building-UWP-.patch',
                     'glib/uwp/0003-glib-getpid-is-available-on-Win32-but-not-WinRT.patch',
                     'glib/uwp/0004-goption-Do-not-call-GetCommandlineW-on-UWP.patch',

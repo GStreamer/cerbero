@@ -1,4 +1,4 @@
-From 948ef6bb40150ab8776fa59c5d15fe9c85701fd7 Mon Sep 17 00:00:00 2001
+From 5b4acfb2b0038c000df54359b3ef733fd8e7da57 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 16 Aug 2019 13:56:39 +0530
 Subject: [PATCH 18/22] gio: Disable win32 API and modules when unavailable on
@@ -21,14 +21,12 @@ of runtime.
 TODO: the following need to be ported to new WinRT APIs:
 
 * gwin32networkmonitor (giomodule)
-* gthreadedresolver (API)
 * gwin32appinfo.c (currently stubbed out)
 ---
  gio/gappinfo.h  |  5 +++++
  gio/giomodule.c | 32 +++++++++++++++++---------------
- gio/gresolver.c |  7 +++++--
- gio/meson.build | 34 ++++++++++++++++++++--------------
- 4 files changed, 47 insertions(+), 31 deletions(-)
+ gio/meson.build | 31 +++++++++++++++++--------------
+ 3 files changed, 39 insertions(+), 29 deletions(-)
 
 diff --git a/gio/gappinfo.h b/gio/gappinfo.h
 index d26d048..b02a310 100644
@@ -144,38 +142,8 @@ index aacfa71..e8f4bf5 100644
  #endif
      }
  
-diff --git a/gio/gresolver.c b/gio/gresolver.c
-index 732d217..9c2dcec 100644
---- a/gio/gresolver.c
-+++ b/gio/gresolver.c
-@@ -198,20 +198,23 @@ static GResolver *default_resolver;
-  * with it. #GResolver may use its reference count as a hint about how
-  * many threads it should allocate for concurrent DNS resolutions.
-  *
-- * Returns: (transfer full): the default #GResolver.
-+ * Returns: (allow-none) (transfer full): the default #GResolver.
-  *
-  * Since: 2.22
-  */
- GResolver *
- g_resolver_get_default (void)
- {
--  GResolver *ret;
-+  GResolver *ret = NULL;
- 
-+  /* FIXME: Implement the default threaded resolver for WinRT */
-+#ifndef G_WINAPI_ONLY_APP
-   G_LOCK (default_resolver);
-   if (!default_resolver)
-     default_resolver = g_object_new (G_TYPE_THREADED_RESOLVER, NULL);
-   ret = g_object_ref (default_resolver);
-   G_UNLOCK (default_resolver);
-+#endif
- 
-   return ret;
- }
 diff --git a/gio/meson.build b/gio/meson.build
-index a7dd536..0463dfd 100644
+index a7dd536..13ec7ff 100644
 --- a/gio/meson.build
 +++ b/gio/meson.build
 @@ -281,7 +281,7 @@ settings_sources = files(
@@ -225,7 +193,15 @@ index a7dd536..0463dfd 100644
    gio_win_rc = configure_file(
      input: 'gio.rc.in',
      output: 'gio.rc',
-@@ -568,8 +572,6 @@ gio_sources = files(
+@@ -549,6 +553,7 @@ gio_sources = files(
+   'gsimpleiostream.c',
+   'gsimplepermission.c',
+   'gsimpleproxyresolver.c',
++  'gthreadedresolver.c',
+   'gsocket.c',
+   'gsocketaddress.c',
+   'gsocketaddressenumerator.c',
+@@ -568,8 +573,6 @@ gio_sources = files(
    'gtcpwrapperconnection.c',
    'gthemedicon.c',
    'gthreadedsocketservice.c',
@@ -234,18 +210,7 @@ index a7dd536..0463dfd 100644
    'gtlsbackend.c',
    'gtlscertificate.c',
    'gtlsclientconnection.c',
-@@ -592,6 +594,10 @@ gio_sources = files(
-   'gliststore.c',
- )
- 
-+if not glib_conf.has('G_WINAPI_ONLY_APP')
-+  gio_sources += files('gthreadedresolver.c')
-+endif
-+
- gio_sources += appinfo_sources
- gio_sources += contenttype_sources
- gio_sources += gdbus_daemon_sources
-@@ -766,7 +772,7 @@ if have_func_kqueue and have_func_kevent
+@@ -766,7 +769,7 @@ if have_func_kqueue and have_func_kevent
    internal_objects += [kqueue_lib.extract_all_objects()]
  endif
  
