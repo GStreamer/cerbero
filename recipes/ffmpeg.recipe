@@ -24,7 +24,7 @@ class Recipe(recipe.Recipe):
         --disable-mediacodec --disable-mediafoundation --disable-nvenc --disable-mmal --disable-omx \
         --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
         --disable-libnpp --disable-iconv --disable-jni --disable-v4l2_m2m \
-        --disable-vulkan --disable-large-tests \
+        --disable-vulkan --disable-large-tests --disable-stripping \
         --enable-optimizations --disable-nonfree --disable-version3 %(options)s'
 
     deps = ['bzip2', 'zlib']
