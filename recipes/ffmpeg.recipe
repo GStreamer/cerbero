@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'ffmpeg'
-    version = '4.2'
+    version = '4.3.1'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
-    url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.bz2'
-    tarball_checksum = '306bde5f411e9ee04352d1d3de41bd3de986e42e2af2a4c44052dce1ada26fb8'
+    url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'ad009240d46e307b4e03a213a0f49c11b650e445b1f8be0dda2a9212b34d2ffb'
     patches = []
 
     btype = BuildType.MAKEFILE
@@ -21,9 +21,10 @@ class Recipe(recipe.Recipe):
         --disable-network --disable-hwaccels --disable-dxva2 --disable-vdpau \
         --disable-filters --enable-filter=yadif --disable-doc --disable-d3d11va \
         --disable-audiotoolbox --disable-videotoolbox --disable-vaapi --disable-crystalhd \
-        --disable-mediacodec --disable-nvenc --disable-mmal --disable-omx \
+        --disable-mediacodec --disable-mediafoundation --disable-nvenc --disable-mmal --disable-omx \
         --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
         --disable-libnpp --disable-iconv --disable-jni --disable-v4l2_m2m \
+        --disable-vulkan --disable-large-tests \
         --enable-optimizations --disable-nonfree --disable-version3 %(options)s'
 
     deps = ['bzip2', 'zlib']
