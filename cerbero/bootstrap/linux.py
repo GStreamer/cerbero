@@ -121,8 +121,6 @@ class RedHatBootstrapper (UnixBootstrapper):
             self.tool = ['yum']
         elif self.config.distro_version == DistroVersion.REDHAT_8:
             self.tool = ['yum', '--enablerepo=PowerTools']
-            # See https://bugzilla.redhat.com/show_bug.cgi?id=1757002
-            self.packages.remove('docbook-utils-pdf')
 
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
