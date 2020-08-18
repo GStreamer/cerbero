@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
     patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
                'cairo/0001-Disable-building-of-the-tests.patch',
                'cairo/0001-build-disable-failing-compile-link-checks-on-any-std.patch',
+               'cairo/0001-win32-Make-font-dc-thread-local.patch',
                ]
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']

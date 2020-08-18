@@ -1,0 +1,62 @@
+From bc3f558c71bf68e28a179a8771e3e92c89acc6a5 Mon Sep 17 00:00:00 2001
+From: Yongsu Park <pcpenpal@gmail.com>
+Date: Wed, 11 Mar 2020 21:13:09 +0900
+Subject: [PATCH] win32: Make font dc thread local
+
+---
+ src/cairo-mutex-list-private.h |  1 +
+ src/win32/cairo-win32-font.c   | 18 +++++++++++++++++-
+ 2 files changed, 18 insertions(+), 1 deletion(-)
+
+diff --git a/src/cairo-mutex-list-private.h b/src/cairo-mutex-list-private.h
+index f46afadb0..ca7403006 100644
+--- a/src/cairo-mutex-list-private.h
++++ b/src/cairo-mutex-list-private.h
+@@ -53,6 +53,7 @@ CAIRO_MUTEX_DECLARE (_cairo_ft_unscaled_font_map_mutex)
+ 
+ #if CAIRO_HAS_WIN32_FONT
+ CAIRO_MUTEX_DECLARE (_cairo_win32_font_face_mutex)
++CAIRO_MUTEX_DECLARE (_cairo_win32_font_dc_mutex)
+ #endif
+ 
+ #if CAIRO_HAS_XLIB_SURFACE
+diff --git a/src/win32/cairo-win32-font.c b/src/win32/cairo-win32-font.c
+index 1599b0751..c6c21dda6 100644
+--- a/src/win32/cairo-win32-font.c
++++ b/src/win32/cairo-win32-font.c
+@@ -162,8 +162,19 @@ _cairo_win32_scaled_font_init_glyph_path (cairo_win32_scaled_font_t *scaled_font
+ static HDC
+ _get_global_font_dc (void)
+ {
+-    static HDC hdc;
++    static DWORD hdc_tls_index;
++    HDC hdc;
++
++    if (!hdc_tls_index) {
++	CAIRO_MUTEX_LOCK (_cairo_win32_font_dc_mutex);
++	if (!hdc_tls_index) {
++	    hdc_tls_index = TlsAlloc ();
++	    assert (hdc_tls_index != TLS_OUT_OF_INDEXES);
++	}
++	CAIRO_MUTEX_UNLOCK (_cairo_win32_font_dc_mutex);
++    }
+ 
++    hdc = TlsGetValue (hdc_tls_index);
+     if (!hdc) {
+ 	hdc = CreateCompatibleDC (NULL);
+ 	if (!hdc) {
+@@ -176,6 +187,11 @@ _get_global_font_dc (void)
+ 	    DeleteDC (hdc);
+ 	    return NULL;
+ 	}
++
++	if (!TlsSetValue (hdc_tls_index, hdc)) {
++	    DeleteDC (hdc);
++	    return NULL;
++	}
+     }
+ 
+     return hdc;
+-- 
+2.25.1
+
