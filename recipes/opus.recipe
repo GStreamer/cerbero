@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'opus'
@@ -30,3 +31,9 @@ class Recipe(recipe.Recipe):
         # Always have NEON on ARM64, don't need to detect the CPU at runtime.
         if self.config.target_arch == Architecture.ARM64:
             self.meson_options['rtcd'] = 'disabled'
+
+    def post_install(self):
+        major, minor, micro = get_libtool_versions(self.version)
+        LibtoolLibrary('opus', major, minor, micro,
+                self.config.libdir, self.config.target_platform).save()
+        super().post_install()
