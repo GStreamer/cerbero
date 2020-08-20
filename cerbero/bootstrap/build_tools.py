@@ -17,6 +17,8 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import sysconfig
+import shutil
 
 from cerbero.config import Config, Platform, DistroVersion
 from cerbero.bootstrap import BootstrapperBase
@@ -24,8 +26,10 @@ from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
 from cerbero.utils import _
+from cerbero.utils import messages as m
 from cerbero.errors import FatalError, ConfigurationError
 
+from pathlib import PurePath
 
 class BuildTools (BootstrapperBase, Fetch):
 
@@ -101,9 +105,38 @@ class BuildTools (BootstrapperBase, Fetch):
         self.recipes = self.BUILD_TOOLS
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 
+    def insert_python_site(self):
+        try:
+            import setuptools.version as stv
+        except ImportError:
+            return
+
+        version = [int(v) for v in stv.__version__.split('.')]
+        if len(version) < 1 or version[:1] < [49]:
+            return
+
+        m.warning('detected setuptools >= 49.0.0, installing fallback site.py file. '
+            'See https://github.com/pypa/setuptools/issues/2295')
+
+        # Since python-setuptools 49.0.0, site.py is not installed by
+        # easy_install/setup.py anymore which breaks python installs outside
+        # the system prefix.
+        # https://github.com/pypa/setuptools/issues/2295
+        #
+        # Install the previously installed site.py ourselves as a workaround
+        config = self.cookbook.get_config()
+
+        py_prefix = sysconfig.get_path('purelib', vars={'base': ''})
+        # Must strip \/ to ensure that the path is relative
+        py_prefix = PurePath(config.prefix) / PurePath(py_prefix.strip('\\/'))
+        src_file = os.path.join(os.path.dirname(__file__), 'site-patch.py')
+        shutil.copy(src_file, py_prefix / 'site.py')
+
     def start(self):
         self._setup_env()
+        self.insert_python_site()
         oven = Oven(self.recipes, self.cookbook)
+
         oven.start_cooking()
         self.config.do_setup_env()
 
