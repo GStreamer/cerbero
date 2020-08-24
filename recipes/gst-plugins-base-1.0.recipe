@@ -223,6 +223,8 @@ class Recipe(custom.GStreamer):
                 self.meson_options['gl_api'] = 'gles2'
                 self.meson_options['gl_platform'] = 'egl'
                 self.meson_options['gl_winsys'] = 'winrt'
+                # https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/-/issues/814
+                self.patches = [self.name + '/0001-TEMPORARY-HACK-Rename-egl.h-to-_egl.h.patch']
             else:
                 self.disable_plugin('opengl', 'sys', 'gl', library_name='gl')
             self.meson_options['gl-graphene'] = 'disabled'
