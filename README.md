@@ -145,7 +145,7 @@ Example usage:
 # Target MinGW 32-bit
 $ ./cerbero-uninstalled -c config/win32.cbc package gstreamer-1.0
 
-# Target MSVC 32-bit
+# Target MSVC 64-bit
 $ ./cerbero-uninstalled -c config/win64.cbc -v visualstudio package gstreamer-1.0
 
 # Target UWP, x86_64
@@ -297,6 +297,11 @@ Download the [Windows executable installer](https://www.python.org/downloads/) a
 * Third page, you must select the following options:
 
 ![Enable Install for all users, associate files with Python, add Python to environment variables, and customize the install location to not have any spaces in it](/data/images/py-installer-page3.png)
+
+* Enabled or Install [.NET 3.5.1 Framework](https://docs.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows-10)
+
+* On Windows 10, remove the Windows Store path entry from the PATH variable in the system settings. Otherwise, Cerbero will try to use the dummy Windows Store version of Python
+
 
 #### Install Git for Windows
 
