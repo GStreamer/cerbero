@@ -751,6 +751,7 @@ class Config(object):
         self.set_property('extra_bootstrap_packages', {})
         self.set_property('override_bootstrap_packages', {})
         self.set_property('bash_completions', set())
+        self.set_property('use_ccache', True)
         # Increase open-files limits
         set_nofile_ulimit()
 
