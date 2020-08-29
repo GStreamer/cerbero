@@ -6,8 +6,6 @@ git config --global user.email "cerbero@gstreamer.freedesktop.org"
 git config --global user.name  "Cerbero Build System"
 
 mkdir $HOME/.cerbero
-echo "allow_parallel_build=True" > $HOME/.cerbero/cerbero.cbc
-echo "use_ccache=True" >> $HOME/.cerbero/cerbero.cbc
 echo "local_sources=\"/cerbero-sources\"" >> localconf.cbc
 echo "home_dir=\"/cerbero-build\"" >> localconf.cbc
 ./cerbero-uninstalled -t -c localconf.cbc fetch-bootstrap --jobs=16

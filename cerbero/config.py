@@ -40,7 +40,6 @@ USER_CONFIG_DIR = Path('~/.cerbero').expanduser()
 USER_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 USER_CONFIG_FILE = (USER_CONFIG_DIR / USER_CONFIG_FILENAME).as_posix()
 DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
-DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = 'Default <default@change.me>'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror']
@@ -689,8 +688,8 @@ class Config(object):
         self.set_property('sources', None)
         self.set_property('local_sources', None)
         self.set_property('git_root', DEFAULT_GIT_ROOT)
-        self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
-        self.set_property('allow_universal_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
+        self.set_property('allow_parallel_build', True)
+        self.set_property('allow_universal_parallel_build', True)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)

@@ -20,4 +20,3 @@ universal_archs = {
 }
 
 #variants.override('nodebug')
-allow_parallel_build = True
