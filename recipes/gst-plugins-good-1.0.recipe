@@ -233,7 +233,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['osxaudio'] = 'enabled'
 
         self.enable_plugin('video4linux2', 'capture', 'v4l2', option='v4l2')
-        self.enable_plugin('ximagesrc', 'capture', 'x11', option='x11')
+        self.enable_plugin('ximagesrc', 'capture', 'x11')
         self.enable_plugin('pulseaudio', 'sys', 'pulse', option='pulse')
 
         # Enable qt5 plugin if possible and selected
