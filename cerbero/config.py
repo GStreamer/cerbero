@@ -73,7 +73,7 @@ class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
     __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio', 'uwp', 'qt5',
-                           'intelmsdk', 'nvcodec', 'python', 'werror', 'vaapi']
+                           'intelmsdk', 'python', 'werror', 'vaapi']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
     __bool_variants = __enabled_variants + __disabled_variants
     # Variants that are `key: (values)`, with the first value in the tuple

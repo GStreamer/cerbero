@@ -248,12 +248,9 @@ options enabled if possible.
 
 ### Nvidia Hardware Codecs
 
-For Nvidia, the [variant to enable](#enabling-optional-features-with-variants)
-is `nvcodec` which will build the `nvcodec` plugin.
-
-If CUDA is not installed into the system prefix, You need to set `CUDA_PATH` to
-point to your [CUDA SDK](https://developer.nvidia.com/cuda-downloads) prefix.
-On Windows, this is done automatically by the installer.
+Since 1.17.1, the `nvcodec` plugin does not need access to the Nvidia Video SDK
+or the CUDA SDK. It now loads everything at runtime. Hence, it is now enabled
+by default on all platforms.
 
 ## Enabling Visual Studio Support
 

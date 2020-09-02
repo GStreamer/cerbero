@@ -20,6 +20,7 @@ class Recipe(custom.GStreamer):
                      'kate': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
                      'libmms': 'enabled',
+                     'nvcodec': 'enabled',
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
                      'opus': 'enabled',
@@ -217,6 +218,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspandsp%(mext)s',
              'lib/gstreamer-1.0/libgstsbc%(mext)s',
              'lib/gstreamer-1.0/libgstzbar%(mext)s',
+             'lib/gstreamer-1.0/libgstnvcodec%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
@@ -248,6 +250,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspandsp.a', 'lib/gstreamer-1.0/libgstspandsp.la',
              'lib/gstreamer-1.0/libgstsbc.a', 'lib/gstreamer-1.0/libgstsbc.la',
              'lib/gstreamer-1.0/libgstzbar.a', 'lib/gstreamer-1.0/libgstzbar.la',
+             'lib/gstreamer-1.0/libgstnvcodec.a', 'lib/gstreamer-1.0/libgstnvcodec.la',
     ]
 
     platform_files_plugins_codecs = {
@@ -454,8 +457,8 @@ class Recipe(custom.GStreamer):
             self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
             self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
 
-        # Enable hardware codecs if variants are enabled
-        self.enable_plugin('nvcodec', 'codecs', 'nvcodec')
+        # Enable hardware codecs if variants are enabled since they have
+        # external dependencies such as SDKs.
         self.enable_plugin('msdk', 'codecs', 'intelmsdk')
         self.enable_plugin('va', 'codecs', 'vaapi')
 
@@ -495,6 +498,7 @@ class Recipe(custom.GStreamer):
 
         if self.using_uwp() or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
+            self.disable_plugin('nvcodec', 'codecs')
 
         # dtls plugin needs openssl, and we pick up the system openssl if on
         # Linux and not cross-compiling.
