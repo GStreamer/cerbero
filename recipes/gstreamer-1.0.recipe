@@ -44,6 +44,10 @@ class Recipe(custom.GStreamer):
             'lib/pkgconfig/gstreamer-net-1.0.pc',
     ]
 
+    platform_files_devel = {
+        Platform.ANDROID: ['share/gst-android/ndk-build/GStreamer.java'],
+    }
+
     files_lang = ['gstreamer-1.0']
 
     files_typelibs = [

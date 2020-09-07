@@ -234,21 +234,15 @@ buildsharedlibrary_$(TARGET_ARCH_ABI): $(GSTREAMER_ANDROID_O)
 	$(hide)$(PRIV_CMD)
 
 ifeq ($(GSTREAMER_INCLUDE_FONTS),yes)
-GSTREAMER_INCLUDE_FONTS_SUBST :=
+GSTREAMER_INCLUDE_FONTS_SUBST := copyFonts
 else
-GSTREAMER_INCLUDE_FONTS_SUBST := //
+GSTREAMER_INCLUDE_FONTS_SUBST := //copyFonts
 endif
 
 ifeq ($(GSTREAMER_INCLUDE_CA_CERTIFICATES),yes)
-GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST := 
+GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST := copyCaCertificates
 else
-GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST := //
-endif
-
-ifneq (,$(findstring yes,$(GSTREAMER_INCLUDE_FONTS)$(GSTREAMER_INCLUDE_CA_CERTIFICATES)))
-GSTREAMER_COPY_FILE_SUBST := 
-else
-GSTREAMER_COPY_FILE_SUBST := //
+GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST := //copyCaCertificates
 endif
 
 # about the sed command, android-studio doesn't seem to like line continuation characters when executing shell commands
@@ -258,7 +252,7 @@ copyjavasource_$(TARGET_ARCH_ABI):
 		$(call host-mkdir,$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(plugin)) && ) echo Done mkdir
 	$(hide)$(foreach file,$(GSTREAMER_PLUGINS_CLASSES), \
 		$(call host-cp,$(GSTREAMER_NDK_BUILD_PATH)$(file),$(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/$(file)) && ) echo Done cp
-	$(hide)$(SED_LOCAL) "s;@INCLUDE_FONTS@;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | $(SED_LOCAL) "s;@INCLUDE_CA_CERTIFICATES@;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" | $(SED_LOCAL) "s;@INCLUDE_COPY_FILE@;$(GSTREAMER_COPY_FILE_SUBST);g" > $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
+	$(hide)$(SED_LOCAL) "s;//copyFonts;$(GSTREAMER_INCLUDE_FONTS_SUBST);g" $(GSTREAMER_NDK_BUILD_PATH)/GStreamer.java | $(SED_LOCAL) "s;//copyCaCertificates;$(GSTREAMER_INCLUDE_CA_CERTIFICATES_SUBST);g" > $(GSTREAMER_JAVA_SRC_DIR)/org/freedesktop/gstreamer/GStreamer.java
 
 ifndef GSTREAMER_ASSETS_DIR
 GSTREAMER_ASSETS_DIR := src/main/assets

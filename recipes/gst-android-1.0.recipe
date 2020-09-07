@@ -21,7 +21,6 @@ class Recipe(recipe.Recipe):
             'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
             'share/gst-android/ndk-build/tools.mk',
             'share/gst-android/ndk-build/plugins.mk',
-            'share/gst-android/ndk-build/GStreamer.java',
             'share/gst-android/ndk-build/tools',
             'share/gst-android/ndk-build/fontconfig',
             ]
