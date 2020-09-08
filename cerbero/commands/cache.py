@@ -214,7 +214,7 @@ class UploadCache(BaseCache):
       sha = self.get_git_sha(args)
       for dep in deps:
         if dep['commit'] == sha:
-          m.message('Cache already uploaded for this commit.')
+          m.message('Cache already uploaded for commit {}'.format(sha))
           return
 
       tmpdir = tempfile.mkdtemp()
@@ -235,6 +235,7 @@ class UploadCache(BaseCache):
                   f.write("\n")
                   f.close()
               ssh_opt += ['-i', private_key_path]
+              print('Using private key using env var CERBERO_PRIVATE_SSH_KEY')
           ssh_cmd = ['ssh'] + ssh_opt + [self.ssh_address]
           scp_cmd = ['scp'] + ssh_opt
 
