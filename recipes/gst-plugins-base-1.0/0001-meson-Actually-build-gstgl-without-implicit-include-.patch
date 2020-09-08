@@ -1,0 +1,26 @@
+From a925557b17f0e3852036828dcd924013e0225f23 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 8 Sep 2020 15:41:55 +0530
+Subject: [PATCH] meson: Actually build gstgl without implicit include dirs
+
+Fixes a typo from https://gitlab.freedesktop.org/gstreamer/gst-plugins-base/-/merge_requests/800
+---
+ gst-libs/gst/gl/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gst-libs/gst/gl/meson.build b/gst-libs/gst/gl/meson.build
+index aab2b13..db11c5e 100644
+--- a/gst-libs/gst/gl/meson.build
++++ b/gst-libs/gst/gl/meson.build
+@@ -1002,7 +1002,7 @@ if build_gstgl
+     dependencies : [gst_base_dep, video_dep, allocators_dep, gmodule_dep,
+                     gl_lib_deps, gl_platform_deps, gl_winsys_deps, gl_misc_deps],
+     # don't confuse EGL/egl.h with gst-libs/gl/egl/egl.h on case-insensitive file systems
+-    implicit_include_directories : true)
++    implicit_include_directories : false)
+ 
+   if build_gir
+     gl_gir = gnome.generate_gir(gstgl,
+-- 
+2.27.0.windows.1
+
