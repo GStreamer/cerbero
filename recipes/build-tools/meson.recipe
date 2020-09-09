@@ -5,21 +5,15 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.54.0'
+    version = '0.55.3'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = 'dde5726d778112acbd4a67bb3633ab2ee75d33d1e879a6283a7b4a44c3363c27'
+    tarball_checksum = '6bed2a25a128bbabe97cf40f63165ebe800e4fcb46db8ab7ef5c2b5789f092a5'
     patches = [
-        # Remove this on bump to 0.54.1, https://github.com/mesonbuild/meson/pull/6896
-        'meson/0001-qt-dependency-Pick-debug-libraries-based-on-b_vscrt.patch',
-        # https://github.com/mesonbuild/meson/pull/7138
-        'meson/0001-ui-qt-use-new-directory-layout-for-qt-on-android.patch',
-        # https://github.com/mesonbuild/meson/pull/7021
+        # Remove on bump to 0.56, https://github.com/mesonbuild/meson/pull/7021
         'meson/0001-meson-Allow-cross-compile-without-a-native-compiler.patch',
-        # https://github.com/mesonbuild/meson/pull/7272
-        'meson/0001-Add-UNIX-large-file-support-for-MinGW.patch',
     ]
 
     deps = ['ninja']

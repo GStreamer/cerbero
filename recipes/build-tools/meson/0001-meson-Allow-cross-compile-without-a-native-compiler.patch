@@ -1,13 +1,12 @@
 From a6aa905f2c580a34e6bb1c547b20ec6ecd4011d0 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 23 Apr 2020 08:32:15 +0530
-Subject: [PATCH 1/2] Allow cross-compile without a native compiler
+Subject: Allow cross-compile without a native compiler
 
 ---
  mesonbuild/backend/ninjabackend.py | 2 +-
- mesonbuild/environment.py          | 2 +-
  mesonbuild/interpreter.py          | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/mesonbuild/backend/ninjabackend.py b/mesonbuild/backend/ninjabackend.py
 index 03ccd196..aeffc80a 100644
@@ -19,22 +18,9 @@ index 03ccd196..aeffc80a 100644
              if static_linker is None:
 -                return
 +                continue
-             rule = 'STATIC_LINKER%s' % self.get_rule_suffix(for_machine)
+             rule = 'STATIC_LINKER{}'.format(self.get_rule_suffix(for_machine))
              cmdlist = []
              args = ['$in']
-diff --git a/mesonbuild/environment.py b/mesonbuild/environment.py
-index 11bc76c9..fd375571 100644
---- a/mesonbuild/environment.py
-+++ b/mesonbuild/environment.py
-@@ -899,7 +899,7 @@ class Environment:
-     def _detect_c_or_cpp_compiler(self, lang: str, for_machine: MachineChoice) -> Compiler:
-         popen_exceptions = {}
-         compilers, ccache, exe_wrap = self._get_compilers(lang, for_machine)
--        is_cross = not self.machines.matches_build_machine(for_machine)
-+        is_cross = not self.machines.matches_build_machine(for_machine) or self.need_exe_wrapper(for_machine)
-         info = self.machines[for_machine]
- 
-         for compiler in compilers:
 diff --git a/mesonbuild/interpreter.py b/mesonbuild/interpreter.py
 index 214b1eb5..c8473cb6 100644
 --- a/mesonbuild/interpreter.py
@@ -48,69 +34,6 @@ index 214b1eb5..c8473cb6 100644
          self.add_languages(proj_langs, True, MachineChoice.HOST)
          self.set_backend()
          if not self.is_subproject():
--- 
-2.26.1.windows.1
-
-
-From 4efad015b9377710a15507083bb12ad2830fde80 Mon Sep 17 00:00:00 2001
-From: Nirbheek Chauhan <nirbheek@centricular.com>
-Date: Thu, 23 Apr 2020 09:38:21 +0530
-Subject: [PATCH 2/2] windows linker: Only guess if we don't know target
- cpu_family
-
-Unlike `cl.exe, MSVC `link.exe` has a 'default' target machine, and
-the actual target machine can be selected with `/MACHINE:`. The
-'default' is `X86` if you use the x86 native or cross toolchain and
-it's `X64` if you use the x64 native or cross toolchain.
-
-So, if you call `vcvarsall.bat x86_arm64` which is the x86 cross
-toolchain for arm64, `link.exe` will default to `X86`, not `ARM64`.
-It has to be selected by the build system by passing `/MACHINE:ARM64`
-
-So that's what we do now. In the native build case when a native file
-is not passed, the auto-detect will always be correct, and in the
-cross build case we will always know the `cpu_family`, so this fixes
-it for all cases.
----
- mesonbuild/environment.py | 22 +++++++++++++++++-----
- 1 file changed, 17 insertions(+), 5 deletions(-)
-
-diff --git a/mesonbuild/environment.py b/mesonbuild/environment.py
-index fd375571..ca6208c9 100644
---- a/mesonbuild/environment.py
-+++ b/mesonbuild/environment.py
-@@ -804,14 +804,26 @@ class Environment:
-             return OptlinkDynamicLinker(compiler, for_machine, version=search_version(o))
-         elif o.startswith('Microsoft') or e.startswith('Microsoft'):
-             out = o or e
--            match = re.search(r'.*(X86|X64|ARM|ARM64).*', out)
--            if match:
--                target = str(match.group(1))
-+
-+            target_arch = self.machines[for_machine].cpu_family
-+            if target_arch is None:
-+                match = re.search(r'.*(X86|X64|ARM|ARM64)\s+', out)
-+                if match:
-+                    target_arch = str(match.group(1))
-+                else:
-+                    target_arch = 'X86'
-+            elif target_arch in ('x86', 'arm'):
-+                target_arch = target_arch.upper()
-+            elif target_arch == 'x86_64':
-+                target_arch = 'X64'
-+            elif target_arch == 'aarch64':
-+                target_arch = 'ARM64'
-             else:
--                target = 'x86'
-+                raise EnvironmentException('Unknown target arch {!r} for MSVC linker '
-+                                           '`link.exe`'.format(target_arch))
- 
-             return MSVCDynamicLinker(
--                for_machine, [], machine=target, exelist=compiler,
-+                for_machine, [], machine=target_arch, exelist=compiler,
-                 prefix=comp_class.LINKER_PREFIX if use_linker_prefix else [],
-                 version=search_version(out), direct=invoked_directly)
-         elif 'GNU coreutils' in o:
 -- 
 2.26.1.windows.1
 
