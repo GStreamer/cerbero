@@ -185,7 +185,8 @@ class BaseTarball(object):
         cc = self.config.platform == Platform.LINUX
         shell.download(self.url, self.download_path, check_cert=cc,
             overwrite=redownload, logfile=get_logfile(self),
-            mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS)
+            mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS,
+            env=self.config._pre_environ)
         self.verify()
 
     @staticmethod

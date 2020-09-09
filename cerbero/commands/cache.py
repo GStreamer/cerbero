@@ -57,12 +57,12 @@ class BaseCache(Command):
         git_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
         return git.get_hash(git_dir, args.commit)
 
-    def json_get(self, url):
+    def json_get(self, url, config):
         m.message("GET %s" % url)
 
         tmpdir = tempfile.mkdtemp()
         tmpfile = os.path.join(tmpdir, 'deps.json')
-        shell.download(url, destination=tmpfile)
+        shell.download(url, destination=tmpfile, env=config._pre_environ)
 
         with open(tmpfile, 'r') as f:
             resp = f.read()
@@ -92,7 +92,7 @@ class BaseCache(Command):
         deps = []
 
         try:
-            deps = self.json_get(url)
+            deps = self.json_get(url, config)
         except FatalError as e:
             m.warning("Could not get cache list: %s" % e.msg)
 
@@ -130,7 +130,7 @@ class FetchCache(BaseCache):
     def fetch_dep(self, config, dep, namespace):
         try:
             dep_path = os.path.join(config.home_dir, os.path.basename(dep['url']))
-            shell.download(dep['url'], dep_path, check_cert=True, overwrite=True)
+            shell.download(dep['url'], dep_path, check_cert=True, overwrite=True, env=config._pre_environ)
             if dep['checksum'] == self.checksum(dep_path):
                 shell.unpack(dep_path, config.home_dir)
             else:

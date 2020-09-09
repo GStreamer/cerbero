@@ -317,7 +317,7 @@ def unpack(filepath, output_dir, logfile=None):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-def download_wget(url, destination=None, check_cert=True, overwrite=False):
+def download_wget(url, destination=None, check_cert=True, overwrite=False, env=None):
     '''
     Downloads a file with wget
 
@@ -339,13 +339,13 @@ def download_wget(url, destination=None, check_cert=True, overwrite=False):
     cmd += " --progress=dot:giga"
 
     try:
-        call(cmd, path)
+        call(cmd, path, env=env)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)
         raise e
 
-def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
+def download_urllib2(url, destination=None, check_cert=True, overwrite=False, env=None):
     '''
     Download a file with urllib2, which does not rely on external programs
 
@@ -376,7 +376,7 @@ def download_urllib2(url, destination=None, check_cert=True, overwrite=False):
             os.remove(destination)
         raise e
 
-def download_curl(url, destination=None, check_cert=True, overwrite=False):
+def download_curl(url, destination=None, check_cert=True, overwrite=False, env=None):
     '''
     Downloads a file with cURL
 
@@ -394,13 +394,13 @@ def download_curl(url, destination=None, check_cert=True, overwrite=False):
     else:
         cmd += "-O %s " % url
     try:
-        call(cmd, path)
+        call(cmd, path, env=env)
     except FatalError as e:
         if os.path.exists(destination):
             os.remove(destination)
         raise e
 
-def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None):
+def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None, env=None):
     '''
     Downloads a file
 
@@ -450,7 +450,7 @@ def download(url, destination=None, check_cert=True, overwrite=False, logfile=No
     errors = []
     for murl in urls:
         try:
-            return download_func(murl, destination, check_cert, overwrite)
+            return download_func(murl, destination, check_cert, overwrite, env)
         except Exception as ex:
             errors.append((murl, ex))
     if len(errors) == 1:
