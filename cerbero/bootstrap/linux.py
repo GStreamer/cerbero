@@ -109,7 +109,7 @@ class RedHatBootstrapper (UnixBootstrapper):
         'mesa-libGL-devel', 'libXcomposite-devel', 'perl-ExtUtils-MakeMaker',
         'libXi-devel', 'perl-XML-Simple', 'gperf', 'wget', 'libXrandr-devel',
         'libXtst-devel', 'git', 'xorg-x11-util-macros', 'mesa-libEGL-devel',
-        'ccache', 'openssl-devel'
+        'ccache', 'openssl-devel', 'alsa-lib-devel',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -157,7 +157,7 @@ class ArchBootstrapper (UnixBootstrapper):
         'intltool', 'cmake', 'libtool', 'bison', 'flex', 'automake',
         'autoconf', 'make', 'gettext', 'nasm', 'gperf', 'libxrender', 'libxv',
         'mesa', 'python3', 'wget', 'git', 'xorg-util-macros', 'ccache',
-        'openssl'
+        'openssl', 'alsa-lib',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -185,7 +185,7 @@ class GentooBootstrapper (UnixBootstrapper):
         'sys-devel/autoconf', 'sys-devel/make', 'sys-devel/gettext',
         'media-sound/pulseaudio', 'dev-lang/nasm', 'dev-util/gperf',
         'x11-libs/libXrender', 'x11-libs/libXv', 'media-libs/mesa',
-        'net-misc/wget', 'dev-libs/openssl'
+        'net-misc/wget', 'dev-libs/openssl', 'media-libs/alsa-lib'
     ]
 
 class NoneBootstrapper (BootstrapperBase):
