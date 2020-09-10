@@ -24,8 +24,6 @@ class Recipe(custom.GStreamer):
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
 
-    patches = [name + '/0001-meson-Actually-build-gstgl-without-implicit-include-.patch']
-
     files_bins = ['gst-discoverer-1.0', 'gst-play-1.0', 'gst-device-monitor-1.0']
 
     files_libs = ['libgstallocators-1.0',
