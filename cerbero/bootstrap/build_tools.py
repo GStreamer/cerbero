@@ -33,11 +33,10 @@ class BuildTools (BootstrapperBase, Fetch):
     BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
                    'orc-tool', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'gettext-m4', 'gperf', 'bison', 'flex',
-                          'moltenvk-tools', 'gettext-tools', 'm4'],
+        Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
+                          'moltenvk-tools'],
         # MSYS already ships with bison, flex, m4 on Windows
-        Platform.WINDOWS: ['intltool', 'gettext-m4', 'gperf', 'nasm',
-                           'gettext-tools'],
+        Platform.WINDOWS: ['intltool', 'gperf', 'nasm'],
         Platform.LINUX: ['intltool-m4'],
     }
 
