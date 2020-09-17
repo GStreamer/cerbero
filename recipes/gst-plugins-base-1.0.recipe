@@ -10,7 +10,6 @@ class Recipe(custom.GStreamer):
                      'gl-graphene': 'enabled',
                      'gl-png': 'enabled',
                      'gl-jpeg': 'enabled',
-                     'libvisual': 'enabled',
                      'ogg': 'enabled',
                      'opus': 'enabled',
                      'pango': 'enabled',
@@ -19,7 +18,7 @@ class Recipe(custom.GStreamer):
                      # disabled plugins
                      'tremor': 'disabled'}
     deps = ['glib', 'gstreamer-1.0', 'libogg', 'pango', 'libtheora',
-            'libvisual', 'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
+            'libvorbis', 'zlib', 'orc', 'opus', 'graphene',
             'libjpeg-turbo', 'libpng']
     platform_deps = {Platform.ANDROID: [ 'tremor' ], Platform.IOS: [ 'tremor' ] }
     use_system_libs = True
@@ -105,14 +104,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgsttheora.a', 'lib/gstreamer-1.0/libgsttheora.la',
              'lib/gstreamer-1.0/libgstvorbis.a', 'lib/gstreamer-1.0/libgstvorbis.la',
              'lib/gstreamer-1.0/libgstopus.a', 'lib/gstreamer-1.0/libgstopus.la',
-    ]
-
-    files_plugins_vis = [
-             'lib/gstreamer-1.0/libgstlibvisual%(mext)s',
-    ]
-
-    files_plugins_vis_devel = [
-             'lib/gstreamer-1.0/libgstlibvisual.a', 'lib/gstreamer-1.0/libgstlibvisual.la',
     ]
 
     files_plugins_devel = [
@@ -210,8 +201,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['tremor'] = 'enabled'
 
         if self.using_uwp():
-            # All these except libvisual can be ported to Meson/UWP
-            self.disable_plugin('libvisual', 'vis', dep='libvisual')
+            # All these can be ported to Meson/UWP
             self.disable_plugin('ogg', 'codecs', dep='libogg')
             self.disable_plugin('pango', 'core', dep='pango')
             self.disable_plugin('theora', 'codecs', dep='libtheora')
