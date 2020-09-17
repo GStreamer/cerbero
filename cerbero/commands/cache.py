@@ -243,26 +243,28 @@ class UploadCache(BaseCache):
           branch = args.branch
           distro, arch = self.get_distro_and_arch(config)
           base_dir = os.path.join(branch, distro, arch)
-          shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ])
+          shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
 
           # Upload the deps files first
           remote_deps_filename = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-          shell.new_call(scp_cmd + [deps_filename, '%s:%s' % (self.ssh_address, remote_deps_filename)])
+          shell.new_call(scp_cmd + [deps_filename, '%s:%s' % (self.ssh_address, remote_deps_filename)],
+                         verbose=True)
 
           # Upload the new log
           remote_tmp_log_filename = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-          shell.new_call(scp_cmd + [log_filename,
-              '%s:%s' % (self.ssh_address, remote_tmp_log_filename)])
+          shell.new_call(scp_cmd + [log_filename, '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
+                         verbose=True)
 
           # Override the new log in a way that we reduce the risk of corrupted
           # fetch.
           remote_log_filename = os.path.join(base_dir, self.log_filename)
-          shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename])
+          shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename],
+                         verbose=True)
 
           # Now remove the obsoleted dep file if needed
           for dep in deps[self.log_size - 1:]:
               old_remote_deps_filename = os.path.join(base_dir, os.path.basename(dep['url']))
-              shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filename])
+              shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filename], verbose=True)
       finally:
           shutil.rmtree(tmpdir)
 

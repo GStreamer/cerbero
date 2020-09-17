@@ -180,11 +180,13 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     return o
 
 
-def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None):
+def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
         logfile.write('Running command {!r}\n'.format(cmd))
         logfile.flush()
+    if verbose:
+        m.message('Running {!r}\n'.format(cmd))
     try:
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT)
