@@ -23,8 +23,9 @@ import shutil
 from hashlib import sha256
 
 from cerbero.commands import Command, register_command
+from cerbero.enums import Platform
 from cerbero.errors import FatalError
-from cerbero.utils import _, N_, ArgparseArgument, git, shell, run_until_complete
+from cerbero.utils import _, N_, ArgparseArgument, git, shell, run_until_complete, to_unixpath
 from cerbero.utils import messages as m
 from cerbero.config import Distro
 
@@ -211,6 +212,17 @@ class UploadCache(BaseCache):
     def __init__(self, args=[]):
         BaseCache.__init__(self, args)
 
+    @staticmethod
+    def msys_scp_path_hack(config, path):
+        '''
+        MSYS scp doesn't understand Windows-style paths like C:/ for the src
+        argument. It tries to resolve `C:` as a network hostname. Convert C:/
+        to /C/ when running on Windows.
+        '''
+        if config.platform == Platform.WINDOWS:
+            return to_unixpath(path)
+        return path
+
     def upload_dep(self, config, args, deps):
       sha = self.get_git_sha(args)
       for dep in deps:
@@ -247,12 +259,14 @@ class UploadCache(BaseCache):
 
           # Upload the deps files first
           remote_deps_filename = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-          shell.new_call(scp_cmd + [deps_filename, '%s:%s' % (self.ssh_address, remote_deps_filename)],
+          shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filename),
+                                    '%s:%s' % (self.ssh_address, remote_deps_filename)],
                          verbose=True)
 
           # Upload the new log
           remote_tmp_log_filename = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-          shell.new_call(scp_cmd + [log_filename, '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
+          shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filename),
+                                    '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
                          verbose=True)
 
           # Override the new log in a way that we reduce the risk of corrupted
