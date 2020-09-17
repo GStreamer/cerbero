@@ -46,6 +46,15 @@ class BuildTools (BootstrapperBase, Fetch):
         if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
             # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
+
+        if self.config.variants.uwp:
+            # UWP config does not build any autotools recipes
+            self.BUILD_TOOLS.remove('automake')
+            self.BUILD_TOOLS.remove('autoconf')
+            self.BUILD_TOOLS.remove('libtool')
+            self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
+            self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
+
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
