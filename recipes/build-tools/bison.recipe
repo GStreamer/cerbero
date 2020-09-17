@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'gnu://'
     tarball_checksum = 'a72428c7917bdf9fa93cb8181c971b6e22834125848cf1d03ce10b1bb0716fe1'
-    deps = ['automake', 'autoconf', 'gettext-tools']
+    deps = ['automake', 'autoconf']
+    override_libtool = False
 
     patches = ['bison/0001-Fix-build-invalid-instruction-on-macOS-10.3.patch']
 
