@@ -231,63 +231,63 @@ class UploadCache(BaseCache):
         return path
 
     def upload_dep(self, config, args, deps):
-      sha = self.get_git_sha(args)
-      for dep in deps:
-        if dep['commit'] == sha:
-          m.message('Cache already uploaded for this commit.')
-          return
+        sha = self.get_git_sha(args)
+        for dep in deps:
+            if dep['commit'] == sha:
+                m.message('Cache already uploaded for this commit.')
+                return
 
-      tmpdir = tempfile.mkdtemp()
-      private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY');
-      private_key_path = os.path.join(tmpdir, 'id_rsa')
+        tmpdir = tempfile.mkdtemp()
+        private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY');
+        private_key_path = os.path.join(tmpdir, 'id_rsa')
 
-      deps_filename = self.get_deps_filename(config)
-      log_filename = self.get_log_filename(config)
-      if not os.path.exists(deps_filename) or not os.path.exists(log_filename):
-          raise FatalError(_('gen-cache must be run before running upload-cache.'))
+        deps_filename = self.get_deps_filename(config)
+        log_filename = self.get_log_filename(config)
+        if not os.path.exists(deps_filename) or not os.path.exists(log_filename):
+            raise FatalError(_('gen-cache must be run before running upload-cache.'))
 
-      try:
-          # Setup tempory private key from env
-          ssh_opt = ['-o', 'StrictHostKeyChecking=no']
-          if private_key:
-              with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
-                  f.write(private_key)
-                  f.write("\n")
-                  f.close()
-              ssh_opt += ['-i', private_key_path]
-          ssh_cmd = ['ssh'] + ssh_opt + [self.ssh_address]
-          scp_cmd = ['scp'] + ssh_opt
+        try:
+            # Setup tempory private key from env
+            ssh_opt = ['-o', 'StrictHostKeyChecking=no']
+            if private_key:
+                with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
+                    f.write(private_key)
+                    f.write("\n")
+                    f.close()
+                ssh_opt += ['-i', private_key_path]
+            ssh_cmd = ['ssh'] + ssh_opt + [self.ssh_address]
+            scp_cmd = ['scp'] + ssh_opt
 
-          # Ensure directory sturcture is in place
-          branch = args.branch
-          distro, arch = self.get_distro_and_arch(config)
-          base_dir = os.path.join(branch, distro, arch)
-          shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
+            # Ensure directory sturcture is in place
+            branch = args.branch
+            distro, arch = self.get_distro_and_arch(config)
+            base_dir = os.path.join(branch, distro, arch)
+            shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
 
-          # Upload the deps files first
-          remote_deps_filename = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-          shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filename),
-                                    '%s:%s' % (self.ssh_address, remote_deps_filename)],
-                         verbose=True)
+            # Upload the deps files first
+            remote_deps_filename = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
+            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filename),
+                                      '%s:%s' % (self.ssh_address, remote_deps_filename)],
+                           verbose=True)
 
-          # Upload the new log
-          remote_tmp_log_filename = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-          shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filename),
-                                    '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
-                         verbose=True)
+            # Upload the new log
+            remote_tmp_log_filename = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
+            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filename),
+                                      '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
+                           verbose=True)
 
-          # Override the new log in a way that we reduce the risk of corrupted
-          # fetch.
-          remote_log_filename = os.path.join(base_dir, self.log_filename)
-          shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename],
-                         verbose=True)
+            # Override the new log in a way that we reduce the risk of corrupted
+            # fetch.
+            remote_log_filename = os.path.join(base_dir, self.log_filename)
+            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename],
+                           verbose=True)
 
-          # Now remove the obsoleted dep file if needed
-          for dep in deps[self.log_size - 1:]:
-              old_remote_deps_filename = os.path.join(base_dir, os.path.basename(dep['url']))
-              shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filename], verbose=True)
-      finally:
-          shutil.rmtree(tmpdir)
+            # Now remove the obsoleted dep file if needed
+            for dep in deps[self.log_size - 1:]:
+                old_remote_deps_filename = os.path.join(base_dir, os.path.basename(dep['url']))
+                shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filename], verbose=True)
+        finally:
+            shutil.rmtree(tmpdir)
 
     def run(self, config, args):
         BaseCache.run(self, config, args)
