@@ -32,6 +32,7 @@ from cerbero.config import Distro
 class BaseCache(Command):
     base_url = 'https://artifacts.gstreamer-foundation.net/cerbero-deps/%s/%s/%s'
     ssh_address = 'cerbero-deps-uploader@artifacts.gstreamer-foundation.net'
+    # FIXME: fetch this value from CI env vars
     build_dir = '/builds/%s/cerbero/cerbero-build'
     deps_filename = 'cerbero-deps.tar.xz'
     log_filename = 'cerbero-deps.log'
@@ -139,13 +140,19 @@ class FetchCache(BaseCache):
                 m.warning("Corrupted dependency file, ignoring.")
             os.remove(dep_path)
 
-            origin = self.build_dir % namespace
-            m.message("Relocating from %s to %s" % (origin, config.home_dir))
-            # FIXME: Just a quick hack for now
-            shell.call(("grep -lnrIU %(origin)s | xargs "
-                        "sed \"s#%(origin)s#%(dest)s#g\" -i") % {
-                            'origin': origin, 'dest': config.home_dir},
-                        config.home_dir)
+            # Don't need to relocate on Windows since binaries in the prefix
+            # are meant to be used in a relocatable manner. In case this needs
+            # to be re-enabled at some point, note that the current
+            # self.build_dir value is an absolute path, and should instead be
+            # derived from CI env vars.
+            if config.target_platform != Platform.WINDOWS:
+                origin = self.build_dir % namespace
+                m.message("Relocating from %s to %s" % (origin, config.home_dir))
+                # FIXME: Just a quick hack for now
+                shell.call(("grep -lnrIU %(origin)s | xargs "
+                            "sed \"s#%(origin)s#%(dest)s#g\" -i") % {
+                                'origin': origin, 'dest': config.home_dir},
+                            config.home_dir)
         except FatalError as e:
             m.warning("Could not retrieve dependencies for commit %s: %s" % (
                         dep['commit'], e.msg))
