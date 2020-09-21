@@ -11,9 +11,13 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     meson_options = {'internal_pcre': 'true', 'libmount': 'false',
                      'dtrace': 'false', 'iconv': 'auto', 'selinux' : 'disabled'}
-    deps = ['proxy-libintl', 'libffi', 'zlib', 'pkg-config']
+    deps = ['libffi', 'zlib', 'pkg-config']
 
     def prepare(self):
+        # On Linux we must use the system gettext
+        if self.config.platform != Platform.LINUX:
+            self.deps.append('proxy-libintl')
+
         # Android only provides libiconv with API level >=28 (Pie and newer)
         if self.config.target_platform == Platform.ANDROID:
             self.deps.append('libiconv')
