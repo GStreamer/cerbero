@@ -165,6 +165,7 @@ class FetchCache(BaseCache):
         dep = self.find_dep(deps, sha)
         if dep:
             run_until_complete(self.fetch_dep(config, dep, args.namespace))
+        m.message('All done!')
 
 class GenCache(BaseCache):
     doc = N_('Generate build cache from current state.')
@@ -204,6 +205,7 @@ class GenCache(BaseCache):
             os.remove(deps_filename)
             os.remove(log_filename)
             raise
+        m.message('build-dep cache generated as {}'.format(deps_filename))
 
     def run(self, config, args):
         BaseCache.run(self, config, args)
@@ -281,6 +283,7 @@ class UploadCache(BaseCache):
             remote_log_filename = os.path.join(base_dir, self.log_filename)
             shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename],
                            verbose=True)
+            m.message('New deps cache uploaded and deps log updated')
 
             # Now remove the obsoleted dep file if needed
             for dep in deps[self.log_size - 1:]:
@@ -293,6 +296,7 @@ class UploadCache(BaseCache):
         BaseCache.run(self, config, args)
         deps = self.get_deps(config, args)
         self.upload_dep(config, args, deps)
+        m.message('All done!')
 
 register_command(FetchCache)
 register_command(GenCache)
