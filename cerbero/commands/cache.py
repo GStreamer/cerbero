@@ -80,6 +80,13 @@ class BaseCache(Command):
             distro = 'fedora'
         if distro == Distro.OS_X:
             distro = 'macos'
+        if distro == Distro.WINDOWS:
+            # When targeting Windows, we need to differentiate between mingw,
+            # msvc, and uwp (debug/release) jobs. When cross-compiling this
+            # will always be 'cross-windows-mingw' right now, but that might
+            # change at some point.
+            toolchain, _ = config._get_toolchain_target_platform_arch()
+            distro = 'windows-' + toolchain
         if config.cross_compiling():
             distro = 'cross-' + distro
         return distro, arch

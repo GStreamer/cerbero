@@ -703,9 +703,9 @@ class Config (object):
     def _get_toolchain_target_platform_arch(self):
         platform_arch = '{}_' + self.target_arch
         if self.target_platform != Platform.WINDOWS or self.prefix_is_build_tools():
-            return platform_arch.format(self.target_platform)
+            return (self.target_platform, self.target_arch)
         if not self.variants.visualstudio:
-            return platform_arch.format('mingw')
+            return ('mingw', self.target_arch)
         # When building with Visual Studio, we can target (MSVC, UWP) x (debug, release)
         if self.variants.uwp:
             target_platform = 'uwp'
@@ -717,8 +717,7 @@ class Config (object):
         # Check for invalid configuration of a custom Visual Studio path
         if self.vs_install_path and not self.vs_install_version:
             raise ConfigurationError('vs_install_path was set, but vs_install_version was not')
-
-        return platform_arch.format(target_platform)
+        return (target_platform, self.target_arch)
 
     def _load_last_defaults(self):
         # Set build tools defaults
@@ -730,7 +729,7 @@ class Config (object):
                 os.path.join(self.home_dir, 'logs', 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools.cache')
         # Set target platform defaults
-        platform_arch = self._get_toolchain_target_platform_arch()
+        platform_arch = '_'.join(self._get_toolchain_target_platform_arch())
         self.set_property('prefix', os.path.join(self.home_dir, "dist", platform_arch))
         self.set_property('sources', os.path.join(self.home_dir, "sources", platform_arch))
         self.set_property('logs', os.path.join(self.home_dir, "logs", platform_arch))
