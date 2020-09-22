@@ -34,14 +34,11 @@ def register_bootstrapper(distro, klass, distro_version=None):
 
 
 class Bootstrapper (object):
-    def __new__(klass, config, build_tools_only, offline, assume_yes,
-            system_only):
+    def __new__(klass, config, system, toolchains, build_tools, offline, assume_yes):
         bs = []
 
-        if not system_only:
+        if build_tools:
             bs.append(BuildTools(config, offline))
-        if build_tools_only:
-            return bs
 
         target_distro = config.target_distro
         distro = config.distro
@@ -55,10 +52,11 @@ class Bootstrapper (object):
         target = (target_distro, target_distro_version)
         build = (distro, distro_version)
 
-        if target == build:
-            blist = [target]
-        else:
-            blist = [target, build]
+        blist = []
+        if system:
+            blist.append(build)
+        if toolchains and build != target:
+            blist.append(target)
 
         for d, v in blist:
             if d not in bootstrappers:

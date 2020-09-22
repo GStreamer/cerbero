@@ -20,6 +20,7 @@ import os
 import sys
 import shlex
 import shutil
+import argparse
 try:
     import sysconfig
 except:
@@ -52,6 +53,21 @@ class ArgparseArgument(object):
 
     def add_to_parser(self, parser):
         parser.add_argument(*self.name, **self.args)
+
+
+class StoreBool(argparse.Action):
+
+    def __init__(self, option_strings, dest, nargs=None, **kwargs):
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, value, option_string=None):
+        if value == 'yes':
+            bvalue = True
+        elif value == 'no':
+            bvalue = False
+        else:
+            raise AssertionError
+        setattr(namespace, self.dest, bvalue)
 
 
 def user_is_root():

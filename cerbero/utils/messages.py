@@ -110,6 +110,10 @@ def error(msg, logfile=None):
         log(msg, logfile=logfile)
 
 
+def deprecation(msg, logfile=None):
+    error("DEPRECATION: %s" % msg, logfile=logfile)
+
+
 def warning(msg, logfile=None):
     error("WARNING: %s" % msg, logfile=logfile)
 
