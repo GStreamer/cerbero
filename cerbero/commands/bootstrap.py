@@ -57,13 +57,14 @@ class Bootstrap(Command):
 
     def run(self, config, args):
         if args.build_tools_only:
+            # --build-tools-only meant '--system=no --toolchains=no --build-tools=yes'
             args.toolchains = False
             args.system = False
-            m.deprecation('--build-tools-only has been replaced by --system/toolchains/build-tools')
+            m.deprecation('Replace --build-tools-only with --system=no --toolchains=no')
         if args.system_only:
+            # --system-only meant '--system=yes --toolchains=yes --build-tools=no'
             args.build_tools = False
-            args.toolchains = False
-            m.deprecation('--system-only has been replaced by --system/toolchains/build-tools')
+            m.deprecation('Replace --system-only with --build-tools=no')
         bootstrappers = Bootstrapper(config, args.system, args.toolchains,
                 args.build_tools, args.offline, args.assume_yes)
         tasks = []
@@ -98,9 +99,9 @@ class FetchBootstrap(Command):
 
     def run(self, config, args):
         if args.build_tools_only:
+            # --build-tools-only meant '--toolchains=no --build-tools=yes'
             args.toolchains = False
-            args.system = False
-            m.deprecation('--build-tools-only has been replaced by --system/toolchains/build-tools')
+            m.deprecation('Replace --build-tools-only with --toolchains=no')
         bootstrappers = Bootstrapper(config, False, args.toolchains,
                 args.build_tools, offline=False, assume_yes=False)
         tasks = []
