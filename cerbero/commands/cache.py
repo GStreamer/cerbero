@@ -147,12 +147,12 @@ class FetchCache(BaseCache):
                 m.warning("Corrupted dependency file, ignoring.")
             os.remove(dep_path)
 
-            # Don't need to relocate on Windows since binaries in the prefix
-            # are meant to be used in a relocatable manner. In case this needs
-            # to be re-enabled at some point, note that the current
-            # self.build_dir value is an absolute path, and should instead be
-            # derived from CI env vars.
-            if config.target_platform != Platform.WINDOWS:
+            # Don't need to relocate on Windows and macOS since we build
+            # pkg-config with --enable-define-prefix.
+            # In case this needs to be re-enabled at some point, note that the
+            # current self.build_dir value is hard-coded and is wrong on macOS
+            # and Windows. It should instead be derived from CI env vars.
+            if config.platform == Platform.LINUX:
                 origin = self.build_dir % namespace
                 m.message("Relocating from %s to %s" % (origin, config.home_dir))
                 # FIXME: Just a quick hack for now
