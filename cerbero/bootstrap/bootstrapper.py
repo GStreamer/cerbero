@@ -24,21 +24,24 @@ from cerbero.utils import messages as m
 from cerbero.bootstrap.build_tools import BuildTools
 
 
-bootstrappers = {}
+toolchain_bootstrappers = {}
+system_bootstrappers = {}
 
 
-def register_bootstrapper(distro, klass, distro_version=None):
-    if not distro in bootstrappers:
-        bootstrappers[distro] = {}
-    bootstrappers[distro][distro_version] = klass
+def register_system_bootstrapper(distro, klass, distro_version=None):
+    if not distro in system_bootstrappers:
+        system_bootstrappers[distro] = {}
+    system_bootstrappers[distro][distro_version] = klass
+
+def register_toolchain_bootstrapper(distro, klass, distro_version=None):
+    if not distro in toolchain_bootstrappers:
+        toolchain_bootstrappers[distro] = {}
+    toolchain_bootstrappers[distro][distro_version] = klass
 
 
 class Bootstrapper (object):
     def __new__(klass, config, system, toolchains, build_tools, offline, assume_yes):
         bs = []
-
-        if build_tools:
-            bs.append(BuildTools(config, offline))
 
         target_distro = config.target_distro
         distro = config.distro
@@ -52,19 +55,30 @@ class Bootstrapper (object):
         target = (target_distro, target_distro_version)
         build = (distro, distro_version)
 
-        blist = []
+        blist = [target]
+        if target != build:
+            blist += [build]
+
+        all_bootstrappers = {}
+        # If enabled, run system bootstrappers first
         if system:
-            blist.append(build)
-        if toolchains and build != target:
-            blist.append(target)
+            all_bootstrappers.update(system_bootstrappers)
+        if toolchains:
+            all_bootstrappers.update(toolchain_bootstrappers)
 
         for d, v in blist:
-            if d not in bootstrappers:
+            if d not in all_bootstrappers:
+                # Skip if we were asked to skip some bootstrapping
+                if not system or not toolchains:
+                    continue
                 raise FatalError(_("No bootstrapper for the distro %s" % d))
-            if v not in bootstrappers[d]:
+            if v not in all_bootstrappers[d]:
                 v = None
+            bs.append(all_bootstrappers[d][v](config, offline, assume_yes))
 
-            bs.insert(0, bootstrappers[d][v](config, offline, assume_yes))
+        # Build the build-tools after all other bootstrappers
+        if build_tools:
+            bs.append(BuildTools(config, offline))
 
         return bs
 

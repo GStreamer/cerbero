@@ -19,7 +19,7 @@
 import os
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.bootstrap.bootstrapper import register_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.config import Distro
 from cerbero.utils import shell
 from cerbero.utils import messages as m
@@ -52,4 +52,4 @@ class OSXBootstrapper (BootstrapperBase):
 
 
 def register_all():
-    register_bootstrapper(Distro.OS_X, OSXBootstrapper)
+    register_system_bootstrapper(Distro.OS_X, OSXBootstrapper)

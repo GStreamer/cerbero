@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.bootstrap.bootstrapper import register_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import ConfigurationError
 from cerbero.utils import shell
@@ -195,9 +195,9 @@ class NoneBootstrapper (BootstrapperBase):
 
 
 def register_all():
-    register_bootstrapper(Distro.DEBIAN, DebianBootstrapper)
-    register_bootstrapper(Distro.REDHAT, RedHatBootstrapper)
-    register_bootstrapper(Distro.SUSE, OpenSuseBootstrapper)
-    register_bootstrapper(Distro.ARCH, ArchBootstrapper, DistroVersion.ARCH_ROLLING)
-    register_bootstrapper(Distro.GENTOO, GentooBootstrapper, DistroVersion.GENTOO_VERSION)
-    register_bootstrapper(Distro.NONE, NoneBootstrapper)
+    register_system_bootstrapper(Distro.DEBIAN, DebianBootstrapper)
+    register_system_bootstrapper(Distro.REDHAT, RedHatBootstrapper)
+    register_system_bootstrapper(Distro.SUSE, OpenSuseBootstrapper)
+    register_system_bootstrapper(Distro.ARCH, ArchBootstrapper, DistroVersion.ARCH_ROLLING)
+    register_system_bootstrapper(Distro.GENTOO, GentooBootstrapper, DistroVersion.GENTOO_VERSION)
+    register_system_bootstrapper(Distro.NONE, NoneBootstrapper)

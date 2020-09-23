@@ -20,7 +20,7 @@ import os
 import shutil
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.bootstrap.bootstrapper import register_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
 from cerbero.config import Distro, FatalError
 from cerbero.utils import _, shell
 
@@ -58,4 +58,4 @@ class AndroidBootstrapper (BootstrapperBase):
 
 
 def register_all():
-    register_bootstrapper(Distro.ANDROID, AndroidBootstrapper)
+    register_toolchain_bootstrapper(Distro.ANDROID, AndroidBootstrapper)

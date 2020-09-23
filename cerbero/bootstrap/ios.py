@@ -24,7 +24,7 @@
 # any later version.
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.bootstrap.bootstrapper import register_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
 from cerbero.config import Distro
 
 
@@ -39,4 +39,4 @@ class IOSBootstrapper (BootstrapperBase):
 
 
 def register_all():
-    register_bootstrapper(Distro.IOS, IOSBootstrapper)
+    register_toolchain_bootstrapper(Distro.IOS, IOSBootstrapper)

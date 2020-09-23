@@ -22,7 +22,8 @@ import shutil
 from pathlib import Path
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.bootstrap.bootstrapper import register_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
+from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
 from cerbero.config import Architecture, Distro, Platform
 from cerbero.errors import ConfigurationError
 from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
@@ -56,7 +57,48 @@ XZ_CHECKSUM = 'd83b82ca75dfab39a13dda364367b34970c781a9df4d41264db922ac3a8f622d'
 # MSYS packages needed
 MINGWGET_DEPS = ['msys-flex', 'msys-bison', 'msys-perl']
 
-class WindowsBootstrapper(BootstrapperBase):
+class MSYSBootstrapper(BootstrapperBase):
+    '''
+    Bootstrapper for native windows builds on top of MSYS
+    Installs the necessary MSYS packages and fixups
+    '''
+
+    def __init__(self, config, offline, assume_yes):
+        super().__init__(config, offline)
+
+    def start(self, jobs=0):
+        self.install_mingwget_deps() # FIXME: This uses the network
+        self.fix_mingw_unused()
+
+    def install_mingwget_deps(self):
+        for dep in MINGWGET_DEPS:
+            shell.new_call(['mingw-get', 'install', dep])
+
+    def fix_mingw_unused(self):
+        mingw_get_exe = shutil.which('mingw-get')
+        if not mingw_get_exe:
+            m.warning('mingw-get not found, are you not using an MSYS shell?')
+            return
+        msys_mingw_bindir = Path(mingw_get_exe).parent
+        # Fixes checks in configure, where cpp -v is called
+        # to get some include dirs (which doesn't looks like a good idea).
+        # If we only have the host-prefixed cpp, this problem is gone.
+        if (msys_mingw_bindir / 'cpp.exe').is_file():
+            os.replace(msys_mingw_bindir / 'cpp.exe',
+                       msys_mingw_bindir / 'cpp.exe.bck')
+        # MSYS's link.exe (for symlinking) overrides MSVC's link.exe (for
+        # C linking) in new shells, so rename it. No one uses `link` for
+        # symlinks anyway.
+        msys_link_exe = shutil.which('link')
+        if not msys_link_exe:
+            return
+        msys_link_exe = Path(msys_link_exe)
+        msys_link_bindir = msys_link_exe.parent
+        if msys_link_exe.is_file() and 'msys/1.0/bin/link' in msys_link_exe.as_posix():
+            os.replace(msys_link_exe, msys_link_bindir / 'link.exe.bck')
+
+
+class MinGWBootstrapper(BootstrapperBase):
     '''
     Bootstrapper for windows builds.
     Installs the mingw-w64 compiler toolchain and headers for Directx
@@ -111,8 +153,6 @@ class WindowsBootstrapper(BootstrapperBase):
             self.fix_mingw()
             self.fix_openssl_mingw_perl()
             self.fix_bin_deps()
-            self.install_mingwget_deps() # FIXME: This uses the network
-            self.fix_mingw_unused()
             self.install_xz()
 
     def check_dirs(self):
@@ -154,10 +194,6 @@ class WindowsBootstrapper(BootstrapperBase):
             shutil.move(os.path.join(perldir, d), self.perl_prefix)
         os.rmdir(perldir)
 
-    def install_mingwget_deps(self):
-        for dep in MINGWGET_DEPS:
-            shell.new_call(['mingw-get', 'install', dep])
-
     def install_xz(self):
         msys_xz = shutil.which('xz')
         if not msys_xz:
@@ -174,29 +210,7 @@ class WindowsBootstrapper(BootstrapperBase):
             shell.replace(os.path.join(self.prefix, f),
                           {'/opt/perl/bin/perl': '/bin/perl'})
 
-    def fix_mingw_unused(self):
-        mingw_get_exe = shutil.which('mingw-get')
-        if not mingw_get_exe:
-            m.warning('mingw-get not found, are you not using an MSYS shell?')
-            return
-        msys_mingw_bindir = Path(mingw_get_exe).parent
-        # Fixes checks in configure, where cpp -v is called
-        # to get some include dirs (which doesn't looks like a good idea).
-        # If we only have the host-prefixed cpp, this problem is gone.
-        if (msys_mingw_bindir / 'cpp.exe').is_file():
-            os.replace(msys_mingw_bindir / 'cpp.exe',
-                       msys_mingw_bindir / 'cpp.exe.bck')
-        # MSYS's link.exe (for symlinking) overrides MSVC's link.exe (for
-        # C linking) in new shells, so rename it. No one uses `link` for
-        # symlinks anyway.
-        msys_link_exe = shutil.which('link')
-        if not msys_link_exe:
-            return
-        msys_link_exe = Path(msys_link_exe)
-        msys_link_bindir = msys_link_exe.parent
-        if msys_link_exe.is_file() and 'msys/1.0/bin/link' in msys_link_exe.as_posix():
-            os.replace(msys_link_exe, msys_link_bindir / 'link.exe.bck')
-
 
 def register_all():
-    register_bootstrapper(Distro.WINDOWS, WindowsBootstrapper)
+    register_toolchain_bootstrapper(Distro.WINDOWS, MinGWBootstrapper)
+    register_system_bootstrapper(Distro.WINDOWS, MSYSBootstrapper)
