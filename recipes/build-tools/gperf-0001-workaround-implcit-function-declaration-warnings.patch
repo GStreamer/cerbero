@@ -1,0 +1,38 @@
+From cbaaecbe00285b7cd4122680610fca69fed29da7 Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Wed, 23 Sep 2020 15:02:28 +1000
+Subject: [PATCH] workaround implcit-function-declaration warnings
+
+On all the platforms we care about, we have all of
+string.h, stdlib.h, stdio.h so just always include them
+
+Fixes compile error with XCode 12
+---
+ lib/getopt.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/getopt.c b/lib/getopt.c
+index 32d6efc..ff293b9 100644
+--- a/lib/getopt.c
++++ b/lib/getopt.c
+@@ -60,7 +60,7 @@
+ 
+ /* This needs to come after some library #include
+    to get __GNU_LIBRARY__ defined.  */
+-#ifdef	__GNU_LIBRARY__
++#if 1
+ /* Don't include stdlib.h for non-GNU C libraries because some of them
+    contain conflicting prototypes for getopt.  */
+ #include <stdlib.h>
+@@ -187,7 +187,7 @@ static enum
+ /* Value of POSIXLY_CORRECT environment variable.  */
+ static char *posixly_correct;
+ 
+-#ifdef	__GNU_LIBRARY__
++#if 1
+ /* We want to avoid inclusion of string.h with non-GNU libraries
+    because there are many ways it can cause trouble.
+    On some systems, it contains special magic macros that don't work
+-- 
+2.24.3 (Apple Git-128)
+
