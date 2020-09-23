@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
         'zlib/0001-Fix-test-builds-to-use-the-built-libz-headers-librar.patch',
         'zlib/0001-Add-a-meson-port.patch',
         'zlib/0001-zconf.h-Check-that-HAVE_UNISTD_H-is-not-0.patch',
+        'zlib/0001-meson-add-the-DSTDC-define-to-include-standard-C-hea.patch',
     ]
     files_libs = ['libz']
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']

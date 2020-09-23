@@ -1,0 +1,42 @@
+From 6bc4b7efe1c935826e7081bd53bed3209269b2fb Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Wed, 23 Sep 2020 15:07:59 +1000
+Subject: [PATCH] meson: add the -DSTDC define to include standard C headers
+
+Fixes build error with XCode 12 erroring out on
+implicit-function-declarations
+---
+ gzguts.h    | 3 +++
+ meson.build | 2 +-
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/gzguts.h b/gzguts.h
+index 990a4d2..b9283f3 100644
+--- a/gzguts.h
++++ b/gzguts.h
+@@ -21,6 +21,9 @@
+ #include <stdio.h>
+ #include "zlib.h"
+ #ifdef STDC
++#  if !defined(_MSC_VER)
++#    include <unistd.h>
++#  endif
+ #  include <string.h>
+ #  include <stdlib.h>
+ #  include <limits.h>
+diff --git a/meson.build b/meson.build
+index 34819bb..3540420 100644
+--- a/meson.build
++++ b/meson.build
+@@ -18,7 +18,7 @@ src = ['adler32.c', 'crc32.c', 'deflate.c', 'infback.c', 'inffast.c', 'inflate.c
+ headers = ['zconf.h', 'zlib.h']
+ 
+ zlib = library('z', src,
+-  c_args : ['-DZLIB_DLL'],
++  c_args : ['-DZLIB_DLL', '-DSTDC'],
+   link_args : link_args,
+   install : true,
+   version : meson.project_version())
+-- 
+2.24.3 (Apple Git-128)
+
