@@ -18,3 +18,16 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
+
+    def post_install(self):
+        # Create relative symlinks to prevent breakage during packaging
+        if self.config.platform != Platform.WINDOWS:
+            dangling = [
+                ('lib/libdts.a', 'libdca.a'),
+                ('share/man/man1/extract_dts.1', 'extract_dca.1'),
+                ('share/man/man1/dtsdec.1', 'dcadec.a'),
+            ]
+            for src, dest in dangling:
+                os.remove(os.path.join(self.config.prefix, src))
+                os.symlink(src, os.path.join(self.config.prefix, dest))
+        super().post_install()
