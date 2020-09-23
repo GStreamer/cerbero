@@ -60,9 +60,9 @@ G_PASTE(g_io_, G_PASTE(name, _load)) (NULL)
 /* Declaration of static gio modules */
  @G_IO_MODULES_DECLARE@
 
-/* Call this function to register static plugins */
+/* This is called by gst_init() to register static plugins */
 void
-gst_android_register_static_plugins (void)
+gst_init_static_plugins (void)
 {
  @PLUGINS_REGISTRATION@
 }
@@ -561,7 +561,6 @@ gst_android_init (JNIEnv * env, jobject context)
     g_free (message);
     return;
   }
-  gst_android_register_static_plugins ();
   gst_android_load_gio_modules ();
   __android_log_print (ANDROID_LOG_INFO, "GStreamer",
       "GStreamer initialization complete");
