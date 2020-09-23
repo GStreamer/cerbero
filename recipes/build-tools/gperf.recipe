@@ -8,7 +8,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
     tarball_checksum = '767112a204407e62dbc3106647cf839ed544f3cf5d0f0523aaa2508623aad63e'
-    patches = ['gperf-0001-Don-t-override-environment-AR.patch']
+    patches = ['gperf-0001-Don-t-override-environment-AR.patch',
+               'gperf-0001-workaround-implcit-function-declaration-warnings.patch']
 
     files_bins = ['gperf']
 
