@@ -42,7 +42,7 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         # Create relative symlinks to prevent breakage during packaging
-        if self.config.target_platform != Platform.WINDOWS:
+        if self.config.platform != Platform.WINDOWS:
             confddir = os.path.join(self.config.prefix, 'etc', 'fonts', 'conf.d')
             linksrc = os.path.join('..', '..', '..', 'share', 'fontconfig', 'conf.avail')
             for f in os.listdir(confddir):
