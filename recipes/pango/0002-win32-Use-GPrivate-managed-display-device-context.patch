@@ -1,0 +1,496 @@
+From 01ee140274f85c4fb3e153b39c0b320bb2f89ada Mon Sep 17 00:00:00 2001
+From: Aaron Boxer <Aaron Boxer>
+Date: Thu, 24 Sep 2020 11:11:18 -0400
+Subject: [PATCH 2/2] win32: Use GPrivate-managed display device context
+
+The document of [CreateDCA][1] says:
+
+> If lpszDriver or lpszDevice is DISPLAY, the thread that calls
+> CreateDC owns the HDC that is created. When this thread is
+> destroyed, the HDC is no longer valid. Thus, if you create the HDC
+> and pass it to another thread, then exit the first thread,
+> the second thread will not be able to use the HDC.
+
+So this change introduces GPrivate to fix potential problem.
+
+This also fixes the problem caused by accessing the global
+variable DC directly, which makes some early call to Pango functions
+fail.
+
+(e.g., failure of calling pango_win32_font_description_from_logfontw
+from _get_system_font_name in GTK.)
+
+[1]: https://docs.microsoft.com/windows/win32/api/wingdi/nf-wingdi-createdca
+---
+ pango/pangocairo-win32fontmap.c |  2 +-
+ pango/pangowin32-fontmap.c      | 59 ++++++++++++++--------
+ pango/pangowin32-private.h      |  4 +-
+ pango/pangowin32-shape.c        |  2 +-
+ pango/pangowin32.c              | 89 ++++++++++++++++++---------------
+ 5 files changed, 93 insertions(+), 63 deletions(-)
+
+diff --git a/pango/pangocairo-win32fontmap.c b/pango/pangocairo-win32fontmap.c
+index b58d16f6..94500fd6 100644
+--- a/pango/pangocairo-win32fontmap.c
++++ b/pango/pangocairo-win32fontmap.c
+@@ -121,5 +121,5 @@ static void
+ pango_cairo_win32_font_map_init (PangoCairoWin32FontMap *cwfontmap)
+ {
+   cwfontmap->serial = 1;
+-  cwfontmap->dpi = GetDeviceCaps (pango_win32_get_dc (), LOGPIXELSY);
++  cwfontmap->dpi = GetDeviceCaps (_pango_win32_get_display_dc (), LOGPIXELSY);
+ }
+diff --git a/pango/pangowin32-fontmap.c b/pango/pangowin32-fontmap.c
+index afb8272f..eab44765 100644
+--- a/pango/pangowin32-fontmap.c
++++ b/pango/pangowin32-fontmap.c
+@@ -200,6 +200,12 @@ pango_win32_inner_enum_proc (LOGFONTW    *lfp,
+   return 1;
+ }
+ 
++struct EnumProcData
++{
++  HDC hdc;
++  PangoWin32FontMap *font_map;
++};
++
+ static int CALLBACK
+ pango_win32_enum_proc (LOGFONTW       *lfp,
+ 		       NEWTEXTMETRICW *metrics,
+@@ -207,6 +213,7 @@ pango_win32_enum_proc (LOGFONTW       *lfp,
+ 		       LPARAM          lParam)
+ {
+   LOGFONTW lf;
++  struct EnumProcData *data = (struct EnumProcData *) lParam;
+ 
+   PING (("%S: %lu %lx", lfp->lfFaceName, fontType, metrics->ntmFlags));
+ 
+@@ -216,9 +223,9 @@ pango_win32_enum_proc (LOGFONTW       *lfp,
+     {
+       lf = *lfp;
+ 
+-      EnumFontFamiliesExW (_pango_win32_hdc, &lf,
++      EnumFontFamiliesExW (data->hdc, &lf,
+ 			   (FONTENUMPROCW) pango_win32_inner_enum_proc,
+-			   lParam, 0);
++                           (LPARAM) data->font_map, 0);
+     }
+ 
+   return 1;
+@@ -725,6 +732,12 @@ static void
+ _pango_win32_font_map_init (PangoWin32FontMap *win32fontmap)
+ {
+   LOGFONTW logfont;
++  HDC hdc = _pango_win32_get_display_dc ();
++
++  struct EnumProcData enum_proc_data = {
++    .hdc = hdc,
++    .font_map = win32fontmap,
++  };
+ 
+   win32fontmap->families =
+     g_hash_table_new_full ((GHashFunc) case_insensitive_str_hash,
+@@ -738,9 +751,9 @@ _pango_win32_font_map_init (PangoWin32FontMap *win32fontmap)
+ 
+   memset (&logfont, 0, sizeof (logfont));
+   logfont.lfCharSet = DEFAULT_CHARSET;
+-  EnumFontFamiliesExW (_pango_win32_hdc, &logfont,
++  EnumFontFamiliesExW (hdc, &logfont,
+ 		       (FONTENUMPROCW) pango_win32_enum_proc,
+-		       (LPARAM) win32fontmap, 0);
++                       (LPARAM) &enum_proc_data, 0);
+ 
+   g_hash_table_foreach (win32fontmap->families, synthesize_foreach, win32fontmap);
+ 
+@@ -749,7 +762,7 @@ _pango_win32_font_map_init (PangoWin32FontMap *win32fontmap)
+   create_standard_family (win32fontmap, "Serif");
+   create_standard_family (win32fontmap, "Monospace");
+ 
+-  win32fontmap->resolution = (PANGO_SCALE / (double) GetDeviceCaps (_pango_win32_hdc, LOGPIXELSY)) * 72.0;
++  win32fontmap->resolution = (PANGO_SCALE / (double) GetDeviceCaps (hdc, LOGPIXELSY)) * 72.0;
+ }
+ 
+ static void
+@@ -802,7 +815,7 @@ _pango_win32_font_map_class_init (PangoWin32FontMapClass *class)
+   fontmap_class->list_families = pango_win32_font_map_list_families;
+   fontmap_class->shape_engine_type = PANGO_RENDER_TYPE_WIN32;
+ 
+-  pango_win32_get_dc ();
++  _pango_win32_get_display_dc ();
+ }
+ 
+ /**
+@@ -1125,6 +1138,7 @@ get_family_nameA (const LOGFONTA *lfp)
+ {
+   HFONT hfont;
+   HFONT oldhfont;
++  HDC hdc;
+ 
+   struct name_header header;
+   struct name_record record;
+@@ -1155,17 +1169,19 @@ get_family_nameA (const LOGFONTA *lfp)
+   if ((hfont = CreateFontIndirect (lfp)) == NULL)
+     goto fail0;
+ 
+-  if ((oldhfont = SelectObject (_pango_win32_hdc, hfont)) == NULL)
++  hdc = _pango_win32_get_display_dc ();
++
++  if ((oldhfont = SelectObject (hdc, hfont)) == NULL)
+     goto fail1;
+ 
+-  if (!_pango_win32_get_name_header (_pango_win32_hdc, &header))
++  if (!_pango_win32_get_name_header (hdc, &header))
+     goto fail2;
+ 
+   PING (("%d name records", header.num_records));
+ 
+   for (i = 0; i < header.num_records; i++)
+     {
+-      if (!_pango_win32_get_name_record (_pango_win32_hdc, i, &record))
++      if (!_pango_win32_get_name_record (hdc, i, &record))
+ 	goto fail2;
+ 
+       if ((record.name_id != 1 && record.name_id != 16) || record.string_length <= 0)
+@@ -1199,11 +1215,11 @@ get_family_nameA (const LOGFONTA *lfp)
+   else
+     goto fail2;
+ 
+-  if (!_pango_win32_get_name_record (_pango_win32_hdc, name_ix, &record))
++  if (!_pango_win32_get_name_record (hdc, name_ix, &record))
+     goto fail2;
+ 
+   string = g_malloc (record.string_length + 1);
+-  if (GetFontData (_pango_win32_hdc, NAME,
++  if (GetFontData (hdc, NAME,
+ 		   header.string_storage_offset + record.string_offset,
+ 		   string, record.string_length) != record.string_length)
+     goto fail2;
+@@ -1229,14 +1245,14 @@ get_family_nameA (const LOGFONTA *lfp)
+ 
+   PING (("%s", name));
+ 
+-  SelectObject (_pango_win32_hdc, oldhfont);
++  SelectObject (hdc, oldhfont);
+   DeleteObject (hfont);
+ 
+   return name;
+ 
+  fail2:
+   g_free (string);
+-  SelectObject (_pango_win32_hdc, oldhfont);
++  SelectObject (hdc, oldhfont);
+ 
+  fail1:
+   DeleteObject (hfont);
+@@ -1308,6 +1324,7 @@ get_family_nameW (const LOGFONTW *lfp)
+ {
+   HFONT hfont;
+   HFONT oldhfont;
++  HDC hdc;
+ 
+   struct name_header header;
+   struct name_record record;
+@@ -1338,17 +1355,19 @@ get_family_nameW (const LOGFONTW *lfp)
+   if ((hfont = CreateFontIndirectW (lfp)) == NULL)
+     goto fail0;
+ 
+-  if ((oldhfont = SelectObject (_pango_win32_hdc, hfont)) == NULL)
++  hdc = _pango_win32_get_display_dc ();
++
++  if ((oldhfont = SelectObject (hdc, hfont)) == NULL)
+     goto fail1;
+ 
+-  if (!_pango_win32_get_name_header (_pango_win32_hdc, &header))
++  if (!_pango_win32_get_name_header (hdc, &header))
+     goto fail2;
+ 
+   PING (("%d name records", header.num_records));
+ 
+   for (i = 0; i < header.num_records; i++)
+     {
+-      if (!_pango_win32_get_name_record (_pango_win32_hdc, i, &record))
++      if (!_pango_win32_get_name_record (hdc, i, &record))
+ 	goto fail2;
+ 
+       if ((record.name_id != 1 && record.name_id != 16) || record.string_length <= 0)
+@@ -1382,11 +1401,11 @@ get_family_nameW (const LOGFONTW *lfp)
+   else
+     goto fail2;
+ 
+-  if (!_pango_win32_get_name_record (_pango_win32_hdc, name_ix, &record))
++  if (!_pango_win32_get_name_record (hdc, name_ix, &record))
+     goto fail2;
+ 
+   string = g_malloc (record.string_length + 1);
+-  if (GetFontData (_pango_win32_hdc, NAME,
++  if (GetFontData (hdc, NAME,
+ 		   header.string_storage_offset + record.string_offset,
+ 		   string, record.string_length) != record.string_length)
+     goto fail2;
+@@ -1412,14 +1431,14 @@ get_family_nameW (const LOGFONTW *lfp)
+ 
+   PING (("%s", name));
+ 
+-  SelectObject (_pango_win32_hdc, oldhfont);
++  SelectObject (hdc, oldhfont);
+   DeleteObject (hfont);
+ 
+   return name;
+ 
+  fail2:
+   g_free (string);
+-  SelectObject (_pango_win32_hdc, oldhfont);
++  SelectObject (hdc, oldhfont);
+ 
+  fail1:
+   DeleteObject (hfont);
+diff --git a/pango/pangowin32-private.h b/pango/pangowin32-private.h
+index 88e5655d..72cae50e 100644
+--- a/pango/pangowin32-private.h
++++ b/pango/pangowin32-private.h
+@@ -291,7 +291,9 @@ _pango_win32_shape (PangoFont        	*font,
+ 		    const char          *paragraph_text G_GNUC_UNUSED,
+ 		    unsigned int         paragraph_length G_GNUC_UNUSED);
+ 
+-extern HDC _pango_win32_hdc;
++_PANGO_EXTERN
++HDC             _pango_win32_get_display_dc                 (void);
++
+ extern OSVERSIONINFO _pango_win32_os_version_info;
+ extern gboolean _pango_win32_debug;
+ 
+diff --git a/pango/pangowin32-shape.c b/pango/pangowin32-shape.c
+index aad0243e..36d43413 100644
+--- a/pango/pangowin32-shape.c
++++ b/pango/pangowin32-shape.c
+@@ -607,7 +607,7 @@ uniscribe_shape (PangoFont           *font,
+ {
+   wchar_t *wtext;
+   long wlen;
+-  HDC hdc = _pango_win32_hdc;
++  HDC hdc = _pango_win32_get_display_dc ();
+   gboolean retval = TRUE;
+ 
+   if (!pango_win32_font_select_font (font, hdc))
+diff --git a/pango/pangowin32.c b/pango/pangowin32.c
+index 630898e0..71204606 100644
+--- a/pango/pangowin32.c
++++ b/pango/pangowin32.c
+@@ -47,7 +47,6 @@
+ 			  ((ch) >= 0x20000 && (ch) <= 0x2A6DF) ||	\
+ 			  ((ch) >= 0x2F800 && (ch) <= 0x2FA1F))
+ 
+-HDC _pango_win32_hdc;
+ OSVERSIONINFO _pango_win32_os_version_info;
+ gboolean _pango_win32_debug = FALSE;
+ 
+@@ -143,24 +142,17 @@ _pango_win32_font_init (PangoWin32Font *win32font)
+   win32font->glyph_info = g_hash_table_new_full (NULL, NULL, NULL, g_free);
+ }
+ 
+-/**
+- * pango_win32_get_dc:
+- *
+- * Obtains a handle to the Windows device context that is used by Pango.
+- *
+- * Return value: A handle to the Windows device context that is used by Pango.
+- **/
++static GPrivate display_dc_key = G_PRIVATE_INIT ((GDestroyNotify) DeleteDC);
++
+ HDC
+-pango_win32_get_dc (void)
++_pango_win32_get_display_dc (void)
+ {
+-  if (g_once_init_enter (&_pango_win32_hdc))
++  HDC hdc = g_private_get (&display_dc_key);
++
++  if (hdc == NULL)
+     {
+-      HDC hdc = CreateDC ("DISPLAY", NULL, NULL, NULL);
+-      memset (&_pango_win32_os_version_info, 0,
+-	      sizeof (_pango_win32_os_version_info));
+-      _pango_win32_os_version_info.dwOSVersionInfoSize =
+-	sizeof (OSVERSIONINFO);
+-      GetVersionEx (&_pango_win32_os_version_info);
++      hdc = CreateDC ("DISPLAY", NULL, NULL, NULL);
++      g_private_set (&display_dc_key, hdc);
+ 
+       /* Also do some generic pangowin32 initialisations... this function
+        * is a suitable place for those as it is called from a couple
+@@ -170,10 +162,22 @@ pango_win32_get_dc (void)
+       if (getenv ("PANGO_WIN32_DEBUG") != NULL)
+ 	_pango_win32_debug = TRUE;
+ #endif
+-      g_once_init_leave (&_pango_win32_hdc, hdc);
+     }
+ 
+-  return _pango_win32_hdc;
++  return hdc;
++}
++
++/**
++ * pango_win32_get_dc:
++ *
++ * Obtains a handle to the Windows device context that is used by Pango.
++ *
++ * Return value: A handle to the Windows device context that is used by Pango.
++ **/
++HDC
++pango_win32_get_dc (void)
++{
++    return _pango_win32_get_display_dc ();
+ }
+ 
+ /**
+@@ -212,7 +216,7 @@ _pango_win32_font_class_init (PangoWin32FontClass *class)
+   class->done_font = pango_win32_font_real_done_font;
+   class->get_metrics_factor = pango_win32_font_real_get_metrics_factor;
+ 
+-  pango_win32_get_dc ();
++  _pango_win32_get_display_dc ();
+ }
+ 
+ /**
+@@ -462,15 +466,14 @@ pango_win32_font_get_glyph_extents (PangoFont      *font,
+ 
+   if (!info)
+     {
++      HDC hdc = _pango_win32_get_display_dc ();
+       info = g_new0 (PangoWin32GlyphInfo, 1);
+ 
+       memset (&gm, 0, sizeof (gm));
+ 
+       hfont = _pango_win32_font_get_hfont (font);
+-      SelectObject (_pango_win32_hdc, hfont);
+-      /* FIXME: (Alex) This constant reuse of _pango_win32_hdc is
+-	 not thread-safe */
+-      res = GetGlyphOutlineA (_pango_win32_hdc,
++      SelectObject (hdc, hfont);
++      res = GetGlyphOutlineA (hdc,
+ 			      glyph_index,
+ 			      GGO_METRICS | GGO_GLYPH_INDEX,
+ 			      &gm,
+@@ -492,7 +495,7 @@ pango_win32_font_get_glyph_extents (PangoFont      *font,
+       info->ink_rect.y = - PANGO_SCALE * gm.gmptGlyphOrigin.y;
+       info->ink_rect.height = PANGO_SCALE * gm.gmBlackBoxY;
+ 
+-      GetTextMetrics (_pango_win32_hdc, &tm);
++      GetTextMetrics (hdc, &tm);
+       info->logical_rect.x = 0;
+       info->logical_rect.width = PANGO_SCALE * gm.gmCellIncX;
+       info->logical_rect.y = - PANGO_SCALE * tm.tmAscent;
+@@ -569,9 +572,10 @@ pango_win32_font_get_metrics (PangoFont     *font,
+ 	{
+ 	  PangoCoverage *coverage;
+ 	  TEXTMETRIC tm;
++	  HDC hdc = _pango_win32_get_display_dc ();
+ 
+-	  SelectObject (_pango_win32_hdc, hfont);
+-	  GetTextMetrics (_pango_win32_hdc, &tm);
++	  SelectObject (hdc, hfont);
++	  GetTextMetrics (hdc, &tm);
+ 
+ 	  metrics->ascent = tm.tmAscent * PANGO_SCALE;
+ 	  metrics->descent = tm.tmDescent * PANGO_SCALE;
+@@ -1489,19 +1493,20 @@ font_get_cmap (PangoFont *font)
+ {
+   PangoWin32Font *win32font = (PangoWin32Font *)font;
+   gpointer cmap;
++  HDC hdc = _pango_win32_get_display_dc ();
+ 
+   if (win32font->win32face->cmap)
+     return win32font->win32face->cmap;
+ 
+-  pango_win32_font_select_font (font, _pango_win32_hdc);
++  pango_win32_font_select_font (font, hdc);
+ 
+   /* Prefer the format 12 cmap */
+-  if ((cmap = get_format_12_cmap (_pango_win32_hdc)) != NULL)
++  if ((cmap = get_format_12_cmap (hdc)) != NULL)
+     {
+       win32font->win32face->cmap_format = 12;
+       win32font->win32face->cmap = cmap;
+     }
+-  else if ((cmap = get_format_4_cmap (_pango_win32_hdc)) != NULL)
++  else if ((cmap = get_format_4_cmap (hdc)) != NULL)
+     {
+       win32font->win32face->cmap_format = 4;
+       win32font->win32face->cmap = cmap;
+@@ -1519,11 +1524,12 @@ pango_win32_font_get_type1_glyph_index (PangoFont *font,
+   wchar_t unicode[2];
+   WORD glyph_index;
+   gint32 res;
++  HDC hdc = _pango_win32_get_display_dc ();
+ 
+   unicode[0] = wc;
+   unicode[1] = 0;
+-  pango_win32_font_select_font (font, _pango_win32_hdc);
+-  res = GetGlyphIndicesW (_pango_win32_hdc, unicode, 1, &glyph_index, 0);
++  pango_win32_font_select_font (font, hdc);
++  res = GetGlyphIndicesW (hdc, unicode, 1, &glyph_index, 0);
+   pango_win32_font_done_font (font);
+ 
+   if (res == 1)
+@@ -1656,24 +1662,25 @@ font_has_name_in (PangoFont                       *font,
+   struct name_record record;
+   gint i;
+   gboolean retval = FALSE;
++  HDC hdc = _pango_win32_get_display_dc ();
+ 
+   if (cjkv == PANGO_WIN32_COVERAGE_UNSPEC)
+     return TRUE;
+ 
+   hfont = _pango_win32_font_get_hfont (font);
+-  oldhfont = SelectObject (_pango_win32_hdc, hfont);
++  oldhfont = SelectObject (hdc, hfont);
+ 
+-  if (!_pango_win32_get_name_header (_pango_win32_hdc, &header))
++  if (!_pango_win32_get_name_header (hdc, &header))
+     {
+-      SelectObject (_pango_win32_hdc, oldhfont);
++      SelectObject (hdc, oldhfont);
+       return FALSE;
+     }
+ 
+   for (i = 0; i < header.num_records; i++)
+     {
+-      if (!_pango_win32_get_name_record (_pango_win32_hdc, i, &record))
++      if (!_pango_win32_get_name_record (hdc, i, &record))
+ 	{
+-	  SelectObject (_pango_win32_hdc, oldhfont);
++	  SelectObject (hdc, oldhfont);
+ 	  return FALSE;
+ 	}
+ 
+@@ -1705,7 +1712,7 @@ font_has_name_in (PangoFont                       *font,
+ 	  }
+     }
+ 
+-  SelectObject (_pango_win32_hdc, oldhfont);
++  SelectObject (hdc, oldhfont);
+   return retval;
+ }
+ 
+@@ -1718,14 +1725,16 @@ pango_win32_font_calc_type1_coverage (PangoFont     *font,
+   gint32 res;
+   guint32 ch;
+   guint32 i;
++  HDC hdc = _pango_win32_get_display_dc ();
++
+   
+-  pango_win32_font_select_font (font, _pango_win32_hdc);
+-  res = GetFontUnicodeRanges(_pango_win32_hdc, NULL);
++  pango_win32_font_select_font (font, hdc);
++  res = GetFontUnicodeRanges(hdc, NULL);
+   if (res == 0)
+     goto fail1;
+ 
+   glyph_set = g_malloc (res);
+-  res = GetFontUnicodeRanges(_pango_win32_hdc, glyph_set);
++  res = GetFontUnicodeRanges(hdc, glyph_set);
+   if (res == 0)
+     goto fail2;
+   
+-- 
+2.17.1
+

@@ -19,6 +19,10 @@ class Recipe(recipe.Recipe):
         name + '/0001-meson-Set-the-compatibility-version-correctly-on-mac.patch',
         # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/181
         name + '/0001-meson-Fix-check-for-builtype-arguments.patch',
+        name + '/0001-pangowin32-fontmap-read-windows-fallbacks-from-regis.patch',
+        # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/34
+        name + '/0002-win32-Use-GPrivate-managed-display-device-context.patch', 
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/merge_requests/574
     ]
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
