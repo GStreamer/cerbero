@@ -352,7 +352,10 @@ class Oven (object):
                 job_allocation[BuildSteps.EXTRACT[1]] = 1
                 queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(loop=loop)
         if self.jobs > 9:
-            job_allocation[BuildSteps.FETCH[1]] = 1
+            # Two jobs is the same allocation as fetch-package/bootstrap, which
+            # is a good idea to avoid getting bottlenecked if one of the
+            # download mirrors is slow.
+            job_allocation[BuildSteps.FETCH[1]] = 2
             queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(loop=loop)
 
         # async locks used to synchronize step execution
