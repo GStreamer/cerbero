@@ -9,6 +9,7 @@ class Recipe(recipe.Recipe):
     url = 'gnu://'
     tarball_checksum = 'af6ba39142220687c500f79b4aa2f181d9b24e4f8d8ec497cea4ba26c64bedaf'
     deps = ['autoconf', 'gettext-m4']
+    use_msys_perl = True
 
     files_bin = ['bin/automake', 'bin/aclocal',
                  'bin/automake-1.15', 'bin/aclocal-1.15']

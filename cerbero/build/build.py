@@ -144,6 +144,8 @@ class ModifyEnvBase:
     '''
 
     use_system_libs = False
+    # Use the outdated MSYS perl instead of the new perl downloaded in bootstrap
+    use_msys_perl = False
 
     def __init__(self):
         # An array of #EnvVarOp operations that will be performed sequentially
@@ -249,6 +251,11 @@ class ModifyEnvBase:
         '''
         Modifies the build environment by inserting env vars from new_env
         '''
+        # If requested, remove the new mingw-perl downloaded in bootstrap from
+        # PATH and use the MSYS Perl instead
+        if self.config.platform == Platform.WINDOWS and self.use_msys_perl:
+            mingw_perl_bindir = Path(self.config.mingw_perl_prefix) / 'bin'
+            self.remove_env('PATH', mingw_perl_bindir.as_posix(), sep=os.pathsep)
         # Don't modify env again if already did it once for this function call
         if self._old_env:
             return
