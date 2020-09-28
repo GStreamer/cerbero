@@ -334,6 +334,11 @@ class Oven (object):
             job_allocation[BuildSteps.COMPILE[1]] = 2
         if self.jobs > 5:
             job_allocation[BuildSteps.COMPILE[1]] = 3
+            if self.config.platform == Platform.WINDOWS:
+                # On Windows, the majority of our recipes use GNU make or
+                # nmake, both of which are run with -j1, so we need to increase
+                # the job allocation since we can run more of them in parallel
+                job_allocation[BuildSteps.COMPILE[1]] = self.jobs // 2
         if self.jobs > 7:
             install_queue = asyncio.PriorityQueue(loop=loop)
             for step in install_steps:
