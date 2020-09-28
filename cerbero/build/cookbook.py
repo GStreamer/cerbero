@@ -316,11 +316,15 @@ class CookBook (object):
             return USER_COOKBOOK_FILE
 
     def _restore_cache(self):
+        self.status = {}
+        cachefile = self._cache_file(self.get_config())
+        if not os.path.isfile(cachefile):
+            # From-scratch build
+            return
         try:
-            with open(self._cache_file(self.get_config()), 'rb') as f:
+            with open(cachefile, 'rb') as f:
                 self.status = pickle.load(f)
         except Exception:
-            self.status = {}
             m.warning(_("Could not recover status"))
 
     def save(self):
