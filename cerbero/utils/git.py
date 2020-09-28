@@ -271,7 +271,12 @@ def init_directory(git_dir, logfile=None):
     '''
     init(git_dir, logfile=logfile)
     shell.new_call([GIT, 'add', '--force', '-A', '.'], git_dir, logfile=logfile)
-    shell.new_call([GIT, 'commit', '-m', 'Initial commit'], git_dir, logfile=logfile)
+    # Check if we need to commit anything. This can happen when extract failed
+    # or was cancelled somehow last time but the source tree was setup
+    # correctly and git commit succeeded.
+    ret = shell.new_call([GIT, 'diff', '--quiet', 'HEAD'], git_dir, logfile=logfile, fail=False)
+    if ret > 0:
+        shell.new_call([GIT, 'commit', '-m', 'Initial commit'], git_dir, logfile=logfile)
 
 
 def apply_patch(patch, git_dir, logfile=None):
