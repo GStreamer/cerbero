@@ -146,6 +146,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
             env['PYTHONUNBUFFERED'] = '1'
             ret = subprocess.check_call(cmd, cwd=cmd_dir, bufsize=1,
                                        stderr=subprocess.STDOUT, stdout=stream,
+                                       stdin=subprocess.DEVNULL,
                                        universal_newlines=True,
                                        env=env, shell=shell)
     except SUBPROCESS_EXCEPTIONS as e:
@@ -189,7 +190,8 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False
         m.message('Running {!r}\n'.format(cmd))
     try:
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
-                              stdout=logfile, stderr=subprocess.STDOUT)
+                              stdout=logfile, stderr=subprocess.STDOUT,
+                              stdin=subprocess.DEVNULL)
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
         if not fail:
@@ -239,7 +241,7 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, 
         env['PYTHONUNBUFFERED'] = '1'
         proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
                             stderr=subprocess.STDOUT, stdout=stream,
-                            env=env)
+                            stdin=subprocess.DEVNULL, env=env)
         await proc.wait()
         if proc.returncode != 0 and fail:
             msg = ''
@@ -279,7 +281,8 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
             tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
 
         proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-                stdout=subprocess.PIPE, stderr=logfile, env=env)
+                stdout=subprocess.PIPE, stderr=logfile,
+                stdin=subprocess.DEVNULL, env=env)
         (output, unused_err) = await proc.communicate()
 
         if PLATFORM == Platform.WINDOWS:
