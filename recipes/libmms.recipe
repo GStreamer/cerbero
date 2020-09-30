@@ -12,9 +12,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['libmms']
     files_devel = ['include/libmms', 'lib/pkgconfig/libmms.pc']
 
-    autoreconf = True
-
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            self.autoreconf = False
-            self.override_libtool = False
+        if self.config.platform != Platform.WINDOWS:
+            self.autoreconf = True

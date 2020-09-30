@@ -47,11 +47,16 @@ class BuildTools (BootstrapperBase, Fetch):
             # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
 
-        if self.config.variants.uwp:
-            # UWP config does not build any autotools recipes
+        if self.config.platform == Platform.WINDOWS:
+            # We must not run automake/autoconf/libtoolize when building on
+            # windows because they hang on the Windows CI runner
+            self.BUILD_TOOLS.remove('gettext-m4')
             self.BUILD_TOOLS.remove('automake')
             self.BUILD_TOOLS.remove('autoconf')
             self.BUILD_TOOLS.remove('libtool')
+
+        if self.config.variants.uwp:
+            # UWP config does not build any autotools recipes
             self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
             self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
 

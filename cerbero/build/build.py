@@ -566,6 +566,10 @@ class Autotools (MakefilesBase):
             await shell.async_call(self.autoreconf_sh, self.config_src_dir,
                                    logfile=self.logfile, env=self.env)
 
+        # We don't build libtool on Windows
+        if self.config.platform == Platform.WINDOWS:
+            self.override_libtool = False
+
         # Use our own config.guess and config.sub
         config_datadir = os.path.join(self.config._relative_path('data'), 'autotools')
         cfs = {'config.guess': config_datadir, 'config.sub': config_datadir}

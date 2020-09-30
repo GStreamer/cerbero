@@ -15,9 +15,7 @@ class Recipe(recipe.Recipe):
                'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',]
 
     def prepare(self):
-        if self.config.platform == Platform.WINDOWS:
-            self.override_libtool = False
-        else:
+        if self.config.platform != Platform.WINDOWS:
             self.autoreconf = True
 
     async def compile(self):

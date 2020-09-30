@@ -27,7 +27,6 @@ class Recipe(recipe.Recipe):
             self.patches += ['spandsp/0001-Fix-build-for-windows-using-mingw.patch']
 
         if self.config.platform == Platform.WINDOWS:
-            self.override_libtool = False
             self.patches += ['spandsp/0001-Avoid-running-autoreconf-on-windows.patch']
         else:
             self.config_sh = 'sh ./autogen.sh && sh ./configure'
