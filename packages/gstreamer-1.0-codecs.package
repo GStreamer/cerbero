@@ -45,6 +45,11 @@ class Package(custom.GStreamer, package.Package):
             # Needed by zbar library
             self.files.append('libiconv:libs')
 
+        # Recipes that need autoreconf hang on the Windows CI
+        if self.config.platform == Platform.WINDOWS:
+            self.files.remove('wavpack:libs')
+            self.files.remove('libdv:libs')
+
         if self.config.variants.uwp:
             self.files = [
                 'libvpx:libs', 'openh264:libs', 'opus:libs',

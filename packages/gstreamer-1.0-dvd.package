@@ -19,3 +19,9 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-good-1.0:plugins_dvd_devel',
             'gst-plugins-ugly-1.0:plugins_dvd_devel',
             'gst-plugins-bad-1.0:plugins_dvd_devel']
+
+    def prepare(self):
+        # Recipes that need autoreconf hang on the Windows CI
+        if self.config.platform == Platform.WINDOWS:
+            self.files.remove('libdvdnav:libs')
+            self.files.remove('libdvdread:libs')
