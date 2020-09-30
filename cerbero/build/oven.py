@@ -345,8 +345,12 @@ class Oven (object):
                 queues[step] = install_queue
             job_allocation[BuildSteps.INSTALL[1]] = 1
         if self.jobs > 8:
-            job_allocation[BuildSteps.EXTRACT[1]] = 1
-            queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(loop=loop)
+            # Extract on windows is slow because we use tarfile for it, so we
+            # can parallelize it. On other platforms, decompression is pretty
+            # fast, so we shouldn't parallelize.
+            if self.config.platform != Platform.WINDOWS:
+                job_allocation[BuildSteps.EXTRACT[1]] = 1
+                queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(loop=loop)
         if self.jobs > 9:
             job_allocation[BuildSteps.FETCH[1]] = 1
             queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(loop=loop)
