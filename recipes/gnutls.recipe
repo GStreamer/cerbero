@@ -27,7 +27,9 @@ class Recipe(recipe.Recipe):
                name + "/0001-asm-rename-some-assembly-functions-to-not-conflict-w.patch",
                name + "/0001-Make-headers-MSVC-compatible-when-built-with-GCC.patch",
                name + "/0001-vasnprintf-Don-t-use-n-on-Android.patch",
-               name + "/0001-Add-version-check-for-internal-idn2-symbols.patch",]
+               name + "/0001-Add-version-check-for-internal-idn2-symbols.patch",
+               # https://gitlab.com/gnutls/gnutls/-/merge_requests/1271
+               name + "/0001-gnutls-pkcs11-verify-crt-status-check-validity.patch",]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

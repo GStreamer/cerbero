@@ -1,0 +1,493 @@
+From 99f86dde95d4a169a679e8578ce2102eb80ba2cf Mon Sep 17 00:00:00 2001
+From: Nikos Mavrogiannopoulos <nmav@redhat.com>
+Date: Thu, 19 Dec 2019 09:37:34 +0100
+Subject: [PATCH 1/4] _gnutls_verify_crt_status: apply algorithm checks to
+ trusted CAs
+
+If a CA is found in the trusted list, check in addition to
+time validity, whether the algorithms comply to the expected
+level. This addresses the problem of accepting CAs which would
+have been marked as insecure otherwise.
+
+Resolves: #877
+
+Signed-off-by: Nikos Mavrogiannopoulos <nmav@redhat.com>
+---
+ lib/x509/verify.c         | 68 ++++++++++++++++++++++--------------
+ 1 files changed, 68 insertions(+), 25 deletions(-)
+
+diff --git a/lib/x509/verify.c b/lib/x509/verify.c
+index b0aec6315..30fdde5bf 100644
+--- a/lib/x509/verify.c
++++ b/lib/x509/verify.c
+@@ -785,6 +785,36 @@ gnutls_x509_crt_check_issuer(gnutls_x509_crt_t cert,
+ 	return is_issuer(cert, issuer);
+ }
+ 
++static
++unsigned check_ca_sanity(const gnutls_x509_crt_t issuer,
++			 time_t now, unsigned int flags)
++{
++	unsigned int status = 0;
++	unsigned sigalg;
++	int ret;
++
++	/* explicit time check for trusted CA that we remove from
++	 * list. GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS
++	 */
++	if (!(flags & GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS) &&
++	    !(flags & GNUTLS_VERIFY_DISABLE_TIME_CHECKS)) {
++		status |= check_time_status(issuer, now);
++	}
++
++	ret =
++	    _gnutls_x509_get_signature_algorithm(issuer->cert, "signatureAlgorithm");
++	sigalg = ret;
++
++	/* we explicitly allow CAs which we do not support their self-algorithms
++	 * to pass. */
++	if (ret >= 0 && !is_level_acceptable(issuer, NULL, sigalg, flags)) {
++		status |= GNUTLS_CERT_INSECURE_ALGORITHM|GNUTLS_CERT_INVALID;
++	}
++
++	return status;
++
++}
++
+ /* Verify X.509 certificate chain.
+  *
+  * Note that the return value is an OR of GNUTLS_CERT_* elements.
+@@ -843,25 +873,17 @@ _gnutls_verify_crt_status(const gnutls_x509_crt_t * certificate_list,
+ 			 * CA to self-signed CA at some point. */
+ 			if (_gnutls_check_if_same_key
+ 			    (certificate_list[i], trusted_cas[j], i) != 0) {
+-				/* explicit time check for trusted CA that we remove from
+-				 * list. GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS
+-				 */
+-
+-				if (!(flags & GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS) &&
+-					!(flags & GNUTLS_VERIFY_DISABLE_TIME_CHECKS)) {
+-					status |=
+-					    check_time_status(trusted_cas[j],
+-						       now);
+-					if (status != 0) {
+-						if (func)
+-							func(certificate_list[i], trusted_cas[j], NULL, status);
+-						return status;
+-					}
+-				}
++
++				status |= check_ca_sanity(trusted_cas[j], now, flags);
+ 
+ 				if (func)
+ 					func(certificate_list[i],
+ 					     trusted_cas[j], NULL, status);
++
++				if (status != 0) {
++					return gnutls_assert_val(status);
++				}
++
+ 				clist_size = i;
+ 				break;
+ 			}
+@@ -1092,20 +1114,16 @@ _gnutls_pkcs11_verify_crt_status(const char* url,
+ 
+ 		if (gnutls_pkcs11_crt_is_known (url, certificate_list[i], vflags) != 0) {
+ 
+-			if (!(flags & GNUTLS_VERIFY_DISABLE_TRUSTED_TIME_CHECKS) &&
+-				!(flags & GNUTLS_VERIFY_DISABLE_TIME_CHECKS)) {
+-				status |=
+-				    check_time_status(certificate_list[i], now);
+-				if (status != 0) {
+-					if (func)
+-						func(certificate_list[i], certificate_list[i], NULL, status);
+-					return status;
+-				}
+-			}
++			status |= check_ca_sanity(certificate_list[i], now, flags);
++
+ 			if (func)
+ 				func(certificate_list[i],
+ 				     certificate_list[i], NULL, status);
+ 
++			if (status != 0) {
++				return gnutls_assert_val(status);
++			}
++
+ 			clist_size = i;
+ 			break;
+ 		}
+-- 
+2.27.0.windows.1
+
+
+From c354883cff7829796ac095cdedf833b6054fd388 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Sun, 31 May 2020 12:39:14 +0200
+Subject: [PATCH 2/4] _gnutls_pkcs11_verify_crt_status: check validity against
+ system cert
+
+To verify a certificate chain, this function replaces known
+certificates with the ones in the system trust store if possible.
+
+However, if it is found, the function checks the validity of the
+original certificate rather than the certificate found in the trust
+store.  That reveals a problem in a scenario that (1) a certificate is
+signed by multiple issuers and (2) one of the issuers' certificate has
+expired and included in the input chain.
+
+This patch makes it a little robuster by actually retrieving the
+certificate from the trust store and perform check against it.
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ lib/pkcs11.c      | 98 +++++++++++++++++++++++++++++++++--------------
+ lib/pkcs11_int.h  |  5 +++
+ lib/x509/verify.c |  7 +++-
+ 3 files changed, 80 insertions(+), 30 deletions(-)
+
+diff --git a/lib/pkcs11.c b/lib/pkcs11.c
+index 46d6e0d7a..440a66d55 100644
+--- a/lib/pkcs11.c
++++ b/lib/pkcs11.c
+@@ -4069,34 +4069,10 @@ int gnutls_pkcs11_get_raw_issuer_by_subject_key_id (const char *url,
+ 	return ret;
+ }
+ 
+-/**
+- * gnutls_pkcs11_crt_is_known:
+- * @url: A PKCS 11 url identifying a token
+- * @cert: is the certificate to find issuer for
+- * @issuer: Will hold the issuer if any in an allocated buffer.
+- * @fmt: The format of the exported issuer.
+- * @flags: Use zero or flags from %GNUTLS_PKCS11_OBJ_FLAG.
+- *
+- * This function will check whether the provided certificate is stored
+- * in the specified token. This is useful in combination with 
+- * %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_TRUSTED or
+- * %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_DISTRUSTED,
+- * to check whether a CA is present or a certificate is blacklisted in
+- * a trust PKCS #11 module.
+- *
+- * This function can be used with a @url of "pkcs11:", and in that case all modules
+- * will be searched. To restrict the modules to the marked as trusted in p11-kit
+- * use the %GNUTLS_PKCS11_OBJ_FLAG_PRESENT_IN_TRUSTED_MODULE flag.
+- *
+- * Note that the flag %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_DISTRUSTED is
+- * specific to p11-kit trust modules.
+- *
+- * Returns: If the certificate exists non-zero is returned, otherwise zero.
+- *
+- * Since: 3.3.0
+- **/
+-unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
+-				 unsigned int flags)
++unsigned
++_gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
++			    unsigned int flags,
++			    gnutls_x509_crt_t *trusted_cert)
+ {
+ 	int ret;
+ 	struct find_cert_st priv;
+@@ -4108,6 +4084,15 @@ unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
+ 
+ 	memset(&priv, 0, sizeof(priv));
+ 
++	if (trusted_cert) {
++		ret = gnutls_pkcs11_obj_init(&priv.obj);
++		if (ret < 0) {
++			gnutls_assert();
++			goto cleanup;
++		}
++		priv.need_import = 1;
++	}
++
+ 	if (url == NULL || url[0] == 0) {
+ 		url = "pkcs11:";
+ 	}
+@@ -4154,8 +4139,18 @@ unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
+ 		_gnutls_debug_log("crt_is_known: did not find cert, using issuer DN + serial, using DN only\n");
+ 		/* attempt searching with the subject DN only */
+ 		gnutls_assert();
++		if (priv.obj)
++			gnutls_pkcs11_obj_deinit(priv.obj);
+ 		gnutls_free(priv.serial.data);
+ 		memset(&priv, 0, sizeof(priv));
++		if (trusted_cert) {
++			ret = gnutls_pkcs11_obj_init(&priv.obj);
++			if (ret < 0) {
++				gnutls_assert();
++				goto cleanup;
++			}
++			priv.need_import = 1;
++		}
+ 		priv.crt = cert;
+ 		priv.flags = flags;
+ 
+@@ -4172,9 +4167,26 @@ unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
+ 		goto cleanup;
+ 	}
+ 
++	if (trusted_cert) {
++		ret = gnutls_x509_crt_init(trusted_cert);
++		if (ret < 0) {
++			gnutls_assert();
++			ret = 0;
++			goto cleanup;
++		}
++		ret = gnutls_x509_crt_import_pkcs11(*trusted_cert, priv.obj);
++		if (ret < 0) {
++			gnutls_assert();
++			gnutls_x509_crt_deinit(*trusted_cert);
++			ret = 0;
++			goto cleanup;
++		}
++	}
+ 	ret = 1;
+ 
+       cleanup:
++	if (priv.obj)
++		gnutls_pkcs11_obj_deinit(priv.obj);
+ 	if (info)
+ 		p11_kit_uri_free(info);
+ 	gnutls_free(priv.serial.data);
+@@ -4182,6 +4194,36 @@ unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
+ 	return ret;
+ }
+ 
++/**
++ * gnutls_pkcs11_crt_is_known:
++ * @url: A PKCS 11 url identifying a token
++ * @cert: is the certificate to find issuer for
++ * @flags: Use zero or flags from %GNUTLS_PKCS11_OBJ_FLAG.
++ *
++ * This function will check whether the provided certificate is stored
++ * in the specified token. This is useful in combination with 
++ * %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_TRUSTED or
++ * %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_DISTRUSTED,
++ * to check whether a CA is present or a certificate is blacklisted in
++ * a trust PKCS #11 module.
++ *
++ * This function can be used with a @url of "pkcs11:", and in that case all modules
++ * will be searched. To restrict the modules to the marked as trusted in p11-kit
++ * use the %GNUTLS_PKCS11_OBJ_FLAG_PRESENT_IN_TRUSTED_MODULE flag.
++ *
++ * Note that the flag %GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_DISTRUSTED is
++ * specific to p11-kit trust modules.
++ *
++ * Returns: If the certificate exists non-zero is returned, otherwise zero.
++ *
++ * Since: 3.3.0
++ **/
++unsigned gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
++				 unsigned int flags)
++{
++	return _gnutls_pkcs11_crt_is_known(url, cert, flags, NULL);
++}
++
+ /**
+  * gnutls_pkcs11_obj_get_flags:
+  * @obj: The pkcs11 object
+diff --git a/lib/pkcs11_int.h b/lib/pkcs11_int.h
+index 168bb7807..5ebc1be79 100644
+--- a/lib/pkcs11_int.h
++++ b/lib/pkcs11_int.h
+@@ -387,6 +387,11 @@ inline static bool is_pkcs11_url_object(const char *url)
+ 	return 0;
+ }
+ 
++unsigned
++_gnutls_pkcs11_crt_is_known(const char *url, gnutls_x509_crt_t cert,
++			    unsigned int flags,
++			    gnutls_x509_crt_t *trusted_cert);
++
+ #endif				/* ENABLE_PKCS11 */
+ 
+ #endif
+diff --git a/lib/x509/verify.c b/lib/x509/verify.c
+index 30fdde5bf..67fb9f412 100644
+--- a/lib/x509/verify.c
++++ b/lib/x509/verify.c
+@@ -34,6 +34,7 @@
+ #include <tls-sig.h>
+ #include <str.h>
+ #include <datum.h>
++#include <pkcs11_int.h>
+ #include <x509_int.h>
+ #include <common.h>
+ #include <pk.h>
+@@ -1104,6 +1105,7 @@ _gnutls_pkcs11_verify_crt_status(const char* url,
+ 
+ 	for (; i < clist_size; i++) {
+ 		unsigned vflags;
++		gnutls_x509_crt_t trusted_cert;
+ 
+ 		if (i == 0) /* in the end certificate do full comparison */
+ 			vflags = GNUTLS_PKCS11_OBJ_FLAG_PRESENT_IN_TRUSTED_MODULE|
+@@ -1112,9 +1114,10 @@ _gnutls_pkcs11_verify_crt_status(const char* url,
+ 			vflags = GNUTLS_PKCS11_OBJ_FLAG_PRESENT_IN_TRUSTED_MODULE|
+ 				GNUTLS_PKCS11_OBJ_FLAG_COMPARE_KEY|GNUTLS_PKCS11_OBJ_FLAG_RETRIEVE_TRUSTED;
+ 
+-		if (gnutls_pkcs11_crt_is_known (url, certificate_list[i], vflags) != 0) {
++		if (_gnutls_pkcs11_crt_is_known (url, certificate_list[i], vflags, &trusted_cert) != 0) {
+ 
+-			status |= check_ca_sanity(certificate_list[i], now, flags);
++			status |= check_ca_sanity(trusted_cert, now, flags);
++			gnutls_x509_crt_deinit(trusted_cert);
+ 
+ 			if (func)
+ 				func(certificate_list[i],
+-- 
+2.27.0.windows.1
+
+
+From 40db4c0887150ec3d32bfd88fd176f51e4371690 Mon Sep 17 00:00:00 2001
+From: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+Date: Mon, 8 May 2017 06:43:28 +0200
+Subject: [PATCH 3/4] gnutls_x509_trust_list_verify_crt2: treat signers with
+ insecure algorithms as unknown
+
+The reason is that many servers utilize a legacy chain to improve compatibility
+with old clients and that chain often contains insecure algorithm. In that case
+try to construct alternative paths. To maintain compatibility with previous
+versions, we ensure that the same error code (verification status) is returned
+in these cases as before by sending the cached error if the alternative path fails
+too.
+
+Signed-off-by: Nikos Mavrogiannopoulos <nmav@gnutls.org>
+---
+ lib/x509/verify-high.c | 30 ++++++++++++++++++++++++------
+ 1 file changed, 24 insertions(+), 6 deletions(-)
+
+diff --git a/lib/x509/verify-high.c b/lib/x509/verify-high.c
+index 188c15489..eefe48aad 100644
+--- a/lib/x509/verify-high.c
++++ b/lib/x509/verify-high.c
+@@ -52,7 +52,6 @@ struct node_st {
+ 	/* The trusted CRLs */
+ 	gnutls_x509_crl_t *crls;
+ 	unsigned int crl_size;
+-
+ };
+ 
+ struct gnutls_x509_trust_list_iter {
+@@ -1184,6 +1183,15 @@ gnutls_x509_trust_list_verify_crt(gnutls_x509_trust_list_t list,
+ 						  NULL, 0, flags, voutput, func);
+ }
+ 
++#define LAST_DN cert_list[cert_list_size-1]->raw_dn
++#define LAST_IDN cert_list[cert_list_size-1]->raw_issuer_dn
++/* This macro is introduced to detect a verification output
++ * which indicates an unknown signer, or a signer which uses
++ * an insecure algorithm (e.g., sha1), something that indicates
++ * a superceded signer */
++#define SIGNER_OLD_OR_UNKNOWN(output) ((output & GNUTLS_CERT_SIGNER_NOT_FOUND) || (output & GNUTLS_CERT_INSECURE_ALGORITHM))
++#define SIGNER_WAS_KNOWN(output) (!(output & GNUTLS_CERT_SIGNER_NOT_FOUND))
++
+ /**
+  * gnutls_x509_trust_list_verify_crt2:
+  * @list: The list
+@@ -1246,6 +1254,7 @@ gnutls_x509_trust_list_verify_crt2(gnutls_x509_trust_list_t list,
+ 	gnutls_x509_crt_t sorted[DEFAULT_MAX_VERIFY_DEPTH];
+ 	const char *hostname = NULL, *purpose = NULL, *email = NULL;
+ 	unsigned hostname_size = 0;
++	unsigned saved_output;
+ 
+ 	if (cert_list == NULL || cert_list_size < 1)
+ 		return gnutls_assert_val(GNUTLS_E_INVALID_REQUEST);
+@@ -1308,11 +1317,9 @@ gnutls_x509_trust_list_verify_crt2(gnutls_x509_trust_list_t list,
+ 					    list->
+ 					    node[hash].trusted_ca_size,
+ 					    flags, purpose, func);
++	saved_output = *voutput;
+ 
+-#define LAST_DN cert_list[cert_list_size-1]->raw_dn
+-#define LAST_IDN cert_list[cert_list_size-1]->raw_issuer_dn
+-
+-	if ((*voutput) & GNUTLS_CERT_SIGNER_NOT_FOUND &&
++	if (SIGNER_OLD_OR_UNKNOWN(*voutput) &&
+ 		(LAST_DN.size != LAST_IDN.size ||
+ 		 memcmp(LAST_DN.data, LAST_IDN.data, LAST_IDN.size) != 0)) {
+ 
+@@ -1324,16 +1331,25 @@ gnutls_x509_trust_list_verify_crt2(gnutls_x509_trust_list_t list,
+ 			  data, cert_list[cert_list_size - 1]->raw_dn.size);
+ 		hash %= list->size;
+ 
++		 _gnutls_debug_log("issuer in verification was not found or insecure; trying against trust list\n");
++
+ 		*voutput =
+ 		    _gnutls_verify_crt_status(cert_list, cert_list_size,
+ 					    list->node[hash].trusted_cas,
+ 					    list->
+ 					    node[hash].trusted_ca_size,
+ 					    flags, purpose, func);
++		if (*voutput != 0) {
++			if (SIGNER_WAS_KNOWN(saved_output))
++				*voutput = saved_output;
++			gnutls_assert();
++		}
+ 	}
+ 
++	saved_output = *voutput;
++
+ #ifdef ENABLE_PKCS11
+-	if ((*voutput & GNUTLS_CERT_SIGNER_NOT_FOUND) && list->pkcs11_token) {
++	if (SIGNER_OLD_OR_UNKNOWN(*voutput) && list->pkcs11_token) {
+ 		/* use the token for verification */
+ 
+ 		*voutput = _gnutls_pkcs11_verify_crt_status(list->pkcs11_token,
+@@ -1341,6 +1357,8 @@ gnutls_x509_trust_list_verify_crt2(gnutls_x509_trust_list_t list,
+ 								purpose,
+ 								flags, func);
+ 		if (*voutput != 0) {
++			if (SIGNER_WAS_KNOWN(saved_output))
++				*voutput = saved_output;
+ 			gnutls_assert();
+ 		}
+ 	}
+-- 
+2.27.0.windows.1
+
+
+From 47e74c88bcf13d863d8e6228a70add83c5a79504 Mon Sep 17 00:00:00 2001
+From: Daiki Ueno <ueno@gnu.org>
+Date: Sun, 31 May 2020 13:59:53 +0200
+Subject: [PATCH 4/4] x509: trigger fallback verification path when cert is
+ expired
+
+gnutls_x509_trust_list_verify_crt2 use the macro SIGNER_OLD_OR_UNKNOWN
+to trigger the fallback verification path if the signer of the last
+certificate is not in the trust store.  Previously, it doesn't take
+into account of the condition where the certificate is expired.
+
+Signed-off-by: Daiki Ueno <ueno@gnu.org>
+---
+ lib/x509/verify-high.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/lib/x509/verify-high.c b/lib/x509/verify-high.c
+index eefe48aad..1760135d1 100644
+--- a/lib/x509/verify-high.c
++++ b/lib/x509/verify-high.c
+@@ -1185,11 +1185,13 @@ gnutls_x509_trust_list_verify_crt(gnutls_x509_trust_list_t list,
+ 
+ #define LAST_DN cert_list[cert_list_size-1]->raw_dn
+ #define LAST_IDN cert_list[cert_list_size-1]->raw_issuer_dn
+-/* This macro is introduced to detect a verification output
+- * which indicates an unknown signer, or a signer which uses
+- * an insecure algorithm (e.g., sha1), something that indicates
+- * a superceded signer */
+-#define SIGNER_OLD_OR_UNKNOWN(output) ((output & GNUTLS_CERT_SIGNER_NOT_FOUND) || (output & GNUTLS_CERT_INSECURE_ALGORITHM))
++/* This macro is introduced to detect a verification output which
++ * indicates an unknown signer, a signer which uses an insecure
++ * algorithm (e.g., sha1), a signer has expired, or something that
++ * indicates a superseded signer */
++#define SIGNER_OLD_OR_UNKNOWN(output) ((output & GNUTLS_CERT_SIGNER_NOT_FOUND) || \
++				       (output & GNUTLS_CERT_EXPIRED) || \
++				       (output & GNUTLS_CERT_INSECURE_ALGORITHM))
+ #define SIGNER_WAS_KNOWN(output) (!(output & GNUTLS_CERT_SIGNER_NOT_FOUND))
+ 
+ /**
+-- 
+2.27.0.windows.1
+
