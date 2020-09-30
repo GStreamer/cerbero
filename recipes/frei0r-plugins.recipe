@@ -4,16 +4,15 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'frei0r-plugins'
-    version = '1.5.0'
+    version = '1.7.0'
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
     url = 'https://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '781cf84a6c2a9a3252f54d2967b57f6de75a31fc1684371e112638c981f72b60'
-    autoreconf = True
-    patches = ['frei0r-plugins/0001-Fix-autoreconf.patch']
+    tarball_checksum = '1b1ff8f0f9bc23eed724e94e9a7c1d8f0244bfe33424bb4fe68e6460c088523a'
 
     files_plugins = ['lib/frei0r-1']
     files_devel = [
-            'lib/pkgconfig/frei0r.pc',
-            'include/frei0r.h',
-            ]
+        'lib/pkgconfig/frei0r.pc',
+        'include/frei0r.h',
+    ]
