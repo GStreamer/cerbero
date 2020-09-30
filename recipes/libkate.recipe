@@ -9,8 +9,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'c40e81d5866c3d4bf744e76ce0068d8f388f0e25f7e258ce0c8e76d7adc87b68'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['libogg', 'libpng']
-    patches = ['libkate/0001-be-more-permissive-with-automake-errors-now-that-we-.patch',
-               'libkate/0002-build-skip-tools-tests-and-doc-subdirs.patch']
+    patches = ['libkate/0002-build-skip-tools-tests-and-doc-subdirs.patch']
 
     files_libs = ['libkate', 'liboggkate']
     files_devel = ['include/kate', 'lib/pkgconfig/kate.pc', 'lib/pkgconfig/oggkate.pc']
@@ -23,3 +22,9 @@ class Recipe(recipe.Recipe):
             self.append_env('PYTHON', 'python3')
         if self.config.target_distro == Distro.ARCH:
             self.append_env('LDFLAGS', '-Wl,-O1,--sort-common,--as-needed,-z,relro')
+        if self.config.platform == Platform.WINDOWS:
+            self.autoreconf = False
+            self.override_libtool = False
+        else:
+            self.patches += ['libkate/0001-be-more-permissive-with-automake-errors-now-that-we-.patch']
+        self.append_env('CFLAGS', '-Wno-error')

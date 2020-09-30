@@ -13,7 +13,6 @@ class Recipe(recipe.Recipe):
     deps = ['libogg']
     configure_options = ' --disable-cpplibs --enable-static'
 
-    autoreconf = True
     files_libs = ['libFLAC']
 
     files_bins = ['flac', 'metaflac']

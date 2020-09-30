@@ -13,7 +13,12 @@ class Recipe(recipe.Recipe):
     patches = ['sbc/0001-sbc-Use-stdint.h.patch',
                'sbc/0002-Don-t-use-NEON-with-aarch64-on-Clang.patch',
                'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',]
-    autoreconf = True
+
+    def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            self.override_libtool = False
+        else:
+            self.autoreconf = True
 
     async def compile(self):
         if self.config.target_platform != Platform.LINUX:

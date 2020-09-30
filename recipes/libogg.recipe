@@ -9,7 +9,6 @@ class Recipe(recipe.Recipe):
     url = 'xiph://ogg/%(name)s-%(version)s.tar.xz'
     tarball_checksum = 'c163bc12bc300c401b6aa35907ac682671ea376f13ae0969a220f7ddf71893fe'
     licenses = [{License.BSD_like: ['COPYING']}]
-    autoreconf = True
     patches = ['libogg/0001-Fix-iOS-build.patch',
                'libogg/0001-include-Use-stdint-on-mac-ios.patch']
 
@@ -23,4 +22,5 @@ class Recipe(recipe.Recipe):
                 # for the arm architecture
                 shell.replace (os.path.join(self.build_dir, 'configure.ac'),
                                {'-O4': '-O2'})
+                self.autoreconf = True
         await super(recipe.Recipe, self).configure()

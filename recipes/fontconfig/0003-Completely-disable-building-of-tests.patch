@@ -1,0 +1,42 @@
+From 8946f58450e04fa8ebc32b62e7479ed8f122408b Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 30 Sep 2020 13:07:43 +0530
+Subject: [PATCH 3/3] Completely disable building of tests
+
+This was originally for disabling on Windows, but to avoid autoreconf,
+we disable it everywhere.
+---
+ Makefile.am | 3 ++-
+ Makefile.in | 2 +-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 2b4a5b8..3cdd66e 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -23,7 +23,8 @@
+ 
+ SUBDIRS=fontconfig fc-blanks fc-case fc-lang fc-glyphname src \
+ 	fc-cache fc-cat fc-list fc-match fc-pattern fc-query fc-scan \
+-	fc-validate conf.d test
++	fc-validate conf.d
++
+ if ENABLE_DOCS
+ SUBDIRS += doc
+ endif
+diff --git a/Makefile.in b/Makefile.in
+index 3e3001b..67e46ef 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -436,7 +436,7 @@ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ SUBDIRS = fontconfig fc-blanks fc-case fc-lang fc-glyphname src \
+ 	fc-cache fc-cat fc-list fc-match fc-pattern fc-query fc-scan \
+-	fc-validate conf.d test $(am__append_1)
++	fc-validate conf.d $(am__append_1)
+ ACLOCAL_AMFLAGS = -I m4
+ EXTRA_DIST = fontconfig.pc.in fonts.conf.in fonts.dtd \
+ 	fontconfig.spec.in fontconfig.spec fontconfig-zip.in \
+-- 
+2.27.0.windows.1
+

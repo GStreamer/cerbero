@@ -1,5 +1,4 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
@@ -10,17 +9,13 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'WavPack-%(version)s'
     tarball_checksum = '1af7eaccbf560271013d4179d98ef6fc681a2bb3603382577eeba73d438785f4'
     licenses = [{License.BSD_like: ['COPYING']}]
+    # Tarball is just a git checkout, not an autotools dist
     autoreconf = True
     configure_options = ' --disable-apps '
 
     files_libs = ['libwavpack']
     files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
 
-    async def configure(self):
-        shell.replace(os.path.join(self.build_dir, 'Makefile.am'),
-            {'SUBDIRS = src include cli man': 'SUBDIRS = src include man'})
+    def prepare(self):
         if self.config.target_arch not in [Architecture.X86, Architecture.X86_64, Architecture.ARMv7, Architecture.ARMv7S] or self.config.target_platform == Platform.IOS:
             self.configure_options += ' --disable-asm '
-
-        await super(Recipe, self).configure()
-

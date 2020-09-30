@@ -10,10 +10,10 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'a21d724ab3b3933330194353687df82c475b5dfb997513eef4c25de6c865ec33'
     licenses = [License.GPLv2Plus]
     configure_options = '--with-pic --enable-shared'
+
+    # Needed on Windows because the configure script that ships with the
+    # tarball is ancient and outputs incorrect linker flags
     autoreconf = True
-    patches = ['a52dec/0002-Fix-link-cross-compiling-to-x86-in-darwin-platforms.patch',
-               'a52dec/0003-Disable-AC_C_ALWAYS_INLINE.patch',
-               'a52dec/0004-configure-let-us-decide-if-we-really-want-PIC-or-not.patch']
 
     files_libs = ['liba52']
     files_bins = ['a52dec']
@@ -23,3 +23,5 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
         self.append_env('CFLAGS', '-fPIC')
+        # Don't enable always-inline, breaks the build on windows and macos (space is significant)
+        self.set_env('ac_cv_c_inline', 'inline ')

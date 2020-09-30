@@ -1,7 +1,7 @@
-From 1041fdf62bbcbd65ab85cf08836195b975c9dd85 Mon Sep 17 00:00:00 2001
+From 5786bcc6be8441d579d26f830ebb35bda40deef6 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 22 Feb 2020 03:57:50 +0530
-Subject: [PATCH] fcatomic: Fix EXC_BAD_ACCESS on iOS ARM64
+Subject: [PATCH 2/3] fcatomic: Fix EXC_BAD_ACCESS on iOS ARM64
 
 iPhone 2.1 was released a long time ago, and the macro for checking
 the target iOS SDK version has changed. We can simplify everything and
@@ -42,5 +42,5 @@ index cc28a88..657a5f5 100644
  
  #elif !defined(FC_NO_MT) && defined(HAVE_INTEL_ATOMIC_PRIMITIVES)
 -- 
-2.21.1 (Apple Git-122.3)
+2.27.0.windows.1
 

@@ -7,8 +7,6 @@ class Recipe(recipe.Recipe):
     version = '2.40.20'
     licenses = [License.LGPLv2Plus]
     deps = ['libcroco', 'gdk-pixbuf', 'pango', 'cairo']
-    autoreconf = True
-    autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
     stype = SourceType.TARBALL
     url = 'gnome://'
     tarball_checksum = 'cff4dd3c3b78bfe99d8fcfad3b8ba1eee3289a0823c0e118d78106be6b84c92b'
@@ -21,12 +19,8 @@ class Recipe(recipe.Recipe):
                    'lib/pkgconfig/librsvg-2.0.pc',
                    'lib/librsvg-2.a', 'lib/librsvg-2.la']
     files_typelibs = ['Rsvg-2.0']
-    # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
-    configure_options = ' --without-gtk3 '
 
-    patches = ['librsvg/option-enable-disable-gtk.patch',
-               'librsvg/0001-Use-ACLOCAL_FLAGS.patch',
-               'librsvg/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
+    patches = ['librsvg/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -34,6 +28,19 @@ class Recipe(recipe.Recipe):
         # Fails on cross-ios and cross-win32
         if self.config.cross_compiling():
             self.configure_options += ' --disable-pixbuf-loader'
+
+        if self.config.platform != Platform.WINDOWS:
+            # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
+            self.configure_options += ' --without-gtk3 '
+            self.autoreconf = True
+            self.autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
+            self.patches += [
+                'librsvg/option-enable-disable-gtk.patch',
+                'librsvg/0001-Use-ACLOCAL_FLAGS.patch',
+            ]
+        else:
+            self.autoreconf = False
+               
 
     async def compile(self):
         # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,

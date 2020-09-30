@@ -1,0 +1,26 @@
+From b98e122b4d96ccfbefdc1b15807be2dcf3481cf7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Tue, 21 Oct 2014 13:46:18 +0200
+Subject: [PATCH] Disable building of the tests
+
+We don't run them anyway and there are build system quirks in there.
+---
+ Makefile.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index fb2a4b2..7d700fe 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -107,7 +107,7 @@ EXTRA_PROGRAMS =
+ TESTS =
+ check_PROGRAMS =
+ # libpng is required for our test programs
+-@CAIRO_HAS_PNG_FUNCTIONS_TRUE@am__append_1 = boilerplate test perf
++@CAIRO_HAS_PNG_FUNCTIONS_TRUE@am__append_1 = 
+ subdir = .
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ am__aclocal_m4_deps = $(top_srcdir)/build/aclocal.cairo.m4 \
+-- 
+2.27.0.windows.1
+

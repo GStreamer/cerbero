@@ -9,14 +9,11 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '8c90f00c500b2299c0a323dd9beead2a00353752b2092ead558139bd67f7bf16'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, {License.MPLv1_1: ['COPYING-MPL-1.1']}]
-    autoreconf = True
-    autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
-    patches = ['cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
-               'cairo/0001-Disable-building-of-the-tests.patch',
-               'cairo/0001-build-disable-failing-compile-link-checks-on-any-std.patch',
-               'cairo/0001-win32-Make-font-dc-thread-local.patch',
-               ]
+    patches = [
+        'cairo/0001-Fix-compilation-with-Android-s-bionic-libc.patch',
+        'cairo/0001-win32-Make-font-dc-thread-local.patch',
+    ]
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [
@@ -47,6 +44,16 @@ class Recipe(recipe.Recipe):
             self.append_env('CFLAGS', '-fno-lto')
             self.append_env('CXXFLAGS', '-fno-lto')
             self.append_env('CPPFLAGS', '-fno-lto')
+
+        if self.config.platform != Platform.WINDOWS:
+            self.autoreconf = True
+            self.autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
+            self.patches += [
+               'cairo/0001-Disable-building-of-the-tests.patch',
+               'cairo/0001-build-disable-failing-compile-link-checks-on-any-std.patch',
+            ]
+        else:
+            self.patches += ['cairo/0001-Disable-building-of-the-tests-noautoreconf.patch']
 
         if self.config.variants.x11:
             self.files_devel += ['lib/pkgconfig/cairo-xlib-xrender.pc',

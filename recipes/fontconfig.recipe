@@ -11,13 +11,12 @@ class Recipe(recipe.Recipe):
     licenses = [{License.MIT: ['COPYING']}]
     configure_options = '--disable-docs'
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
-    autoreconf = True
-    patches = ['fontconfig/0003-configure-Allow-static-build.patch',
-               'fontconfig/0001-Do-not-build-tests-on-windows.patch',
-               'fontconfig/0001-Don-t-use-_mktemp_s-which-is-not-available-in-XP.patch',
-               'fontconfig/0004-Fix-cross-compilation-by-passing-CPPFLAGS-to-CPP.patch',
-	       'fontconfig/0001-fcatomic-Fix-EXC_BAD_ACCESS-on-iOS-ARM64.patch',
-               ]
+    patches = [
+        'fontconfig/0001-Fix-cross-compilation-by-passing-CPPFLAGS-to-CPP.patch',
+        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/88
+        'fontconfig/0002-fcatomic-Fix-EXC_BAD_ACCESS-on-iOS-ARM64.patch',
+        'fontconfig/0003-Completely-disable-building-of-tests.patch',
+    ]
 
     files_libs = ['libfontconfig']
     files_etc = [
@@ -27,18 +26,21 @@ class Recipe(recipe.Recipe):
         ]
     files_devel = ['lib/pkgconfig/fontconfig.pc', 'include/fontconfig']
 
-    autoreconf = True
 
     def prepare(self):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             self.deps.append('libiconv')
         if needs_xcode8_sdk_workaround(self.config):
             self.set_env('ac_cv_func_mkostemp', 'no')
+
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.target_arch == Architecture.X86_64:
                 self.configure_options += ' --with-arch=x86_64 '
             else:
                 self.configure_options += ' --with-arch=i686 '
+        else:
+            self.autoreconf = True
+            self.patches += ['fontconfig/0003-configure-Allow-static-build.patch']
 
     def post_install(self):
         # Create relative symlinks to prevent breakage during packaging

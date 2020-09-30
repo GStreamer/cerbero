@@ -9,16 +9,12 @@ class Recipe(recipe.Recipe):
     url = 'xiph://theora/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
     deps = ['libogg', 'libvorbis']
-    autoreconf = True
     allow_parallel_build = False
-    patches = ['libtheora/0001-Add-option-to-disable-doc.patch',
-               'libtheora/0002-Fix-linking-of-theora-encoder-library.patch',
-               'libtheora/0003-Use-our-automake-version-and-not-an-older-one.patch',
-               'libtheora/0004-examples-Don-t-use-png_sizeof.patch',
-               'libtheora/0005-build-allow-skipping-configure-in-autogen.sh.patch',
-               'libtheora/0006-Fix-cross-compilation-build.patch',
-               ]
-    configure_options = ' --disable-spec --disable-doc --disable-examples'
+    patches = [
+        'libtheora/0004-examples-Don-t-use-png_sizeof.patch',
+        'libtheora/0006-Fix-cross-compilation-build.patch',
+    ]
+    configure_options = ' --disable-spec --disable-examples'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
     files_bins = ['dvconnect', 'encodedv', 'dubdv']
@@ -28,9 +24,18 @@ class Recipe(recipe.Recipe):
     autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
 
     def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.config_sh = 'sh autogen.sh'
-        elif self.config.target_platform == Platform.IOS:
+        if self.config.platform == Platform.WINDOWS:
+            self.autoreconf = False
+            self.override_libtool = False
+        else:
+            # Don't build documentation even if doxygen is available
+            self.configure_options += ' --disable-doc'
+            self.patches += [
+                'libtheora/0001-Add-option-to-disable-doc.patch',
+                'libtheora/0003-Use-our-automake-version-and-not-an-older-one.patch',
+                'libtheora/0005-build-allow-skipping-configure-in-autogen.sh.patch',
+            ]
+        if self.config.target_platform == Platform.IOS:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
         elif self.config.target_platform == Platform.DARWIN:
             self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']

@@ -7,7 +7,6 @@ class Recipe(recipe.Recipe):
     url = 'https://download.videolan.org/pub/videolan/libdca/%(version)s/libdca-%(version)s.tar.bz2'
     tarball_checksum = 'dba022e022109a5bacbe122d50917769ff27b64a7bba104bd38ced8de8510642'
     licenses = [License.GPLv2Plus]
-    patches = ['libdca/0001-Disable-AC_C_ALWAYS_INLINE.patch']
     autoreconf = True
 
     files_libs = ['libdca']
@@ -18,6 +17,11 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' --disable-oss'
+        if self.config.platform == Platform.WINDOWS:
+            self.override_libtool = False
+            self.autoreconf = False
+        # Don't enable always-inline, breaks the build on macos (space is significant)
+        self.set_env('ac_cv_c_inline', 'inline ')
 
     def post_install(self):
         # Create relative symlinks to prevent breakage during packaging

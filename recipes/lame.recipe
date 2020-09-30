@@ -8,7 +8,6 @@ class Recipe(recipe.Recipe):
     configure_options = ' --enable-static --disable-frontend --disable-decoder'
     url = 'sf://.tar.gz'
     tarball_checksum = 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e'
-    autoreconf = True
     patches = ['lame/0001-Remove-decoder-symbols.patch']
 
     files_libs = ['libmp3lame']

@@ -10,17 +10,18 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'af00bb5a784e7c9e69f56823de4637c350643deedaf333d0fa86ecdba6fcb415'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['libogg']
-    config_sh = 'rm ltmain.sh && sh autogen.sh'
-    patches = ['libvorbis/0001-Fix-linking-on-Android.patch',
-               'libvorbis/0003-Link-the-other-libs-with-lm-too.patch',
-               'libvorbis/0004-configure-check-for-endianness.patch',
-               'libvorbis/0005-darwin-do-not-build-for-a-generic-arm-architecture.patch',
-               'libvorbis/0001-build-check-if-mno-ieee-fp-is-supported.patch',
-              ]
-    config_sh = './autogen.sh && ./configure'
-    autoreconf = True
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']
     files_devel = [
         'include/vorbis', 'lib/pkgconfig/vorbis.pc',
         'lib/pkgconfig/vorbisenc.pc', 'lib/pkgconfig/vorbisfile.pc']
+
+    def prepare(self):
+        self.append_env('LDFLAGS', '-lm')
+        if self.config.target_platform != Platform.WINDOWS:
+            self.autoreconf = True
+            self.patches += [
+                'libvorbis/0004-configure-check-for-endianness.patch',
+                'libvorbis/0005-darwin-do-not-build-for-a-generic-arm-architecture.patch',
+                'libvorbis/0001-build-check-if-mno-ieee-fp-is-supported.patch',
+            ]
