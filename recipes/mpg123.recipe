@@ -2,14 +2,13 @@
 
 class Recipe(recipe.Recipe):
     name = 'mpg123'
-    version = '1.25.12'
+    version = '1.26.3'
     stype = SourceType.TARBALL
     url = 'sf://.tar.bz2'
-    tarball_checksum = '1ffec7c9683dfb86ea9040d6a53d6ea819ecdda215df347f79def08f1fe731d1'
+    tarball_checksum = '30c998785a898f2846deefc4d17d6e4683a5a550b7eacf6ea506e30a7a736c6e'
     licenses = [License.LGPLv2_1Plus]
-    autoreconf = True
     configure_options = '--with-audio=dummy --enable-static'
-    patches = ['mpg123/0001-Disable-tools-and-libout123-library.patch']
+    patches = ['mpg123/0001-Only-build-libmpg123-under-libraries.patch']
 
     files_libs = ['libmpg123']
     files_devel = ['include/mpg123.h', 'include/fmt123.h', 'lib/pkgconfig/libmpg123.pc']
@@ -28,4 +27,7 @@ class Recipe(recipe.Recipe):
             if self.config.target_arch == Architecture.X86:
                 # make sure we use 32bit asm
                 self.configure_options += ' --with-cpu=x86 '
-
+        # Only install the libmpg123 library and things needed for it
+        self.make_install = self.make + ['install-libLTLIBRARIES', 'install-pkgconfigDATA',
+                                         'install-includeHEADERS', 'install-nodist_includeHEADERS']
+        self.make += ['src/libmpg123/libmpg123.la']
