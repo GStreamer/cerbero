@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from pathlib import Path
 
 class Recipe(recipe.Recipe):
     name = 'libdca'
@@ -23,11 +24,13 @@ class Recipe(recipe.Recipe):
         # Create relative symlinks to prevent breakage during packaging
         if self.config.platform != Platform.WINDOWS:
             dangling = [
-                ('lib/libdts.a', 'libdca.a'),
-                ('share/man/man1/extract_dts.1', 'extract_dca.1'),
-                ('share/man/man1/dtsdec.1', 'dcadec.a'),
+                ('libdca.a', 'lib/libdts.a'),
+                ('extract_dca.1', 'share/man/man1/extract_dts.1'),
+                ('dcadec.1', 'share/man/man1/dtsdec.1'),
             ]
+            prefix = Path(self.config.prefix)
             for src, dest in dangling:
-                os.remove(os.path.join(self.config.prefix, src))
-                os.symlink(src, os.path.join(self.config.prefix, dest))
+                dest = prefix / dest
+                dest.unlink()
+                dest.symlink_to(src)
         super().post_install()
