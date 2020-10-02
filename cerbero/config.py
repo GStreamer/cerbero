@@ -390,22 +390,26 @@ class Config (object):
         gstregistry = os.path.expanduser(gstregistry)
         gstregistry10 = os.path.expanduser(gstregistry10)
 
-        pypath = sysconfig.get_path('purelib', vars={'base': ''})
-        # Must strip \/ to ensure that the path is relative
-        pypath = PurePath(pypath.strip('\\/'))
-        # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
-        # native path separator and must end in a path separator.
-        pythonpath = [str(prefix / pypath) + os.sep,
-                      str(self.build_tools_prefix / pypath) + os.sep]
-
-        if self.platform == Platform.WINDOWS:
-            # On Windows, pypath doesn't include Python version although some
-            # packages (pycairo, gi, etc...) install themselves using Python
-            # version scheme like on a posix system.
-            # Let's add an extra path to PYTHONPATH for these libraries.
-            pypath = sysconfig.get_path('purelib', 'posix_prefix', {'base': ''})
+        for p in (prefix, self.build_tools_prefix):
+            # Explicitly use the posix_prefix scheme because:
+            # 1. On Windows, pypath doesn't include Python version although some
+            #    packages (pycairo, gi, etc...) install themselves using Python
+            #    version scheme like on a posix system.
+            # 2. The Python3 that ships with XCode on macOS Big Sur defaults to
+            #    a framework path, but setuptools defaults to a posix prefix
+            # So just use a posix prefix everywhere consistently.
+            pypath = sysconfig.get_path('purelib', 'posix_prefix', vars={'base': ''})
+            # Must strip \/ to ensure that the path is relative
             pypath = PurePath(pypath.strip('\\/'))
-            pythonpath.append(str(prefix / pypath) + os.sep)
+            # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
+            # native path separator and must end in a path separator.
+            pythonpath = [str(p / pypath) + os.sep]
+            # Make sure we also include the default non-versioned path on
+            # Windows in addition to the posix path.
+            if self.platform == Platform.WINDOWS:
+                pypath = sysconfig.get_path('purelib', vars={'base': ''})
+                pypath = PurePath(pypath.strip('\\/'))
+                pythonpath += [str(p / pypath) + os.sep]
 
         # Ensure python paths exists because setup.py won't create them
         for path in pythonpath:
