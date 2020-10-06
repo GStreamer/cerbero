@@ -71,4 +71,4 @@ class Recipe(custom.GStreamer):
             self.meson_options['libunwind'] = 'disabled'
 
         if self.using_msvc():
-            self.meson_options['dbghlp'] = 'enabled'
+            self.meson_options['dbghelp'] = 'enabled'
