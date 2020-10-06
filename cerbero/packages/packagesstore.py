@@ -177,7 +177,6 @@ class PackagesStore (object):
                 m.warning(_("Could not found a valid package in %s") % f)
                 continue
             for p in file_packages:
-                p.__file__ = os.path.abspath(f)
                 packages_dict[p.name] = p
         return packages_dict
 
@@ -214,6 +213,10 @@ class PackagesStore (object):
             p = package_cls(self._config, self, self.cookbook)
         else:
             raise Exception('Uknown package type %s' % package_cls)
+        # Set the __file__ attribute before calling any package method because
+        # a package may need to call something that needs it
+        # e.g. prepare() may call self.relative_path(), which uses __file__
+        p.__file__ = os.path.abspath(filepath)
         p.prepare()
         # reload files from package now that we called prepare that
         # may have changed it
