@@ -191,8 +191,13 @@ def run_and_get_env(cmd):
     env = os.environ.copy()
     env['VSCMD_ARG_no_logo'] = '1'
     env['VSCMD_DEBUG'] = ''
+    # Pass errors=ignore to ignore env vars with invalid encoding, such as
+    # GITLAB_USER_NAME when the name of the user triggering the pipeline has
+    # non-ascii characters.
+    # The env vars set by MSVC will always be correctly encoded.
     output = subprocess.check_output(cmd, shell=True, env=env,
-                                     universal_newlines=True)
+                                     universal_newlines=True,
+                                     errors='ignore')
     lines = []
     for line in output.split('\n'):
         if '=' in line:
