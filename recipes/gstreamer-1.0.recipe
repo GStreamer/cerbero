@@ -71,4 +71,8 @@ class Recipe(custom.GStreamer):
             self.meson_options['libunwind'] = 'disabled'
 
         if self.using_msvc():
-            self.meson_options['dbghelp'] = 'enabled'
+            if self.config.variants.uwp:
+                # Most symbols in DbgHelp.h are not allowed for UWP
+                self.meson_options['dbghelp'] = 'disabled'
+            else:
+                self.meson_options['dbghelp'] = 'enabled'
