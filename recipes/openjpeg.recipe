@@ -24,6 +24,8 @@ class Recipe(recipe.Recipe):
     library_type = LibraryType.BOTH
 
     def prepare(self):
+        # This project uses OPENJPEG_INSTALL_LIB_DIR instead of CMAKE_INSTALL_LIBDIR
+        self.configure_tpl = self.configure_tpl.replace('CMAKE_INSTALL_LIBDIR', 'OPENJPEG_INSTALL_LIB_DIR')
         if self.config.target_platform in [Platform.WINDOWS]:
             self.library_type = LibraryType.SHARED
 
