@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     patches = ['libkate/0002-build-skip-tools-tests-and-doc-subdirs.patch']
 
     files_libs = ['libkate', 'liboggkate']
-    files_devel = ['include/kate', 'lib/pkgconfig/kate.pc', 'lib/pkgconfig/oggkate.pc']
+    files_devel = ['include/kate', '%(libdir)s/pkgconfig/kate.pc', '%(libdir)s/pkgconfig/oggkate.pc']
 
     def prepare(self):
         # Tell internal script to call python3 instead of python on non-Windows

@@ -35,22 +35,22 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [
-        'lib/pkgconfig/cairo-fc.pc',
-        'lib/pkgconfig/cairo.pc',
-        'lib/pkgconfig/cairo-ps.pc',
-        'lib/pkgconfig/cairo-ft.pc',
-        'lib/pkgconfig/cairo-pdf.pc',
-        'lib/pkgconfig/cairo-svg.pc',
-        'lib/pkgconfig/cairo-gobject.pc',
-        'lib/pkgconfig/cairo-png.pc',
+        '%(libdir)s/pkgconfig/cairo-fc.pc',
+        '%(libdir)s/pkgconfig/cairo.pc',
+        '%(libdir)s/pkgconfig/cairo-ps.pc',
+        '%(libdir)s/pkgconfig/cairo-ft.pc',
+        '%(libdir)s/pkgconfig/cairo-pdf.pc',
+        '%(libdir)s/pkgconfig/cairo-svg.pc',
+        '%(libdir)s/pkgconfig/cairo-gobject.pc',
+        '%(libdir)s/pkgconfig/cairo-png.pc',
         'include/cairo',
         ]
     platform_files_devel = {
-        Platform.WINDOWS: [ 'lib/pkgconfig/cairo-win32-font.pc',
-                            'lib/pkgconfig/cairo-win32.pc'],
-        Platform.DARWIN: ['lib/pkgconfig/cairo-quartz-font.pc',
-                         'lib/pkgconfig/cairo-quartz-image.pc',
-                         'lib/pkgconfig/cairo-quartz.pc']
+        Platform.WINDOWS: [ '%(libdir)s/pkgconfig/cairo-win32-font.pc',
+                            '%(libdir)s/pkgconfig/cairo-win32.pc'],
+        Platform.DARWIN: ['%(libdir)s/pkgconfig/cairo-quartz-font.pc',
+                         '%(libdir)s/pkgconfig/cairo-quartz-image.pc',
+                         '%(libdir)s/pkgconfig/cairo-quartz.pc']
     }
 
     def prepare(self):
@@ -65,8 +65,8 @@ class Recipe(recipe.Recipe):
         #if self.config.variants.x11:
         #    self.meson_options['xlib'] = 'enabled'
         #    self.meson_options['xcb'] = 'auto'
-        #    self.files_devel += ['lib/pkgconfig/cairo-xlib-xrender.pc',
-        #                         'lib/pkgconfig/cairo-xlib.pc']
+        #    self.files_devel += ['%(libdir)s/pkgconfig/cairo-xlib-xrender.pc',
+        #                         '%(libdir)s/pkgconfig/cairo-xlib.pc']
 
         if self.config.target_platform == Platform.DARWIN:
             self.meson_options['quartz'] = 'enabled'

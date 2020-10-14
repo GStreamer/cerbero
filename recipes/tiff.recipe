@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
         'tiff2pdf', 'tiffset', 'tiffcp', 'tiff2rgba', 'tiffinfo', 'tiff2bw',
         'raw2tiff', 'fax2tiff', 'tiffdither', 'tiffcmp']
     files_devel = ['include/tiffvers.h', 'include/tiffio.h', 'include/tiff.h',
-        'include/tiffconf.h', 'lib/pkgconfig/libtiff-4.pc']
+        'include/tiffconf.h', '%(libdir)s/pkgconfig/libtiff-4.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:

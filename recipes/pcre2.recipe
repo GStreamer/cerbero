@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
                     }
 
     files_libs = ['libpcre2-8']
-    files_devel = ['include/pcre2.h', 'lib/pkgconfig/libpcre2-8.pc']
+    files_devel = ['include/pcre2.h', '%(libdir)s/pkgconfig/libpcre2-8.pc']
 
     patches = [
         'pcre2/0001-Add-meson-build-files-based-on-wrap-pcre2_10.42-1.patch',

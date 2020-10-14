@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     meson_options = {'tests': 'disabled'}
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
-    files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
+    files_devel = ['include/wels', '%(libdir)s/pkgconfig/openh264.pc']
     patches = []
 
     def post_install(self):

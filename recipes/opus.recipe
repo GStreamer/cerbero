@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libopus']
-    files_devel = ['include/opus', 'lib/pkgconfig/opus.pc']
+    files_devel = ['include/opus', '%(libdir)s/pkgconfig/opus.pc']
 
     def prepare(self):
         # Always have NEON on ARM64, don't need to detect the CPU at runtime.

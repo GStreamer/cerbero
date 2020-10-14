@@ -138,16 +138,17 @@ class FilesProvider(object):
     # mext = module (plugin) extension
     # smext = static module (plugin) extension
     # pext = python module extension (.pyd on Windows)
+    # libdir = relative libdir path (lib, lib64, lib/i386-linux-gnu)
     EXTENSIONS = {
-        Platform.WINDOWS: {'bext': '.exe', 'sregex': _DLL_REGEX, 'sdir': 'bin',
+        Platform.WINDOWS: {'bext': '.exe', 'sregex': _DLL_REGEX,
             'mext': '.dll', 'smext': '.a', 'pext': '.pyd', 'srext': '.dll'},
-        Platform.LINUX: {'bext': '', 'sregex': _LINUX_SO_REGEX, 'sdir': 'lib',
+        Platform.LINUX: {'bext': '', 'sregex': _LINUX_SO_REGEX,
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
-        Platform.ANDROID: {'bext': '', 'sregex': _ANDROID_SO_REGEX, 'sdir': 'lib',
+        Platform.ANDROID: {'bext': '', 'sregex': _ANDROID_SO_REGEX,
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.so'},
-        Platform.DARWIN: {'bext': '', 'sregex': _DYLIB_REGEX, 'sdir': 'lib',
+        Platform.DARWIN: {'bext': '', 'sregex': _DYLIB_REGEX,
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.dylib'},
-        Platform.IOS: {'bext': '', 'sregex': _DYLIB_REGEX, 'sdir': 'lib',
+        Platform.IOS: {'bext': '', 'sregex': _DYLIB_REGEX,
             'mext': '.so', 'smext': '.a', 'pext': '.so', 'srext': '.dylib'}}
 
     # Match static gstreamer plugins, GIO modules, etc.
@@ -159,6 +160,11 @@ class FilesProvider(object):
         self.extensions = self.EXTENSIONS[self.platform].copy()
         self.extensions['pydir'] = config.py_prefix
         self.extensions['pyplatdir'] = config.py_plat_prefix
+        self.extensions['libdir'] = self.config.rel_libdir
+        if self.platform == Platform.WINDOWS:
+            self.extensions['sdir'] = 'bin'
+        else:
+            self.extensions['sdir'] = self.extensions['libdir']
         if self._dylib_plugins():
             self.extensions['mext'] = '.dylib'
         self.py_prefixes = config.py_prefixes
@@ -374,7 +380,7 @@ class FilesProvider(object):
             # For plugins, the .la file is generated using the .pc file, but we
             # don't add the .pc to files_devel. It has the same name, so we can
             # add it using the .la entry.
-            if f.startswith('lib/gstreamer-1.0/') and f.endswith('.la'):
+            if f.startswith(self.extensions['libdir'] + '/gstreamer-1.0/') and f.endswith('.la'):
                 fs.append(self._get_plugin_pc(f))
         # fill directories
         dirs = [x for x in fs if
@@ -418,7 +424,7 @@ class FilesProvider(object):
         '''
         if self.library_type == LibraryType.STATIC:
             return {}
-        libdir = self.extensions['sdir'] + self.config.lib_suffix
+        libdir = self.extensions['sdir']
         libext = self.extensions['srext']
         libregex = self.extensions['sregex']
         if libregex:
@@ -509,13 +515,13 @@ class FilesProvider(object):
         if not self.config.variants.gi:
             return []
 
-        pattern = 'lib/girepository-1.0/%s.typelib'
+        pattern = '{}/girepository-1.0/%s.typelib'.format(self.extensions['libdir'])
         typelibs = shell.ls_files([pattern % x for x in files],
                                   self.config.prefix)
         if not typelibs:
             # Add the architecture for universal builds
-            pattern = 'lib/%s/girepository-1.0/%%s.typelib' % \
-                self.config.target_arch
+            pattern = '{}/{}/girepository-1.0/%s.typelib'\
+                .format(self.extensions['libdir'], self.config.target_arch)
             typelibs = shell.ls_files([pattern % x for x in files],
                                       self.config.prefix)
         return typelibs
@@ -558,24 +564,24 @@ class FilesProvider(object):
 
             pattern = ''
             if self.library_type != LibraryType.NONE:
-                pattern += 'lib/%(f)s.la '
+                pattern += '%(libdir)s/%(f)s.la '
 
             if self.library_type in (LibraryType.BOTH, LibraryType.STATIC):
-                pattern += 'lib/%(f)s.a '
+                pattern += '%(libdir)s/%(f)s.a '
 
             if self.library_type in (LibraryType.BOTH, LibraryType.SHARED):
                 if self.platform == Platform.LINUX:
-                    pattern += 'lib/%(f)s.so '
+                    pattern += '%(libdir)s/%(f)s.so '
                 elif self.platform == Platform.WINDOWS:
-                    pattern += 'lib/%(f)s.dll.a '
-                    pattern += 'lib/%(f)s.def '
-                    pattern += 'lib/%(fnolib)s.lib '
+                    pattern += '%(libdir)s/%(f)s.dll.a '
+                    pattern += '%(libdir)s/%(f)s.def '
+                    pattern += '%(libdir)s/%(fnolib)s.lib '
                 elif self.platform in [Platform.DARWIN, Platform.IOS]:
-                    pattern += 'lib/%(f)s.dylib '
+                    pattern += '%(libdir)s/%(f)s.dylib '
 
             libsmatch = []
             for x in self._get_category_files_list(category):
-                libsmatch.append(pattern % {'f': x, 'fnolib': x[3:]})
+                libsmatch.append(pattern % {'f': x, 'fnolib': x[3:], 'libdir': self.extensions['libdir']})
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
                 if self.have_pdbs():

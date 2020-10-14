@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
     licenses_bins = [License.GPLv2Plus]
 
     files_devel = [
-        'lib/pkgconfig/flac.pc',
+        '%(libdir)s/pkgconfig/flac.pc',
         'include/FLAC',
     ]
 

@@ -31,7 +31,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libtag']
-    files_devel = ['include/taglib', 'lib/pkgconfig/taglib.pc']
+    files_devel = ['include/taglib', '%(libdir)s/pkgconfig/taglib.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

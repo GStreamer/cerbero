@@ -16,4 +16,4 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
-                   'include/jmorecfg.h','include/turbojpeg.h', 'lib/pkgconfig/libjpeg.pc']
+                   'include/jmorecfg.h','include/turbojpeg.h', '%(libdir)s/pkgconfig/libjpeg.pc']

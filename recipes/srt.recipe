@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
     use_system_libs = True
 
     files_libs = ['libsrt']
-    files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
+    files_devel = ['include/srt', '%(libdir)s/pkgconfig/srt.pc']
 
     def prepare(self):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():

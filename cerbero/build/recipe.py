@@ -491,9 +491,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
 
         # retrieve the list of files we need to generate
         for f in self.devel_files_list():
-            if not f.endswith('.a') or not f.startswith('lib/'):
+            libdir = self.config.rel_libdir + '/'
+            if not f.endswith('.a') or not f.startswith(libdir):
                 continue
-            if f.startswith('lib/gstreamer-1.0/'):
+            if f.startswith(libdir + 'gstreamer-1.0/'):
                 libtype = 'plugin'
             else:
                 libtype = 'library'

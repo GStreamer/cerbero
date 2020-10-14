@@ -72,7 +72,7 @@ class GStreamer(recipe.Recipe):
         if variant is None or getattr(self.config.variants, variant):
             if dep is not None:
                 self.deps.append(dep)
-            plugin = 'lib/gstreamer-1.0/libgst' + plugin
+            plugin = '%(libdir)s/gstreamer-1.0/libgst' + plugin
             if not hasattr(self, 'files_plugins_' + category):
                 setattr(self, 'files_plugins_' + category, [])
                 self.update_categories()
@@ -104,7 +104,7 @@ class GStreamer(recipe.Recipe):
         raise FatalError('{} not found in category {}'.format(entry, files_category))
 
     def _remove_plugin_file(self, plugin, category):
-        plugin = 'lib/gstreamer-1.0/libgst' + plugin
+        plugin = '%(libdir)s/gstreamer-1.0/libgst' + plugin
         plugin_shared_lib = plugin + '%(mext)s'
         plugin_static_lib = plugin + '.a'
         plugin_libtool_lib = plugin + '.la'
@@ -121,11 +121,11 @@ class GStreamer(recipe.Recipe):
         if library_name is not None:
             library = 'libgst' + library_name + '-1.0'
             self.files_libs.remove(library)
-            pcname = 'lib/pkgconfig/gstreamer-' + library_name + '-1.0.pc'
+            pcname = '%(libdir)s/pkgconfig/gstreamer-' + library_name + '-1.0.pc'
             self.files_plugins_devel.remove(pcname)
             includedir = 'include/gstreamer-1.0/gst/' + library_name
             self.files_plugins_devel.remove(includedir)
-            libincdir = 'lib/gstreamer-1.0/include/gst/' + library_name
+            libincdir = '%(libdir)s/gstreamer-1.0/include/gst/' + library_name
             if libincdir in self.files_plugins_devel:
                 self.files_plugins_devel.remove(libincdir)
         self.meson_options[option] = 'disabled'
@@ -153,7 +153,7 @@ def list_gstreamer_1_0_plugins_by_category(config):
             else:
                 continue
             for e in plugins_list:
-                if not e.startswith('lib/gstreamer-'):
+                if not e.startswith('lib/gstreamer-') and not e.startswith('%(libdir)s/gstreamer-'):
                     continue
                 e = os.path.basename(e)
                 # Only pick static libs

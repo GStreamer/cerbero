@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libpsl']
-    files_devel = ['include/libpsl.h', 'lib/pkgconfig/libpsl.pc']
+    files_devel = ['include/libpsl.h', '%(libdir)s/pkgconfig/libpsl.pc']
 
     def prepare(self):
         # FIXME: The actual upstreamable fix would be to not use system() at

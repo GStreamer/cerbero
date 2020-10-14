@@ -15,8 +15,8 @@ class Recipe(recipe.Recipe):
     deps = [ 'zlib' ]
 
     files_libs = ['libxml2']
-    files_devel = ['include/libxml2', 'lib/xml2Conf.sh', 'bin/xml2-config',
-                   'lib/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
+    files_devel = ['include/libxml2', '%(libdir)s/xml2Conf.sh', 'bin/xml2-config',
+                   '%(libdir)s/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:

@@ -6,10 +6,10 @@ class Recipe(custom.GStreamer):
     tarball_checksum = 'aea24eeb59ee5fadfac355de2f7cecb51966c3e147e5ad7cfb4c314f1a4086ed'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
 
-    files_devel = ['include/gstreamer-1.0/gst/rtsp-server', 'lib/pkgconfig/gstreamer-rtsp-server-1.0.pc']
+    files_devel = ['include/gstreamer-1.0/gst/rtsp-server', '%(libdir)s/pkgconfig/gstreamer-rtsp-server-1.0.pc']
     files_libs = ['libgstrtspserver-1.0']
     files_typelibs = ['GstRtspServer-1.0']
-    files_plugins_net = [ 'lib/gstreamer-1.0/libgstrtspclientsink%(mext)s' ]
+    files_plugins_net = [ '%(libdir)s/gstreamer-1.0/libgstrtspclientsink%(mext)s' ]
     files_plugins_net_devel = [
-        'lib/gstreamer-1.0/libgstrtspclientsink.a', 'lib/gstreamer-1.0/libgstrtspclientsink.la',
+        '%(libdir)s/gstreamer-1.0/libgstrtspclientsink.a', '%(libdir)s/gstreamer-1.0/libgstrtspclientsink.la',
     ]

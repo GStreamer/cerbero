@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libgdk_pixbuf-2.0']
     files_bins = ['gdk-pixbuf-query-loaders', 'gdk-pixbuf-csource']
-    files_devel = ['lib/pkgconfig/gdk-pixbuf-2.0.pc', 'include/gdk-pixbuf-2.0']
+    files_devel = ['%(libdir)s/pkgconfig/gdk-pixbuf-2.0.pc', 'include/gdk-pixbuf-2.0']
     files_lang = ['gdk-pixbuf']
     files_typelibs = ['GdkPixbuf-2.0']
 
@@ -31,12 +31,12 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['native_windows_loaders'] = 'false'
         if self.config.prefix_is_executable():
-            self.files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
+            self.files_misc = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders.cache']
 
     def post_install (self):
         if self.config.platform == Platform.WINDOWS and\
                 self.config.target_platform == Platform.WINDOWS:
-            cache = os.path.join(self.config.prefix, 'lib', 'gdk-pixbuf-2.0',
+            cache = os.path.join(self.config.libdir, 'gdk-pixbuf-2.0',
                 '2.10.0', 'loaders.cache')
             shell.replace(cache, {self.config.prefix: '../'})
 

@@ -24,7 +24,7 @@ class Recipe(recipe.Recipe):
 
     async def install(self):
         include_path = os.path.join(self.config.prefix, 'include', 'tinyalsa')
-        library_path = os.path.join(self.config.prefix, 'lib')
+        library_path = self.config.libdir
 
         tinyalsa_header = os.path.join(self.build_dir, 'include', 'tinyalsa', 'asoundlib.h')
         tinyalsa_lib = os.path.join(self.build_dir, 'src', 'libtinyalsa.a')

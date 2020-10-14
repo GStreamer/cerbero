@@ -16,33 +16,33 @@ class Recipe(custom.GStreamer):
             'libdvdread', 'x264']
 
     files_plugins_codecs_restricted = [
-             'lib/gstreamer-1.0/libgsta52dec%(mext)s',
-             'lib/gstreamer-1.0/libgstamrnb%(mext)s',
-             'lib/gstreamer-1.0/libgstamrwbdec%(mext)s',
-             'lib/gstreamer-1.0/libgstasf%(mext)s',
-             'lib/gstreamer-1.0/libgstdvdsub%(mext)s',
-             'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
-             'lib/gstreamer-1.0/libgstrealmedia%(mext)s',
-             'lib/gstreamer-1.0/libgstx264%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsta52dec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstamrnb%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstamrwbdec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstasf%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvdsub%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrealmedia%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstx264%(mext)s',
     ]
 
     files_plugins_codecs_restricted_devel = [
-             'lib/gstreamer-1.0/libgsta52dec.a', 'lib/gstreamer-1.0/libgsta52dec.la',
-             'lib/gstreamer-1.0/libgstamrnb.a', 'lib/gstreamer-1.0/libgstamrnb.la',
-             'lib/gstreamer-1.0/libgstamrwbdec.a', 'lib/gstreamer-1.0/libgstamrwbdec.la',
-             'lib/gstreamer-1.0/libgstasf.a', 'lib/gstreamer-1.0/libgstasf.la',
-             'lib/gstreamer-1.0/libgstdvdsub.a', 'lib/gstreamer-1.0/libgstdvdsub.la',
-             'lib/gstreamer-1.0/libgstdvdlpcmdec.a', 'lib/gstreamer-1.0/libgstdvdlpcmdec.la',
-             'lib/gstreamer-1.0/libgstrealmedia.a', 'lib/gstreamer-1.0/libgstrealmedia.la',
-             'lib/gstreamer-1.0/libgstx264.a', 'lib/gstreamer-1.0/libgstx264.la',
+             '%(libdir)s/gstreamer-1.0/libgsta52dec.a', '%(libdir)s/gstreamer-1.0/libgsta52dec.la',
+             '%(libdir)s/gstreamer-1.0/libgstamrnb.a', '%(libdir)s/gstreamer-1.0/libgstamrnb.la',
+             '%(libdir)s/gstreamer-1.0/libgstamrwbdec.a', '%(libdir)s/gstreamer-1.0/libgstamrwbdec.la',
+             '%(libdir)s/gstreamer-1.0/libgstasf.a', '%(libdir)s/gstreamer-1.0/libgstasf.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvdsub.a', '%(libdir)s/gstreamer-1.0/libgstdvdsub.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.a', '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.la',
+             '%(libdir)s/gstreamer-1.0/libgstrealmedia.a', '%(libdir)s/gstreamer-1.0/libgstrealmedia.la',
+             '%(libdir)s/gstreamer-1.0/libgstx264.a', '%(libdir)s/gstreamer-1.0/libgstx264.la',
     ]
 
     files_plugins_dvd = [
-             'lib/gstreamer-1.0/libgstdvdread%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvdread%(mext)s',
     ]
 
     files_plugins_dvd_devel = [
-             'lib/gstreamer-1.0/libgstdvdread.a', 'lib/gstreamer-1.0/libgstdvdread.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvdread.a', '%(libdir)s/gstreamer-1.0/libgstdvdread.la',
     ]
 
     files_lang = ['gst-plugins-ugly-1.0']

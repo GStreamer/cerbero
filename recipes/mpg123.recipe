@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
     patches = ['mpg123/0001-Only-build-libmpg123-under-libraries.patch']
 
     files_libs = ['libmpg123']
-    files_devel = ['include/mpg123.h', 'include/fmt123.h', 'lib/pkgconfig/libmpg123.pc']
+    files_devel = ['include/mpg123.h', 'include/fmt123.h', '%(libdir)s/pkgconfig/libmpg123.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.ANDROID]:

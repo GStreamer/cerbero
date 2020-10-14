@@ -67,7 +67,7 @@ class Recipe(recipe.Recipe):
 
         prefix = self.config.prefix
         bindir = os.path.join(prefix, 'bin')
-        libdir = os.path.join(prefix, 'lib')
+        libdir = self.config.libdir
 
         to_copy = []
 

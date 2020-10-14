@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libpng16']
     files_devel = ['include/libpng16', 'bin/libpng16-config',
-                   'lib/pkgconfig/libpng16.pc', 'lib/pkgconfig/libpng.pc']
+                   '%(libdir)s/pkgconfig/libpng16.pc', '%(libdir)s/pkgconfig/libpng.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.IOS:

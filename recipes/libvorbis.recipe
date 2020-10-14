@@ -13,8 +13,8 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libvorbis', 'libvorbisenc', 'libvorbisfile']
     files_devel = [
-        'include/vorbis', 'lib/pkgconfig/vorbis.pc',
-        'lib/pkgconfig/vorbisenc.pc', 'lib/pkgconfig/vorbisfile.pc']
+        'include/vorbis', '%(libdir)s/pkgconfig/vorbis.pc',
+        '%(libdir)s/pkgconfig/vorbisenc.pc', '%(libdir)s/pkgconfig/vorbisfile.pc']
 
     def prepare(self):
         self.append_env('LDFLAGS', '-lm')

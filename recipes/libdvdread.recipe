@@ -16,4 +16,4 @@ class Recipe(recipe.Recipe):
     configure_options = ' --enable-static --enable-shared '
 
     files_libs = ['libdvdread']
-    files_devel = ['include/dvdread', 'lib/pkgconfig/dvdread.pc']
+    files_devel = ['include/dvdread', '%(libdir)s/pkgconfig/dvdread.pc']

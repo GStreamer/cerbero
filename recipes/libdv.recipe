@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
               ]
 
     files_libs = ['libdv']
-    files_devel = ['include/libdv', 'lib/pkgconfig/libdv.pc']
+    files_devel = ['include/libdv', '%(libdir)s/pkgconfig/libdv.pc']
 
     # FIXME: asm probably works fine on x86/x86_64 with mingw or clang?
     def prepare(self):

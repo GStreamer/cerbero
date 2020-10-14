@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
         'zlib/0001-meson-add-the-DSTDC-define-to-include-standard-C-hea.patch',
     ]
     files_libs = ['libz']
-    files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
+    files_devel = ['include/zlib.h', 'include/zconf.h', '%(libdir)s/pkgconfig/zlib.pc']
 
     def post_install(self):
         libtool_la = LibtoolLibrary('z', 1, 2, 12, self.config.libdir,

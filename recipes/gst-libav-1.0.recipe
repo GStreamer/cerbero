@@ -7,9 +7,9 @@ class Recipe(custom.GStreamer):
     tarball_checksum = '0e48407b4905227a260213dbda84cba3812f0530fc7a75b43829102ef82810f1'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'ffmpeg']
 
-    files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
+    files_plugins_codecs_restricted = ['%(libdir)s/gstreamer-1.0/libgstlibav%(mext)s']
     files_plugins_codecs_restricted_devel = [
-        'lib/gstreamer-1.0/libgstlibav.a', 'lib/gstreamer-1.0/libgstlibav.la',
+        '%(libdir)s/gstreamer-1.0/libgstlibav.a', '%(libdir)s/gstreamer-1.0/libgstlibav.la',
     ]
 
     def prepare(self):

@@ -13,8 +13,8 @@ class Recipe(recipe.Recipe):
     url = 'https://files.dyne.org/frei0r/releases/%(name)s-%(version)s.tar.gz'
     tarball_checksum = '1b1ff8f0f9bc23eed724e94e9a7c1d8f0244bfe33424bb4fe68e6460c088523a'
 
-    files_plugins = ['lib/frei0r-1']
+    files_plugins = ['%(libdir)s/frei0r-1']
     files_devel = [
-        'lib/pkgconfig/frei0r.pc',
+        '%(libdir)s/pkgconfig/frei0r.pc',
         'include/frei0r.h',
     ]

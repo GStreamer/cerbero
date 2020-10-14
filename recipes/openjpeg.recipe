@@ -20,7 +20,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/openjpeg-2.3/openjpeg.h',
                    'include/openjpeg-2.3/opj_stdint.h',
                    'include/openjpeg-2.3/opj_config.h',
-                   'lib/pkgconfig/libopenjp2.pc']
+                   '%(libdir)s/pkgconfig/libopenjp2.pc']
     library_type = LibraryType.BOTH
 
     def prepare(self):

@@ -53,11 +53,10 @@ class GenSdkShell(Command):
     def run(self, config, args):
         name = args.name[0]
         prefix = args.prefix and args.prefix or config.prefix
-        libdir = os.path.join(prefix, 'lib')
         py_prefixes = config.py_prefixes
         output_dir = args.output_dir
         cmd = args.cmd
-        self.runargs(config, name, output_dir, prefix, libdir, py_prefixes, cmd)
+        self.runargs(config, name, output_dir, prefix, self.config.libdir, py_prefixes, cmd)
 
     def _putvar(self, var, value, append_separator=":"):
         if var in self._env:

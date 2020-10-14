@@ -8,16 +8,16 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-devtools-1.0']
 
     files_bins = ['ges-launch-1.0']
-    files_devel = ['include/gstreamer-1.0/ges', 'lib/pkgconfig/gst-editing-services-1.0.pc']
+    files_devel = ['include/gstreamer-1.0/ges', '%(libdir)s/pkgconfig/gst-editing-services-1.0.pc']
     files_libs = ['libges-1.0']
     files_typelibs = ['GES-1.0']
 
-    files_plugins_ges = [ 'lib/gstreamer-1.0/libgstnle%(mext)s',
-                          'lib/gstreamer-1.0/libgstges%(mext)s']
-    files_plugins_ges_devel = ['lib/gstreamer-1.0/libgstnle.a', 'lib/gstreamer-1.0/libgstnle.la',
-                               'lib/gstreamer-1.0/libgstges.a', 'lib/gstreamer-1.0/libgstges.la']
+    files_plugins_ges = [ '%(libdir)s/gstreamer-1.0/libgstnle%(mext)s',
+                          '%(libdir)s/gstreamer-1.0/libgstges%(mext)s']
+    files_plugins_ges_devel = ['%(libdir)s/gstreamer-1.0/libgstnle.a', '%(libdir)s/gstreamer-1.0/libgstnle.la',
+                               '%(libdir)s/gstreamer-1.0/libgstges.a', '%(libdir)s/gstreamer-1.0/libgstges.la']
 
-    files_validate = ['lib/gst-validate-launcher/python/launcher/apps/geslaunch.py',
+    files_validate = ['%(libdir)s/gst-validate-launcher/python/launcher/apps/geslaunch.py',
                       'share/gstreamer-1.0/validate/scenarios/ges-edit-clip-while-paused.scenario']
 
 #    files_python = ['site-packages/ges%(pext)s']

@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
     patches = []
 
     files_libs = ['libsrtp2']
-    files_devel = ['include/srtp2', 'lib/pkgconfig/libsrtp2.pc']
+    files_devel = ['include/srtp2', '%(libdir)s/pkgconfig/libsrtp2.pc']
 
     async def install(self):
         await super(Recipe, self).install()

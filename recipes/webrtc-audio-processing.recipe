@@ -44,7 +44,7 @@ class Recipe(recipe.Recipe):
                 'webrtc-audio-processing/0001-build-meson-fix-compilation-on-arm64.patch',]
 
     files_libs = ['libwebrtc_audio_processing']
-    files_devel = ['include/webrtc_audio_processing', 'lib/pkgconfig/webrtc-audio-processing.pc']
+    files_devel = ['include/webrtc_audio_processing', '%(libdir)s/pkgconfig/webrtc-audio-processing.pc']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:

@@ -23,11 +23,11 @@ class Recipe(recipe.Recipe):
     files_devel = [
         'include/nice',
         'include/stun',
-        'lib/pkgconfig/nice.pc',
+        '%(libdir)s/pkgconfig/nice.pc',
     ]
-    files_plugins_net = ['lib/gstreamer-1.0/libgstnice%(mext)s']
+    files_plugins_net = ['%(libdir)s/gstreamer-1.0/libgstnice%(mext)s']
     files_plugins_net_devel = [
-        'lib/gstreamer-1.0/libgstnice.a', 'lib/gstreamer-1.0/libgstnice.la',
+        '%(libdir)s/gstreamer-1.0/libgstnice.a', '%(libdir)s/gstreamer-1.0/libgstnice.la',
     ]
     # FIXME - if_arp.h? (iOS)
 

@@ -67,15 +67,15 @@ class Recipe(recipe.Recipe):
                 setattr(self, attr, [])
                 self.update_categories()
             f = getattr(self, attr)
-            f += [f'lib/gstreamer-1.0/libgst{name}%(mext)s']
+            f += [f'%(libdir)s/gstreamer-1.0/libgst{name}%(mext)s']
         if LibraryType.STATIC in self.library_type:
             attr = f'files_plugins_{category}_devel'
             if not hasattr(self, attr):
                 setattr(self, attr, [])
             d = getattr(self, attr)
             d += [
-                f'lib/gstreamer-1.0/libgst{name}.a',
-                f'lib/gstreamer-1.0/libgst{name}.la',
+                f'%(libdir)s/gstreamer-1.0/libgst{name}.a',
+                f'%(libdir)s/gstreamer-1.0/libgst{name}.la',
             ]
 
     def prepare(self):
@@ -136,7 +136,7 @@ class Recipe(recipe.Recipe):
             if not f.endswith('.pc') or not 'gstreamer-1.0' in f:
                 continue
             name = os.path.basename(f)
-            src = os.path.join(self.config.prefix, 'lib', 'pkgconfig', name)
+            src = os.path.join(self.config.libdir, 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             os.replace(src, dst)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll

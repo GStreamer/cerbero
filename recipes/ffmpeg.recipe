@@ -36,12 +36,12 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         # Populate self.files_devel
-        files_devel_tpl = ['lib/{}.la', 'lib/pkgconfig/{}.pc', 'include/{}']
+        files_devel_tpl = ['%(libdir)s/{}.la', '%(libdir)s/pkgconfig/{}.pc', 'include/{}']
         # ffmpeg can only build either shared or static on Windows, not both
         if self.config.target_platform == Platform.WINDOWS:
             self.library_type = LibraryType.SHARED
         else:
-            files_devel_tpl += ['lib/{}.a']
+            files_devel_tpl += ['%(libdir)s/{}.a']
         for lib in self.files_libs:
             self.files_devel += [tpl.format(lib) for tpl in files_devel_tpl]
 

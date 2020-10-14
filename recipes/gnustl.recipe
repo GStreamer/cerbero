@@ -13,10 +13,10 @@ class Recipe(recipe.Recipe):
     runtime_dep = True
 
     files_stl = [
-            'lib/libc++_shared.so']
+            '%(libdir)s/libc++_shared.so']
     files_devel= [
-            'lib/pkgconfig/gnustl.pc',
-            'lib/libgnustl.la',
+            '%(libdir)s/pkgconfig/gnustl.pc',
+            '%(libdir)s/libgnustl.la',
             ]
 
     def prepare(self):
@@ -24,9 +24,8 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
 
     async def compile(self):
-        libdir = os.path.join(self.config.prefix, 'lib')
-        if not os.path.exists(libdir):
-            os.makedirs(libdir)
+        if not os.path.exists(self.config.libdir):
+            os.makedirs(self.config.libdir)
 
     async def install(self):
         stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
@@ -44,7 +43,7 @@ class Recipe(recipe.Recipe):
         else:
             raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
         stl_libdir = os.path.join(stl_prefix, 'libs', libarch)
-        libdir = os.path.join(self.config.prefix, 'lib')
+        libdir = self.config.libdir
         if not os.path.exists(libdir):
             os.makedirs(libdir)
 
@@ -62,13 +61,14 @@ class Recipe(recipe.Recipe):
         lib.save()
 
         # Create pkg-config file (gnustl.pc)
-        pkgdir = os.path.join(self.config.prefix, 'lib', 'pkgconfig')
+        pkgdir = os.path.join(self.config.libdir, 'pkgconfig')
         if not os.path.exists(pkgdir):
             os.makedirs(pkgdir)
         stl_pc = PkgConfigWritter('gnustl', 'gnustl', '2.0',
                 '', '-L${libdir} ${libdir}/libc++_shared.so',
                 # FIXME: slurp these headers into the cerbero directory somehow so that they are usable from c++ applications
                 '-I%s/include' % (stl_prefix),
-                self.config.prefix)
+                self.config.prefix,
+                self.config.rel_libdir)
         stl_pc.rel_incldir = 'include'
         stl_pc.save('gnustl', pkgdir)

@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
                      'tools': 'enabled', 'orc-test': 'enabled'}
 
     files_libs = ['liborc-0.4']
-    files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
+    files_devel = ['include/orc-0.4', '%(libdir)s/pkgconfig/orc-0.4.pc',
         'share/aclocal/orc.m4', 'bin/orcc%(bext)s']
 
     def prepare(self):

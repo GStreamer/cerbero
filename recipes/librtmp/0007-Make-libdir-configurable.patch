@@ -1,5 +1,5 @@
 From c08ae6dfe2f0464fb03389d58304e37c2c3969d6 Mon Sep 17 00:00:00 2001
-From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Wed, 14 Oct 2020 17:28:32 +0200
 Subject: [PATCH] Make libdir configurable
 

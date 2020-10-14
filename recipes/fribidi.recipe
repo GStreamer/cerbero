@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libfribidi']
     files_bins = ['fribidi']
-    files_devel = ['lib/pkgconfig/fribidi.pc', 'include/fribidi']
+    files_devel = ['%(libdir)s/pkgconfig/fribidi.pc', 'include/fribidi']
 
     def post_install (self):
         lib = LibtoolLibrary('fribidi', None, None, None, self.config.libdir,

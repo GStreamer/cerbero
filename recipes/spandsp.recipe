@@ -20,7 +20,7 @@ class Recipe(recipe.Recipe):
                 ]
 
     files_libs = ['libspandsp']
-    files_devel = ['include/spandsp', 'include/spandsp.h', 'lib/pkgconfig/spandsp.pc']
+    files_devel = ['include/spandsp', 'include/spandsp.h', '%(libdir)s/pkgconfig/spandsp.pc']
 
     def prepare(self):
         # libdir is incorrectly overriden in configure.ac to lib64 for x86_64 archs

@@ -11,4 +11,4 @@ class Recipe(recipe.Recipe):
     configure_options = '--without-docbook'
 
     files_libs = ['libexpat']
-    files_devel = ['include/expat.h', 'include/expat_external.h', 'lib/pkgconfig/expat.pc']
+    files_devel = ['include/expat.h', 'include/expat_external.h', '%(libdir)s/pkgconfig/expat.pc']

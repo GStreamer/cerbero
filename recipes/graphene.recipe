@@ -42,9 +42,9 @@ class Recipe(recipe.Recipe):
 
     files_devel = [
         'include/graphene-1.0',
-        'lib/graphene-1.0/include',
-        'lib/pkgconfig/graphene-1.0.pc',
-        'lib/pkgconfig/graphene-gobject-1.0.pc',
+        '%(libdir)s/graphene-1.0/include',
+        '%(libdir)s/pkgconfig/graphene-1.0.pc',
+        '%(libdir)s/pkgconfig/graphene-gobject-1.0.pc',
     ]
 
     def prepare(self):
@@ -77,13 +77,13 @@ class Recipe(recipe.Recipe):
             elif Architecture.is_arm(arch):
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
+            arch_dir = os.path.join(self.config.libdir, 'graphene-1.0',
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
             shutil.copyfile(os.path.join(self.meson_dir, 'include', 'graphene-config.h'),
                             os.path.join(arch_dir, 'graphene-config.h'))
-            with open(os.path.join(self.config.prefix, 'lib', 'graphene-1.0',
+            with open(os.path.join(self.config.libdir, 'graphene-1.0',
                                    'include', 'graphene-config.h'), 'w+') as f:
                 f.write(GRAPHENE_CONFIG_UNVERSAL)
 

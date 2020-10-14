@@ -368,7 +368,8 @@ class Config (object):
     def do_setup_env(self):
         self._create_paths()
 
-        libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
+        self.rel_libdir = 'lib%s' % self.lib_suffix
+        libdir = os.path.join(self.prefix, self.rel_libdir)
         self.libdir = libdir
 
         self.env = self.get_env(self.prefix, libdir)

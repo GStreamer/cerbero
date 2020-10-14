@@ -14,10 +14,10 @@ class Recipe(custom.GStreamer):
     files_libs = ['libgstvalidate-1.0']
 
     files_devel = ["include/gstreamer-1.0/gst/validate/*.h",
-                   "lib/pkgconfig/gstreamer-validate-1.0.pc"]
+                   "%(libdir)s/pkgconfig/gstreamer-validate-1.0.pc"]
 
-    files_validate = ["lib/gst-validate-launcher/python/launcher/",
-                      "lib/gst-validate-launcher/",
+    files_validate = ["%(libdir)s/gst-validate-launcher/python/launcher/",
+                      "%(libdir)s/gst-validate-launcher/",
                       'bin/gst-validate-launcher',
                       "share/gstreamer-1.0/validate/scenarios/*.scenario"
     ]
@@ -32,7 +32,7 @@ class Recipe(custom.GStreamer):
 
         if self.config.platform != Platform.WINDOWS:
             # validatedefaultinjection plugin isn't built on Windows
-            self.files_gst_validate_plugins = ['lib/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
+            self.files_gst_validate_plugins = ['%(libdir)s/gstreamer-1.0/validate/libgstvalidatefaultinjection%(mext)s']
 
     def post_install(self):
         super().post_install()

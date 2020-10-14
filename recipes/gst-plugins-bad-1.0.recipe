@@ -123,166 +123,166 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/transcoder',
         'include/gstreamer-1.0/gst/vulkan',
         'include/gstreamer-1.0/gst/webrtc',
-        'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
-        'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
-        'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
-        'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
-        'lib/pkgconfig/gstreamer-photography-1.0.pc',
-        'lib/pkgconfig/gstreamer-play-1.0.pc',
-        'lib/pkgconfig/gstreamer-player-1.0.pc',
-        'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
-        'lib/pkgconfig/gstreamer-sctp-1.0.pc',
-        'lib/pkgconfig/gstreamer-transcoder-1.0.pc',
-        'lib/pkgconfig/gstreamer-vulkan-1.0.pc',
-        'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
-        'lib/pkgconfig/gstreamer-webrtc-nice-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-bad-audio-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-codecparsers-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-insertbin-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-mpegts-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-photography-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-play-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-player-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-plugins-bad-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-sctp-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-transcoder-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-vulkan-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-webrtc-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-webrtc-nice-1.0.pc',
     ]
 
     files_plugins_effects = [
-             'lib/gstreamer-1.0/libgstaccurip%(mext)s',
-             'lib/gstreamer-1.0/libgstaes%(mext)s',
-             'lib/gstreamer-1.0/libgstaiff%(mext)s',
-             'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
-             'lib/gstreamer-1.0/libgstaudiofxbad%(mext)s',
-             'lib/gstreamer-1.0/libgstaudiolatency%(mext)s',
-             'lib/gstreamer-1.0/libgstaudiomixmatrix%(mext)s',
-             'lib/gstreamer-1.0/libgstautoconvert%(mext)s',
-             'lib/gstreamer-1.0/libgstbayer%(mext)s',
-             'lib/gstreamer-1.0/libgstcoloreffects%(mext)s',
-             'lib/gstreamer-1.0/libgstclosedcaption%(mext)s',
-             'lib/gstreamer-1.0/libgstdebugutilsbad%(mext)s',
-             'lib/gstreamer-1.0/libgstfieldanalysis%(mext)s',
-             'lib/gstreamer-1.0/libgstfreeverb%(mext)s',
-             'lib/gstreamer-1.0/libgstfrei0r%(mext)s',
-             'lib/gstreamer-1.0/libgstgaudieffects%(mext)s',
-             'lib/gstreamer-1.0/libgstgeometrictransform%(mext)s',
-             'lib/gstreamer-1.0/libgstinter%(mext)s',
-             'lib/gstreamer-1.0/libgstinterlace%(mext)s',
-             'lib/gstreamer-1.0/libgstivtc%(mext)s',
-             'lib/gstreamer-1.0/libgstlegacyrawparse%(mext)s',
-             'lib/gstreamer-1.0/libgstproxy%(mext)s',
-             'lib/gstreamer-1.0/libgstremovesilence%(mext)s',
-             'lib/gstreamer-1.0/libgstsegmentclip%(mext)s',
-             'lib/gstreamer-1.0/libgstsmooth%(mext)s',
-             'lib/gstreamer-1.0/libgstspeed%(mext)s',
-             'lib/gstreamer-1.0/libgstsoundtouch%(mext)s',
-             'lib/gstreamer-1.0/libgsttimecode%(mext)s',
-             'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
-             'lib/gstreamer-1.0/libgstvideoframe_audiolevel%(mext)s',
-             'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
-             'lib/gstreamer-1.0/libgstladspa%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaccurip%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaes%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaiff%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaudiofxbad%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaudiolatency%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaudiomixmatrix%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstautoconvert%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstbayer%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstcoloreffects%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstclosedcaption%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstfieldanalysis%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstfreeverb%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstfrei0r%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstgaudieffects%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstgeometrictransform%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstinter%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstinterlace%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstivtc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstlegacyrawparse%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstproxy%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstremovesilence%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsegmentclip%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsmooth%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstspeed%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsoundtouch%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsttimecode%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstladspa%(mext)s',
     ]
 
     files_plugins_effects_devel = [
-             'lib/gstreamer-1.0/libgstaccurip.a', 'lib/gstreamer-1.0/libgstaccurip.la',
-             'lib/gstreamer-1.0/libgstaes.a', 'lib/gstreamer-1.0/libgstaes.la',
-             'lib/gstreamer-1.0/libgstaiff.a', 'lib/gstreamer-1.0/libgstaiff.la',
-             'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
-             'lib/gstreamer-1.0/libgstaudiofxbad.a', 'lib/gstreamer-1.0/libgstaudiofxbad.la',
-             'lib/gstreamer-1.0/libgstaudiolatency.a', 'lib/gstreamer-1.0/libgstaudiolatency.la',
-             'lib/gstreamer-1.0/libgstaudiomixmatrix.a', 'lib/gstreamer-1.0/libgstaudiomixmatrix.la',
-             'lib/gstreamer-1.0/libgstautoconvert.a', 'lib/gstreamer-1.0/libgstautoconvert.la',
-             'lib/gstreamer-1.0/libgstbayer.a', 'lib/gstreamer-1.0/libgstbayer.la',
-             'lib/gstreamer-1.0/libgstcoloreffects.a', 'lib/gstreamer-1.0/libgstcoloreffects.la',
-             'lib/gstreamer-1.0/libgstclosedcaption.a', 'lib/gstreamer-1.0/libgstclosedcaption.la',
-             'lib/gstreamer-1.0/libgstdebugutilsbad.a', 'lib/gstreamer-1.0/libgstdebugutilsbad.la',
-             'lib/gstreamer-1.0/libgstfieldanalysis.a', 'lib/gstreamer-1.0/libgstfieldanalysis.la',
-             'lib/gstreamer-1.0/libgstfreeverb.a', 'lib/gstreamer-1.0/libgstfreeverb.la',
-             'lib/gstreamer-1.0/libgstfrei0r.a', 'lib/gstreamer-1.0/libgstfrei0r.la',
-             'lib/gstreamer-1.0/libgstgaudieffects.a', 'lib/gstreamer-1.0/libgstgaudieffects.la',
-             'lib/gstreamer-1.0/libgstgeometrictransform.a', 'lib/gstreamer-1.0/libgstgeometrictransform.la',
-             'lib/gstreamer-1.0/libgstinter.a', 'lib/gstreamer-1.0/libgstinter.la',
-             'lib/gstreamer-1.0/libgstinterlace.a', 'lib/gstreamer-1.0/libgstinterlace.la',
-             'lib/gstreamer-1.0/libgstivtc.a', 'lib/gstreamer-1.0/libgstivtc.la',
-             'lib/gstreamer-1.0/libgstlegacyrawparse.a', 'lib/gstreamer-1.0/libgstlegacyrawparse.la',
-             'lib/gstreamer-1.0/libgstproxy.a', 'lib/gstreamer-1.0/libgstproxy.la',
-             'lib/gstreamer-1.0/libgstremovesilence.a', 'lib/gstreamer-1.0/libgstremovesilence.la',
-             'lib/gstreamer-1.0/libgstsegmentclip.a', 'lib/gstreamer-1.0/libgstsegmentclip.la',
-             'lib/gstreamer-1.0/libgstsmooth.a', 'lib/gstreamer-1.0/libgstsmooth.la',
-             'lib/gstreamer-1.0/libgstspeed.a', 'lib/gstreamer-1.0/libgstspeed.la',
-             'lib/gstreamer-1.0/libgstsoundtouch.a', 'lib/gstreamer-1.0/libgstsoundtouch.la',
-             'lib/gstreamer-1.0/libgsttimecode.a', 'lib/gstreamer-1.0/libgsttimecode.la',
-             'lib/gstreamer-1.0/libgstvideofiltersbad.a', 'lib/gstreamer-1.0/libgstvideofiltersbad.la',
-             'lib/gstreamer-1.0/libgstvideoframe_audiolevel.a', 'lib/gstreamer-1.0/libgstvideoframe_audiolevel.la',
-             'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
-             'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
+             '%(libdir)s/gstreamer-1.0/libgstaccurip.a', '%(libdir)s/gstreamer-1.0/libgstaccurip.la',
+             '%(libdir)s/gstreamer-1.0/libgstaes.a', '%(libdir)s/gstreamer-1.0/libgstaes.la',
+             '%(libdir)s/gstreamer-1.0/libgstaiff.a', '%(libdir)s/gstreamer-1.0/libgstaiff.la',
+             '%(libdir)s/gstreamer-1.0/libgstaudiobuffersplit.a', '%(libdir)s/gstreamer-1.0/libgstaudiobuffersplit.la',
+             '%(libdir)s/gstreamer-1.0/libgstaudiofxbad.a', '%(libdir)s/gstreamer-1.0/libgstaudiofxbad.la',
+             '%(libdir)s/gstreamer-1.0/libgstaudiolatency.a', '%(libdir)s/gstreamer-1.0/libgstaudiolatency.la',
+             '%(libdir)s/gstreamer-1.0/libgstaudiomixmatrix.a', '%(libdir)s/gstreamer-1.0/libgstaudiomixmatrix.la',
+             '%(libdir)s/gstreamer-1.0/libgstautoconvert.a', '%(libdir)s/gstreamer-1.0/libgstautoconvert.la',
+             '%(libdir)s/gstreamer-1.0/libgstbayer.a', '%(libdir)s/gstreamer-1.0/libgstbayer.la',
+             '%(libdir)s/gstreamer-1.0/libgstcoloreffects.a', '%(libdir)s/gstreamer-1.0/libgstcoloreffects.la',
+             '%(libdir)s/gstreamer-1.0/libgstclosedcaption.a', '%(libdir)s/gstreamer-1.0/libgstclosedcaption.la',
+             '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad.a', '%(libdir)s/gstreamer-1.0/libgstdebugutilsbad.la',
+             '%(libdir)s/gstreamer-1.0/libgstfieldanalysis.a', '%(libdir)s/gstreamer-1.0/libgstfieldanalysis.la',
+             '%(libdir)s/gstreamer-1.0/libgstfreeverb.a', '%(libdir)s/gstreamer-1.0/libgstfreeverb.la',
+             '%(libdir)s/gstreamer-1.0/libgstfrei0r.a', '%(libdir)s/gstreamer-1.0/libgstfrei0r.la',
+             '%(libdir)s/gstreamer-1.0/libgstgaudieffects.a', '%(libdir)s/gstreamer-1.0/libgstgaudieffects.la',
+             '%(libdir)s/gstreamer-1.0/libgstgeometrictransform.a', '%(libdir)s/gstreamer-1.0/libgstgeometrictransform.la',
+             '%(libdir)s/gstreamer-1.0/libgstinter.a', '%(libdir)s/gstreamer-1.0/libgstinter.la',
+             '%(libdir)s/gstreamer-1.0/libgstinterlace.a', '%(libdir)s/gstreamer-1.0/libgstinterlace.la',
+             '%(libdir)s/gstreamer-1.0/libgstivtc.a', '%(libdir)s/gstreamer-1.0/libgstivtc.la',
+             '%(libdir)s/gstreamer-1.0/libgstlegacyrawparse.a', '%(libdir)s/gstreamer-1.0/libgstlegacyrawparse.la',
+             '%(libdir)s/gstreamer-1.0/libgstproxy.a', '%(libdir)s/gstreamer-1.0/libgstproxy.la',
+             '%(libdir)s/gstreamer-1.0/libgstremovesilence.a', '%(libdir)s/gstreamer-1.0/libgstremovesilence.la',
+             '%(libdir)s/gstreamer-1.0/libgstsegmentclip.a', '%(libdir)s/gstreamer-1.0/libgstsegmentclip.la',
+             '%(libdir)s/gstreamer-1.0/libgstsmooth.a', '%(libdir)s/gstreamer-1.0/libgstsmooth.la',
+             '%(libdir)s/gstreamer-1.0/libgstspeed.a', '%(libdir)s/gstreamer-1.0/libgstspeed.la',
+             '%(libdir)s/gstreamer-1.0/libgstsoundtouch.a', '%(libdir)s/gstreamer-1.0/libgstsoundtouch.la',
+             '%(libdir)s/gstreamer-1.0/libgsttimecode.a', '%(libdir)s/gstreamer-1.0/libgsttimecode.la',
+             '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad.a', '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad.la',
+             '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel.a', '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel.la',
+             '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp.a', '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp.la',
+             '%(libdir)s/gstreamer-1.0/libgstladspa.a', '%(libdir)s/gstreamer-1.0/libgstladspa.la',
     ]
 
     files_plugins_codecs = [
-             'lib/gstreamer-1.0/libgstadpcmdec%(mext)s',
-             'lib/gstreamer-1.0/libgstadpcmenc%(mext)s',
-             'lib/gstreamer-1.0/libgstassrender%(mext)s',
-             'lib/gstreamer-1.0/libgstbz2%(mext)s',
-             'lib/gstreamer-1.0/libgstcodectimestamper%(mext)s',
-             'lib/gstreamer-1.0/libgstdash%(mext)s',
-             'lib/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
-             'lib/gstreamer-1.0/libgstdvdspu%(mext)s',
-             'lib/gstreamer-1.0/libgsthls%(mext)s',
-             'lib/gstreamer-1.0/libgstid3tag%(mext)s',
-             'lib/gstreamer-1.0/libgstkate%(mext)s',
-             'lib/gstreamer-1.0/libgstmidi%(mext)s',
-             'lib/gstreamer-1.0/libgstmxf%(mext)s',
-             'lib/gstreamer-1.0/libgstopenh264%(mext)s',
-             'lib/gstreamer-1.0/libgstopusparse%(mext)s',
-             'lib/gstreamer-1.0/libgstpcapparse%(mext)s',
-             'lib/gstreamer-1.0/libgstpnm%(mext)s',
-             'lib/gstreamer-1.0/libgstrfbsrc%(mext)s',
-             'lib/gstreamer-1.0/libgstsiren%(mext)s',
-             'lib/gstreamer-1.0/libgstsmoothstreaming%(mext)s',
-             'lib/gstreamer-1.0/libgstsubenc%(mext)s',
-             'lib/gstreamer-1.0/libgstvideoparsersbad%(mext)s',
-             'lib/gstreamer-1.0/libgsty4mdec%(mext)s',
-             'lib/gstreamer-1.0/libgstjpegformat%(mext)s',
-             'lib/gstreamer-1.0/libgstgdp%(mext)s',
-             'lib/gstreamer-1.0/libgstrsvg%(mext)s',
-             'lib/gstreamer-1.0/libgstopenjpeg%(mext)s',
-             'lib/gstreamer-1.0/libgstspandsp%(mext)s',
-             'lib/gstreamer-1.0/libgstsbc%(mext)s',
-             'lib/gstreamer-1.0/libgstzbar%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstadpcmdec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstadpcmenc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstassrender%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstbz2%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstcodectimestamper%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdash%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvdspu%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsthls%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstid3tag%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstkate%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmidi%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmxf%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstopenh264%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstopusparse%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstpcapparse%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstpnm%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrfbsrc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsiren%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsubenc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvideoparsersbad%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgsty4mdec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstjpegformat%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstgdp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrsvg%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstopenjpeg%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstspandsp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsbc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstzbar%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
-             'lib/gstreamer-1.0/libgstadpcmdec.a', 'lib/gstreamer-1.0/libgstadpcmdec.la',
-             'lib/gstreamer-1.0/libgstadpcmenc.a', 'lib/gstreamer-1.0/libgstadpcmenc.la',
-             'lib/gstreamer-1.0/libgstassrender.a', 'lib/gstreamer-1.0/libgstassrender.la',
-             'lib/gstreamer-1.0/libgstbz2.a', 'lib/gstreamer-1.0/libgstbz2.la',
-             'lib/gstreamer-1.0/libgstcodectimestamper.a', 'lib/gstreamer-1.0/libgstcodectimestamper.la',
-             'lib/gstreamer-1.0/libgstdash.a', 'lib/gstreamer-1.0/libgstdash.la',
-             'lib/gstreamer-1.0/libgstdvbsuboverlay.a', 'lib/gstreamer-1.0/libgstdvbsuboverlay.la',
-             'lib/gstreamer-1.0/libgstdvdspu.a', 'lib/gstreamer-1.0/libgstdvdspu.la',
-             'lib/gstreamer-1.0/libgsthls.a', 'lib/gstreamer-1.0/libgsthls.la',
-             'lib/gstreamer-1.0/libgstid3tag.a', 'lib/gstreamer-1.0/libgstid3tag.la',
-             'lib/gstreamer-1.0/libgstkate.a', 'lib/gstreamer-1.0/libgstkate.la',
-             'lib/gstreamer-1.0/libgstmidi.a', 'lib/gstreamer-1.0/libgstmidi.la',
-             'lib/gstreamer-1.0/libgstmxf.a', 'lib/gstreamer-1.0/libgstmxf.la',
-             'lib/gstreamer-1.0/libgstopenh264.a', 'lib/gstreamer-1.0/libgstopenh264.la',
-             'lib/gstreamer-1.0/libgstopusparse.a', 'lib/gstreamer-1.0/libgstopusparse.la',
-             'lib/gstreamer-1.0/libgstpcapparse.a', 'lib/gstreamer-1.0/libgstpcapparse.la',
-             'lib/gstreamer-1.0/libgstpnm.a', 'lib/gstreamer-1.0/libgstpnm.la',
-             'lib/gstreamer-1.0/libgstrfbsrc.a', 'lib/gstreamer-1.0/libgstrfbsrc.la',
-             'lib/gstreamer-1.0/libgstsiren.a', 'lib/gstreamer-1.0/libgstsiren.la',
-             'lib/gstreamer-1.0/libgstsmoothstreaming.a', 'lib/gstreamer-1.0/libgstsmoothstreaming.la',
-             'lib/gstreamer-1.0/libgstsubenc.a', 'lib/gstreamer-1.0/libgstsubenc.la',
-             'lib/gstreamer-1.0/libgstvideoparsersbad.a', 'lib/gstreamer-1.0/libgstvideoparsersbad.la',
-             'lib/gstreamer-1.0/libgsty4mdec.a', 'lib/gstreamer-1.0/libgsty4mdec.la',
-             'lib/gstreamer-1.0/libgstjpegformat.a', 'lib/gstreamer-1.0/libgstjpegformat.la',
-             'lib/gstreamer-1.0/libgstgdp.a', 'lib/gstreamer-1.0/libgstgdp.la',
-             'lib/gstreamer-1.0/libgstrsvg.a', 'lib/gstreamer-1.0/libgstrsvg.la',
-             'lib/gstreamer-1.0/libgstopenjpeg.a', 'lib/gstreamer-1.0/libgstopenjpeg.la',
-             'lib/gstreamer-1.0/libgstspandsp.a', 'lib/gstreamer-1.0/libgstspandsp.la',
-             'lib/gstreamer-1.0/libgstsbc.a', 'lib/gstreamer-1.0/libgstsbc.la',
-             'lib/gstreamer-1.0/libgstzbar.a', 'lib/gstreamer-1.0/libgstzbar.la',
+             '%(libdir)s/gstreamer-1.0/libgstadpcmdec.a', '%(libdir)s/gstreamer-1.0/libgstadpcmdec.la',
+             '%(libdir)s/gstreamer-1.0/libgstadpcmenc.a', '%(libdir)s/gstreamer-1.0/libgstadpcmenc.la',
+             '%(libdir)s/gstreamer-1.0/libgstassrender.a', '%(libdir)s/gstreamer-1.0/libgstassrender.la',
+             '%(libdir)s/gstreamer-1.0/libgstbz2.a', '%(libdir)s/gstreamer-1.0/libgstbz2.la',
+             '%(libdir)s/gstreamer-1.0/libgstcodectimestamper.a', '%(libdir)s/gstreamer-1.0/libgstcodectimestamper.la',
+             '%(libdir)s/gstreamer-1.0/libgstdash.a', '%(libdir)s/gstreamer-1.0/libgstdash.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvbsuboverlay.a', '%(libdir)s/gstreamer-1.0/libgstdvbsuboverlay.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvdspu.a', '%(libdir)s/gstreamer-1.0/libgstdvdspu.la',
+             '%(libdir)s/gstreamer-1.0/libgsthls.a', '%(libdir)s/gstreamer-1.0/libgsthls.la',
+             '%(libdir)s/gstreamer-1.0/libgstid3tag.a', '%(libdir)s/gstreamer-1.0/libgstid3tag.la',
+             '%(libdir)s/gstreamer-1.0/libgstkate.a', '%(libdir)s/gstreamer-1.0/libgstkate.la',
+             '%(libdir)s/gstreamer-1.0/libgstmidi.a', '%(libdir)s/gstreamer-1.0/libgstmidi.la',
+             '%(libdir)s/gstreamer-1.0/libgstmxf.a', '%(libdir)s/gstreamer-1.0/libgstmxf.la',
+             '%(libdir)s/gstreamer-1.0/libgstopenh264.a', '%(libdir)s/gstreamer-1.0/libgstopenh264.la',
+             '%(libdir)s/gstreamer-1.0/libgstopusparse.a', '%(libdir)s/gstreamer-1.0/libgstopusparse.la',
+             '%(libdir)s/gstreamer-1.0/libgstpcapparse.a', '%(libdir)s/gstreamer-1.0/libgstpcapparse.la',
+             '%(libdir)s/gstreamer-1.0/libgstpnm.a', '%(libdir)s/gstreamer-1.0/libgstpnm.la',
+             '%(libdir)s/gstreamer-1.0/libgstrfbsrc.a', '%(libdir)s/gstreamer-1.0/libgstrfbsrc.la',
+             '%(libdir)s/gstreamer-1.0/libgstsiren.a', '%(libdir)s/gstreamer-1.0/libgstsiren.la',
+             '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming.a', '%(libdir)s/gstreamer-1.0/libgstsmoothstreaming.la',
+             '%(libdir)s/gstreamer-1.0/libgstsubenc.a', '%(libdir)s/gstreamer-1.0/libgstsubenc.la',
+             '%(libdir)s/gstreamer-1.0/libgstvideoparsersbad.a', '%(libdir)s/gstreamer-1.0/libgstvideoparsersbad.la',
+             '%(libdir)s/gstreamer-1.0/libgsty4mdec.a', '%(libdir)s/gstreamer-1.0/libgsty4mdec.la',
+             '%(libdir)s/gstreamer-1.0/libgstjpegformat.a', '%(libdir)s/gstreamer-1.0/libgstjpegformat.la',
+             '%(libdir)s/gstreamer-1.0/libgstgdp.a', '%(libdir)s/gstreamer-1.0/libgstgdp.la',
+             '%(libdir)s/gstreamer-1.0/libgstrsvg.a', '%(libdir)s/gstreamer-1.0/libgstrsvg.la',
+             '%(libdir)s/gstreamer-1.0/libgstopenjpeg.a', '%(libdir)s/gstreamer-1.0/libgstopenjpeg.la',
+             '%(libdir)s/gstreamer-1.0/libgstspandsp.a', '%(libdir)s/gstreamer-1.0/libgstspandsp.la',
+             '%(libdir)s/gstreamer-1.0/libgstsbc.a', '%(libdir)s/gstreamer-1.0/libgstsbc.la',
+             '%(libdir)s/gstreamer-1.0/libgstzbar.a', '%(libdir)s/gstreamer-1.0/libgstzbar.la',
     ]
 
     platform_files_plugins_codecs = {
         Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstandroidmedia%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstandroidmedia%(mext)s',
             ]
     }
 
     platform_files_plugins_codecs_devel = {
         Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstandroidmedia.a', 'lib/gstreamer-1.0/libgstandroidmedia.la',
+             '%(libdir)s/gstreamer-1.0/libgstandroidmedia.a', '%(libdir)s/gstreamer-1.0/libgstandroidmedia.la',
             ]
     }
 
@@ -293,168 +293,168 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_codecs_restricted = [
-             'lib/gstreamer-1.0/libgstasfmux%(mext)s',
-             'lib/gstreamer-1.0/libgstdtsdec%(mext)s',
-             'lib/gstreamer-1.0/libgstmpegpsdemux%(mext)s',
-             'lib/gstreamer-1.0/libgstmpegpsmux%(mext)s',
-             'lib/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
-             'lib/gstreamer-1.0/libgstmpegtsmux%(mext)s',
-             'lib/gstreamer-1.0/libgstvoaacenc%(mext)s'
+             '%(libdir)s/gstreamer-1.0/libgstasfmux%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdtsdec%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmpegpsmux%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstmpegtsmux%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvoaacenc%(mext)s'
     ]
 
     files_plugins_codecs_restricted_devel = [
-             'lib/gstreamer-1.0/libgstasfmux.a', 'lib/gstreamer-1.0/libgstasfmux.la',
-             'lib/gstreamer-1.0/libgstdtsdec.a', 'lib/gstreamer-1.0/libgstdtsdec.la',
-             'lib/gstreamer-1.0/libgstmpegpsdemux.a', 'lib/gstreamer-1.0/libgstmpegpsdemux.la',
-             'lib/gstreamer-1.0/libgstmpegpsmux.a', 'lib/gstreamer-1.0/libgstmpegpsmux.la',
-             'lib/gstreamer-1.0/libgstmpegtsdemux.a', 'lib/gstreamer-1.0/libgstmpegtsdemux.la',
-             'lib/gstreamer-1.0/libgstmpegtsmux.a', 'lib/gstreamer-1.0/libgstmpegtsmux.la',
-             'lib/gstreamer-1.0/libgstvoaacenc.a', 'lib/gstreamer-1.0/libgstvoaacenc.la',
+             '%(libdir)s/gstreamer-1.0/libgstasfmux.a', '%(libdir)s/gstreamer-1.0/libgstasfmux.la',
+             '%(libdir)s/gstreamer-1.0/libgstdtsdec.a', '%(libdir)s/gstreamer-1.0/libgstdtsdec.la',
+             '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux.a', '%(libdir)s/gstreamer-1.0/libgstmpegpsdemux.la',
+             '%(libdir)s/gstreamer-1.0/libgstmpegpsmux.a', '%(libdir)s/gstreamer-1.0/libgstmpegpsmux.la',
+             '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux.a', '%(libdir)s/gstreamer-1.0/libgstmpegtsdemux.la',
+             '%(libdir)s/gstreamer-1.0/libgstmpegtsmux.a', '%(libdir)s/gstreamer-1.0/libgstmpegtsmux.la',
+             '%(libdir)s/gstreamer-1.0/libgstvoaacenc.a', '%(libdir)s/gstreamer-1.0/libgstvoaacenc.la',
     ]
 
     files_plugins_dvd = [
-             'lib/gstreamer-1.0/libgstresindvd%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstresindvd%(mext)s',
     ]
 
     files_plugins_dvd_devel = [
-             'lib/gstreamer-1.0/libgstresindvd.a', 'lib/gstreamer-1.0/libgstresindvd.la',
+             '%(libdir)s/gstreamer-1.0/libgstresindvd.a', '%(libdir)s/gstreamer-1.0/libgstresindvd.la',
     ]
 
     files_plugins_net = [
-             'lib/gstreamer-1.0/libgstdtls%(mext)s',
-             'lib/gstreamer-1.0/libgstnetsim%(mext)s',
-             'lib/gstreamer-1.0/libgstrist%(mext)s',
-             'lib/gstreamer-1.0/libgstrtmp2%(mext)s',
-             'lib/gstreamer-1.0/libgstrtpmanagerbad%(mext)s',
-             'lib/gstreamer-1.0/libgstsctp%(mext)s',
-             'lib/gstreamer-1.0/libgstsdpelem%(mext)s',
-             'lib/gstreamer-1.0/libgstsrtp%(mext)s',
-             'lib/gstreamer-1.0/libgstsrt%(mext)s',
-             'lib/gstreamer-1.0/libgstwebrtc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdtls%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstnetsim%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrist%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp2%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsctp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsdpelem%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsrtp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstsrt%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstwebrtc%(mext)s',
     ]
 
     files_plugins_net_devel = [
-             'lib/gstreamer-1.0/libgstdtls.a', 'lib/gstreamer-1.0/libgstdtls.la',
-             'lib/gstreamer-1.0/libgstnetsim.a', 'lib/gstreamer-1.0/libgstnetsim.la',
-             'lib/gstreamer-1.0/libgstrist.a', 'lib/gstreamer-1.0/libgstrist.la',
-             'lib/gstreamer-1.0/libgstrtmp2.a', 'lib/gstreamer-1.0/libgstrtmp2.la',
-             'lib/gstreamer-1.0/libgstrtpmanagerbad.a', 'lib/gstreamer-1.0/libgstrtpmanagerbad.la',
-             'lib/gstreamer-1.0/libgstsctp.a', 'lib/gstreamer-1.0/libgstsctp.la',
-             'lib/gstreamer-1.0/libgstsdpelem.a', 'lib/gstreamer-1.0/libgstsdpelem.la',
-             'lib/gstreamer-1.0/libgstsrtp.a', 'lib/gstreamer-1.0/libgstsrtp.la',
-             'lib/gstreamer-1.0/libgstsrt.a', 'lib/gstreamer-1.0/libgstsrt.la',
-             'lib/gstreamer-1.0/libgstwebrtc.a', 'lib/gstreamer-1.0/libgstwebrtc.la',
+             '%(libdir)s/gstreamer-1.0/libgstdtls.a', '%(libdir)s/gstreamer-1.0/libgstdtls.la',
+             '%(libdir)s/gstreamer-1.0/libgstnetsim.a', '%(libdir)s/gstreamer-1.0/libgstnetsim.la',
+             '%(libdir)s/gstreamer-1.0/libgstrist.a', '%(libdir)s/gstreamer-1.0/libgstrist.la',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp2.a', '%(libdir)s/gstreamer-1.0/libgstrtmp2.la',
+             '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad.a', '%(libdir)s/gstreamer-1.0/libgstrtpmanagerbad.la',
+             '%(libdir)s/gstreamer-1.0/libgstsctp.a', '%(libdir)s/gstreamer-1.0/libgstsctp.la',
+             '%(libdir)s/gstreamer-1.0/libgstsdpelem.a', '%(libdir)s/gstreamer-1.0/libgstsdpelem.la',
+             '%(libdir)s/gstreamer-1.0/libgstsrtp.a', '%(libdir)s/gstreamer-1.0/libgstsrtp.la',
+             '%(libdir)s/gstreamer-1.0/libgstsrt.a', '%(libdir)s/gstreamer-1.0/libgstsrt.la',
+             '%(libdir)s/gstreamer-1.0/libgstwebrtc.a', '%(libdir)s/gstreamer-1.0/libgstwebrtc.la',
     ]
 
     files_plugins_net_restricted = [
-             'lib/gstreamer-1.0/libgstrtmp%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp%(mext)s',
     ]
 
     files_plugins_net_restricted_devel = [
-             'lib/gstreamer-1.0/libgstrtmp.a', 'lib/gstreamer-1.0/libgstrtmp.la',
+             '%(libdir)s/gstreamer-1.0/libgstrtmp.a', '%(libdir)s/gstreamer-1.0/libgstrtmp.la',
     ]
 
     files_plugins_capture = [
-             'lib/gstreamer-1.0/libgstcamerabin%(mext)s'
+             '%(libdir)s/gstreamer-1.0/libgstcamerabin%(mext)s'
     ]
 
     files_plugins_capture_devel = [
-             'lib/gstreamer-1.0/libgstcamerabin.a', 'lib/gstreamer-1.0/libgstcamerabin.la',
+             '%(libdir)s/gstreamer-1.0/libgstcamerabin.a', '%(libdir)s/gstreamer-1.0/libgstcamerabin.la',
     ]
 
     platform_files_plugins_capture = {
         Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstdvb%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdvb%(mext)s',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstwinscreencap%(mext)s',
-             'lib/gstreamer-1.0/libgstdirectsoundsrc%(mext)s',
-             'lib/gstreamer-1.0/libgstwinks%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstwinscreencap%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdirectsoundsrc%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstwinks%(mext)s',
             ]
     }
 
     platform_files_plugins_capture_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstdvb.a', 'lib/gstreamer-1.0/libgstdvb.la',
+             '%(libdir)s/gstreamer-1.0/libgstdvb.a', '%(libdir)s/gstreamer-1.0/libgstdvb.la',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstwinscreencap.a', 'lib/gstreamer-1.0/libgstwinscreencap.la',
-             'lib/gstreamer-1.0/libgstdirectsoundsrc.a', 'lib/gstreamer-1.0/libgstdirectsoundsrc.la',
-             'lib/gstreamer-1.0/libgstwinks.a', 'lib/gstreamer-1.0/libgstwinks.la',
+             '%(libdir)s/gstreamer-1.0/libgstwinscreencap.a', '%(libdir)s/gstreamer-1.0/libgstwinscreencap.la',
+             '%(libdir)s/gstreamer-1.0/libgstdirectsoundsrc.a', '%(libdir)s/gstreamer-1.0/libgstdirectsoundsrc.la',
+             '%(libdir)s/gstreamer-1.0/libgstwinks.a', '%(libdir)s/gstreamer-1.0/libgstwinks.la',
             ]
     }
 
     files_plugins_vulkan = [
-        'lib/gstreamer-1.0/libgstvulkan%(mext)s',
+        '%(libdir)s/gstreamer-1.0/libgstvulkan%(mext)s',
     ]
 
     files_plugins_vulkan_devel = [
-        'lib/gstreamer-1.0/libgstvulkan.a', 'lib/gstreamer-1.0/libgstvulkan.la',
+        '%(libdir)s/gstreamer-1.0/libgstvulkan.a', '%(libdir)s/gstreamer-1.0/libgstvulkan.la',
     ]
 
     files_plugins_vis = [
-             'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
     ]
 
     files_plugins_vis_devel = [
-             'lib/gstreamer-1.0/libgstaudiovisualizers.a', 'lib/gstreamer-1.0/libgstaudiovisualizers.la',
+             '%(libdir)s/gstreamer-1.0/libgstaudiovisualizers.a', '%(libdir)s/gstreamer-1.0/libgstaudiovisualizers.la',
     ]
 
     files_plugins_sys = [
-        'lib/gstreamer-1.0/libgstipcpipeline%(mext)s',
+        '%(libdir)s/gstreamer-1.0/libgstipcpipeline%(mext)s',
     ]
 
     files_plugins_sys_devel = [
-        'lib/gstreamer-1.0/libgstipcpipeline.a', 'lib/gstreamer-1.0/libgstipcpipeline.la',
+        '%(libdir)s/gstreamer-1.0/libgstipcpipeline.a', '%(libdir)s/gstreamer-1.0/libgstipcpipeline.la',
     ]
 
     platform_files_plugins_sys = {
         Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstshm%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstd3d%(mext)s',
-             'lib/gstreamer-1.0/libgstd3d11%(mext)s',
-             'lib/gstreamer-1.0/libgstwasapi%(mext)s',
-             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstd3d%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstd3d11%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstwasapi%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.DARWIN: [
-             'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
-             'lib/gstreamer-1.0/libgstshm%(mext)s',
-             'lib/gstreamer-1.0/libgstdecklink%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstshm%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
         Platform.IOS: [
-             'lib/gstreamer-1.0/libgstapplemedia%(mext)s',
-             'lib/gstreamer-1.0/libgstshm%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstshm%(mext)s',
             ],
         Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstopensles%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstopensles%(mext)s',
             ]
     }
 
     platform_files_plugins_sys_devel = {
         Platform.LINUX: [
-             'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
-             'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
+             '%(libdir)s/gstreamer-1.0/libgstshm.a', '%(libdir)s/gstreamer-1.0/libgstshm.la',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink.a', '%(libdir)s/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.WINDOWS: [
-             'lib/gstreamer-1.0/libgstd3d.a', 'lib/gstreamer-1.0/libgstd3d.la',
-             'lib/gstreamer-1.0/libgstd3d11.a', 'lib/gstreamer-1.0/libgstd3d11.la',
-             'lib/gstreamer-1.0/libgstwasapi.a', 'lib/gstreamer-1.0/libgstwasapi.la',
-             'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
+             '%(libdir)s/gstreamer-1.0/libgstd3d.a', '%(libdir)s/gstreamer-1.0/libgstd3d.la',
+             '%(libdir)s/gstreamer-1.0/libgstd3d11.a', '%(libdir)s/gstreamer-1.0/libgstd3d11.la',
+             '%(libdir)s/gstreamer-1.0/libgstwasapi.a', '%(libdir)s/gstreamer-1.0/libgstwasapi.la',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink.a', '%(libdir)s/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.DARWIN: [
-             'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
-             'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
-             'lib/gstreamer-1.0/libgstdecklink.a', 'lib/gstreamer-1.0/libgstdecklink.la',
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia.a', '%(libdir)s/gstreamer-1.0/libgstapplemedia.la',
+             '%(libdir)s/gstreamer-1.0/libgstshm.a', '%(libdir)s/gstreamer-1.0/libgstshm.la',
+             '%(libdir)s/gstreamer-1.0/libgstdecklink.a', '%(libdir)s/gstreamer-1.0/libgstdecklink.la',
             ],
         Platform.IOS: [
-             'lib/gstreamer-1.0/libgstapplemedia.a', 'lib/gstreamer-1.0/libgstapplemedia.la',
-             'lib/gstreamer-1.0/libgstshm.a', 'lib/gstreamer-1.0/libgstshm.la',
+             '%(libdir)s/gstreamer-1.0/libgstapplemedia.a', '%(libdir)s/gstreamer-1.0/libgstapplemedia.la',
+             '%(libdir)s/gstreamer-1.0/libgstshm.a', '%(libdir)s/gstreamer-1.0/libgstshm.la',
             ],
         Platform.ANDROID: [
-             'lib/gstreamer-1.0/libgstopensles.a', 'lib/gstreamer-1.0/libgstopensles.la',
+             '%(libdir)s/gstreamer-1.0/libgstopensles.a', '%(libdir)s/gstreamer-1.0/libgstopensles.la',
             ]
     }
 
@@ -512,8 +512,8 @@ class Recipe(custom.GStreamer):
             self.files_libs += ['libgstd3d11-1.0']
             self.files_plugins_devel += [
                 'include/gstreamer-1.0/gst/d3d11',
-                'lib/gstreamer-1.0/include/gst/d3d11',
-                'lib/pkgconfig/gstreamer-d3d11-1.0.pc',
+                '%(libdir)s/gstreamer-1.0/include/gst/d3d11',
+                '%(libdir)s/pkgconfig/gstreamer-d3d11-1.0.pc',
             ]
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
@@ -523,7 +523,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('nvcodec', 'codecs')
             self.files_plugins_devel += [
                 'include/gstreamer-1.0/gst/cuda',
-                'lib/pkgconfig/gstreamer-cuda-1.0.pc',
+                '%(libdir)s/pkgconfig/gstreamer-cuda-1.0.pc',
             ]
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):

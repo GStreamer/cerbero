@@ -15,5 +15,4 @@ class Recipe(recipe.Recipe):
               ]
 
     files_libs = ['libdvdnav']
-    files_devel = ['include/dvdnav', 'lib/pkgconfig/dvdnav.pc']
-
+    files_devel = ['include/dvdnav', '%(libdir)s/pkgconfig/dvdnav.pc']

@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libcroco-0.6']
     files_bins = ['csslint-0.6']
     files_devel = ['include/libcroco-0.6/libcroco',
-                   'lib/pkgconfig/libcroco-0.6.pc']
+                   '%(libdir)s/pkgconfig/libcroco-0.6.pc']
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:

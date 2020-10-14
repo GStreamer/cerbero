@@ -31,7 +31,7 @@ class Recipe(recipe.Recipe):
         return gstlibs
 
     async def install(self):
-        libname = os.path.join(self.config.prefix, 'lib', 'GStreamer')
+        libname = os.path.join(self.config.libdir, 'GStreamer')
         install_name = '@rpath/GStreamer.framework/Versions/1.0/lib/GStreamer'
         libs = await self._get_installed_gst_libs()
         if not libs:

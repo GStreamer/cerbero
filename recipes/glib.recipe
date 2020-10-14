@@ -58,7 +58,7 @@ class Recipe(recipe.Recipe):
         Platform.IOS: ['share/glib-2.0/schemas'],
     }
     #FIXME: Fill it when needed
-    #files_gio = ['lib/gio/modules']
+    #files_gio = ['%(libdir)s/gio/modules']
     files_devel = [
         'bin/glib-gettextize',
         'bin/glib-mkenums',
@@ -66,24 +66,24 @@ class Recipe(recipe.Recipe):
         'bin/glib-genmarshal',
         'bin/gresource%(bext)s',
         'bin/gdbus-codegen',
-        'lib/glib-2.0/include',
-        'lib/pkgconfig/gio-2.0.pc',
-        'lib/pkgconfig/glib-2.0.pc',
-        'lib/pkgconfig/gmodule-2.0.pc',
-        'lib/pkgconfig/gmodule-export-2.0.pc',
-        'lib/pkgconfig/gmodule-no-export-2.0.pc',
-        'lib/pkgconfig/gobject-2.0.pc',
-        'lib/pkgconfig/gthread-2.0.pc',
+        '%(libdir)s/glib-2.0/include',
+        '%(libdir)s/pkgconfig/gio-2.0.pc',
+        '%(libdir)s/pkgconfig/glib-2.0.pc',
+        '%(libdir)s/pkgconfig/gmodule-2.0.pc',
+        '%(libdir)s/pkgconfig/gmodule-export-2.0.pc',
+        '%(libdir)s/pkgconfig/gmodule-no-export-2.0.pc',
+        '%(libdir)s/pkgconfig/gobject-2.0.pc',
+        '%(libdir)s/pkgconfig/gthread-2.0.pc',
         'include/glib-2.0',
         'share/aclocal/glib-2.0.m4',
         'share/aclocal/glib-gettext.m4'
     ]
     platform_files_devel = {
-        Platform.WINDOWS: ['lib/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
-        Platform.LINUX: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
-        Platform.ANDROID: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
-        Platform.DARWIN: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
-        Platform.IOS: ['lib/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.WINDOWS: ['%(libdir)s/pkgconfig/gio-windows-2.0.pc', 'include/gio-win32-2.0'],
+        Platform.LINUX: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.ANDROID: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.DARWIN: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
+        Platform.IOS: ['%(libdir)s/pkgconfig/gio-unix-2.0.pc', 'include/gio-unix-2.0'],
     }
 
     files_lang = ['glib20']
@@ -167,7 +167,7 @@ class Recipe(recipe.Recipe):
                     'glib/uwp/0025-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
                 ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
+            self.files_devel.append('%(libdir)s/glib-2.0/include/*/glibconfig.h')
             arch = self.config.target_arch
             if arch == Architecture.X86:
                 arch = 'i386'
@@ -240,13 +240,13 @@ class Recipe(recipe.Recipe):
             elif Architecture.is_arm(arch):
                 arch = 'arm'
 
-            arch_dir = os.path.join(self.config.prefix, 'lib', 'glib-2.0',
+            arch_dir = os.path.join(self.config.libdir, 'glib-2.0',
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
             shutil.copyfile(os.path.join(self.meson_dir, 'glib', 'glibconfig.h'),
                         os.path.join(arch_dir, 'glibconfig.h'))
-            with open(os.path.join(self.config.prefix, 'lib', 'glib-2.0',
+            with open(os.path.join(self.config.libdir, 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:
                 f.write(GLIB_CONFIG_UNVERSAL)
         major, minor, micro = get_libtool_versions(self.version)

@@ -21,14 +21,14 @@ class Recipe(recipe.Recipe):
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-view']
     files_devel = ['include/pango-1.0',
-        'lib/pkgconfig/pangoft2.pc', 'lib/pkgconfig/pango.pc',
-        'lib/pkgconfig/pangocairo.pc']
+        '%(libdir)s/pkgconfig/pangoft2.pc', '%(libdir)s/pkgconfig/pango.pc',
+        '%(libdir)s/pkgconfig/pangocairo.pc']
     platform_files_libs = {
         Platform.WINDOWS: ['libpangowin32-1.0'],
     }
     platform_files_devel = {
-        Platform.WINDOWS: ['lib/pkgconfig/pangowin32.pc'],
-        Platform.LINUX: ['lib/pkgconfig/pango.pc'],
+        Platform.WINDOWS: ['%(libdir)s/pkgconfig/pangowin32.pc'],
+        Platform.LINUX: ['%(libdir)s/pkgconfig/pango.pc'],
     }
     files_typelibs = [
         'Pango-1.0',

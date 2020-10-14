@@ -10,7 +10,7 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
 
     files_libs = ['libffi']
-    files_devel = ['include/ffi*.h', 'lib/pkgconfig/libffi.pc']
+    files_devel = ['include/ffi*.h', '%(libdir)s/pkgconfig/libffi.pc']
 
     def post_install(self):
         libtool_la = LibtoolLibrary('ffi', 7, None, None, self.config.libdir,

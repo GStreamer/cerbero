@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
     patches = []
 
     files_libs = ['libfreetype']
-    files_devel = ['lib/pkgconfig/freetype2.pc',
+    files_devel = ['%(libdir)s/pkgconfig/freetype2.pc',
                    'include/freetype2']
 
     def post_install(self):

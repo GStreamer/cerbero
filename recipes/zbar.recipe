@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'ac52763a7dd6ddc53ca6cd75ccee14f7abf6ae46ecb31137d025af123edd33bf'
     configure_options = '--disable-pthread --disable-video --without-imagemagick --without-gtk --without-qt --with-python=no --with-jpeg=no --with-x=no'
     files_libs = ['libzbar']
-    files_devel = ['include/zbar.h', 'lib/pkgconfig/zbar.pc']
+    files_devel = ['include/zbar.h', '%(libdir)s/pkgconfig/zbar.pc']
 
     def prepare(self):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):

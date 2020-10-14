@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
 
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']
-    files_devel  = ['include/json-glib-1.0', 'lib/pkgconfig/json-glib-1.0.pc']
+    files_devel  = ['include/json-glib-1.0', '%(libdir)s/pkgconfig/json-glib-1.0.pc']
     files_typelibs = ['Json-1.0']
 
     def post_install (self):

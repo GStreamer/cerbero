@@ -11,4 +11,4 @@ class Recipe(recipe.Recipe):
     deps = ['libtheora', 'libogg', 'libvorbis', 'speex']
 
     files_libs = ['libshout']
-    files_devel = ['include/shout', 'lib/pkgconfig/shout.pc']
+    files_devel = ['include/shout', '%(libdir)s/pkgconfig/shout.pc']

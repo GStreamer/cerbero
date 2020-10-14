@@ -14,11 +14,11 @@ class Recipe(custom.GStreamer):
     use_system_libs = True
 
     files_plugins_codecs = [
-             'lib/gstreamer-1.0/libgstvaapi%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvaapi%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
-             'lib/gstreamer-1.0/libgstvaapi.a',
+             '%(libdir)s/gstreamer-1.0/libgstvaapi.a',
     ]
 
     def prepare(self):

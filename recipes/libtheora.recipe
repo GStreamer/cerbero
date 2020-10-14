@@ -22,8 +22,8 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
-    files_devel = ['include/theora', 'lib/pkgconfig/theora.pc',
-                   'lib/pkgconfig/theoraenc.pc', 'lib/pkgconfig/theoradec.pc']
+    files_devel = ['include/theora', '%(libdir)s/pkgconfig/theora.pc',
+                   '%(libdir)s/pkgconfig/theoraenc.pc', '%(libdir)s/pkgconfig/theoradec.pc']
 
     def post_install(self):
         # Meson does not generate la files

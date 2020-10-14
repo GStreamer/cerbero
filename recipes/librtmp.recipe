@@ -27,7 +27,7 @@ class Recipe(recipe.Recipe):
     # openssl on Linux
     use_system_libs = True
     files_libs = ['librtmp']
-    files_devel = ['include/librtmp', 'lib/pkgconfig/librtmp.pc']
+    files_devel = ['include/librtmp', '%(libdir)s/pkgconfig/librtmp.pc']
 
     def prepare(self):
         # Pick system openssl if on Linux and not cross-compiling

@@ -6,10 +6,10 @@ class Recipe(custom.GStreamer):
     tarball_checksum = 'dbc951a99af532380e599aa8acd9e1385fdb299b46b5868cd2be4230ad888341'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
 
-    files_plugins_codecs = ['lib/gstreamer-1.0/libgstomx%(mext)s']
+    files_plugins_codecs = ['%(libdir)s/gstreamer-1.0/libgstomx%(mext)s']
     files_plugins_codecs_devel = [
-        'lib/gstreamer-1.0/libgstomx.a',
-        'lib/gstreamer-1.0/libgstomx.la'
+        '%(libdir)s/gstreamer-1.0/libgstomx.a',
+        '%(libdir)s/gstreamer-1.0/libgstomx.la'
     ]
 
     def prepare(self):

@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
     files_libs = ['libintl']
     files_devel = [
             'include/libintl.h',
-            'lib/libintl.la'
+            '%(libdir)s/libintl.la'
             ]
 
     def post_install(self):

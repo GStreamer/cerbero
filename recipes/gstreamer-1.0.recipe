@@ -16,12 +16,12 @@ class Recipe(custom.GStreamer):
                   'libgstnet-1.0', 'libgstreamer-1.0', 'libgstcheck-1.0']
 
     files_plugins_core = [
-        'lib/gstreamer-1.0/libgstcoreelements%(mext)s',
-        'lib/gstreamer-1.0/libgstcoretracers%(mext)s'
+        '%(libdir)s/gstreamer-1.0/libgstcoreelements%(mext)s',
+        '%(libdir)s/gstreamer-1.0/libgstcoretracers%(mext)s'
     ]
     files_plugins_core_devel = [
-        'lib/gstreamer-1.0/libgstcoreelements.a', 'lib/gstreamer-1.0/libgstcoreelements.la',
-        'lib/gstreamer-1.0/libgstcoretracers.a', 'lib/gstreamer-1.0/libgstcoretracers.la',
+        '%(libdir)s/gstreamer-1.0/libgstcoreelements.a', '%(libdir)s/gstreamer-1.0/libgstcoreelements.la',
+        '%(libdir)s/gstreamer-1.0/libgstcoretracers.a', '%(libdir)s/gstreamer-1.0/libgstcoretracers.la',
     ]
 
     files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s']
@@ -37,11 +37,11 @@ class Recipe(custom.GStreamer):
             'include/gstreamer-1.0/gst/check',
             'include/gstreamer-1.0/gst/controller',
             'include/gstreamer-1.0/gst/net',
-            'lib/pkgconfig/gstreamer-1.0.pc',
-            'lib/pkgconfig/gstreamer-check-1.0.pc',
-            'lib/pkgconfig/gstreamer-base-1.0.pc',
-            'lib/pkgconfig/gstreamer-controller-1.0.pc',
-            'lib/pkgconfig/gstreamer-net-1.0.pc',
+            '%(libdir)s/pkgconfig/gstreamer-1.0.pc',
+            '%(libdir)s/pkgconfig/gstreamer-check-1.0.pc',
+            '%(libdir)s/pkgconfig/gstreamer-base-1.0.pc',
+            '%(libdir)s/pkgconfig/gstreamer-controller-1.0.pc',
+            '%(libdir)s/pkgconfig/gstreamer-net-1.0.pc',
     ]
 
     platform_files_devel = {

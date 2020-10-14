@@ -17,10 +17,10 @@ class Recipe(recipe.Recipe):
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
     licenses_bins = [License.GPLv2Plus]
-    files_loader = ['lib/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
+    files_loader = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
     files_devel = ['include/librsvg-2.0/librsvg/*.h',
-                   'lib/pkgconfig/librsvg-2.0.pc',
-                   'lib/librsvg-2.a', 'lib/librsvg-2.la']
+                   '%(libdir)s/pkgconfig/librsvg-2.0.pc',
+                   '%(libdir)s/librsvg-2.a', '%(libdir)s/librsvg-2.la']
     files_typelibs = ['Rsvg-2.0']
 
     patches = ['librsvg/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']

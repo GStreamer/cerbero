@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libx264']
     files_bins = ['x264']
-    files_devel = ['lib/pkgconfig/x264.pc', 'include/x264.h',
+    files_devel = ['%(libdir)s/pkgconfig/x264.pc', 'include/x264.h',
                    'include/x264_config.h']
 
     def prepare(self):

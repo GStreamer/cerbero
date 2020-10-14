@@ -24,7 +24,7 @@ class Recipe(recipe.Recipe):
     }
 
     files_libs = ['libsoup-2.4']
-    files_devel = ['include/libsoup-2.4', 'lib/pkgconfig/libsoup-2.4.pc']
+    files_devel = ['include/libsoup-2.4', '%(libdir)s/pkgconfig/libsoup-2.4.pc']
     files_typelibs = ['Soup-2.4']
 
     def post_install(self):

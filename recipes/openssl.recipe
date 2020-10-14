@@ -35,8 +35,8 @@ class Recipe(recipe.Recipe):
 
     files_bins = ['openssl']
     files_libs = ['libcrypto', 'libssl']
-    files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc',
-                   'lib/pkgconfig/libssl.pc', 'lib/pkgconfig/libcrypto.pc']
+    files_devel = ['include/openssl', '%(libdir)s/pkgconfig/openssl.pc',
+                   '%(libdir)s/pkgconfig/libssl.pc', '%(libdir)s/pkgconfig/libcrypto.pc']
 
     def _get_openssl_platform(self):
         # map platforms

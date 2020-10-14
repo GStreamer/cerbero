@@ -28,7 +28,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libwavpack']
-    files_devel = ['include/wavpack', 'lib/pkgconfig/wavpack.pc']
+    files_devel = ['include/wavpack', '%(libdir)s/pkgconfig/wavpack.pc']
 
     def prepare(self):
         if self.config.target_arch not in [Architecture.X86, Architecture.X86_64, Architecture.ARMv7, Architecture.ARMv7S] or self.config.target_platform == Platform.IOS:

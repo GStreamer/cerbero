@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
         'tools': 'disabled',
     }
     files_libs = ['libsbc']
-    files_devel = ['include/sbc/sbc.h', 'lib/pkgconfig/sbc.pc']
+    files_devel = ['include/sbc/sbc.h', '%(libdir)s/pkgconfig/sbc.pc']
     patches = ['sbc/0001-sbc-Use-stdint.h.patch',
                'sbc/0002-Don-t-use-NEON-with-aarch64-on-Clang.patch',
                'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',

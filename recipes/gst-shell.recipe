@@ -16,12 +16,11 @@ class Recipe(recipe.Recipe):
         from cerbero.commands.gensdkshell import GenSdkShell
         name = self.files_shell[0]
         prefix = self.config.prefix
-        libdir = os.path.join(prefix, 'lib')
         py_prefix = self.config.py_prefix
         output_dir = prefix
         gensdkshell = GenSdkShell()
-        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+        gensdkshell.runargs(self.config, name, output_dir, prefix, self.config.libdir,
                 py_prefix)
         name = self.files_shell[1]
-        gensdkshell.runargs(self.config, name, output_dir, prefix, libdir,
+        gensdkshell.runargs(self.config, name, output_dir, prefix, self.config.libdir,
                 py_prefix, cmd='')

@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libvpx']
-    files_devel = ['include/vpx', 'lib/pkgconfig/vpx.pc']
+    files_devel = ['include/vpx', '%(libdir)s/pkgconfig/vpx.pc']
 
     # libvpx does not have check target
     make_check = None
@@ -170,8 +170,8 @@ class Recipe(recipe.Recipe):
                 subdir = 'ARM'
             else:
                 raise FatalError('Unsupported target arch: ' + self.config.target_arch)
-            os.replace(os.path.join(self.config.prefix, 'lib', subdir, 'vpxmd.lib'),
-                       os.path.join(self.config.prefix, 'lib', 'libvpx.a'))
+            os.replace(os.path.join(self.config.libdir, subdir, 'vpxmd.lib'),
+                       os.path.join(self.config.libdir, 'libvpx.a'))
         LibtoolLibrary('vpx', None, None, None,
                        self.config.libdir, self.config.target_platform,
                        static_only=self.library_type == LibraryType.STATIC).save()

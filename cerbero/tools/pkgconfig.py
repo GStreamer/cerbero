@@ -41,11 +41,10 @@ Libs.private: %(libs_priv)s
 Cflags: %(cflags)s
 '''
 
-    rel_libdir = 'lib'
     rel_incldir = 'include'
     rel_sharedir = 'share'
 
-    def __init__(self, name, desc, version, req, libs, cflags, prefix):
+    def __init__(self, name, desc, version, req, libs, cflags, prefix, rel_libdir='lib'):
         self.name = name
         self.desc = desc
         self.version = version
@@ -55,6 +54,7 @@ Cflags: %(cflags)s
         self.prefix = prefix
         self.libs_priv = ''
         self.req_priv = ''
+        self.rel_libdir = rel_libdir
 
     def save(self, name, pkgconfigdir):
         variables = self._get_variables()

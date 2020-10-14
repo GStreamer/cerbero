@@ -11,7 +11,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['libvo-aacenc']
     files_devel = ['include/vo-aacenc',
-        'lib/pkgconfig/vo-aacenc.pc']
+        '%(libdir)s/pkgconfig/vo-aacenc.pc']
 
     def prepare(self):
         if self.config.platform != Platform.WINDOWS:

@@ -25,7 +25,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_libs = ['libpixman-1']
-    files_devel = ['include/pixman-1', 'lib/pkgconfig/pixman-1.pc']
+    files_devel = ['include/pixman-1', '%(libdir)s/pkgconfig/pixman-1.pc']
 
     def prepare(self):
         # clang from xcode has a known bug, avoid codepath that trigger it
