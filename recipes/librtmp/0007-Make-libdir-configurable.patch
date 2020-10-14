@@ -1,0 +1,25 @@
+From c08ae6dfe2f0464fb03389d58304e37c2c3969d6 Mon Sep 17 00:00:00 2001
+From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
+Date: Wed, 14 Oct 2020 17:28:32 +0200
+Subject: [PATCH] Make libdir configurable
+
+---
+ librtmp/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/librtmp/Makefile b/librtmp/Makefile
+index 159f0e3..29162ff 100644
+--- a/librtmp/Makefile
++++ b/librtmp/Makefile
+@@ -5,7 +5,7 @@ pkgconfig?=$(shell which pkg-config)
+ 
+ incdir=$(prefix)/include/librtmp
+ bindir=$(prefix)/bin
+-libdir=$(prefix)/lib
++libdir?=$(prefix)/lib
+ mandir=$(prefix)/man
+ BINDIR=$(DESTDIR)$(bindir)
+ INCDIR=$(DESTDIR)$(incdir)
+-- 
+2.26.0
+

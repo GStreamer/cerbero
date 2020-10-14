@@ -22,6 +22,7 @@ class Recipe(recipe.Recipe):
         name + '/0004-Port-to-newer-MSVC.patch',
         name + '/0005-Fix-debug-build.patch',
         name + '/0006-Add-license-for-vcpkg-changes.patch',
+        name + '/0007-Make-libdir-configurable.patch',
     ]
     # openssl on Linux
     use_system_libs = True
@@ -46,7 +47,7 @@ class Recipe(recipe.Recipe):
         cflags = self.get_env('CFLAGS')
         ldflags = self.get_env('LDFLAGS')
         self.make += ['SYS=' + system, 'prefix=' + prefix, 'CRYPTO=OPENSSL', 'XCFLAGS=' + cflags,
-                      'XLDFLAGS=' + ldflags, 'CC=' + cc, 'LD=' + ld]
+                      'XLDFLAGS=' + ldflags, 'CC=' + cc, 'LD=' + ld, 'libdir=' + self.config.libdir]
         self.make_install = self.make + ['install']
 
     def post_install(self):
