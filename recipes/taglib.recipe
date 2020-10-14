@@ -49,8 +49,8 @@ class Recipe(recipe.Recipe):
         else:
             stlib_name = 'libtag_static.a'
         shutil.move(
-                os.path.join(self.config.prefix, 'lib', stlib_name),
-                os.path.join(self.config.prefix, 'lib', 'libtag.a'))
+                os.path.join(self.config.libdir, stlib_name),
+                os.path.join(self.config.libdir, 'libtag.a'))
 
     def post_install(self):
         deps = ['z']
