@@ -620,7 +620,7 @@ class CMake (MakefilesBase):
                     '-H%(make_dir)s ' \
                     '-B%(build_dir)s ' \
                     '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s ' \
-                    '-DCMAKE_INSTALL_LIBDIR=lib ' \
+                    '-DCMAKE_INSTALL_LIBDIR=%(libdir)s ' \
                     '-DCMAKE_INSTALL_BINDIR=bin ' \
                     '-DCMAKE_INSTALL_INCLUDEDIR=include ' \
                     '%(options)s -DCMAKE_BUILD_TYPE=Release '\
