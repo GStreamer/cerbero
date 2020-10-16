@@ -172,6 +172,14 @@ class Config (object):
 
     @ivar build_tools_config: Configuration for build tools
     @type build_tools_config: L{cerbero.config.Config}
+    @ivar py_prefix: Python purelib prefix eg: lib/pyhton3.8/site-packages
+    @type recipe: str
+    @ivar py_plat_prefix: Python platlib prefix eg: lib64/pyhton3.8/site-packages
+    @type py_plat_prefix: str
+    @ivar py_win_prefix: Python windows prefix eg: Lib/site-packages
+    @type py_win_prefix: str
+    @ivar py_prefixes: List of python prefixes
+    @type py_refixes: list
     '''
 
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',
@@ -209,6 +217,10 @@ class Config (object):
         self._check_uninstalled()
         self.build_tools_config = None
         self._is_build_tools_config = is_build_tools_config
+        self.py_prefixes = []
+        self.py_prefix = ""
+        self.py_plat_prefix = ""
+        self.py_win_prefix = ""
 
         for a in self._properties:
             setattr(self, a, None)
@@ -290,6 +302,7 @@ class Config (object):
         # And validate properties
         self._validate_properties()
         self._check_windows_is_x86_64()
+        self._init_python_prefixes()
 
         # The build tools config is required to properly configure the environment
         if not self._is_build_tools_config:
@@ -315,6 +328,7 @@ class Config (object):
                 config._load_platform_config()
                 config._validate_properties()
                 config.build_tools_config = self.build_tools_config
+                config._init_python_prefixes()
 
         # Ensure that variants continue to override all other configuration
         self.variants.override(variants_override)
@@ -357,7 +371,7 @@ class Config (object):
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
 
-        self.env = self.get_env(self.prefix, libdir, self.py_prefix)
+        self.env = self.get_env(self.prefix, libdir)
 
     def get_wine_runtime_env(self, prefix, env):
         '''
@@ -404,7 +418,7 @@ class Config (object):
         return ret_env
 
     @lru_cache(maxsize=None)
-    def get_env(self, prefix, libdir, py_prefix):
+    def get_env(self, prefix, libdir):
         # Get paths for environment variables
         includedir = os.path.join(prefix, 'include')
         bindir = os.path.join(prefix, 'bin')
@@ -437,37 +451,12 @@ class Config (object):
         gstregistry = os.path.expanduser(gstregistry)
         gstregistry10 = os.path.expanduser(gstregistry10)
 
-        for p in (prefix, self.build_tools_prefix):
-            # Explicitly use the posix_prefix scheme because:
-            # 1. On Windows, pypath doesn't include Python version although some
-            #    packages (pycairo, gi, etc...) install themselves using Python
-            #    version scheme like on a posix system.
-            # 2. The Python3 that ships with XCode on macOS Big Sur defaults to
-            #    a framework path, but setuptools defaults to a posix prefix
-            # So just use a posix prefix everywhere consistently.
-            pypath = sysconfig.get_path('purelib', 'posix_prefix', vars={'base': ''})
-            # Must strip \/ to ensure that the path is relative
-            pypath = PurePath(pypath.strip('\\/'))
-            # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
-            # native path separator and must end in a path separator.
-            pythonpath = [str(p / pypath) + os.sep]
-            # Make sure we also include the default non-versioned path on
-            # Windows in addition to the posix path.
-            if self.platform == Platform.WINDOWS:
-                pypath = sysconfig.get_path('purelib', vars={'base': ''})
-                pypath = PurePath(pypath.strip('\\/'))
-                pythonpath += [str(p / pypath) + os.sep]
-
-        # Ensure python paths exists because setup.py won't create them
-        for path in pythonpath:
-            if self.platform == Platform.WINDOWS:
-                # pythonpaths start with 'Lib' on Windows, which is extremely
-                # undesirable since our libdir is 'lib'. Windows APIs are
-                # case-preserving case-insensitive.
-                path = path.lower()
-            # dict universal arches do not have an active prefix
-            if not isinstance(self.universal_archs, dict):
-                self._create_path(path)
+        pythonpath = []
+        for p in (self.prefix, self.build_tools_prefix):
+            for pypath in self.py_prefixes:
+                # Starting with Python 3.7.1 on Windows, each PYTHONPATH must use the
+                # native path separator and must end in a path separator.
+                pythonpath += [os.path.join(p, pypath) + os.sep]
         pythonpath = os.pathsep.join(pythonpath)
 
         if self.platform == Platform.LINUX:
@@ -726,6 +715,38 @@ class Config (object):
         self.build_tools_config.vs_install_version = self.vs_install_version
 
         self.build_tools_config.do_setup_env()
+
+    def _init_python_prefixes(self):
+        # Explicitly use the posix_prefix scheme because:
+        # 1. On Windows, pypath doesn't include Python version although some
+        #    packages (pycairo, gi, etc...) install themselves using Python
+        #    version scheme like on a posix system.
+        # 2. The Python3 that ships with XCode on macOS Big Sur defaults to
+        #    a framework path, but setuptools defaults to a posix prefix
+        # So just use a posix prefix everywhere consistently.
+        pyvars = {'base': '.', 'platbase': '.'}
+        self.py_prefix =  sysconfig.get_path('purelib', 'posix_prefix', vars=pyvars)
+        self.py_plat_prefix = sysconfig.get_path('platlib', 'posix_prefix', vars=pyvars)
+        # Make sure we also include the default non-versioned path on
+        # Windows in addition to the posix path.
+        self.py_win_prefix = sysconfig.get_path('purelib', 'nt', vars=pyvars)
+
+        self.py_prefixes = [self.py_prefix ,self.py_plat_prefix]
+        if self.platform == Platform.WINDOWS:
+            self.py_prefixes.append(self.py_win_prefix)
+        self.py_prefixes = list(set(self.py_prefixes))
+
+        # Ensure python paths exists because setup.py won't create them
+        for path in self.py_prefixes:
+            path = os.path.join(self.prefix, path)
+            if self.platform == Platform.WINDOWS:
+                # pythonpaths start with 'Lib' on Windows, which is extremely
+                # undesirable since our libdir is 'lib'. Windows APIs are
+                # case-preserving case-insensitive.
+                path = path.lower()
+            # dict universal arches do not have an active prefix
+            if not isinstance(self.universal_archs, dict):
+                self._create_path(path)
 
     def _parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename, 'env': self.config_env,

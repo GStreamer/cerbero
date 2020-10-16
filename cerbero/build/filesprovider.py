@@ -157,15 +157,11 @@ class FilesProvider(object):
         self.config = config
         self.platform = config.target_platform
         self.extensions = self.EXTENSIONS[self.platform].copy()
+        self.extensions['pydir'] = self.config.py_prefix
+        self.extensions['pyplatdir'] = self.config.py_plat_prefix
         if self._dylib_plugins():
             self.extensions['mext'] = '.dylib'
-        if config.platform == Platform.WINDOWS:
-            # On Windows, py_prefix doesn't include Python version although some
-            # packages (pycairo, gi, etc...) install themselves using Python
-            # version scheme like on a posix system.
-            self.py_prefix = sysconfig.get_path('stdlib', 'posix_prefix', vars={'installed_base': ''})[1:]
-        else:
-            self.py_prefix = config.py_prefix
+        self.py_prefixes = config.py_prefixes
         self.add_files_bins_devel()
         self.add_license_files()
         self.update_categories()
@@ -450,8 +446,8 @@ class FilesProvider(object):
     def _pyfile_get_name(self, f):
         if os.path.exists(os.path.join(self.config.prefix, f)):
             return f
-        else:
-            pydir = os.path.basename(os.path.normpath(self.py_prefix))
+        for py_prefix in self.py_prefixes:
+            pydir = os.path.basename(os.path.normpath(py_prefix))
             pyversioname = re.sub("python|\.", '', pydir)
             cpythonname = "cpython-" + pyversioname
 
@@ -484,9 +480,8 @@ class FilesProvider(object):
         path to the given list of files
         '''
         pyfiles = []
-        files = [f % self.extensions for f in files]
-        files = ['%s/%s' % (self.py_prefix, f) for f in files]
-        files = self._search_files (files)
+        files_exts = [f % self.extensions for f in files]
+        files = self._search_files (files_exts)
         for f in files:
             real_name = self._pyfile_get_name(f)
             if real_name:

@@ -54,10 +54,10 @@ class GenSdkShell(Command):
         name = args.name[0]
         prefix = args.prefix and args.prefix or config.prefix
         libdir = os.path.join(prefix, 'lib')
-        py_prefix = config.py_prefix
+        py_prefixes = config.py_prefixes
         output_dir = args.output_dir
         cmd = args.cmd
-        self.runargs(config, name, output_dir, prefix, libdir, py_prefix, cmd)
+        self.runargs(config, name, output_dir, prefix, libdir, py_prefixes, cmd)
 
     def _putvar(self, var, value, append_separator=":"):
         if var in self._env:
@@ -67,7 +67,7 @@ class GenSdkShell(Command):
             self._env[var] = value
 
     def runargs(self, config, name, output_dir, prefix, libdir,
-                py_prefix, cmd=None, env=None, prefix_env_name='GSTREAMER_ROOT'):
+                py_prefixes, cmd=None, env=None, prefix_env_name='GSTREAMER_ROOT'):
         if cmd == None:
             cmd = self.DEFAULT_CMD
         if env == None:
@@ -92,8 +92,7 @@ class GenSdkShell(Command):
                 '%s/libexec/gstreamer-1.0/gst-plugin-scanner' % prefix_env)
         self._putvar('GST_PLUGIN_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
         self._putvar('GST_PLUGIN_SYSTEM_PATH_1_0', '%s/lib/gstreamer-1.0' % prefix_env)
-        self._putvar('PYTHONPATH',  '%s/%s/site-packages${PYTHONPATH:+:$PYTHONPATH}'
-                % (prefix_env, py_prefix))
+        self._putvar('PYTHONPATH', '%s${PYTHONPATH:+:$PYTHONPATH}' % (os.pathsep.join(py_prefixes)))
         self._putvar('CFLAGS',  '-I%s/include ${CFLAGS}' % prefix_env, " ")
         self._putvar('CXXFLAGS',  '-I%s/include ${CXXFLAGS}' % prefix_env, " ")
         self._putvar('CPPFLAGS',  '-I%s/include ${CPPFLAGS}' % prefix_env, " ")
