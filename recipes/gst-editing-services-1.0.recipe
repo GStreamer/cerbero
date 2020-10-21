@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-editing-services-1.0'
     btype = BuildType.MESON
     url = 'https://gstreamer.freedesktop.org/src/%(name)s/gstreamer-editing-services-%(version)s.tar.xz'
-    tarball_checksum = '0e06a6191a0c6c16e16272bf2573cecaeb245f10629486ad940a299bef700c16'
+    tarball_checksum = '9b05cbb8a6f1db53999e7ad11f00f4f1ccc154d6805b7e49cb7755eb37a99ba6'
     tarball_dirname = 'gstreamer-editing-services-%(version)s'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0', 'gst-validate']
 
