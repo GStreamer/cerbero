@@ -1,34 +1,26 @@
-From 96395f10a35a81b33064276f921a1bd0636d4837 Mon Sep 17 00:00:00 2001
+From b41f16d79b5e81cfca7a4bfc4aad68e87a8295d9 Mon Sep 17 00:00:00 2001
 From: Edward Hervey <edward@centricular.com>
-Date: Thu, 22 Feb 2018 07:56:35 +0100
+Date: Wed, 21 Oct 2020 14:03:36 -0400
 Subject: [PATCH] pngshim: Workaround buggy mingw compiler
 
 Our antequated mingw toolchain is buggy :(
 ---
- src/sfnt/pngshim.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ src/sfnt/pngshim.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/sfnt/pngshim.c b/src/sfnt/pngshim.c
-index 1602026..b5fae67 100644
+index f550161..b510e13 100644
 --- a/src/sfnt/pngshim.c
 +++ b/src/sfnt/pngshim.c
-@@ -63,7 +63,7 @@
-     /* `__builtin_shuffle' for gcc was introduced in gcc 4.7.0.     */
- #if ( ( defined( __GNUC__ )                                &&             \
+@@ -67,7 +67,7 @@
+ #if !defined( __INTEL_COMPILER )                                       && \
+     ( ( defined( __GNUC__ )                                &&             \
          ( ( __GNUC__ >= 5 )                              ||               \
 -        ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ >= 7 ) ) ) )         ||   \
-+        ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 7 ) ) ) )         ||   \
++        ( ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ > 7 ) ) ) )         ||    \
        ( defined( __clang__ )                                       &&     \
          ( ( __clang_major__ >= 4 )                               ||       \
          ( ( __clang_major__ == 3 ) && ( __clang_minor__ >= 2 ) ) ) ) ) && \
-@@ -81,7 +81,6 @@
- 
-     typedef unsigned short  v82 __attribute__(( vector_size( 16 ) ));
- 
--
-     if ( row_info->rowbytes > 15 )
-     {
-       /* process blocks of 16 bytes in one rush, which gives a nice speed-up */
 -- 
-2.14.3
+2.25.1
 
