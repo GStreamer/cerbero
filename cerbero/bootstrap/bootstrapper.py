@@ -55,26 +55,27 @@ class Bootstrapper (object):
         target = (target_distro, target_distro_version)
         build = (distro, distro_version)
 
-        blist = [target]
-        if target != build:
-            blist += [build]
-
-        all_bootstrappers = {}
-        # If enabled, run system bootstrappers first
+        # Always run the system bootstrapper first (if enabled)
         if system:
-            all_bootstrappers.update(system_bootstrappers)
-        if toolchains:
-            all_bootstrappers.update(toolchain_bootstrappers)
-
-        for d, v in blist:
-            if d not in all_bootstrappers:
-                # Skip if we were asked to skip some bootstrapping
-                if not system or not toolchains:
-                    continue
-                raise FatalError(_("No bootstrapper for the distro %s" % d))
-            if v not in all_bootstrappers[d]:
+            d, v = build
+            if d not in system_bootstrappers:
+                raise FatalError(_("No system bootstrapper for %s" % d))
+            if v not in system_bootstrappers[d]:
                 v = None
-            bs.append(all_bootstrappers[d][v](config, offline, assume_yes))
+            bs.append(system_bootstrappers[d][v](config, offline, assume_yes))
+
+        # We need to run the toolchain bootstrapper for the target, not the
+        # build because we might be cross-compiling
+        if toolchains:
+            d, v = target
+            # We don't require a toolchain bootstrapper when not
+            # cross-compiling, and when cross-compiling we sometimes rely on
+            # the system to provide it. For example, when cross-compiling to
+            # Linux-ARM or to UWP.
+            if d in toolchain_bootstrappers:
+                if v not in toolchain_bootstrappers[d]:
+                    v = None
+                bs.append(toolchain_bootstrappers[d][v](config, offline, assume_yes))
 
         # Build the build-tools after all other bootstrappers
         if build_tools:
