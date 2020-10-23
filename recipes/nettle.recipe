@@ -25,7 +25,9 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/nettle', 'lib/pkgconfig/nettle.pc', 'lib/pkgconfig/hogweed.pc']
 
     def prepare(self):
-        self.append_env('CFLAGS', '-std=c99')        
+        self.append_env('CFLAGS', '-std=c99')
+        if self.config.target_platform == Platform.IOS:
+            self.set_env('CC_FOR_BUILD', self.get_env('CC') + ' ' + '-Wno-error=implicit-function-declaration ')
 
     async def configure(self):
         shell.replace(os.path.join(self.build_dir, 'Makefile.in'),
