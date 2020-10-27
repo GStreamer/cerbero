@@ -18,7 +18,7 @@
 
 
 # Safest place to define this since this file imports very few modules
-CERBERO_VERSION = '1.16.2.1'
+CERBERO_VERSION = '1.16.3.1'
 
 class Platform:
     ''' Enumeration of supported platforms '''
