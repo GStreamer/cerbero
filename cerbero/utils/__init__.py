@@ -299,6 +299,10 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.FEDORA_31
             elif d[1] == '32':
                 distro_version = DistroVersion.FEDORA_32
+            elif d[0] == 'Fedora':
+                # str(int()) is for ensuring that the fedora version is
+                # actually a number
+                distro_version = 'fedora_' + str(int(d[1]))
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
             elif d[1].startswith('7.'):
