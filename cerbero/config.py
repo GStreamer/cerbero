@@ -306,19 +306,14 @@ class Config (object):
         arches = []
         if isinstance(self.universal_archs, dict):
             arches = self.arch_config.keys()
-        for c in list(self.arch_config.values()):
-            self._create_path(c.local_sources)
-            self._create_path(c.sources)
-            self._create_path(c.logs)
+        for arch_config in list(self.arch_config.values()):
+            arch_config._create_paths()
         if arches:
             m.message('Building the following arches: ' + ' '.join(arches))
 
 
     def do_setup_env(self):
-        self._create_path(self.prefix)
-        # dict universal arches do not have an active prefix
-        if not isinstance(self.universal_archs, dict):
-            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+        self._create_paths()
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
@@ -642,6 +637,20 @@ class Config (object):
         assert distro_version.startswith(self.target_distro + "_")
         return self.target_distro_version >= distro_version
 
+    def _create_paths(self):
+        if self.toolchain_prefix:
+            self._create_path(self.toolchain_prefix)
+        self._create_path(self.prefix)
+        self._create_path(self.sources)
+        self._create_path(self.logs)
+        # dict universal arches do not have an active prefix
+        if not isinstance(self.universal_archs, dict):
+            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+
+        if self._is_build_tools_config:
+            self._create_path(os.path.join(self.prefix, 'var', 'tmp'))
+
+
     def _create_build_tools_config(self):
         # Use a common prefix for the build tools for all the configurations
         # so that it can be reused
@@ -665,14 +674,6 @@ class Config (object):
         self.build_tools_config.vs_install_path = self.vs_install_path
         self.build_tools_config.vs_install_version = self.vs_install_version
 
-        if self.build_tools_config.toolchain_prefix and not os.path.exists(self.build_tools_config.toolchain_prefix):
-            os.makedirs(self.build_tools_config.toolchain_prefix)
-        if not os.path.exists(self.build_tools_config.prefix):
-            os.makedirs(self.build_tools_config.prefix)
-        if not os.path.exists(self.build_tools_config.sources):
-            os.makedirs(self.build_tools_config.sources)
-        if not os.path.exists(self.build_tools_config.logs):
-            os.makedirs(self.build_tools_config.logs)
         self.build_tools_config.do_setup_env()
 
     def _parse(self, filename, reset=True):
