@@ -1,17 +1,27 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'freetype'
     version = '2.12.1'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'savannah://.tar.xz'
     tarball_checksum = '4766f20157cc4cf0cd292f80bf917f92d1c439b243ac3018debf6b9140c41a7f'
     licenses = [{License.FreeType: ['LICENSE.TXT']}, License.GPLv2Plus]
-    configure_tpl = "%(config-sh)s --prefix=%(prefix)s --libdir=%(libdir)s --with-harfbuzz=no"
     deps = ['zlib', 'bzip2', 'libpng']
+    meson_options = {'harfbuzz': 'disabled'}
+
+    patches = []
 
     files_libs = ['libfreetype']
     files_devel = ['lib/pkgconfig/freetype2.pc',
-                   'include/freetype2',
-                   'share/aclocal/freetype2.m4']
+                   'include/freetype2']
+
+    def post_install(self):
+         # Meson does not generate la files
+         libtool_la = LibtoolLibrary('libfreetype', None, None, None,
+                                     self.config.libdir, self.config.target_platform,
+                                     deps=['png16', 'bz2', 'z'])
+         libtool_la.save()
+         super().post_install()
