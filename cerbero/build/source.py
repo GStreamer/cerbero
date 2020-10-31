@@ -21,6 +21,8 @@ import shutil
 import zipfile
 import tarfile
 import urllib.request, urllib.parse, urllib.error
+import collections
+import asyncio
 from hashlib import sha256
 
 from cerbero.config import Platform, DEFAULT_MIRRORS
@@ -303,6 +305,9 @@ class GitCache (Source):
     remotes = None
     commit = None
 
+    _fetch_locks = collections.defaultdict(asyncio.Lock)
+    _fetch_done = set()
+
     def __init__(self):
         Source.__init__(self)
         self.remotes = {} if self.remotes is None else self.remotes.copy()
@@ -327,6 +332,15 @@ class GitCache (Source):
         self.remotes.update(self.config.recipes_remotes.get(self.name, {}))
 
     async def fetch(self, checkout=True):
+        # Could have multiple recipes using the same repo.
+        lock = self._fetch_locks[self.repo_dir]
+        async with lock:
+            if self.repo_dir in self._fetch_done:
+                return
+            await self.fetch_impl(checkout)
+            self._fetch_done.add(self.repo_dir)
+
+    async def fetch_impl(self, checkout):
         # First try to get the sources from the cached dir if there is one
         cached_dir = os.path.join(self.config.cached_sources,  self.name)
 
@@ -363,6 +377,9 @@ class Git (GitCache):
     Source handler for git repositories
     '''
 
+    _extract_locks = collections.defaultdict(asyncio.Lock)
+    _extract_done = set()
+
     def __init__(self):
         GitCache.__init__(self)
         if self.commit is None:
@@ -370,6 +387,15 @@ class Git (GitCache):
             self.commit = 'origin/sdk-%s' % self.version
 
     async def extract(self):
+        # Could have multiple recipes using the same repo.
+        lock = self._extract_locks[self.config_src_dir]
+        async with lock:
+            if self.config_src_dir in self._extract_done:
+                return
+            await self.extract_impl()
+            self._extract_done.add(self.config_src_dir)
+
+    async def extract_impl(self):
         if os.path.exists(self.config_src_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self))

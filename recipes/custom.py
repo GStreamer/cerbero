@@ -29,17 +29,32 @@ class GStreamer(recipe.Recipe):
 
     if use_git:
         stype = SourceType.GIT
-        remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
+        remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'}
         if int(version.split('.')[1]) % 2 == 0:
             # Even version, use the specific branch
             commit = 'origin/' + '.'.join(version.split('.')[0:2])
         else:
-            # Odd version, use git master
-            commit = 'origin/master'
+            # Odd version, use git main
+            commit = 'origin/main'
     else:
         stype = SourceType.TARBALL
         url = 'https://gstreamer.freedesktop.org/src/%(name)s/%(name)s-%(version)s.tar.xz'
         tarball_dirname = '%(name)s-%(version)s'
+
+    def __init__(self, config, env):
+        super().__init__(config, env)
+        if self.use_git:
+            # All GStreamer recipes share the same git repo, but they build a
+            # different subproject from it.
+            subproject = self.name.replace('-1.0', '')
+            self.repo_dir = os.path.abspath(os.path.join(self.config.local_sources, 'gstreamer-1.0'))
+            self.config_src_dir = os.path.abspath(os.path.join(self.config.sources, 'gstreamer-1.0'))
+            self.build_dir = os.path.join(self.config_src_dir, 'subprojects', subproject)
+            # Force using the commit/remotes from 'gstreamer-1.0' recipe, if set
+            # in the config, on all gstreamer recipes because they share the same
+            # git repository.
+            self.commit = self.config.recipe_commit('gstreamer-1.0') or self.commit
+            self.remotes.update(self.config.recipes_remotes.get('gstreamer-1.0', {}))
 
     def enable_plugin(self, plugin, category, variant, option=None, dep=None):
         if option is None:
