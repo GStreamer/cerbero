@@ -333,7 +333,7 @@ Terminating.''', file=sys.stderr)
     elif platform == Platform.DARWIN:
         distro = Distro.OS_X
         ver = pplatform.mac_ver()[0]
-        if ver.startswith('11.0'):
+        if ver.startswith(('11.0', '10.16')):
             distro_version = DistroVersion.OS_X_BIG_SUR
         elif ver.startswith('10.15'):
             distro_version = DistroVersion.OS_X_CATALINA
