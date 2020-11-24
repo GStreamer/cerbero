@@ -1,0 +1,27 @@
+From 64dda3ad87af85c657389ce69ec49204175d8332 Mon Sep 17 00:00:00 2001
+From: Andoni Morales Alastruey <ylatuya@gmail.com>
+Date: Tue, 24 Nov 2020 13:05:17 +0000
+Subject: [PATCH] macos: fix frexpl checks in cross-compilation
+
+Cross-compilation to arm64 for Apple Silicon is not possible
+due to the hardcoded settings for frexpl.
+See: #1868
+---
+ glib/gnulib/gl_cv_func_frexpl_works/meson.build | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/glib/gnulib/gl_cv_func_frexpl_works/meson.build b/glib/gnulib/gl_cv_func_frexpl_works/meson.build
+index 303ec63d7..50e614e89 100644
+--- a/glib/gnulib/gl_cv_func_frexpl_works/meson.build
++++ b/glib/gnulib/gl_cv_func_frexpl_works/meson.build
+@@ -120,7 +120,6 @@ if not meson.is_cross_build() or meson.has_exe_wrapper()
+ else
+   if (host_system.startswith ('aix') or
+       host_system.startswith ('beos') or
+-      host_system.startswith ('darwin') or
+       host_system.startswith ('irix'))
+     gl_cv_func_frexpl_works = false
+     gl_cv_func_frexpl_broken_beyond_repair = true
+-- 
+2.23.0
+

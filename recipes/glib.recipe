@@ -49,7 +49,9 @@ class Recipe(recipe.Recipe):
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1522
         'glib/0001-meson-Fix-gnulib-printf-checks.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1579
-        'glib/0001-glib-Use-g_getenv-everywhere-instead-of-getenv.patch'
+        'glib/0001-glib-Use-g_getenv-everywhere-instead-of-getenv.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1771
+        'glib/0001-macos-fix-frexpl-checks-in-cross-compilation.patch',
     ]
 
     files_libs = [
