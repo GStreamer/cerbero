@@ -1,0 +1,4 @@
+from cerbero.config import Platform, Architecture, Distro, DistroVersion
+
+target_platform = Platform.DARWIN
+target_arch = Architecture.ARM64
