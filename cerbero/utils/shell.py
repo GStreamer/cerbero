@@ -332,6 +332,13 @@ async def unpack(filepath, output_dir, logfile=None):
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
+    elif filepath.endswith('.dmg'):
+        vol_name =  '/Volumes/' + os.path.splitext(os.path.split(filepath)[1])[0]
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        call(['hdiutil', 'attach', filepath])
+        call(['cp', '-r', vol_name, output_dir])
+        call(['hdiutil', 'detach', vol_name])
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
