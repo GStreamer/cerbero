@@ -39,6 +39,8 @@ class Recipe(recipe.Recipe):
         'libvpx/0007-remove-old-visual-studio-remnants.patch',
         # From upstream git master, remove on bump
         'libvpx/0008-support-visual-studio-2019-vs16.patch',
+        # From upstream git master, remove on bump
+        'libvpx/0001-configure-add-darwin20-support.patch',
     ]
 
     files_libs = ['libvpx']
@@ -69,7 +71,10 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             self.configure_options += '--enable-shared '
-            platform = 'darwin12'
+            if self.config.target_arch == Architecture.ARM64:
+                platform = 'darwin20'
+            else:
+                platform = 'darwin12'
         elif self.config.target_platform == Platform.IOS:
             if self.config.target_arch == Architecture.X86 or self.config.target_arch == Architecture.X86_64:
                 platform = 'iphonesimulator'
