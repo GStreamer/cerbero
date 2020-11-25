@@ -37,7 +37,7 @@ class Recipe(recipe.Recipe):
                 AS = [cc]
             else:
                 AS = []
-        if self.config.target_platform == Platform.IOS:
+        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             if Architecture.is_arm(self.config.target_arch):
                 # x264 ships its own gas-preprocessor.pl
                 AS = ['tools/' + self.get_env('GAS')]
