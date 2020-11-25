@@ -19,7 +19,6 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-bad-1.0:plugins_sys_devel']
 
     platform_files = {
-      Platform.DARWIN : ['moltenvk:libs'],
       Platform.IOS : ['moltenvk:libs'],
     }
 
@@ -32,3 +31,6 @@ class Package(custom.GStreamer, package.Package):
             if self.config.target_arch in (Architecture.X86, Architecture.X86_64, Architecture.ARM64, Architecture.UNIVERSAL):
                 self.files.append('angle-uwp:libs')
                 self.files_devel.append('angle-uwp:headers')
+        if self.config.target_platform == Platform.DARWIN and \
+                self.config.target_arch ==  Architecture.X86_64:
+            self.platform_files[Platform.DARWIN] = ['moltenvk:libs']
