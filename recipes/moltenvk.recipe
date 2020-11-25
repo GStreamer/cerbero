@@ -6,7 +6,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'moltenvk'
-    version = '1.2.131.1'
+    version = '1.2.162.1'
     licenses = [License.Apachev2]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
@@ -33,7 +33,6 @@ class Recipe(recipe.Recipe):
     files_devel = [
         'include/vulkan',
         'include/MoltenVK',
-        'include/vulkan-portability'
     ]
 
     def prepare(self):
@@ -46,14 +45,11 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             self.files_libs += ['libvulkan']
-            self.files_devel += ['etc/vulkan']
             # no libvulkan.a
             self.library_type = LibraryType.SHARED
 
     async def install(self):
         # only copy once for the only architecture supported by the libraries
-        if self.config.target_platform == Platform.DARWIN and self.config.target_arch != Architecture.X86_64:
-            return
         if self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64:
             return
 
@@ -77,25 +73,28 @@ class Recipe(recipe.Recipe):
                  os.path.join(prefix, 'include', d), True)
             ]
 
+        libmoltenvk_shared = os.path.join(libdir, 'libMoltenVK.dylib')
+        libmoltenvk_static = os.path.join(libdir, 'libMoltenVK.a')
+        libvulkan = os.path.join(libdir, 'libvulkan.dylib')
+        libvulkan1 = os.path.join(libdir, 'libvulkan.1.dylib')
+
         if self.config.target_platform == Platform.DARWIN:
             to_copy += [
-                (os.path.join(srcdir, 'macOS', 'etc', 'vulkan'),
-                 os.path.join(prefix, 'etc', 'vulkan'), True),
                 (os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.dylib'),
-                 os.path.join(libdir, 'libvulkan.dylib'), False),
+                 libvulkan, False),
                 (os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.1.dylib'),
-                 os.path.join(libdir, 'libvulkan.1.dylib'), False),
-                (os.path.join(srcdir, 'MoltenVK', 'macOS', 'dynamic', 'libMoltenVK.dylib'),
-                 os.path.join(libdir, 'libMoltenVK.dylib'), False),
-                (os.path.join(srcdir, 'MoltenVK', 'macOS', 'static', 'libMoltenVK.a'),
-                 os.path.join(libdir, 'libMoltenVK.a'), False)
+                 libvulkan, False),
+                (os.path.join(srcdir, 'MoltenVK', 'dylib', 'macOS', 'libMoltenVK.dylib'),
+                 libmoltenvk_shared, False),
+                (os.path.join(srcdir, 'MoltenVK', 'MoltenVK.xcframework', 'macos-arm64_x86_64', 'libMoltenVK.a'),
+                 libmoltenvk_static, False)
             ]
         elif self.config.target_platform == Platform.IOS:
             to_copy += [
-                (os.path.join(srcdir, 'MoltenVK', 'iOS', 'dynamic', 'libMoltenVK.dylib'),
-                         os.path.join(libdir, 'libMoltenVK.dylib'), False),
-                (os.path.join(srcdir, 'MoltenVK', 'iOS', 'static', 'libMoltenVK.a'),
-                         os.path.join(libdir, 'libMoltenVK.a'), False)
+                (os.path.join(srcdir, 'MoltenVK', 'dylib', 'iOS', 'libMoltenVK.dylib'),
+                         libmoltenvk_shared, False),
+                (os.path.join(srcdir, 'MoltenVK', 'MoltenVK.xcframework', 'ios-arm64', 'libMoltenVK.a'),
+                         libmoltenvk_static, False)
             ]
 
         for src, dest, is_dir in to_copy:
@@ -105,6 +104,17 @@ class Recipe(recipe.Recipe):
                 if not os.path.exists(os.path.dirname(dest)):
                     os.makedirs(os.path.dirname(dest))
                 shutil.copy(src, dest)
+
+        # The SDK provides universal binaries, we need to convert them into thin binaries so
+        # that the merge step can merge them back
+        if self.config.target_platform == Platform.DARWIN:
+            binaries = [os.path.join(bindir, x) for x in self.files_bins]
+            for f in binaries + [libvulkan, libmoltenvk_shared, libmoltenvk_static]:
+                await shell.async_call(['lipo', '-thin', self.config.target_arch, f, '-output', f], logfile=self.logfile)
+                # Because we are editing the binary, we need to the remove the signature.
+                # The process would crash otherwise as not being
+                await shell.async_call(['codesign', '--remove-signature', f], logfile=self.logfile)
+
 
         LibtoolLibrary('vulkan', None, None, None, libdir,
                 self.config.target_platform).save()

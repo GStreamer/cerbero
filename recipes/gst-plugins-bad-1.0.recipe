@@ -495,12 +495,7 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options['applemedia'] = 'enabled'
-            # No Vulkan SDK for macOS ARM664 yet
-            if self.config.target_platform == Platform.DARWIN and \
-                    self.config.target_arch ==  Architecture.ARM64:
-                self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
-            else:
-                self.deps += ['moltenvk']
+            self.deps += ['moltenvk']
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['vulkan-android']
 
