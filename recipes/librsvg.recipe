@@ -28,6 +28,7 @@ class Recipe(recipe.Recipe):
         # Fails on cross-ios and cross-win32
         if self.config.cross_compiling():
             self.configure_options += ' --disable-pixbuf-loader'
+            self.files_loader.clear()
 
         if self.config.platform != Platform.WINDOWS:
             # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
