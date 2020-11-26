@@ -34,6 +34,7 @@ class Recipe(recipe.Recipe):
         # Fails on cross-ios and cross-win32
         if self.config.cross_compiling():
             self.configure_options += ' --disable-pixbuf-loader'
+            self.files_loader.clear()
 
     async def compile(self):
         # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
