@@ -85,9 +85,9 @@ class Recipe(recipe.Recipe):
                 self.config.target_platform == Platform.WINDOWS:
             libavextraconf += ' --enable-cross-compile'
             target_os = self.config.target_platform
-            if target_os == 'windows':
+            if target_os == Platform.WINDOWS:
                 target_os = 'mingw32'
-            elif target_os == 'ios':
+            elif target_os == Platform.IOS:
                 target_os = 'darwin'
             target_arch = self.config.host.split('-', 1)[0]
             libavextraconf += ' --target-os=' + target_os
