@@ -90,6 +90,8 @@ class Recipe(recipe.Recipe):
             elif target_os == Platform.IOS:
                 target_os = 'darwin'
             target_arch = self.config.host.split('-', 1)[0]
+            if target_arch == 'aarch64':
+                target_arch = 'arm64'
             libavextraconf += ' --target-os=' + target_os
             libavextraconf += ' --arch=' + target_arch
             libavextraconf += ' --cross-prefix={} '\
