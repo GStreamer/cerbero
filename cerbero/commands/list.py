@@ -16,20 +16,16 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Variants
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.utils import _, N_
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
-
+from cerbero.utils import ArgparseArgument
 
 class List(Command):
     doc = N_('List all the available recipes')
     name = 'list'
-
-    def __init__(self):
-        Command.__init__(self, [])
 
     def run(self, config, args):
         cookbook = CookBook(config)
@@ -42,15 +38,12 @@ class List(Command):
             except:
                 current = "Not checked out"
 
-            m.message("%s - %s (current checkout: %s)" % (recipe.name, recipe.version, current))
+            m.message("%s - %s (current checkout: %s) - %s" % (recipe.name, recipe.version, current, recipe.__file__))
 
 
 class ListPackages(Command):
     doc = N_('List all the available packages')
     name = 'list-packages'
-
-    def __init__(self):
-        Command.__init__(self, [])
 
     def run(self, config, args):
         store = PackagesStore(config)
@@ -58,7 +51,7 @@ class ListPackages(Command):
         if len(packages) == 0:
             m.message(_("No packages found"))
         for p in packages:
-            m.message("%s - %s" % (p.name, p.version))
+            m.message("%s - %s - %s" % (p.name, p.version, p.__file__))
 
 class ShowConfig(Command):
     doc = N_('Show configuration settings')
