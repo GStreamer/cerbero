@@ -1,0 +1,25 @@
+From 5bfb9bcbea916ca6bd62fa459978a33e47d8ad3d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 31 Dec 2020 15:04:10 +0000
+Subject: [PATCH] meson: error out in script if gperf preprocessing failed
+
+---
+ src/cutout.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/cutout.py b/src/cutout.py
+index 6fa55a3..96cafd2 100644
+--- a/src/cutout.py
++++ b/src/cutout.py
+@@ -12,7 +12,7 @@ if __name__== '__main__':
+     print (args[0].output)
+ 
+     cpp = args[1]
+-    ret = subprocess.run(cpp + [args[0].input], stdout=subprocess.PIPE)
++    ret = subprocess.run(cpp + [args[0].input], stdout=subprocess.PIPE, check=True)
+ 
+     stdout = ret.stdout.decode('utf8')
+ 
+-- 
+2.29.2
+

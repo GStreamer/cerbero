@@ -1,0 +1,75 @@
+From 15dd8e71cd9b702ab3def1d2fe885fa0a8e6815d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 17 Jan 2021 12:51:59 +0000
+Subject: [PATCH] meson: fix cross-compilation issues with gperf header file
+ preprocessing
+
+Pass c_args to the compiler when preprocessing the gperf header file,
+they might contain important bits without which compilation/preprocessing
+might fail (e.g. with clang on Android). cc.cmd_array() does not include
+the c_args and we can't easily look them up from the meson.build file, so
+we have retrieve them ourselves from the introspection info.
+---
+ src/cutout.py   | 16 ++++++++++++++--
+ src/meson.build |  5 ++++-
+ 2 files changed, 18 insertions(+), 3 deletions(-)
+
+diff --git a/src/cutout.py b/src/cutout.py
+index 96cafd2..323eec8 100644
+--- a/src/cutout.py
++++ b/src/cutout.py
+@@ -1,5 +1,6 @@
+ import argparse
+ import subprocess
++import json
+ import os
+ import re
+ 
+@@ -7,12 +8,23 @@ if __name__== '__main__':
+     parser = argparse.ArgumentParser()
+     parser.add_argument('input')
+     parser.add_argument('output')
++    parser.add_argument('buildroot')
+ 
+     args = parser.parse_known_args()
+-    print (args[0].output)
++
++    # c_args might contain things that are essential for crosscompilation, but
++    # are not included in cc.cmd_array(), so we have to look them up ourselves
++    host_cargs = []
++    buildroot = args[0].buildroot
++    with open(os.path.join(buildroot, 'meson-info', 'intro-buildoptions.json')) as json_file:
++        bopts = json.load(json_file)
++        for opt in bopts:
++            if opt['name'] == 'c_args' and opt['section'] == 'compiler' and opt['machine'] == 'host':
++                host_cargs = opt['value']
++                break
+ 
+     cpp = args[1]
+-    ret = subprocess.run(cpp + [args[0].input], stdout=subprocess.PIPE, check=True)
++    ret = subprocess.run(cpp + host_cargs + [args[0].input], stdout=subprocess.PIPE, check=True)
+ 
+     stdout = ret.stdout.decode('utf8')
+ 
+diff --git a/src/meson.build b/src/meson.build
+index f2a4861..7f9bf31 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -44,10 +44,13 @@ endif
+ 
+ cpp += ['-I', join_paths(meson.current_source_dir(), '..')]
+ 
++# Can use meson.project_build_dir() once we require Meson 0.56
++project_build_dir = meson.current_build_dir() / '..'
++
+ fcobjshash_gperf = custom_target('fcobjshash.gperf',
+   input: 'fcobjshash.gperf.h',
+   output: 'fcobjshash.gperf',
+-  command: [python3, files('cutout.py')[0], '@INPUT@', '@OUTPUT@', cpp],
++  command: [python3, files('cutout.py')[0], '@INPUT@', '@OUTPUT@', project_build_dir, cpp],
+   build_by_default: true,
+ )
+ 
+-- 
+2.29.2
+

@@ -1,21 +1,25 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
-from cerbero.utils import needs_xcode8_sdk_workaround
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'fontconfig'
-    version = '2.12.6'
+    version = '2.13.93'
     stype = SourceType.TARBALL
     url = 'https://www.freedesktop.org/software/fontconfig/release/fontconfig-%(version)s.tar.gz'
-    tarball_checksum = '064b9ebf060c9e77011733ac9dc0e2ce92870b574cca2405e11f5353a683c334'
+    tarball_checksum = '0f302a18ee52dde0793fe38b266bf269dfe6e0c0ae140e30d72c6cca5dc08db5'
     licenses = [{License.MIT: ['COPYING']}]
-    configure_options = '--disable-docs'
+    btype = BuildType.MESON
+    meson_options = {'doc': 'disabled', 'tests': 'disabled', 'tools': 'disabled'}
     deps = ['expat', 'freetype', 'zlib', 'bzip2']
     patches = [
-        'fontconfig/0001-Fix-cross-compilation-by-passing-CPPFLAGS-to-CPP.patch',
-        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/88
-        'fontconfig/0002-fcatomic-Fix-EXC_BAD_ACCESS-on-iOS-ARM64.patch',
-        'fontconfig/0003-Completely-disable-building-of-tests.patch',
+        # From git master post-2.13.93
+        'fontconfig/0001-meson-error-out-in-script-if-gperf-preprocessing-fai.patch',
+        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/138/
+        'fontconfig/0001-handle-absolute-sysconfdir-when-installing-symlinks.patch',
+        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/165
+        'fontconfig/0001-meson-fix-cross-compilation-issues-with-gperf-header.patch'
     ]
 
     files_libs = ['libfontconfig']
@@ -30,19 +34,14 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             self.deps.append('libiconv')
-        if needs_xcode8_sdk_workaround(self.config):
-            self.set_env('ac_cv_func_mkostemp', 'no')
-
-        if self.config.target_platform == Platform.WINDOWS:
-            if self.config.target_arch == Architecture.X86_64:
-                self.configure_options += ' --with-arch=x86_64 '
-            else:
-                self.configure_options += ' --with-arch=i686 '
-        else:
-            self.autoreconf = True
-            self.patches += ['fontconfig/0003-configure-Allow-static-build.patch']
 
     def post_install(self):
+        # Meson does not generate la files
+        major, minor, micro = get_libtool_versions(self.version)
+        libtool_la = LibtoolLibrary('fontconfig', major, minor, micro,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=['expat', 'freetype', 'bz2', 'z'])
+        libtool_la.save()
         # Create relative symlinks to prevent breakage during packaging
         if self.config.platform != Platform.WINDOWS:
             confddir = os.path.join(self.config.prefix, 'etc', 'fonts', 'conf.d')
