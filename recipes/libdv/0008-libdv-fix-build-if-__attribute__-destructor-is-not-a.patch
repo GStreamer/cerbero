@@ -1,0 +1,47 @@
+From c201ad95e20d3614707856e6752a6800f22cbcdb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 6 Jan 2021 10:33:34 +0000
+Subject: [PATCH 08/12] libdv: fix build if __attribute__(destructor) is not
+ available
+
+Fixes build on Windows with MSVC.
+---
+ libdv/encode.c | 3 ++-
+ meson.build    | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libdv/encode.c b/libdv/encode.c
+index 71deb95..d57f62a 100644
+--- a/libdv/encode.c
++++ b/libdv/encode.c
+@@ -1597,12 +1597,13 @@ dv_encoder_free( dv_encoder_t *encoder)
+  * This fixes potential memory leaks when repeatedly loading 
+  * and unloading libdv.
+  */
+-
++#ifdef HAVE_ATTRIBUTE_DESTRUCTOR
+ static void do_free() __attribute__ ((destructor));
+ 
+ static void do_free() {
+   dv_cleanup();
+ } /* do_free */
++#endif /* HAVE_ATTRIBUTE_DESTRUCTOR */
+ 
+ /** @brief Free the dynamically allocated global memory.
+  *
+diff --git a/meson.build b/meson.build
+index 8c839da..c73b885 100644
+--- a/meson.build
++++ b/meson.build
+@@ -94,6 +94,8 @@ endforeach
+ # This is an inline function on windows and needs the time.h header to be detected
+ cdata.set10('HAVE_LOCALTIME_S', cc.has_function('localtime_s', prefix: '#include <time.h>'))
+ 
++cdata.set('HAVE_ATTRIBUTE_DESTRUCTOR', cc.has_function_attribute('destructor'))
++
+ # need to define these if needed
+ #assert(cc.has_type('off_t'))
+ #assert(cc.has_type('size_t'))
+-- 
+2.29.2
+

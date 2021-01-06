@@ -1,0 +1,365 @@
+From 0fe09c23751af5f7c668dfd67f34b4977df7f23f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 20 Dec 2020 00:53:46 +0000
+Subject: [PATCH 01/12] Add Meson build system definitions
+
+---
+ encodedv/meson.build |  24 ++++++++
+ libdv/meson.build    | 141 +++++++++++++++++++++++++++++++++++++++++++
+ meson.build          |  95 +++++++++++++++++++++++++++++
+ meson_options.txt    |  25 ++++++++
+ playdv/meson.build   |  29 +++++++++
+ 5 files changed, 314 insertions(+)
+ create mode 100644 encodedv/meson.build
+ create mode 100644 libdv/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 playdv/meson.build
+
+diff --git a/encodedv/meson.build b/encodedv/meson.build
+new file mode 100644
+index 0000000..70b93e2
+--- /dev/null
++++ b/encodedv/meson.build
+@@ -0,0 +1,24 @@
++install_man('encodedv.1', 'dvconnect.1', 'dubdv.1')
++
++executable('encodedv', 'encodedv.c',
++  include_directories: config_inc,
++  dependencies: [dv_dep, popt_dep],
++  install: true)
++
++executable('dvconnect', 'dvconnect.c',
++  include_directories: config_inc,
++  dependencies: [dv_dep, popt_dep, threads_dep],
++  install: true)
++
++executable('dubdv', 'insert_audio.c',
++  include_directories: config_inc,
++  dependencies: [dv_dep, popt_dep],
++  install: true)
++
++# noinst_PROGRAMS
++foreach p : ['fix_headers', 'scan_packet_headers', 'steal_header', 'ppmqscale', 'dvavi']
++  executable(p, '@0@.c'.format(p),
++    include_directories: config_inc,
++    dependencies: [dv_dep, popt_dep],
++    install: false)
++endforeach
+diff --git a/libdv/meson.build b/libdv/meson.build
+new file mode 100644
+index 0000000..da50266
+--- /dev/null
++++ b/libdv/meson.build
+@@ -0,0 +1,141 @@
++install_headers('dv_types.h', 'dv.h', subdir: 'libdv')
++
++dv_sources = [
++  'dv.c',
++  'dct.c',
++  'idct_248.c',
++  'weighting.c',
++  'quant.c',
++  'vlc.c',
++  'place.c',
++  'parse.c',
++  'bitstream.c',
++  'YUY2.c',
++  'YV12.c',
++  'rgb.c',
++  'audio.c',
++  'util.c',
++  'encode.c',
++  'headers.c',
++  'enc_input.c',
++  'enc_audio_input.c',
++  'enc_output.c',
++]
++
++dv_asm_sources_table = {
++  'x86': [
++    'vlc_x86.S',
++    'quant_x86.S',
++    'idct_block_mmx.S',
++    'dct_block_mmx.S',
++    'rgbtoyuv.S',
++    'encode_x86.S',
++    'transpose_x86.S',
++  ],
++  'x86_64': [
++    'vlc_x86_64.S',
++    'quant_x86_64.S',
++    'idct_block_mmx_x86_64.S',
++    'dct_block_mmx_x86_64.S',
++    'rgbtoyuv_x86_64.S',
++    'encode_x86_64.S',
++    'transpose_x86_64.S',
++  ]
++}
++
++# x86 / x86_64 assembly support
++
++have_asm = false
++cpu_family = host_machine.cpu_family()
++
++if cpu_family in ['x86', 'x86_64'] and cc.get_id() != 'msvc' and not get_option('asm').disabled()
++  have_asm = cc.compiles(files('transpose_@0@.S'.format(cpu_family)),
++     args: cc.get_supported_arguments(['-Werror']),
++     name: '.S assembly file')
++endif
++
++if get_option('asm').enabled() and not have_asm
++  error('Assembly optimizations were requested, but are not available with this architecture/compiler.')
++endif
++
++if have_asm
++  cdata.set10('ARCH_@0@'.format(cpu_family.to_upper().underscorify()), true)
++
++  dv_sources += dv_asm_sources_table[cpu_family]
++
++  asm_structs = [
++    ['dv_videosegment_t', ['i', 'k', 'bs', 'mb', 'isPAL']],
++    ['dv_macroblock_t', ['b', 'eob_count', 'vlc_error', 'qno', 'sta', 'i', 'j', 'k']],
++    ['dv_block_t', ['coeffs', 'dct_mode', 'class_no', 'reorder', 'reorder_sentinel', 'offset', 'end', 'eob', 'mark']],
++    ['bitstream_t', ['buf']],
++  ]
++
++  asm_defines = [
++    'DV_QUALITY_BEST',
++    'DV_QUALITY_FASTEST',
++    'DV_QUALITY_COLOR',
++    'DV_QUALITY_AC_MASK',
++    'DV_QUALITY_DC',
++    'DV_QUALITY_AC_1',
++    'DV_QUALITY_AC_2',
++    'DV_WEIGHT_BIAS',
++  ]
++
++  asm_check_prefix = '''
++    #include <stddef.h>
++    #include "libdv/dv.h"
++    '''
++
++  # We generate asmoff.h via meson instead of calling the gasmoff tool
++  cdata_asm = configuration_data()
++
++  foreach struct : asm_structs
++    struct_name = struct[0]
++    struct_members = struct[1]
++
++    cdata_asm.set('@0@_size'.format(struct_name),
++      cc.sizeof(struct_name, prefix: asm_check_prefix))
++
++    foreach m : struct_members  
++      cdata_asm.set('@0@_@1@'.format(struct_name, m),
++        cc.compute_int('offsetof(@0@,@1@)'.format(struct_name, m),
++                       prefix: asm_check_prefix,
++                       high: 8192))
++    endforeach
++  endforeach
++
++  asmoff_h = configure_file(output: 'asmoff.h', configuration: cdata_asm)
++  dv_sources += [asmoff_h]
++endif
++
++cfg_summary += {'assembly optimizations': have_asm}
++
++libdv = library('dv', dv_sources,
++  include_directories: config_inc,
++  dependencies: [popt_dep, threads_dep, libm],
++  soversion: soversion,
++  version: libversion,
++  install: true)
++
++dv_dep = declare_dependency(link_with: libdv,
++  include_directories: include_directories('.', '..'))
++
++# pkg-config file
++static_cflags = [] # FIXME
++pkg = import('pkgconfig')
++pkg.generate(libdv,
++  name: 'libdv',
++  description: 'DV software codec library',
++  extra_cflags: static_cflags)
++  
++# test utilities
++if not get_option('utils').disabled() and cc.get_id() != 'msvc'
++  foreach util : ['dovlc', 'testvlc', 'testbitstream', 'recode', 'reppm', 'enctest']
++    executable(util, '@0@.c'.format(util),
++      include_directories: config_inc,
++      dependencies: [dv_dep, threads_dep],
++      install: false)
++  endforeach
++elif get_option('utils').enabled()
++  error('Utilities required via options but are not buildable on this platform.')
++endif
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..fe3090d
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,95 @@
++project('libdv', 'c', version: '1.0.0',
++  meson_version: '>= 0.53',
++  default_options: ['buildtype=debugoptimized'])
++
++soversion = '4'
++libversion = '4.0.3'
++
++cc = meson.get_compiler('c')
++
++# to enable GNU extensions of glibc, notably large file support
++add_project_arguments('-D_GNU_SOURCE', '-DHAVE_CONFIG_H', language: 'c')
++
++# so MSVC defines M_PI etc.
++if cc.get_id() == 'msvc'
++  add_project_arguments('-D_USE_MATH_DEFINES', language: 'c')
++endif
++
++cfg_summary = {}
++
++cdata = configuration_data()
++
++config_inc = include_directories('.')
++
++cdata.set10('DEBUG', get_option('debug'))
++
++cdata.set_quoted('VERSION', meson.project_version())
++
++libm = cc.find_library('m', required: false)
++
++# Don't bother with popt on non-gcc build, because we make heavy use of 
++# gcc struct initialization extension in our popt code.  (Could be fixed)
++if cc.get_id() == 'gcc'
++  popt_dep = dependency('popt', required: get_option('popt'))
++  cdata.set10('HAVE_LIBPOPT', popt_dep.found())
++else
++  assert(not get_option('popt').enabled(), 'popt requested via options but was not found.')
++  popt_dep = dependency('', required: false)
++endif
++
++if get_option('yuv-format') == 'YV12'
++  cdata.set10('YUV_420_USE_YV12', true)
++endif
++cfg_summary += {'YUV format': get_option('yuv-format')}
++
++threads_dep = dependency('threads')
++
++check_headers = [
++  'endian.h',
++  'machine/endian.h',
++  'dlfcn.h',
++  'fcntl.h',
++  'unistd.h',
++  'inttypes.h',
++  'memory.h',
++  'stdint.h',
++  'stdlib.h',
++  'string.h',
++  'strings.h',
++  'sys/param.h',
++  'sys/stat.h',
++  'sys/types.h',
++  'sys/time.h',
++  'linux/videodev.h',
++  'sys/soundcard.h',
++]
++
++foreach h : check_headers
++  cdata.set10('HAVE_@0@'.format(h.underscorify().to_upper()), cc.has_header(h))
++endforeach
++
++cdata.set10('STDC_HEADERS', true)
++
++check_funcs = ['mmap', 'gettimeofday', 'getpagesize']
++foreach f : check_funcs
++  cdata.set10('HAVE_@0@'.format(f.underscorify().to_upper()), cc.has_function(f))
++endforeach
++
++# need to define these if needed
++#assert(cc.has_type('off_t'))
++#assert(cc.has_type('size_t'))
++
++subdir('libdv')
++
++if not get_option('tools').disabled()
++  if cdata.get('HAVE_UNISTD_H') == 1
++    # TODO: subdir('playdv')
++    subdir('encodedv')
++  elif get_option('tools').enabled()
++    error('Tools required via options but are not buildable on this platform.')
++  endif
++endif
++
++configure_file(output: 'config.h', configuration: cdata)
++
++summary(cfg_summary, bool_yn: true)
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..e4fa9a9
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,25 @@
++option('asm', type: 'feature', value: 'auto',
++  description: 'Use architecture specific assembly code (probably only works with GCC/clang)')
++
++option('yuv-format', type : 'combo', choices : ['YV12', 'YUY2'], value : 'YUY2',
++  description: 'YUV format')
++
++option('popt', type: 'feature', value: 'auto')
++
++option('utils', type : 'feature', value : 'disabled',
++  description: 'Build uninstalled utilities')
++
++#option('tests', type : 'feature', value : 'auto',
++#  description: 'Build tests')
++
++# tools
++option('tools', type : 'feature', value : 'disabled',
++  description: 'Build playdv and encodedv tools')
++
++#option('gtk', type: 'feature', value: 'auto',
++#  description: 'Use GTK for display in playdv tool')
++#option('sdl', type: 'feature', value: 'disabled',
++#  description: 'Use SDL for display in playdv tool')
++#option('xv', type: 'feature', value: 'auto',
++#  description: 'Use XV for display in playdv tool')
++
+diff --git a/playdv/meson.build b/playdv/meson.build
+new file mode 100644
+index 0000000..b663d01
+--- /dev/null
++++ b/playdv/meson.build
+@@ -0,0 +1,29 @@
++# FIXME: requires Gtk+ and an ancient version at that, needs more work.
++# Apparently works with gtk2 though.
++'''
++gtk_dep = dependency('gtk+-x11-2.0', required: get_option('gtk'))
++
++sdl_dep = dependency('sdl2', version: '>= 1.1.6', required: get_option('sdl'))
++
++xv_dep = dependency('xv', required: get_option('xv'))
++
++cdata.set10('HAVE_GTK', gtk_dep.found())
++cdata.set10('HAVE_SDL', sdl_dep.found())
++cdata.set10('HAVE_LIBXV', xv_dep.found())
++
++if not gtk_dep.found()
++  message('playdv needs GTK+ 2.x')
++  subdir_done()
++endif
++
++executable('playdv', 'playdv.c', 'display.c', 'oss.c',
++  include_directories: config_inc,
++  dependencies: [dv_dep, sdl_dep, gtk_dep, xv_dep, popt_dep, dependency('x11'), dependency('xshm')],
++  install: true)
++
++if not popt_dep.found()
++  warning('playdv needs the popt package for command line parsing.')
++endif
++
++install_man('playdv.1')
++'''
+-- 
+2.29.2
+

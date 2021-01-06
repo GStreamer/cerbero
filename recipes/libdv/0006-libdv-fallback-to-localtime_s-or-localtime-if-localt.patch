@@ -1,0 +1,65 @@
+From 43bc6731de33a83666813d1f3c3e591439557d89 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 6 Jan 2021 01:39:44 +0000
+Subject: [PATCH 06/12] libdv: fallback to localtime_s or localtime if
+ localtime_r is not available
+
+Fixes build on Windows with MSVC.
+---
+ libdv/headers.c | 19 +++++++++++++++++++
+ meson.build     |  5 ++++-
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/libdv/headers.c b/libdv/headers.c
+index 444c463..041be69 100644
+--- a/libdv/headers.c
++++ b/libdv/headers.c
+@@ -33,6 +33,25 @@
+ 
+ #include "headers.h"
+ 
++#if !HAVE_LOCALTIME_R
++# if HAVE_LOCALTIME_S
++#  define localtime_r(t,r) localtime_s(r,t)
++# else /* !HAVE_LOCALTIME_S */
++#  define localtime_r(t,r) dv_localtime_r(t,r)
++static struct tm *
++dv_localtime_r (const time_t *t, struct tm *result)
++{
++  struct tm *tm = localtime (t);
++
++  if (tm == NULL)
++    return NULL;
++
++  *result = *tm;
++  return result;
++}
++# endif /* !HAVE_LOCALTIME_S */
++#endif /* !HAVE_LOCALTIME_R */
++
+ static void write_header_block(unsigned char* target, int ds, int isPAL)
+ {
+ 	target[0] = 0x1f; /* header magic */
+diff --git a/meson.build b/meson.build
+index 8294f04..8c839da 100644
+--- a/meson.build
++++ b/meson.build
+@@ -86,11 +86,14 @@ endforeach
+ 
+ cdata.set10('STDC_HEADERS', true)
+ 
+-check_funcs = ['mmap', 'gettimeofday', 'getpagesize', 'sched_setscheduler']
++check_funcs = ['mmap', 'gettimeofday', 'getpagesize', 'sched_setscheduler', 'localtime_r']
+ foreach f : check_funcs
+   cdata.set10('HAVE_@0@'.format(f.underscorify().to_upper()), cc.has_function(f))
+ endforeach
+ 
++# This is an inline function on windows and needs the time.h header to be detected
++cdata.set10('HAVE_LOCALTIME_S', cc.has_function('localtime_s', prefix: '#include <time.h>'))
++
+ # need to define these if needed
+ #assert(cc.has_type('off_t'))
+ #assert(cc.has_type('size_t'))
+-- 
+2.29.2
+

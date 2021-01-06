@@ -1,0 +1,108 @@
+From 731406a573a94f9c1c2b321a67371316d1393870 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 9 Jan 2021 18:54:26 +0000
+Subject: [PATCH 10/12] meson: pick up endianness from config.h
+
+Fixes endianness detection with MSVC and older
+Android versions, which in turn fixes bitstream
+parsing and decoding on MSVC and older Android.
+---
+ libdv/YUY2.c      | 11 +++--------
+ libdv/bitstream.h |  7 +------
+ meson.build       |  5 +++--
+ 3 files changed, 7 insertions(+), 16 deletions(-)
+
+diff --git a/libdv/YUY2.c b/libdv/YUY2.c
+index 20b7513..2329c81 100644
+--- a/libdv/YUY2.c
++++ b/libdv/YUY2.c
+@@ -31,11 +31,6 @@
+ # include <config.h>
+ #endif
+ 
+-#if HAVE_ENDIAN_H
+-#include <endian.h>
+-#elif HAVE_MACHINE_ENDIAN_H
+-#include <machine/endian.h>
+-#endif
+ #include <stdlib.h>
+ 
+ #include "YUY2.h"
+@@ -128,7 +123,7 @@ dv_mb411_YUY2(dv_macroblock_t *mb, uint8_t **pixels, int *pitches, int add_ntsc_
+         cb_frame++;
+         cr_frame++;
+ 
+-#if 0 /* (BYTE_ORDER == BIG_ENDIAN) */
++#if 0 /* DV_IS_BIG_ENDIAN */
+        *pwyuv++ = cb;
+        *pwyuv++ = my_ylut[CLAMP(*Ytmp, -256, 511)];
+        Ytmp++;
+@@ -201,7 +196,7 @@ dv_mb411_right_YUY2(dv_macroblock_t *mb, uint8_t **pixels, int *pitches, int add
+ 	  cb_frame++;
+ 	  cr_frame++;
+ 
+-#if 0 /* (BYTE_ORDER == BIG_ENDIAN) */
++#if 0 /* DV_IS_BIG_ENDIAN */
+          *pwyuv++ = cb;
+          *pwyuv++ = my_ylut[CLAMP(*Ytmp, -256, 511)];
+          Ytmp++;
+@@ -275,7 +270,7 @@ dv_mb420_YUY2 (dv_macroblock_t *mb, uint8_t **pixels, int *pitches) {
+           cb_frame++;
+           cr_frame++;
+ 
+-#if (BYTE_ORDER == LITTLE_ENDIAN)
++#if DV_IS_LITTLE_ENDIAN
+           *pwyuv0++ = ylut[CLAMP(*(Ytmp0 + 0), -256, 511)];
+           *pwyuv0++ = cb;
+           *pwyuv0++ = ylut[CLAMP(*(Ytmp0 + 1), -256, 511)];
+diff --git a/libdv/bitstream.h b/libdv/bitstream.h
+index 25f4ae9..cd36688 100644
+--- a/libdv/bitstream.h
++++ b/libdv/bitstream.h
+@@ -32,11 +32,6 @@
+ #define DV_BITSTREAM_H
+ 
+ #include "dv_types.h"
+-#if HAVE_ENDIAN_H
+-#include <endian.h>
+-#elif HAVE_MACHINE_ENDIAN_H
+-#include <machine/endian.h>
+-#endif
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -44,7 +39,7 @@ extern "C" {
+ 
+ //My new and improved vego-matic endian swapping routine
+ //(stolen from the kernel)
+-#if (BYTE_ORDER == BIG_ENDIAN)
++#if DV_IS_BIG_ENDIAN
+ #define swab32(x) (x)
+ #else // LITTLE_ENDIAN
+ #    define swab32(x)\
+diff --git a/meson.build b/meson.build
+index c73b885..584bfc7 100644
+--- a/meson.build
++++ b/meson.build
+@@ -61,8 +61,6 @@ cfg_summary += {'YUV format': get_option('yuv-format')}
+ threads_dep = dependency('threads')
+ 
+ check_headers = [
+-  'endian.h',
+-  'machine/endian.h',
+   'dlfcn.h',
+   'fcntl.h',
+   'unistd.h',
+@@ -96,6 +94,9 @@ cdata.set10('HAVE_LOCALTIME_S', cc.has_function('localtime_s', prefix: '#include
+ 
+ cdata.set('HAVE_ATTRIBUTE_DESTRUCTOR', cc.has_function_attribute('destructor'))
+ 
++cdata.set10('DV_IS_BIG_ENDIAN', host_machine.endian() == 'big')
++cdata.set10('DV_IS_LITTLE_ENDIAN', host_machine.endian() == 'little')
++
+ # need to define these if needed
+ #assert(cc.has_type('off_t'))
+ #assert(cc.has_type('size_t'))
+-- 
+2.29.2
+

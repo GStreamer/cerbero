@@ -1,0 +1,42 @@
+From a2b14979c34bfc370b42cad1574afafb7d673b94 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 10 Jan 2021 00:12:01 +0000
+Subject: [PATCH 13/13] libdv: don't spam stderr if there's no audio
+
+Don't spam stderr with '#no audio' if there's no audio
+data. This can happen with DV video in MXF or AVI
+containers where the audio stream is separate and
+not part of the DV bitstream.
+
+Log this into the configured log file instead. That way
+applications or other libraries (such as GStreamer) can
+suppress the output.
+---
+ libdv/dv.c | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/libdv/dv.c b/libdv/dv.c
+index 49d581e..4a7b912 100644
+--- a/libdv/dv.c
++++ b/libdv/dv.c
+@@ -591,9 +591,15 @@ dv_decode_full_audio(dv_decoder_t *dv, const uint8_t *buffer, int16_t **outbufs)
+   return(TRUE);
+ 
+  fail:
+-fprintf (stderr, "# decode failure \n");
++    if (dv -> audio -> error_log) {
++      fprintf (dv -> audio -> error_log,
++               "# decode failure \n");
++    }
+  no_audio:
+-fprintf (stderr, "# no audio\n");
++    if (dv -> audio -> error_log) {
++      fprintf (dv -> audio -> error_log,
++               "# no audio\n");
++    }
+   return(FALSE);
+ 
+ } /* dv_decode_full_audio */
+-- 
+2.29.2
+

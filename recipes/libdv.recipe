@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'libdv'
@@ -8,32 +9,45 @@ class Recipe(recipe.Recipe):
     url = 'sf://.tar.gz'
     tarball_checksum = 'a305734033a9c25541a59e8dd1c254409953269ea7c710c39e540bd8853389ba'
     licenses = [License.LGPLv2_1Plus]
-    autoreconf = True
-    patches = ['libdv/0001-Check-properly-for-sched_setscheduler.patch',
-               'libdv/0003-Don-t-build-test-programs.patch',
-               'libdv/0004-Fix-compilation-on-Android.patch',
-               'libdv/0005-Fix-compilation-on-Windows-some-more.patch',
-               'libdv/0006-Add-the-pthread-libs-to-pkg-config.patch',
-               'libdv/0007-Don-t-require-libsdl-to-be-installed-for-autoreconf.patch',
-               'libdv/0012-Build-a-DLL-on-Windows.patch',
-               'libdv/0013-Fix-endianess-detection-with-mingw-w64.patch',
-               'libdv/0014-libdv-fix-build-of-gasmoff-after-autoreconf.patch']
+    btype = BuildType.MESON
+    meson_options = {'popt': 'disabled', 'tools': 'disabled', 'utils': 'disabled', 'tests': 'disabled'}
+    patches = [# From https://gitlab.freedesktop.org/gstreamer/meson-ports/libdv
+               'libdv/0001-Add-Meson-build-system-definitions.patch',
+               'libdv/0002-meson-work-around-brokenness-in-public-dv_types.h-he.patch',
+               # 'libdv/0003-meson-add-some-basic-gitlab-CI.patch',
+               'libdv/0004-meson-Fix-build-on-macOS-and-iOS.patch',
+               'libdv/0005-libdv-encode.c-fix-undefined-behavior-compiler-warni.patch',
+               'libdv/0006-libdv-fallback-to-localtime_s-or-localtime-if-localt.patch',
+               'libdv/0007-libdv-use-win32-thread-primitives-on-Windows.patch',
+               'libdv/0008-libdv-fix-build-if-__attribute__-destructor-is-not-a.patch',
+               'libdv/0009-meson-fix-symbol-export-on-MSVC.patch',
+               'libdv/0010-meson-pick-up-endianness-from-config.h.patch',
+               # 'libdv/0011-meson-hook-up-bitstream-unit-test.patch',
+               # 'libdv/0012-meson-hook-up-vlc-test.patch',
+               'libdv/0013-libdv-don-t-spam-stderr-if-there-s-no-audio.patch',
+               'libdv/0014-libdv-Fix-compilation-on-older-Android-versions.patch',
+              ]
 
     files_libs = ['libdv']
     files_devel = ['include/libdv', 'lib/pkgconfig/libdv.pc']
 
+    # FIXME: asm probably works fine on x86/x86_64 with mingw or clang?
     def prepare(self):
-        if self.config.variants.nox11:
-            self.configure_options += ' --disable-xv --without-x'
+        #if self.config.variants.nox11:
+        #    self.configure_options += ' --disable-xv --without-x'
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --disable-asm'
-            self.append_env('LDFLAGS', '-lpthread')
+            self.meson_options['asm'] = 'disabled'
         elif self.config.target_platform == Platform.DARWIN:
-            self.configure_options += ' --disable-asm'
+            self.meson_options['asm'] = 'disabled'
         elif self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
-                self.configure_options += ' --disable-asm'
-            self.autoreconf = True
+                self.meson_options['asm'] = 'disabled'
         elif self.config.target_platform == Platform.IOS:
             if self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
-                self.configure_options += ' --disable-asm'
+                self.meson_options['asm'] = 'disabled'
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libdv', 4, 0, 3, self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

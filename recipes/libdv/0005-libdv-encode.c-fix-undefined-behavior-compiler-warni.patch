@@ -1,0 +1,44 @@
+From c88e6d30fa4d7fa09af5e2e18e242a6a61d89558 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Tue, 5 Jan 2021 23:56:37 +0000
+Subject: [PATCH 05/12] libdv/encode.c: fix 'undefined behavior' compiler
+ warning
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+encode.c: In function ‘dv_show_statistics’:
+encode.c:1506:3: warning: iteration 11 invokes undefined behavior [-Waggressive-loop-optimizations]
+
+runs_used is defined as runs_used[15] but the loop was
+trying to get 16 values out of it.
+---
+ libdv/encode.c | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/libdv/encode.c b/libdv/encode.c
+index b5aabbe..870c4ac 100644
+--- a/libdv/encode.c
++++ b/libdv/encode.c
+@@ -1502,11 +1502,16 @@ void dv_show_statistics()
+ 			i, cycles_used[i], runs_used[i], qnos_used[i],
+ 			classes_used[i]);
+ 	}
+-	for (;i < 16; i++) {
++	for (;i < 15; i++) {
+ 		fprintf(stderr, "%2d: %8ld |%8ld  |%8ld |         "
+-			"|         |\n", 
++			"|         |\n",
+ 			i, cycles_used[i], runs_used[i], qnos_used[i]);
+ 	}
++	for (;i < 16; i++) {
++		fprintf(stderr, "%2d: %8ld |          |%8ld |         "
++			"|         |\n",
++			i, cycles_used[i], qnos_used[i]);
++	}
+ }
+ 
+ 
+-- 
+2.29.2
+

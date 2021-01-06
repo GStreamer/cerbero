@@ -1,0 +1,631 @@
+From c09aea851eb567db5b30db0685d6c4782b26e84d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 26 Dec 2020 22:13:36 +0000
+Subject: [PATCH 02/12] meson: work around brokenness in public dv_types.h
+ header
+
+The header includes config.h which might be the libdv
+config.h or some random application's config.h, and
+does things based on fairly common defines. This is
+just broken.
+
+Instead generate dv_config.h with the build-time config,
+and include config.h only locally.
+
+Also change defines used to carry a LIBDV_ prefix to
+minimise chances of clashing with library consumer defines.
+
+See https://salsa.debian.org/debian/libdv/-/blob/master/debian/patches/
+for an alternative (but more debian specific) version of this.
+---
+ configure.ac                   |   2 +
+ encodedv/encodedv.c            |   3 +
+ encodedv/fix_headers.c         |   3 +
+ encodedv/insert_audio.c        |   4 ++
+ encodedv/ppmqscale.c           |   3 +
+ encodedv/scan_packet_headers.c |   3 +
+ encodedv/steal_header.c        |   3 +
+ libdv/dovlc.c                  |   3 +
+ libdv/dv_types.h               | 127 ++++++++++++++-------------------
+ libdv/enctest.c                |   3 +
+ libdv/gasmoff.c                |   4 ++
+ libdv/meson.build              |  27 +++++++
+ libdv/recode.c                 |   3 +
+ libdv/reppm.c                  |   4 ++
+ libdv/testbitstream.c          |   3 +
+ libdv/testvlc.c                |   4 +-
+ meson.build                    |  16 +++++
+ 17 files changed, 142 insertions(+), 73 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 2b95735..77ab153 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -3,6 +3,8 @@ AC_INIT(libdv/parse.c)
+ dnl AC_CONFIG_AUX_DIR(config)
+ AM_CONFIG_HEADER(config.h)
+ 
++AC_MSG_ERROR([The autotools build in this branch is not functional as-is, needs updating for the new dv_config.h header])
++
+ RPM_RELEASE=1
+ AC_CANONICAL_HOST
+ AC_CANONICAL_TARGET
+diff --git a/encodedv/encodedv.c b/encodedv/encodedv.c
+index f50ba4b..7a05826 100644
+--- a/encodedv/encodedv.c
++++ b/encodedv/encodedv.c
+@@ -23,6 +23,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include <string.h>
+ #include "libdv/dv_types.h"
+diff --git a/encodedv/fix_headers.c b/encodedv/fix_headers.c
+index d55e20b..920c07f 100644
+--- a/encodedv/fix_headers.c
++++ b/encodedv/fix_headers.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "libdv/dv_types.h"
+ 
+diff --git a/encodedv/insert_audio.c b/encodedv/insert_audio.c
+index a470926..e225968 100644
+--- a/encodedv/insert_audio.c
++++ b/encodedv/insert_audio.c
+@@ -23,6 +23,10 @@
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
+ 
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
++
+ #include "libdv/dv_types.h"
+ 
+ #include <stdio.h>
+diff --git a/encodedv/ppmqscale.c b/encodedv/ppmqscale.c
+index 338efb9..9f9086b 100644
+--- a/encodedv/ppmqscale.c
++++ b/encodedv/ppmqscale.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "libdv/dv_types.h"
+ 
+diff --git a/encodedv/scan_packet_headers.c b/encodedv/scan_packet_headers.c
+index 3e08f33..8341c5b 100644
+--- a/encodedv/scan_packet_headers.c
++++ b/encodedv/scan_packet_headers.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "libdv/dv_types.h"
+ 
+diff --git a/encodedv/steal_header.c b/encodedv/steal_header.c
+index b3d1174..951837d 100644
+--- a/encodedv/steal_header.c
++++ b/encodedv/steal_header.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "libdv/dv_types.h"
+ 
+diff --git a/libdv/dovlc.c b/libdv/dovlc.c
+index 6001bb3..3cd3c1e 100644
+--- a/libdv/dovlc.c
++++ b/libdv/dovlc.c
+@@ -23,6 +23,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include <dv_types.h>
+ 
+diff --git a/libdv/dv_types.h b/libdv/dv_types.h
+index 1f90561..ae65b24 100644
+--- a/libdv/dv_types.h
++++ b/libdv/dv_types.h
+@@ -26,23 +26,16 @@
+ #ifndef DV_TYPES_H
+ #define DV_TYPES_H
+ 
+-#if HAVE_CONFIG_H
+-# include <config.h>
+-#endif
++#include "dv_config.h"
+ 
+-#if HAVE_LIBPOPT
++#if LIBDV_HAVE_LIBPOPT
+ #include <popt.h>
+-#endif // HAVE_LIBPOPT
++#endif /* LIBDV_HAVE_LIBPOPT */
+ 
+ #include <stdlib.h>
+ #include <inttypes.h>
+ #include <stdio.h>
+ #include <time.h>
+-#if HAVE_ENDIAN_H
+-#include <endian.h>
+-#elif HAVE_MACHINE_ENDIAN_H
+-#include <machine/endian.h>
+-#endif
+ 
+ /* please tell me these are defined somewhere standard??? */
+ #ifndef FALSE
+@@ -61,25 +54,23 @@
+ #define CLAMP(a,x,b) (MIN(b,MAX(a,x)))
+ #endif
+ 
+-// For now assume ARCH_X86 means GCC with hints.
+-#ifdef ARCH_X86
+-#define HAVE_GCC 1
+-#endif
+-#ifdef ARCH_X86_64
+-#define HAVE_GCC 1
+-#endif
+-//#define HAVE_GCC 0
+-
+-#if HAVE_GCC
+-#define ALIGN64 __attribute__ ((aligned (64)))
+-#define ALIGN32 __attribute__ ((aligned (32)))
+-#define ALIGN8 __attribute__ ((aligned (8)))
++#if LIBDV_USING_ASM
++# if defined(__GNUC__) || defined(__clang__)
++#  define LIBDV_ALIGN64 __attribute__ ((aligned (64)))
++#  define LIBDV_ALIGN32 __attribute__ ((aligned (32)))
++#  define LIBDV_ALIGN8 __attribute__ ((aligned (8)))
++# elif defined(_MSVC_VER)
++#  /* FIXME: untested, but only kicks in if libdv built with gcc/clang and app/gstreamer built with MSVC */
++#  define LIBDV_ALIGN64 __declspec(align(64))
++#  define LIBDV_ALIGN32 __declspec(align(32))
++#  define LIBDV_ALIGN8 __declspec(align(8))
++# else
++#  error "Need to align struct members but don't know how to do that with this compiler"
++# endif
+ #else
+-#define ALIGN64
+-#define ALIGN32
+-#define ALIGN8
+-#define __inline__ inline
+-#define __FUNCTION__ __FILE__ // Less specific info, but it's a string.
++#define LIBDV_ALIGN64
++#define LIBDV_ALIGN32
++#define LIBDV_ALIGN8
+ #endif
+ 
+ #define DV_AUDIO_MAX_SAMPLES 1944
+@@ -124,7 +115,7 @@
+ #define DV_FSC_0         (0)
+ #define DV_FSC_1         (1)
+ 
+-#if ARCH_X86 || ARCH_X86_64
++#if LIBDV_USING_ASM
+ #define DV_WEIGHT_BIAS	 6
+ #else
+ #define DV_WEIGHT_BIAS	 0
+@@ -203,7 +194,7 @@ typedef struct {
+ } dv_header_t;
+ 
+ typedef struct {
+-  dv_coeff_t   coeffs[64] ALIGN8;
++  dv_coeff_t   coeffs[64] LIBDV_ALIGN8;
+   int         dct_mode;
+   int         class_no;
+   int8_t        *reorder;
+@@ -248,75 +239,69 @@ typedef struct {
+ /* About bitfield ordering: The C standard does not specify the order
+    of bits within a unit of storage.  In the code here, I will use the
+    definition of BYTE_ORDER to determine whether to set
+-   BIG_ENDIAN_BITFIELD or LITTLE_ENDIAN_BITFIELD.  There is nothing
++   LIBDV_BIG_ENDIAN_BITFIELD or LIBDV_LITTLE_ENDIAN_BITFIELD.  There is nothing
+    that guarantees this relationship to be correct, but I know of no
+    counter examples.  If we do find out there is one, we'll have to
+    fix it... */
+ 
+-#if (BYTE_ORDER == LITTLE_ENDIAN)
+-#define LITTLE_ENDIAN_BITFIELD
+-#else
+-#define BIG_ENDIAN_BITFIELD
+-#endif  /* (BYTE_ORDER == LITTLE_ENDIAN) */
+-
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t af_size : 6; /* Samples per frame:
+ 		       * 32 kHz: 1053-1080
+ 		       * 44.1: 1452-1489
+ 		       * 48: 1580-1620 */
+   uint8_t         : 1; // Should be 1
+   uint8_t lf      : 1; // Locked mode flag (1 = unlocked)
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t lf      : 1; // Locked mode flag (1 = unlocked)
+   uint8_t         : 1; // Should be 1
+   uint8_t af_size : 6; /* Samples per frame:
+ 		       * 32 kHz: 1053-1080
+ 		       * 44.1: 1452-1489
+ 		       * 48: 1580-1620 */
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_as_pc1_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t audio_mode: 4; // See 8.1...
+   uint8_t pa        : 1; // pair bit: 0 = one pair of channels, 1 = independent channel (for sm = 1, pa shall be 1)
+   uint8_t chn       : 2; // number of audio channels per block: 0 = 1 channel, 1 = 2 channels, others reserved
+   uint8_t sm        : 1; // stereo mode: 0 = Multi-stereo, 1 = Lumped
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t sm        : 1; // stereo mode: 0 = Multi-stereo, 1 = Lumped
+   uint8_t chn       : 2; // number of audio channels per block: 0 = 1 channel, 1 = 2 channels, others reserved
+   uint8_t pa        : 1; // pair bit: 0 = one pair of channels, 1 = independent channel (for sm = 1, pa shall be 1)
+   uint8_t audio_mode: 4; // See 8.1...
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_as_pc2_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t stype     :5; // 0x0 = SD (525/625), 0x2 = HD (1125,1250), others reserved
+   uint8_t system    :1; // 0 = 60 fields, 1 = 50 field
+   uint8_t ml        :1; // Multi-languag flag
+   uint8_t           :1;
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t           :1;
+   uint8_t ml        :1; // Multi-languag flag
+   uint8_t system    :1; // 0 = 60 fields, 1 = 50 field
+   uint8_t stype     :5; // 0x0 = SD (525/625), 0x2 = HD (1125,1250), others reserved
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_as_pc3_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t qu        :3; // quantization: 0=16bits linear, 1=12bits non-linear, 2=20bits linear, others reserved
+   uint8_t smp       :3; // sampling frequency: 0=48kHz, 1=44,1 kHz, 2=32 kHz
+   uint8_t tc        :1; // time constant of emphasis: 1=50/15us, 0=reserved
+   uint8_t ef        :1; // emphasis: 0=on, 1=off
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t ef        :1; // emphasis: 0=on, 1=off
+   uint8_t tc        :1; // time constant of emphasis: 1=50/15us, 0=reserved
+   uint8_t smp       :3; // sampling frequency: 0=48kHz, 1=44,1 kHz, 2=32 kHz
+   uint8_t qu        :3; // quantization: 0=16bits linear, 1=12bits non-linear, 2=20bits linear, others reserved
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_as_pc4_t;
+ 
+ // AAUX source pack (AS)
+@@ -330,55 +315,55 @@ typedef struct {
+ 
+ // From 61834-4 (section 8.2), and SMPE 314M (section 4.6.2.3.2)
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t ss        :2; /* 61834 says "Source and recorded situation...", SMPTE says EFC (emphasis audio channel flag)
+ 			  0=emphasis off, 1=emphasis on, others reserved.  EFC shall be set for each audio block. */
+   uint8_t cmp       :2; /* number of times compression: 0=once, 1=twice, 2=three or more, 3=no information */
+   uint8_t isr       :2; /* 0=analog input, 1=digital input, 2=reserved, 3=no information */
+   uint8_t cgms      :2; /* Copy generation management system:
+ 			  0=unrestricted, 1=not used, 2=one generation only, 3=no copy */
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t cgms      :2; /* Copy generation management system:
+ 			  0=unrestricted, 1=not used, 2=one generation only, 3=no copy */
+   uint8_t isr       :2; /* 0=analog input, 1=digital input, 2=reserved, 3=no information */
+   uint8_t cmp       :2; /* number of times compression: 0=once, 1=twice, 2=three or more, 3=no information */
+   uint8_t ss        :2; /* 61834 says "Source and recorded situation...", SMPTE says EFC (emphasis audio channel flag)
+ 			  0=emphasis off, 1=emphasis on, others reserved.  EFC shall be set for each audio block. */
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_asc_pc1_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t insert_ch :3; /* see 61834-4... */
+   uint8_t rec_mode  :3; /* recording mode: 1=original, others=various dubs... (see 68134-4) */
+   uint8_t rec_end   :1; /* recording end point: same as starting... */
+   uint8_t rec_st    :1; /* recording start point: 0=yes,1=no */
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t rec_st    :1; /* recording start point: 0=yes,1=no */
+   uint8_t rec_end   :1; /* recording end point: same as starting... */
+   uint8_t rec_mode  :3; /* recording mode: 1=original, others=various dubs... (see 68134-4) */
+   uint8_t insert_ch :3; /* see 61834-4... */
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_asc_pc2_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t speed     :7; /* speed: see tables in 314M and 61834-4 (they differ), except 0xff = invalid/unkown */
+   uint8_t drf       :1; /* direction: 1=forward, 0=reverse */
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t drf       :1; /* direction: 1=forward, 0=reverse */
+   uint8_t speed     :7; /* speed: see tables in 314M and 61834-4 (they differ), except 0xff = invalid/unkown */
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_asc_pc3_t;
+ 
+ typedef struct {
+-#if defined(LITTLE_ENDIAN_BITFIELD)
++#if defined(LIBDV_LITTLE_ENDIAN_BITFIELD)
+   uint8_t genre_category: 7;
+   uint8_t               : 1;
+-#elif defined(BIG_ENDIAN_BITFIELD)
++#elif defined(LIBDV_BIG_ENDIAN_BITFIELD)
+   uint8_t               : 1;
+   uint8_t genre_category: 7;
+-#endif // BIG_ENDIAN_BITFIELD
++#endif // LIBDV_BIG_ENDIAN_BITFIELD
+ } dv_aaux_asc_pc4_t;
+ 
+ // AAUX source control pack (ASC)
+@@ -429,9 +414,9 @@ typedef struct {
+ 
+   FILE             *error_log;
+   dv_decoder_tp    dv_decoder;
+-#if HAVE_LIBPOPT
++#if LIBDV_HAVE_LIBPOPT
+   struct poptOption option_table[DV_AUDIO_NUM_OPTS+1];
+-#endif // HAVE_LIBPOPT
++#endif // LIBDV_HAVE_LIBPOPT
+ } dv_audio_t;
+ 
+ typedef struct {
+@@ -443,9 +428,9 @@ typedef struct {
+    */
+   FILE              *error_log;
+   dv_decoder_tp     dv_decoder;
+-#if HAVE_LIBPOPT
++#if LIBDV_HAVE_LIBPOPT
+   struct poptOption  option_table[DV_VIDEO_NUM_OPTS+1];
+-#endif // HAVE_LIBPOPT
++#endif // LIBDV_HAVE_LIBPOPT
+ 
+ } dv_video_t;
+ 
+@@ -478,9 +463,9 @@ typedef struct dv_decoder_s {
+   uint8_t             ssyb_data [45][4];
+   bitstream_t        *bs;
+ 
+-#if HAVE_LIBPOPT
++#if LIBDV_HAVE_LIBPOPT
+   struct poptOption option_table[DV_DECODER_NUM_OPTS+1];
+-#endif // HAVE_LIBPOPT
++#endif // LIBDV_HAVE_LIBPOPT
+ } dv_decoder_t;
+ 
+ typedef struct {
+@@ -488,9 +473,9 @@ typedef struct {
+   int16_t             *buffer;
+   uint8_t             *arg_audio_file;
+   char                *arg_audio_device;
+-#if HAVE_LIBPOPT
++#if LIBDV_HAVE_LIBPOPT
+   struct poptOption option_table[DV_OSS_NUM_OPTS+1];
+-#endif // HAVE_LIBPOPT
++#endif // LIBDV_HAVE_LIBPOPT
+ } dv_oss_t;
+ 
+ typedef struct {
+@@ -510,9 +495,7 @@ typedef struct {
+   short *img_cb;
+ } dv_encoder_t;
+ 
+-#if ARCH_X86
+-extern int dv_use_mmx;
+-#elif ARCH_X86_64
++#if LIBDV_USING_ASM
+ extern int dv_use_mmx;
+ #endif
+ 
+diff --git a/libdv/enctest.c b/libdv/enctest.c
+index 2528ff1..038fd42 100644
+--- a/libdv/enctest.c
++++ b/libdv/enctest.c
+@@ -5,6 +5,9 @@
+  *    ./enctest 40 x > gray.dv    encodes 40 frames sequentially
+  *
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include <stdio.h>
+ #include <libdv/dv.h>
+diff --git a/libdv/gasmoff.c b/libdv/gasmoff.c
+index 12a2f00..1a34d02 100644
+--- a/libdv/gasmoff.c
++++ b/libdv/gasmoff.c
+@@ -22,6 +22,10 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
++
+ #include "dv_types.h"
+ 
+ #include <stdio.h>
+diff --git a/libdv/meson.build b/libdv/meson.build
+index da50266..5a4830a 100644
+--- a/libdv/meson.build
++++ b/libdv/meson.build
+@@ -1,3 +1,5 @@
++dv_config = configuration_data()
++
+ install_headers('dv_types.h', 'dv.h', subdir: 'libdv')
+ 
+ dv_sources = [
+@@ -61,6 +63,14 @@ endif
+ if have_asm
+   cdata.set10('ARCH_@0@'.format(cpu_family.to_upper().underscorify()), true)
+ 
++  # This is just a sanity check. We might not catch all cases, but then compilation will (hopefully) fail later.
++  if cc.get_id() != 'msvc'
++    attributes_werror_arg = cc.get_supported_arguments(['-Werror=attributes'])
++    if not cc.compiles('typedef struct { char a[64] __attribute__ ((aligned (32))); } b;', args: attributes_werror_arg)
++      error('Don\'t know how to align struct members with this compiler, but assembly is enabled which requires proper alignment.')
++    endif
++  endif
++
+   dv_sources += dv_asm_sources_table[cpu_family]
+ 
+   asm_structs = [
+@@ -120,6 +130,23 @@ libdv = library('dv', dv_sources,
+ dv_dep = declare_dependency(link_with: libdv,
+   include_directories: include_directories('.', '..'))
+ 
++# we diverge from the autotools build and create a dv_config.h file to
++# work around the complete brokeness of the libdv dv_types.h header which
++# includes config.h (which might be from the libdv-using application!)
++dv_config.set10('LIBDV_HAVE_LIBPOPT', popt_dep.found())
++
++if host_machine.endian() == 'little'
++  dv_config.set('LIBDV_LITTLE_ENDIAN_BITFIELD', true)
++else
++  dv_config.set('LIBDV_BIG_ENDIAN_BITFIELD', true)
++endif
++
++dv_config.set10('LIBDV_USING_ASM', have_asm)
++
++configure_file(output: 'dv_config.h', configuration: dv_config,
++  install_dir: get_option('includedir') / 'libdv',
++  install: true)
++
+ # pkg-config file
+ static_cflags = [] # FIXME
+ pkg = import('pkgconfig')
+diff --git a/libdv/recode.c b/libdv/recode.c
+index 4005203..4060aff 100644
+--- a/libdv/recode.c
++++ b/libdv/recode.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include <libdv/dv.h>
+ #include <libdv/dv_types.h>
+diff --git a/libdv/reppm.c b/libdv/reppm.c
+index fc724aa..0c5fb67 100644
+--- a/libdv/reppm.c
++++ b/libdv/reppm.c
+@@ -23,6 +23,10 @@
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
+ 
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
++
+ #include "dv.h"
+ #include "dv_types.h"
+ #include <stdio.h>
+diff --git a/libdv/testbitstream.c b/libdv/testbitstream.c
+index e400304..594be8e 100644
+--- a/libdv/testbitstream.c
++++ b/libdv/testbitstream.c
+@@ -22,6 +22,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "dv_types.h"
+ 
+diff --git a/libdv/testvlc.c b/libdv/testvlc.c
+index a1dfdbf..7eab91e 100644
+--- a/libdv/testvlc.c
++++ b/libdv/testvlc.c
+@@ -23,7 +23,9 @@
+  *
+  *  The libdv homepage is http://libdv.sourceforge.net/.  
+  */
+-
++#if HAVE_CONFIG_H
++# include <config.h>
++#endif
+ 
+ #include "dv_types.h"
+ 
+diff --git a/meson.build b/meson.build
+index fe3090d..60f977c 100644
+--- a/meson.build
++++ b/meson.build
+@@ -15,6 +15,16 @@ if cc.get_id() == 'msvc'
+   add_project_arguments('-D_USE_MATH_DEFINES', language: 'c')
+ endif
+ 
++extra_cargs = cc.get_supported_arguments([
++  '-Werror=attributes',
++  '-Wno-unused-function',
++  '-Wno-unused-variable',
++  '-Wno-unused-but-set-variable',
++  '-Wno-pointer-sign',
++])
++
++add_project_arguments(extra_cargs, language: 'c')
++
+ cfg_summary = {}
+ 
+ cdata = configuration_data()
+@@ -25,6 +35,12 @@ cdata.set10('DEBUG', get_option('debug'))
+ 
+ cdata.set_quoted('VERSION', meson.project_version())
+ 
++foreach alignment : ['8', '32', '64']
++  cdata.set('ALIGN@0@'.format(alignment), 'LIBDV_ALIGN@0@'.format(alignment))
++endforeach
++
++cdata.set('__inline__', 'inline') # it being 2020 and all
++
+ libm = cc.find_library('m', required: false)
+ 
+ # Don't bother with popt on non-gcc build, because we make heavy use of 
+-- 
+2.29.2
+

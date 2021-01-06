@@ -1,0 +1,100 @@
+From 330231fb37ba70434706de1b7168f47598d65a7c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 6 Jan 2021 10:31:31 +0000
+Subject: [PATCH 07/12] libdv: use win32 thread primitives on Windows
+
+Fixes build of the library on Windows with MSVC.
+
+Tools/utils have not been ported, but the whole
+threading setup looks like it's nonsense anyway.
+---
+ libdv/dv.c               |  5 +++++
+ libdv/dv_win32_pthread.h | 39 +++++++++++++++++++++++++++++++++++++++
+ libdv/encode.c           |  6 +++++-
+ 3 files changed, 49 insertions(+), 1 deletion(-)
+ create mode 100644 libdv/dv_win32_pthread.h
+
+diff --git a/libdv/dv.c b/libdv/dv.c
+index 49d099e..49d581e 100644
+--- a/libdv/dv.c
++++ b/libdv/dv.c
+@@ -40,7 +40,12 @@
+ #endif
+ 
+ #include <string.h>
++
++#if _WIN32
++#include "dv_win32_pthread.h"
++#else
+ #include <pthread.h>
++#endif
+ 
+ #include "dv.h"
+ #include "encode.h"
+diff --git a/libdv/dv_win32_pthread.h b/libdv/dv_win32_pthread.h
+new file mode 100644
+index 0000000..a6cd774
+--- /dev/null
++++ b/libdv/dv_win32_pthread.h
+@@ -0,0 +1,39 @@
++/* libdv win32 pthread wrapper */
++#ifndef _DV_WIN32_PTHREAD_H_INCLUDED_
++#define _DV_WIN32_PTHREAD_H_INCLUDED_
++
++#include <windows.h>
++
++typedef struct {
++  INIT_ONCE init_once;
++  CRITICAL_SECTION mutex;
++} pthread_mutex_t;
++
++#define PTHREAD_MUTEX_INITIALIZER {INIT_ONCE_STATIC_INIT,}
++
++#define pthread_mutex_lock(m) dv_win32_pthread_mutex_lock(m)
++#define pthread_mutex_unlock(m) dv_win32_pthread_mutex_unlock(m)
++
++static BOOL CALLBACK
++dv_win32_init_mutex(PINIT_ONCE InitOnce, PVOID Parameter, PVOID *lpCtx)
++{
++  InitializeCriticalSection((CRITICAL_SECTION*)lpCtx);
++  return TRUE;
++}
++
++static inline int
++dv_win32_pthread_mutex_lock(pthread_mutex_t *m)
++{
++  InitOnceExecuteOnce(&m->init_once, dv_win32_init_mutex, NULL, (PVOID *)&m->mutex);
++  EnterCriticalSection(&m->mutex);
++  return 0;
++}
++
++static inline int
++dv_win32_pthread_mutex_unlock(pthread_mutex_t *m)
++{
++  LeaveCriticalSection(&m->mutex);
++  return 0;
++}
++
++#endif /* _DV_WIN32_PTHREAD_H_INCLUDED_ */
+diff --git a/libdv/encode.c b/libdv/encode.c
+index 870c4ac..71deb95 100644
+--- a/libdv/encode.c
++++ b/libdv/encode.c
+@@ -45,9 +45,13 @@
+ #include <string.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+-#include <unistd.h>
+ #include <inttypes.h>
++
++#if _WIN32
++#include "dv_win32_pthread.h"
++#else
+ #include <pthread.h>
++#endif
+ 
+ #include "dv.h"
+ #include "encode.h"
+-- 
+2.29.2
+

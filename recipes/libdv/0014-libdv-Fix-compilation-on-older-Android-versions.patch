@@ -1,17 +1,18 @@
-From 9da7cd6b4e3b9c36dc335456efa3c6c7851887ad Mon Sep 17 00:00:00 2001
+From 923bde006e3380cab8347fc72129f7dfa1c734fc Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian.droege@collabora.co.uk>
 Date: Tue, 13 Nov 2012 16:38:07 +0100
-Subject: [PATCH 04/14] Fix compilation on Android
+Subject: [PATCH 14/14] libdv: Fix compilation on older Android versions
 
+swab is only available from v28 onwards.
 ---
  libdv/encode.c | 10 ++++------
  1 file changed, 4 insertions(+), 6 deletions(-)
 
 diff --git a/libdv/encode.c b/libdv/encode.c
-index b5aabbe..e672d22 100644
+index d57f62a..68e1a11 100644
 --- a/libdv/encode.c
 +++ b/libdv/encode.c
-@@ -1884,10 +1884,6 @@ int dv_encode_full_frame(dv_encoder_t *dv_enc, uint8_t **in,
+@@ -1894,10 +1894,6 @@ int dv_encode_full_frame(dv_encoder_t *dv_enc, uint8_t **in,
  	return 0;
  }
  
@@ -22,7 +23,7 @@ index b5aabbe..e672d22 100644
  /** @brief Encode signed 16-bit integer PCM audio data into a frame of DV video.
   *
   * @param dv_enc A pointer to a dv_encoder_t struct containing relevant options:
-@@ -1926,8 +1922,10 @@ int dv_encode_full_audio(dv_encoder_t *dv_enc, int16_t **pcm,
+@@ -1936,8 +1932,10 @@ int dv_encode_full_audio(dv_encoder_t *dv_enc, int16_t **pcm,
  	/* interleave channels */
  	if (channels > 1) {
  		for (i=0; i < DV_AUDIO_MAX_SAMPLES; i++)
@@ -36,5 +37,5 @@ index b5aabbe..e672d22 100644
  
  	return _dv_raw_insert_audio(frame_buf, &audio, dv_enc->isPAL);
 -- 
-2.1.4
+2.29.2
 

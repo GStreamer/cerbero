@@ -48,7 +48,6 @@ class Package(custom.GStreamer, package.Package):
         # Recipes that need autoreconf hang on the Windows CI
         if self.config.platform == Platform.WINDOWS:
             self.files.remove('wavpack:libs')
-            self.files.remove('libdv:libs')
 
         if self.config.variants.uwp:
             self.files = [

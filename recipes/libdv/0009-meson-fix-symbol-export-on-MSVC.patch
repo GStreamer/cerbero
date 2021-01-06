@@ -1,0 +1,79 @@
+From 3ade4dcfd027d3a4c6a75dfcbd2fd8c115349aa1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 6 Jan 2021 17:22:28 +0000
+Subject: [PATCH 09/12] meson: fix symbol export on MSVC
+
+---
+ libdv/libdv.def   | 47 +++++++++++++++++++++++++++++++++++++++++++++++
+ libdv/meson.build |  1 +
+ 2 files changed, 48 insertions(+)
+ create mode 100644 libdv/libdv.def
+
+diff --git a/libdv/libdv.def b/libdv/libdv.def
+new file mode 100644
+index 0000000..336a1f5
+--- /dev/null
++++ b/libdv/libdv.def
+@@ -0,0 +1,47 @@
++EXPORTS
++dv_decoder_new
++dv_decoder_free
++dv_init
++dv_cleanup
++dv_reconfigure
++dv_parse_header
++dv_parse_packs
++dv_decode_full_frame
++dv_decode_full_audio
++dv_set_audio_correction
++dv_set_error_log
++dv_report_video_error
++dv_calculate_samples
++dv_encoder_new
++dv_encoder_free
++dv_encode_full_frame
++dv_encode_full_audio
++dv_encode_metadata
++dv_encode_timecode
++dv_parse_video_segment
++dv_decode_video_segment
++dv_render_video_segment_rgb
++dv_render_video_segment_yuv
++dv_encode_videosegment
++dv_set_quality
++dv_frame_changed
++dv_frame_is_color
++dv_system_50_fields
++dv_format_normal
++dv_format_wide
++dv_format_letterbox
++dv_is_progressive
++dv_get_vaux_pack
++dv_get_timestamp
++dv_get_recording_datetime
++dv_get_timestamp_int
++dv_get_recording_datetime_tm
++dv_get_ssyb_pack
++dv_is_new_recording
++dv_is_normal_speed
++dv_set_mixing_level
++dv_get_num_samples
++dv_get_num_channels
++dv_get_raw_samples
++dv_is_4ch
++dv_get_frequency
+diff --git a/libdv/meson.build b/libdv/meson.build
+index 5a4830a..c27671b 100644
+--- a/libdv/meson.build
++++ b/libdv/meson.build
+@@ -125,6 +125,7 @@ libdv = library('dv', dv_sources,
+   dependencies: [popt_dep, threads_dep, libm],
+   soversion: soversion,
+   version: libversion,
++  vs_module_defs: 'libdv.def',
+   install: true)
+ 
+ dv_dep = declare_dependency(link_with: libdv,
+-- 
+2.29.2
+

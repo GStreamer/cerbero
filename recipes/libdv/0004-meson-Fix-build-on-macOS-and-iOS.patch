@@ -1,0 +1,40 @@
+From 0ad7eacb8dcfe263a44a21e4274e1eeb5225dc79 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Tue, 5 Jan 2021 23:34:33 +0000
+Subject: [PATCH 04/12] meson: Fix build on macOS and iOS
+
+Where sched_setscheduler() is apparently not available.
+---
+ encodedv/dvconnect.c | 2 +-
+ meson.build          | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/encodedv/dvconnect.c b/encodedv/dvconnect.c
+index f276846..7e990f6 100644
+--- a/encodedv/dvconnect.c
++++ b/encodedv/dvconnect.c
+@@ -857,7 +857,7 @@ int send_raw(const char*const* filenames, int channel, int nbuffers,
+ 
+ int rt_raisepri (int pri)
+ {
+-#ifdef _SC_PRIORITY_SCHEDULING
++#if defined(_SC_PRIORITY_SCHEDULING) && HAVE_SCHED_SETSCHEDULER
+ 	struct sched_param scp;
+ 
+ 	/*
+diff --git a/meson.build b/meson.build
+index 60f977c..8294f04 100644
+--- a/meson.build
++++ b/meson.build
+@@ -86,7 +86,7 @@ endforeach
+ 
+ cdata.set10('STDC_HEADERS', true)
+ 
+-check_funcs = ['mmap', 'gettimeofday', 'getpagesize']
++check_funcs = ['mmap', 'gettimeofday', 'getpagesize', 'sched_setscheduler']
+ foreach f : check_funcs
+   cdata.set10('HAVE_@0@'.format(f.underscorify().to_upper()), cc.has_function(f))
+ endforeach
+-- 
+2.29.2
+
