@@ -487,6 +487,7 @@ class Recipe(custom.GStreamer):
                 # built with MSVC, it uses Meson but it doesn't build:
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
                 self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
+                self.enable_plugin('wasapi2', 'sys', 'visualstudio')
                 if self.config.msvc_version == 'vs14':
                     self.disable_plugin('d3d11', 'sys')
 
@@ -517,7 +518,6 @@ class Recipe(custom.GStreamer):
             self.deps.append('openssl')
 
         if self.using_uwp():
-            self.enable_plugin('wasapi2', 'sys', 'uwp')
             # Uses unavailable APIs
             self.disable_plugin('d3d', 'sys', option='d3dvideosink')
             self.disable_plugin('decklink', 'sys')
