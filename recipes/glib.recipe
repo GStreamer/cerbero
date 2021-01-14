@@ -52,6 +52,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-glib-Use-g_getenv-everywhere-instead-of-getenv.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1771
         'glib/0001-macos-fix-frexpl-checks-in-cross-compilation.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1884
+        'glib/0001-gthread-win32-Use-SetThreadDescription-Win32-API-for.patch',
     ]
 
     files_libs = [
