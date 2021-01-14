@@ -378,7 +378,10 @@ class Config (object):
         xdgdatadir = os.path.join(prefix, 'share')
         xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
         xcursordir = os.path.join(prefix, 'share', 'icons')
-        aclocaldir = os.path.join(prefix, 'share', 'aclocal')
+        aclocalflags = '-I{} -I{}'.format(
+            os.path.join(prefix, 'share', 'aclocal'),
+            os.path.join(self.build_tools_prefix, 'share', 'aclocal'))
+
         perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
                                        self._perl_version())
         if self.target_platform == Platform.WINDOWS:
@@ -474,7 +477,7 @@ class Config (object):
                'XDG_DATA_DIRS': xdgdatadir,
                'XDG_CONFIG_DIRS': xdgconfigdir,
                'XCURSOR_PATH': xcursordir,
-               'ACLOCAL_FLAGS': '-I%s' % aclocaldir,
+               'ACLOCAL_FLAGS': aclocalflags,
                'ACLOCAL': "aclocal",
                'PERL5LIB': perl5lib,
                'GST_PLUGIN_PATH': gstpluginpath,
