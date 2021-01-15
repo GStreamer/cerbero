@@ -341,9 +341,9 @@ async def unpack(filepath, output_dir, logfile=None):
         vol_name =  '/Volumes/' + os.path.splitext(os.path.split(filepath)[1])[0]
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        call(['hdiutil', 'attach', filepath])
-        call(['cp', '-r', vol_name, output_dir])
-        call(['hdiutil', 'detach', vol_name])
+        new_call(['hdiutil', 'attach', filepath])
+        new_call(['cp', '-r', vol_name, output_dir])
+        new_call(['hdiutil', 'detach', vol_name])
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
