@@ -1,0 +1,33 @@
+From 99f61f13b5b4b5db014e3a2e9dfb57382c295a1b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 16 Jan 2021 00:46:52 +0000
+Subject: [PATCH] cairo-ft-font: fix build with MSVC if freetype was built with
+ MingW
+
+Work around bug in freetype headers which define
+HAVE_UNISTD_H if freetype was compiled with MingW,
+which causes problems when building cairo with MSVC.
+---
+ src/cairo-ft-font.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/cairo-ft-font.c b/src/cairo-ft-font.c
+index d2221edec..02a85ec72 100644
+--- a/src/cairo-ft-font.c
++++ b/src/cairo-ft-font.c
+@@ -67,6 +67,12 @@
+ #include FT_LCD_FILTER_H
+ #endif
+ 
++/* Work around bug in freetype headers which define HAVE_UNISTD_H if freetype
++ * was compiled with MingW, which causes problems when building cairo with MSVC */
++#ifdef _MSC_VER
++#undef HAVE_UNISTD_H
++#endif
++
+ #if HAVE_UNISTD_H
+ #include <unistd.h>
+ #else
+-- 
+2.29.2
+
