@@ -75,6 +75,8 @@ class Recipe(custom.GStreamer):
             'srt', 'libusrsctp', 'zbar']
     use_system_libs = True
 
+    patches = [name + '/0001-d3d11videosink-Fix-build-error-on-UWP.patch']
+
     files_lang = ['gst-plugins-bad-1.0']
 
     files_libs = [
