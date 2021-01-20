@@ -8,5 +8,10 @@ class Recipe(recipe.Recipe):
     remotes = {'github': 'https://github.com/xkbcommon/libxkbcommon.git'}
     commit = 'c60b77ea512bef92e481be38972b58dd71a34180'
     meson_options = {'enable-x11': 'false', 'enable-wayland': 'false', 'enable-docs': 'false'}
-    patches = ['xkbcommon/0001-Disable-tools-build.patch']
+    deps = ['libxml2']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.patches = ['xkbcommon/0001-Disable-tools-build.patch']
+            self.meson_options['enable-tools'] = 'false'
 

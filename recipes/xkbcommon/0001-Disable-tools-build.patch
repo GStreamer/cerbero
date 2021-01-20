@@ -41,7 +41,7 @@ index 04982c6..9bfa6ec 100644
 +option(
 +    'enable-tools',
 +    type: 'boolean',
-+    value: false,
++    value: true,
 +    description: 'Enable building the tools',
 +)
 +
