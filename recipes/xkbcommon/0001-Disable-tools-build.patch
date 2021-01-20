@@ -1,0 +1,50 @@
+From 2ba736982f4cd1697cc27615b433f20060cf7910 Mon Sep 17 00:00:00 2001
+From: Fernando Jimenez <fjimenez@igalia.com>
+Date: Wed, 20 Jan 2021 12:56:48 +0100
+Subject: [PATCH] Disable tools build
+
+---
+ meson.build       | 4 ++--
+ meson_options.txt | 7 +++++++
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 47c436f..dd36e99 100644
+--- a/meson.build
++++ b/meson.build
+@@ -373,7 +373,7 @@ man_pages = []
+ 
+ # Tools
+ build_tools = have_getopt_long
+-if build_tools
++if build_tools and get_option('enable-tools')
+     libxkbcommon_tools_internal = static_library(
+         'tools-internal',
+         'tools/tools-common.h',
+@@ -652,7 +652,7 @@ if get_option('enable-xkbregistry')
+         env: test_env,
+     )
+ endif
+-if build_tools
++if build_tools and get_option('enable-tools')
+     test('tool-option-parsing',
+          find_program('test/tool-option-parsing.py'),
+          env: test_env,
+diff --git a/meson_options.txt b/meson_options.txt
+index 04982c6..9bfa6ec 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -67,3 +67,10 @@ option(
+     value: true,
+     description: 'Enable building libxkbregistry',
+ )
++option(
++    'enable-tools',
++    type: 'boolean',
++    value: true,
++    description: 'Enable building the tools',
++)
++
+-- 
+2.25.1
+
