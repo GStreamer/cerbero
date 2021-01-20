@@ -1,0 +1,12 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'xkbcommon'
+    version = '1.0.3'
+    stype = SourceType.GIT
+    btype = BuildType.MESON
+    remotes = {'github': 'https://github.com/xkbcommon/libxkbcommon.git'}
+    commit = 'c60b77ea512bef92e481be38972b58dd71a34180'
+    meson_options = {'enable-x11': 'false', 'enable-wayland': 'false', 'enable-docs': 'false'}
+    patches = ['xkbcommon/0001-Disable-tools-build.patch']
+
