@@ -1,0 +1,22 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'libgpg-error'
+    version = '1.18'
+    licenses = [License.LGPLv2_1Plus]
+    stype = SourceType.TARBALL
+    url = 'https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-{0}.tar.bz2'.format(version)
+    configure_options = ' --enable-static --enable-shared'
+    tarball_checksum = '9ff1d6e61d4cef7c1d0607ceef6d40dc33f3da7a3094170c3718c00153d80810'
+    deps = ['gnutls']
+
+    files_libs = ['libgpg-error']
+    files_bins = ['gpg-error']
+    files_devel = ['include/gpg-error.h', 'bin/gpg-error-config']
+    files_lang = ['libgpg-error']
+    autoreconf = True
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            self.patches = [self.name + '/0001-gawk-error-when-compiling-in-crossdev-arm-environmen.patch']
