@@ -1,0 +1,49 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'libgpg-error'
+    version = '1.27'
+    licenses = [License.LGPLv2_1Plus]
+    stype = SourceType.TARBALL
+    url = 'https://www.gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-{0}.tar.bz2'.format(version)
+    configure_options = ' --enable-static --enable-shared'
+    tarball_checksum = '4f93aac6fecb7da2b92871bb9ee33032be6a87b174f54abf8ddf0911a22d29d2'
+    patches = [name + '/0001-Fully-support-gawk-5.patch']
+
+    files_libs = ['libgpg-error']
+    files_bins = ['gpg-error']
+    files_devel = ['include/gpg-error.h', 'bin/gpg-error-config']
+    files_lang = ['libgpg-error']
+    autoreconf = True
+
+    async def configure(self):
+        if self.config.cross_compiling():
+            if self.config.target_arch in (Architecture.ARM64, Architecture.X86_64):
+                cfg_file = 'lock-obj-pub.aarch64-unknown-linux-gnu.h'
+            elif self.config.target_arch in (Architecture.ARM, Architecture.ARMv7, Architecture.X86):
+                cfg_file = 'lock-obj-pub.arm-unknown-linux-androideabi.h'
+            else:
+                raise FatalError('Unsupported target arch: ' + self.config.target_arch)
+
+        if self.config.target_platform == Platform.ANDROID:
+            # Make sure android x86/x86_64/ARM64 had a valid syscfg
+            # Same fix as for vlc : http://git.videolan.org/gitweb.cgi/vlc.git/?p=vlc.git;a=blb;f=contrib/src/gpg-error/rules.mak
+            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', cfg_file),
+                        os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.linux-android.h'))
+        elif self.config.target_platform == Platform.IOS:
+            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', cfg_file),
+                        os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.darwin10.h'))
+        pc = os.path.join(self.config.prefix, 'lib', 'pkgconfig', 'gpg-error.pc')
+        with open(pc, 'w') as pc_file:
+            pc_file.write('prefix=' + self.config.prefix + '\n')
+            pc_file.write('exec_prefix=${prefix}\n')
+            pc_file.write('libdir=${prefix}/lib\n')
+            pc_file.write('includedir=${prefix}/include\n\n')
+            pc_file.write('Name: gpg-error\n')
+            pc_file.write('Description: a library that defines common error values for all GnuPG components\n')
+            pc_file.write('Version:' + self.version + '\n')
+            pc_file.write('Libs: -l${libdir} -lgpg-error\n')
+            pc_file.write('Cflags: -I${includedir}\n')
+        await super(recipe.Recipe, self).configure()
+
