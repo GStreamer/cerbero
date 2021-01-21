@@ -1,0 +1,22 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libgcrypt'
+    version = '1.9.0'
+    stype = SourceType.GIT
+    remotes = { 'origin': 'https://github.com/gpg/libgcrypt.git'}
+    commit = '0dc49af9b5371c5e2f766b70c3bede2b10db9f7e'
+    autoreconf = True
+    configure_options = ' --enable-static --enable-shared --with-gpg-error-prefix=$CERBERO_PREFIX --disable-doc'
+    deps = ['libgpg-error']
+
+    files_libs = ['libgcrypt']
+    files_devel = ['include/gcrypt.h', 'bin/libgcrypt-config']
+
+    def prepare(self):
+        if self.config.cross_compiling() and \
+                self.config.target_platform == Platform.ANDROID and \
+                self.config.target_arch in (Architecture.X86, Architecture.X86_64):
+            # Fails linking with undefined symbols on function
+            # implemented in assembler, so disable those for now.
+            self.configure_options += ' --disable-asm'
