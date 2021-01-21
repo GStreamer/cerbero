@@ -1,0 +1,15 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'libgcrypt'
+    version = '1.8.7'
+    stype = SourceType.GIT
+    remotes = { 'origin': 'https://github.com/gpg/libgcrypt.git'}
+    commit = '04c156a48b35b56cf201091ddd43883957a042e5'
+    autoreconf = True
+    configure_options = ' --enable-static --enable-shared --with-gpg-error-prefix=$CERBERO_PREFIX --disable-doc'
+    deps = ['libgpg-error']
+
+    files_libs = ['libgcrypt']
+    files_devel = ['include/gcrypt.h', 'bin/libgcrypt-config']
+
