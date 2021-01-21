@@ -1,0 +1,25 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.utils import needs_xcode8_sdk_workaround
+
+class Recipe(recipe.Recipe):
+    name = 'libtasn1'
+    version = '4.13'
+    stype = SourceType.TARBALL
+    url = 'gnu://.tar.gz'
+    tarball_checksum = '7e528e8c317ddd156230c4e31d082cd13e7ddeb7a54824be82632209550c8cca'
+    licenses = [License.LGPLv2_1Plus]
+    autoreconf = True
+    patches = ['libtasn1/0001-Rename-gnulib-symbols.patch']
+    configure_options = '--disable-doc'
+
+    files_libs = ['libtasn1']
+    files_devel = ['include/libtasn1.h', 'lib/pkgconfig/libtasn1.pc']
+
+    def prepare(self):
+        # Don't make compiler warnings errors, there are quite a few
+        # depending on the compiler used
+        self.append_env('CFLAGS', '-Wno-error')
+        if needs_xcode8_sdk_workaround(self.config):
+            self.set_env('ac_cv_func_clock_gettime', 'no')
+
