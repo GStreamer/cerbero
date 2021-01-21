@@ -1,0 +1,92 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import shutil
+import shlex
+
+GMP_H_UNVERSAL='''\
+#ifdef __i386__
+#include "i386/gmp.h"
+#elif defined(__ppc__)
+#include "ppc/gmp.h"
+#elif defined(__x86_64__)
+#include "x86_64/gmp.h"
+#elif defined(__arm__)
+#include "arm/gmp.h"
+#elif defined(__arm64__)
+#include "arm64/gmp.h"
+#else
+#error "Unsupported Architecture"
+#endif
+'''
+
+class Recipe(recipe.Recipe):
+    name = 'gmp'
+    version = '6.1.2'
+    url = 'gnu://'
+    tarball_checksum = '87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912'
+    stype = SourceType.TARBALL
+    licenses = [License.LGPLv3Plus, License.GPLv2Plus, License.GPLv3Plus]
+    tarball_dirname = 'gmp-6.1.2'
+
+    files_libs = ['libgmp']
+    files_devel = ['include/gmp.h']
+    autoreconf = True
+
+    patches = ['gmp/0001-fix-cross-compilation-with-wine-installed.patch']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options = ' --enable-shared --disable-static'
+            self.library_type = LibraryType.SHARED
+        elif self.config.target_platform == Platform.IOS:
+            self.configure_options = ' --disable-assembly'
+        elif self.config.target_platform == Platform.ANDROID:
+            # gmp use CFLAGS to compile and link some programs during configure
+            self.append_env('CFLAGS', self.get_env('LDFLAGS'))
+
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            self.files_devel.append(os.path.join('include', '*', 'gmp.h'))
+
+    def post_install(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            dllname = 'libgmp-10.dll'
+
+            src = os.path.join(self.config.prefix, 'lib', dllname)
+            dll = os.path.join(self.config.prefix, 'bin', dllname)
+            dll_a = os.path.join(self.config.prefix, 'lib', 'libgmp.dll.a')
+            implib = os.path.join(self.config.prefix, 'lib', 'libgmp.lib')
+            defs_file = os.path.join(self.build_dir, '.libs', 'libgmp-3.dll.def')
+            dlltool = self.get_env('DLLTOOL')
+            if not dlltool:
+              raise FatalError('dlltool was not found, check cerbero configuration')
+
+            if os.path.exists(implib):
+                os.remove(implib)
+            if os.path.exists(dll_a):
+                os.remove(dll_a)
+            shell.check_call(shlex.split(dlltool) + ['-D', dllname, '-d',
+                defs_file, '-l', dll_a])
+            os.replace(src, dll)
+            gmp_la = os.path.join(self.config.prefix, 'lib', 'libgmp.la')
+            shell.replace(gmp_la, {'libgmp.lib': 'libgmp.dll.a'})
+        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            # For the universal build we need to ship gmp.h of both
+            # architectures in a subfolder and include the correct one depending
+            # on the compiler architecture
+            arch = self.config.target_arch
+            if arch == Architecture.X86:
+                arch = 'i386'
+            elif arch == Architecture.ARM64:
+                arch = 'arm64'
+            elif Architecture.is_arm(arch):
+                arch = 'arm'
+
+            arch_dir = os.path.join(self.config.prefix, 'include', arch)
+            if not os.path.exists(arch_dir):
+                os.makedirs(arch_dir)
+            shutil.copyfile(os.path.join(self.build_dir, 'gmp.h'),
+                        os.path.join(arch_dir, 'gmp.h'))
+            with open(os.path.join(self.config.prefix, 'include', 'gmp.h'), 'w+') as f:
+                f.write(GMP_H_UNVERSAL)
+        super().post_install()
+
