@@ -1,0 +1,34 @@
+From f70b0f19e322092a4b7ca47cb6c76e77022561f2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 24 Feb 2016 16:46:11 +0200
+Subject: [PATCH] Disable ncrypt support
+
+It's Windows Vista only and our mingw toolchain does not support it currently
+either.
+---
+ lib/Makefile.am | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index e90e870..ec77901 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -86,11 +86,11 @@ COBJECTS = range.c record.c compress.c debug.c cipher.c			\
+ 	system-keys.h urls.c urls.h prf.c auto-verify.c dh-session.c \
+ 	cert-session.c handshake-checks.c dtls-sw.c dh-primes.c openpgp_compat.c
+ 
+-if WINDOWS
+-COBJECTS += system/keys-win.c
+-else
++#if WINDOWS
++#COBJECTS += system/keys-win.c
++#else
+ COBJECTS += system/keys-dummy.c
+-endif
++#endif
+ 
+ if ENABLE_SELF_CHECKS
+ COBJECTS += crypto-selftests.c crypto-selftests-pk.c
+-- 
+2.13.3
+
