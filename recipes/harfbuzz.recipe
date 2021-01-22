@@ -10,8 +10,8 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '4a6ce097b75a8121facc4ba83b5b083bfec657f45b003cd5a3424f2ae6b4434d'
     licenses = [{License.BSD_like: ['COPYING']}]
-    deps = ['fontconfig', 'cairo', 'glib']
-    meson_options = {'icu': 'disabled',
+    deps = ['fontconfig', 'cairo', 'glib', 'icu']
+    meson_options = {'icu': 'enabled',
                      'glib': 'enabled',
                      'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
                      'gobject': 'disabled',
@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
     patches = []
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
-    files_libs = ['libharfbuzz']
+    files_libs = ['libharfbuzz', 'libharfbuzz-icu']
     files_devel = ['include/harfbuzz/*.h', '%(libdir)s/pkgconfig/harfbuzz.pc']
 
     def prepare(self):
