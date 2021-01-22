@@ -10,12 +10,12 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '49e481d06cdff97bf68d99fa26bdf785331f411614485d892ea4c78eb479b218'
     licenses = [{License.BSD_like: ['COPYING']}]
-    deps = ['fontconfig', 'cairo', 'glib']
-    meson_options = {'icu': 'disabled',
+    deps = ['fontconfig', 'cairo', 'glib', 'icu']
+    meson_options = {'icu': 'enabled',
                      'glib': 'enabled',
                      'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
                      'gobject': 'disabled',
-                     'icu_builtin': 'false',
+                     'icu_builtin': 'true',
                      'introspection': 'disabled',
                      'tests': 'disabled'}
 
