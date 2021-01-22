@@ -1,0 +1,12 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'atk'
+    version = '2.36'
+    stype = SourceType.GIT
+    btype = BuildType.MESON
+    remotes = {'origin': 'https://gitlab.gnome.org/GNOME/atk.git'}
+    commit = 'dbe95f6170ae1f4bb76c755506b4e3dd3990d5aa'
+    meson_options = {'instropection': 'false'}
+    deps = ['glib']
