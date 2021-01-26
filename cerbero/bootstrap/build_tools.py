@@ -29,8 +29,10 @@ from cerbero.utils import shell
 from cerbero.enums import Platform, Distro
 
 
-class BuildTools(BootstrapperBase, Fetch):
-    BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config', 'orc', 'gettext-m4', 'meson']
+class BuildTools (BootstrapperBase, Fetch):
+
+    BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
+                   'orc', 'gettext-m4', 'meson', 'icu-tools']
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['sed', 'gperf', 'bison', 'flex', 'moltenvk-tools'],
         Platform.WINDOWS: ['nasm'],

@@ -1,0 +1,102 @@
+# Copyright (c) 2014-2015, Centricular Ltd. All rights reserved.
+# Copyright (c) 2015, Ericsson AB. All rights reserved.
+# Copyright (c) 2021, 2022, Igalia. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification,
+# are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice, this
+# list of conditions and the following disclaimer in the documentation and/or other
+# materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+# OF SUCH DAMAGE.
+
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.build.build import modify_environment
+from cerbero.tools.libtool import LibtoolLibrary
+from pathlib import Path
+
+class Recipe(recipe.Recipe):
+    name = 'icu'
+    version = '68.2'
+    (major_ver, minor_ver) = version.split('.')
+    url = 'https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.tgz'
+    tarball_checksum = 'c79193dee3907a2199b8296a93b52c5cb74332c26f3d167269487680d479d625'
+    stype = SourceType.TARBALL
+    autoreconf = True
+    tarball_dirname = 'icu'
+    srcdir = 'source'
+    configure_options = '\
+        --disable-debug \
+        --disable-extras \
+        --disable-layout \
+        --disable-renaming \
+        --disable-samples \
+        --disable-tests \
+        --disable-tools \
+        --enable-shared \
+        --enable-static '
+
+    files_devel = ['bin/icu-config', 'lib/pkgconfig/icu-i18n.pc',
+                   'lib/pkgconfig/icu-io.pc', 'lib/pkgconfig/icu-uc.pc',
+                   'include/unicode']
+    files_libs = ['libicudata', 'libicui18n', 'libicuio', 'libicuuc']
+    files_share = ['share/icu']
+
+    def prepare(self):
+        self.autoreconf_sh = f'cd {self.srcdir} && {self.autoreconf_sh}'
+        if self.config.cross_compiling:
+            build_tools_dir = f'{self.build_dir}/../..'
+            if 'universal' in self.build_dir:
+                build_tools_dir += '/..'
+            self.configure_options += \
+                f'--with-cross-build={build_tools_dir}/build-tools/icu-tools-{self.version}/source '
+            self.append_env('CXXFLAGS', '-frtti')
+        if self.config.target_platform == Platform.ANDROID:
+            self.append_env('LDFLAGS', '-lc++_shared')
+
+    @modify_environment
+    async def configure(self):
+        await super().configure()
+        # Prepend the contents of uconfig.h.prepend to uconfig.h and replace the header in-place.
+        uconfigh = Path(self.build_dir, self.srcdir, 'common', 'unicode', 'uconfig.h')
+        contents = Path(self.build_dir, self.srcdir, 'uconfig.h.prepend').read_bytes() + uconfigh.read_bytes()
+        uconfigh.write_bytes(contents)
+
+    def post_install(self):
+        common_deps = ['-lm', '-lc', '-ldl', '-lstdc++']
+        icudata_deps = ['-lstdc++']
+        libtool_la = LibtoolLibrary('icudata', self.major_ver, self.minor_ver,
+                                    None, self.config.libdir,
+                                    self.config.target_platform,
+                                    deps=icudata_deps)
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('icuuc', self.major_ver, self.minor_ver,
+                                    None, self.config.libdir,
+                                    self.config.target_platform,
+                                    deps=['icudata'] + common_deps)
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('icui18n', self.major_ver, self.minor_ver,
+                                    None, self.config.libdir,
+                                    self.config.target_platform,
+                                    deps=['icuuc', 'icudata'] + common_deps)
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('icuio', self.major_ver, self.minor_ver,
+                                    None, self.config.libdir,
+                                    self.config.target_platform,
+                                    deps=['icuuc', 'icudata', 'icui18n'] \
+                                         + common_deps)
+        libtool_la.save()
