@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import glob
+import os
+import shutil
+
+from cerbero.utils import android
+
+class Recipe(recipe.Recipe):
+    name = 'libwebp'
+    version = '1.2.2'
+    stype = SourceType.TARBALL
+    btype = BuildType.AUTOTOOLS
+    url = 'https://github.com/webmproject/libwebp/archive/v%(version)s.tar.gz'
+    tarball_checksum = '51e9297aadb7d9eb99129fe0050f53a11fcce38a0848fb2b0389e385ad93695e'
+    allow_parallel_build = True
+    autoreconf = True
+
+    files_devel = ['lib/pkgconfig/libwebp.pc', 'lib/pkgconfig/libwebpdemux.pc']
+    files_libs = ['libwebp', 'libwebpdemux']
+
