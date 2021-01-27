@@ -1,0 +1,27 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.utils import shell
+
+class Recipe(recipe.Recipe):
+    name = 'wpewebkit'
+    version = '2.30.4'
+    stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
+    url = 'https://wpewebkit.org/releases/wpewebkit-stable.tar.xz'
+    tarball_checksum = '1e521d85cf8cf344b9fd08eabad7a1d18a330fb7862a77eaf78d7d7b10d5f6ef'
+    deps = [
+        'cairo',
+        'gstreamer-1.0',
+        'gst-plugins-base-1.0',
+        'gst-plugins-good-1.0',
+        'gst-plugins-bad-1.0',
+        'harfbuzz',
+        'libepoxy',
+        'libgcrypt',
+        'libsoup',
+        'libwpe'
+    ]
+    # TODO: support accessibility and gstreamer-gl
+    configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF -DUSE_GSTREAMER_GL=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
+
+    async def compile(self):
+        await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
