@@ -15,7 +15,7 @@ class Recipe(recipe.Recipe):
                      'glib': 'enabled',
                      'cairo': 'enabled', # Is this needed? Is it only used for cmd line utils?
                      'gobject': 'disabled',
-                     'icu_builtin': 'true',
+                     'icu_builtin': 'false',
                      'introspection': 'disabled',
                      'tests': 'disabled'}
 
