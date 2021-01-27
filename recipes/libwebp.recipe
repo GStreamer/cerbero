@@ -1,0 +1,43 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'libwebp'
+    version = '1.2.0-rc3'
+    stype = SourceType.TARBALL
+    btype = BuildType.CUSTOM
+    url = 'https://github.com/webmproject/libwebp/archive/v1.2.0-rc3.tar.gz'
+    tarball_checksum = '7505579ca0f290ad1847078c1e18f990c0ee5652aca7414687808382fe2d1223'
+    allow_parallel_build = True
+
+    def prepare(self):
+        if self.config.target_platform != Platform.ANDROID:
+            raise FatalError('Unsupported platform')
+
+    async def compile(self):
+        shell.symlink(self.build_dir, '{0}/jni'.format(self.build_dir))
+        await shell.async_call(['{0}/ndk-build'.format(self.config.toolchain_prefix)],
+                                cmd_dir=self.build_dir, logfile=self.logfile)
+
+    async def install(self):
+        if self.config.target_arch == Architecture.ARMv7:
+            self.arch_name = "armeabi-v7a"
+        elif self.config.target_arch == Architecture.ARM:
+            self.arch_name = "armeabi"
+        elif self.config.target_arch == Architecture.ARM64:
+            self.arch_name = "arm64-v8a"
+        elif self.config.target_arch == Architecture.X86:
+            self.arch_name = "x86"
+        elif self.config.target_arch == Architecture.X86_64:
+            self.arch_name = "x86_64"
+        else:
+            raise FatalError("Unsupported Android architecture: " + \
+                self.config.target_arch)
+
+        libdir_dest = os.path.join(self.config.prefix, 'lib')
+        libdir_src = os.path.join(self.build_dir, 'libs', self.arch_name)
+        src_files = os.listdir(libdir_src)
+        for file_name in src_files:
+            full_file_name = os.path.join(libdir_src, file_name)
+            shutil.copy(full_file_name, libdir_dest)
