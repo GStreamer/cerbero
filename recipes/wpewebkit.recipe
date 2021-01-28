@@ -18,10 +18,13 @@ class Recipe(recipe.Recipe):
         'libepoxy',
         'libgcrypt',
         'libsoup',
+        'libxslt',
         'libwpe'
     ]
-    # TODO: support accessibility and gstreamer-gl
-    configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF -DUSE_GSTREAMER_GL=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
+    # TODO: support accessibility, gstreamer-gl and woff2
+    configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF \
+                        -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
+                        -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
 
     def prepare(self):
         if self.config.target_platform in (Platform.ANDROID):
