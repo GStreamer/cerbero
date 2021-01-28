@@ -23,5 +23,9 @@ class Recipe(recipe.Recipe):
     # TODO: support accessibility and gstreamer-gl
     configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF -DUSE_GSTREAMER_GL=OFF -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
 
+    def prepare(self):
+        if self.config.target_platform in (Platform.ANDROID):
+            self.deps += ['libwebp']
+
     async def compile(self):
         await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
