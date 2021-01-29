@@ -1,0 +1,75 @@
+From 2d5e3ba525b3ef247f5476175eb9e25cbc9dd705 Mon Sep 17 00:00:00 2001
+From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
+Date: Fri, 29 Jan 2021 12:37:31 +0100
+Subject: [PATCH] Android: remove uses of shm_open and shm_unlink
+
+---
+ .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 25 ++++++++++++++-----
+ 1 file changed, 19 insertions(+), 6 deletions(-)
+
+diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+index f413abff..79cbfd6c 100644
+--- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
++++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+@@ -49,6 +49,9 @@
+ #include <sys/syscall.h>
+ #endif
+ 
++#include <glib.h>
++#include <wtf/glib/GUniquePtr.h>
++
+ namespace WebKit {
+ 
+ SharedMemory::Handle::Handle()
+@@ -116,6 +119,7 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+ 
+ static int createSharedMemory()
+ {
++#if 0
+     int fileDescriptor = -1;
+ 
+ #if HAVE(LINUX_MEMFD_H)
+@@ -149,25 +153,34 @@ static int createSharedMemory()
+         shm_unlink(tempName.data());
+ 
+     return fileDescriptor;
++#endif
+ }
+ 
+ RefPtr<SharedMemory> SharedMemory::allocate(size_t size)
+ {
+-    int fileDescriptor = createSharedMemory();
++    GUniquePtr<char> name(g_build_filename(g_get_user_runtime_dir(), "WK2SharedMemory.XXXXXX", nullptr));
++    int fileDescriptor = mkstemp(name.get());
+     if (fileDescriptor == -1) {
+         WTFLogAlways("Failed to create shared memory: %s", strerror(errno));
+         return nullptr;
+     }
+ 
+-    while (ftruncate(fileDescriptor, size) == -1) {
+-        if (errno != EINTR) {
+-            closeWithRetry(fileDescriptor);
+-            return nullptr;
+-        }
++    {
++        long flags = fcntl(fileDescriptor, F_GETFD);
++        fcntl(fileDescriptor, F_SETFD, flags | FD_CLOEXEC);
++        unlink(name.get());
++    }
++
++    int ret = posix_fallocate(fileDescriptor, 0, size);
++    if (ret != 0) {
++        WTFLogAlways("  failed to fallocate");
++        closeWithRetry(fileDescriptor);
++        return nullptr;
+     }
+ 
+     void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+     if (data == MAP_FAILED) {
++        WTFLogAlways("  failed to mmap");
+         closeWithRetry(fileDescriptor);
+         return nullptr;
+     }
+-- 
+2.25.1
+

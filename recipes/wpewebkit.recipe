@@ -26,9 +26,9 @@ class Recipe(recipe.Recipe):
                         -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
-                        -DCMAKE_SYSTEM_NAME=Linux \
-                        -Dis_android=1 \
                         -DENABLE_WEBDRIVER=OFF \
+                        -Dis_android=1 \
+                        -DCMAKE_SYSTEM_NAME=Linux \
                         -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
 
     def prepare(self):
@@ -52,6 +52,7 @@ class Recipe(recipe.Recipe):
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR={0}'.format(src_arch)
             stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', libarch)
             self.append_env('LDFLAGS', '-L', stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared')
+            self.patches += ['wpewebkit/0001-Android-remove-uses-of-shm_open-and-shm_unlink.patch']
 
 
     async def compile(self):
