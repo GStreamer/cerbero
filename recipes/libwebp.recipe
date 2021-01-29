@@ -48,3 +48,11 @@ class Recipe(recipe.Recipe):
         for file_name in static_libs:
             full_file_name = os.path.join(static_libdir_src, file_name)
             shutil.copy(full_file_name, libdir_dest)
+        headers_dest = os.path.join(self.config.prefix, 'include', 'webp')
+        if not os.path.exists(headers_dest):
+            os.makedirs(headers_dest)
+        headers_src = os.path.join(self.build_dir, 'src', 'webp')
+        headers = glob.iglob(os.path.join(headers_src, '*.h'))
+        for header in headers:
+            full_header_name = os.path.join(headers_src, header)
+            shutil.copy(full_header_name, headers_dest)
