@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.0.3'
     stype = SourceType.GIT
     btype = BuildType.MESON
-    remotes = {'github': 'https://github.com/xkbcommon/libxkbcommon.git'}
+    remotes = {'origin': 'https://github.com/xkbcommon/libxkbcommon.git'}
     commit = 'c60b77ea512bef92e481be38972b58dd71a34180'
     meson_options = {'enable-x11': 'false', 'enable-wayland': 'false', 'enable-docs': 'false'}
     deps = ['libxml2']
