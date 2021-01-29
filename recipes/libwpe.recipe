@@ -5,7 +5,7 @@ class Recipe(recipe.Recipe):
     version = '1.9.1'
     stype = SourceType.GIT
     btype = BuildType.MESON
-    remotes = {'github': 'https://github.com/WebPlatformForEmbedded/libwpe.git'}
+    remotes = {'origin': 'https://github.com/WebPlatformForEmbedded/libwpe.git'}
     commit = '6458ea369f8fc8ed0aac7107f2a560ee186ad495'
     deps = ['xkbcommon']
 
