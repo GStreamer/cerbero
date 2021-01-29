@@ -1,0 +1,33 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'gettext'
+    version = '0.21'
+    stype = SourceType.TARBALL
+    url = 'https://ftp.gnu.org/pub/gnu/gettext/gettext-{0}.tar.gz'.format(version)
+    tarball_checksum = 'c77d0da3102aec9c07f43671e60611ebff89a996ef159497ce8e59d075786b12'
+    srcdir = 'gettext-runtime'
+
+    def prepare (self):
+        src_arch = self.config.target_arch
+        if self.config.target_platform in (Platform.ANDROID):
+            self.deps += ['libiconv']
+            if self.config.target_arch == Architecture.ARMv7:
+                src_arch = "arm"
+            elif self.config.target_arch == Architecture.ARM:
+                libarch = "armeabi"
+            elif self.config.target_arch == Architecture.ARM64:
+                libarch = "arm64-v8a"
+            elif self.config.target_arch == Architecture.X86:
+                libarch = "x86"
+            elif self.config.target_arch == Architecture.X86_64:
+                libarch = "x86_64"
+            else:
+                raise FatalError("Unsupported Android architecture: " + \
+                    self.config.target_arch)
+            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', libarch)
+            self.append_env('LDFLAGS', '-L{0}'.format(stl_libdir), '-lc++_shared')
+
+        if self.config.target_platform in (Platform.ANDROID):
+            self.deps += ['libiconv']
+
