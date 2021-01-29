@@ -24,11 +24,17 @@ class Recipe(recipe.Recipe):
     # TODO: support accessibility, gstreamer-gl and woff2
     configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF \
                         -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
+                        -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+                        -DHAVE_PTHREAD_NP_H=OFF \
+                        -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=arm \
+                        -Dis_android=1 \
+                        -DENABLE_WEBDRIVER=OFF \
                         -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
 
     def prepare(self):
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['libwebp']
+            self.append_env('LDFLAGS', '-landroid', '-llog', '-lm')
 
     async def compile(self):
         await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
