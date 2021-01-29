@@ -26,15 +26,33 @@ class Recipe(recipe.Recipe):
                         -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
-                        -DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=arm \
+                        -DCMAKE_SYSTEM_NAME=Linux \
                         -Dis_android=1 \
                         -DENABLE_WEBDRIVER=OFF \
                         -DCMAKE_BUILD_TYPE=RelWithDebInfo -GNinja'
 
     def prepare(self):
+        src_arch = self.config.target_arch
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['libwebp']
-            self.append_env('LDFLAGS', '-landroid', '-llog', '-lm')
+            if self.config.target_arch == Architecture.ARMv7:
+                libarch = "armeabi-v7a"
+                src_arch = "arm"
+            elif self.config.target_arch == Architecture.ARM:
+                libarch = "armeabi"
+            elif self.config.target_arch == Architecture.ARM64:
+                libarch = "arm64-v8a"
+            elif self.config.target_arch == Architecture.X86:
+                libarch = "x86"
+            elif self.config.target_arch == Architecture.X86_64:
+                libarch = "x86_64"
+            else:
+                raise FatalError("Unsupported Android architecture: " + \
+                    self.config.target_arch)
+            self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR={0}'.format(src_arch)
+            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', libarch)
+            self.append_env('LDFLAGS', '-L', stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared')
+
 
     async def compile(self):
         await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
