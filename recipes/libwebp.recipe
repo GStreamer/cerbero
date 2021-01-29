@@ -4,6 +4,8 @@ import glob
 import os
 import shutil
 
+from cerbero.utils import android
+
 class Recipe(recipe.Recipe):
     name = 'libwebp'
     version = '1.2.0-rc3'
@@ -23,27 +25,14 @@ class Recipe(recipe.Recipe):
                                 cmd_dir=self.build_dir, logfile=self.logfile)
 
     async def install(self):
-        if self.config.target_arch == Architecture.ARMv7:
-            self.arch_name = "armeabi-v7a"
-        elif self.config.target_arch == Architecture.ARM:
-            self.arch_name = "armeabi"
-        elif self.config.target_arch == Architecture.ARM64:
-            self.arch_name = "arm64-v8a"
-        elif self.config.target_arch == Architecture.X86:
-            self.arch_name = "x86"
-        elif self.config.target_arch == Architecture.X86_64:
-            self.arch_name = "x86_64"
-        else:
-            raise FatalError("Unsupported Android architecture: " + \
-                self.config.target_arch)
-
+        arch_name = android.get_android_arch_name(self.config.target_arch)
         libdir_dest = os.path.join(self.config.prefix, 'lib')
-        shared_libdir_src = os.path.join(self.build_dir, 'libs', self.arch_name)
+        shared_libdir_src = os.path.join(self.build_dir, 'libs', arch_name)
         shared_libs = glob.iglob(os.path.join(shared_libdir_src, '*.so'))
         for file_name in shared_libs:
             full_file_name = os.path.join(shared_libdir_src, file_name)
             shutil.copy(full_file_name, libdir_dest)
-        static_libdir_src = os.path.join(self.build_dir, 'obj', 'local', self.arch_name)
+        static_libdir_src = os.path.join(self.build_dir, 'obj', 'local', arch_name)
         static_libs = glob.iglob(os.path.join(static_libdir_src, '*.a'))
         for file_name in static_libs:
             full_file_name = os.path.join(static_libdir_src, file_name)
