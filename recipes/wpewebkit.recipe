@@ -47,3 +47,6 @@ class Recipe(recipe.Recipe):
 
     async def compile(self):
         await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
+
+    async def install(self):
+        await shell.async_call(['ninja', 'install'], cmd_dir=self.build_dir, logfile=self.logfile)
