@@ -30,6 +30,7 @@ import copy
 import cerbero.config
 from cerbero.build.build import modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.utils import android
 from cerbero.utils import shell
 from cerbero.utils import messages
 
@@ -47,7 +48,6 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-shared --enable-static \
         --disable-renaming --disable-samples --disable-debug \
         --disable-layout --disable-extras --disable-tests'
-    platform_deps = {Platform.ANDROID: ['gnustl']}
     allow_parallel_build = True
 
     files_devel = ['bin/icu-config', 'lib/pkgconfig/icu-i18n.pc',
@@ -73,19 +73,14 @@ class Recipe(recipe.Recipe):
             # Some headers/objs aren't found include/lib paths aren't set:
             # * typefind
             # * bits/c++config.h
-            old_env = os.environ.copy()
-            os.environ['PKG_CONFIG_PATH'] = self.env['PKG_CONFIG_LIBDIR']
-            gnustl_includes = shell.check_output([self.env['PKG_CONFIG'], '--cflags', 'gnustl']).strip('\n')
             # crtbegin_so.o and crtend_so.o
             ldflags1 = os.path.join(self.config.toolchain_prefix, 'platforms',
-                                    'android-16', 'arch-{0}'.format(src_arch),
+                                    'android-16', 'arch-' + src_arch,
                                     'usr', src_libdir)
-            # GNU STL is needed for full STL support
-            # http://www.kandroid.org/ndk/docs/CPLUSPLUS-SUPPORT.html
-            gnustl_libs = shell.check_output([self.env['PKG_CONFIG'], '--libs', 'gnustl']).strip('\n')
-            self.append_env('CXXFLAGS', gnustl_includes, '-frtti')
-            self.append_env('LDFLAGS', '-B', ldflags1, gnustl_libs)
-            os.environ = old_env
+            arch_lib_name = android.get_android_arch_name(self.config.target_arch)
+            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
+            self.append_env('LDFLAGS', '-B', ldflags1, '-L' + stl_libdir, '-lc++_shared')
+            self.append_env('CXXFLAGS', '-frtti')
 
     @modify_environment
     async def configure(self):
@@ -134,9 +129,6 @@ class Recipe(recipe.Recipe):
     def post_install(self):
         common_deps = ['-lm', '-lc', '-ldl', '-lstdc++']
         icudata_deps = ['-lstdc++']
-        if self.config.target_platform == Platform.ANDROID:
-            common_deps.append('gnustl')
-            icudata_deps.append('gnustl')
         libtool_la = LibtoolLibrary('icudata', self.major_ver, self.minor_ver,
                                     None, self.config.libdir,
                                     self.config.target_platform,
