@@ -44,7 +44,6 @@ class Recipe(recipe.Recipe):
     autoreconf = True
     # Source directory is icu/source, not icu-68.2
     srcdir = "../{0}/source".format(name)
-    licenses = [License.BSD]
     configure_options = '--enable-shared --enable-static \
         --disable-renaming --disable-samples --disable-debug \
         --disable-layout --disable-extras --disable-tests'
@@ -75,7 +74,7 @@ class Recipe(recipe.Recipe):
             # * bits/c++config.h
             # crtbegin_so.o and crtend_so.o
             ldflags1 = os.path.join(self.config.toolchain_prefix, 'platforms',
-                                    'android-16', 'arch-' + src_arch,
+                                    'android-21', 'arch-' + src_arch,
                                     'usr', src_libdir)
             arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)

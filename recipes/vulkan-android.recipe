@@ -9,6 +9,8 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
 
+    files_libs = ['libvulkan']
+
     def prepare(self):
         if self.config.target_platform != Platform.ANDROID:
             raise InvalidRecipeError(self, "Invalid platform")

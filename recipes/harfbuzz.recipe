@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
     ]
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
-    files_libs = ['libharfbuzz']
+    files_libs = ['libharfbuzz', 'libharfbuzz-icu']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
 
     def post_install(self):
