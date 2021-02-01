@@ -15,6 +15,8 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '7505579ca0f290ad1847078c1e18f990c0ee5652aca7414687808382fe2d1223'
     allow_parallel_build = True
 
+    files_libs = ['libwebp', 'libwebpdemux']
+
     def prepare(self):
         if self.config.target_platform != Platform.ANDROID:
             raise InvalidRecipeError(self, 'Unsupported platform')

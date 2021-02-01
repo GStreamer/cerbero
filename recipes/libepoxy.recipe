@@ -8,3 +8,5 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/anholt/libepoxy/archive/{0}.tar.gz'.format(version)
     tarball_checksum = '5d80a43a6524a1ebdd0c9c5d5105295546a0794681853c636a0c70f8f9c658ce'
 
+    files_libs = ['libepoxy']
+    files_devel  = ['include/epoxy', 'lib/pkgconfig/epoxy.pc']

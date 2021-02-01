@@ -23,7 +23,7 @@ class Recipe(recipe.Recipe):
     patches = ['harfbuzz/0001-meson-Export-symbols-for-a-DLL-when-not-building-sta.patch']
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
-    files_libs = ['libharfbuzz']
+    files_libs = ['libharfbuzz', 'libharfbuzz-icu']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
 
     def post_install(self):

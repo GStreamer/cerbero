@@ -10,6 +10,8 @@ class Recipe(recipe.Recipe):
     meson_options = {'enable-x11': 'false', 'enable-wayland': 'false', 'enable-docs': 'false'}
     deps = ['libxml2']
 
+    files_libs = ['libxkbcommon']
+
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             self.patches = ['xkbcommon/0001-Disable-tools-build.patch']
