@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import shutil
+import sys
 
 from cerbero.utils import android
 
@@ -9,6 +10,8 @@ class Recipe(recipe.Recipe):
     version = '0.1'
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
+
+    deps = ['wpewebkit']
 
     files_stl = [
         'lib/libc++_shared.so',
@@ -23,6 +26,45 @@ class Recipe(recipe.Recipe):
         'libm',
         'libstdc++'
     ]
+
+    async def compile(self):
+        # Android package manager only unpacks libxxx.so named libraries,
+        # so any library with versioning (i.e. libxxx.so.1) will be ignored.
+        # To fix this we rename all versioned libraries to the libxxx.so form.
+        # For example, a library named libfoo.so.1 will become libfoo_1.so.
+        # Apart from renaming the actual library files, we need to tweak the
+        # SONAME and NEEDED values as well to reflect the name changes.
+        # The libxxx_y.so form is used because it keeps the same length of
+        # the string, avoiding having to further tweak ELF metadata.
+        replacements = [
+            [ "libhogweed.so.4", "libhogweed_4.so" ],
+            [ "libicudata.so.68", "libicudata_68.so" ],
+            [ "libicui18n.so.68", "libicui18n_68.so" ],
+            [ "libicuuc.so.68", "libicuuc_68.so" ],
+            [ "libicutu.so.68", "libicutu_68.so" ],
+            [ "libicuio.so.68", "libicuio_68.so" ],
+            [ "libicutest.so.68", "libicutest_68.so" ],
+            [ "libnettle.so.6", "libnettle_6.so" ],
+            [ "libopenjp2.so.7", "libopenjp2_7.so" ],
+            [ "libWPEWebKit-1.0.so.3", "libWPEWebKit-1.0_3.so" ],
+        ]
+        libspath = os.path.join(self.config.prefix, 'lib')
+        for lib in os.listdir(libspath):
+            libpath = os.path.join(libspath, lib)
+            if os.path.isdir(libpath):
+                continue
+
+            with open(libpath, 'rb') as libfile:
+                contents = libfile.read()
+
+            for pair in replacements:
+                assert len(pair[0]) == len(pair[1])
+
+            for pair in replacements:
+                contents = contents.replace(bytes(pair[0], encoding='utf8'), bytes(pair[1], encoding='utf8'))
+
+            with open(libpath, 'wb') as libfile:
+                libfile.write(contents)
 
     async def install(self):
         src_libdir = 'lib'
