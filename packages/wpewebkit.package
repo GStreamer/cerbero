@@ -1,5 +1,10 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import errno
+import tarfile
+import tempfile
+import os
+
 class Package(package.Package):
     name = 'wpewebkit'
     version = '2.30.4'
@@ -17,13 +22,13 @@ class Package(package.Package):
         'expat:libs',
         'fontconfig:libs',
         'freetype:libs',
-        'glib:libs:lang:bins:schemas',
+        'glib:libs',
         'gmp:libs',
         'gnutls:libs',
         'gstreamer-1.0:libs',
         'gst-plugins-base-1.0:libs',
         'gst-plugins-good-1.0:libs',
-        'gst-plugins-bad-1.0:plugins_core:libs',
+        'gst-plugins-bad-1.0:libs',
         'gst-plugins-ugly-1.0:libs',
         'harfbuzz:libs',
         'icu:libs',
@@ -52,6 +57,8 @@ class Package(package.Package):
         'zlib:libs'
     ]
 
+    files_devel = ['glib']
+
     platform_files = {
         Platform.ANDROID: [
             'vulkan-android:libs',
@@ -59,3 +66,105 @@ class Package(package.Package):
         ]
     }
 
+    replacements = [
+        [ "libhogweed.so.4", "libhogweed_4.so" ],
+        [ "libicudata.so.68", "libicudata_68.so" ],
+        [ "libicui18n.so.68", "libicui18n_68.so" ],
+        [ "libicuuc.so.68", "libicuuc_68.so" ],
+        [ "libicutu.so.68", "libicutu_68.so" ],
+        [ "libicuio.so.68", "libicuio_68.so" ],
+        [ "libicutest.so.68", "libicutest_68.so" ],
+        [ "libnettle.so.6", "libnettle_6.so" ],
+        [ "libopenjp2.so.7", "libopenjp2_7.so" ],
+        [ "libopenjp2.so.2.3.1", "libopenjp2_2.3.1.so" ],
+        [ "libWPEWebKit-1.0.so.3", "libWPEWebKit-1.0_3.so" ],
+        [ "libWPEWebKit-1.0.so.3.11.7", "libWPEWebKit-1.0_3.11.7.so"]
+    ]
+
+    def replace_versioned_lib_refs(self, reverse=False):
+        # Android package manager only unpacks libxxx.so named libraries,
+        # so any library with versioning (i.e. libxxx.so.1) will be ignored.
+        # To fix this we rename all versioned libraries to the libxxx.so form.
+        # For example, a library named libfoo.so.1 will become libfoo_1.so.
+        # Apart from renaming the actual library files, we need to tweak the
+        # SONAME and NEEDED values as well to reflect the name changes.
+
+        libspath = os.path.join(self.config.prefix, 'lib')
+
+        for lib in os.listdir(libspath):
+            libpath = os.path.join(libspath, lib)
+            if os.path.isdir(libpath):
+                continue
+
+            with open(libpath, 'rb') as libfile:
+                contents = libfile.read()
+
+            # The libxxx_y.so form is used because it keeps the same length of
+            # the string, avoiding having to further tweak ELF metadata.
+            for pair in self.replacements:
+                assert len(pair[0]) == len(pair[1])
+
+            for pair in self.replacements:
+                from_ = pair[1] if reverse else pair[0]
+                to = pair[0] if reverse else pair[1]
+                contents = contents.replace(bytes(from_, encoding='utf8'), bytes(to, encoding='utf8'))
+
+            with open(libpath, 'wb') as libfile:
+                libfile.write(contents)
+
+    def rename_versioned_libs(self, path):
+        # Rename versioned libraries.
+        for pair in self.replacements:
+            old_path = os.path.join(path, pair[0])
+            new_path = os.path.join(path, pair[1])
+            if os.path.isfile(old_path):
+                os.rename(old_path, new_path)
+
+        # Since we are renaming files we also need to modify symlinks.
+        for lib in os.listdir(path):
+            libpath = os.path.join(path, lib)
+            if os.path.isdir(libpath) or libpath == os.path.realpath(libpath):
+                continue
+            for pair in self.replacements:
+                from_path = os.path.join(path, pair[0])
+                if from_path != os.path.realpath(libpath):
+                    continue
+                try:
+                    os.symlink(pair[1], libpath)
+                except OSError as e:
+                    if e.errno == errno.EEXIST:
+                        os.remove(libpath)
+                        os.symlink(pair[1], libpath)
+                    else:
+                        raise e
+                break
+
+    def pre_package(self):
+        if self.config.target_platform == Platform.ANDROID:
+            print('Processing WPEWebKit libraries...')
+            self.replace_versioned_lib_refs()
+
+    def post_package(self, paths, outdir):
+        if self.config.target_platform != Platform.ANDROID:
+            return
+        print('Processing generated packages...')
+        # Undo pre_package changes to libraries
+        self.replace_versioned_lib_refs(reverse=True)
+        # Extract to a tmp file to rename libraries and symlinks.
+        for path in paths:
+            if 'runtime' not in path:
+                continue
+            print('Processing package content', path)
+            tar = tarfile.open(path, 'r:xz')
+            content_path = tempfile.mkdtemp(prefix='wpewebkit.tmp.')
+            tar.extractall(path=content_path)
+            self.rename_versioned_libs(os.path.join(content_path, 'lib'))
+            # Create tarball with the modified files.
+            fd, final_tar_path = tempfile.mkstemp(prefix='wpewebkit.final.')
+            os.close(fd)
+            final_tar = tarfile.open(final_tar_path, 'w:xz')
+            for content in os.listdir(content_path):
+                final_tar.add(os.path.join(content_path, content), arcname=content)
+            final_tar.close()
+            tar.close()
+            os.rename(final_tar_path, path)
