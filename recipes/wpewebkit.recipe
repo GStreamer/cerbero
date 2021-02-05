@@ -30,6 +30,8 @@ class Recipe(recipe.Recipe):
                         -DENABLE_WEBDRIVER=OFF \
                         -Dis_android=1 \
                         -DCMAKE_SYSTEM_NAME=Linux \
+                        -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -O2 \
+                        -DCMAKE_CXX_FLAGS_RELEASE=-DNDEBUG -O2 \
                         -DCMAKE_BUILD_TYPE=Release -GNinja'
 
     files_libs = [
@@ -144,7 +146,7 @@ class Recipe(recipe.Recipe):
                 arch_src_name = 'arm'
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
             stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
-            self.append_env('LDFLAGS', '-L' + stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared', '-lintl')
+            self.append_env('LDFLAGS', '-L' + stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared', '-lintl', '-O2')
             self.patches += ['wpewebkit/0001-Android-remove-uses-of-shm_open-and-shm_unlink.patch']
 
 
