@@ -21,3 +21,4 @@ MANIFEST.in
 /gstreamer*.rpm
 /gstreamer*.tar.bz2
 /gstreamer*.tar.xz
+/wpewebkit*.tar.xz
