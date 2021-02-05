@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     deps = ['libxml2']
 
     files_libs = ['libxkbcommon']
+    files_devel = ['include/xkbcommon']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
