@@ -62,7 +62,8 @@ class Package(package.Package):
     platform_files = {
         Platform.ANDROID: [
             'vulkan-android:libs',
-            'wpeandroid:libs:stl'
+            'wpeandroid:libs:stl',
+            'wpebackend-android:libs'
         ]
     }
 
