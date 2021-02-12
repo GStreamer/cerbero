@@ -138,6 +138,11 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/wpe-web-extension-1.0.pc'
     ]
 
+    files_libexec = [
+        'libexec/wpe-webkit-1.0/WPENetworkProcess',
+        'libexec/wpe-webkit-1.0/WPEWebProcess',
+    ]
+
     def prepare(self):
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['libwebp']
