@@ -24,11 +24,14 @@ class Recipe(recipe.Recipe):
         'libwpe'
     ]
     # TODO: support accessibility, gstreamer-gl and woff2
+    # TODO: swap DEVELOPER_MODE by WPE_ANDROID to special case
+    # https://webkit-search.igalia.com/webkit/source/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp#48
     configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF \
                         -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
                         -DENABLE_WEBDRIVER=OFF \
+                        -DENABLE_DEVELOPER_MODE=ON \
                         -Dis_android=1 \
                         -DCMAKE_SYSTEM_NAME=Linux \
                         -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -O2 \
