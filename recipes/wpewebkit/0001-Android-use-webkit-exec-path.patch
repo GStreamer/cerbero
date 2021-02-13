@@ -1,0 +1,46 @@
+From 4252b346c32a25d48b295dfe23eecad3f1f5de9d Mon Sep 17 00:00:00 2001
+From: Fernando Jimenez <fjimenez@igalia.com>
+Date: Sat, 13 Feb 2021 21:40:21 +0100
+Subject: [PATCH] Android: Get process executable path from WEBKIT_EXEC_PATH
+
+---
+ Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp b/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp
+index a1e05f52..32926daa 100644
+--- a/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp
++++ b/Source/WebKit/Shared/glib/ProcessExecutablePathGLib.cpp
+@@ -33,7 +33,6 @@
+ 
+ namespace WebKit {
+ 
+-#if ENABLE(DEVELOPER_MODE)
+ static String getExecutablePath()
+ {
+     CString executablePath = getCurrentExecutablePath();
+@@ -41,11 +40,9 @@ static String getExecutablePath()
+         return FileSystem::directoryName(FileSystem::stringFromFileSystemRepresentation(executablePath.data()));
+     return { };
+ }
+-#endif
+ 
+ static String findWebKitProcess(const char* processName)
+ {
+-#if ENABLE(DEVELOPER_MODE)
+     static const char* execDirectory = g_getenv("WEBKIT_EXEC_PATH");
+     if (execDirectory) {
+         String processPath = FileSystem::pathByAppendingComponent(FileSystem::stringFromFileSystemRepresentation(execDirectory), processName);
+@@ -59,9 +56,6 @@ static String findWebKitProcess(const char* processName)
+         if (FileSystem::fileExists(processPath))
+             return processPath;
+     }
+-#endif
+-
+-    return FileSystem::pathByAppendingComponent(FileSystem::stringFromFileSystemRepresentation(PKGLIBEXECDIR), processName);
+ }
+ 
+ String executablePathOfWebProcess()
+-- 
+2.25.1
+
