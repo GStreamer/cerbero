@@ -155,7 +155,9 @@ class Recipe(recipe.Recipe):
             self.append_env('LDFLAGS', '-L' + stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared', '-lintl', '-O2')
             self.patches += [
                 'wpewebkit/0001-Android-remove-uses-of-shm_open-and-shm_unlink.patch',
-                'wpewebkit/0001-Android-use-webkit-exec-path.patch'
+                'wpewebkit/0001-Android-logging.patch',
+                'wpewebkit/0001-Android-spawn-services.patch',
+                'wpewebkit/0001-Android-web-network-process-entrypoint.patch',
             ]
 
 
