@@ -36,7 +36,12 @@ class Recipe(recipe.Recipe):
                         -DCMAKE_BUILD_TYPE=Release -GNinja'
 
     files_libs = [
-        'libWPEWebKit-1.0',
+        'libWPEWebKit-1.0'
+    ]
+
+    files_misc = [
+        'lib/wpe-webkit-1.0/libWPEWebInspectorResources.so',
+        'lib/wpe-webkit-1.0/injected-bundle/libWPEInjectedBundle.so'
     ]
 
     files_devel = [
