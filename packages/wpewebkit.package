@@ -23,6 +23,7 @@ class Package(package.Package):
         'fontconfig:libs',
         'freetype:libs',
         'glib:libs',
+        'glib-networking:misc',
         'gmp:libs',
         'gnutls:libs',
         'gstreamer-1.0:libs',
