@@ -16,14 +16,17 @@ class Recipe(recipe.Recipe):
     patches = [name + '/0001-meson-use-c-std-c99.patch']
 
     meson_options = {'libproxy': 'disabled', 'gnome_proxy': 'disabled',
-                     'gnutls': 'disabled', 'openssl': 'enabled',
+                     'gnutls': 'enabled', 'openssl': 'enabled',
                      # Also build static modules on all platforms
                      'static_modules': 'true'}
     deps = ['glib']
     # openssl on Linux
     use_system_libs = True
 
-    files_misc = ['lib/gio/modules/libgioopenssl%(mext)s']
+    files_misc = [
+        'lib/gio/modules/libgioopenssl%(mext)s',
+        'lib/gio/modules/libgiognutls.so'
+    ]
     files_lang = ['glib-networking']
     files_devel = ['lib/gio/modules/libgioopenssl.a']
 
