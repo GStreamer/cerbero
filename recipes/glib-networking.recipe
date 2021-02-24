@@ -16,7 +16,7 @@ class Recipe(recipe.Recipe):
                      'gnutls': 'enabled', 'openssl': 'enabled',
                      # Also build static modules on all platforms
                      'static_modules': 'true'}
-    deps = ['glib']
+    deps = ['glib', 'gnutls']
     # openssl on Linux
     use_system_libs = True
 
