@@ -83,19 +83,23 @@ class Package(package.Package):
         [ "libWPEWebKit-1.0.so.3.11.7", "libWPEWebKit-1.0_3.11.7.so"]
     ]
 
-    def replace_versioned_lib_refs(self, reverse=False):
+    def replace_versioned_lib_refs(self, libspath=None, reverse=False):
         # Android package manager only unpacks libxxx.so named libraries,
         # so any library with versioning (i.e. libxxx.so.1) will be ignored.
         # To fix this we rename all versioned libraries to the libxxx.so form.
         # For example, a library named libfoo.so.1 will become libfoo_1.so.
         # Apart from renaming the actual library files, we need to tweak the
         # SONAME and NEEDED values as well to reflect the name changes.
-
-        libspath = os.path.join(self.config.prefix, 'lib')
+        if libspath is None:
+            libspath = os.path.join(self.config.prefix, 'lib')
 
         for lib in os.listdir(libspath):
             libpath = os.path.join(libspath, lib)
             if os.path.isdir(libpath):
+                self.replace_versioned_lib_refs(libspath=libpath, reverse=reverse)
+                continue
+
+            if not '.so' in lib:
                 continue
 
             with open(libpath, 'rb') as libfile:
