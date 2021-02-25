@@ -53,7 +53,7 @@ class Strip(object):
             cmd += ['--strip-unneeded', path]
 
         try:
-            await shell.async_call(cmd)
+            await shell.async_call(cmd, env=self.config.env)
         except Exception as e:
             m.warning(e)
 
