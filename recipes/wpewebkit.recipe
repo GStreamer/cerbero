@@ -7,7 +7,7 @@ class Recipe(recipe.Recipe):
     version = '2.30.4'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    url = 'https://wpewebkit.org/releases/wpewebkit-stable.tar.xz'
+    url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
     tarball_checksum = '1e521d85cf8cf344b9fd08eabad7a1d18a330fb7862a77eaf78d7d7b10d5f6ef'
     deps = [
         'cairo',
