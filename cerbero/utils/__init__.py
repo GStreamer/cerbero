@@ -257,7 +257,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_STRETCH
             elif d[1].startswith('10.') or d[1].startswith('buster'):
                 distro_version = DistroVersion.DEBIAN_BUSTER
-            elif d[1].startswith('11.') or d[1].startswith('bullseye'):
+            elif distro_version in ['bullseye'] or d[1].startswith('11.') or d[1].startswith('bullseye'):
                 distro_version = DistroVersion.DEBIAN_BULLSEYE
             elif d[1] == 'unstable' and d[2] == 'sid':
                 distro_version = DistroVersion.DEBIAN_SID

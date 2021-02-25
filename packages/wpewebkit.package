@@ -15,6 +15,7 @@ class Package(package.Package):
         graphics APIs for best performance'
     vendor = 'Igalia'
     uuid = 'ba9d7b24-6174-4b31-9284-67fcad7fd879'
+    strip = True
 
     files = [
         'bzip2:libs',
@@ -145,32 +146,3 @@ class Package(package.Package):
                         raise e
                 break
 
-    def pre_package(self):
-        if self.config.target_platform == Platform.ANDROID:
-            print('Processing WPEWebKit libraries...')
-            self.replace_versioned_lib_refs()
-
-    def post_package(self, paths, outdir):
-        if self.config.target_platform != Platform.ANDROID:
-            return
-        print('Processing generated packages...')
-        # Undo pre_package changes to libraries
-        self.replace_versioned_lib_refs(reverse=True)
-        # Extract to a tmp file to rename libraries and symlinks.
-        for path in paths:
-            if 'runtime' not in path:
-                continue
-            print('Processing package content', path)
-            tar = tarfile.open(path, 'r:xz')
-            content_path = tempfile.mkdtemp(prefix='wpewebkit.tmp.')
-            tar.extractall(path=content_path)
-            self.rename_versioned_libs(os.path.join(content_path, 'lib'))
-            # Create tarball with the modified files.
-            fd, final_tar_path = tempfile.mkstemp(prefix='wpewebkit.final.')
-            os.close(fd)
-            final_tar = tarfile.open(final_tar_path, 'w:xz')
-            for content in os.listdir(content_path):
-                final_tar.add(os.path.join(content_path, content), arcname=content)
-            final_tar.close()
-            tar.close()
-            os.rename(final_tar_path, path)
