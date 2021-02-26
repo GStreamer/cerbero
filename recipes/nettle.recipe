@@ -10,14 +10,13 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'nettle'
-    version = '3.4'
+    version = '3.6'
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
-    tarball_checksum = 'ae7a42df026550b85daca8389b6a60ba6313b0567f374392e54918588a411e94'
+    tarball_checksum = 'd24c0d0f2abffbc8f4f34dcf114b0f131ec3774895f3555922fe2f40f3d5e3f1'
     licenses = [License.LGPLv3Plus, License.GPLv2Plus, License.GPLv3Plus]
     configure_options = '--enable-shared --enable-public-key'
     deps = ['gmp']
-    patches = [name + '/0001-ios-fix-build-using-.word-for-assembly-constants.patch']
     allow_parallel_build = False
 
     files_bins = ['nettle-hash', 'nettle-lfib-stream', 'nettle-pbkdf2']

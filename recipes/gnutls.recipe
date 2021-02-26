@@ -6,9 +6,9 @@ from cerbero.utils import needs_xcode8_sdk_workaround
 
 class Recipe(recipe.Recipe):
     name = 'gnutls'
-    version = '3.5.18'
+    version = '3.7.0'
     url = 'https://www.gnupg.org/ftp/gcrypt/%(name)s/v%(maj_ver)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = 'ae2248d9e78747cf9c469dde81ff8f90b56838b707a0637f3f7d4eee90e80234'
+    tarball_checksum = '49e2a22691d252c9f24a9829b293a8f359095bc5a818351f05f1c0a5188a1df8'
     stype = SourceType.TARBALL
     # main library is LGPLv2+ and binaries is GPLv3+ and defined below
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE']}]
@@ -22,16 +22,12 @@ class Recipe(recipe.Recipe):
         Platform.IOS: ['proxy-libintl'],
         Platform.DARWIN: ['proxy-libintl']
     }
-    patches = [name + "/0003-Disable-ncrypt-support.patch",
-               name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
-               name + "/0001-pgusage-remove-system-call.patch",
-               name + "/0001-asm-rename-some-assembly-functions-to-not-conflict-w.patch",
-               name + "/0001-Make-headers-MSVC-compatible-when-built-with-GCC.patch",]
+    patches = [name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
+               name + "/0001-pgusage-remove-system-call.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']
     files_bins = ['gnutls-cli', 'gnutls-serv', 'gnutls-cli-debug']
-    tarball_checksum = 'ae2248d9e78747cf9c469dde81ff8f90b56838b707a0637f3f7d4eee90e80234'
     licenses_bins = [License.GPLv3Plus]
     files_devel = ['lib/pkgconfig/gnutls.pc', 'include/gnutls']
     files_lang = ['gnutls']
