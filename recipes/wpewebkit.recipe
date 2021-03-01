@@ -163,7 +163,6 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-Android-logging.patch',
                 'wpewebkit/0001-Android-spawn-services.patch',
                 'wpewebkit/0001-Android-web-network-process-entrypoint.patch',
-                'wpewebkit/0001-Android-temporarily-ignore-ipc-error.patch',
             ]
 
 
