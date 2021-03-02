@@ -73,7 +73,8 @@ class DebianBootstrapper (UnixBootstrapper):
         'libxfixes-dev', 'libxdamage-dev', 'libxcomposite-dev',
         'libasound2-dev', 'build-essential', 'gperf', 'wget', 'libxtst-dev',
         'libxrandr-dev', 'libglu1-mesa-dev', 'libegl1-mesa-dev', 'git',
-        'xutils-dev', 'intltool', 'ccache', 'python3-setuptools', 'libssl-dev'
+        'xutils-dev', 'intltool', 'ccache', 'python3-setuptools', 'libssl-dev',
+        'libwayland-dev'
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -111,7 +112,7 @@ class RedHatBootstrapper (UnixBootstrapper):
         'mesa-libGL-devel', 'libXcomposite-devel', 'perl-ExtUtils-MakeMaker',
         'libXi-devel', 'perl-XML-Simple', 'gperf', 'wget', 'libXrandr-devel',
         'libXtst-devel', 'git', 'xorg-x11-util-macros', 'mesa-libEGL-devel',
-        'ccache', 'openssl-devel', 'alsa-lib-devel', 'perl-FindBin',
+        'ccache', 'openssl-devel', 'alsa-lib-devel', 'wayland-devel'
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -149,7 +150,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
         'xorg-x11-libXrender-devel', 'libpulse-devel', 'xorg-x11-libXv-devel',
         'Mesa-libGL-devel', 'libXcomposite-devel', 'libX11-devel',
         'alsa-devel', 'libXi-devel', 'Mesa-devel', 'Mesa-libGLESv3-devel',
-        'gperf', 'wget', 'git', 'ccache', 'openssl-devel'
+        'gperf', 'wget', 'git', 'ccache', 'openssl-devel', 'wayland',
     ]
 
 class ArchBootstrapper (UnixBootstrapper):
@@ -161,7 +162,7 @@ class ArchBootstrapper (UnixBootstrapper):
         'intltool', 'cmake', 'libtool', 'bison', 'flex', 'automake',
         'autoconf', 'make', 'gettext', 'nasm', 'gperf', 'libxrender', 'libxv',
         'mesa', 'python3', 'wget', 'git', 'xorg-util-macros', 'ccache',
-        'openssl', 'alsa-lib',
+        'openssl', 'alsa-lib', 'wayland',
     ]
 
     def __init__(self, config, offline, assume_yes):
@@ -189,7 +190,8 @@ class GentooBootstrapper (UnixBootstrapper):
         'sys-devel/autoconf', 'sys-devel/make', 'sys-devel/gettext',
         'media-sound/pulseaudio', 'dev-lang/nasm', 'dev-util/gperf',
         'x11-libs/libXrender', 'x11-libs/libXv', 'media-libs/mesa',
-        'net-misc/wget', 'dev-libs/openssl', 'media-libs/alsa-lib'
+        'net-misc/wget', 'dev-libs/openssl', 'media-libs/alsa-lib',
+        'dev-libs/wayland',
     ]
 
 class NoneBootstrapper (BootstrapperBase):

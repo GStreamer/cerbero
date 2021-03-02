@@ -1,0 +1,21 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.build.build import modify_environment
+
+class Recipe(recipe.Recipe):
+    name = 'wayland'
+    version = '1.19.0'
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'https://wayland.freedesktop.org/releases/wayland-{0}.tar.xz'.format(version)
+    tarball_checksum = 'baccd902300d354581cd5ad3cc49daa4921d55fb416a5883e218750fef166d15'
+    meson_options = {'scanner': 'true', 'documentation': 'false'}
+    deps = ['expat', 'libffi', 'libxml2']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID:
+            # Wayland requires wayland-scanner to build, but since we are
+            # cross-compiling, we cannot use the one that we are building,
+            # so we need to use the host's machine one.
+            self.patches = ['wayland/0001-Android-hardcode-wayland-scanner-path.patch']
+
