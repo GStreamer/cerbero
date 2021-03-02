@@ -1,0 +1,26 @@
+From 7c56ea9fcf905ed2ce93c22989e80e62837c2816 Mon Sep 17 00:00:00 2001
+From: Fernando Jimenez <fjimenez@igalia.com>
+Date: Tue, 2 Mar 2021 11:31:25 +0100
+Subject: [PATCH] Set wayland-scanner path
+
+---
+ src/meson.build | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index d91c503..4886750 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -59,8 +59,7 @@ if get_option('scanner')
+ endif
+ 
+ if meson.is_cross_build() or not get_option('scanner')
+-	scanner_dep = dependency('wayland-scanner', native: true, version: meson.project_version())
+-	wayland_scanner_for_build = find_program(scanner_dep.get_pkgconfig_variable('wayland_scanner'))
++	wayland_scanner_for_build = '/usr/bin/wayland-scanner'
+ else
+ 	wayland_scanner_for_build = wayland_scanner
+ endif
+-- 
+2.25.1
+
