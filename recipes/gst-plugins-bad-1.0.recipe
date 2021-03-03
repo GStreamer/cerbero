@@ -491,6 +491,9 @@ class Recipe(custom.GStreamer):
                 if self.config.msvc_version == 'vs14':
                     self.disable_plugin('d3d11', 'sys')
 
+            if self.meson_options['d3d11'] == 'enabled':
+                self.files_libs += ['libgstd3d11-1.0']
+
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
 
