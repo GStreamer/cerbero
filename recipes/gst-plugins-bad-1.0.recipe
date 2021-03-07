@@ -89,6 +89,7 @@ class Recipe(custom.GStreamer):
         'libgstisoff-1.0',
         'libgstmpegts-1.0',
         'libgstphotography-1.0',
+        'libgstplay-1.0',
         'libgstplayer-1.0',
         'libgstsctp-1.0',
         'libgsttranscoder-1.0',
@@ -106,6 +107,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/isoff',
         'include/gstreamer-1.0/gst/mpegts',
+        'include/gstreamer-1.0/gst/play',
         'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/sctp',
         'include/gstreamer-1.0/gst/transcoder',
@@ -116,6 +118,7 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-photography-1.0.pc',
+        'lib/pkgconfig/gstreamer-play-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
@@ -447,6 +450,7 @@ class Recipe(custom.GStreamer):
     files_typelibs = [
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
+        'GstPlay-1.0',
         'GstPlayer-1.0',
         'GstTranscoder-1.0',
     ]
