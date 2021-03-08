@@ -65,6 +65,9 @@ class Main(object):
         m.error('%s' % msg)
         if print_usage:
             self.parser.print_usage()
+
+        if sys.platform == 'win32':
+            os._exit(1)
         sys.exit(1)
 
     def init_logging(self):
