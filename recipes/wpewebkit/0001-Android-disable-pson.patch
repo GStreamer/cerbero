@@ -1,0 +1,27 @@
+From 97c06478ebd1baf7a4b845d20036ba27ecf8cf16 Mon Sep 17 00:00:00 2001
+From: Fernando Jimenez <fjimenez@igalia.com>
+Date: Tue, 23 Mar 2021 11:51:43 +0100
+Subject: [PATCH] Disable PSON
+
+---
+ Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+index af43f9ac..726cf6e7 100644
+--- a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
++++ b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+@@ -393,8 +393,9 @@ static void webkitWebContextConstructed(GObject* object)
+ 
+     API::ProcessPoolConfiguration configuration;
+     configuration.setInjectedBundlePath(FileSystem::stringFromFileSystemRepresentation(bundleFilename.get()));
++    configuration.setProcessSwapsOnNavigation(false);
++    configuration.setUsesSingleWebProcess(true);
+ #if PLATFORM(GTK)
+-    configuration.setProcessSwapsOnNavigation(priv->psonEnabled);
+     if (!priv->psonEnabled) {
+         const char* useSingleWebProcess = getenv("WEBKIT_USE_SINGLE_WEB_PROCESS");
+         if (useSingleWebProcess && strcmp(useSingleWebProcess, "0"))
+-- 
+2.25.1
+
