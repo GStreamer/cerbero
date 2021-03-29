@@ -120,6 +120,7 @@ class DistroVersion:
     REDHAT_8 = 'redhat_8'
     # Amazon Linux seems to be RedHat/CentOS-based
     AMAZON_LINUX = 'amazon_linux'
+    AMAZON_LINUX_2 = 'amazon_linux_2'
     ARCH_ROLLING = 'rolling'
     GENTOO_VERSION = 'gentoo-version'
     OPENSUSE_42_2 = 'opensuse_42_2'
