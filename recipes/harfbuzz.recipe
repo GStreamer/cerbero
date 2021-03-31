@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
-    version = '2.6.7'
+    version = '5.3.1'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '49e481d06cdff97bf68d99fa26bdf785331f411614485d892ea4c78eb479b218'
+    tarball_checksum = '4a6ce097b75a8121facc4ba83b5b083bfec657f45b003cd5a3424f2ae6b4434d'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib']
     meson_options = {'icu': 'disabled',
@@ -19,15 +19,19 @@ class Recipe(recipe.Recipe):
                      'introspection': 'disabled',
                      'tests': 'disabled'}
 
-    # https://github.com/harfbuzz/harfbuzz/pull/2458
-    patches = [
-        'harfbuzz/0001-meson-Export-symbols-for-a-DLL-when-not-building-sta.patch',
-        'harfbuzz/0001-harfbuzz-disable-werror-from-pragmas.patch',
-    ]
+    patches = []
 
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', 'lib/pkgconfig/harfbuzz.pc']
+
+    def prepare(self):
+        # Disable werror from pragmas. Currently fails building on macOS 12.3
+        # and should actually be controlled by the build system.
+        self.append_env('CFLAGS', '-DHB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR')
+
+        if self.config.target_platform == Platform.DARWIN:
+            self.meson_options['coretext'] = 'enabled'
 
     def post_install(self):
         # Meson does not generate la files
