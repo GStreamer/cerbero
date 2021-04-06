@@ -163,6 +163,8 @@ def system_info():
             arch = Architecture.X86
         elif arch.startswith('armv7'):
             arch = Architecture.ARMv7
+        elif arch.startswith('arm64'):
+            arch = Architecture.ARM64
         elif arch.startswith('arm'):
             arch = Architecture.ARM
         else:
