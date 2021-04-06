@@ -128,7 +128,7 @@ def windows_arch():
 
 def system_info():
     '''
-    Get the sysem information.
+    Get the system information.
     Return a tuple with the platform type, the architecture and the
     distribution
     '''
