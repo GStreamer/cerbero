@@ -29,6 +29,8 @@ class Recipe(recipe.Recipe):
         'cairo/0001-meson-only-build-cairo-boilerplate-and-cairo-missing.patch',
         # FIXME: remove once freetype recipe has been moved to Meson as well
         'cairo/0001-cairo-ft-font-fix-build-with-MSVC-if-freetype-was-bu.patch',
+        # https://gitlab.freedesktop.org/cairo/cairo/-/merge_requests/151
+        'cairo/0001-atomic-Add-support-for-WIN32-atomic-operations.patch',
     ]
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
