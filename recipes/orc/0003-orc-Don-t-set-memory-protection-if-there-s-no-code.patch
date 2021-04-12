@@ -1,0 +1,31 @@
+From 1ec0f3f9238d44eb9c60d72c3572c42c98cf2ad4 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 2 Jul 2020 15:02:57 +0530
+Subject: [PATCH 3/3] orc: Don't set memory protection if there's no code
+
+If the size of the JIT code is 0, there's no code and the *mem is
+uninitialized. This can happen when orcc.exe is used to generate
+backup C code.
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/44>
+---
+ orc/orccompiler.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/orc/orccompiler.c b/orc/orccompiler.c
+index 23a1a84..63eee29 100644
+--- a/orc/orccompiler.c
++++ b/orc/orccompiler.c
+@@ -223,6 +223,9 @@ _set_virtual_protect (void * mem, size_t size, int code_protect)
+   char *msg;
+   DWORD old_protect;
+ 
++  /* No code, so we 'succeed' */
++  if (size == 0)
++    return TRUE;
+ 
+   if (!mem)
+     return FALSE;
+-- 
+2.25.1
+

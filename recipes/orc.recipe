@@ -29,6 +29,10 @@ class Recipe(recipe.Recipe):
         'orc/0003-orc-Fix-some-warnings-on-MSVC-and-enable-werror.patch',
         # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/48
         'orc/0001-orc-Use-page-size-aligned-memory-block-for-Windows.patch',
+        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/44
+        'orc/0001-orc-Fix-indentation.patch',
+        'orc/0002-orc-Print-hex-value-directly-instead-of-a-constant.patch',
+        'orc/0003-orc-Don-t-set-memory-protection-if-there-s-no-code.patch',
     ]
 
     def prepare(self):

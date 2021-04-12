@@ -1,0 +1,54 @@
+From e6ff84bdf56eb8213f240b2e74ec441d8ec80814 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 2 Jul 2020 15:02:12 +0530
+Subject: [PATCH 2/3] orc: Print hex value directly instead of a constant
+
+This is actually more useful because the constants are all bitfields
+and it's fairly straightforward to look it up:
+
+https://docs.microsoft.com/en-us/windows/win32/memory/memory-protection-constants
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/44>
+---
+ orc/orccompiler.c | 18 ++----------------
+ 1 file changed, 2 insertions(+), 16 deletions(-)
+
+diff --git a/orc/orccompiler.c b/orc/orccompiler.c
+index e6bd43c..23a1a84 100644
+--- a/orc/orccompiler.c
++++ b/orc/orccompiler.c
+@@ -217,20 +217,6 @@ orc_program_compile_for_target (OrcProgram *program, OrcTarget *target)
+ }
+ 
+ #if defined(HAVE_CODEMEM_VIRTUALALLOC)
+-static const char*
+-_get_protect_name (int protect)
+-{
+-  switch (protect) {
+-    /* These are the only two memory protection constants we use */
+-    case PAGE_EXECUTE:
+-      return "execute";
+-    case PAGE_READWRITE:
+-      return "readwrite";
+-    default:
+-      return "unknown";
+-  }
+-}
+-
+ static orc_bool
+ _set_virtual_protect (void * mem, size_t size, int code_protect)
+ {
+@@ -247,8 +233,8 @@ _set_virtual_protect (void * mem, size_t size, int code_protect)
+   FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER
+       | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+       GetLastError (), 0, (LPTSTR) &msg, 0, NULL);
+-  ORC_ERROR ("Couldn't set memory protect on %p from %s to %s: %s", mem,
+-      _get_protect_name (old_protect), _get_protect_name (code_protect), msg);
++  ORC_ERROR ("Couldn't set memory protect on %p from %x to %x: %s", mem,
++      old_protect, code_protect, msg);
+   LocalFree (msg);
+ 
+   return FALSE;
+-- 
+2.25.1
+
