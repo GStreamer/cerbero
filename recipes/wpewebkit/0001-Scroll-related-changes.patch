@@ -1,0 +1,49 @@
+From e937a4ee39d233852b1b6f7e75be2482357d2611 Mon Sep 17 00:00:00 2001
+From: Fernando Jimenez Moreno <fjimenez@igalia.com>
+Date: Fri, 16 Apr 2021 17:32:06 +0200
+Subject: [PATCH] Scroll related changes
+
+---
+ Source/WebKit/UIProcess/API/wpe/WPEView.cpp                 | 4 +++-
+ Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp | 2 +-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
+index cc81eec6..63eaebbe 100644
+--- a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
++++ b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
+@@ -72,6 +72,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+ 
+     auto* pool = configuration->processPool();
+     m_pageProxy = pool->createWebPage(*m_pageClient, WTFMove(configuration));
++    m_pageProxy->setIntrinsicDeviceScaleFactor(2.0);
+ 
+ #if ENABLE(MEMORY_SAMPLER)
+     if (getenv("WEBKIT_SAMPLE_MEMORY"))
+@@ -264,8 +265,9 @@ void View::selectionDidChange()
+ void View::setSize(const WebCore::IntSize& size)
+ {
+     m_size = size;
++    m_size.scale(1 / m_pageProxy->deviceScaleFactor());
+     if (m_pageProxy->drawingArea())
+-        m_pageProxy->drawingArea()->setSize(size);
++        m_pageProxy->drawingArea()->setSize(m_size);
+ }
+ 
+ void View::setViewState(OptionSet<WebCore::ActivityState::Flag> flags)
+diff --git a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
+index efc003bd..5adbbcf0 100644
+--- a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
++++ b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
+@@ -149,7 +149,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
+ 
+ FloatRect WebChromeClient::windowRect()
+ {
+-#if PLATFORM(IOS_FAMILY)
++#if PLATFORM(IOS_FAMILY) || PLATFORM(WPE)
+     return FloatRect();
+ #else
+ #if PLATFORM(MAC)
+-- 
+2.30.1
+

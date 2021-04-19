@@ -169,6 +169,7 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-Android-terminate-process.patch',
                 'wpewebkit/0001-Android-disable-pson.patch',
                 'wpewebkit/0001-Try-to-find-libz-with-pkg-config.patch',
+                'wpewebkit/0001-Scroll-related-changes.patch',
             ]
 
 
