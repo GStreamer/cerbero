@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
         'libgcrypt',
         'libsoup',
         'libxslt',
+        'libwebp',
         'libwpe'
     ]
     # TODO: support accessibility, gstreamer-gl and woff2
@@ -151,7 +152,6 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         if self.config.target_platform in (Platform.ANDROID):
-            self.deps += ['libwebp']
             arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             arch_src_name = self.config.target_arch
             if self.config.target_arch == Architecture.ARMv7:
@@ -171,7 +171,12 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-Try-to-find-libz-with-pkg-config.patch',
                 'wpewebkit/0001-Scroll-related-changes.patch',
             ]
-
+        else:
+            self.deps.append('icu')
+            self.append_env('CXXFLAGS', '-I{0}/include'.format(self.config.prefix), '-licui18n -licuuc -licudata')
+            self.append_env('CFLAGS', '-I{0}/include'.format(self.config.prefix), '-licui18n -licuuc -licudata')
+            self.append_env('LDFLAGS', '-lrt')
+            self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + self.config.target_arch
 
     async def compile(self):
         await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
