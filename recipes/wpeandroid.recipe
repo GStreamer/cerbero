@@ -34,8 +34,9 @@ class Recipe(recipe.Recipe):
             src_arch = 'arm'
         elif self.config.target_arch == Architecture.X86_64:
             src_libdir = 'lib64'
+        v = DistroVersion.get_android_api_version(self.config.target_distro_version)
         libdir = os.path.join(self.config.toolchain_prefix, 'platforms',
-                              'android-21', 'arch-' + src_arch,
+                              'android-' + str(v), 'arch-' + src_arch,
                               'usr', src_libdir)
 
         for lib_name in self.files_libs:
