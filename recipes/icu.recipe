@@ -73,8 +73,9 @@ class Recipe(recipe.Recipe):
             # * typefind
             # * bits/c++config.h
             # crtbegin_so.o and crtend_so.o
+            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
             ldflags1 = os.path.join(self.config.toolchain_prefix, 'platforms',
-                                    'android-21', 'arch-' + src_arch,
+                                    'android-' + str(v), 'arch-' + src_arch,
                                     'usr', src_libdir)
             arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
