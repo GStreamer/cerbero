@@ -16,30 +16,22 @@ class Recipe(recipe.Recipe):
             raise InvalidRecipeError(self, "Invalid platform")
 
     async def install(self):
-        to_copy = []
-
+        # Hacky way of copying the earliest version (android-24) of
+        # libvulkan.so so we can build the vulkan plugin with a newer
+        # version than what may be built by the rest of cerbero.
         v = DistroVersion.get_android_api_version(self.config.target_distro_version)
         if v < 24:
-            # Hacky way of copying the earliest version (android-24) of
-            # libvulkan.so so we can build the vulkan plugin with a newer
-            # version than what may be built by the rest of cerbero.
-            src_arch = self.config.target_arch
-            if self.config.target_arch == Architecture.ARMv7:
-                src_arch = 'arm'
-            src_libdir = 'lib'
-            if self.config.target_arch == Architecture.X86_64:
-                src_libdir = 'lib64'
-            srcdir = os.path.join(self.config.toolchain_prefix, 'platforms', 'android-24', 'arch-' + src_arch, 'usr', src_libdir)
-            destdir = os.path.join(self.config.prefix, 'lib')
-            to_copy += [
-                (os.path.join(srcdir, 'libvulkan.so'),
-                os.path.join(destdir, 'libvulkan.so'), False)
-            ]
+            v = 24
 
-        for src, dest, is_dir in to_copy:
-            if is_dir:
-                shell.copy_dir(src, dest)
-            else:
-                if not os.path.exists(os.path.dirname(dest)):
-                    os.makedirs(os.path.dirname(dest))
-                shutil.copy(src, dest)
+        src_arch = self.config.target_arch
+        if self.config.target_arch == Architecture.ARMv7:
+            src_arch = 'arm'
+        src_libdir = 'lib'
+        if self.config.target_arch == Architecture.X86_64:
+            src_libdir = 'lib64'
+        srcdir = os.path.join(self.config.toolchain_prefix, 'platforms', 'android-' + str(v), 'arch-' + src_arch, 'usr', src_libdir)
+        destdir = os.path.join(self.config.prefix, 'lib')
+
+        if not os.path.exists(destdir):
+            os.makedirs(destdir)
+        shutil.copy(os.path.join(srcdir, 'libvulkan.so'), os.path.join(destdir, 'libvulkan.so'))
