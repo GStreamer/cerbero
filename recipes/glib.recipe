@@ -176,6 +176,8 @@ class Recipe(recipe.Recipe):
                     'glib/uwp/0018-gio-Disable-win32-API-and-modules-when-unavailable-o.patch',
                     'glib/uwp/0019-TODO-gdbus-Completely-disable-when-building-for-WinR.patch',
                     'glib/uwp/0022-TODO-gio-gcontenttype-Needs-porting-to-WinRT-model.patch',
+                    # Visual Studio 2019 workaround
+                    'glib/uwp/0001-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
                 ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             self.files_devel.append(os.path.join('lib', 'glib-2.0', 'include', '*', 'glibconfig.h'))
