@@ -58,6 +58,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-gioerror-Map-WSAENETRESET-on-Windows-to-G_IO_ERROR_C.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1836
         'glib/0001-Windows-fix-FD_READ-condition-flag-still-set-on-reco.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1428
+        'glib/0001-Add-missing-extern-to-the-dllexport-version-of-GLIB_.patch',
     ]
 
     files_libs = [
