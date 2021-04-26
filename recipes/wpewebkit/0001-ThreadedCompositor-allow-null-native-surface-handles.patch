@@ -1,0 +1,42 @@
+From d5eefa93bf01f6c926c9451e2a262e42632fb09a Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Mon, 26 Apr 2021 15:07:01 +0200
+Subject: [PATCH 2/2] ThreadedCompositor: allow null native-surface handles for
+ the purpose of surfaceless rendering.
+
+---
+ .../threadedcompositor/ThreadedCompositor.cpp         | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp b/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
+index b7cb12a1..6d7ff5c3 100644
+--- a/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
++++ b/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
+@@ -68,9 +68,12 @@ ThreadedCompositor::ThreadedCompositor(Client& client, ThreadedDisplayRefreshMon
+         m_scene = adoptRef(new CoordinatedGraphicsScene(this));
+         m_nativeSurfaceHandle = m_client.nativeSurfaceHandleForCompositing();
+ 
+-        m_scene->setActive(!!m_nativeSurfaceHandle);
+-        if (m_nativeSurfaceHandle)
+-            createGLContext();
++        createGLContext();
++        if (m_context) {
++            if (!m_nativeSurfaceHandle)
++                m_paintFlags |= TextureMapper::PaintingMirrored;
++            m_scene->setActive(true);
++        }
+     });
+ }
+ 
+@@ -82,8 +85,6 @@ void ThreadedCompositor::createGLContext()
+ {
+     ASSERT(!RunLoop::isMain());
+ 
+-    ASSERT(m_nativeSurfaceHandle);
+-
+     m_context = GLContext::createContextForWindow(reinterpret_cast<GLNativeWindowType>(m_nativeSurfaceHandle), &PlatformDisplay::sharedDisplayForCompositing());
+     if (m_context)
+         m_context->makeContextCurrent();
+-- 
+2.30.2
+

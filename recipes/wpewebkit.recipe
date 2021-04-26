@@ -170,6 +170,9 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-Android-disable-pson.patch',
                 'wpewebkit/0001-Try-to-find-libz-with-pkg-config.patch',
                 'wpewebkit/0001-Scroll-related-changes.patch',
+                'wpewebkit/0001-PlatformDisplayLibWPE-use-eglGetPlatformDisplay-when.patch',
+                'wpewebkit/0001-GLContextEGL-don-t-attempt-to-swap-buffers-for-surfa.patch',
+                'wpewebkit/0001-ThreadedCompositor-allow-null-native-surface-handles.patch',
             ]
         else:
             self.deps.append('icu')

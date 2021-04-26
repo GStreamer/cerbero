@@ -1,0 +1,27 @@
+From 2953fa7017a173a7dd80a1d2a37e5452d5f261f9 Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Mon, 26 Apr 2021 15:06:22 +0200
+Subject: [PATCH 1/2] GLContextEGL: don't attempt to swap buffers for
+ surfaceless contexts.
+
+---
+ Source/WebCore/platform/graphics/egl/GLContextEGL.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Source/WebCore/platform/graphics/egl/GLContextEGL.cpp b/Source/WebCore/platform/graphics/egl/GLContextEGL.cpp
+index b6d60b49..dd4a0611 100644
+--- a/Source/WebCore/platform/graphics/egl/GLContextEGL.cpp
++++ b/Source/WebCore/platform/graphics/egl/GLContextEGL.cpp
+@@ -488,6 +488,9 @@ bool GLContextEGL::makeContextCurrent()
+ 
+ void GLContextEGL::swapBuffers()
+ {
++    if (m_type == Surfaceless)
++        return;
++
+     ASSERT(m_surface);
+     eglSwapBuffers(m_display.eglDisplay(), m_surface);
+ }
+-- 
+2.30.2
+
