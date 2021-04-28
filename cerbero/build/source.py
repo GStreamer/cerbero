@@ -380,7 +380,7 @@ class Git (GitCache):
                 pass
             shutil.rmtree(self.build_dir)
         if not os.path.exists(self.build_dir):
-            os.mkdir(self.build_dir)
+            os.makedirs(self.build_dir)
 
         # checkout the current version
         await git.local_checkout(self.build_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
