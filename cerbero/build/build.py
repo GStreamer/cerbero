@@ -690,6 +690,8 @@ class CMake (MakefilesBase):
             shutil.rmtree(cmake_files)
         self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
+        if not os.path.exists(self.build_dir):
+            os.makedirs(self.build_dir)
         # as build_dir is different from source dir, makefile location will be in build_dir.
         self.make_dir = self.build_dir
 

@@ -271,7 +271,7 @@ class Tarball(BaseTarball, Source):
         await super().fetch(redownload=redownload)
 
     async def extract(self):
-        m.action(_('Extracting tarball to %s') % self.build_dir, logfile=get_logfile(self))
+        m.action(_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
 
@@ -370,29 +370,29 @@ class Git (GitCache):
         self.commit = self.config.recipe_commit(self.name) or self.commit
 
     async def extract(self):
-        if os.path.exists(self.build_dir):
+        if os.path.exists(self.config_src_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self))
-                checkout_hash = git.get_hash(self.build_dir, 'HEAD', logfile=get_logfile(self))
+                checkout_hash = git.get_hash(self.config_src_dir, 'HEAD', logfile=get_logfile(self))
                 if commit_hash == checkout_hash and not self.patches:
                     return False
             except Exception:
                 pass
-            shutil.rmtree(self.build_dir)
-        if not os.path.exists(self.build_dir):
-            os.makedirs(self.build_dir)
+            shutil.rmtree(self.config_src_dir)
+        if not os.path.exists(self.config_src_dir):
+            os.makedirs(self.config_src_dir)
 
         # checkout the current version
-        await git.local_checkout(self.build_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
+        await git.local_checkout(self.config_src_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
 
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
 
             if self.strip == 1:
-                git.apply_patch(patch, self.build_dir, logfile=get_logfile(self))
+                git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
+                shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
 
         return True
 
@@ -419,9 +419,9 @@ class GitExtractedTarball(Git):
             return False
         for match in self.matches:
             self._files[match] = []
-        self._find_files(self.build_dir)
+        self._find_files(self.config_src_dir)
         self._files['.in'] = [x for x in self._files['.in'] if
-                os.path.join(self.build_dir, 'm4') not in x]
+                os.path.join(self.config_src_dir, 'm4') not in x]
         self._fix_ts()
 
     def _fix_ts(self):
