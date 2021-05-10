@@ -28,7 +28,10 @@ class Recipe(recipe.Recipe):
         'lib/gio/modules/libgiognutls.so'
     ]
     files_lang = ['glib-networking']
-    files_devel = ['lib/gio/modules/libgioopenssl.a']
+    files_devel = [
+        'lib/gio/modules/libgioopenssl.a',
+        'lib/gio/modules/libgiognutls.a',
+    ]
 
     def prepare(self):
         # Pick system openssl if on Linux and not cross-compiling

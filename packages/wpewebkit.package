@@ -1,11 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-import errno
-import tarfile
-import tempfile
-import os
-
-class Package(package.Package):
+class SDKPackage(package.SDKPackage):
     name = 'wpewebkit'
     version = '2.32.1'
     shortdesc = 'Web Platform for Embedded'
@@ -14,7 +9,7 @@ class Package(package.Package):
         with flexibility and hardware acceleration in mind, leveraging commond 3D \
         graphics APIs for best performance'
     vendor = 'Igalia'
-    uuid = 'ba9d7b24-6174-4b31-9284-67fcad7fd879'
+    uuid = '5c8655ac-6e87-4cfa-b41c-4af5a814687a'
     strip = True
     strip_excludes = [
         'libc.so',
@@ -22,55 +17,24 @@ class Package(package.Package):
         'libstdc++.so',
     ]
 
-    files = [
-        'bzip2:libs',
-        'cairo:libs',
-        'expat:libs',
-        'fontconfig:libs',
-        'freetype:libs',
-        'glib:libs',
-        'glib-networking:misc',
-        'gmp:libs',
-        'gnutls:libs',
-        'gstreamer-1.0:libs',
-        'gst-plugins-base-1.0:libs',
-        'gst-plugins-good-1.0:libs',
-        'gst-plugins-bad-1.0:libs',
-        'gst-plugins-ugly-1.0:libs',
-        'harfbuzz:libs',
-        'icu:libs',
-        'libepoxy:libs',
-        'libgcrypt:libs',
-        'libffi:libs',
-        'libgpg-error:libs',
-        'libiconv:libs',
-        'libjpeg-turbo:libs',
-        'libpng:libs',
-        'libsoup:libs',
-        'libtasn1:libs',
-        'libwebp:libs',
-        'libwpe:libs',
-        'libxml2:libs',
-        'libxslt:libs',
-        'nettle:libs',
-        'orc:libs',
-        'pixman:libs',
-        'proxy-libintl:libs',
-        'libpsl:libs',
-        'openjpeg:libs',
-        'sqlite3:libs',
-        'xkbcommon:libs',
-        'wpewebkit',
-        'zlib:libs'
+    packages = [
+        # (name, required, selected)
+       ('wpewebkit-core', True, True),
+       ('gstreamer-1.0-core', True, True),
+       ('gstreamer-1.0-system', False, True),
+       ('gstreamer-1.0-playback', False, True),
+       ('gstreamer-1.0-codecs', False, True),
+       ('gstreamer-1.0-qt5', False, True),
+       ('gstreamer-1.0-effects', False, True),
+       ('gstreamer-1.0-net', False, True),
+       ('gstreamer-1.0-visualizers', False, True),
+       ('gstreamer-1.0-codecs-gpl', False, False),
+       ('gstreamer-1.0-codecs-restricted', False, False),
+       ('gstreamer-1.0-net-restricted', False, False),
+       ('gstreamer-1.0-dvd', False, False),
+       ('gstreamer-1.0-libav', False, False),
+       ('gstreamer-1.0-encoding', False, False),
+       ('gstreamer-1.0-capture', False, False),
+       ('gstreamer-1.0-editing', False, False),
+       ('gstreamer-1.0-devtools', False, False),
     ]
-
-    files_devel = ['glib']
-
-    platform_files = {
-        Platform.ANDROID: [
-            'vulkan-android:libs',
-            'wpeandroid:libs:stl',
-            'wpebackend-android:libs'
-        ]
-    }
-
