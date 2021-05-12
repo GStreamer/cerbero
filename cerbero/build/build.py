@@ -884,10 +884,13 @@ class Meson (Build, ModifyEnvBase) :
         props['objc_args'] = build_env.pop('OBJCFLAGS', [])
         props['objcpp_args'] = build_env.pop('OBJCXXFLAGS', [])
         # Link args
-        props['c_link_args'] = build_env.pop('LDFLAGS', [])
-        props['cpp_link_args'] = props['c_link_args']
-        props['objc_link_args'] = build_env.pop('OBJLDFLAGS', props['c_link_args'])
-        props['objcpp_link_args'] = props['objc_link_args']
+        ldflags_value = build_env.pop('LDFLAGS', [])
+        props['c_link_args'] = ldflags_value.copy()
+        props['cpp_link_args'] = ldflags_value.copy()
+        objldflags_value = build_env.pop('OBJLDFLAGS', ldflags_value)
+        props['objc_link_args'] = objldflags_value.copy()
+        props['objcpp_link_args'] = objldflags_value.copy()
+
         for key, value in self.config.meson_properties.items():
             if key not in props:
                 props[key] = value
