@@ -1,0 +1,38 @@
+From 51d50621be80131334d6966d5c08bb5f635882ac Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Fri, 15 Jan 2021 18:47:08 +0000
+Subject: [PATCH] meson: only build cairo-boilerplate and cairo-missing helper
+ libs if needed
+
+Used by tests and the sphinx utility, which may or may not be built,
+and if they're not built we don't need to build those libs either.
+---
+ boilerplate/meson.build        | 2 ++
+ util/cairo-missing/meson.build | 2 ++
+ 2 files changed, 4 insertions(+)
+
+diff --git a/boilerplate/meson.build b/boilerplate/meson.build
+index 325396d6e..79d1eeea4 100644
+--- a/boilerplate/meson.build
++++ b/boilerplate/meson.build
+@@ -40,4 +40,6 @@ libcairoboilerplate = static_library('cairoboilerplate', cairo_boilerplate_sourc
+   include_directories: [incbase, incsrc],
+   dependencies: deps,
+   link_with: [libcairo],
++  install: false,
++  build_by_default: false,
+ )
+diff --git a/util/cairo-missing/meson.build b/util/cairo-missing/meson.build
+index db328fb1c..dd1507b59 100644
+--- a/util/cairo-missing/meson.build
++++ b/util/cairo-missing/meson.build
+@@ -8,4 +8,6 @@ inccairomissing = include_directories('.')
+ libcairomissing = static_library('cairo-missing', cairo_missing_sources,
+   c_args: ['-DHAVE_CONFIG_H'],
+   include_directories: [incbase, incsrc],
++  install: false,
++  build_by_default: false,
+ )
+-- 
+2.29.2
+

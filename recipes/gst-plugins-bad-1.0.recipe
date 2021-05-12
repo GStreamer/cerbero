@@ -89,6 +89,7 @@ class Recipe(custom.GStreamer):
         'libgstisoff-1.0',
         'libgstmpegts-1.0',
         'libgstphotography-1.0',
+        'libgstplay-1.0',
         'libgstplayer-1.0',
         'libgstsctp-1.0',
         'libgsttranscoder-1.0',
@@ -106,6 +107,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/isoff',
         'include/gstreamer-1.0/gst/mpegts',
+        'include/gstreamer-1.0/gst/play',
         'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/sctp',
         'include/gstreamer-1.0/gst/transcoder',
@@ -116,6 +118,7 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-photography-1.0.pc',
+        'lib/pkgconfig/gstreamer-play-1.0.pc',
         'lib/pkgconfig/gstreamer-player-1.0.pc',
         'lib/pkgconfig/gstreamer-plugins-bad-1.0.pc',
         'lib/pkgconfig/gstreamer-sctp-1.0.pc',
@@ -447,6 +450,7 @@ class Recipe(custom.GStreamer):
     files_typelibs = [
         'GstInsertBin-1.0',
         'GstMpegts-1.0',
+        'GstPlay-1.0',
         'GstPlayer-1.0',
         'GstTranscoder-1.0',
     ]
@@ -489,18 +493,19 @@ class Recipe(custom.GStreamer):
                 self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
                 if self.config.msvc_version == 'vs14':
                     self.disable_plugin('d3d11', 'sys')
+                else:
+                    # requires at least Visual Studio 2017
+                    self.enable_plugin('wasapi2', 'sys', 'visualstudio')
+
+            if self.meson_options['d3d11'] == 'enabled':
+                self.files_libs += ['libgstd3d11-1.0']
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
 
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.meson_options['applemedia'] = 'enabled'
-            # No Vulkan SDK for macOS ARM664 yet
-            if self.config.target_platform == Platform.DARWIN and \
-                    self.config.target_arch ==  Architecture.ARM64:
-                self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
-            else:
-                self.deps += ['moltenvk']
+            self.deps += ['moltenvk']
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['vulkan-android']
 
@@ -522,7 +527,6 @@ class Recipe(custom.GStreamer):
             self.deps.append('openssl')
 
         if self.using_uwp():
-            self.enable_plugin('wasapi2', 'sys', 'uwp')
             # Uses unavailable APIs
             self.disable_plugin('d3d', 'sys', option='d3dvideosink')
             self.disable_plugin('decklink', 'sys')

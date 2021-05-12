@@ -1,0 +1,48 @@
+From ce03adee8dee58a25c9bfa6e137390e9c13d6ca2 Mon Sep 17 00:00:00 2001
+From: Jeff Lenk <jeff@jefflenk.com>
+Date: Fri, 29 Nov 2013 22:16:49 -0600
+Subject: [PATCH] FS-6010 --resolve
+
+---
+ src/spandsp/fast_convert.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/spandsp/fast_convert.h b/src/spandsp/fast_convert.h
+index 10679ea..af54e68 100644
+--- a/src/spandsp/fast_convert.h
++++ b/src/spandsp/fast_convert.h
+@@ -247,6 +247,7 @@ extern "C"
+      *    Therefore implement inline versions of these functions here.
+      */
+ 
++#if (_MSC_VER < 1800)
+     __inline long int lrint(double x)
+     {
+         long int i;
+@@ -287,6 +288,7 @@ extern "C"
+             frndint
+         }
+     }
++#endif
+ 
+     __inline long int lfastrint(double x)
+     {
+@@ -316,6 +318,7 @@ extern "C"
+     /* x86_64 machines will do best with a simple assignment. */
+ #include <intrin.h>
+ 
++#if (_MSC_VER < 1800)
+     __inline long int lrint(double x)
+     {
+ 		return (long int)_mm_cvtsd_si64x( _mm_loadu_pd ((const double*)&x) );
+@@ -325,6 +328,7 @@ extern "C"
+     {
+ 		return _mm_cvt_ss2si( _mm_load_ss((const float*)&x) );
+     }
++#endif
+ 
+     __inline long int lfastrint(double x)
+     {
+-- 
+2.25.1
+

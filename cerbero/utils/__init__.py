@@ -128,7 +128,7 @@ def windows_arch():
 
 def system_info():
     '''
-    Get the sysem information.
+    Get the system information.
     Return a tuple with the platform type, the architecture and the
     distribution
     '''
@@ -163,6 +163,8 @@ def system_info():
             arch = Architecture.X86
         elif arch.startswith('armv7'):
             arch = Architecture.ARMv7
+        elif arch.startswith('arm64'):
+            arch = Architecture.ARM64
         elif arch.startswith('arm'):
             arch = Architecture.ARM
         else:
@@ -263,7 +265,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_SID
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:
+        elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux']:
             distro = Distro.REDHAT
             if d[1] == '16':
                 distro_version = DistroVersion.FEDORA_16
@@ -309,6 +311,8 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.REDHAT_7
             elif d[1].startswith('8.'):
                 distro_version = DistroVersion.REDHAT_8
+            elif d[0] == 'Amazon Linux' and d[1].startswith('2'):
+                distro_version = DistroVersion.AMAZON_LINUX_2
             elif d[1] == 'amazon':
                 distro_version = DistroVersion.AMAZON_LINUX
             else:
@@ -353,7 +357,7 @@ Terminating.''', file=sys.stderr)
     elif platform == Platform.DARWIN:
         distro = Distro.OS_X
         ver = pplatform.mac_ver()[0]
-        if ver.startswith(('11.0', '10.16')):
+        if ver.startswith(('11.', '10.16')):
             distro_version = DistroVersion.OS_X_BIG_SUR
         elif ver.startswith('10.15'):
             distro_version = DistroVersion.OS_X_CATALINA

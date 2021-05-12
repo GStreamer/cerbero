@@ -44,6 +44,8 @@ class Build(Command):
                 ArgparseArgument('--jobs', '-j', action='store', type=int,
                     default=0, help=_('How many recipes to build concurrently. '
                         '0 = number of CPUs.')),
+                ArgparseArgument('--build-tools', '-b', action='store_true',
+                    default=False, help=_('Runs the build command for the build tools of this config.')),
                 ]
             if force is None:
                 args.append(
@@ -67,6 +69,8 @@ class Build(Command):
             self.force = args.force
         if self.no_deps is None:
             self.no_deps = args.no_deps
+        if args.build_tools:
+            config = config.build_tools_config
         self.runargs(config, args.recipe, args.missing_files, self.force,
                      self.no_deps, dry_run=args.dry_run, offline=args.offline,
                      deps_only=self.deps_only, jobs=args.jobs)

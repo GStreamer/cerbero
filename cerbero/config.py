@@ -143,6 +143,12 @@ class Variants(object):
 
 
 class Config (object):
+    '''
+    Holds the configuration for the build
+
+    @ivar build_tools_config: Configuration for build tools
+    @type build_tools_config: L{cerbero.config.Config}
+    '''
 
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',
                    'prefix', 'recipes_dir', 'host', 'build', 'target',
@@ -173,9 +179,11 @@ class Config (object):
 
     cookbook = None
 
-    def __init__(self):
+    def __init__(self, is_build_tools_config=False):
         self._check_uninstalled()
         self.python_exe = Path(sys.executable).as_posix()
+        self.build_tools_config = None
+        self._is_build_tools_config = is_build_tools_config
 
         for a in self._properties:
             setattr(self, a, None)
@@ -251,6 +259,10 @@ class Config (object):
         self._validate_properties()
         self._check_windows_is_x86_64()
 
+        # The build tools config is required to properly configure the environment
+        if not self._is_build_tools_config:
+            self._create_build_tools_config()
+
         for config in list(self.arch_config.values()):
             if self.target_arch == Architecture.UNIVERSAL:
                 config.sources = os.path.join(self.sources, config.target_arch)
@@ -266,6 +278,7 @@ class Config (object):
                 config._load_last_defaults()
                 config._load_platform_config()
                 config._validate_properties()
+                config.build_tools_config = self.build_tools_config
 
         # Ensure that variants continue to override all other configuration
         self.variants.override(variants_override)
@@ -285,27 +298,22 @@ class Config (object):
             if self.vs_install_path:
                 m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
 
-        m.message('Install prefix will be {}'.format(self.prefix))
+        if self._is_build_tools_config:
+            m.message('Build tools install prefix will be {}'.format(self.prefix))
+        else:
+            m.message('Install prefix will be {}'.format(self.prefix))
         # Store current os.environ data
         arches = []
         if isinstance(self.universal_archs, dict):
             arches = self.arch_config.keys()
-        for c in list(self.arch_config.values()):
-            self._create_path(c.local_sources)
-            self._create_path(c.sources)
-            self._create_path(c.logs)
+        for arch_config in list(self.arch_config.values()):
+            arch_config._create_paths()
         if arches:
             m.message('Building the following arches: ' + ' '.join(arches))
 
+
     def do_setup_env(self):
-        self._create_path(self.prefix)
-        # dict universal arches do not have an active prefix
-        if not isinstance(self.universal_archs, dict):
-            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
-        self._create_path(os.path.join(
-            self.build_tools_prefix, 'share', 'aclocal'))
-        self._create_path(os.path.join(
-            self.build_tools_prefix, 'var', 'tmp'))
+        self._create_paths()
 
         libdir = os.path.join(self.prefix, 'lib%s' % self.lib_suffix)
         self.libdir = libdir
@@ -370,7 +378,10 @@ class Config (object):
         xdgdatadir = os.path.join(prefix, 'share')
         xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
         xcursordir = os.path.join(prefix, 'share', 'icons')
-        aclocaldir = os.path.join(prefix, 'share', 'aclocal')
+        aclocalflags = '-I{} -I{}'.format(
+            os.path.join(prefix, 'share', 'aclocal'),
+            os.path.join(self.build_tools_prefix, 'share', 'aclocal'))
+
         perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
                                        self._perl_version())
         if self.target_platform == Platform.WINDOWS:
@@ -432,14 +443,16 @@ class Config (object):
             ldflags = self._join_values(ldflags, ldflags_libdir)
 
         path = self.config_env.get('PATH', None)
-        path = self._join_path(
-            os.path.join(self.build_tools_prefix, 'bin'), path)
+        if not self._is_build_tools_config:
+            path = self._join_path(
+                os.path.join(self.build_tools_config.prefix, 'bin'), path)
         # Add the prefix bindir after the build-tools bindir so that on Windows
         # binaries are run with the same libraries that they are linked with.
         if bindir not in path and self.prefix_is_executable():
             path = self._join_path(bindir, path)
-
-        ld_library_path = os.path.join(self.build_tools_prefix, 'lib')
+        ld_library_path = ''
+        if not self._is_build_tools_config:
+            ld_library_path = os.path.join(self.build_tools_config.libdir)
         if self.prefix_is_executable():
             ld_library_path = self._join_path(libdir, ld_library_path)
         if self.extra_lib_path is not None:
@@ -464,7 +477,7 @@ class Config (object):
                'XDG_DATA_DIRS': xdgdatadir,
                'XDG_CONFIG_DIRS': xdgconfigdir,
                'XCURSOR_PATH': xcursordir,
-               'ACLOCAL_FLAGS': '-I%s' % aclocaldir,
+               'ACLOCAL_FLAGS': aclocalflags,
                'ACLOCAL': "aclocal",
                'PERL5LIB': perl5lib,
                'GST_PLUGIN_PATH': gstpluginpath,
@@ -621,11 +634,50 @@ class Config (object):
         return True
 
     def prefix_is_build_tools(self):
-        return self.build_tools_prefix == self.prefix
+        return self._is_build_tools_config
 
     def target_distro_version_gte(self, distro_version):
         assert distro_version.startswith(self.target_distro + "_")
         return self.target_distro_version >= distro_version
+
+    def _create_paths(self):
+        if self.toolchain_prefix:
+            self._create_path(self.toolchain_prefix)
+        self._create_path(self.prefix)
+        self._create_path(self.sources)
+        self._create_path(self.logs)
+        # dict universal arches do not have an active prefix
+        if not isinstance(self.universal_archs, dict):
+            self._create_path(os.path.join(self.prefix, 'share', 'aclocal'))
+
+        if self._is_build_tools_config:
+            self._create_path(os.path.join(self.prefix, 'var', 'tmp'))
+
+
+    def _create_build_tools_config(self):
+        # Use a common prefix for the build tools for all the configurations
+        # so that it can be reused
+        self.build_tools_config = Config(is_build_tools_config=True)
+        self.build_tools_config.prefix = self.build_tools_prefix
+        self.build_tools_config.home_dir = self.home_dir
+        self.build_tools_config.local_sources = self.local_sources
+        self.build_tools_config.load()
+
+        self.build_tools_config.prefix = self.build_tools_prefix
+        self.build_tools_config.build_tools_prefix = self.build_tools_prefix
+        self.build_tools_config.sources = self.build_tools_sources
+        self.build_tools_config.build_tools_sources = self.build_tools_sources
+        self.build_tools_config.logs = self.build_tools_logs
+        self.build_tools_config.build_tools_logs = self.build_tools_logs
+        self.build_tools_config.cache_file = self.build_tools_cache
+        self.build_tools_config.build_tools_cache = self.build_tools_cache
+        self.build_tools_config.external_recipes = self.external_recipes
+        self.build_tools_config.extra_mirrors = self.extra_mirrors
+        self.build_tools_config.cached_sources = self.cached_sources
+        self.build_tools_config.vs_install_path = self.vs_install_path
+        self.build_tools_config.vs_install_version = self.vs_install_version
+
+        self.build_tools_config.do_setup_env()
 
     def _parse(self, filename, reset=True):
         config = {'os': os, '__file__': filename, 'env': self.config_env,
@@ -677,7 +729,8 @@ class Config (object):
 
     def _load_user_config(self):
         if os.path.exists(USER_CONFIG_FILE):
-            m.message('Loading default configuration from {}'.format(USER_CONFIG_FILE))
+            if not self._is_build_tools_config:
+                m.message('Loading default configuration from {}'.format(USER_CONFIG_FILE))
             self._parse(USER_CONFIG_FILE)
 
     def _load_cmd_config(self, filenames):
@@ -706,7 +759,7 @@ class Config (object):
 
     def _get_toolchain_target_platform_arch(self):
         platform_arch = '{}_' + self.target_arch
-        if self.target_platform != Platform.WINDOWS or self.prefix_is_build_tools():
+        if self.target_platform != Platform.WINDOWS or self._is_build_tools_config:
             return (self.target_platform, self.target_arch)
         if not self.variants.visualstudio:
             return ('mingw', self.target_arch)

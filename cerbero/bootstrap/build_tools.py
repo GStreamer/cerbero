@@ -90,39 +90,7 @@ class BuildTools (BootstrapperBase, Fetch):
         return ret
 
     def _setup_env(self):
-        # Use a common prefix for the build tools for all the configurations
-        # so that it can be reused
-        config = Config()
-        config.prefix = self.config.build_tools_prefix
-        config.home_dir = self.config.home_dir
-        config.local_sources = self.config.local_sources
-        config.load()
-
-        config.prefix = self.config.build_tools_prefix
-        config.build_tools_prefix = self.config.build_tools_prefix
-        config.sources = self.config.build_tools_sources
-        config.build_tools_sources = self.config.build_tools_sources
-        config.logs = self.config.build_tools_logs
-        config.build_tools_logs = self.config.build_tools_logs
-        config.cache_file = self.config.build_tools_cache
-        config.build_tools_cache = self.config.build_tools_cache
-        config.external_recipes = self.config.external_recipes
-        config.extra_mirrors = self.config.extra_mirrors
-        config.cached_sources = self.config.cached_sources
-        config.vs_install_path = self.config.vs_install_path
-        config.vs_install_version = self.config.vs_install_version
-
-        if config.toolchain_prefix and not os.path.exists(config.toolchain_prefix):
-            os.makedirs(config.toolchain_prefix)
-        if not os.path.exists(config.prefix):
-            os.makedirs(config.prefix)
-        if not os.path.exists(config.sources):
-            os.makedirs(config.sources)
-        if not os.path.exists(config.logs):
-            os.makedirs(config.logs)
-
-        config.do_setup_env()
-        self.cookbook = CookBook(config, offline=self.offline)
+        self.cookbook = CookBook(self.config.build_tools_config, offline=self.offline)
         self.recipes = self.BUILD_TOOLS
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 

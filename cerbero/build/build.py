@@ -690,6 +690,8 @@ class CMake (MakefilesBase):
             shutil.rmtree(cmake_files)
         self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
+        if not os.path.exists(self.build_dir):
+            os.makedirs(self.build_dir)
         # as build_dir is different from source dir, makefile location will be in build_dir.
         self.make_dir = self.build_dir
 
@@ -732,6 +734,8 @@ class Meson (Build, ModifyEnvBase) :
     # Build files require a build machine compiler when cross-compiling
     meson_needs_build_machine_compiler = False
     meson_builddir = "_builddir"
+    # We do not use cmake dependency files by default, speed up the build by disabling it
+    need_cmake = False
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
@@ -756,6 +760,10 @@ class Meson (Build, ModifyEnvBase) :
             self.make_check = self.make + ['test']
         if not self.make_clean:
             self.make_clean = self.make + ['clean']
+
+        # Allow CMake dependencies to be found if requested
+        if self.need_cmake:
+            self.append_env('CMAKE_PREFIX_PATH', self.config.prefix, sep=os.pathsep)
 
     @staticmethod
     def _get_option_value(opt_type, value):
@@ -897,8 +905,10 @@ class Meson (Build, ModifyEnvBase) :
             else:
                 props[key] += value
 
-        # We do not use cmake dependency files, speed up the build by disabling it
-        binaries = {'cmake': ['false']}
+        if self.need_cmake:
+            binaries = {}
+        else:
+            binaries = {'cmake': ['false']}
         # Get qmake and moc paths
         if self.config.qt5_qmake_path:
             binaries['qmake'] = [self.config.qt5_qmake_path]

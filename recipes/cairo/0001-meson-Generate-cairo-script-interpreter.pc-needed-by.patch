@@ -1,0 +1,101 @@
+From ebbaebdec12878836fc84d31c59ee324e67abc05 Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Fri, 16 Oct 2020 19:52:55 -0400
+Subject: [PATCH] meson: Generate cairo-script-interpreter.pc needed by GTK+
+
+---
+ build/configure.ac.features                           |  4 +++-
+ util/cairo-script/Makefile.am                         |  3 +++
+ .../cairo-script-interpreter-uninstalled.pc.in        |  8 ++++++++
+ util/cairo-script/cairo-script-interpreter.pc.in      | 10 ++++++++++
+ util/cairo-script/meson.build                         | 11 ++++++++++-
+ 5 files changed, 34 insertions(+), 2 deletions(-)
+ create mode 100644 util/cairo-script/cairo-script-interpreter-uninstalled.pc.in
+ create mode 100644 util/cairo-script/cairo-script-interpreter.pc.in
+
+diff --git a/build/configure.ac.features b/build/configure.ac.features
+index e0a46069c..3f26c2a6f 100644
+--- a/build/configure.ac.features
++++ b/build/configure.ac.features
+@@ -136,9 +136,11 @@ dnl
+ dnl Generate .pc files
+ dnl
+ 
+-dnl All .pc files are generated automatically except for this one
++dnl All .pc files are generated automatically except for these
+ AC_CONFIG_FILES([src/cairo.pc])dnl
+ AC_CONFIG_FILES([cairo-uninstalled.pc:src/cairo-uninstalled.pc.in])dnl
++AC_CONFIG_FILES([util/cairo-script/cairo-script-interpreter.pc])dnl
++AC_CONFIG_FILES([util/cairo-script/cairo-script-interpreter-uninstalled.pc:util/cairo-script/cairo-script-interpreter-uninstalled.pc.in])dnl
+ 
+ dnl pkg-config requires, non-pkgconfig cflags and libs, and total cflags and libs
+ CAIRO_FEATURE_VARS_REGISTER([BASE],[cairo])dnl
+diff --git a/util/cairo-script/Makefile.am b/util/cairo-script/Makefile.am
+index d5c2998ac..82519fb31 100644
+--- a/util/cairo-script/Makefile.am
++++ b/util/cairo-script/Makefile.am
+@@ -17,6 +17,9 @@ libcairo_script_interpreter_la_CFLAGS = $(CAIRO_CFLAGS)
+ libcairo_script_interpreter_la_LDFLAGS = -version-info $(CAIRO_LIBTOOL_VERSION_INFO) -no-undefined $(export_symbols)
+ libcairo_script_interpreter_la_LIBADD = $(top_builddir)/src/libcairo.la $(CAIRO_LIBS) $(lzo_LIBS) -lz
+ 
++pkgconfigdir = $(libdir)/pkgconfig
++pkgconfig_DATA = cairo-script-interpreter.pc
++
+ csi_replay_SOURCES = csi-replay.c
+ csi_replay_CFLAGS = $(CAIRO_CFLAGS)
+ csi_replay_LDADD = libcairo-script-interpreter.la $(top_builddir)/src/libcairo.la $(CAIRO_LIBS)
+diff --git a/util/cairo-script/cairo-script-interpreter-uninstalled.pc.in b/util/cairo-script/cairo-script-interpreter-uninstalled.pc.in
+new file mode 100644
+index 000000000..b3407bcba
+--- /dev/null
++++ b/util/cairo-script/cairo-script-interpreter-uninstalled.pc.in
+@@ -0,0 +1,8 @@
++Name: cairo-script-interpreter
++Description: script surface backend for cairo graphics library
++Version: @VERSION@
++
++Requires: cairo
++Libs: ${pc_top_builddir}/${pcfiledir}/util/cairo-script/libcairo-script-interpreter.la
++Cflags: -I${pc_top_builddir}/${pcfiledir}/@srcdir@/util/cairo-script
++
+diff --git a/util/cairo-script/cairo-script-interpreter.pc.in b/util/cairo-script/cairo-script-interpreter.pc.in
+new file mode 100644
+index 000000000..d773b1509
+--- /dev/null
++++ b/util/cairo-script/cairo-script-interpreter.pc.in
+@@ -0,0 +1,10 @@
++prefix=@prefix@
++libdir=@libdir@
++includedir=@includedir@
++
++Name: cairo-script-interpreter
++Description: script surface backend for cairo graphics library
++Version: @VERSION@
++Requires: cairo
++Libs: -L${libdir} -lcairo-script-interpreter
++Cflags: -I${includedir}/cairo
+diff --git a/util/cairo-script/meson.build b/util/cairo-script/meson.build
+index 8cedc6834..f50a200df 100644
+--- a/util/cairo-script/meson.build
++++ b/util/cairo-script/meson.build
+@@ -38,7 +38,16 @@ libcairoscript = library('cairo-script-interpreter',
+ inccairoscript = include_directories('.')
+ 
+ libcairoscript_dep = declare_dependency(link_with: libcairoscript,
+-  include_directories: [incbase, inccairoscript])
++  include_directories: [inccairoscript],
++  dependencies: libcairo_dep)
++
++pkgmod.generate(libcairoscript,
++  libraries: [libcairo],
++  description: 'script surface backend for cairo graphics library',
++  subdirs: [meson.project_name()],
++)
++
++meson.override_dependency('cairo-script-interpreter', libcairoscript_dep)
+ 
+ csi_replay_exe = executable('csi-replay', csi_replay_sources,
+   c_args: ['-DHAVE_CONFIG_H'],
+-- 
+2.29.2
+
