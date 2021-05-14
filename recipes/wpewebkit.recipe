@@ -173,6 +173,7 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-PlatformDisplayLibWPE-use-eglGetPlatformDisplay-when.patch',
                 'wpewebkit/0001-GLContextEGL-don-t-attempt-to-swap-buffers-for-surfa.patch',
                 'wpewebkit/0001-ThreadedCompositor-allow-null-native-surface-handles.patch',
+                'wpewebkit/0001-wpewebkit-try-to-find-icu-with-pkg-config.patch'
             ]
         else:
             self.deps.append('icu')
