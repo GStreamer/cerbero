@@ -4,15 +4,13 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'json-glib'
-    version = '1.4.4'
+    version = '1.6.2'
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = '720c5f4379513dc11fd97dc75336eb0c0d3338c53128044d9fabec4374f4bc47'
+    tarball_checksum = 'a33d66c6d038bda46b910c6c6d59c4e15db014e363dc997a0414c2e07d134f24'
     deps = ['glib']
-    patches = [# https://gitlab.gnome.org/GNOME/json-glib/merge_requests/17
-               'json-glib/0001-meson-Don-t-error-with-MSVC-C4819-warning.patch']
 
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']
