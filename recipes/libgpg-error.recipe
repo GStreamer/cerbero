@@ -27,5 +27,16 @@ class Recipe(recipe.Recipe):
         elif self.config.target_platform == Platform.IOS:
             shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.arm-unknown-linux-androideabi.h'),
                         os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.darwin10.h'))
+        pc = os.path.join(self.config.prefix, 'lib', 'pkgconfig', 'gpg-error.pc')
+        with open(pc, 'w') as pc_file:
+            pc_file.write('prefix=' + self.config.prefix + '\n')
+            pc_file.write('exec_prefix=${prefix}\n')
+            pc_file.write('libdir=${prefix}/lib\n')
+            pc_file.write('includedir=${prefix}/include\n\n')
+            pc_file.write('Name: gpg-error\n')
+            pc_file.write('Description: a library that defines common error values for all GnuPG components\n')
+            pc_file.write('Version:' + self.version + '\n')
+            pc_file.write('Libs: -l${libdir} -lgpg-error\n')
+            pc_file.write('Cflags: -I${includedir}\n')
         await super(recipe.Recipe, self).configure()
 
