@@ -15,6 +15,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '7505579ca0f290ad1847078c1e18f990c0ee5652aca7414687808382fe2d1223'
     allow_parallel_build = True
 
+    files_devel = ['lib/pkgconfig/libwebp.pc', 'lib/pkgconfig/libwebpdemux.pc']
     files_libs = ['libwebp', 'libwebpdemux']
 
     async def compile(self):
@@ -55,3 +56,17 @@ class Recipe(recipe.Recipe):
         for header in headers:
             full_header_name = os.path.join(headers_src, header)
             shutil.copy(full_header_name, headers_dest)
+
+        for lib in ['libwebp.pc', 'libwebpdecoder.pc']:
+            pc_in = os.path.join(self.build_dir, 'src', lib + '.in')
+            pc = os.path.join(self.config.prefix, 'lib', 'pkgconfig', lib)
+            shutil.copy(pc_in, pc)
+            with open(pc, 'r') as pc_file:
+                pc_contents = pc_file.read()
+            pc_contents = pc_contents.replace('@prefix@', self.config.prefix)
+            pc_contents = pc_contents.replace('@exec_prefix@', '${prefix}')
+            pc_contents = pc_contents.replace('@libdir@', '${prefix}/lib')
+            pc_contents = pc_contents.replace('@includedir@', '${prefix}/include')
+            pc_contents = pc_contents.replace('@PACKAGE_VERSION@', self.version)
+            with open(pc, 'w') as pc_file:
+                pc_file.write(pc_contents)
