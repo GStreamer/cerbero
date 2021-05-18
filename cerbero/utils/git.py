@@ -19,9 +19,10 @@
 import os
 import time
 import shutil
+import cerbero.utils.messages as m
 
 from cerbero.config import Platform
-from cerbero.utils import shell, run_until_complete
+from cerbero.utils import shell, run_until_complete, _
 from cerbero.errors import FatalError
 
 
@@ -150,6 +151,10 @@ async def submodules_update(git_dir, src_dir=None, fail=True, offline=False, log
     @param offline: don't use the network
     @type offline: false
     '''
+    if not os.path.exists(os.path.join(git_dir, '.gitmodules')):
+        m.log(_(".gitmodules does not exist in %s. No need to fetch submodules.") % git_dir, logfile)
+        return
+
     if src_dir:
         config = shell.check_output([GIT, 'config', '--file=.gitmodules', '--list'],
                                     fail=False, cmd_dir=git_dir, logfile=logfile)
