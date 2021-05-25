@@ -1,17 +1,17 @@
-From 37d2754e69734c9dfd494a0fa69a55d5ac215de0 Mon Sep 17 00:00:00 2001
-From: Fernando Jimenez <fjimenez@igalia.com>
-Date: Fri, 19 Mar 2021 17:30:52 +0100
+From e6d1642c197cfaaf71c5fc90b58c1df557fcb173 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
+Date: Tue, 25 May 2021 13:56:14 +0200
 Subject: [PATCH] Android: terminate process
 
 ---
- .../Launcher/glib/ProcessLauncherGLib.cpp     | 33 ++++++++++++++-----
- 1 file changed, 25 insertions(+), 8 deletions(-)
+ .../Launcher/glib/ProcessLauncherGLib.cpp     | 34 ++++++++++++++-----
+ 1 file changed, 26 insertions(+), 8 deletions(-)
 
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
-index a8a2f512..f8bbd878 100644
+index 260703ba..fd4a7f69 100644
 --- a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 +++ b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
-@@ -112,25 +112,28 @@ void ProcessLauncher::launchProcess()
+@@ -106,25 +106,29 @@ void ProcessLauncher::launchProcess()
  {
      IPC::Connection::SocketPair socketPair = IPC::Connection::createPlatformConnection(IPC::Connection::ConnectionOptions::SetCloexecOnServer);
  
@@ -44,10 +44,11 @@ index a8a2f512..f8bbd878 100644
 -        jniEnv->CallVoidMethod(jniObj, jMethodID, static_cast<int>(m_launchOptions.processType), fdArray);
 +        jniEnv->CallVoidMethod(jniObj, jMethodID, static_cast<long>(m_processIdentifier),
 +                               static_cast<int>(m_launchOptions.processType), fdArray);
- 
++
          jniEnv->DeleteLocalRef(fdArray);
          jniEnv->DeleteLocalRef(jClass);
-@@ -149,7 +152,21 @@ void ProcessLauncher::terminateProcess()
+     }
+@@ -142,7 +146,21 @@ void ProcessLauncher::terminateProcess()
          return;
      }
  

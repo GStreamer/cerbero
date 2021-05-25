@@ -1,18 +1,18 @@
-From 2d5e3ba525b3ef247f5476175eb9e25cbc9dd705 Mon Sep 17 00:00:00 2001
-From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
-Date: Fri, 29 Jan 2021 12:37:31 +0100
-Subject: [PATCH] Android: remove uses of shm_open and shm_unlink
+From 9741205478ebeb7565010d7d680380185c60e7fe Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
+Date: Tue, 25 May 2021 16:00:54 +0200
+Subject: [PATCH] Android remove uses of shm_open and shm_unlink
 
 ---
  .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 25 ++++++++++++++-----
  1 file changed, 19 insertions(+), 6 deletions(-)
 
 diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-index f413abff..79cbfd6c 100644
+index aff7b0d1..f2f5a804 100644
 --- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
 +++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-@@ -49,6 +49,9 @@
- #include <sys/syscall.h>
+@@ -54,6 +54,9 @@
+ #include "ArgumentCoders.h"
  #endif
  
 +#include <glib.h>
@@ -21,7 +21,7 @@ index f413abff..79cbfd6c 100644
  namespace WebKit {
  
  SharedMemory::Handle::Handle()
-@@ -116,6 +119,7 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+@@ -126,6 +129,7 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
  
  static int createSharedMemory()
  {
@@ -29,7 +29,7 @@ index f413abff..79cbfd6c 100644
      int fileDescriptor = -1;
  
  #if HAVE(LINUX_MEMFD_H)
-@@ -149,25 +153,34 @@ static int createSharedMemory()
+@@ -159,25 +163,34 @@ static int createSharedMemory()
          shm_unlink(tempName.data());
  
      return fileDescriptor;

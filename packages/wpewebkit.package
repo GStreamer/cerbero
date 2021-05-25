@@ -7,7 +7,7 @@ import os
 
 class Package(package.Package):
     name = 'wpewebkit'
-    version = '2.30.4'
+    version = '2.32.1'
     shortdesc = 'Web Platform for Embedded'
     longdesc = 'WPE WebKit allows embedders to create simple and performant \
         systems based on Web platform technologies. It is a WebKit port designed \
