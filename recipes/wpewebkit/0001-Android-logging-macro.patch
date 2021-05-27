@@ -1,0 +1,24 @@
+From 292e81f4d8342148875c56210da4ac5bae9b5fe7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
+Date: Tue, 25 May 2021 15:32:57 +0200
+Subject: [PATCH] Android logging macro
+
+---
+ Source/WebKit/config.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Source/WebKit/config.h b/Source/WebKit/config.h
+index ee3c03a5..63f4443d 100644
+--- a/Source/WebKit/config.h
++++ b/Source/WebKit/config.h
+@@ -64,3 +64,7 @@
+ #if ENABLE(WEBDRIVER_MOUSE_INTERACTIONS) || ENABLE(WEBDRIVER_KEYBOARD_INTERACTIONS) || ENABLE(WEBDRIVER_TOUCH_INTERACTIONS) || ENABLE(WEBDRIVER_WHEEL_INTERACTIONS)
+ #define ENABLE_WEBDRIVER_ACTIONS_API 1
+ #endif
++
++#include <android/log.h>
++#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WPEDebug", __VA_ARGS__)
++
+-- 
+2.25.1
+

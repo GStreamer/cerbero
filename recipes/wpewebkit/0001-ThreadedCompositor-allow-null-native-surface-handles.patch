@@ -1,18 +1,18 @@
-From d5eefa93bf01f6c926c9451e2a262e42632fb09a Mon Sep 17 00:00:00 2001
-From: Zan Dobersek <zdobersek@igalia.com>
-Date: Mon, 26 Apr 2021 15:07:01 +0200
-Subject: [PATCH 2/2] ThreadedCompositor: allow null native-surface handles for
- the purpose of surfaceless rendering.
+From 9b2bdf7dc1c5de5e1abcd9da34fa772ab6ff5e18 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
+Date: Tue, 25 May 2021 14:23:14 +0200
+Subject: [PATCH] ThreadedCompositor: allow null native-surface handles for the
+ purpose of surfaceless rendering
 
 ---
  .../threadedcompositor/ThreadedCompositor.cpp         | 11 ++++++-----
  1 file changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp b/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
-index b7cb12a1..6d7ff5c3 100644
+index 36659e46..92d6c966 100644
 --- a/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
 +++ b/Source/WebKit/Shared/CoordinatedGraphics/threadedcompositor/ThreadedCompositor.cpp
-@@ -68,9 +68,12 @@ ThreadedCompositor::ThreadedCompositor(Client& client, ThreadedDisplayRefreshMon
+@@ -70,9 +70,12 @@ ThreadedCompositor::ThreadedCompositor(Client& client, ThreadedDisplayRefreshMon
          m_scene = adoptRef(new CoordinatedGraphicsScene(this));
          m_nativeSurfaceHandle = m_client.nativeSurfaceHandleForCompositing();
  
@@ -28,15 +28,15 @@ index b7cb12a1..6d7ff5c3 100644
      });
  }
  
-@@ -82,8 +85,6 @@ void ThreadedCompositor::createGLContext()
+@@ -84,8 +87,6 @@ void ThreadedCompositor::createGLContext()
  {
      ASSERT(!RunLoop::isMain());
  
 -    ASSERT(m_nativeSurfaceHandle);
 -
-     m_context = GLContext::createContextForWindow(reinterpret_cast<GLNativeWindowType>(m_nativeSurfaceHandle), &PlatformDisplay::sharedDisplayForCompositing());
-     if (m_context)
-         m_context->makeContextCurrent();
+     // GLNativeWindowType depends on the EGL implementation: reinterpret_cast works
+     // for pointers (only if they are 64-bit wide and not for other cases), and static_cast for
+     // numeric types (and when needed they get extended to 64-bit) but not for pointers. Using
 -- 
-2.30.2
+2.25.1
 
