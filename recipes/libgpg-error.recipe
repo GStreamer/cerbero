@@ -19,13 +19,21 @@ class Recipe(recipe.Recipe):
     autoreconf = True
 
     async def configure(self):
+        if self.config.cross_compiling():
+            if self.config.target_arch == Architecture.ARM64:
+                cfg_file = 'lock-obj-pub.aarch64-unknown-linux-gnu.h'
+            elif self.config.target_arch == Architecture.ARM:
+                cfg_file = 'lock-obj-pub.arm-unknown-linux-androideabi.h'
+            else:
+                raise FatalError('Unsupported target arch: ' + self.config.target_arch)
+
         if self.config.target_platform == Platform.ANDROID:
             # Make sure android x86/x86_64/ARM64 had a valid syscfg
             # Same fix as for vlc : http://git.videolan.org/gitweb.cgi/vlc.git/?p=vlc.git;a=blb;f=contrib/src/gpg-error/rules.mak
-            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.arm-unknown-linux-androideabi.h'),
+            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', cfg_file),
                         os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.linux-android.h'))
         elif self.config.target_platform == Platform.IOS:
-            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.arm-unknown-linux-androideabi.h'),
+            shutil.copy(os.path.join(self.build_dir, 'src', 'syscfg', cfg_file),
                         os.path.join(self.build_dir, 'src', 'syscfg', 'lock-obj-pub.darwin10.h'))
         pc = os.path.join(self.config.prefix, 'lib', 'pkgconfig', 'gpg-error.pc')
         with open(pc, 'w') as pc_file:
