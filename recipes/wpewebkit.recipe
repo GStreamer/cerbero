@@ -175,6 +175,8 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-ThreadedCompositor-allow-null-native-surface-handles.patch',
                 'wpewebkit/0001-wpewebkit-try-to-find-icu-with-pkg-config.patch',
                 'wpewebkit/0001-wpewebkit-try-to-find-freetype-png-and-others-with-p.patch',
+                'wpewebkit/0001-WPE-Correctly-compute-wheel-event-phase-for-2D-axis-.patch',
+                'wpewebkit/0001-WPE-Rework-touch-based-gesture-controller.patch',
             ]
         else:
             self.deps.append('icu')
