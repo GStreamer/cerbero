@@ -5,7 +5,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     btype = BuildType.MESON
     licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['ext/sctp/usrsctp/LICENSE.md']}]
-    tarball_checksum = 'f382ab1caddd64aaa7acb7c4787487f63fd39bd0fde9c757655cbaa457c1185f'
+    tarball_checksum = '82d210bbfb0ecbff2121c52704e2b81660503235c54d6f4581786134137170b1'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {# enabled plugins
