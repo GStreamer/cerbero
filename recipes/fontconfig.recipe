@@ -19,7 +19,10 @@ class Recipe(recipe.Recipe):
         # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/138/
         'fontconfig/0001-handle-absolute-sysconfdir-when-installing-symlinks.patch',
         # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/165
-        'fontconfig/0001-meson-fix-cross-compilation-issues-with-gperf-header.patch'
+        'fontconfig/0001-meson-fix-cross-compilation-issues-with-gperf-header.patch',
+        # From git master post-2.13.93
+        'fontconfig/0001-Windows-Fix-symlink-privilege-error-detection.patch',
+        'fontconfig/0001-Overwrite-symlinks-for-config-files.patch',
     ]
 
     files_libs = ['libfontconfig']
