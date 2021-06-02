@@ -1,0 +1,131 @@
+From cfc6475fcdb94e60840227f3b12f45e99719d2a2 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 2 Jun 2021 17:16:41 +0530
+Subject: [PATCH] fcobjs: Remove duplicate function prototypes
+
+These are already defined in fcobjsghash.h which is generated from
+fcobjshash.gperf. This has been working fine because we were detecting
+the len of FC_GPERF_SIZE_T, but it's incorrect in some cases, such as
+on Windows, and then we get build errors like:
+
+```
+In file included from ../src/fcobjs.c:33:
+src/fcobjshash.gperf:28:1: error: conflicting types for 'FcObjectTypeHash'
+ "aspect",FC_ASPECT_OBJECT
+ ^~~~~~~~~~~~~~~~
+../src/fcobjs.c:28:1: note: previous declaration of 'FcObjectTypeHash' was here
+ FcObjectTypeHash (register const char *str, register FC_GPERF_SIZE_T len);
+ ^~~~~~~~~~~~~~~~
+In file included from ../src/fcobjs.c:33:
+src/fcobjshash.gperf:192:1: error: conflicting types for 'FcObjectTypeLookup'
+../src/fcobjs.c:31:1: note: previous declaration of 'FcObjectTypeLookup' was here
+ FcObjectTypeLookup (register const char *str, register FC_GPERF_SIZE_T len);
+ ^~~~~~~~~~~~~~~~~~
+```
+
+We don't actually need to auto-detect this value in configure if we
+let the header define it.
+---
+ configure.ac | 20 --------------------
+ meson.build  | 36 ------------------------------------
+ src/fcobjs.c |  6 ------
+ 3 files changed, 62 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index faee5b0..e239da0 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -208,26 +208,6 @@ fi
+ AC_CHECK_MEMBERS([struct dirent.d_type],,,
+ 	[#include <dirent.h>])
+ 
+-# Check the argument type of the gperf hash/lookup function
+-AC_MSG_CHECKING([The type of len parameter of gperf hash/lookup function])
+-fc_gperf_test="$(echo 'foo' | gperf -L ANSI-C)"
+-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+-	#include <string.h>
+-
+-	const char *in_word_set(register const char *, register size_t);
+-	$fc_gperf_test
+-	]])], [FC_GPERF_SIZE_T=size_t],
+-	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+-		#include <string.h>
+-
+-		const char *in_word_set(register const char *, register unsigned int);
+-		$fc_gperf_test
+-	]])], [FC_GPERF_SIZE_T="unsigned int"],
+-	[AC_MSG_ERROR([Unable to determine the type of the len parameter of the gperf hash/lookup function])]
+-)])
+-AC_DEFINE_UNQUOTED(FC_GPERF_SIZE_T, $FC_GPERF_SIZE_T, [The type of len parameter of the gperf hash/lookup function])
+-AC_MSG_RESULT($FC_GPERF_SIZE_T)
+-
+ #
+ # Checks for iconv
+ #
+diff --git a/meson.build b/meson.build
+index 3c96f1f..8151498 100644
+--- a/meson.build
++++ b/meson.build
+@@ -247,42 +247,6 @@ if not gperf.found()
+   gperf = find_program('gperf')
+ endif
+ 
+-sh = find_program('sh', required : false)
+-
+-if not sh.found() # host_machine.system() == 'windows' or not sh.found()
+-  # TODO: This is not always correct
+-  if cc.get_id() == 'msvc'
+-    gperf_len_type = 'size_t'
+-  else
+-    gperf_len_type = 'unsigned'
+-  endif
+-else
+-  gperf_test_format = '''
+-  #include <string.h>
+-  const char * in_word_set(const char *, @0@);
+-  @1@
+-  '''
+-  gperf_snippet_format = 'echo foo,bar | @0@ -L ANSI-C'
+-  gperf_snippet = run_command(sh, '-c', gperf_snippet_format.format(gperf.path()))
+-  gperf_test = gperf_test_format.format('size_t', gperf_snippet.stdout())
+-
+-  if cc.compiles(gperf_test)
+-    gperf_len_type = 'size_t'
+-  else
+-    gperf_test = gperf_test_format.format('unsigned', gperf_snippet.stdout())
+-    if cc.compiles(gperf_test)
+-      gperf_len_type = 'unsigned'
+-    else
+-      error('unable to determine gperf len type')
+-    endif
+-  endif
+-endif
+-
+-message('gperf len type is @0@'.format(gperf_len_type))
+-
+-conf.set('FC_GPERF_SIZE_T', gperf_len_type,
+-  description : 'The type of gperf "len" parameter')
+-
+ conf.set('_GNU_SOURCE', true)
+ 
+ conf.set_quoted('GETTEXT_PACKAGE', meson.project_name())
+diff --git a/src/fcobjs.c b/src/fcobjs.c
+index 33bba8d..b0d660f 100644
+--- a/src/fcobjs.c
++++ b/src/fcobjs.c
+@@ -24,12 +24,6 @@
+ 
+ #include "fcint.h"
+ 
+-static unsigned int
+-FcObjectTypeHash (register const char *str, register FC_GPERF_SIZE_T len);
+-
+-static const struct FcObjectTypeInfo *
+-FcObjectTypeLookup (register const char *str, register FC_GPERF_SIZE_T len);
+-
+ #include "fcobjshash.h"
+ 
+ #include <string.h>
+-- 
+2.31.1.windows.1
+

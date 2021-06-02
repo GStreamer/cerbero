@@ -23,6 +23,9 @@ class Recipe(recipe.Recipe):
         # From git master post-2.13.93
         'fontconfig/0001-Windows-Fix-symlink-privilege-error-detection.patch',
         'fontconfig/0001-Overwrite-symlinks-for-config-files.patch',
+        # Proper fix is pending, upstream issue is:
+        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/issues/247
+        'fontconfig/0001-fcobjs-Remove-duplicate-function-prototypes.patch',
     ]
 
     files_libs = ['libfontconfig']
