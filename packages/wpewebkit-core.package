@@ -1,0 +1,71 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import errno
+import tarfile
+import tempfile
+import os
+
+class Package(package.Package):
+    name = 'wpewebkit-core'
+    version = '2.32.1'
+    shortdesc = 'Web Platform for Embedded'
+    longdesc = 'WPE WebKit allows embedders to create simple and performant \
+        systems based on Web platform technologies. It is a WebKit port designed \
+        with flexibility and hardware acceleration in mind, leveraging commond 3D \
+        graphics APIs for best performance'
+    vendor = 'Igalia'
+    uuid = 'ba9d7b24-6174-4b31-9284-67fcad7fd879'
+    strip = True
+    strip_excludes = [
+        'libc.so',
+        'libm.so',
+        'libstdc++.so',
+    ]
+
+    files = [
+        'bzip2:libs',
+        'cairo:libs',
+        'expat:libs',
+        'fontconfig:libs',
+        'freetype:libs',
+        'glib:libs',
+        'glib-networking:misc',
+        'gmp:libs',
+        'gnutls:libs',
+        'harfbuzz:libs',
+        'icu:libs',
+        'libepoxy:libs',
+        'libgcrypt:libs',
+        'libffi:libs',
+        'libgpg-error:libs',
+        'libiconv:libs',
+        'libjpeg-turbo:libs',
+        'libpng:libs',
+        'libsoup:libs',
+        'libtasn1:libs',
+        'libwebp:libs',
+        'libwpe:libs',
+        'libxml2:libs',
+        'libxslt:libs',
+        'nettle:libs',
+        'orc:libs',
+        'pixman:libs',
+        'proxy-libintl:libs',
+        'libpsl:libs',
+        'openjpeg:libs',
+        'sqlite3:libs',
+        'xkbcommon:libs',
+        'wpewebkit',
+        'zlib:libs'
+    ]
+
+    files_devel = ['glib']
+
+    platform_files = {
+        Platform.ANDROID: [
+            'vulkan-android:libs',
+            'wpeandroid:libs:stl',
+            'wpebackend-android:libs'
+        ]
+    }
+
