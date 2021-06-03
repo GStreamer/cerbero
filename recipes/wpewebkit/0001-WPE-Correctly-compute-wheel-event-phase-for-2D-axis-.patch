@@ -1,0 +1,70 @@
+From 8aa80a266b980522157069226636c644650a0f8e Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Mon, 31 May 2021 09:21:36 +0200
+Subject: [PATCH 1/2] [WPE] Correctly compute wheel event phase for 2D axis
+ events
+
+---
+ Source/WebKit/UIProcess/API/wpe/WPEView.cpp | 39 ++++++++++++++++-----
+ 1 file changed, 31 insertions(+), 8 deletions(-)
+
+diff --git a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
+index 29851a15..1237858e 100644
+--- a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
++++ b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
+@@ -168,6 +168,27 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+                 Horizontal
+             };
+ 
++            // We treat an axis motion event with a value of zero to be equivalent
++            // to a 'stop' event. Motion events with zero motion don't exist naturally,
++            // so this allows a backend to express 'stop' events without changing API.
++            // The wheel event phase is adjusted accordingly.
++            WebWheelEvent::Phase phase = WebWheelEvent::Phase::PhaseChanged;
++            WebWheelEvent::Phase momentumPhase = WebWheelEvent::Phase::PhaseNone;
++
++#if WPE_CHECK_VERSION(1, 5, 0)
++            if (event->type & wpe_input_axis_event_type_mask_2d) {
++                auto* event2D = reinterpret_cast<struct wpe_input_axis_2d_event*>(event);
++                view.m_horizontalScrollActive = !!event2D->x_axis;
++                view.m_verticalScrollActive = !!event2D->y_axis;
++                if (!view.m_horizontalScrollActive && !view.m_verticalScrollActive)
++                    phase = WebWheelEvent::Phase::PhaseEnded;
++
++                auto& page = view.page();
++                page.handleWheelEvent(WebKit::NativeWebWheelEvent(event, page.deviceScaleFactor(), phase, momentumPhase));
++                return;
++            }
++#endif
++
+             switch (event->axis) {
+             case Vertical:
+                 view.m_horizontalScrollActive = !!event->value;
+@@ -177,14 +198,16 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+                 break;
+             }
+ 
+-            // We treat an axis motion event with a value of zero to be equivalent
+-            // to a 'stop' event. Motion events with zero motion don't exist naturally,
+-            // so this allows a backend to express 'stop' events without changing API.
+-            auto& page = view.page();
+-            if (event->value)
+-                page.handleWheelEvent(WebKit::NativeWebWheelEvent(event, page.deviceScaleFactor(), WebWheelEvent::Phase::PhaseChanged, WebWheelEvent::Phase::PhaseNone));
+-            else if (!view.m_horizontalScrollActive && !view.m_verticalScrollActive)
+-                page.handleWheelEvent(WebKit::NativeWebWheelEvent(event, page.deviceScaleFactor(), WebWheelEvent::Phase::PhaseEnded, WebWheelEvent::Phase::PhaseNone));
++            bool shouldDispatch = !!event->value;
++            if (!view.m_horizontalScrollActive && !view.m_verticalScrollActive) {
++                shouldDispatch = true;
++                phase = WebWheelEvent::Phase::PhaseEnded;
++            }
++
++            if (shouldDispatch) {
++                auto& page = view.page();
++                page.handleWheelEvent(WebKit::NativeWebWheelEvent(event, page.deviceScaleFactor(), phase, momentumPhase));
++            }
+         },
+         // handle_touch_event
+         [](void* data, struct wpe_input_touch_event* event)
+-- 
+2.30.2
+
