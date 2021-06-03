@@ -322,6 +322,9 @@ class GitCache (Source):
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
         self._previous_env = None
+        # For forced commits in the config
+        self.commit = self.config.recipe_commit(self.name) or self.commit
+        self.remotes.update(self.config.recipes_remotes.get(self.name, {}))
 
     async def fetch(self, checkout=True):
         # First try to get the sources from the cached dir if there is one
@@ -347,8 +350,7 @@ class GitCache (Source):
             if not self.offline:
                 await git.fetch(self.repo_dir, fail=False, logfile=get_logfile(self))
         if checkout:
-            commit = self.config.recipe_commit(self.name) or self.commit
-            await git.checkout(self.repo_dir, commit, logfile=get_logfile(self))
+            await git.checkout(self.repo_dir, self.commit, logfile=get_logfile(self))
             await git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
 
 
@@ -366,8 +368,6 @@ class Git (GitCache):
         if self.commit is None:
             # Used by recipes in recipes/toolchain/
             self.commit = 'origin/sdk-%s' % self.version
-        # For forced commits in the config
-        self.commit = self.config.recipe_commit(self.name) or self.commit
 
     async def extract(self):
         if os.path.exists(self.config_src_dir):
