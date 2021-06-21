@@ -245,6 +245,8 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_BULLSEYE
             elif d[1] == 'unstable' and d[2] == 'sid':
                 distro_version = DistroVersion.DEBIAN_SID
+            elif d[0] in ['debian', 'Debian GNU/Linux']:
+                distro_version = "debian_{number:02d}_{name}".format(number=int(d[1]), name=d[2])
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux']:

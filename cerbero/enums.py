@@ -78,6 +78,7 @@ class DistroVersion:
     DEBIAN_BUSTER = 'debian_10_buster'
     DEBIAN_BULLSEYE = 'debian_11_bullseye'
     DEBIAN_SID = 'debian_99_sid'
+    # further debian versions are generated automatically
     UBUNTU_LUCID = 'ubuntu_10_04_lucid'
     UBUNTU_MAVERICK = 'ubuntu_10_10_maverick'
     UBUNTU_NATTY = 'ubuntu_11_04_natty'
