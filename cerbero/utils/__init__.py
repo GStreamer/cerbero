@@ -251,17 +251,17 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.UBUNTU_FOCAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
-            elif d[1].startswith('7.') or d[1].startswith('wheezy') or distro_version == "wheezy":
+            elif d[1].startswith('7.') or d[1].startswith('wheezy'):
                 distro_version = DistroVersion.DEBIAN_WHEEZY
-            elif d[1].startswith('8.') or d[1].startswith('jessie') or distro_version == "jessie":
+            elif d[1].startswith('8.') or d[1].startswith('jessie'):
                 distro_version = DistroVersion.DEBIAN_JESSIE
-            elif d[1].startswith('9.') or d[1].startswith('stretch') or distro_version == "stretch":
+            elif d[1].startswith('9.') or d[1].startswith('stretch'):
                 distro_version = DistroVersion.DEBIAN_STRETCH
-            elif d[1].startswith('10.') or d[1].startswith('buster') or distro_version == "buster":
+            elif d[1].startswith('10.') or d[1].startswith('buster'):
                 distro_version = DistroVersion.DEBIAN_BUSTER
-            elif d[1].startswith('11.') or d[1].startswith('bullseye') or distro_version == "bullseye":
+            elif d[1].startswith('11.') or d[1].startswith('bullseye'):
                 distro_version = DistroVersion.DEBIAN_BULLSEYE
-            elif d[1] == 'unstable' and distro_version == 'sid':
+            elif d[1] == 'unstable' and d[2] == 'sid':
                 distro_version = DistroVersion.DEBIAN_SID
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
