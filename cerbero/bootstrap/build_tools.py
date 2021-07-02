@@ -100,8 +100,8 @@ class BuildTools (BootstrapperBase, Fetch):
         except ImportError:
             return
 
-        version = [int(v) for v in stv.__version__.split('.')]
-        if len(version) < 1 or version[:1] < [49]:
+        version = stv.__version__.split('.', 1)
+        if len(version) < 1 or int(version[0]) < 49:
             return
 
         m.warning('detected setuptools >= 49.0.0, installing fallback site.py file. '
