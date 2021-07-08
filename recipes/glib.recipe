@@ -60,6 +60,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-Windows-fix-FD_READ-condition-flag-still-set-on-reco.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1428
         'glib/0001-Add-missing-extern-to-the-dllexport-version-of-GLIB_.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1698
+        'glib/0001-gslice-Inline-win32-implementation-of-g_getenv-to-av.patch',
     ]
 
     files_libs = [
