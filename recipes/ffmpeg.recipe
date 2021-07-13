@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.MAKEFILE
     configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
-        --ar="$AR" --as="$CC" --cc="$CC" --ld="$CC" --nm="$NM" --ranlib="$RANLIB" \
+        --ar="$AR" --as="$AS" --cc="$CC" --ld="$CC" --nm="$NM" --ranlib="$RANLIB" \
         --strip="$STRIP" --windres="$RC" \
         --enable-static --enable-pic --enable-shared \
         --disable-avdevice --disable-postproc --disable-swscale \
@@ -49,6 +49,7 @@ class Recipe(recipe.Recipe):
                 gas = self.get_env('GAS')
                 if gas:
                     self.set_env('AS', gas)
+                    self.set_env('ASFLAGS', self.get_env('CPPFLAGS'))
             else:
                 cc = self.get_env('CC')
                 if cc:
