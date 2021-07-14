@@ -11,8 +11,11 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     url = 'gnome://'
     tarball_checksum = '8ca1f86f23a76b5c7640624f7d5490705c78e81375e1741c9a1c41ce7f8f7ff7'
-    meson_options = {'ca_certificates_path': '', 'libproxy_support': 'false',
-                     'gnome_proxy_support': 'false', 'pkcs11_support': 'false',
+
+    # Taken from upstream remove on bump
+    patches = [name + '/0001-meson-use-c-std-c99.patch']
+
+    meson_options = {'libproxy': 'disabled', 'gnome_proxy': 'disabled',
                      'gnutls': 'disabled', 'openssl': 'enabled',
                      # Also build static modules on all platforms
                      'static_modules': 'true'}
