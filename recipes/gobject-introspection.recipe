@@ -21,6 +21,9 @@ class Recipe(recipe.Recipe):
         # Taken from upstream, remove on bump
         # https://gitlab.gnome.org/GNOME/gobject-introspection/merge_requests/38
         name + '/0003-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch',
+        # Taken from upstream, remove on bump
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/194
+        name + '/0001-Drop-deprecated-xml.etree.ElementTree.Element.getchi.patch',
     ]
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
