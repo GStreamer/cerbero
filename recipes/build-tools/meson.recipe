@@ -5,16 +5,15 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.55.3'
+    version = '0.58.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = '6bed2a25a128bbabe97cf40f63165ebe800e4fcb46db8ab7ef5c2b5789f092a5'
-    patches = [
-        # Remove on bump to 0.56, https://github.com/mesonbuild/meson/pull/7021
-        'meson/0001-meson-Allow-cross-compile-without-a-native-compiler.patch',
-    ]
+    tarball_checksum = '3144a3da662fcf79f1e5602fa929f2821cba4eba28c2c923fe0a7d3e3db04d5d'
+
+    # https://github.com/mesonbuild/meson/pull/8993
+    patches = [name + '/0001-gnome-Always-pass-absolute-L-paths-to-g-ir-scanner.patch']
 
     deps = ['ninja']
 
