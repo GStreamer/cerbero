@@ -1,0 +1,27 @@
+From e4e1a00e2dc4ca94301750ccbc6f605906e2a85e Mon Sep 17 00:00:00 2001
+From: Ignacio Casal Quinteiro <qignacio@amazon.com>
+Date: Thu, 26 Sep 2019 16:12:05 +0200
+Subject: [PATCH] meson: use c std c99
+
+c11 is not supported on centos 6 nor on Visual Studio which
+does not even fully supports c99
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index d07d7fa..eac24fd 100644
+--- a/meson.build
++++ b/meson.build
+@@ -3,7 +3,7 @@ project(
+   version: '2.62.3',
+   license: 'LGPL2.1+',
+   meson_version: '>= 0.50.0',
+-  default_options: ['c_std=c11']
++  default_options: ['c_std=c99']
+ )
+ 
+ prefix = get_option('prefix')
+-- 
+2.31.1.windows.1
+
