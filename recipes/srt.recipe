@@ -5,17 +5,16 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'srt'
-    version = '1.4.1'
+    version = '1.4.3'
     url = 'https://github.com/Haivision/srt/archive/v%(version)s.tar.gz'
-    tarball_checksum = 'e80ca1cd0711b9c70882c12ec365cda1ba852e1ce8acd43161a21a04de0cbf14'
+    tarball_checksum = 'c06e05664c71d635c37207a2b5a444f2c4a95950a3548402b3e0c524f735b33d'
     licenses = [License.MPLv2]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
+    # CXX11 builds stuff we don't need, and causes a build failure on mingw
     configure_options = '-DUSE_ENCLIB=openssl -DENABLE_CXX11=OFF'
     # openssl on Linux
     use_system_libs = True
-
-    patches = ['srt/0001-Allow-using-public-API-when-building-with-MSVC.patch']
 
     files_libs = ['libsrt']
     files_devel = ['include/srt', 'lib/pkgconfig/srt.pc']
