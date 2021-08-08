@@ -14,4 +14,4 @@ class Recipe(recipe.Recipe):
     files_libs = ['libunwind']
     files_devel = ['include/libunwind-*.h',
                    'include/unwind.h',
-                   'lib/pkgconfig/libunwind-*.pc']
+                   'lib/pkgconfig/libunwind*.pc']
