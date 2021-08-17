@@ -382,6 +382,8 @@ async def download_urllib2(url, destination=None, check_cert=True, overwrite=Fal
     @param destination: destination where the file will be saved
     @type destination: str
     '''
+    # 1MiB chunk size (same as dot:giga for wget)
+    chunk_size = 1024 * 1024
     ctx = None
     if not check_cert:
         import ssl
@@ -392,12 +394,25 @@ async def download_urllib2(url, destination=None, check_cert=True, overwrite=Fal
     if not destination:
         destination = os.path.basename(url)
 
+    from datetime import datetime
+    start_time = datetime.now()
+
     try:
         with open(destination, 'wb') as d:
             req = urllib.request.Request(url)
             req.add_header('User-Agent', USER_AGENT)
-            f = urllib.request.urlopen(req, context=ctx)
-            d.write(f.read())
+            f = urllib.request.urlopen(req, timeout=20, context=ctx)
+            while True:
+                chunk = f.read(chunk_size)
+                if not chunk:
+                    break
+                d.write(chunk)
+                print('.', end='', file=logfile, flush=True)
+            total_time = (datetime.now() - start_time).total_seconds()
+            size = d.tell() / 1024
+            speed = size / total_time
+            print('\nDownloaded {:2,.2f} KiB in {:2,.2f} seconds at {:2,.2f} KiB/s'
+                  .format(size, total_time, speed), file=logfile, flush=True)
     except urllib.error.HTTPError as e:
         if os.path.exists(destination):
             os.remove(destination)
