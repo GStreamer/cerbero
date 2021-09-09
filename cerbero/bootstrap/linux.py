@@ -173,6 +173,7 @@ class RedHatBootstrapper(UnixBootstrapper):
         'openssl-devel',
         'alsa-lib-devel',
         'perl-FindBin',
+        'perl-IPC-Cmd',
     ]
 
     def __init__(self, config, offline, assume_yes):

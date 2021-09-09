@@ -1,0 +1,79 @@
+From 4215bbcc7ab4d7c36735ef6fb336d204a2b4a221 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 22 Oct 2024 23:34:03 -0300
+Subject: [PATCH 4/4] Fix build with NASM on Windows
+
+Windows does not allow section alignment higher than 64 bytes.
+
+This commit partially reverts https://github.com/openssl/openssl/commit/25391acc140e215774242bf3b0a51d59754a23f4 .
+---
+ crypto/ec/asm/ecp_nistz256-x86_64.pl | 4 ++--
+ crypto/sha/asm/keccak1600-x86_64.pl  | 2 +-
+ crypto/sha/asm/sha1-mb-x86_64.pl     | 2 +-
+ crypto/sha/asm/sha256-mb-x86_64.pl   | 2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/crypto/ec/asm/ecp_nistz256-x86_64.pl b/crypto/ec/asm/ecp_nistz256-x86_64.pl
+index 4da9a14..e485eaa 100644
+--- a/crypto/ec/asm/ecp_nistz256-x86_64.pl
++++ b/crypto/ec/asm/ecp_nistz256-x86_64.pl
+@@ -85,7 +85,7 @@ $code.=<<___;
+ .extern	OPENSSL_ia32cap_P
+ 
+ # The polynomial
+-.section .rodata align=4096
++.section .rodata align=64
+ .align 64
+ .Lpoly:
+ .quad 0xffffffffffffffff, 0x00000000ffffffff, 0x0000000000000000, 0xffffffff00000001
+@@ -4725,7 +4725,7 @@ close TABLE;
+ die "insane number of elements" if ($#arr != 64*16*37-1);
+ 
+ print <<___;
+-.section .rodata align=4096
++.section .rodata align=64
+ .globl	ecp_nistz256_precomputed
+ .type	ecp_nistz256_precomputed,\@object
+ .align	4096
+diff --git a/crypto/sha/asm/keccak1600-x86_64.pl b/crypto/sha/asm/keccak1600-x86_64.pl
+index 3dbf177..09f75b4 100644
+--- a/crypto/sha/asm/keccak1600-x86_64.pl
++++ b/crypto/sha/asm/keccak1600-x86_64.pl
+@@ -567,7 +567,7 @@ SHA3_squeeze:
+ ___
+ }
+ $code.=<<___;
+-.section .rodata align=256
++.section .rodata align=64
+ .align	256
+ 	.quad	0,0,0,0,0,0,0,0
+ .type	iotas,\@object
+diff --git a/crypto/sha/asm/sha1-mb-x86_64.pl b/crypto/sha/asm/sha1-mb-x86_64.pl
+index d9d1630..593711c 100644
+--- a/crypto/sha/asm/sha1-mb-x86_64.pl
++++ b/crypto/sha/asm/sha1-mb-x86_64.pl
+@@ -1374,7 +1374,7 @@ $code.=<<___;
+ ___
+ 						}	}}}
+ $code.=<<___;
+-.section .rodata align=256
++.section .rodata align=64
+ .align	256
+ 	.long	0x5a827999,0x5a827999,0x5a827999,0x5a827999	# K_00_19
+ 	.long	0x5a827999,0x5a827999,0x5a827999,0x5a827999	# K_00_19
+diff --git a/crypto/sha/asm/sha256-mb-x86_64.pl b/crypto/sha/asm/sha256-mb-x86_64.pl
+index 9398b79..60128fd 100644
+--- a/crypto/sha/asm/sha256-mb-x86_64.pl
++++ b/crypto/sha/asm/sha256-mb-x86_64.pl
+@@ -1340,7 +1340,7 @@ $code.=<<___;
+ ___
+ 					}	}}}
+ $code.=<<___;
+-.section .rodata align=256
++.section .rodata align=64
+ .align	256
+ K256:
+ ___
+-- 
+2.44.0.windows.1
+

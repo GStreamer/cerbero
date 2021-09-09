@@ -1,7 +1,8 @@
-From 96881a7b26d569b08dc5847204856ebb5fc532f9 Mon Sep 17 00:00:00 2001
+From 94d7dc4d928b6dbd7e4a34021d0fff8ddfc73f65 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 9 Jun 2020 15:14:32 +0530
-Subject: [PATCH] windows-makefile.tmpl: Generate and install pkgconfig files
+Subject: [PATCH 2/2] windows-makefile.tmpl: Generate and install pkgconfig
+ files
 
 Copied from unix-makefile.tmpl
 ---
@@ -9,27 +10,27 @@ Copied from unix-makefile.tmpl
  1 file changed, 49 insertions(+), 1 deletion(-)
 
 diff --git a/Configurations/windows-makefile.tmpl b/Configurations/windows-makefile.tmpl
-index 8ef70b8..bc1e199 100644
+index 894834cfb7..51ad2e9b5b 100644
 --- a/Configurations/windows-makefile.tmpl
 +++ b/Configurations/windows-makefile.tmpl
-@@ -314,7 +314,7 @@ PROCESSOR= {- $config{processor} -}
- {- dependmagic('build_programs'); -}: build_programs_nodep
- 
+@@ -424,7 +424,7 @@ build_html_docs: $(HTMLDOCS1) $(HTMLDOCS3) $(HTMLDOCS5) $(HTMLDOCS7)
+ 	@
  build_generated: $(GENERATED_MANDATORY)
--build_libs_nodep: $(LIBS) {- join(" ",map { shlib_import($_) } @{$unified_info{libraries}}) -}
-+build_libs_nodep: libcrypto.pc libssl.pc openssl.pc $(LIBS) {- join(" ",map { shlib_import($_) } @{$unified_info{libraries}}) -}
- build_engines_nodep: $(ENGINES)
- build_programs_nodep: $(PROGRAMS) $(SCRIPTS)
- 
-@@ -371,6 +371,7 @@ clean: libclean
+ 	@
+-build_libs_nodep: $(LIBS) {- join(" ",map { platform->sharedlib_import($_) // () } @{$unified_info{libraries}}) -}
++build_libs_nodep: libcrypto.pc libssl.pc openssl.pc $(LIBS) {- join(" ",map { platform->sharedlib_import($_) // () } @{$unified_info{libraries}}) -}
+ 	@
+ build_modules_nodep: $(MODULES)
+ 	@
+@@ -484,6 +484,7 @@ clean: libclean
  	-del /Q /S /F engines\*.lib engines\*.exp
  	-del /Q /S /F apps\*.lib apps\*.rc apps\*.res apps\*.exp
  	-del /Q /S /F test\*.exp
 +	-del /Q /S /F openssl.pc libcrypto.pc libssl.pc
- 	-rmdir /Q /S test\test-runs
+ 	-rd /Q /S test\test-runs
  
  distclean: clean
-@@ -426,6 +427,14 @@ install_dev: install_runtime_libs
+@@ -566,6 +567,14 @@ install_dev: install_runtime_libs
  	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_LIBS) "$(libdir)"
  	@if "$(SHLIBS)"=="" \
  	 "$(PERL)" "$(SRCDIR)\util\copy.pl" ossl_static.pdb "$(libdir)"
@@ -40,12 +41,12 @@ index 8ef70b8..bc1e199 100644
 +	@$(ECHO) "install libssl.pc -> $(DESTDIR)$(libdir)\pkgconfig\libssl.pc"
 +	@"$(PERL)" "$(SRCDIR)\util\copy.pl" libssl.pc "$(DESTDIR)$(libdir)\pkgconfig"
 +	@$(ECHO) "install openssl.pc -> $(DESTDIR)$(libdir)\pkgconfig\openssl.pc"
-+	@"$(PERL)" "$(SRCDIR)\util\copy.pl" openssl.pc "$(DESTDIR)$(libdir)\pkgconfig"
++	@"$(PERL)" "$(SRCDIR)\util\copy.pl" openssl.pc "$(DESTDIR)$(libdir)\pkgconfig" 
+ 	@"$(PERL)" "$(SRCDIR)\util\mkdir-p.pl" "$(CMAKECONFIGDIR)"
+ 	@"$(PERL)" "$(SRCDIR)\util\copy.pl" $(INSTALL_EXPORTERS_CMAKE) "$(CMAKECONFIGDIR)"
  
- uninstall_dev:
- 
-@@ -472,6 +481,45 @@ install_html_docs:
- uninstall_html_docs:
+@@ -660,6 +669,45 @@ $(BLDDIR)\apps\openssl.cnf: makefile
+ 	@if NOT "$(SRCDIR)"=="$(BLDDIR)" copy "$(SRCDIR)\apps\$(@F)" "$(BLDDIR)\apps"
  
  # Building targets ###################################################
 +#
@@ -88,8 +89,8 @@ index 8ef70b8..bc1e199 100644
 +	@$(ECHO) "Version: $(VERSION)" >> openssl.pc
 +	@$(ECHO) "Requires: libssl libcrypto" >> openssl.pc
  
- configdata.pm: "$(SRCDIR)\Configure" {- join(" ", map { '"'.$_.'"' } @{$config{build_file_templates}}, @{$config{build_infos}}, @{$config{conf_files}}) -}
+ makefile: configdata.pm {- join(" ", map { '"'.$_.'"' } @{$config{build_file_templates}}) -}
  	@$(ECHO) "Detected changed: $?"
 -- 
-2.27.0.windows.1
+2.46.0
 
