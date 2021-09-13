@@ -1,7 +1,7 @@
-From 6c85a583572229922ff685f353feedbeaeecf0d9 Mon Sep 17 00:00:00 2001
+From 81c4bd656cd6850fc06aabc632b4992b155bcbce Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
 Date: Fri, 15 Apr 2016 11:24:29 +0100
-Subject: [PATCH 01/12] bzlib.h: don't use WINAPI and add
+Subject: [PATCH 01/11] bzlib.h: don't use WINAPI and add
  __declspec(dllexport/dllimport)
 
 windows.h does #define WINAPI __stdcall but we want
@@ -16,7 +16,7 @@ by default, but MSVC doesn't).
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/bzlib.h b/bzlib.h
-index 8277123..219a94f 100644
+index 8966a6c..bc0df9b 100644
 --- a/bzlib.h
 +++ b/bzlib.h
 @@ -82,12 +82,12 @@ typedef
@@ -37,13 +37,13 @@ index 8277123..219a94f 100644
  #else
  #   define BZ_API(func) func
 -- 
-2.19.1
+2.30.2
 
 
-From 48f1c5863d1f8ec32f682d010dbe772a9d46e0bb Mon Sep 17 00:00:00 2001
+From c5d2e53e33bb7817650fc74fe0d8470da2f3636d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
 Date: Fri, 15 Apr 2016 11:26:43 +0100
-Subject: [PATCH 02/12] meson: add meson build for bz2
+Subject: [PATCH 02/11] meson: add meson build for bz2
 
 ---
  meson.build | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -134,13 +134,13 @@ index 0000000..7f70507
 +
 +# FIXME: build docs
 -- 
-2.19.1
+2.30.2
 
 
-From 28dba9f327e19a9cd13a9259a1f59d65b36bd7d8 Mon Sep 17 00:00:00 2001
+From 26effe6e1b5e6649f434c4a044460feb02a04b5b Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 17 Jun 2016 15:55:36 +0530
-Subject: [PATCH 03/12] bzlib.h: Don't need to #include windows.h anymore
+Subject: [PATCH 03/11] bzlib.h: Don't need to #include windows.h anymore
 
 We no longer use the WINAPI macro
 ---
@@ -148,7 +148,7 @@ We no longer use the WINAPI macro
  1 file changed, 5 deletions(-)
 
 diff --git a/bzlib.h b/bzlib.h
-index 219a94f..955baf4 100644
+index bc0df9b..5fa9eb4 100644
 --- a/bzlib.h
 +++ b/bzlib.h
 @@ -76,11 +76,6 @@ typedef
@@ -164,13 +164,13 @@ index 219a94f..955baf4 100644
  #   define BZ_API(func) func
  #   define BZ_EXTERN __declspec(dllexport) extern
 -- 
-2.19.1
+2.30.2
 
 
-From 580d70a187dab25820523e88af26dea67e047fd8 Mon Sep 17 00:00:00 2001
+From d1aaeff5784360310c615196be845f2408a95439 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 17 Jun 2016 15:57:54 +0530
-Subject: [PATCH 04/12] bzlib.h: Don't use dllimport/dllexport when
+Subject: [PATCH 04/11] bzlib.h: Don't use dllimport/dllexport when
  BZ_STATIC_COMPILATION is defined
 
 This allows code to see the correct prototypes for linking to the static
@@ -182,7 +182,7 @@ fail to find those symbols.
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/bzlib.h b/bzlib.h
-index 955baf4..acc6bf8 100644
+index 5fa9eb4..536375c 100644
 --- a/bzlib.h
 +++ b/bzlib.h
 @@ -75,7 +75,8 @@ typedef
@@ -196,13 +196,13 @@ index 955baf4..acc6bf8 100644
  #   define BZ_API(func) func
  #   define BZ_EXTERN __declspec(dllexport) extern
 -- 
-2.19.1
+2.30.2
 
 
-From e51a4a15b20abf422fba043cdd5b8f2ebd537872 Mon Sep 17 00:00:00 2001
+From 3fc8638c1e9a27f6537e6f68d7e45e761f831da2 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 17 Jun 2016 15:59:11 +0530
-Subject: [PATCH 05/12] meson: soversion should be an unsigned integer
+Subject: [PATCH 05/11] meson: soversion should be an unsigned integer
 
 Either as an integer, or as a string containing an integer
 ---
@@ -223,13 +223,13 @@ index 7f70507..8146535 100644
  bz2_c_args = ['-D_FILE_OFFSET_BITS=64']
  
 -- 
-2.19.1
+2.30.2
 
 
-From 4d9a917d818c45a008ad20121fbdfb45ac04c5cb Mon Sep 17 00:00:00 2001
+From 708ed9bf749072b4af2eca002fe6d6e5d1a9c20b Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 17 Jun 2016 16:00:21 +0530
-Subject: [PATCH 06/12] meson: Ignore warnings about 'insecure functions' that
+Subject: [PATCH 06/11] meson: Ignore warnings about 'insecure functions' that
  are used everywhere by bz2
 
 ---
@@ -251,13 +251,13 @@ index 8146535..bc333c5 100644
  
  bz2_incs = include_directories('.')
 -- 
-2.19.1
+2.30.2
 
 
-From aca8425eab7095c97980d83edf3527d06617768e Mon Sep 17 00:00:00 2001
+From aeb4a9d4647df80c53f0457331d1cc2d6fe4550e Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 13 Dec 2018 20:19:18 +0530
-Subject: [PATCH 07/12] Update to latest meson, fix MSVC support, etc.
+Subject: [PATCH 07/11] Update to latest meson, fix MSVC support, etc.
 
 ---
  meson.build | 61 ++++++++++++++++++++++++-----------------------------
@@ -358,13 +358,13 @@ index bc333c5..c2cb942 100644
  
  # FIXME: build docs
 -- 
-2.19.1
+2.30.2
 
 
-From 70ca7688f527cf17078b6e6551ef7800550a3e0a Mon Sep 17 00:00:00 2001
+From a58c851aaf85b37453b8c889c735289a5da7d056 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 13 Dec 2018 20:22:55 +0530
-Subject: [PATCH 08/12] Don't use __declspec(dllimport/export) for symbol
+Subject: [PATCH 08/11] Don't use __declspec(dllimport/export) for symbol
  exporting
 
 This partially reverts commit 42f2a11dbe251cea54844a987ca0e0715b1d8ca9.
@@ -377,7 +377,7 @@ static.
  1 file changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/bzlib.h b/bzlib.h
-index acc6bf8..8a0363d 100644
+index 536375c..1585623 100644
 --- a/bzlib.h
 +++ b/bzlib.h
 @@ -75,15 +75,14 @@ typedef
@@ -400,13 +400,13 @@ index acc6bf8..8a0363d 100644
  #else
  #   define BZ_API(func) func
 -- 
-2.19.1
+2.30.2
 
 
-From ed95413aa0bd4d6f435b53429cf56dcdea98834b Mon Sep 17 00:00:00 2001
+From 1045a0b474bc3f3d94e909fae56728fa41a0d34e Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 13 Dec 2018 20:26:34 +0530
-Subject: [PATCH 09/12] libbz2.def: Don't encode the library name
+Subject: [PATCH 09/11] libbz2.def: Don't encode the library name
 
 With MSVC we output bz2.dll, not libbz2.dll
 ---
@@ -423,41 +423,13 @@ index 2dc0dd8..6e4ddf6 100644
  EXPORTS
  	BZ2_bzCompressInit
 -- 
-2.19.1
+2.30.2
 
 
-From 9984c2128e15d309a85922599d54366387265c57 Mon Sep 17 00:00:00 2001
-From: Nirbheek Chauhan <nirbheek@centricular.com>
-Date: Fri, 14 Dec 2018 14:29:38 +0530
-Subject: [PATCH 10/12] Don't use \ in #include lines
-
-Causes a build failure with MinGW, and is also against the convention
-around path separators in #include lines.
----
- bzip2.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/bzip2.c b/bzip2.c
-index 6de9d1d..dc626a4 100644
---- a/bzip2.c
-+++ b/bzip2.c
-@@ -128,7 +128,7 @@
- #if BZ_LCCWIN32
- #   include <io.h>
- #   include <fcntl.h>
--#   include <sys\stat.h>
-+#   include <sys/stat.h>
- 
- #   define NORETURN       /**/
- #   define PATH_SEP       '\\'
--- 
-2.19.1
-
-
-From 928fd716ecffa87f47d47585a9e09ff364c7689a Mon Sep 17 00:00:00 2001
+From 38dce8671edb92516eea9738298241aea520f8a2 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Sat, 15 Dec 2018 03:41:52 +0530
-Subject: [PATCH 11/12] meson: Set the dylib current_version as the project
+Subject: [PATCH 10/11] meson: Set the dylib current_version as the project
  version
 
 Just for completeness in ABI compatibility.
@@ -478,53 +450,28 @@ index c2cb942..400a1c3 100644
  )
  
 -- 
-2.19.1
+2.30.2
 
 
-From d98301c372c5066c22410cb8323da08badd4de64 Mon Sep 17 00:00:00 2001
-From: Nirbheek Chauhan <nirbheek@centricular.com>
-Date: Sat, 15 Dec 2018 04:12:36 +0530
-Subject: [PATCH 12/12] Don't use 'small' as a function prototype parameter
+From 9d5f7d3c421691a3e44919cfe77544e0ac6c0711 Mon Sep 17 00:00:00 2001
+From: Aaron Boxer <boxerab@gmail.com>
+Date: Mon, 13 Sep 2021 16:55:09 -0400
+Subject: [PATCH 11/11] bump version to 1.0.8
 
-While using MinGW or targetting old Windows versions, windows.h defines
-`small` as `char`, which results in a compiler error:
-
-error: two or more data types in declaration specifiers
 ---
- bzlib.h | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/bzlib.h b/bzlib.h
-index 8a0363d..5dd7461 100644
---- a/bzlib.h
-+++ b/bzlib.h
-@@ -111,7 +111,7 @@ BZ_EXTERN int BZ_API(BZ2_bzCompressEnd) (
- BZ_EXTERN int BZ_API(BZ2_bzDecompressInit) ( 
-       bz_stream *strm, 
-       int       verbosity, 
--      int       small
-+      int       small_
-    );
+diff --git a/meson.build b/meson.build
+index 400a1c3..f0b46fb 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,4 +1,4 @@
+-project('bzip2', 'c', version : '1.0.6', meson_version : '>=0.49')
++project('bzip2', 'c', version : '1.0.8', meson_version : '>=0.49')
  
- BZ_EXTERN int BZ_API(BZ2_bzDecompress) ( 
-@@ -135,7 +135,7 @@ BZ_EXTERN BZFILE* BZ_API(BZ2_bzReadOpen) (
-       int*  bzerror,   
-       FILE* f, 
-       int   verbosity, 
--      int   small,
-+      int   small_,
-       void* unused,    
-       int   nUnused 
-    );
-@@ -211,7 +211,7 @@ BZ_EXTERN int BZ_API(BZ2_bzBuffToBuffDecompress) (
-       unsigned int* destLen,
-       char*         source, 
-       unsigned int  sourceLen,
--      int           small, 
-+      int           small_,
-       int           verbosity 
-    );
- 
+ bzip2_sources = [
+   'blocksort.c',
 -- 
-2.19.1
+2.30.2
 
