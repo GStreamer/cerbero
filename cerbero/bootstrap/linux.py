@@ -20,7 +20,7 @@ from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import ConfigurationError
-from cerbero.utils import shell
+from cerbero.utils import user_is_root, shell
 from cerbero.utils import messages as m
 
 import shlex
@@ -37,6 +37,8 @@ class UnixBootstrapper (BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         BootstrapperBase.__init__(self, config, offline)
         self.assume_yes = assume_yes
+        if user_is_root() and 'sudo' in self.tool: # no need for sudo as root user
+          self.tool.remove('sudo')
 
     def start(self, jobs=0):
         for c in self.checks:
@@ -127,6 +129,8 @@ class RedHatBootstrapper (UnixBootstrapper):
                 self.packages.append('glibc.i686')
             if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
                 self.packages.append('libncurses-compat-libs.i686')
+        if user_is_root():
+            return
         # Use sudo to gain root access on everything except RHEL
         if self.config.distro_version == DistroVersion.REDHAT_6:
             self.tool = ['su', '-c', shlex.join(self.tool)]
