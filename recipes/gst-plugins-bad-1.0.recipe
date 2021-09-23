@@ -543,6 +543,8 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('ladspa', 'effects', dep='ladspa')
             self.disable_plugin('mms', 'net_restricted', option='libmms', dep='libmms')
             self.disable_plugin('openjpeg', 'codecs', dep='openjpeg')
+            # https://gitlab.freedesktop.org/gstreamer/gst-plugins-bad/-/merge_requests/2545
+            self.patches = [self.name + '/0001-meson-Fix-build-with-Dopenjpeg-disabled.patch']
             self.disable_plugin('rtmp', 'net_restricted', option='rtmp', dep='librtmp')
             self.disable_plugin('sbc', 'codecs', dep='sbc')
             self.disable_plugin('spandsp', 'codecs', dep='spandsp')

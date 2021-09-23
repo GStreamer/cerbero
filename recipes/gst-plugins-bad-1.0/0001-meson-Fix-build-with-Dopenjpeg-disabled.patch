@@ -1,0 +1,35 @@
+From cdd8b377a9f5817228b4cf507a8f40f4032a8d9c Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 23 Sep 2021 17:36:20 +0530
+Subject: [PATCH] meson: Fix build with -Dopenjpeg=disabled
+
+tests/check/meson.build uses the openjpeg_dep variable
+unconditionally, and the subdir_done() is useless anyway, since the
+plugin is only built if openjpeg_dep.found() is true. Fixes:
+
+..\tests\check\meson.build:23:0: ERROR: Unknown variable "openjpeg_dep".
+
+In particular, this fixes the build on UWP since we disable openjpeg
+explicitly in Cerbero when building for UWP.
+---
+ ext/openjpeg/meson.build | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/ext/openjpeg/meson.build b/ext/openjpeg/meson.build
+index 822f2c94f..94597fb16 100644
+--- a/ext/openjpeg/meson.build
++++ b/ext/openjpeg/meson.build
+@@ -6,10 +6,6 @@ openjpeg_sources = [
+ 
+ openjpeg_cargs = []
+ 
+-if get_option('openjpeg').disabled()
+-  subdir_done()
+-endif
+-
+ openjpeg_dep = dependency('libopenjp2', version : '>=2.2',
+                           fallback : ['libopenjp2', 'libopenjp2_dep'],
+                           required : get_option('openjpeg'))
+-- 
+2.33.0.windows.2
+

@@ -72,6 +72,8 @@ class Recipe(custom.GStreamer):
 
         if self.using_msvc():
             if self.config.variants.uwp:
+                # https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/890
+                self.patches = [self.name + '/0001-meson-Fix-gst-launch-build-on-UWP.patch']
                 # Most symbols in DbgHelp.h are not allowed for UWP
                 self.meson_options['dbghelp'] = 'disabled'
             else:

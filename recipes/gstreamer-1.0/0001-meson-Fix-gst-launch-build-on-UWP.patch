@@ -1,0 +1,28 @@
+From c68bfffa1aaa813763e1eb5b1ffced6ebf66a817 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 23 Sep 2021 17:07:09 +0530
+Subject: [PATCH] meson: Fix gst-launch build on UWP
+
+The APIs we need from WinMM for higher timer resolution are only
+available for non-UWP apps. The winmm library itself is still
+available, so we need to disable the check.
+---
+ tools/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/meson.build b/tools/meson.build
+index e22721d9d..c5bf4f9a0 100644
+--- a/tools/meson.build
++++ b/tools/meson.build
+@@ -4,7 +4,7 @@ extra_launch_dep = []
+ extra_launch_arg = []
+ 
+ if gst_parse
+-  if host_system == 'windows'
++  if host_system == 'windows' and not building_for_uwp
+     winmm_lib = cc.find_library('winmm', required: false)
+     if winmm_lib.found() and cc.has_header('timeapi.h')
+       extra_launch_dep += [winmm_lib]
+-- 
+2.33.0.windows.2
+
