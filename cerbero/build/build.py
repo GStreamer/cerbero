@@ -669,7 +669,11 @@ class CMake (MakefilesBase):
             self.make = ['ninja', '-v']
             self.make_install = self.make + ['install']
         else:
-            self.configure_options += ['-G', 'Unix Makefiles']
+            if self.config.platform == Platform.WINDOWS and \
+                    self.config.distro != Distro.MSYS :
+                self.configure_options += ['-G', 'MSYS Makefiles']
+            else:
+                self.configure_options += ['-G', 'Unix Makefiles']
             self.make += ['VERBOSE=1']
 
         if self.config.target_platform == Platform.WINDOWS:
