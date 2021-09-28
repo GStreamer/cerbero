@@ -185,7 +185,7 @@ class Recipe(recipe.Recipe):
                                  ''.format(perl, found, m))
         # OpenSSL guesses the libdir incorrectly on x86_64
         config_sh = 'perl ./Configure --prefix=' + self.config.prefix + \
-            ' --libdir=lib' + self.config.lib_suffix + '  no-makedepend '
+            ' --libdir=lib' + self.config.lib_suffix + '  no-makedepend no-unit-test '
         if self.config.target_platform == Platform.IOS:
             # Note: disable 'no-devcryptoeng' when we finally target the
             # *real* ios configuration targets
