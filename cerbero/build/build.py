@@ -548,6 +548,8 @@ class Autotools (MakefilesBase):
     async def configure(self):
         # Build with PIC for static linking
         self.configure_tpl += ' --with-pic '
+        # Disable automatic dependency tracking, speeding up one-time builds
+        self.configure_tpl += ' --disable-dependency-tracking '
         # Only use --disable-maintainer mode for real autotools based projects
         if os.path.exists(os.path.join(self.config_src_dir, 'configure.in')) or\
                 os.path.exists(os.path.join(self.config_src_dir, 'configure.ac')):
