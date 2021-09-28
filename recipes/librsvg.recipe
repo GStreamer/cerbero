@@ -1,6 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
 from pathlib import Path
+
+from cerbero.build.build import modify_environment
+
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
@@ -10,6 +12,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'gnome://'
     tarball_checksum = 'cff4dd3c3b78bfe99d8fcfad3b8ba1eee3289a0823c0e118d78106be6b84c92b'
+    configure_options = ' --disable-always-build-tests --disable-tools '
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
@@ -41,14 +44,22 @@ class Recipe(recipe.Recipe):
             ]
         else:
             self.autoreconf = False
-               
+        if self.config.platform == Platform.WINDOWS:
+            # MSYS2 does not add . to PATH, so we need to add this ourselves
+            # so that our python3 wrapper script is found"
+            self.prepend_env('PATH', self.make_dir, sep=os.pathsep)
 
+
+    @modify_environment
     async def compile(self):
         # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
         # but on Windows Python 3 is `python.exe`. Meson already handles this
         # for us, but Autotools can't.
         # NOTE: Remove this when the recipe is ported to Meson.
         if self.config.platform == Platform.WINDOWS:
-            with (Path(self.build_dir) / 'python3').open('w') as f:
+            python3 = Path(self.build_dir) / 'python3'
+            with python3.open('w') as f:
                 f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
+            shell.new_call(['chmod', '+x', python3])
+
         await super().compile()
