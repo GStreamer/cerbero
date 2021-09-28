@@ -30,6 +30,7 @@ from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
 from cerbero.utils import EnvVar, EnvValue
 from cerbero.utils import messages as m
+from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.env import get_vs_year_version
 
 
@@ -374,9 +375,6 @@ class Config (object):
         bindir = os.path.join(prefix, 'bin')
         manpathdir = os.path.join(prefix, 'share', 'man')
         infopathdir = os.path.join(prefix, 'share', 'info')
-        pkgconfigbin = os.path.join(self.build_tools_prefix, 'bin', 'pkg-config')
-        pkgconfigdatadir = os.path.join(prefix, 'share', 'pkgconfig')
-        pkgconfigdir = os.path.join(libdir, 'pkgconfig')
         typelibpath = os.path.join(libdir, 'girepository-1.0')
         xdgdatadir = os.path.join(prefix, 'share')
         xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
@@ -466,16 +464,12 @@ class Config (object):
             includedir = self._join_path(includedir,
                 os.path.join(self.toolchain_prefix, 'include'))
 
-
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': ld_library_path,
                'LDFLAGS': ldflags,
                'PATH': path,
                'MANPATH': manpathdir,
                'INFOPATH': infopathdir,
-               'PKG_CONFIG': pkgconfigbin,
-               'PKG_CONFIG_PATH': '%s' % pkgconfigdatadir,
-               'PKG_CONFIG_LIBDIR': '%s' % pkgconfigdir,
                'GI_TYPELIB_PATH': typelibpath,
                'XDG_DATA_DIRS': xdgdatadir,
                'XDG_CONFIG_DIRS': xdgconfigdir,
@@ -492,8 +486,12 @@ class Config (object):
                'MONO_GAC_PREFIX': prefix,
                'GSTREAMER_ROOT': prefix,
                'CERBERO_PREFIX': self.prefix,
-               'CERBERO_HOST_SOURCES': self.sources
+               'CERBERO_HOST_SOURCES': self.sources,
                }
+
+        PkgConfig.set_executable(env, self)
+        PkgConfig.set_default_search_dir(os.path.join(prefix, 'share', 'pkgconfig'), env, self)
+        PkgConfig.add_search_dir(os.path.join(libdir, 'pkgconfig'), env, self)
 
         # Some autotools recipes will call the native (non-cross) compiler to
         # build generators, and we don't want it to use these. We will set the

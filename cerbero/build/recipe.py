@@ -31,6 +31,7 @@ from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalFlatFilesProvider
 from cerbero.config import Platform
 from cerbero.errors import FatalError
+from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
@@ -327,14 +328,11 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             return os.path.join(self.config.prefix, self.config.target_arch)
         return self.config.prefix
 
-    def _get_unique_ordered(self, elems):
-        used = []
-        return [x for x in elems if x not in used and (used.append(x) or True)]
-
     def _get_la_deps_from_pc (self, laname, pcname, env):
-        ret = shell.check_output(['pkg-config', '--libs-only-l', '--static', pcname], env=env, logfile=self.logfile)
+        pkgc = PkgConfig([pcname], env=env)
+        libs =  set(pkgc.static_libraries())
         # Don't add the library itself to the list of dependencies
-        return ['lib' + lib[2:] for lib in self._get_unique_ordered(ret.split()) if lib[2:] != laname[3:]]
+        return ['lib' + lib for lib in libs if lib != laname[3:]]
 
     def _resolve_deps(self, deps):
         resolved = []
@@ -418,9 +416,9 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
 
         pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
         env = self.env.copy()
-        env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
         if self.use_system_libs:
             add_system_libs(self.config, env, self.env)
+        PkgConfig.add_search_dir(pluginpcdir, env, self.config)
 
         # retrieve the list of files we need to generate
         for f in self.devel_files_list():

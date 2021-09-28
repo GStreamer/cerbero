@@ -21,8 +21,9 @@ import subprocess
 import os
 import sys
 
+from cerbero.enums import Distro
 from cerbero.errors import FatalError
-from cerbero.utils import shell
+from cerbero.utils import shell, to_winpath
 
 class PkgConfig(object):
     '''
@@ -60,6 +61,10 @@ class PkgConfig(object):
         res = self._exec('--libs-only-l', '-l')
         return self._remove_deps(PkgConfig.libraries, res)
 
+    def static_libraries(self):
+        res = self._exec('--libs-only-l --static', '-l')
+        return self._remove_deps(PkgConfig.libraries, res)
+
     def requires(self):
         res = []
         for x in self._exec('--print-requires', '\n'):
@@ -90,6 +95,22 @@ class PkgConfig(object):
             include_dirs.extend(pkgconfig.include_dirs())
         return list(set(include_dirs))
 
+    @staticmethod
+    def set_default_search_dir(path, env, config):
+        env['PKG_CONFIG_LIBDIR'] = path
+
+    @staticmethod
+    def add_search_dir(path, env, config):
+        PkgConfig._add_path(path, env, config, 'PKG_CONFIG_PATH')
+
+    @staticmethod
+    def set_executable(env, config):
+        if config.distro == Distro.MSYS2:
+            # We use pkg-config installed with pacman
+            env['PKG_CONFIG'] = "/ucrt64/bin/pkg-config"
+            return
+        env['PKG_CONFIG'] = os.path.join(config.build_tools_prefix, 'bin', 'pkg-config')
+
     def _remove_deps(self, func, all_values):
         if not self.inherit:
             deps = func(self.deps_pkgconfig)
@@ -97,7 +118,7 @@ class PkgConfig(object):
         return all_values
 
     def _exec(self, mode, delimiter=None):
-        cmd = '%s %s %s' % (self.cmd, mode, ' '.join(self.libs))
+        cmd = '%s %s %s' % (self.env.get('PKG_CONFIG', self.cmd), mode, ' '.join(self.libs))
         return self._call(cmd, delimiter, env=self.env)
 
     @staticmethod
@@ -114,3 +135,12 @@ class PkgConfig(object):
                 res.remove('')
             return [x.strip() for x in res]
         return output
+
+    @staticmethod
+    def _add_path(path, env, config, var):
+        separator = os.pathsep
+        dirs = [path]
+        env_paths = env.get(var, None)
+        if env_paths is not None:
+            dirs += env_paths.split(separator)
+        env[var] = separator.join(dirs)
