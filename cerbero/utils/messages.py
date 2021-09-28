@@ -24,12 +24,26 @@ import logging
 import shutil
 
 
+if sys.platform == 'win32':
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+
+
 ACTION_TPL = '-----> %s'
 DONE_STEP_TPL = '[(%s/%s) %s -> %s]'
 STEP_TPL = '[(%s/%s @ %d%%) %s -> %s]'
 START_TIME = None
 SHELL_CLEAR_LINE = "\r\033[K"
 SHELL_MOVE_UP = "\033[F"
+
+
+# Enable support fot VT-100 escapes in Windows 10
+# https://docs.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+# For an unknown reason, subprocess disables this flag and it has to
+# be re-enabled each time
+def enable_vt100():
+    if sys.platform == 'win32':
+        kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
 
 
 def console_is_interactive():
@@ -52,6 +66,7 @@ class StdoutManager:
         self.clear_lines = 0
 
     def output(self, msg):
+        enable_vt100()
         self.clear_status()
         sys.stdout.write(msg)
         sys.stdout.flush()
@@ -59,12 +74,13 @@ class StdoutManager:
         self.clear_lines = 0
 
     def clear_status (self):
-        if console_is_interactive() and sys.platform != 'win32':
+        if console_is_interactive():
             clear_prev_status = SHELL_CLEAR_LINE + "".join((SHELL_CLEAR_LINE + SHELL_MOVE_UP for i in range(self.clear_lines)))
             sys.stdout.write(clear_prev_status)
             sys.stdout.flush()
 
     def output_status(self, status):
+        enable_vt100()
         self.clear_status()
         sys.stdout.write(status)
         sys.stdout.flush()
