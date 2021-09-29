@@ -102,7 +102,7 @@ class Recipe(recipe.Recipe):
         # On Windows, make fails if V=1 is passed with:
         # `couldn't commit memory for cygwin heap, Win32 error 0`
         if self.config.platform == Platform.WINDOWS:
-            self.make = ['make']
+            self.make.remove('V=1')
 
     async def configure(self):
         await super(recipe.Recipe, self).configure()
