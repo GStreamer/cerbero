@@ -46,6 +46,8 @@ class Build(Command):
                         '0 = number of CPUs.')),
                 ArgparseArgument('--build-tools', '-b', action='store_true',
                     default=False, help=_('Runs the build command for the build tools of this config.')),
+                ArgparseArgument('--steps', '-s', nargs='*', action='store', type=str,
+                    help=_('List of steps to execute, instead of all build steps.')),
                 ]
             if force is None:
                 args.append(
@@ -73,11 +75,11 @@ class Build(Command):
             config = config.build_tools_config
         self.runargs(config, args.recipe, args.missing_files, self.force,
                      self.no_deps, dry_run=args.dry_run, offline=args.offline,
-                     deps_only=self.deps_only, jobs=args.jobs)
+                     deps_only=self.deps_only, jobs=args.jobs, steps_filter=args.steps)
 
     def runargs(self, config, fuzzy_recipes, missing_files=False, force=False,
                 no_deps=False, cookbook=None, dry_run=False, offline=False,
-                deps_only=False, jobs=None):
+                deps_only=False, jobs=None, steps_filter=None):
         if cookbook is None:
             cookbook = CookBook(config, offline=offline)
 
@@ -91,7 +93,8 @@ class Build(Command):
 
         oven = Oven(recipes, cookbook, force=self.force,
                     no_deps=self.no_deps, missing_files=missing_files,
-                    dry_run=dry_run, deps_only=deps_only, jobs=jobs)
+                    dry_run=dry_run, deps_only=deps_only, jobs=jobs,
+                    steps_filter=steps_filter)
         oven.start_cooking()
 
 

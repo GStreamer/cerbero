@@ -74,10 +74,13 @@ class Oven (object):
     @type dry_run: bool
     @ivar deps_only: only build depenencies and not the recipes
     @type deps_only: bool
+    @ivar steps_filter: only executes the steps in the list
+    @type steps_filter: list
     '''
 
     def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False, dry_run=False, deps_only=False, jobs=None):
+                 missing_files=False, dry_run=False, deps_only=False, jobs=None,
+                 steps_filter =None):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -90,6 +93,7 @@ class Oven (object):
         self.deps_only = deps_only
         shell.DRY_RUN = dry_run
         self.jobs = jobs
+        self.steps_filter = steps_filter
         if not self.jobs:
             self.jobs = determine_num_of_cpus()
         if self.config.platform == Platform.WINDOWS:
@@ -125,6 +129,11 @@ class Oven (object):
                   ' '.join([x.name for x in ordered_recipes]))
 
         steps = [step[1] for step in recipes[0].steps]
+        if self.steps_filter is not None:
+            steps = [s for s in steps if s in self.steps_filter]
+            if len(steps) == 0:
+                raise FatalError(_('No valid steps found in %s') %
+                                 self.steps_filter)
         self._build_status_printer = BuildStatusPrinter(steps, self.interactive)
         self._static_libraries_built = []
 
@@ -445,7 +454,9 @@ class Oven (object):
                 raise AbortedError()
 
     async def _cook_recipe_step (self, recipe, step, count):
-       # check if the current step needs to be done
+        # check if the current step needs to be done
+        if self.steps_filter is not None and step not in self.steps_filter:
+            return
         if self.cookbook.step_done(recipe.name, step) and not self.force:
             self._build_status_printer.update_recipe_step(count, recipe.name, step)
             return

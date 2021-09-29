@@ -776,6 +776,7 @@ class Meson (Build, ModifyEnvBase) :
         # Allow CMake dependencies to be found if requested
         if self.need_cmake:
             self.append_env('CMAKE_PREFIX_PATH', self.config.prefix, sep=os.pathsep)
+        self.meson_dir = os.path.join(self.build_dir, self.meson_builddir)
 
     @staticmethod
     def _get_option_value(opt_type, value):

@@ -77,6 +77,9 @@ $ ./cerbero-uninstalled build glib
 # Force-rebuild a single recipe
 $ ./cerbero-uninstalled buildone glib
 
+# Run the compile step of a recipe
+$ ./cerbero-uninstalled buildone glib --steps compile
+
 # Create a package (this automatically builds all recipes in the package)
 $ ./cerbero-uninstalled package gstreamer-1.0
 ```
