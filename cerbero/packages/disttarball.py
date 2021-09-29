@@ -23,7 +23,7 @@ import tempfile
 
 import cerbero.utils.messages as m
 from cerbero.utils import shell, _
-from cerbero.enums import Platform
+from cerbero.enums import Platform, Distro
 from cerbero.errors import FatalError, UsageError, EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.tools import strip
@@ -142,7 +142,7 @@ class DistTarball(PackagerBase):
                 os.remove(filename)
             else:
                 raise UsageError("File %s already exists" % filename)
-        if self.config.platform == Platform.WINDOWS:
+        if self.config.distro == Distro.MSYS:
             self._write_tar_windows(filename, package_prefix, files)
         else:
             self._write_tar(filename, package_prefix, files)
@@ -175,7 +175,7 @@ class DistTarball(PackagerBase):
         shell.new_call(compress_cmd)
 
     def _write_tar(self, filename, package_prefix, files):
-        tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
+        tar_cmd = [shell.get_tar_cmd(), '-C', self.prefix, '-cf', filename]
         # ensure we provide a unique list of files to tar to avoid
         # it creating hard links/copies
         files = sorted(set(files))

@@ -204,7 +204,7 @@ class GenCache(BaseCache):
         arch = os.path.basename(config.sources)
         try:
             shell.new_call(
-                ['tar',
+                [shell.get_tar_cmd(),
                     '-C', config.home_dir,
                     '--use-compress-program=xz --threads=0',
                     '--exclude=var/tmp',

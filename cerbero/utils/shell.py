@@ -35,7 +35,7 @@ import collections
 from pathlib import Path, PurePath
 from distutils.version import StrictVersion
 
-from cerbero.enums import CERBERO_VERSION, Platform
+from cerbero.enums import CERBERO_VERSION, Platform, Distro
 from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus, CerberoSemaphore
 from cerbero.utils import messages as m
 from cerbero.errors import CommandError, FatalError
@@ -47,9 +47,10 @@ TAR = 'tar'
 TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 SUBPROCESS_EXCEPTIONS = (FileNotFoundError, PermissionError, subprocess.CalledProcessError)
 
-
-PLATFORM = system_info()[0]
-CPU_BOUND_SEMAPHORE = CerberoSemaphore(determine_num_of_cpus())
+info = system_info()
+PLATFORM = info[0]
+DISTRO = info[2]
+CPU_BOUND_SEMAPHORE = CerberoSemaphore(info[4])
 NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(2)
 DRY_RUN = False
 
@@ -316,7 +317,7 @@ def apply_patch(patch, directory, strip=1, logfile=None):
     call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
 
 
-async def unpack(filepath, output_dir, logfile=None):
+async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
     '''
     Extracts a tarball
 
@@ -324,20 +325,23 @@ async def unpack(filepath, output_dir, logfile=None):
     @type filepath: str
     @param output_dir: output directory
     @type output_dir: str
+    @param force_tarfile: forces use of tarfile
+    @type force_tarfile: bool
     '''
     m.log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
-    # Recent versions of tar are much faster than the tarfile module, but we
-    # can't use tar on Windows because MSYS tar is ancient and buggy.
     if filepath.endswith(TARBALL_SUFFIXES):
-        if PLATFORM != Platform.WINDOWS:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            await async_call(['tar', '-C', output_dir, '-xf', filepath])
-        else:
+        # Recent versions of tar are much faster than the tarfile module, but we
+        # can't use tar on Windows because MSYS tar is ancient and buggy.
+        if DISTRO == Distro.MSYS or force_tarfile:
             cmode = 'bz2' if filepath.endswith('bz2') else filepath[-2:]
             tf = tarfile.open(filepath, mode='r:' + cmode)
             tf.extractall(path=output_dir)
+        else:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath])
+
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
@@ -704,6 +708,22 @@ def which(pgm, path=None):
                 pext = p + ext
                 if os.path.exists(pext):
                     return pext
+
+
+def get_tar_cmd():
+    '''
+    Returns the tar command to use
+
+    @return: the tar command
+    @rtype: str
+    '''
+    # Use bsdtar with MSYS2 since tar hangs
+    # https://github.com/msys2/MSYS2-packages/issues/1548
+    if DISTRO == Distro.MSYS2:
+        return 'bsdtar'
+    else:
+        return TAR
+
 
 def check_tool_version(tool_name, needed, env, version_arg='--version'):
     found = False
