@@ -302,6 +302,9 @@ class Config (object):
             m.message('Build tools install prefix will be {}'.format(self.prefix))
         else:
             m.message('Install prefix will be {}'.format(self.prefix))
+            if self.distro == Distro.MSYS:
+                m.warning('Support for the old MSYS is now deprecated. Check the README to migrate to MSYS2 for faster build times')
+
         # Store current os.environ data
         arches = []
         if isinstance(self.universal_archs, dict):
@@ -521,13 +524,17 @@ class Config (object):
         self.set_property('build', None)
         self.set_property('target', None)
         platform, arch, distro, distro_version, num_of_cpus = system_info()
+        target_distro = distro
+        # In Windows we do not differenciate between MSYS and MSYS2 for the target_distro
+        if platform == Platform.WINDOWS:
+            target_distro = Distro.WINDOWS
         self.set_property('platform', platform)
         self.set_property('num_of_cpus', num_of_cpus)
         self.set_property('target_platform', platform)
         self.set_property('arch', arch)
         self.set_property('target_arch', arch)
         self.set_property('distro', distro)
-        self.set_property('target_distro', distro)
+        self.set_property('target_distro', target_distro)
         self.set_property('distro_version', distro_version)
         self.set_property('target_distro_version', distro_version)
         self.set_property('packages_prefix', None)

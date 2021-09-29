@@ -149,18 +149,24 @@ class Recipe(recipe.Recipe):
             self.make += ['build_libs', 'openssl.pc', 'libssl.pc', 'libcrypto.pc']
             self.make_install = ['make', 'install_dev', 'RANLIB=' + ranlib]
 
+       
         if self.config.platform == Platform.WINDOWS:
-            # Msys ships with a too-old perl, so we modify PATH to use the
-            # mingw-perl that was downloaded and installed by bootstrap.
-            openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
-            self.prepend_env('PATH', openssl_path, sep=';')
+            if self.config.distro == Distro.MSYS:
+                # Msys ships with a too-old perl, so we modify PATH to use the
+                # mingw-perl that was downloaded and installed by bootstrap.
+                openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
+                self.prepend_env('PATH', openssl_path, sep=';')
+
             # Ensure that our Perl's File/Spec.pm uses backward slashes when
             # building for MSVC and forward-slashes when building for MinGW.
             # The vars for the MinGW case are automatically set by the MSYS
             # terminal, but they might get overriden by something, which will
             # cause Perl to use backward slashes and fail
             # `Configurations/unix-checker.pm` on configure.
-            self.set_env('MSYSTEM', 'MINGW32')
+            if self.config.distro == Distro.MSYS:
+                self.set_env('MSYSTEM', 'MINGW32')
+            else:
+                self.set_env('MSYSTEM', 'MSYS')
             if self.using_msvc():
                 self.set_env('TERM', 'dumb')
             else:

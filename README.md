@@ -326,32 +326,22 @@ Download the [Git for Windows installer](https://gitforwindows.org/) and run it.
 
 Git will be installed at `C:\Program Files\Git`.
 
-#### Install MSYS/MinGW
+#### Install MSYS2
 
-Download the [`mingw-get-setup` executable installer](http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download) and run it.
+Install the latests MSYS2 following the [instructions on their site](https://www.msys2.org/).
 
-* First page, keep all the options as-is
+MSYS2 will be installed at `C:\Msys64`.
 
-* Second page will download the latest package catalogue and base packages
+Some programs like Git or Python require an interative shell with MSYS2. Install [aliases.sh](data/msys2/profile.d/aliases.sh) to run them through `winpty`.
 
-* Once done, the MinGW Installation Manager will open, select the following
-  packages under Basic Setup:
+`$ cp -r data/msys2/profile.d/* /etc/profile.d`
 
-![Under Basic Setup, select mingw-developer-toolkit, mingw32-base, and msys-base](/data/images/msys-install-packages.png)
+**IMPORTANT:** MSYS2 installs several applications to launch the shell configured for
+different compilers. You must run Cerbero using the MSYS2 MSYS app.
 
-Then, click on the `Installation` menu and select `Apply Changes`. MSYS will be
-installed at `C:\MinGW`.
-
-**IMPORTANT:** After installation, you must create a shortcut on the desktop to
-`C:\MinGW\msys\1.0\msys.bat` which will run the MinGW shell. **You must run
-Cerbero from inside that**.
-
-**NOTE**: Cerbero does not use the MinGW compiler toolchain shipped with MSYS.
+**NOTE**: Cerbero does not use the MinGW compiler toolchain provided with MSYS2.
 We download our own custom [GCC toolchain](docs/toolchains.md#gcc-mingw) during [bootstrap](#Bootstrap).
 
-**NOTE**: MSYS is not the same as [MSYS2](https://www.msys2.org/), and the
-GStreamer project does not support running Cerbero inside the MSYS2
-environment. Things may work or they may break, and you get to keep the pieces.
 
 #### Install Visual Studio 2015 or newer
 
@@ -374,8 +364,6 @@ https://visualstudio.microsoft.com/vs/older-downloads/
 
 #### Install other tools
 
-* CMake: http://www.cmake.org/cmake/resources/software.html
-
 * WiX 3.11.1 installer: https://github.com/wixtoolset/wix3/releases/tag/wix3111rtm
 
 #### Important Windows-specific Notes
@@ -385,8 +373,9 @@ anti-virus, or you will get random build failures when Autotools does file
 operations such as renames and deletions. It will also slow your build by
 about 3-4x.
 
-Cerbero must be run in the MingGW shell, which is accessible from the main menu
-or desktop. If it is not, create a shortcut on the desktop to `C:\MinGW\msys\1.0\msys.bat`
+MSYS2 comes with different [environments](https://www.msys2.org/docs/environments/). Cerbero must be run using the UCRT64, since it targets the same CRT as our toolchain.
+
+The UCRT64 shell can be launched with the application : `c:\msys64\ucrt64.exe`.
 
 The path to your `$HOME` must not contain spaces. If your Windows username
 contains spaces, you can create a new directory in `/home` and execute:
@@ -402,4 +391,4 @@ $ echo 'export HOME=/home/newdir' > ~/.profile
 
 Then restart your shell and type `cd` to go to the new home directory.
 
-Note that inside the shell, `/` is mapped to `C:\Mingw\msys\1.0\`
+Note that inside the shell, `/` is mapped to `C:\msys64`

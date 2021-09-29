@@ -24,8 +24,19 @@
 ARGS=$@
 SCRIPTDIR="`dirname $0`"
 
-case "$MSYSTEM" in
-    *MINGW*) PYTHON="py -3";;
+if [[ -f "/mingw/bin/mingw-get.exe" ]]; then
+    MSYS_VERSION=1
+elif  [[ -f "/usr/bin/pacman" ]]; then
+    MSYS_VERSION=2
+    if [ "$MSYSTEM" != "UCRT64" ]; then
+        echo "MSYS2 must use the UCRT64 environment instead of $MSYSTEM. https://www.msys2.org/docs/environments/";
+        exit 1;
+    fi
+fi
+
+case "$MSYS_VERSION" in
+    *1) PYTHON="py -3";;
+    *2) PYTHON="winpty py -3";;
     *) PYTHON="python3";;
 esac
 
@@ -69,13 +80,13 @@ msys_dir_to_win32() {
     echo ${mounted_path}${path}
 }
 
+
 get_scriptdir() {
-    if [ -n "$MSYSTEM" ]; then
-        # Get the win32 path, instead of the Cygwin one
-        msys_dir_to_win32 "$SCRIPTDIR"
-    else
-        echo $SCRIPTDIR
-    fi
+    case "$MSYS_VERSION" in
+    *1) msys_dir_to_win32 "$SCRIPTDIR";;
+    *2) cygpath -m -C ANSI "$SCRIPTDIR";;
+    *) echo $SCRIPTDIR;;
+    esac
 }
 
 $PYTHON -c """

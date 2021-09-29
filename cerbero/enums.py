@@ -60,7 +60,9 @@ class Distro:
     DEBIAN = 'debian'
     REDHAT = 'redhat'
     SUSE = 'suse'
-    WINDOWS = 'windows'
+    WINDOWS = 'windows' # To be used as target_distro
+    MSYS = 'msys'       # When running on a native Windows with MSYS
+    MSYS2 = 'msys2'     # When running on a native Windows with MSYS2
     ARCH = 'arch'
     OS_X = 'osx'
     IOS = 'ios'

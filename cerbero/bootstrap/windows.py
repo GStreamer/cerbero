@@ -54,24 +54,44 @@ INTLTOOL_CHECKSUM = '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c93
 XZ_URL = 'https://tukaani.org/xz/xz-5.2.5-windows.zip'
 XZ_CHECKSUM = 'd83b82ca75dfab39a13dda364367b34970c781a9df4d41264db922ac3a8f622d'
 
-# MSYS packages needed
-MINGWGET_DEPS = ['msys-flex', 'msys-bison', 'msys-perl']
 
 class MSYSBootstrapper(BootstrapperBase):
     '''
     Bootstrapper for native windows builds on top of MSYS
     Installs the necessary MSYS packages and fixups
     '''
+    # MSYS packages needed
+    packages = ['msys-flex', 'msys-bison', 'msys-perl']
 
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
+        self.perl_prefix = self.config.mingw_perl_prefix
+        self.prefix = self.config.toolchain_prefix
+        # MinGW Perl needed by openssl
+        url = MINGW_PERL_TPL.format(PERL_VERSION)
+        self.fetch_urls.append((url, MINGW_PERL_CHECKSUM))
+        self.extract_steps.append((url, True, self.perl_prefix))
+        # Newer versions of binary deps such as intltool. Must be extracted
+        # after the MinGW toolchain from above is extracted so that it
+        # replaces the older files.
+        self.fetch_urls.append((INTLTOOL_URL, INTLTOOL_CHECKSUM))
+        self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
+        # Newer version of xz that supports multithreaded compression. Need
+        # to extract to a temporary directory, then overwrite the existing
+        # lzma/xz binaries.
+        self.xz_tmp_prefix = tempfile.TemporaryDirectory() # cleaned up on exit
+        self.fetch_urls.append((XZ_URL, XZ_CHECKSUM))
+        self.extract_steps.append((XZ_URL, True, self.xz_tmp_prefix.name))
 
     def start(self, jobs=0):
         self.install_mingwget_deps() # FIXME: This uses the network
         self.fix_mingw_unused()
+        self.fix_openssl_mingw_perl()
+        self.fix_bin_deps()
+        self.install_xz()
 
     def install_mingwget_deps(self):
-        for dep in MINGWGET_DEPS:
+        for dep in self.packages:
             shell.new_call(['mingw-get', 'install', dep])
 
     def fix_mingw_unused(self):
@@ -96,88 +116,6 @@ class MSYSBootstrapper(BootstrapperBase):
         msys_link_bindir = msys_link_exe.parent
         if msys_link_exe.is_file() and 'msys/1.0/bin/link' in msys_link_exe.as_posix():
             os.replace(msys_link_exe, msys_link_bindir / 'link.exe.bck')
-
-
-class MinGWBootstrapper(BootstrapperBase):
-    '''
-    Bootstrapper for windows builds.
-    Installs the mingw-w64 compiler toolchain and headers for Directx
-    '''
-
-    def __init__(self, config, offline, assume_yes):
-        super().__init__(config, offline)
-        self.prefix = self.config.toolchain_prefix
-        self.perl_prefix = self.config.mingw_perl_prefix
-        self.platform = self.config.target_platform
-        self.arch = self.config.target_arch
-        self.platform = self.config.platform
-        # Register all network resources this bootstrapper needs. They will all
-        # be downloaded into self.config.local_sources
-        #
-        # MinGW toolchain
-        filename, checksum = TOOLCHAIN_PLATFORM[self.config.platform]
-        url = TOOLCHAIN_BASE_URL + filename
-        self.fetch_urls.append((url, checksum))
-        self.extract_steps.append((url, True, self.prefix))
-        # wglext.h
-        url = KHRONOS_WGL_TPL.format(OPENGL_COMMIT)
-        self.fetch_urls.append((url, WGL_CHECKSUM))
-        sysroot = os.path.join(self.prefix,
-                'x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32')
-        gl_inst_path = os.path.join(sysroot, 'include/GL/')
-        self.extract_steps.append((url, False, gl_inst_path))
-        if self.platform == Platform.WINDOWS:
-            # MinGW Perl needed by openssl
-            url = MINGW_PERL_TPL.format(PERL_VERSION)
-            self.fetch_urls.append((url, MINGW_PERL_CHECKSUM))
-            self.extract_steps.append((url, True, self.perl_prefix))
-            # Newer versions of binary deps such as intltool. Must be extracted
-            # after the MinGW toolchain from above is extracted so that it
-            # replaces the older files.
-            self.fetch_urls.append((INTLTOOL_URL, INTLTOOL_CHECKSUM))
-            self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
-            # Newer version of xz that supports multithreaded compression. Need
-            # to extract to a temporary directory, then overwrite the existing
-            # lzma/xz binaries.
-            self.xz_tmp_prefix = tempfile.TemporaryDirectory() # cleaned up on exit
-            self.fetch_urls.append((XZ_URL, XZ_CHECKSUM))
-            self.extract_steps.append((XZ_URL, True, self.xz_tmp_prefix.name))
-
-    def start(self, jobs=0):
-        if not git.check_line_endings(self.config.platform):
-            raise ConfigurationError("git is configured to use automatic line "
-                    "endings conversion. Please change that by running:\n"
-                    "`git config --global core.autocrlf false` inside the MSYS shell")
-        self.check_dirs()
-        if self.platform == Platform.WINDOWS:
-            self.fix_mingw()
-            self.fix_openssl_mingw_perl()
-            self.fix_bin_deps()
-            self.install_xz()
-
-    def check_dirs(self):
-        if not os.path.exists(self.perl_prefix):
-            os.makedirs(self.perl_prefix)
-        if not os.path.exists(self.prefix):
-            os.makedirs(self.prefix)
-        etc_path = os.path.join(self.config.prefix, 'etc')
-        if not os.path.exists(etc_path):
-            os.makedirs(etc_path)
-
-    def fix_mingw(self):
-        # On Windows, if the user is not allowed to create symbolic links or if
-        # the Python version is older than 3.8, tarfile creates an empty
-        # directory instead of creating a symlink. This affects the `mingw`
-        # dir which is supposed to be a symlink to `usr/x86_64-w64-mingw32`
-        sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32/sysroot')
-        mingwdir = os.path.join(sysroot, 'mingw')
-        if not os.path.islink(mingwdir) and os.path.isdir(mingwdir):
-            shutil.rmtree(mingwdir)
-        shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
-        # In cross-compilation gcc does not create a prefixed cpp
-        cpp_exe = os.path.join(self.prefix, 'bin', 'cpp.exe')
-        host_cpp_exe = os.path.join(self.prefix, 'bin', 'x86_64-w64-mingw32-cpp.exe')
-        shutil.copyfile(cpp_exe, host_cpp_exe)
 
     def fix_openssl_mingw_perl(self):
         '''
@@ -211,6 +149,92 @@ class MinGWBootstrapper(BootstrapperBase):
                           {'/opt/perl/bin/perl': '/bin/perl'})
 
 
+class MSYS2Bootstrapper(BootstrapperBase):
+    '''
+    Bootstrapper for native windows builds on top of MSYS2
+    Installs the necessary MSYS2 packages and fixups
+    '''
+    packages = ['flex', 'bison',  'intltool', 'gperf',
+                'nasm', 'make', 'diffutils',
+                # OpenSSL needs a perl version using '\' for the MSVC build
+                # and a perl version using '/' for the MinGW build
+                'mingw-w64-ucrt-x86_64-perl', 'perl',
+                # We need the ucrt64 version of pkg-config, since we distribute it
+                'mingw-w64-ucrt-x86_64-pkg-config',
+                ]
+
+    def __init__(self, config, offline, assume_yes):
+        super().__init__(config, offline)
+
+    def start(self, jobs=0):
+        shell.new_call(['pacman', '-Syu', '--noconfirm', '-q', '--needed'] +  self.packages)
+
+
+class MinGWBootstrapper(BootstrapperBase):
+    '''
+    Bootstrapper for windows builds.
+    Installs the mingw-w64 compiler toolchain and headers for Directx
+    '''
+
+    def __init__(self, config, offline, assume_yes):
+        super().__init__(config, offline)
+        self.prefix = self.config.toolchain_prefix
+        self.arch = self.config.target_arch
+        # Register all network resources this bootstrapper needs. They will all
+        # be downloaded into self.config.local_sources
+        #
+        # MinGW toolchain
+        filename, checksum = TOOLCHAIN_PLATFORM[self.config.platform]
+        url = TOOLCHAIN_BASE_URL + filename
+        self.fetch_urls.append((url, checksum))
+        self.extract_steps.append((url, True, self.prefix))
+        # wglext.h
+        url = KHRONOS_WGL_TPL.format(OPENGL_COMMIT)
+        self.fetch_urls.append((url, WGL_CHECKSUM))
+        sysroot = os.path.join(self.prefix,
+                'x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32')
+        gl_inst_path = os.path.join(sysroot, 'include/GL/')
+        self.extract_steps.append((url, False, gl_inst_path))
+        # Fix extraction in MSYS2 with tar if the symlink exists
+        mingw_sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32', 'sysroot', 'mingw')
+        if os.path.exists(mingw_sysroot):
+            shutil.rmtree(mingw_sysroot)
+
+    def start(self, jobs=0):
+        if not git.check_line_endings(self.config.platform):
+            raise ConfigurationError("git is configured to use automatic line "
+                    "endings conversion. Please change that by running:\n"
+                    "`git config --global core.autocrlf false` inside the MSYS shell")
+        self.check_dirs()
+        if self.config.platform == Platform.WINDOWS:
+            self.fix_mingw()
+
+    def check_dirs(self):
+        if not os.path.exists(self.prefix):
+            os.makedirs(self.prefix)
+        etc_path = os.path.join(self.config.prefix, 'etc')
+        if not os.path.exists(etc_path):
+            os.makedirs(etc_path)
+
+    def fix_mingw(self):
+        # On Windows, if the user is not allowed to create symbolic links or if
+        # the Python version is older than 3.8, tarfile creates an empty
+        # directory instead of creating a symlink. This affects the `mingw`
+        # dir which is supposed to be a symlink to `usr/x86_64-w64-mingw32`
+        sysroot = os.path.join(self.prefix, 'x86_64-w64-mingw32/sysroot')
+        mingwdir = os.path.join(sysroot, 'mingw')
+        if not os.path.islink(mingwdir) and os.path.isdir(mingwdir):
+            shutil.rmtree(mingwdir)
+        shell.symlink('usr/x86_64-w64-mingw32', 'mingw', sysroot)
+        # In cross-compilation gcc does not create a prefixed cpp
+        cpp_exe = os.path.join(self.prefix, 'bin', 'cpp.exe')
+        host_cpp_exe = os.path.join(self.prefix, 'bin', 'x86_64-w64-mingw32-cpp.exe')
+        shutil.copyfile(cpp_exe, host_cpp_exe)
+
+
 def register_all():
+    register_toolchain_bootstrapper(Distro.MSYS, MinGWBootstrapper)
+    register_toolchain_bootstrapper(Distro.MSYS2, MinGWBootstrapper)
     register_toolchain_bootstrapper(Distro.WINDOWS, MinGWBootstrapper)
-    register_system_bootstrapper(Distro.WINDOWS, MSYSBootstrapper)
+    register_system_bootstrapper(Distro.MSYS, MSYSBootstrapper)
+    register_system_bootstrapper(Distro.MSYS2, MSYS2Bootstrapper)

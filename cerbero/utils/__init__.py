@@ -342,7 +342,10 @@ Terminating.''', file=sys.stderr)
         else:
             raise FatalError("Distribution '%s' not supported" % str(d))
     elif platform == Platform.WINDOWS:
-        distro = Distro.WINDOWS
+        if shutil.which('mingw-get') is not None and shutil.which('pacman') is None:
+            distro = Distro.MSYS
+        else:
+            distro = Distro.MSYS2
         win32_ver = pplatform.win32_ver()[0]
         dmap = {'xp': DistroVersion.WINDOWS_XP,
                 'vista': DistroVersion.WINDOWS_VISTA,

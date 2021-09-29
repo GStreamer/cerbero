@@ -129,5 +129,7 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.WINDOWS and \
            self.config.prefix != self.config.build_tools_prefix:
             pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
+            if not os.path.exists(pkgconfig):
+                pkgconfig = shell.which('pkg-config')
             bindir = os.path.join(self.config.prefix, 'bin')
             shutil.copy(pkgconfig, bindir)

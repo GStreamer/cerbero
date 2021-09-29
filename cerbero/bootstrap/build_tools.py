@@ -28,7 +28,7 @@ from cerbero.commands.fetch import Fetch
 from cerbero.utils import _, shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError, ConfigurationError
-from cerbero.enums import Platform, Architecture, DistroVersion
+from cerbero.enums import Platform, Distro
 
 from pathlib import PurePath
 
@@ -39,7 +39,6 @@ class BuildTools (BootstrapperBase, Fetch):
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
                           'moltenvk-tools'],
-        # MSYS already ships with bison, flex, m4 on Windows
         Platform.WINDOWS: ['intltool', 'gperf', 'nasm'],
         Platform.LINUX: ['intltool-m4'],
     }
@@ -59,10 +58,16 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.remove('autoconf')
             self.BUILD_TOOLS.remove('libtool')
 
-        if self.config.variants.uwp:
-            # UWP config does not build any autotools recipes
-            self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
-            self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
+            if self.config.distro == Distro.MSYS:
+                if self.config.variants.uwp:
+                    # UWP config does not build any autotools recipes
+                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
+                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
+            elif self.config.distro == Distro.MSYS2:
+                # Installed by the MSYS2 bootstrapper
+                self.BUILD_TOOLS.remove('pkg-config')
+                self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
+                self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('nasm')
 
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():

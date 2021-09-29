@@ -253,7 +253,7 @@ class ModifyEnvBase:
         '''
         # If requested, remove the new mingw-perl downloaded in bootstrap from
         # PATH and use the MSYS Perl instead
-        if self.config.platform == Platform.WINDOWS and self.use_msys_perl:
+        if self.config.distro == Distro.MSYS and self.use_msys_perl:
             mingw_perl_bindir = Path(self.config.mingw_perl_prefix) / 'bin'
             self.remove_env('PATH', mingw_perl_bindir.as_posix(), sep=os.pathsep)
         # Don't modify env again if already did it once for this function call
