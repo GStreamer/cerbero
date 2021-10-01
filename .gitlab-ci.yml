@@ -12,7 +12,7 @@ variables:
   CI_GSTREAMER_REF_NAME: 'main'
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   GST_UPSTREAM_BRANCH: 'main'
-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gst-ci/amd64/windows:v13-master'
+  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2021-10-01.0-master'
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --timestamps
