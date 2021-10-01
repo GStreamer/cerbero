@@ -36,9 +36,26 @@ Cerbero will build all other required packages during [bootstrap](#Bootstrap).
 
 ### Windows Setup
 
-The initial setup on Windows is somewhat longer since the required packages
-must be installed manually. Detailed steps on what you need to install are
-**[at the bottom of the page](#installing-minimum-requirements-on-windows)**.
+The initial setup on Windows is automated with the PowerShell script [bootstrap-windows][tools/bootstrap-windows.ps1].
+It installs the following tools:
+  * Visual Studio 19 Community Edition
+  * MSYS2
+  * Git
+  * Python 3
+  * Wix
+
+Start an admin PowerShell and run:
+
+```powershell
+# Enable running scripts
+$ Set-ExecutionPolicy -ExecutionPolicy Unrestricted
+
+# Run the bootstrap script
+$ .\tools\bootstrap-windows.ps
+```
+
+**IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows) requires a 64-bit operating system. The toolchain is only available for 64-bit and it can produce 32-bit or 64-bit binaries.
+
 
 # Running Cerbero
 
@@ -276,98 +293,6 @@ running in this mode.
 Currently, most recipes that use Meson (`btype = BuildType.MESON`) and those
 that have the `can_msvc` recipe property set to `True` are built with Visual
 Studio.
-
-
-# Installing Minimum Requirements on Windows
-
-**IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows) requires a 64-bit operating system. The toolchain is only available for 64-bit and it can produce 32-bit or 64-bit binaries.
-
-These steps are necessary for using Cerbero on Windows.
-
-#### Install Python 3.7 or newer (either 32-bit or 64-bit)
-
-Download the [Windows executable installer](https://www.python.org/downloads/) and run it.
-
-* On the first page of the installer, select the following:
-
-![Enable Add Python to PATH, then click Customize Installation](/data/images/py-installer-page1.png)
-
-* On the second page, the defaults are fine
-
-* Third page, you must select the following options:
-
-![Enable Install for all users, associate files with Python, add Python to environment variables, and customize the install location to not have any spaces in it](/data/images/py-installer-page3.png)
-
-* Enabled or Install [.NET 3.5.1 Framework](https://docs.microsoft.com/en-us/dotnet/framework/install/dotnet-35-windows-10)
-
-* On Windows 10, remove the Windows Store path entry from the PATH variable in the system settings. Otherwise, Cerbero will try to use the dummy Windows Store version of Python
-
-
-#### Install Git for Windows
-
-Download the [Git for Windows installer](https://gitforwindows.org/) and run it.
-
-* First page is the license
-
-* Next page is `Select Components`, the defaults are fine, enable whatever else you prefer
-
-* Next `Choosing the default editor used by Git`, select whatever you prefer
-
-* Next `Adjusting your PATH environment`, you *must* select as shown in the screenshot
-
-![Select "Git from the command line and also from 3rd-party software"](/data/images/git-installer-PATH.png)
-
-* Next `Choosing HTTPS transport backend`, default is fine
-
-* Next `Configuring the line ending conversions`, you *must* select as shown in the screenshot
-
-![Select "Git from the command line and also from 3rd-party software"](/data/images/git-installer-line-endings.png)
-
-* Next `Configuring the terminal emulator`, default is fine
-
-* Next `Configuring extra options`, defaults are fine
-
-Git will be installed at `C:\Program Files\Git`.
-
-#### Install MSYS2
-
-Install the latests MSYS2 following the [instructions on their site](https://www.msys2.org/).
-
-MSYS2 will be installed at `C:\Msys64`.
-
-Some programs like Git or Python require an interative shell with MSYS2. Install [aliases.sh](data/msys2/profile.d/aliases.sh) to run them through `winpty`.
-
-`$ cp -r data/msys2/profile.d/* /etc/profile.d`
-
-**IMPORTANT:** MSYS2 installs several applications to launch the shell configured for
-different compilers. You must run Cerbero using the MSYS2 MSYS app.
-
-**NOTE**: Cerbero does not use the MinGW compiler toolchain provided with MSYS2.
-We download our own custom [GCC toolchain](docs/toolchains.md#gcc-mingw) during [bootstrap](#Bootstrap).
-
-
-#### Install Visual Studio 2015 or newer
-
-This is needed for correctly generating import libraries for recipes built with
-MinGW. Both the Community build and the Professional build are supported.
-
-You must install the latest Windows 10 SDK when installing Visual Studio as
-shown below. You do not need any older Windows SDKs.
-
-![Select the 'Desktop development with C++' workload](/data/images/vs2017-installer-workloads.png)
-
-If you want to build for UWP (aka Universal Windows Platform), you have to use
-VS 2017 or newer, and you must *also* select the Universal Windows Platform
-workload:
-
-![Select both 'Desktop development with C++' and 'Universal Windows Platform development' workloads](/data/images/vs-installer-uwp-workload.png)
-
-You can find all versions of Visual Studio at:
-https://visualstudio.microsoft.com/vs/older-downloads/
-
-#### Install other tools
-
-* WiX 3.11.1 installer: https://github.com/wixtoolset/wix3/releases/tag/wix3111rtm
 
 #### Important Windows-specific Notes
 
