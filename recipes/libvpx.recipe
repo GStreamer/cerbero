@@ -153,7 +153,7 @@ class Recipe(recipe.Recipe):
             shutil.copy(o, f)
         elif self.using_msvc():
             # Visual Studio solution hard-codes yasm
-            nasm = os.path.join(self.config.build_tools_prefix, 'bin', 'nasm.exe')
+            nasm = shell.which('nasm', path=self.config.env['PATH'])
             shell.replace(os.path.join(self.build_dir, 'build/make/gen_msvs_vcxproj.sh'),
                           {'yasm': nasm, '-Xvc -g cv8': '-Xvc -g -F cv8'})
         await super().configure()
