@@ -151,22 +151,26 @@ class Recipe(recipe.Recipe):
 
        
         if self.config.platform == Platform.WINDOWS:
-            if self.config.distro == Distro.MSYS:
-                # Msys ships with a too-old perl, so we modify PATH to use the
-                # mingw-perl that was downloaded and installed by bootstrap.
-                openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
-                self.prepend_env('PATH', openssl_path, sep=';')
-
             # Ensure that our Perl's File/Spec.pm uses backward slashes when
             # building for MSVC and forward-slashes when building for MinGW.
             # The vars for the MinGW case are automatically set by the MSYS
             # terminal, but they might get overriden by something, which will
             # cause Perl to use backward slashes and fail
             # `Configurations/unix-checker.pm` on configure.
-            if self.config.distro == Distro.MSYS:
+            if self.config.distro == Distro.MSYS2:
+                if not self.using_msvc():
+                    # With MSYS2 use the mingw64 perl installed in bootstrap which
+                    # uses backward slashes
+                    msys2_usr_prefix = shell.check_output(['cygpath', '-m', '/usr']).split('\n')[0]
+                    perl_mingw64_path = os.path.join(msys2_usr_prefix, 'bin')
+                    self.prepend_env('PATH', perl_mingw64_path, sep=os.pathsep)
+                self.set_env('MSYSTEM', 'UCRT64')
+            elif self.config.distro == Distro.MSYS:
+                # Msys ships with a too-old perl, so we modify PATH to use the
+                # mingw-perl that was downloaded and installed by bootstrap.
+                openssl_path = os.path.join(self.config.mingw_perl_prefix, 'bin')
+                self.prepend_env('PATH', openssl_path, sep=';')
                 self.set_env('MSYSTEM', 'MINGW32')
-            else:
-                self.set_env('MSYSTEM', 'MSYS')
             if self.using_msvc():
                 self.set_env('TERM', 'dumb')
             else:
@@ -225,4 +229,7 @@ class Recipe(recipe.Recipe):
             libtool_la = LibtoolLibrary('crypto', 1, 1, 0, self.config.libdir,
                                         self.config.target_platform)
             libtool_la.save()
+        if self.using_msvc():
+            shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'openssl.pc'), {'\\': '/'})
+            shell.replace(os.path.join(self.config.libdir, 'pkgconfig', 'libcrypto.pc'), {'\\': '/'})
         super().post_install()
