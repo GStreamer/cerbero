@@ -31,6 +31,7 @@ class Recipe(recipe.Recipe):
 
         # mingw's static libraries
         self.mingw_static_files = ['libmingwex.a',
+                                   'libmingw32.a',
                                    'libdxerr9.a',
                                    'libmoldname.a']
         self.gcc_static_files = [gcclib + 'libgcc.a',
@@ -82,6 +83,7 @@ class Recipe(recipe.Recipe):
         # copy the development libraries
         for f, v, d in [
                 ('libstdc++', '', libdir),
+                ('libgcc_s', '', libdir),
                 ('libpthread', '', libmingw),
                 ('libwinpthread', '1', libmingw)]:
             # Copy the dll.a
