@@ -56,7 +56,7 @@ class UnixBootstrapper (BootstrapperBase):
             tool += self.command;
             cmd = tool + self.packages
             m.message("Running command '%s'" % ' '.join(cmd))
-            shell.new_call(cmd)
+            shell.new_call(cmd, interactive=True)
 
 
 class DebianBootstrapper (UnixBootstrapper):

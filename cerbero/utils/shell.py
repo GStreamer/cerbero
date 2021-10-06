@@ -181,17 +181,21 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     return o
 
 
-def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False):
+def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
         logfile.write('Running command {!r}\n'.format(cmd))
         logfile.flush()
     if verbose:
         m.message('Running {!r}\n'.format(cmd))
+    if not interactive:
+        stdin = subprocess.DEVNULL
+    else:
+        stdin = None
     try:
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT,
-                              stdin=subprocess.DEVNULL)
+                              stdin=stdin)
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
         if not fail:
