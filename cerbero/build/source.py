@@ -304,6 +304,7 @@ class GitCache (Source):
 
     remotes = None
     commit = None
+    use_submodules = True
 
     _fetch_locks = collections.defaultdict(asyncio.Lock)
     _fetch_done = set()
@@ -365,7 +366,8 @@ class GitCache (Source):
                 await git.fetch(self.repo_dir, fail=False, logfile=get_logfile(self))
         if checkout:
             await git.checkout(self.repo_dir, self.commit, logfile=get_logfile(self))
-            await git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
+            if self.use_submodules:
+                await git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
 
 
     def built_version(self):
@@ -409,7 +411,7 @@ class Git (GitCache):
             os.makedirs(self.config_src_dir)
 
         # checkout the current version
-        await git.local_checkout(self.config_src_dir, self.repo_dir, self.commit, logfile=get_logfile(self))
+        await git.local_checkout(self.config_src_dir, self.repo_dir, self.commit, logfile=get_logfile(self), use_submodules=self.use_submodules)
 
         for patch in self.patches:
             if not os.path.isabs(patch):
