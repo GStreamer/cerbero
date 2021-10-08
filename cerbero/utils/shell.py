@@ -410,13 +410,17 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
     url_fmt = cmd[-1]
     cmd = cmd[:-1]
     for murl in urls:
-        try:
-            return await async_call(cmd + [url_fmt % murl], cpu_bound=False,
-                                    logfile=logfile)
-        except Exception as ex:
-            if os.path.exists(dest):
-                os.remove(dest)
-            errors.append((murl, ex))
+        tries = 2
+        while tries > 0:
+            try:
+                return await async_call(cmd + [url_fmt % murl], cpu_bound=False,
+                                        logfile=logfile)
+            except Exception as ex:
+                if os.path.exists(dest):
+                    os.remove(dest)
+                tries -= 1
+                if tries == 0:
+                    errors.append((murl, ex))
     if len(errors) == 1:
         errors = errors[0]
     raise FatalError('Failed to download {!r}: {!r}'.format(url, errors))
