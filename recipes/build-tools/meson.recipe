@@ -5,15 +5,12 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.58.1'
+    version = '0.59.2'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = '3144a3da662fcf79f1e5602fa929f2821cba4eba28c2c923fe0a7d3e3db04d5d'
-
-    # https://github.com/mesonbuild/meson/pull/8993
-    patches = [name + '/0001-gnome-Always-pass-absolute-L-paths-to-g-ir-scanner.patch']
+    tarball_checksum = '13dee549a7ba758b7e33ce7719f28d1d337a98d10d378a4779ccc996f5a2fc49'
 
     deps = ['ninja']
 
