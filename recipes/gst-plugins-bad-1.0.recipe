@@ -198,6 +198,7 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs = [
              'lib/gstreamer-1.0/libgstadpcmdec%(mext)s',
              'lib/gstreamer-1.0/libgstadpcmenc%(mext)s',
+             'lib/gstreamer-1.0/libgstassrender%(mext)s',
              'lib/gstreamer-1.0/libgstbz2%(mext)s',
              'lib/gstreamer-1.0/libgstdash%(mext)s',
              'lib/gstreamer-1.0/libgstdvbsuboverlay%(mext)s',
@@ -230,6 +231,7 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs_devel = [
              'lib/gstreamer-1.0/libgstadpcmdec.a', 'lib/gstreamer-1.0/libgstadpcmdec.la',
              'lib/gstreamer-1.0/libgstadpcmenc.a', 'lib/gstreamer-1.0/libgstadpcmenc.la',
+             'lib/gstreamer-1.0/libgstassrender.a', 'lib/gstreamer-1.0/libgstassrender.la',
              'lib/gstreamer-1.0/libgstbz2.a', 'lib/gstreamer-1.0/libgstbz2.la',
              'lib/gstreamer-1.0/libgstdash.a', 'lib/gstreamer-1.0/libgstdash.la',
              'lib/gstreamer-1.0/libgstdvbsuboverlay.a', 'lib/gstreamer-1.0/libgstdvbsuboverlay.la',
@@ -272,11 +274,9 @@ class Recipe(custom.GStreamer):
     }
 
     files_plugins_codecs_gpl = [
-             'lib/gstreamer-1.0/libgstassrender%(mext)s',
     ]
 
     files_plugins_codecs_gpl_devel = [
-             'lib/gstreamer-1.0/libgstassrender.a', 'lib/gstreamer-1.0/libgstassrender.la',
     ]
 
     files_plugins_codecs_restricted = [
