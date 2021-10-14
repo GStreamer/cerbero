@@ -8,7 +8,8 @@ class Recipe(custom.GStreamer):
     tarball_checksum = '5382f98a9af2c92e5c0ca4fcb3911025cafd9f89b3142b206eb7b92b812e0979'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
-    meson_options = {# enabled plugins
+    meson_options = {'gpl': 'enabled',
+                     # enabled plugins
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',
