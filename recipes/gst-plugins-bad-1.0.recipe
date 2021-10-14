@@ -61,7 +61,6 @@ class Recipe(custom.GStreamer):
                      'mplex': 'disabled',
                      'musepack': 'disabled',
                      'neon': 'disabled',
-                     'ofa': 'disabled',
                      'openal': 'disabled',
                      'opencv': 'disabled',
                      'sndfile': 'disabled',
