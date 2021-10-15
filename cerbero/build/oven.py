@@ -316,8 +316,7 @@ class Oven (object):
         all_steps = ["init"] + [s[1] for s in next(iter(recipes)).steps]
 
         # async queues used for each step
-        loop = asyncio.get_event_loop()
-        default_queue = asyncio.PriorityQueue(loop=loop)
+        default_queue = asyncio.PriorityQueue()
         queues = {step : default_queue for step in all_steps}
 
         # find the install steps for ensuring consistency between all of them
@@ -330,7 +329,7 @@ class Oven (object):
         # allocate jobs
         job_allocation = collections.defaultdict(lambda : 0)
         if self.jobs > 4:
-            queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue(loop=loop)
+            queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue()
             job_allocation[BuildSteps.COMPILE[1]] = 2
         if self.jobs > 5:
             job_allocation[BuildSteps.COMPILE[1]] = 3
@@ -340,7 +339,7 @@ class Oven (object):
                 # the job allocation since we can run more of them in parallel
                 job_allocation[BuildSteps.COMPILE[1]] = self.jobs // 2
         if self.jobs > 7:
-            install_queue = asyncio.PriorityQueue(loop=loop)
+            install_queue = asyncio.PriorityQueue()
             for step in install_steps:
                 queues[step] = install_queue
             job_allocation[BuildSteps.INSTALL[1]] = 1
@@ -350,13 +349,13 @@ class Oven (object):
             # fast, so we shouldn't parallelize.
             if self.config.platform != Platform.WINDOWS:
                 job_allocation[BuildSteps.EXTRACT[1]] = 1
-                queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(loop=loop)
+                queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue()
         if self.jobs > 9:
             # Two jobs is the same allocation as fetch-package/bootstrap, which
             # is a good idea to avoid getting bottlenecked if one of the
             # download mirrors is slow.
             job_allocation[BuildSteps.FETCH[1]] = 2
-            queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(loop=loop)
+            queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue()
 
         # async locks used to synchronize step execution
         locks = collections.defaultdict(lambda : None)
