@@ -3,12 +3,12 @@
 
 class Recipe(recipe.Recipe):
     name = 'libass'
-    version = '0.13.7'
+    version = '0.15.2'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
-    url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.gz'.format(version)
-    tarball_checksum = '008a05a4ed341483d8399c8071d57a39853cf025412b32da277e76ad8226e158'
-    deps = ['freetype', 'fontconfig', 'libpng', 'fribidi']
+    url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.xz'.format(version)
+    tarball_checksum = '1be2df9c4485a57d78bb18c0a8ed157bc87a5a8dd48c661961c625cb112832fd'
+    deps = ['freetype', 'fontconfig', 'libpng', 'fribidi', 'harfbuzz']
 
     files_libs = ['libass']
     files_devel = ['include/ass', 'lib/pkgconfig/libass.pc']
