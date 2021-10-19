@@ -21,7 +21,6 @@ class Recipe(custom.GStreamer):
                      'hls-crypto': 'openssl',
                      'kate': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
-                     'libmms': 'enabled',
                      'nvcodec': 'enabled',
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
@@ -71,7 +70,7 @@ class Recipe(custom.GStreamer):
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
-            'libsrtp', 'libdca', 'libmms', 'libdvdnav', 'libnice',
+            'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar']
@@ -334,12 +333,10 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_net_restricted = [
-             'lib/gstreamer-1.0/libgstmms%(mext)s',
              'lib/gstreamer-1.0/libgstrtmp%(mext)s',
     ]
 
     files_plugins_net_restricted_devel = [
-             'lib/gstreamer-1.0/libgstmms.a', 'lib/gstreamer-1.0/libgstmms.la',
              'lib/gstreamer-1.0/libgstrtmp.a', 'lib/gstreamer-1.0/libgstrtmp.la',
     ]
 
@@ -543,7 +540,6 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('dtsdec', 'codecs_restricted', option='dts', dep='libdca')
             self.disable_plugin('kate', 'codecs', dep='libkate')
             self.disable_plugin('ladspa', 'effects', dep='ladspa')
-            self.disable_plugin('mms', 'net_restricted', option='libmms', dep='libmms')
             self.disable_plugin('openjpeg', 'codecs', dep='openjpeg')
             self.disable_plugin('rtmp', 'net_restricted', option='rtmp', dep='librtmp')
             self.disable_plugin('sbc', 'codecs', dep='sbc')
