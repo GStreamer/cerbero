@@ -534,7 +534,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('winscreencap', 'capture')
             self.disable_plugin('winks', 'capture')
             # External deps that haven't been ported to UWP
-            self.disable_plugin('assrender', 'codecs_gpl', dep='libass')
+            self.disable_plugin('assrender', 'codecs', dep='libass')
             self.disable_plugin('closedcaption', 'effects', dep='pango')
             self.disable_plugin('dash', 'codecs', dep='libxml2')
             self.disable_plugin('dtsdec', 'codecs_restricted', option='dts', dep='libdca')
