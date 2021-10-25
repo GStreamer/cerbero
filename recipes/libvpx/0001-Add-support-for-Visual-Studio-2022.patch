@@ -1,0 +1,95 @@
+From 613a3f961a59dfca6d6775c5668fb7220db60e8d Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Tue, 26 Oct 2021 01:01:07 +0900
+Subject: [PATCH] Add support for Visual Studio 2022
+
+---
+ build/make/gen_msvs_sln.sh     | 5 +++--
+ build/make/gen_msvs_vcxproj.sh | 5 ++++-
+ configure                      | 3 +++
+ 3 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/build/make/gen_msvs_sln.sh b/build/make/gen_msvs_sln.sh
+index d1adfd7..0b31285 100644
+--- a/build/make/gen_msvs_sln.sh
++++ b/build/make/gen_msvs_sln.sh
+@@ -25,7 +25,7 @@ files.
+ Options:
+     --help                      Print this message
+     --out=outfile               Redirect output to a file
+-    --ver=version               Version (14-16) of visual studio to generate for
++    --ver=version               Version (14-17) of visual studio to generate for
+     --target=isa-os-cc          Target specifier
+ EOF
+     exit 1
+@@ -219,6 +219,7 @@ for opt in "$@"; do
+         14) vs_year=2015 ;;
+         15) vs_year=2017 ;;
+         16) vs_year=2019 ;;
++        17) vs_year=2022 ;;
+         *) die Unrecognized Visual Studio Version in $opt ;;
+       esac
+     ;;
+@@ -232,7 +233,7 @@ done
+ outfile=${outfile:-/dev/stdout}
+ mkoutfile=${mkoutfile:-/dev/stdout}
+ case "${vs_ver}" in
+-    1[4-6])
++    1[4-7])
+       # VS has used Format Version 12.00 continuously since vs11.
+       sln_vers="12.00"
+       sln_vers_str="Visual Studio ${vs_year}"
+diff --git a/build/make/gen_msvs_vcxproj.sh b/build/make/gen_msvs_vcxproj.sh
+index 4821ca8..1e58e85 100644
+--- a/build/make/gen_msvs_vcxproj.sh
++++ b/build/make/gen_msvs_vcxproj.sh
+@@ -168,7 +168,7 @@ for opt in "$@"; do
+         --ver=*)
+             vs_ver="$optval"
+             case "$optval" in
+-                1[4-6])
++                1[4-7])
+                 ;;
+                 *) die Unrecognized Visual Studio Version in $opt
+                 ;;
+@@ -345,6 +345,9 @@ generate_vcxproj() {
+             if [ "$vs_ver" = "16" ]; then
+                 tag_content PlatformToolset v142
+             fi
++            if [ "$vs_ver" = "17" ]; then
++                tag_content PlatformToolset v143
++            fi
+             tag_content CharacterSet Unicode
+             if [ "$config" = "Release" ]; then
+                 tag_content WholeProgramOptimization true
+diff --git a/configure b/configure
+index f097266..d63d6f5 100644
+--- a/configure
++++ b/configure
+@@ -104,6 +104,7 @@ all_platforms="${all_platforms} arm64-linux-gcc"
+ all_platforms="${all_platforms} arm64-win64-gcc"
+ all_platforms="${all_platforms} arm64-win64-vs15"
+ all_platforms="${all_platforms} arm64-win64-vs16"
++all_platforms="${all_platforms} arm64-win64-vs17"
+ all_platforms="${all_platforms} armv7-android-gcc"   #neon Cortex-A8
+ all_platforms="${all_platforms} armv7-darwin-gcc"    #neon Cortex-A8
+ all_platforms="${all_platforms} armv7-linux-rvct"    #neon Cortex-A8
+@@ -142,6 +143,7 @@ all_platforms="${all_platforms} x86-win32-gcc"
+ all_platforms="${all_platforms} x86-win32-vs14"
+ all_platforms="${all_platforms} x86-win32-vs15"
+ all_platforms="${all_platforms} x86-win32-vs16"
++all_platforms="${all_platforms} x86-win32-vs17"
+ all_platforms="${all_platforms} x86_64-android-gcc"
+ all_platforms="${all_platforms} x86_64-darwin9-gcc"
+ all_platforms="${all_platforms} x86_64-darwin10-gcc"
+@@ -160,6 +162,7 @@ all_platforms="${all_platforms} x86_64-win64-gcc"
+ all_platforms="${all_platforms} x86_64-win64-vs14"
+ all_platforms="${all_platforms} x86_64-win64-vs15"
+ all_platforms="${all_platforms} x86_64-win64-vs16"
++all_platforms="${all_platforms} x86_64-win64-vs17"
+ all_platforms="${all_platforms} generic-gnu"
+ 
+ # all_targets is a list of all targets that can be configured
+-- 
+2.33.0.windows.2
+
