@@ -54,6 +54,16 @@ VCVARSALLS = {
         ),
         r'VC\Auxiliary\Build\vcvarsall.bat'
     ),
+    'vs17': (
+        (
+            r'Microsoft Visual Studio\2022\Community',
+            r'Microsoft Visual Studio\2022\Professional',
+            r'Microsoft Visual Studio\2022\Enterprise',
+            r'Microsoft Visual Studio\2022\BuildTools',
+            r'Microsoft Visual Studio\2022\Preview',
+        ),
+        r'VC\Auxiliary\Build\vcvarsall.bat'
+    ),
 }
 
 def get_program_files_dir():
@@ -72,6 +82,8 @@ def get_vs_year_version(vcver):
         return '2017'
     if vcver == 'vs16':
         return '2019'
+    if vcver == 'vs17':
+        return '2022'
     raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
 def _get_custom_vs_install(vs_version, vs_install_path):

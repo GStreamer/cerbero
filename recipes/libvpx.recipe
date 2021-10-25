@@ -41,6 +41,7 @@ class Recipe(recipe.Recipe):
         'libvpx/0008-support-visual-studio-2019-vs16.patch',
         # From upstream git master, remove on bump
         'libvpx/0001-configure-add-darwin20-support.patch',
+        'libvpx/0001-Add-support-for-Visual-Studio-2022.patch',
     ]
 
     files_libs = ['libvpx']
