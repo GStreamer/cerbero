@@ -169,7 +169,7 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=stderr)
     except SUBPROCESS_EXCEPTIONS as e:
-        msg = getattr(e, 'output', '')
+        msg = getattr(e, 'output', '').decode(sys.stdout.encoding, errors='replace')
         if not fail:
             return msg
         if logfile:
