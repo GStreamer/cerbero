@@ -4,7 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-bad-1.0'
     btype = BuildType.MESON
-    licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['subprojects/gst-plugins-bad/ext/sctp/usrsctp/LICENSE.md']}]
+    # License path/location is different in tarball vs. monorepo
+    if custom.GStreamer.stype == SourceType.TARBALL:
+      licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['ext/sctp/usrsctp/LICENSE.md']}]
+    else:
+      licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['subprojects/gst-plugins-bad/ext/sctp/usrsctp/LICENSE.md']}]
     tarball_checksum = '50193a23b13713ccb32ee5d1852faeeaed29b91f8398285acdfd522fa3e16835'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
