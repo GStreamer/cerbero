@@ -82,12 +82,6 @@ class Recipe(recipe.Recipe):
         'share/gobject-introspection-1.0'
     ]
 
-    def prepare(self):
-        # on arch python2 needs to be specified as the interpreter
-        # the full path needs to be specified, since shebangs are generated
-        if self.config.target_distro == Distro.ARCH:
-            self.config_sh = "PYTHON=/usr/bin/python3 %s" % self.config_sh
-
     # TODO: catch the share/man stuff like man1/g-ir* ?
     async def configure(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
