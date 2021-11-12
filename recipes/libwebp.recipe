@@ -10,63 +10,12 @@ class Recipe(recipe.Recipe):
     name = 'libwebp'
     version = '1.2.0-rc3'
     stype = SourceType.TARBALL
-    btype = BuildType.CUSTOM
+    btype = BuildType.AUTOTOOLS
     url = 'https://github.com/webmproject/libwebp/archive/v1.2.0-rc3.tar.gz'
     tarball_checksum = '7505579ca0f290ad1847078c1e18f990c0ee5652aca7414687808382fe2d1223'
     allow_parallel_build = True
+    autoreconf = True
 
     files_devel = ['lib/pkgconfig/libwebp.pc', 'lib/pkgconfig/libwebpdemux.pc']
     files_libs = ['libwebp', 'libwebpdemux']
 
-    async def compile(self):
-        if self.config.target_platform == Platform.ANDROID:
-            shell.symlink(self.build_dir, '{0}/jni'.format(self.build_dir))
-            await shell.async_call(['{0}/ndk-build'.format(self.config.toolchain_prefix), 'ENABLE_SHARED=1'],
-                cmd_dir=self.build_dir, logfile=self.logfile)
-        else:
-            self._build_dir = os.path.join(self.build_dir, 'build')
-            os.mkdir(self._build_dir)
-            os.chdir(self._build_dir)
-            await shell.async_call(['cmake', '..'], cmd_dir=self._build_dir, logfile=self.logfile)
-            await shell.async_call('make', cmd_dir=self._build_dir, logfile=self.logfile)
-
-    async def install(self):
-        libdir_dest = os.path.join(self.config.prefix, 'lib')
-        if self.config.target_platform == Platform.ANDROID:
-            arch_name = android.get_android_arch_name(self.config.target_arch)
-            shared_libdir_src = os.path.join(self.build_dir, 'libs', arch_name)
-            shared_libs = glob.iglob(os.path.join(shared_libdir_src, '*.so'))
-            for file_name in shared_libs:
-                full_file_name = os.path.join(shared_libdir_src, file_name)
-                shutil.copy(full_file_name, libdir_dest)
-            static_libdir_src = os.path.join(self.build_dir, 'obj', 'local', arch_name)
-        else:
-            arch_name = self.config.target_arch
-            static_libdir_src = self._build_dir
-        static_libs = glob.iglob(os.path.join(static_libdir_src, '*.a'))
-        for file_name in static_libs:
-            full_file_name = os.path.join(static_libdir_src, file_name)
-            shutil.copy(full_file_name, libdir_dest)
-
-        headers_dest = os.path.join(self.config.prefix, 'include', 'webp')
-        if not os.path.exists(headers_dest):
-            os.makedirs(headers_dest)
-        headers_src = os.path.join(self.build_dir, 'src', 'webp')
-        headers = glob.iglob(os.path.join(headers_src, '*.h'))
-        for header in headers:
-            full_header_name = os.path.join(headers_src, header)
-            shutil.copy(full_header_name, headers_dest)
-
-        for lib in ['libwebp.pc', 'libwebpdecoder.pc']:
-            pc_in = os.path.join(self.build_dir, 'src', lib + '.in')
-            pc = os.path.join(self.config.prefix, 'lib', 'pkgconfig', lib)
-            shutil.copy(pc_in, pc)
-            with open(pc, 'r') as pc_file:
-                pc_contents = pc_file.read()
-            pc_contents = pc_contents.replace('@prefix@', self.config.prefix)
-            pc_contents = pc_contents.replace('@exec_prefix@', '${prefix}')
-            pc_contents = pc_contents.replace('@libdir@', '${prefix}/lib')
-            pc_contents = pc_contents.replace('@includedir@', '${prefix}/include')
-            pc_contents = pc_contents.replace('@PACKAGE_VERSION@', self.version)
-            with open(pc, 'w') as pc_file:
-                pc_file.write(pc_contents)
