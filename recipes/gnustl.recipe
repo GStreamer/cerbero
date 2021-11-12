@@ -65,7 +65,7 @@ class Recipe(recipe.Recipe):
         lib.change_value('dlname', 'libc++_shared.so')
         lib.change_value('library_names', 'libc++_shared.so libc++_shared.so libc++_shared.so')
         lib.change_value('old_library', '')
-        lib.change_value('dependency_libs', '-lc++_shared' +
+        lib.change_value('dependency_libs', '-lc++_shared -lm' +
                                 (' %s/libandroid_support.a' % (libdir) if v < 21 else '') +
                                 (' %s/libunwind.a' % (libdir) if self.config.target_arch == Architecture.ARMv7 else ''))
         lib.save()
@@ -76,6 +76,7 @@ class Recipe(recipe.Recipe):
             os.makedirs(pkgdir)
         stl_pc = PkgConfigWritter('gnustl', 'gnustl', '2.0',
                 '', '-L${libdir} ${libdir}/libc++_shared.so' +
+                (' %s/libm.so' % self.config.sysroot) +
                 (' ${libdir}/libandroid_support.a ' if v < 21 else '') +
                 (' ${libdir}/libunwind.a ' if self.config.target_arch == Architecture.ARMv7 else '') +
                 '',
