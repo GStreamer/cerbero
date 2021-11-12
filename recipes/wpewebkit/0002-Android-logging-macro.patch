@@ -1,14 +1,14 @@
-From 292e81f4d8342148875c56210da4ac5bae9b5fe7 Mon Sep 17 00:00:00 2001
+From 2d01f8407de58afa879a201e5cec85ae0566db8e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 15:32:57 +0200
-Subject: [PATCH] Android logging macro
+Subject: [PATCH xserver 2/9] Android logging macro
 
 ---
  Source/WebKit/config.h | 4 ++++
  1 file changed, 4 insertions(+)
 
 diff --git a/Source/WebKit/config.h b/Source/WebKit/config.h
-index ee3c03a5..63f4443d 100644
+index ee3c03a5e4e6..63f4443de87f 100644
 --- a/Source/WebKit/config.h
 +++ b/Source/WebKit/config.h
 @@ -64,3 +64,7 @@
@@ -20,5 +20,5 @@ index ee3c03a5..63f4443d 100644
 +#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WPEDebug", __VA_ARGS__)
 +
 -- 
-2.25.1
+2.30.2
 

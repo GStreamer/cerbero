@@ -1,17 +1,17 @@
-From 22a2c859237151c43a788e463a01ed1e0576094e Mon Sep 17 00:00:00 2001
+From 79a5e8d2b0db7294d289f4783c0002dcfe65e629 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 14:17:31 +0200
-Subject: [PATCH] Disable PSON
+Subject: [PATCH xserver 1/9] Disable PSON
 
 ---
  Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
-index 9388282e..2d4cc5d2 100644
+index bd2d4d20206f..990e8d04d749 100644
 --- a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
 +++ b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
-@@ -390,9 +390,10 @@ static void webkitWebContextConstructed(GObject* object)
+@@ -402,9 +402,10 @@ static void webkitWebContextConstructed(GObject* object)
  
      API::ProcessPoolConfiguration configuration;
      configuration.setInjectedBundlePath(FileSystem::stringFromFileSystemRepresentation(bundleFilename.get()));
@@ -25,5 +25,5 @@ index 9388282e..2d4cc5d2 100644
      configuration.setUseSystemAppearanceForScrollbars(priv->useSystemAppearanceForScrollbars);
  #endif
 -- 
-2.25.1
+2.30.2
 

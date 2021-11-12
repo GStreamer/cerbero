@@ -1,0 +1,69 @@
+From 9b46dbadccd00c0267cdbfbb30e3b8f78e59363b Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Mon, 1 Nov 2021 19:03:03 +0100
+Subject: [PATCH xserver 9/9] wpewebkit: try to find freetype, png and others
+ with pkg-config
+
+---
+ Source/cmake/WebKitFindPackage.cmake | 39 +++++++++++++++++++++++++++-
+ 1 file changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/Source/cmake/WebKitFindPackage.cmake b/Source/cmake/WebKitFindPackage.cmake
+index 39b3b35e2481..3240bb6872f8 100644
+--- a/Source/cmake/WebKitFindPackage.cmake
++++ b/Source/cmake/WebKitFindPackage.cmake
+@@ -177,7 +177,7 @@ macro(find_package package)
+         if (JPEG_FOUND AND NOT TARGET JPEG::JPEG)
+             add_library(JPEG::JPEG UNKNOWN IMPORTED)
+             set_target_properties(JPEG::JPEG PROPERTIES
+-                IMPORTED_LOCATION "${JPEG_LIBRARIES}"
++                IMPORTED_LOCATION "${JPEG_LIBRARY}"
+                 INTERFACE_INCLUDE_DIRECTORIES "${JPEG_INCLUDE_DIR}"
+             )
+         endif ()
+@@ -189,5 +189,42 @@ macro(find_package package)
+                 INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIRS}"
+             )
+         endif ()
++    elseif ("${package}" STREQUAL "Freetype")
++        if (FREETYPE_FOUND AND NOT TARGET Freetype::Freetype)
++            add_library(Freetype::Freetype UNKNOWN IMPORTED)
++            set_target_properties(Freetype::Freetype PROPERTIES
++                IMPORTED_LOCATION "${FREETYPE_LIBRARY}"
++                INTERFACE_INCLUDE_DIRECTORIES "${FREETYPE_INCLUDE_DIRS}"
++            )
++        endif ()
++    elseif ("${package}" STREQUAL "PNG")
++        if (PNG_FOUND AND NOT TARGET PNG::PNG)
++            add_library(PNG::PNG UNKNOWN IMPORTED)
++            set_target_properties(PNG::PNG PROPERTIES
++                IMPORTED_LOCATION "${PNG_LIBRARY}"
++                INTERFACE_INCLUDE_DIRECTORIES "${PNG_INCLUDE_DIRS}"
++            )
++        endif ()
++    elseif ("${package}" STREQUAL "WebP")
++        if (WEBP_FOUND AND NOT TARGET WebP::WebP)
++            add_library(WebP::WebP UNKNOWN IMPORTED)
++            set_target_properties(WebP::WebP PROPERTIES
++                IMPORTED_LOCATION "${WEBP_LIBRARY}"
++                INTERFACE_INCLUDE_DIRECTORIES "${WEBP_INCLUDE_DIRS}"
++            )
++            add_library(WebPDecoder::WebPDecoder UNKNOWN IMPORTED)
++            set_target_properties(WebPDecoder::WebPDecoder PROPERTIES
++                IMPORTED_LOCATION "${WEBP_DECODER_LIBRARY}"
++                INTERFACE_INCLUDE_DIRECTORIES "${WEBP_DECODER_INCLUDE_DIRS}"
++            )
++        endif ()
++    elseif ("${package}" STREQUAL "LibGcrypt")
++        if (LIBGCRYPT_FOUND AND NOT TARGET LibGcrypt::LibGcrypt)
++            add_library(LibGcrypt::LibGcrypt UNKNOWN IMPORTED)
++            set_target_properties(LibGcrypt::LibGcrypt PROPERTIES
++                IMPORTED_LOCATION "${LIBGCRYPT_LIBRARY}"
++                INTERFACE_INCLUDE_DIRECTORIES "${LIBGCRYPT_INCLUDE_DIRS}"
++            )
++        endif ()
+     endif ()
+ endmacro()
+-- 
+2.30.2
+

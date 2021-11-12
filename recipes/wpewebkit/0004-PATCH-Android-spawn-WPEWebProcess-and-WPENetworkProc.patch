@@ -1,14 +1,15 @@
-From 71439394a9d459b4d3bec38c2936a6a127cc2d3b Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
-Date: Tue, 25 May 2021 13:44:00 +0200
-Subject: [PATCH] Android: spawn WPEWebProcess and WPENetworkProcess services
+From 43d2c8ffac7832fd84b528c6fb37dc19d153f43e Mon Sep 17 00:00:00 2001
+From: Zan Dobersek <zdobersek@igalia.com>
+Date: Mon, 1 Nov 2021 18:54:23 +0100
+Subject: [PATCH xserver 4/9] [PATCH] Android: spawn WPEWebProcess and
+ WPENetworkProcess services
 
 ---
- .../Launcher/glib/ProcessLauncherGLib.cpp     | 120 ++++--------------
- 1 file changed, 25 insertions(+), 95 deletions(-)
+ .../Launcher/glib/ProcessLauncherGLib.cpp     | 122 ++++--------------
+ 1 file changed, 25 insertions(+), 97 deletions(-)
 
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
-index ba5d5ce4..260703ba 100644
+index b0d079fdd62f..1b6e0c1415b6 100644
 --- a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 +++ b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 @@ -42,6 +42,9 @@
@@ -21,7 +22,7 @@ index ba5d5ce4..260703ba 100644
  namespace WebKit {
  
  #if OS(LINUX)
-@@ -103,97 +106,28 @@ void ProcessLauncher::launchProcess()
+@@ -103,99 +106,28 @@ void ProcessLauncher::launchProcess()
  {
      IPC::Connection::SocketPair socketPair = IPC::Connection::createPlatformConnection(IPC::Connection::ConnectionOptions::SetCloexecOnServer);
  
@@ -47,7 +48,7 @@ index ba5d5ce4..260703ba 100644
 -    realExecutablePath = FileSystem::fileSystemRepresentation(executablePath);
 -    GUniquePtr<gchar> processIdentifier(g_strdup_printf("%" PRIu64, m_launchOptions.processIdentifier.toUInt64()));
 -    GUniquePtr<gchar> webkitSocket(g_strdup_printf("%d", socketPair.client));
--    unsigned nargs = 5; // size of the argv array for g_spawn_async()
+-    unsigned nargs = 4; // size of the argv array for g_spawn_async()
 -
 -#if ENABLE(DEVELOPER_MODE)
 -    Vector<CString> prefixArgs;
@@ -100,7 +101,6 @@ index ba5d5ce4..260703ba 100644
 -        argv[i++] = const_cast<char*>("--configure-jsc-for-testing");
 -#endif
 -    argv[i++] = nullptr;
--    argv[i++] = nullptr;
 -
 -    GRefPtr<GSubprocessLauncher> launcher = adoptGRef(g_subprocess_launcher_new(G_SUBPROCESS_FLAGS_INHERIT_FDS));
 -    g_subprocess_launcher_take_fd(launcher.get(), socketPair.client, socketPair.client);
@@ -128,9 +128,12 @@ index ba5d5ce4..260703ba 100644
 -        process = adoptGRef(g_subprocess_launcher_spawnv(launcher.get(), argv, &error.outPtr()));
 -
 -    if (!process.get())
--        g_error("Unable to fork a new child process: %s", error->message);
+-        g_error("Unable to spawn a new child process: %s", error->message);
 -
 -    const char* processIdStr = g_subprocess_get_identifier(process.get());
+-    if (!processIdStr)
+-        g_error("Spawned process died immediately. This should not happen.");
+-
 -    m_processIdentifier = g_ascii_strtoll(processIdStr, nullptr, 0);
 -    RELEASE_ASSERT(m_processIdentifier);
 -
@@ -140,7 +143,7 @@ index ba5d5ce4..260703ba 100644
  
      // We've finished launching the process, message back to the main run loop.
      RunLoop::main().dispatch([protectedThis = makeRef(*this), this, serverSocket = socketPair.server] {
-@@ -208,11 +142,7 @@ void ProcessLauncher::terminateProcess()
+@@ -210,11 +142,7 @@ void ProcessLauncher::terminateProcess()
          return;
      }
  
@@ -154,5 +157,5 @@ index ba5d5ce4..260703ba 100644
  
  void ProcessLauncher::platformInvalidate()
 -- 
-2.25.1
+2.30.2
 

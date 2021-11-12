@@ -4,11 +4,11 @@ from cerbero.utils import android, shell
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.32.1'
+    version = '2.34.1'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '7b6b39a12ccf3f84da4cc6ac59e02fbe328f7476eaeb9c23de9b9288c2c2f39c'
+    tarball_checksum = 'cb336986341be9c3a9b1ca2c18de0d29d90ae4e77b9967a6f6879597e7a969f7'
     deps = [
         'cairo',
         'gettext',
@@ -22,15 +22,19 @@ class Recipe(recipe.Recipe):
         'libsoup',
         'libxslt',
         'libwebp',
-        'libwpe'
+        'libwpe',
+        'openjpeg',
     ]
     # TODO: support accessibility, gstreamer-gl and woff2
     configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF \
                         -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+                        -DUSE_SOUP2=ON \
+                        -DUSE_LCMS=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
                         -DENABLE_WEBDRIVER=OFF \
                         -Dis_android=1 \
+                        -DUSE_LD_LDD=ON -DUSE_LD_GOLD=OFF \
                         -DCMAKE_SYSTEM_NAME=Linux \
                         -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -O2 \
                         -DCMAKE_CXX_FLAGS_RELEASE=-DNDEBUG -O2 \
@@ -95,6 +99,7 @@ class Recipe(recipe.Recipe):
         'include/wpe-webkit-1.0/wpe/WebKitInstallMissingMediaPluginsPermissionRequest.h',
         'include/wpe-webkit-1.0/wpe/WebKitJavascriptResult.h',
         'include/wpe-webkit-1.0/wpe/WebKitMediaKeySystemPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitMemoryPressureSettings.h',
         'include/wpe-webkit-1.0/wpe/WebKitMimeInfo.h',
         'include/wpe-webkit-1.0/wpe/WebKitNavigationAction.h',
         'include/wpe-webkit-1.0/wpe/WebKitNavigationPolicyDecision.h',
@@ -163,20 +168,15 @@ class Recipe(recipe.Recipe):
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
-                'wpewebkit/0001-Android-remove-uses-of-shm_open-and-shm_unlink.patch',
-                'wpewebkit/0001-Android-logging-macro.patch',
-                'wpewebkit/0001-Android-spawn-services.patch',
-                'wpewebkit/0001-Android-web-network-process-entrypoint.patch',
-                'wpewebkit/0001-Android-terminate-process.patch',
-                'wpewebkit/0001-Android-disable-pson.patch',
-                'wpewebkit/0001-Try-to-find-libz-with-pkg-config.patch',
-                'wpewebkit/0001-Scroll-related-changes.patch',
-                'wpewebkit/0001-GLContextEGL-don-t-attempt-to-swap-buffers-for-surfa.patch',
-                'wpewebkit/0001-ThreadedCompositor-allow-null-native-surface-handles.patch',
-                'wpewebkit/0001-wpewebkit-try-to-find-icu-with-pkg-config.patch',
-                'wpewebkit/0001-wpewebkit-try-to-find-freetype-png-and-others-with-p.patch',
-                'wpewebkit/0001-WPE-Correctly-compute-wheel-event-phase-for-2D-axis-.patch',
-                'wpewebkit/0001-WPE-Rework-touch-based-gesture-controller.patch',
+                'wpewebkit/0001-Disable-PSON.patch',
+                'wpewebkit/0002-Android-logging-macro.patch',
+                'wpewebkit/0003-Android-remove-uses-of-shm_open-and-shm_unlink.patch',
+                'wpewebkit/0004-PATCH-Android-spawn-WPEWebProcess-and-WPENetworkProc.patch',
+                'wpewebkit/0005-Android-terminate-process.patch',
+                'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
+                'wpewebkit/0007-Scroll-related-changes.patch',
+                'wpewebkit/0008-Try-to-find-libz-with-pkg-config.patch',
+                'wpewebkit/0009-wpewebkit-try-to-find-freetype-png-and-others-with-p.patch',
             ]
         else:
             self.deps.append('icu')
