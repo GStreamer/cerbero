@@ -1,14 +1,14 @@
-From e6d1642c197cfaaf71c5fc90b58c1df557fcb173 Mon Sep 17 00:00:00 2001
+From f0189701327599ed1f3b100492acb646aa2d2388 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:56:14 +0200
-Subject: [PATCH] Android: terminate process
+Subject: [PATCH xserver 5/9] Android: terminate process
 
 ---
  .../Launcher/glib/ProcessLauncherGLib.cpp     | 34 ++++++++++++++-----
  1 file changed, 26 insertions(+), 8 deletions(-)
 
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
-index 260703ba..fd4a7f69 100644
+index 1b6e0c1415b6..ae6687f59f25 100644
 --- a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 +++ b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 @@ -106,25 +106,29 @@ void ProcessLauncher::launchProcess()
@@ -72,5 +72,5 @@ index 260703ba..fd4a7f69 100644
  
  void ProcessLauncher::platformInvalidate()
 -- 
-2.25.1
+2.30.2
 

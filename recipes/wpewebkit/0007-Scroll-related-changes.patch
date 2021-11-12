@@ -1,7 +1,7 @@
-From e937a4ee39d233852b1b6f7e75be2482357d2611 Mon Sep 17 00:00:00 2001
+From 055ec030fa2429a7d7be76d7d55c21551921d33c Mon Sep 17 00:00:00 2001
 From: Fernando Jimenez Moreno <fjimenez@igalia.com>
 Date: Fri, 16 Apr 2021 17:32:06 +0200
-Subject: [PATCH] Scroll related changes
+Subject: [PATCH xserver 7/9] Scroll related changes
 
 ---
  Source/WebKit/UIProcess/API/wpe/WPEView.cpp                 | 4 +++-
@@ -9,10 +9,10 @@ Subject: [PATCH] Scroll related changes
  2 files changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-index cc81eec6..63eaebbe 100644
+index 5536fbc54309..216da19fa269 100644
 --- a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
 +++ b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-@@ -72,6 +72,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+@@ -71,6 +71,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
  
      auto* pool = configuration->processPool();
      m_pageProxy = pool->createWebPage(*m_pageClient, WTFMove(configuration));
@@ -20,7 +20,7 @@ index cc81eec6..63eaebbe 100644
  
  #if ENABLE(MEMORY_SAMPLER)
      if (getenv("WEBKIT_SAMPLE_MEMORY"))
-@@ -264,8 +265,9 @@ void View::selectionDidChange()
+@@ -365,8 +366,9 @@ void View::selectionDidChange()
  void View::setSize(const WebCore::IntSize& size)
  {
      m_size = size;
@@ -32,10 +32,10 @@ index cc81eec6..63eaebbe 100644
  
  void View::setViewState(OptionSet<WebCore::ActivityState::Flag> flags)
 diff --git a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
-index efc003bd..5adbbcf0 100644
+index 41257f63e1e6..e2a58b1918ec 100644
 --- a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
 +++ b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
-@@ -149,7 +149,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
+@@ -161,7 +161,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
  
  FloatRect WebChromeClient::windowRect()
  {
@@ -45,5 +45,5 @@ index efc003bd..5adbbcf0 100644
  #else
  #if PLATFORM(MAC)
 -- 
-2.30.1
+2.30.2
 

@@ -1,14 +1,14 @@
-From 9741205478ebeb7565010d7d680380185c60e7fe Mon Sep 17 00:00:00 2001
+From 1f924137c9ed2abc6a4d5457518c61c7f62d4dcd Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 16:00:54 +0200
-Subject: [PATCH] Android remove uses of shm_open and shm_unlink
+Subject: [PATCH xserver 3/9] Android remove uses of shm_open and shm_unlink
 
 ---
  .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 25 ++++++++++++++-----
  1 file changed, 19 insertions(+), 6 deletions(-)
 
 diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-index aff7b0d1..f2f5a804 100644
+index 998a2a767930..09196a0dae85 100644
 --- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
 +++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
 @@ -54,6 +54,9 @@
@@ -71,5 +71,5 @@ index aff7b0d1..f2f5a804 100644
          return nullptr;
      }
 -- 
-2.25.1
+2.30.2
 

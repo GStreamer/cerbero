@@ -1,7 +1,8 @@
-From b71195a2e8ba5405d48709a94a605105b9e17bcb Mon Sep 17 00:00:00 2001
+From c9dd7cc9c188408116f6523ea829217f67b41fbe Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH] Implement Android WebProcess and NetworkProcess entry points
+Subject: [PATCH xserver 6/9] Implement Android WebProcess and NetworkProcess
+ entry points
 
 ---
  .../soup/NetworkProcessMainSoup.cpp           | 35 ++++++++-----------
@@ -10,7 +11,7 @@ Subject: [PATCH] Implement Android WebProcess and NetworkProcess entry points
  3 files changed, 30 insertions(+), 20 deletions(-)
 
 diff --git a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
-index f98cd65a..73c43280 100644
+index f98cd65a0ea1..73c4328060fd 100644
 --- a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
 +++ b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
 @@ -37,28 +37,23 @@
@@ -58,7 +59,7 @@ index f98cd65a..73c43280 100644
 +}
 +
 diff --git a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
-index c9f63aa1..92df6bfa 100644
+index c9f63aa18cef..92df6bfa0085 100644
 --- a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 +++ b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 @@ -107,3 +107,17 @@ int WebProcessMain(int argc, char** argv)
@@ -80,7 +81,7 @@ index c9f63aa1..92df6bfa 100644
 +}
 +
 diff --git a/Source/WebKit/webkitglib-symbols.map b/Source/WebKit/webkitglib-symbols.map
-index 853edcfc..a357c6b6 100644
+index 853edcfcb83d..a357c6b61d1e 100644
 --- a/Source/WebKit/webkitglib-symbols.map
 +++ b/Source/WebKit/webkitglib-symbols.map
 @@ -11,6 +11,7 @@ global:
@@ -92,5 +93,5 @@ index 853edcfc..a357c6b6 100644
    *;
  };
 -- 
-2.25.1
+2.30.2
 
