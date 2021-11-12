@@ -8,11 +8,11 @@ class Recipe(recipe.Recipe):
     # Note: openssl helpfully moves tarballs somewhere else (old/x.y.z/)
     # whenever a new release comes out, so make sure to mirror to fdo when
     # bumping the release!
-    version = '1.1.1h'
+    version = '1.1.1l'
     licenses = [{License.OPENSSL: ['LICENSE']}]
     stype = SourceType.TARBALL
     url = 'https://ftp.openssl.org/source/{0}-{1}.tar.gz'.format(name, version)
-    tarball_checksum = '5c9ca8774bd7b03e5784f26ae9e9e6d749c9da2438545077e6b3d755a06595d9'
+    tarball_checksum = '0b7a3e5e59c34827fe0c3a74b7ec8baef302b98fa80088d7f9153aa16fa76bd1'
     deps = ['ca-certificates', 'zlib']
     # Parallel make fails randomly due to undefined macros, probably races
     allow_parallel_build = False
@@ -31,8 +31,6 @@ class Recipe(recipe.Recipe):
         # https://github.com/openssl/openssl/pull/12400
         'openssl/0001-crypto-win-Don-t-use-disallowed-APIs-on-UWP.patch',
         'openssl/0002-win-onecore-Build-with-APPCONTAINER-for-UWP-compat.patch',
-        # https://github.com/openssl/openssl/pull/13476 '1.1.1i'
-        'openssl/0001-Add-darwin64-arm64-cc-build-target.patch',
     ]
 
     files_bins = ['openssl']
