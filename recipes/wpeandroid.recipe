@@ -28,26 +28,7 @@ class Recipe(recipe.Recipe):
     ]
 
     async def install(self):
-        src_libdir = 'lib'
-        src_arch = self.config.target_arch
-        if self.config.target_arch == Architecture.ARMv7:
-            src_arch = 'arm'
-        elif self.config.target_arch == Architecture.X86_64:
-            src_libdir = 'lib64'
-        v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-        libdir = os.path.join(self.config.toolchain_prefix, 'platforms',
-                              'android-' + str(v), 'arch-' + src_arch,
-                              'usr', src_libdir)
-
         for lib_name in self.files_libs:
-            lib_path_src = os.path.join(libdir, lib_name + '.so')
+            lib_path_src = os.path.join(self.config.sysroot, lib_name + '.so')
             lib_path_dest = os.path.join(self.config.prefix, 'lib', lib_name + '.so')
             shutil.copy(lib_path_src, lib_path_dest)
-
-        stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
-                                'cxx-stl', 'llvm-libc++')
-        libarch = android.get_android_arch_name(src_arch)
-        stl_libdir = os.path.join(stl_prefix, 'libs', libarch)
-        c_shared_src = os.path.join(stl_libdir, 'libc++_shared.so')
-        c_shared_dest = os.path.join(libdir, 'libc++_shared.so')
-        shutil.copy(c_shared_src, c_shared_dest)
