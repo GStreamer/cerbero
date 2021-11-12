@@ -24,12 +24,10 @@ from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
 from cerbero.config import Distro, FatalError
 from cerbero.utils import _, shell
 
-NDK_VERSION = 'r21'
-NDK_BASE_URL = 'https://dl.google.com/android/repository/android-ndk-%s-%s-%s.zip'
+NDK_VERSION = 'r23b'
+NDK_BASE_URL = 'https://dl.google.com/android/repository/android-ndk-%s-%s.zip'
 NDK_CHECKSUMS = {
-    'android-ndk-r21-linux-x86_64.zip': 'b65ea2d5c5b68fb603626adcbcea6e4d12c68eb8a73e373bbb9d23c252fc647b',
-    'android-ndk-r21-darwin-x86_64.zip': 'b82a49ec591d6f283acc7a241a8c56a14788320bf85a3375b5f2309b3b0c9b45',
-    'android-ndk-r21-windows-x86_64.zip': 'faf5a09f78dc7b350b2b77e71031d039191f2af66ac7c99494cd7d5a65e8d147',
+    'android-ndk-r23b-linux.zip': 'c6e97f9c8cfe5b7be0a9e6c15af8e7a179475b7ded23e2d1c1fa0945d6fb4382',
 }
 
 class AndroidBootstrapper (BootstrapperBase):
@@ -37,8 +35,8 @@ class AndroidBootstrapper (BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix
-        url = NDK_BASE_URL % (NDK_VERSION, self.config.platform, self.config.arch)
-        self.fetch_urls.append((url, None, NDK_CHECKSUMS[os.path.basename(url)]))
+        url = NDK_BASE_URL % (NDK_VERSION, self.config.platform)
+        self.fetch_urls.append((url, NDK_CHECKSUMS[os.path.basename(url)]))
         self.extract_steps.append((url, True, self.prefix))
 
     async def start(self, jobs=0):
