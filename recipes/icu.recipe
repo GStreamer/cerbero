@@ -113,6 +113,9 @@ class Recipe(recipe.Recipe):
                          'LDFLAGS', 'OBJCFLAGS', 'CXX', 'CC', 'CPP']:
                 self_copy.env[each] = ''
 
+            if self.config.target_platform == Platform.ANDROID:
+                self_copy.env['LDFLAGS'] = '-lstdc++'
+
             self_copy.config = cerbero.config.Config()
             self_copy.config.load()
             self_copy.build_dir = cross_build_dir
