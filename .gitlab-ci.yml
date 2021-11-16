@@ -133,6 +133,7 @@ android fedora image:
     CERBERO_PACKAGE_ARGS: "-t"
     CERBERO_RUN_WRAPPER: "" # 'wine' on cross-winXX
     CERBERO_RUN_SUFFIX: "" # '.exe' on cross-winXX
+    CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: "yes"
     # used by macos packages as we only ever install to a fixed directory
     CERBERO_OVERRIDDEN_DIST_DIR: ""
@@ -475,6 +476,7 @@ cerbero cross-ios universal examples:
     CERBERO_HOST_DIR: "C:/cerbero"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v visualstudio -v nowerror"
     CERBERO_RUN_SUFFIX: ".exe"
+    CERBERO_BOOTSTRAP_SYSTEM: "yes"
     HAVE_CCACHE: ""
   before_script:
     - $env:CI_PROJECT_DIR = $env:CI_PROJECT_DIR.replace('\', '/')
