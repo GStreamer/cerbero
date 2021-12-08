@@ -247,7 +247,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.UBUNTU_DISCO
             elif distro_version in ['eoan']:
                 distro_version = DistroVersion.UBUNTU_EOAN
-            elif distro_version in ['focal'] or (distro_version[0] == 'u' and d[1].startswith('20.')):
+            elif distro_version in ['focal'] or (distro_version.startswith('u') and d[1].startswith('20.')):
                 distro_version = DistroVersion.UBUNTU_FOCAL
             elif d[1].startswith('6.'):
                 distro_version = DistroVersion.DEBIAN_SQUEEZE
