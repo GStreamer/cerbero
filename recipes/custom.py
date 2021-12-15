@@ -59,10 +59,10 @@ class GStreamer(recipe.Recipe):
             # disable the submodule to avoid to download more than 500MB of test medias.
             self.use_submodules = False
 
-    def enable_plugin(self, plugin, category, variant, option=None, dep=None):
+    def enable_plugin(self, plugin, category, variant=None, option=None, dep=None):
         if option is None:
             option = plugin
-        if getattr(self.config.variants, variant):
+        if variant is None or getattr(self.config.variants, variant):
             if dep is not None:
                 self.deps.append(dep)
             plugin = 'lib/gstreamer-1.0/libgst' + plugin

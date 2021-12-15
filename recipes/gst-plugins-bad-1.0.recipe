@@ -67,6 +67,7 @@ class Recipe(custom.GStreamer):
                      'neon': 'disabled',
                      'openal': 'disabled',
                      'opencv': 'disabled',
+                     'qsv': 'disabled',
                      'sndfile': 'disabled',
                      'teletext': 'disabled',
                      'voamrwbenc': 'disabled',
@@ -502,6 +503,8 @@ class Recipe(custom.GStreamer):
 
             if self.meson_options['d3d11'] == 'enabled':
                 self.files_libs += ['libgstd3d11-1.0']
+                # qsv depends on d3d11
+                self.enable_plugin('qsv', 'codecs')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
@@ -553,6 +556,8 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('rsvg', 'codecs', dep='librsvg')
             self.disable_plugin('voaacenc', 'codecs_restricted', dep='vo-aacenc')
             self.disable_plugin('zbar', 'codecs', dep='zbar')
+            # Not tested, and it needs some work on libmfx dispatcher build for UWP
+            self.disable_plugin('qsv', 'codecs')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
