@@ -359,9 +359,7 @@ Terminating.''', file=sys.stderr)
     elif platform == Platform.DARWIN:
         distro = Distro.OS_X
         ver = pplatform.mac_ver()[0]
-        if ver.startswith('12.'):
-            distro_version = DistroVersion.OS_X_MONTEREY
-        elif ver.startswith(('11.', '10.16')):
+        if ver.startswith(('11.', '10.16')):
             distro_version = DistroVersion.OS_X_BIG_SUR
         elif ver.startswith('10.15'):
             distro_version = DistroVersion.OS_X_CATALINA
@@ -380,7 +378,7 @@ Terminating.''', file=sys.stderr)
         elif ver.startswith('10.8'):
             distro_version = DistroVersion.OS_X_MOUNTAIN_LION
         else:
-            raise FatalError("Mac version %s not supported" % ver)
+            distro_version = "osx_%s" % ver
 
     num_of_cpus = determine_num_of_cpus()
 

@@ -142,7 +142,7 @@ class DistroVersion:
     OS_X_MOJAVE = 'osx_mojave'
     OS_X_CATALINA = 'osx_catalina'
     OS_X_BIG_SUR = 'osx_big_sur'
-    OS_X_MONTEREY = 'osx_monterey'
+    # further osx versions are generated automatically
     IOS_8_0 = 'ios_08_0'
     IOS_8_1 = 'ios_08_1'
     IOS_8_2 = 'ios_08_2'
