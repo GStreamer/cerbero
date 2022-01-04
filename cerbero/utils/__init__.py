@@ -267,7 +267,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = "debian_{number:02d}_{name}".format(number=int(d[1]), name=d[2])
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['RedHat', 'Fedora', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux']:
+        elif d[0] in ['RedHat', 'Fedora', 'Fedora Linux', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux']:
             distro = Distro.REDHAT
             if d[1] == '16':
                 distro_version = DistroVersion.FEDORA_16
@@ -303,7 +303,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.FEDORA_31
             elif d[1] == '32':
                 distro_version = DistroVersion.FEDORA_32
-            elif d[0] == 'Fedora':
+            elif d[0].startswith('Fedora'):
                 # str(int()) is for ensuring that the fedora version is
                 # actually a number
                 distro_version = 'fedora_' + str(int(d[1]))
