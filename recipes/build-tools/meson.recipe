@@ -5,12 +5,12 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '0.59.2'
+    version = '0.61.0'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = '13dee549a7ba758b7e33ce7719f28d1d337a98d10d378a4779ccc996f5a2fc49'
+    tarball_checksum = 'ea9f33246b1f23f02e90a50e75e0f41e526f6dabf0c24f3e00e27a3f5abdc35c'
 
     deps = ['ninja']
 

@@ -10,7 +10,12 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'a305734033a9c25541a59e8dd1c254409953269ea7c710c39e540bd8853389ba'
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.MESON
-    meson_options = {'popt': 'disabled', 'tools': 'disabled', 'utils': 'disabled', 'tests': 'disabled'}
+    meson_options = {
+        'popt': 'disabled',
+        'tools': 'disabled',
+        'utils': 'disabled',
+        #'tests': 'disabled',
+    }
     patches = [# From https://gitlab.freedesktop.org/gstreamer/meson-ports/libdv
                'libdv/0001-Add-Meson-build-system-definitions.patch',
                'libdv/0002-meson-work-around-brokenness-in-public-dv_types.h-he.patch',

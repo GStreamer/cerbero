@@ -50,7 +50,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")
-            self.meson_options['instrospection'] = 'true'
+            self.meson_options['introspection'] = 'true'
 
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
