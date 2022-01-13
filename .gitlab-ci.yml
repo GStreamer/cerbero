@@ -293,6 +293,7 @@ cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+      allow_failure: true
   needs:
     - "build cerbero cross-android universal"
 
@@ -300,6 +301,7 @@ cerbero cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
     - if: '$CI_PIPELINE_SOURCE != "pipeline"'
+      allow_failure: true
   needs:
     - "cerbero deps cross-android universal"
 
