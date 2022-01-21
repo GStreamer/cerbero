@@ -249,10 +249,6 @@ class Recipe(custom.GStreamer):
         if can_enable_qt5:
             self.enable_plugin('qmlgl', 'qt5', 'qt5', option='qt5')
 
-        # Recipes that need autoreconf hang on the Windows CI
-        if self.config.platform == Platform.WINDOWS:
-            self.disable_plugin('wavpack', 'codecs', dep='wavpack')
-
         if self.using_msvc():
             # plugin is C++, library is Autotools
             self.disable_plugin('taglib', 'codecs', dep='taglib')
