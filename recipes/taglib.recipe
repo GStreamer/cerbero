@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/taglib/taglib/releases/download/v1.11.1/taglib-%(version)s.tar.gz'
     tarball_checksum = 'b6d1a5a610aae6ff39d93de5efd0fdc787aa9e9dc1e7026fa4c961b26563526b'
     # either LGPLv2.1 or MPLv1.1
-    licenses = [License.LGPLv2_1Plus]
+    licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
 
     btype = BuildType.CMAKE
     configure_options = '-DWITH_MP4=ON \
@@ -21,6 +21,7 @@ class Recipe(recipe.Recipe):
         -DBUILD_STATIC_LIBS=1 \
         -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
     can_msvc = True
+    cmake_generator = 'ninja'
 
     patches = [
         'taglib/0001-Link-with-correct-STL-on-Android.patch',
