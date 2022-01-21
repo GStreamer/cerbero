@@ -274,19 +274,19 @@ class Tarball(BaseTarball, Source):
 
     async def extract(self):
         m.action(_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
-        if os.path.exists(self.build_dir):
-            shutil.rmtree(self.build_dir)
+        if os.path.exists(self.config_src_dir):
+            shutil.rmtree(self.config_src_dir)
 
         unpack_dir = self.config.sources
         if self.tarball_is_bomb:
-            unpack_dir = self.build_dir
+            unpack_dir = self.config_src_dir
         await self.extract_tarball(unpack_dir)
 
         if self.tarball_dirname is not None:
             extracted = os.path.join(unpack_dir, self.tarball_dirname)
             # Since we just extracted this, a Windows anti-virus might still
             # have a lock on files inside it.
-            shell.windows_proof_rename(extracted, self.build_dir)
+            shell.windows_proof_rename(extracted, self.config_src_dir)
         git.init_directory(self.config_src_dir, logfile=get_logfile(self))
         for patch in self.patches:
             if not os.path.isabs(patch):
@@ -507,15 +507,15 @@ class Svn(Source):
         await svn.update(self.repo_dir, self.revision)
 
     async def extract(self):
-        if os.path.exists(self.build_dir):
-            shutil.rmtree(self.build_dir)
+        if os.path.exists(self.config_src_dir):
+            shutil.rmtree(self.config_src_dir)
 
-        shutil.copytree(self.repo_dir, self.build_dir)
+        shutil.copytree(self.repo_dir, self.config_src_dir)
 
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
-            shell.apply_patch(patch, self.build_dir, self.strip, logfile=get_logfile(self))
+            shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
 
     def built_version(self):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))
