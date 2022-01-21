@@ -11,6 +11,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'
+    can_msvc = True
     url = 'https://github.com/uclouvain/openjpeg/archive/v%(version)s.tar.gz'
     tarball_checksum = '63f5a4713ecafc86de51bfad89cc07bb788e9bba24ebbf0c4ca637621aadb6a9'
     configure_options = ' -DBUILD_CODEC:bool=off -DBUILD_PKGCONFIG_FILES:bool=on '

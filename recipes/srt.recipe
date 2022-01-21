@@ -12,6 +12,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     cmake_generator = 'ninja'
+    can_msvc = False
     # CXX11 builds stuff we don't need, and causes a build failure on mingw
     configure_options = '-DUSE_ENCLIB=openssl -DENABLE_CXX11=OFF'
     # openssl on Linux
