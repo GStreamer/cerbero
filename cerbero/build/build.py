@@ -665,8 +665,15 @@ class CMake (MakefilesBase):
             self.configure_options += ['-DCMAKE_SYSTEM_NAME=Windows']
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options += ['-DCMAKE_SYSTEM_NAME=Linux']
+
         if self.config.platform == Platform.WINDOWS:
-            self.configure_options += ['-G', 'Unix Makefiles']
+            if self.using_msvc():
+                self.configure_options += ['-G', 'Ninja']
+                self.make = ['ninja', '-v']
+                self.make_install = self.make + ['install']
+            else:
+                self.configure_options += ['-G', 'Unix Makefiles']
+                self.make += ['VERBOSE=1']
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
@@ -688,7 +695,6 @@ class CMake (MakefilesBase):
             os.remove(cmake_cache)
         if os.path.exists(cmake_files):
             shutil.rmtree(cmake_files)
-        self.make += ['VERBOSE=1']
         await MakefilesBase.configure(self)
         if not os.path.exists(self.build_dir):
             os.makedirs(self.build_dir)
