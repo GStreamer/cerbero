@@ -64,7 +64,7 @@ class Package(Command):
             ArgparseArgument('--dry-run', action='store_true',
                 default=False, help=_('Only print the packages that will be built')),
             ArgparseArgument('--compress-method', type=str,
-                choices=['default', 'xz', 'bz2'], default='default',
+                choices=['default', 'xz', 'bz2', 'none'], default='default',
                 help=_('Select compression method for tarballs')),
             ArgparseArgument('--jobs', '-j', action='store', type=int,
                 default=0, help=_('How many recipes to build concurrently. '

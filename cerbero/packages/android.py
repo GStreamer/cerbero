@@ -37,8 +37,7 @@ class AndroidPackager(DistTarball):
         return super()._create_tarball(output_dir, package_type, files, force, package_prefix)
 
     def _get_name(self, package_type, ext=None):
-        if ext is None:
-            ext = 'tar.' + self.compress
+        ext = self._get_ext(ext)
 
         if package_type == PackageType.DEVEL:
             package_type = ''

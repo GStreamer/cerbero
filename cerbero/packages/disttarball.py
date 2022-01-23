@@ -40,7 +40,7 @@ class DistTarball(PackagerBase):
         if self.config.packages_prefix is not None:
             self.package_prefix = '%s-' % self.config.packages_prefix
         self.compress = config.package_tarball_compression
-        if self.compress not in ('bz2', 'xz'):
+        if self.compress not in ('none', 'bz2', 'xz'):
             raise UsageError('Invalid compression type {!r}'.format(self.compress))
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False,
@@ -82,9 +82,15 @@ class DistTarball(PackagerBase):
             filenames.append(devel)
         return filenames
 
+    def _get_ext(self, ext=None):
+        if ext is not None:
+            return ext
+        if self.compress == 'none':
+            return 'tar'
+        return 'tar.' + self.compress
+
     def _get_name(self, package_type, ext=None):
-        if ext is None:
-            ext = 'tar.' + self.compress
+        ext = self._get_ext(ext)
 
         if self.config.target_platform != Platform.WINDOWS:
             platform = self.config.target_platform
@@ -158,6 +164,8 @@ class DistTarball(PackagerBase):
         except OSError:
             os.replace(tar_filename, tar_filename + '.partial')
             raise
+        if self.compress == 'none':
+            return
         # Compress the tarball
         compress_cmd = ['-z', '-f', tar_filename]
         if self.compress == 'bz2':
@@ -182,7 +190,7 @@ class DistTarball(PackagerBase):
                 tar_cmd += ['--bzip2']
         elif self.compress == 'xz':
             tar_cmd += ['--use-compress-program=xz --threads=0']
-        else:
+        elif self.compress != 'none':
             raise AssertionError("Unknown tar compression: {}".format(self.compress))
         try:
             shell.new_call(tar_cmd + files)
