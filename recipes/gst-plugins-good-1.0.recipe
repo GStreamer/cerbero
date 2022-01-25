@@ -266,6 +266,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('png', 'codecs', dep='libpng')
             self.disable_plugin('soup', 'net', dep='libsoup')
             self.disable_plugin('speex', 'codecs', dep='speex')
+            self.disable_plugin('wavpack', 'codecs', dep='wavpack')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
