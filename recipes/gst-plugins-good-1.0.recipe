@@ -10,7 +10,7 @@ class Recipe(custom.GStreamer):
                      'flac': 'enabled',
                      'gdk-pixbuf': 'enabled',
                      'jpeg': 'enabled',
-                     'lame': 'enabled', 
+                     'lame': 'enabled',
                      'mpg123': 'enabled',
                      'png': 'enabled',
                      'soup': 'enabled',
