@@ -137,7 +137,7 @@ MSVC x86_64     | `win64.cbc`               | visualstudio
 UWP x86         | `win32.cbc`               | uwp
 UWP x86_64      | `win64.cbc`               | uwp
 UWP ARM64       | `cross-win-arm64.cbc`     | uwp
-UWP Universal   | `cross-uwp-universal.cbc  | (implicitly uwp)
+UWP Universal   | `cross-uwp-universal.cbc` | (implicitly uwp)
 
 Example usage:
 
