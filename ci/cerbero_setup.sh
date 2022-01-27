@@ -95,10 +95,10 @@ cerbero_before_script() {
 
     echo "home_dir = \"$(pwd_native)/${CERBERO_HOME}\"" > localconf.cbc
     echo "local_sources = \"$(pwd_native)/${CERBERO_SOURCES}\"" >> localconf.cbc
-    if [[ $CONFIG == win??.cbc ]]; then
-        # Visual Studio 2017 build tools install path
+    if [[ $CONFIG == win??.cbc ]] || [[ $CONFIG =~ uwp ]] ; then
+        # Visual Studio 2019 build tools install path
         echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
-        echo 'vs_install_version = "vs15"' >> localconf.cbc
+        echo 'vs_install_version = "vs16"' >> localconf.cbc
     fi
     echo "recipes_commits = {'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'}" >> localconf.cbc
     echo "recipes_remotes = {'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}}" >> localconf.cbc
@@ -133,16 +133,24 @@ cerbero_script() {
 }
 
 cerbero_deps_script() {
+    # Build deps for all gstreamer recipes and any recipes that build gstreamer
+    # plugins (and hence compile against gstreamer)
+    local build_deps="gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0
+        gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0
+        gst-devtools-1.0 gst-editing-services-1.0 libnice"
+    # Some deps that are only listed in the package files
+    local more_deps="glib-networking"
+    # UWP target doesn't support building ffmpeg yet
+    [[ $CONFIG =~ uwp ]] || build_deps="$build_deps gst-libav-1.0"
+
     show_ccache_sum
 
     $CERBERO $CERBERO_ARGS show-config
     $CERBERO $CERBERO_ARGS fetch-bootstrap --jobs=4
     $CERBERO $CERBERO_ARGS fetch-package --jobs=4 --deps gstreamer-1.0
     $CERBERO $CERBERO_ARGS bootstrap --offline --system=no
-    $CERBERO $CERBERO_ARGS build-deps --offline \
-        gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0 \
-        gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0 \
-        gst-libav-1.0 gst-devtools-1.0 gst-editing-services-1.0 libnice
+    $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
+    $CERBERO $CERBERO_ARGS build --offline $more_deps
 
     if [[ -n ${CERBERO_OVERRIDDEN_DIST_DIR} ]]; then
         mkdir -p "${CERBERO_HOME}/dist/${ARCH}"
