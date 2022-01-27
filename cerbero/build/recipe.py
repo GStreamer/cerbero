@@ -402,6 +402,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             'gstvalidate-1.0' : 'gst-validate-1.0',
             'gstvalidate-default-overrides-1.0' : None,
             'ges-1.0' : 'gst-editing-services-1.0',
+            'gstd3d11-1.0': None,
+            'gstwinrt-1.0': None,
         }
         generated_libs = []
 
