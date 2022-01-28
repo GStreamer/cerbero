@@ -73,9 +73,12 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         # Meson does not generate la files
-        major, minor, micro = get_libtool_versions(self.version)
         libtool_la = LibtoolLibrary('libcairo', None, None, None,
                                     self.config.libdir, self.config.target_platform,
                                     deps=['gobject-2.0', 'pixman-1', 'freetype', 'fontconfig', 'png16', 'z'])
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('libcairo-gobject', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=['cairo', 'gobject-2.0', 'pixman-1', 'freetype', 'fontconfig', 'png16', 'z'])
         libtool_la.save()
         super().post_install()
