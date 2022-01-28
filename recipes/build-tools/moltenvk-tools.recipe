@@ -13,6 +13,8 @@ class Recipe(recipe.Recipe):
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/' + tarball_dirname + '.dmg'
     tarball_checksum = '9e89291283e41d62673bf48007dac764e99a504d145ee4d70d2d32e328f7ee40'
     btype = BuildType.CUSTOM
+    # The binaries from the SDK are already signed and do not require relocation
+    skip_steps = [BuildSteps.RELOCATE_OSX_LIBRARIES, BuildSteps.CODE_SIGN]
 
     files_bins = [
         'glslangValidator',
@@ -31,11 +33,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             raise InvalidRecipeError(self, "Invalid platform")
-        # The binaries from the SDK are already signed and do not require relocation
-        if BuildSteps.RELOCATE_OSX_LIBRARIES in self._steps:
-            self._steps.remove(BuildSteps.RELOCATE_OSX_LIBRARIES)
-        if BuildSteps.CODE_SIGN in self._steps:
-            self._steps.remove(BuildSteps.CODE_SIGN)
 
     async def install(self):
         srcdir = self.config.moltenvk_prefix

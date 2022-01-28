@@ -237,6 +237,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     platform_deps = None
     runtime_dep = False
     bash_completions = None
+    skip_steps = None
 
     # Internal properties
     force = False
@@ -271,6 +272,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             config.bash_completions.update(self.bash_completions)
             self.deps.append('bash-completion')
         self.platform_deps = self.platform_deps or {}
+        self.skip_steps = self.skip_steps or []
         self._steps = self._default_steps[:]
         if self.config.target_platform == Platform.WINDOWS:
             self._steps.append(BuildSteps.GEN_LIBFILES)
@@ -279,6 +281,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         if self.config.target_platform == Platform.DARWIN and \
                 self.config.prefix == self.config.build_tools_prefix:
             self._steps.append(BuildSteps.CODE_SIGN)
+        for s in self.skip_steps:
+            self._steps.remove(s)
         FilesProvider.__init__(self, config)
         try:
             self.stype.__init__(self)
