@@ -55,9 +55,13 @@ class BaseCache(Command):
                 h.update(block)
         return h.hexdigest()
 
-    def get_git_sha(self, args):
+    def get_git_sha(self, commit):
         git_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
-        return git.get_hash(git_dir, args.commit)
+        return git.get_hash(git_dir, commit)
+
+    def get_git_sha_is_ancestor(self, commit):
+        git_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+        return git.get_hash_is_ancestor(git_dir, commit)
 
     def json_get(self, url):
         m.message("GET %s" % url)
@@ -129,12 +133,18 @@ class FetchCache(BaseCache):
                     default='gstreamer', help=_('GitLab namespace to search from')))
         BaseCache.__init__(self, args)
 
-    def find_dep(self, deps, sha):
+    def find_dep(self, deps, sha, allow_old=False):
         for dep in deps:
             if dep['commit'] == sha:
                 return dep
-
-        m.warning("Did not find cache for commit %s" % sha)
+        if allow_old:
+            m.message("Did not find cache for commit %s, looking for an older one...");
+            for dep in deps:
+                if self.get_git_sha_is_ancestor(dep['commit']):
+                    return dep
+            m.warning("Did not find any cache for commit %s" % sha)
+        else:
+            m.warning("Did not find cache for commit %s" % sha)
         return None
 
     async def fetch_dep(self, config, dep, namespace):
@@ -167,9 +177,9 @@ class FetchCache(BaseCache):
     def run(self, config, args):
         BaseCache.run(self, config, args)
 
-        sha = self.get_git_sha(args)
+        sha = self.get_git_sha(args.commit)
         deps = self.get_deps(config, args)
-        dep = self.find_dep(deps, sha)
+        dep = self.find_dep(deps, sha, allow_old=True)
         if dep:
             run_until_complete(self.fetch_dep(config, dep, args.namespace))
         m.message('All done!')
@@ -217,7 +227,7 @@ class GenCache(BaseCache):
     def run(self, config, args):
         BaseCache.run(self, config, args)
 
-        sha = self.get_git_sha(args)
+        sha = self.get_git_sha(args.commit)
         deps = self.get_deps(config, args)
         self.gen_dep(config, args, deps, sha)
 

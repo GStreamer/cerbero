@@ -207,6 +207,13 @@ def get_hash(git_dir, commit, logfile=None):
     return shell.check_output([GIT, 'rev-parse', commit], cmd_dir=git_dir,
                               fail=False, quiet=True, logfile=logfile).rstrip()
 
+def get_hash_is_ancestor(git_dir, commit, logfile=None):
+    if not os.path.isdir(os.path.join(git_dir, '.git')):
+        return False
+    ret = shell.new_call([GIT, 'merge-base', '--is-ancestor', commit, 'HEAD'],
+                         cmd_dir=git_dir, fail=False, logfile=logfile)
+    return ret == 0
+
 
 async def local_checkout(git_dir, local_git_dir, commit, logfile=None, use_submodules=True):
     '''
