@@ -282,7 +282,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                 self.config.prefix == self.config.build_tools_prefix:
             self._steps.append(BuildSteps.CODE_SIGN)
         for s in self.skip_steps:
-            self._steps.remove(s)
+            if s in self._steps:
+                self._steps.remove(s)
         FilesProvider.__init__(self, config)
         try:
             self.stype.__init__(self)
