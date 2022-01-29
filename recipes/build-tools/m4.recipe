@@ -4,15 +4,12 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'm4'
-    version = '1.4.18'
+    version = '1.4.19'
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     url = 'gnu://'
-    tarball_checksum = 'f2c1e86ca0a404ff281631bdc8377638992744b175afb806e25871a24a934e07'
+    tarball_checksum = '63aede5c6d33b6d9b13511cd0be2cac046f2e70fd0a07aa9573a04a82783af96'
     files_bins = ['m4']
-
-    patches = ['m4/0001-Fix-build-invalid-instruction-on-macOS-10.13.patch',
-               'm4/0001-m4-compilation-with-glibc-2.28.patch']
 
     def prepare(self):
         self.configure_options += " --disable-gcc-warnings"
