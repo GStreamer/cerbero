@@ -250,7 +250,7 @@ class UploadCache(BaseCache):
         return path
 
     def upload_dep(self, config, args, deps):
-        sha = self.get_git_sha(args)
+        sha = self.get_git_sha(args.commit)
         for dep in deps:
             if dep['commit'] == sha:
                 m.message('Cache already uploaded for this commit.')
