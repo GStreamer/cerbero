@@ -49,8 +49,8 @@ class OSXRelocator(object):
     def relocate_dir(self, dirname):
         self.parse_dir(os.path.join(self.root, dirname))
 
-    def relocate_file(self, object_file):
-        self.change_libs_path(object_file)
+    def relocate_file(self, object_file, original_file=None):
+        self.change_libs_path(object_file, original_file)
 
     def change_id(self, object_file, id=None):
         id = id or object_file.replace(self.lib_prefix, '@rpath')
@@ -60,8 +60,16 @@ class OSXRelocator(object):
         cmd = [INT_CMD, '-id', id, object_file]
         shell.new_call(cmd, fail=False, logfile=self.logfile)
 
-    def change_libs_path(self, object_file):
-        depth = len(object_file.split('/')) - len(self.root.split('/')) - 1
+    def change_libs_path(self, object_file, original_file=None):
+        # @object_file: the actual file location
+        # @original_file: where the file will end up in the output directory
+        # structure and the basis of how to calculate rpath entries.  This may
+        # be different from where the file is currently located e.g. when
+        # creating a fat binary from copy of the original file in a temporary
+        # location.
+        if original_file is None:
+            original_file = object_file
+        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/')) - 1
         p_depth = '/..' * depth
         rpaths = ['.']
         rpaths += ['@loader_path' + p_depth, '@executable_path' + p_depth]
