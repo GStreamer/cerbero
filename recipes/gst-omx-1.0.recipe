@@ -3,7 +3,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-omx-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '2cd457c1e8deb1a9b39608048fb36a44f6c9a864a6b6115b1453a32e7be93b42'
+    tarball_checksum = 'b5281c938e959fd2418e989cfb6065fdd9fe5f6f87ee86236c9427166e708163'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0']
 
     files_plugins_codecs = ['lib/gstreamer-1.0/libgstomx%(mext)s']
