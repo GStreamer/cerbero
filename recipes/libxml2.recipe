@@ -32,3 +32,5 @@ class Recipe(recipe.Recipe):
             self.configure_options = '--with-python=no'
         elif self.config.target_platform == Platform.LINUX:
             self.configure_options = '--with-python=no'
+        elif self.config.target_platform == Platform.DARWIN:
+            self.configure_options = '--with-python=no'
