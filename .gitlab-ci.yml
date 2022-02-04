@@ -11,6 +11,7 @@ variables:
   # CI_GSTREAMER_* variables are overriden by gstreamer's CI when it triggers cerbero CI.
   CI_GSTREAMER_REF_NAME: 'main'
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
+  CI_GSTREAMER_TRIGGERED: 'false'
   GST_UPSTREAM_BRANCH: 'main'
   WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2022-01-26.3-main'
   DEFAULT_CERBERO_ARGS: >
@@ -102,7 +103,7 @@ android fedora image:
   variables:
     GIT_STRATEGY: none
 
-# Template for Cerbero GStreamer Build
+# Template for all Cerbero GStreamer builds
 #
 # Parameters:
 # CONFIG: The name of the configuration file to use
@@ -113,8 +114,6 @@ android fedora image:
   extends:
     - .fedora image
     - .fdo.distribution-image@fedora
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
   # Ensure that the runners it will be executed on
   # will have plenty of space for the cache
   tags: ['gstreamer']
@@ -142,8 +141,6 @@ android fedora image:
   before_script:
     - echo $CI_PIPELINE_SOURCE
     - ./ci/cerbero_setup.sh cerbero_before_script
-  script:
-    - ./ci/cerbero_setup.sh cerbero_script
   cache:
     key: "${CI_JOB_NAME}"
     paths:
@@ -171,9 +168,21 @@ android fedora image:
 .cerbero deps:
   extends: .cerbero
   rules:
-    - if: '$CI_PIPELINE_SOURCE != "pipeline"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
   script:
     - ./ci/cerbero_setup.sh cerbero_deps_script
+
+# Template for Cerbero GStreamer MR Pipelines
+#
+# This template is used when a cerbero pipeline is triggered by a merge
+# request in another project such as gstreamer. In that case, we fetch a cache
+# (if available) and use it instead of building from scratch.
+.cerbero mr:
+  extends: .cerbero
+  rules:
+    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
+  script:
+    - ./ci/cerbero_setup.sh cerbero_script
 
 #
 # Cerbero Linux X86_64 build
@@ -185,7 +194,7 @@ cerbero deps fedora x86_64:
     ARCH: "linux_x86_64"
 
 build cerbero fedora x86_64:
-  extends: '.cerbero'
+  extends: '.cerbero mr'
   variables:
     CONFIG: "linux.config"
 
@@ -211,7 +220,7 @@ cerbero deps cross-android universal:
 
 build cerbero cross-android universal:
   extends:
-    - '.cerbero'
+    - '.cerbero mr'
     - '.cerbero cross-android universal'
 
 #
@@ -224,7 +233,7 @@ cerbero deps cross-windows x86:
     ARCH: "mingw_x86"
 
 build cerbero cross win32:
-  extends: '.cerbero'
+  extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win32.cbc"
     CERBERO_RUN_WRAPPER: "wine"
@@ -238,7 +247,7 @@ cerbero deps cross-windows x86_64:
     ARCH: "mingw_x86_64"
 
 build cerbero cross win64:
-  extends: '.cerbero'
+  extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win64.cbc"
     CERBERO_RUN_WRAPPER: "wine"
@@ -292,7 +301,7 @@ build cerbero cross win64:
 cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
       allow_failure: true
   needs:
     - "build cerbero cross-android universal"
@@ -300,7 +309,7 @@ cross-android universal examples:
 cerbero cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
-    - if: '$CI_PIPELINE_SOURCE != "pipeline"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
       allow_failure: true
   needs:
     - "cerbero deps cross-android universal"
@@ -334,7 +343,7 @@ cerbero deps macos x86_64:
 
 build cerbero macos x86_64:
   extends:
-    - '.cerbero'
+    - '.cerbero mr'
     - '.cerbero macos x86_64'
 
 #
@@ -365,7 +374,7 @@ cerbero deps cross-macos universal:
 
 build cerbero cross-macos universal:
   extends:
-    - '.cerbero'
+    - '.cerbero mr'
     - '.cerbero cross-macos universal'
 
 #
@@ -396,7 +405,7 @@ cerbero deps cross-ios universal:
 
 build cerbero cross-ios universal:
   extends:
-    - '.cerbero'
+    - '.cerbero mr'
     - '.cerbero cross-ios universal'
 
 #
@@ -439,14 +448,14 @@ build cerbero cross-ios universal:
 cross-ios universal examples:
   extends: ".cross-ios universal examples"
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
   needs:
     - "build cerbero cross-ios universal"
 
 cerbero cross-ios universal examples:
   extends: ".cross-ios universal examples"
   rules:
-    - if: '$CI_PIPELINE_SOURCE != "pipeline"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
   needs:
     - "cerbero deps cross-ios universal"
 
@@ -477,7 +486,7 @@ cerbero deps msvc x86_64:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
 
 build cerbero msvc x86_64:
-  extends: ['.cerbero', '.cerbero windows native']
+  extends: ['.cerbero mr', '.cerbero windows native']
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_script"
 
