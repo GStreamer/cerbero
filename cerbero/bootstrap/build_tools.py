@@ -123,7 +123,6 @@ class BuildTools (BootstrapperBase, Fetch):
 
     def start(self, jobs=0):
         self.insert_python_site()
-
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()
@@ -131,4 +130,5 @@ class BuildTools (BootstrapperBase, Fetch):
         oven.start_cooking()
 
     def fetch_recipes(self, jobs):
+        self.recipes += self.check_build_tools()
         Fetch.fetch(self.cookbook, self.recipes, False, False, False, False, jobs)
