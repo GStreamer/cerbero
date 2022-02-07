@@ -15469,3 +15469,43 @@ index 00000000..7c458969
 -- 
 2.42.0
 
+
+From 3a3281abf9ca2121959a7d1348244ba0ae909498 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Sun, 29 Jun 2025 00:21:37 +0000
+Subject: [PATCH] meson: Fix build with Android API level 24 on x86
+
+It simply doesn't allow relocations from inline assembly at all (with
+ff_h264_cabac_tables or MMXEXT code), and there is a force disable
+missing for inline_asm_nonlocal_labels.
+
+See https://github.com/ffmpeg/ffmpeg/commit/102045028ee57967973ea90acac41eb747d3c601
+---
+ meson.build | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 3ab837378c..58a340ded0 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2511,6 +2511,8 @@ if cc.get_id() != 'clang' or host_system != 'windows'
+   asm_inline_checks += [
+     ['"Label:\\n"', 'inline_asm_nonlocal_labels']
+   ]
++else
++  conf.set('inline_asm_nonlocal_labels', 0)
+ endif
+ 
+ extern_prefix = cc.symbols_have_underscore_prefix() ? '_' : ''
+@@ -2542,7 +2544,7 @@ endif
+ if conf.get('x86') == 1
+   is_broken_android_api = cc.links(cpp_cond.format('android/api-level.h', '__ANDROID_API__ < 24'), name: 'compiling for Android API <24')
+ 
+-  if is_broken_android_api and conf.get('x86_64') == 0
++  if cc.has_define('__ANDROID__') and conf.get('x86_64') == 0
+     # https://stackoverflow.com/questions/34691970/ffmpeg-for-android-neon-build-has-text-relocations/34697703#34697703
+     # https://issuetracker.google.com/issues/37067983
+     # https://trac.ffmpeg.org/ticket/4928
+-- 
+2.49.0
+
