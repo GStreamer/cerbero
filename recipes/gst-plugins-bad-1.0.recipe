@@ -475,8 +475,9 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('msdk', 'codecs', 'intelmsdk')
         self.enable_plugin('va', 'codecs', 'vaapi')
 
-        # MediaFoundation can only be built with MSVC
+        # MediaFoundation and DirectShow can only be built with MSVC
         self.enable_plugin('mediafoundation', 'sys', 'visualstudio')
+        self.enable_plugin('directshow', 'sys', 'visualstudio')
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi2'] = 'disabled'
@@ -541,6 +542,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('d3d', 'sys', option='d3dvideosink')
             self.disable_plugin('decklink', 'sys')
             self.disable_plugin('directsoundsrc', 'capture', option='directsound')
+            self.disable_plugin('directshow', 'sys')
             self.disable_plugin('wasapi', 'sys')
             self.disable_plugin('winscreencap', 'capture')
             self.disable_plugin('winks', 'capture')
