@@ -226,13 +226,13 @@ build cerbero cross-android universal:
 #
 # Cerbero Cross Windows builds
 #
-.cerbero deps cross-windows x86:
+cerbero deps cross-windows x86:
   extends: '.cerbero deps'
   variables:
     CONFIG: "cross-win32.cbc"
     ARCH: "mingw_x86"
 
-.build cerbero cross win32:
+build cerbero cross win32:
   extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win32.cbc"
@@ -240,13 +240,13 @@ build cerbero cross-android universal:
     CERBERO_RUN_SUFFIX: ".exe"
 
 
-.cerbero deps cross-windows x86_64:
+cerbero deps cross-windows x86_64:
   extends: '.cerbero deps'
   variables:
     CONFIG: "cross-win64.cbc"
     ARCH: "mingw_x86_64"
 
-.build cerbero cross win64:
+build cerbero cross win64:
   extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win64.cbc"
@@ -480,18 +480,18 @@ cerbero cross-ios universal examples:
     - $env:CI_PROJECT_DIR = $env:CI_PROJECT_DIR.replace('\', '/')
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_before_script"
 
-.cerbero deps msvc x86_64:
+cerbero deps msvc x86_64:
   extends: ['.cerbero deps', '.cerbero windows native']
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
 
-.build cerbero msvc x86_64:
+build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_script"
 
-.cerbero deps uwp universal:
-  extends: ['.cerbero deps msvc x86_64']
+cerbero deps uwp universal:
+  extends: ['cerbero deps msvc x86_64']
   variables:
     CONFIG: 'cross-uwp-universal.cbc'
     ARCH: 'uwp_universal'
@@ -499,8 +499,8 @@ cerbero cross-ios universal examples:
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
 
-.build cerbero uwp universal:
-  extends: ['.build cerbero msvc x86_64']
+build cerbero uwp universal:
+  extends: ['build cerbero msvc x86_64']
   variables:
     CONFIG: 'cross-uwp-universal.cbc'
     ARCH: 'uwp_universal'
