@@ -159,7 +159,6 @@ class MSYS2Bootstrapper(BootstrapperBase):
                 # OpenSSL needs a perl version using '\' for the MSVC build
                 # and a perl version using '/' for the MinGW build
                 'mingw-w64-ucrt-x86_64-perl', 'perl',
-                # We need the ucrt64 version of pkg-config, since we distribute it
                 'mingw-w64-ucrt-x86_64-pkg-config',
                 ]
 

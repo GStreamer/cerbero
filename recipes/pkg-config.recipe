@@ -19,4 +19,6 @@ class Recipe(recipe.Recipe):
         # pkgconfig in /usr/lib/x86_64-linux-gnu etc. instead of in /usr/lib
         if self.config.platform != Platform.LINUX:
             self.configure_options += '--enable-define-prefix '
+        if self.config.platform == Platform.WINDOWS:
+            self.runtime_dep = True
         self.append_env('CFLAGS', '-Wno-error=format-nonliteral')

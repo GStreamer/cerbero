@@ -36,17 +36,16 @@ class Recipe(recipe.Recipe):
                                    'libmoldname.a']
         self.gcc_static_files = [gcclib + 'libgcc.a',
                                  gcclib + 'libgcc_eh.a']
-        self.files_static += [os.path.join('lib', os.path.basename(f)) \
-                for f in self.mingw_static_files + self.gcc_static_files]
+        self.files_static += [os.path.join('lib', os.path.basename(f))
+                              for f in self.mingw_static_files + self.gcc_static_files]
 
         self.files_libs.append(self._ehlib)
-        if self.config.platform == Platform.WINDOWS and \
-           self.config.prefix != self.config.build_tools_prefix:
-            self.files_bins += ['pkg-config']
 
     async def install(self):
-        hostroot = os.path.join(self.config.toolchain_prefix, 'x86_64-w64-mingw32')
-        sysroot = os.path.join(hostroot, 'sysroot', 'usr', 'x86_64-w64-mingw32')
+        hostroot = os.path.join(
+            self.config.toolchain_prefix, 'x86_64-w64-mingw32')
+        sysroot = os.path.join(hostroot, 'sysroot',
+                               'usr', 'x86_64-w64-mingw32')
         # Copy libstdc++ to the prefix and update the .la files with the
         # the prefix path.
         if self.config.target_arch == Architecture.X86:
@@ -123,15 +122,4 @@ class Recipe(recipe.Recipe):
         for f in self.gcc_static_files:
             out_file = os.path.join('lib', os.path.basename(f))
             shutil.copy(os.path.join(self.config.toolchain_prefix, f),
-                os.path.join(self.config.prefix, out_file))
-        # copy the bootstrapped build-tool pkg-config into the prefix so it's
-        # included in the Windows binary release. Of course, we shouldn't try
-        # to do this while bootstrapping, so skip if the prefix is the
-        # build-tools prefix.
-        if self.config.platform == Platform.WINDOWS and \
-           self.config.prefix != self.config.build_tools_prefix:
-            pkgconfig = os.path.join(self.config.build_tools_prefix, 'bin', 'pkg-config.exe')
-            if not os.path.exists(pkgconfig):
-                pkgconfig = shell.which('pkg-config')
-            bindir = os.path.join(self.config.prefix, 'bin')
-            shutil.copy(pkgconfig, bindir)
+                 os.path.join(self.config.prefix, out_file))
