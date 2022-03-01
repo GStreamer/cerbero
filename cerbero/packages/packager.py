@@ -55,7 +55,7 @@ class Packager (object):
 
         if d == Distro.WINDOWS and config.cross_compiling():
             try:
-                get_wix_prefix()
+                get_wix_prefix(config)
             except:
                 m.warning("Cross-compiling for Windows and WIX not found, overriding Packager")
                 d = Distro.NONE

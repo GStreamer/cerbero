@@ -1,0 +1,18 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+from cerbero.utils import shell
+
+
+class Recipe(recipe.Recipe):
+    name = 'winetricks'
+    version = '20210825'
+    stype = SourceType.TARBALL
+    url = 'https://github.com/Winetricks/winetricks/archive/refs/tags/%(version)s.tar.gz'
+    tarball_checksum = 'bac77918ef4d58c6465a1043fd996d09c3ee2c5a07f56ed089c4c65a71881277'
+    btype = BuildType.CUSTOM
+
+    async def install(self):
+        winetricks_tool = os.path.join(self.config.prefix, 'bin', self.name)
+        shutil.copy(os.path.join(self.build_dir, 'src', self.name), winetricks_tool)
+        await shell.async_call(['chmod', '+x', winetricks_tool])

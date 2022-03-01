@@ -392,7 +392,12 @@ class Config (object):
         )
         for each in runtime_env:
             env[each] = to_winepath(env[each])
+        env['WIX'] = os.path.join(self.build_tools_prefix, 'lib', 'wix')
+        # NOTE: Ensure that whatever directory this goes into is ignored by the
+        # .cerbero deps CI job otherwise we will tar up ~1GB of generated data.
+        env['WINEPREFIX'] = os.path.join(self.build_tools_prefix, 'var', 'tmp', 'wine')
         env['WINEPATH'] = to_winepath(os.path.join(prefix, 'bin'))
+        env['WINEDEBUG'] = 'fixme-all'
         return env
 
     def _merge_env(self, old_env, new_env, override_env=()):
@@ -490,7 +495,6 @@ class Config (object):
                 os.path.join(self.toolchain_prefix, 'lib'))
             includedir = self._join_path(includedir,
                 os.path.join(self.toolchain_prefix, 'include'))
-
         # Most of these variables are extracted from jhbuild
         env = {'LD_LIBRARY_PATH': ld_library_path,
                'LDFLAGS': ldflags,

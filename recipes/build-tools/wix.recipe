@@ -10,24 +10,23 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip'
     tarball_checksum = '37f0a533b0978a454efb5dc3bd3598becf9660aaf4287e55bf68ca6b527d051d'
+    deps = ['winetricks', 'wine-mono']
     btype = BuildType.CUSTOM
-    winetricks_url = 'https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks'
 
     async def extract(self):
         if os.path.exists(self.build_dir):
             shutil.rmtree(self.build_dir)
         os.makedirs(self.build_dir)
-        await shell.unpack(self.download_path, self.build_dir)
+        await shell.unpack(os.path.join(self.download_dir, self.tarball_name), self.build_dir)
 
     async def install(self):
         shell.copy_dir(self.build_dir, os.path.join(self.config.prefix, 'lib', 'wix', 'bin'))
-        if self.config.platform == Platform.LINUX:
-            wine_path = os.path.join(self.config.prefix, 'share', 'wine')
-            shell.download(self.winetricks_url, os.path.join(wine_path, 'winetricks'), True, True)
-            env = {
-                'DISPLAY': '',
-                'HOME': wine_path,
-                'WINEPREFIX': wine_path
-            }
-            await shell.async_call(['sh', './winetricks', '-q', 'dotnet40'],
-                           cmd_dir=wine_path, env=env)
+        # wineconsole fails trying to get env var in a VT with DISPLAY.
+        # This is working on docker buildbot and on a real terminal.
+        winetricks_tool = os.path.join(self.config.prefix, 'bin', 'winetricks')
+        if not 'DISPLAY' in self.env:
+          self.env['WINE'] = "wineconsole"
+        if self.config.target_platform == Platform.WINDOWS and \
+           self.config.platform == Platform.LINUX:
+          await shell.async_call([winetricks_tool, '-q', 'dotnet40'], env=self.env)
+

@@ -76,6 +76,10 @@ class BuildTools (BootstrapperBase, Fetch):
            self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
+        if self.config.target_platform == Platform.WINDOWS and \
+           self.config.platform == Platform.LINUX:
+                self.BUILD_TOOLS.append('wix')
+
         self.BUILD_TOOLS += self.config.extra_build_tools
         self._setup_env()
 

@@ -37,7 +37,7 @@ class MergeModulePackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = get_wix_prefix()
+        self.wix_prefix = get_wix_prefix(config)
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
@@ -97,22 +97,21 @@ class MergeModulePackager(PackagerBase):
             wixobjs.append(os.path.join(output_dir, "%s.wixobj" % x))
             sources.append(os.path.join(os.path.abspath(self.config.data_dir),
                                         'wix/%s.wxs' % x))
-
         if self._with_wine:
-            final_wixobjs = [to_winepath(x) for x in wixobjs]
-            final_sources = [to_winepath(x) for x in sources]
+            final_wixobjs = ['"{}"'.format(to_winepath(x)) for x in wixobjs]
+            final_sources = ['"{}"'.format(to_winepath(x)) for x in sources]
         else:
             final_wixobjs = wixobjs
             final_sources = sources
 
         candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(' '.join(final_sources), output_dir)
+        candle.compile(' '.join(final_sources), output_dir, env=self.config.env)
 
         if self.package.wix_use_fragment:
             path = wixobjs[0]
         else:
             light = Light(self.wix_prefix, self._with_wine)
-            path = light.compile(final_wixobjs, package_name, output_dir, True)
+            path = light.compile(final_wixobjs, package_name, output_dir, env=self.config.env, merge_module=True)
 
         # Clean up
         if not keep_temp:
@@ -153,7 +152,7 @@ class MSIPackager(PackagerBase):
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
-        self.wix_prefix = get_wix_prefix()
+        self.wix_prefix = get_wix_prefix(config)
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
         self.output_dir = os.path.realpath(output_dir)
@@ -255,17 +254,17 @@ class MSIPackager(PackagerBase):
                                         'wix/%s.wxs' % x))
 
         if self._with_wine:
-            final_wixobjs = [to_winepath(x) for x in wixobjs]
-            final_sources = [to_winepath(x) for x in sources]
+            final_wixobjs = ['"{}"'.format(to_winepath(x)) for x in wixobjs]
+            final_sources = ['"{}"'.format(to_winepath(x)) for x in sources]
         else:
             final_wixobjs = wixobjs
             final_sources = sources
 
         candle = Candle(self.wix_prefix, self._with_wine)
-        candle.compile(' '.join(final_sources), self.output_dir)
+        candle.compile(' '.join(final_sources), self.output_dir, env=self.config.env)
         light = Light(self.wix_prefix, self._with_wine,
                       "%s %s" % (self.UI_EXT, self.UTIL_EXT))
-        path = light.compile(final_wixobjs, self._package_name(), self.output_dir)
+        path = light.compile(final_wixobjs, self._package_name(), self.output_dir, env=self.config.env)
 
         # Clean up
         if not self.keep_temp:
@@ -308,9 +307,9 @@ class Candle(object):
             self.options['wine'] = ''
             self.options['q'] = ''
 
-    def compile(self, source, output_dir):
+    def compile(self, source, output_dir, env):
         self.options['source'] = source
-        shell.new_call(self.cmd % self.options, output_dir)
+        shell.new_call(self.cmd % self.options, output_dir, env=env)
         return os.path.join(output_dir, source, '.msm')
 
 
@@ -331,14 +330,14 @@ class Light(object):
             self.options['wine'] = ''
             self.options['q'] = ''
 
-    def compile(self, objects, msi_file, output_dir, merge_module=False):
+    def compile(self, objects, msi_file, output_dir, env, merge_module=False):
         self.options['objects'] = ' '.join(objects)
         self.options['msi'] = msi_file
         if merge_module:
             self.options['ext'] = 'msm'
         else:
             self.options['ext'] = 'msi'
-        shell.new_call(self.cmd % self.options, output_dir)
+        shell.new_call(self.cmd % self.options, output_dir, env=env)
         msi_file_path = os.path.join(output_dir,
                                      '%(msi)s.%(ext)s' % self.options)
         if self.options['wine'] == 'wine':

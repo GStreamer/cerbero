@@ -10,6 +10,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
     sdk_version = '1.0'
     uuid = 'b1b4b712-0d09-4a34-8117-8a69b6deecc2'
     ignore_package_prefix = True
+    wix_use_fragment = True
     packages =[
                # (name, required, selected)
                ('gstreamer-1.0-core', True, True),

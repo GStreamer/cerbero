@@ -82,6 +82,8 @@ class DebianBootstrapper (UnixBootstrapper):
             if self.config.arch == Architecture.X86_64:
                 self.packages.append('libc6:i386')
                 self.checks.append(self.create_debian_arch_check('i386'))
+            if self.config.arch in [Architecture.X86_64, Architecture.X86]:
+               self.packages.append('wine')
 
     def create_debian_arch_check(self, arch):
         def check_arch():
@@ -129,6 +131,8 @@ class RedHatBootstrapper (UnixBootstrapper):
                 self.packages.append('glibc.i686')
             if self.config.distro_version in [DistroVersion.FEDORA_24, DistroVersion.FEDORA_25]:
                 self.packages.append('libncurses-compat-libs.i686')
+            if self.config.arch in [Architecture.X86_64, Architecture.X86]:
+               self.packages.append('wine')
         if user_is_root():
             return
         self.tool = ['sudo'] + self.tool
@@ -147,6 +151,12 @@ class OpenSuseBootstrapper (UnixBootstrapper):
         'alsa-devel', 'libXi-devel', 'Mesa-devel', 'Mesa-libGLESv3-devel',
         'gperf', 'wget', 'git', 'ccache', 'openssl-devel'
     ]
+
+    def __init__(self, config, offline, assume_yes):
+        UnixBootstrapper.__init__(self, config, offline, assume_yes)
+        if self.config.target_platform == Platform.WINDOWS:
+          if self.config.arch in [Architecture.X86_64, Architecture.X86]:
+               self.packages.append('wine')
 
 class ArchBootstrapper (UnixBootstrapper):
 
@@ -173,6 +183,9 @@ class ArchBootstrapper (UnixBootstrapper):
             self.packages.append('gcc-multilib')
         else:
             self.packages.append('gcc')
+        if self.config.target_platform == Platform.WINDOWS:
+            if self.config.arch in [Architecture.X86_64, Architecture.X86]:
+                self.packages.append('wine')
 
 class GentooBootstrapper (UnixBootstrapper):
 
@@ -187,6 +200,12 @@ class GentooBootstrapper (UnixBootstrapper):
         'x11-libs/libXrender', 'x11-libs/libXv', 'media-libs/mesa',
         'net-misc/wget', 'dev-libs/openssl', 'media-libs/alsa-lib'
     ]
+
+    def __init__(self, config, offline, assume_yes):
+        UnixBootstrapper.__init__(self, config, offline, assume_yes)
+        if self.config.target_platform == Platform.WINDOWS:
+          if self.config.arch in [Architecture.X86_64, Architecture.X86]:
+               self.packages.append('virtual/wine')
 
 class NoneBootstrapper (BootstrapperBase):
 

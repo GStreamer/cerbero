@@ -1,0 +1,25 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import os
+import shutil
+from cerbero.utils import shell
+
+
+class Recipe(recipe.Recipe):
+    name = 'wine-mono'
+    version = '7.1.1'
+    stype = SourceType.TARBALL
+    url = 'https://dl.winehq.org/wine/wine-mono/%(version)s/wine-mono-%(version)s-x86.msi'
+    tarball_checksum = '9dc8e5603b7bc64354eb94ae4ea0f6821424767a3ff44ff0d19e346a490c11ea'
+    btype = BuildType.CUSTOM
+
+    async def extract(self):
+        pass
+
+    async def install(self):
+        wine_path = os.path.join(self.config.prefix, 'share', 'wine')
+        if not os.path.exists(wine_path):
+            os.makedirs(wine_path)
+        self.env['WINEPREFIX'] = os.path.join(self.config.prefix, 'var', 'tmp', 'wine')
+        self.env['WINEDEBUG'] = 'fixme-all'
+        await shell.async_call(['wine', 'msiexec', '/i', os.path.join(self.download_dir, self.tarball_name)],
+           cmd_dir=wine_path, env=self.env)

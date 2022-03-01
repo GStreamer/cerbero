@@ -443,9 +443,9 @@ def escape_path(path):
     return path
 
 
-def get_wix_prefix():
-    if 'WIX' in os.environ:
-        wix_prefix = os.path.join(os.environ['WIX'], 'bin')
+def get_wix_prefix(config):
+    if 'WIX' in config.env:
+        wix_prefix = os.path.join(config.env['WIX'], 'bin')
     else:
         wix_prefix = 'C:/Program Files%s/Windows Installer XML v3.5/bin'
         if not os.path.exists(wix_prefix):
