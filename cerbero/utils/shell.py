@@ -705,7 +705,7 @@ def which(pgm, path=None):
                 if os.path.exists(pext):
                     return pext
 
-def check_tool_version(tool_name, needed, env):
+def check_tool_version(tool_name, needed, env, version_arg='--version'):
     found = False
     newer = False
     if env is None:
@@ -714,7 +714,7 @@ def check_tool_version(tool_name, needed, env):
     if not tool:
         return None, False, False
     try:
-        out = check_output([tool, '--version'], env=env)
+        out = check_output([tool, version_arg], env=env)
     except FatalError:
         return None, False, False
     m = re.search('([0-9]+\.[0-9]+(\.[0-9]+)?)', out)
