@@ -25,7 +25,7 @@ import collections
 import asyncio
 from hashlib import sha256
 
-from cerbero.config import Platform, DEFAULT_MIRRORS
+from cerbero.config import Distro, DistroVersion, Platform, DEFAULT_MIRRORS
 from cerbero.utils import git, svn, shell, _, run_until_complete
 from cerbero.errors import FatalError, CommandError, InvalidRecipeError
 import cerbero.utils.messages as m
@@ -191,7 +191,11 @@ class BaseTarball(object):
             os.makedirs(self.download_dir)
         # Enable certificate checking only on Linux for now
         # FIXME: Add more platforms here after testing
-        cc = self.config.platform == Platform.LINUX
+        cc = False
+        if self.config.platform == Platform.LINUX:
+            if self.config.distro != Distro.REDHAT or \
+               self.config.distro_version > DistroVersion.REDHAT_7:
+                cc = True
         await shell.download(self.url, fname, check_cert=cc,
             overwrite=redownload, logfile=get_logfile(self),
             mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS)
