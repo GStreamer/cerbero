@@ -322,7 +322,7 @@ class Oven (object):
         # https://docs.python.org/3/whatsnew/3.10.html#whatsnew310-removed
         if sys.version_info < (3, 7, 0):
             asyncio_queue_args = {'loop': asyncio.get_event_loop()}
-        default_queue = asyncio.PriorityQueue(*asyncio_queue_args)
+        default_queue = asyncio.PriorityQueue(**asyncio_queue_args)
         queues = {step : default_queue for step in all_steps}
 
         # find the install steps for ensuring consistency between all of them
@@ -335,21 +335,21 @@ class Oven (object):
         # allocate jobs
         job_allocation = collections.defaultdict(lambda : 0)
         if self.jobs > 4:
-            queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue(*asyncio_queue_args)
+            queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue(**asyncio_queue_args)
             job_allocation[BuildSteps.COMPILE[1]] = 2
         if self.jobs > 5:
             job_allocation[BuildSteps.COMPILE[1]] = 3
         if self.jobs > 7:
-            install_queue = asyncio.PriorityQueue(*asyncio_queue_args)
+            install_queue = asyncio.PriorityQueue(**asyncio_queue_args)
             for step in install_steps:
                 queues[step] = install_queue
             job_allocation[BuildSteps.INSTALL[1]] = 1
         if self.jobs > 8:
             job_allocation[BuildSteps.EXTRACT[1]] = 1
-            queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(*asyncio_queue_args)
+            queues[BuildSteps.EXTRACT[1]] = asyncio.PriorityQueue(**asyncio_queue_args)
         if self.jobs > 9:
             job_allocation[BuildSteps.FETCH[1]] = 1
-            queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(*asyncio_queue_args)
+            queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue(**asyncio_queue_args)
 
         # async locks used to synchronize step execution
         locks = collections.defaultdict(lambda : None)
