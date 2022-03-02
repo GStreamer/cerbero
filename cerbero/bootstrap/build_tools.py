@@ -84,7 +84,7 @@ class BuildTools (BootstrapperBase, Fetch):
             if not newer:
                 ret.append('cmake')
             # dav1d requires nasm >=2.13.02
-            tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None)
+            tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None, version_arg='-v')
             if not newer:
                 ret.append('nasm')
         return ret
