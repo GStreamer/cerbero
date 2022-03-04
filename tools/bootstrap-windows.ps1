@@ -31,6 +31,7 @@ Write-Host "Installing MSYS2"
 choco install msys2 --params "/InstallDir:C:\msys64"
 C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -S -q --needed winpty perl'
 Add-Content C:\msys64\ucrt64.ini "`nMSYS2_PATH_TYPE=inherit"
+Copy-Item "data\msys2\profile.d\aliases.sh" -Destination "C:\msys64\etc\profile.d"
 
 $confirmation = Read-Host "Visual Studio 2019 build tools will be installed, do you want to proceed:[y/n]"
 if ($confirmation -eq 'y') {
