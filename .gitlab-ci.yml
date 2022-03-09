@@ -13,7 +13,7 @@ variables:
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   CI_GSTREAMER_TRIGGERED: 'false'
   GST_UPSTREAM_BRANCH: 'main'
-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2022-01-26.3-main'
+  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2022-03-09.0-main'
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --timestamps
@@ -476,7 +476,7 @@ cerbero cross-ios universal examples:
     CERBERO_HOST_DIR: "C:/cerbero"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v visualstudio -v nowerror"
     CERBERO_RUN_SUFFIX: ".exe"
-    CERBERO_BOOTSTRAP_SYSTEM: "yes"
+    CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
   before_script:
     - $env:CI_PROJECT_DIR = $env:CI_PROJECT_DIR.replace('\', '/')
