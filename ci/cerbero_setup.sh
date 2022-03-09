@@ -126,7 +126,7 @@ cerbero_script() {
         time rsync -aH "${CERBERO_HOME}/dist/${ARCH}/" "${CERBERO_OVERRIDDEN_DIST_DIR}"
     fi
 
-    $CERBERO $CERBERO_ARGS bootstrap --offline --system=no
+    $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
     fix_build_tools
 
     cerbero_package_and_check
