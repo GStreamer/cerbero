@@ -87,6 +87,9 @@ class FetchBootstrap(Command):
         args = [
             ArgparseArgument('--build-tools-only', action='store_true',
                 default=False, help=argparse.SUPPRESS),
+            ArgparseArgument('--system', action=StoreBool,
+                default=True, nargs='?', choices=('yes', 'no'),
+                help='Fetch sources to setup the system by the target platform'),
             ArgparseArgument('--toolchains', action=StoreBool,
                 default=True, nargs='?', choices=('yes', 'no'),
                 help='Setup any toolchains needed by the target platform'),
@@ -99,10 +102,10 @@ class FetchBootstrap(Command):
 
     def run(self, config, args):
         if args.build_tools_only:
-            # --build-tools-only meant '--toolchains=no --build-tools=yes'
+            # --build-tools-only meant '--system=no --toolchains=no --build-tools=yes'
             args.toolchains = False
-            m.deprecation('Replace --build-tools-only with --toolchains=no')
-        bootstrappers = Bootstrapper(config, False, args.toolchains,
+            m.deprecation('Replace --build-tools-only with --system=no --toolchains=no')
+        bootstrappers = Bootstrapper(config, args.system, args.toolchains,
                 args.build_tools, offline=False, assume_yes=False)
         tasks = []
         for bootstrapper in bootstrappers:
