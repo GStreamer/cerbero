@@ -95,6 +95,7 @@ cerbero_before_script() {
 
     echo "home_dir = \"$(pwd_native)/${CERBERO_HOME}\"" > localconf.cbc
     echo "local_sources = \"$(pwd_native)/${CERBERO_SOURCES}\"" >> localconf.cbc
+    echo "mingw_perl_prefix = \"${CERBERO_HOST_DIR}/cerbero-build/mingw/perl\"" >> localconf.cbc
     if [[ $CONFIG == win??.cbc ]] || [[ $CONFIG =~ uwp ]] ; then
         # Visual Studio 2019 build tools install path
         echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
