@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
+import shutil
 from cerbero.tools.libtool import LibtoolLibrary
 from cerbero.tools.libtool import get_libtool_versions
 
@@ -48,13 +49,18 @@ class Recipe(recipe.Recipe):
                                     self.config.libdir, self.config.target_platform,
                                     deps=['expat', 'freetype', 'bz2', 'z'])
         libtool_la.save()
-        # Create relative symlinks to prevent breakage during packaging
-        if self.config.platform != Platform.WINDOWS:
-            confddir = os.path.join(self.config.prefix, 'etc', 'fonts', 'conf.d')
-            linksrc = os.path.join('..', '..', '..', 'share', 'fontconfig', 'conf.avail')
-            for f in os.listdir(confddir):
-                if not f.endswith('.conf'):
-                    continue
-                os.remove(os.path.join(confddir, f))
+        # Either make symlinks relative, or convert to a copy to prevent
+        # breakage during packaging
+        confddir = os.path.join(self.config.prefix, 'etc', 'fonts', 'conf.d')
+        confsrc = os.path.join(self.config.prefix, 'share', 'fontconfig', 'conf.avail')
+        linksrc = os.path.join('..', '..', '..', 'share', 'fontconfig', 'conf.avail')
+        for f in os.listdir(confddir):
+            if not f.endswith('.conf'):
+                continue
+            os.remove(os.path.join(confddir, f))
+            if self.config.platform == Platform.WINDOWS:
+                # We sometimes get broken symlinks on Windows, so just make it a copy
+                shutil.copyfile(os.path.join(confsrc, f), os.path.join(confddir, f))
+            else:
                 os.symlink(os.path.join(linksrc, f), os.path.join(confddir, f))
         super().post_install()
