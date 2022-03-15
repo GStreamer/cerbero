@@ -26,18 +26,20 @@ class Recipe(recipe.Recipe):
         'openjpeg',
     ]
     # TODO: support accessibility, gstreamer-gl and woff2
-    configure_options = '-DPORT=WPE -DENABLE_ACCESSIBILITY=OFF \
-                        -DUSE_GSTREAMER_GL=OFF -DUSE_WOFF2=OFF \
-                        -DUSE_SYSTEMD=OFF -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+    configure_options = '-DPORT=WPE \
+                        -DENABLE_ACCESSIBILITY=OFF \
+                        -DUSE_GSTREAMER_GL=OFF \
+                        -DUSE_WOFF2=OFF \
+                        -DUSE_SYSTEMD=OFF \
+                        -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
                         -DUSE_SOUP2=ON \
                         -DUSE_LCMS=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
                         -DENABLE_WEBDRIVER=OFF \
                         -Dis_android=1 \
-                        -DUSE_LD_LDD=ON -DUSE_LD_GOLD=OFF \
+                        -DUSE_LD_LLD=ON \
+                        -DUSE_LD_GOLD=OFF \
                         -DCMAKE_SYSTEM_NAME=Linux \
-                        -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -O2 \
-                        -DCMAKE_CXX_FLAGS_RELEASE=-DNDEBUG -O2 \
                         -DLOG_DISABLED=1 \
                         -DCMAKE_BUILD_TYPE=Release -GNinja'
 
