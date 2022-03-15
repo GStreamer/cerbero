@@ -35,7 +35,7 @@ class Recipe(recipe.Recipe):
         v = DistroVersion.get_android_api_version(self.config.target_distro_version)
         if v >= 21:
             shell.new_call([self.get_env('AR'), 'rc', os.path.join(libdir, 'libandroid_support.a')], env=self.env)
-        if self.config.target_arch not in [Architecture.ARMv7, Architecture.ARM64]:
+        if self.config.target_arch != Architecture.ARMv7:
             shell.new_call([self.get_env('AR'), 'rc', os.path.join(libdir, 'libunwind.a')], env=self.env)
 
     async def install(self):
@@ -55,7 +55,7 @@ class Recipe(recipe.Recipe):
             shutil.copy(os.path.join(stl_libdir, 'libandroid_support.a'),
                         os.path.join(libdir, 'libandroid_support.a'))
 
-        if self.config.target_arch in [Architecture.ARMv7, Architecture.ARM64]:
+        if self.config.target_arch == Architecture.ARMv7:
             shutil.copy(os.path.join(stl_libdir, 'libunwind.a'),
                         os.path.join(libdir, 'libunwind.a'))
 
