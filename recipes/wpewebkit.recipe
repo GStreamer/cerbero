@@ -41,7 +41,8 @@ class Recipe(recipe.Recipe):
                         -DUSE_LD_GOLD=OFF \
                         -DCMAKE_SYSTEM_NAME=Linux \
                         -DLOG_DISABLED=1 \
-                        -DCMAKE_BUILD_TYPE=Release -GNinja'
+                        -DCMAKE_BUILD_TYPE=Release'
+    cmake_generator = 'ninja'
 
     files_libs = [
         'libWPEWebKit-1.0'
@@ -186,9 +187,3 @@ class Recipe(recipe.Recipe):
             self.append_env('CFLAGS', '-I{0}/include'.format(self.config.prefix), '-licui18n -licuuc -licudata')
             self.append_env('LDFLAGS', '-lrt')
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + self.config.target_arch
-
-    async def compile(self):
-        await shell.async_call(['ninja'], cmd_dir=self.build_dir, logfile=self.logfile)
-
-    async def install(self):
-        await shell.async_call(['ninja', 'install'], cmd_dir=self.build_dir, logfile=self.logfile)
