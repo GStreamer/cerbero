@@ -343,8 +343,21 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
             await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath])
 
     elif filepath.endswith('.zip'):
-        zf = zipfile.ZipFile(filepath, "r")
-        zf.extractall(path=output_dir)
+        with zipfile.ZipFile(filepath, "r") as zf:
+            for zi in zf.infolist():
+                if os.path.normpath(zi.filename).startswith(".."):
+                    continue
+                if zi.filename.startswith("/"):
+                    zi.filename = zi.filename[1:]
+                if (zi.external_attr >> 28) == 0xA:
+                    os.symlink(zf.read(zi), os.path.join(output_dir, zi.filename))
+                else:
+                    zf.extract(zi, path=output_dir)
+                    dt = time.mktime(zi.date_time + (0, 0, -1))
+                    os.utime(os.path.join(output_dir, zi.filename), (dt, dt))
+                    if os.name == "posix":
+                        permissions = zi.external_attr >> 16
+                        os.chmod(os.path.join(output_dir, zi.filename), permissions)
     elif filepath.endswith('.dmg'):
         vol_name =  '/Volumes/' + os.path.splitext(os.path.split(filepath)[1])[0]
         if not os.path.exists(output_dir):
