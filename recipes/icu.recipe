@@ -1,6 +1,6 @@
 # Copyright (c) 2014-2015, Centricular Ltd. All rights reserved.
 # Copyright (c) 2015, Ericsson AB. All rights reserved.
-# Copyright (c) 2021, Igalia. All rights reserved.
+# Copyright (c) 2021, 2022, Igalia. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
@@ -25,14 +25,9 @@
 
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-import os
-import copy
-import cerbero.config
 from cerbero.build.build import modify_environment
 from cerbero.tools.libtool import LibtoolLibrary
-from cerbero.utils import android
-from cerbero.utils import shell
-from cerbero.utils import messages
+from pathlib import Path
 
 class Recipe(recipe.Recipe):
     name = 'icu'
@@ -41,13 +36,20 @@ class Recipe(recipe.Recipe):
     url = 'https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.tgz'
     tarball_checksum = 'c79193dee3907a2199b8296a93b52c5cb74332c26f3d167269487680d479d625'
     stype = SourceType.TARBALL
+    platform_deps = {Platform.ANDROID: ['gnustl']}
     autoreconf = True
-    # Source directory is icu/source, not icu-68.2
-    srcdir = "../{0}/source".format(name)
-    configure_options = '--enable-shared --enable-static \
-        --disable-renaming --disable-samples --disable-debug \
-        --disable-layout --disable-extras --disable-tests'
-    allow_parallel_build = True
+    tarball_dirname = 'icu'
+    srcdir = 'source'
+    configure_options = '\
+        --disable-debug \
+        --disable-extras \
+        --disable-layout \
+        --disable-renaming \
+        --disable-samples \
+        --disable-tests \
+        --disable-tools \
+        --enable-shared \
+        --enable-static '
 
     files_devel = ['bin/icu-config', 'lib/pkgconfig/icu-i18n.pc',
                    'lib/pkgconfig/icu-io.pc', 'lib/pkgconfig/icu-uc.pc',
@@ -57,77 +59,21 @@ class Recipe(recipe.Recipe):
     files_share = ['share/icu']
 
     def prepare(self):
-        # Build directory is icu/source, not icu-68.2
-        self.build_dir = os.path.join(os.path.dirname(self.build_dir),
-                                      self.name, "source")
-        self.config_src_dir = self.build_dir
-        self.make_dir = self.build_dir
-        if self.config.target_platform == Platform.ANDROID:
-            src_libdir = 'lib'
-            src_arch = self.config.target_arch
-            if self.config.target_arch == Architecture.ARMv7:
-                src_arch = 'arm'
-            elif self.config.target_arch == Architecture.X86_64:
-                src_libdir = 'lib64'
-            # Some headers/objs aren't found include/lib paths aren't set:
-            # * typefind
-            # * bits/c++config.h
-            # crtbegin_so.o and crtend_so.o
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            ldflags1 = os.path.join(self.config.toolchain_prefix, 'platforms',
-                                    'android-' + str(v), 'arch-' + src_arch,
-                                    'usr', src_libdir)
-            arch_lib_name = android.get_android_arch_name(self.config.target_arch)
-            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
-            self.append_env('LDFLAGS', '-B', ldflags1, '-L' + stl_libdir, '-lc++_shared')
+        self.autoreconf_sh = f'cd {self.srcdir} && {self.autoreconf_sh}'
+        if self.config.cross_compiling:
+            self.configure_options += \
+                f'--with-cross-build={self.build_dir}/../../build-tools/icu-tools-{self.version}/source '
             self.append_env('CXXFLAGS', '-frtti')
+        if self.config.target_platform == Platform.ANDROID:
+            self.append_env('LDFLAGS', '-lc++_shared')
 
     @modify_environment
     async def configure(self):
-        # Disable symbol renaming properly
-        shell.replace(os.path.join(self.build_dir, 'common', 'unicode',
-                                   'uconfig.h'),
-                      {'#define U_DISABLE_RENAMING 0':
-                       '#define U_DISABLE_RENAMING 1'})
-        if self.config.cross_compiling():
-            # If we're cross-compiling, we first need to build ICU
-            # inside icu/source/host and then inside icu/source
-            cross_build_dir = os.path.join(self.build_dir, "host")
-            try:
-                os.mkdir(cross_build_dir)
-            except OSError:
-                # Already exists
-                pass
-
-            # Workaround deepcopy exception
-            # TypeError: cannot serialize '_io.TextIOWrapper' object
-            self_copy = Recipe(self.config, self.env);
-            for attr, value in vars(self).items():
-                try:
-                    setattr(self_copy, attr, copy.deepcopy(value))
-                except Exception:
-                    pass
-
-            # Set everything to be the same as the host platform
-            for each in ['CPPFLAGS', 'CFLAGS', 'CCASFLAGS', 'CXXFLAGS',
-                         'LDFLAGS', 'OBJCFLAGS', 'CXX', 'CC', 'CPP']:
-                self_copy.env[each] = ''
-
-            if self.config.target_platform == Platform.ANDROID:
-                self_copy.env['LDFLAGS'] = '-lstdc++'
-
-            self_copy.config = cerbero.config.Config()
-            self_copy.config.load()
-            self_copy.build_dir = cross_build_dir
-            self_copy.make_dir = cross_build_dir
-            self_copy.config_sh = '../configure'
-            messages.action("Configuring icu on the host platform")
-            await super(recipe.Recipe, self_copy).configure()
-            messages.action("Compiling icu on the host platform")
-            await super(recipe.Recipe, self_copy).compile()
-            self.configure_options += ' --with-cross-build={0}'.format(cross_build_dir)
-        messages.action("Configuring icu on the target platform")
-        await super(recipe.Recipe, self).configure()
+        await super().configure()
+        # Prepend the contents of uconfig.h.prepend to uconfig.h and replace the header in-place.
+        uconfigh = Path(self.build_dir, self.srcdir, 'common', 'unicode', 'uconfig.h')
+        contents = Path(self.build_dir, self.srcdir, 'uconfig.h.prepend').read_bytes() + uconfigh.read_bytes()
+        uconfigh.write_bytes(contents)
 
     def post_install(self):
         common_deps = ['-lm', '-lc', '-ldl', '-lstdc++']
@@ -165,4 +111,3 @@ class Recipe(recipe.Recipe):
                                     deps=['icuuc', 'icudata', 'icui18n',
                                           'icutu'] + common_deps)
         libtool_la.save()
-
