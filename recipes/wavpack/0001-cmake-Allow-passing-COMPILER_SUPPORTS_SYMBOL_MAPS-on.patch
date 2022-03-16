@@ -1,0 +1,43 @@
+From 94ff18963c8868278306028e8bfd4959197f8760 Mon Sep 17 00:00:00 2001
+From: Adrian Perez de Castro <aperez@igalia.com>
+Date: Thu, 17 Mar 2022 00:58:01 +0200
+Subject: [PATCH] cmake: Allow passing COMPILER_SUPPORTS_SYMBOL_MAPS on the
+ command line
+
+---
+ CMakeLists.txt | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a066724..eb27b65 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -331,10 +331,12 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+     endforeach()
+     file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libwavpack.sym ${FILE_CONTENTS})
+     target_link_libraries(wavpack PRIVATE "-Wl,-exported_symbols_list,'${CMAKE_CURRENT_BINARY_DIR}/libwavpack.sym'")
+-else()
+-    set(CONFTTEST_CONTENTS "VERS_1 {\n    global: sym\;\n\n};\n\nVERS_2 {\n    global: sym;\n} VERS_1\;")
+-    file(WRITE ${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/conftest.map "${CONFTTEST_CONTENTS}")
+-    check_c_linker_flag("-Wl,--version-script='${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/conftest.map'" COMPILER_SUPPORTS_SYMBOL_MAPS)
++elseif(BUILD_SHARED_LIBS)
++    if (UNDEFINED COMPILER_SUPPORTS_SYMBOL_MAPS)
++        set(CONFTTEST_CONTENTS "VERS_1 {\n    global: sym\;\n\n};\n\nVERS_2 {\n    global: sym;\n} VERS_1\;")
++        file(WRITE ${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/conftest.map "${CONFTTEST_CONTENTS}")
++        check_c_linker_flag("-Wl,--version-script='${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/conftest.map'" COMPILER_SUPPORTS_SYMBOL_MAPS)
++    endif ()
+ 
+     if(COMPILER_SUPPORTS_SYMBOL_MAPS)
+         set(FILE_CONTENTS "{ global:\n")
+@@ -343,7 +345,7 @@ else()
+         endforeach()
+         list(APPEND FILE_CONTENTS "local: *\; }\;")
+         file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/libwavpack.map ${FILE_CONTENTS})
+-        target_link_libraries(wavpack PRIVATE "-Wl,--version-script='${CMAKE_CURRENT_BINARY_DIR}/libwavpack.map';-Wl,-no-undefined")
++        target_link_options(wavpack PRIVATE "-Wl,--version-script='${CMAKE_CURRENT_BINARY_DIR}/libwavpack.map';-Wl,-no-undefined")
+     endif()
+ endif()
+ 
+-- 
+2.35.1
+

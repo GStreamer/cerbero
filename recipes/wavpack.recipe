@@ -25,6 +25,7 @@ class Recipe(recipe.Recipe):
     patches = [
         name + '/0001-cmake-Don-t-name-MSVC-DLL-wavpackdll.dll.patch',
         name + '/0001-cmake-Set-SOVERSION-to-match-Autotools.patch',
+        name + '/0001-cmake-Allow-passing-COMPILER_SUPPORTS_SYMBOL_MAPS-on.patch',
     ]
 
     files_libs = ['libwavpack']
@@ -39,6 +40,8 @@ class Recipe(recipe.Recipe):
             self.library_type = LibraryType.SHARED
         else:
             self.library_type = LibraryType.STATIC
+            if self.config.target_platform != Platform.WINDOWS:
+                self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS=ON '
 
     async def extract(self):
         await super().extract()
