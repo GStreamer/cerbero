@@ -14,7 +14,7 @@ class Recipe(custom.GStreamer):
     files_libs = ['libgstvalidate-1.0']
 
     files_devel = ["include/gstreamer-1.0/gst/validate/*.h",
-                   "lib/pkgconfig/gst-validate-1.0.pc"]
+                   "lib/pkgconfig/gstreamer-validate-1.0.pc"]
 
     files_validate = ["lib/gst-validate-launcher/python/launcher/",
                       "lib/gst-validate-launcher/",
