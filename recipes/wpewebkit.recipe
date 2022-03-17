@@ -161,7 +161,17 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
-        self.configure_options += f' -DICU_ROOT={self.config.prefix} '
+        self.configure_options += f' \
+            -DICU_ROOT={self.config.prefix} \
+            -DZLIB_ROOT={self.config.prefix} \
+            -DFREETYPE_LIBRARY={self.config.prefix}/lib/libfreetype.so \
+            -DFREETYPE_INCLUDE_DIR_ft2build={self.config.prefix}/include/freetype2 \
+            -DFREETYPE_INCLUDE_DIR_freetype2={self.config.prefix}/include/freetype2 \
+            -DJPEG_LIBRARY={self.config.prefix}/lib/libjpeg.so \
+            -DJPEG_INCLUDE_DIR={self.config.prefix}/include \
+            -DPNG_LIBRARY={self.config.prefix}/lib/libpng.so \
+            -DPNG_INCLUDE_DIR={self.config.prefix}/include \
+            '
         if self.config.target_platform in (Platform.ANDROID):
             arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             arch_src_name = self.config.target_arch
@@ -180,8 +190,6 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0005-Android-terminate-process.patch',
                 'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
                 'wpewebkit/0007-Scroll-related-changes.patch',
-                'wpewebkit/0008-Try-to-find-libz-with-pkg-config.patch',
-                'wpewebkit/0009-wpewebkit-try-to-find-freetype-png-and-others-with-p.patch',
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
