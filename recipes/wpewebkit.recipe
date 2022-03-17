@@ -12,6 +12,7 @@ class Recipe(recipe.Recipe):
     deps = [
         'icu',
         'cairo',
+        'freetype',
         'gettext',
         'gstreamer-1.0',
         'gst-plugins-base-1.0',
@@ -20,12 +21,15 @@ class Recipe(recipe.Recipe):
         'harfbuzz',
         'libepoxy',
         'libgcrypt',
+        'libjpeg-turbo',
+        'libpng',
         'libsoup',
         'libxslt',
         'libwebp',
         'libwpe',
         'openjpeg',
     ]
+    platform_deps = {Platform.ANDROID: ['gnustl']}
     # TODO: support accessibility, gstreamer-gl and woff2
     configure_options = '-DPORT=WPE \
                         -DENABLE_ACCESSIBILITY=OFF \
