@@ -10,6 +10,7 @@ class Recipe(recipe.Recipe):
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
     tarball_checksum = 'cb336986341be9c3a9b1ca2c18de0d29d90ae4e77b9967a6f6879597e7a969f7'
     deps = [
+        'icu',
         'cairo',
         'gettext',
         'gstreamer-1.0',
@@ -160,6 +161,7 @@ class Recipe(recipe.Recipe):
     ]
 
     def prepare(self):
+        self.configure_options += f' -DICU_ROOT={self.config.prefix} '
         if self.config.target_platform in (Platform.ANDROID):
             arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             arch_src_name = self.config.target_arch
@@ -182,8 +184,5 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0009-wpewebkit-try-to-find-freetype-png-and-others-with-p.patch',
             ]
         else:
-            self.deps.append('icu')
-            self.append_env('CXXFLAGS', '-I{0}/include'.format(self.config.prefix), '-licui18n -licuuc -licudata')
-            self.append_env('CFLAGS', '-I{0}/include'.format(self.config.prefix), '-licui18n -licuuc -licudata')
             self.append_env('LDFLAGS', '-lrt')
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + self.config.target_arch
