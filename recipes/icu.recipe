@@ -54,8 +54,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['bin/icu-config', 'lib/pkgconfig/icu-i18n.pc',
                    'lib/pkgconfig/icu-io.pc', 'lib/pkgconfig/icu-uc.pc',
                    'include/unicode']
-    files_libs = ['libicudata', 'libicui18n', 'libicuio',
-                  'libicutest', 'libicutu', 'libicuuc']
+    files_libs = ['libicudata', 'libicui18n', 'libicuio', 'libicuuc']
     files_share = ['share/icu']
 
     def prepare(self):
@@ -98,16 +97,4 @@ class Recipe(recipe.Recipe):
                                     self.config.target_platform,
                                     deps=['icuuc', 'icudata', 'icui18n'] \
                                          + common_deps)
-        libtool_la.save()
-        libtool_la = LibtoolLibrary('icutu', self.major_ver, self.minor_ver,
-                                    None, self.config.libdir,
-                                    self.config.target_platform,
-                                    deps=['icuuc', 'icudata', 'icui18n'] \
-                                         + common_deps)
-        libtool_la.save()
-        libtool_la = LibtoolLibrary('icutest', self.major_ver, self.minor_ver,
-                                    None, self.config.libdir,
-                                    self.config.target_platform,
-                                    deps=['icuuc', 'icudata', 'icui18n',
-                                          'icutu'] + common_deps)
         libtool_la.save()
