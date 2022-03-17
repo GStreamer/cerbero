@@ -177,13 +177,11 @@ class Recipe(recipe.Recipe):
             -DPNG_INCLUDE_DIR={self.config.prefix}/include \
             '
         if self.config.target_platform in (Platform.ANDROID):
-            arch_lib_name = android.get_android_arch_name(self.config.target_arch)
             arch_src_name = self.config.target_arch
             if self.config.target_arch == Architecture.ARMv7:
                 arch_src_name = 'arm'
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
-            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
-            self.append_env('LDFLAGS', '-L' + stl_libdir, '-landroid', '-llog', '-lm', '-lc++_shared', '-lintl', '-lwebpdemux', '-lwebp', '-O2')
+            self.append_env('LDFLAGS', '-landroid -llog -lm -lintl -lc++_shared -O2')
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
