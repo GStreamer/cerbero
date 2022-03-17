@@ -34,7 +34,7 @@ class Recipe(custom.GStreamer):
                      'sbc': 'enabled',
                      'sctp': 'enabled',
                      'sctp-internal-usrsctp': 'enabled',
-                     'soundtouch': 'enabled',
+                     'soundtouch': 'disabled',
                      'srt': 'enabled',
                      'spandsp': 'enabled',
                      'srtp': 'enabled',
@@ -79,7 +79,7 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'libkate', 'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
-            'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
+            'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar']
     use_system_libs = True
@@ -582,6 +582,10 @@ class Recipe(custom.GStreamer):
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
+
+        # XXX: Unneeded for WebKit.
+        self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
+        self.disable_plugin('srt', 'net', dep='srt')
 
     def post_install(self):
         LibtoolLibrary('gsturidownloader-1.0', None, None, None, self.config.libdir,
