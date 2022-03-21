@@ -571,6 +571,8 @@ class Recipe(custom.GStreamer):
             # Not tested, and it needs some work on libmfx dispatcher build for UWP
             self.disable_plugin('qsv', 'codecs')
             self.disable_plugin('amfcodec', 'codecs')
+            # nvcodec loads cuda dlls which wouldn't work
+            self.disable_plugin('nvcodec', 'codecs')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
