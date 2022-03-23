@@ -4,11 +4,11 @@ from cerbero.utils import android, shell
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.34.1'
+    version = '2.34.6'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = 'cb336986341be9c3a9b1ca2c18de0d29d90ae4e77b9967a6f6879597e7a969f7'
+    tarball_checksum = '301e895c8ed08ce7dccef3192b972f2ccfc2020463244c64069a636f2b05265f'
     deps = [
         'icu',
         'cairo',
