@@ -33,6 +33,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ] and \
            self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
             self.meson_options['mmx'] = 'disabled'
+        elif self.config.target_arch == Architecture.ARMv7:
+            self.meson_options['neon'] = 'enabled'
         if self.config.target_platform == Platform.IOS:
             self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:
@@ -49,6 +51,9 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_getCpuIdArm=pixman_android_getCpuIdArm',
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
+            if self.config.target_arch == Architecture.ARMv7:
+                self.append_env('CFLAGS', '-fno-integrated-as -fno-unwind-tables')
+                self.append_env('LDFLAGS', '-lm')
 
     def post_install(self):
         pixman_deps = []
