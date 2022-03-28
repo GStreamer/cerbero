@@ -1,7 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-from cerbero.utils import android
-
 class Recipe(recipe.Recipe):
     name = 'gettext'
     version = '0.21'
@@ -15,7 +13,4 @@ class Recipe(recipe.Recipe):
     def prepare (self):
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['libiconv']
-            arch_name = android.get_android_arch_name(self.config.target_arch)
-            stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_name)
-            self.append_env('LDFLAGS', '-L' + stl_libdir, '-lc++_shared')
-
+            self.append_env('LDFLAGS', '-lc++_shared')
