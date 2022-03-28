@@ -22,6 +22,7 @@ import shutil
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
 from cerbero.config import Distro, FatalError
+from cerbero.enums import Platform
 from cerbero.utils import _, shell
 
 NDK_VERSION = 'r23b'
@@ -45,6 +46,17 @@ class AndroidBootstrapper (BootstrapperBase):
         ndkdir = os.path.join(self.prefix, 'android-ndk-' + NDK_VERSION)
         if not os.path.isdir(ndkdir):
             return
+
+        # Fixup broken symlinks from the zip file, needed for -fno-integrated-as to work.
+        tc_arch = 'darwin' if self.config.platform == Platform.DARWIN else 'linux'
+        base = f'{ndkdir}/toolchains/llvm/prebuilt/{tc_arch}-x86_64'
+        for (dst, src) in ((f'{base}/aarch64-linux-android/bin/as', '../../bin/aarch64-linux-android-as'),
+                           (f'{base}/arm-linux-androideabi/bin/as', '../../bin/arm-linux-androideabi-as'),
+                           (f'{base}/x86_64-linux-android/bin/as', '../../bin/x86_64-linux-android-as'),
+                           (f'{base}/i686-linux-android/bin/as', '../../bin/i686-linux-android-as')):
+            os.unlink(dst)
+            os.symlink(src, dst)
+
         # Android NDK extracts to android-ndk-$NDK_VERSION, so move its
         # contents to self.prefix
         for d in os.listdir(ndkdir):
