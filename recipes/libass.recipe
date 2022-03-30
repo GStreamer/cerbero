@@ -20,3 +20,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed for codepage conversion support in subtitles
             self.deps.append('libiconv')
+        if self.config.target_platform == Platform.ANDROID:
+            if self.config.target_arch in (Architecture.X86, Architecture.X86_64):
+                self.configure_options += ' --disable-asm'
