@@ -6,5 +6,5 @@ target_arch = Architecture.UNIVERSAL
 universal_archs = {
     # Path is relative to this file
     Architecture.ARM64:  "cross-macos-arm64.cbc",
-    Architecture.X86_64: "cross-macos-x86_64.cbc",
+    Architecture.X86_64: "cross-macos-x86-64.cbc",
 }
