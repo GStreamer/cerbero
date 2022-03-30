@@ -134,14 +134,15 @@ Android x86_64    | `cross-android-x86-64.cbc`
 
 #### macOS Targets
 
-Target                 | Config file
-:----------------------|:-----------
-macOS System Framework | `osx-x86-64.cbc`
-iOS Universal          | `cross-ios-universal.cbc`
-iOS ARM64              | `cross-ios-arm64.cbc`
-iOS ARMv7              | `cross-ios-armv7.cbc`
-iOS x86                | `cross-ios-x86.cbc`
-iOS x86_64             | `cross-ios-x86-64.cbc`
+Target                         | Config file
+:------------------------------|:-----------
+macOS Universal (relocatable)  | `cross-macos-universal.cbc`
+macOS x86_64 (relocatable)     | `cross-macos-x86-64.cbc`
+macOS ARM64 (relocatable)      | `cross-macos-arm64.cbc`
+macOS x86_64 (not-relocatable) | `osx-x86-64.cbc`
+iOS Universal                  | `cross-ios-universal.cbc`
+iOS ARM64                      | `cross-ios-arm64.cbc`
+iOS x86_64                     | `cross-ios-x86-64.cbc`
 
 #### Windows Targets
 
