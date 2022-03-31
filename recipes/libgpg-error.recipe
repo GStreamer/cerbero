@@ -20,9 +20,9 @@ class Recipe(recipe.Recipe):
 
     async def configure(self):
         if self.config.cross_compiling():
-            if self.config.target_arch == Architecture.ARM64:
+            if self.config.target_arch in (Architecture.ARM64, Architecture.X86_64):
                 cfg_file = 'lock-obj-pub.aarch64-unknown-linux-gnu.h'
-            elif self.config.target_arch in (Architecture.ARM, Architecture.ARMv7):
+            elif self.config.target_arch in (Architecture.ARM, Architecture.ARMv7, Architecture.X86):
                 cfg_file = 'lock-obj-pub.arm-unknown-linux-androideabi.h'
             else:
                 raise FatalError('Unsupported target arch: ' + self.config.target_arch)
