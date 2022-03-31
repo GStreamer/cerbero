@@ -13,3 +13,10 @@ class Recipe(recipe.Recipe):
     files_libs = ['libgcrypt']
     files_devel = ['include/gcrypt.h', 'bin/libgcrypt-config']
 
+    def prepare(self):
+        if self.config.cross_compiling() and \
+                self.config.target_platform == Platform.ANDROID and \
+                self.config.target_arch in (Architecture.X86, Architecture.X86_64):
+            # Fails linking with undefined symbols on function
+            # implemented in assembler, so disable those for now.
+            self.configure_options += ' --disable-asm'
