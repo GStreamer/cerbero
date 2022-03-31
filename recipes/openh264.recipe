@@ -18,6 +18,11 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/wels', 'lib/pkgconfig/openh264.pc']
     patches = []
 
+    def prepare(self):
+        if self.config.target_platform == Platform.ANDROID and \
+            self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
+            self.append_env('LDFLAGS', '-Wl,-z,notext')
+
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!
         dependency_libs=[]
