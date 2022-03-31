@@ -17,6 +17,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.IOS and \
             self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
             self.append_env('LDFLAGS', '-Wl,-read_only_relocs,suppress')
+        if self.config.target_platform == Platform.ANDROID and \
+            self.config.target_arch in [Architecture.X86, Architecture.X86_64]:
+            self.append_env('LDFLAGS', '-Wl,-z,notext')
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed for codepage conversion support in subtitles
             self.deps.append('libiconv')
