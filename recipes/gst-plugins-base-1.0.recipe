@@ -45,9 +45,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstpango%(mext)s',
              'lib/gstreamer-1.0/libgstrawparse%(mext)s',
              'lib/gstreamer-1.0/libgsttypefindfunctions%(mext)s',
-             'lib/gstreamer-1.0/libgstvideoconvert%(mext)s',
-             'lib/gstreamer-1.0/libgstvideorate%(mext)s',
-             'lib/gstreamer-1.0/libgstvideoscale%(mext)s',
+             'lib/gstreamer-1.0/libgstvideoconvertscale%(mext)s',
              'lib/gstreamer-1.0/libgstvideotestsrc%(mext)s',
              'lib/gstreamer-1.0/libgstvolume%(mext)s',
     ]
@@ -66,9 +64,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstpango.a', 'lib/gstreamer-1.0/libgstpango.la',
              'lib/gstreamer-1.0/libgstrawparse.a', 'lib/gstreamer-1.0/libgstrawparse.la',
              'lib/gstreamer-1.0/libgsttypefindfunctions.a', 'lib/gstreamer-1.0/libgsttypefindfunctions.la',
-             'lib/gstreamer-1.0/libgstvideoconvert.a', 'lib/gstreamer-1.0/libgstvideoconvert.la',
-             'lib/gstreamer-1.0/libgstvideorate.a', 'lib/gstreamer-1.0/libgstvideorate.la',
-             'lib/gstreamer-1.0/libgstvideoscale.a', 'lib/gstreamer-1.0/libgstvideoscale.la',
+             'lib/gstreamer-1.0/libgstvideoconvertscale.a', 'lib/gstreamer-1.0/libgstvideoconvertscale.la',
              'lib/gstreamer-1.0/libgstvideotestsrc.a', 'lib/gstreamer-1.0/libgstvideotestsrc.la',
              'lib/gstreamer-1.0/libgstvolume.a', 'lib/gstreamer-1.0/libgstvolume.la',
     ]
