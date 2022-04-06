@@ -265,6 +265,8 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_SID
             elif d[0] in ['debian', 'Debian GNU/Linux']:
                 distro_version = "debian_{number:02d}_{name}".format(number=int(d[1]), name=d[2])
+            elif d[0] in ['Ubuntu']:
+                distro_version = "ubuntu_{number}_{name}".format(number=d[1].replace('.', '_'), name=distro_version)
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in ['RedHat', 'Fedora', 'Fedora Linux', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux']:
