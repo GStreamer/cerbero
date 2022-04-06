@@ -120,7 +120,7 @@ class BuildTools (BootstrapperBase, Fetch):
         # Install the previously installed site.py ourselves as a workaround
         config = self.cookbook.get_config()
 
-        py_prefix = sysconfig.get_path('purelib', vars={'base': ''})
+        py_prefix = sysconfig.get_path('purelib', 'posix_prefix', vars={'base': ''})
         # Must strip \/ to ensure that the path is relative
         py_prefix = PurePath(config.prefix) / PurePath(py_prefix.strip('\\/'))
         src_file = os.path.join(os.path.dirname(__file__), 'site-patch.py')
