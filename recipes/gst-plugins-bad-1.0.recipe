@@ -47,6 +47,7 @@ class Recipe(custom.GStreamer):
                      'webrtcdsp': 'enabled',
                      'zbar': 'enabled',
                      # disabled plugins
+                     'amfcodec': 'disabled',
                      'curl': 'disabled',
                      'curl-ssh2': 'disabled',
                      'dc1394': 'disabled',
@@ -504,8 +505,9 @@ class Recipe(custom.GStreamer):
 
             if self.meson_options['d3d11'] == 'enabled':
                 self.files_libs += ['libgstd3d11-1.0']
-                # qsv depends on d3d11
+                # qsv and amfcodec depend on d3d11
                 self.enable_plugin('qsv', 'codecs')
+                self.enable_plugin('amfcodec', 'codecs')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
@@ -564,6 +566,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('zbar', 'codecs', dep='zbar')
             # Not tested, and it needs some work on libmfx dispatcher build for UWP
             self.disable_plugin('qsv', 'codecs')
+            self.disable_plugin('amfcodec', 'codecs')
 
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
