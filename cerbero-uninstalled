@@ -24,14 +24,16 @@
 ARGS=$@
 SCRIPTDIR="`dirname $0`"
 
-if [ -f "/mingw/bin/mingw-get.exe" ]; then
-    MSYS_VERSION=1
-elif  [ -f "/usr/bin/pacman" ]; then
-    MSYS_VERSION=2
-    if [ "$MSYSTEM" != "UCRT64" ]; then
-        echo "MSYS2 must use the UCRT64 environment instead of $MSYSTEM. https://www.msys2.org/docs/environments/";
-        exit 1;
-    fi
+if [ "$OSTYPE" == "msys" ]; then
+   if [ -f "/mingw/bin/mingw-get.exe" ]; then
+       MSYS_VERSION=1
+   elif  [ -f "/usr/bin/pacman" ]; then
+       MSYS_VERSION=2
+       if [ "$MSYSTEM" != "UCRT64" ]; then
+           echo "MSYS2 must use the UCRT64 environment instead of $MSYSTEM. https://www.msys2.org/docs/environments/";
+           exit 1;
+       fi
+   fi
 fi
 
 case "$MSYS_VERSION" in
