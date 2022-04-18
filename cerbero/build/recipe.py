@@ -364,6 +364,32 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
 
         return ret
 
+    def fixup_pc_files(self):
+        # Ideally all these checks should be target_platform, but pkg-config
+        # isn't built with --define-prefix when cross-compiling to Windows from
+        # Linux, so we have to skip it.
+        if self.config.platform == Platform.LINUX:
+            return
+        elif self.config.platform == Platform.DARWIN:
+            prefix_value = '/non_existent_on_purpose/please_use_framework_pkg-config/or_pass_--define-prefix_to_your_pkg-config'
+        elif self.config.platform == Platform.WINDOWS:
+            prefix_value = 'C:/non_existent_on_purpose/please_use_MSI_pkg-config/or_pass_--define-prefix_to_your_pkg-config'
+
+        for f in self.files_list_by_category(self.DEVEL_CAT):
+            if not f.endswith('.pc'):
+                continue
+            fpath = os.path.join(self._get_arch_prefix(), f)
+            if not os.path.isfile(fpath):
+                m.warning(f'{self.config.target_arch} {fpath} not found')
+                continue
+            with open(fpath, 'r+', encoding='utf-8') as fo:
+                contents = fo.read().split('\n')
+                fo.seek(0)
+                for line in contents:
+                    if line.startswith('prefix='):
+                        line = f'prefix={prefix_value}'
+                    fo.write(line + '\n')
+
     def generate_gst_la_files(self):
         '''
         Generate .la files for all libraries and plugins packaged by this Meson
@@ -628,6 +654,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         '''
         Runs post installation steps
         '''
+        self.fixup_pc_files()
         if self.btype == build.BuildType.MESON and self.name.startswith('gst'):
             self.generate_gst_la_files()
         self.install_licenses()
