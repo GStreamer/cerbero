@@ -42,7 +42,7 @@ class BaseCache(Command):
         args.append(ArgparseArgument('--commit', action='store', type=str,
                     default='HEAD', help=_('the commit to pick artifact from')))
         args.append(ArgparseArgument('--branch', action='store', type=str,
-                    default='master', help=_('Git branch to search from')))
+                    default='main', help=_('Git branch to search from')))
         Command.__init__(self, args)
 
     # FIXME: move this to utils
