@@ -198,7 +198,7 @@ class BaseTarball(object):
                 cc = True
         await shell.download(self.url, fname, check_cert=cc,
             overwrite=redownload, logfile=get_logfile(self),
-            mirrors= self.config.extra_mirrors + DEFAULT_MIRRORS)
+            mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS))
         self.verify(fname)
 
     @staticmethod
