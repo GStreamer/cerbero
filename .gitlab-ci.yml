@@ -169,19 +169,20 @@ android fedora image:
 .cerbero deps:
   extends: .cerbero
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
   script:
     - ./ci/cerbero_setup.sh cerbero_deps_script
 
 # Template for Cerbero GStreamer MR Pipelines
 #
-# This template is used when a cerbero pipeline is triggered by a merge
-# request in another project such as gstreamer. In that case, we fetch a cache
-# (if available) and use it instead of building from scratch.
+# This template is used when a cerbero pipeline is triggered by a merge request
+# in another project such as gstreamer running inside the GSTreamer namespace
+# which implies that the default cerbero branch is used. In that case, we fetch
+# a cache (if available) and use it instead of building from scratch.
 .cerbero mr:
   extends: .cerbero
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
   script:
     - ./ci/cerbero_setup.sh cerbero_script
 
@@ -302,14 +303,14 @@ build cerbero cross win64:
 cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
   needs:
     - "build cerbero cross-android universal"
 
 cerbero cross-android universal examples:
   extends: ".cross-android universal examples"
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
   needs:
     - "cerbero deps cross-android universal"
 
@@ -447,14 +448,14 @@ build cerbero cross-ios universal:
 cross-ios universal examples:
   extends: ".cross-ios universal examples"
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
   needs:
     - "build cerbero cross-ios universal"
 
 cerbero cross-ios universal examples:
   extends: ".cross-ios universal examples"
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
   needs:
     - "cerbero deps cross-ios universal"
 
