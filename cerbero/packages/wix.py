@@ -556,7 +556,7 @@ class MSI(WixBase):
         platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
         root_env_var = self.package.get_root_env_var(platform_arch)
         env = etree.SubElement(envcomponent, 'Environment', Id="SdkRootEnv",
-                               Action="set", Part="all", Name=root_env_var,
+                               Action="set", Part="all", Name=root_env_var, System="yes",
                                Permanent="no", Value='[SDKROOTDIR]')
         etree.SubElement(self.main_feature, 'ComponentRef',
                          Id='EnvironmentVariables')
