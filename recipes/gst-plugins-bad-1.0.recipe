@@ -574,6 +574,9 @@ class Recipe(custom.GStreamer):
             # nvcodec loads cuda dlls which wouldn't work
             self.disable_plugin('nvcodec', 'codecs')
 
+        if self.meson_options['nvcodec'] == 'enabled':
+            self.files_libs += ['libgstcuda-1.0']
+
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
 
