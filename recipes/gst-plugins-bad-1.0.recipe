@@ -506,11 +506,12 @@ class Recipe(custom.GStreamer):
                     # WIC plugin supports only MSVC built for now, and not
                     # tested using old Visual Studio
                     self.enable_plugin('wic', 'codecs')
+                    # Deadlock in libstdc++ (std::regex) with MinGW build, need investigation
+                    self.enable_plugin('qsv', 'codecs')
 
             if self.meson_options['d3d11'] == 'enabled':
                 self.files_libs += ['libgstd3d11-1.0']
                 # qsv and amfcodec depend on d3d11
-                self.enable_plugin('qsv', 'codecs')
                 self.enable_plugin('amfcodec', 'codecs')
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
