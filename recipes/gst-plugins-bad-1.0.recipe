@@ -25,7 +25,6 @@ class Recipe(custom.GStreamer):
                      'hls-crypto': 'openssl',
                      'kate': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
-                     'nvcodec': 'enabled',
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
                      'opus': 'enabled',
@@ -66,6 +65,7 @@ class Recipe(custom.GStreamer):
                      'mplex': 'disabled',
                      'musepack': 'disabled',
                      'neon': 'disabled',
+                     'nvcodec': 'disabled',
                      'openal': 'disabled',
                      'opencv': 'disabled',
                      'qsv': 'disabled',
@@ -231,7 +231,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspandsp%(mext)s',
              'lib/gstreamer-1.0/libgstsbc%(mext)s',
              'lib/gstreamer-1.0/libgstzbar%(mext)s',
-             'lib/gstreamer-1.0/libgstnvcodec%(mext)s',
     ]
 
     files_plugins_codecs_devel = [
@@ -264,7 +263,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstspandsp.a', 'lib/gstreamer-1.0/libgstspandsp.la',
              'lib/gstreamer-1.0/libgstsbc.a', 'lib/gstreamer-1.0/libgstsbc.la',
              'lib/gstreamer-1.0/libgstzbar.a', 'lib/gstreamer-1.0/libgstzbar.la',
-             'lib/gstreamer-1.0/libgstnvcodec.a', 'lib/gstreamer-1.0/libgstnvcodec.la',
     ]
 
     platform_files_plugins_codecs = {
@@ -514,6 +512,9 @@ class Recipe(custom.GStreamer):
                 # qsv and amfcodec depend on d3d11
                 self.enable_plugin('amfcodec', 'codecs')
 
+        if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
+            self.enable_plugin('nvcodec', 'codecs')
+
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
 
@@ -533,7 +534,6 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.disable_plugin('resindvd', 'dvd', dep='libdvdnav')
-            self.disable_plugin('nvcodec', 'codecs')
 
         # Recipes that need autoreconf hang on the Windows CI
         if self.config.platform == Platform.WINDOWS:
