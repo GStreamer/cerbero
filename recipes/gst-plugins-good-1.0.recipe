@@ -5,6 +5,7 @@ class Recipe(custom.GStreamer):
     btype = BuildType.MESON
     tarball_checksum = '2d119c15ab8c9e79f8cd3c6bf582ff7a050b28ccae52ab4865e1a1464991659c'
     meson_options = {# enabled plugins
+                     'adaptivedemux2': 'enabled',
                      'cairo': 'enabled',
                      'dv': 'enabled',
                      'flac': 'enabled',
@@ -99,6 +100,7 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_codecs = [
+             'lib/gstreamer-1.0/libgstadaptivedemux2%(mext)s',
              'lib/gstreamer-1.0/libgstalaw%(mext)s',
              'lib/gstreamer-1.0/libgstapetag%(mext)s',
              'lib/gstreamer-1.0/libgstaudioparsers%(mext)s',
@@ -128,6 +130,7 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_codecs_devel = [
+             'lib/gstreamer-1.0/libgstadaptivedemux2.a', 'lib/gstreamer-1.0/libgstadaptivedemux2.la',
              'lib/gstreamer-1.0/libgstalaw.a', 'lib/gstreamer-1.0/libgstalaw.la',
              'lib/gstreamer-1.0/libgstapetag.a', 'lib/gstreamer-1.0/libgstapetag.la',
              'lib/gstreamer-1.0/libgstaudioparsers.a', 'lib/gstreamer-1.0/libgstaudioparsers.la',
@@ -257,6 +260,7 @@ class Recipe(custom.GStreamer):
             # Uses unavailable APIs
             self.disable_plugin('directsound', 'sys')
             # External deps that haven't been ported to UWP
+            self.disable_plugin('adaptivedemux2', 'codecs')
             self.disable_plugin('cairo', 'effects', dep='cairo')
             self.disable_plugin('flac', 'codecs', dep='flac')
             self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
