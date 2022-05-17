@@ -23,10 +23,16 @@ class Recipe(recipe.Recipe):
             prefix = str(PurePath(self.config.prefix))
         else:
             prefix = self.config.prefix
-        await shell.async_call([self.config.python_exe, 'setup.py', 'install', '--prefix', prefix],
-                       cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
-        if self.config.platform == Platform.WINDOWS:
-            prefix = Path(self.config.prefix)
-            for f in ('meson.exe', 'meson-script.py'):
-                (prefix / 'Scripts' / f).replace(prefix / 'bin' / f)
-            shutil.rmtree(prefix / 'Scripts')
+        # Some distros have changed the default sysconfig scheme to
+        # manually add 'local' to all install dirs for setuptools.
+        # Reverting this is far too much work and will be fragile as heck,
+        # so just accept it and move on.
+        # Fedora: https://src.fedoraproject.org/rpms/python3.10/blob/f36/f/00251-change-user-install-location.patch
+        # Debian: https://salsa.debian.org/cpython-team/python3/-/blob/3.10.4-4/debian/patches/sysconfig-debian-schemes.diff
+        #
+        # Our workaround is to only install the script into bin. This also
+        # fixes things on Windows, where the script is installed into Scripts/
+        # instead of bin/
+        await shell.async_call([self.config.python_exe, 'setup.py', 'install',
+                                '--prefix', prefix, '--install-scripts', '{}/bin'.format(prefix)],
+                               cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
