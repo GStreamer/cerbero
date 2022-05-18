@@ -5,6 +5,10 @@ set -e
 git config --global user.email "cerbero@gstreamer.freedesktop.org"
 git config --global user.name  "Cerbero Build System"
 
+# FIXME: might cause problems if the image is used outside CI
+# https://github.blog/2022-04-12-git-security-vulnerability-announced/#cve-2022-24765
+git config --global --replace-all safe.directory '*'
+
 mkdir $HOME/.cerbero
 echo "allow_parallel_build=True" > $HOME/.cerbero/cerbero.cbc
 echo "use_ccache=True" >> $HOME/.cerbero/cerbero.cbc
