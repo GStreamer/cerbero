@@ -60,8 +60,11 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         self.autoreconf_sh = f'cd {self.srcdir} && {self.autoreconf_sh}'
         if self.config.cross_compiling:
+            build_tools_dir = f'{self.build_dir}/../..'
+            if 'universal' in self.build_dir:
+                build_tools_dir += '/..'
             self.configure_options += \
-                f'--with-cross-build={self.build_dir}/../../build-tools/icu-tools-{self.version}/source '
+                f'--with-cross-build={build_tools_dir}/build-tools/icu-tools-{self.version}/source '
             self.append_env('CXXFLAGS', '-frtti')
         if self.config.target_platform == Platform.ANDROID:
             self.append_env('LDFLAGS', '-lc++_shared')
