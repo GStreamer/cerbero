@@ -233,6 +233,8 @@ cerbero deps cross-windows x86:
   variables:
     CONFIG: "cross-win32.cbc"
     ARCH: "mingw_x86"
+    CERBERO_RUN_WRAPPER: "wine"
+    CERBERO_RUN_SUFFIX: ".exe"
 
 build cerbero cross win32:
   extends: '.cerbero mr'
@@ -247,6 +249,8 @@ cerbero deps cross-windows x86_64:
   variables:
     CONFIG: "cross-win64.cbc"
     ARCH: "mingw_x86_64"
+    CERBERO_RUN_WRAPPER: "wine"
+    CERBERO_RUN_SUFFIX: ".exe"
 
 build cerbero cross win64:
   extends: '.cerbero mr'
