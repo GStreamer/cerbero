@@ -22,6 +22,8 @@ class Recipe(recipe.Recipe):
             gas = self.get_env('GAS')
             if gas:
                 self.set_env('CCAS', gas, '-no-integrated-as')
+        elif self.config.target_platform == Platform.ANDROID:
+            self.append_env('CPPFLAGS', r' -I$$CERBERO_PREFIX/include')
         if self.config.target_arch == Architecture.ARM64:
             self.configure_options += ' --disable-arm-neon '
         # Needs zlib include flags in CPPFLAGS to generate pnglibconf.h with
