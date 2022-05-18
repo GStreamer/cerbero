@@ -193,6 +193,7 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
                 'wpewebkit/0007-Scroll-related-changes.patch',
                 'wpewebkit/0008-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
+                'wpewebkit/0009-Callback-process-launch-terminate-to-Android-layer.patch',
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
