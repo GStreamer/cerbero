@@ -111,7 +111,7 @@ class RedHatBootstrapper (UnixBootstrapper):
         'mesa-libGL-devel', 'libXcomposite-devel', 'perl-ExtUtils-MakeMaker',
         'libXi-devel', 'perl-XML-Simple', 'gperf', 'wget', 'libXrandr-devel',
         'libXtst-devel', 'git', 'xorg-x11-util-macros', 'mesa-libEGL-devel',
-        'ccache', 'openssl-devel', 'alsa-lib-devel',
+        'ccache', 'openssl-devel', 'alsa-lib-devel', 'perl-FindBin',
     ]
 
     def __init__(self, config, offline, assume_yes):
