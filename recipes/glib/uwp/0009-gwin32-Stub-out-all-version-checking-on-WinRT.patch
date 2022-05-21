@@ -1,26 +1,27 @@
-From a545436c794ac323ce27aa5d29c9f2aec419a3ef Mon Sep 17 00:00:00 2001
+From 591314c5def03bd0e743f9d0cb53921158846c5f Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 04:45:42 +0530
-Subject: [PATCH 09/22] gwin32: Stub out all version checking on WinRT
+Subject: [PATCH] gwin32: Stub out all version checking on WinRT
 
 Also remove all `WINAPI_FAMILY == 2` conditionals. That code is
 equivalent to `G_WINAPI_FAMILY_APP` being defined, and we now no
 longer run any version checking in that case.
 ---
- glib/gwin32.c | 72 +++++++++++++++++++++++++++++++++------------------
- 1 file changed, 47 insertions(+), 25 deletions(-)
+ glib/gwin32.c | 70 ++++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 47 insertions(+), 23 deletions(-)
 
 diff --git a/glib/gwin32.c b/glib/gwin32.c
-index 2f2fe05..d3bcbcd 100644
+index d1391b1..40d5a9d 100644
 --- a/glib/gwin32.c
 +++ b/glib/gwin32.c
-@@ -37,34 +37,18 @@
+@@ -40,35 +40,19 @@
  #include <wchar.h>
  #include <errno.h>
  #include <fcntl.h>
 +#include <ctype.h>
  
  #define STRICT			/* Strict typing, please */
+ #include <winsock2.h>
  #include <windows.h>
  #undef STRICT
 +
@@ -52,7 +53,7 @@ index 2f2fe05..d3bcbcd 100644
  #endif
  
  #include "glib.h"
-@@ -125,6 +109,11 @@ g_win32_getlocale (void)
+@@ -132,6 +116,11 @@ g_win32_getlocale (void)
        || ((ev = g_getenv ("LANG")) != NULL && ev[0] != '\0'))
      return g_strdup (ev);
  
@@ -63,16 +64,16 @@ index 2f2fe05..d3bcbcd 100644
 +#else
    lcid = GetThreadLocale ();
  
-   if (!GetLocaleInfo (lcid, LOCALE_SISO639LANGNAME, iso639, sizeof (iso639)) ||
-@@ -174,6 +163,7 @@ g_win32_getlocale (void)
+   if (!GetLocaleInfoW (lcid, LOCALE_SISO639LANGNAME, iso639, sizeof (iso639)) ||
+@@ -181,6 +170,7 @@ g_win32_getlocale (void)
        break;
      }
-   return g_strconcat (iso639, "_", iso3166, script, NULL);
-+#endif
- }
  
- /**
-@@ -309,6 +299,9 @@ g_win32_get_package_installation_directory_of_module (gpointer hmodule)
++#endif
+   iso639_utf8 = g_utf16_to_utf8 (iso639, -1, NULL, NULL, NULL);
+   iso3166_utf8 = g_utf16_to_utf8 (iso3166, -1, NULL, NULL, NULL);
+ 
+@@ -325,6 +315,9 @@ g_win32_get_package_installation_directory_of_module (gpointer hmodule)
    return retval;
  }
  
@@ -82,7 +83,7 @@ index 2f2fe05..d3bcbcd 100644
  static gchar *
  get_package_directory_from_module (const gchar *module_name)
  {
-@@ -357,6 +350,7 @@ get_package_directory_from_module (const gchar *module_name)
+@@ -373,6 +366,7 @@ get_package_directory_from_module (const gchar *module_name)
  
    return g_strdup (fn);
  }
@@ -90,7 +91,7 @@ index 2f2fe05..d3bcbcd 100644
  
  /**
   * g_win32_get_package_installation_directory:
-@@ -423,11 +417,17 @@ g_win32_get_package_installation_directory (const gchar *package,
+@@ -439,11 +433,17 @@ g_win32_get_package_installation_directory (const gchar *package,
    if (package != NULL)
        g_warning ("Passing a non-NULL package to g_win32_get_package_installation_directory() is deprecated and it is ignored.");
  
@@ -108,9 +109,9 @@ index 2f2fe05..d3bcbcd 100644
  
    return result;
  }
-@@ -510,17 +510,25 @@ g_win32_check_windows_version (const gint major,
-                                const gint spver,
-                                const GWin32OSType os_type)
+@@ -502,6 +502,15 @@ G_GNUC_END_IGNORE_DEPRECATIONS
+ gboolean
+ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
  {
 +#ifdef G_WINAPI_ONLY_APP
 +  /* RtlGetVersion is not available when building for UWP, but we only support
@@ -121,49 +122,43 @@ index 2f2fe05..d3bcbcd 100644
 +    return FALSE;
 +  return TRUE;
 +#else
-   OSVERSIONINFOEXW osverinfo;
-   gboolean is_ver_checked = FALSE;
-   gboolean is_type_checked = FALSE;
+   static OSVERSIONINFOEXW result;
+   static gsize inited = 0;
+ 
+@@ -509,7 +518,6 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
+ 
+   if (g_once_init_enter (&inited))
+     {
+-#if WINAPI_FAMILY != MODERN_API_FAMILY
+       /* For non-modern UI Apps, use the LoadLibraryW()/GetProcAddress() thing */
+       typedef NTSTATUS (WINAPI fRtlGetVersion) (PRTL_OSVERSIONINFOEXW);
+ 
+@@ -519,22 +527,21 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
+ 
+       RtlGetVersion = (fRtlGetVersion *) GetProcAddress (hmodule, "RtlGetVersion");
+       g_return_val_if_fail (RtlGetVersion != NULL, FALSE);
+-#endif
+ 
+       memset (&result, 0, sizeof (OSVERSIONINFOEXW));
+       result.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
+ 
+       RtlGetVersion (&result);
  
 -#if WINAPI_FAMILY != MODERN_API_FAMILY
-   /* For non-modern UI Apps, use the LoadLibraryW()/GetProcAddress() thing */
-   typedef NTSTATUS (WINAPI fRtlGetVersion) (PRTL_OSVERSIONINFOEXW);
- 
-   fRtlGetVersion *RtlGetVersion;
-   HMODULE hmodule;
+       FreeLibrary (hmodule);
 -#endif
 +
-   /* We Only Support Checking for XP or later */
-   g_return_val_if_fail (major >= 5 && (major <=6 || major == 10), FALSE);
-   g_return_val_if_fail ((major >= 5 && minor >= 1) || major >= 6, FALSE);
-@@ -528,13 +536,11 @@ g_win32_check_windows_version (const gint major,
-   /* Check for Service Pack Version >= 0 */
-   g_return_val_if_fail (spver >= 0, FALSE);
- 
--#if WINAPI_FAMILY != MODERN_API_FAMILY
-   hmodule = LoadLibraryW (L"ntdll.dll");
-   g_return_val_if_fail (hmodule != NULL, FALSE);
- 
-   RtlGetVersion = (fRtlGetVersion *) GetProcAddress (hmodule, "RtlGetVersion");
-   g_return_val_if_fail (RtlGetVersion != NULL, FALSE);
--#endif
- 
-   memset (&osverinfo, 0, sizeof (OSVERSIONINFOEXW));
-   osverinfo.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
-@@ -576,11 +582,10 @@ g_win32_check_windows_version (const gint major,
-         }
+       g_once_init_leave (&inited, TRUE);
      }
  
--#if WINAPI_FAMILY != MODERN_API_FAMILY
-   FreeLibrary (hmodule);
--#endif
+   *info = result;
  
-   return is_ver_checked && is_type_checked;
+   return TRUE;
 +#endif /* !G_WINAPI_ONLY_APP */
  }
  
  /**
-@@ -612,8 +617,14 @@ g_win32_get_windows_version (void)
+@@ -648,8 +655,14 @@ g_win32_get_windows_version (void)
  {
    static gsize windows_version;
  
@@ -178,23 +173,23 @@ index 2f2fe05..d3bcbcd 100644
  
    return windows_version;
  }
-@@ -703,6 +714,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+@@ -739,6 +752,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
  
-   retval = special_wchar_to_locale_enoding (wname);
+   retval = special_wchar_to_locale_encoding (wname);
  
 +#ifndef G_WINAPI_ONLY_APP
    if (retval == NULL)
      {
        /* Conversion failed, so check if there is a 8.3 version, and use that. */
-@@ -711,6 +723,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+@@ -747,6 +761,7 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
        if (GetShortPathNameW (wname, wshortname, G_N_ELEMENTS (wshortname)))
-         retval = special_wchar_to_locale_enoding (wshortname);
+         retval = special_wchar_to_locale_encoding (wshortname);
      }
 +#endif
  
    g_free (wname);
  
-@@ -758,6 +771,10 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
+@@ -794,6 +809,10 @@ g_win32_locale_filename_from_utf8 (const gchar *utf8filename)
  gchar **
  g_win32_get_command_line (void)
  {
@@ -205,17 +200,17 @@ index 2f2fe05..d3bcbcd 100644
    gchar **result;
    LPWSTR *args;
    gint i, n;
-@@ -771,6 +788,7 @@ g_win32_get_command_line (void)
+@@ -807,6 +826,7 @@ g_win32_get_command_line (void)
  
    LocalFree (args);
    return result;
 +#endif
  }
  
- #ifdef G_OS_WIN32
-@@ -1216,14 +1234,18 @@ g_crash_handler_win32_init (void)
-   if (g_getenv ("G_DEBUGGER") == NULL && g_getenv("G_VEH_CATCH") == NULL)
-     return;
+ /* Binary compatibility versions. Not for newly compiled code. */
+@@ -1322,14 +1342,18 @@ g_crash_handler_win32_init (void)
+   else
+     debugger_spawn_flags = CREATE_NEW_CONSOLE;
  
 +#ifndef G_WINAPI_ONLY_APP
    WinVEH_handle = AddVectoredExceptionHandler (0, &g_win32_veh_handler);
@@ -233,5 +228,5 @@ index 2f2fe05..d3bcbcd 100644
    WinVEH_handle = NULL;
  }
 -- 
-2.27.0.windows.1
+2.38.1
 

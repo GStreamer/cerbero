@@ -1,8 +1,7 @@
-From 5b4acfb2b0038c000df54359b3ef733fd8e7da57 Mon Sep 17 00:00:00 2001
+From c7913e142a09a1f1e935b580305ba93968501804 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 16 Aug 2019 13:56:39 +0530
-Subject: [PATCH 18/22] gio: Disable win32 API and modules when unavailable on
- WinRT
+Subject: [PATCH] gio: Disable win32 API and modules when unavailable on WinRT
 
 The modules listed below are useless on a UWP app:
 
@@ -25,14 +24,14 @@ TODO: the following need to be ported to new WinRT APIs:
 ---
  gio/gappinfo.h  |  5 +++++
  gio/giomodule.c | 32 +++++++++++++++++---------------
- gio/meson.build | 31 +++++++++++++++++--------------
- 3 files changed, 39 insertions(+), 29 deletions(-)
+ gio/meson.build | 33 ++++++++++++++++++---------------
+ 3 files changed, 40 insertions(+), 30 deletions(-)
 
 diff --git a/gio/gappinfo.h b/gio/gappinfo.h
-index d26d048..b02a310 100644
+index 84162f0..5ca8bf5 100644
 --- a/gio/gappinfo.h
 +++ b/gio/gappinfo.h
-@@ -262,6 +262,11 @@ GLIB_AVAILABLE_IN_2_50
+@@ -282,6 +282,11 @@ GLIB_AVAILABLE_IN_2_50
  gboolean  g_app_info_launch_default_for_uri_finish (GAsyncResult         *result,
                                                      GError              **error);
  
@@ -45,11 +44,11 @@ index d26d048..b02a310 100644
  /**
   * GAppLaunchContext:
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index aacfa71..e8f4bf5 100644
+index 0860499..1f8042c 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -1009,14 +1009,10 @@ G_LOCK_DEFINE_STATIC (loaded_dirs);
- extern GType g_fen_file_monitor_get_type (void);
+@@ -1066,14 +1066,10 @@ _g_io_module_get_default (const gchar         *extension_point,
+ 
  extern GType g_inotify_file_monitor_get_type (void);
  extern GType g_kqueue_file_monitor_get_type (void);
 -extern GType g_win32_file_monitor_get_type (void);
@@ -63,7 +62,7 @@ index aacfa71..e8f4bf5 100644
  extern GType _g_dummy_proxy_resolver_get_type (void);
  extern GType _g_dummy_tls_backend_get_type (void);
  extern GType g_network_monitor_base_get_type (void);
-@@ -1040,6 +1036,11 @@ extern GType g_cocoa_notification_backend_get_type (void);
+@@ -1103,6 +1099,11 @@ extern GType g_cocoa_notification_backend_get_type (void);
  #ifdef G_PLATFORM_WIN32
  extern GType g_win32_notification_backend_get_type (void);
  
@@ -75,27 +74,27 @@ index aacfa71..e8f4bf5 100644
  #include <windows.h>
  extern GType _g_win32_network_monitor_get_type (void);
  
-@@ -1064,6 +1065,7 @@ DllMain (HINSTANCE hinstDLL,
- 
- #endif
+@@ -1162,6 +1163,7 @@ giomodule_init_ctor (void)
+ #error Your platform/compiler is missing constructor support
+ #endif /* GLIB_STATIC_COMPILATION */
  
 +/* Currently only used in gdbusprivate.c */
  void *
  _g_io_win32_get_module (void)
  {
-@@ -1074,7 +1076,9 @@ _g_io_win32_get_module (void)
-   return gio_dll;
- }
- 
+@@ -1187,7 +1189,9 @@ _g_io_modules_ensure_extension_points_registered (void)
+ #if !GLIB_CHECK_VERSION (3, 0, 0)
+       ep = g_io_extension_point_register (G_DESKTOP_APP_INFO_LOOKUP_EXTENSION_POINT_NAME);
+       g_io_extension_point_set_required_type (ep, G_TYPE_DESKTOP_APP_INFO_LOOKUP);
 -#endif
 +#endif /* !G_WINAPI_ONLY_APP */
 +
 +#endif /* G_PLATFORM_WIN32 */
+ #endif
  
- void
- _g_io_modules_ensure_extension_points_registered (void)
-@@ -1140,7 +1144,7 @@ get_gio_module_dir (void)
-   module_dir = g_strdup (g_getenv ("GIO_MODULE_DIR"));
+       ep = g_io_extension_point_register (G_LOCAL_FILE_MONITOR_EXTENSION_POINT_NAME);
+@@ -1252,7 +1256,7 @@ get_gio_module_dir (void)
+   module_dir = !is_setuid ? g_strdup (g_getenv ("GIO_MODULE_DIR")) : NULL;
    if (module_dir == NULL)
      {
 -#ifdef G_OS_WIN32
@@ -103,8 +102,8 @@ index aacfa71..e8f4bf5 100644
        gchar *install_dir;
  
        install_dir = g_win32_get_package_installation_directory_of_module (gio_dll);
-@@ -1225,10 +1229,15 @@ _g_io_modules_ensure_loaded (void)
-       g_type_ensure (g_fen_file_monitor_get_type ());
+@@ -1333,10 +1337,15 @@ _g_io_modules_ensure_loaded (void)
+       g_type_ensure (g_kqueue_file_monitor_get_type ());
  #endif
  #ifdef G_OS_WIN32
 +      g_type_ensure (g_win32_notification_backend_get_type ());
@@ -121,7 +120,7 @@ index aacfa71..e8f4bf5 100644
  #ifdef HAVE_COCOA
        g_type_ensure (g_nextstep_settings_backend_get_type ());
        g_type_ensure (g_osx_app_info_get_type ());
-@@ -1243,10 +1252,6 @@ _g_io_modules_ensure_loaded (void)
+@@ -1355,10 +1364,6 @@ _g_io_modules_ensure_loaded (void)
  #endif
  #if MAC_OS_X_VERSION_MIN_REQUIRED >= 1090
        g_type_ensure (g_cocoa_notification_backend_get_type ());
@@ -129,24 +128,24 @@ index aacfa71..e8f4bf5 100644
 -#ifdef G_OS_WIN32
 -      g_type_ensure (g_win32_notification_backend_get_type ());
 -      g_type_ensure (_g_winhttp_vfs_get_type ());
+       g_type_ensure (g_memory_monitor_win32_get_type ());
  #endif
        g_type_ensure (_g_local_vfs_get_type ());
-       g_type_ensure (_g_dummy_proxy_resolver_get_type ());
-@@ -1260,9 +1265,6 @@ _g_io_modules_ensure_loaded (void)
- #ifdef HAVE_NETLINK
+@@ -1374,9 +1379,6 @@ _g_io_modules_ensure_loaded (void)
        g_type_ensure (_g_network_monitor_netlink_get_type ());
        g_type_ensure (_g_network_monitor_nm_get_type ());
--#endif
+ #endif
 -#ifdef G_OS_WIN32
 -      g_type_ensure (_g_win32_network_monitor_get_type ());
- #endif
-     }
+-#endif
  
+       g_once_init_leave (&loaded_dirs, TRUE);
+     }
 diff --git a/gio/meson.build b/gio/meson.build
-index a7dd536..13ec7ff 100644
+index 14f0d82..56a9289 100644
 --- a/gio/meson.build
 +++ b/gio/meson.build
-@@ -281,7 +281,7 @@ settings_sources = files(
+@@ -272,7 +272,7 @@ settings_sources = files(
    'gsettings.c',
  )
  
@@ -155,7 +154,7 @@ index a7dd536..13ec7ff 100644
    settings_sources += files('gregistrysettingsbackend.c')
  endif
  
-@@ -439,23 +439,27 @@ if host_system != 'windows'
+@@ -428,30 +428,34 @@ if host_system != 'windows'
      )
    endif
  else
@@ -165,15 +164,23 @@ index a7dd536..13ec7ff 100644
 -                    cc.find_library('dnsapi'),
 -                    iphlpapi_dep,
 -                    winsock2]
+   platform_deps += uwp_gio_deps
+ 
    win32_sources += files(
+-    'gmemorymonitorwin32.c',
 -    'gwin32registrykey.c',
 -    'gwin32mount.c',
 -    'gwin32volumemonitor.c',
++    'gmemorymonitorwin32.c', # Maybe this neeeds to be moved into WINAPI_ONLY_APP section as well? (tpm) 
      'gwin32inputstream.c',
      'gwin32outputstream.c',
+     'gwin32file-sync-stream.c',
+     'gwin32packageparser.c',
 -    'gwin32networkmonitor.c',
 -    'gwin32networkmonitor.h',
      'gwin32notificationbackend.c',
+     'gwin32sid.c',
+     'gwin32sid.h',
    )
  
 +  if not glib_conf.has('G_WINAPI_ONLY_APP')
@@ -193,7 +200,7 @@ index a7dd536..13ec7ff 100644
    gio_win_rc = configure_file(
      input: 'gio.rc.in',
      output: 'gio.rc',
-@@ -549,6 +553,7 @@ gio_sources = files(
+@@ -551,6 +555,7 @@ gio_sources = files(
    'gsimpleiostream.c',
    'gsimplepermission.c',
    'gsimpleproxyresolver.c',
@@ -201,7 +208,7 @@ index a7dd536..13ec7ff 100644
    'gsocket.c',
    'gsocketaddress.c',
    'gsocketaddressenumerator.c',
-@@ -568,8 +573,6 @@ gio_sources = files(
+@@ -570,8 +575,6 @@ gio_sources = files(
    'gtcpwrapperconnection.c',
    'gthemedicon.c',
    'gthreadedsocketservice.c',
@@ -210,15 +217,15 @@ index a7dd536..13ec7ff 100644
    'gtlsbackend.c',
    'gtlscertificate.c',
    'gtlsclientconnection.c',
-@@ -766,7 +769,7 @@ if have_func_kqueue and have_func_kevent
-   internal_objects += [kqueue_lib.extract_all_objects()]
+@@ -782,7 +785,7 @@ if have_func_kqueue and have_func_kevent
+   internal_deps += [ kqueue_lib ]
  endif
  
 -if host_system == 'windows'
 +if host_system == 'windows' and not glib_conf.has('G_WINAPI_ONLY_APP')
    subdir('win32')
    internal_deps += [ giowin32_lib ]
-   internal_objects += [giowin32_lib.extract_all_objects()]
+ endif
 -- 
-2.27.0.windows.1
+2.38.1
 

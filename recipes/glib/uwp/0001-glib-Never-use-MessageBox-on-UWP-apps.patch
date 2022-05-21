@@ -1,4 +1,4 @@
-From 681ef40f95a82e79637aad668a2c38851c8df9de Mon Sep 17 00:00:00 2001
+From 575d1526d78c58cb7e50f497d73a4d8bd9c95544 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 18 Jun 2020 17:40:59 +0530
 Subject: [PATCH] glib: Never use MessageBox on UWP apps
@@ -7,14 +7,14 @@ It used to be allowed when building in debug mode, but it isn't
 allowed at all anymore.
 ---
  glib/gbacktrace.c | 5 ++---
- glib/gmessages.c  | 5 ++---
- 2 files changed, 4 insertions(+), 6 deletions(-)
+ glib/gmessages.c  | 7 +++----
+ 2 files changed, 5 insertions(+), 7 deletions(-)
 
 diff --git a/glib/gbacktrace.c b/glib/gbacktrace.c
-index 86f8841..98db3eb 100644
+index 9c52a7d..b040451 100644
 --- a/glib/gbacktrace.c
 +++ b/glib/gbacktrace.c
-@@ -192,9 +192,8 @@ g_on_error_query (const gchar *prg_name)
+@@ -212,9 +212,8 @@ g_on_error_query (const gchar *prg_name)
    if (!prg_name)
      prg_name = g_get_prgname ();
  
@@ -23,14 +23,14 @@ index 86f8841..98db3eb 100644
 -#if defined(_DEBUG) || !defined(G_WINAPI_ONLY_APP)
 +  /* MessageBox is not allowed on UWP apps */
 +#if !defined(G_WINAPI_ONLY_APP)
-   MessageBox (NULL, "g_on_error_query called, program terminating",
-               (prg_name && *prg_name) ? prg_name : NULL,
-               MB_OK|MB_ICONERROR);
+   {
+     WCHAR *caption = NULL;
+ 
 diff --git a/glib/gmessages.c b/glib/gmessages.c
-index 201192f..3271553 100644
+index b4178c2..499182b 100644
 --- a/glib/gmessages.c
 +++ b/glib/gmessages.c
-@@ -1360,9 +1360,8 @@ g_logv (const gchar   *log_domain,
+@@ -1410,9 +1410,8 @@ g_logv (const gchar   *log_domain,
  
            if ((test_level & G_LOG_FLAG_FATAL) && !masquerade_fatal)
              {
@@ -41,8 +41,8 @@ index 201192f..3271553 100644
 +#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
                if (win32_keep_fatal_message)
                  {
-                   gchar *locale_msg = g_locale_from_utf8 (fatal_msg_buf, -1, NULL, NULL, NULL);
-@@ -2684,7 +2684,7 @@ handled:
+                   WCHAR *wide_msg;
+@@ -2825,7 +2824,7 @@ handled:
      {
        /* MessageBox is allowed on UWP apps only when building against
         * the debug CRT, which will set -D_DEBUG */
@@ -50,7 +50,7 @@ index 201192f..3271553 100644
 +#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
        if (!g_test_initialized ())
          {
-           gchar *locale_msg = NULL;
+           WCHAR *wide_msg;
 -- 
-2.27.0.windows.1
+2.38.1
 

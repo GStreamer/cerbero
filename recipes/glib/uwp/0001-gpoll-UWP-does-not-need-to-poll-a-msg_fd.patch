@@ -1,4 +1,4 @@
-From 029fc2872786dba06ca5a85294419eb229e080e9 Mon Sep 17 00:00:00 2001
+From a2c37fde3ab28d459e42014e671fe1cf69601934 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 9 Jul 2020 00:04:22 +0530
 Subject: [PATCH] gpoll: UWP does not need to poll a msg_fd
@@ -10,12 +10,12 @@ are not available when building with UWP.
  1 file changed, 14 insertions(+)
 
 diff --git a/glib/gpoll.c b/glib/gpoll.c
-index 290c64c..524fd39 100644
+index 5afc759..148f551 100644
 --- a/glib/gpoll.c
 +++ b/glib/gpoll.c
-@@ -149,8 +149,15 @@ poll_rest (GPollFD *msg_fd,
+@@ -151,8 +151,15 @@ poll_rest (GPollFD *msg_fd,
        if (_g_main_poll_debug)
- 	g_print ("  MsgWaitForMultipleObjectsEx(%d, %d)\n", nhandles, timeout_ms);
+ 	g_print ("  MsgWaitForMultipleObjectsEx(%d, %lu)\n", nhandles, timeout_ms);
  
 +#ifdef G_WINAPI_ONLY_APP
 +      /* msg_fd is only set when we need to handle win32 Window Messages, which
@@ -29,7 +29,7 @@ index 290c64c..524fd39 100644
  
        if (ready == WAIT_FAILED)
  	{
-@@ -447,8 +454,15 @@ g_poll (GPollFD *fds,
+@@ -449,8 +456,15 @@ g_poll (GPollFD *fds,
  
    /* Wait for at least one thread to return */
    if (msg_fd != NULL)
@@ -43,8 +43,8 @@ index 290c64c..524fd39 100644
                                           QS_ALLINPUT, MWMO_ALERTABLE);
 +#endif
    else
-     ready = WaitForMultipleObjects (nthreads, thread_handles, timeout > 0, timeout);
+     ready = WaitForMultipleObjects (nthreads, thread_handles, FALSE, timeout);
  
 -- 
-2.27.0.windows.1
+2.38.1
 

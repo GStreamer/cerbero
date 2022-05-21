@@ -1,4 +1,4 @@
-From 322c2534ffc8aaf8a28aebaccac00bbdc3d13201 Mon Sep 17 00:00:00 2001
+From 50f9b494cf867daabe20fc39199698af9f4a0fb5 Mon Sep 17 00:00:00 2001
 From: Seungha Yang <seungha@centricular.com>
 Date: Thu, 22 Apr 2021 15:11:34 +0900
 Subject: [PATCH] meson: Add workaround for Visual Studio 2019 ARM build
@@ -9,18 +9,18 @@ See https://developercommunity.visualstudio.com/t/vs2019-1662-c2039-wait-for-is-
  1 file changed, 5 insertions(+)
 
 diff --git a/glib/meson.build b/glib/meson.build
-index 914089c..d93e745 100644
+index 4512d0b..2dc31a4 100644
 --- a/glib/meson.build
 +++ b/glib/meson.build
-@@ -306,6 +306,7 @@ else
-   'gprintf.c',
- )
+@@ -317,6 +317,7 @@ glib_sources = files(
+ 
+ platform_deps = []
  
 +extra_cpp_args = []
  if host_system == 'windows'
-   glib_win_rc = configure_file(
-     input: 'glib.rc.in',
-@@ -317,6 +318,9 @@ if host_system == 'windows'
+   if get_option('default_library') == 'shared'
+     glib_win_rc = configure_file(
+@@ -330,6 +331,9 @@ if host_system == 'windows'
    glib_sources += files('gwin32.c', 'gspawn-win32.c', 'giowin32.c')
    if glib_conf.has('G_WINAPI_ONLY_APP')
      glib_sources += files('gutils-winrt.cpp')
@@ -30,14 +30,14 @@ index 914089c..d93e745 100644
    endif
    platform_deps = [winsock2, cc.find_library('winmm')]
    if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
-@@ -369,6 +373,7 @@ libglib = library('glib-2.0',
-   include_directories : configinc,
-   dependencies : pcre_deps + [thread_dep, libintl, librt] + libiconv + platform_deps + gnulib_libm_dependency,
+@@ -385,6 +389,7 @@ libglib = library('glib-2.0',
+   link_with: [charset_lib, gnulib_lib],
+   dependencies : [pcre2, thread_dep, librt] + libintl_deps + libiconv + platform_deps + [gnulib_libm_dependency, libm] + [libsysprof_capture_dep],
    c_args : glib_c_args,
 +  cpp_args : glib_c_args + extra_cpp_args,
    objc_args : glib_c_args,
  )
  
 -- 
-2.25.1
+2.38.1
 

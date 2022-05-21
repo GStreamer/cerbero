@@ -1,8 +1,7 @@
-From d8560587bcd61a7beb13a8da941175412744f22a Mon Sep 17 00:00:00 2001
+From 22676e9cfee20c6593c9d25901adf3668865c9d9 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 14 Aug 2019 13:28:31 +0530
-Subject: [PATCH 14/22] WIP: gspawn: Do not allow spawning or making pipes on
- UWP
+Subject: [PATCH] WIP: gspawn: Do not allow spawning or making pipes on UWP
 
 _pipe(), _wspawn*() are not allowed on UWP apps, and will cause
 a Windows App Certification Kit error.
@@ -10,15 +9,15 @@ a Windows App Certification Kit error.
 Set errno as ENOSYS instead of EACCES so that it's slightly clearer to
 the user that they shouldn't use the gspawn API on UWP.
 ---
- glib/gspawn-win32.c | 15 +++++++++++++--
+ glib/gspawn-win32.c | 14 +++++++++++++-
  glib/meson.build    |  7 +++++--
- 2 files changed, 18 insertions(+), 4 deletions(-)
+ 2 files changed, 18 insertions(+), 3 deletions(-)
 
 diff --git a/glib/gspawn-win32.c b/glib/gspawn-win32.c
-index c1b024c..0ba34f9 100644
+index cae4c28..ffe1b66 100644
 --- a/glib/gspawn-win32.c
 +++ b/glib/gspawn-win32.c
-@@ -303,6 +303,8 @@ static gboolean
+@@ -346,6 +346,8 @@ static gboolean
  make_pipe (gint     p[2],
             GError **error)
  {
@@ -27,7 +26,7 @@ index c1b024c..0ba34f9 100644
    if (_pipe (p, 4096, _O_BINARY) < 0)
      {
        int errsv = errno;
-@@ -313,6 +315,7 @@ make_pipe (gint     p[2],
+@@ -356,6 +358,7 @@ make_pipe (gint     p[2],
        return FALSE;
      }
    else
@@ -35,7 +34,7 @@ index c1b024c..0ba34f9 100644
      return TRUE;
  }
  
-@@ -488,6 +491,8 @@ do_spawn_directly (gint                 *exit_status,
+@@ -538,6 +541,8 @@ do_spawn_directly (gint                 *exit_status,
        return FALSE;
      }
  
@@ -43,9 +42,9 @@ index c1b024c..0ba34f9 100644
 +#ifndef G_WINAPI_ONLY_APP
    if (flags & G_SPAWN_SEARCH_PATH)
      if (wenvp != NULL)
-       rc = _wspawnvpe (mode, wargv0, (const wchar_t **) wargv, (const wchar_t **) wenvp);
-@@ -498,8 +503,10 @@ do_spawn_directly (gint                 *exit_status,
-       rc = _wspawnve (mode, wargv0, (const wchar_t **) wargv, (const wchar_t **) wenvp);
+       rc = safe_wspawnvpe (mode, wargv0, (const wchar_t **) wargv, (const wchar_t **) wenvp);
+@@ -548,8 +553,10 @@ do_spawn_directly (gint                 *exit_status,
+       rc = safe_wspawnve (mode, wargv0, (const wchar_t **) wargv, (const wchar_t **) wenvp);
      else
        rc = _wspawnv (mode, wargv0, (const wchar_t **) wargv);
 -
@@ -56,17 +55,17 @@ index c1b024c..0ba34f9 100644
  
    g_free (wargv0);
    g_strfreev ((gchar **) wargv);
-@@ -753,12 +760,16 @@ do_spawn_with_fds (gint                 *exit_status,
+@@ -883,12 +890,17 @@ fork_exec (gint                  *exit_status,
    whelper = g_utf8_to_utf16 (helper_process, -1, NULL, NULL, NULL);
    g_free (helper_process);
  
 +  /* Spawning processes is not allowed on UWP */
 +#ifndef G_WINAPI_ONLY_APP
    if (wenvp != NULL)
-     rc = _wspawnvpe (P_NOWAIT, whelper, (const wchar_t **) wargv, (const wchar_t **) wenvp);
+     rc = safe_wspawnvpe (P_NOWAIT, whelper, (const wchar_t **) wargv, (const wchar_t **) wenvp);
    else
      rc = _wspawnvp (P_NOWAIT, whelper, (const wchar_t **) wargv);
--
+ 
    errsv = errno;
 +#else
 +  errsv = ENOSYS;
@@ -75,11 +74,11 @@ index c1b024c..0ba34f9 100644
    g_free (whelper);
    g_strfreev ((gchar **) wargv);
 diff --git a/glib/meson.build b/glib/meson.build
-index 2858c02..d3c2de4 100644
+index c365901..c3a6e62 100644
 --- a/glib/meson.build
 +++ b/glib/meson.build
-@@ -394,7 +394,7 @@ pkg.generate(libglib,
- )
+@@ -409,7 +409,7 @@ pkg.generate(libglib,
+ meson.override_dependency('glib-2.0', libglib_dep)
  
  # On Windows, glib needs a spawn helper for g_spawn* API
 -if host_system == 'windows'
@@ -87,7 +86,7 @@ index 2858c02..d3c2de4 100644
    if host_machine.cpu_family() == 'x86'
      executable('gspawn-win32-helper', 'gspawn-win32-helper.c',
        install : true,
-@@ -418,7 +418,10 @@ if host_system == 'windows'
+@@ -433,7 +433,10 @@ if host_system == 'windows'
        include_directories : configinc,
        dependencies : [libglib_dep])
    endif
@@ -98,7 +97,7 @@ index 2858c02..d3c2de4 100644
 +if host_system != 'windows'
    gtester = executable('gtester', 'gtester.c',
      install : true,
-     c_args : ['-UG_DISABLE_ASSERT'],
+     install_tag : 'bin-devel',
 -- 
-2.27.0.windows.1
+2.38.1
 

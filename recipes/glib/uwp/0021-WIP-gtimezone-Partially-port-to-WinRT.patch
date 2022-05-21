@@ -1,7 +1,7 @@
-From d1c2d17c2b7e2a80b185a9f0877c9a8372f6df2d Mon Sep 17 00:00:00 2001
+From 8a0763f2ef7f9e7cf84f1240e7b9fae86477719a Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 8 Jun 2020 06:04:49 +0530
-Subject: [PATCH 21/22] WIP: gtimezone: Partially port to WinRT
+Subject: [PATCH] WIP: gtimezone: Partially port to WinRT
 
 get_default_timezone() was easy to port, but to port the timezone
 DST transition rule code, need to understand how the existing code
@@ -18,11 +18,11 @@ Registry into the format used by the `TIME_ZONE_INFORMATION` struct.
  3 files changed, 25 insertions(+), 4 deletions(-)
 
 diff --git a/glib/gtimezone.c b/glib/gtimezone.c
-index e3fec1b..e4f87f2 100644
+index 0049299..e42d814 100644
 --- a/glib/gtimezone.c
 +++ b/glib/gtimezone.c
-@@ -39,11 +39,14 @@
- #include "genviron.h"
+@@ -46,11 +46,14 @@
+ #endif
  
  #ifdef G_OS_WIN32
 -
@@ -37,7 +37,7 @@ index e3fec1b..e4f87f2 100644
  
  /**
   * SECTION:timezone
-@@ -645,6 +648,9 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
+@@ -888,6 +891,9 @@ rule_from_windows_time_zone_info (TimeZoneRule *rule,
    return TRUE;
  }
  
@@ -47,7 +47,7 @@ index e3fec1b..e4f87f2 100644
  static gchar*
  windows_default_tzname (void)
  {
-@@ -714,6 +720,9 @@ register_tzi_to_tzi (RegTZI *reg, TIME_ZONE_INFORMATION *tzi)
+@@ -957,6 +963,9 @@ register_tzi_to_tzi (RegTZI *reg, TIME_ZONE_INFORMATION *tzi)
    tzi->DaylightBias = reg->DaylightBias;
  }
  
@@ -56,8 +56,8 @@ index e3fec1b..e4f87f2 100644
 + * TimeZoneInfo.AdjustmentRule */
  static guint
  rules_from_windows_time_zone (const gchar   *identifier,
-                               gchar        **out_identifier,
-@@ -903,8 +912,9 @@ utf16_conv_failed:
+                               const gchar   *resolved_identifier,
+@@ -1135,8 +1144,9 @@ utf16_conv_failed:
  
    return 0;
  }
@@ -68,7 +68,7 @@ index e3fec1b..e4f87f2 100644
  
  static void
  find_relative_date (TimeZoneDate *buffer)
-@@ -1439,7 +1449,7 @@ rules_from_identifier (const gchar   *identifier,
+@@ -1671,7 +1681,7 @@ rules_from_identifier (const gchar   *identifier,
                                hour earlier that standard */
      tzr.dlt_offset = tzr.std_offset - 3600;
    if (*pos == '\0')
@@ -76,16 +76,16 @@ index e3fec1b..e4f87f2 100644
 +#if defined(G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
      /* Windows allows us to use the US DST boundaries if they're not given */
      {
-       int i;
-@@ -1597,7 +1607,7 @@ g_time_zone_new (const gchar *identifier)
+       guint i, rules_num = 0;
+@@ -1910,7 +1920,7 @@ g_time_zone_new_identifier (const gchar *identifier)
            init_zone_from_iana_info (tz, zoneinfo, g_steal_pointer (&resolved_identifier));
            g_bytes_unref (zoneinfo);
          }
 -#elif defined (G_OS_WIN32)
 +#elif defined (G_OS_WIN32) && !defined(G_WINAPI_ONLY_APP)
        if ((rules_num = rules_from_windows_time_zone (identifier,
-                                                      &resolved_identifier,
-                                                      &rules,
+                                                      resolved_identifier,
+                                                      &rules)))
 diff --git a/glib/gutils-winrt-private.h b/glib/gutils-winrt-private.h
 index 643c201..016bea7 100644
 --- a/glib/gutils-winrt-private.h
@@ -129,5 +129,5 @@ index 30a3b20..9f814bd 100644
 +  return from_hstring (calendar.GetTimeZone());
 +}
 -- 
-2.27.0.windows.1
+2.38.1
 

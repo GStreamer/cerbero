@@ -1,7 +1,7 @@
-From c2a0037899b3e233e337b500dc338e56ae9399e7 Mon Sep 17 00:00:00 2001
+From bf46295cf0bdae9c927fef18f5aadbf27279e3f4 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 19 Aug 2019 13:24:40 +0530
-Subject: [PATCH 20/22] WIP: glib: Implement get_special_folder for UWP apps
+Subject: [PATCH] WIP: glib: Implement get_special_folder for UWP apps
 
 ---
  glib/gutils-winrt-private.h | 77 ++++++++++++++++++++++++++++++
@@ -198,10 +198,10 @@ index 0000000..30a3b20
 +  }
 +}
 diff --git a/glib/gutils.c b/glib/gutils.c
-index b5ec664..95eb3f1 100644
+index 5835bed..918a41d 100644
 --- a/glib/gutils.c
 +++ b/glib/gutils.c
-@@ -96,6 +96,10 @@
+@@ -100,6 +100,10 @@
  #  include <direct.h>
  #  include <shlobj.h>
  #  include <process.h>
@@ -212,24 +212,21 @@ index b5ec664..95eb3f1 100644
  #endif
  
  #ifdef HAVE_CODESET
-@@ -551,11 +555,12 @@ static  gchar  **g_user_special_dirs = NULL;
+@@ -532,8 +536,9 @@ static  gchar  **g_user_special_dirs = NULL;
  static gchar *
- get_special_folder (int csidl)
+ get_special_folder (REFKNOWNFOLDERID known_folder_guid_ptr)
  {
-+  gchar *retval = NULL;
+-  wchar_t *wcp = NULL;
+   gchar *result = NULL;
 +#ifndef G_WINAPI_ONLY_APP
-   wchar_t path[MAX_PATH+1];
++  wchar_t *wcp = NULL;
    HRESULT hr;
-   LPITEMIDLIST pidl = NULL;
-   BOOL b;
--  gchar *retval = NULL;
  
-   hr = SHGetSpecialFolderLocation (NULL, csidl, &pidl);
-   if (hr == S_OK)
-@@ -565,6 +570,37 @@ get_special_folder (int csidl)
- 	retval = g_utf16_to_utf8 (path, -1, NULL, NULL, NULL);
-       CoTaskMemFree (pidl);
-     }
+   hr = SHGetKnownFolderPath (known_folder_guid_ptr, 0, NULL, &wcp);
+@@ -542,6 +547,37 @@ get_special_folder (REFKNOWNFOLDERID known_folder_guid_ptr)
+     result = g_utf16_to_utf8 (wcp, -1, NULL, NULL, NULL);
+ 
+   CoTaskMemFree (wcp);
 +#else
 +  enum GUtilsWinRTStorageFolderID fid;
 +
@@ -259,18 +256,18 @@ index b5ec664..95eb3f1 100644
 +      g_assert_not_reached ();
 +      g_abort ();
 +  }
-+  retval = g_utils_winrt_get_storage_folder (fid);
++  result = g_utils_winrt_get_storage_folder (fid);
 +#endif
-   return retval;
- }
  
+   return result;
+ }
 diff --git a/glib/meson.build b/glib/meson.build
-index d3c2de4..ef96772 100644
+index c3a6e62..4512d0b 100644
 --- a/glib/meson.build
 +++ b/glib/meson.build
-@@ -315,6 +315,9 @@ if host_system == 'windows'
-   glib_win_res = windows.compile_resources(glib_win_rc)
-   glib_sources += [glib_win_res]
+@@ -328,6 +328,9 @@ if host_system == 'windows'
+     glib_sources += [glib_win_res]
+   endif
    glib_sources += files('gwin32.c', 'gspawn-win32.c', 'giowin32.c')
 +  if glib_conf.has('G_WINAPI_ONLY_APP')
 +    glib_sources += files('gutils-winrt.cpp')
@@ -279,19 +276,19 @@ index d3c2de4..ef96772 100644
    if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
      glib_sources += files('dirent/wdirent.c')
 diff --git a/meson.build b/meson.build
-index 7203a3f..f511446 100644
+index 6ea8841..fc25943 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -5,7 +5,8 @@ project('glib', 'c', 'cpp',
+@@ -5,7 +5,8 @@ project('glib', 'c',
    default_options : [
      'buildtype=debugoptimized',
-     'warning_level=1',
--    'c_std=gnu89'
-+    'c_std=gnu89',
+     'warning_level=3',
+-    'c_std=gnu99'
++    'c_std=gnu99',
 +    'cpp_std=c++17',
    ]
  )
  
 -- 
-2.27.0.windows.1
+2.38.1
 

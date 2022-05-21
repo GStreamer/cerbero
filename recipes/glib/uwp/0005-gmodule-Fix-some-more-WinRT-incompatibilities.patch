@@ -1,7 +1,7 @@
-From 3624c8d6e80d44e7b91650a3edef61f285e27fc0 Mon Sep 17 00:00:00 2001
+From 4b7a0fb662baf5aa8391c2d06848f3050dbaa825 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 03:01:42 +0530
-Subject: [PATCH 05/22] gmodule: Fix some more WinRT incompatibilities
+Subject: [PATCH] gmodule: Fix some more WinRT incompatibilities
 
 Testing with Windows SDK 10.0.18362 revealed more errors; some of
 which weren't around with the last SDK version I tested with.
@@ -10,10 +10,10 @@ which weren't around with the last SDK version I tested with.
  1 file changed, 30 insertions(+), 15 deletions(-)
 
 diff --git a/gmodule/gmodule-win32.c b/gmodule/gmodule-win32.c
-index 795dc09..da22db9 100644
+index bea8412..df5f124 100644
 --- a/gmodule/gmodule-win32.c
 +++ b/gmodule/gmodule-win32.c
-@@ -70,7 +70,6 @@ _g_module_open (const gchar *file_name,
+@@ -77,7 +77,6 @@ _g_module_open (const gchar *file_name,
  {
    HINSTANCE handle;
    wchar_t *wfilename;
@@ -21,14 +21,14 @@ index 795dc09..da22db9 100644
    BOOL success;
  #ifdef G_WITH_CYGWIN
    gchar tmp[MAX_PATH];
-@@ -80,21 +79,27 @@ _g_module_open (const gchar *file_name,
+@@ -87,21 +86,27 @@ _g_module_open (const gchar *file_name,
  #endif
    wfilename = g_utf8_to_utf16 (file_name, -1, NULL, NULL, NULL);
  
 -  /* suppress error dialog */
 -  success = SetThreadErrorMode (SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS, &old_mode);
 -  if (!success)
--    set_error ("");
+-    set_error (error, "");
 -
 +#ifdef G_WINAPI_ONLY_APP
    /* When building for UWP, load app asset DLLs instead of filesystem DLLs.
@@ -45,7 +45,7 @@ index 795dc09..da22db9 100644
 +    /* suppress error dialog */
 +    success = SetThreadErrorMode (SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS, &old_mode);
 +    if (!success)
-+      set_error ("");
++      set_error (error, "");
 +
 +    handle = LoadLibraryW (wfilename);
 +
@@ -59,8 +59,8 @@ index 795dc09..da22db9 100644
    g_free (wfilename);
        
    if (!handle)
-@@ -121,6 +126,12 @@ _g_module_close (gpointer handle,
-       set_error ("");
+@@ -127,6 +132,12 @@ _g_module_close (gpointer handle)
+       set_error (NULL, "");
  }
  
 +/* Under UWP, Module32Next and Module32First are not available since we're
@@ -72,17 +72,17 @@ index 795dc09..da22db9 100644
  static gpointer
  find_in_any_module_using_toolhelp (const gchar *symbol_name)
  {
-@@ -129,9 +140,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
+@@ -135,9 +146,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
  
    gpointer p = NULL;
  
 -  /* Under UWP, Module32Next and Module32First are not available since we're
 -   * not allowed to search in the address space of arbitrary loaded DLLs */
 -#if !defined(G_WINAPI_ONLY_APP)
-   if ((snapshot = CreateToolhelp32Snapshot (TH32CS_SNAPMODULE, 0)) == (HANDLE) -1)
-     return NULL;
- 
-@@ -146,7 +154,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
+   /* https://docs.microsoft.com/en-us/windows/win32/api/tlhelp32/nf-tlhelp32-createtoolhelp32snapshot#remarks
+    * If the function fails with ERROR_BAD_LENGTH, retry the function until it succeeds. */
+   while (TRUE)
+@@ -165,7 +173,6 @@ find_in_any_module_using_toolhelp (const gchar *symbol_name)
      }
  
    CloseHandle (snapshot);
@@ -90,7 +90,7 @@ index 795dc09..da22db9 100644
  
    return p;
  }
-@@ -161,6 +168,7 @@ find_in_any_module (const gchar *symbol_name)
+@@ -180,6 +187,7 @@ find_in_any_module (const gchar *symbol_name)
    else
      return result;
  }
@@ -98,7 +98,7 @@ index 795dc09..da22db9 100644
  
  static gpointer
  _g_module_symbol (gpointer     handle,
-@@ -170,8 +178,15 @@ _g_module_symbol (gpointer     handle,
+@@ -189,8 +197,15 @@ _g_module_symbol (gpointer     handle,
    
    if (handle == null_module_handle)
      {
@@ -115,5 +115,5 @@ index 795dc09..da22db9 100644
    else
      p = GetProcAddress (handle, symbol_name);
 -- 
-2.27.0.windows.1
+2.38.1
 
