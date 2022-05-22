@@ -194,6 +194,7 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0007-Scroll-related-changes.patch',
                 'wpewebkit/0008-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
                 'wpewebkit/0009-Callback-process-launch-terminate-to-Android-layer.patch',
+                'wpewebkit/0010-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
