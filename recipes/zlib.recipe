@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'zlib'
-    version = '1.2.11'
+    version = '1.2.12'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://zlib.net/fossils/zlib-%(version)s.tar.gz'
-    tarball_checksum = 'c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1'
+    tarball_checksum = '91844808532e5ce316b3c010929493c0244f3d37593afd6de04f71821d5136d9'
     licenses = [{License.BSD_like: ['README']}]
     patches = [
         'zlib/0001-Add-a-meson-port.patch',
@@ -19,7 +19,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
 
     def post_install(self):
-        libtool_la = LibtoolLibrary('z', 1, 2, 11, self.config.libdir,
+        libtool_la = LibtoolLibrary('z', 1, 2, 12, self.config.libdir,
                 self.config.target_platform)
         libtool_la.save()
         super().post_install()
