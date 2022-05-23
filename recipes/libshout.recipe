@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'libshout'
-    version = '2.4.1'
+    version = '2.4.6'
     stype = SourceType.TARBALL
     url = 'xiph://.tar.gz'
-    tarball_checksum = 'f3acb8dec26f2dbf6df778888e0e429a4ce9378a9d461b02a7ccbf2991bbf24d'
+    tarball_checksum = '39cbd4f0efdfddc9755d88217e47f8f2d7108fa767f9d58a2ba26a16d8f7c910'
     licenses = [License.LGPLv2Plus]
     deps = ['libtheora', 'libogg', 'libvorbis', 'speex']
 
