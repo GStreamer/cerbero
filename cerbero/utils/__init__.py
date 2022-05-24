@@ -264,7 +264,8 @@ Terminating.''', file=sys.stderr)
             elif d[1] == 'unstable' and d[2] == 'sid':
                 distro_version = DistroVersion.DEBIAN_SID
             elif d[0] in ['debian', 'Debian GNU/Linux']:
-                distro_version = "debian_{number:02d}_{name}".format(number=int(d[1]), name=d[2])
+                number = int(d[1]) if d[1].isnumeric() else 0
+                distro_version = "debian_{number:02d}_{name}".format(number=number, name=d[2])
             elif d[0] in ['Ubuntu']:
                 distro_version = "ubuntu_{number}_{name}".format(number=d[1].replace('.', '_'), name=distro_version)
             else:
