@@ -1,4 +1,4 @@
-From cfc6475fcdb94e60840227f3b12f45e99719d2a2 Mon Sep 17 00:00:00 2001
+From 6287527c316a5dfb783b4f82d9b2d9702e9d8728 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 2 Jun 2021 17:16:41 +0530
 Subject: [PATCH] fcobjs: Remove duplicate function prototypes
@@ -32,7 +32,7 @@ let the header define it.
  3 files changed, 62 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index faee5b0..e239da0 100644
+index da69f8d..fff20f2 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -208,26 +208,6 @@ fi
@@ -63,12 +63,12 @@ index faee5b0..e239da0 100644
  # Checks for iconv
  #
 diff --git a/meson.build b/meson.build
-index 3c96f1f..8151498 100644
+index f616600..0dd1f69 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -247,42 +247,6 @@ if not gperf.found()
-   gperf = find_program('gperf')
- endif
+@@ -256,42 +256,6 @@ endif
+ # It will automatically fallback to subproject if not found on system
+ gperf = find_program('gperf')
  
 -sh = find_program('sh', required : false)
 -
@@ -127,5 +127,5 @@ index 33bba8d..b0d660f 100644
  
  #include <string.h>
 -- 
-2.31.1.windows.1
+2.36.1
 
