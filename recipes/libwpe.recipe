@@ -2,18 +2,20 @@
 
 class Recipe(recipe.Recipe):
     name = 'libwpe'
-    version = '1.9.1'
+    version = '1.13.2'
     stype = SourceType.GIT
     btype = BuildType.MESON
     remotes = {'origin': 'https://github.com/WebPlatformForEmbedded/libwpe.git'}
-    commit = '657d49860a3d0d8d4f6ee6798067a8c4325ff638'
+    commit = '203eb3bf1ea6be98d44cb5a2cc8bf7c1a8ebb171'
     deps = ['xkbcommon']
 
     files_libs = ['libwpe-1.0']
 
     files_devel = [
         'include/wpe-1.0/wpe/export.h',
+        'include/wpe-1.0/wpe/gamepad.h',
         'include/wpe-1.0/wpe/input.h',
+        'include/wpe-1.0/wpe/input-xkb.h',
         'include/wpe-1.0/wpe/keysyms.h',
         'include/wpe-1.0/wpe/libwpe-version.h',
         'include/wpe-1.0/wpe/loader.h',
@@ -26,3 +28,5 @@ class Recipe(recipe.Recipe):
         'include/wpe-1.0/wpe/wpe-egl.h',
         'include/wpe-1.0/wpe/wpe.h',
     ]
+
+    library_type = LibraryType.SHARED
