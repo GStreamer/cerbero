@@ -3,11 +3,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'expat'
-    version = '2.2.7'
+    version = '2.4.8'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
-    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_2_7/%(name)s-%(version)s.tar.bz2'
-    tarball_checksum = 'cbc9102f4a31a8dafd42d642e9a3aa31e79a0aedaa1f6efd2795ebc83174ec18'
+    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_4_8/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'f79b8f904b749e3e0d20afeadecf8249c55b2e32d4ebb089ae378df479dcaf25'
     configure_options = '--without-docbook'
 
     files_libs = ['libexpat']
