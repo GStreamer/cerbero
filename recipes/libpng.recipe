@@ -24,3 +24,6 @@ class Recipe(recipe.Recipe):
                 self.set_env('CCAS', gas, '-no-integrated-as')
         if self.config.target_arch == Architecture.ARM64:
             self.configure_options += ' --disable-arm-neon '
+        # Needs zlib include flags in CPPFLAGS to generate pnglibconf.h with
+        # the right PNG_ZLIB_VERNUM
+        self.append_env('CPPFLAGS', self.get_env('CFLAGS'))
