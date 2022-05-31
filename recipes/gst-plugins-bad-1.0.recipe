@@ -102,6 +102,7 @@ class Recipe(custom.GStreamer):
         'libgsturidownloader-1.0',
         'libgstvulkan-1.0',
         'libgstwebrtc-1.0',
+        'libgstwebrtcnice-1.0',
     ]
 
     files_plugins_devel = [
