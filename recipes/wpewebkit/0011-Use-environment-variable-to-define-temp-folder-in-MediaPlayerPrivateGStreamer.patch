@@ -1,0 +1,35 @@
+From 879a657c1af08ef8d00a149763d28b1133e49497 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Thu, 2 Jun 2022 20:42:29 +0200
+Subject: [PATCH] Patch MediaPlayerPrivateGStreamer.cpp from version 2.36
+
+---
+ .../gstreamer/MediaPlayerPrivateGStreamer.cpp        | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+index 3237520e..487c0c8c 100644
+--- a/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
++++ b/Source/WebCore/platform/graphics/gstreamer/MediaPlayerPrivateGStreamer.cpp
+@@ -2100,7 +2100,17 @@ void MediaPlayerPrivateGStreamer::configureDownloadBuffer(GstElement* element)
+     GUniqueOutPtr<char> oldDownloadTemplate;
+     g_object_get(element, "temp-template", &oldDownloadTemplate.outPtr(), nullptr);
+ 
+-    GUniquePtr<char> newDownloadTemplate(g_build_filename(G_DIR_SEPARATOR_S, "var", "tmp", "WebKit-Media-XXXXXX", nullptr));
++#if PLATFORM(WPE)
++    GUniquePtr<char> mediaDiskCachePath(g_strdup(std::getenv("WPE_SHELL_MEDIA_DISK_CACHE_PATH")));
++    if (!mediaDiskCachePath || !*mediaDiskCachePath) {
++        GUniquePtr<char> defaultValue(g_build_filename(G_DIR_SEPARATOR_S, "var", "tmp", nullptr));
++        mediaDiskCachePath.swap(defaultValue);
++    }
++#else
++    GUniquePtr<char> mediaDiskCachePath(g_build_filename(G_DIR_SEPARATOR_S, "var", "tmp", nullptr));
++#endif
++
++    GUniquePtr<char> newDownloadTemplate(g_build_filename(G_DIR_SEPARATOR_S, mediaDiskCachePath.get(), "WebKit-Media-XXXXXX", nullptr));
+     g_object_set(element, "temp-template", newDownloadTemplate.get(), nullptr);
+     GST_DEBUG_OBJECT(pipeline(), "Reconfigured file download template from '%s' to '%s'", oldDownloadTemplate.get(), newDownloadTemplate.get());
+ 
+-- 
+2.25.1
+
