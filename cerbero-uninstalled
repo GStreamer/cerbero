@@ -24,7 +24,7 @@
 ARGS=$@
 SCRIPTDIR="`dirname $0`"
 
-if [ "$OSTYPE" == "msys" ]; then
+if [ "$OSTYPE" = "msys" ]; then
    if [ -f "/mingw/bin/mingw-get.exe" ]; then
        MSYS_VERSION=1
    elif  [ -f "/usr/bin/pacman" ]; then
