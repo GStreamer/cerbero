@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
     tarball_checksum = '7c87a8c2c8c0fc9cd5019e402bed4292462d00a718a7cd5f11218153bf28b26f'
     deps = ['m4']
     patches = ['libtool/0001-Add-support-for-weak_framework-linking-on-Darwin.patch',
-               'libtool/0002-libtool-Stop-adding-bind_at_load-on-all-Darwin.patch',
                'libtool/0001-support-gcc-toolchain-argument.patch']
 
     files_bin = ['bin/libtool', 'bin/libtoolize']

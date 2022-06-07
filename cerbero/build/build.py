@@ -430,21 +430,6 @@ class MakefilesBase (Build, ModifyEnvBase):
         self.set_env('MAKEFLAGS', when='now')
         # Disable site config, which is set on openSUSE
         self.set_env('CONFIG_SITE', when='now')
-        # Only add this for non-meson recipes, and only for iPhoneOS
-        if self.config.ios_platform == 'iPhoneOS':
-            bitcode_cflags = ['-fembed-bitcode']
-            # NOTE: Can't pass -bitcode_bundle to Makefile projects because we
-            # can't control what options they pass while linking dylibs
-            bitcode_ldflags = bitcode_cflags #+ ['-Wl,-bitcode_bundle']
-            self.append_env('ASFLAGS', *bitcode_cflags, when='now')
-            self.append_env('CFLAGS', *bitcode_cflags, when='now')
-            self.append_env('CXXFLAGS', *bitcode_cflags, when='now')
-            self.append_env('OBJCFLAGS', *bitcode_cflags, when='now')
-            self.append_env('OBJCXXFLAGS', *bitcode_cflags, when='now')
-            self.append_env('CCASFLAGS', *bitcode_cflags, when='now')
-            # Autotools only adds LDFLAGS when doing compiler checks,
-            # so add -fembed-bitcode again
-            self.append_env('LDFLAGS', *bitcode_ldflags, when='now')
 
     async def configure(self):
         '''
@@ -1078,10 +1063,6 @@ class Meson (Build, ModifyEnvBase) :
 
         if self.using_msvc():
             meson_cmd.append('-Db_vscrt=' + self.config.variants.vscrt)
-
-        # Don't enable bitcode by passing flags manually, use the option
-        if self.config.ios_platform == 'iPhoneOS':
-            self.meson_options.update({'b_bitcode': 'true'})
 
         # Get platform config in the form of a meson native/cross file
         contents = self._get_meson_target_file_contents()

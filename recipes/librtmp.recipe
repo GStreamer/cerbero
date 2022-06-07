@@ -16,7 +16,6 @@ class Recipe(recipe.Recipe):
     patches = [
         # Our patches, upstream is non-existent
         name + '/0001-Fix-support-for-cross-compilation.patch',
-        name + '/0002-ios-Remove-flags-incompatible-with-fembed-bitcode.patch',
         # vcpkg patches, porting to openssl and fixing windows bugs, since
         # upstream is non-existent
         name + '/0003-Port-to-openssl-1.1.1.patch',
