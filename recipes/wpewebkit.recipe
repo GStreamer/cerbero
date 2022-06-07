@@ -33,7 +33,9 @@ class Recipe(recipe.Recipe):
     # TODO: support accessibility, gstreamer-gl and woff2
     configure_options = '-DPORT=WPE \
                         -DENABLE_ACCESSIBILITY=OFF \
-                        -DUSE_GSTREAMER_GL=OFF \
+                        -DUSE_GSTREAMER_GL=ON \
+                        -DUSE_GSTREAMER_NATIVE_VIDEO=ON \
+                        -DUSE_GSTREAMER_NATIVE_AUDIO=ON \
                         -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF \
                         -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
