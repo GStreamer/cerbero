@@ -1,0 +1,41 @@
+name: Build
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - 'wpe-android'
+
+jobs:
+  build:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        target: [arm64, armv7, x86_64, x86]
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v2
+      - name: Bootstrap Cerbero
+        run: |
+          ANDROID_CONFIG=${{ matrix.target }}
+          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
+          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} bootstrap
+      - name: Package dependencies
+        run: |
+          ANDROID_CONFIG=${{ matrix.target }}
+          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
+          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} package -f wpewebkit
+      - name: Store packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: wpe-deps-${{ matrix.target }}
+          path: ./wpewebkit-android-${{ matrix.target }}*
+          if-no-files-found: error
+      - name: Upload packages to wpewebkit.org
+        run: |
+          python3 ./.github/workflows/upload.py "./wpewebkit-android-${{ matrix.target }}*" || \
+          echo "**:warning: WARNING :warning:** Cannot upload ./wpewebkit-android-${{ matrix.target }}... files to wpewebkit.org" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        env:
+          UPLOAD_KEY_PASSWD: ${{ secrets.UPLOAD_KEY_PASSWD }}
