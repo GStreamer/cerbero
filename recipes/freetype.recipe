@@ -3,10 +3,10 @@
 
 class Recipe(recipe.Recipe):
     name = 'freetype'
-    version = '2.11.0'
+    version = '2.12.1'
     stype = SourceType.TARBALL
     url = 'savannah://.tar.xz'
-    tarball_checksum = '8bee39bd3968c4804b70614a0a3ad597299ad0e824bc8aad5ce8aaf48067bde7'
+    tarball_checksum = '4766f20157cc4cf0cd292f80bf917f92d1c439b243ac3018debf6b9140c41a7f'
     licenses = [{License.FreeType: ['LICENSE.TXT']}, License.GPLv2Plus]
     configure_tpl = "%(config-sh)s --prefix=%(prefix)s --libdir=%(libdir)s --with-harfbuzz=no"
     deps = ['zlib', 'bzip2', 'libpng']
