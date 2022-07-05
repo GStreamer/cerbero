@@ -6,9 +6,6 @@
     <EmbedManifest>false</EmbedManifest>
   </PropertyGroup>
   <ItemDefinitionGroup>
-    <ClCompile>
-      <PreprocessorDefinitions>WINVER=0x0501;WIN32;_WINDOWS;_USRDLL;HAVE_WIN32</PreprocessorDefinitions>
-    </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
