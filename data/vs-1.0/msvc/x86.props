@@ -3,7 +3,6 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="common.props" />
     <Import Project="msvcrt.props" />
-    <Import Project="config.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
