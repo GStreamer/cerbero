@@ -78,7 +78,10 @@ class OSXRelocator(object):
             return
         if depth > 1:
             rpaths += ['@loader_path/..', '@executable_path/..']
+        existing_rpaths = self.list_rpaths(object_file)
         for p in rpaths:
+            if p in existing_rpaths:
+                continue
             cmd = [INT_CMD, '-add_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
         for lib in self.list_shared_libraries(object_file):
@@ -114,6 +117,22 @@ class OSXRelocator(object):
         # Remove the version info
         libs = [x.split(' ', 1)[0] for x in libs]
         return libs
+
+    @staticmethod
+    def list_rpaths(object_file):
+        res = shell.check_output([OTOOL_CMD, '-l', object_file]).splitlines()
+        i = iter(res)
+        paths = []
+        for line in i:
+            if 'LC_RPATH' not in line:
+                continue
+            cmdsize_line = next(i)
+            path_line = next(i)
+            # Extract the path from a line that looks like this:
+            #          path @loader_path/.. (offset 12)
+            path = path_line.split('path ', 1)[1].split(' (offset', 1)[0]
+            paths.append(path)
+        return paths
 
     def _fix_path(self, path):
         if path.endswith('/'):
