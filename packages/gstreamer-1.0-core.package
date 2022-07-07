@@ -19,11 +19,18 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-good-1.0:plugins_core_devel', 'gst-plugins-bad-1.0:plugins_core_devel']
     platform_files = {
         Platform.DARWIN: ['gstreamer-1.0-osx-framework', 'pkg-config'],
+        Platform.WINDOWS: [],
         Platform.IOS: ['gstreamer-ios-templates'],
         Platform.ANDROID: ['gst-android-1.0'],
         Platform.LINUX: ['bash-completion'],
     }
 
     def prepare(self):
+        # UWP cannot build pkg-config because it uses Autotools, and even if we
+        # port it to Meson, the UWP toolchain still can't build a usable pkg-config.
+        # On the other hand, UWP also doesn't need pkg-config because people
+        # will likely only use it from inside Visual Studio.
+        if not self.config.variants.uwp:
+            self.platform_files[Platform.WINDOWS].append('pkg-config')
         if self.config.variants.unwind:
             self.files.append('libunwind:libs')
