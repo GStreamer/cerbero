@@ -53,7 +53,6 @@ class Recipe(recipe.Recipe):
                 return 'BSD-generic64'
             raise InvalidRecipeError(self, "Unknown iOS platform")
         if self.config.target_platform == Platform.ANDROID:
-            self.make += ['CROSS_SYSROOT=' + self.config.sysroot]
             if self.config.target_arch == Architecture.ARM:
                 return 'android-arm'
             if self.config.target_arch == Architecture.ARMv7:
@@ -202,6 +201,10 @@ class Recipe(recipe.Recipe):
                 config_sh += ' no-asm '
         else:
             config_sh += ' shared '
+
+        if self.config.target_platform == Platform.ANDROID:
+            api_version = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            config_sh += f' -D__ANDROID_API__={api_version} '
 
         # ssl3 is needed by sphinx which is used by gst-validate, which tries
         # to use this libssl and fails with undefined symbols. md2 is needed by
