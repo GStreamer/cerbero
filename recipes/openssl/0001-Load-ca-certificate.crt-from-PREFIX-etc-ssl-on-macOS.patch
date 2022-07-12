@@ -64,7 +64,7 @@ diff --git a/crypto/x509/by_file.c b/crypto/x509/by_file.c
 index 237b362..5f67759 100644
 --- a/crypto/x509/by_file.c
 +++ b/crypto/x509/by_file.c
-@@ -17,6 +17,49 @@
+@@ -17,6 +17,56 @@
  #include <openssl/pem.h>
  #include "x509_local.h"
  
@@ -85,27 +85,34 @@ index 237b362..5f67759 100644
 +char *
 +_get_portable_X509_cert_file (void)
 +{
-+    char *p;
++    char *fname, *p;
 +    char certfile[PATH_MAX];
 +
 +    Dl_info info;
 +    if (!dladdr(_get_portable_X509_cert_file, &info))
 +        return NULL;
 +
++    fname = strdup(info.dli_fname);
++
 +    /* Get dylib directory: PREFIX/lib */
-+    if ((p = strrchr(info.dli_fname, '/')) == NULL)
-+        return NULL;
++    if ((p = strrchr(fname, '/')) == NULL)
++        goto err;
 +    *p = '\0';
 +
 +    /* Get parent directory: PREFIX */
-+    if ((p = strrchr(info.dli_fname, '/')) == NULL)
-+        return NULL;
++    if ((p = strrchr(fname, '/')) == NULL)
++        goto err;
 +    *p = '\0';
 +
 +    /* Path to the cert bundle; filename is from the ca-certificates recipe */
-+    if (snprintf(certfile, PATH_MAX, "%s/etc/ssl/certs/ca-certificates.crt", info.dli_fname) < 0)
-+        return NULL;
++    if (snprintf(certfile, PATH_MAX, "%s/etc/ssl/certs/ca-certificates.crt", fname) < 0)
++        goto err;
++
++    free(fname);
 +    return strdup(certfile);
++err:
++    free(fname);
++    return NULL;
 +}
 +#else
 +#define _get_portable_X509_cert_file() NULL
