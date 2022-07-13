@@ -28,12 +28,6 @@ from cerbero.utils import messages as m
 
 # We only support Visual Studio 2015 as of now
 VCVARSALLS = {
-    'vs14': (
-        (
-            r'Microsoft Visual Studio 14.0',
-        ),
-        r'VC\vcvarsall.bat'
-    ),
     'vs15': (
         (
             r'Microsoft Visual Studio\2017\Community',
@@ -76,8 +70,6 @@ def get_program_files_dir():
     raise FatalError('Could not find path to 32-bit Program Files directory')
 
 def get_vs_year_version(vcver):
-    if vcver == 'vs14':
-        return '2015'
     if vcver == 'vs15':
         return '2017'
     if vcver == 'vs16':

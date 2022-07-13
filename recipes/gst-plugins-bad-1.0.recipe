@@ -494,23 +494,17 @@ class Recipe(custom.GStreamer):
                 # built with MSVC, it uses Meson but it doesn't build:
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
                 self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
-                if self.config.msvc_version == 'vs14':
-                    self.disable_plugin('d3d11', 'sys')
-                else:
-                    # requires at least Visual Studio 2017
-                    self.enable_plugin('wasapi2', 'sys', 'visualstudio')
-                    # This dll is used by wasapi2 and mediafoundation UWP build
-                    self.files_libs += ['libgstwinrt-1.0']
-                    # WIC plugin supports only MSVC built for now, and not
-                    # tested using old Visual Studio
-                    self.enable_plugin('wic', 'codecs')
-                    # Deadlock in libstdc++ (std::regex) with MinGW build, need investigation
-                    self.enable_plugin('qsv', 'codecs')
+                self.enable_plugin('wasapi2', 'sys', 'visualstudio')
+                # This dll is used by wasapi2 and mediafoundation UWP build
+                self.files_libs += ['libgstwinrt-1.0']
+                # WIC plugin supports only MSVC built for now
+                self.enable_plugin('wic', 'codecs')
+                # Deadlock in libstdc++ (std::regex) with MinGW build, need investigation
+                self.enable_plugin('qsv', 'codecs')
 
-            if self.meson_options['d3d11'] == 'enabled':
-                self.files_libs += ['libgstd3d11-1.0']
-                # qsv and amfcodec depend on d3d11
-                self.enable_plugin('amfcodec', 'codecs')
+            self.files_libs += ['libgstd3d11-1.0']
+            # qsv and amfcodec depend on d3d11
+            self.enable_plugin('amfcodec', 'codecs')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
