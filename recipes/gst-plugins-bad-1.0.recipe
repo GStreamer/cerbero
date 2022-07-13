@@ -17,6 +17,7 @@ class Recipe(custom.GStreamer):
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',
+                     'd3d11': 'enabled',
                      'dash': 'enabled',
                      'decklink': 'enabled',
                      'dtls': 'enabled',
@@ -91,6 +92,7 @@ class Recipe(custom.GStreamer):
         'libgstbasecamerabinsrc-1.0',
         'libgstcodecparsers-1.0',
         'libgstcodecs-1.0',
+        'libgstd3d11-1.0',
         'libgstinsertbin-1.0',
         'libgstisoff-1.0',
         'libgstmpegts-1.0',
@@ -109,6 +111,8 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/basecamerabinsrc',
         'include/gstreamer-1.0/gst/codecparsers',
+        'include/gstreamer-1.0/gst/d3d11',
+        'lib/gstreamer-1.0/include/gst/d3d11',
         'include/gstreamer-1.0/gst/insertbin',
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/isoff',
@@ -121,6 +125,7 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/webrtc',
         'lib/pkgconfig/gstreamer-bad-audio-1.0.pc',
         'lib/pkgconfig/gstreamer-codecparsers-1.0.pc',
+        'lib/pkgconfig/gstreamer-d3d11-1.0.pc',
         'lib/pkgconfig/gstreamer-insertbin-1.0.pc',
         'lib/pkgconfig/gstreamer-mpegts-1.0.pc',
         'lib/pkgconfig/gstreamer-photography-1.0.pc',
@@ -383,6 +388,14 @@ class Recipe(custom.GStreamer):
         'lib/gstreamer-1.0/libgstvulkan.a', 'lib/gstreamer-1.0/libgstvulkan.la',
     ]
 
+    files_plugins_d3d11 = [
+        'lib/gstreamer-1.0/libgstd3d11%(mext)s',
+    ]
+
+    files_plugins_d3d11_devel = [
+        'lib/gstreamer-1.0/libgstd3d11.a', 'lib/gstreamer-1.0/libgstd3d11.la',
+    ]
+
     files_plugins_vis = [
              'lib/gstreamer-1.0/libgstaudiovisualizers%(mext)s',
     ]
@@ -406,7 +419,6 @@ class Recipe(custom.GStreamer):
             ],
         Platform.WINDOWS: [
              'lib/gstreamer-1.0/libgstd3d%(mext)s',
-             'lib/gstreamer-1.0/libgstd3d11%(mext)s',
              'lib/gstreamer-1.0/libgstwasapi%(mext)s',
              'lib/gstreamer-1.0/libgstdecklink%(mext)s',
             ],
@@ -495,7 +507,7 @@ class Recipe(custom.GStreamer):
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
                 self.disable_plugin('webrtcdsp', 'effects', dep='webrtc-audio-processing')
                 if self.config.msvc_version == 'vs14':
-                    self.disable_plugin('d3d11', 'sys')
+                    self.disable_plugin('d3d11', 'd3d11', library_name='d3d11')
                 else:
                     # requires at least Visual Studio 2017
                     self.enable_plugin('wasapi2', 'sys', 'visualstudio')
@@ -508,9 +520,10 @@ class Recipe(custom.GStreamer):
                     self.enable_plugin('qsv', 'codecs')
 
             if self.meson_options['d3d11'] == 'enabled':
-                self.files_libs += ['libgstd3d11-1.0']
                 # qsv and amfcodec depend on d3d11
                 self.enable_plugin('amfcodec', 'codecs')
+        else:
+            self.disable_plugin('d3d11', 'd3d11', library_name='d3d11')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
