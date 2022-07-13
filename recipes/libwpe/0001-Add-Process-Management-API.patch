@@ -1,0 +1,319 @@
+From e3b00d97d02c427462f82f89a7068174a43d87e6 Mon Sep 17 00:00:00 2001
+From: Don <don.j.olmstead@gmail.com>
+Date: Fri, 13 May 2022 10:37:11 -0700
+Subject: [PATCH] Add Process Management API
+
+Allows the launching and termination of processes through the WPE API.
+---
+ CMakeLists.txt          | 12 +++++-
+ include/wpe/meson.build |  1 +
+ include/wpe/process.h   | 89 +++++++++++++++++++++++++++++++++++++++++
+ include/wpe/wpe.h       |  1 +
+ meson.build             |  5 +++
+ meson_options.txt       |  5 +++
+ src/process.c           | 88 ++++++++++++++++++++++++++++++++++++++++
+ 7 files changed, 200 insertions(+), 1 deletion(-)
+ create mode 100644 include/wpe/process.h
+ create mode 100644 src/process.c
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c7830fa..55591e9 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,6 +27,10 @@ set(WPE_BACKEND
+     ""
+     CACHE STRING "Name of the backend library to load, instead of libWPEBackend-default.so"
+ )
++set(WPE_ENABLE_PROCESS
++    ON
++    CACHE STRING "Enable process management"
++)
+ set(WPE_ENABLE_XKB
+     ON
+     CACHE STRING "Enable use of libxkbcommon for keyboard input"
+@@ -68,6 +72,7 @@ set(WPE_PUBLIC_HEADERS
+     include/wpe/keysyms.h
+     include/wpe/loader.h
+     include/wpe/pasteboard.h
++    include/wpe/process.h
+     include/wpe/renderer-backend-egl.h
+     include/wpe/renderer-host.h
+     include/wpe/view-backend.h
+@@ -82,6 +87,7 @@ add_library(
+     src/pasteboard.c
+     src/pasteboard-generic.cpp
+     src/pasteboard-noop.cpp
++    src/process.c
+     src/renderer-backend-egl.c
+     src/renderer-host.c
+     src/version.c
+@@ -114,9 +120,13 @@ target_compile_definitions(
+ if (WPE_BACKEND)
+     target_compile_definitions(wpe PRIVATE WPE_BACKEND=\"${WPE_BACKEND}\")
+ endif ()
++if (WPE_ENABLE_PROCESS)
++    target_compile_definitions(wpe PUBLIC WPE_ENABLE_PROCESS=1)
++    list(APPEND WPE_PC_CFLAGS -DWPE_ENABLE_PROCESS=1)
++endif ()
+ if (WPE_ENABLE_XKB)
+     target_compile_definitions(wpe PUBLIC WPE_ENABLE_XKB=1)
+-    set(WPE_PC_CFLAGS -DWPE_ENABLE_XKB=1)
++    list(APPEND WPE_PC_CFLAGS -DWPE_ENABLE_XKB=1)
+ endif ()
+ target_compile_options(wpe PRIVATE $<TARGET_PROPERTY:GL::egl,INTERFACE_COMPILE_OPTIONS>)
+ 
+diff --git a/include/wpe/meson.build b/include/wpe/meson.build
+index 185619d..45f1275 100644
+--- a/include/wpe/meson.build
++++ b/include/wpe/meson.build
+@@ -7,6 +7,7 @@ api_headers = [
+ 	'libwpe-version.h',
+ 	'loader.h',
+ 	'pasteboard.h',
++	'process.h',
+ 	'renderer-backend-egl.h',
+ 	'renderer-host.h',
+ 	'version.h',
+diff --git a/include/wpe/process.h b/include/wpe/process.h
+new file mode 100644
+index 0000000..50a3b16
+--- /dev/null
++++ b/include/wpe/process.h
+@@ -0,0 +1,89 @@
++/*
++ * Copyright (C) 2022 Igalia S.L.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
++ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#if !defined(__WPE_H_INSIDE__) && !defined(WPE_COMPILATION)
++#error "Only <wpe/wpe.h> can be included directly."
++#endif
++
++#ifndef wpe_process_h
++#define wpe_process_h
++
++/**
++ * SECTION:process
++ * @short_description: Process management
++ * @title: Process
++ */
++
++#if defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS
++
++#if defined(WPE_COMPILATION)
++#include "export.h"
++#endif
++
++#include <stdint.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++enum wpe_process_type {
++    WPE_PROCESS_TYPE_WEB,
++    WPE_PROCESS_TYPE_NETWORK,
++    WPE_PROCESS_TYPE_GPU,
++    WPE_PROCESS_TYPE_WEB_AUTHN,
++};
++
++struct wpe_process_provider;
++
++struct wpe_process_provider_interface {
++    void* (*create)(struct wpe_process_provider*);
++    void (*destroy)(void*);
++    int32_t (*launch)(void*, enum wpe_process_type, void*);
++    void (*terminate)(void*, int32_t);
++};
++
++WPE_EXPORT
++struct wpe_process_provider* wpe_process_provider_create(void);
++
++WPE_EXPORT
++void wpe_process_provider_destroy(struct wpe_process_provider*);
++
++WPE_EXPORT
++int32_t wpe_process_launch(struct wpe_process_provider*, enum wpe_process_type, void*);
++
++WPE_EXPORT
++void wpe_process_terminate(struct wpe_process_provider*, int32_t);
++
++WPE_EXPORT
++void wpe_process_provider_register_interface(struct wpe_process_provider_interface*);
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif /* defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS */
++
++#endif /* wpe_process_h */
+diff --git a/include/wpe/wpe.h b/include/wpe/wpe.h
+index f266a42..375ed94 100644
+--- a/include/wpe/wpe.h
++++ b/include/wpe/wpe.h
+@@ -41,6 +41,7 @@
+ #include "libwpe-version.h"
+ #include "loader.h"
+ #include "pasteboard.h"
++#include "process.h"
+ #include "renderer-host.h"
+ #include "version-deprecated.h"
+ #include "version.h"
+diff --git a/meson.build b/meson.build
+index 40eb0f9..1a57840 100644
+--- a/meson.build
++++ b/meson.build
+@@ -46,6 +46,10 @@ endif
+ dependencies = []
+ pkg_cflags = []
+ 
++if get_option('enable-process')
++	pkg_cflags += ['-DWPE_ENABLE_PROCESS=1']
++endif
++
+ if get_option('enable-xkb')
+ 	pkg_cflags += ['-DWPE_ENABLE_XKB=1']
+ 	dependencies += dependency('xkbcommon',
+@@ -87,6 +91,7 @@ libwpe = library('wpe-' + api_version,
+ 	'src/pasteboard.c',
+ 	'src/pasteboard-generic.cpp',
+ 	'src/pasteboard-noop.cpp',
++	'src/process.c',
+ 	'src/renderer-backend-egl.c',
+ 	'src/renderer-host.c',
+ 	'src/version.c',
+diff --git a/meson_options.txt b/meson_options.txt
+index 635cf09..218b45b 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -3,6 +3,11 @@ option('default-backend',
+ 	value: '',
+ 	description: 'Name of the backend library to load, instead of libWPEBackend-default.so'
+ )
++option('enable-process',
++	type: 'boolean',
++	value: true,
++	description: '(Experimental) Enable process management api'
++)
+ option('enable-xkb',
+ 	type: 'boolean',
+ 	value: true,
+diff --git a/src/process.c b/src/process.c
+new file mode 100644
+index 0000000..3b28bee
+--- /dev/null
++++ b/src/process.c
+@@ -0,0 +1,88 @@
++/*
++ * Copyright (C) 2022 Igalia S.L.
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
++ * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#if defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS
++
++#include "../include/wpe/process.h"
++#include <stdlib.h>
++
++struct wpe_process_provider {
++    void* backend;
++};
++
++static struct wpe_process_provider_interface* provider_interface = NULL;
++
++struct wpe_process_provider*
++wpe_process_provider_create()
++{
++    if (!provider_interface)
++        return NULL;
++
++    struct wpe_process_provider* provider = calloc(1, sizeof(struct wpe_process_provider));
++    if (!provider)
++        return NULL;
++
++    if (provider_interface->create)
++        provider->backend = provider_interface->create(provider);
++
++    return provider;
++}
++
++void
++wpe_process_provider_destroy(struct wpe_process_provider* provider)
++{
++    if (!provider)
++        return;
++
++    if (provider_interface && provider_interface->destroy)
++        provider_interface->destroy(provider);
++    provider->backend = NULL;
++    free(provider);
++}
++
++int32_t
++wpe_process_launch(struct wpe_process_provider* provider, enum wpe_process_type type, void* options)
++{
++    if (provider && provider_interface && provider_interface->launch)
++        return provider_interface->launch(provider->backend, type, options);
++    return -1;
++}
++
++void
++wpe_process_terminate(struct wpe_process_provider* provider, int32_t process)
++{
++    if (provider && provider_interface && provider_interface->terminate)
++        provider_interface->terminate(provider->backend, process);
++}
++
++void
++wpe_process_provider_register_interface(struct wpe_process_provider_interface* provider)
++{
++    if (provider && !provider_interface)
++        provider_interface = provider;
++}
++
++#endif /* defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS */
+-- 
+2.34.1
+

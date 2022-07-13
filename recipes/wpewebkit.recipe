@@ -39,6 +39,7 @@ class Recipe(recipe.Recipe):
                         -DUSE_WOFF2=OFF \
                         -DUSE_SYSTEMD=OFF \
                         -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+                        -DWPE_ENABLE_PROCESS=1 \
                         -DUSE_SOUP2=ON \
                         -DUSE_LCMS=OFF \
                         -DHAVE_PTHREAD_NP_H=OFF \
@@ -190,14 +191,12 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0001-Disable-PSON.patch',
                 'wpewebkit/0002-Android-logging-macro.patch',
                 'wpewebkit/0003-Android-remove-uses-of-shm_open-and-shm_unlink.patch',
-                'wpewebkit/0004-PATCH-Android-spawn-WPEWebProcess-and-WPENetworkProc.patch',
-                'wpewebkit/0005-Android-terminate-process.patch',
                 'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
                 'wpewebkit/0007-Scroll-related-changes.patch',
                 'wpewebkit/0008-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
-                'wpewebkit/0009-Callback-process-launch-terminate-to-Android-layer.patch',
                 'wpewebkit/0010-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
                 'wpewebkit/0011-Use-environment-variable-to-define-temp-folder-in-MediaPlayerPrivateGStreamer.patch',
+                'wpewebkit/0012-Enable-libwpe-process-management-API.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
