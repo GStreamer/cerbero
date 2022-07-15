@@ -56,7 +56,7 @@ class PackageBase(object):
     @cvar resources_license: filename of the .txt license file
     @type resources_license: str
     @cvar resources_license_unwrapped: filename of the .txt license file
-                                       withouth the 80 chars wrapping
+                                       without the 80 chars wrapping
     @type resources_license_unwrapped: str
     @cvar resources_license_rtf: filename of .rtf license file
     @type resources_license_rtf: str
@@ -64,8 +64,10 @@ class PackageBase(object):
     @type resources_icon: str
     @cvar resources_icon_icns: filename of the .icsn icon
     @type resources_icon_icns: str
-    @cvar resources_backgound = filename of the background image
-    @type resources_backgound = str
+    @cvar resources_background = filename of the background image
+    @type resources_background = str
+    @cvar resources_background_dark = filename of the dark mode background image
+    @type resources_background_dark = str
     @cvar resources_preinstall = filename for the pre-installation script
     @type resources_preinstall = str
     @cvar resources_postinstall = filename for the post-installation script
@@ -99,6 +101,7 @@ class PackageBase(object):
     resources_icon = 'icon.ico'
     resources_icon_icns = 'icon.icns'
     resources_background = 'background.png'
+    resources_background_dark = 'background_dark.png'
     resources_preinstall = 'preinstall'
     resources_postinstall = 'postinstall'
     resources_postremove = 'postremove'

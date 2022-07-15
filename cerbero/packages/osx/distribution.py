@@ -21,7 +21,8 @@ DISTRO_XML_TPL = '''\
 <?xml version="1.0"?>
 <installer-gui-script minSpecVesion="1">
   <options require-scripts="false"/>
-  <background align="left" file="%(background)s" scale="none"/>
+  <background alignment="bottomleft" file="%(background)s" scale="none"/>
+  <background-darkAqua alignment="bottomleft" file="%(background_dark)s" scale="none"/>
   <license file="%(license)s"/>
   <domains enable_anywhere="false" enable_currentUserHome="%(ehome)s" enable_localSystem="%(elocal)s"/>
   <title>%(title)s</title>
@@ -67,6 +68,7 @@ class DistributionXML(object):
 
     def _fill_distro(self):
         return self.template % {'background': self.package.resources_background,
+                                'background_dark': self.package.resources_background_dark,
                                 'license': self.package.resources_license_rtf,
                                 'ehome': self.enable_user_home,
                                 'elocal': self.enable_local_system,
