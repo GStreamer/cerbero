@@ -563,11 +563,10 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('rsvg', 'codecs', dep='librsvg')
             self.disable_plugin('voaacenc', 'codecs_restricted', dep='vo-aacenc')
             self.disable_plugin('zbar', 'codecs', dep='zbar')
-            # Not tested, and it needs some work on libmfx dispatcher build for UWP
-            self.disable_plugin('qsv', 'codecs')
+            # amf, nvcodec, and qsv all load dlls which wouldn't work on UWP
             self.disable_plugin('amfcodec', 'codecs')
-            # nvcodec loads cuda dlls which wouldn't work
             self.disable_plugin('nvcodec', 'codecs')
+            self.disable_plugin('qsv', 'codecs')
 
         if self.meson_options['nvcodec'] == 'enabled':
             self.files_libs += ['libgstcuda-1.0']
