@@ -681,6 +681,9 @@ class CMake (MakefilesBase):
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options += ['-DCMAKE_SYSTEM_NAME=Linux']
 
+        if self.config.target_platform == Platform.DARWIN:
+            self.configure_options += ['-DCMAKE_OSX_ARCHITECTURES=' + self.config.target_arch]
+
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             r = re.compile(r".*-isysroot ([^ ]+) .*")
