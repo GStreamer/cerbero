@@ -503,6 +503,11 @@ class Recipe(custom.GStreamer):
                 self.enable_plugin('qsv', 'codecs')
 
             self.files_libs += ['libgstd3d11-1.0']
+            self.files_plugins_devel += [
+                'include/gstreamer-1.0/gst/d3d11',
+                'lib/gstreamer-1.0/include/gst/d3d11',
+                'lib/pkgconfig/gstreamer-d3d11-1.0.pc',
+            ]
             # qsv and amfcodec depend on d3d11
             self.enable_plugin('amfcodec', 'codecs')
 
