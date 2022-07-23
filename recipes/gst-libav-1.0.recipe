@@ -13,5 +13,7 @@ class Recipe(custom.GStreamer):
     ]
 
     def prepare(self):
+        if not self.using_msvc():
+            self.append_env('CFLAGS', '-Wno-deprecated-declarations')
         if self.config.variants.nodebug:
             self.append_env('CFLAGS', '-DGST_LEVEL_MAX=GST_LEVEL_FIXME')
