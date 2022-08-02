@@ -131,7 +131,6 @@ android fedora image:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS}"
     CERBERO: "./cerbero-uninstalled -c config/${CONFIG} -c localconf.cbc"
     CERBERO_PACKAGE_ARGS: "-t"
-    CERBERO_RUN_WRAPPER: "" # 'wine' on cross-winXX
     CERBERO_RUN_SUFFIX: "" # '.exe' on cross-winXX
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: "yes"
@@ -233,14 +232,12 @@ cerbero deps cross-windows x86:
   variables:
     CONFIG: "cross-win32.cbc"
     ARCH: "mingw_x86"
-    CERBERO_RUN_WRAPPER: "wine"
     CERBERO_RUN_SUFFIX: ".exe"
 
 build cerbero cross win32:
   extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win32.cbc"
-    CERBERO_RUN_WRAPPER: "wine"
     CERBERO_RUN_SUFFIX: ".exe"
 
 
@@ -249,14 +246,12 @@ cerbero deps cross-windows x86_64:
   variables:
     CONFIG: "cross-win64.cbc"
     ARCH: "mingw_x86_64"
-    CERBERO_RUN_WRAPPER: "wine"
     CERBERO_RUN_SUFFIX: ".exe"
 
 build cerbero cross win64:
   extends: '.cerbero mr'
   variables:
     CONFIG: "cross-win64.cbc"
-    CERBERO_RUN_WRAPPER: "wine"
     CERBERO_RUN_SUFFIX: ".exe"
 
 #
