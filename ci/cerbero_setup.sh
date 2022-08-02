@@ -74,9 +74,9 @@ cerbero_package_and_check() {
     $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     # Run gst-inspect-1.0 for some basic checks. Can't do this for cross-(android|ios)-universal, of course.
-    if [[ $CONFIG != *universal* ]]; then
-        $CERBERO $CERBERO_ARGS run $CERBERO_RUN_WRAPPER gst-inspect-1.0$CERBERO_RUN_SUFFIX --version
-        $CERBERO $CERBERO_ARGS run $CERBERO_RUN_WRAPPER gst-inspect-1.0$CERBERO_RUN_SUFFIX
+    if [[ $CONFIG != *universal* ]] && [[ $CONFIG != *cross-win* ]]; then
+        $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX --version
+        $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX
     fi
 
     show_ccache_sum
