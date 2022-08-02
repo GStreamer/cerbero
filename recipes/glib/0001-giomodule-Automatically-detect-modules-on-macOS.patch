@@ -1,0 +1,48 @@
+From 1ea5c0f0c62368aa5e363cdacb9b723b4bfa3235 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Piotr=20Brzezi=C5=84ski?= <piotr@centricular.com>
+Date: Tue, 2 Aug 2022 22:47:44 +0200
+Subject: [PATCH] giomodule: Automatically detect modules on macOS
+
+Makes use of relocatable prefixes, allowing gio to find modules
+automatically without needing to set the GIO_EXTRA_MODULES env var.
+---
+ gio/giomodule.c | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/gio/giomodule.c b/gio/giomodule.c
+index f5dbb4555..e3ff3fdb1 100644
+--- a/gio/giomodule.c
++++ b/gio/giomodule.c
+@@ -1260,6 +1260,29 @@ get_gio_module_dir (void)
+                                      "lib", "gio", "modules",
+                                      NULL);
+       g_free (install_dir);
++#elif defined (__APPLE__)
++#include "TargetConditionals.h"
++#if TARGET_OS_OSX
++#include <dlfcn.h>
++      char *path, *p;
++      Dl_info info;
++
++      if (!dladdr (get_gio_module_dir, &info))
++          return NULL;
++
++      path = strdup (info.dli_fname);
++
++      /* PREFIX/lib directory */
++      if ((p = strrchr (path, '/')) == NULL)
++        {
++          free (path);
++          return NULL;
++        }
++      *p = '\0';
++
++      module_dir = g_build_filename (path, "gio", "modules", NULL);
++      free(path);
++#endif
+ #else
+       module_dir = g_strdup (GIO_MODULE_DIR);
+ #endif
+-- 
+2.32.1 (Apple Git-133)
+
