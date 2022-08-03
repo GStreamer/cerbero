@@ -60,6 +60,6 @@ class Recipe(recipe.Recipe):
             python3 = Path(self.build_dir) / 'python3'
             with python3.open('w') as f:
                 f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
-            shell.new_call(['chmod', '+x', python3])
+            shell.new_call(['chmod', '+x', str(python3)])
 
         await super().compile()
