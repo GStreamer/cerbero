@@ -32,6 +32,11 @@ class BootstrapTarball(BaseTarball, Source):
         self.tarball_checksum = checksum
         BaseTarball.__init__(self)
 
+    def verify(self, fname, fatal=True):
+        if self.tarball_checksum is False:
+            return True
+        return super().verify(fname, fatal)
+
 
 class BootstrapperBase (object):
     # List of URLs to be fetched
