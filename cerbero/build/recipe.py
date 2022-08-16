@@ -208,7 +208,7 @@ class Recipe(FilesProvider, metaclass=MetaRecipe):
     # This format is chosen to allow you to declare when a recipe is licensed
     # under multiple licenses in various combinations. For example:
     #
-    #  (LICENSE1 && LICENSE2) || (LICENSE3) || (LICENSE4 && LICENSE5)
+    #  LICENSE1 || (LICENSE2 && LICENSE3) || (LICENSE4 && LICENSE-MISC)
     #
     # can be represented as
     #
