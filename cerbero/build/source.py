@@ -28,6 +28,7 @@ from hashlib import sha256
 from cerbero.config import Distro, DistroVersion, Platform, DEFAULT_MIRRORS
 from cerbero.utils import git, svn, shell, _, run_until_complete
 from cerbero.errors import FatalError, CommandError, InvalidRecipeError
+from cerbero.build.build import BuildType
 import cerbero.utils.messages as m
 
 URL_TEMPLATES = {
@@ -67,6 +68,35 @@ class Source (object):
         if not self.version:
             raise InvalidRecipeError(
                 self, _("'version' attribute is missing in the recipe"))
+
+    @property
+    def cargo_vendor_cache_dir(self):
+        return f'{self.repo_dir}/cargo-vendor'
+
+    def have_cargo_lock_file(self):
+        return os.path.exists(os.path.join(self.config_src_dir, 'Cargo.lock'))
+
+    def cargo_vendor(self, offline):
+        logfile = get_logfile(self)
+        if not self.have_cargo_lock_file():
+            update_args = ['--verbose']
+            if offline:
+                update_args += ['--offline']
+            m.log('Running cargo fetch to generate Cargo.lock', logfile=logfile)
+            shell.new_call([self.cargo, 'update'] + update_args,
+                           cmd_dir=self.config_src_dir,
+                           logfile=logfile, env=self.env)
+        m.log('Running cargo vendor to vendor sources', logfile=logfile)
+        vendor_args = [self.cargo_vendor_cache_dir]
+        if offline:
+            vendor_args += ['--frozen', '--offline']
+        config_toml = shell.check_output([self.cargo, 'vendor'] + vendor_args,
+                                         cmd_dir=self.config_src_dir,
+                                         logfile=logfile, env=self.env)
+        os.makedirs(os.path.join(self.config_src_dir, '.cargo'))
+        with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
+            f.write(config_toml)
+        m.log('Created cargo vendor config.toml', logfile=logfile)
 
     async def fetch(self, **kwargs):
         self.fetch_impl(**kwargs)
@@ -277,10 +307,13 @@ class Tarball(BaseTarball, Source):
             m.action(_('Copying cached tarball from %s to %s instead of %s') %
                      (cached_file, fname, self.url), logfile=get_logfile(self))
             shutil.copy(cached_file, fname)
-            return
-        await super().fetch(redownload=redownload)
+        else:
+            await super().fetch(redownload=redownload)
+        if issubclass(self.btype, BuildType.CARGO):
+            m.log(f'Extracting project {self.name} to run cargo vendor', logfile=get_logfile(self))
+            await self.extract_impl(fetching=True)
 
-    async def extract(self):
+    async def extract_impl(self, fetching=False):
         m.action(_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
         if os.path.exists(self.config_src_dir):
             shutil.rmtree(self.config_src_dir)
@@ -303,6 +336,11 @@ class Tarball(BaseTarball, Source):
                 git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
             else:
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
+        if issubclass(self.btype, BuildType.CARGO):
+            self.cargo_vendor(not fetching or self.offline)
+
+    async def extract(self):
+        await self.extract_impl()
 
 
 class GitCache (Source):
@@ -375,6 +413,9 @@ class GitCache (Source):
             await git.checkout(self.repo_dir, self.commit, logfile=get_logfile(self))
             if self.use_submodules:
                 await git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
+        if issubclass(self.btype, BuildType.CARGO):
+            m.log(f'Extracting project to run cargo vendor', logfile=get_logfile(self))
+            await self.extract_impl(fetching=True)
 
 
     def built_version(self):
@@ -404,12 +445,13 @@ class Git (GitCache):
             await self.extract_impl()
             self._extract_done.add(self.config_src_dir)
 
-    async def extract_impl(self):
+    async def extract_impl(self, fetching=False):
         if os.path.exists(self.config_src_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self))
                 checkout_hash = git.get_hash(self.config_src_dir, 'HEAD', logfile=get_logfile(self))
                 if commit_hash == checkout_hash and not self.patches:
+                    m.log('Already checked out, nothing to do')
                     return False
             except Exception:
                 pass
@@ -428,6 +470,8 @@ class Git (GitCache):
                 git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
             else:
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
+        if issubclass(self.btype, BuildType.CARGO):
+            self.cargo_vendor(not fetching or self.offline)
 
         return True
 
