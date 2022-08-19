@@ -184,7 +184,7 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
 def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
-        logfile.write('Running command {!r}\n'.format(cmd))
+        logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
         logfile.flush()
     if verbose:
         m.message('Running {!r}\n'.format(cmd))
@@ -230,7 +230,7 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, 
         if logfile is None:
             stream = None
         else:
-            logfile.write("Running command '%s'\n" % ' '.join([shlex.quote(c) for c in cmd]))
+            logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
             logfile.flush()
             stream = logfile
 
