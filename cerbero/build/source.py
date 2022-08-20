@@ -335,7 +335,6 @@ class GitCache (Source):
             self.remotes['origin'] = '%s/%s.git' % \
                                      (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
-        self._previous_env = None
         # For forced commits in the config
         self.commit = self.config.recipe_commit(self.name) or self.commit
         self.remotes.update(self.config.recipes_remotes.get(self.name, {}))
