@@ -11,9 +11,11 @@ MANIFEST.in
 /*.wsx
 /*.wixobj
 /*.msm
+/osx-framework-*.pkg
 /ios-framework-*.pkg
 /gstreamer*.dmg
 /gstreamer*.pkg
+/base*.pkg
 /gstreamer*.msi
 /gstreamer*.zip
 /gstreamer*.rpm
