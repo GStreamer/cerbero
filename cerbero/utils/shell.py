@@ -166,6 +166,9 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     stderr = logfile
     if quiet and not logfile:
         stderr = subprocess.DEVNULL
+    if logfile:
+        logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
+        logfile.flush()
 
     try:
         o = subprocess.check_output(cmd, cwd=cmd_dir, env=env, stderr=stderr)
@@ -271,6 +274,10 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
 
     async with semaphore:
         cmd = _cmd_string_to_array(cmd, env)
+
+        if logfile:
+            logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
+            logfile.flush()
 
         if PLATFORM == Platform.WINDOWS:
             import cerbero.hacks
