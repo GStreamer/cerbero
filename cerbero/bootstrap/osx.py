@@ -48,7 +48,7 @@ class OSXBootstrapper (BootstrapperBase):
         # Install XML::Parser, required for intltool
         cmd = ['sudo', cpanm_installer, 'XML::Parser']
         m.message("Installing XML::Parser, may require a password for running \'" + " ".join(cmd) + "\'")
-        shell.new_call(cmd)
+        shell.new_call(cmd, interactive=True)
 
 
 def register_all():
