@@ -16,3 +16,8 @@ class Package(custom.GStreamer, package.Package):
             'gst-plugins-good-1.0:plugins_vis_devel',
             'gst-plugins-ugly-1.0:plugins_vis_devel',
             'gst-plugins-bad-1.0:plugins_vis_devel']
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_vis')
+            self.files_devel.append('gst-plugins-rs:plugins_vis_devel')

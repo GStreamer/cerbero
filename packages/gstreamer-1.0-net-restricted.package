@@ -20,3 +20,7 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         if self.config.variants.uwp:
             self.files.remove('librtmp:libs')
+
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_net_restricted')
+            self.files_devel.append('gst-plugins-rs:plugins_net_restricted_devel')

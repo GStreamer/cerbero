@@ -19,3 +19,7 @@ class Package(custom.GStreamer, package.Package):
                    'gst-plugins-ugly-1.0:plugins_encoding_devel',
                    'gst-plugins-bad-1.0:plugins_encoding_devel']
 
+    def prepare(self):
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_encoding')
+            self.files_devel.append('gst-plugins-rs:plugins_encoding_devel')

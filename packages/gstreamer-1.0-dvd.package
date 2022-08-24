@@ -25,3 +25,7 @@ class Package(custom.GStreamer, package.Package):
         if self.config.platform == Platform.WINDOWS:
             self.files.remove('libdvdnav:libs')
             self.files.remove('libdvdread:libs')
+
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_dvd')
+            self.files_devel.append('gst-plugins-rs:plugins_dvd_devel')

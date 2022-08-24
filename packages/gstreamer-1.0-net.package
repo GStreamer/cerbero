@@ -32,6 +32,10 @@ class Package(custom.GStreamer, package.Package):
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
 
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_net')
+            self.files_devel.append('gst-plugins-rs:plugins_net_devel')
+
         if self.config.variants.uwp:
             self.files = [
                 'glib-networking', 'libsrtp:libs',

@@ -1,0 +1,121 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'gst-plugins-rs'
+    version = '0.8.4.9999'
+    stype = SourceType.GIT
+    remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
+    commit = 'origin/main'
+    # Each plugin uses one or more of these licenses.
+    licenses = [{
+        License.Apachev2: ['LICENSE-APACHE'],
+        License.MIT: ['LICENSE-MIT'],
+        License.LGPLv2_1Plus: None,
+    }]
+
+    btype = BuildType.CARGO_C
+    cargoc_packages = ['audiofx', 'aws', 'cdg', 'claxon', 'closedcaption',
+        'fallbackswitch', 'ffv1', 'file', 'flavors', 'gif', 'hsv', 'json',
+        'lewton', 'rav1e', 'regex', 'reqwest', 'rspng', 'rtpav1', 'textahead',
+        'textwrap', 'threadshare', 'togglerecord', 'uriplaylistbin',
+        'webrtchttp']
+
+    # Needed for openssl
+    use_system_libs = True
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'pango', 'cairo',
+        'gst-plugins-bad-1.0']
+
+    files_plugins_core = [
+        'lib/gstreamer-1.0/libgstfallbackswitch%(mext)s',
+        'lib/gstreamer-1.0/libgstrsfile%(mext)s',
+        'lib/gstreamer-1.0/libgstthreadshare%(mext)s',
+        'lib/gstreamer-1.0/libgsttogglerecord%(mext)s',
+    ]
+
+    files_plugins_core_devel = [
+        'lib/gstreamer-1.0/libgstfallbackswitch.a', 'lib/gstreamer-1.0/libgstfallbackswitch.la',
+        'lib/gstreamer-1.0/libgstrsfile.a', 'lib/gstreamer-1.0/libgstrsfile.la',
+        'lib/gstreamer-1.0/libgstthreadshare.a', 'lib/gstreamer-1.0/libgstthreadshare.la',
+        'lib/gstreamer-1.0/libgsttogglerecord.a', 'lib/gstreamer-1.0/libgsttogglerecord.la',
+    ]
+
+    files_plugins_net = [
+        'lib/gstreamer-1.0/libgstaws%(mext)s',
+        'lib/gstreamer-1.0/libgstrtpav1%(mext)s',
+        'lib/gstreamer-1.0/libgstreqwest%(mext)s',
+        'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
+    ]
+
+    files_plugins_net_devel = [
+        'lib/gstreamer-1.0/libgstaws.a', 'lib/gstreamer-1.0/libgstaws.la',
+        'lib/gstreamer-1.0/libgstrtpav1.a', 'lib/gstreamer-1.0/libgstrtpav1.la',
+        'lib/gstreamer-1.0/libgstreqwest.a', 'lib/gstreamer-1.0/libgstreqwest.la',
+        'lib/gstreamer-1.0/libgstwebrtchttp.a', 'lib/gstreamer-1.0/libgstwebrtchttp.la',
+    ]
+
+    files_plugins_effects = [
+        'lib/gstreamer-1.0/libgstrsaudiofx%(mext)s',
+    ]
+
+    files_plugins_effects_devel = [
+        'lib/gstreamer-1.0/libgstrsaudiofx.a', 'lib/gstreamer-1.0/libgstrsaudiofx.la',
+    ]
+
+    files_plugins_codecs = [
+        'lib/gstreamer-1.0/libgstcdg%(mext)s',
+        'lib/gstreamer-1.0/libgstclaxon%(mext)s',
+        'lib/gstreamer-1.0/libgstrsclosedcaption%(mext)s',
+        'lib/gstreamer-1.0/libgstffv1%(mext)s',
+        'lib/gstreamer-1.0/libgstgif%(mext)s',
+        'lib/gstreamer-1.0/libgsthsv%(mext)s',
+        'lib/gstreamer-1.0/libgstlewton%(mext)s',
+        'lib/gstreamer-1.0/libgstrav1e%(mext)s',
+        'lib/gstreamer-1.0/libgstrsflv%(mext)s',
+        'lib/gstreamer-1.0/libgstrsjson%(mext)s',
+        'lib/gstreamer-1.0/libgstrspng%(mext)s',
+        'lib/gstreamer-1.0/libgstrsregex%(mext)s',
+        'lib/gstreamer-1.0/libgstrstextwrap%(mext)s',
+        'lib/gstreamer-1.0/libgsttextahead%(mext)s',
+    ]
+
+    files_plugins_codecs_devel = [
+        'lib/gstreamer-1.0/libgstcdg.a', 'lib/gstreamer-1.0/libgstcdg.la',
+        'lib/gstreamer-1.0/libgstclaxon.a', 'lib/gstreamer-1.0/libgstclaxon.la',
+        'lib/gstreamer-1.0/libgstrsclosedcaption.a', 'lib/gstreamer-1.0/libgstrsclosedcaption.la',
+        'lib/gstreamer-1.0/libgstffv1.a', 'lib/gstreamer-1.0/libgstffv1.la',
+        'lib/gstreamer-1.0/libgstgif.a', 'lib/gstreamer-1.0/libgstgif.la',
+        'lib/gstreamer-1.0/libgsthsv.a', 'lib/gstreamer-1.0/libgsthsv.la',
+        'lib/gstreamer-1.0/libgstlewton.a', 'lib/gstreamer-1.0/libgstlewton.la',
+        'lib/gstreamer-1.0/libgstrav1e.a', 'lib/gstreamer-1.0/libgstrav1e.la',
+        'lib/gstreamer-1.0/libgstrsflv.a', 'lib/gstreamer-1.0/libgstrsflv.la',
+        'lib/gstreamer-1.0/libgstrsjson.a', 'lib/gstreamer-1.0/libgstrsjson.la',
+        'lib/gstreamer-1.0/libgstrspng.a', 'lib/gstreamer-1.0/libgstrspng.la',
+        'lib/gstreamer-1.0/libgstrsregex.a', 'lib/gstreamer-1.0/libgstrsregex.la',
+        'lib/gstreamer-1.0/libgstrstextwrap.a', 'lib/gstreamer-1.0/libgstrstextwrap.la',
+        'lib/gstreamer-1.0/libgsttextahead.a', 'lib/gstreamer-1.0/libgsttextahead.la',
+    ]
+
+    files_plugins_playback = [
+        'lib/gstreamer-1.0/libgsturiplaylistbin%(mext)s',
+    ]
+
+    files_plugins_playback_devel = [
+        'lib/gstreamer-1.0/libgsturiplaylistbin.a', 'lib/gstreamer-1.0/libgsturiplaylistbin.la',
+    ]
+
+    def prepare(self):
+        if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
+            self.deps.append('openssl')
+        self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
+
+    def post_install(self):
+        # Cargo-C currently can't install pc files into custom dirs, so we need
+        # to move these plugin pkgconfig files to the right place.
+        for f in self.files_list_by_category(self.DEVEL_CAT):
+            if not f.endswith('.pc') or not 'gstreamer-1.0' in f:
+                continue
+            name = os.path.basename(f)
+            src = os.path.join(self.config.prefix, 'lib', 'pkgconfig', name)
+            dst = os.path.join(self.config.prefix, f)
+            os.replace(src, dst)
+        super().post_install()

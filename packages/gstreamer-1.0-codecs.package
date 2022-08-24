@@ -45,6 +45,10 @@ class Package(custom.GStreamer, package.Package):
             # Needed by zbar library
             self.files.append('libiconv:libs')
 
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_codecs')
+            self.files_devel.append('gst-plugins-rs:plugins_codecs_devel')
+
         if self.config.variants.uwp:
             self.files = [
                 'libvpx:libs', 'openh264:libs', 'opus:libs',

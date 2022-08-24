@@ -26,3 +26,7 @@ class Package(custom.GStreamer, package.Package):
             self.files += ['soundtouch:libs', 'webrtc-audio-processing:libs']
         if self.config.variants.uwp:
             self.files.remove('ladspa:libs')
+
+        if self.config.variants.rust:
+            self.files.append('gst-plugins-rs:plugins_effects')
+            self.files_devel.append('gst-plugins-rs:plugins_effects_devel')
