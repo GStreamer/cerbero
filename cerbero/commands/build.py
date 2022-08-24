@@ -22,6 +22,7 @@ from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.build.oven import Oven
 from cerbero.utils import _, N_, ArgparseArgument
+from cerbero.utils import run_until_complete
 
 
 class Build(Command):
@@ -95,7 +96,7 @@ class Build(Command):
                     no_deps=self.no_deps, missing_files=missing_files,
                     dry_run=dry_run, deps_only=deps_only, jobs=jobs,
                     steps_filter=steps_filter)
-        oven.start_cooking()
+        run_until_complete(oven.start_cooking())
 
 
 class BuildOne(Build):

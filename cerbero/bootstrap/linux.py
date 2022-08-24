@@ -40,7 +40,7 @@ class UnixBootstrapper (BootstrapperBase):
         if user_is_root() and 'sudo' in self.tool: # no need for sudo as root user
           self.tool.remove('sudo')
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         for c in self.checks:
             c()
 
@@ -194,7 +194,7 @@ class GentooBootstrapper (UnixBootstrapper):
 
 class NoneBootstrapper (BootstrapperBase):
 
-    def start(self):
+    async def start(self):
         pass
 
 

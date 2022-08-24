@@ -41,7 +41,7 @@ class AndroidBootstrapper (BootstrapperBase):
         self.fetch_urls.append((url, None, NDK_CHECKSUMS[os.path.basename(url)]))
         self.extract_steps.append((url, True, self.prefix))
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         if not os.path.exists(self.prefix):
             os.makedirs(self.prefix)
         ndkdir = os.path.join(self.prefix, 'android-ndk-' + NDK_VERSION)

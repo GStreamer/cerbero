@@ -1,0 +1,20 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'cargo-c'
+    version = '0.9.12'
+    stype = SourceType.TARBALL
+    btype = BuildType.CARGO
+    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.12.tar.gz'
+    tarball_checksum = 'd700c6cc93d06c5ed7a887f51d87d47e88e783dfc1b28d00b951625c4d3ce509'
+    tarball_dirname = '%(name)s-%(version)s'
+    # Need system openssl on Linux
+    use_system_libs = True
+
+    deps = ['pkg-config']
+    # Need openssl on macOS. On Windows, a prebuilt openssl crate is downloaded.
+    platform_deps = {
+        Platform.DARWIN: ['openssl'],
+    }
+
+    files_bins = ['cargo-capi', 'cargo-cbuild', 'cargo-cinstall', 'cargo-ctest']

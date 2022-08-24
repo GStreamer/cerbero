@@ -46,7 +46,7 @@ class Fetch(Command):
         Command.__init__(self, args)
 
     @staticmethod
-    def fetch(cookbook, recipes, no_deps, reset_rdeps, full_reset, print_only, jobs):
+    async def fetch(cookbook, recipes, no_deps, reset_rdeps, full_reset, print_only, jobs):
         fetch_recipes = []
         if not recipes:
             fetch_recipes = cookbook.get_recipes_list()
@@ -60,7 +60,6 @@ class Fetch(Command):
                   (jobs, ' '.join([x.name for x in fetch_recipes])))
         shell.set_max_non_cpu_bound_calls(jobs)
         to_rebuild = []
-        tasks = []
         printer = BuildStatusPrinter (('fetch',), cookbook.get_config().interactive)
         printer.total = len(fetch_recipes)
 
@@ -78,14 +77,13 @@ class Fetch(Command):
                 continue
             stepfunc = getattr(recipe, 'fetch')
             if asyncio.iscoroutinefunction(stepfunc):
-                tasks.append(fetch_print_wrapper(recipe.name, stepfunc))
+                await fetch_print_wrapper(recipe.name, stepfunc)
             else:
                 printer.update_recipe_step(printer.count, recipe.name, 'fetch')
                 stepfunc()
                 printer.count += 1
                 printer.remove_recipe(recipe.name)
 
-        run_until_complete(tasks)
         m.message("All async fetch jobs finished")
 
         # Checking the current built version against the fetched one
@@ -135,8 +133,9 @@ class FetchRecipes(Fetch):
             recipes.append(found)
           else:
             recipes.append(recipe)
-        return self.fetch(cookbook, recipes, args.no_deps,
+        task = self.fetch(cookbook, recipes, args.no_deps,
                           args.reset_rdeps, args.full_reset, args.print_only, args.jobs)
+        return run_until_complete(task)
 
 
 class FetchPackage(Fetch):
@@ -155,9 +154,10 @@ class FetchPackage(Fetch):
     def run(self, config, args):
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
-        return self.fetch(store.cookbook, package.recipes_dependencies(),
+        task = self.fetch(store.cookbook, package.recipes_dependencies(),
                           args.deps, args.reset_rdeps, args.full_reset,
                           args.print_only, args.jobs)
+        return run_until_complete(task)
 
 register_command(FetchRecipes)
 register_command(FetchPackage)

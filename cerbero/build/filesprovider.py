@@ -177,7 +177,7 @@ class FilesProvider(object):
 
     def _dylib_plugins(self):
         from cerbero.build.build import BuildType
-        if self.btype != BuildType.MESON:
+        if self.btype not in (BuildType.MESON, BuildType.CARGO_C):
             return False
         if self.platform not in (Platform.DARWIN, Platform.IOS):
             return False

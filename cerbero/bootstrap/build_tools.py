@@ -46,6 +46,9 @@ class BuildTools (BootstrapperBase, Fetch):
     def __init__(self, config, offline):
         BootstrapperBase.__init__(self, config, offline)
 
+        if self.config.variants.rust:
+            self.BUILD_TOOLS.append('cargo-c')
+
         if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
             # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
@@ -126,14 +129,14 @@ class BuildTools (BootstrapperBase, Fetch):
         src_file = os.path.join(os.path.dirname(__file__), 'site-patch.py')
         shutil.copy(src_file, py_prefix / 'site.py')
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         self.insert_python_site()
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()
         oven = Oven(self.recipes, self.cookbook, jobs=jobs)
-        oven.start_cooking()
+        await oven.start_cooking()
 
-    def fetch_recipes(self, jobs):
+    async def fetch_recipes(self, jobs):
         self.recipes += self.check_build_tools()
-        Fetch.fetch(self.cookbook, self.recipes, False, False, False, False, jobs)
+        await Fetch.fetch(self.cookbook, self.recipes, False, False, False, False, jobs)

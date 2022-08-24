@@ -24,7 +24,8 @@ import subprocess
 from urllib.parse import urlparse
 
 from cerbero.bootstrap import BootstrapperBase
-from cerbero.utils import shell, run_until_complete
+from cerbero.utils import shell
+from cerbero.utils import messages as m
 from cerbero.enums import Platform, Architecture
 
 
@@ -37,9 +38,13 @@ class RustBootstrapper(BootstrapperBase):
     SERVER = 'https://static.rust-lang.org'
     RUSTUP_VERSION = '1.25.1'
     RUST_VERSION = '1.63.0'
+    CARGOC_VERSION = '0.9.12'
+    CARGOC_NAME = f'cargo-c-{CARGOC_VERSION}'
+    CARGOC_CHECKSUM = 'd700c6cc93d06c5ed7a887f51d87d47e88e783dfc1b28d00b951625c4d3ce509'
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
     CHANNEL_URL_TPL = '{server}/dist/channel-rust-{version}.toml'
+    CARGOC_URL = f'https://github.com/lu-zero/cargo-c/archive/refs/tags/v{CARGOC_VERSION}.tar.gz'
     COMPONENTS = ('cargo', 'rustc', 'rust-std')
     DOWNLOAD_CHECKSUMS = {
         # Rust packages metadata
@@ -77,6 +82,10 @@ class RustBootstrapper(BootstrapperBase):
                 self.target_triples.append(bs_triple)
         self.fetch_urls = self.get_fetch_urls()
         self.fetch_urls_func = self.get_more_fetch_urls
+        # This is extracted in self.install_toolchain_and_fetch_cargoc, after
+        # we install the Rust toolchain because we need to run cargo update to
+        # fetch deps so we can build it offline later as a build-tools recipe.
+        self.extract_steps = [(self.CARGOC_URL, True, self.config.rust_prefix)]
 
     def get_fetch_urls(self):
         '''Get Rustup and Rust channel URLs'''
@@ -104,6 +113,10 @@ class RustBootstrapper(BootstrapperBase):
         urls.append((url, path[1:], checksum))
         for each in ('.sha256', '.asc'):
             urls.append((url + each, path[1:] + each, False))
+        # Also need to fetch cargo-c to run cargo update for the build-tools
+        # recipe, so fetch it into the same location as the recipe.
+        download_path = os.path.join(self.CARGOC_NAME, os.path.basename(self.CARGOC_URL))
+        urls.append((self.CARGOC_URL, download_path, self.CARGOC_CHECKSUM))
         return urls
 
     @staticmethod
@@ -123,7 +136,7 @@ class RustBootstrapper(BootstrapperBase):
                         tomllib = None
         return tomllib
 
-    def get_more_fetch_urls(self):
+    async def get_more_fetch_urls(self):
         tomllib = self.find_toml_module()
         if not tomllib:
             raise SystemExit('Rust support requires either Python >=3.11 or one of '
@@ -159,7 +172,19 @@ class RustBootstrapper(BootstrapperBase):
                 entry = channel_data['pkg']['rust-std']['target'][triple]
                 urls += list(get_entry_urls(entry))
 
-        return urls
+        return (urls, self.install_toolchain_and_fetch_cargoc)
+
+    async def install_toolchain_and_fetch_cargoc(self):
+        m.action('Installing Rust toolchain to fetch cargo-c deps')
+        await self.install_toolchain()
+        # Extract cargo-c, remove it from extract steps, and run cargo update
+        # to fetch all dependencies required to build it
+        m.action('Extracting cargo-c')
+        await self.extract()
+        self.extract_steps = []
+        m.action('Fetching cargo-c deps')
+        await self.fetch_cargoc_deps()
+        return ([], None)
 
     def get_rustup_env(self):
         rustup_env = self.config.env.copy()
@@ -170,7 +195,7 @@ class RustBootstrapper(BootstrapperBase):
         rustup_env['RUSTUP_DIST_SERVER'] = 'file://{}'.format(self.config.local_sources)
         return rustup_env
 
-    def start(self, jobs=0):
+    async def install_toolchain(self):
         '''
         Run rustup to install the downloaded toolchain. We pretend that
         RUST_VERSION is the latest stable release. That way when we upgrade the
@@ -188,6 +213,16 @@ class RustBootstrapper(BootstrapperBase):
         for suffix in ('', '.asc', '.sha256'):
             stable_channel = f'{os.path.dirname(self.channel)}/channel-rust-stable.toml'
             shutil.copyfile(self.channel + suffix, stable_channel + suffix)
-        # Use check_output to discard stdout which contains messages that will confuse the user
-        shell.check_output(rustup_args, env=rustup_env)
-        print('Rust toolchain v{} installed at {}'.format(self.RUST_VERSION, self.config.rust_prefix))
+        # Use async_call_output to discard stdout which contains messages that will confuse the user
+        await shell.async_call_output(rustup_args, cpu_bound=False, env=rustup_env)
+        m.message('Rust toolchain v{} installed at {}'.format(self.RUST_VERSION, self.config.rust_prefix))
+
+    async def fetch_cargoc_deps(self):
+        cmd_dir = os.path.join(self.config.rust_prefix, self.CARGOC_NAME)
+        cargo_update_args = ['--verbose']
+        if not os.path.isfile(os.path.join(cmd_dir, 'Cargo.lock')):
+            await shell.async_call_output(['cargo', 'update'] + cargo_update_args,
+                                          cmd_dir=cmd_dir, env=self.get_rustup_env())
+
+    async def start(self, jobs=0):
+        await self.install_toolchain()

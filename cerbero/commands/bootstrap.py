@@ -23,6 +23,7 @@ from cerbero.commands import Command, register_command
 from cerbero.utils import N_, _, ArgparseArgument, determine_num_of_cpus, run_until_complete, StoreBool
 from cerbero.utils import messages as m
 from cerbero.bootstrap.bootstrapper import Bootstrapper
+from cerbero.bootstrap.build_tools import BuildTools
 
 NUMBER_OF_JOBS_IF_UNUSED = 2
 NUMBER_OF_JOBS_IF_USED = 2 * determine_num_of_cpus()
@@ -75,8 +76,13 @@ class Bootstrap(Command):
             tasks.append(bootstrap_fetch_extract(bootstrapper))
         run_until_complete(tasks)
 
+        # Bootstrap steps must happen sequentially because:
+        # 1. rust bootstrapper requires the system bootstrapper to have completed at least once
+        # 2. build-tools bootstrapper requires the rust bootstrapper to be completed
+        # 3. Some system bootstrappers run commands interactively
+        # 4. The log output gets jumbled up
         for bootstrapper in bootstrappers:
-            bootstrapper.start(jobs=args.jobs)
+            run_until_complete(bootstrapper.start(jobs=args.jobs))
 
 
 class FetchBootstrap(Command):
@@ -108,10 +114,17 @@ class FetchBootstrap(Command):
         bootstrappers = Bootstrapper(config, args.system, args.toolchains,
                 args.build_tools, offline=False, assume_yes=False)
         tasks = []
+        build_tools_task = None
         for bootstrapper in bootstrappers:
-            bootstrapper.fetch_recipes(args.jobs)
-            tasks.append(bootstrapper.fetch())
+            if isinstance(bootstrapper, BuildTools):
+                build_tools_task = bootstrapper.fetch_recipes(args.jobs)
+            else:
+                tasks.append(bootstrapper.fetch())
         run_until_complete(tasks)
+        # Ensure that build-tools recipes are fetched *after* all other bootstrap
+        # tasks are complete, because we need that for cargo-c
+        if build_tools_task:
+            run_until_complete(build_tools_task)
 
 register_command(Bootstrap)
 register_command(FetchBootstrap)

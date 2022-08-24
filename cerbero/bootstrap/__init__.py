@@ -41,7 +41,9 @@ class BootstrapTarball(BaseTarball, Source):
 class BootstrapperBase (object):
     # List of URLs to be fetched
     fetch_urls = None
-    # A function that returns more URLs to fetch
+    # A function that returns more URLs to fetch and a function to call that
+    # can return more URLs to fetch. This continues recursively till the func
+    # returned is None.
     fetch_urls_func = None
     # List of extract steps to be performed
     extract_steps = None
@@ -53,7 +55,7 @@ class BootstrapperBase (object):
         self.extract_steps = []
         self.sources = {}
 
-    def start(self):
+    async def start(self):
         raise NotImplemented("'start' must be implemented by subclasses")
 
     async def fetch_urls_impl(self, urls):
@@ -66,11 +68,12 @@ class BootstrapperBase (object):
     async def fetch(self):
         'Fetch bootstrap binaries'
         await self.fetch_urls_impl(self.fetch_urls)
-        if self.fetch_urls_func:
-            more_urls = self.fetch_urls_func()
+        next_func = self.fetch_urls_func
+        while next_func:
+            (more_urls, next_func) = await next_func()
             await self.fetch_urls_impl(more_urls)
 
-    def fetch_recipes(self, jobs):
+    async def fetch_recipes(self, jobs):
         'Fetch build-tools recipes; only called by fetch-bootstrap'
         pass
 

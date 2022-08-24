@@ -457,6 +457,8 @@ class Config (object):
         if not self._is_build_tools_config:
             path = self._join_path(
                 os.path.join(self.build_tools_config.prefix, 'bin'), path)
+        if self.variants.rust:
+            path = self._join_path(os.path.join(self.cargo_home, 'bin'), path)
         # Add the prefix bindir after the build-tools bindir so that on Windows
         # binaries are run with the same libraries that they are linked with.
         if bindir not in path and self.prefix_is_executable():

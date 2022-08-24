@@ -27,7 +27,7 @@ from pathlib import Path
 from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
@@ -197,7 +197,7 @@ class ModifyEnvBase:
         if self.config.target_platform != Platform.WINDOWS:
             return
 
-        if isinstance(self, Meson):
+        if isinstance(self, (Cargo, Meson)):
             if self.using_msvc():
                 toolchain_env = self.config.msvc_env_for_toolchain.items()
             else:
@@ -293,7 +293,7 @@ class ModifyEnvBase:
         new_env = {}
         add_system_libs(self.config, new_env, self.env)
 
-        if step != 'configure':
+        if 'configure' not in step:
             # gobject-introspection gets the paths to internal libraries all
             # wrong if we add system libraries during compile.  We should only
             # need PKG_CONFIG_PATH during configure so just unset it everywhere
@@ -1117,6 +1117,98 @@ class Meson (Build, ModifyEnvBase) :
         shell.new_call(self.make_check, self.meson_dir, logfile=self.logfile, env=self.env)
 
 
+class Cargo(Build, ModifyEnvBase):
+    '''
+    Cargo build system recipes
+
+    NOTE: Currently only intended for build-tools recipes
+    '''
+    srcdir = '.'
+    can_msvc = True
+
+    def __init__(self):
+        Build.__init__(self)
+        ModifyEnvBase.__init__(self)
+        self.setup_toolchain_env_ops()
+        if not self.using_msvc():
+            self.setup_buildtype_env_ops()
+        self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
+                                                           self.srcdir))
+        self.cargo_dir = os.path.join(self.config_src_dir, '_builddir')
+        self.cargo = os.path.join(self.config.cargo_home, 'bin',
+                'cargo' + self.config._get_exe_suffix())
+        try:
+            target_triple = self.config.rust_triple(self.config.target_arch,
+                    self.config.target_platform, self.using_msvc())
+        except FatalError as e:
+            raise InvalidRecipeError(self.name, e.msg)
+        self.cargo_args = [
+            '--verbose', '--offline',
+            '--target', target_triple,
+            '--target-dir', self.cargo_dir,
+        ]
+
+    async def configure(self):
+        if os.path.exists(self.cargo_dir):
+            # Only remove if it's not empty
+            if os.listdir(self.cargo_dir):
+                shutil.rmtree(self.cargo_dir)
+                os.makedirs(self.cargo_dir)
+        else:
+            os.makedirs(self.cargo_dir)
+        # No configure step with cargo
+
+    async def compile(self):
+        # Intended only for build-tools recipes, which we will directly install
+        recipe_subdir = os.path.basename(os.path.dirname(self.__file__))
+        if 'build-tools' not in recipe_subdir:
+            raise FatalError('BuildType.CARGO is only intended for build-tools recipes')
+
+    @modify_environment
+    async def install(self):
+        self.maybe_add_system_libs(step='configure+install')
+        cmd = [
+            self.cargo, 'install',
+            '--path', self.config_src_dir,
+            '--root', self.config.prefix,
+        ] + self.cargo_args
+        await shell.async_call(cmd, logfile=self.logfile, env=self.env)
+
+
+class CargoC(Cargo):
+    '''
+    Cargo-C build system recipes
+    '''
+    srcdir = '.'
+
+    cargoc_packages = None
+
+    def get_cargoc_args(self):
+        cargoc_args = [
+            '--release',
+            '--prefix', self.config.prefix,
+            '--libdir', self.config.libdir,
+        ]
+        cargoc_args += self.cargo_args
+        if self.cargoc_packages:
+            for package in self.cargoc_packages:
+                args = ['-p', package]
+                cargoc_args += args
+        return cargoc_args
+
+    @modify_environment
+    async def compile(self):
+        self.maybe_add_system_libs(step='configure+compile')
+        cmd = [self.cargo, 'cbuild'] + self.get_cargoc_args()
+        await shell.async_call(cmd, self.cargo_dir, logfile=self.logfile, env=self.env)
+
+    @modify_environment
+    async def install(self):
+        self.maybe_add_system_libs(step='configure+install')
+        cmd = [self.cargo, 'cinstall'] + self.get_cargoc_args()
+        await shell.async_call(cmd, self.cargo_dir, logfile=self.logfile, env=self.env)
+
+
 class BuildType (object):
 
     CUSTOM = CustomBuild
@@ -1124,3 +1216,5 @@ class BuildType (object):
     AUTOTOOLS = Autotools
     CMAKE = CMake
     MESON = Meson
+    CARGO = Cargo
+    CARGO_C = CargoC

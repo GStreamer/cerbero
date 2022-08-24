@@ -83,7 +83,7 @@ class MSYSBootstrapper(BootstrapperBase):
         self.fetch_urls.append((XZ_URL, None, XZ_CHECKSUM))
         self.extract_steps.append((XZ_URL, True, self.xz_tmp_prefix.name))
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         self.install_mingwget_deps() # FIXME: This uses the network
         self.fix_mingw_unused()
         self.fix_openssl_mingw_perl()
@@ -165,7 +165,7 @@ class MSYS2Bootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         shell.new_call(['pacman', '-Syu', '--noconfirm', '-q', '--needed'] +  self.packages)
 
 
@@ -199,7 +199,7 @@ class MinGWBootstrapper(BootstrapperBase):
         if os.path.exists(mingw_sysroot):
             shutil.rmtree(mingw_sysroot)
 
-    def start(self, jobs=0):
+    async def start(self, jobs=0):
         if not git.check_line_endings(self.config.platform):
             raise ConfigurationError("git is configured to use automatic line "
                     "endings conversion. Please change that by running:\n"

@@ -106,7 +106,7 @@ class Oven (object):
         # enable this.
         self._install_lock = asyncio.Lock()
 
-    def start_cooking(self):
+    async def start_cooking(self):
         '''
         Cooks the recipe and all its dependencies
         '''
@@ -137,7 +137,7 @@ class Oven (object):
         self._build_status_printer = BuildStatusPrinter(steps, self.interactive)
         self._static_libraries_built = []
 
-        run_until_complete(self._cook_recipes(ordered_recipes))
+        await self._cook_recipes(ordered_recipes)
 
     async def _cook_recipes(self, recipes):
         recipes = set(recipes)
