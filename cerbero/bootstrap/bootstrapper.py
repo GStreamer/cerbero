@@ -22,6 +22,7 @@ from cerbero.errors import FatalError
 from cerbero.utils import _
 from cerbero.utils import messages as m
 from cerbero.bootstrap.build_tools import BuildTools
+from cerbero.bootstrap.rust import RustBootstrapper
 
 
 toolchain_bootstrappers = {}
@@ -76,6 +77,8 @@ class Bootstrapper (object):
                 if v not in toolchain_bootstrappers[d]:
                     v = None
                 bs.append(toolchain_bootstrappers[d][v](config, offline, assume_yes))
+            if config.variants.rust:
+                bs.append(RustBootstrapper(config, offline))
 
         # Build the build-tools after all other bootstrappers
         if build_tools:

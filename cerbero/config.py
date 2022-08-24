@@ -24,7 +24,7 @@ import itertools
 from functools import lru_cache
 from pathlib import PurePath, Path
 
-from cerbero import enums
+from cerbero.enums import Architecture, Platform, Distro, DistroVersion, License, LibraryType
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5
@@ -43,14 +43,23 @@ DEFAULT_ALLOW_PARALLEL_BUILD = True
 DEFAULT_PACKAGER = "Default <default@change.me>"
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror/']
+RUST_TRIPLE_MAPPING = {
+    (Platform.ANDROID, Architecture.ARM64): 'aarch64-linux-android',
+    (Platform.ANDROID, Architecture.ARMv7): 'armv7-linux-androideabi',
+    (Platform.ANDROID, Architecture.X86): 'i686-linux-android',
+    (Platform.ANDROID, Architecture.X86_64): 'x86_64-linux-android',
+    (Platform.LINUX, Architecture.ARM64): 'aarch64-unknown-linux-gnu',
+    (Platform.LINUX, Architecture.X86_64): 'x86_64-unknown-linux-gnu',
+    (Platform.DARWIN, Architecture.ARM64): 'aarch64-apple-darwin',
+    (Platform.DARWIN, Architecture.X86_64): 'x86_64-apple-darwin',
+    (Platform.IOS, Architecture.ARM64): 'aarch64-apple-ios',
+    (Platform.IOS, Architecture.X86_64): 'x86_64-apple-ios',
+    (Platform.WINDOWS, Architecture.X86_64, 'gnu'): 'x86_64-pc-windows-gnu',
+    (Platform.WINDOWS, Architecture.X86_64, 'msvc'): 'x86_64-pc-windows-msvc',
+    (Platform.WINDOWS, Architecture.X86, 'gnu'): 'i686-pc-windows-gnu',
+    (Platform.WINDOWS, Architecture.X86, 'msvc'): 'i686-pc-windows-msvc',
+}
 
-
-Platform = enums.Platform
-Architecture = enums.Architecture
-Distro = enums.Distro
-DistroVersion = enums.DistroVersion
-License = enums.License
-LibraryType = enums.LibraryType
 
 def set_nofile_ulimit():
     '''
@@ -74,7 +83,7 @@ class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
     __disabled_variants = ['x11', 'alsa', 'pulse', 'jack', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio', 'uwp', 'qt5',
-                           'intelmsdk', 'python', 'werror', 'vaapi']
+                           'intelmsdk', 'python', 'werror', 'vaapi', 'rust']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
     __bool_variants = __enabled_variants + __disabled_variants
     # Variants that are `key: (values)`, with the first value in the tuple
@@ -176,7 +185,8 @@ class Config (object):
                    'extra_properties', 'qt5_qmake_path', 'qt5_pkgconfigdir',
                    'for_shell', 'package_tarball_compression', 'extra_mirrors',
                    'extra_bootstrap_packages', 'moltenvk_prefix',
-                   'vs_install_path', 'vs_install_version', 'exe_suffix']
+                   'vs_install_path', 'vs_install_version', 'exe_suffix',
+                   'rust_prefix', 'rustup_home', 'cargo_home']
 
     cookbook = None
 
@@ -487,6 +497,8 @@ class Config (object):
                'GSTREAMER_ROOT': prefix,
                'CERBERO_PREFIX': self.prefix,
                'CERBERO_HOST_SOURCES': self.sources,
+               'RUSTUP_HOME': self.rustup_home,
+               'CARGO_HOME': self.cargo_home,
                }
 
         PkgConfig.set_executable(env, self)
@@ -799,6 +811,9 @@ class Config (object):
         self.set_property('cache_file', platform_arch + ".cache")
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
+        self.set_property('rust_prefix', os.path.join(self.home_dir, 'rust'))
+        self.set_property('rustup_home', os.path.join(self.rust_prefix, 'rustup'))
+        self.set_property('cargo_home', os.path.join(self.rust_prefix, 'cargo'))
 
     def _get_exe_suffix(self):
         if self.platform != Platform.WINDOWS:
@@ -864,3 +879,32 @@ class Config (object):
         minor = str(int(version[2:5]))
         revision = str(int(version[5:8]))
         return '.'.join([mayor, minor, revision])
+
+    @staticmethod
+    def rust_triple(arch, platform, vs):
+        if platform != Platform.WINDOWS:
+            key = (platform, arch)
+        elif vs:
+            key = (Platform.WINDOWS, arch, 'msvc')
+        else:
+            key = (Platform.WINDOWS, arch, 'gnu')
+        if key in RUST_TRIPLE_MAPPING:
+            return RUST_TRIPLE_MAPPING[key]
+        else:
+            raise FatalError(f'Unsupported build platform/arch combination: {platform}/{arch}')
+
+    @property
+    def rust_build_triple(self):
+        return self.rust_triple(self.arch, self.platform, self.variants.visualstudio)
+
+    @property
+    def rust_target_triples(self):
+        if self.target_arch != Architecture.UNIVERSAL:
+            targets = (self.target_arch,)
+        else:
+            targets = self.arch_config.keys()
+        triples = []
+        for target_arch in targets:
+            triple = self.rust_triple(target_arch, self.target_platform, self.variants.visualstudio)
+            triples.append(triple)
+        return triples
