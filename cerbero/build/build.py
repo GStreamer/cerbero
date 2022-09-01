@@ -18,6 +18,7 @@
 
 import os
 import re
+import glob
 import copy
 import shutil
 import shlex
@@ -1138,13 +1139,13 @@ class Cargo(Build, ModifyEnvBase):
         self.cargo = os.path.join(self.config.cargo_home, 'bin',
                 'cargo' + self.config._get_exe_suffix())
         try:
-            target_triple = self.config.rust_triple(self.config.target_arch,
+            self.target_triple = self.config.rust_triple(self.config.target_arch,
                     self.config.target_platform, self.using_msvc())
         except FatalError as e:
             raise InvalidRecipeError(self.name, e.msg)
         self.cargo_args = [
             '--verbose', '--offline',
-            '--target', target_triple,
+            '--target', self.target_triple,
             '--target-dir', self.cargo_dir,
         ]
 
@@ -1156,6 +1157,27 @@ class Cargo(Build, ModifyEnvBase):
                 os.makedirs(self.cargo_dir)
         else:
             os.makedirs(self.cargo_dir)
+        if self.config.target_platform == Platform.ANDROID:
+            dot_cargo = os.path.join(self.config_src_dir, '.cargo')
+            os.makedirs(dot_cargo, exist_ok=True)
+            linker = self.env['LD']
+            link_args = []
+            args = iter(shlex.split(self.env['LDFLAGS']))
+            # We need to extract necessary linker flags from LDFLAGS which is
+            # passed to the compiler
+            for arg in args:
+                if arg.startswith('-L'):
+                    link_args.append(arg)
+                elif arg == '-gcc-toolchain':
+                    arg = next(args)
+                    for l in glob.glob(f'{arg}/lib/gcc/*/*/libgcc.a'):
+                        d = os.path.dirname(l)
+                        link_args.append(f'-L{d}')
+            # Append so we don't overwrite cargo vendor settings
+            with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
+                f.write(f'[target.{self.target_triple}]\n')
+                f.write(f'linker = "{linker}"\n')
+                f.write(f'rustflags = {link_args!r}\n')
         # No configure step with cargo
 
     async def compile(self):

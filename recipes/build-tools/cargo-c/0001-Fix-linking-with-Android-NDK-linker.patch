@@ -1,0 +1,27 @@
+From 1f25fb1c4c69a845b01afe0e6619c2a10c890522 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 1 Sep 2022 21:33:29 +0530
+Subject: [PATCH] Fix linking with Android NDK linker
+
+Android ld.gold cannot handle -Wl, and it's incorrect anyway since all
+the other linker arguments passed by cargo do not have a -Wl prefix.
+---
+ src/target.rs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/target.rs b/src/target.rs
+index 7b1c43e..03a0d4c 100644
+--- a/src/target.rs
++++ b/src/target.rs
+@@ -70,7 +70,7 @@ impl Target {
+         let env = &self.env;
+ 
+         if os == "android" {
+-            lines.push(format!("-Wl,-soname,lib{}.so", lib_name));
++            lines.push(format!("-soname,lib{}.so", lib_name));
+         } else if os == "linux"
+             || os == "freebsd"
+             || os == "dragonfly"
+-- 
+2.37.1
+
