@@ -1211,6 +1211,11 @@ class CargoC(Cargo):
             '--prefix', self.config.prefix,
             '--libdir', self.config.libdir,
         ]
+        # --library-type args do not override, but are collected
+        if self.library_type in (LibraryType.STATIC, LibraryType.BOTH):
+            cargoc_args += ['--library-type', 'staticlib']
+        if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
+            cargoc_args += ['--library-type', 'cdylib']
         cargoc_args += self.cargo_args
         if self.cargoc_packages:
             for package in self.cargoc_packages:
