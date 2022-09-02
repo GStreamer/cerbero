@@ -1148,6 +1148,9 @@ class Cargo(Build, ModifyEnvBase):
             '--target', self.target_triple,
             '--target-dir', self.cargo_dir,
         ]
+        # https://github.com/lu-zero/cargo-c/issues/278
+        if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
+            self.library_type = LibraryType.STATIC
 
     async def configure(self):
         if os.path.exists(self.cargo_dir):
