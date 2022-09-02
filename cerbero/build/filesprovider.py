@@ -30,6 +30,7 @@ from cerbero.config import Platform, LibraryType
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.errors import FatalError
+from cerbero.build.build import BuildType
 
 def find_shlib_regex(config, libname, prefix, libdir, ext, regex):
     # Use globbing to find all files that look like they might match
@@ -176,7 +177,6 @@ class FilesProvider(object):
                              'default': self._search_files}
 
     def _dylib_plugins(self):
-        from cerbero.build.build import BuildType
         if self.btype not in (BuildType.MESON, BuildType.CARGO_C):
             return False
         if self.platform not in (Platform.DARWIN, Platform.IOS):
@@ -184,6 +184,18 @@ class FilesProvider(object):
         # gstreamer plugins on macOS and iOS use the .dylib extension when
         # built with Meson but modules that use GModule do not
         if not self.name.startswith('gst') and self.name != 'libnice':
+            return False
+        return True
+
+    def have_pdbs(self):
+        if not self.using_msvc():
+            return False
+        if self.config.variants.nodebug:
+            return False
+        if self.library_type in (LibraryType.STATIC, LibraryType.NONE):
+            return False
+        # https://github.com/lu-zero/cargo-c/issues/279
+        if issubclass(self.btype, BuildType.CARGO):
             return False
         return True
 
@@ -203,7 +215,7 @@ class FilesProvider(object):
         is identical to `self.files_bins`, so we duplicate it here into a devel
         category. It will get included via the 'default' search function.
         '''
-        if not self.using_msvc() or self.config.variants.nodebug:
+        if not self.have_pdbs():
             return
         pdbs = []
         if hasattr(self, 'files_bins'):
@@ -348,7 +360,7 @@ class FilesProvider(object):
             else:
                 fs.append(f)
             # Look for a PDB file and add it
-            if self.using_msvc() and self.config.variants.debug:
+            if self.have_pdbs():
                 # We try to find a pdb file corresponding to the plugin's .a
                 # file instead of the .dll because we want it to go into the
                 # devel package, not the runtime package.
@@ -566,13 +578,8 @@ class FilesProvider(object):
                 libsmatch.append(pattern % {'f': x, 'fnolib': x[3:]})
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
-                if self.platform != Platform.WINDOWS:
-                    continue
-                if not self.using_msvc() or self.config.variants.nodebug:
-                    continue
-                if self.library_type in (LibraryType.STATIC, LibraryType.NONE):
-                    continue
-                devel_libs += find_pdb_implib(self.config, x[3:], self.config.prefix)
+                if self.have_pdbs():
+                    devel_libs += find_pdb_implib(self.config, x[3:], self.config.prefix)
             devel_libs.extend(shell.ls_files(libsmatch, self.config.prefix))
         return devel_libs
 
