@@ -243,6 +243,22 @@ added to the package outputted.
 **NOTE:** The package outputted will not contain a copy of the Qt5 libraries in
 it. You must link to them while building your app yourself.
 
+## Enabling Rust / Cargo Support
+
+Starting with version 1.22, Cerbero supports bootstrapping Rust toolchains, and
+can build Rust gstreamer plugins.
+
+This is enabled by default for the following configurations: native-linux,
+cross-macos-universal, native-win64 (msvc), native-win32 (msvc).
+
+More targets will be enabled in the future. If you want to force-enable the
+feature, you can use the [`rust` variant](#enabling-optional-features-with-variants)
+by invoking cerbero as follows:
+
+```
+$ ./cerbero-uninstalled -v rust <command>
+```
+
 ## Enabling Hardware Codec Support
 
 Starting with version 1.15.2, Cerbero has built-in support for building and
