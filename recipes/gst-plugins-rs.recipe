@@ -118,4 +118,29 @@ class Recipe(recipe.Recipe):
             src = os.path.join(self.config.prefix, 'lib', 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             os.replace(src, dst)
+        # Cargo-C names static libraries as foo.lib with MSVC, so rename them
+        # to libfoo.a: https://github.com/lu-zero/cargo-c/issues/280
+        if self.using_msvc():
+            for f in self.files_list_by_category(self.DEVEL_CAT):
+                if not f.endswith('.a'):
+                    continue
+                name = os.path.basename(f)
+                root = os.path.splitext(name)[0]
+                d = os.path.dirname(f)
+                src = os.path.join(self.config.prefix, d, f'{root[3:]}.lib')
+                dst = os.path.join(self.config.prefix, f)
+                os.replace(src, dst)
+        # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
+        # https://github.com/lu-zero/cargo-c/issues/280
+        else:
+            for f in self.dist_files_list():
+                if not f.endswith('.dll'):
+                    continue
+                name = os.path.basename(f)
+                d = os.path.dirname(f)
+                src = os.path.join(self.config.prefix, d, f'{name[3:]}')
+                dst = os.path.join(self.config.prefix, f)
+                os.replace(src, dst)
+                # .dll.a also needs renaming
+                os.replace(src + '.a', dst + '.a')
         super().post_install()
