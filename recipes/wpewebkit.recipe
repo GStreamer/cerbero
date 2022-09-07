@@ -188,7 +188,6 @@ class Recipe(recipe.Recipe):
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
-                'wpewebkit/0001-Disable-PSON.patch',
                 'wpewebkit/0002-Android-logging-macro.patch',
                 'wpewebkit/0003-Android-remove-uses-of-shm_open-and-shm_unlink.patch',
                 'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',

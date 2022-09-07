@@ -8,7 +8,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.GIT
     btype = BuildType.CMAKE
     remotes = {'origin': 'https://github.com/Igalia/WPEBackend-android.git'}
-    commit = 'e3f68d43db52c62669289f862bb9440bb443228f'
+    commit = 'bd7c4d37239ac720d9363cee51f36a20775af696'
     deps = ['glib', 'libwpe']
 
     files_libs = ['libWPEBackend-android']
