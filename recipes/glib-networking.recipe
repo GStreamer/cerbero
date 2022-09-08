@@ -5,15 +5,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.62.3'
+    version = '2.74.0'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '8ca1f86f23a76b5c7640624f7d5490705c78e81375e1741c9a1c41ce7f8f7ff7'
-
-    # Taken from upstream remove on bump
-    patches = [name + '/0001-meson-use-c-std-c99.patch']
+    tarball_checksum = '1f185aaef094123f8e25d8fa55661b3fd71020163a0174adb35a37685cda613b'
 
     meson_options = {'libproxy': 'disabled', 'gnome_proxy': 'disabled',
                      'gnutls': 'disabled', 'openssl': 'enabled',
