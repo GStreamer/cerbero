@@ -310,11 +310,11 @@ Terminating.''', file=sys.stderr)
                 # str(int()) is for ensuring that the fedora version is
                 # actually a number
                 distro_version = 'fedora_' + str(int(d[1]))
-            elif d[1].startswith('6.'):
+            elif d[1] == '6' or d[1].startswith('6.'):
                 distro_version = DistroVersion.REDHAT_6
-            elif d[1].startswith('7.'):
+            elif d[1] == '7' or d[1].startswith('7.'):
                 distro_version = DistroVersion.REDHAT_7
-            elif d[1].startswith('8.'):
+            elif d[1] == '8' or d[1].startswith('8.'):
                 distro_version = DistroVersion.REDHAT_8
             elif d[0] == 'Amazon Linux' and d[1].startswith('2'):
                 distro_version = DistroVersion.AMAZON_LINUX_2
