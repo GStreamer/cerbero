@@ -20,6 +20,10 @@ class Recipe(recipe.Recipe):
         'textwrap', 'threadshare', 'togglerecord', 'uriplaylistbin',
         'webrtchttp']
 
+    # See "static plugins" bullet point in phase 2 at
+    # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
+    library_type = LibraryType.SHARED
+
     # Needed for openssl
     use_system_libs = True
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'pango', 'cairo',
@@ -32,13 +36,6 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgsttogglerecord%(mext)s',
     ]
 
-    files_plugins_core_devel = [
-        'lib/gstreamer-1.0/libgstfallbackswitch.a', 'lib/gstreamer-1.0/libgstfallbackswitch.la',
-        'lib/gstreamer-1.0/libgstrsfile.a', 'lib/gstreamer-1.0/libgstrsfile.la',
-        'lib/gstreamer-1.0/libgstthreadshare.a', 'lib/gstreamer-1.0/libgstthreadshare.la',
-        'lib/gstreamer-1.0/libgsttogglerecord.a', 'lib/gstreamer-1.0/libgsttogglerecord.la',
-    ]
-
     files_plugins_net = [
         'lib/gstreamer-1.0/libgstaws%(mext)s',
         'lib/gstreamer-1.0/libgstrtpav1%(mext)s',
@@ -46,19 +43,8 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
     ]
 
-    files_plugins_net_devel = [
-        'lib/gstreamer-1.0/libgstaws.a', 'lib/gstreamer-1.0/libgstaws.la',
-        'lib/gstreamer-1.0/libgstrtpav1.a', 'lib/gstreamer-1.0/libgstrtpav1.la',
-        'lib/gstreamer-1.0/libgstreqwest.a', 'lib/gstreamer-1.0/libgstreqwest.la',
-        'lib/gstreamer-1.0/libgstwebrtchttp.a', 'lib/gstreamer-1.0/libgstwebrtchttp.la',
-    ]
-
     files_plugins_effects = [
         'lib/gstreamer-1.0/libgstrsaudiofx%(mext)s',
-    ]
-
-    files_plugins_effects_devel = [
-        'lib/gstreamer-1.0/libgstrsaudiofx.a', 'lib/gstreamer-1.0/libgstrsaudiofx.la',
     ]
 
     files_plugins_codecs = [
@@ -78,29 +64,8 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgsttextahead%(mext)s',
     ]
 
-    files_plugins_codecs_devel = [
-        'lib/gstreamer-1.0/libgstcdg.a', 'lib/gstreamer-1.0/libgstcdg.la',
-        'lib/gstreamer-1.0/libgstclaxon.a', 'lib/gstreamer-1.0/libgstclaxon.la',
-        'lib/gstreamer-1.0/libgstrsclosedcaption.a', 'lib/gstreamer-1.0/libgstrsclosedcaption.la',
-        'lib/gstreamer-1.0/libgstffv1.a', 'lib/gstreamer-1.0/libgstffv1.la',
-        'lib/gstreamer-1.0/libgstgif.a', 'lib/gstreamer-1.0/libgstgif.la',
-        'lib/gstreamer-1.0/libgsthsv.a', 'lib/gstreamer-1.0/libgsthsv.la',
-        'lib/gstreamer-1.0/libgstlewton.a', 'lib/gstreamer-1.0/libgstlewton.la',
-        'lib/gstreamer-1.0/libgstrav1e.a', 'lib/gstreamer-1.0/libgstrav1e.la',
-        'lib/gstreamer-1.0/libgstrsflv.a', 'lib/gstreamer-1.0/libgstrsflv.la',
-        'lib/gstreamer-1.0/libgstrsjson.a', 'lib/gstreamer-1.0/libgstrsjson.la',
-        'lib/gstreamer-1.0/libgstrspng.a', 'lib/gstreamer-1.0/libgstrspng.la',
-        'lib/gstreamer-1.0/libgstrsregex.a', 'lib/gstreamer-1.0/libgstrsregex.la',
-        'lib/gstreamer-1.0/libgstrstextwrap.a', 'lib/gstreamer-1.0/libgstrstextwrap.la',
-        'lib/gstreamer-1.0/libgsttextahead.a', 'lib/gstreamer-1.0/libgsttextahead.la',
-    ]
-
     files_plugins_playback = [
         'lib/gstreamer-1.0/libgsturiplaylistbin%(mext)s',
-    ]
-
-    files_plugins_playback_devel = [
-        'lib/gstreamer-1.0/libgsturiplaylistbin.a', 'lib/gstreamer-1.0/libgsturiplaylistbin.la',
     ]
 
     def prepare(self):
@@ -118,21 +83,9 @@ class Recipe(recipe.Recipe):
             src = os.path.join(self.config.prefix, 'lib', 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             os.replace(src, dst)
-        # Cargo-C names static libraries as foo.lib with MSVC, so rename them
-        # to libfoo.a: https://github.com/lu-zero/cargo-c/issues/280
-        if self.using_msvc():
-            for f in self.files_list_by_category(self.DEVEL_CAT):
-                if not f.endswith('.a'):
-                    continue
-                name = os.path.basename(f)
-                root = os.path.splitext(name)[0]
-                d = os.path.dirname(f)
-                src = os.path.join(self.config.prefix, d, f'{root[3:]}.lib')
-                dst = os.path.join(self.config.prefix, f)
-                os.replace(src, dst)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
-        else:
+        if not self.using_msvc():
             for f in self.dist_files_list():
                 if not f.endswith('.dll'):
                     continue
