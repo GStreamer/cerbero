@@ -352,7 +352,12 @@ class FilesProvider(object):
         be a separate system for those.
         '''
         # replace extensions
-        files_expanded = [f % self.extensions for f in files]
+        files_expanded = []
+        for f in files:
+            # Don't add shared plugin files when building only static plugins
+            if '%(mext)s' in f and self.library_type == LibraryType.STATIC:
+                continue
+            files_expanded.append(f % self.extensions)
         fs = []
         for f in files_expanded:
             if f.endswith('.dll') and self.using_msvc():
@@ -432,10 +437,7 @@ class FilesProvider(object):
             if not libsmatch[f]:
                 notfound.append(f)
 
-        # It's ok if shared libraries aren't found for iOS, we only want the
-        # static libraries. In fact, all recipes should only build static on
-        # iOS, but most don't.
-        if notfound and self.config.target_platform != Platform.IOS:
+        if notfound:
             msg = "Some libraries weren't found while searching!"
             for each in notfound:
                 msg += '\n' + each

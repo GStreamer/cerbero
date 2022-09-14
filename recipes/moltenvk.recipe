@@ -42,6 +42,7 @@ class Recipe(recipe.Recipe):
         # no binaries available on iOS
         if self.config.target_platform == Platform.IOS:
             self.files_bins = []
+            self.library_type = LibraryType.STATIC
 
         if self.config.target_platform == Platform.DARWIN:
             # FIXME: libvulkan.dylib doesn't currently work with the

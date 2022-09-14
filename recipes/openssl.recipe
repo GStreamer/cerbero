@@ -176,6 +176,9 @@ class Recipe(recipe.Recipe):
             else:
                 self.set_env('TERM', 'cygwin')
 
+        if self.config.target_platform == Platform.IOS:
+            self.library_type = LibraryType.STATIC
+
 
     @modify_environment
     async def configure(self):

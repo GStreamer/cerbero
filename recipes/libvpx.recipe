@@ -83,6 +83,7 @@ class Recipe(recipe.Recipe):
                 platform = 'darwin'
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv6'
+            self.library_type = LibraryType.STATIC
         elif self.config.target_platform == Platform.WINDOWS:
             # XXX: If we set CC when using msvc, libvpx runs configure checks that
             # fail while linking. If we unset it, it's correctly auto-detected.
