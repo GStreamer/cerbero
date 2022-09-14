@@ -1138,6 +1138,17 @@ class Cargo(Build, ModifyEnvBase):
         self.cargo_dir = os.path.join(self.config_src_dir, '_builddir')
         self.cargo = os.path.join(self.config.cargo_home, 'bin',
                 'cargo' + self.config._get_exe_suffix())
+
+        # Debuginfo is enormous, about 0.5GB per plugin, so it's split out
+        # where enabled by default (macOS and MSVC) and stripped everywhere
+        # else because the split-debuginfo option is unstable and actually
+        # crashes.
+        # TODO: We don't ship split debuginfo (dSYM, PDB) in the packages yet:
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
+        if self.config.target_platform in (Platform.WINDOWS, Platform.DARWIN):
+            self.rustc_debuginfo = 'split'
+        else:
+            self.rustc_debuginfo = 'strip'
         try:
             self.target_triple = self.config.rust_triple(self.config.target_arch,
                     self.config.target_platform, self.using_msvc())
@@ -1152,6 +1163,13 @@ class Cargo(Build, ModifyEnvBase):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.library_type = LibraryType.STATIC
 
+    def append_config_toml(self, s):
+        dot_cargo = os.path.join(self.config_src_dir, '.cargo')
+        os.makedirs(dot_cargo, exist_ok=True)
+        # Append so we don't overwrite cargo vendor settings
+        with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
+            f.write(s)
+
     async def configure(self):
         if os.path.exists(self.cargo_dir):
             # Only remove if it's not empty
@@ -1160,9 +1178,13 @@ class Cargo(Build, ModifyEnvBase):
                 os.makedirs(self.cargo_dir)
         else:
             os.makedirs(self.cargo_dir)
+
+        # TODO: Ideally we should strip while packaging, not while linking
+        if self.rustc_debuginfo == 'strip':
+            s = '\n[profile.release]\nstrip = "debuginfo"\n'
+            self.append_config_toml(s)
+
         if self.config.target_platform == Platform.ANDROID:
-            dot_cargo = os.path.join(self.config_src_dir, '.cargo')
-            os.makedirs(dot_cargo, exist_ok=True)
             linker = self.env['LD']
             link_args = []
             args = iter(shlex.split(self.env['LDFLAGS']))
@@ -1176,11 +1198,10 @@ class Cargo(Build, ModifyEnvBase):
                     for l in glob.glob(f'{arg}/lib/gcc/*/*/libgcc.a'):
                         d = os.path.dirname(l)
                         link_args.append(f'-L{d}')
-            # Append so we don't overwrite cargo vendor settings
-            with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
-                f.write(f'[target.{self.target_triple}]\n')
-                f.write(f'linker = "{linker}"\n')
-                f.write(f'rustflags = {link_args!r}\n')
+            s = f'[target.{self.target_triple}]\n' \
+                f'linker = "{linker}"\n' \
+                f'rustflags = {link_args!r}\n'
+            self.append_config_toml(s)
         # No configure step with cargo
 
     async def compile(self):
