@@ -14,11 +14,36 @@ class Recipe(recipe.Recipe):
     }]
 
     btype = BuildType.CARGO_C
-    cargoc_packages = ['audiofx', 'aws', 'cdg', 'claxon', 'closedcaption',
-        'fallbackswitch', 'ffv1', 'file', 'flavors', 'gif', 'hsv', 'json',
-        'lewton', 'rav1e', 'regex', 'reqwest', 'rspng', 'rtpav1', 'textahead',
-        'textwrap', 'threadshare', 'togglerecord', 'uriplaylistbin',
-        'webrtchttp']
+    cargoc_packages = [
+        'audiofx',
+        'aws',
+        'cdg',
+        'claxon',
+        'closedcaption',
+        'fallbackswitch',
+        'ffv1',
+        'fmp4',
+        'gif',
+        'hlssink3',
+        'hsv',
+        'json',
+        'lewton',
+        'onvif',
+        'rav1e',
+        'regex',
+        'reqwest',
+        'raptorq',
+        'rspng',
+        'rtpav1',
+        'textahead',
+        'textwrap',
+        'threadshare',
+        'togglerecord',
+        'tracers',
+        'uriplaylistbin',
+        'videofx',
+        'webrtchttp',
+    ]
 
     # See "static plugins" bullet point in phase 2 at
     # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
@@ -31,13 +56,16 @@ class Recipe(recipe.Recipe):
 
     files_plugins_core = [
         'lib/gstreamer-1.0/libgstfallbackswitch%(mext)s',
-        'lib/gstreamer-1.0/libgstrsfile%(mext)s',
         'lib/gstreamer-1.0/libgstthreadshare%(mext)s',
         'lib/gstreamer-1.0/libgsttogglerecord%(mext)s',
+        'lib/gstreamer-1.0/libgstrstracers%(mext)s',
     ]
 
     files_plugins_net = [
         'lib/gstreamer-1.0/libgstaws%(mext)s',
+        'lib/gstreamer-1.0/libgsthlssink3%(mext)s',
+        'lib/gstreamer-1.0/libgstrsonvif%(mext)s',
+        'lib/gstreamer-1.0/libgstraptorq%(mext)s',
         'lib/gstreamer-1.0/libgstrtpav1%(mext)s',
         'lib/gstreamer-1.0/libgstreqwest%(mext)s',
         'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
@@ -45,6 +73,7 @@ class Recipe(recipe.Recipe):
 
     files_plugins_effects = [
         'lib/gstreamer-1.0/libgstrsaudiofx%(mext)s',
+        'lib/gstreamer-1.0/libgstvideofx%(mext)s',
     ]
 
     files_plugins_codecs = [
@@ -52,11 +81,11 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstclaxon%(mext)s',
         'lib/gstreamer-1.0/libgstrsclosedcaption%(mext)s',
         'lib/gstreamer-1.0/libgstffv1%(mext)s',
+        'lib/gstreamer-1.0/libgstfmp4%(mext)s',
         'lib/gstreamer-1.0/libgstgif%(mext)s',
         'lib/gstreamer-1.0/libgsthsv%(mext)s',
         'lib/gstreamer-1.0/libgstlewton%(mext)s',
         'lib/gstreamer-1.0/libgstrav1e%(mext)s',
-        'lib/gstreamer-1.0/libgstrsflv%(mext)s',
         'lib/gstreamer-1.0/libgstrsjson%(mext)s',
         'lib/gstreamer-1.0/libgstrspng%(mext)s',
         'lib/gstreamer-1.0/libgstrsregex%(mext)s',
