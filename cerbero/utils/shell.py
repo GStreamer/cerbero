@@ -332,7 +332,7 @@ async def unpack(filepath, output_dir, logfile=None):
         if PLATFORM != Platform.WINDOWS:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await async_call(['tar', '-C', output_dir, '-xf', filepath])
+            await async_call(['tar', '-C', output_dir, '-xf', filepath, '--no-same-owner'])
         else:
             cmode = 'bz2' if filepath.endswith('bz2') else filepath[-2:]
             tf = tarfile.open(filepath, mode='r:' + cmode)
