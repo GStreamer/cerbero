@@ -347,7 +347,7 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
         else:
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath])
+            await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath, '--no-same-owner'])
 
     elif filepath.endswith('.zip'):
         zf = zipfile.ZipFile(filepath, "r")
