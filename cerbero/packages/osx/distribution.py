@@ -16,11 +16,12 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 import os
+from cerbero.enums import Architecture
 
 DISTRO_XML_TPL = '''\
 <?xml version="1.0"?>
 <installer-gui-script minSpecVesion="1">
-  <options require-scripts="false"/>
+  <options require-scripts="false" hostArchitectures="%(archs)s"/>
   <background alignment="bottomleft" file="%(background)s" scale="none"/>
   <background-darkAqua alignment="bottomleft" file="%(background_dark)s" scale="none"/>
   <license file="%(license)s"/>
@@ -67,8 +68,13 @@ class DistributionXML(object):
             f.write(self._fill_distro())
 
     def _fill_distro(self):
+        if self.target_arch == Architecture.UNIVERSAL:
+            archs = 'arm64,x86_64'
+        else:
+            archs = self.target_arch
         return self.template % {'background': self.package.resources_background,
                                 'background_dark': self.package.resources_background_dark,
+                                'archs': archs,
                                 'license': self.package.resources_license_rtf,
                                 'ehome': self.enable_user_home,
                                 'elocal': self.enable_local_system,
