@@ -68,8 +68,7 @@ class BaseCache(Command):
 
         tmpdir = tempfile.mkdtemp()
         tmpfile = os.path.join(tmpdir, 'deps.json')
-        run_until_complete(shell.download(url, destination=tmpfile,
-              logfile=open(os.devnull, 'w')))
+        run_until_complete(shell.download(url, tmpfile))
 
         with open(tmpfile, 'r') as f:
             resp = f.read()
