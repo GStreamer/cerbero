@@ -41,7 +41,6 @@ from cerbero.utils import messages as m
 from cerbero.errors import CommandError, FatalError
 
 
-USER_AGENT = 'GStreamer Cerbero/' + CERBERO_VERSION
 PATCH = 'patch'
 TAR = 'tar'
 TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
@@ -351,125 +350,33 @@ async def unpack(filepath, output_dir, logfile=None):
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
-async def download_wget(url, destination=None, check_cert=True, overwrite=False, logfile=None):
-    '''
-    Downloads a file with wget
 
-    @param url: url to download
-    @type: str
-    @param destination: destination where the file will be saved
-    @type destination: str
-    '''
-    cmd = ['wget', '--user-agent', USER_AGENT, url]
-    path = None
-    if destination is not None:
-        cmd += ['-O', destination]
-
-    if not check_cert:
-        cmd += ['--no-check-certificate']
-
-    cmd += ['--tries=2', '--timeout=20.0', '--progress=dot:giga']
-
-    try:
-        await async_call(cmd, path, cpu_bound=False, logfile=logfile)
-    except FatalError as e:
-        if os.path.exists(destination):
-            os.remove(destination)
-        raise e
-
-async def download_urllib2(url, destination=None, check_cert=True, overwrite=False, logfile=None):
-    '''
-    Download a file with urllib2, which does not rely on external programs
-
-    @param url: url to download
-    @type: str
-    @param destination: destination where the file will be saved
-    @type destination: str
-    '''
-    # 1MiB chunk size (same as dot:giga for wget)
-    chunk_size = 1024 * 1024
-    ctx = None
-    if not check_cert:
-        import ssl
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-    # This is roughly what wget and curl do
-    if not destination:
-        destination = os.path.basename(url)
-
-    from datetime import datetime
-    start_time = datetime.now()
-
-    try:
-        with open(destination, 'wb') as d:
-            req = urllib.request.Request(url)
-            req.add_header('User-Agent', USER_AGENT)
-            f = urllib.request.urlopen(req, timeout=20, context=ctx)
-            while True:
-                chunk = f.read(chunk_size)
-                if not chunk:
-                    break
-                d.write(chunk)
-                print('.', end='', file=logfile, flush=True)
-            total_time = (datetime.now() - start_time).total_seconds()
-            size = d.tell() / 1024
-            speed = size / total_time
-            print('\nDownloaded {:2,.2f} KiB in {:2,.2f} seconds at {:2,.2f} KiB/s'
-                  .format(size, total_time, speed), file=logfile, flush=True)
-    except urllib.error.HTTPError as e:
-        if os.path.exists(destination):
-            os.remove(destination)
-        raise e
-
-async def download_curl(url, destination=None, check_cert=True, overwrite=False, logfile=None):
-    '''
-    Downloads a file with cURL
-
-    @param url: url to download
-    @type: str
-    @param destination: destination where the file will be saved
-    @type destination: str
-    '''
-    path = None
-    cmd = ['curl', '-L', '--fail', '--retry', '2', '--user-agent', USER_AGENT]
-    if not check_cert:
-        cmd += ['-k']
-    if destination is not None:
-        cmd += [url, '-o', destination]
-    else:
-        cmd += ['-O', url]
-    try:
-        await async_call(cmd, path, cpu_bound=False, logfile=logfile)
-    except FatalError as e:
-        if os.path.exists(destination):
-            os.remove(destination)
-        raise e
-
-async def download(url, destination=None, check_cert=True, overwrite=False, logfile=None, mirrors=None):
+async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mirrors=None):
     '''
     Downloads a file
 
     @param url: url to download
     @type: str
-    @param destination: destination where the file will be saved
-    @type destination: str
+    @param dest: dest where the file will be saved
+    @type dest: str
     @param check_cert: whether to check certificates or not
     @type check_cert: bool
-    @param overwrite: whether to overwrite the destination or not
+    @param overwrite: whether to overwrite the dest or not
     @type check_cert: bool
     @param logfile: path to the file to log instead of stdout
     @type logfile: str
     @param mirrors: list of mirrors to use as fallback
     @type logfile: list
     '''
-    if not overwrite and os.path.exists(destination):
+    user_agent = 'GStreamerCerbero/' + CERBERO_VERSION
+
+    if not overwrite and os.path.exists(dest):
         if logfile is None:
-            logging.info("File %s already downloaded." % destination)
+            logging.info("File %s already downloaded." % dest)
         return
     else:
-        if not os.path.exists(os.path.dirname(destination)):
-            os.makedirs(os.path.dirname(destination))
+        if not os.path.exists(os.path.dirname(dest)):
+            os.makedirs(os.path.dirname(dest))
         m.log("Downloading {}".format(url), logfile)
 
     urls = [url]
@@ -479,25 +386,31 @@ async def download(url, destination=None, check_cert=True, overwrite=False, logf
         # in case users provided it without the trailing '/'
         urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
-    # wget shipped with msys fails with an SSL error on github URLs
-    # https://githubengineering.com/crypto-removal-notice/
-    # curl on Windows (if provided externally) is often badly-configured and fails
-    # to download over https, so just always use urllib2 on Windows.
     if sys.platform.startswith('win'):
-        download_func = download_urllib2
+        cmd = ['powershell', '-Command', 'Invoke-WebRequest', '-UserAgent',
+               user_agent, '-Method', 'Get', '-OutFile', dest]
+        # We will append the url at the end of the cmd array
+        cmd += ['-Uri']
     elif which('wget'):
-        download_func = download_wget
+        cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20',
+               '--progress=dot:giga', '-O', dest]
+        if not check_cert:
+            cmd += ['--no-check-certificate']
     elif which('curl'):
-        download_func = download_curl
+        cmd = ['curl', '-L', '--fail', '--user-agent', user_agent, '--retry', '2',
+               '--connect-timeout', '20', '--progress-bar', '-o', dest]
+        if not check_cert:
+            cmd += ['-k']
     else:
-        # Fallback. TODO: make this the default and remove curl/wget dependency
-        download_func = download_urllib2
+        raise FatalError('Need either wget or curl to download things')
 
     errors = []
     for murl in urls:
         try:
-            return await download_func(murl, destination, check_cert, overwrite, logfile)
+            return await async_call(cmd + [murl], cpu_bound=False, logfile=logfile)
         except Exception as ex:
+            if os.path.exists(dest):
+                os.remove(dest)
             errors.append((murl, ex))
     if len(errors) == 1:
         errors = errors[0]
