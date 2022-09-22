@@ -189,13 +189,9 @@ class BaseTarball(object):
             return
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
-        # Enable certificate checking only on Linux for now
-        # FIXME: Add more platforms here after testing
-        cc = False
-        if self.config.platform == Platform.LINUX:
-            if self.config.distro != Distro.REDHAT or \
-               self.config.distro_version > DistroVersion.REDHAT_7:
-                cc = True
+        cc = True
+        if self.config.distro == Distro.REDHAT and self.config.distro_version <= DistroVersion.REDHAT_7:
+            cc = False
         await shell.download(self.url, fname, check_cert=cc,
             overwrite=redownload, logfile=get_logfile(self),
             mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS))
