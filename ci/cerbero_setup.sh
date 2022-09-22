@@ -139,10 +139,21 @@ cerbero_deps_script() {
     local build_deps="gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0
         gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0
         gst-devtools-1.0 gst-editing-services-1.0 libnice"
-    # Some deps that are only listed in the package files
+    # Deps that don't get picked up automatically because are only listed in
+    # the package files
     local more_deps="glib-networking"
     # UWP target doesn't support building ffmpeg yet
-    [[ $CONFIG =~ uwp ]] || build_deps="$build_deps gst-libav-1.0"
+    if ! [[ $CONFIG =~ uwp ]]; then
+        build_deps="$build_deps gst-libav-1.0"
+        # Deps that don't get picked up automatically because they are
+        # a runtime dep
+        # XXX: This is two separate comparisons because older bash (as on
+        # Cerbero's MSYS) requires `|` to be escaped, but newer bash
+        # (everywhere else) requires it to not be escaped.
+        if [[ $ARCH =~ darwin ]] || [[ $ARCH =~ msvc\|mingw ]]; then
+            more_deps="$more_deps pkg-config"
+        fi
+    fi
 
     show_ccache_sum
 
