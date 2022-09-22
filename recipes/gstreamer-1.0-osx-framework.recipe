@@ -9,7 +9,7 @@ class Recipe(recipe.Recipe):
     version = '0.1'
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
-    deps = ['pkg-config', 'gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0']
+    deps = ['pkg-config', 'gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-bad-1.0', 'gst-rtsp-server-1.0']
 
     files_library = ['lib/GStreamer']
 
@@ -26,10 +26,6 @@ class Recipe(recipe.Recipe):
             gstlib = m.groups()[0]
             # Not a gstreamer library pkgconfig file
             if 'gstreamer-plugins-' in gstlib:
-                continue
-            # The gst-rtsp-server library should not be in this; only core,
-            # base, and bad libraries are allowed.
-            if 'rtsp-server' in gstlib:
                 continue
             gstlibs.append(gstlib)
         return gstlibs
