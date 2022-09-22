@@ -4,10 +4,6 @@ export ANDROID_HOME=$1
 export ANDROID_NDK_HOME=$2
 DEFAULT_BRANCH=$3
 
-# FIXME: might cause problems if the image is used outside CI
-# https://github.blog/2022-04-12-git-security-vulnerability-announced/#cve-2022-24765
-git config --global --replace-all safe.directory '*'
-
 mkdir -p /android/sources
 
 curl -o /android/sources/android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21-linux-x86_64.zip
