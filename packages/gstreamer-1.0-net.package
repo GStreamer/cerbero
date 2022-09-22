@@ -10,7 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = '2f9ca3f5-3b3b-4b4d-8cc9-6c08f21af807'
     deps = ['gstreamer-1.0-core', 'base-crypto']
 
-    files = ['libsoup:libs', 'libpsl:libs', 'sqlite3:libs', 'libsrtp:libs',
+    files = ['libsoup:libs', 'libpsl:libs', 'libsrtp:libs',
             'libnice:libs:plugins_net', 'srt:libs',
             'gst-plugins-base-1.0:plugins_net', 'gst-plugins-good-1.0:plugins_net',
             'gst-plugins-ugly-1.0:plugins_net', 'gst-plugins-bad-1.0:plugins_net',
@@ -31,6 +31,9 @@ class Package(custom.GStreamer, package.Package):
             self.files += ['glib-networking']
         elif self.config.target_platform == Platform.LINUX:
             self.sys_deps = {self.config.target_distro_version: ['glib-networking']}
+
+        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
+            self.files.append('sqlite3:libs')
 
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_net')
