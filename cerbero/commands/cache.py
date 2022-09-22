@@ -150,7 +150,7 @@ class FetchCache(BaseCache):
     async def fetch_dep(self, config, dep, namespace):
         try:
             dep_path = os.path.join(config.home_dir, os.path.basename(dep['url']))
-            await shell.download(dep['url'], dep_path, check_cert=True, overwrite=True)
+            await shell.download(dep['url'], dep_path, overwrite=True)
             if dep['checksum'] == self.checksum(dep_path):
                 await shell.unpack(dep_path, config.home_dir)
             else:
