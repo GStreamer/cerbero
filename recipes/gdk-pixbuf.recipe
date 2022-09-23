@@ -25,9 +25,11 @@ class Recipe(recipe.Recipe):
     files_typelibs = ['GdkPixbuf-2.0']
 
     def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            # tar and bstar fail extracting files with symbolic links for this file
+        if self.config.platform == Platform.WINDOWS:
+            # tar and bstar fail extracting files with symbolic links for this
+            # file when running on Windows
             self.force_tarfile = True
+        if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['native_windows_loaders'] = 'false'
         if self.config.prefix_is_executable():
             self.files_misc = ['lib/gdk-pixbuf-2.0/2.10.0/loaders.cache']
