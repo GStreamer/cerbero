@@ -159,7 +159,7 @@ class MSYS2Bootstrapper(BootstrapperBase):
                 # OpenSSL needs a perl version using '\' for the MSVC build
                 # and a perl version using '/' for the MinGW build
                 'mingw-w64-ucrt-x86_64-perl', 'perl',
-                'mingw-w64-ucrt-x86_64-pkg-config',
+                'mingw-w64-ucrt-x86_64-pkgconf',
                 ]
 
     def __init__(self, config, offline, assume_yes):
