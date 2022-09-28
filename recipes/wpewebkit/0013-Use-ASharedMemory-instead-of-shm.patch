@@ -1,0 +1,126 @@
+From 8b4454f25a4ad867d75b539d5050a6496630af3f Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Wed, 28 Sep 2022 15:13:08 +0300
+Subject: [PATCH] Use ASharedMemory instead of shm
+
+---
+ .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 60 ++++++++++---------
+ 1 file changed, 31 insertions(+), 29 deletions(-)
+
+diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+index 998a2a76..2732a187 100644
+--- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
++++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+@@ -54,6 +54,8 @@
+ #include "ArgumentCoders.h"
+ #endif
+ 
++#include <android/sharedmem.h>
++
+ namespace WebKit {
+ 
+ SharedMemory::Handle::Handle()
+@@ -124,56 +126,35 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+     return PROT_READ | PROT_WRITE;
+ }
+ 
+-static int createSharedMemory()
++static int createSharedMemory(size_t size)
+ {
+     int fileDescriptor = -1;
+ 
+-#if HAVE(LINUX_MEMFD_H)
+-    static bool isMemFdAvailable = true;
+-    if (isMemFdAvailable) {
+-        do {
+-            fileDescriptor = syscall(__NR_memfd_create, "WebKitSharedMemory", MFD_CLOEXEC);
+-        } while (fileDescriptor == -1 && errno == EINTR);
+-
+-        if (fileDescriptor != -1)
+-            return fileDescriptor;
+-
+-        if (errno != ENOSYS)
+-            return fileDescriptor;
+-
+-        isMemFdAvailable = false;
+-    }
+-#endif
+-
+     CString tempName;
+     for (int tries = 0; fileDescriptor == -1 && tries < 10; ++tries) {
+         String name = String("/WK2SharedMemory.") + String::number(static_cast<unsigned>(WTF::randomNumber() * (std::numeric_limits<unsigned>::max() + 1.0)));
+         tempName = name.utf8();
+ 
+         do {
+-            fileDescriptor = shm_open(tempName.data(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
++            fileDescriptor = ASharedMemory_create(tempName.data(), size);
+         } while (fileDescriptor == -1 && errno == EINTR);
+     }
+ 
+-    if (fileDescriptor != -1)
+-        shm_unlink(tempName.data());
+-
+     return fileDescriptor;
+ }
+ 
+ RefPtr<SharedMemory> SharedMemory::allocate(size_t size)
+ {
+-    int fileDescriptor = createSharedMemory();
++    int fileDescriptor = createSharedMemory(size);
+     if (fileDescriptor == -1) {
+         WTFLogAlways("Failed to create shared memory: %s", strerror(errno));
+         return nullptr;
+     }
+ 
+-    while (ftruncate(fileDescriptor, size) == -1) {
+-        if (errno != EINTR) {
+-            closeWithRetry(fileDescriptor);
+-            return nullptr;
+-        }
++    int err = ASharedMemory_setProt(fileDescriptor, PROT_READ | PROT_WRITE);
++    if (err < 0) {
++        WTFLogAlways("Error %d when setting protection of ashmem", err);
++        return nullptr;
+     }
+ 
+     void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
+@@ -225,7 +206,20 @@ SharedMemory::~SharedMemory()
+         closeWithRetry(m_fileDescriptor.value());
+ }
+ 
+-bool SharedMemory::createHandle(Handle& handle, Protection)
++static inline int accessModeFile(SharedMemory::Protection protection)
++{
++    switch (protection) {
++    case SharedMemory::Protection::ReadOnly:
++        return PROT_READ;
++    case SharedMemory::Protection::ReadWrite:
++        return PROT_READ | PROT_WRITE;
++    }
++
++    ASSERT_NOT_REACHED();
++    return O_RDWR;
++}
++
++bool SharedMemory::createHandle(Handle& handle, Protection protection)
+ {
+     ASSERT_ARG(handle, handle.isNull());
+     ASSERT(m_fileDescriptor);
+@@ -238,6 +232,14 @@ bool SharedMemory::createHandle(Handle& handle, Protection)
+         ASSERT_NOT_REACHED();
+         return false;
+     }
++
++    int err = ASharedMemory_setProt(duplicatedHandle, accessModeFile(protection));
++    if (err < 0) {
++        ASSERT_NOT_REACHED();
++        while (close(duplicatedHandle) == -1 && errno == EINTR) { }
++        return false;
++    }
++
+     handle.m_attachment = IPC::Attachment(duplicatedHandle, m_size);
+     return true;
+ }
+-- 
+2.34.1
+
