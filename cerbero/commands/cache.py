@@ -212,6 +212,7 @@ class GenCache(BaseCache):
             config.build_tools_cache,
             os.path.join('dist', arch),
             config.cache_file,
+            '--verbose',
         ]
         # xz seems to hang sometimes while compressing on Windows CI
         if config.platform != Platform.WINDOWS:
