@@ -67,6 +67,7 @@ class BaseCache(Command):
         tmpdir = tempfile.mkdtemp()
         tmpfile = os.path.join(tmpdir, 'deps.json')
         run_until_complete(shell.download(url, tmpfile))
+        m.message(f'{tmpfile} downloaded')
 
         with open(tmpfile, 'r') as f:
             resp = f.read()
@@ -137,11 +138,13 @@ class FetchCache(BaseCache):
     def find_dep(self, deps, sha, allow_old=False):
         for dep in deps:
             if dep['commit'] == sha:
+                m.message(f"Matching cache file is {dep['url']}")
                 return dep
         if allow_old:
             m.message("Did not find cache for commit %s, looking for an older one...");
             for dep in deps:
                 if self.get_git_sha_is_ancestor(dep['commit']):
+                    m.message(f"Latest available cache file is {dep['url']}")
                     return dep
             m.warning("Did not find any cache for commit %s" % sha)
         else:
@@ -219,6 +222,7 @@ class GenCache(BaseCache):
             cmd += ['--use-compress-program=xz --threads=0']
         else:
             cmd += ['--bzip2']
+        m.message(f'Generating cache file with {cmd!r}')
         try:
             shell.new_call(cmd)
             url = self.make_url(config, args, '%s-%s' % (sha, self.get_deps_filename(config)))
@@ -230,7 +234,8 @@ class GenCache(BaseCache):
             os.remove(deps_filepath)
             os.remove(log_filepath)
             raise
-        m.message('build-dep cache generated as {}'.format(deps_filename))
+        fsize = os.path.getsize(deps_filepath) / (1024 * 1024)
+        m.message(f'build-dep cache {deps_filepath} of size {fsize}MB generated')
 
     def run(self, config, args):
         BaseCache.run(self, config, args)
