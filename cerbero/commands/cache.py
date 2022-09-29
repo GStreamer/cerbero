@@ -23,18 +23,16 @@ import shutil
 from hashlib import sha256
 
 from cerbero.commands import Command, register_command
-from cerbero.enums import Platform
+from cerbero.enums import Platform, Distro
 from cerbero.errors import FatalError
 from cerbero.utils import _, N_, ArgparseArgument, git, shell, run_until_complete, to_unixpath
 from cerbero.utils import messages as m
-from cerbero.config import Distro
 
 class BaseCache(Command):
     base_url = 'https://artifacts.gstreamer-foundation.net/cerbero-deps/%s/%s/%s'
     ssh_address = 'cerbero-deps-uploader@artifacts.gstreamer-foundation.net'
     # FIXME: fetch this value from CI env vars
     build_dir = '/builds/%s/cerbero/cerbero-build'
-    deps_filename = 'cerbero-deps.tar.xz'
     log_filename = 'cerbero-deps.log'
     log_size = 10
 
@@ -108,13 +106,17 @@ class BaseCache(Command):
             deps = self.json_get(url)
         except FatalError as e:
             m.warning("Could not get cache list: %s" % e.msg)
-
         return deps
 
     def get_deps_filename(self, config):
-        return os.path.join(config.home_dir, self.deps_filename)
+        if config.platform == Platform.WINDOWS:
+            return 'cerbero-deps.tar.bz2'
+        return 'cerbero-deps.tar.xz'
 
-    def get_log_filename(self, config):
+    def get_deps_filepath(self, config):
+        return os.path.join(config.home_dir, self.get_deps_filename(config))
+
+    def get_log_filepath(self, config):
         return os.path.join(config.home_dir, self.log_filename)
 
     def run(self, config, args):
@@ -191,35 +193,41 @@ class GenCache(BaseCache):
         BaseCache.__init__(self, args)
 
     def gen_dep(self, config, args, deps, sha):
-        deps_filename = self.get_deps_filename(config)
-        if os.path.exists(deps_filename):
-          os.remove(deps_filename)
+        deps_filepath = self.get_deps_filepath(config)
+        if os.path.exists(deps_filepath):
+          os.remove(deps_filepath)
 
-        log_filename = self.get_log_filename(config)
-        if os.path.exists(log_filename):
-          os.remove(log_filename)
+        log_filepath = self.get_log_filepath(config)
+        if os.path.exists(log_filepath):
+          os.remove(log_filepath)
 
         # Workaround special mangling for windows hidden in the config
         arch = os.path.basename(config.sources)
+        cmd = [
+            'tar',
+            '-C', config.home_dir,
+            '--exclude=var/tmp',
+            '-cf', deps_filepath,
+            'build-tools',
+            config.build_tools_cache,
+            os.path.join('dist', arch),
+            config.cache_file,
+        ]
+        # xz seems to hang sometimes while compressing on Windows CI
+        if config.platform != Platform.WINDOWS:
+            cmd += ['--use-compress-program=xz --threads=0']
+        else:
+            cmd += ['--bzip2']
         try:
-            shell.new_call(
-                ['tar',
-                    '-C', config.home_dir,
-                    '--use-compress-program=xz --threads=0',
-                    '--exclude=var/tmp',
-                    '-cf', deps_filename,
-                    'build-tools',
-                    config.build_tools_cache,
-                    os.path.join('dist', arch),
-                    config.cache_file])
-            url = self.make_url(config, args, '%s-%s' % (sha, self.deps_filename))
-            deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filename), 'url': url})
+            shell.new_call(cmd)
+            url = self.make_url(config, args, '%s-%s' % (sha, self.get_deps_filename(config)))
+            deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filepath), 'url': url})
             deps = deps[0:self.log_size]
-            with open(log_filename, 'w') as outfile:
-                    json.dump(deps, outfile, indent=1)
+            with open(log_filepath, 'w') as outfile:
+                json.dump(deps, outfile, indent=1)
         except FatalError:
-            os.remove(deps_filename)
-            os.remove(log_filename)
+            os.remove(deps_filepath)
+            os.remove(log_filepath)
             raise
         m.message('build-dep cache generated as {}'.format(deps_filename))
 
@@ -259,9 +267,9 @@ class UploadCache(BaseCache):
         private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY');
         private_key_path = os.path.join(tmpdir, 'id_rsa')
 
-        deps_filename = self.get_deps_filename(config)
-        log_filename = self.get_log_filename(config)
-        if not os.path.exists(deps_filename) or not os.path.exists(log_filename):
+        deps_filepath = self.get_deps_filepath(config)
+        log_filepath = self.get_log_filepath(config)
+        if not os.path.exists(deps_filepath) or not os.path.exists(log_filepath):
             raise FatalError(_('gen-cache must be run before running upload-cache.'))
 
         try:
@@ -283,28 +291,28 @@ class UploadCache(BaseCache):
             shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
 
             # Upload the deps files first
-            remote_deps_filename = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filename),
-                                      '%s:%s' % (self.ssh_address, remote_deps_filename)],
+            remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.get_deps_filename(config)))
+            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filepath),
+                                      '%s:%s' % (self.ssh_address, remote_deps_filepath)],
                            verbose=True)
 
             # Upload the new log
-            remote_tmp_log_filename = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filename),
-                                      '%s:%s' % (self.ssh_address, remote_tmp_log_filename)],
+            remote_tmp_log_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
+            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filepath),
+                                      '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)],
                            verbose=True)
 
             # Override the new log in a way that we reduce the risk of corrupted
             # fetch.
-            remote_log_filename = os.path.join(base_dir, self.log_filename)
-            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filename, remote_log_filename],
+            remote_log_filepath = os.path.join(base_dir, self.log_filename)
+            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath],
                            verbose=True)
             m.message('New deps cache uploaded and deps log updated')
 
             # Now remove the obsoleted dep file if needed
             for dep in deps[self.log_size - 1:]:
-                old_remote_deps_filename = os.path.join(base_dir, os.path.basename(dep['url']))
-                shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filename], verbose=True)
+                old_remote_deps_filepath = os.path.join(base_dir, os.path.basename(dep['url']))
+                shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filepath], verbose=True)
         finally:
             shutil.rmtree(tmpdir)
 
