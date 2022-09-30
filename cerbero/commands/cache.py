@@ -210,11 +210,6 @@ class GenCache(BaseCache):
             shell.get_tar_cmd(),
             '-C', config.home_dir,
             '--exclude=var/tmp',
-            '-cf', deps_filepath,
-            'build-tools',
-            config.build_tools_cache,
-            os.path.join('dist', arch),
-            config.cache_file,
             '--verbose',
         ]
         # xz seems to hang sometimes while compressing on Windows CI
@@ -222,6 +217,13 @@ class GenCache(BaseCache):
             cmd += ['--use-compress-program=xz --threads=0']
         else:
             cmd += ['--bzip2']
+        cmd += [
+            '-cf', deps_filepath,
+            'build-tools',
+            config.build_tools_cache,
+            os.path.join('dist', arch),
+            config.cache_file,
+        ]
         m.message(f'Generating cache file with {cmd!r}')
         try:
             shell.new_call(cmd)
