@@ -33,6 +33,7 @@ class BaseCache(Command):
     ssh_address = 'cerbero-deps-uploader@artifacts.gstreamer-foundation.net'
     # FIXME: fetch this value from CI env vars
     build_dir = '/builds/%s/cerbero/cerbero-build'
+    deps_filename = 'cerbero-deps.tar.xz'
     log_filename = 'cerbero-deps.log'
     log_size = 10
 
@@ -109,13 +110,8 @@ class BaseCache(Command):
             m.warning("Could not get cache list: %s" % e.msg)
         return deps
 
-    def get_deps_filename(self, config):
-        if config.platform == Platform.WINDOWS:
-            return 'cerbero-deps.tar.bz2'
-        return 'cerbero-deps.tar.xz'
-
     def get_deps_filepath(self, config):
-        return os.path.join(config.home_dir, self.get_deps_filename(config))
+        return os.path.join(config.home_dir, self.deps_filename)
 
     def get_log_filepath(self, config):
         return os.path.join(config.home_dir, self.log_filename)
@@ -168,7 +164,7 @@ class FetchCache(BaseCache):
             # and Windows. It should instead be derived from CI env vars.
             if config.platform == Platform.LINUX:
                 origin = self.build_dir % namespace
-                m.message("Relocating from %s to %s" % (origin, config.home_dir))
+                m.action("Relocating from %s to %s" % (origin, config.home_dir))
                 # FIXME: Just a quick hack for now
                 shell.call(("grep -lnrIU %(origin)s | xargs "
                             "sed \"s#%(origin)s#%(dest)s#g\" -i") % {
@@ -195,6 +191,50 @@ class GenCache(BaseCache):
     def __init__(self, args=[]):
         BaseCache.__init__(self, args)
 
+    def create_tarball_tarfile(self, workdir, out_file, *in_files, exclude=None):
+        import tarfile
+        m.action(f'Generating cache file with tarfile + xz')
+        def exclude_filter(tarinfo):
+            for each in exclude:
+                if each in tarinfo.name:
+                    return None
+            print(tarinfo.name)
+            return tarinfo
+        prev_cwd = os.getcwd()
+        os.chdir(workdir)
+        out_tar, _ = os.path.splitext(out_file)
+        try:
+            with tarfile.open(out_tar, 'w') as tf:
+                for in_file in in_files:
+                    tf.add(in_file, filter=exclude_filter)
+        finally:
+            os.chdir(prev_cwd)
+        m.action('Compressing cache file with xz')
+        shell.new_call(['xz', '-vv', '--threads=0', out_tar])
+
+    def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
+        cmd = [
+            shell.get_tar_cmd(),
+            '-C', workdir,
+            '--verbose',
+            '--use-compress-program=xz --threads=0',
+        ]
+        for each in exclude:
+            cmd += ['--exclude=' + each]
+        cmd += ['-cf', out_file]
+        cmd += in_files
+        m.action(f'Generating cache file with {cmd!r}')
+        shell.new_call(cmd)
+
+    def create_tarball(self, config, workdir, *args):
+        exclude = ['var/tmp']
+        # MSYS tar seems to hang sometimes while compressing on Windows CI, so
+        # use the tarfile module
+        if config.platform == Platform.WINDOWS:
+            self.create_tarball_tarfile(workdir, *args, exclude=exclude)
+        else:
+            self.create_tarball_tar(workdir, *args, exclude=exclude)
+
     def gen_dep(self, config, args, deps, sha):
         deps_filepath = self.get_deps_filepath(config)
         if os.path.exists(deps_filepath):
@@ -204,40 +244,26 @@ class GenCache(BaseCache):
         if os.path.exists(log_filepath):
           os.remove(log_filepath)
 
-        # Workaround special mangling for windows hidden in the config
-        arch = os.path.basename(config.sources)
-        cmd = [
-            shell.get_tar_cmd(),
-            '-C', config.home_dir,
-            '--exclude=var/tmp',
-            '--verbose',
-        ]
-        # xz seems to hang sometimes while compressing on Windows CI
-        if config.platform != Platform.WINDOWS:
-            cmd += ['--use-compress-program=xz --threads=0']
-        else:
-            cmd += ['--bzip2']
-        cmd += [
-            '-cf', deps_filepath,
-            'build-tools',
-            config.build_tools_cache,
-            os.path.join('dist', arch),
-            config.cache_file,
-        ]
-        m.message(f'Generating cache file with {cmd!r}')
+        workdir = config.home_dir
+        platform_arch = '_'.join(config._get_toolchain_target_platform_arch())
+        distdir = f'dist/{platform_arch}'
         try:
-            shell.new_call(cmd)
-            url = self.make_url(config, args, '%s-%s' % (sha, self.get_deps_filename(config)))
+            self.create_tarball(config, workdir, deps_filepath, 'build-tools',
+                                config.build_tools_cache, distdir,
+                                config.cache_file)
+            url = self.make_url(config, args, '%s-%s' % (sha, self.deps_filename))
             deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filepath), 'url': url})
             deps = deps[0:self.log_size]
             with open(log_filepath, 'w') as outfile:
                 json.dump(deps, outfile, indent=1)
         except FatalError:
-            os.remove(deps_filepath)
-            os.remove(log_filepath)
+            if os.path.exists(deps_filepath):
+                os.remove(deps_filepath)
+            if os.path.exists(log_filepath):
+                os.remove(log_filepath)
             raise
         fsize = os.path.getsize(deps_filepath) / (1024 * 1024)
-        m.message(f'build-dep cache {deps_filepath} of size {fsize}MB generated')
+        m.message(f'build-dep cache {deps_filepath} of size {fsize:.2f}MB generated')
 
     def run(self, config, args):
         BaseCache.run(self, config, args)
@@ -299,7 +325,7 @@ class UploadCache(BaseCache):
             shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
 
             # Upload the deps files first
-            remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.get_deps_filename(config)))
+            remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
             shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filepath),
                                       '%s:%s' % (self.ssh_address, remote_deps_filepath)],
                            verbose=True)
