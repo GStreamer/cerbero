@@ -62,6 +62,7 @@ oldjoin = os.path.join
 oldexpanduser = os.path.expanduser
 oldabspath = os.path.abspath
 oldrealpath = os.path.realpath
+oldrelpath = os.path.relpath
 
 
 def join(*args):
@@ -79,6 +80,14 @@ def abspath(path):
 def realpath(path):
     return oldrealpath(path).replace('\\', '/')
 
+
+def relpath(path, start=None):
+    os.path.abspath = oldabspath
+    ret = oldrelpath(path, start).replace('\\', '/')
+    os.path.abspath = abspath
+    return ret
+
+
 if sys.platform.startswith('win'):
     # FIXME: replace all usage of os.path.join with pathlib.PurePath.as_posix()
     # instead of doing this brittle monkey-patching.
@@ -86,6 +95,7 @@ if sys.platform.startswith('win'):
     os.path.expanduser = expanduser
     os.path.abspath = abspath
     os.path.realpath = realpath
+    os.path.relpath = relpath
 
     # On windows, python transforms all enviroment variables to uppercase,
     # but we need lowercase ones to override configure options like
