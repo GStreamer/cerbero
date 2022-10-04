@@ -37,7 +37,7 @@ class AndroidBootstrapper (BootstrapperBase):
         super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix
         url = NDK_BASE_URL % (NDK_VERSION, self.config.platform)
-        self.fetch_urls.append((url, NDK_CHECKSUMS[os.path.basename(url)]))
+        self.fetch_urls.append((url, None, NDK_CHECKSUMS[os.path.basename(url)]))
         self.extract_steps.append((url, True, self.prefix))
 
     async def start(self, jobs=0):

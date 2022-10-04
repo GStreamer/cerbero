@@ -74,7 +74,7 @@ class DebianBootstrapper (UnixBootstrapper):
         'libasound2-dev', 'build-essential', 'gperf', 'wget', 'libxtst-dev',
         'libxrandr-dev', 'libglu1-mesa-dev', 'libegl1-mesa-dev', 'git',
         'xutils-dev', 'intltool', 'ccache', 'python3-setuptools', 'libssl-dev',
-        'libwayland-dev'
+        'libwayland-dev', 'ruby-dev'
     ]
 
     def __init__(self, config, offline, assume_yes):
