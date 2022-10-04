@@ -1170,6 +1170,21 @@ class Cargo(Build, ModifyEnvBase):
         with open(os.path.join(dot_cargo, 'config.toml'), 'a') as f:
             f.write(s)
 
+    def get_cargo_toml_version(self):
+        tomllib = self.config.find_toml_module()
+        if not tomllib:
+            raise FatalError('toml module not found, try re-running bootstrap')
+        cargo_toml_list = [os.path.join(self.config_src_dir, 'Cargo.toml')]
+        cargo_toml_list += glob.glob(f'{self.config_src_dir}/**/Cargo.toml', recursive=True)
+        for cargo_toml in cargo_toml_list:
+            with open(cargo_toml, 'r', encoding='utf-8') as f:
+                data = tomllib.loads(f.read())
+            try:
+                version = data['package']['version']
+            except KeyError:
+                continue
+            return version
+
     async def configure(self):
         if os.path.exists(self.cargo_dir):
             # Only remove if it's not empty
@@ -1178,6 +1193,16 @@ class Cargo(Build, ModifyEnvBase):
                 os.makedirs(self.cargo_dir)
         else:
             os.makedirs(self.cargo_dir)
+
+        # Check that the Cargo.toml version matches the recipe version for git recipes
+        if hasattr(self, 'commit'):
+            toml_version = self.get_cargo_toml_version()
+            if toml_version != self.version:
+                msg = f'{self.name} version {self.version} doesn\'t match Cargo.toml version {toml_version}'
+                if self.commit == 'origin/main':
+                    m.warning(msg)
+                else:
+                    raise FatalError(msg)
 
         # TODO: Ideally we should strip while packaging, not while linking
         if self.rustc_debuginfo == 'strip':

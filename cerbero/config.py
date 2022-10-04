@@ -188,7 +188,7 @@ class Config (object):
                    'for_shell', 'package_tarball_compression', 'extra_mirrors',
                    'extra_bootstrap_packages', 'moltenvk_prefix',
                    'vs_install_path', 'vs_install_version', 'exe_suffix',
-                   'rust_prefix', 'rustup_home', 'cargo_home']
+                   'rust_prefix', 'rustup_home', 'cargo_home', 'tomllib_path']
 
     cookbook = None
 
@@ -818,6 +818,7 @@ class Config (object):
         self.set_property('rust_prefix', os.path.join(self.home_dir, 'rust'))
         self.set_property('rustup_home', os.path.join(self.rust_prefix, 'rustup'))
         self.set_property('cargo_home', os.path.join(self.rust_prefix, 'cargo'))
+        self.set_property('tomllib_path', os.path.join(self.rust_prefix, 'tomllib'))
 
     def _get_exe_suffix(self):
         if self.platform != Platform.WINDOWS:
@@ -912,3 +913,18 @@ class Config (object):
             triple = self.rust_triple(target_arch, self.target_platform, self.variants.visualstudio)
             triples.append(triple)
         return triples
+
+    def find_toml_module(self, system_only=False):
+        import importlib
+        if sys.version_info >= (3, 11, 0):
+            return importlib.import_module('tomllib')
+        for m in ('tomli', 'toml', 'tomlkit'):
+            try:
+                return importlib.import_module(m)
+            except ModuleNotFoundError:
+                continue
+        if not system_only and os.path.exists(self.tomllib_path):
+            tomli_dir = os.path.join(self.tomllib_path, 'src')
+            sys.path.insert(0, os.path.abspath(tomli_dir))
+            return importlib.import_module('tomli')
+        return None

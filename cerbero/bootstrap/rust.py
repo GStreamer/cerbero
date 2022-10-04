@@ -89,7 +89,7 @@ class RustBootstrapper(BootstrapperBase):
         self.extract_steps = []
         # Need to extract our own toml library if the system doesn't provide
         # one already
-        if not self.find_toml_module():
+        if not self.config.find_toml_module(system_only=True):
             self.extract_steps += [(self.TOMLI_URL, True, self.config.rust_prefix)]
         # This is extracted in self.install_toolchain_and_fetch_cargoc, after
         # we install the Rust toolchain because we need to run cargo update to
@@ -122,35 +122,15 @@ class RustBootstrapper(BootstrapperBase):
         urls.append((url, path[1:], checksum))
         for each in ('.sha256', '.asc'):
             urls.append((url + each, path[1:] + each, False))
-        # Need the tomli python module to be able to parse the channel TOML file
-        checksum = self.DOWNLOAD_CHECKSUMS[os.path.basename(self.TOMLI_URL)]
-        urls.append((self.TOMLI_URL, None, checksum))
+        if not self.config.find_toml_module(system_only=True):
+            # Need the tomli python module to be able to parse the channel TOML file
+            checksum = self.DOWNLOAD_CHECKSUMS[os.path.basename(self.TOMLI_URL)]
+            urls.append((self.TOMLI_URL, None, checksum))
         # Also need to fetch cargo-c to run cargo update for the build-tools
         # recipe, so fetch it into the same location as the recipe.
         download_path = os.path.join(self.CARGOC_NAME, os.path.basename(self.CARGOC_URL))
         urls.append((self.CARGOC_URL, download_path, self.CARGOC_CHECKSUM))
         return urls
-
-    def find_toml_module(self, extracted=False):
-        import importlib
-        if sys.version_info >= (3, 11, 0):
-            return importlib.import_module('tomllib')
-        for m in ('tomli', 'toml', 'tomlkit'):
-            try:
-                return importlib.import_module(m)
-            except ModuleNotFoundError:
-                continue
-        if extracted:
-            # tomli-<version>.tar.gz
-            tomli_basename = os.path.basename(self.TOMLI_URL)
-            # tomli-<version>.tar
-            tomli_basename = os.path.splitext(tomli_basename)[0]
-            # tomli-<version>
-            tomli_basename = os.path.splitext(tomli_basename)[0]
-            tomli_dir = os.path.join(self.config.rust_prefix, tomli_basename, 'src')
-            sys.path.insert(0, os.path.abspath(tomli_dir))
-            return importlib.import_module('tomli')
-        return None
 
     async def get_more_fetch_urls(self):
         # Extract tomli (if specified) and cargo-c, remove them from extract steps
@@ -158,7 +138,19 @@ class RustBootstrapper(BootstrapperBase):
         await self.extract()
         self.extract_steps = []
 
-        tomllib = self.find_toml_module(extracted=True)
+        if not self.config.find_toml_module(system_only=True):
+            # tomli-<version>.tar.gz
+            basename = os.path.basename(self.TOMLI_URL)
+            # tomli-<version>.tar
+            basename = os.path.splitext(basename)[0]
+            # tomli-<version>
+            basename = os.path.splitext(basename)[0]
+            extracted_path = os.path.join(self.config.rust_prefix, basename)
+            if os.path.exists(self.config.tomllib_path):
+                shutil.rmtree(self.config.tomllib_path)
+            os.replace(extracted_path, self.config.tomllib_path)
+
+        tomllib = self.config.find_toml_module()
 
         with open(self.channel, 'r', encoding='utf-8') as f:
             channel_data = tomllib.loads(f.read())
