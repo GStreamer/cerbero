@@ -1,11 +1,15 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from custom import GStreamer
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
-    version = '0.8.4.9999'
+    version = '0.9.0-alpha.1'
     stype = SourceType.GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
-    commit = 'origin/main'
+    if GStreamer.tagged_for_release:
+        commit = f'gstreamer-{GStreamer.version}'
+    else:
+        commit = 'origin/main'
     # Each plugin uses one or more of these licenses.
     licenses = [{
         License.Apachev2: ['LICENSE-APACHE'],
