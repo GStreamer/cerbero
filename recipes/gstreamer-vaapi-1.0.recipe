@@ -4,7 +4,7 @@
 class Recipe(custom.GStreamer):
     name = 'gstreamer-vaapi-1.0'
     btype = BuildType.MESON
-    tarball_checksum = 'f79a47346dfd5e585e063e77078e5fc498b06dee895bfcbf47d8863fcac9ea32'
+    tarball_checksum = '213c6883417f889947ceec2e9ece66ff7321643c0b9c2d908a612960bfdbcc35'
     meson_options = {# auto enable plugins
                      'with_encoders': 'auto',
                      'with_drm': 'auto',
