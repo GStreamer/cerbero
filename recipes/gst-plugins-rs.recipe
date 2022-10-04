@@ -24,6 +24,7 @@ class Recipe(recipe.Recipe):
         'cdg',
         'claxon',
         'closedcaption',
+        'dav1d',
         'fallbackswitch',
         'ffv1',
         'fmp4',
@@ -56,7 +57,7 @@ class Recipe(recipe.Recipe):
     # Needed for openssl
     use_system_libs = True
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'pango', 'cairo',
-        'gst-plugins-bad-1.0']
+        'gst-plugins-bad-1.0', 'dav1d']
 
     files_plugins_core = [
         'lib/gstreamer-1.0/libgstfallbackswitch%(mext)s',
@@ -83,6 +84,7 @@ class Recipe(recipe.Recipe):
     files_plugins_codecs = [
         'lib/gstreamer-1.0/libgstcdg%(mext)s',
         'lib/gstreamer-1.0/libgstclaxon%(mext)s',
+        'lib/gstreamer-1.0/libgstrsdav1d%(mext)s',
         'lib/gstreamer-1.0/libgstrsclosedcaption%(mext)s',
         'lib/gstreamer-1.0/libgstffv1%(mext)s',
         'lib/gstreamer-1.0/libgstfmp4%(mext)s',
