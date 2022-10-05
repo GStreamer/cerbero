@@ -186,6 +186,8 @@ android fedora image:
     - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
   script:
     - ./ci/cerbero_setup.sh cerbero_script
+  # Don't interrupt gstreamer MR CI when cerbero main gets pushes
+  interruptible: false
 
 #
 # Cerbero Linux X86_64 build
