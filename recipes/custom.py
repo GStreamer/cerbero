@@ -8,7 +8,14 @@ from cerbero.build.cookbook import CookBook
 from cerbero.enums import License, FatalError
 
 def running_on_cerbero_ci():
-    return os.environ.get('CI_PROJECT_NAME', '') == 'cerbero'
+    if os.environ.get('CI_PROJECT_NAME', '') != 'cerbero':
+        return False
+    # If the cerbero CI was triggered from a merge request on the gstreamer
+    # monorepo, we want to use git because we want to test the changes that the
+    # merge request contains.
+    if os.environ.get('CI_GSTREAMER_TRIGGERED', '') == 'true':
+        return False
+    return True
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
