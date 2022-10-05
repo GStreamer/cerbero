@@ -502,6 +502,7 @@ cerbero deps uwp universal:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
+    - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && CERBERO_ARGS='$env:CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_deps_script"
 
 build cerbero uwp universal:
   extends: ['build cerbero msvc x86_64']
@@ -511,3 +512,4 @@ build cerbero uwp universal:
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_script"
+    - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && CERBERO_ARGS='$env:CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_script"
