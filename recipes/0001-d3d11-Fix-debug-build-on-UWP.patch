@@ -1,0 +1,50 @@
+From dbd3007664de97f8bb8fa86349452f37a8bb7ba0 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Wed, 5 Oct 2022 05:38:54 +0530
+Subject: [PATCH] d3d11: Fix debug build on UWP
+
+GstDXGIGetDebugInterface() is unused when targeting UWP. We directly
+call DXGIGetDebugInterface1() in that case.
+
+Fixes build failure:
+
+../gst-libs/gst/d3d11/gstd3d11device.cpp(271): error C2440: '=': cannot convert from 'HRESULT (__cdecl *)(UINT,const IID &,void **)' to 'DXGIGetDebugInterface_t'
+../gst-libs/gst/d3d11/gstd3d11device.cpp(271): note: This conversion requires a reinterpret_cast, a C-style cast or function-style cast
+---
+ gst-libs/gst/d3d11/gstd3d11device.cpp                | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
+
+diff --git a/gst-libs/gst/d3d11/gstd3d11device.cpp b/gst-libs/gst/d3d11/gstd3d11device.cpp
+index db42e3925c..fc668736a9 100644
+--- a/gst-libs/gst/d3d11/gstd3d11device.cpp
++++ b/gst-libs/gst/d3d11/gstd3d11device.cpp
+@@ -258,22 +258,21 @@ gst_d3d11_device_d3d11_debug (GstD3D11Device * device,
+ static gboolean
+ gst_d3d11_device_enable_dxgi_debug (void)
+ {
++#if (!GST_D3D11_WINAPI_ONLY_APP)
+   static GModule *dxgi_debug_module = nullptr;
+ 
+   GST_D3D11_CALL_ONCE_BEGIN {
+-#if (!GST_D3D11_WINAPI_ONLY_APP)
+     dxgi_debug_module = g_module_open ("dxgidebug.dll", G_MODULE_BIND_LAZY);
+ 
+     if (dxgi_debug_module)
+       g_module_symbol (dxgi_debug_module,
+           "DXGIGetDebugInterface", (gpointer *) & GstDXGIGetDebugInterface);
+-#else
+-    GstDXGIGetDebugInterface = DXGIGetDebugInterface1;
+-#endif
+-  } GST_D3D11_CALL_ONCE_END;
++  }
++  GST_D3D11_CALL_ONCE_END;
+ 
+   if (!GstDXGIGetDebugInterface)
+     return FALSE;
++#endif
+ 
+   return TRUE;
+ }
+-- 
+2.37.3
+
