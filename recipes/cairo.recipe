@@ -70,6 +70,8 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             self.meson_options['quartz'] = 'enabled'
+        if self.config.target_platform == Platform.ANDROID:
+            self.patches += ['cairo/0001-android-dont-build-malloc-stats.patch']
 
     def post_install(self):
         # Meson does not generate la files

@@ -11,6 +11,11 @@ class Recipe(recipe.Recipe):
     files_libs = ['libintl']
 
     def prepare (self):
-        if self.config.target_platform in (Platform.ANDROID):
-            self.deps += ['libiconv']
+        if self.config.target_platform == Platform.ANDROID:
             self.append_env('LDFLAGS', '-lc++_shared')
+
+            # Android only provides libiconv with API level >=28 (Pie and newer)
+            if DistroVersion.get_android_api_version(self.config.target_distro_version) >= 28:
+                self.append_env('LDFLAGS', '-lc')
+            else:
+                self.deps.append('libiconv')

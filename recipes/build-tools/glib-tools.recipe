@@ -18,9 +18,12 @@ class Recipe(recipe.Recipe):
         if self.config.platform != Platform.LINUX:
             self.deps.append('proxy-libintl')
 
-        # Android only provides libiconv with API level >=28 (Pie and newer)
         if self.config.target_platform == Platform.ANDROID:
-            self.deps.append('libiconv')
+            # Android only provides libiconv with API level >=28 (Pie and newer)
+            if DistroVersion.get_android_api_version(self.config.target_distro_version) >= 28:
+                self.meson_options.update({'iconv': 'libc'})
+            else:
+                self.deps.append('libiconv')
 
         if self.config.target_platform == Platform.WINDOWS:
             # Want secure versions of stdlib functions. Glib already defines

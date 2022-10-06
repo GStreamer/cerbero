@@ -35,10 +35,8 @@ class Recipe(recipe.Recipe):
             shell.new_call([self.get_env('AR'), 'rc', os.path.join(libdir, 'libandroid_support.a')], env=self.env)
 
     async def install(self):
-        stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
-                  'cxx-stl', 'llvm-libc++')
         libarch = android.get_android_arch_name(self.config.target_arch)
-        stl_libdir = os.path.join(stl_prefix, 'libs', libarch)
+        stl_libdir = os.path.join(self.config.sysroot, '..')
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)

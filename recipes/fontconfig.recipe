@@ -30,7 +30,11 @@ class Recipe(recipe.Recipe):
 
 
     def prepare(self):
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.deps.append('libiconv')
+
+        # Android only provides libiconv with API level >=28 (Pie and newer)
+        if self.config.target_platform == Platform.ANDROID and DistroVersion.get_android_api_version(self.config.target_distro_version) < 28:
             self.deps.append('libiconv')
 
     def post_install(self):

@@ -11,9 +11,8 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/zbar.h', 'lib/pkgconfig/zbar.pc']
 
     def prepare(self):
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
-            self.deps.append('libiconv')
         if self.config.target_platform == Platform.WINDOWS:
+            self.deps.append('libiconv')
             # This flag should be removed in 0.24
             self.append_env('CFLAGS', '-std=c99')
             # zbar incorrectly passes CPPFLAGS to WINDRES, which then barfs on
@@ -21,3 +20,9 @@ class Recipe(recipe.Recipe):
             self.set_env('CPPFLAGS', '')
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             self.autoreconf = True
+        if self.config.target_platform == Platform.ANDROID:
+            # Android only provides libiconv with API level >=28 (Pie and newer)
+            if DistroVersion.get_android_api_version(self.config.target_distro_version) >= 28:
+                self.append_env('LDFLAGS', '-lc')
+            else:
+                self.deps.append('libiconv')

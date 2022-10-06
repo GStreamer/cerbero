@@ -1,0 +1,26 @@
+From 85ad5530e79657b5d54581b3a541d2092189decf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Thu, 6 Oct 2022 18:16:53 +0200
+Subject: [PATCH] Android: don't build malloc-stats.c
+
+---
+ util/meson.build | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/util/meson.build b/util/meson.build
+index 016955c..2b6a109 100644
+--- a/util/meson.build
++++ b/util/meson.build
+@@ -57,9 +57,3 @@ foreach util : cairo_utils
+     link_with: [libcairo, libcairoscript],
+   )
+ endforeach
+-
+-if cc.has_header_symbol('malloc.h', '__malloc_hook') and cc.has_header('execinfo.h')
+-  libmallocstats = library('malloc-stats', 'malloc-stats.c')
+-endif
+-
+-# backtrace-symbols does not build
+-- 
+2.34.1
+

@@ -52,7 +52,7 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
             if self.config.target_arch == Architecture.ARMv7:
-                self.append_env('CFLAGS', '-fno-integrated-as -fno-unwind-tables')
+                self.append_env('CFLAGS', '-fno-unwind-tables')
                 self.append_env('LDFLAGS', '-lm')
 
     def post_install(self):
