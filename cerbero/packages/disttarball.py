@@ -175,7 +175,7 @@ class DistTarball(PackagerBase):
         shell.new_call(compress_cmd)
 
     def _write_tar(self, filename, package_prefix, files):
-        tar_cmd = ['tar', '-C', self.prefix, '-cf', filename]
+        tar_cmd = ['tar', '-C', self.prefix]
         # ensure we provide a unique list of files to tar to avoid
         # it creating hard links/copies
         files = sorted(set(files))
@@ -192,6 +192,7 @@ class DistTarball(PackagerBase):
             tar_cmd += ['--use-compress-program=xz --threads=0']
         elif self.compress != 'none':
             raise AssertionError("Unknown tar compression: {}".format(self.compress))
+        tar_cmd += ['-cf', filename]
         try:
             shell.new_call(tar_cmd + files)
         except FatalError:
