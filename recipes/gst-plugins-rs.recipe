@@ -33,6 +33,7 @@ class Recipe(recipe.Recipe):
         'hsv',
         'json',
         'lewton',
+        'ndi',
         'onvif',
         'rav1e',
         'regex',
@@ -69,6 +70,7 @@ class Recipe(recipe.Recipe):
     files_plugins_net = [
         'lib/gstreamer-1.0/libgstaws%(mext)s',
         'lib/gstreamer-1.0/libgsthlssink3%(mext)s',
+        'lib/gstreamer-1.0/libgstndi%(mext)s',
         'lib/gstreamer-1.0/libgstrsonvif%(mext)s',
         'lib/gstreamer-1.0/libgstraptorq%(mext)s',
         'lib/gstreamer-1.0/libgstrtpav1%(mext)s',
