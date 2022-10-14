@@ -38,7 +38,7 @@ class Recipe(recipe.Recipe):
         'glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
         'glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
         'glib/0009-Implementation-of-Cocoa-event-loop-integration-in-GM.patch',
-        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415,
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1415
         'glib/0001-meson-Don-t-use-assert-in-test-code.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/1433
         'glib/0001-meson-fix-buildtype-args-and-vscrt-usage.patch',
