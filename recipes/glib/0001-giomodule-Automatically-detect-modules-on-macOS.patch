@@ -1,6 +1,6 @@
-From 1ea5c0f0c62368aa5e363cdacb9b723b4bfa3235 Mon Sep 17 00:00:00 2001
+From af83c6571e47d06468b8162dd29ad57bcf4967a8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Piotr=20Brzezi=C5=84ski?= <piotr@centricular.com>
-Date: Tue, 2 Aug 2022 22:47:44 +0200
+Date: Tue, 9 Aug 2022 10:42:39 +0200
 Subject: [PATCH] giomodule: Automatically detect modules on macOS
 
 Makes use of relocatable prefixes, allowing gio to find modules
@@ -10,39 +10,39 @@ automatically without needing to set the GIO_EXTRA_MODULES env var.
  1 file changed, 23 insertions(+)
 
 diff --git a/gio/giomodule.c b/gio/giomodule.c
-index f5dbb4555..e3ff3fdb1 100644
+index f5dbb4555f..fce60e9fc5 100644
 --- a/gio/giomodule.c
 +++ b/gio/giomodule.c
-@@ -1260,6 +1260,29 @@ get_gio_module_dir (void)
-                                      "lib", "gio", "modules",
-                                      NULL);
+@@ -1262,6 +1262,29 @@ get_gio_module_dir (void)
        g_free (install_dir);
-+#elif defined (__APPLE__)
+ #else
+       module_dir = g_strdup (GIO_MODULE_DIR);
++#ifdef __APPLE__
 +#include "TargetConditionals.h"
 +#if TARGET_OS_OSX
 +#include <dlfcn.h>
-+      char *path, *p;
-+      Dl_info info;
++      {
++        g_autofree gchar *path = NULL;
++        g_autofree gchar *possible_dir = NULL;
++        Dl_info info;
 +
-+      if (!dladdr (get_gio_module_dir, &info))
-+          return NULL;
-+
-+      path = strdup (info.dli_fname);
-+
-+      /* PREFIX/lib directory */
-+      if ((p = strrchr (path, '/')) == NULL)
-+        {
-+          free (path);
-+          return NULL;
-+        }
-+      *p = '\0';
-+
-+      module_dir = g_build_filename (path, "gio", "modules", NULL);
-+      free(path);
++        if (dladdr (get_gio_module_dir, &info))
++          {
++            /* Gets path to the PREFIX/lib directory */
++            path = g_path_get_dirname (info.dli_fname);
++            possible_dir = g_build_filename (path, "gio", "modules", NULL);
++            if (g_file_test (possible_dir, G_FILE_TEST_IS_DIR))
++              {
++                g_free (module_dir);
++                module_dir = g_steal_pointer (&possible_dir);
++              }
++          }
++      }
 +#endif
- #else
-       module_dir = g_strdup (GIO_MODULE_DIR);
++#endif
  #endif
+     }
+ 
 -- 
-2.32.1 (Apple Git-133)
+GitLab
 
