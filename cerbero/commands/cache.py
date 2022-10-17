@@ -137,14 +137,14 @@ class FetchCache(BaseCache):
                 m.message(f"Matching cache file is {dep['url']}")
                 return dep
         if allow_old:
-            m.message("Did not find cache for commit %s, looking for an older one...");
+            m.message(f"Did not find cache for commit {sha}, looking for an older one...");
             for dep in deps:
                 if self.get_git_sha_is_ancestor(dep['commit']):
                     m.message(f"Latest available cache file is {dep['url']}")
                     return dep
-            m.warning("Did not find any cache for commit %s" % sha)
+            m.warning(f"Did not find any cache for commit {sha}")
         else:
-            m.warning("Did not find cache for commit %s" % sha)
+            m.warning(f"Did not find cache for commit {sha}")
         return None
 
     async def fetch_dep(self, config, dep, namespace):
