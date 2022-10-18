@@ -140,9 +140,17 @@ class OSXRelocator(object):
         return path
 
     def _is_mach_o_file(self, filename):
-        return os.path.splitext(filename)[1] in ['.dylib', '.so'] or \
-                shell.check_output(['file', '-bh', filename]).startswith('Mach-O')
+        fileext = os.path.splitext(filename)[1]
 
+        if '.dylib' in fileext:
+            return True
+
+        filedesc = shell.check_output(['file', '-bh', filename])
+
+        if fileext == '.a' and 'ar archive' in filedesc:
+            return False
+
+        return filedesc.startswith('Mach-O')
 
 
 class Main(object):
