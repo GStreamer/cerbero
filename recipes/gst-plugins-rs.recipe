@@ -48,6 +48,7 @@ class Recipe(recipe.Recipe):
         'tracers',
         'uriplaylistbin',
         'videofx',
+        'webrtc',
         'webrtchttp',
     ]
 
@@ -76,6 +77,7 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstrsrtp%(mext)s',
         'lib/gstreamer-1.0/libgstreqwest%(mext)s',
         'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
+        'lib/gstreamer-1.0/libgstrswebrtc%(mext)s',
     ]
 
     files_plugins_effects = [
