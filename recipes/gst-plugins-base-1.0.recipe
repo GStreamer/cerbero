@@ -125,6 +125,7 @@ class Recipe(custom.GStreamer):
             'lib/pkgconfig/gstreamer-audio-1.0.pc',
             'lib/pkgconfig/gstreamer-fft-1.0.pc',
             'lib/pkgconfig/gstreamer-gl-1.0.pc',
+            'lib/pkgconfig/gstreamer-gl-prototypes-1.0.pc',
             'lib/pkgconfig/gstreamer-pbutils-1.0.pc',
             'lib/pkgconfig/gstreamer-riff-1.0.pc',
             'lib/pkgconfig/gstreamer-rtp-1.0.pc',
