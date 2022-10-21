@@ -133,6 +133,7 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-transcoder-1.0.pc',
         'lib/pkgconfig/gstreamer-vulkan-1.0.pc',
         'lib/pkgconfig/gstreamer-webrtc-1.0.pc',
+        'lib/pkgconfig/gstreamer-webrtc-nice-1.0.pc',
     ]
 
     files_plugins_effects = [
