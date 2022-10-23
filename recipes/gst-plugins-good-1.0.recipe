@@ -126,6 +126,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstwavenc%(mext)s',
              'lib/gstreamer-1.0/libgstwavpack%(mext)s',
              'lib/gstreamer-1.0/libgstwavparse%(mext)s',
+             'lib/gstreamer-1.0/libgstxingmux%(mext)s',
              'lib/gstreamer-1.0/libgsty4menc%(mext)s',
     ]
 
@@ -156,6 +157,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstwavenc.a', 'lib/gstreamer-1.0/libgstwavenc.la',
              'lib/gstreamer-1.0/libgstwavpack.a', 'lib/gstreamer-1.0/libgstwavpack.la',
              'lib/gstreamer-1.0/libgstwavparse.a', 'lib/gstreamer-1.0/libgstwavparse.la',
+             'lib/gstreamer-1.0/libgstxingmux.a', 'lib/gstreamer-1.0/libgstxingmux.la',
              'lib/gstreamer-1.0/libgsty4menc.a', 'lib/gstreamer-1.0/libgsty4menc.la',
     ]
 

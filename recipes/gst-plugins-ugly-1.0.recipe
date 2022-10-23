@@ -22,7 +22,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstasf%(mext)s',
              'lib/gstreamer-1.0/libgstdvdsub%(mext)s',
              'lib/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
-             'lib/gstreamer-1.0/libgstxingmux%(mext)s',
              'lib/gstreamer-1.0/libgstrealmedia%(mext)s',
              'lib/gstreamer-1.0/libgstx264%(mext)s',
     ]
@@ -34,7 +33,6 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgstasf.a', 'lib/gstreamer-1.0/libgstasf.la',
              'lib/gstreamer-1.0/libgstdvdsub.a', 'lib/gstreamer-1.0/libgstdvdsub.la',
              'lib/gstreamer-1.0/libgstdvdlpcmdec.a', 'lib/gstreamer-1.0/libgstdvdlpcmdec.la',
-             'lib/gstreamer-1.0/libgstxingmux.a', 'lib/gstreamer-1.0/libgstxingmux.la',
              'lib/gstreamer-1.0/libgstrealmedia.a', 'lib/gstreamer-1.0/libgstrealmedia.la',
              'lib/gstreamer-1.0/libgstx264.a', 'lib/gstreamer-1.0/libgstx264.la',
     ]
