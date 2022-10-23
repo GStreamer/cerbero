@@ -39,8 +39,8 @@ class Recipe(recipe.Recipe):
         'regex',
         'reqwest',
         'raptorq',
-        'rspng',
-        'rtpav1',
+        'png',
+        'rtp',
         'textahead',
         'textwrap',
         'threadshare',
@@ -73,20 +73,20 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstndi%(mext)s',
         'lib/gstreamer-1.0/libgstrsonvif%(mext)s',
         'lib/gstreamer-1.0/libgstraptorq%(mext)s',
-        'lib/gstreamer-1.0/libgstrtpav1%(mext)s',
+        'lib/gstreamer-1.0/libgstrtp%(mext)s',
         'lib/gstreamer-1.0/libgstreqwest%(mext)s',
         'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
     ]
 
     files_plugins_effects = [
         'lib/gstreamer-1.0/libgstrsaudiofx%(mext)s',
-        'lib/gstreamer-1.0/libgstvideofx%(mext)s',
+        'lib/gstreamer-1.0/libgstrsvideofx%(mext)s',
     ]
 
     files_plugins_codecs = [
         'lib/gstreamer-1.0/libgstcdg%(mext)s',
         'lib/gstreamer-1.0/libgstclaxon%(mext)s',
-        'lib/gstreamer-1.0/libgstrsdav1d%(mext)s',
+        'lib/gstreamer-1.0/libgstdav1d%(mext)s',
         'lib/gstreamer-1.0/libgstrsclosedcaption%(mext)s',
         'lib/gstreamer-1.0/libgstffv1%(mext)s',
         'lib/gstreamer-1.0/libgstfmp4%(mext)s',
@@ -94,10 +94,10 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgsthsv%(mext)s',
         'lib/gstreamer-1.0/libgstlewton%(mext)s',
         'lib/gstreamer-1.0/libgstrav1e%(mext)s',
-        'lib/gstreamer-1.0/libgstrsjson%(mext)s',
+        'lib/gstreamer-1.0/libgstjson%(mext)s',
         'lib/gstreamer-1.0/libgstrspng%(mext)s',
-        'lib/gstreamer-1.0/libgstrsregex%(mext)s',
-        'lib/gstreamer-1.0/libgstrstextwrap%(mext)s',
+        'lib/gstreamer-1.0/libgstregex%(mext)s',
+        'lib/gstreamer-1.0/libgsttextwrap%(mext)s',
         'lib/gstreamer-1.0/libgsttextahead%(mext)s',
     ]
 
