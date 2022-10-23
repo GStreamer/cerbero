@@ -73,7 +73,7 @@ class Recipe(recipe.Recipe):
         'lib/gstreamer-1.0/libgstndi%(mext)s',
         'lib/gstreamer-1.0/libgstrsonvif%(mext)s',
         'lib/gstreamer-1.0/libgstraptorq%(mext)s',
-        'lib/gstreamer-1.0/libgstrtp%(mext)s',
+        'lib/gstreamer-1.0/libgstrsrtp%(mext)s',
         'lib/gstreamer-1.0/libgstreqwest%(mext)s',
         'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
     ]
