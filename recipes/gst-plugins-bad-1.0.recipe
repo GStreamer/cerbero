@@ -504,8 +504,6 @@ class Recipe(custom.GStreamer):
                 self.files_libs += ['libgstwinrt-1.0']
                 # WIC plugin supports only MSVC built for now
                 self.enable_plugin('wic', 'codecs')
-                # Deadlock in libstdc++ (std::regex) with MinGW build, need investigation
-                self.enable_plugin('qsv', 'codecs')
 
             self.files_libs += ['libgstd3d11-1.0']
             self.files_plugins_devel += [
@@ -513,8 +511,8 @@ class Recipe(custom.GStreamer):
                 'lib/gstreamer-1.0/include/gst/d3d11',
                 'lib/pkgconfig/gstreamer-d3d11-1.0.pc',
             ]
-            # qsv and amfcodec depend on d3d11
             self.enable_plugin('amfcodec', 'codecs')
+            self.enable_plugin('qsv', 'codecs')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
