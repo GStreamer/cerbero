@@ -195,7 +195,8 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0010-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
                 'wpewebkit/0011-Use-environment-variable-to-define-temp-folder-in-MediaPlayerPrivateGStreamer.patch',
                 'wpewebkit/0012-Enable-libwpe-process-management-API.patch',
-                'wpewebkit/0013-Use-ASharedMemory-instead-of-shm.patch'
+                'wpewebkit/0013-Use-ASharedMemory-instead-of-shm.patch',
+                'wpewebkit/0014-GTK-WPE-PlatformDisplay-terminateEglDisplays-is-neve.patch' # backport from webkit head
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

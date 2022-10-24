@@ -1,0 +1,122 @@
+From 2b8e83dbd23cafc479610c40db91424b85f7d030 Mon Sep 17 00:00:00 2001
+From: Pablo Saavedra <psaavedra@igalia.com>
+Date: Wed, 23 Feb 2022 09:32:13 +0000
+Subject: [PATCH] PlatformDisplay::terminateEglDisplays() is never called
+ https://bugs.webkit.org/show_bug.cgi?id=217655
+
+Stop the run loop for GTK and WPE to ensure a normal exit, since we need
+atexit handlers to be called to cleanup resources like EGL displays.
+
+Reviewed by Carlos Garcia Campos.
+
+* Shared/AuxiliaryProcess.cpp:
+(WebKit::AuxiliaryProcess::didClose):
+* WebProcess/WebProcess.cpp:
+(WebKit::WebProcess::initializeConnection):
+* WebProcess/WebProcess.h:
+* WebProcess/glib/WebProcessGLib.cpp:
+(WebKit::WebProcess::stopRunLoop):
+
+Canonical link: https://commits.webkit.org/247678@main
+git-svn-id: https://svn.webkit.org/repository/webkit/trunk@290360 268f45cc-cd09-0410-ab3c-d52691b4dbfc
+---
+ Source/WebKit/Shared/AuxiliaryProcess.cpp        |  8 +++++++-
+ Source/WebKit/WebProcess/WebProcess.cpp          |  6 ++++++
+ Source/WebKit/WebProcess/WebProcess.h            |  2 +-
+ Source/WebKit/WebProcess/glib/WebProcessGLib.cpp | 14 ++++++++++++++
+ 4 files changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/Source/WebKit/Shared/AuxiliaryProcess.cpp b/Source/WebKit/Shared/AuxiliaryProcess.cpp
+index 7a597661..e3d8df80 100644
+--- a/Source/WebKit/Shared/AuxiliaryProcess.cpp
++++ b/Source/WebKit/Shared/AuxiliaryProcess.cpp
+@@ -59,7 +59,13 @@ AuxiliaryProcess::~AuxiliaryProcess()
+ 
+ void AuxiliaryProcess::didClose(IPC::Connection&)
+ {
+-    _exit(EXIT_SUCCESS);
++// Stop the run loop for GTK and WPE to ensure a normal exit, since we need
++// atexit handlers to be called to cleanup resources like EGL displays.
++#if PLATFORM(GTK) || PLATFORM(WPE)
++    stopRunLoop();
++#else
++     _exit(EXIT_SUCCESS);
++#endif
+ }
+ 
+ void AuxiliaryProcess::initialize(const AuxiliaryProcessInitializationParameters& parameters)
+diff --git a/Source/WebKit/WebProcess/WebProcess.cpp b/Source/WebKit/WebProcess/WebProcess.cpp
+index 7d12acba..d02b0939 100644
+--- a/Source/WebKit/WebProcess/WebProcess.cpp
++++ b/Source/WebKit/WebProcess/WebProcess.cpp
+@@ -248,6 +248,7 @@ namespace WebKit {
+ using namespace JSC;
+ using namespace WebCore;
+ 
++#if !PLATFORM(GTK) && !PLATFORM(WPE)
+ NO_RETURN static void callExit(IPC::Connection*)
+ {
+ #if OS(WINDOWS)
+@@ -257,6 +258,7 @@ NO_RETURN static void callExit(IPC::Connection*)
+     _exit(EXIT_SUCCESS);
+ #endif
+ }
++#endif
+ 
+ WebProcess& WebProcess::singleton()
+ {
+@@ -352,9 +354,13 @@ void WebProcess::initializeConnection(IPC::Connection* connection)
+ {
+     AuxiliaryProcess::initializeConnection(connection);
+ 
++// Do not call exit in background queue for GTK and WPE because we need to ensure
++// atexit handlers are called in the main thread to cleanup resources like EGL displays.
++#if !PLATFORM(GTK) && !PLATFORM(WPE)
+     // We call _exit() directly from the background queue in case the main thread is unresponsive
+     // and AuxiliaryProcess::didClose() does not get called.
+     connection->setDidCloseOnConnectionWorkQueueCallback(callExit);
++#endif
+ 
+ #if !PLATFORM(GTK) && !PLATFORM(WPE)
+     connection->setShouldExitOnSyncMessageSendFailure(true);
+diff --git a/Source/WebKit/WebProcess/WebProcess.h b/Source/WebKit/WebProcess/WebProcess.h
+index 45a0173b..8c2866d8 100644
+--- a/Source/WebKit/WebProcess/WebProcess.h
++++ b/Source/WebKit/WebProcess/WebProcess.h
+@@ -506,7 +506,7 @@ private:
+     bool shouldTerminate() override;
+     void terminate() override;
+ 
+-#if USE(APPKIT)
++#if USE(APPKIT) || PLATFORM(GTK) || PLATFORM(WPE)
+     void stopRunLoop() override;
+ #endif
+ 
+diff --git a/Source/WebKit/WebProcess/glib/WebProcessGLib.cpp b/Source/WebKit/WebProcess/glib/WebProcessGLib.cpp
+index 1dc04565..1a307388 100644
+--- a/Source/WebKit/WebProcess/glib/WebProcessGLib.cpp
++++ b/Source/WebKit/WebProcess/glib/WebProcessGLib.cpp
+@@ -59,6 +59,20 @@ namespace WebKit {
+ 
+ using namespace WebCore;
+ 
++void WebProcess::stopRunLoop()
++{
++    // Pages are normally closed after Close message is received from the UI
++    // process, but it can happen that the connection is closed before the
++    // Close message is processed because the UI process close the socket
++    // right after sending the Close message. Close here any pending page to
++    // ensure the threaded compositor is invalidated and GL resources
++    // released (see https://bugs.webkit.org/show_bug.cgi?id=217655).
++    for (auto& webPage : copyToVector(m_pageMap.values()))
++        webPage->close();
++
++    AuxiliaryProcess::stopRunLoop();
++}
++
+ void WebProcess::platformSetCacheModel(CacheModel cacheModel)
+ {
+     WebCore::MemoryCache::singleton().setDisabled(cacheModel == CacheModel::DocumentViewer);
+-- 
+2.34.1
+
