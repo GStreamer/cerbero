@@ -16,7 +16,7 @@ jobs:
         target: [arm64, armv7, x86_64, x86]
     steps:
       - name: Fetch source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
       - name: Bootstrap Cerbero
         run: |
           ANDROID_CONFIG=${{ matrix.target }}
@@ -28,7 +28,7 @@ jobs:
           ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
           ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} package -f wpewebkit
       - name: Store packages
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.1
         with:
           name: wpe-deps-${{ matrix.target }}
           path: ./wpewebkit-android-${{ matrix.target }}*
