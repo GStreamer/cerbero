@@ -1,0 +1,25 @@
+From 7b95ab3f239c159de2b507d7d34ce0cdb9b0215d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Wed, 26 Oct 2022 13:00:27 +0200
+Subject: [PATCH] Fix webrtcnice pc file name
+
+---
+ gst-libs/gst/webrtc/nice/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gst-libs/gst/webrtc/nice/meson.build b/gst-libs/gst/webrtc/nice/meson.build
+index 7dc7030..23dabe0 100644
+--- a/gst-libs/gst/webrtc/nice/meson.build
++++ b/gst-libs/gst/webrtc/nice/meson.build
+@@ -48,7 +48,7 @@ if libnice_dep.found()
+     install: true,
+   )
+ 
+-  pkg_name = 'gstreamer-webrtc-nice-1.0'
++  pkg_name = 'gstreamer-webrtcnice-1.0'
+   gst_libraries += [[pkg_name, {'lib': libgstwebrtcnice}]]
+   pkgconfig.generate(libgstwebrtcnice,
+     libraries : [deps],
+-- 
+2.34.1
+

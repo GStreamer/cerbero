@@ -84,6 +84,8 @@ class Recipe(custom.GStreamer):
             'srt', 'zbar']
     use_system_libs = True
 
+    patches = ["gst-plugins-bad/0001-Fix-webrtcnice-pc-file-name.patch"]
+
     files_lang = ['gst-plugins-bad-1.0']
 
     files_libs = [
