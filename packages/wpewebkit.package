@@ -15,6 +15,14 @@ class SDKPackage(package.SDKPackage):
         'libc.so',
         'libm.so',
         'libstdc++.so',
+        '.mo',
+        '.scenario',
+        '.conf',
+        '.py',
+        'gst-env',
+        'gst-shell',
+        'gst-validate-launcher',
+        'README'
     ]
 
     packages = [
