@@ -120,10 +120,12 @@ class Recipe(recipe.Recipe):
                 self.append_env('ASFLAGS', '-D__ANDROID__')
                 self.append_env('CFLAGS', '-D__ANDROID__')
 
-            if self.config.target_arch == Architecture.ARM:
-                arch = 'armv5te'
-            elif self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
+            if self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
+
+            if self.config.target_arch == Architecture.ARMv7:
+                self.configure_options += '--disable-neon '
+
             # Build system passes gcc arguments to $LD
             self.set_env('LD', self.get_env('CC'))
             self.configure_options.replace('--as=nasm', '')
