@@ -23,7 +23,8 @@ class Recipe(recipe.Recipe):
         Platform.DARWIN: ['proxy-libintl']
     }
     patches = [name + "/0001-Undefine-__USE_MINGW_ANSI_STDIO-as-otherwise-stdio.h.patch",
-               name + "/0001-pgusage-remove-system-call.patch"]
+               name + "/0001-pgusage-remove-system-call.patch",
+               name + "/0001-Fix-armv8-architecture-for-clang.patch"]
     autoreconf = True
 
     files_libs = ['libgnutls', 'libgnutlsxx']

@@ -1,0 +1,25 @@
+From 4a6cef0e0a9a35e56b894612757ef9d33ec64bb2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Wed, 26 Oct 2022 12:33:49 +0200
+Subject: [PATCH] Fix armv8 architecture for clang
+
+---
+ lib/accelerated/aarch64/Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/accelerated/aarch64/Makefile.am b/lib/accelerated/aarch64/Makefile.am
+index 0c245ac..8cb601f 100644
+--- a/lib/accelerated/aarch64/Makefile.am
++++ b/lib/accelerated/aarch64/Makefile.am
+@@ -34,7 +34,7 @@ AM_CPPFLAGS += -I$(srcdir)/../../minitasn1
+ endif
+ 
+ #ensure that we have all aarch64 instruction sets enabled for the assembler
+-AM_CCASFLAGS = -Wa,-march=all
++AM_CCASFLAGS = -Wa,-march=armv8-a
+ 
+ EXTRA_DIST = README
+ 
+-- 
+2.34.1
+
