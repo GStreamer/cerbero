@@ -52,6 +52,8 @@ class Recipe(recipe.Recipe):
                 '-Dandroid_setCpu=pixman_android_setCpu',
                 '-Dandroid_setCpuArm=pixman_android_setCpuArm')
             if self.config.target_arch == Architecture.ARMv7:
+                self.meson_options['neon'] = 'disabled'
+                self.meson_options['arm-simd'] = 'disabled'
                 self.append_env('CFLAGS', '-fno-unwind-tables')
                 self.append_env('LDFLAGS', '-lm')
 
