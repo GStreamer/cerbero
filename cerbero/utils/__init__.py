@@ -559,6 +559,9 @@ def detect_qt5(platform, arch, is_universal):
         except CommandError as e:
             m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake_path), str(e)))
             qt_version = [0, 0]
+        if len(qt_version) >= 1 and qt_version[0] != 5:
+            # QMAKE is not for Qt5
+            return (None, None)
         if len(qt_version) >= 2 and qt_version[:2] < [5, 14] and \
            is_universal and platform == Platform.ANDROID:
             # require QT5_PREFIX before Qt 5.14 with android universal
