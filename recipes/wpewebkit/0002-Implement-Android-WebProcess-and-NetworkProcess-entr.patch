@@ -62,7 +62,7 @@ diff --git a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp b/Source/WebKit/
 index c9f63aa18cef..92df6bfa0085 100644
 --- a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 +++ b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
-@@ -107,3 +107,17 @@ int WebProcessMain(int argc, char** argv)
+@@ -76,3 +76,17 @@ int WebProcessMain(int argc, char** argv)
  }
  
  } // namespace WebKit
@@ -84,7 +84,7 @@ diff --git a/Source/WebKit/webkitglib-symbols.map b/Source/WebKit/webkitglib-sym
 index 853edcfcb83d..a357c6b61d1e 100644
 --- a/Source/WebKit/webkitglib-symbols.map
 +++ b/Source/WebKit/webkitglib-symbols.map
-@@ -11,6 +11,7 @@ global:
+@@ -9,6 +9,7 @@ global:
      "WebKit::WebKitExtensionManager::singleton()";
      "WebKit::WebProcessMain(int, char**)";
    };

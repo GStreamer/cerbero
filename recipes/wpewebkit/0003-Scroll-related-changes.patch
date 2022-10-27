@@ -12,7 +12,7 @@ diff --git a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp b/Source/WebKit/UIProce
 index 5536fbc54309..216da19fa269 100644
 --- a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
 +++ b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-@@ -71,6 +71,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+@@ -80,6 +80,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
  
      auto* pool = configuration->processPool();
      m_pageProxy = pool->createWebPage(*m_pageClient, WTFMove(configuration));
@@ -20,7 +20,7 @@ index 5536fbc54309..216da19fa269 100644
  
  #if ENABLE(MEMORY_SAMPLER)
      if (getenv("WEBKIT_SAMPLE_MEMORY"))
-@@ -365,8 +366,9 @@ void View::selectionDidChange()
+@@ -387,8 +388,9 @@ void View::selectionDidChange()
  void View::setSize(const WebCore::IntSize& size)
  {
      m_size = size;
@@ -35,7 +35,7 @@ diff --git a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp b/Sourc
 index 41257f63e1e6..e2a58b1918ec 100644
 --- a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
 +++ b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
-@@ -161,7 +161,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
+@@ -176,7 +176,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
  
  FloatRect WebChromeClient::windowRect()
  {

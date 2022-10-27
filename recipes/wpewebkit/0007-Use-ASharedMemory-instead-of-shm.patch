@@ -4,14 +4,14 @@ Date: Wed, 28 Sep 2022 15:13:08 +0300
 Subject: [PATCH] Use ASharedMemory instead of shm
 
 ---
- .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 60 ++++++++++---------
- 1 file changed, 31 insertions(+), 29 deletions(-)
+ .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 66 +++++++++----------
+ 1 file changed, 31 insertions(+), 35 deletions(-)
 
 diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-index 998a2a76..2732a187 100644
+index 05a93d97..5af06814 100644
 --- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
 +++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-@@ -54,6 +54,8 @@
+@@ -56,6 +56,8 @@
  #include "ArgumentCoders.h"
  #endif
  
@@ -20,7 +20,7 @@ index 998a2a76..2732a187 100644
  namespace WebKit {
  
  SharedMemory::Handle::Handle()
-@@ -124,56 +126,35 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+@@ -120,62 +122,35 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
      return PROT_READ | PROT_WRITE;
  }
  
@@ -46,9 +46,14 @@ index 998a2a76..2732a187 100644
 -    }
 -#endif
 -
+-#if HAVE(SHM_ANON)
+-    do {
+-        fileDescriptor = shm_open(SHM_ANON, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+-    } while (fileDescriptor == -1 && errno == EINTR);
+-#else
      CString tempName;
      for (int tries = 0; fileDescriptor == -1 && tries < 10; ++tries) {
-         String name = String("/WK2SharedMemory.") + String::number(static_cast<unsigned>(WTF::randomNumber() * (std::numeric_limits<unsigned>::max() + 1.0)));
+         auto name = makeString("/WK2SharedMemory.", static_cast<unsigned>(WTF::randomNumber() * (std::numeric_limits<unsigned>::max() + 1.0)));
          tempName = name.utf8();
  
          do {
@@ -59,6 +64,7 @@ index 998a2a76..2732a187 100644
  
 -    if (fileDescriptor != -1)
 -        shm_unlink(tempName.data());
+-#endif
 -
      return fileDescriptor;
  }
@@ -68,7 +74,7 @@ index 998a2a76..2732a187 100644
 -    int fileDescriptor = createSharedMemory();
 +    int fileDescriptor = createSharedMemory(size);
      if (fileDescriptor == -1) {
-         WTFLogAlways("Failed to create shared memory: %s", strerror(errno));
+         WTFLogAlways("Failed to create shared memory: %s", safeStrerror(errno).data());
          return nullptr;
      }
  
@@ -84,7 +90,7 @@ index 998a2a76..2732a187 100644
      }
  
      void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor, 0);
-@@ -225,7 +206,20 @@ SharedMemory::~SharedMemory()
+@@ -227,7 +202,20 @@ SharedMemory::~SharedMemory()
          closeWithRetry(m_fileDescriptor.value());
  }
  
@@ -106,19 +112,18 @@ index 998a2a76..2732a187 100644
  {
      ASSERT_ARG(handle, handle.isNull());
      ASSERT(m_fileDescriptor);
-@@ -238,6 +232,14 @@ bool SharedMemory::createHandle(Handle& handle, Protection)
+@@ -240,6 +228,13 @@ bool SharedMemory::createHandle(Handle& handle, Protection)
          ASSERT_NOT_REACHED();
          return false;
      }
 +
-+    int err = ASharedMemory_setProt(duplicatedHandle, accessModeFile(protection));
++    int err = ASharedMemory_setProt(duplicate.value(), accessModeFile(protection));
 +    if (err < 0) {
 +        ASSERT_NOT_REACHED();
-+        while (close(duplicatedHandle) == -1 && errno == EINTR) { }
 +        return false;
 +    }
 +
-     handle.m_attachment = IPC::Attachment(duplicatedHandle, m_size);
+     handle.m_attachment = IPC::Attachment(WTFMove(duplicate), m_size);
      return true;
  }
 -- 

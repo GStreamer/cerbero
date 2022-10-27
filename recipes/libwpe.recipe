@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'libwpe'
-    version = '1.13.2'
-    stype = SourceType.GIT
+    version = '1.14.0'
+    stype = SourceType.TARBALL
     btype = BuildType.MESON
-    remotes = {'origin': 'https://github.com/WebPlatformForEmbedded/libwpe.git'}
-    commit = '203eb3bf1ea6be98d44cb5a2cc8bf7c1a8ebb171'
+    url = 'https://wpewebkit.org/releases/libwpe-{0}.tar.xz'.format(version)
+    tarball_checksum = 'c073305bbac5f4402cc1c8a4753bfa3d63a408901f86182051eaa5a75dd89c00'
     deps = ['xkbcommon']
 
     files_libs = ['libwpe-1.0']
@@ -31,8 +31,3 @@ class Recipe(recipe.Recipe):
     ]
 
     library_type = LibraryType.SHARED
-
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            self.patches = ['libwpe/0001-Add-Process-Management-API.patch']
-            self.meson_options['enable-process'] = 'true'

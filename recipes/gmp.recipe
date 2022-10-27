@@ -21,18 +21,16 @@ GMP_H_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'gmp'
-    version = '6.1.2'
+    version = '6.2.1'
     url = 'gnu://'
-    tarball_checksum = '87b565e89a9a684fe4ebeeddb8399dce2599f9c9049854ca8c0dfbdea0e21912'
+    tarball_checksum = 'fd4829912cddd12f84181c3451cc752be224643e87fac497b69edddadc49b4f2'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus, License.GPLv2Plus, License.GPLv3Plus]
-    tarball_dirname = 'gmp-6.1.2'
+    tarball_dirname = 'gmp-6.2.1'
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
     autoreconf = True
-
-    patches = ['gmp/0001-fix-cross-compilation-with-wine-installed.patch']
 
     def prepare(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -89,4 +87,3 @@ class Recipe(recipe.Recipe):
             with open(os.path.join(self.config.prefix, 'include', 'gmp.h'), 'w+') as f:
                 f.write(GMP_H_UNVERSAL)
         super().post_install()
-

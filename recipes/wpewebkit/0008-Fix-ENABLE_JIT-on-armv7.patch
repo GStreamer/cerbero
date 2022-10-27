@@ -1,0 +1,25 @@
+From 93930db98beb941c00dcf3c237db04360f01c5d9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Mon, 31 Oct 2022 13:49:18 +0100
+Subject: [PATCH] Fix ENABLE_JIT on armv7
+
+---
+ Source/WTF/wtf/PlatformEnable.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/WTF/wtf/PlatformEnable.h b/Source/WTF/wtf/PlatformEnable.h
+index 8863f57d..6aa2432c 100644
+--- a/Source/WTF/wtf/PlatformEnable.h
++++ b/Source/WTF/wtf/PlatformEnable.h
+@@ -591,7 +591,7 @@
+ #undef ENABLE_WEBASSEMBLY_B3JIT
+ #define ENABLE_WEBASSEMBLY_B3JIT 0
+ #endif
+-#if ((CPU(ARM_THUMB2) && CPU(ARM_HARDFP)) || CPU(MIPS)) && OS(LINUX)
++#if ((CPU(ARM_THUMB2) && (CPU(ARM_HARDFP) || WTF_ARM_ARCH_AT_LEAST(7))) || CPU(MIPS)) && OS(LINUX)
+ /* On ARMv7 and MIPS on Linux the JIT is enabled unless explicitly disabled. */
+ #if !defined(ENABLE_JIT)
+ #define ENABLE_JIT 1
+-- 
+2.34.1
+

@@ -18,7 +18,7 @@ diff --git a/Source/WebCore/platform/graphics/texmap/TextureMapperShaderProgram.
 index 299f0a9e..83b325c0 100644
 --- a/Source/WebCore/platform/graphics/texmap/TextureMapperShaderProgram.cpp
 +++ b/Source/WebCore/platform/graphics/texmap/TextureMapperShaderProgram.cpp
-@@ -167,6 +167,7 @@ static const char* vertexTemplateCommon =
+@@ -158,6 +158,7 @@ static const char* vertexTemplateCommon =
      GLSL_DIRECTIVE(ifdef ENABLE_TextureExternalOES) \
          GLSL_DIRECTIVE(extension GL_OES_EGL_image_external : require) \
          GLSL_DIRECTIVE(define SamplerExternalOESType samplerExternalOES) \

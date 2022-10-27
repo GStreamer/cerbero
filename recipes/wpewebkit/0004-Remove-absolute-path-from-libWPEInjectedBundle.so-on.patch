@@ -12,7 +12,7 @@ diff --git a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp b/Source/WebK
 index 990e8d04..7178e313 100644
 --- a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
 +++ b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
-@@ -323,8 +323,7 @@ static const char* injectedBundleDirectory()
+@@ -329,8 +329,7 @@ static const char* injectedBundleDirectory()
          G_DIR_SEPARATOR_S "injected-bundle" G_DIR_SEPARATOR_S;
      return injectedBundlePath;
  #elif PLATFORM(WPE)

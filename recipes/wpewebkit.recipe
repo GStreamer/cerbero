@@ -1,14 +1,12 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-from cerbero.utils import android, shell
-
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.34.6'
+    version = '2.38.1'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '301e895c8ed08ce7dccef3192b972f2ccfc2020463244c64069a636f2b05265f'
+    tarball_checksum = 'bfa913aa60c39659983cd906c10a97b2cef1ae0c0574c89ed43dae2a35fefc00'
     deps = [
         'icu',
         'cairo',
@@ -30,26 +28,23 @@ class Recipe(recipe.Recipe):
         'openjpeg',
     ]
     platform_deps = {Platform.ANDROID: ['gnustl']}
-    # TODO: support accessibility, gstreamer-gl and woff2
-    configure_options = '-DPORT=WPE \
-                        -DENABLE_ACCESSIBILITY=OFF \
-                        -DUSE_GSTREAMER_GL=ON \
-                        -DUSE_GSTREAMER_NATIVE_VIDEO=ON \
-                        -DUSE_GSTREAMER_NATIVE_AUDIO=ON \
-                        -DUSE_WOFF2=OFF \
-                        -DUSE_SYSTEMD=OFF \
-                        -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
-                        -DWPE_ENABLE_PROCESS=1 \
-                        -DUSE_SOUP2=ON \
-                        -DUSE_LCMS=OFF \
-                        -DHAVE_PTHREAD_NP_H=OFF \
-                        -DENABLE_WEBDRIVER=OFF \
-                        -Dis_android=1 \
-                        -DUSE_LD_LLD=ON \
-                        -DUSE_LD_GOLD=OFF \
-                        -DCMAKE_SYSTEM_NAME=Linux \
-                        -DLOG_DISABLED=1 \
-                        -DCMAKE_BUILD_TYPE=Release'
+    # TODO: support accessibility woff2
+    configure_options = '\
+        -DPORT=WPE \
+        -DENABLE_ACCESSIBILITY=OFF \
+        -DUSE_GSTREAMER_GL=ON \
+        -DUSE_GSTREAMER_NATIVE_VIDEO=ON \
+        -DUSE_GSTREAMER_NATIVE_AUDIO=ON \
+        -DUSE_WOFF2=OFF \
+        -DENABLE_DOCUMENTATION=OFF \
+        -DENABLE_INTROSPECTION=OFF \
+        -DENABLE_JOURNALD_LOG=OFF \
+        -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+        -DUSE_SOUP2=ON \
+        -DUSE_LCMS=OFF \
+        -DENABLE_WEBDRIVER=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
+    '
     cmake_generator = 'ninja'
 
     files_libs = [
@@ -132,6 +127,7 @@ class Recipe(recipe.Recipe):
         'include/wpe-webkit-1.0/wpe/WebKitURIRequest.h',
         'include/wpe-webkit-1.0/wpe/WebKitURIResponse.h',
         'include/wpe-webkit-1.0/wpe/WebKitURISchemeRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURISchemeResponse.h',
         'include/wpe-webkit-1.0/wpe/WebKitURIUtilities.h',
         'include/wpe-webkit-1.0/wpe/WebKitUserContent.h',
         'include/wpe-webkit-1.0/wpe/WebKitUserContentFilterStore.h',
@@ -185,18 +181,23 @@ class Recipe(recipe.Recipe):
                 arch_src_name = 'arm'
             self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
             self.append_env('LDFLAGS', '-landroid -llog -lm -lintl -lc++_shared -O2')
+            # Android libc does not have bcmp()
+            self.append_env('CXXFLAGS', ' -Dbcmp=memcmp ')
+            self.append_env('CFLAGS', ' -Dbcmp=memcmp ')
+            # XXX: CMake fails to check for this properly
+            self.append_env('CXXFLAGS', ' -DHAVE_MISSING_STD_FILESYSTEM_PATH_CONSTRUCTOR=1')
+            self.append_env('CXXFLAGS', ' -DWPE_ENABLE_PROCESS=1 -Dis_android=1 -DLOG_DISABLED=1')
             # Placeholder to allow enabling debug externally
             self.append_env('WEBKIT_DEBUG', '')
             self.patches += [
-                'wpewebkit/0002-Android-logging-macro.patch',
-                'wpewebkit/0006-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
-                'wpewebkit/0007-Scroll-related-changes.patch',
-                'wpewebkit/0008-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
-                'wpewebkit/0010-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
-                'wpewebkit/0011-Use-environment-variable-to-define-temp-folder-in-MediaPlayerPrivateGStreamer.patch',
-                'wpewebkit/0012-Enable-libwpe-process-management-API.patch',
-                'wpewebkit/0013-Use-ASharedMemory-instead-of-shm.patch',
-                'wpewebkit/0014-GTK-WPE-PlatformDisplay-terminateEglDisplays-is-neve.patch' # backport from webkit head
+                'wpewebkit/0001-Android-logging-macro.patch',
+                'wpewebkit/0002-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
+                'wpewebkit/0003-Scroll-related-changes.patch',
+                'wpewebkit/0004-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
+                'wpewebkit/0005-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
+                'wpewebkit/0006-Enable-libwpe-process-management-API.patch',
+                'wpewebkit/0007-Use-ASharedMemory-instead-of-shm.patch',
+                'wpewebkit/0008-Fix-ENABLE_JIT-on-armv7.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

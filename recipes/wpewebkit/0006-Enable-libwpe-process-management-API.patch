@@ -5,27 +5,27 @@ Subject: [PATCH] Enable libwpe process management API
 
 ---
  Source/WebKit/SourcesWPE.txt                  |  1 +
- .../Launcher/glib/ProcessLauncherGLib.cpp     | 53 +++++++++++++-
- .../Launcher/glib/WPEProcessProvider.cpp      | 71 +++++++++++++++++++
- .../Launcher/glib/WPEProcessProvider.h        | 34 +++++++++
- 4 files changed, 157 insertions(+), 2 deletions(-)
+ .../Launcher/glib/ProcessLauncherGLib.cpp     | 36 +++++++++-
+ .../Launcher/glib/WPEProcessProvider.cpp      | 72 +++++++++++++++++++
+ .../Launcher/glib/WPEProcessProvider.h        | 35 +++++++++
+ 4 files changed, 142 insertions(+), 2 deletions(-)
  create mode 100644 Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.cpp
  create mode 100644 Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.h
 
 diff --git a/Source/WebKit/SourcesWPE.txt b/Source/WebKit/SourcesWPE.txt
-index 1446d28f..2bd62e47 100644
+index 79fa705d..d0d6ec02 100644
 --- a/Source/WebKit/SourcesWPE.txt
 +++ b/Source/WebKit/SourcesWPE.txt
-@@ -208,6 +208,7 @@ UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
+@@ -220,6 +220,7 @@ UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
  UIProcess/Launcher/glib/BubblewrapLauncher.cpp
  UIProcess/Launcher/glib/FlatpakLauncher.cpp
  UIProcess/Launcher/glib/XDGDBusProxy.cpp
 +UIProcess/Launcher/glib/WPEProcessProvider.cpp
  
- UIProcess/WebsiteData/soup/WebsiteDataStoreSoup.cpp
- UIProcess/WebsiteData/unix/WebsiteDataStoreUnix.cpp
+ UIProcess/Notifications/glib/NotificationService.cpp
+ 
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
-index b0d079fd..83a683b6 100644
+index c219c57a..eda7ac14 100644
 --- a/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 +++ b/Source/WebKit/UIProcess/Launcher/glib/ProcessLauncherGLib.cpp
 @@ -31,6 +31,7 @@
@@ -36,30 +36,9 @@ index b0d079fd..83a683b6 100644
  #include <errno.h>
  #include <fcntl.h>
  #include <glib.h>
-@@ -99,10 +100,54 @@ static bool isInsideSnap()
- }
- #endif
- 
-+#if USE(WPE_PROCESS_LAUNCHER)
-+static wpe_process_type wpeProcessType(ProcessLauncher::ProcessType processType)
-+{
-+    switch (processType) {
-+    case ProcessLauncher::ProcessType::Network:
-+        return WPE_PROCESS_TYPE_NETWORK;
-+#if ENABLE(GPU_PROCESS)
-+    case ProcessLauncher::ProcessType::GPU:
-+        return WPE_PROCESS_TYPE_GPU;
-+#endif
-+    case ProcessLauncher::ProcessType::Web:
-+    default:
-+        return WPE_PROCESS_TYPE_WEB;
-+    }
-+}
-+#endif
-+
- void ProcessLauncher::launchProcess()
+@@ -72,6 +73,33 @@ void ProcessLauncher::launchProcess()
  {
-     IPC::Connection::SocketPair socketPair = IPC::Connection::createPlatformConnection(IPC::Connection::ConnectionOptions::SetCloexecOnServer);
+     IPC::Connection::SocketPair socketPair = IPC::Connection::createPlatformConnection(IPC::Connection::ConnectionOptions::SetCloexecOnClient | IPC::Connection::ConnectionOptions::SetCloexecOnServer);
  
 +    GUniquePtr<gchar> processIdentifier(g_strdup_printf("%" PRIu64, m_launchOptions.processIdentifier.toUInt64()));
 +    GUniquePtr<gchar> webkitSocket(g_strdup_printf("%d", socketPair.client));
@@ -78,7 +57,7 @@ index b0d079fd..83a683b6 100644
 +
 +        if (m_processIdentifier > -1) {
 +            // We've finished launching the process, message back to the main run loop.
-+            RunLoop::main().dispatch([protectedThis = makeRef(*this), this, serverSocket = socketPair.server] {
++            RunLoop::main().dispatch([protectedThis = Ref { *this }, this, serverSocket = socketPair.server] {
 +                didFinishLaunchingProcess(m_processIdentifier, serverSocket);
 +            });
 +        } else {
@@ -91,7 +70,7 @@ index b0d079fd..83a683b6 100644
      String executablePath;
      CString realExecutablePath;
      switch (m_launchOptions.processType) {
-@@ -123,8 +168,6 @@ void ProcessLauncher::launchProcess()
+@@ -92,8 +120,6 @@ void ProcessLauncher::launchProcess()
      }
  
      realExecutablePath = FileSystem::fileSystemRepresentation(executablePath);
@@ -100,7 +79,7 @@ index b0d079fd..83a683b6 100644
      unsigned nargs = 4; // size of the argv array for g_spawn_async()
  
  #if ENABLE(DEVELOPER_MODE)
-@@ -213,7 +256,13 @@ void ProcessLauncher::terminateProcess()
+@@ -192,7 +218,13 @@ void ProcessLauncher::terminateProcess()
      if (!m_processIdentifier)
          return;
  
@@ -116,10 +95,10 @@ index b0d079fd..83a683b6 100644
  
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.cpp b/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.cpp
 new file mode 100644
-index 00000000..2437198c
+index 00000000..383d67f7
 --- /dev/null
 +++ b/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.cpp
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,72 @@
 +#include "config.h"
 +#include "WPEProcessProvider.h"
 +
@@ -191,13 +170,13 @@ index 00000000..2437198c
 +} // namespace WebKit
 +
 +#endif // defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS
-\ No newline at end of file
++
 diff --git a/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.h b/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.h
 new file mode 100644
-index 00000000..9398981c
+index 00000000..2417e09c
 --- /dev/null
 +++ b/Source/WebKit/UIProcess/Launcher/glib/WPEProcessProvider.h
-@@ -0,0 +1,34 @@
+@@ -0,0 +1,35 @@
 +#pragma once
 +
 +#if defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS
@@ -232,7 +211,7 @@ index 00000000..9398981c
 +} // namespace WebKit
 +
 +#endif // defined(WPE_ENABLE_PROCESS) && WPE_ENABLE_PROCESS
-\ No newline at end of file
++
 -- 
 2.34.1
 
