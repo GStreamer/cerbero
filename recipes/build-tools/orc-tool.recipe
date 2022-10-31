@@ -3,16 +3,16 @@
 
 class Recipe(recipe.Recipe):
     name = 'orc-tool'
-    version = '0.4.31'
+    version = '0.4.33'
 
     stype = SourceType.TARBALL
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
-    tarball_checksum = 'a0ab5f10a6a9ae7c3a6b4218246564c3bf00d657cbdf587e6d34ec3ef0616075'
+    tarball_checksum = '844e6d7db8086f793f57618d3d4b68d29d99b16034e71430df3c21cfd3c3542a'
     tarball_dirname = 'orc-%(version)s'
     # These properties are only used when stype is GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
-    commit = 'origin/master'
+    commit = 'origin/main'
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]

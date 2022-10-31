@@ -3,15 +3,15 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.31'
+    version = '0.4.33'
 
     stype = SourceType.TARBALL
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
-    tarball_checksum = 'a0ab5f10a6a9ae7c3a6b4218246564c3bf00d657cbdf587e6d34ec3ef0616075'
+    tarball_checksum = '844e6d7db8086f793f57618d3d4b68d29d99b16034e71430df3c21cfd3c3542a'
     # These properties are only used when stype is GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
-    commit = 'origin/master'
+    commit = 'origin/main'
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
@@ -22,18 +22,7 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
         'share/aclocal/orc.m4', 'bin/orcc%(bext)s']
 
-    patches = [
-        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/42
-        'orc/0001-orc-Implement-a-windows-helper-for-getenv.patch',
-        'orc/0002-orccodemem-Add-support-for-Universal-Windows-Platfor.patch',
-        'orc/0003-orc-Fix-some-warnings-on-MSVC-and-enable-werror.patch',
-        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/48
-        'orc/0001-orc-Use-page-size-aligned-memory-block-for-Windows.patch',
-        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/44
-        'orc/0001-orc-Fix-indentation.patch',
-        'orc/0002-orc-Print-hex-value-directly-instead-of-a-constant.patch',
-        'orc/0003-orc-Don-t-set-memory-protection-if-there-s-no-code.patch',
-    ]
+    patches = []
 
     def prepare(self):
         # Don't build testing helper library on ios
