@@ -14,7 +14,7 @@ class Recipe(recipe.Recipe):
     # https://github.com/lu-zero/cargo-c/pull/277
     patches = [name + '/0001-Fix-linking-with-Android-NDK-linker.patch']
 
-    deps = ['pkg-config']
+    deps = ['zlib', 'pkg-config']
     # Need openssl on macOS. On Windows, a prebuilt openssl crate is downloaded.
     platform_deps = {
         Platform.DARWIN: ['openssl'],
