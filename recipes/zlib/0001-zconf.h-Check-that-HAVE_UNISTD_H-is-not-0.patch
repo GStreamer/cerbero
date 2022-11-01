@@ -1,32 +1,43 @@
-From 2fe4c96e72c3c23c9545d4ff6ec493fddb210889 Mon Sep 17 00:00:00 2001
-From: Cerbero Build System <cerbero@gstreamer.freedesktop.org>
-Date: Mon, 8 Jun 2020 09:56:46 +0530
+From fb950d69c91194cde5d4cf0b523661e01bc518ac Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 1 Nov 2022 20:20:44 +0530
 Subject: [PATCH] zconf.h: Check that HAVE_UNISTD_H is not 0
 
 Also do the same check for HAVE_STDARG_H. Some projects such as ffmpeg
 will use 1/0 to denote presence/absence instead of define/undef.
 ---
- zconf.h | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ zconf.h | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
 
 diff --git a/zconf.h b/zconf.h
-index 5e1d68a..d4b49da 100644
+index 5e1d68a..148d0a6 100644
 --- a/zconf.h
 +++ b/zconf.h
-@@ -431,11 +431,11 @@ typedef uLong FAR uLongf;
+@@ -431,12 +431,20 @@ typedef uLong FAR uLongf;
     typedef unsigned long z_crc_t;
  #endif
  
 -#ifdef HAVE_UNISTD_H    /* may be set to #if 1 by ./configure */
-+#if defined(HAVE_UNISTD_H) && HAVE_UNISTD_H != 0    /* may be set to #if 1 by ./configure */
- #  define Z_HAVE_UNISTD_H
+-#  define Z_HAVE_UNISTD_H
++/* may be just defined without a value, or defined to 1, so handle both */
++#define Z_EXPAND(macro_or_string)    Z_EXPAND_ARG (macro_or_string)
++#define Z_EXPAND_ARG(contents)       1 ## contents
++
++#ifdef HAVE_UNISTD_H
++#  if Z_EXPAND(HAVE_UNISTD_H) != 10
++#    define Z_HAVE_UNISTD_H
++#  endif
  #endif
  
 -#ifdef HAVE_STDARG_H    /* may be set to #if 1 by ./configure */
-+#if defined(HAVE_STDARG_H) && HAVE_STDARG_H != 0    /* may be set to #if 1 by ./configure */
- #  define Z_HAVE_STDARG_H
+-#  define Z_HAVE_STDARG_H
++#ifdef HAVE_STDARG_H
++#  if Z_EXPAND(HAVE_STDARG_H) != 10
++#    define Z_HAVE_STDARG_H
++#  endif
  #endif
  
+ #ifdef STDC
 -- 
-2.27.0.windows.1
+2.37.3
 
