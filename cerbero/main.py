@@ -27,6 +27,7 @@ import os
 import time
 
 from cerbero import config, commands
+from cerbero.enums import Platform
 from cerbero.errors import UsageError, FatalError, BuildStepError, \
     ConfigurationError, CerberoException, AbortedError
 from cerbero.utils import _, N_, user_is_root, git, run_until_complete
@@ -102,6 +103,8 @@ class Main(object):
         if len(args) == 0:
             args = ["-h"]
         self.args = self.parser.parse_args(args)
+        if self.args.variants is None:
+            self.args.variants = []
 
     def list_variants(self):
         if not self.args.list_variants:
@@ -141,6 +144,15 @@ class Main(object):
             if self.args.command == 'shell':
                 self.config.for_shell = True
             self.config.load(self.args.config, self.args.variants)
+            if self.config.platform == Platform.WINDOWS and 'visualstudio' not in self.args.variants:
+                m.warning("'visualstudio' variant is now enabled by default: to build using only MinGW, use -v mingw")
+                for name in ('orc-0.4-0', 'z-1', 'ffi-7', 'glib-2.0-0'):
+                    dll = os.path.join(self.config.build_tools_prefix, 'bin', f'lib{name}.dll')
+                    if os.path.exists(dll):
+                        m.error('MIGRATION: build-tools now use Visual Studio, you need to rebuild:')
+                        print('./cerbero-uninstalled -c config/build-tools.cbc wipe --force', file=sys.stderr)
+                        print('./cerbero-uninstalled bootstrap --build-tools-only', file=sys.stderr)
+                        sys.exit(1)
             if self.args.manifest:
                 self.config.manifest = self.args.manifest
         except ConfigurationError as exc:

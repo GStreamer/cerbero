@@ -84,13 +84,17 @@ def set_nofile_ulimit():
 class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
     __disabled_variants = ['x11', 'alsa', 'pulse', 'jack', 'cdparanoia', 'v4l2',
-                           'gi', 'unwind', 'rpi', 'visualstudio', 'uwp', 'qt5',
+                           'gi', 'unwind', 'rpi', 'visualstudio', 'mingw', 'uwp', 'qt5',
                            'intelmsdk', 'python', 'werror', 'vaapi', 'rust']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
     __bool_variants = __enabled_variants + __disabled_variants
     # Variants that are `key: (values)`, with the first value in the tuple
     # being the default
     __mapping_variants = {'vscrt': ('auto', 'md', 'mdd')}
+    __aliases = {
+        'visualstudio': ['nomingw'],
+        'mingw': ['novisualstudio'],
+    }
 
     def __init__(self, variants):
         # Set default values
@@ -101,6 +105,17 @@ class Variants(object):
         for v, choices in self.__mapping_variants.items():
             setattr(self, v, choices[0])
         self.override(variants)
+
+    def set_bool(self, key):
+        if key.startswith('no'):
+            key = key[2:]
+            if key not in self.__bool_variants:
+                m.warning('Variant {!r} is unknown or obsolete'.format(key))
+            setattr(self, key, False)
+        else:
+            if key not in self.__bool_variants:
+                m.warning('Variant {!r} is unknown or obsolete'.format(key))
+            setattr(self, key, True)
 
     def override(self, variants):
         if not isinstance(variants, list):
@@ -115,14 +130,10 @@ class Variants(object):
                 if value not in self.__mapping_variants[key]:
                     raise AttributeError('Mapping variant {!r} value {!r} is unknown'.format(key, value))
                 setattr(self, key, value)
-            elif v.startswith('no'):
-                if v[2:] not in self.__bool_variants:
-                    m.warning('Variant {!r} is unknown or obsolete'.format(v[2:]))
-                setattr(self, v[2:], False)
             else:
-                if v not in self.__bool_variants:
-                    m.warning('Variant {!r} is unknown or obsolete'.format(v))
-                setattr(self, v, True)
+                self.set_bool(v)
+                for alias in self.__aliases.get(v, []):
+                    self.set_bool(alias)
         # Auto-set vscrt variant if it wasn't set explicitly
         if self.vscrt == 'auto':
             self.vscrt = 'md'
@@ -136,6 +147,7 @@ class Variants(object):
             # UWP implies Visual Studio
             if attr == 'uwp' and value:
                 self.visualstudio = True
+                self.mingw = False
 
     def __getattr__(self, name):
         if name.startswith('no') and name[2:] in self.bools():
@@ -683,6 +695,9 @@ class Config (object):
         self.build_tools_config.prefix = self.build_tools_prefix
         self.build_tools_config.home_dir = self.home_dir
         self.build_tools_config.local_sources = self.local_sources
+        # We want build tools to use the VS specified by the user manually
+        self.build_tools_config.vs_install_path = self.vs_install_path
+        self.build_tools_config.vs_install_version = self.vs_install_version
         self.build_tools_config.load()
 
         self.build_tools_config.prefix = self.build_tools_prefix
