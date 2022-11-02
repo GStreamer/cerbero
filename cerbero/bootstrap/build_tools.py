@@ -67,8 +67,6 @@ class BuildTools (BootstrapperBase, Fetch):
                     self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
                     self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
             elif self.config.distro == Distro.MSYS2:
-                # Installed by the MSYS2 bootstrapper
-                self.BUILD_TOOLS.remove('pkg-config')
                 self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
                 self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('nasm')
 
