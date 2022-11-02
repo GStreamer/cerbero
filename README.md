@@ -151,10 +151,10 @@ used to select the toolchain (MinGW, MSVC, UWP):
 
 Target          | Config file               | Variant
 :---------------|:--------------------------|:-------
-MinGW x86       | `win32.cbc`               |
-MinGW x86_64    | `win64.cbc`               |
-MSVC x86        | `win32.cbc`               | visualstudio
-MSVC x86_64     | `win64.cbc`               | visualstudio
+MSVC x86        | `win32.cbc`               |
+MSVC x86_64     | `win64.cbc`               |
+MinGW x86       | `win32.cbc`               | mingw
+MinGW x86_64    | `win64.cbc`               | mingw
 UWP x86         | `win32.cbc`               | uwp
 UWP x86_64      | `win64.cbc`               | uwp
 UWP ARM64       | `cross-win-arm64.cbc`     | uwp
@@ -163,11 +163,11 @@ UWP Universal   | `cross-uwp-universal.cbc` | (implicitly uwp)
 Example usage:
 
 ```sh
-# Target MinGW 32-bit
-$ ./cerbero-uninstalled -c config/win32.cbc package gstreamer-1.0
-
 # Target MSVC 64-bit
-$ ./cerbero-uninstalled -c config/win64.cbc -v visualstudio package gstreamer-1.0
+$ ./cerbero-uninstalled -c config/win64.cbc package gstreamer-1.0
+
+# Target MinGW 32-bit
+$ ./cerbero-uninstalled -c config/win32.cbc -v mingw package gstreamer-1.0
 
 # Target UWP, x86_64
 $ ./cerbero-uninstalled -c config/win64.cbc -v uwp package gstreamer-1.0
@@ -289,27 +289,20 @@ Since 1.17.1, the `nvcodec` plugin does not need access to the Nvidia Video SDK
 or the CUDA SDK. It now loads everything at runtime. Hence, it is now enabled
 by default on all platforms.
 
-## Enabling Visual Studio Support
+## Building without Visual Studio
 
-Starting with version 1.15.2, Cerbero supports building all GStreamer recipes,
+Starting with version 1.22, Cerbero defaults to building all GStreamer recipes,
 all mandatory dependencies (such as glib, libffi, zlib, etc), and some external
-dependencies with Visual Studio. You must explicitly opt-in to this by [enabling
-the `visualstudio` variant](#enabling-optional-features-with-variants):
+dependencies with Visual Studio.
+
+If you want to build only with the MinGW toolchain and without Visual Studio,
+you can do so by [enabling the `mingw` variant](#enabling-optional-features-with-variants):
 
 ```sh
-$ python ./cerbero-uninstalled -v visualstudio package gstreamer-1.0
+$ ./cerbero-uninstalled -v mingw package gstreamer-1.0
 ```
 
-If you already have a Cerbero build, it is highly recommended to run the `wipe`
-command before switching to building with Visual Studio.
-
-[Some plugins that require external dependencies will be automatically
-disabled](https://gitlab.freedesktop.org/gstreamer/cerbero/issues/121) when
-running in this mode.
-
-Currently, most recipes that use Meson (`btype = BuildType.MESON`) and those
-that have the `can_msvc` recipe property set to `True` are built with Visual
-Studio.
+Note that Autotools recipes continue to require MinGW.
 
 #### Important Windows-specific Notes
 
