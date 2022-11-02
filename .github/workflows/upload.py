@@ -121,6 +121,8 @@ async def upload_tarball(sftp, path: Path, progress: bool):
 
     remotedir = f"wpewebkit/android/bootstrap/{spec.version}"
     print("Remote location:", remotedir)
+    if not await sftp.isdir(remotedir):
+        await sftp.mkdir(remotedir)
 
     if spec.datecode:
         log.warn("Package '%s' already has a datecode, continuing anyway", path)
