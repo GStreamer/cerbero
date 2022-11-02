@@ -14,6 +14,7 @@ class Recipe(custom.GStreamer):
     # we error out if they weren't found.
     meson_options = {'gpl': 'enabled',
                      # enabled plugins
+                     'aes': 'enabled',
                      'assrender': 'enabled',
                      'bz2': 'enabled',
                      'closedcaption': 'enabled',
@@ -132,6 +133,7 @@ class Recipe(custom.GStreamer):
 
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
+             'lib/gstreamer-1.0/libgstaes%(mext)s',
              'lib/gstreamer-1.0/libgstaiff%(mext)s',
              'lib/gstreamer-1.0/libgstaudiobuffersplit%(mext)s',
              'lib/gstreamer-1.0/libgstaudiofxbad%(mext)s',
@@ -166,6 +168,7 @@ class Recipe(custom.GStreamer):
 
     files_plugins_effects_devel = [
              'lib/gstreamer-1.0/libgstaccurip.a', 'lib/gstreamer-1.0/libgstaccurip.la',
+             'lib/gstreamer-1.0/libgstaes.a', 'lib/gstreamer-1.0/libgstaes.la',
              'lib/gstreamer-1.0/libgstaiff.a', 'lib/gstreamer-1.0/libgstaiff.la',
              'lib/gstreamer-1.0/libgstaudiobuffersplit.a', 'lib/gstreamer-1.0/libgstaudiobuffersplit.la',
              'lib/gstreamer-1.0/libgstaudiofxbad.a', 'lib/gstreamer-1.0/libgstaudiofxbad.la',
