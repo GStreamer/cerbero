@@ -1,0 +1,32 @@
+From f756104e41d2adf27e1d09520c0d7bc98882f008 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 3 Nov 2022 19:17:39 +0000
+Subject: [PATCH] meson: fix freetype lookup with MSVC using pkg-config
+
+People use pkg-config to find depencies with MSVC too,
+so don't assume cmake here for no good reason.
+
+Fixes regression caused by commit afdf144ae84fd67ad773799a93407214e5cc2261
+---
+ meson.build | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 723e0c22..1ae2476f 100644
+--- a/meson.build
++++ b/meson.build
+@@ -312,10 +312,7 @@ endif
+ 
+ # The first version of freetype with a pkg-config file is 2.1.5,
+ # CMake uses 'freetype' rather than 'freetype2' for the package name
+-freetype_package_name = cc.get_argument_syntax() == 'msvc' ? \
+-                        'freetype' : 'freetype2'
+-
+-freetype_dep = dependency(freetype_package_name,
++freetype_dep = dependency('freetype2', 'freetype',
+                           required: freetype_option,
+                           fallback: ['freetype2', 'freetype_dep'])
+ 
+-- 
+2.38.1
+

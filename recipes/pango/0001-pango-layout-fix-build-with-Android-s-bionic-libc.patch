@@ -1,0 +1,33 @@
+From cf793ed2957c5005f83da53f68ffa596fd765f19 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 3 Nov 2022 23:54:43 +0000
+Subject: [PATCH] pango-layout: fix build with Android's bionic libc
+
+It does not properly implement localeconv() and
+the decimal point in struct lconv.
+---
+ pango/pango-layout.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/pango/pango-layout.c b/pango/pango-layout.c
+index 306741b5..89d675a4 100644
+--- a/pango/pango-layout.c
++++ b/pango/pango-layout.c
+@@ -3466,7 +3466,13 @@ static void
+ ensure_decimal (PangoLayout *layout)
+ {
+   if (layout->decimal == 0)
+-    layout->decimal = g_utf8_get_char (localeconv ()->decimal_point);
++    {
++#ifndef __BIONIC__
++      layout->decimal = g_utf8_get_char (localeconv ()->decimal_point);
++#else
++      layout->decimal = g_utf8_get_char (".");
++#endif
++    }
+ }
+ 
+ struct _LastTabState {
+-- 
+2.38.1
+
