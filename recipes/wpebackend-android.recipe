@@ -8,11 +8,13 @@ class Recipe(recipe.Recipe):
     stype = SourceType.GIT
     btype = BuildType.CMAKE
     remotes = {'origin': 'https://github.com/Igalia/WPEBackend-android.git'}
-    commit = '8594c965eae0b64e0ed2f0a348f000705da35446'
+    commit = '9421292521f043b1096e8b639df4821b57084121'
     deps = ['glib', 'libwpe']
 
     files_libs = ['libWPEBackend-android']
     files_devel = ['include/wpe-android']
+
+    configure_options = '-DCMAKE_BUILD_TYPE=Release'
 
     def prepare(self):
         if self.config.target_platform != Platform.ANDROID:
