@@ -8,7 +8,9 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.xz'
     tarball_checksum = 'ef2efae259ce80a240de48ec85ecb062cecca26e4352ffb3fda562c21a93007b'
-    patches = []
+    patches = [
+        name + '/0001-pkgconfig-fix-generation-to-use-prefix.patch',
+    ]
 
     btype = BuildType.MAKEFILE
     configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
