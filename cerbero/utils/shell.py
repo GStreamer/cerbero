@@ -398,27 +398,32 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
     if sys.platform.startswith('win'):
-        cmd = ['powershell', '-Command', 'Invoke-WebRequest', '-UserAgent',
-               user_agent, '-Method', 'Get', '-OutFile', dest]
-        # We will append the url at the end of the cmd array
-        cmd += ['-Uri']
+        cmd = ['powershell', '-Command', '& { Set-Variable -Name ' \
+               'ProgressPreference -Value \'SilentlyContinue\'; ' \
+               f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} ' \
+               '-Method Get -Uri %s }']
     elif which('wget'):
         cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20',
                '--progress=dot:giga', '-O', dest]
         if not check_cert:
             cmd += ['--no-check-certificate']
+        cmd += ['%s']
     elif which('curl'):
         cmd = ['curl', '-L', '--fail', '--user-agent', user_agent, '--retry', '2',
                '--connect-timeout', '20', '--progress-bar', '-o', dest]
         if not check_cert:
             cmd += ['-k']
+        cmd += ['%s']
     else:
         raise FatalError('Need either wget or curl to download things')
 
     errors = []
+    url_fmt = cmd[-1]
+    cmd = cmd[:-1]
     for murl in urls:
         try:
-            return await async_call(cmd + [murl], cpu_bound=False, logfile=logfile)
+            return await async_call(cmd + [url_fmt % murl], cpu_bound=False,
+                                    logfile=logfile)
         except Exception as ex:
             if os.path.exists(dest):
                 os.remove(dest)
