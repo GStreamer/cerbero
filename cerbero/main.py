@@ -145,7 +145,8 @@ class Main(object):
                 self.config.for_shell = True
             self.config.load(self.args.config, self.args.variants)
             if self.config.platform == Platform.WINDOWS and 'visualstudio' not in self.args.variants:
-                m.warning("'visualstudio' variant is now enabled by default: to build using only MinGW, use -v mingw")
+                if 'mingw' not in self.args.variants and not self.config.variants.uwp:
+                    m.warning("'visualstudio' variant is now enabled by default: to build using only MinGW, use -v mingw")
                 for name in ('orc-0.4-0', 'z-1', 'ffi-7', 'glib-2.0-0'):
                     dll = os.path.join(self.config.build_tools_prefix, 'bin', f'lib{name}.dll')
                     if os.path.exists(dll):
