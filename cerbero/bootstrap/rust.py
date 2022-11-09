@@ -79,9 +79,9 @@ class RustBootstrapper(BootstrapperBase):
         self.build_triple = self.config.rust_build_triple
         self.target_triples = self.config.rust_target_triples
         if self.config.platform == Platform.WINDOWS:
-            # On Windows, build-tools always use the GNU toolchain for
-            # historical reasons so we need to also bootstrap $arch-windows-gnu
-            bs_triple = self.config.rust_triple(self.config.arch, self.config.platform, False)
+            # On Windows, build-tools always use MSVC so we need to always
+            # bootstrap $arch-windows-msvc
+            bs_triple = self.config.rust_triple(self.config.arch, self.config.platform, True)
             if bs_triple not in self.target_triples:
                 self.target_triples.append(bs_triple)
         self.fetch_urls = self.get_fetch_urls()
