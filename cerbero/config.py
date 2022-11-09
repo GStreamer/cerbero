@@ -238,6 +238,13 @@ class Config (object):
         # First load the default configuration
         self.load_defaults()
 
+        # Use Visual Studio by default when building on Windows
+        if not self.variants.mingw and not self.variants.visualstudio:
+            if self.platform == Platform.WINDOWS:
+                self.variants.override(['visualstudio'])
+            else:
+                self.variants.override(['mingw'])
+
         # Next parse the user configuration file USER_CONFIG_FILE
         # which overrides the defaults
         self._load_user_config()
