@@ -84,6 +84,14 @@ class RustBootstrapper(BootstrapperBase):
             bs_triple = self.config.rust_triple(self.config.arch, self.config.platform, True)
             if bs_triple not in self.target_triples:
                 self.target_triples.append(bs_triple)
+            # rustup-init wants to always install both 64-bit and 32-bit
+            # toolchains, so ensure that we fetch and install both
+            archs = {Architecture.X86_64, Architecture.X86}
+            other_arch = (archs - {self.config.arch}).pop()
+            arch_triple = self.config.rust_triple(other_arch, self.config.platform,
+                                                  self.config.variants.visualstudio)
+            if arch_triple not in self.target_triples:
+                self.target_triples.append(arch_triple)
         self.fetch_urls = self.get_fetch_urls()
         self.fetch_urls_func = self.get_more_fetch_urls
         self.extract_steps = []
