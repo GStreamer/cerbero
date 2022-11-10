@@ -49,7 +49,7 @@ class Recipe(recipe.Recipe):
             # id/signature modifications we do later and may need to be rebuilt
             #self.files_libs += ['libvulkan']
             # no libvulkan.a
-            self.library_type = LibraryType.SHARED
+            self.library_type = LibraryType.BOTH
 
     async def install(self):
         # only copy once for the architectures supported by the libraries
