@@ -113,7 +113,10 @@ class Recipe(recipe.Recipe):
 
     def prepare(self):
         self.openssl_platform = self._get_openssl_platform()
-        cflags = self.get_env('CFLAGS')
+        # Need this include first, otherwise on compilation openssl will prefer
+        # the headers in the prefix over those in its sources dir
+        srcdir_include = f'-I{self.config_src_dir}/include '
+        cflags = srcdir_include + self.get_env('CFLAGS')
         ldflags = self.get_env('LDFLAGS')
 
         if self.using_msvc():
@@ -137,7 +140,7 @@ class Recipe(recipe.Recipe):
             # build, and we can't pass arguments via Configure because on Darwin,
             # Configure reads the `-arch x86_64` as meaning that you want to use
             # `x86_64` as the platform, and errors out about a redefined platform.
-            cc = self.get_env('CC') + ' ' + self.get_env('CFLAGS')
+            cc = self.get_env('CC') + ' ' + srcdir_include + self.get_env('CFLAGS')
             ld = self.get_env('LD') + ' ' + self.get_env('LDFLAGS')
             # NOTE: CFLAG and LDFLAG are not typos!
             self.make += ['AR=' + ar, 'RANLIB=' + ranlib, 'CC=' + cc, 'LD=' + ld,
