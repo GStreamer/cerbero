@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
-from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
@@ -123,7 +122,6 @@ class Recipe(recipe.Recipe):
             src = os.path.join(self.config.prefix, 'lib', 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
             os.replace(src, dst)
-            shell.replace(dst, {f'libdir={self.config.libdir}': 'libdir=${prefix}/lib'})
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         if not self.using_msvc():

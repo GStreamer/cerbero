@@ -11,8 +11,12 @@ class Recipe(recipe.Recipe):
     # Need system openssl on Linux
     use_system_libs = True
 
-    # https://github.com/lu-zero/cargo-c/pull/277
-    patches = [name + '/0001-Fix-linking-with-Android-NDK-linker.patch']
+    patches = [
+        # https://github.com/lu-zero/cargo-c/pull/277
+        name + '/0001-Fix-linking-with-Android-NDK-linker.patch',
+        # https://github.com/lu-zero/cargo-c/pull/291
+        name + '/0002-generate-paths-relative-to.patch',
+    ]
 
     deps = ['zlib', 'pkg-config']
     # Need openssl on macOS. On Windows, a prebuilt openssl crate is downloaded.
