@@ -1194,16 +1194,6 @@ class Cargo(Build, ModifyEnvBase):
         else:
             os.makedirs(self.cargo_dir)
 
-        # Check that the Cargo.toml version matches the recipe version for git recipes
-        if hasattr(self, 'commit'):
-            toml_version = self.get_cargo_toml_version()
-            if toml_version != self.version:
-                msg = f'{self.name} version {self.version} doesn\'t match Cargo.toml version {toml_version}'
-                if self.commit == 'origin/main':
-                    m.warning(msg)
-                else:
-                    raise FatalError(msg)
-
         # TODO: Ideally we should strip while packaging, not while linking
         if self.rustc_debuginfo == 'strip':
             s = '\n[profile.release]\nstrip = "debuginfo"\n'

@@ -112,6 +112,17 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
         self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
 
+    async def configure(self):
+        # Check that the Cargo.toml version matches the recipe version
+        toml_version = self.get_cargo_toml_version()
+        if toml_version != self.version:
+            msg = f'{self.name} version {self.version} doesn\'t match Cargo.toml version {toml_version}'
+            if GStreamer.tagged_for_release:
+                raise FatalError(msg)
+            else:
+                m.warning(msg)
+        await super().configure()
+
     def post_install(self):
         # Cargo-C currently can't install pc files into custom dirs, so we need
         # to move these plugin pkgconfig files to the right place.
