@@ -26,6 +26,8 @@ class Recipe(recipe.Recipe):
     patches = [
         'taglib/0001-Link-with-correct-STL-on-Android.patch',
         'taglib/0002-Build-a-static-and-non-static-version.patch',
+        # https://github.com/taglib/taglib/pull/1071
+        'taglib/0003-cmake-generate-pc-file-with-the-use-of-prefix-in-lib.patch',
     ]
 
     files_libs = ['libtag']
