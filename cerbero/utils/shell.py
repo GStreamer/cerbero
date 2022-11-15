@@ -398,10 +398,10 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
     if sys.platform.startswith('win'):
-        cmd = ['powershell', '-Command', '& { Set-Variable -Name ' \
+        cmd = ['powershell', '-Command', 'Set-Variable -Name ' \
                'ProgressPreference -Value \'SilentlyContinue\'; ' \
                f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} ' \
-               '-Method Get -Uri %s }']
+               '-Method Get -Uri %s']
     elif which('wget'):
         cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20',
                '--progress=dot:giga', '-O', dest]
