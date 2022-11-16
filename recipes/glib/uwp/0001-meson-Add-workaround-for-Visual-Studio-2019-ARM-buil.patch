@@ -13,8 +13,8 @@ index 914089c..d93e745 100644
 --- a/glib/meson.build
 +++ b/glib/meson.build
 @@ -306,6 +306,7 @@ else
-   glib_sources += 'gmain.c'
- endif
+   'gprintf.c',
+ )
  
 +extra_cpp_args = []
  if host_system == 'windows'
