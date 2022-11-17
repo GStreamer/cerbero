@@ -164,7 +164,7 @@ android fedora image:
   before_script:
     - echo $CI_PIPELINE_SOURCE
     # cmake takes forever to bootstrap from source
-    - test $(uname) = Darwin && pip3 install cmake==3.24.*
+    # - test $(uname) = Darwin && pip3 install cmake==3.24.*
     - ./ci/cerbero_setup.sh cerbero_before_script
     - test $(uname) = Linux && cat /proc/self/limits
   cache:
@@ -394,8 +394,6 @@ cerbero cross-android universal examples:
     CERBERO_PACKAGE_ARGS: ""
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
-  tags:
-    - gst-macos-13
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -408,15 +406,36 @@ cerbero cross-android universal examples:
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
 
-cerbero deps cross-macos universal:
+.cerbero macos arm64 image:
+  image: "ghcr.io/ystreet/macos-ventura-cerbero-main:2022-11-20"
+  tags:
+    - gst-mac-arm
+
+cerbero deps cross-macos universal arm64-host:
   extends:
     - '.cerbero deps'
     - '.cerbero cross-macos universal'
+    - '.cerbero macos arm64 image'
 
-build cerbero cross-macos universal:
+build cerbero cross-macos universal arm64-host:
   extends:
     - '.cerbero mr'
     - '.cerbero cross-macos universal'
+    - '.cerbero macos arm64 image'
+
+cerbero deps cross-macos universal x86_64-host:
+  extends:
+    - '.cerbero deps'
+    - '.cerbero cross-macos universal'
+  tags:
+    - gst-macos-13
+
+build cerbero cross-macos universal x86_64-host:
+  extends:
+    - '.cerbero mr'
+    - '.cerbero cross-macos universal'
+  tags:
+    - gst-macos-13
 
 #
 # Cerbero iOS build
@@ -429,8 +448,6 @@ build cerbero cross-macos universal:
     CERBERO_PACKAGE_ARGS: ""
     HAVE_CCACHE: ""
     CERBERO_HOST_DIR: "/Users/gst-ci/cerbero/"
-  tags:
-    - gst-ios-16
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -442,15 +459,31 @@ build cerbero cross-macos universal:
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-*-ios-universal.pkg"
 
-cerbero deps cross-ios universal:
+cerbero deps cross-ios universal arm64-host:
   extends:
     - '.cerbero deps'
     - '.cerbero cross-ios universal'
+    - '.cerbero macos arm64 image'
 
-build cerbero cross-ios universal:
+build cerbero cross-ios universal arm64-host:
   extends:
     - '.cerbero mr'
     - '.cerbero cross-ios universal'
+    - '.cerbero macos arm64 image'
+
+cerbero deps cross-ios universal x86_64-host:
+  extends:
+    - '.cerbero deps'
+    - '.cerbero cross-ios universal'
+  tags:
+    - gst-ios-16
+
+build cerbero cross-ios universal x86_64-host:
+  extends:
+    - '.cerbero mr'
+    - '.cerbero cross-ios universal'
+  tags:
+    - gst-ios-16
 
 #
 # Build an iOS App using the iOS binaries
@@ -461,7 +494,7 @@ build cerbero cross-ios universal:
     EXAMPLES_HOME: gstreamer/subprojects
     # disable codesigning so we don't need developer identities on the CI
     # machines
-    XCODE_BUILD_ARGS: >
+    XCODE_BUILD_ARGS: >-
       CODE_SIGNING_REQUIRED="NO"
       CODE_SIGN_IDENTITY=""
       CODE_SIGNING_ALLOWED="NO"
@@ -476,32 +509,51 @@ build cerbero cross-ios universal:
     # dump some useful information
     - xcodebuild -version
     - xcodebuild -showsdks
+    - echo ${XCODE_BUILD_ARGS} > xcode_buildargs
 
     # gst-docs ios tutorials
-    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj
-    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj ${XCODE_BUILD_ARGS}
+    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
+    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-docs/examples/tutorials/xcode\ iOS/GStreamer\ iOS\ Tutorials.xcodeproj $(cat xcode_buildargs)
 
     # gst-examples
-    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj
-    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj ${XCODE_BUILD_ARGS}
+    - ./ci/run_retry.sh xcodebuild -showBuildSettings -alltargets -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
+    - ./ci/run_retry.sh xcodebuild -alltargets -destination generic/platform=iOS -project ${EXAMPLES_HOME}/gst-examples/playback/player/ios/GstPlay.xcodeproj $(cat xcode_buildargs)
   after_script:
     - rm -rf gstreamer
-  tags:
-    - gst-ios-16
 
-cross-ios universal examples:
+cross-ios universal examples x86_64-host:
   extends:
     - '.cross-ios universal examples'
     - '.cerbero mr rules'
   needs:
-    - "build cerbero cross-ios universal"
+    - "build cerbero cross-ios universal x86_64-host"
+  tags:
+    - gst-ios-16
 
-cerbero cross-ios universal examples:
+cerbero cross-ios universal examples x86_64-host:
   extends:
     - '.cross-ios universal examples'
     - '.cerbero not-mr rules'
   needs:
-    - "cerbero deps cross-ios universal"
+    - "cerbero deps cross-ios universal x86_64-host"
+  tags:
+    - gst-ios-16
+
+cross-ios universal examples arm64-host:
+  extends:
+    - '.cross-ios universal examples'
+    - '.cerbero macos arm64 image'
+    - '.cerbero mr rules'
+  needs:
+    - "build cerbero cross-ios universal arm64-host"
+
+cerbero cross-ios universal examples arm64-host:
+  extends:
+    - '.cross-ios universal examples'
+    - '.cerbero macos arm64 image'
+    - '.cerbero not-mr rules'
+  needs:
+    - "cerbero deps cross-ios universal arm64-host"
 
 #
 # Cerbero Native Windows builds
