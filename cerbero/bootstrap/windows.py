@@ -187,6 +187,9 @@ class MinGWBootstrapper(BootstrapperBase):
         filename, checksum = TOOLCHAIN_PLATFORM[self.config.platform]
         url = TOOLCHAIN_BASE_URL + filename
         self.fetch_urls.append((url, None, checksum))
+        # Remove the mingw folder before extracting, getting permission denied other
+        # and need to download the mingw package again.
+        shutil.rmtree(self.prefix)
         self.extract_steps.append((url, True, self.prefix))
         # wglext.h
         url = KHRONOS_WGL_TPL.format(OPENGL_COMMIT)
