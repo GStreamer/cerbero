@@ -772,3 +772,9 @@ class BuildStatusPrinter:
     def output_status_line(self):
         if self.interactive:
             m.output_status(self.generate_status_line())
+
+    def heartbeat(self):
+        if not self.interactive:
+            m.message(self.generate_status_line())
+        else:
+            self.output_status_line()
