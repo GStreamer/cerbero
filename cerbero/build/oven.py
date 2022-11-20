@@ -398,9 +398,19 @@ class Oven (object):
             tasks.append(asyncio.ensure_future(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
 
         async def recipes_done():
+            async def heartbeat_output():
+                while True:
+                    await asyncio.sleep(60)
+                    self._build_status_printer.heartbeat()
+
+            heartbeat_task = asyncio.create_task(heartbeat_output())
+
             while built_recipes & recipe_targets != recipe_targets:
                 for q in queues.values():
                     await q.join()
+
+            heartbeat_task.cancel()
+
 
         # push the initial set of recipes that have no dependencies to start
         # building
