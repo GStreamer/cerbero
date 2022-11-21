@@ -663,11 +663,18 @@ class CMake (MakefilesBase):
             self.make += ['VERBOSE=1']
 
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ['-DCMAKE_SYSTEM_NAME=Windows']
-        elif self.config.target_platform == Platform.ANDROID:
-            self.configure_options += ['-DCMAKE_SYSTEM_NAME=Linux']
+            system_name = 'Windows'
+        elif self.config.target_platform in (Platform.LINUX, Platform.ANDROID):
+            system_name = 'Linux'
+        elif self.config.target_platform == Platform.DARWIN:
+            system_name = 'Darwin'
+        elif self.config.target_platform == Platform.IOS:
+            system_name = 'iOS'
 
-        if self.config.target_platform == Platform.DARWIN:
+        if self.config.cross_compiling():
+            self.configure_options += [f'-DCMAKE_SYSTEM_NAME={system_name}']
+
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
             self.configure_options += ['-DCMAKE_OSX_ARCHITECTURES=' + self.config.target_arch]
 
         # FIXME: Maybe export the sysroot properly instead of doing regexp magic
