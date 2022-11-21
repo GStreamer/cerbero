@@ -17,6 +17,7 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
                ('gstreamer-1.0-playback', False, True),
                ('gstreamer-1.0-codecs', False, True),
                ('gstreamer-1.0-qt5', False, True),
+               ('gstreamer-1.0-qt6', False, True),
                ('gstreamer-1.0-effects', False, True),
                ('gstreamer-1.0-net', False, True),
                ('gstreamer-1.0-visualizers', False, True),

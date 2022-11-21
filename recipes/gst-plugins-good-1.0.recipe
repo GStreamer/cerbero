@@ -27,6 +27,7 @@ class Recipe(custom.GStreamer):
                      'oss': 'disabled',
                      'oss4': 'disabled',
                      'qt5': 'disabled', # Enabled in prepare()
+                     'qt6': 'disabled', # Enabled in prepare()
                      'shout2': 'disabled',
                      'twolame': 'disabled',
                      'waveform': 'disabled',}
@@ -253,6 +254,13 @@ class Recipe(custom.GStreamer):
                 can_enable_qt5 = False
         if can_enable_qt5:
             self.enable_plugin('qmlgl', 'qt5', 'qt5', option='qt5')
+
+        # Enable qt6 plugin if possible and selected
+        can_enable_qt6 = False
+        if self.config.target_platform == Platform.LINUX:
+            can_enable_qt6 = True
+        if can_enable_qt6:
+            self.enable_plugin('qml6', 'qt6', 'qt6', option='qt6')
 
         if self.using_msvc():
             # plugin is C++, library is Autotools

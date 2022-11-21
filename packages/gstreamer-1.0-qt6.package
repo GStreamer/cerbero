@@ -1,0 +1,14 @@
+# vi:si:et:sw=4:sts=4:ts=4:syntax=python:ft=python
+# -*- Mode: Python -*-
+
+
+class Package(custom.GStreamer, package.Package):
+
+    name = 'gstreamer-1.0-qt6'
+    shortdesc = 'GStreamer 1.0 plugins for the Qt6 framework'
+    longdesc = 'GStreamer 1.0 plugins for the Qt6 framework'
+    uuid = '1044f0a2-55a6-11ed-b55d-a87eeaa6e497'
+    deps = ['gstreamer-1.0-core']
+
+    files = ['gst-plugins-good-1.0:plugins_qt6']
+    files_devel = ['gst-plugins-good-1.0:plugins_qt6_devel']

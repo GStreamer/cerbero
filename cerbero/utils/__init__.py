@@ -606,6 +606,27 @@ def detect_qt5(platform, arch, is_universal):
         m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
     return ret
 
+def detect_qt6(platform, arch, is_universal):
+    '''
+    Returns the path to qmake:
+
+    Returns None if qmake could not be found.
+    '''
+    path = None
+    qmake6_path = os.environ.get('QMAKE', None)
+    if not qmake6_path:
+        return None
+    try:
+        qt_version = shell.check_output([qmake6_path, '-query', 'QT_VERSION']).strip()
+        qt_version = [int(v) for v in qt_version.split('.')]
+    except CommandError as e:
+        m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake6_path), str(e)))
+        qt_version = [0, 0]
+    if len(qt_version) >= 1 and qt_version[0] != 6:
+        # QMAKE is not for Qt6
+        return None
+    return qmake6_path
+
 # asyncio.Semaphore classes set their working event loop internally on
 # creation, so we need to ensure the proper loop has already been set by then.
 # This is especially important if we create global semaphores that are
