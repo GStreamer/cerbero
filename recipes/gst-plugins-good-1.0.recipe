@@ -257,7 +257,7 @@ class Recipe(custom.GStreamer):
 
         # Enable qt6 plugin if possible and selected
         can_enable_qt6 = False
-        if self.config.target_platform == Platform.LINUX:
+        if self.config.target_platform in (Platform.LINUX, Platform.DARWIN):
             can_enable_qt6 = True
         if can_enable_qt6:
             self.enable_plugin('qml6', 'qt6', 'qt6', option='qt6')
