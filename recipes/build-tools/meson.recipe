@@ -17,6 +17,11 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/meson']
     files_python = []
 
+    patches = [
+        # https://github.com/mesonbuild/meson/pull/11101
+        'meson/0001-dependencies-qt-add-support-for-Qt-frameworks-refere.patch'
+    ]
+
     async def install(self):
         # setup.py barfs if using posix paths on Windows
         if self.config.platform == Platform.WINDOWS:
