@@ -168,7 +168,7 @@ class FilesProvider(object):
             self.py_prefix = config.py_prefix
         self.add_files_bins_devel()
         self.add_license_files()
-        self.categories = self._files_categories()
+        self.update_categories()
         self._searchfuncs = {self.LIBS_CAT: self._search_libraries,
                              self.BINS_CAT: self._search_binaries,
                              self.PY_CAT: self._search_pyfiles,
@@ -287,6 +287,9 @@ class FilesProvider(object):
 
     def use_gobject_introspection(self):
         return self.TYPELIB_CAT in self._files_categories()
+
+    def update_categories(self):
+        self.categories = self._files_categories()
 
     def _files_categories(self):
         ''' Get the list of categories available '''

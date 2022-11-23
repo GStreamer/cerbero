@@ -75,6 +75,7 @@ class GStreamer(recipe.Recipe):
             plugin = 'lib/gstreamer-1.0/libgst' + plugin
             if not hasattr(self, 'files_plugins_' + category):
                 setattr(self, 'files_plugins_' + category, [])
+                self.update_categories()
             f = getattr(self, 'files_plugins_' + category)
             f += [plugin + '%(mext)s']
             if not hasattr(self, 'files_plugins_{}_devel'.format(category)):
