@@ -137,9 +137,6 @@ android fedora image:
 #
 .cerbero:
   stage: "build"
-  extends:
-    - .fedora image
-    - .fdo.distribution-image@fedora
   # Ensure that the runners it will be executed on
   # will have plenty of space for the cache
   tags: ['gstreamer']
@@ -185,6 +182,13 @@ android fedora image:
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.tar.*"
 
+.cerbero fedora base:
+  extends:
+    - .fedora image
+    - .fdo.distribution-image@fedora
+  needs:
+    - "fedora image"
+
 # Template for Cerbero GStreamer Deps
 #
 # This template is used by cerbero/ project to pre-built the GStreamer
@@ -221,13 +225,17 @@ android fedora image:
 # Cerbero Linux X86_64 build
 #
 cerbero deps fedora x86_64:
-  extends: '.cerbero deps'
+  extends:
+    - '.cerbero fedora base'
+    - '.cerbero deps'
   variables:
     CONFIG: "linux.config"
     ARCH: "linux_x86_64"
 
 build cerbero fedora x86_64:
-  extends: '.cerbero mr'
+  extends:
+    - '.cerbero fedora base'
+    - '.cerbero mr'
   variables:
     CONFIG: "linux.config"
 
@@ -251,11 +259,13 @@ build cerbero fedora x86_64:
 
 cerbero deps cross-android universal:
   extends:
+    - '.cerbero fedora base'
     - '.cerbero deps'
     - '.cerbero cross-android universal'
 
 build cerbero cross-android universal:
   extends:
+    - '.cerbero fedora base'
     - '.cerbero mr'
     - '.cerbero cross-android universal'
 
@@ -264,7 +274,9 @@ build cerbero cross-android universal:
 #
 
 .cerbero deps cross-windows:
-  extends: '.cerbero deps'
+  extends:
+    - '.cerbero fedora base'
+    - '.cerbero deps'
   variables:
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_PACKAGE_ARGS: ""
@@ -286,7 +298,9 @@ cerbero deps cross-windows x86:
     ARCH: "mingw_x86"
 
 build cerbero cross win32:
-  extends: '.cerbero mr'
+  extends:
+    - '.cerbero fedora base'
+    - '.cerbero mr'
   variables:
     CONFIG: "cross-win32.cbc"
     CERBERO_RUN_SUFFIX: ".exe"
@@ -298,7 +312,9 @@ cerbero deps cross-windows x86_64:
     ARCH: "mingw_x86_64"
 
 build cerbero cross win64:
-  extends: '.cerbero mr'
+  extends:
+    - '.cerbero fedora base'
+    - '.cerbero mr'
   variables:
     CONFIG: "cross-win64.cbc"
     CERBERO_RUN_SUFFIX: ".exe"
@@ -358,6 +374,7 @@ cross-android universal examples:
     - '.cerbero mr rules'
   needs:
     - "build cerbero cross-android universal"
+    - "android fedora image"
 
 cerbero cross-android universal examples:
   extends:
@@ -365,6 +382,7 @@ cerbero cross-android universal examples:
     - '.cerbero not-mr rules'
   needs:
     - "cerbero deps cross-android universal"
+    - "android fedora image"
 
 #
 # Cerbero macOS Universal build
