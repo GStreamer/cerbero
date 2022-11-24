@@ -75,6 +75,7 @@ class Recipe(custom.GStreamer):
                      'teletext': 'disabled',
                      'voamrwbenc': 'disabled',
                      'wic': 'disabled',
+                     'win32ipc': 'disabled',
                      'wildmidi': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
@@ -516,6 +517,7 @@ class Recipe(custom.GStreamer):
             ]
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
+            self.enable_plugin('win32ipc', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
@@ -556,6 +558,7 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('directsoundsrc', 'capture', option='directsound')
             self.disable_plugin('directshow', 'sys')
             self.disable_plugin('wasapi', 'sys')
+            self.disable_plugin('win32ipc', 'sys')
             self.disable_plugin('winscreencap', 'capture')
             self.disable_plugin('winks', 'capture')
             # External deps that haven't been ported to UWP
