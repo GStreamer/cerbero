@@ -115,6 +115,20 @@ android fedora image:
   variables:
     GIT_STRATEGY: none
 
+# Rules for when to use a specific job
+
+# Used when a GStreamer MR is used using the triggered pipeline
+.cerbero mr rules:
+  rules:
+    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
+  # Don't interrupt gstreamer MR CI when cerbero main gets pushes
+  interruptible: false
+
+# Used when any other usage is encountered, cerbero MR, branch push, etc
+.cerbero not-mr rules:
+  rules:
+    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
+
 # Template for all Cerbero GStreamer builds
 #
 # Parameters:
@@ -184,9 +198,9 @@ android fedora image:
 # Produce an artifact with the dist/ and .cache along
 # with the associated build-tools.
 .cerbero deps:
-  extends: .cerbero
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
+  extends:
+    - '.cerbero'
+    - '.cerbero not-mr rules'
   script:
     - ./ci/cerbero_setup.sh cerbero_deps_script
 
@@ -197,13 +211,11 @@ android fedora image:
 # which implies that the default cerbero branch is used. In that case, we fetch
 # a cache (if available) and use it instead of building from scratch.
 .cerbero mr:
-  extends: .cerbero
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
+  extends:
+    - '.cerbero'
+    - '.cerbero mr rules'
   script:
     - ./ci/cerbero_setup.sh cerbero_script
-  # Don't interrupt gstreamer MR CI when cerbero main gets pushes
-  interruptible: false
 
 #
 # Cerbero Linux X86_64 build
@@ -341,16 +353,16 @@ build cerbero cross win64:
       - "${OUTPUT_DIR}"
 
 cross-android universal examples:
-  extends: ".cross-android universal examples"
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
+  extends:
+    - '.cross-android universal examples'
+    - '.cerbero mr rules'
   needs:
     - "build cerbero cross-android universal"
 
 cerbero cross-android universal examples:
-  extends: ".cross-android universal examples"
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
+  extends:
+    - '.cross-android universal examples'
+    - '.cerbero not-mr rules'
   needs:
     - "cerbero deps cross-android universal"
 
@@ -460,16 +472,16 @@ build cerbero cross-ios universal:
     - gst-ios-16
 
 cross-ios universal examples:
-  extends: ".cross-ios universal examples"
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
+  extends:
+    - '.cross-ios universal examples'
+    - '.cerbero mr rules'
   needs:
     - "build cerbero cross-ios universal"
 
 cerbero cross-ios universal examples:
-  extends: ".cross-ios universal examples"
-  rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
+  extends:
+    - '.cross-ios universal examples'
+    - '.cerbero not-mr rules'
   needs:
     - "cerbero deps cross-ios universal"
 
