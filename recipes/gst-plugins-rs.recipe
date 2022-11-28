@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
+from cerbero.utils import messages as m
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
