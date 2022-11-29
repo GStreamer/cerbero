@@ -38,13 +38,9 @@ class RustBootstrapper(BootstrapperBase):
     SERVER = 'https://static.rust-lang.org'
     RUSTUP_VERSION = '1.25.1'
     RUST_VERSION = '1.65.0'
-    CARGOC_VERSION = '0.9.14'
-    CARGOC_NAME = f'cargo-c-{CARGOC_VERSION}'
-    CARGOC_CHECKSUM = 'd79c12eae1460803a1ce8b440ae213dc4df63a6f2bf39ebd49eea1d7a008bec6'
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
     CHANNEL_URL_TPL = '{server}/dist/channel-rust-{version}.toml'
-    CARGOC_URL = f'https://github.com/lu-zero/cargo-c/archive/refs/tags/v{CARGOC_VERSION}.tar.gz'
     COMPONENTS = ('cargo', 'rustc', 'rust-std')
     # Update from https://pypi.org/project/tomli/#files
     TOMLI_URL = 'https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz'
@@ -99,10 +95,6 @@ class RustBootstrapper(BootstrapperBase):
         # one already
         if not self.config.find_toml_module(system_only=True):
             self.extract_steps += [(self.TOMLI_URL, True, self.config.rust_prefix)]
-        # This is extracted in self.install_toolchain_and_fetch_cargoc, after
-        # we install the Rust toolchain because we need to run cargo update to
-        # fetch deps so we can build it offline later as a build-tools recipe.
-        self.extract_steps += [(self.CARGOC_URL, True, self.config.rust_prefix)]
 
     def get_fetch_urls(self):
         '''Get Rustup and Rust channel URLs'''
@@ -134,10 +126,6 @@ class RustBootstrapper(BootstrapperBase):
             # Need the tomli python module to be able to parse the channel TOML file
             checksum = self.DOWNLOAD_CHECKSUMS[os.path.basename(self.TOMLI_URL)]
             urls.append((self.TOMLI_URL, None, checksum))
-        # Also need to fetch cargo-c to run cargo update for the build-tools
-        # recipe, so fetch it into the same location as the recipe.
-        download_path = os.path.join(self.CARGOC_NAME, os.path.basename(self.CARGOC_URL))
-        urls.append((self.CARGOC_URL, download_path, self.CARGOC_CHECKSUM))
         return urls
 
     async def get_more_fetch_urls(self):
@@ -188,14 +176,11 @@ class RustBootstrapper(BootstrapperBase):
                 entry = channel_data['pkg']['rust-std']['target'][triple]
                 urls += list(get_entry_urls(entry))
 
-        return (urls, self.install_toolchain_and_fetch_cargoc)
+        return (urls, self.install_toolchain_for_cargoc_fetch)
 
-    async def install_toolchain_and_fetch_cargoc(self):
-        m.action('Installing Rust toolchain to fetch cargo-c deps')
+    async def install_toolchain_for_cargoc_fetch(self):
+        m.action('Installing Rust toolchain so cargo-c.recipe can fetch deps')
         await self.install_toolchain()
-        # Fetch all dependencies required to build cargo-c
-        m.action('Fetching cargo-c deps')
-        await self.fetch_cargoc_deps()
         return ([], None)
 
     def get_rustup_env(self):
@@ -228,13 +213,6 @@ class RustBootstrapper(BootstrapperBase):
         # Use async_call_output to discard stdout which contains messages that will confuse the user
         await shell.async_call_output(rustup_args, cpu_bound=False, env=rustup_env)
         m.message('Rust toolchain v{} installed at {}'.format(self.RUST_VERSION, self.config.rust_prefix))
-
-    async def fetch_cargoc_deps(self):
-        cmd_dir = os.path.join(self.config.rust_prefix, self.CARGOC_NAME)
-        cargo_update_args = ['--verbose']
-        if not os.path.isfile(os.path.join(cmd_dir, 'Cargo.lock')):
-            await shell.async_call_output(['cargo', 'update'] + cargo_update_args,
-                                          cmd_dir=cmd_dir, env=self.get_rustup_env())
 
     async def start(self, jobs=0):
         await self.install_toolchain()
