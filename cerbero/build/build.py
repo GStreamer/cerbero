@@ -679,7 +679,7 @@ class CMake (MakefilesBase):
         elif self.config.target_platform == Platform.IOS:
             system_name = 'iOS'
 
-        if self.config.cross_compiling():
+        if self.config.cross_compiling() or self.config.target_platform == Platform.WINDOWS:
             self.configure_options += [f'-DCMAKE_SYSTEM_NAME={system_name}']
 
         if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
