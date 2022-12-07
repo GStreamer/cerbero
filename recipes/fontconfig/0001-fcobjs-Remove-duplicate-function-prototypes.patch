@@ -1,4 +1,4 @@
-From 6287527c316a5dfb783b4f82d9b2d9702e9d8728 Mon Sep 17 00:00:00 2001
+From dc83e10f46617a6e0b128caff5dfddd022e1a3b3 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 2 Jun 2021 17:16:41 +0530
 Subject: [PATCH] fcobjs: Remove duplicate function prototypes
@@ -27,12 +27,12 @@ We don't actually need to auto-detect this value in configure if we
 let the header define it.
 ---
  configure.ac | 20 --------------------
- meson.build  | 36 ------------------------------------
+ meson.build  | 37 -------------------------------------
  src/fcobjs.c |  6 ------
- 3 files changed, 62 deletions(-)
+ 3 files changed, 63 deletions(-)
 
 diff --git a/configure.ac b/configure.ac
-index da69f8d..fff20f2 100644
+index 60871dc..886471d 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -208,26 +208,6 @@ fi
@@ -63,10 +63,10 @@ index da69f8d..fff20f2 100644
  # Checks for iconv
  #
 diff --git a/meson.build b/meson.build
-index f616600..0dd1f69 100644
+index 6453d8c..d038fc4 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -256,42 +256,6 @@ endif
+@@ -318,43 +318,6 @@ endif
  # It will automatically fallback to subproject if not found on system
  gperf = find_program('gperf')
  
@@ -86,7 +86,8 @@ index f616600..0dd1f69 100644
 -  @1@
 -  '''
 -  gperf_snippet_format = 'echo foo,bar | @0@ -L ANSI-C'
--  gperf_snippet = run_command(sh, '-c', gperf_snippet_format.format(gperf.path()))
+-  gperf_snippet = run_command(sh, '-c', gperf_snippet_format.format(gperf.full_path()),
+-    check: true)
 -  gperf_test = gperf_test_format.format('size_t', gperf_snippet.stdout())
 -
 -  if cc.compiles(gperf_test)
@@ -127,5 +128,5 @@ index 33bba8d..b0d660f 100644
  
  #include <string.h>
 -- 
-2.36.1
+2.38.1
 
