@@ -445,6 +445,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         if self.use_system_libs:
             add_system_libs(self.config, env, self.env)
         PkgConfig.add_search_dir(pluginpcdir, env, self.config)
+        if self.config.qt5_pkgconfigdir:
+            PkgConfig.add_search_dir(self.config.qt5_pkgconfigdir, env, self.config)
 
         # retrieve the list of files we need to generate
         for f in self.devel_files_list():
