@@ -445,6 +445,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         pluginpcdir = os.path.join(self.config.libdir, 'gstreamer-1.0', 'pkgconfig')
         env = self.env.copy()
         env['PKG_CONFIG_LIBDIR'] += os.pathsep + pluginpcdir
+        if self.config.qt5_pkgconfigdir:
+            env['PKG_CONFIG_LIBDIR'] += os.pathsep + self.config.qt5_pkgconfigdir
         if self.use_system_libs:
             add_system_libs(self.config, env, self.env)
 
