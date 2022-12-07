@@ -521,6 +521,10 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
+            self.files_plugins_devel += [
+                'include/gstreamer-1.0/gst/cuda',
+                'lib/pkgconfig/gstreamer-cuda-1.0.pc',
+            ]
 
         if self.config.target_platform in (Platform.LINUX, Platform.DARWIN, Platform.IOS):
             self.meson_options['shm'] = 'enabled'
