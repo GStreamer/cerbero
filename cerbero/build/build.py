@@ -1069,7 +1069,8 @@ class Meson (Build, ModifyEnvBase) :
         meson_cmd = [self.meson_sh, '--prefix=' + self.config.prefix,
             '--libdir=lib' + self.config.lib_suffix, '-Ddebug=' + debug,
             '--default-library=' + self.library_type, '-Doptimization=' + opt,
-            '--backend=' + self.meson_backend, '--wrap-mode=nodownload']
+            '--backend=' + self.meson_backend, '--wrap-mode=nodownload',
+            '-Dpkgconfig.relocatable=true']
 
         if self.using_msvc():
             meson_cmd.append('-Db_vscrt=' + self.config.variants.vscrt)

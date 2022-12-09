@@ -15,10 +15,6 @@ class Recipe(recipe.Recipe):
     files_share = ['share/aclocal/pkg.m4']
 
     def prepare(self):
-        # --define-prefix is too unreliable on Debian-like distros that have
-        # pkgconfig in /usr/lib/x86_64-linux-gnu etc. instead of in /usr/lib
-        if self.config.platform != Platform.LINUX:
-            self.configure_options += '--enable-define-prefix '
         # Strictly speaking, it poesn't need to be a runtime dep, but it will
         # not make it into the Cerbero CI deps cache otherwise.
         if self.config.platform in (Platform.WINDOWS, Platform.DARWIN) and not self.config.variants.uwp:
