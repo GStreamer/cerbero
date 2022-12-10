@@ -114,6 +114,16 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
         self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
+        # Build with Cerbero's latest glib version as minimum version
+        self.cargo_features += ['glib/v2_62', 'gio/v2_62']
+        # Enable assembly optimizations via nasm
+        self.cargo_features.append('gst-plugin-rav1e/asm')
+        # Build with the current GStreamer version as minimum version
+        components = ('', '-app', '-audio', '-base', '-check', '-net', '-pbutils',
+                      '-plugin-tracers', '-rtp', '-sdp', '-utils', '-video', '-webrtc')
+        for each in components:
+            self.cargo_features.append(f'gst{each}/v1_22')
+        self.cargo_features.append('gst-plugin-webrtc/gst1_22')
 
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version
