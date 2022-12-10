@@ -91,8 +91,8 @@ class PkgConfig(object):
             for p in d:
                 if not os.path.isabs(p):
                     raise FatalError("pkg-config file %s contains relative include dir %s" % (pc, p))
-
-            include_dirs.extend(pkgconfig.include_dirs())
+                # Normalize before appending
+                include_dirs.append(os.path.abspath(p))
         return list(set(include_dirs))
 
     @staticmethod
