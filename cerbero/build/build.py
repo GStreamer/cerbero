@@ -1135,13 +1135,18 @@ class Cargo(Build, ModifyEnvBase):
     '''
     srcdir = '.'
     can_msvc = True
+    cargo_features = None
 
     def __init__(self):
+        self.cargo_features = self.cargo_features or []
+
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
+
         self.setup_toolchain_env_ops()
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
+
         self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
                                                            self.srcdir))
         self.cargo_dir = os.path.join(self.config_src_dir, '_builddir')
@@ -1171,6 +1176,11 @@ class Cargo(Build, ModifyEnvBase):
         # https://github.com/lu-zero/cargo-c/issues/278
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.library_type = LibraryType.STATIC
+
+    def get_cargo_features_args(self):
+        if not self.cargo_features:
+            return []
+        return ['--features=' + ','.join(self.cargo_features)]
 
     def append_config_toml(self, s):
         dot_cargo = os.path.join(self.config_src_dir, '.cargo')
@@ -1241,7 +1251,7 @@ class Cargo(Build, ModifyEnvBase):
             self.cargo, 'install',
             '--path', self.config_src_dir,
             '--root', self.config.prefix,
-        ] + self.cargo_args
+        ] + self.cargo_args + self.get_cargo_features_args()
         await shell.async_call(cmd, logfile=self.logfile, env=self.env)
 
 
@@ -1272,6 +1282,7 @@ class CargoC(Cargo):
         for package in self.cargoc_packages:
             args = ['-p', package]
             cargoc_args += args
+        cargoc_args += self.get_cargo_features_args()
         return cargoc_args
 
     @modify_environment
