@@ -1253,6 +1253,10 @@ class CargoC(Cargo):
 
     cargoc_packages = None
 
+    def __init__(self):
+        self.cargoc_packages = self.cargoc_packages or []
+        Cargo.__init__(self)
+
     def get_cargoc_args(self):
         cargoc_args = [
             '--release', '--frozen',
@@ -1265,10 +1269,9 @@ class CargoC(Cargo):
         if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
             cargoc_args += ['--library-type', 'cdylib']
         cargoc_args += self.cargo_args
-        if self.cargoc_packages:
-            for package in self.cargoc_packages:
-                args = ['-p', package]
-                cargoc_args += args
+        for package in self.cargoc_packages:
+            args = ['-p', package]
+            cargoc_args += args
         return cargoc_args
 
     @modify_environment
