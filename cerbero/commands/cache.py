@@ -150,11 +150,14 @@ class FetchCache(BaseCache):
     async def fetch_dep(self, config, dep, namespace):
         try:
             dep_path = os.path.join(config.home_dir, os.path.basename(dep['url']))
+            m.action(f'Downloading deps cache {dep["url"]}')
             await shell.download(dep['url'], dep_path, overwrite=True)
             if dep['checksum'] == self.checksum(dep_path):
+                m.action(f'Unpacking deps cache {dep_path}')
                 await shell.unpack(dep_path, config.home_dir)
             else:
                 m.warning("Corrupted dependency file, ignoring.")
+            m.action('Unpack complete, deleting artifact')
             os.remove(dep_path)
 
             # Don't need to relocate on Windows and macOS since we build
