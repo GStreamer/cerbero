@@ -33,6 +33,7 @@ class Recipe(recipe.Recipe):
         'hlssink3',
         'hsv',
         'json',
+        'livesync',
         'lewton',
         'mp4',
         'ndi',
@@ -65,6 +66,7 @@ class Recipe(recipe.Recipe):
 
     files_plugins_core = [
         'lib/gstreamer-1.0/libgstfallbackswitch%(mext)s',
+        'lib/gstreamer-1.0/libgstlivesync%(mext)s',
         'lib/gstreamer-1.0/libgstthreadshare%(mext)s',
         'lib/gstreamer-1.0/libgsttogglerecord%(mext)s',
         'lib/gstreamer-1.0/libgstrstracers%(mext)s',
