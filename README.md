@@ -330,3 +330,40 @@ $ echo 'export HOME=/home/newdir' > ~/.profile
 Then restart your shell and type `cd` to go to the new home directory.
 
 Note that inside the shell, `/` is mapped to `C:\msys64`
+
+# Customising Cerbero
+
+## How to build a custom GStreamer repository or branch
+
+Create a `localconf.cbc` file and add the following:
+
+```
+# Set custom remote and branch for all gstreamer recipes
+recipes_remotes = {'gstreamer-1.0': {'custom-remote': '<YOUR_GIT_REPO>'}}
+recipes_commits = {'gstreamer-1.0': 'custom-remote/<YOUR_GIT_BRANCH>'}
+```
+
+You can then run Cerbero with e.g.:
+
+```cmd
+./cerbero-uninstalled -c localconf.cbc -c config/win64.cbc -v visualstudio package gstreamer-1.0
+```
+
+This works for all builds of course, not only the Windows one.
+
+## How to force a specific Visual Studio version
+
+Create a `localconf.cbc` file and add the following:
+
+```
+# Specify Visual Studio install path and version
+vs_install_path = 'C:/Path/To/Install'
+
+# This is the Visual Studio Compiler toolset version, vs16 is for Visual Studio 2019. vs15 is 2017.
+vs_install_version = 'vs16'
+```
+You can then run Cerbero with e.g.:
+
+```cmd
+./cerbero-uninstalled -c localconf.cbc -c config/win64.cbc -v visualstudio package gstreamer-1.0
+```
