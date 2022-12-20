@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'cargo-c'
-    version = '0.9.14'
+    version = '0.9.15'
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
-    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.14.tar.gz'
-    tarball_checksum = 'd79c12eae1460803a1ce8b440ae213dc4df63a6f2bf39ebd49eea1d7a008bec6'
+    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.15.tar.gz'
+    tarball_checksum = '2205170f30fe49da05f42b1c151b04042547d60a4429815935a2b6e1069a27bb'
     tarball_dirname = '%(name)s-%(version)s'
     # Need system openssl on Linux
     use_system_libs = True
@@ -14,8 +14,6 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://github.com/lu-zero/cargo-c/pull/277
         name + '/0001-Fix-linking-with-Android-NDK-linker.patch',
-        # https://github.com/lu-zero/cargo-c/pull/291
-        name + '/0002-generate-paths-relative-to.patch',
     ]
 
     deps = ['zlib', 'pkg-config']
