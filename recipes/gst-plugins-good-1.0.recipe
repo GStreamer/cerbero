@@ -262,6 +262,17 @@ class Recipe(custom.GStreamer):
         if can_enable_qt6:
             self.enable_plugin('qml6', 'qt6', 'qt6', option='qt6')
 
+        if self.config.target_platform != Platform.LINUX:
+            # Don't want to find Qt using pkg-config on non-Linux because:
+            # 1. It's actually not recommended by Qt
+            # 2. It causes gstqmlgl.pc to contain references to those pkgconfig
+            #    files, but on non-Linux, you're using the official Qt binaries
+            #    which require --define-prefix with pkg-config, which breaks
+            #    static linking of gstreamer plugins, so we don't want that
+            # 3. --define-prefix makes cerbero's relocatable pkgconfig files
+            #    completely useless
+            self.meson_options['qt-method'] = 'qmake'
+
         if self.using_msvc():
             # plugin is C++, library is Autotools
             self.disable_plugin('taglib', 'codecs', dep='taglib')
