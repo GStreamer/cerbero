@@ -47,7 +47,7 @@ default:
     # If you are hacking on them or need a them to rebuild, its enough
     # to change any part of the string of the image you want.
     ###
-    FDO_DISTRIBUTION_TAG: '2022-09-22.0'
+    FDO_DISTRIBUTION_TAG: '2022-12-24.0'
     FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_PACKAGES: sudo git-core lbzip2 rsync wine which python3-distro
     FDO_DISTRIBUTION_EXEC: ci/docker_setup.sh
@@ -61,7 +61,7 @@ default:
     # If you are hacking on them or need a them to rebuild, its enough
     # to change any part of the string of the image you want.
     ###
-    FDO_DISTRIBUTION_TAG: '2022-09-22.0'
+    FDO_DISTRIBUTION_TAG: '2022-12-24.0'
     FDO_DISTRIBUTION_VERSION: '36'
     FDO_DISTRIBUTION_PACKAGES: file git-core java-11-openjdk-devel lbzip2 python3-distro make pkg-config unzip which xz
     FDO_DISTRIBUTION_EXEC: ci/docker_android_setup.sh $ANDROID_HOME $ANDROID_NDK_HOME $GST_UPSTREAM_BRANCH
