@@ -8,7 +8,7 @@ stages:
   - 'integrate'
 
 variables:
-  # CI_GSTREAMER_* variables are overriden by gstreamer's CI when it triggers cerbero CI.
+  # CI_GSTREAMER_* variables are overridden by gstreamer's CI when it triggers cerbero CI.
   CI_GSTREAMER_REF_NAME: 'main'
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   CI_GSTREAMER_TRIGGERED: 'false'
