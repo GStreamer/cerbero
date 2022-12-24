@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
     url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.15.tar.gz'
-    tarball_checksum = '2205170f30fe49da05f42b1c151b04042547d60a4429815935a2b6e1069a27bb'
+    tarball_checksum = 'ba29e662c2419ce12e4d5a9d0b05c057378088f474bc9316238c0a621b488299'
     tarball_dirname = '%(name)s-%(version)s'
     # Need system openssl on Linux
     use_system_libs = True
