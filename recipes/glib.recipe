@@ -38,6 +38,8 @@ class Recipe(recipe.Recipe):
         'glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
         # TODO upstreaming
         'glib/0001-meson-Fix-detection-of-a-system-provided-proxy-libin.patch',
+        # TODO upstreaming
+        'glib/0001-gio-gsocket-fix-compiler-warnings-on-armv7-Android.patch',
     ]
 
     files_libs = [
