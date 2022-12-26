@@ -1,0 +1,1080 @@
+From aa4ed04b21dd8272db1ae959f14ebc0aa1dada26 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Mon, 26 Dec 2022 14:53:56 +0100
+Subject: [PATCH] Add meson build system
+
+wrapdb version 1.1.1-2
+---
+ doc/doxyfile-patcher.py               |  20 +++
+ doc/meson.build                       |  46 +++++
+ doc/spec/check-needed-tex-packages.py |  10 ++
+ doc/spec/latexmk-wrapper.py           |  17 ++
+ doc/spec/meson.build                  |  66 +++++++
+ doc/spec/test-tex-packages.py         |  27 +++
+ examples/meson.build                  |  80 +++++++++
+ include/meson.build                   |  10 ++
+ lib/meson.build                       | 246 ++++++++++++++++++++++++++
+ lib/theora.def                        |  55 ++++++
+ meson.build                           | 227 ++++++++++++++++++++++++
+ meson_options.txt                     |   8 +
+ tests/meson.build                     | 114 ++++++++++++
+ win32/xmingw32/generate_windows_rc.py |  30 ++++
+ 14 files changed, 956 insertions(+)
+ create mode 100644 doc/doxyfile-patcher.py
+ create mode 100644 doc/meson.build
+ create mode 100644 doc/spec/check-needed-tex-packages.py
+ create mode 100644 doc/spec/latexmk-wrapper.py
+ create mode 100644 doc/spec/meson.build
+ create mode 100644 doc/spec/test-tex-packages.py
+ create mode 100644 examples/meson.build
+ create mode 100644 include/meson.build
+ create mode 100644 lib/meson.build
+ create mode 100644 lib/theora.def
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 tests/meson.build
+ create mode 100644 win32/xmingw32/generate_windows_rc.py
+
+diff --git a/doc/doxyfile-patcher.py b/doc/doxyfile-patcher.py
+new file mode 100644
+index 0000000..f3a2613
+--- /dev/null
++++ b/doc/doxyfile-patcher.py
+@@ -0,0 +1,20 @@
++#!/usr/bin/env python3
++
++from argparse import ArgumentParser
++from pathlib import Path
++
++if __name__ == '__main__':
++    parser = ArgumentParser()
++    parser.add_argument('doxyfile_in', type=Path)
++    parser.add_argument('doxyfile_out', type=Path)
++    parser.add_argument('output_directory', type=Path)
++    args = parser.parse_args()
++
++    doxyfile_in: Path = args.doxyfile_in
++    src_contents = doxyfile_in \
++        .read_text(encoding='utf-8') \
++        .replace('OUTPUT_DIRECTORY       = libtheora',
++                 f'OUTPUT_DIRECTORY       = {args.output_directory}')
++
++    doxyfile_out: Path = args.doxyfile_out
++    doxyfile_out.write_text(src_contents, encoding='utf-8')
+diff --git a/doc/meson.build b/doc/meson.build
+new file mode 100644
+index 0000000..7bf9b50
+--- /dev/null
++++ b/doc/meson.build
+@@ -0,0 +1,46 @@
++static_docs = files(
++  'color.html',
++  'draft-ietf-avt-rtp-theora-00.txt',
++  'draft-ietf-avt-rtp-theora-00.xml',
++  'vp3-format.txt',
++)
++
++install_data(static_docs)
++
++if doxygen_exe.found()
++  doxygen_conf = configuration_data()
++
++  doxygen_conf.set('PACKAGE', meson.project_name())
++  doxygen_conf.set('VERSION', meson.project_version())
++  doxygen_conf.set('top_srcdir', doc_root_dir)
++
++  doxyfile_tmp = configure_file(
++    input: 'Doxyfile.in',
++    configuration: doxygen_conf,
++    output: 'Doxyfile.in',
++  )
++
++  doxyfile_patcher = find_program('doxyfile-patcher.py')
++
++  doxyfile = custom_target(
++    'doxyfile-patcher',
++    command: [
++      doxyfile_patcher,
++      '@INPUT@',
++      '@OUTPUT@',
++      meson.current_build_dir(),
++    ],
++    input: doxyfile_tmp,
++    output: 'Doxyfile',
++  )
++
++  custom_target(
++    'libtheora-docs',
++    input: doxyfile,
++    output: 'html',
++    command: [doxygen_exe, doxyfile],
++    console: true,
++    install: true,
++    install_dir: get_option('datadir') / 'doc' / meson.project_name(),
++  )
++endif
+diff --git a/doc/spec/check-needed-tex-packages.py b/doc/spec/check-needed-tex-packages.py
+new file mode 100644
+index 0000000..f541aa0
+--- /dev/null
++++ b/doc/spec/check-needed-tex-packages.py
+@@ -0,0 +1,10 @@
++#!/usr/bin/env python3
++
++import re
++
++if __name__ == '__main__':
++    with open('doc/spec/spec.tex', 'r') as f:
++        packages = [x for x in re.findall(
++            r'\\usepackage\{(.+)\}', f.read()) if x != "ltablex"]
++        for x in packages:
++            print(x)
+diff --git a/doc/spec/latexmk-wrapper.py b/doc/spec/latexmk-wrapper.py
+new file mode 100644
+index 0000000..c0d9233
+--- /dev/null
++++ b/doc/spec/latexmk-wrapper.py
+@@ -0,0 +1,17 @@
++#!/usr/bin/env python3
++
++from argparse import ArgumentParser
++from pathlib import Path
++from subprocess import run
++
++if __name__ == '__main__':
++    parser = ArgumentParser()
++    parser.add_argument('latexmk', type=Path)
++    parser.add_argument('src_file', type=Path)
++    args = parser.parse_args()
++
++    latexmk = args.latexmk
++    src = args.src_file
++
++    run([latexmk, '-pdf', src.name],
++        capture_output=True, cwd=src.parent, check=True)
+diff --git a/doc/spec/meson.build b/doc/spec/meson.build
+new file mode 100644
+index 0000000..31bc8d5
+--- /dev/null
++++ b/doc/spec/meson.build
+@@ -0,0 +1,66 @@
++fig_sources = {
++  'pic-frame.pdf': files('pic-frame.fig'),
++  'hilbert-mb.pdf': files('hilbert-mb.fig'),
++  'hilbert-block.pdf': files('hilbert-block.fig'),
++  'xifish.pdf': files('xifish.fig'),
++  'superblock.pdf': files('superblock.fig'),
++  'macroblock.pdf': files('macroblock.fig'),
++  'raster-block.pdf': files('raster-block.fig'),
++  'reference-frames.pdf': files('reference-frames.fig'),
++  'pixel444.pdf': files('pixel444.fig'),
++  'pixel422.pdf': files('pixel422.fig'),
++  'pixel420.pdf': files('pixel420.fig'),
++  'idct.pdf': files('idct.fig'),
++  'fdct.pdf': files('fdct.fig'),
++  'pic_even.pdf': files('pic_even.fig'),
++  'pic_even_odd.pdf': files('pic_even_odd.fig'),
++  'pic_odd.pdf': files('pic_odd.fig'),
++  'pic_odd_even.pdf': files('pic_odd_even.fig'),
++  'lflim.pdf': files('lflim.fig'),
++}
++
++fig_pdfs = []
++
++foreach fig_name, fig_source : fig_sources
++  pdf = custom_target(
++    fig_name,
++    command: [transfig_exe, '-L', 'pdf', '@INPUT@'],
++    output: fig_name,
++    input: fig_source,
++    capture: true,
++  )
++  fig_pdfs += [pdf]
++endforeach
++
++vp3huff_sources = files('vp3huff.c')
++
++vp3huff_exe = executable(
++  'vp3huff',
++  vp3huff_sources,
++  native: true,
++  install: false,
++)
++
++vp3huff_tex = custom_target(
++  'vp3huff.tex',
++  command: [vp3huff_exe],
++  capture: true,
++  output: 'vp3huff.tex',
++)
++
++spec_file = configure_file(input: 'spec.tex', output: 'spec.tex', copy: true)
++bib_file = configure_file(input: 'spec.bib', output: 'spec.bib', copy: true)
++
++latexmk_wrapper = find_program('latexmk-wrapper.py', required: true)
++
++built_docs = custom_target(
++  'Theora.pdf',
++  command: [latexmk_wrapper, latexmk_exe, '@INPUT@'],
++  console: true,
++  input: [spec_file],
++  depend_files: [bib_file],
++  depends: [fig_pdfs, vp3huff_tex],
++  output: 'Theora.pdf',
++  install: true,
++  install_dir: get_option('datadir') / 'doc' / meson.project_name(),
++)
+diff --git a/doc/spec/test-tex-packages.py b/doc/spec/test-tex-packages.py
+new file mode 100644
+index 0000000..c5f64ff
+--- /dev/null
++++ b/doc/spec/test-tex-packages.py
+@@ -0,0 +1,27 @@
++#!/usr/bin/env python3
++
++from argparse import ArgumentParser
++from pathlib import Path
++from subprocess import run
++from sys import stdout, stderr
++from tempfile import TemporaryDirectory
++
++if __name__ == '__main__':
++    parser = ArgumentParser(description='Tests for installed TeX packages')
++    parser.add_argument('--pdflatex', type=Path)
++    parser.add_argument('package')
++    args = parser.parse_args()
++
++    with TemporaryDirectory() as tmp:
++        test = Path(f'{tmp}/test.tex')
++
++        with test.open(mode='w', encoding='utf-8') as f:
++            f.write('\\documentclass{book}\n')
++            f.write('\\usepackage{%s}\n' % args.package)
++            f.write('\\begin{document}\n')
++            f.write('Hello World.\n')
++            f.write('\\end{document}\n')
++            f.close()
++
++        run([args.pdflatex, '-interaction', 'batchmode', '-halt-on-error',
++            test.absolute()], check=True, stdout=stdout, stderr=stderr, cwd=tmp)
+diff --git a/examples/meson.build b/examples/meson.build
+new file mode 100644
+index 0000000..e4eba82
+--- /dev/null
++++ b/examples/meson.build
+@@ -0,0 +1,80 @@
++theora_libs = [theora_dep]
++theoradec_libs = [theoradec_dep]
++theoraenc_libs = [theoraenc_dep, theoradec_dep]
++
++compat_dep = dependency('compat', required: host_machine.system() == 'openbsd')
++
++if cc.has_header_symbol('unistd.h', 'getopt_long')
++  getopt_dep = declare_dependency(
++    dependencies: config_dep,
++  )
++else
++  if cc.get_id() == 'msvc'
++    getopt_sources = files(
++      '../win32/getopt.c',
++      '../win32/getopt1.c',
++    )
++    getopt_incdir = include_directories('../win32/')
++  else
++    getopt_sources = files(
++      'getopt.c',
++      'getopt1.c',
++    )
++    getopt_incdir = include_directories('.')
++  endif
++
++  getopt_dep = declare_dependency(
++    sources: getopt_sources,
++    dependencies: config_dep,
++    include_directories: [getopt_incdir, incdir],
++  )
++endif
++
++dump_video_sources = files('dump_video.c')
++
++dump_video = executable(
++  'dump_video',
++  dump_video_sources,
++  c_args: compile_args,
++  dependencies: [compat_dep, getopt_dep] + theoradec_libs,
++)
++
++dump_psnr_sources = files('dump_psnr.c')
++
++dump_psnr = executable(
++  'dump_psnr',
++  dump_psnr_sources,
++  c_args: compile_args,
++  dependencies: [m_dep, getopt_dep] + theoradec_libs,
++)
++
++player_example_sources = files('player_example.c')
++
++player_example = executable(
++  'player_example',
++  player_example_sources,
++  c_args: compile_args,
++  dependencies: [sdl_dep, vorbis_dep, oss_dep, m_dep, getopt_dep, config_dep] + theoradec_libs,
++)
++
++# Upstream defines a rint substitute
++if host_machine.system() == 'windows' and not cc.has_header_symbol('math.h', 'rint')
++  encoder_example_sources = files('encoder_example.c')
++
++  encoder_example = executable(
++    'encoder_example',
++    encoder_example_sources,
++    c_args: compile_args,
++    dependencies: [ogg_dep, vorbis_dep, vorbisenc_dep, m_dep, getopt_dep] + theoraenc_libs,
++  )
++endif
++
++png2theora_sources = files('png2theora.c')
++
++png2theora = executable(
++  'png2theora',
++  png2theora_sources,
++  c_args: compile_args,
++  dependencies: [ogg_dep, libpng_dep, unistd_dep, m_dep, getopt_dep, config_dep] +
++  theoraenc_libs,
++)
+diff --git a/include/meson.build b/include/meson.build
+new file mode 100644
+index 0000000..631dd10
+--- /dev/null
++++ b/include/meson.build
+@@ -0,0 +1,10 @@
++theorainclude_headers = files(
++  'theora/codec.h',
++  'theora/theora.h',
++  'theora/theoradec.h',
++  'theora/theoraenc.h',
++)
++
++install_headers(theorainclude_headers, subdir: 'theora')
++
++incdir = include_directories('.', '..')
+diff --git a/lib/meson.build b/lib/meson.build
+new file mode 100644
+index 0000000..00aaf5e
+--- /dev/null
++++ b/lib/meson.build
+@@ -0,0 +1,246 @@
++encoder_sources = files(
++  'analyze.c',
++  'apiwrapper.c',
++  'bitpack.c',
++  'dequant.c',
++  'encapiwrapper.c',
++  'encfrag.c',
++  'encinfo.c',
++  'encode.c',
++  'enquant.c',
++  'fdct.c',
++  'fragment.c',
++  'huffenc.c',
++  'idct.c',
++  'info.c', # not in SConstruct or Makefile.am
++  'internal.c',
++  'mathops.c',
++  'mcenc.c',
++  'quant.c',
++  'rate.c',
++  'state.c',
++  'tokenize.c',
++)
++
++decoder_sources = files(
++  'apiwrapper.c',
++  'bitpack.c',
++  'decapiwrapper.c',
++  'decinfo.c',
++  'decode.c',
++  'dequant.c',
++  'fragment.c',
++  'huffdec.c',
++  'idct.c',
++  'info.c',
++  'internal.c',
++  'quant.c',
++  'state.c',
++)
++
++if asm
++  if conf.get('CPU_x86_64', false)
++    if cc.get_id() != 'msvc'
++      encoder_sources += files(
++        'x86/mmxencfrag.c',
++        'x86/mmxfdct.c',
++        'x86/mmxfrag.c',
++        'x86/mmxidct.c',
++        'x86/mmxstate.c',
++        'x86/sse2fdct.c',
++        'x86/x86enc.c',
++        'x86/x86state.c',
++      )
++      decoder_sources += files(
++        'x86/mmxfrag.c',
++        'x86/mmxidct.c',
++        'x86/mmxstate.c',
++        'x86/x86state.c',
++      )
++    endif
++  elif conf.get('CPU_x86_32', false)
++    if cc.get_id() != 'msvc'
++      decoder_sources += files(
++        'x86/mmxfrag.c',
++        'x86/mmxidct.c',
++        'x86/mmxstate.c',
++        'x86/sse2idct.c',
++        'x86/x86cpu.c',
++        'x86/x86state.c',
++      )
++      encoder_sources += files(
++        'x86/mmxencfrag.c',
++        'x86/mmxfdct.c',
++        'x86/mmxfrag.c',
++        'x86/mmxidct.c',
++        'x86/mmxstate.c',
++        'x86/x86cpu.c',
++        'x86/x86enc.c',
++        'x86/x86state.c',
++      )
++    else
++      encoder_sources += files(
++        'x86_vc/mmxencfrag.c',
++        'x86_vc/mmxfdct.c',
++        'x86_vc/mmxfrag.c',
++        'x86_vc/mmxidct.c',
++        'x86_vc/mmxstate.c',
++        'x86_vc/x86enc.c',
++        'x86_vc/x86state.c',
++      )
++      decoder_sources += files(
++        'x86_vc/mmxfrag.c',
++        'x86_vc/mmxidct.c',
++        'x86_vc/mmxstate.c',
++        'x86_vc/x86state.c',
++      )
++    endif
++  endif
++endif
++
++decoder_res = files()
++encoder_res = files()
++
++if host_machine.system() == 'windows'
++  if get_option('buildtype') == 'debug'
++    decoder_rc = '../win32/xmingw32/libtheoradecd.rc'
++    encoder_rc = '../win32/xmingw32/libtheoraencd.rc'
++  else
++    decoder_rc = '../win32/xmingw32/libtheoradec.rc'
++    encoder_rc = '../win32/xmingw32/libtheoraenc.rc'
++  endif
++
++  patcher_py = find_program(
++    '../win32/xmingw32/generate_windows_rc.py',
++    required: true,
++    native: true,
++  )
++
++  libtheoradec_rc = custom_target(
++    'libtheoradec.rc',
++    command: [patcher_py, '@INPUT@', '@OUTPUT@', meson.project_version()],
++    input: [decoder_rc, '../win32/xmingw32/libtheoradec-all.rc'],
++    output: ['libtheoradec.rc'],
++  )
++
++  decoder_res += windows.compile_resources(libtheoradec_rc)
++
++  libtheoraenc_rc = custom_target(
++    'libtheoraenc.rc',
++    command: [patcher_py, '@INPUT@', '@OUTPUT@', meson.project_version()],
++    input: [encoder_rc, '../win32/xmingw32/libtheoraenc-all.rc'],
++    output: ['libtheoraenc.rc'],
++  )
++
++  encoder_res += windows.compile_resources(libtheoraenc_rc)
++endif
++
++if host_machine.system() == 'darwin'
++  version_flag = '-Wl,-exported_symbols_list,@0@'
++  theoradec_version_arg = meson.current_source_dir() / 'theoradec.exp'
++  theoraenc_version_arg = meson.current_source_dir() / 'theoraenc.exp'
++  theora_version_arg = meson.current_source_dir() / 'theora.exp'
++
++  # macOS Clang requires exported_symbols_list to have all symbols already
++  # compiled, so the test will fail. We will use it directly.
++  theoradec_version_flag = version_flag.format(theoradec_version_arg)
++  theoraenc_version_flag = version_flag.format(theoraenc_version_arg)
++  theora_version_flag = version_flag.format(theora_version_arg)
++else
++  version_flag = '-Wl,--version-script,@0@'
++  theoradec_version_arg = meson.current_source_dir() / 'Version_script-dec'
++  theoraenc_version_arg = meson.current_source_dir() / 'Version_script-enc'
++  theora_version_arg = meson.current_source_dir() / 'Version_script'
++
++  theoradec_version_flag = cc.get_supported_link_arguments(
++    version_flag.format(theoradec_version_arg),
++  )
++
++  theoraenc_version_flag = cc.get_supported_link_arguments(
++    version_flag.format(theoraenc_version_arg),
++  )
++
++  theora_version_flag = cc.get_supported_link_arguments(
++    version_flag.format(theora_version_arg),
++  )
++endif
++
++libtheoradec = library(
++  'theoradec',
++  decoder_sources + decoder_res,
++  dependencies: [m_dep, libpng_dep, ogg_dep, cairo_dep, config_dep],
++  include_directories: incdir,
++  vs_module_defs: '../win32/xmingw32/libtheoradec-all.def',
++  c_args: compile_args,
++  link_args: theoradec_version_flag,
++  install: true,
++)
++
++pkg.generate(
++  libtheoradec,
++  description: 'Theora video codec (decoder)',
++  version: meson.project_version(),
++)
++
++theoradec_dep = declare_dependency(
++  link_with: libtheoradec,
++  dependencies: [m_dep, libpng_dep, ogg_dep, cairo_dep, config_dep],
++  include_directories: incdir,
++)
++
++libtheoraenc = library(
++  'theoraenc',
++  encoder_sources + encoder_res,
++  dependencies: [m_dep, libpng_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++  vs_module_defs: '../win32/xmingw32/libtheoraenc-all.def',
++  c_args: compile_args,
++  link_args: theoraenc_version_flag,
++  install: true,
++)
++
++# In 1.1.1 the source pkg-config specifies an incorrect
++# dependency on theoradec which is relied on by GStreamer.
++# Otherwise th_version_string is invisible according to the
++# version scripts/.def files.
++pkg.generate(
++  libtheoraenc,
++  requires: libtheoradec,
++  description: 'Theora video codec (encoder)',
++  version: meson.project_version(),
++)
++
++theoraenc_dep = declare_dependency(
++  link_with: [libtheoraenc, libtheoradec],
++  dependencies: [m_dep, libpng_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++libtheora = library(
++  'theora',
++  encoder_sources + decoder_sources,
++  dependencies: [m_dep, libpng_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++  c_args: compile_args,
++  link_args: theora_version_flag,
++  vs_module_defs: 'theora.def', # Missing in the official tarballs
++  install: true,
++)
++
++pkg.generate(
++  libtheora,
++  description: 'Theora video codec',
++  version: meson.project_version(),
++)
++
++theora_dep = declare_dependency(
++  link_with: libtheora,
++  dependencies: [m_dep, libpng_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++if meson.version().version_compare('>=0.54.0')
++  meson.override_dependency('theora', theora_dep)
++  meson.override_dependency('theoradec', theoradec_dep)
++  meson.override_dependency('theoraenc', theoraenc_dep)
++endif
+diff --git a/lib/theora.def b/lib/theora.def
+new file mode 100644
+index 0000000..304b487
+--- /dev/null
++++ b/lib/theora.def
+@@ -0,0 +1,55 @@
++EXPORTS
++	theora_version_string
++	theora_version_number
++	theora_encode_init
++	theora_encode_YUVin
++	theora_encode_packetout
++	theora_encode_header
++	theora_encode_comment
++	theora_encode_tables
++	theora_decode_header
++	theora_decode_init
++	theora_decode_packetin
++	theora_decode_YUVout
++	theora_control
++	theora_packet_isheader
++	theora_packet_iskeyframe
++	theora_granule_shift
++	theora_granule_frame
++	theora_granule_time
++	theora_info_init
++	theora_info_clear
++	theora_clear
++	theora_comment_init
++	theora_comment_add
++	theora_comment_add_tag
++	theora_comment_query
++	theora_comment_query_count
++	theora_comment_clear
++	th_version_string
++	th_version_number
++	th_decode_headerin
++	th_decode_alloc
++	th_setup_free
++	th_decode_ctl
++	th_decode_packetin
++	th_decode_ycbcr_out
++	th_decode_free
++	th_packet_isheader
++	th_packet_iskeyframe
++	th_granule_frame
++	th_granule_time
++	th_info_init
++	th_info_clear
++	th_comment_init
++	th_comment_add
++	th_comment_add_tag
++	th_comment_query
++	th_comment_query_count
++	th_comment_clear
++	th_encode_alloc
++	th_encode_ctl
++	th_encode_flushheader
++	th_encode_packetout
++	th_encode_ycbcr_in
++	th_encode_free
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..a2d5248
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,227 @@
++project(
++  'theora',
++  'c',
++  'cpp',
++  version: '1.1.1',
++  meson_version: '>= 0.49.0',
++  license: 'BSD-3-Clause',
++  default_options: ['c_std=c11'],
++)
++
++conf = configuration_data()
++
++valgrind_testing = get_option('valgrind-testing')
++
++valgrind_exe = find_program('valgrind', required: valgrind_testing)
++
++if valgrind_exe.found()
++  add_test_setup(
++    'valgrind',
++    exe_wrapper: [
++      valgrind_exe,
++      '-q',
++      '--leak-check=yes',
++      '--show-reachable=yes',
++      '--num-callers=100',
++    ],
++  )
++endif
++
++compile_args = []
++
++cc = meson.get_compiler('c')
++
++if cc.get_argument_syntax() != 'msvc'
++  compile_args += cc.get_supported_arguments(
++    '-Wno-parentheses',
++    '-Wno-shift-op-parentheses',
++    '-Wno-shift-negative-value',
++  )
++endif
++
++m_dep = cc.find_library('m', required: false)
++
++if get_option('collect-metrics')
++  add_project_arguments('-DOC_COLLECT_METRICS', language: 'c')
++endif
++
++ogg_dep = dependency('ogg', version: '>= 1.1', required: true)
++
++vorbis_dep = dependency(
++  'vorbis',
++  version: '>= 1.0.1',
++  required: false,
++  disabler: true,
++)
++
++vorbisenc_dep = dependency(
++  'vorbisenc',
++  version: '>= 1.0.1',
++  required: false,
++  disabler: true,
++)
++
++sdl_dep = dependency('sdl', required: false, disabler: true)
++
++if not sdl_dep.found()
++  message('*** Unable to find SDL -- Not compiling example players ***')
++endif
++
++if (
++  cc.has_header('sys/soundcard.h')
++  or cc.has_header('soundcard.h')
++  or cc.has_header('machine/soundcard.h')
++)
++  if host_machine.system() == 'openbsd'
++    oss_dep = dependency('ossaudio', required: false, disabler: true)
++  else
++    oss_dep = declare_dependency()
++  endif
++else
++  oss_dep = disabler()
++endif
++
++if not oss_dep.found()
++  message('OSS audio support not found -- not compiling player_example')
++endif
++
++libpng_dep = dependency('libpng', required: false)
++
++if cc.has_header('unistd.h')
++  unistd_dep = declare_dependency()
++else
++  unistd_dep = disabler()
++endif
++
++telemetry = get_option('telemetry')
++
++cairo_dep = dependency('cairo', required: telemetry)
++
++if cairo_dep.found()
++  conf.set('HAVE_CAIRO', true)
++endif
++
++mem_constraint = get_option('mem-constraint')
++
++if mem_constraint.enabled()
++  conf.set('HAVE_MEMORY_CONSTRAINT', language: 'c')
++endif
++
++asm = not get_option('asm').disabled()
++if asm
++  if host_machine.cpu_family() == 'x86_64'
++    conf.set('CPU_x86_64', true)
++    if cc.get_id() != 'msvc'
++      conf.set('OC_X86_ASM', true)
++      conf.set('OC_X86_64_ASM', true)
++    endif
++  elif host_machine.cpu_family() == 'x86'
++    conf.set('OC_X86_ASM', true)
++  endif
++endif
++
++config_h = configure_file(configuration: conf, output: 'config.h')
++
++config_dep = declare_dependency(sources: config_h)
++
++add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
++
++pkg = import('pkgconfig')
++windows = import('windows')
++
++subdir('include')
++
++subdir('lib')
++
++examples = get_option('examples')
++
++if examples.auto() or examples.enabled()
++  subdir('examples')
++endif
++
++subdir('tests')
++
++doc = get_option('doc')
++
++doc_root_dir = meson.current_source_dir()
++
++doxygen_exe = find_program(
++  'doxygen',
++  required: doc,
++  disabler: true,
++)
++
++subdir('doc')
++
++spec = get_option('spec')
++
++if spec.auto() or spec.enabled()
++  # Note: unlike the original autotools script, here we use
++  # latexmk to do the dependency management for us.
++  # This implicates that we've got to copy spec.{tex,bib}
++  # to the build folder in /doc/spec/ to make all files
++  # live in the same folder.
++  latexmk_exe = find_program('latexmk', required: spec)
++  transfig_exe = find_program('fig2dev', required: spec)
++  # used indirectly by latexmk
++  pdflatex = find_program('pdflatex', required: spec)
++  bibtex = find_program('bibtex', required: spec)
++
++  if (
++    latexmk_exe.found()
++    and pdflatex.found()
++    and bibtex.found()
++    and transfig_exe.found()
++  )
++    check_needed_tex_packages = find_program(
++      'doc/spec/check-needed-tex-packages.py',
++      required: true,
++    )
++    test_tex_packages = find_program(
++      'doc/spec/test-tex-packages.py',
++      required: true,
++    )
++
++    message(
++      'Checking for packages in @0@...'.format(
++        meson.current_source_dir() / 'doc/spec/spec.tex',
++      ),
++    )
++
++    packages = run_command(
++      check_needed_tex_packages,
++      capture: true,
++      check: true,
++    ).stdout().split()
++
++    tex_pkg_ok = true
++
++    foreach pkg : packages
++      message('for Tex package @0@'.format(pkg))
++
++      pkg_test = run_command(test_tex_packages, '--pdflatex', pdflatex, pkg)
++      if pkg_test.returncode() != 0
++        message = 'The \'@0@\' TeX package is missing or broken'.format(pkg)
++
++        if spec.enabled()
++          error(message)
++        else
++          warning(message)
++          tex_pkg_ok = false
++        endif
++        break
++      endif
++    endforeach
++  else
++    tex_pkg_ok = false
++  endif
++
++  if tex_pkg_ok and meson.project_version() > '1.2.0alpha1'
++    # libtheora <= 1.2.0alpha1 has a tex file which is incompatible
++    # with TeX distributions < 2015 at the least.
++    # See commit fbb275803696085225c310773474ef4dcf8a4528.
++    subdir('doc/spec')
++  else
++    message('*** Format Specification will not be built.')
++  endif
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..9f2900b
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,8 @@
++option('doc', type: 'feature', value: 'auto', description: 'Build API documentation')
++option('spec', type: 'feature', value: 'auto', description: 'Build the specification')
++option('valgrind-testing', type: 'feature', value: 'disabled', description: 'Enable running of tests inside Valgrind')
++option('asm', type: 'feature', value: 'enabled', description: 'Enable assembly optimizations')
++option('telemetry', type: 'feature', value: 'disabled', description: 'Enable debugging output controls')
++option('mem-constraint', type: 'feature', value: 'disabled', description: 'Abort if size exceeds 16384x16384 (for fuzzing only)')
++option('examples', type: 'feature', value: 'disabled', description: 'Enable examples')
++option('collect-metrics', type: 'boolean', value: 'false', description: 'Enable metrics collection for mode training')
+diff --git a/tests/meson.build b/tests/meson.build
+new file mode 100644
+index 0000000..2f08129
+--- /dev/null
++++ b/tests/meson.build
+@@ -0,0 +1,114 @@
++theora_libs = [libtheora]
++theoradec_libs = [libtheoradec]
++theoraenc_libs = [libtheoraenc, libtheoradec]
++
++tests = {}
++
++# dummy call tests for the current api
++noop = executable(
++  'noop',
++  files('noop.c'),
++  c_args: compile_args,
++  link_with: theoraenc_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'noop': noop}
++
++# dummy call tests for the pre-1.0 legacy api with current link line
++noop_theoraenc = executable(
++  'noop_theoraenc',
++  files('noop_theora.c'),
++  c_args: compile_args,
++  link_with: theoraenc_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'noop_theoraenc': noop_theoraenc}
++
++# dummy call tests for the pre-1.0 legacy api with legacy link line
++noop_theora = executable(
++  'noop_theora',
++  files('noop_theora.c'),
++  c_args: compile_args,
++  link_with: theora_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'noop_theora': noop_theora}
++
++# comment utilities for the current api
++comment = executable(
++  'comment',
++  files('comment.c'),
++  c_args: compile_args,
++  link_with: theoradec_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'comment': comment}
++
++# comment utilities for the legacy api and current lib
++comment_theoradec = executable(
++  'comment_theoradec',
++  files('comment.c'),
++  c_args: compile_args,
++  link_with: theoradec_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'comment_theoradec': comment_theoradec}
++
++# comment utilities for the legacy api and legacy lib
++comment_theora = executable(
++  'comment_theora',
++  files('comment_theora.c'),
++  c_args: compile_args,
++  link_with: theora_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'comment_theora': comment_theora}
++
++granulepos = executable(
++  'granulepos',
++  files('granulepos.c'),
++  c_args: compile_args,
++  link_with: theoraenc_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'granulepos': granulepos}
++
++granulepos_theoraenc = executable(
++  'granulepos_theoraenc',
++  files('granulepos_theora.c'),
++  c_args: compile_args,
++  link_with: theoraenc_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'granulepos_theoraenc': granulepos_theoraenc}
++
++granulepos_theora = executable(
++  'granulepos_theora',
++  files('granulepos_theora.c'),
++  c_args: compile_args,
++  link_with: theora_libs,
++  dependencies: [m_dep, ogg_dep, config_dep],
++  include_directories: incdir,
++)
++
++tests += {'granulepos_theora': granulepos_theora}
++
++foreach name, exe : tests
++  test(name, exe)
++endforeach
+diff --git a/win32/xmingw32/generate_windows_rc.py b/win32/xmingw32/generate_windows_rc.py
+new file mode 100644
+index 0000000..068bc57
+--- /dev/null
++++ b/win32/xmingw32/generate_windows_rc.py
+@@ -0,0 +1,30 @@
++#!/usr/bin/env python3
++
++from argparse import ArgumentParser
++from pathlib import Path
++
++if __name__ == '__main__':
++    parser = ArgumentParser(
++        description='Patches the BLOCK "0x040904B0" instruction in .rc files to be Windows compliant')
++    parser.add_argument('src_rc', type=Path, help='Source file')
++    parser.add_argument('all_rc', type=Path, help='"All" metadata file')
++    parser.add_argument('dst_rc', type=Path, help='Destination file')
++    parser.add_argument(
++        'version', help='Version string in the format major.minor.patch')
++
++    args = parser.parse_args()
++
++    source = args.src_rc.read_text(encoding='utf-8')
++    all = args.all_rc.read_text(encoding='utf-8')
++
++    version = f"{','.join(args.version.split('.')[0:2])},0"
++
++    all = all.replace('"0x040904B0"', '"040904B0"') \
++        .replace('TH_VERSION_FIELD', version) \
++        .replace('TH_VERSION_STRING', f'"{version}"')
++
++    source = source.replace(f'#include "{args.all_rc.name}"', all)
++
++    dest = args.dst_rc
++    dest.parent.mkdir(exist_ok=True, parents=True)
++    dest.write_text(source, encoding='utf-8')
+-- 
+2.38.1
+

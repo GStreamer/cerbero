@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libtheora'
@@ -8,31 +8,29 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'xiph://theora/%(name)s-%(version)s.tar.bz2'
     tarball_checksum = 'b6ae1ee2fa3d42ac489287d3ec34c5885730b1296f0801ae577a35193d3affbc'
-    deps = ['libogg', 'libvorbis']
-    allow_parallel_build = False
+    deps = ['libogg']
+    btype = BuildType.MESON
+    meson_options = {
+        'doc': 'disabled',
+        'examples': 'disabled',
+        'spec': 'disabled',
+    }
     patches = [
-        'libtheora/0004-examples-Don-t-use-png_sizeof.patch',
-        'libtheora/0006-Fix-cross-compilation-build.patch',
+        'libtheora/0001-Add-meson-build-system.patch',
+        'libtheora/0001-meson-fix-build-with-assembly-enabled-on-32-bit-x86.patch',
+        'libtheora/0001-theora-fix-library-so-versioning-and-add-darwin_vers.patch',
     ]
-    configure_options = ' --disable-spec --disable-examples'
 
     files_libs = ['libtheora', 'libtheoradec', 'libtheoraenc']
-    files_bins = ['dvconnect', 'encodedv', 'dubdv']
     files_devel = ['include/theora', 'lib/pkgconfig/theora.pc',
                    'lib/pkgconfig/theoraenc.pc', 'lib/pkgconfig/theoradec.pc']
 
-    def prepare(self):
-        if self.config.platform != Platform.WINDOWS:
-            # Don't build documentation even if doxygen is available
-            self.autoreconf = True
-            self.autoreconf_sh = 'NOCONFIGURE=1 ./autogen.sh'
-            self.configure_options += ' --disable-doc'
-            self.patches += [
-                'libtheora/0001-Add-option-to-disable-doc.patch',
-                'libtheora/0003-Use-our-automake-version-and-not-an-older-one.patch',
-                'libtheora/0005-build-allow-skipping-configure-in-autogen.sh.patch',
-            ]
-        if self.config.target_platform == Platform.IOS:
-            self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
-        elif self.config.target_platform == Platform.DARWIN:
-            self.patches += ['libtheora/0007-Don-t-use-fforce-addr.patch']
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('theora', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['ogg']).save()
+        LibtoolLibrary('theoradec', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['ogg']).save()
+        LibtoolLibrary('theoraenc', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=['ogg']).save()
+        super().post_install()

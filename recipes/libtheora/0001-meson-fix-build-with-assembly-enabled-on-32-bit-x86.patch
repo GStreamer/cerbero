@@ -1,0 +1,48 @@
+From 26ec164200923b1e1ae48f9f4065053072cd3476 Mon Sep 17 00:00:00 2001
+From: Tim-Philipp Muller <tim@centricular.com>
+Date: Mon, 26 Dec 2022 17:14:37 +0000
+Subject: [PATCH] meson: fix build with assembly enabled on 32-bit x86
+
+- config key 'CPU_x86_32' was never set anywhere
+- some referenced files don't actually exist
+---
+ lib/meson.build | 3 ---
+ meson.build     | 1 +
+ 2 files changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/lib/meson.build b/lib/meson.build
+index 00aaf5e..b46d105 100644
+--- a/lib/meson.build
++++ b/lib/meson.build
+@@ -64,8 +64,6 @@ if asm
+         'x86/mmxfrag.c',
+         'x86/mmxidct.c',
+         'x86/mmxstate.c',
+-        'x86/sse2idct.c',
+-        'x86/x86cpu.c',
+         'x86/x86state.c',
+       )
+       encoder_sources += files(
+@@ -74,7 +72,6 @@ if asm
+         'x86/mmxfrag.c',
+         'x86/mmxidct.c',
+         'x86/mmxstate.c',
+-        'x86/x86cpu.c',
+         'x86/x86enc.c',
+         'x86/x86state.c',
+       )
+diff --git a/meson.build b/meson.build
+index a2d5248..8e50ba0 100644
+--- a/meson.build
++++ b/meson.build
+@@ -116,6 +116,7 @@ if asm
+       conf.set('OC_X86_64_ASM', true)
+     endif
+   elif host_machine.cpu_family() == 'x86'
++    conf.set('CPU_x86_32', true)
+     conf.set('OC_X86_ASM', true)
+   endif
+ endif
+-- 
+2.30.2
+

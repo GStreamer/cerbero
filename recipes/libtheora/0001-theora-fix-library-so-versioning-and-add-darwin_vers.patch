@@ -1,0 +1,63 @@
+From 723b6a113cb272cda0fe578551d0f42fa25f2ae7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Mon, 26 Dec 2022 20:18:59 +0100
+Subject: [PATCH] theora: fix library so versioning and add darwin_versions
+
+Should match the upstream build system versions.
+---
+ lib/meson.build | 6 ++++++
+ meson.build     | 7 +++++++
+ 2 files changed, 13 insertions(+)
+
+diff --git a/lib/meson.build b/lib/meson.build
+index 00aaf5e..a893c86 100644
+--- a/lib/meson.build
++++ b/lib/meson.build
+@@ -173,6 +173,8 @@ libtheoradec = library(
+   vs_module_defs: '../win32/xmingw32/libtheoradec-all.def',
+   c_args: compile_args,
+   link_args: theoradec_version_flag,
++  version: theoradec_libversion,
++  darwin_versions: theoradec_darwin_version,
+   install: true,
+ )
+ 
+@@ -196,6 +198,8 @@ libtheoraenc = library(
+   vs_module_defs: '../win32/xmingw32/libtheoraenc-all.def',
+   c_args: compile_args,
+   link_args: theoraenc_version_flag,
++  version: theoraenc_libversion,
++  darwin_versions: theoraenc_darwin_version,
+   install: true,
+ )
+ 
+@@ -224,6 +228,8 @@ libtheora = library(
+   c_args: compile_args,
+   link_args: theora_version_flag,
+   vs_module_defs: 'theora.def', # Missing in the official tarballs
++  version: theora_libversion,
++  darwin_versions: theora_darwin_version,
+   install: true,
+ )
+ 
+diff --git a/meson.build b/meson.build
+index a2d5248..d9a8627 100644
+--- a/meson.build
++++ b/meson.build
+@@ -8,6 +8,13 @@ project(
+   default_options: ['c_std=c11'],
+ )
+ 
++theora_libversion = '0.3.10'
++theora_darwin_version = ['4.0.0', '4.10.0']
++theoradec_libversion = '1.1.4'
++theoradec_darwin_version = ['3.0.0', '3.4.0']
++theoraenc_libversion = '1.1.2'
++theoraenc_darwin_version = ['3.0.0', '3.2.0']
++
+ conf = configuration_data()
+ 
+ valgrind_testing = get_option('valgrind-testing')
+-- 
+2.38.1
+
