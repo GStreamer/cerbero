@@ -4,18 +4,17 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'gdk-pixbuf'
-    version = '2.40.0'
+    version = '2.42.10'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '1582595099537ca8ff3b99c6804350b4c058bb8ad67411bbaae024ee7cead4e6'
+    tarball_checksum = 'ee9b6c75d13ba096907a2e3c6b27b61bcd17f5c7ebeab5a5b439d2f2e39fe44b'
     meson_options = {'docs' : 'false',
                      'man' : 'false',
                      'installed_tests' : 'false',
                      'builtin_loaders' : 'all',
-                     'gio_sniffing' : 'false',
-                     'x11' : 'false'}
+                     'gio_sniffing' : 'false'}
     deps = ['libjpeg-turbo', 'glib', 'libpng', 'tiff', 'zlib' ]
 
     files_libs = ['libgdk_pixbuf-2.0']
