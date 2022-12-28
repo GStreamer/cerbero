@@ -42,6 +42,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-gio-gsocket-fix-compiler-warnings-on-armv7-Android.patch',
         # TODO upstreaming
         'glib/0001-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
+        # TODO upstreaming
+        'glib/0001-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
     ]
 
     files_libs = [
