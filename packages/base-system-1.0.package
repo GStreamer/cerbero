@@ -14,7 +14,8 @@ class Package(custom.GStreamer, package.Package):
              'pango:libs:modules', 'libpng:libs', 'libjpeg-turbo:libs',
              'tiff:libs', 'gdk-pixbuf:bins:libs:modules:lang', 'libcroco:libs',
              'librsvg:libs', 'libxml2:libs', 'pixman:libs', 'fribidi:libs',
-             'zlib:libs', 'bzip2:libs', 'harfbuzz:libs', 'json-glib:bins:libs']
+             'zlib:libs', 'bzip2:libs', 'harfbuzz:libs', 'json-glib:bins:libs',
+             'pcre2:libs']
 
     platform_files = {
         Platform.WINDOWS: ['proxy-libintl:libs:lang', 'mingw-runtime'],
@@ -31,6 +32,7 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.uwp:
             self.platform_files[Platform.WINDOWS] = ['proxy-libintl:libs:lang']
             self.files = [
-                'libffi:libs', 'zlib:libs', 'glib:libs:lang:schemas', 'orc:libs',
-                'bzip2:libs', 'json-glib:libs',
+                'libffi:libs', 'zlib:libs', 'pcre2:libs',
+                'glib:libs:lang:schemas', 'orc:libs', 'bzip2:libs',
+                'json-glib:libs',
             ]

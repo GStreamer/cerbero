@@ -1,0 +1,33 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+    name = 'pcre2'
+    version = '10.42'
+
+    stype = SourceType.TARBALL
+    url = 'https://github.com/PhilipHazel/pcre2/releases/download/pcre2-%(version)s/pcre2-%(version)s.tar.bz2'
+    tarball_checksum = '8d36cd8cb6ea2a4c2bb358ff6411b0c788633a2a45dabbf1aeb4b701d1b5e840'
+
+    btype = BuildType.MESON
+    licenses = [{License.BSD_like: ['LICENCE']}]
+    meson_options = {'grep': 'false',
+                     'test': 'false',
+                     'pcre2-8': 'enabled',
+                     'pcre2-16': 'disabled',
+                     'pcre2-32': 'disabled',
+                    }
+
+    files_libs = ['libpcre2-8']
+    files_devel = ['include/pcre2.h', 'lib/pkgconfig/libpcre2-8.pc']
+
+    patches = [
+        'pcre2/0001-Add-meson-build-files-based-on-wrap-pcre2_10.42-1.patch',
+        'pcre2/0002-meson-add-build-options-for-8-16-32-bit-libs-and-dis.patch',
+        'pcre2/0003-meson-define-SUPPORT_PCRE2_16-etc-as-well-if-those-a.patch',
+        'pcre2/0004-meson-fix-library-versioning.patch',
+    ]
+
+    def post_install(self):
+        LibtoolLibrary('pcre2-8', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()

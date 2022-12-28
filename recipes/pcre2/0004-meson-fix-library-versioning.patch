@@ -1,0 +1,60 @@
+From 26d41da4e3c23b295293e352cf7848e4b8b9c86d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 28 Dec 2022 23:41:23 +0100
+Subject: [PATCH] meson: fix library versioning
+
+---
+ meson.build | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/meson.build b/meson.build
+index 1aff62e..26975e5 100644
+--- a/meson.build
++++ b/meson.build
+@@ -6,6 +6,11 @@ project(
+   version: '10.42',
+ )
+ 
++pcre2_8_lib_version = '0.11.0'
++pcre2_16_lib_version = '0.11.0'
++pcre2_32_lib_version = '0.11.0'
++pcre2_posix_lib_version = '3.0.2'
++
+ c_compiler = meson.get_compiler('c')
+ 
+ pcre2_h = configure_file(
+@@ -123,6 +128,7 @@ if not get_option('pcre2-8').disabled() # enable on auto
+     sources,
+     include_directories: includes,
+     c_args: [config_h_defs, '-DHAVE_CONFIG_H', '-DPCRE2_CODE_UNIT_WIDTH=8'],
++    version: pcre2_8_lib_version,
+     install: true,
+   )
+ 
+@@ -137,6 +143,7 @@ if not get_option('pcre2-8').disabled() # enable on auto
+     'src/pcre2posix.c',
+     dependencies: libpcre2_8,
+     c_args: [config_h_defs, '-DHAVE_CONFIG_H', '-DPCRE2_CODE_UNIT_WIDTH=8'],
++    version: pcre2_posix_lib_version,
+     install: true,
+   )
+ 
+@@ -158,6 +165,7 @@ if get_option('pcre2-16').enabled() # disable on auto
+     sources,
+     include_directories: includes,
+     c_args: [config_h_defs, '-DHAVE_CONFIG_H', '-DPCRE2_CODE_UNIT_WIDTH=16'],
++    version: pcre2_16_lib_version,
+     install: true,
+   )
+ 
+@@ -178,6 +186,7 @@ if get_option('pcre2-32').enabled() # disable on auto
+     sources,
+     include_directories: includes,
+     c_args: [config_h_defs, '-DHAVE_CONFIG_H', '-DPCRE2_CODE_UNIT_WIDTH=32'],
++    version: pcre2_32_lib_version,
+     install: true,
+   )
+ 
+-- 
+2.38.1
+
