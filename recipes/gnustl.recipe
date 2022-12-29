@@ -17,25 +17,16 @@ class Recipe(recipe.Recipe):
     files_devel= [
             'lib/pkgconfig/gnustl.pc',
             'lib/libgnustl.la',
-            'lib/libandroid_support.a'
             ]
 
     def prepare(self):
         if self.config.target_platform != Platform.ANDROID:
             raise InvalidRecipeError(self, "Invalid platform")
-        v = DistroVersion.get_android_api_version(self.config.target_distro_version)
 
     async def compile(self):
         libdir = os.path.join(self.config.prefix, 'lib')
         if not os.path.exists(libdir):
             os.makedirs(libdir)
-
-        # Generate libraries that aren't copied from the NDK
-        v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-        if v >= 21:
-            shell.new_call([self.get_env('AR'), 'rc', os.path.join(libdir, 'libandroid_support.a')], env=self.env)
-        if self.config.target_arch != Architecture.ARMv7:
-            shell.new_call([self.get_env('AR'), 'rc', os.path.join(libdir, 'libunwind.a')], env=self.env)
 
     async def install(self):
         stl_prefix = os.path.join(self.config.toolchain_prefix, 'sources',
@@ -60,14 +51,6 @@ class Recipe(recipe.Recipe):
         # Copies libraries to the prefix
         shutil.copy(os.path.join(stl_libdir, 'libc++_shared.so'),
                     os.path.join(libdir, 'libc++_shared.so'))
-        v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-        if v < 21:
-            shutil.copy(os.path.join(stl_libdir, 'libandroid_support.a'),
-                        os.path.join(libdir, 'libandroid_support.a'))
-
-        if self.config.target_arch == Architecture.ARMv7:
-            shutil.copy(os.path.join(stl_libdir, 'libunwind.a'),
-                        os.path.join(libdir, 'libunwind.a'))
 
         # Create a libtool library for gnustl (libgnustl.la)
         lib = LibtoolLibrary('gnustl', None, None, None, libdir,
@@ -75,9 +58,7 @@ class Recipe(recipe.Recipe):
         lib.change_value('dlname', 'libc++_shared.so')
         lib.change_value('library_names', 'libc++_shared.so libc++_shared.so libc++_shared.so')
         lib.change_value('old_library', '')
-        lib.change_value('dependency_libs', '-lc++_shared' +
-                                (' %s/libandroid_support.a' % (libdir) if v < 21 else '') +
-                                (' %s/libunwind.a' % (libdir) if self.config.target_arch == Architecture.ARMv7 else ''))
+        lib.change_value('dependency_libs', '-lc++_shared')
         lib.save()
 
         # Create pkg-config file (gnustl.pc)
@@ -85,13 +66,9 @@ class Recipe(recipe.Recipe):
         if not os.path.exists(pkgdir):
             os.makedirs(pkgdir)
         stl_pc = PkgConfigWritter('gnustl', 'gnustl', '2.0',
-                '', '-L${libdir} ${libdir}/libc++_shared.so' +
-                (' ${libdir}/libandroid_support.a ' if v < 21 else '') +
-                (' ${libdir}/libunwind.a ' if self.config.target_arch == Architecture.ARMv7 else '') +
-                '',
+                '', '-L${libdir} ${libdir}/libc++_shared.so',
                 # FIXME: slurp these headers into the cerbero directory somehow so that they are usable from c++ applications
-                '-I%s/include' % (stl_prefix) +
-                (' -I%s/sources/android/support/include ' % self.config.toolchain_prefix if v < 21 else ''),
+                '-I%s/include' % (stl_prefix),
                 self.config.prefix)
         stl_pc.rel_incldir = 'include'
         stl_pc.save('gnustl', pkgdir)
