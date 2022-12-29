@@ -1,7 +1,7 @@
-From 50f9b494cf867daabe20fc39199698af9f4a0fb5 Mon Sep 17 00:00:00 2001
+From aad3da4bd706b4bf233c5a93da28ea4d4df2004f Mon Sep 17 00:00:00 2001
 From: Seungha Yang <seungha@centricular.com>
 Date: Thu, 22 Apr 2021 15:11:34 +0900
-Subject: [PATCH] meson: Add workaround for Visual Studio 2019 ARM build
+Subject: [PATCH 25/25] meson: Add workaround for Visual Studio 2019 ARM build
 
 See https://developercommunity.visualstudio.com/t/vs2019-1662-c2039-wait-for-is-not-a-member-of-winr/1080777
 ---

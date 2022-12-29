@@ -1,15 +1,15 @@
-From 033ea3a136180c6b4c065e9903cf807d97f5f603 Mon Sep 17 00:00:00 2001
+From 086edb78fdc7bc5e82ab8d0a9067979c1e525ff4 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 14 Aug 2019 15:38:54 +0530
-Subject: [PATCH] TODO: gdbus: Completely disable when building for WinRT
+Subject: [PATCH 20/25] TODO: gdbus: Completely disable when building for WinRT
 
 Disable all GDBus APIs and everything that relies on it for now.
 ---
  fuzzing/meson.build |  5 ++++-
  gio/gapplication.h  |  7 +++++++
  gio/giomodule.c     |  9 +++++----
- gio/meson.build     | 34 +++++++++++++++++++++++++---------
- 4 files changed, 41 insertions(+), 14 deletions(-)
+ gio/meson.build     | 32 ++++++++++++++++++++++++--------
+ 4 files changed, 40 insertions(+), 13 deletions(-)
 
 diff --git a/fuzzing/meson.build b/fuzzing/meson.build
 index e87abc7..df9152d 100644
@@ -98,7 +98,7 @@ index 1f8042c..9a9402e 100644
        g_type_ensure (_g_win32_volume_monitor_get_type ());
        g_type_ensure (_g_winhttp_vfs_get_type ());
 diff --git a/gio/meson.build b/gio/meson.build
-index 56a9289..79dfaa0 100644
+index ffef5e1..a290728 100644
 --- a/gio/meson.build
 +++ b/gio/meson.build
 @@ -226,6 +226,10 @@ gdbus_sources = files(
@@ -135,7 +135,7 @@ index 56a9289..79dfaa0 100644
  if host_system != 'windows'
    unix_sources = files(
      'gfiledescriptorbased.c',
-@@ -437,7 +450,6 @@ else
+@@ -436,7 +449,6 @@ else
      'gwin32outputstream.c',
      'gwin32file-sync-stream.c',
      'gwin32packageparser.c',
@@ -143,12 +143,10 @@ index 56a9289..79dfaa0 100644
      'gwin32sid.c',
      'gwin32sid.h',
    )
-@@ -452,7 +464,9 @@ else
-       'gwin32mount.c',
-       'gwin32registrykey.c',
+@@ -453,6 +465,8 @@ else
        'gwin32volumemonitor.c',
--      'gwin32networkmonitor.c'
-+      'gwin32networkmonitor.c',
+       'gwin32networkmonitor.c',
+       'gmemorymonitorwin32.c',
 +      # Re-enable when gapplication is re-enabled
 +      'gwin32notificationbackend.c',
      )

@@ -1,7 +1,7 @@
-From acf4f0678063b31c4c3bc236530c17eec3aac903 Mon Sep 17 00:00:00 2001
+From e559148dbaa4673e6627308781ce69b225bd0dd2 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 16 Aug 2019 12:49:16 +0530
-Subject: [PATCH 16/22] WIP: glocalfile: Trash as a concept does not exist on
+Subject: [PATCH 17/25] WIP: glocalfile: Trash as a concept does not exist on
  UWP
 
 And the functions we use to implement `g_local_file_trash()` and
@@ -12,10 +12,10 @@ those are called.
  1 file changed, 13 insertions(+)
 
 diff --git a/gio/glocalfile.c b/gio/glocalfile.c
-index af68a59..4d167fa 100644
+index ed7a663..6010894 100644
 --- a/gio/glocalfile.c
 +++ b/gio/glocalfile.c
-@@ -835,6 +835,7 @@ get_volume_for_path (const char *path)
+@@ -856,6 +856,7 @@ get_volume_for_path (const char *path)
    wpath = g_utf8_to_utf16 (path, -1, NULL, NULL, NULL);
    result = g_new (wchar_t, MAX_PATH);
  
@@ -23,7 +23,7 @@ index af68a59..4d167fa 100644
    if (!GetVolumePathNameW (wpath, result, MAX_PATH))
      {
        char *msg = g_win32_error_message (GetLastError ());
-@@ -844,6 +845,10 @@ get_volume_for_path (const char *path)
+@@ -865,6 +866,10 @@ get_volume_for_path (const char *path)
        g_free (wpath);
        return NULL;
      }
@@ -34,7 +34,7 @@ index af68a59..4d167fa 100644
  
    len = wcslen (result);
    if (len > 0 && result[len-1] != L'\\')
-@@ -2230,6 +2235,13 @@ g_local_file_trash (GFile         *file,
+@@ -2340,6 +2345,13 @@ g_local_file_trash (GFile         *file,
  		    GCancellable  *cancellable,
  		    GError       **error)
  {
@@ -48,7 +48,7 @@ index af68a59..4d167fa 100644
    GLocalFile *local = G_LOCAL_FILE (file);
    SHFILEOPSTRUCTW op = {0};
    gboolean success;
-@@ -2263,6 +2275,7 @@ g_local_file_trash (GFile         *file,
+@@ -2373,6 +2385,7 @@ g_local_file_trash (GFile         *file,
  
    g_free (wfilename);
    return success;
@@ -57,5 +57,5 @@ index af68a59..4d167fa 100644
  #endif /* G_OS_WIN32 */
  
 -- 
-2.27.0.windows.1
+2.38.1
 

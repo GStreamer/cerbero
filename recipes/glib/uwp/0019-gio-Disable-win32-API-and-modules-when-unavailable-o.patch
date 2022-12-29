@@ -1,7 +1,8 @@
-From c7913e142a09a1f1e935b580305ba93968501804 Mon Sep 17 00:00:00 2001
+From 38ba531d557e61c418d69c0f7af7c217eb8c4d8e Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Fri, 16 Aug 2019 13:56:39 +0530
-Subject: [PATCH] gio: Disable win32 API and modules when unavailable on WinRT
+Subject: [PATCH 19/25] gio: Disable win32 API and modules when unavailable on
+ WinRT
 
 The modules listed below are useless on a UWP app:
 
@@ -21,6 +22,7 @@ TODO: the following need to be ported to new WinRT APIs:
 
 * gwin32networkmonitor (giomodule)
 * gwin32appinfo.c (currently stubbed out)
+* gmemorymonitorwin32
 ---
  gio/gappinfo.h  |  5 +++++
  gio/giomodule.c | 32 +++++++++++++++++---------------
@@ -142,7 +144,7 @@ index 0860499..1f8042c 100644
        g_once_init_leave (&loaded_dirs, TRUE);
      }
 diff --git a/gio/meson.build b/gio/meson.build
-index 14f0d82..56a9289 100644
+index ce2587e..ffef5e1 100644
 --- a/gio/meson.build
 +++ b/gio/meson.build
 @@ -272,7 +272,7 @@ settings_sources = files(
@@ -171,7 +173,6 @@ index 14f0d82..56a9289 100644
 -    'gwin32registrykey.c',
 -    'gwin32mount.c',
 -    'gwin32volumemonitor.c',
-+    'gmemorymonitorwin32.c', # Maybe this neeeds to be moved into WINAPI_ONLY_APP section as well? (tpm) 
      'gwin32inputstream.c',
      'gwin32outputstream.c',
      'gwin32file-sync-stream.c',
@@ -193,7 +194,8 @@ index 14f0d82..56a9289 100644
 +      'gwin32mount.c',
 +      'gwin32registrykey.c',
 +      'gwin32volumemonitor.c',
-+      'gwin32networkmonitor.c'
++      'gwin32networkmonitor.c',
++      'gmemorymonitorwin32.c',
 +    )
 +  endif
 +

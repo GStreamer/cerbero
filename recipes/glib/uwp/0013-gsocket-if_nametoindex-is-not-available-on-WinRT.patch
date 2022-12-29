@@ -1,7 +1,7 @@
-From b8f0b78b055941e1512f8967b8d40236be9a78af Mon Sep 17 00:00:00 2001
+From 5aa2eaf9acc5fe1e62e23afab43d521097a3cd92 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 06:00:04 +0530
-Subject: [PATCH] gsocket: if_nametoindex is not available on WinRT
+Subject: [PATCH 13/25] gsocket: if_nametoindex is not available on WinRT
 
 if_indextoname() is also not available, and since that's the only way
 to get interface names on Windows, we can simply disable this code.
@@ -10,7 +10,7 @@ to get interface names on Windows, we can simply disable this code.
  1 file changed, 4 insertions(+)
 
 diff --git a/gio/gsocket.c b/gio/gsocket.c
-index bd5549f..6348c63 100644
+index e00ba2c..d535ddd 100644
 --- a/gio/gsocket.c
 +++ b/gio/gsocket.c
 @@ -2259,7 +2259,11 @@ g_socket_w32_get_adapter_ipv4_addr (const gchar *name_or_ip)

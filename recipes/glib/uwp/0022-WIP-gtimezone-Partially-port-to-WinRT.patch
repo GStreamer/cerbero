@@ -1,7 +1,7 @@
-From 8a0763f2ef7f9e7cf84f1240e7b9fae86477719a Mon Sep 17 00:00:00 2001
+From b5ca3900861782656b4204a9880d8ddc8ef794d7 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 8 Jun 2020 06:04:49 +0530
-Subject: [PATCH] WIP: gtimezone: Partially port to WinRT
+Subject: [PATCH 22/25] WIP: gtimezone: Partially port to WinRT
 
 get_default_timezone() was easy to port, but to port the timezone
 DST transition rule code, need to understand how the existing code
@@ -87,12 +87,12 @@ index 0049299..e42d814 100644
                                                       resolved_identifier,
                                                       &rules)))
 diff --git a/glib/gutils-winrt-private.h b/glib/gutils-winrt-private.h
-index 643c201..016bea7 100644
+index 2298000..99d2e5a 100644
 --- a/glib/gutils-winrt-private.h
 +++ b/glib/gutils-winrt-private.h
-@@ -72,6 +72,8 @@ enum GUtilsWinRTStorageFolderID
+@@ -31,6 +31,8 @@ enum GUtilsWinRTStorageFolderID
  
- gchar * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
+ char * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
  
 +gchar * g_winrt_get_default_timezone (void);
 +

@@ -1,7 +1,7 @@
-From 4b7a0fb662baf5aa8391c2d06848f3050dbaa825 Mon Sep 17 00:00:00 2001
+From ed727cc9edf81bc3a1499a003c9aa1427dc1ac67 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 03:01:42 +0530
-Subject: [PATCH] gmodule: Fix some more WinRT incompatibilities
+Subject: [PATCH 07/25] gmodule: Fix some more WinRT incompatibilities
 
 Testing with Windows SDK 10.0.18362 revealed more errors; some of
 which weren't around with the last SDK version I tested with.

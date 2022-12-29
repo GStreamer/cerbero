@@ -1,7 +1,7 @@
-From 591314c5def03bd0e743f9d0cb53921158846c5f Mon Sep 17 00:00:00 2001
+From 297bb094687fa9539740bd6fc09ee8785fe931d3 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 04:45:42 +0530
-Subject: [PATCH] gwin32: Stub out all version checking on WinRT
+Subject: [PATCH 12/25] gwin32: Stub out all version checking on WinRT
 
 Also remove all `WINAPI_FAMILY == 2` conditionals. That code is
 equivalent to `G_WINAPI_FAMILY_APP` being defined, and we now no
@@ -11,7 +11,7 @@ longer run any version checking in that case.
  1 file changed, 47 insertions(+), 23 deletions(-)
 
 diff --git a/glib/gwin32.c b/glib/gwin32.c
-index d1391b1..40d5a9d 100644
+index d1391b1..8d78647 100644
 --- a/glib/gwin32.c
 +++ b/glib/gwin32.c
 @@ -40,35 +40,19 @@
@@ -109,23 +109,15 @@ index d1391b1..40d5a9d 100644
  
    return result;
  }
-@@ -502,6 +502,15 @@ G_GNUC_END_IGNORE_DEPRECATIONS
+@@ -499,6 +499,7 @@ G_GNUC_END_IGNORE_DEPRECATIONS
+  * private API to call Windows's RtlGetVersion(), which may need to be called
+  * via GetProcAddress()
+  */
++#ifndef G_WINAPI_ONLY_APP
  gboolean
  _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
  {
-+#ifdef G_WINAPI_ONLY_APP
-+  /* RtlGetVersion is not available when building for UWP, but we only support
-+   * Windows 10 in that case, so we can hard-code the results */
-+  if (os_type == G_WIN32_OS_SERVER || major > 10)
-+    return FALSE;
-+  if (major == 10 && minor > 0)
-+    return FALSE;
-+  return TRUE;
-+#else
-   static OSVERSIONINFOEXW result;
-   static gsize inited = 0;
- 
-@@ -509,7 +518,6 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
+@@ -509,7 +510,6 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
  
    if (g_once_init_enter (&inited))
      {
@@ -133,7 +125,7 @@ index d1391b1..40d5a9d 100644
        /* For non-modern UI Apps, use the LoadLibraryW()/GetProcAddress() thing */
        typedef NTSTATUS (WINAPI fRtlGetVersion) (PRTL_OSVERSIONINFOEXW);
  
-@@ -519,22 +527,21 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
+@@ -519,16 +519,14 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
  
        RtlGetVersion = (fRtlGetVersion *) GetProcAddress (hmodule, "RtlGetVersion");
        g_return_val_if_fail (RtlGetVersion != NULL, FALSE);
@@ -151,10 +143,33 @@ index d1391b1..40d5a9d 100644
        g_once_init_leave (&inited, TRUE);
      }
  
-   *info = result;
+@@ -536,6 +534,7 @@ _g_win32_call_rtl_version (OSVERSIONINFOEXW *info)
  
    return TRUE;
+ }
 +#endif /* !G_WINAPI_ONLY_APP */
+ 
+ /**
+  * g_win32_check_windows_version:
+@@ -568,6 +567,13 @@ g_win32_check_windows_version (const gint major,
+                                const gint spver,
+                                const GWin32OSType os_type)
+ {
++#ifdef G_WINAPI_ONLY_APP
++  /* RtlGetVersion is not available when building for UWP, but we only support
++   * Windows 10 or newer in that case, so we can hard-code the results */
++  if (os_type != G_WIN32_OS_SERVER && major >= 10)
++    return TRUE;
++  return FALSE;
++#else
+   OSVERSIONINFOEXW osverinfo;
+   gboolean is_ver_checked = FALSE;
+   gboolean is_type_checked = FALSE;
+@@ -617,6 +623,7 @@ g_win32_check_windows_version (const gint major,
+     }
+ 
+   return is_ver_checked && is_type_checked;
++#endif
  }
  
  /**

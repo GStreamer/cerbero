@@ -1,7 +1,7 @@
-From c5338d5e8d1a7e4ddd4acfb25597c58cc9f2fab3 Mon Sep 17 00:00:00 2001
+From a8333e5a888166b84726998d14533d975e09794c Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 27 May 2020 00:48:52 +0530
-Subject: [PATCH 04/22] goption: Do not call GetCommandlineW() on UWP
+Subject: [PATCH 06/25] goption: Do not call GetCommandlineW() on UWP
 
 The function is not available there since there is no such thing as
 a 'command-line' or 'command-line argument' on UWP.
@@ -11,10 +11,10 @@ a 'command-line' or 'command-line argument' on UWP.
  2 files changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/glib/goption.c b/glib/goption.c
-index 7868363..f6a0f8e 100644
+index 0b3a05e..1e851b4 100644
 --- a/glib/goption.c
 +++ b/glib/goption.c
-@@ -1870,7 +1870,7 @@ platform_get_argv0 (void)
+@@ -1868,7 +1868,7 @@ platform_get_argv0 (void)
    base_arg0 = g_path_get_basename (*cmdline);
    g_free (cmdline);
    return base_arg0;
@@ -24,10 +24,10 @@ index 7868363..f6a0f8e 100644
    wchar_t **wargv;
    int wargc;
 diff --git a/glib/tests/option-argv0.c b/glib/tests/option-argv0.c
-index 5b626df..6780eb1 100644
+index a18e686..eddffbc 100644
 --- a/glib/tests/option-argv0.c
 +++ b/glib/tests/option-argv0.c
-@@ -52,7 +52,8 @@ test_platform_argv0 (void)
+@@ -51,7 +51,8 @@ test_platform_argv0 (void)
     * is implemented. At the moment that means Linux/Cygwin,
     * (which uses /proc/self/cmdline) or OpenBSD (which uses
     * sysctl and KERN_PROC_ARGS) or Windows (which uses
@@ -37,7 +37,7 @@ index 5b626df..6780eb1 100644
     * is not expected to pass, but we'd still want to know
     * how it does (the test code itself doesn't use any platform-specific
     * functionality, the difference is internal to glib, so it's quite
-@@ -64,7 +65,8 @@ test_platform_argv0 (void)
+@@ -63,7 +64,8 @@ test_platform_argv0 (void)
  #if !defined HAVE_PROC_SELF_CMDLINE && \
      !defined __OpenBSD__ && \
      !defined __linux && \
@@ -48,5 +48,5 @@ index 5b626df..6780eb1 100644
  #endif
  
 -- 
-2.27.0.windows.1
+2.38.1
 

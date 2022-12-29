@@ -1,7 +1,7 @@
-From e89bf7275eedeaebf90989bb80abdfe84b89a539 Mon Sep 17 00:00:00 2001
+From 8b036a937c003b6944fbddb7a75366535622384c Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Tue, 4 Aug 2020 01:25:42 +0530
-Subject: [PATCH] gio: Disable generic DNS record lookup on UWP
+Subject: [PATCH 01/25] gio: Disable generic DNS record lookup on UWP
 
 `DnsQuery()` is not available when building for UWP, so return an
 error if DNS record lookup is requested. Lookup by name and by address
@@ -11,10 +11,10 @@ still works.
  1 file changed, 6 insertions(+), 4 deletions(-)
 
 diff --git a/gio/gthreadedresolver.c b/gio/gthreadedresolver.c
-index 7691b91..a42d381 100644
+index 7453c0f..b650e69 100644
 --- a/gio/gthreadedresolver.c
 +++ b/gio/gthreadedresolver.c
-@@ -755,7 +755,7 @@ g_resolver_records_from_res_query (const gchar      *rrname,
+@@ -900,7 +900,7 @@ g_resolver_records_from_res_query (const gchar      *rrname,
      return records;
  }
  
@@ -23,7 +23,7 @@ index 7691b91..a42d381 100644
  
  static GVariant *
  parse_dns_srv (DNS_RECORD *rec)
-@@ -939,7 +939,7 @@ do_lookup_records (GTask         *task,
+@@ -1084,7 +1084,7 @@ do_lookup_records (GTask         *task,
                     GCancellable  *cancellable)
  {
    LookupRecordsData *lrd = task_data;
@@ -32,7 +32,7 @@ index 7691b91..a42d381 100644
    GError *error = NULL;
  
  #if defined(G_OS_UNIX)
-@@ -1007,7 +1007,7 @@ do_lookup_records (GTask         *task,
+@@ -1152,7 +1152,7 @@ do_lookup_records (GTask         *task,
  
  #endif  /* HAVE_RES_NQUERY */
  
@@ -41,7 +41,7 @@ index 7691b91..a42d381 100644
  
    DNS_STATUS status;
    DNS_RECORD *results = NULL;
-@@ -1018,7 +1018,9 @@ do_lookup_records (GTask         *task,
+@@ -1163,7 +1163,9 @@ do_lookup_records (GTask         *task,
    records = g_resolver_records_from_DnsQuery (lrd->rrname, dnstype, status, results, &error);
    if (results != NULL)
      DnsRecordListFree (results, DnsFreeRecordList);
@@ -53,5 +53,5 @@ index 7691b91..a42d381 100644
  
    if (records)
 -- 
-2.27.0.windows.1
+2.38.1
 

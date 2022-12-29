@@ -1,7 +1,7 @@
-From 575d1526d78c58cb7e50f497d73a4d8bd9c95544 Mon Sep 17 00:00:00 2001
+From 3a4f124975afe39ccbd6df2624aa65e41f7298fb Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 18 Jun 2020 17:40:59 +0530
-Subject: [PATCH] glib: Never use MessageBox on UWP apps
+Subject: [PATCH 02/25] glib: Never use MessageBox on UWP apps
 
 It used to be allowed when building in debug mode, but it isn't
 allowed at all anymore.

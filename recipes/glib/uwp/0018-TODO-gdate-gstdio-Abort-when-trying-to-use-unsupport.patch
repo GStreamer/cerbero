@@ -1,8 +1,8 @@
-From 4ea5436a4cb747c04573cf31b8ebdee7ed264c25 Mon Sep 17 00:00:00 2001
+From 615d244d45f351efe21aa0d163ad5830c171bc3a Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 3 Jun 2020 02:28:15 +0530
-Subject: [PATCH] TODO: gdate, gstdio: Abort when trying to use unsupported
- APIs
+Subject: [PATCH 18/25] TODO: gdate, gstdio: Abort when trying to use
+ unsupported APIs
 
 ---
  glib/gdate.c  | 10 +++++++++-

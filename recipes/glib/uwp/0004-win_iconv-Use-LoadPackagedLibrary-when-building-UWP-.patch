@@ -1,7 +1,7 @@
-From 2d1a5a8a6b7e3403ed7b03605659b81967dd9afb Mon Sep 17 00:00:00 2001
+From ec85883308b4afd28b6a268949bc8838635be166 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 14 Aug 2019 10:42:45 +0530
-Subject: [PATCH 02/22] win_iconv: Use LoadPackagedLibrary when building UWP
+Subject: [PATCH 04/25] win_iconv: Use LoadPackagedLibrary when building UWP
  apps
 
 LoadLibrary is not available at all when building with
@@ -11,7 +11,7 @@ LoadLibrary is not available at all when building with
  1 file changed, 12 insertions(+)
 
 diff --git a/glib/win_iconv.c b/glib/win_iconv.c
-index 605e5f0..3cc2464 100644
+index 7c78e78..ecdc94d 100644
 --- a/glib/win_iconv.c
 +++ b/glib/win_iconv.c
 @@ -60,6 +60,12 @@
@@ -42,5 +42,5 @@ index 605e5f0..3cc2464 100644
          return FALSE;
      ConvertINetString = (CONVERTINETSTRING)GetProcAddressA(h, "ConvertINetString");
 -- 
-2.27.0.windows.1
+2.38.1
 

@@ -1,7 +1,7 @@
-From a2c37fde3ab28d459e42014e671fe1cf69601934 Mon Sep 17 00:00:00 2001
+From e4b268180159559b768065025c5608d64c8ce75f Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 9 Jul 2020 00:04:22 +0530
-Subject: [PATCH] gpoll: UWP does not need to poll a msg_fd
+Subject: [PATCH 03/25] gpoll: UWP does not need to poll a msg_fd
 
 msg_fd is only set when we need to handle win32 Window Messages, which
 are not available when building with UWP.

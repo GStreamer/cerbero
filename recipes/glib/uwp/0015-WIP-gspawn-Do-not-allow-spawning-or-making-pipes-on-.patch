@@ -1,7 +1,8 @@
-From 22676e9cfee20c6593c9d25901adf3668865c9d9 Mon Sep 17 00:00:00 2001
+From 03c4036581df9c6c5228a8ce28389cc82534121b Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 14 Aug 2019 13:28:31 +0530
-Subject: [PATCH] WIP: gspawn: Do not allow spawning or making pipes on UWP
+Subject: [PATCH 15/25] WIP: gspawn: Do not allow spawning or making pipes on
+ UWP
 
 _pipe(), _wspawn*() are not allowed on UWP apps, and will cause
 a Windows App Certification Kit error.

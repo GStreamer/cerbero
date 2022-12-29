@@ -1,24 +1,24 @@
-From bf46295cf0bdae9c927fef18f5aadbf27279e3f4 Mon Sep 17 00:00:00 2001
+From 3bfd65491d7226ee478a5ecd2ea62ddc32b640d8 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 19 Aug 2019 13:24:40 +0530
-Subject: [PATCH] WIP: glib: Implement get_special_folder for UWP apps
+Subject: [PATCH 21/25] WIP: glib: Implement get_special_folder for UWP apps
 
 ---
- glib/gutils-winrt-private.h | 77 ++++++++++++++++++++++++++++++
+ glib/gutils-winrt-private.h | 36 ++++++++++++++
  glib/gutils-winrt.cpp       | 95 +++++++++++++++++++++++++++++++++++++
- glib/gutils.c               | 38 ++++++++++++++-
+ glib/gutils.c               | 28 +++++++++++
  glib/meson.build            |  3 ++
  meson.build                 |  3 +-
- 5 files changed, 214 insertions(+), 2 deletions(-)
+ 5 files changed, 164 insertions(+), 1 deletion(-)
  create mode 100644 glib/gutils-winrt-private.h
  create mode 100644 glib/gutils-winrt.cpp
 
 diff --git a/glib/gutils-winrt-private.h b/glib/gutils-winrt-private.h
 new file mode 100644
-index 0000000..643c201
+index 0000000..2298000
 --- /dev/null
 +++ b/glib/gutils-winrt-private.h
-@@ -0,0 +1,77 @@
+@@ -0,0 +1,36 @@
 +/* GLIB - Library of useful routines for C programming
 + * Copyright (C) 2019 Nirbheek Chauhan
 + *
@@ -39,48 +39,7 @@ index 0000000..643c201
 +#ifndef __G_UTILS_WINRT_PRIVATE_H__
 +#define __G_UTILS_WINRT_PRIVATE_H__
 +
-+#include <glib/gtypes.h>
-+
 +G_BEGIN_DECLS
-+
-+/* These are defined in ShlObj_core.h and aren't available when targeting UWP.
-+ * However, we use these defines internally so redefine them for simplicity */
-+#ifndef CSIDL_LOCAL_APPDATA
-+#define CSIDL_LOCAL_APPDATA             0x001c
-+#endif
-+#ifndef CSIDL_INTERNET_CACHE
-+#define CSIDL_INTERNET_CACHE            0x0020
-+#endif
-+#ifndef CSIDL_COMMON_APPDATA
-+#define CSIDL_COMMON_APPDATA            0x0023
-+#endif
-+#ifndef CSIDL_COMMON_DOCUMENTS
-+#define CSIDL_COMMON_DOCUMENTS          0x002e
-+#endif
-+#ifndef CSIDL_DESKTOPDIRECTORY
-+#define CSIDL_DESKTOPDIRECTORY          0x0010
-+#endif
-+#ifndef CSIDL_PERSONAL
-+#define CSIDL_PERSONAL                  0x0005
-+#endif
-+#ifndef CSIDL_MYDOCUMENTS
-+#define CSIDL_MYDOCUMENTS               CSIDL_PERSONAL
-+#endif
-+#ifndef CSIDL_MYMUSIC
-+#define CSIDL_MYMUSIC                   0x000d
-+#endif
-+#ifndef CSIDL_MYPICTURES
-+#define CSIDL_MYPICTURES                0x0027
-+#endif
-+#ifndef CSIDL_MYVIDEO
-+#define CSIDL_MYVIDEO                   0x000e
-+#endif
-+#ifndef CSIDL_TEMPLATES
-+#define CSIDL_TEMPLATES                 0x0015
-+#endif
-+#ifndef CSIDL_PROFILE
-+#define CSIDL_PROFILE                   0x0028
-+#endif
 +
 +enum GUtilsWinRTStorageFolderID
 +{
@@ -91,7 +50,7 @@ index 0000000..643c201
 +  G_UTILS_WINRT_ROAMING_FOLDER,
 +};
 +
-+gchar * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
++char * g_utils_winrt_get_storage_folder (enum GUtilsWinRTStorageFolderID folder_id);
 +
 +G_END_DECLS
 +
@@ -198,7 +157,7 @@ index 0000000..30a3b20
 +  }
 +}
 diff --git a/glib/gutils.c b/glib/gutils.c
-index 5835bed..918a41d 100644
+index 81f51a0..3beaf8e 100644
 --- a/glib/gutils.c
 +++ b/glib/gutils.c
 @@ -100,6 +100,10 @@
@@ -212,55 +171,44 @@ index 5835bed..918a41d 100644
  #endif
  
  #ifdef HAVE_CODESET
-@@ -532,8 +536,9 @@ static  gchar  **g_user_special_dirs = NULL;
+@@ -529,6 +533,7 @@ static  gchar  **g_user_special_dirs = NULL;
+ 
+ #ifdef G_OS_WIN32
+ 
++#ifndef G_WINAPI_ONLY_APP
  static gchar *
  get_special_folder (REFKNOWNFOLDERID known_folder_guid_ptr)
  {
--  wchar_t *wcp = NULL;
-   gchar *result = NULL;
-+#ifndef G_WINAPI_ONLY_APP
-+  wchar_t *wcp = NULL;
-   HRESULT hr;
- 
-   hr = SHGetKnownFolderPath (known_folder_guid_ptr, 0, NULL, &wcp);
-@@ -542,6 +547,37 @@ get_special_folder (REFKNOWNFOLDERID known_folder_guid_ptr)
-     result = g_utf16_to_utf8 (wcp, -1, NULL, NULL, NULL);
- 
-   CoTaskMemFree (wcp);
-+#else
-+  enum GUtilsWinRTStorageFolderID fid;
-+
-+  switch (csidl) {
-+    case CSIDL_LOCAL_APPDATA:
-+      fid = G_UTILS_WINRT_LOCAL_FOLDER;
-+      break;
-+    case CSIDL_INTERNET_CACHE:
-+      fid = G_UTILS_WINRT_TEMPORARY_FOLDER;
-+      break;
-+    case CSIDL_COMMON_APPDATA:
-+    case CSIDL_COMMON_DOCUMENTS:
-+      fid = G_UTILS_WINRT_SHARED_LOCAL_FOLDER;
-+      break;
-+    /* User data locations are all inaccessible without an async call to get
-+     * permissions, so return the next best thing: the app's local data dir */
-+    case CSIDL_DESKTOPDIRECTORY:
-+    case CSIDL_PERSONAL:
-+    case CSIDL_MYMUSIC:
-+    case CSIDL_MYPICTURES:
-+    case CSIDL_MYVIDEO:
-+    case CSIDL_TEMPLATES:
-+    case CSIDL_PROFILE:
-+      fid = G_UTILS_WINRT_LOCAL_FOLDER;
-+      break;
-+    default:
-+      g_assert_not_reached ();
-+      g_abort ();
-+  }
-+  result = g_utils_winrt_get_storage_folder (fid);
-+#endif
+@@ -545,6 +550,29 @@ get_special_folder (REFKNOWNFOLDERID known_folder_guid_ptr)
  
    return result;
  }
++#else
++static int FOLDERID_Profile         = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_LocalAppData    = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_InternetCache   = G_UTILS_WINRT_TEMPORARY_FOLDER;
++static int FOLDERID_ProgramData     = G_UTILS_WINRT_SHARED_LOCAL_FOLDER;
++/* User data locations are all inaccessible without an async call to get
++ * permissions, so return the next best thing: the app's local data dir */
++static int FOLDERID_Desktop         = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Documents       = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Downloads       = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Music           = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Pictures        = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Public          = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_PublicDocuments = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Templates       = G_UTILS_WINRT_LOCAL_FOLDER;
++static int FOLDERID_Videos          = G_UTILS_WINRT_LOCAL_FOLDER;
++
++static gchar *
++get_special_folder (int * fid)
++{
++  return g_utils_winrt_get_storage_folder (*fid);
++}
++#endif
+ 
+ static char *
+ get_windows_directory_root (void)
 diff --git a/glib/meson.build b/glib/meson.build
 index c3a6e62..4512d0b 100644
 --- a/glib/meson.build
@@ -276,7 +224,7 @@ index c3a6e62..4512d0b 100644
    if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
      glib_sources += files('dirent/wdirent.c')
 diff --git a/meson.build b/meson.build
-index 6ea8841..fc25943 100644
+index b347271..39e7c89 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -5,7 +5,8 @@ project('glib', 'c',

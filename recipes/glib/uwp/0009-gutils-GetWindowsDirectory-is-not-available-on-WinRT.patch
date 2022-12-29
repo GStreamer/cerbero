@@ -1,7 +1,7 @@
-From 4391759de44dbb52ccbd675364dad0fcecb8d16e Mon Sep 17 00:00:00 2001
+From 44706a6dce64b0e9289769dcf2162aad9dbb3973 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Mon, 8 Jun 2020 06:18:02 +0530
-Subject: [PATCH 07/22] gutils: GetWindowsDirectory is not available on WinRT
+Subject: [PATCH 09/25] gutils: GetWindowsDirectory is not available on WinRT
 
 This call is only allowed on desktop apps, not UWP apps:
 
@@ -11,10 +11,10 @@ https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-getw
  1 file changed, 4 insertions(+)
 
 diff --git a/glib/gutils.c b/glib/gutils.c
-index f4794b4..f4baa4d 100644
+index cc125e1..81eea9f 100644
 --- a/glib/gutils.c
 +++ b/glib/gutils.c
-@@ -369,9 +369,11 @@ g_find_program_in_path (const gchar *program)
+@@ -342,9 +342,11 @@ g_find_program_in_path (const gchar *program)
    if (n > 0 && n < MAXPATHLEN)
      sysdir = g_utf16_to_utf8 (wsysdir, -1, NULL, NULL, NULL);
    
@@ -26,7 +26,7 @@ index f4794b4..f4baa4d 100644
    
    if (filename)
      {
-@@ -571,6 +573,7 @@ get_windows_directory_root (void)
+@@ -549,6 +551,7 @@ get_windows_directory_root (void)
  {
    wchar_t wwindowsdir[MAX_PATH];
  
@@ -34,7 +34,7 @@ index f4794b4..f4baa4d 100644
    if (GetWindowsDirectoryW (wwindowsdir, G_N_ELEMENTS (wwindowsdir)))
      {
        /* Usually X:\Windows, but in terminal server environments
-@@ -589,6 +592,7 @@ get_windows_directory_root (void)
+@@ -567,6 +570,7 @@ get_windows_directory_root (void)
        return windowsdir;
      }
    else
@@ -43,5 +43,5 @@ index f4794b4..f4baa4d 100644
  }
  
 -- 
-2.27.0.windows.1
+2.38.1
 
