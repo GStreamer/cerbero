@@ -1,0 +1,53 @@
+From 0fc589f3dc534ac514f48f98be42f1393d625aad Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Ole=20Andr=C3=A9=20Vadla=20Ravn=C3=A5s?= <oleavr@gmail.com>
+Date: Fri, 4 Nov 2022 20:56:08 +0100
+Subject: [PATCH] interfaces: Only use `ifr_ifindex` if OS supports it
+
+This fixes compilation on e.g. macOS and FreeBSD, where it is missing.
+---
+ agent/interfaces.c | 6 ++++++
+ meson.build        | 4 ++++
+ 2 files changed, 10 insertions(+)
+
+diff --git a/agent/interfaces.c b/agent/interfaces.c
+index 4cd988c2..3590e0de 100644
+--- a/agent/interfaces.c
++++ b/agent/interfaces.c
+@@ -373,6 +373,7 @@ get_local_ips_ioctl (gboolean include_loopback)
+ static guint
+ get_local_if_index_by_addr_ioctl (NiceAddress *addr)
+ {
++#ifdef HAVE_IFR_IFINDEX
+   gint sockfd;
+   gint size = 0;
+   struct ifreq *ifr;
+@@ -427,6 +428,11 @@ get_local_if_index_by_addr_ioctl (NiceAddress *addr)
+   close (sockfd);
+ 
+   return if_index;
++#else
++  g_critical ("getifaddrs() should not fail on a platform that doesn't"
++      " include ifr_index in the struct ifreq. Please report the bug.");
++  return 0;
++#endif
+ }
+ 
+ #ifdef HAVE_GETIFADDRS
+diff --git a/meson.build b/meson.build
+index 5904367f..ad7ae6ec 100644
+--- a/meson.build
++++ b/meson.build
+@@ -119,6 +119,10 @@ foreach f : ['poll', 'getifaddrs']
+   endif
+ endforeach
+ 
++if cc.has_member('struct ifreq', 'ifr_ifindex', prefix: '#include <net/if.h>')
++  cdata.set('HAVE_IFR_IFINDEX', 1)
++endif
++
+ if cc.has_argument('-fno-strict-aliasing')
+   add_project_arguments('-fno-strict-aliasing', language: 'c')
+ endif
+-- 
+GitLab
+

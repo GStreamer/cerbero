@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.19'
+    version = '0.1.20'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '6747af710998cf708a2e8ceef51cccd181373d94201dd4b8d40797a070ed47cc'
+    tarball_checksum = '5f94258896de44ab8e85cf6a52f92404cdcfa37cfa8b418943256e3d7b67f4bf'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     meson_options = {'tests' : 'disabled',
@@ -17,6 +17,8 @@ class Recipe(recipe.Recipe):
     deps = ['glib', 'gstreamer-1.0']
 
     patches = [
+        # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/246
+        'libnice/0001-interfaces-only-use-ifr_ifindex-if-os-supports-it.patch',
     ]
 
     files_bins = ['stunbdc', 'stund']
