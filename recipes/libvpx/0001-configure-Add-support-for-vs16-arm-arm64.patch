@@ -25,8 +25,8 @@ index 72ae510..b681f1b 100644
  all_platforms="${all_platforms} armv7-win32-vs15"
 +all_platforms="${all_platforms} armv7-win32-vs16"
  all_platforms="${all_platforms} armv7s-darwin-gcc"
- all_platforms="${all_platforms} armv5te-android-gcc"
  all_platforms="${all_platforms} armv8-linux-gcc"
+ all_platforms="${all_platforms} loongarch32-linux-gcc"
 -- 
 2.27.0.windows.1
 

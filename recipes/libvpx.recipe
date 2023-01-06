@@ -6,11 +6,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.8.1'
+    version = 'v1.12.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
-    tarball_checksum = 'df19b8f24758e90640e1ab228ab4a4676ec3df19d23e4593375e6f3847dee03e'
+    tarball_checksum = 'f1acc15d0fd0cb431f4bf6eac32d5e932e40ea1186fe78e074254d6d003957bb'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
     btype = BuildType.MAKEFILE
     configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s " \
@@ -30,18 +30,12 @@ class Recipe(recipe.Recipe):
     patches = [
         'libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
         'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
-        'libvpx/0003-configure-Add-back-the-armv5te-android-gcc-target.patch',
         'libvpx/0004-Fix-pkg-config-file-library-list.patch',
-        'libvpx/0005-Always-generate-a-pkg-config-file.patch',
         'libvpx/0006-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
         'libvpx/0001-configure-Add-support-for-vs16-arm-arm64.patch',
-        # From upstream git master, remove on bump
-        'libvpx/0007-remove-old-visual-studio-remnants.patch',
-        # From upstream git master, remove on bump
-        'libvpx/0008-support-visual-studio-2019-vs16.patch',
-        # From upstream git master, remove on bump
-        'libvpx/0001-configure-add-darwin20-support.patch',
         'libvpx/0001-Add-support-for-Visual-Studio-2022.patch',
+        'libvpx/0001-libs.mk-Generate-pkgconfig-file-when-building-with-M.patch',
+        'libvpx/0001-Fix-implicit-argument-conversion-on-UWP.patch',
     ]
 
     files_libs = ['libvpx']
@@ -184,7 +178,7 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.DARWIN:
             # Fixup the id of the dylib
-            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.6.dylib')
+            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.7.dylib')
             vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
             shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib])
             shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver])

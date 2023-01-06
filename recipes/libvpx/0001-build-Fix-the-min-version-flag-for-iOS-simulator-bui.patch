@@ -12,7 +12,7 @@ index 472e7de..4f3b32b 100644
 --- a/build/make/configure.sh
 +++ b/build/make/configure.sh
 @@ -932,8 +932,8 @@ process_common_toolchain() {
-       add_ldflags "-mmacosx-version-min=10.13"
+       add_ldflags "-arch ${toolchain%%-*}"
        ;;
      *-iphonesimulator-*)
 -      add_cflags  "-miphoneos-version-min=${IOS_VERSION_MIN}"
