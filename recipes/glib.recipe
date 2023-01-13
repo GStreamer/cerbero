@@ -22,10 +22,10 @@ GLIB_CONFIG_UNVERSAL='''\
 
 class Recipe(recipe.Recipe):
     name = 'glib'
-    version = '2.74.3'
+    version = '2.74.4'
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'e9bc41ecd9690d9bc6a970cc7380119b828e5b6a4b16c393c638b3dc2b87cbcb'
+    tarball_checksum = '0e82da5ea129b4444227c7e4a9e598f7288d1994bf63f129c44b90cfd2432172'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
     meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'iconv': 'auto'}
@@ -44,6 +44,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
         # TODO upstreaming
         'glib/0001-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
+        # From post-2.74.4 glib upstream (remove when bumping version)
+        'glib/0001-gthread-posix-need-to-include-errno.h.patch',
     ]
 
     files_libs = [
