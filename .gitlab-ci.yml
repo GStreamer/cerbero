@@ -466,6 +466,7 @@ build cerbero msvc x86_64:
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_script"
 
+# FIXME: UWP build is disabled until build issues with latest GLib version are sorted out
 cerbero deps uwp universal:
   extends: ['cerbero deps msvc x86_64']
   variables:
@@ -475,7 +476,9 @@ cerbero deps uwp universal:
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && CERBERO_ARGS='$env:CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
 
+# FIXME: UWP build is disabled until build issues with latest GLib version are sorted out
 build cerbero uwp universal:
   extends: ['build cerbero msvc x86_64']
   variables:
@@ -485,3 +488,4 @@ build cerbero uwp universal:
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_script"
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && CERBERO_ARGS='$env:CERBERO_ARGS,vscrt=mdd' && ./ci/cerbero_setup.sh cerbero_script"
+  when: 'manual'
