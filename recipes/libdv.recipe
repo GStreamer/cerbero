@@ -31,6 +31,7 @@ class Recipe(recipe.Recipe):
                # 'libdv/0012-meson-hook-up-vlc-test.patch',
                'libdv/0013-libdv-don-t-spam-stderr-if-there-s-no-audio.patch',
                'libdv/0014-libdv-Fix-compilation-on-older-Android-versions.patch',
+               'libdv/0001-quant-Fix-buffer-overflow-detected-by-ASAN.patch',
               ]
 
     files_libs = ['libdv']
@@ -53,6 +54,6 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         # Meson does not generate la files
-        libtool_la = LibtoolLibrary('libdv', 4, 0, 3, self.config.libdir, self.config.target_platform)
+        libtool_la = LibtoolLibrary('libdv', None, None, None, self.config.libdir, self.config.target_platform)
         libtool_la.save()
         super().post_install()

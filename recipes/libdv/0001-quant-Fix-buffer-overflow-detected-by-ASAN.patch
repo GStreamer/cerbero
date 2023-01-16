@@ -1,0 +1,89 @@
+From 4a28ebb4a169644ea6180795b1f39db7c4c07212 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 16 Jan 2023 23:37:35 +0530
+Subject: [PATCH] quant: Fix buffer overflow detected by ASAN
+
+This changes the quantization factors subtly and it is really hard to
+figure out whether the new factors are correct, but this looks like an
+obvious typo.
+
+```
+==49324==ERROR: AddressSanitizer: global-buffer-overflow on address 0x0001031101e3 at pc 0x0001030bd59b bp 0x7ff7bfef7aa0 sp 0x7ff7bfef7a98
+READ of size 1 at 0x0001031101e3 thread T0
+    #0 0x1030bd59a in dv_quant_init quant.c:163
+    #1 0x1030a1b49 in dv_init dv.c:188
+    #2 0x102c64ffa in dv_element_init gstdvelement.c:33
+    #3 0x102c68a1d in gst_element_register_dvdemux gstdvdemux.c:134
+    #4 0x102c64f6e in plugin_init gstdv.c:32
+    #5 0x1007c69d6 in gst_plugin_register_func gstplugin.c:532
+    #6 0x1007c8975 in _priv_gst_plugin_load_file_for_registry gstplugin.c:971
+    #7 0x1007d2488 in exchange_packets gstpluginloader.c:1160
+    #8 0x1007d12ae in _gst_plugin_loader_client_run gstpluginloader.c:700
+    #9 0x100003c44 in main gst-plugin-scanner.c:67
+    #10 0x10001152d in start+0x1cd (dyld:x86_64+0x552d)
+
+0x0001031101e3 is located 29 bytes to the left of global variable 'dv_vlc_lookup4' defined in '../subprojects/dv/libdv/vlc.c:462:14' (0x103110200) of size 256
+0x0001031101e3 is located 3 bytes to the right of global variable 'dv_vlc_class_lookup5' defined in '../subprojects/dv/libdv/vlc.c:116:8' (0x103110160) of size 128
+SUMMARY: AddressSanitizer: global-buffer-overflow quant.c:163 in dv_quant_init
+Shadow bytes around the buggy address:
+  0x100020621fe0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020621ff0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020622000: f9 f9 f9 f9 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020622010: 00 00 00 00 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x100020622020: 00 00 00 f9 f9 f9 f9 f9 04 f9 f9 f9 00 00 00 00
+=>0x100020622030: 00 00 00 00 00 00 00 00 00 00 00 00[f9]f9 f9 f9
+  0x100020622040: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020622050: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020622060: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x100020622070: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x100020622080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==49324==ABORTING
+```
+---
+ libdv/quant.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libdv/quant.c b/libdv/quant.c
+index 1933728..6b746e1 100644
+--- a/libdv/quant.c
++++ b/libdv/quant.c
+@@ -51,7 +51,7 @@
+ #endif
+ 
+ static uint8_t dv_88_areas[64] = {
+--1,0,0,1,1,1,2,2, 
++ 0,0,0,1,1,1,2,2, 
+  0,0,1,1,1,2,2,2, 
+  0,1,1,1,2,2,2,3, 
+  1,1,1,2,2,2,3,3, 
+@@ -62,7 +62,7 @@ static uint8_t dv_88_areas[64] = {
+  2,2,3,3,3,3,3,3 };
+ 
+ static uint8_t dv_248_areas[64] = {
+--1,0,1,1,1,2,2,3, 
++ 0,0,1,1,1,2,2,3, 
+  0,1,1,2,2,2,3,3, 
+  1,1,2,2,2,3,3,3, 
+  1,2,2,2,3,3,3,3,
+-- 
+2.37.1 (Apple Git-137.1)
+
