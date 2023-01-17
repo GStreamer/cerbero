@@ -1,0 +1,65 @@
+From 0b11b919934dd9f2d13e105d4f7214ac71dc6e27 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Tue, 17 Jan 2023 21:39:29 +0530
+Subject: [PATCH] Automatically detect prefix on macOS too
+
+There's already code for Windows.
+---
+ main.c | 31 ++++++++++++++++++++++++++++++-
+ 1 file changed, 30 insertions(+), 1 deletion(-)
+
+diff --git a/main.c b/main.c
+index 9b27d9a..81862de 100644
+--- a/main.c
++++ b/main.c
+@@ -290,9 +290,10 @@ print_list_data (gpointer data,
+ static void
+ init_pc_path (void)
+ {
+-#ifdef G_OS_WIN32
++#if defined(G_OS_WIN32) || defined(__APPLE__)
+   char *instdir, *lpath, *shpath;
+ 
++#ifdef G_OS_WIN32
+   instdir = g_win32_get_package_installation_directory_of_module (NULL);
+   if (instdir == NULL)
+     {
+@@ -302,6 +303,35 @@ init_pc_path (void)
+       debug_spew ("g_win32_get_package_installation_directory_of_module failed\n");
+       return;
+     }
++#else
++  #include <dlfcn.h>
++  char *p;
++  Dl_info info;
++
++  if (!dladdr (init_pc_path, &info))
++    {
++      debug_spew ("dladdr failed\n");
++      return;
++    }
++
++  instdir = g_strdup (info.dli_fname);
++
++  /* Get bindir:PREFIX/bin */
++  if ((p = strrchr (instdir, '/')) == NULL)
++    {
++      debug_spew ("strrchr bindir failed\n");
++      return;
++    }
++  *p = '\0';
++
++  /* Get parent directory: PREFIX */
++  if ((p = strrchr (instdir, '/')) == NULL)
++    {
++      debug_spew ("strrchr prefix failed\n");
++      return;
++    }
++  *p = '\0';
++#endif
+ 
+   lpath = g_build_filename (instdir, "lib", "pkgconfig", NULL);
+   shpath = g_build_filename (instdir, "share", "pkgconfig", NULL);
+-- 
+2.37.1 (Apple Git-137.1)
+
