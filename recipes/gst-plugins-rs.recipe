@@ -4,7 +4,7 @@ from cerbero.utils import messages as m
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
-    version = '0.9.5'
+    version = '0.9.6'
     stype = SourceType.GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/%(name)s.git'}
     if GStreamer.tagged_for_release:
