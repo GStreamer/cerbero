@@ -1,5 +1,7 @@
 include:
-  - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/master/templates/fedora.yml'
+  - project: 'freedesktop/ci-templates'
+    ref: 'master'
+    file: '/templates/fedora.yml'
 
 stages:
   - 'build docker'
