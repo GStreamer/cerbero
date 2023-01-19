@@ -1239,11 +1239,11 @@ class Cargo(Build, ModifyEnvBase):
             except CommandError:
                 if retries == 0 or not errors:
                     raise
-                ret = self.is_spurious_error()
+                ret = is_spurious_error()
                 if not ret:
                     raise
                 retries -= 1
-                m.action(f'Retrying, caught spurious failure: {ret}')
+                m.action(f'Retrying, caught spurious failure: {ret.strip()}')
 
     async def configure(self):
         if os.path.exists(self.cargo_dir):
