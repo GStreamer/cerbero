@@ -4,7 +4,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-base-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '5fb7f4f3da47f30cde0ab17d716e2593477133f2bc3a59f822e0d470ec3644fa'
+    tarball_checksum = 'f53672294f3985d56355c8b1df8f6b49c8c8721106563e19f53be3507ff2229d'
     meson_options = {# enabled plugins
                      'gl': 'enabled',
                      'gl-graphene': 'enabled',
