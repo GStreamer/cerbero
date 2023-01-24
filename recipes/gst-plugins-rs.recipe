@@ -117,7 +117,7 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
         self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
         # Build with Cerbero's latest glib version as minimum version
-        self.cargo_features += ['glib/v2_62', 'gio/v2_62']
+        self.cargo_features += ['glib/v2_74', 'gio/v2_74']
         # Enable assembly optimizations via nasm
         self.cargo_features.append('gst-plugin-rav1e/asm')
         # Build with the current GStreamer version as minimum version
