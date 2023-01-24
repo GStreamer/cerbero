@@ -68,7 +68,6 @@ class BuildTools (BootstrapperBase, Fetch):
                     self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
             elif self.config.distro == Distro.MSYS2:
                 self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
-                self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('nasm')
 
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():
