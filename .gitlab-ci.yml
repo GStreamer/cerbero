@@ -11,10 +11,10 @@ stages:
 
 variables:
   # CI_GSTREAMER_* variables are overridden by gstreamer's CI when it triggers cerbero CI.
-  CI_GSTREAMER_REF_NAME: 'main'
+  CI_GSTREAMER_REF_NAME: '1.22'
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   CI_GSTREAMER_TRIGGERED: 'false'
-  GST_UPSTREAM_BRANCH: 'main'
+  GST_UPSTREAM_BRANCH: '1.22'
   WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2022-07-31.0-main'
   DEFAULT_CERBERO_ARGS: >
     --variants werror
