@@ -45,7 +45,7 @@ index a2d5248..d9a8627 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -8,6 +8,13 @@ project(
-   default_options: ['c_std=c11'],
+   license: 'BSD-3-Clause',
  )
  
 +theora_libversion = '0.3.10'
