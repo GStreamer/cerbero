@@ -105,10 +105,6 @@ class PkgConfig(object):
 
     @staticmethod
     def set_executable(env, config):
-        if config.distro == Distro.MSYS2:
-            # We use pkg-config installed with pacman
-            env['PKG_CONFIG'] = "/ucrt64/bin/pkg-config"
-            return
         env['PKG_CONFIG'] = os.path.join(config.build_tools_prefix, 'bin', 'pkg-config')
 
     def _remove_deps(self, func, all_values):
