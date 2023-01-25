@@ -17,6 +17,9 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import sys
+import venv
+import glob
 import sysconfig
 import shutil
 
@@ -121,8 +124,23 @@ class BuildTools (BootstrapperBase, Fetch):
         src_file = os.path.join(os.path.dirname(__file__), 'site-patch.py')
         shutil.copy(src_file, py_prefix / 'site.py')
 
+    def setup_venv(self):
+        venv.create(self.config.build_tools_prefix, with_pip=True)
+        if self.config.platform == Platform.WINDOWS:
+            # Python insists on using Scripts instead of bin on Windows for
+            # scripts. Insist back, and use bin again.
+            scriptsdir = os.path.join(self.config.build_tools_prefix, 'Scripts')
+            bindir = os.path.join(self.config.build_tools_prefix, 'bin')
+            os.mkdir(bindir)
+            for f in glob.glob('*', root_dir=scriptsdir):
+                shutil.move(os.path.join(scriptsdir, f), bindir)
+            os.rmdir(scriptsdir)
+
     def start(self, jobs=0):
-        self.insert_python_site()
+        if sys.version_info >= (3, 11, 0):
+            self.setup_venv()
+        else:
+            self.insert_python_site()
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()
