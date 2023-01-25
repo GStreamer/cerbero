@@ -207,7 +207,6 @@ class Config (object):
 
     def __init__(self, is_build_tools_config=False):
         self._check_uninstalled()
-        self.python_exe = Path(sys.executable).as_posix()
         self.build_tools_config = None
         self._is_build_tools_config = is_build_tools_config
 
@@ -846,6 +845,10 @@ class Config (object):
         self.set_property('rustup_home', os.path.join(self.rust_prefix, 'rustup'))
         self.set_property('cargo_home', os.path.join(self.rust_prefix, 'cargo'))
         self.set_property('tomllib_path', os.path.join(self.rust_prefix, 'tomllib'))
+        if sys.version_info >= (3, 11, 0):
+            self.python_exe = Path(self.build_tools_prefix, 'bin', 'python').as_posix()
+        else:
+            self.python_exe = Path(sys.executable).as_posix()
 
     def _get_exe_suffix(self):
         if self.platform != Platform.WINDOWS:
