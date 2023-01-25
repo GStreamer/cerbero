@@ -4,27 +4,14 @@ import sys
 
 class Recipe(recipe.Recipe):
     name = 'gobject-introspection'
-    version = '1.56.1'
+    version = '1.74.0'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '5b2875ccff99ff7baab63a34b67f8c920def240e178ff50add809e267d9ea24b'
+    tarball_checksum = '347b3a719e68ba4c69ff2d57ee2689233ea8c07fc492205e573386779e42d653'
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
-    configure_options = '--with-python=python3'
     deps = ['glib']
-    patches = [
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/issues/222
-        name + '/0001-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch',
-        # Taken from upstream, remove on bump
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/merge_requests/73
-        name + '/0002-Fix-non-libtool-build.patch',
-        # Taken from upstream, remove on bump
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/merge_requests/38
-        name + '/0003-giscanner-Fix-shared-library-name-with-Meson-on-macO.patch',
-        # Taken from upstream, remove on bump
-        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/194
-        name + '/0001-Drop-deprecated-xml.etree.ElementTree.Element.getchi.patch',
-    ]
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
@@ -81,20 +68,3 @@ class Recipe(recipe.Recipe):
         'lib/pkgconfig/gobject-introspection-no-export-1.0.pc',
         'share/gobject-introspection-1.0'
     ]
-
-    # TODO: catch the share/man stuff like man1/g-ir* ?
-    async def configure(self):
-        if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
-            if self.config.target_arch == Architecture.ARM64:
-                arch = 'arm64'
-            elif Architecture.is_arm(self.config.target_arch):
-                arch = 'arm'
-            elif self.config.target_arch == Architecture.X86:
-                arch = 'i386'
-            else:
-                arch = self.config.target_arch
-            makefilein = os.path.join (self.build_dir, 'Makefile.in')
-            replacements = {'glib-2.0/include/glibconfig.h':
-                    'glib-2.0/include/%s/glibconfig.h' % arch}
-            shell.replace(makefilein, replacements)
-        await super(Recipe, self).configure()

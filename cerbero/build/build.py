@@ -811,11 +811,13 @@ class Meson (Build, ModifyEnvBase) :
                     # get the type of the option
                     type_regex = "type\s*:\s*'(?P<type>[^']+)'"
                     ty = re.search (type_regex, option, re.MULTILINE)
-                    if ty and ty.group('type') in ('feature', 'boolean'):
-                        opt_type = ty.group('type')
-                        break
-                    else:
-                        raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
+                    if ty:
+                        if ty.group('type') in ('feature', 'boolean'):
+                            opt_type = ty.group('type')
+                            break
+                        elif ty.group('type') == 'string':
+                            break
+                    raise FatalError('Unable to detect type of option {!r}'.format(opt_name))
         if opt_name and opt_type:
             value = getattr(self.config.variants, variant_name) if variant_name else False
             self.meson_options[opt_name] = self._get_option_value(opt_type, value)
