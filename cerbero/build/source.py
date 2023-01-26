@@ -76,26 +76,29 @@ class Source (object):
     def have_cargo_lock_file(self):
         return os.path.exists(os.path.join(self.config_src_dir, 'Cargo.lock'))
 
-    def cargo_vendor(self, offline):
+    async def cargo_update(self, offline, logfile):
+        update_args = ['--verbose']
+        if offline:
+            update_args += ['--offline']
+        m.log('Running cargo update to generate Cargo.lock', logfile=logfile)
+        await shell.async_call([self.cargo, 'update'] + update_args,
+                               cmd_dir=self.config_src_dir, logfile=logfile,
+                               env=self.env, cpu_bound=False)
+
+    async def cargo_vendor(self, offline):
         logfile = get_logfile(self)
         if not self.have_cargo_lock_file():
-            update_args = ['--verbose']
-            if offline:
-                update_args += ['--offline']
-            m.log('Running cargo fetch to generate Cargo.lock', logfile=logfile)
-            shell.new_call([self.cargo, 'update'] + update_args,
-                           cmd_dir=self.config_src_dir,
-                           logfile=logfile, env=self.env)
+            await self.retry_run(self.cargo_update, offline, logfile)
         m.log('Running cargo vendor to vendor sources', logfile=logfile)
         vendor_args = [self.cargo_vendor_cache_dir]
         if offline:
             vendor_args += ['--frozen', '--offline']
-        config_toml = shell.check_output([self.cargo, 'vendor'] + vendor_args,
-                                         cmd_dir=self.config_src_dir,
-                                         logfile=logfile, env=self.env)
+        ct = await shell.async_call_output([self.cargo, 'vendor'] + vendor_args,
+                                           cmd_dir=self.config_src_dir, env=self.env,
+                                           cpu_bound=False, logfile=logfile)
         os.makedirs(os.path.join(self.config_src_dir, '.cargo'))
         with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
-            f.write(config_toml)
+            f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
 
     async def fetch(self, **kwargs):
@@ -333,7 +336,7 @@ class Tarball(BaseTarball, Source):
             else:
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
-            self.cargo_vendor(not fetching or self.offline)
+            await self.cargo_vendor(not fetching or self.offline)
 
     async def extract(self):
         await self.extract_impl()
@@ -467,7 +470,7 @@ class Git (GitCache):
             else:
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
-            self.cargo_vendor(not fetching or self.offline)
+            await self.cargo_vendor(not fetching or self.offline)
 
         return True
 
