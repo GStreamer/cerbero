@@ -30,7 +30,7 @@ from cerbero.enums import License, LicenseDescription, LibraryType
 from cerbero.build import build, source
 from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalFlatFilesProvider
 from cerbero.config import Platform
-from cerbero.errors import FatalError
+from cerbero.errors import FatalError, CommandError
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.genlib import GenLib, GenGnuLib
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
@@ -252,6 +252,23 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
     # Used in recipes/custom.py. See also: cookbook.py:_load_recipes_from_dir()
     _using_manifest_force_git = False
 
+    SPURIOUS_RETRIES = 3
+    SPURIOUS_ERRORS = {
+        Platform.DARWIN: (
+            '(signal: 11, SIGSEGV: invalid memory reference)',
+            '(signal: 6, SIGABRT: process abort signal)',
+            'LLVM ERROR: Type mismatch in constant table!',
+            'LLVM ERROR: Invalid abbrev number',
+            'error: failed to parse bitcode for LTO module: Invalid record',
+            'returned -6',
+            'fatal runtime error: assertion failed: thread_info.is_none()',
+            'SecureTransport error: (null); class=Net (12)',
+        ),
+        Platform.WINDOWS: (
+            'fatal error C1083: Cannot open compiler generated file:',
+        ),
+    }
+
     def __init__(self, config, env):
         self.config = config
         if self.package_name is None:
@@ -322,6 +339,30 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         the configuration
         '''
         pass
+
+    async def retry_run(self, func, *args, **kwargs):
+        errors = self.SPURIOUS_ERRORS.get(self.config.platform, None)
+        def is_spurious_error():
+            assert(self.logfile)
+            self.logfile.seek(0)
+            for line in self.logfile:
+                for error in errors:
+                    if error in line:
+                        return line
+            return None
+
+        retries = self.SPURIOUS_RETRIES
+        while True:
+            try:
+                return await func(*args, **kwargs)
+            except CommandError:
+                if retries == 0 or not errors:
+                    raise
+                ret = is_spurious_error()
+                if not ret:
+                    raise
+                retries -= 1
+                m.action(f'Retrying, caught spurious failure: {ret.strip()}')
 
     def _get_arch_prefix(self):
         if self.config.cross_universal_type() == 'flat':

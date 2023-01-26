@@ -28,7 +28,7 @@ from pathlib import Path
 from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
-from cerbero.errors import CommandError, FatalError, InvalidRecipeError
+from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import shell, to_unixpath, add_system_libs
 from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
@@ -1138,22 +1138,6 @@ class Cargo(Build, ModifyEnvBase):
     can_msvc = True
     cargo_features = None
 
-    SPURIOUS_RETRIES = 3
-    SPURIOUS_ERRORS = {
-        Platform.DARWIN: (
-            '(signal: 11, SIGSEGV: invalid memory reference)',
-            '(signal: 6, SIGABRT: process abort signal)',
-            'LLVM ERROR: Type mismatch in constant table!',
-            'LLVM ERROR: Invalid abbrev number',
-            'error: failed to parse bitcode for LTO module: Invalid record',
-            'returned -6',
-            'fatal runtime error: assertion failed: thread_info.is_none()',
-        ),
-        Platform.WINDOWS: (
-            'fatal error C1083: Cannot open compiler generated file:',
-        ),
-    }
-
     def __init__(self):
         self.cargo_features = self.cargo_features or []
 
@@ -1220,30 +1204,6 @@ class Cargo(Build, ModifyEnvBase):
             except KeyError:
                 continue
             return version
-
-    async def retry_run(self, func, *args, **kwargs):
-        errors = self.SPURIOUS_ERRORS.get(self.config.platform, None)
-        def is_spurious_error():
-            assert(self.logfile)
-            self.logfile.seek(0)
-            for line in self.logfile:
-                for error in errors:
-                    if error in line:
-                        return line
-            return None
-
-        retries = self.SPURIOUS_RETRIES
-        while True:
-            try:
-                return await func(*args, **kwargs)
-            except CommandError:
-                if retries == 0 or not errors:
-                    raise
-                ret = is_spurious_error()
-                if not ret:
-                    raise
-                retries -= 1
-                m.action(f'Retrying, caught spurious failure: {ret.strip()}')
 
     async def configure(self):
         if os.path.exists(self.cargo_dir):
