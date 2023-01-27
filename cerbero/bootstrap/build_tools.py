@@ -136,7 +136,7 @@ class BuildTools (BootstrapperBase, Fetch):
             # scripts. Insist back, and use bin again.
             scriptsdir = os.path.join(self.config.build_tools_prefix, 'Scripts')
             bindir = os.path.join(self.config.build_tools_prefix, 'bin')
-            os.mkdir(bindir)
+            os.makedirs(bindir, exist_ok=True)
             for f in glob.glob('*', root_dir=scriptsdir):
                 shutil.move(os.path.join(scriptsdir, f), bindir)
             os.rmdir(scriptsdir)
