@@ -257,8 +257,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         Platform.DARWIN: (
             '(signal: 11, SIGSEGV: invalid memory reference)',
             '(signal: 6, SIGABRT: process abort signal)',
-            'LLVM ERROR: Type mismatch in constant table!',
-            'LLVM ERROR: Invalid abbrev number',
+            'LLVM ERROR:',
             'error: failed to parse bitcode for LTO module: Invalid record',
             'returned -6',
             'fatal runtime error: assertion failed: thread_info.is_none()',
