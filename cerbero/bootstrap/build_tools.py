@@ -138,7 +138,10 @@ class BuildTools (BootstrapperBase, Fetch):
             bindir = os.path.join(self.config.build_tools_prefix, 'bin')
             os.makedirs(bindir, exist_ok=True)
             for f in glob.glob('*', root_dir=scriptsdir):
-                shutil.move(os.path.join(scriptsdir, f), bindir)
+                tof = os.path.join(bindir, f)
+                if os.path.isfile(tof):
+                    os.remove(tof)
+                shutil.move(os.path.join(scriptsdir, f), tof)
             os.rmdir(scriptsdir)
 
     async def start(self, jobs=0):
