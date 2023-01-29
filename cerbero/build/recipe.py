@@ -258,7 +258,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             '(signal: 11, SIGSEGV: invalid memory reference)',
             '(signal: 6, SIGABRT: process abort signal)',
             'LLVM ERROR:',
-            'error: failed to parse bitcode for LTO module: Invalid record',
+            'error: failed to parse bitcode for LTO module',
             'returned -6',
             'fatal runtime error: assertion failed: thread_info.is_none()',
             'SecureTransport error: (null); class=Net (12)',
