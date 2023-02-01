@@ -5,10 +5,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libsrtp'
-    version = '2.3.0'
+    version = '2.5.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/cisco/%(name)s/archive/v%(version)s.tar.gz'
-    tarball_checksum = '94093a5d04c5f4743e8d81182b76938374df6d393b45322f24960d250b0110e8'
+    tarball_checksum = '8a43ef8e9ae2b665292591af62aa1a4ae41e468b6d98d8258f91478735da4e09'
     licenses = [{License.BSD_like: ['LICENSE']}]
 
     btype = BuildType.MESON
@@ -20,13 +20,7 @@ class Recipe(recipe.Recipe):
         'pcap-tests': 'disabled'
     }
 
-    patches = [
-        # https://github.com/cisco/libsrtp/pull/495
-        'libsrtp/libsrtp-meson-port.patch',
-        'libsrtp/0001-meson-Fix-check-for-size_t-on-MSVC.patch',
-        # https://github.com/cisco/libsrtp/pull/486
-        'libsrtp/0001-Fix-building-with-gcc-10.patch',
-    ]
+    patches = []
 
     files_libs = ['libsrtp2']
     files_devel = ['include/srtp2', 'lib/pkgconfig/libsrtp2.pc']
