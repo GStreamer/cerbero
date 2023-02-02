@@ -36,7 +36,7 @@ class RustBootstrapper(BootstrapperBase):
     '''
 
     SERVER = 'https://static.rust-lang.org'
-    RUSTUP_VERSION = '1.25.1'
+    RUSTUP_VERSION = '1.25.2'
     RUST_VERSION = '1.67.0'
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
@@ -50,14 +50,14 @@ class RustBootstrapper(BootstrapperBase):
         # Tomli Python module
         'tomli-2.0.1.tar.gz': 'de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f',
         # Rustup
-        'rustup-init-1.25.1-aarch64-unknown-linux-gnu': 'e189948e396d47254103a49c987e7fb0e5dd8e34b200aa4481ecc4b8e41fb929',
-        'rustup-init-1.25.1-x86_64-unknown-linux-gnu': '5cc9ffd1026e82e7fb2eec2121ad71f4b0f044e88bca39207b3f6b769aaa799c',
-        'rustup-init-1.25.1-aarch64-apple-darwin': 'd92ac0005eebabffaa0f5b2159597ae4bfb03e647a5d9385124033bdc9132f3c',
-        'rustup-init-1.25.1-x86_64-apple-darwin': 'a45f826cdf2509dae65d53a52372736f54412cf92471dc8dba1299ef0885a03e',
-        'rustup-init-1.25.1-i686-pc-windows-msvc.exe': '79442f66a969a504febda49ee9158a90ad9e94913209ccdca3c22ef86d635c31',
-        'rustup-init-1.25.1-x86_64-pc-windows-msvc.exe': '2220ddb49fea0e0945b1b5913e33d66bd223a67f19fd1c116be0318de7ed9d9c',
-        'rustup-init-1.25.1-i686-pc-windows-gnu.exe': 'e463cca92bd26e89c7ef79880e68309482cde3cc62f166a2d3c785ea9a09d7cd',
-        'rustup-init-1.25.1-x86_64-pc-windows-gnu.exe': 'f7367ca97f4b0e4d1f34181bcb68599099134c608bcf10257b4f64e6770395a6',
+        'rustup-init-1.25.2-aarch64-unknown-linux-gnu': '4ccaa7de6b8be1569f6b764acc28e84f5eca342f5162cd5c810891bff7ed7f74',
+        'rustup-init-1.25.2-x86_64-unknown-linux-gnu': 'bb31eaf643926b2ee9f4d8d6fc0e2835e03c0a60f34d324048aa194f0b29a71c',
+        'rustup-init-1.25.2-aarch64-apple-darwin': '7231db07136f6ed06af12c591a37be7e395ebc16cfa239dbc151b9016efc68d2',
+        'rustup-init-1.25.2-x86_64-apple-darwin': '203dcef5a2fb0238ac5ac93edea8207eb63ef9823a150789a97f86965c4518f2',
+        'rustup-init-1.25.2-i686-pc-windows-msvc.exe': '1fd95ff35e7383c5bd3b5f01c038e9be818e0a00f5a3a70afeaa2185bb585e90',
+        'rustup-init-1.25.2-x86_64-pc-windows-msvc.exe': 'f7ddacce04969a59f7080a64c466b936d7c2ae661b4fda44be8fe54aac0972ec',
+        'rustup-init-1.25.2-i686-pc-windows-gnu.exe': '50407413a8f276439e1a3fe96412e64dfe13c69d118eae1ab971bddd3c1a54df',
+        'rustup-init-1.25.2-x86_64-pc-windows-gnu.exe': '1a068bd137eab57c8e067dff14dc80aa4648c74ee653a7be0863e63f8f26b815',
     }
     # The triple for the build platform/arch
     build_triple = None
