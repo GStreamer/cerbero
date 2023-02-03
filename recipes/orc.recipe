@@ -13,6 +13,9 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
 
+    # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/87
+    patches = ['orc/0001-Fix-usage-of-pthread_jit_write_protect_np-on-macOS-a.patch']
+
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
     meson_options = {'benchmarks': 'disabled', 'tests': 'disabled',
@@ -21,8 +24,6 @@ class Recipe(recipe.Recipe):
     files_libs = ['liborc-0.4']
     files_devel = ['include/orc-0.4', 'lib/pkgconfig/orc-0.4.pc',
         'share/aclocal/orc.m4', 'bin/orcc%(bext)s']
-
-    patches = []
 
     def prepare(self):
         # Don't build testing helper library on ios
