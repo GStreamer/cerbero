@@ -38,7 +38,7 @@ from pathlib import PurePath
 class BuildTools (BootstrapperBase, Fetch):
 
     BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
-                   'orc-tool', 'gettext-m4', 'meson']
+                   'orc', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
                           'moltenvk-tools'],
