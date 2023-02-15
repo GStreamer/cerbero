@@ -5,10 +5,10 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'dav1d'
-    version = '1.0.0'
+    version = '1.1.0'
     stype = SourceType.TARBALL
     url = 'https://download.videolan.org/pub/videolan/%(name)s/%(version)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '51737db7e4897e599684f873a4725176dd3c779e639411d7c4fce134bb5ebb82'
+    tarball_checksum = 'fb57aae7875f28c30fb3dbae4a3683d27e2f91dde09ce5c60c22cef9bc58dfd1'
     licenses = [{License.BSD_like: ['COPYING']}]
 
     btype = BuildType.MESON
@@ -17,10 +17,6 @@ class Recipe(recipe.Recipe):
         'enable_examples': 'false',
         'enable_tests': 'false',
     }
-
-    patches = [
-        'dav1d/0001-Handle-host_machine.system-ios-the-same-way-as-darwi.patch',
-    ]
 
     files_libs = ['libdav1d']
     files_devel = ['include/dav1d', 'lib/pkgconfig/dav1d.pc']
