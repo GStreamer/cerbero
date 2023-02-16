@@ -1,16 +1,32 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     version = '3.100'
     name = 'lame'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['README', 'LICENSE']}]
     stype = SourceType.TARBALL
-    configure_options = ' --enable-static --disable-frontend --disable-decoder'
     url = 'sf://.tar.gz'
     tarball_checksum = 'ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e'
-    patches = ['lame/0001-Remove-decoder-symbols.patch']
+    btype = BuildType.MESON
+    meson_options = {
+        'decoder': 'false',
+        'tools': 'disabled',
+        'iconv': 'disabled',
+    }
+
+    patches = [
+        # https://wrapdb.mesonbuild.com/v2/lame_3.100-7/get_patch
+        'lame/0001-lame-add-meson-build-based-on-wrapdb-wrap-lame_3.100.patch',
+        # Export symbol fixup
+        'lame/0002-lame.def-remove-decoder-symbols.patch',
+    ]
 
     files_libs = ['libmp3lame']
-    files_bins = ['lame']
     files_devel = ['include/lame/lame.h']
 
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libmp3lame', None, None, None, self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

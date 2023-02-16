@@ -1,0 +1,860 @@
+From 0067f2a7fa562ef310a58c63aefebb7b34d51c46 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 16 Feb 2023 01:59:34 +0000
+Subject: [PATCH 1/2] lame: add meson build based on wrapdb wrap lame_3.100-7
+
+https://wrapdb.mesonbuild.com/v2/lame_3.100-7/get_patch
+---
+ LICENSE.build                             |  19 ++
+ config.h.meson                            | 371 ++++++++++++++++++++++
+ frontend/meson.build                      |  40 +++
+ include-workaround-meson/lame/meson.build |   4 +
+ libmp3lame/fix_def.py                     |  11 +
+ libmp3lame/meson.build                    |  54 ++++
+ meson.build                               | 248 +++++++++++++++
+ meson_options.txt                         |   6 +
+ mpglib/meson.build                        |  23 ++
+ 9 files changed, 776 insertions(+)
+ create mode 100644 LICENSE.build
+ create mode 100644 config.h.meson
+ create mode 100644 frontend/meson.build
+ create mode 100644 include-workaround-meson/lame/meson.build
+ create mode 100644 libmp3lame/fix_def.py
+ create mode 100644 libmp3lame/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 mpglib/meson.build
+
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/config.h.meson b/config.h.meson
+new file mode 100644
+index 0000000..0e26fe6
+--- /dev/null
++++ b/config.h.meson
+@@ -0,0 +1,371 @@
++/* config.h.in.  Generated from configure.in by autoheader.  */
++
++
++#ifndef LAME_CONFIG_H
++#define LAME_CONFIG_H
++
++
++/* debug define */
++#mesondefine ABORTFP
++
++/* Define if building universal (internal helper macro) */
++#mesondefine AC_APPLE_UNIVERSAL_BUILD
++
++/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
++   systems. This function is required for `alloca.c' support on those systems.
++   */
++#mesondefine CRAY_STACKSEG_END
++
++/* Define to 1 if using `alloca.c'. */
++#mesondefine C_ALLOCA
++
++/* alot of debug output */
++#mesondefine DEBUG
++
++/* allow to compute a more accurate replaygain value */
++#mesondefine DECODE_ON_THE_FLY
++
++/* double is faster than float on Alpha */
++#mesondefine FLOAT
++
++/* Define to 1 if you have `alloca', as a function or macro. */
++#mesondefine HAVE_ALLOCA
++
++/* Define to 1 if you have <alloca.h> and it should be used (not on Ultrix).
++   */
++#mesondefine HAVE_ALLOCA_H
++
++/* Define to 1 if you have the <dlfcn.h> header file. */
++#mesondefine HAVE_DLFCN_H
++
++/* we link against libefence */
++#mesondefine HAVE_EFENCE
++
++/* Define to 1 if you have the <errno.h> header file. */
++#mesondefine HAVE_ERRNO_H
++
++/* Define to 1 if you have the <fcntl.h> header file. */
++#mesondefine HAVE_FCNTL_H
++
++/* Define to 1 if you have the `gettimeofday' function. */
++#mesondefine HAVE_GETTIMEOFDAY
++
++/* Define if you have the iconv() function and it works. */
++#mesondefine HAVE_ICONV
++
++/* add ieee754_float32_t type */
++#mesondefine HAVE_IEEE754_FLOAT32_T
++#ifndef HAVE_IEEE754_FLOAT32_T
++	typedef float ieee754_float32_t;
++#endif
++
++/* add ieee754_float64_t type */
++#mesondefine HAVE_IEEE754_FLOAT64_T
++#ifndef HAVE_IEEE754_FLOAT64_T
++	typedef double ieee754_float64_t;
++#endif
++
++/* system has 80 bit floats */
++#mesondefine HAVE_IEEE854_FLOAT80
++
++/* add ieee854_float80_t type */
++#mesondefine HAVE_IEEE854_FLOAT80_T
++#ifndef HAVE_IEEE854_FLOAT80_T
++	typedef long double ieee854_float80_t;
++#endif
++
++/* add int16_t type */
++#mesondefine HAVE_INT16_T
++#ifndef HAVE_INT16_T
++	typedef short int16_t;
++#endif
++
++/* add int32_t type */
++#mesondefine HAVE_INT32_T
++#ifndef HAVE_INT32_T
++#mesondefine A_INT32_T
++	typedef A_INT32_T int32_t;
++#endif
++
++/* add int64_t type */
++#mesondefine HAVE_INT64_T
++#ifndef HAVE_INT64_T
++#mesondefine A_INT64_T
++	typedef A_INT64_T int64_t;
++#endif
++
++/* add int8_t type */
++#mesondefine HAVE_INT8_T
++#ifndef HAVE_INT8_T
++	typedef char int8_t;
++#endif
++
++/* Define to 1 if you have the <inttypes.h> header file. */
++#mesondefine HAVE_INTTYPES_H
++
++/* Define to 1 if you have the <limits.h> header file. */
++#mesondefine HAVE_LIMITS_H
++
++/* Define to 1 if you have the <linux/soundcard.h> header file. */
++#mesondefine HAVE_LINUX_SOUNDCARD_H
++
++/* Define to 1 if the type `long double' works and has more range or precision
++   than `double'. */
++#mesondefine HAVE_LONG_DOUBLE
++
++/* Define to 1 if the type `long double' works and has more range or precision
++   than `double'. */
++#mesondefine HAVE_LONG_DOUBLE_WIDER
++
++/* Define to 1 if you have the <memory.h> header file. */
++#mesondefine HAVE_MEMORY_H
++
++/* build with mpglib support */
++#mesondefine HAVE_MPGLIB
++
++/* have nasm */
++#mesondefine HAVE_NASM
++
++/* Define to 1 if you have the <ncurses/termcap.h> header file. */
++#mesondefine HAVE_NCURSES_TERMCAP_H
++
++/* Define to 1 if you have the `socket' function. */
++#mesondefine HAVE_SOCKET
++
++/* Define to 1 if you have the <stdint.h> header file. */
++#mesondefine HAVE_STDINT_H
++
++/* Define to 1 if you have the <stdlib.h> header file. */
++#mesondefine HAVE_STDLIB_H
++
++/* Define to 1 if you have the <strings.h> header file. */
++#mesondefine HAVE_STRINGS_H
++
++/* Define to 1 if you have the <string.h> header file. */
++#mesondefine HAVE_STRING_H
++
++/* Define to 1 if you have the `strtol' function. */
++#mesondefine HAVE_STRTOL
++
++/* Define to 1 if you have the <sys/soundcard.h> header file. */
++#mesondefine HAVE_SYS_SOUNDCARD_H
++
++/* Define to 1 if you have the <sys/stat.h> header file. */
++#mesondefine HAVE_SYS_STAT_H
++
++/* Define to 1 if you have the <sys/time.h> header file. */
++#mesondefine HAVE_SYS_TIME_H
++
++/* Define to 1 if you have the <sys/types.h> header file. */
++#mesondefine HAVE_SYS_TYPES_H
++
++/* have termcap */
++#mesondefine HAVE_TERMCAP
++
++/* Define to 1 if you have the <termcap.h> header file. */
++#mesondefine HAVE_TERMCAP_H
++
++/* add uint16_t type */
++#mesondefine HAVE_UINT16_T
++#ifndef HAVE_UINT16_T
++	typedef unsigned short uint16_t;
++#endif
++
++/* add uint32_t type */
++#mesondefine HAVE_UINT32_T
++#ifndef HAVE_UINT32_T
++#mesondefine A_UINT32_T
++	typedef A_UINT32_T uint32_t;
++#endif
++
++/* add uint64_t type */
++#mesondefine HAVE_UINT64_T
++#ifndef HAVE_UINT64_T
++#mesondefine A_UINT64_T
++	typedef A_UINT64_T uint64_t;
++#endif
++
++/* add uint8_t type */
++#mesondefine HAVE_UINT8_T
++#ifndef HAVE_UINT8_T
++	typedef unsigned char uint8_t;
++#endif
++
++/* Define to 1 if you have the <unistd.h> header file. */
++#mesondefine HAVE_UNISTD_H
++
++/* Define if SSE intrinsics work. */
++#mesondefine HAVE_XMMINTRIN_H
++
++/* Define as const if the declaration of iconv() needs const. */
++#mesondefine ICONV_CONST
++
++/* requested by Frank, seems to be temporary needed for a smooth transition */
++#mesondefine LAME_LIBRARY_BUILD
++
++/* set to 1 if you have libsndfile */
++#mesondefine LIBSNDFILE
++
++/* Define to the sub-directory where libtool stores uninstalled libraries. */
++#mesondefine LT_OBJDIR
++
++/* use MMX version of choose_table */
++#mesondefine MMX_choose_table
++
++/* build without hooks for analyzer */
++#mesondefine NOANALYSIS
++
++/* Name of package */
++#mesondefine PACKAGE
++
++/* Define to the address where bug reports for this package should be sent. */
++#mesondefine PACKAGE_BUGREPORT
++
++/* Define to the full name of this package. */
++#mesondefine PACKAGE_NAME
++
++/* Define to the full name and version of this package. */
++#mesondefine PACKAGE_STRING
++
++/* Define to the one symbol short name of this package. */
++#mesondefine PACKAGE_TARNAME
++
++/* Define to the home page for this package. */
++#mesondefine PACKAGE_URL
++
++/* Define to the version of this package. */
++#mesondefine PACKAGE_VERSION
++
++/* The size of `double', as computed by sizeof. */
++#mesondefine SIZEOF_DOUBLE
++
++/* The size of `float', as computed by sizeof. */
++#mesondefine SIZEOF_FLOAT
++
++/* The size of `int', as computed by sizeof. */
++#mesondefine SIZEOF_INT
++
++/* The size of `long', as computed by sizeof. */
++#mesondefine SIZEOF_LONG
++
++/* The size of `long double', as computed by sizeof. */
++#mesondefine SIZEOF_LONG_DOUBLE
++
++/* The size of `long long', as computed by sizeof. */
++#mesondefine SIZEOF_LONG_LONG
++
++/* The size of `short', as computed by sizeof. */
++#mesondefine SIZEOF_SHORT
++
++/* The size of `unsigned int', as computed by sizeof. */
++#mesondefine SIZEOF_UNSIGNED_INT
++
++/* The size of `unsigned long', as computed by sizeof. */
++#mesondefine SIZEOF_UNSIGNED_LONG
++
++/* The size of `unsigned long long', as computed by sizeof. */
++#mesondefine SIZEOF_UNSIGNED_LONG_LONG
++
++/* The size of `unsigned short', as computed by sizeof. */
++#mesondefine SIZEOF_UNSIGNED_SHORT
++
++/* If using the C implementation of alloca, define if you know the
++   direction of stack growth for your system; otherwise it will be
++   automatically deduced at runtime.
++	STACK_DIRECTION > 0 => grows toward higher addresses
++	STACK_DIRECTION < 0 => grows toward lower addresses
++	STACK_DIRECTION = 0 => direction of growth unknown */
++#mesondefine STACK_DIRECTION
++
++/* Define to 1 if you have the ANSI C header files. */
++#mesondefine STDC_HEADERS
++
++/* IEEE754 compatible machine */
++#mesondefine TAKEHIRO_IEEE754_HACK
++
++/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
++#mesondefine TIME_WITH_SYS_TIME
++
++/* faster log implementation with less but enough precission */
++#mesondefine USE_FAST_LOG
++
++/* Enable extensions on AIX 3, Interix.  */
++#ifndef _ALL_SOURCE
++#mesondefine _ALL_SOURCE
++#endif
++/* Enable GNU extensions on systems that have them.  */
++#ifndef _GNU_SOURCE
++#mesondefine _GNU_SOURCE
++#endif
++/* Enable threading extensions on Solaris.  */
++#ifndef _POSIX_PTHREAD_SEMANTICS
++#mesondefine _POSIX_PTHREAD_SEMANTICS
++#endif
++/* Enable extensions on HP NonStop.  */
++#ifndef _TANDEM_SOURCE
++#mesondefine _TANDEM_SOURCE
++#endif
++/* Enable general extensions on Solaris.  */
++#ifndef __EXTENSIONS__
++#mesondefine __EXTENSIONS__
++#endif
++
++
++/* Version number of package */
++#mesondefine VERSION
++
++/* Define if using the dmalloc debugging malloc package */
++#mesondefine WITH_DMALLOC
++
++/* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
++   significant byte first (like Motorola and SPARC, unlike Intel). */
++#if defined AC_APPLE_UNIVERSAL_BUILD
++# if defined __BIG_ENDIAN__
++#  define WORDS_BIGENDIAN 1
++# endif
++#else
++# ifndef WORDS_BIGENDIAN
++#  undef WORDS_BIGENDIAN
++# endif
++#endif
++
++/* Enable large inode numbers on Mac OS X 10.5.  */
++#ifndef _DARWIN_USE_64_BIT_INODE
++# define _DARWIN_USE_64_BIT_INODE 1
++#endif
++
++/* Number of bits in a file offset, on hosts where this is settable. */
++#mesondefine _FILE_OFFSET_BITS
++
++/* Define for large files, on AIX-style hosts. */
++#mesondefine _LARGE_FILES
++
++/* Define to 1 if on MINIX. */
++#mesondefine _MINIX
++
++/* Define to 2 if the system does not provide POSIX.1 features except with
++   this defined. */
++#mesondefine _POSIX_1_SOURCE
++
++/* Define to 1 if you need to in order for `stat' and other things to work. */
++#mesondefine _POSIX_SOURCE
++
++/* we're on DEC Alpha */
++#mesondefine __DECALPHA__
++
++/* work around a glibc bug */
++#mesondefine __NO_MATH_INLINES
++
++/* Define to empty if `const' does not conform to ANSI C. */
++#mesondefine const
++
++/* Define to `__inline__' or `__inline' if that's what the C compiler
++   calls it, or to nothing if 'inline' is not supported under any name.  */
++#ifndef __cplusplus
++#mesondefine inline
++#endif
++
++/* Define to `unsigned int' if <sys/types.h> does not define. */
++#mesondefine size_t
++
++#endif /* LAME_CONFIG_H */
+diff --git a/frontend/meson.build b/frontend/meson.build
+new file mode 100644
+index 0000000..b62926c
+--- /dev/null
++++ b/frontend/meson.build
+@@ -0,0 +1,40 @@
++common_sources = files(
++  'brhist.c',
++  'console.c',
++  'get_audio.c',
++  'lametime.c',
++  'main.c',
++  'parse.c',
++  'timestatus.c',
++)
++
++tools_deps = [lame_dep, m_dep, iconv_dep, curses_dep]
++if host_machine.system() == 'windows'
++  tools_deps += [cc.find_library('ws2_32')]
++endif
++
++executable(
++  'lame',
++  common_sources,
++  'lame_main.c',
++  c_args: common_args,
++  dependencies: tools_deps,
++)
++
++executable(
++  'mp3rpt',
++  common_sources,
++  'mp3rtp.c',
++  'rtp.c',
++  c_args: common_args,
++  dependencies: tools_deps,
++)
++
++# Do not build as it requires GTK+.
++# If someone wants to add this, feel free.
++#mp3x = executable('mp3x',
++#  'mp3x.c', 'gtkanal.c', 'gpkplotting.c',
++#  include_directories : [lameinc, confinc],
++#  c_args : common_args,
++#  link_with : lamelib,
++#  )
+diff --git a/include-workaround-meson/lame/meson.build b/include-workaround-meson/lame/meson.build
+new file mode 100644
+index 0000000..e1c1afe
+--- /dev/null
++++ b/include-workaround-meson/lame/meson.build
+@@ -0,0 +1,4 @@
++install_headers(
++  configure_file(input: '../../include/lame.h', output: 'lame.h', copy: true),
++  subdir: 'lame',
++)
+diff --git a/libmp3lame/fix_def.py b/libmp3lame/fix_def.py
+new file mode 100644
+index 0000000..8405d71
+--- /dev/null
++++ b/libmp3lame/fix_def.py
+@@ -0,0 +1,11 @@
++#!/usr/bin/env python3
++
++import os
++import sys
++
++with open(sys.argv[1], 'r') as f:
++    # Skip first line, which is LIBRARY and has a MinGW name
++    line = f.readline()
++    assert(line.startswith('LIBRARY'))
++    with open(sys.argv[2], 'w') as of:
++        of.write(f.read())
+diff --git a/libmp3lame/meson.build b/libmp3lame/meson.build
+new file mode 100644
+index 0000000..f1a1368
+--- /dev/null
++++ b/libmp3lame/meson.build
+@@ -0,0 +1,54 @@
++lame_sources = files(
++  'VbrTag.c',
++  'bitstream.c',
++  'encoder.c',
++  'fft.c',
++  'gain_analysis.c',
++  'id3tag.c',
++  'lame.c',
++  'mpglib_interface.c',
++  'newmdct.c',
++  'presets.c',
++  'psymodel.c',
++  'quantize.c',
++  'quantize_pvt.c',
++  'reservoir.c',
++  'set_get.c',
++  'tables.c',
++  'takehiro.c',
++  'util.c',
++  'vbrquantize.c',
++  'version.c',
++  cdata.has('HAVE_XMMINTRIN_H') ? 'vector/xmm_quantize_sub.c' : [],
++)
++
++if host_machine.system() == 'windows'
++  lame_sources += windows.compile_resources('lame.rc', include_directories: [lameinc, confinc])
++endif
++
++lame_deps = [m_dep]
++if build_decoder
++  lame_deps += [mpglib_dep]
++endif
++
++lame_def = configure_file(
++  input: '../include/lame.def',
++  output: 'lame.def',
++  command: [find_program('fix_def.py'), '@INPUT@', '@OUTPUT@'],
++)
++
++lamelib = library(
++  'mp3lame',
++  lame_sources,
++  version : '0.0.0',
++  include_directories : [lameinc, confinc],
++  c_args : common_args,
++  vs_module_defs: lame_def,
++  dependencies: lame_deps,
++  install: true,
++)
++
++lame_dep = declare_dependency(
++  include_directories: [lameinc, confinc],
++  link_with: lamelib,
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..2b470f3
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,248 @@
++project(
++  'lame',
++  'c',
++  version: '3.100',
++  meson_version: '>=0.49',
++  license: 'LGPL-2.1-or-later',
++  default_options: ['warning_level=0'],
++)
++
++cc = meson.get_compiler('c')
++cpu_family = host_machine.cpu_family()
++
++build_decoder = get_option('decoder')
++
++cdata = configuration_data()
++check_headers = [
++  'alloca.h',
++  'ctype.h',
++  'errno.h',
++  'fcntl.h',
++  'inttypes.h',
++  'limits.h',
++  'linux/soundcard.h',
++  'sys/soundcard.h',
++  'memory.h',
++  'stdarg.h',
++  'stddef.h',
++  'stdint.h',
++  'stdio.h',
++  'stdlib.h',
++  'string.h',
++  'strings.h',
++  'sys/stat.h',
++  'sys/time.h',
++  'sys/types.h',
++  'unistd.h',
++]
++
++if cc.check_header('xmmintrin.h')
++  cdata.set('HAVE_XMMINTRIN_H', 1)
++endif
++
++foreach h : check_headers
++  if cc.has_header(h)
++    cdata.set('HAVE_' + h.underscorify().to_upper(), 1)
++  endif
++endforeach
++
++stdtypes = [
++  'int8_t',
++  'int16_t',
++  'int32_t',
++  'int64_t',
++  'uint8_t',
++  'uint16_t',
++  'uint32_t',
++  'uint64_t',
++  'long double',
++]
++
++foreach t : stdtypes
++  if cc.has_type(t, prefix: '#include <stdint.h>')
++    cdata.set('HAVE_@0@'.format(t.underscorify().to_upper()), 1)
++  endif
++endforeach
++
++cdata.set('A_INT32_T', 'int')
++cdata.set('A_INT64_T', cc.sizeof('long') == 8 ? 'long' : 'long long')
++cdata.set('A_UINT32_T', 'unsigned int')
++cdata.set('A_UINT64_T', cc.sizeof('long') == 8 ? 'unsigned long' : 'unsigned long long')
++
++sizes = [
++  'double',
++  'float',
++  'int',
++  'long',
++  'long long',
++  'long double',
++  'short',
++  'unsigned int',
++  'unsigned long',
++  'unsigned long long',
++  'unsigned short',
++]
++
++foreach s : sizes
++  cdata.set('SIZEOF_@0@'.format(s.underscorify().to_upper()), cc.sizeof(s))
++endforeach
++
++if cc.sizeof('long double') > cc.sizeof('double')
++  cdata.set('HAVE_LONG_DOUBLE_WIDER', 1)
++endif
++
++# mingw32 does not enable SSE by default
++if cc.get_argument_syntax() == 'gcc' and cpu_family == 'x86'
++  add_project_arguments('-msse', language: 'c')
++endif
++
++# Approximate autoconf's STDC_HEADERS define
++have_stdc_headers = true
++stdc_headers = [
++  'HAVE_CTYPE_H',
++  'HAVE_STDARG_H',
++  'HAVE_STDDEF_H',
++  'HAVE_STDIO_H',
++  'HAVE_STDINT_H',
++  'HAVE_STDLIB_H',
++  'HAVE_STRING_H',
++]
++foreach h : stdc_headers
++  if not cdata.has(h)
++    have_stdc_headers = false
++  endif
++endforeach
++if have_stdc_headers
++  cdata.set('STDC_HEADERS', 1)
++endif
++
++# Enable the decoder
++if build_decoder
++  cdata.set('HAVE_MPGLIB', 1)
++  cdata.set('DECODE_ON_THE_FLY', 1)
++endif
++
++check_functions = {
++  'alloca': 'alloca.h',
++  'gettimeofday': 'sys/time.h',
++  'memcpy': 'string.h',
++  'socket': 'sys/socket.h',
++  'strchr': 'string.h',
++  'strtol': 'stdlib.h',
++}
++
++foreach f, h : check_functions
++  if cc.has_function(f, prefix: '#include <@0@>'.format(h))
++    cdata.set('HAVE_@0@'.format(f.underscorify().to_upper()), 1)
++  endif
++endforeach
++
++# These functions are used unconditionally
++need_functions = {
++  'strtol': 'stdlib.h',
++}
++
++foreach f, h : need_functions
++  if not cc.has_function(f, prefix: '#include <@0@>'.format(h))
++    error('Need @0@() from @1@'.format(f, h))
++  endif
++endforeach
++
++if meson.version().version_compare('>= 0.62')
++  dl_dep = dependency('dl', required: false)
++else
++  dl_dep = cc.find_library('dl', required: false)
++endif
++
++if dl_dep.found() and cc.has_header('dlfcn.h')
++  cdata.set('HAVE_DLFCN_H', 1)
++endif
++
++if meson.version().version_compare('>= 0.54')
++  curses_dep = dependency('curses', required: get_option('tools'))
++else
++  curses_dep = dependency('', required: false)
++endif
++
++if curses_dep.found()
++  if cc.has_header('ncurses/termcap.h')
++    cdata.set('HAVE_NCURSES_TERMCAP_H', 1)
++  endif
++  if cc.has_header('termcap.h')
++    cdata.set('HAVE_TERMCAP_H', 1)
++  endif
++  cdata.set('HAVE_TERMCAP', 1)
++endif
++
++if meson.version().version_compare('>= 0.60') and cc.has_header('langinfo.h')
++  iconv_dep = dependency('iconv', required: get_option('iconv'))
++else
++  iconv_dep = dependency('', required: false)
++endif
++
++if iconv_dep.found() and cc.has_header('langinfo.h')
++  cdata.set('HAVE_ICONV', 1)
++
++  iconv_const_test = '''
++      #include <iconv.h>
++      size_t iconv(iconv_t, const char**, size_t*, char**, size_t*);
++      int main(){}
++      '''
++  cdata.set('ICONV_CONST', cc.compiles(iconv_const_test, dependencies: iconv_dep) ? 'const' : '')
++endif
++
++if cc.get_argument_syntax() == 'msvc' and get_option('default_library') != 'static'
++  export_define = '__declspec(dllexport) extern'
++elif cc.has_argument('-fvisibility=hidden')
++  export_define = 'extern __attribute__ ((visibility ("default")))'
++else
++  export_define = 'extern'
++endif
++
++cdata.set('LAME_EXPORT', export_define)
++
++cdata.set_quoted('PACKAGE', meson.project_name())
++cdata.set_quoted('PACKAGE_NAME', meson.project_name())
++cdata.set_quoted('PACKAGE_TARNAME', meson.project_name())
++cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
++cdata.set_quoted('VERSION', meson.project_version())
++cdata.set_quoted('PACKAGE_BUGREPORT', 'lame-dev@lists.sf.net')
++cdata.set_quoted('PACKAGE_URL', '')
++cdata.set('PACKAGE_STRING', '"@0@ @1@"'.format(meson.project_name(), meson.project_version()))
++
++cdata.set('TIME_WITH_SYS_TIME', 1)
++cdata.set_quoted('LT_OBJDIR', '.libs/')
++cdata.set('LAME_LIBRARY_BUILD', 1)
++cdata.set('_POSIX_PTHREAD_SEMANTICS', 1)
++cdata.set('_ALL_SOURCE', 1)
++cdata.set('_GNU_SOURCE', 1)
++cdata.set('_TANDEM_SOURCE', 1)
++cdata.set('__EXTENSIONS__', 1)
++
++#hacks
++cdata.set('TAKEHIRO_IEEE754_HACK', 1)
++cdata.set('USE_FAST_LOG', 1)
++cdata.set('HAVE_IEEE854_FLOAT80', 1)
++
++configure_file(
++  input: 'config.h.meson',
++  output: 'config.h',
++  configuration: cdata,
++)
++
++common_args = ['-DHAVE_CONFIG_H']
++subdir('include-workaround-meson/lame')
++lameinc = include_directories('include-workaround-meson', 'include-workaround-meson/lame', 'libmp3lame')
++confinc = include_directories('.')
++
++m_dep = cc.find_library('m', required: false)
++
++windows = import('windows')
++
++if build_decoder
++  subdir('mpglib')
++endif
++subdir('libmp3lame')
++if curses_dep.found()
++  subdir('frontend')
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..6051c94
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,6 @@
++option('decoder', type : 'boolean', value : true,
++       description : 'Build the mpg123 decoder')
++option('iconv', type : 'feature',
++       description : 'Build tools with iconv support')
++option('tools', type : 'feature',
++       description : 'Build command-line tools')
+diff --git a/mpglib/meson.build b/mpglib/meson.build
+new file mode 100644
+index 0000000..83e9551
+--- /dev/null
++++ b/mpglib/meson.build
+@@ -0,0 +1,23 @@
++mpglib_sources = files(
++  'common.c',
++  'dct64_i386.c',
++  'decode_i386.c',
++  'interface.c',
++  'layer1.c',
++  'layer2.c',
++  'layer3.c',
++  'tabinit.c',
++)
++
++mpglib = static_library(
++  'mpgdecoder',
++  mpglib_sources,
++  include_directories: [confinc, lameinc],
++  c_args: common_args,
++  install: false,
++)
++
++mpglib_dep = declare_dependency(
++  link_with: mpglib,
++  include_directories: include_directories('.'),
++)
+-- 
+2.39.1
+

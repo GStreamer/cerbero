@@ -1,0 +1,42 @@
+From 8ffdcb3ddeee3beed4c23909b4726780811c26ee Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 16 Feb 2023 10:18:35 +0000
+Subject: [PATCH 2/2] lame.def: remove decoder symbols
+
+---
+ include/lame.def | 19 -------------------
+ 1 file changed, 19 deletions(-)
+
+diff --git a/include/lame.def b/include/lame.def
+index def5287..ba5a1c3 100644
+--- a/include/lame.def
++++ b/include/lame.def
+@@ -253,25 +253,6 @@ lame_get_bitrate	@502
+ lame_get_samplerate	@503
+ lame_get_maximum_number_of_samples	@504
+ 
+-lame_decode_init	@1000
+-lame_decode		@1001
+-lame_decode_headers	@1002
+-lame_decode1		@1003
+-lame_decode1_headers	@1004
+-lame_decode1_headersB	@1005
+-lame_decode_exit	@1006
+-
+-hip_decode_init	@1100
+-hip_decode_exit	@1101
+-hip_decode		@1102
+-hip_decode_headers	@1103
+-hip_decode1		@1104
+-hip_decode1_headers	@1105
+-hip_decode1_headersB	@1106
+-hip_set_debugf	@1107
+-hip_set_errorf	@1108
+-hip_set_msgf	@1109
+-
+ id3tag_genre_list	@2000
+ id3tag_init   		@2001
+ id3tag_add_v2   	@2002
+-- 
+2.39.1
+
