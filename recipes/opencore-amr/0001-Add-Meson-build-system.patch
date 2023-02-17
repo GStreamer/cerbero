@@ -1,0 +1,521 @@
+From 5df3ab35400ad4e9c12c11a7d207320b0eeeffd0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 16 Feb 2023 20:27:35 +0000
+Subject: [PATCH] Add Meson build system
+
+---
+ amrnb/libopencore-amrnb.map |   8 ++
+ amrnb/meson.build           | 225 ++++++++++++++++++++++++++++++++++++
+ amrnb/opencore-amrnb.def    |   7 ++
+ amrwb/libopencore-amrwb.map |   5 +
+ amrwb/meson.build           |  80 +++++++++++++
+ amrwb/opencore-amrwb.def    |   4 +
+ meson.build                 |  58 ++++++++++
+ meson_options.txt           |  14 +++
+ test/meson.build            |  37 ++++++
+ 9 files changed, 438 insertions(+)
+ create mode 100644 amrnb/libopencore-amrnb.map
+ create mode 100644 amrnb/meson.build
+ create mode 100644 amrnb/opencore-amrnb.def
+ create mode 100644 amrwb/libopencore-amrwb.map
+ create mode 100644 amrwb/meson.build
+ create mode 100644 amrwb/opencore-amrwb.def
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 test/meson.build
+
+diff --git a/amrnb/libopencore-amrnb.map b/amrnb/libopencore-amrnb.map
+new file mode 100644
+index 0000000..24f1e0a
+--- /dev/null
++++ b/amrnb/libopencore-amrnb.map
+@@ -0,0 +1,8 @@
++{ global:
++Decoder_Interface_init;
++Decoder_Interface_exit;
++Decoder_Interface_Decode;
++Encoder_Interface_init;
++Encoder_Interface_exit;
++Encoder_Interface_Encode;
++local: *; };
+diff --git a/amrnb/meson.build b/amrnb/meson.build
+new file mode 100644
+index 0000000..5b46687
+--- /dev/null
++++ b/amrnb/meson.build
+@@ -0,0 +1,225 @@
++dec_src_dir = '../opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src/'
++enc_src_dir = '../opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src/'
++common_src_dir = '../opencore/codecs_v2/audio/gsm_amr/amr_nb/common/src/'
++
++amrnb_incs = include_directories(
++  '../opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/src',
++  '../opencore/codecs_v2/audio/gsm_amr/amr_nb/common/include',
++  '../opencore/codecs_v2/audio/gsm_amr/amr_nb/dec/include',
++  '../opencore/codecs_v2/audio/gsm_amr/common/dec/include',
++  '../opencore/codecs_v2/audio/gsm_amr/amr_nb/enc/src',
++)
++
++amrnb_args = []
++
++# Our sources to include. There are certain sources we exclude and they are
++# $(dec_src_dir)/decoder_gsm_amr.cpp
++# $(dec_src_dir)/pvgsmamrdecoder.cpp
++# $(enc_src_dir)/gsmamr_encoder_wrapper.cpp
++# $(common_src_dir)/bits2prm.cpp
++# $(common_src_dir)/copy.cpp
++# $(common_src_dir)/div_32.cpp
++# $(common_src_dir)/l_abs.cpp
++# $(common_src_dir)/r_fft.cpp
++# $(common_src_dir)/vad1.cpp
++# $(common_src_dir)/vad2.cpp
++opencore_amrnb_sources = files('wrapper.cpp')
++
++if not get_option('amrnb-decoder').disabled()
++  opencore_amrnb_sources += files([
++    dec_src_dir + 'agc.cpp',
++    dec_src_dir + 'amrdecode.cpp',
++    dec_src_dir + 'a_refl.cpp',
++    dec_src_dir + 'b_cn_cod.cpp',
++    dec_src_dir + 'bgnscd.cpp',
++    dec_src_dir + 'c_g_aver.cpp',
++    dec_src_dir + 'd1035pf.cpp',
++    dec_src_dir + 'd2_11pf.cpp',
++    dec_src_dir + 'd2_9pf.cpp',
++    dec_src_dir + 'd3_14pf.cpp',
++    dec_src_dir + 'd4_17pf.cpp',
++    dec_src_dir + 'd8_31pf.cpp',
++    dec_src_dir + 'dec_amr.cpp',
++    dec_src_dir + 'dec_gain.cpp',
++    dec_src_dir + 'dec_input_format_tab.cpp',
++    dec_src_dir + 'dec_lag3.cpp',
++    dec_src_dir + 'dec_lag6.cpp',
++    dec_src_dir + 'd_gain_c.cpp',
++    dec_src_dir + 'd_gain_p.cpp',
++    dec_src_dir + 'd_plsf_3.cpp',
++    dec_src_dir + 'd_plsf_5.cpp',
++    dec_src_dir + 'd_plsf.cpp',
++    dec_src_dir + 'dtx_dec.cpp',
++    dec_src_dir + 'ec_gains.cpp',
++    dec_src_dir + 'ex_ctrl.cpp',
++    dec_src_dir + 'if2_to_ets.cpp',
++    dec_src_dir + 'int_lsf.cpp',
++    dec_src_dir + 'lsp_avg.cpp',
++    dec_src_dir + 'ph_disp.cpp',
++    dec_src_dir + 'post_pro.cpp',
++    dec_src_dir + 'preemph.cpp',
++    dec_src_dir + 'pstfilt.cpp',
++    dec_src_dir + 'qgain475_tab.cpp',
++    dec_src_dir + 'sp_dec.cpp',
++    dec_src_dir + 'wmf_to_ets.cpp',
++  ])
++
++  install_headers('interf_dec.h', subdir: 'opencore-amrnb')
++else
++  amrnb_args += ['-DDISABLE_AMRNB_DECODER']
++endif
++
++if not get_option('amrnb-encoder').disabled()
++  opencore_amrnb_sources += files([
++    enc_src_dir + 'amrencode.cpp',
++    enc_src_dir + 'autocorr.cpp',
++    enc_src_dir + 'c1035pf.cpp',
++    enc_src_dir + 'c2_11pf.cpp',
++    enc_src_dir + 'c2_9pf.cpp',
++    enc_src_dir + 'c3_14pf.cpp',
++    enc_src_dir + 'c4_17pf.cpp',
++    enc_src_dir + 'c8_31pf.cpp',
++    enc_src_dir + 'calc_cor.cpp',
++    enc_src_dir + 'calc_en.cpp',
++    enc_src_dir + 'cbsearch.cpp',
++    enc_src_dir + 'cl_ltp.cpp',
++    enc_src_dir + 'cod_amr.cpp',
++    enc_src_dir + 'convolve.cpp',
++    enc_src_dir + 'cor_h.cpp',
++    enc_src_dir + 'cor_h_x2.cpp',
++    enc_src_dir + 'cor_h_x.cpp',
++    enc_src_dir + 'corrwght_tab.cpp',
++    enc_src_dir + 'div_32.cpp',
++    enc_src_dir + 'dtx_enc.cpp',
++    enc_src_dir + 'enc_lag3.cpp',
++    enc_src_dir + 'enc_lag6.cpp',
++    enc_src_dir + 'enc_output_format_tab.cpp',
++    enc_src_dir + 'ets_to_if2.cpp',
++    enc_src_dir + 'ets_to_wmf.cpp',
++    enc_src_dir + 'g_adapt.cpp',
++    enc_src_dir + 'gain_q.cpp',
++    enc_src_dir + 'g_code.cpp',
++    enc_src_dir + 'g_pitch.cpp',
++    enc_src_dir + 'hp_max.cpp',
++    enc_src_dir + 'inter_36.cpp',
++    enc_src_dir + 'inter_36_tab.cpp',
++    enc_src_dir + 'l_abs.cpp',
++    enc_src_dir + 'lag_wind.cpp',
++    enc_src_dir + 'lag_wind_tab.cpp',
++    enc_src_dir + 'l_comp.cpp',
++    enc_src_dir + 'levinson.cpp',
++    enc_src_dir + 'l_extract.cpp',
++    enc_src_dir + 'lflg_upd.cpp',
++    enc_src_dir + 'l_negate.cpp',
++    enc_src_dir + 'lpc.cpp',
++    enc_src_dir + 'ol_ltp.cpp',
++    enc_src_dir + 'pitch_fr.cpp',
++    enc_src_dir + 'pitch_ol.cpp',
++    enc_src_dir + 'p_ol_wgh.cpp',
++    enc_src_dir + 'pre_big.cpp',
++    enc_src_dir + 'pre_proc.cpp',
++    enc_src_dir + 'prm2bits.cpp',
++    enc_src_dir + 'qgain475.cpp',
++    enc_src_dir + 'qgain795.cpp',
++    enc_src_dir + 'q_gain_c.cpp',
++    enc_src_dir + 'q_gain_p.cpp',
++    enc_src_dir + 'qua_gain.cpp',
++    enc_src_dir + 's10_8pf.cpp',
++    enc_src_dir + 'set_sign.cpp',
++    enc_src_dir + 'sid_sync.cpp',
++    enc_src_dir + 'sp_enc.cpp',
++    enc_src_dir + 'spreproc.cpp',
++    enc_src_dir + 'spstproc.cpp',
++    enc_src_dir + 'ton_stab.cpp',
++    enc_src_dir + 'vad1.cpp',
++  ])
++
++  install_headers('interf_enc.h', subdir: 'opencore-amrnb')
++else
++  amrnb_args += ['-DDISABLE_AMRNB_ENCODER']
++endif
++
++opencore_amrnb_sources += files([
++  common_src_dir + 'add.cpp',
++  common_src_dir + 'az_lsp.cpp',
++  common_src_dir + 'bitno_tab.cpp',
++  common_src_dir + 'bitreorder_tab.cpp',
++  common_src_dir + 'c2_9pf_tab.cpp',
++  common_src_dir + 'div_s.cpp',
++  common_src_dir + 'extract_h.cpp',
++  common_src_dir + 'extract_l.cpp',
++  common_src_dir + 'gains_tbl.cpp',
++  common_src_dir + 'gc_pred.cpp',
++  common_src_dir + 'get_const_tbls.cpp',
++  common_src_dir + 'gmed_n.cpp',
++  common_src_dir + 'gray_tbl.cpp',
++  common_src_dir + 'grid_tbl.cpp',
++  common_src_dir + 'int_lpc.cpp',
++  common_src_dir + 'inv_sqrt.cpp',
++  common_src_dir + 'inv_sqrt_tbl.cpp',
++  common_src_dir + 'l_deposit_h.cpp',
++  common_src_dir + 'l_deposit_l.cpp',
++  common_src_dir + 'log2.cpp',
++  common_src_dir + 'log2_norm.cpp',
++  common_src_dir + 'log2_tbl.cpp',
++  common_src_dir + 'lsfwt.cpp',
++  common_src_dir + 'l_shr_r.cpp',
++  common_src_dir + 'lsp_az.cpp',
++  common_src_dir + 'lsp.cpp',
++  common_src_dir + 'lsp_lsf.cpp',
++  common_src_dir + 'lsp_lsf_tbl.cpp',
++  common_src_dir + 'lsp_tab.cpp',
++  common_src_dir + 'mult_r.cpp',
++  common_src_dir + 'negate.cpp',
++  common_src_dir + 'norm_l.cpp',
++  common_src_dir + 'norm_s.cpp',
++  common_src_dir + 'overflow_tbl.cpp',
++  common_src_dir + 'ph_disp_tab.cpp',
++  common_src_dir + 'pow2.cpp',
++  common_src_dir + 'pow2_tbl.cpp',
++  common_src_dir + 'pred_lt.cpp',
++  common_src_dir + 'q_plsf_3.cpp',
++  common_src_dir + 'q_plsf_3_tbl.cpp',
++  common_src_dir + 'q_plsf_5.cpp',
++  common_src_dir + 'q_plsf_5_tbl.cpp',
++  common_src_dir + 'q_plsf.cpp',
++  common_src_dir + 'qua_gain_tbl.cpp',
++  common_src_dir + 'reorder.cpp',
++  common_src_dir + 'residu.cpp',
++  common_src_dir + 'round.cpp',
++  common_src_dir + 'set_zero.cpp',
++  common_src_dir + 'shr.cpp',
++  common_src_dir + 'shr_r.cpp',
++  common_src_dir + 'sqrt_l.cpp',
++  common_src_dir + 'sqrt_l_tbl.cpp',
++  common_src_dir + 'sub.cpp',
++  common_src_dir + 'syn_filt.cpp',
++  common_src_dir + 'weight_a.cpp',
++  common_src_dir + 'window_tab.cpp',
++])
++
++amrnb_link_args = cxx.get_supported_link_arguments(
++  '-Wl,--version-script,@0@/libopencore-amrnb.map'.format(meson.current_source_dir()),
++)
++
++libopencore_amrnb = library('opencore-amrnb',
++  opencore_amrnb_sources,
++  cpp_args: [amr_lib_args, amrnb_args],
++  include_directories: [oscl_incs, amrnb_incs],
++  link_args: amrnb_link_args,
++  link_language: amr_lib_link_language,
++  version: libversion,
++  vs_module_defs: 'opencore-amrnb.def',
++  install: true)
++
++pkg = import('pkgconfig')
++pkg.generate(libopencore_amrnb,
++  filebase: 'opencore-amrnb',
++  subdirs: 'opencore-amrnb',
++  name: 'OpenCORE AMR-NB',
++  description: 'Adaptive Multi-Rate speech codec library')
++
++opencore_amrnb_dep = declare_dependency(
++  include_directories: include_directories('.'),
++  link_with: libopencore_amrnb,
++)
+diff --git a/amrnb/opencore-amrnb.def b/amrnb/opencore-amrnb.def
+new file mode 100644
+index 0000000..43d2cac
+--- /dev/null
++++ b/amrnb/opencore-amrnb.def
+@@ -0,0 +1,7 @@
++EXPORTS
++Decoder_Interface_init
++Decoder_Interface_exit
++Decoder_Interface_Decode
++Encoder_Interface_init
++Encoder_Interface_exit
++Encoder_Interface_Encode
+diff --git a/amrwb/libopencore-amrwb.map b/amrwb/libopencore-amrwb.map
+new file mode 100644
+index 0000000..58bd87f
+--- /dev/null
++++ b/amrwb/libopencore-amrwb.map
+@@ -0,0 +1,5 @@
++{ global:
++D_IF_init;
++D_IF_decode;
++D_IF_exit;
++local: *; };
+diff --git a/amrwb/meson.build b/amrwb/meson.build
+new file mode 100644
+index 0000000..c1596f6
+--- /dev/null
++++ b/amrwb/meson.build
+@@ -0,0 +1,80 @@
++install_headers(['dec_if.h', 'if_rom.h'], subdir: 'opencore-amrwb')
++
++dec_src_dir = '../opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src/'
++
++amrwb_incs = include_directories(
++  '../opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/src',
++  '../opencore/codecs_v2/audio/gsm_amr/amr_wb/dec/include',
++  '../opencore/codecs_v2/audio/gsm_amr/common/dec/include',
++)
++
++# Our sources to include. There are certain sources we exclude and they are
++# $(dec_src_dir)/decoder_amr_wb.cpp
++opencore_amrwb_sources = files([
++  'wrapper.cpp',
++  dec_src_dir + 'agc2_amr_wb.cpp',
++  dec_src_dir + 'band_pass_6k_7k.cpp',
++  dec_src_dir + 'dec_acelp_2p_in_64.cpp',
++  dec_src_dir + 'dec_acelp_4p_in_64.cpp',
++  dec_src_dir + 'dec_alg_codebook.cpp',
++  dec_src_dir + 'dec_gain2_amr_wb.cpp',
++  dec_src_dir + 'deemphasis_32.cpp',
++  dec_src_dir + 'dtx_decoder_amr_wb.cpp',
++  dec_src_dir + 'get_amr_wb_bits.cpp',
++  dec_src_dir + 'highpass_400hz_at_12k8.cpp',
++  dec_src_dir + 'highpass_50hz_at_12k8.cpp',
++  dec_src_dir + 'homing_amr_wb_dec.cpp',
++  dec_src_dir + 'interpolate_isp.cpp',
++  dec_src_dir + 'isf_extrapolation.cpp',
++  dec_src_dir + 'isp_az.cpp',
++  dec_src_dir + 'isp_isf.cpp',
++  dec_src_dir + 'lagconceal.cpp',
++  dec_src_dir + 'low_pass_filt_7k.cpp',
++  dec_src_dir + 'median5.cpp',
++  dec_src_dir + 'mime_io.cpp',
++  dec_src_dir + 'noise_gen_amrwb.cpp',
++  dec_src_dir + 'normalize_amr_wb.cpp',
++  dec_src_dir + 'oversamp_12k8_to_16k.cpp',
++  dec_src_dir + 'phase_dispersion.cpp',
++  dec_src_dir + 'pit_shrp.cpp',
++  dec_src_dir + 'pred_lt4.cpp',
++  dec_src_dir + 'preemph_amrwb_dec.cpp',
++  dec_src_dir + 'pvamrwbdecoder.cpp',
++  dec_src_dir + 'pvamrwb_math_op.cpp',
++  dec_src_dir + 'q_gain2_tab.cpp',
++  dec_src_dir + 'qisf_ns.cpp',
++  dec_src_dir + 'qisf_ns_tab.cpp',
++  dec_src_dir + 'qpisf_2s.cpp',
++  dec_src_dir + 'qpisf_2s_tab.cpp',
++  dec_src_dir + 'scale_signal.cpp',
++  dec_src_dir + 'synthesis_amr_wb.cpp',
++  dec_src_dir + 'voice_factor.cpp',
++  dec_src_dir + 'wb_syn_filt.cpp',
++  dec_src_dir + 'weight_amrwb_lpc.cpp',
++])
++
++amrwb_link_args = cxx.get_supported_link_arguments(
++  '-Wl,--version-script,@0@/libopencore-amrwb.map'.format(meson.current_source_dir()),
++)
++
++libopencore_amrwb = library('opencore-amrwb',
++  opencore_amrwb_sources,
++  cpp_args: amr_lib_args,
++  include_directories: [oscl_incs, amrwb_incs],
++  link_args: amrwb_link_args,
++  link_language: amr_lib_link_language,
++  version: libversion,
++  vs_module_defs: 'opencore-amrwb.def',
++  install: true)
++
++pkg = import('pkgconfig')
++pkg.generate(libopencore_amrwb,
++  filebase: 'opencore-amrwb',
++  subdirs: 'opencore-amrwb',
++  name: 'OpenCORE AMR-WB',
++  description: 'Adaptive Multi-Rate Wideband speech codec library')
++
++opencore_amrwb_dep = declare_dependency(
++  include_directories: include_directories('.'),
++  link_with: libopencore_amrwb,
++)
+diff --git a/amrwb/opencore-amrwb.def b/amrwb/opencore-amrwb.def
+new file mode 100644
+index 0000000..5ba4b9c
+--- /dev/null
++++ b/amrwb/opencore-amrwb.def
+@@ -0,0 +1,4 @@
++EXPORTS
++D_IF_init
++D_IF_decode
++D_IF_exit
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..afb4897
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,58 @@
++# Meson build for opencore-amr <http://sourceforge.net/projects/opencore-amr/>
++# Copyright (C) 2023 Tim-Philipp Müller <tim centricular com>
++# SPDX-License-Identifier: Apache-2.0
++project('opencore-amr', 'c', 'cpp', version: '0.1.5',
++  meson_version: '>= 0.64.0',
++  default_options: ['buildtype=debugoptimized'])
++
++libversion = '0.0.5'
++
++cc = meson.get_compiler('c')
++cxx = meson.get_compiler('cpp')
++
++libm = cc.find_library('m', required: false)
++
++# Required headers
++cc.has_header('stdint.h', required: true)
++cc.has_header('stdlib.h', required: true)
++cc.has_header('string.h', required: true)
++cxx.has_header('stdbool.h', required: true)
++
++# Required types
++required_types = [
++  'int16_t', 'int32_t', 'int64_t', 'int8_t',
++  'uint16_t', 'uint32_t', 'uint64_t', 'uint8_t',
++]
++
++foreach type : required_types
++  if not cc.has_type(type, prefix: '#include <stdint.h>')
++    error(f'Need type {type} in stdint.h')
++  endif
++endforeach
++
++# Required functions
++if not cc.has_function('memset', prefix: '#include <string.h>')
++  error('Need memset()')
++endif
++
++amr_lib_args = []
++if get_option('gcc-armv5').enabled()
++  amr_lib_args += ['-DPV_CPU_ARCH_VERSION=5', '-DPV_COMPILER=1']
++endif
++
++amr_lib_link_language = 'cpp'
++if get_option('compile-c').enabled()
++  if cxx.get_argument_syntax() == 'gcc'
++    amr_lib_args += cxx.get_supported_arguments('-xc') # FIXME: '-std=c99'
++  endif
++  amr_lib_link_language = 'c'
++endif
++
++oscl_incs = include_directories('oscl')
++
++subdir('amrnb')
++subdir('amrwb')
++
++if get_option('examples').allowed()
++  subdir('test')
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..b1bc523
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,14 @@
++option('amrnb-encoder', type: 'feature', value: 'enabled',
++  description: 'Build AMR-NB encoder')
++
++option('amrnb-decoder', type: 'feature', value: 'enabled',
++  description: 'Build AMR-NB decoder')
++
++option('compile-c', type: 'feature', value: 'enabled',
++  description: 'Enable compiling as C program')
++
++option('gcc-armv5', type: 'feature', value: 'disabled',
++  description: 'Enable GCC specific ARMv5 assembler')
++
++option('examples', type : 'feature', value : 'auto', yield : true,
++  description: 'Build example command line applications')
+diff --git a/test/meson.build b/test/meson.build
+new file mode 100644
+index 0000000..d2be164
+--- /dev/null
++++ b/test/meson.build
+@@ -0,0 +1,37 @@
++executable('amrwb-dec',
++  'amrwb-dec.c', 'wavwriter.c',
++  dependencies: opencore_amrwb_dep,
++  install: true)
++
++linkboth_args = []
++
++if not get_option('amrnb-decoder').disabled()
++  executable('amrnb-dec',
++    'amrnb-dec.c', 'wavwriter.c',
++    dependencies: opencore_amrnb_dep,
++    install: true)
++else
++  linkboth_args += ['-DDISABLE_AMRNB_DECODER']
++endif
++
++if not get_option('amrnb-encoder').disabled()
++  executable('amrnb-enc',
++    'amrnb-enc.c', 'wavreader.c',
++    dependencies: opencore_amrnb_dep,
++    install: true)
++
++  executable('amrnb-enc-sine',
++    'amrnb-enc-sine.c',
++    dependencies: [opencore_amrnb_dep, libm],
++    install: false)
++else
++  linkboth_args += ['-DDISABLE_AMRNB_ENCODER']
++endif
++
++# skipped: linkboth_LDFLAGS = -static
++executable('linkboth',
++  'linkboth.c',
++  c_args: linkboth_args,
++  dependencies: [opencore_amrnb_dep, opencore_amrwb_dep],
++  install: false)
++
+-- 
+2.39.1
+
