@@ -3,10 +3,10 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'opencore-amr'
-    version = '0.1.5'
+    version = '0.1.6'
     stype = SourceType.TARBALL
     url = 'sf://.tar.gz'
-    tarball_checksum = '2c006cb9d5f651bfb5e60156dbff6af3c9d35c7bbcc9015308c0aff1e14cd341'
+    tarball_checksum = '483eb4061088e2b34b358e47540b5d495a96cd468e361050fae615b1809dc4a1'
     licenses = [License.Apachev2]
     btype = BuildType.MESON
     meson_options = {

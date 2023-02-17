@@ -398,7 +398,7 @@ index 0000000..afb4897
 +# Meson build for opencore-amr <http://sourceforge.net/projects/opencore-amr/>
 +# Copyright (C) 2023 Tim-Philipp Müller <tim centricular com>
 +# SPDX-License-Identifier: Apache-2.0
-+project('opencore-amr', 'c', 'cpp', version: '0.1.5',
++project('opencore-amr', 'c', 'cpp', version: '0.1.6',
 +  meson_version: '>= 0.64.0',
 +  default_options: ['buildtype=debugoptimized'])
 +
