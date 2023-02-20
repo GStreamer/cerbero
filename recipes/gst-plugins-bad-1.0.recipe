@@ -27,7 +27,6 @@ class Recipe(custom.GStreamer):
                      'hls': 'enabled',
                      'hls-crypto': 'openssl',
                      'isac': 'enabled',
-                     'kate': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
@@ -81,7 +80,7 @@ class Recipe(custom.GStreamer):
                      'wildmidi': 'disabled',
                     }
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
-            'libkate', 'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
+            'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
@@ -235,7 +234,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdvdspu%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgsthls%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstid3tag%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstkate%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmidi%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmxf%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstopenh264%(mext)s',
@@ -270,7 +268,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdvdspu.a', '%(libdir)s/gstreamer-1.0/libgstdvdspu.la',
              '%(libdir)s/gstreamer-1.0/libgsthls.a', '%(libdir)s/gstreamer-1.0/libgsthls.la',
              '%(libdir)s/gstreamer-1.0/libgstid3tag.a', '%(libdir)s/gstreamer-1.0/libgstid3tag.la',
-             '%(libdir)s/gstreamer-1.0/libgstkate.a', '%(libdir)s/gstreamer-1.0/libgstkate.la',
              '%(libdir)s/gstreamer-1.0/libgstmidi.a', '%(libdir)s/gstreamer-1.0/libgstmidi.la',
              '%(libdir)s/gstreamer-1.0/libgstmxf.a', '%(libdir)s/gstreamer-1.0/libgstmxf.la',
              '%(libdir)s/gstreamer-1.0/libgstopenh264.a', '%(libdir)s/gstreamer-1.0/libgstopenh264.la',
@@ -586,7 +583,6 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('closedcaption', 'effects', dep='pango')
             self.disable_plugin('dash', 'codecs', dep='libxml2')
             self.disable_plugin('dtsdec', 'codecs_restricted', option='dts', dep='libdca')
-            self.disable_plugin('kate', 'codecs', dep='libkate')
             self.disable_plugin('ladspa', 'effects', dep='ladspa')
             self.disable_plugin('openjpeg', 'codecs', dep='openjpeg')
             self.disable_plugin('rtmp', 'net_restricted', option='rtmp', dep='librtmp')
