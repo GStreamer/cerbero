@@ -13,8 +13,12 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
 
-    # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/87
-    patches = ['orc/0001-Fix-usage-of-pthread_jit_write_protect_np-on-macOS-a.patch']
+    patches = [
+        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/87 (merged)
+        'orc/0001-Fix-usage-of-pthread_jit_write_protect_np-on-macOS-a.patch',
+        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/89 (merged)
+        'orc/0001-Fix-guard-around-usage-of-pthread_jit_write_protect.patch',
+    ]
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
