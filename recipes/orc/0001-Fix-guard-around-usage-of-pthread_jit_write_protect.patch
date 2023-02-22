@@ -1,0 +1,28 @@
+From 1be4d0443148096000c5171c0f6d0e4dc4668fd1 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 23 Feb 2023 02:44:20 +0530
+Subject: [PATCH] Fix guard around usage of pthread_jit_write_protect*
+
+The guard should be macOS 11.0, not 10.11. We got no compiler warning
+for this because `-Wunguarded-availability-new` only checks that you
+have a guard. It can't check whether the guard is correct.
+---
+ orc/orccompiler.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/orc/orccompiler.c b/orc/orccompiler.c
+index 19bec9e..00a8b6f 100644
+--- a/orc/orccompiler.c
++++ b/orc/orccompiler.c
+@@ -69,7 +69,7 @@ G_ALWAYS_INLINE
+ static void
+ orc_pthread_jit_write_protect_np (int protect)
+ {
+-  if (__builtin_available (macOS 10.11, *))
++  if (__builtin_available (macOS 11.0, *))
+     if (pthread_jit_write_protect_supported_np ())
+       pthread_jit_write_protect_np (protect);
+ }
+-- 
+2.39.2
+
