@@ -125,8 +125,10 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
               'back to manual searching...' .format(', '.join(vs_versions)))
     return None
 
-def get_vcvarsall(vs_version, vs_install_path):
+def get_vcvarsall(vs_version, vs_install_path, uwp):
     known_vs_versions = sorted(VCVARSALLS.keys(), reverse=True)
+    if uwp:
+        known_vs_versions.remove('vs17')
     if vs_version:
         if vs_version not in VCVARSALLS:
             raise FatalError('Requested Visual Studio version {} is not one of: '
@@ -224,7 +226,7 @@ def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
 @lru_cache()
 def get_msvc_env(arch, target_arch, uwp, version=None, vs_install_path=None):
     ret_env = {}
-    vcvarsall, vsver = get_vcvarsall(version, vs_install_path)
+    vcvarsall, vsver = get_vcvarsall(version, vs_install_path, uwp)
 
     without_msvc = run_and_get_env('set')
     arg = get_vcvarsall_arg(arch, target_arch)
