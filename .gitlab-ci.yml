@@ -288,7 +288,7 @@ build cerbero cross win64:
   script:
     # Clone gstreamer repository to get gst-examples and gst-docs
     - rm -rf gstreamer
-    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1
+    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1 gstreamer/
     - mkdir -p ${EXAMPLES_HOME}/outputs
 
     # extract our binaries
@@ -416,7 +416,7 @@ build cerbero cross-ios universal:
     - installer -pkg gstreamer-1.0-devel-*-ios-universal.pkg -target CurrentUserHomeDirectory -verbose
 
     # Clone gstreamer repository to get gst-examples and gst-docs
-    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1
+    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1 gstreamer/
 
     # dump some useful information
     - xcodebuild -version
