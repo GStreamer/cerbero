@@ -218,6 +218,10 @@ class OSXUniversalGenerator(object):
                 remaining_dirpath, token = os.path.split(remaining_dirpath)
                 current_dir = os.path.join(token, current_dir)
 
+            for d in dirnames:
+                if os.path.islink(os.path.join(dirpath, d)):
+                    filenames.append(d)
+
             for f in filenames:
                 if filters is not None and os.path.splitext(f)[1] not in filters:
                     continue
