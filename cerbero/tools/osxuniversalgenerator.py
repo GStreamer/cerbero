@@ -22,9 +22,18 @@ import subprocess
 import shutil
 import tempfile
 import sys
+import asyncio
 import os.path
 
-from cerbero.utils import shell
+if __name__ == "__main__":
+    # Add cerbero dir to path when invoked as a script so
+    # that the cerbero imports below resolve correctly.
+    parent = os.path.dirname(__file__)
+    parent = os.path.dirname(parent)
+    parent = os.path.dirname(parent)
+    sys.path.append(parent)
+
+from cerbero.utils import shell, run_tasks, run_until_complete
 from cerbero.tools.osxrelocator import OSXRelocator
 
 def get_parent_prefix(f, dirs):
