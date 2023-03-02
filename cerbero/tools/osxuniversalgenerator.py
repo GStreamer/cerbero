@@ -63,6 +63,9 @@ file_types = [
     ('PEM certificate', 'copy'),
     ('data', 'copy'),
     ('GVariant Database', 'copy'),
+    ('Font', 'copy'),
+    ('OpenType', 'copy'),
+    ('TrueType', 'copy'),
     ('directory', 'recurse'),
 ]
 
