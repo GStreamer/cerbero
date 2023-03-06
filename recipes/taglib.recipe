@@ -28,6 +28,8 @@ class Recipe(recipe.Recipe):
         'taglib/0002-Build-a-static-and-non-static-version.patch',
         # https://github.com/taglib/taglib/pull/1071
         'taglib/0003-cmake-generate-pc-file-with-the-use-of-prefix-in-lib.patch',
+        # Upstream did this change once and then reverted it, so keep it private
+        'taglib/0001-Don-t-use-deprecated-OSAtomic-on-macOS-10.12-and-new.patch',
     ]
 
     files_libs = ['libtag']
