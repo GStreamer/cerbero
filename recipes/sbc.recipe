@@ -2,14 +2,14 @@
 
 class Recipe(recipe.Recipe):
     name = 'sbc'
-    version = '1.3'
+    version = '2.0'
     stype = SourceType.TARBALL
-    url = 'https://www.kernel.org/pub/linux/bluetooth/sbc-%(version)s.tar.gz'
-    tarball_checksum = '4a358581fb57b98e0c1c34606a35343f31f908f57c26659e51495f75e283785d'
+    url = 'https://www.kernel.org/pub/linux/bluetooth/sbc-%(version)s.tar.xz'
+    tarball_checksum = '8f12368e1dbbf55e14536520473cfb338c84b392939cc9b64298360fd4a07992'
     licenses = [License.LGPLv2_1Plus]
     files_libs = ['libsbc']
     files_devel = ['include/sbc/sbc.h', 'lib/pkgconfig/sbc.pc']
-    configure_options = '--disable-tester --disable-tools'
+    configure_options = '--disable-tester --disable-tools --enable-static'
     patches = ['sbc/0001-sbc-Use-stdint.h.patch',
                'sbc/0002-Don-t-use-NEON-with-aarch64-on-Clang.patch',
                'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',]
