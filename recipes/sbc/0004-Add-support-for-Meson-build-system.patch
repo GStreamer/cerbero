@@ -1,0 +1,187 @@
+From e6ba76ceab3e7758d6e98717a71cd06f78d3e269 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Fri, 25 May 2018 09:58:26 +0100
+Subject: [PATCH] Add support for Meson build system
+
+---
+ meson.build       | 33 +++++++++++++++++++++++++++++++++
+ meson_options.txt |  8 ++++++++
+ sbc/meson.build   | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ sbc/sbc.def       | 15 +++++++++++++++
+ src/meson.build   | 34 ++++++++++++++++++++++++++++++++++
+ 5 files changed, 136 insertions(+)
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 sbc/meson.build
+ create mode 100644 sbc/sbc.def
+ create mode 100644 src/meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..4dc119a
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,33 @@
++project('sbc', 'c', version: '2.0',
++  meson_version: '>= 0.46.1')
++
++# Library code modified: REVISION++
++# Interfaces changed:    CURRENT++ REVISION=0
++# Interfaces added:      CURRENT++ REVISION=0 AGE++
++# Interfaces removed:    CURRENT++ REVISION=0 AGE=0
++sbc_current = 4
++sbc_revision = 1
++sbc_age = 3
++
++cc = meson.get_compiler('c')
++
++args = [
++  '-fvisibility=hidden',
++  '-finline-functions',
++  '-fgcse-after-reload',
++  '-funswitch-loops',
++  '-funroll-loops',
++]
++add_project_arguments(cc.get_supported_arguments(args), language: 'c')
++
++add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
++
++cdata = configuration_data()
++cdata.set_quoted('VERSION', meson.project_version())
++cdata.set('SBC_HIGH_PRECISION', get_option('high-precision').enabled())
++configure_file(output: 'config.h', configuration: cdata)
++
++config_inc = include_directories('.')
++
++subdir('sbc')
++subdir('src')
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..36336fd
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,8 @@
++option('high-precision', type: 'feature', value: 'disabled',
++       description: 'Enable SBC high precision support')
++
++option('tester', type: 'feature', value: 'auto',
++       description: 'Build sbctester tool')
++
++option('tools', type: 'feature', value: 'enabled',
++       description: 'Build tools')
+diff --git a/sbc/meson.build b/sbc/meson.build
+new file mode 100644
+index 0000000..d265288
+--- /dev/null
++++ b/sbc/meson.build
+@@ -0,0 +1,46 @@
++# public headers
++install_headers('sbc.h', subdir: 'sbc')
++
++# library
++sbc_sources = [
++  'sbc.c',
++  'sbc_primitives.c',
++  'sbc_primitives_mmx.c',
++  'sbc_primitives_iwmmxt.c',
++  'sbc_primitives_neon.c',
++  'sbc_primitives_armv6.c',
++  'sbc_primitives_sse.c',
++]
++
++sbc_soversion_major = sbc_current - sbc_age
++sbc_soversion_minor = sbc_age
++sbc_soversion_patch = sbc_revision
++
++soversion = sbc_soversion_major
++libversion = '@0@.@1@.@2@'.format(soversion, sbc_soversion_minor, sbc_soversion_patch)
++
++sbc_ldflags = []
++
++mapfile = 'sbc.sym'
++sym_ldflag = '-Wl,--version-script,@0@/@1@'.format(meson.current_source_dir(), mapfile)
++if cc.has_link_argument(sym_ldflag)
++  sbc_ldflags += [sym_ldflag]
++endif
++
++libsbc = library('sbc', sbc_sources,
++  include_directories: config_inc,
++  soversion: soversion,
++  version: libversion,
++  link_args : sbc_ldflags,
++  link_depends: mapfile,
++  vs_module_defs: 'sbc.def',
++  install: true)
++
++sbc_dep = declare_dependency(link_with: libsbc)
++
++# pkg-config file
++pkg = import('pkgconfig')
++pkg.generate(libsbc,
++  name: 'sbc',
++  description: 'SBC library',
++  version: meson.project_version())
+diff --git a/sbc/sbc.def b/sbc/sbc.def
+new file mode 100644
+index 0000000..ae34809
+--- /dev/null
++++ b/sbc/sbc.def
+@@ -0,0 +1,15 @@
++EXPORTS
++	sbc_init
++	sbc_reinit
++	sbc_finish
++	sbc_parse
++	sbc_decode
++	sbc_encode
++	sbc_get_frame_length
++	sbc_get_frame_duration
++	sbc_get_codesize
++	sbc_get_implementation_info
++	sbc_init_msbc
++	sbc_init_a2dp
++	sbc_reinit_a2dp
++	sbc_reinit_msbc
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..3ca22bd
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,34 @@
++if not get_option('tools').disabled()
++  executable('sbcdec', 'sbcdec.c',
++    include_directories: config_inc,
++    dependencies: sbc_dep,
++    install: true)
++
++  executable('sbcenc', 'sbcenc.c',
++    include_directories: config_inc,
++    dependencies: sbc_dep,
++    install: true)
++
++  executable('sbcinfo', 'sbcinfo.c',
++    include_directories: config_inc,
++    dependencies: sbc_dep,
++    install: true)
++endif
++
++if not get_option('tester').disabled()
++  libm = cc.find_library('m', required: false)
++
++  sndfile_dep = dependency('sndfile', required: get_option('tester'))
++
++  tester = executable('sbctester', 'sbctester.c',
++    include_directories: config_inc,
++    dependencies: [sbc_dep, sndfile_dep, libm],
++    install: false)
++
++  test('sbctester', tester, args: ['0'])
++  test('sbctester', tester, args: ['1'])
++  test('sbctester', tester, args: ['128'])
++  test('sbctester', tester, args: ['4321'])
++  test('sbctester', tester, args: ['65535'])
++  test('sbctester', tester, args: ['-999'])
++endif
+-- 
+2.39.2
+

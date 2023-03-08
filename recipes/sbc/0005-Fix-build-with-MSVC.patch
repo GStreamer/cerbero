@@ -1,0 +1,121 @@
+From 2436be23e7e382f66fe033603732338b73bd464d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 8 Mar 2023 22:35:06 +0000
+Subject: [PATCH] Fix build with MSVC
+
+---
+ meson.build       |  2 +-
+ sbc/sbc.c         | 17 +++++++++++++++--
+ sbc/sbc.h         |  6 ++++++
+ sbc/sbc_math.h    |  1 +
+ sbc/sbc_private.h |  4 ++++
+ src/meson.build   | 21 +++++++++++++--------
+ src/sbcinfo.c     | 23 +++++++++++++++++++++--
+ 7 files changed, 61 insertions(+), 13 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 29e5837..36ea51a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('sbc', 'c', version: '2.0',
+-  meson_version: '>= 0.46.1')
++  meson_version: '>= 0.50')
+ 
+ # Library code modified: REVISION++
+ # Interfaces changed:    CURRENT++ REVISION=0
+diff --git a/sbc/sbc.c b/sbc/sbc.c
+index d059906..73c882f 100644
+--- a/sbc/sbc.c
++++ b/sbc/sbc.c
+@@ -70,6 +70,13 @@
+ #define A2DP_ALLOCATION_SNR			(1 << 1)
+ #define A2DP_ALLOCATION_LOUDNESS		(1 << 0)
+ 
++#ifdef _MSC_VER
++#pragma pack(push, 1)
++#define ATTRIBUTE_PACKED
++#else
++#define ATTRIBUTE_PACKED __attribute__ ((packed))
++#endif
++
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ 
+ struct a2dp_sbc {
+@@ -80,7 +87,7 @@ struct a2dp_sbc {
+ 	uint8_t block_length:4;
+ 	uint8_t min_bitpool;
+ 	uint8_t max_bitpool;
+-} __attribute__ ((packed));
++} ATTRIBUTE_PACKED;
+ 
+ #elif __BYTE_ORDER == __BIG_ENDIAN
+ 
+@@ -92,12 +99,18 @@ struct a2dp_sbc {
+ 	uint8_t allocation_method:2;
+ 	uint8_t min_bitpool;
+ 	uint8_t max_bitpool;
+-} __attribute__ ((packed));
++} ATTRIBUTE_PACKED;
+ 
+ #else
+ #error "Unknown byte order"
+ #endif
+ 
++#ifdef _MSC_VER
++#pragma pack(pop)
++#else
++#undef ATTRIBUTE_PACKED
++#endif
++
+ /* This structure contains an unpacked SBC frame.
+    Yes, there is probably quite some unused space herein */
+ struct sbc_frame {
+diff --git a/sbc/sbc_private.h b/sbc/sbc_private.h
+index 1d420d5..879909b 100644
+--- a/sbc/sbc_private.h
++++ b/sbc/sbc_private.h
+@@ -22,4 +22,8 @@
+  *
+  */
+ 
++#ifdef _MSC_VER
++#define SBC_EXPORT /* nothing, we specify export symbols in a .def file */
++#else
+ #define SBC_EXPORT __attribute__ ((visibility("default")))
++#endif
+\ No newline at end of file
+diff --git a/src/meson.build b/src/meson.build
+index 3ca22bd..6cb9ef1 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -1,13 +1,18 @@
+ if not get_option('tools').disabled()
+-  executable('sbcdec', 'sbcdec.c',
+-    include_directories: config_inc,
+-    dependencies: sbc_dep,
+-    install: true)
++  have_unistd_h = cc.has_header('unistd.h', required: get_option('tools'))
++  have_getopt_h = cc.has_header('getopt.h', required: get_option('tools'))
+ 
+-  executable('sbcenc', 'sbcenc.c',
+-    include_directories: config_inc,
+-    dependencies: sbc_dep,
+-    install: true)
++  if have_unistd_h and have_getopt_h
++    executable('sbcdec', 'sbcdec.c',
++      include_directories: config_inc,
++      dependencies: sbc_dep,
++      install: true)
++
++    executable('sbcenc', 'sbcenc.c',
++      include_directories: config_inc,
++      dependencies: sbc_dep,
++      install: true)
++  endif
+ 
+   executable('sbcinfo', 'sbcinfo.c',
+     include_directories: config_inc,
+-- 
+2.39.2
+

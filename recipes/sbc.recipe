@@ -1,4 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'sbc'
@@ -7,23 +8,21 @@ class Recipe(recipe.Recipe):
     url = 'https://www.kernel.org/pub/linux/bluetooth/sbc-%(version)s.tar.xz'
     tarball_checksum = '8f12368e1dbbf55e14536520473cfb338c84b392939cc9b64298360fd4a07992'
     licenses = [License.LGPLv2_1Plus]
+    btype = BuildType.MESON
+    meson_options = {
+        'tester': 'disabled',
+        'tools': 'disabled',
+    }
     files_libs = ['libsbc']
     files_devel = ['include/sbc/sbc.h', 'lib/pkgconfig/sbc.pc']
-    configure_options = '--disable-tester --disable-tools --enable-static'
     patches = ['sbc/0001-sbc-Use-stdint.h.patch',
                'sbc/0002-Don-t-use-NEON-with-aarch64-on-Clang.patch',
-               'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',]
+               'sbc/0003-sbc.h-Define-ssize_t-when-building-with-MSVC.patch',
+               # From https://gitlab.freedesktop.org/tpm/sbc
+               'sbc/0004-Add-support-for-Meson-build-system.patch',
+               'sbc/0005-Fix-build-with-MSVC.patch']
 
-    def prepare(self):
-        if self.config.platform != Platform.WINDOWS:
-            self.autoreconf = True
-
-    async def compile(self):
-        if self.config.target_platform != Platform.LINUX:
-            # Don't use --version-script on platforms other than GNU/Linux.
-            # ld does not support that on non-GNU platforms. This is not done
-            # via a patch to Makefile.am because the Autotools build system
-            # doesn't regenerate after the Autofoo sources are changed.
-            shell.replace(os.path.join(self.build_dir, 'Makefile'),
-                          {'-Wl,--version-script=$(top_srcdir)/sbc/sbc.sym': '$(NULL)'})
-        await super(Recipe, self).compile()
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('libsbc', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()
