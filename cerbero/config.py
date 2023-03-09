@@ -173,13 +173,13 @@ class Config (object):
     @ivar build_tools_config: Configuration for build tools
     @type build_tools_config: L{cerbero.config.Config}
     @ivar py_prefix: Python purelib prefix eg: lib/pyhton3.8/site-packages
-    @type recipe: str
+    @type py_prefix: str
     @ivar py_plat_prefix: Python platlib prefix eg: lib64/pyhton3.8/site-packages
     @type py_plat_prefix: str
     @ivar py_win_prefix: Python windows prefix eg: Lib/site-packages
     @type py_win_prefix: str
     @ivar py_prefixes: List of python prefixes
-    @type py_refixes: list
+    @type py_prefixes: list
     '''
 
     _properties = ['platform', 'target_platform', 'arch', 'target_arch',

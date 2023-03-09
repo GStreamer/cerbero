@@ -157,8 +157,8 @@ class FilesProvider(object):
         self.config = config
         self.platform = config.target_platform
         self.extensions = self.EXTENSIONS[self.platform].copy()
-        self.extensions['pydir'] = self.config.py_prefix
-        self.extensions['pyplatdir'] = self.config.py_plat_prefix
+        self.extensions['pydir'] = config.py_prefix
+        self.extensions['pyplatdir'] = config.py_plat_prefix
         if self._dylib_plugins():
             self.extensions['mext'] = '.dylib'
         self.py_prefixes = config.py_prefixes
