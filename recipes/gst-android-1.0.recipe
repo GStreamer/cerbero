@@ -16,14 +16,18 @@ class Recipe(recipe.Recipe):
     ]
 
     files_devel = [
-            'share/gst-android/ndk-build/gstreamer_android-1.0.c.in',
-            'share/gst-android/ndk-build/gstreamer-1.0.mk',
-            'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
-            'share/gst-android/ndk-build/tools.mk',
-            'share/gst-android/ndk-build/plugins.mk',
-            'share/gst-android/ndk-build/tools',
-            'share/gst-android/ndk-build/fontconfig',
-            ]
+        'share/gst-android/ndk-build/gstreamer_android-1.0.c.in',
+        'share/gst-android/ndk-build/gstreamer-1.0.mk',
+        'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
+        'share/gst-android/ndk-build/tools.mk',
+        'share/gst-android/ndk-build/plugins.mk',
+        'share/gst-android/ndk-build/tools',
+        'share/gst-android/ndk-build/fontconfig',
+    ]
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.deps.append('gst-plugins-rs')
 
     async def install(self):
         ndk_build_dir_dst = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
@@ -45,5 +49,3 @@ class Recipe(recipe.Recipe):
             p = ' '.join(p)
             f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), p))
         f.close()
-
-
