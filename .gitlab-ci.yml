@@ -15,7 +15,7 @@ variables:
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   CI_GSTREAMER_TRIGGERED: 'false'
   GST_UPSTREAM_BRANCH: 'main'
-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-01-26.0-main'
+  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-03-20.0-main'
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --timestamps
@@ -474,6 +474,22 @@ cerbero deps msvc x86_64:
   extends: ['.cerbero deps', '.cerbero windows native']
   script:
     - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
+
+cerbero deps msvc x86_64 msi package:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    CERBERO_PACKAGE_ARGS: ""
+  script:
+    - C:\MinGW\msys\1.0\bin\bash.exe --login -c "cd $env:CI_PROJECT_DIR && ./ci/cerbero_setup.sh cerbero_deps_script"
+  artifacts:
+    name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
+    expire_in: '5 days'
+    when: 'always'
+    paths:
+      - "${CERBERO_HOME}/logs"
+      - "${CERBERO_HOME}/sources/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*.msi"
+  when: 'manual'
 
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
