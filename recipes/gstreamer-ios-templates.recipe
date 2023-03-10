@@ -23,8 +23,12 @@ class Recipe(recipe.Recipe):
     ]
 
     files_devel = [
-            'share/xcode/templates/ios/',
-            ]
+        'share/xcode/templates/ios/',
+    ]
+
+    def prepare(self):
+        if self.config.variants.rust:
+            self.deps.append('gst-plugins-rs')
 
     async def install(self):
         share_dir = os.path.join(self.config.prefix, 'share', 'xcode',

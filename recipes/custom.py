@@ -132,35 +132,36 @@ class GStreamer(recipe.Recipe):
 
 
 def list_gstreamer_1_0_plugins_by_category(config):
-        cookbook = CookBook(config)
-        plugins = defaultdict(list)
-        for r in ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
-                  'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'libnice',
-                  'gst-libav-1.0', 'gst-editing-services-1.0', 'gst-rtsp-server-1.0']:
-            r = cookbook.get_recipe(r)
-            for attr_name in dir(r):
-                if attr_name.startswith('files_plugins_'):
-                    cat_name = attr_name[len('files_plugins_'):]
-                    plugins_list = getattr(r, attr_name)
-                elif attr_name.startswith('platform_files_plugins_'):
-                    cat_name = attr_name[len('platform_files_plugins_'):]
-                    plugins_dict = getattr(r, attr_name)
-                    plugins_list = plugins_dict.get(config.target_platform, [])
-                else:
+    cookbook = CookBook(config)
+    plugins = defaultdict(list)
+    recipes = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
+        'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'libnice',
+        'gst-libav-1.0', 'gst-editing-services-1.0', 'gst-rtsp-server-1.0'
+    ]
+    if config.variants.rust:
+        recipes.append('gst-plugins-rs')
+    for r in recipes:
+        r = cookbook.get_recipe(r)
+        for attr_name in dir(r):
+            if attr_name.startswith('files_plugins_') and attr_name.endswith('devel'):
+                cat_name = attr_name[len('files_plugins_'):-len('_devel')]
+                plugins_list = getattr(r, attr_name)
+            elif attr_name.startswith('platform_files_plugins_') and attr_name.endswith('devel'):
+                cat_name = attr_name[len('platform_files_plugins_'):-len('_devel')]
+                plugins_dict = getattr(r, attr_name)
+                plugins_list = plugins_dict.get(config.target_platform, [])
+            else:
+                continue
+            for e in plugins_list:
+                if not e.startswith('lib/gstreamer-'):
                     continue
-                for e in plugins_list:
-                    if not e.startswith('lib/gstreamer-'):
-                        continue
-                    c = e.split('/')
-                    if len(c) != 3:
-                        continue
-                    e = c[2]
-                    # we only care about files with the replaceable %(mext)s extension
-                    if not e.endswith ('%(mext)s'):
-                        continue
-                    if e.startswith('libgst'):
-                        e = e[6:-8]
-                    else:
-                        e = e[3:-8]
-                    plugins[cat_name].append(e)
-        return plugins
+                e = os.path.basename(e)
+                # Only pick static libs
+                if not e.endswith('.a'):
+                    continue
+                if e.startswith('libgst'):
+                    e = e[6:-2]
+                else:
+                    e = e[3:-2]
+                plugins[cat_name].append(e)
+    return plugins

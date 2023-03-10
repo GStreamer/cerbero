@@ -55,66 +55,55 @@ class Recipe(recipe.Recipe):
         'webrtchttp',
     ]
 
-    # See "static plugins" bullet point in phase 2 at
-    # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
-    library_type = LibraryType.SHARED
-
     # Needed for openssl
     use_system_libs = True
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'pango', 'cairo',
         'gst-plugins-bad-1.0', 'dav1d']
 
-    files_plugins_core = [
-        'lib/gstreamer-1.0/libgstfallbackswitch%(mext)s',
-        'lib/gstreamer-1.0/libgstlivesync%(mext)s',
-        'lib/gstreamer-1.0/libgstthreadshare%(mext)s',
-        'lib/gstreamer-1.0/libgsttogglerecord%(mext)s',
-        'lib/gstreamer-1.0/libgstrstracers%(mext)s',
-    ]
-
-    files_plugins_net = [
-        'lib/gstreamer-1.0/libgstaws%(mext)s',
-        'lib/gstreamer-1.0/libgsthlssink3%(mext)s',
-        'lib/gstreamer-1.0/libgstndi%(mext)s',
-        'lib/gstreamer-1.0/libgstrsonvif%(mext)s',
-        'lib/gstreamer-1.0/libgstraptorq%(mext)s',
-        'lib/gstreamer-1.0/libgstrsrtp%(mext)s',
-        'lib/gstreamer-1.0/libgstreqwest%(mext)s',
-        'lib/gstreamer-1.0/libgstwebrtchttp%(mext)s',
-        'lib/gstreamer-1.0/libgstrswebrtc%(mext)s',
-    ]
-
-    files_plugins_effects = [
-        'lib/gstreamer-1.0/libgstrsaudiofx%(mext)s',
-        'lib/gstreamer-1.0/libgstrsvideofx%(mext)s',
-    ]
-
-    files_plugins_codecs = [
-        'lib/gstreamer-1.0/libgstcdg%(mext)s',
-        'lib/gstreamer-1.0/libgstclaxon%(mext)s',
-        'lib/gstreamer-1.0/libgstdav1d%(mext)s',
-        'lib/gstreamer-1.0/libgstrsclosedcaption%(mext)s',
-        'lib/gstreamer-1.0/libgstffv1%(mext)s',
-        'lib/gstreamer-1.0/libgstfmp4%(mext)s',
-        'lib/gstreamer-1.0/libgstmp4%(mext)s',
-        'lib/gstreamer-1.0/libgstgif%(mext)s',
-        'lib/gstreamer-1.0/libgsthsv%(mext)s',
-        'lib/gstreamer-1.0/libgstlewton%(mext)s',
-        'lib/gstreamer-1.0/libgstrav1e%(mext)s',
-        'lib/gstreamer-1.0/libgstjson%(mext)s',
-        'lib/gstreamer-1.0/libgstrspng%(mext)s',
-        'lib/gstreamer-1.0/libgstregex%(mext)s',
-        'lib/gstreamer-1.0/libgsttextwrap%(mext)s',
-        'lib/gstreamer-1.0/libgsttextahead%(mext)s',
-    ]
-
-    files_plugins_playback = [
-        'lib/gstreamer-1.0/libgsturiplaylistbin%(mext)s',
-    ]
+    def enable_plugin(self, name, category):
+        if LibraryType.SHARED in self.library_type:
+            attr = f'files_plugins_{category}'
+            if not hasattr(self, attr):
+                setattr(self, attr, [])
+                self.update_categories()
+            f = getattr(self, attr)
+            f += [f'lib/gstreamer-1.0/libgst{name}%(mext)s']
+        if LibraryType.STATIC in self.library_type:
+            attr = f'files_plugins_{category}_devel'
+            if not hasattr(self, attr):
+                setattr(self, attr, [])
+            d = getattr(self, attr)
+            d += [
+                f'lib/gstreamer-1.0/libgst{name}.a',
+                f'lib/gstreamer-1.0/libgst{name}.la',
+            ]
 
     def prepare(self):
+        # See "static plugins" bullet point in phase 2 at
+        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
+        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+            self.library_type = LibraryType.STATIC
+        else:
+            self.library_type = LibraryType.SHARED
+
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
+
+        plugin_files = {
+            'core': ('fallbackswitch', 'livesync', 'threadshare',
+                     'togglerecord', 'rstracers'),
+            'net': ('aws', 'hlssink3', 'ndi', 'rsonvif', 'raptorq', 'rsrtp',
+                    'reqwest', 'webrtchttp', 'rswebrtc'),
+            'effects': ('rsaudiofx', 'rsvideofx'),
+            'codecs': ('cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
+                       'fmp4', 'mp4', 'gif', 'hsv', 'lewton', 'rav1e', 'json',
+                       'rspng', 'regex', 'textwrap', 'textahead'),
+            'playback': ('uriplaylistbin',),
+        }
+        for category, names in plugin_files.items():
+            for name in names:
+                self.enable_plugin(name, category)
+
         self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
         # Build with Cerbero's latest glib version as minimum version
         self.cargo_features += ['glib/v2_74', 'gio/v2_74']
