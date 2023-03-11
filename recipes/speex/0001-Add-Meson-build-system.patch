@@ -1,0 +1,575 @@
+From 12b027d3ff70456cef0150c1ac0f527dedc89909 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 11 Mar 2023 17:43:49 +0000
+Subject: [PATCH] Add Meson build system
+
+---
+ doc/meson.build           |   1 +
+ include/speex/meson.build |  22 ++++
+ libspeex/meson.build      |  79 ++++++++++++++
+ libspeex/speex.def        |  80 ++++++++++++++
+ meson.build               | 224 ++++++++++++++++++++++++++++++++++++++
+ meson_options.txt         |  44 ++++++++
+ src/meson.build           |  57 ++++++++++
+ 7 files changed, 507 insertions(+)
+ create mode 100644 doc/meson.build
+ create mode 100644 include/speex/meson.build
+ create mode 100644 libspeex/meson.build
+ create mode 100644 libspeex/speex.def
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 src/meson.build
+
+diff --git a/doc/meson.build b/doc/meson.build
+new file mode 100644
+index 0000000..331edee
+--- /dev/null
++++ b/doc/meson.build
+@@ -0,0 +1 @@
++install_data('manual.pdf', install_dir: get_option('datadir') / 'doc' / 'speex')
+diff --git a/include/speex/meson.build b/include/speex/meson.build
+new file mode 100644
+index 0000000..e5402ff
+--- /dev/null
++++ b/include/speex/meson.build
+@@ -0,0 +1,22 @@
++install_headers([
++  'speex.h',
++  'speex_bits.h',
++  'speex_callbacks.h',
++  'speex_header.h',
++  'speex_stereo.h',
++  'speex_types.h',
++], subdir: 'speex')
++
++# speex_config_types.h
++ctypes_cdata = configuration_data()
++ctypes_cdata.set('INCLUDE_STDINT', '#include <stdint.h>')
++ctypes_cdata.set('SIZE16', 'int16_t')
++ctypes_cdata.set('USIZE16', 'uint16_t')
++ctypes_cdata.set('SIZE32', 'int32_t')
++ctypes_cdata.set('USIZE32', 'uint32_t')
++
++speex_config_types_h = configure_file(input: 'speex_config_types.h.in',
++  output: 'speex_config_types.h',
++  configuration: ctypes_cdata,
++  install_dir: get_option('includedir') / 'speex',
++  install: true)
+diff --git a/libspeex/meson.build b/libspeex/meson.build
+new file mode 100644
+index 0000000..c744dd0
+--- /dev/null
++++ b/libspeex/meson.build
+@@ -0,0 +1,79 @@
++# Sources for compilation in the library
++speex_sources = files([
++  'cb_search.c',
++  'exc_10_32_table.c',
++  'exc_8_128_table.c',
++  'filters.c',
++  'gain_table.c',
++  'hexc_table.c',
++  'high_lsp_tables.c',
++  'lsp.c',
++  'ltp.c',
++  'speex.c',
++  'stereo.c',
++  'vbr.c',
++  'vq.c',
++  'bits.c',
++  'exc_10_16_table.c',
++  'exc_20_32_table.c',
++  'exc_5_256_table.c',
++  'exc_5_64_table.c',
++  'gain_table_lbr.c',
++  'hexc_10_32_table.c',
++  'lpc.c',
++  'lsp_tables_nb.c',
++  'modes.c',
++  'modes_wb.c',
++  'nb_celp.c',
++  'quant_lsp.c',
++  'sb_celp.c',
++  'speex_callbacks.c',
++  'speex_header.c',
++  'window.c',
++])
++
++if fft_used == 'kiss'
++  # Use KISS Fast Fourier Transform
++  speex_sources += files(['kiss_fft.c', 'kiss_fftr.c'])
++  cdata.set('USE_KISS_FFT', true)
++elif fft_used == 'smallft'
++  # Use FFT from OggVorbis
++  speex_sources += files(['smallft.c'])
++  cdata.set('USE_SMALLFT', true)
++endif
++
++if opt_vorbis_psy
++  speex_sources += files(['vorbis_psy.c'])
++  cdata.set('VORBIS_PSYCHO', true)
++endif
++
++libm = cc.find_library('m', required: false)
++
++libspeex = library('speex', speex_sources, speex_config_types_h,
++  include_directories: [config_inc, speex_incs],
++  dependencies: [fft_dep, libm],
++  gnu_symbol_visibility: 'hidden',
++  vs_module_defs: 'speex.def',
++  version: libversion,
++  install: true)
++
++speex_dep = declare_dependency(link_with: libspeex,
++  include_directories: speex_incs)
++
++meson.override_dependency('speex', speex_dep)
++
++# pkg-config file
++pkg = import('pkgconfig')
++pkg.generate(libspeex,
++  name: 'speex',
++  description: 'Speex is an audio codec tuned for speech',
++  version: meson.project_version())
++
++if not get_option('test-binaries').disabled()
++  foreach bin : ['testenc', 'testenc_wb', 'testenc_uwb']
++    executable(bin, '@0@.c'.format(bin),
++      include_directories: config_inc,
++      dependencies: [speex_dep, libm],
++      install: false)
++  endforeach
++endif
+diff --git a/libspeex/speex.def b/libspeex/speex.def
+new file mode 100644
+index 0000000..0464fad
+--- /dev/null
++++ b/libspeex/speex.def
+@@ -0,0 +1,80 @@
++; speex.def for Meson build. This is identical to
++; win32/libspeex.def but without the LIBRARY directive
++; which is wrong in the case of Meson as it will produce
++; a speex-1.dll with MSVC and a libspeex.dll with MingW.
++
++EXPORTS
++
++
++;
++;	speex.h
++;
++speex_encoder_init
++speex_encoder_destroy
++speex_encode
++speex_encode_int
++speex_encoder_ctl
++speex_decoder_init
++speex_decoder_destroy
++speex_decode
++speex_decode_int
++speex_decoder_ctl
++speex_mode_query
++speex_lib_ctl
++speex_lib_get_mode
++
++;
++;	speex_bits.h
++;
++speex_bits_init
++speex_bits_init_buffer
++speex_bits_set_bit_buffer
++speex_bits_destroy
++speex_bits_reset
++speex_bits_rewind
++speex_bits_read_from
++speex_bits_read_whole_bytes
++speex_bits_write
++speex_bits_write_whole_bytes
++speex_bits_pack
++speex_bits_unpack_signed
++speex_bits_unpack_unsigned
++speex_bits_nbytes
++speex_bits_peek_unsigned
++speex_bits_peek
++speex_bits_advance
++speex_bits_remaining
++speex_bits_insert_terminator
++
++;
++;	speex_callbacks.h
++;
++speex_inband_handler
++speex_std_mode_request_handler
++speex_std_high_mode_request_handler
++speex_std_char_handler
++speex_default_user_handler
++speex_std_low_mode_request_handler
++speex_std_vbr_request_handler
++speex_std_enh_request_handler
++speex_std_vbr_quality_request_handler
++
++;
++;	speex_header.h
++;
++speex_init_header
++speex_header_to_packet
++speex_packet_to_header
++speex_header_free
++
++;
++;	speex_stereo.h
++;
++speex_stereo_state_init
++speex_stereo_state_reset
++speex_stereo_state_destroy
++speex_encode_stereo
++speex_encode_stereo_int
++speex_decode_stereo
++speex_decode_stereo_int
++speex_std_stereo_request_handler
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..36c390f
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,224 @@
++project('speex', 'c', version: '1.2.1',
++  meson_version: '>= 0.59')
++
++libversion = '1.5.2'
++
++speex_version = meson.project_version()
++version_arr = speex_version.split('.')
++speex_version_major = version_arr[0].to_int()
++speex_version_minor = version_arr[1].to_int()
++
++# extra version might be "-svn" or ".2" or empty
++if version_arr.length() == 4
++  speex_version_micro = version_arr[2].to_int()
++  speex_version_extra = '.' + version_arr[3]
++elif version_arr[2].contains('-')
++  speex_version_micro = version_arr[2].split('-')[0].to_int()
++  speex_version_extra = '-' + version_arr[2].split('-')[1]
++else
++  speex_version_micro = version_arr[2].to_int()
++  speex_version_extra = ''
++endif
++
++host_system = host_machine.system()
++host_cpu_family = host_machine.cpu_family()
++
++if host_machine.endian() == 'big'
++  cdata.set('WORDS_BIGENDIAN', true)
++endif
++
++cc = meson.get_compiler('c')
++
++config_inc = include_directories('.')
++
++speex_incs = include_directories('include', 'include/speex')
++
++cdata = configuration_data()
++
++add_project_arguments('-DHAVE_CONFIG_H=1', language: 'c')
++
++cdata.set_quoted('SPEEX_VERSION', speex_version,
++                 description: 'Complete version string')
++
++cdata.set('SPEEX_MAJOR_VERSION', speex_version_major,
++          description: 'Version major')
++cdata.set('SPEEX_MINOR_VERSION', speex_version_minor,
++          description: 'Version minor')
++cdata.set('SPEEX_MICRO_VERSION', speex_version_micro,
++          description: 'Version micro')
++cdata.set_quoted('SPEEX_EXTRA_VERSION', speex_version_extra,
++          description: 'Version extra (version suffix string)')
++
++# Test whether the compiler supports the 'long double' type.
++have_var_arrays = cc.compiles('void func (int n) {int arr[n]; }',
++                              name: 'C99 variable-size arrays')
++
++cdata.set('VAR_ARRAYS', have_var_arrays,
++          description: 'Use C99 variable-size arrays')
++
++has_sse = false
++if host_cpu_family in ['x86', 'x86_64'] and get_option('sse').allowed()
++  intrin_check = '''#include <xmmintrin.h>
++                    __m128 testfunc(float *a, float *b) {
++                      return _mm_add_ps(_mm_loadu_ps(a), _mm_loadu_ps(b));
++                    }
++                    int main (int argc, char ** argv) {
++                      float a = 2.0, b = 99.0;
++                      testfunc(&a, &b);
++                      return 0;
++                    }
++                 '''
++  # Intrinsics arguments are not available with MSVC-like compilers
++  intrin_args = cc.get_argument_syntax() == 'msvc' ? [] : ['-msse']
++  if cc.links(intrin_check, name: 'Compiler supports SEE intrinsics', args: intrin_args)
++    has_sse = true
++  endif
++
++  # Mimicing the logic in win32/config.h
++  if cc.get_id() == 'msvc' and host_cpu_family == 'x86'
++    m_ix86_fp = cc.get_define('_M_IX86_FP')
++    if m_ix86_fp == '' or m_ix86_fp.to_int() < 1
++      has_sse = false
++    endif
++  endif
++endif
++
++# Visual Studio supports alloca(), but it always aligns variables to 16-bit
++# boundary, while SSE needs 128-bit alignment. So we disable alloca() when
++# SSE is enabled (from win32/config.h)
++allow_alloca = not (cc.get_id() == 'msvc' and has_sse)
++
++use_alloca = false
++
++if allow_alloca
++  alloca_check = 'int main (int n) { char * array = alloca(n); }'
++
++  if cc.has_header('alloca.h')
++    cdata.set('HAVE_ALLOCA_H', true)
++
++    if cc.links('#include <alloca.h>\n' + alloca_check, name: 'alloca (alloca.h)')
++      use_alloca = true
++    endif
++  endif
++
++  if cc.links('#include <malloc.h>\n#include <stdlib.h>\n' + alloca_check, name: 'alloca (malloc.h)')
++    use_alloca = true
++  endif
++endif
++
++cdata.set('USE_ALLOCA', use_alloca)
++
++if cc.get_id() != 'msvc' and cc.has_argument('-fvisibility=hidden')
++  add_project_arguments('-fvisibility=hidden', language: 'c')
++  cdata.set('EXPORT', '__attribute__((visibility("default")))')
++else
++  cdata.set('EXPORT', '/* */')
++endif
++
++# FFT implementation
++
++fft_dep = []
++
++use_fixed_point = get_option('fixed-point').enabled()
++
++if use_fixed_point
++  default_fft = 'kiss'
++  has_sse = false
++  cdata.set('FIXED_POINT', true)
++else
++  default_fft = 'smallft'
++  cdata.set('FLOATING_POINT', true)
++endif
++
++fft_opt = get_option('fft')
++
++if fft_opt == 'auto'
++  fft_used = default_fft
++elif fft_opt == 'kiss'
++  fft_used = 'kiss'
++elif fft_opt == 'smallft'
++  fft_used = 'smallft'
++elif fft_opt == 'gpl-fftw3'
++  fft_used = 'gpl-fftw3'
++  fft_dep = dependency('fftw3f', required: true)
++elif fft_opt == 'proprietary-intel-mkl'
++  error('FIXME: add support for proprietary-intel-mkl FFT')
++else
++  error('Unexpected FFT option', fft_opt)
++endif
++
++if not has_sse and get_option('sse').enabled()
++  error('No SSE support, but SSE support required via options')
++endif
++
++cdata.set('_USE_SSE', has_sse)
++
++opt_arm4_asm = get_option('arm4-asm').enabled()
++opt_arm5e_asm = get_option('arm5e-asm').enabled()
++opt_blackfin_asm = get_option('blackfin-asm').enabled()
++# opt_ti_c55x = get_option('ti-c55x').enabled()
++
++cdata.set('ARM4_ASM', opt_arm4_asm)
++cdata.set('ARM5E_ASM', opt_arm5e_asm)
++cdata.set('BFIN_ASM', opt_blackfin_asm)
++# cdata.set('TI_C55X', opt_ti_c55x) # has_char16=yes
++
++opt_disable_vbr = get_option('vbr').disabled()
++opt_disable_float_api = get_option('float-api').disabled()
++opt_fixed_point_debug = get_option('fixed-point-debug').enabled()
++opt_valgrind = get_option('valgrind').enabled()
++opt_vorbis_psy = get_option('vorbis-psy').enabled()
++
++cdata.set('DISABLE_VBR', opt_disable_vbr)
++cdata.set('DISABLE_FLOAT_API', opt_disable_float_api)
++cdata.set('FIXED_POINT_DEBUG', opt_fixed_point_debug)
++cdata.set('ENABLE_VALGRIND', opt_valgrind)
++
++subdir('doc')
++subdir('include/speex')
++subdir('libspeex')
++
++if not get_option('tools').disabled()
++  subdir('src')
++endif
++
++# config.h
++configure_file(output: 'config.h', configuration: cdata)
++
++# summary
++
++building_speex_tools = get_variable('building_speex_tools', false)
++
++opt_disable_vbr = get_option('vbr').disabled()
++opt_disable_float_api = get_option('float-api').disabled()
++opt_fixed_point_debug = get_option('fixed-point-debug').enabled()
++opt_valgrind = get_option('valgrind').enabled()
++
++asms = {
++  'has_sse': 'SSE',
++  'opt_arm4_asm': 'ARM4 assembly',
++  'opt_arm5e_asm': 'ARMv5e assembly',
++  'opt_blackfin_asm': 'Blackfin assembly',
++  'opt_ti_c55x': 'TI C55X DSP',
++}
++optimizations = []
++foreach var, desc : asms
++  if get_variable(var, false)
++    optimizations += [desc]
++  endif
++endforeach
++
++summary(
++  {
++    'Assembly optimizations': optimizations.length() > 0 ? optimizations : false,
++    'Floating point support': not use_fixed_point,
++    'Fixed point debugging': use_fixed_point ? opt_fixed_point_debug : 'N/A',
++    'Float API': not opt_disable_float_api,
++    'FFT': fft_used,
++    'VBR + VAD support': not opt_disable_vbr,
++    'Vorbis psy model': opt_vorbis_psy,
++    'Tools': building_speex_tools,
++  },
++  bool_yn: true,
++  list_sep: ', ',
++)
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..760c454
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,44 @@
++option('fft', type: 'combo', choices: ['auto', 'kiss', 'smallft', 'gpl-fftw3', 'proprietary-intel-mkl'], value: 'auto',
++       description: 'Use an alternate FFT implementation (auto = kiss for fixed point and smallft for floating point')
++
++option('test-binaries', type: 'feature', value: 'auto',
++       description: 'Build speex test binaries')
++
++option('fixed-point', type: 'feature', value: 'disabled',
++       description: 'Use fixed-point arithmetic instead of floating-point')
++
++option('fixed-point-debug', type: 'feature', value: 'disabled',
++       description: 'Debug fixed-point arithmetic implementation])')
++
++option('float-api', type: 'feature', value: 'enabled',
++       description: 'Disable all parts of the API that are using floats')
++
++option('tools', type: 'feature', value: 'auto',
++       description: 'Build speex command line tools')
++
++option('valgrind', type: 'feature', value: 'disabled',
++       description: 'Enable valgrind extra checks')
++
++option('vbr', type: 'feature', value: 'enabled',
++       description: 'Disable support for VBR and VAD from the codec')
++
++option('vorbis-psy', type: 'feature', value: 'disabled',
++       description: 'Enable support for the Vorbis psy model')
++
++# Assembly + DSP options
++option('arm4-asm', type: 'feature', value: 'disabled',
++       description: 'Make use of ARM4 assembly optimizations')
++
++option('arm5e-asm', type: 'feature', value: 'disabled',
++       description: 'Make use of ARM5E assembly optimizations')
++
++option('blackfin-asm', type: 'feature', value: 'disabled',
++       description: 'Make use of Blackfin assembly optimizations')
++
++option('sse', type: 'feature', value: 'auto',
++       description: 'Enable or disable SSE support')
++
++#option('ti-c55x', type: 'feature', value: 'disabled',
++#       description: 'Enable support for TI C55X DSP')
++
++
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..dfacee7
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,57 @@
++have_getopt_h = cc.has_header('getopt.h')
++cdata.set('HAVE_GETOPT_H', have_getopt_h)
++
++winmm_lib = []
++if host_system == 'windows' and cc.get_id() == 'gcc'
++  winmm_lib = cc.find_library('winmm', required: true)
++endif
++
++ogg_dep = dependency('ogg', required: get_option('tools'))
++
++if not ogg_dep.found()
++  message('Not building command line tools, libogg not found.')
++  subdir_done()
++endif
++
++speexdsp_dep = dependency('speexdsp', required: false)
++
++cdata.set('USE_SPEEXDSP', speexdsp_dep.found())
++
++cdata.set('HAVE_SYS_SOUNDCARD_H', cc.has_header('sys/soundcard.h'))
++cdata.set('HAVE_SYS_AUDIOIO_H', cc.has_header('sys/audioio.h'))
++
++gnugetopt_lib = []
++
++if have_getopt_h
++  if cc.has_function('getopt_long', prefix: '#include <getopt.h>')
++    cdata.set('HAVE_GETOPT_LONG', true)
++  else
++    # FreeBSD has a gnugetopt library
++    gnugetopt_lib = cc.find_library('gnugetopt', required: false)
++    if gnugetopt_lib.found()
++      if cc.has_function('getopt_long', prefix: '#include <getopt.h>', dependencies: gnugetopt_lib)
++        cdata.set('HAVE_GETOPT_LONG', true)
++      endif
++    endif
++  endif
++endif
++
++getopt_sources = []
++if not cdata.get('HAVE_GETOPT_LONG', false)
++  # Use the GNU replacement.
++  getopt_sources = ['getopt.c', 'getopt1.c']
++endif
++
++executable('speexdec', 'speexdec.c', 'wav_io.c', getopt_sources,
++  include_directories: config_inc,
++  dependencies: [speex_dep, ogg_dep, fft_dep, winmm_lib],
++  install: true)
++
++executable('speexenc', 'speexenc.c', 'wav_io.c', 'skeleton.c', getopt_sources,
++  include_directories: config_inc,
++  dependencies: [speex_dep, ogg_dep, speexdsp_dep],
++  install: true)
++
++install_man('speexenc.1', 'speexdec.1')
++
++building_speex_tools = true
+\ No newline at end of file
+-- 
+2.39.2
+
