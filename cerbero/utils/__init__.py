@@ -451,6 +451,10 @@ def get_wix_prefix(config):
         if not os.path.exists(wix_prefix):
             wix_prefix = wix_prefix % ' (x86)'
     if not os.path.exists(wix_prefix):
+        wix_prefix = 'C:/Program Files%s/Wix Toolset v3.11/bin'
+        if not os.path.exists(wix_prefix):
+            wix_prefix = wix_prefix % ' (x86)'
+    if not os.path.exists(wix_prefix):
         raise FatalError("The required packaging tool 'WiX' was not found")
     return escape_path(to_unixpath(wix_prefix))
 
