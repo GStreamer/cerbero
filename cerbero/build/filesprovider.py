@@ -522,7 +522,7 @@ class FilesProvider(object):
 
     def _search_girfiles(self):
         '''
-        Search for typelibs in lib/girepository-1.0/
+        Search for gir files in share/gir-1.0/
         '''
         if not self.config.variants.gi:
             return []
