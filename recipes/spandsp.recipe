@@ -23,6 +23,10 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/spandsp', 'include/spandsp.h', 'lib/pkgconfig/spandsp.pc']
 
     def prepare(self):
+        # libdir is incorrectly overriden in configure.ac to lib64 for x86_64 archs
+        # we pass the correct one in make and make install
+        self.make += ['libdir={}'.format(self.config.libdir)]
+        self.make_install += ['libdir={}'.format(self.config.libdir)]
         # Workaround broken autoconf test in cross compilation
         if self.config.arch != self.config.target_arch or self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.set_env('ac_cv_func_malloc_0_nonnull', 'yes')
