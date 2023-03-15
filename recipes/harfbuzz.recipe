@@ -24,6 +24,7 @@ class Recipe(recipe.Recipe):
     files_bins = ['hb-ot-shape-closure', 'hb-view', 'hb-shape']
     files_libs = ['libharfbuzz']
     files_devel = ['include/harfbuzz/*.h', '%(libdir)s/pkgconfig/harfbuzz.pc']
+    files_typelibs = ['HarfBuzz-0.0']
 
     def prepare(self):
         # Disable werror from pragmas. Currently fails building on macOS 12.3
