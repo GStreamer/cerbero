@@ -1,0 +1,131 @@
+From dbbac3164e84c65c79b804f62a48a4fe1bb70e06 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Fri, 17 Mar 2023 17:47:28 +0000
+Subject: [PATCH] Add Meson build system
+
+https://wrapdb.mesonbuild.com/v2/ogg_1.3.5-5/get_patch
+---
+ LICENSE.build           | 19 +++++++++++++++++++
+ include/ogg/meson.build | 26 ++++++++++++++++++++++++++
+ meson.build             | 12 ++++++++++++
+ src/meson.build         | 30 ++++++++++++++++++++++++++++++
+ 4 files changed, 87 insertions(+)
+ create mode 100644 LICENSE.build
+ create mode 100644 include/ogg/meson.build
+ create mode 100644 meson.build
+ create mode 100644 src/meson.build
+
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/include/ogg/meson.build b/include/ogg/meson.build
+new file mode 100644
+index 0000000..1536461
+--- /dev/null
++++ b/include/ogg/meson.build
+@@ -0,0 +1,26 @@
++cc = meson.get_compiler('c')
++
++cdata = configuration_data()
++cdata.set10('INCLUDE_INTTYPES_H', cc.has_header('inttypes.h'))
++cdata.set10('INCLUDE_STDINT_H', cc.has_header('stdint.h'))
++cdata.set10('INCLUDE_SYS_TYPES_H', cc.has_header('sys/types.h'))
++
++# stdint.h is everywhere we care about.
++
++cdata.set('SIZE16', 'int16_t')
++cdata.set('USIZE16', 'uint16_t')
++cdata.set('SIZE32', 'int32_t')
++cdata.set('USIZE32', 'uint32_t')
++cdata.set('SIZE64', 'int64_t')
++cdata.set('USIZE64', 'uint64_t')
++
++configure_file(
++  input: 'config_types.h.in',
++  output: 'config_types.h',
++  format: 'cmake@',
++  install_dir: join_paths(get_option('includedir'), 'ogg'),
++  configuration: cdata,
++)
++
++headers = files(['ogg.h', 'os_types.h'])
++install_headers(headers, subdir: 'ogg')
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..c24bf03
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,12 @@
++project('libogg', 'c', version : '1.3.5', license : 'bsd-like')
++
++# See configure.ac and CMakeLists.txt
++lib_current = 8
++lib_revision = 5
++lib_age = 8
++lib_soversion = lib_current - lib_age
++lib_version = '@0@.@1@.@2@'.format(lib_soversion, lib_age, lib_revision)
++
++incdir = include_directories('include')
++subdir('include/ogg')
++subdir('src')
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..345034d
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,30 @@
++sources = ['bitwise.c', 'framing.c']
++
++libogg = library('ogg',
++  sources,
++  include_directories : incdir,
++  vs_module_defs: '../win32/ogg.def',
++  version: lib_version,
++  soversion: host_machine.system() == 'windows' ? '' : lib_soversion,
++  install: true,
++)
++
++bw_test = executable('bitwise', 'bitwise.c',
++  include_directories : incdir,
++  c_args : '-D_V_SELFTEST'
++)
++framing_test = executable('framing', 'framing.c',
++  include_directories : incdir,
++  c_args : '-D_V_SELFTEST'
++)
++
++test('bitwise', bw_test)
++test('framing', framing_test)
++
++libogg_dep = declare_dependency(link_with : libogg,
++  include_directories : incdir)
++
++pkgconfig = import('pkgconfig')
++pkgconfig.generate(libogg,
++  description: 'ogg is a library for manipulating ogg bitstreams',
++)
+-- 
+2.39.2
+

@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libogg'
@@ -9,17 +8,16 @@ class Recipe(recipe.Recipe):
     url = 'xiph://ogg/%(name)s-%(version)s.tar.xz'
     tarball_checksum = 'c4d91be36fc8e54deae7575241e03f4211eb102afb3fc0775fbbc1b740016705'
     licenses = [{License.BSD_like: ['COPYING']}]
-    patches = []
+    btype = BuildType.MESON
+    patches = [
+        'libogg/0001-Add-Meson-build-system.patch',
+        'libogg/0002-meson-fix-exports-and-library-name-with-MingW.patch',
+    ]
 
     files_libs = ['libogg']
-    files_devel = ['include/ogg', '%(libdir)s/pkgconfig/ogg.pc', 'share/aclocal/ogg.m4']
+    files_devel = ['include/ogg', '%(libdir)s/pkgconfig/ogg.pc']
 
-    async def configure(self):
-        if self.config.target_platform == Platform.IOS:
-            if Architecture.is_arm(self.config.target_arch):
-                # These optimizations make the linker think the object file is not
-                # for the arm architecture
-                shell.replace (os.path.join(self.build_dir, 'configure.ac'),
-                               {'-O4': '-O2'})
-                self.autoreconf = True
-        await super(recipe.Recipe, self).configure()
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('libogg', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()

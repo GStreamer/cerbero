@@ -1,0 +1,37 @@
+From 3a2ad4b0b3571da53993509addfc671025503768 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Fri, 17 Mar 2023 19:34:10 +0000
+Subject: [PATCH] meson: fix exports and library name with MingW
+
+---
+ src/meson.build | 1 -
+ win32/ogg.def   | 1 -
+ 2 files changed, 2 deletions(-)
+
+diff --git a/src/meson.build b/src/meson.build
+index 345034d..cda56ad 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -5,7 +5,6 @@ libogg = library('ogg',
+   include_directories : incdir,
+   vs_module_defs: '../win32/ogg.def',
+   version: lib_version,
+-  soversion: host_machine.system() == 'windows' ? '' : lib_soversion,
+   install: true,
+ )
+ 
+diff --git a/win32/ogg.def b/win32/ogg.def
+index 030b644..614031b 100644
+--- a/win32/ogg.def
++++ b/win32/ogg.def
+@@ -2,7 +2,6 @@
+ ; ogg.def
+ ; List of exported functions for Windows builds.
+ ;
+-LIBRARY ogg
+ EXPORTS
+ ;
+ oggpack_writeinit
+-- 
+2.39.2
+
