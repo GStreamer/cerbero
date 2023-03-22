@@ -94,6 +94,19 @@ class Recipe(recipe.Recipe):
         if self.config.platform in (Platform.WINDOWS, Platform.DARWIN):
             self.meson_options['python'] = self.config.python_exe
 
+    async def extract(self):
+        await super().extract()
+        # In macOS, we use a main lib/glib-2.0/include/glibconfig.h that loads
+        # the architecture specific config from a subdirectory like:
+        # lib/glib-2.0/include/x86_64/glibconfig.h
+        # To generate correctly the introspection data g-ir-scanner must use
+        # the final glibconfig.h instead of the intermediate
+        if self.config.target_platform == Platform.DARWIN:
+            meson_build = os.path.join(self.build_dir, 'gir', 'meson.build')
+            shell.replace(meson_build, {
+                "'glibconfig.h'": "'{}/glibconfig.h'".format(self.config.target_arch)
+            })
+
     def post_install(self):
         # Meson does not generate la files
         libtool_la = LibtoolLibrary('libgirepository-1.0', None, None, None,
