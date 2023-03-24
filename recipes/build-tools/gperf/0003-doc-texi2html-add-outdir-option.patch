@@ -1,0 +1,79 @@
+From b8e2ee79facbea2036f4962ae3cc4281d71ea9b0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 14 Jun 2020 17:10:27 +0100
+Subject: [PATCH 3/4] doc: texi2html: add -outdir option
+
+So we can put the generated files into the right
+directory with the Meson build (where the command
+might be run from the top-level build directory).
+---
+ doc/texi2html | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/doc/texi2html b/doc/texi2html
+index d6ae081..77fad9d 100755
+--- a/doc/texi2html
++++ b/doc/texi2html
+@@ -329,6 +329,7 @@ $split_node = 0;
+ $split_chapter = 0;
+ $monolithic = 0;
+ $verbose = 0;
++$output_dir = '.';
+ $usage = <<EOT;
+ This is $THISPROG
+ To convert a Texinfo file to HMTL: $0 [options] file
+@@ -342,6 +343,7 @@ To convert a Texinfo file to HMTL: $0 [options] file
+     -menu          : handle menus
+     -monolithic    : output only one file including ToC
+     -number        : number sections
++    -outdir DIR    : output directory
+     -split_chapter : split on main sections
+     -split_node    : split on nodes
+     -usage         : print usage instructions
+@@ -374,6 +376,7 @@ while (@ARGV && $ARGV[0] =~ /^-/) {
+ 	next;
+     }
+     if (/^-v(erbose)?$/)     { $verbose = 1; next; }
++    if (/^-o(utdir=?)?(.+)?$/) { $output_dir = $2 || shift(@ARGV); next; } 
+     die $usage;
+ }
+ if ($check) {
+@@ -1444,7 +1447,7 @@ $full_title = "<H1>" . join("</H1>\n<H1>", split(/\n/, $_)) . "</H1>\n";
+ # print ToC
+ #
+ if (!$monolithic && @toc_lines) {
+-    if (open(FILE, "> $docu_toc")) {
++    if (open(FILE, "> $output_dir/$docu_toc")) {
+ 	print "# creating $docu_toc...\n" if $verbose;
+ 	&print_toplevel_header("$title - Table of Contents");
+ 	&print_ruler;
+@@ -1460,7 +1463,7 @@ if (!$monolithic && @toc_lines) {
+ # print footnotes
+ #
+ if (!$monolithic && @foot_lines) {
+-    if (open(FILE, "> $docu_foot")) {
++    if (open(FILE, "> $output_dir/$docu_foot")) {
+ 	print "# creating $docu_foot...\n" if $verbose;
+ 	&print_toplevel_header("$title - Footnotes");
+ 	&print_ruler;
+@@ -1483,7 +1486,7 @@ if ($split_chapter || $split_node) { # split
+     while (@sections) {
+ 	$section = shift(@sections);
+ 	&next_doc;
+-	if (open(FILE, "> $docu_doc")) {
++	if (open(FILE, "> $output_dir/$docu_doc")) {
+ 	    print "# creating $docu_doc...\n" if $verbose;
+ 	    &print_header("$title - $section");
+ 	    $prev_doc = ($doc_num == 1 ? undef : &doc_name($doc_num - 1));
+@@ -1516,7 +1519,7 @@ if ($split_chapter || $split_node) { # split
+ 	}
+     }
+ } else { # not split
+-    if (open(FILE, "> $docu_doc")) {
++    if (open(FILE, "> $output_dir/$docu_doc")) {
+ 	print "# creating $docu_doc...\n" if $verbose;
+ 	if ($monolithic || !@toc_lines) {
+ 	    &print_toplevel_header($title);
+-- 
+2.40.0
+

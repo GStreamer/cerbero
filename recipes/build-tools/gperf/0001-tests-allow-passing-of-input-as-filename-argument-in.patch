@@ -1,0 +1,64 @@
+From 37aa240a1cf809db760ccb0b1ecf483f244205d1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 13 Jun 2020 23:44:45 +0100
+Subject: [PATCH 1/4] tests: allow passing of input as filename argument in
+ addition to stdin
+
+This allows for cleaner test setup in meson.
+---
+ tests/test.c | 30 ++++++++++++++++++++++++++++--
+ 1 file changed, 28 insertions(+), 2 deletions(-)
+
+diff --git a/tests/test.c b/tests/test.c
+index 52d41d8..217a0ab 100644
+--- a/tests/test.c
++++ b/tests/test.c
+@@ -2,6 +2,10 @@
+    Tests the generated perfect hash function.
+    The -v option prints diagnostics as to whether a word is in
+    the set or not.  Without -v the program is useful for timing.
++
++   Usage: $executable [-v] [INPUT.GPERF]
++
++   If no input file is specified it will read from stdin.
+ */
+ 
+ #include <stdio.h>
+@@ -14,10 +18,32 @@ extern const char * in_word_set (const char *, size_t);
+ int
+ main (int argc, char *argv[])
+ {
+-  int  verbose = argc > 1 ? 1 : 0;
++  const char *input_fn = NULL;
++  int  verbose = 0;
+   char buf[MAX_LEN];
++  FILE *f = NULL;
++
++  if (argc > 2) {
++    verbose = 1;
++    input_fn = argv[2];
++  } else if (argc == 2) {
++    if (strcmp (argv[1], "-v") == 0)
++      verbose = 1;
++    else
++      input_fn = argv[1];
++  }
++
++  if (input_fn != NULL && strcmp (input_fn, "-") != 0) {
++    f = fopen (argv[2], "r");
++    if (f == NULL) {
++      perror("Could not open input file: ");
++      return -1;
++    }
++  } else {
++    f = stdin;
++  }
+ 
+-  while (fgets (buf, MAX_LEN, stdin))
++  while (fgets (buf, MAX_LEN, f))
+     {
+       if (strlen (buf) > 0 && buf[strlen (buf) - 1] == '\n')
+         buf[strlen (buf) - 1] = '\0';
+-- 
+2.40.0
+

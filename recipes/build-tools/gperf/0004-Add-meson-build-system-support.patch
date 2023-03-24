@@ -1,0 +1,549 @@
+From 466a830a726dbf4cd4c5ecd983ff9503f5832109 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 14 Jun 2020 15:44:48 +0100
+Subject: [PATCH 4/4] Add meson build system support
+
+Useful in order to be able to use gperf as
+a build tool subproject.
+
+Mostly complete, but not all tests are
+hooked up and test setup should perhaps
+be done differently, with both gperf and
+the compiler called as part of the actual
+test run.
+---
+ doc/meson.build               | 96 +++++++++++++++++++++++++++++++++++
+ lib/meson.build               | 31 +++++++++++
+ meson.build                   | 49 ++++++++++++++++++
+ meson_options.txt             | 12 +++++
+ src/meson.build               | 43 ++++++++++++++++
+ tests/compare_output.py       | 54 ++++++++++++++++++++
+ tests/extract_index_column.py | 50 ++++++++++++++++++
+ tests/meson.build             | 76 +++++++++++++++++++++++++++
+ version.py                    | 47 +++++++++++++++++
+ 9 files changed, 458 insertions(+)
+ create mode 100644 doc/meson.build
+ create mode 100644 lib/meson.build
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 src/meson.build
+ create mode 100755 tests/compare_output.py
+ create mode 100755 tests/extract_index_column.py
+ create mode 100644 tests/meson.build
+ create mode 100755 version.py
+
+diff --git a/doc/meson.build b/doc/meson.build
+new file mode 100644
+index 0000000..230ca92
+--- /dev/null
++++ b/doc/meson.build
+@@ -0,0 +1,96 @@
++# meson configuration for gperf
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++texi2dvi = find_program('texi2dvi', required: get_option('doc-dvi'))
++texi2pdf = find_program('texi2pdf', required: get_option('doc-pdf'))
++makeinfo = find_program('makeinfo', required: get_option('doc-info'))
++help2man = find_program('help2man', required: get_option('doc-man')) # from srcdir
++texi2html = find_program('texi2html', required: get_option('doc-html')) # from srcdir
++dvips = find_program('dvips', required: get_option('doc-ps'))
++
++docdir = get_option('datadir') / 'doc' / 'gperf'
++mandir = get_option('mandir') / 'man1'
++infodir = get_option('infodir')
++
++examplesdir = docdir / 'examples'
++
++if makeinfo.found()
++  custom_target('gperf.info',
++    output: 'gperf.info',
++    input: ['gperf.texi', 'gpl-3.0.texi'],
++    command: [makeinfo, '--no-split', '-o', '@OUTPUT@', '@INPUT0@'],
++    install_dir: infodir,
++    install: true)
++endif
++
++gperf_pdf = []
++if texi2pdf.found()
++  gperf_pdf = custom_target('gperf.pdf',
++    output: 'gperf.pdf',
++    input: ['gperf.texi', 'gpl-3.0.texi'],
++    command: [texi2pdf, '--quiet', '-o', '@OUTPUT@', '@INPUT0@'],
++    install_dir: docdir,
++    install: true)
++endif
++
++if texi2dvi.found()
++  gperf_dvi = custom_target('gperf.dvi',
++    output: 'gperf.dvi',
++    input: ['gperf.texi', 'gpl-3.0.texi'],
++    command: [texi2dvi, '--quiet', '-o', '@OUTPUT@', '@INPUT0@'],
++    depends: gperf_pdf, # avoid parallel run with texi2pdf which uses same temp dirs
++    install_dir: docdir,
++    install: true)
++endif
++
++if dvips.found()
++  if get_option('doc-ps').enabled() and not texi2dvi.found()
++    error('doc-ps option was enabled, but required tool texi2dvi was not found')
++  endif
++  custom_target('gperf.ps',
++    output: 'gperf.ps',
++    depend_files: ['gperf.texi', 'gpl-3.0.texi'],
++    command: [dvips, '-D600', '-q', '-o', '@OUTPUT@', gperf_dvi],
++    install_dir: docdir,
++    install: true)
++endif
++
++if help2man.found()
++  # Can't use install_man() here because it doesn't accept a custom_target (yet)
++  custom_target('gperf.1',
++    output: 'gperf.1',
++    command: [help2man, '--name=generate a perfect hash function from a key set', '--section=1', '-o', '@OUTPUT@', gperf_exe],
++    install_dir: mandir,
++    install: true)
++endif
++
++if texi2html.found()
++  gperf_html = custom_target('gperf.html',
++    output: 'gperf.html',
++    input: ['gperf.texi', 'gpl-3.0.texi'],
++    command: [texi2html, '-number', '-monolithic', '-outdir=@OUTDIR@', '@INPUT0@'],
++    install_dir: docdir,
++    install: true)
++endif
++
++# This list is based on what the debian package ships
++if not get_option('doc-examples').disabled()
++  install_data('../tests/c++.gperf', '../tests/c.gperf', '../tests/c-parse.gperf',
++     install_dir: examplesdir)
++endif
+diff --git a/lib/meson.build b/lib/meson.build
+new file mode 100644
+index 0000000..d36255e
+--- /dev/null
++++ b/lib/meson.build
+@@ -0,0 +1,31 @@
++# meson configuration for gperf
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++libgp_sources = [
++  'getline.cc',
++  'hash.cc',
++  'getopt.c',
++  'getopt1.c',
++]
++
++libgp = static_library ('gp', libgp_sources,
++  include_directories: gperf_incs,
++  dependencies: libm,
++  native: true,
++  install: false)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..a66488a
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,49 @@
++# meson configuration for gperf
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++project('gperf', 'cpp', 'c',
++  version: run_command(find_program('version.py'), check: true).stdout().strip(),
++  meson_version: '>= 0.49')
++
++cxx = meson.get_compiler('cpp', native: true)
++
++gperf_incs = include_directories('.', 'lib')
++
++cdata = configuration_data()
++
++libm = cxx.find_library('m', required: false)
++
++have_dynamic_array = cxx.compiles('int func (int n) { int dynamic_array[n]; }',
++  name: 'C++ compiler supports stack-allocated variable-size arrays')
++
++cdata.set10('HAVE_DYNAMIC_ARRAY', have_dynamic_array,
++  description: 'C++ compiler supports stack-allocated variable-size arrays')
++
++subdir('lib')
++subdir('src')
++
++if not get_option('tests').disabled()
++  subdir('tests')
++endif
++
++if not get_option('docs').disabled()
++  subdir('doc')
++endif
++
++configure_file(output: 'config.h', configuration: cdata)
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..d547fba
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,12 @@
++# common feature options
++option('tests', type: 'feature', value: 'disabled')
++
++# documentation
++option('docs', type: 'feature', value: 'disabled')
++option('doc-ps', type: 'feature', value: 'disabled')
++option('doc-dvi', type: 'feature', value: 'disabled')
++option('doc-man', type: 'feature', value: 'auto')
++option('doc-pdf', type: 'feature', value: 'auto')
++option('doc-info', type: 'feature', value: 'auto',)
++option('doc-html', type: 'feature', value: 'auto')
++option('doc-examples', type: 'feature', value: 'auto')
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..258bf81
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,43 @@
++# meson configuration for gperf
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++gperf_sources = [
++  'version.cc',
++  'positions.cc',
++  'options.cc',
++  'keyword.cc',
++  'keyword-list.cc',
++  'input.cc',
++  'bool-array.cc',
++  'hash-table.cc',
++  'search.cc',
++  'output.cc',
++  'main.cc',
++]
++
++gperf_exe = executable('gperf', gperf_sources,
++  include_directories: gperf_incs,
++  dependencies: libm,
++  link_with: libgp,
++  native: true,
++  install: not meson.is_subproject())
++
++if meson.is_subproject()
++  meson.override_find_program('gperf', gperf_exe)
++endif
+diff --git a/tests/compare_output.py b/tests/compare_output.py
+new file mode 100755
+index 0000000..96a94d5
+--- /dev/null
++++ b/tests/compare_output.py
+@@ -0,0 +1,54 @@
++#!/usr/bin/env python3
++#
++# gperf compare_output.py
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++#
++# Compares two text files line-by-line to make sure they match.
++
++import os
++import sys
++
++if len(sys.argv) != 3:
++  print('ERROR: usage: {} EXPECTED-OUTPUT-FILE ACTUAL-TEST-OUTPUT-FILE'.format(sys.argv[0]))
++  sys.exit(-1)
++
++fn_exp = sys.argv[1]
++fn_test = sys.argv[2]
++f_exp = open(fn_exp, 'r', encoding='utf8')
++f_test = open(fn_test, 'r', encoding='utf8')
++
++for (n, (line_exp, line_test)) in enumerate(zip(f_exp, f_test)):
++  line_exp = line_exp.strip()
++  line_test = line_test.strip()
++  if line_exp != line_test:
++    print('Output does not match in line {}:\nExpected: "{}" in {}\nActual:   "{}" in {}'.format(n+1, line_exp, fn_exp, line_test, fn_test))
++    sys.exit(-1)
++
++if f_exp.read() != '':
++  print('Actual output file "{}" has fewer lines than expected out file "{}"!'.format(fn_test, fn_exp))
++  sys.exit(-1)
++
++if f_test.read() != '':
++  print('Actual output file "{}" has more lines than expected out file "{}"!'.format(fn_test, fn_exp))
++  sys.exit(-1)
++
++f_exp.close()
++f_test.close()
++
++sys.exit(0)
+diff --git a/tests/extract_index_column.py b/tests/extract_index_column.py
+new file mode 100755
+index 0000000..904fa67
+--- /dev/null
++++ b/tests/extract_index_column.py
+@@ -0,0 +1,50 @@
++#!/usr/bin/env python3
++#
++# gperf extract_index_column.py
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++#
++# Takes .gperf file and strips the 'struct' bit at the top and all but the
++# first column of data, e.g. to extract just foreign_name from lang-utf8.gperf
++
++import os
++import sys
++
++if len(sys.argv) < 2:
++  print('ERROR: usage: {} INPUT.GPERF [OUTPUT.GPERF]'.format(sys.argv[0]))
++  sys.exit(-1)
++
++input_fn = sys.argv[1]
++f = open(input_fn, 'r', encoding='utf8')
++
++if len(sys.argv) > 2 and sys.argv[2] != '-':
++  f_out = open(sys.argv[2], 'w', encoding='utf8')
++else:
++  f_out = sys.stdout
++
++seen_hdr_sep = False
++
++for (n, (line)) in enumerate(f):
++  line = line.strip()
++  if not seen_hdr_sep:
++    seen_hdr_sep = line == '%%'
++    continue
++  first_column = line.split(',')[0]
++  print(first_column, file=f_out)
++
++sys.exit(0)
+diff --git a/tests/meson.build b/tests/meson.build
+new file mode 100644
+index 0000000..9cbba2a
+--- /dev/null
++++ b/tests/meson.build
+@@ -0,0 +1,76 @@
++# meson configuration for gperf
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++
++compare_output = find_program('compare_output.py')
++extract_index_column = find_program('extract_index_column.py')
++
++lang_utf8_foreign_name_gperf = custom_target('lang-utf8-foreign_name.gperf',
++  input: 'lang-utf8.gperf',
++  output: 'lang-utf8_foreign_name.gperf',
++  command: [extract_index_column, '@INPUT@', '@OUTPUT@'])
++
++# FIXME: quite a few tests missing, incl. all the validate ones
++
++tests = {
++  # Testing ANSI C reserved words, all items should be found in the set
++  'c': ['cinset.c', 'c.gperf', ['-c', '-l', '-S1', '-I', '-o']],
++
++  # Testing Ada reserved words, all items should be found in the set
++  'ada-res': ['adainset.c', 'ada.gperf', ['-k1,4,$']],
++
++  # Testing Ada predefined words, all items should be found in the set
++  'ada-pred': ['adapreinset.c', 'adadefs.gperf', ['-D', '-k1,$', '-s', '2', '-o']],
++
++  # Testing Modula3 reserved words, all items should be found in the set
++  'modula': ['m3inset.c', 'modula3.gperf', ['-k1,2,$', '-o']],
++
++  # Testing Pascal reserved words, all items should be found in the set
++  'pascal': ['pinset.c', 'pascal.gperf', ['-o', '-S2']],
++
++  # check for 8-bit cleanliness
++  # Testing UTF-8 encoded languages, all items should be found in the set
++  'lang-utf8': ['lu8inset.c', 'lang-utf8.gperf', ['-k1', '-t', '-K', 'foreign_name'], lang_utf8_foreign_name_gperf],
++}
++
++foreach tname, t : tests
++  c_fn = t[0]
++  gperf_fn = t[1]
++  gperf_args = t[2]
++  out_fn = '@0@.out'.format(tname)
++  exp_fn = '@0@.exp'.format(tname)
++  test_name = 'check-@0@'.format(tname)
++  check_exe_input_fn = t.get(3, gperf_fn)
++
++  gen_c_code = custom_target(c_fn,
++    input: gperf_fn,
++    output: c_fn,
++    command: [gperf_exe, gperf_args, '-I', '@INPUT@'],
++    capture: true)
++
++  # run with exe_wrapper if cross compile?
++  check_exe = executable('check-@0@'.format(tname), gen_c_code, 'test.c', native: true)
++
++  gen_out = custom_target(out_fn,
++    input: check_exe_input_fn,
++    output: out_fn,
++    command: [check_exe, '-v', '@INPUT@'],
++    capture: true)
++
++  test(test_name, compare_output, args: [files(exp_fn), gen_out])
++endforeach
+diff --git a/version.py b/version.py
+new file mode 100755
+index 0000000..fe6fcb8
+--- /dev/null
++++ b/version.py
+@@ -0,0 +1,47 @@
++#!/usr/bin/env python3
++#
++# gperf version.py
++#
++# Copyright (C) 2020 Tim-Philipp Müller <tim centricular com>
++#
++# This file is part of GNU GPERF.
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <https://www.gnu.org/licenses/>.
++#
++# Extracts version from src/version.cc, because like any sane build system
++# we extract the version from the code instead of having the build system set
++# the version for the code to consume.
++
++import os
++import sys
++
++version = None
++
++srcroot = os.path.dirname(__file__)
++
++f = open(os.path.join(srcroot, 'src/version.cc'), 'r')
++
++for line in f:
++    if line.startswith('const char *version_string'):
++        version = line[26:].split('"')[1]
++        break
++
++f.close()
++
++if not version:
++   print('Warning: Could not extract version from src/version.cc in', srcroot, file=sys.stderr)
++   sys.exit(-1)
++
++print(version)
++sys.exit(0)
+-- 
+2.40.0
+

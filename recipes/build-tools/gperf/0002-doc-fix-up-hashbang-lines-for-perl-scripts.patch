@@ -1,0 +1,33 @@
+From 0a9fd822607c61902d863274151414f7c3b7a225 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sun, 14 Jun 2020 16:43:39 +0100
+Subject: [PATCH 2/4] doc: fix up hashbang lines for perl scripts
+
+---
+ doc/help2man  | 2 +-
+ doc/texi2html | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/doc/help2man b/doc/help2man
+index 2beabba..f5f4ee5 100755
+--- a/doc/help2man
++++ b/doc/help2man
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl -w
++#!/usr/bin/env -S perl -w
+ 
+ # Generate a short man page from --help and --version output.
+ # Copyright © 1997, 1998, 1999, 2000 Free Software Foundation, Inc.
+diff --git a/doc/texi2html b/doc/texi2html
+index d423c2f..d6ae081 100755
+--- a/doc/texi2html
++++ b/doc/texi2html
+@@ -1,4 +1,4 @@
+-#!/usr/local/bin/perl
++#!/usr/bin/env perl
+ 'di ';
+ 'ig 00 ';
+ #+##############################################################################
+-- 
+2.40.0
+

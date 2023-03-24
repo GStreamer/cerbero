@@ -3,13 +3,20 @@
 
 class Recipe(recipe.Recipe):
     name = 'gperf'
-    version = '3.0.4'
+    version = '3.1'
     licenses = [License.GPLv2Plus]
     stype = SourceType.TARBALL
     url = 'gnu://.tar.gz'
-    tarball_checksum = '767112a204407e62dbc3106647cf839ed544f3cf5d0f0523aaa2508623aad63e'
-    patches = ['gperf-0001-Don-t-override-environment-AR.patch',
-               'gperf-0001-workaround-implcit-function-declaration-warnings.patch']
+    tarball_checksum = '588546b945bba4b70b6a3a616e80b4ab466e3f33024a352fc2198112cdbb3ae2'
+    btype = BuildType.MESON
+
+    patches = [
+	    'gperf/0000-workaround-implicit-function-declaration-warnings.patch',
+	    'gperf/0001-tests-allow-passing-of-input-as-filename-argument-in.patch',
+	    'gperf/0002-doc-fix-up-hashbang-lines-for-perl-scripts.patch',
+	    'gperf/0003-doc-texi2html-add-outdir-option.patch',
+	    'gperf/0004-Add-meson-build-system-support.patch',
+    ]
 
     files_bins = ['gperf']
 
