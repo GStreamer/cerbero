@@ -433,7 +433,7 @@ class Oven (object):
         except Exception as e:
             raise e
 
-    async def _cook_recipe_step_with_prompt (self, recipe, step, count):
+    async def _cook_recipe_step_with_prompt(self, recipe, step, count):
         try:
             await self._cook_recipe_step(recipe, step, count)
         except BuildStepError as be:
@@ -447,11 +447,15 @@ class Oven (object):
                 environ = recipe.get_recipe_env()
                 if recipe.use_system_libs:
                     add_system_libs(recipe.config, environ, environ)
+                if be.step == BuildSteps.EXTRACT[1]:
+                    source_dir = recipe.get_for_arch(be.arch, 'config_src_dir')
+                else:
+                    source_dir = recipe.get_for_arch(be.arch, 'build_dir')
                 shell.enter_build_environment(self.config.target_platform,
-                        be.arch, recipe.get_for_arch (be.arch, 'build_dir'), env=environ)
+                        be.arch, source_dir, env=environ)
                 raise be
             elif action == RecoveryActions.RETRY_ALL:
-                shutil.rmtree(recipe.get_for_arch (be.arch, 'build_dir'))
+                shutil.rmtree(recipe.get_for_arch(be.arch, 'build_dir'))
                 self.cookbook.reset_recipe_status(recipe.name)
                 # propagate up to the task manager to retry the recipe entirely
                 raise RetryRecipeError()
@@ -463,7 +467,7 @@ class Oven (object):
             elif action == RecoveryActions.ABORT:
                 raise AbortedError()
 
-    async def _cook_recipe_step (self, recipe, step, count):
+    async def _cook_recipe_step(self, recipe, step, count):
         # check if the current step needs to be done
         if self.steps_filter is not None and step not in self.steps_filter:
             return
