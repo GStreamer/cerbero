@@ -1,0 +1,76 @@
+From e15b9df19b7f28685a55fbca8826278151a6ba6b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 25 Mar 2023 02:22:47 +0000
+Subject: [PATCH 2/4] tiff: add 'gl' option to disable OpenGL support
+
+---
+ meson.build       | 20 +++++++++++++++-----
+ meson_options.txt |  4 ++++
+ 2 files changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 2360782..1e24985 100644
+--- a/meson.build
++++ b/meson.build
+@@ -2,7 +2,7 @@ project(
+   'tiff',
+   'c',
+   version: files('VERSION'),
+-  meson_version: '>=0.57.0',
++  meson_version: '>=0.59.0',
+ )
+ 
+ cc = meson.get_compiler('c')
+@@ -34,16 +34,19 @@ cdata.set('SIZEOF_SIZE_T', cc.sizeof('size_t'))
+ check_headers = [
+   'assert.h',
+   'fcntl.h',
+-  'GLUT/glut.h',
+   'io.h',
++  'strings.h',
++  'sys/types.h',
++  'unistd.h',
++]
++
++gl_headers = [
++  'GLUT/glut.h',
+   'GL/glut.h',
+   'GL/glu.h',
+   'GL/gl.h',
+   'OpenGL/glu.h',
+   'OpenGL/gl.h',
+-  'strings.h',
+-  'sys/types.h',
+-  'unistd.h',
+ ]
+ 
+ foreach h : check_headers
+@@ -52,6 +55,13 @@ foreach h : check_headers
+   endif
+ endforeach
+ 
++opt_gl = get_option('gl')
++foreach h : gl_headers
++  if opt_gl.allowed() and cc.has_header(h, required: opt_gl)
++    cdata.set('HAVE_@0@'.format(h.underscorify().to_upper()), 1)
++  endif
++endforeach
++
+ foreach f : ['fseeko', 'mmap', 'setmode']
+   if cc.has_function(f)
+     cdata.set('HAVE_@0@'.format(f.underscorify().to_upper()), 1)
+diff --git a/meson_options.txt b/meson_options.txt
+index 2646f73..a68e4e9 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1,3 +1,7 @@
++option('gl', type: 'feature',
++  description: 'Build with OpenGL support'
++)
++
+ option('jbig', type: 'feature',
+   description: 'Build with libjbig support'
+ )
+-- 
+2.40.0
+

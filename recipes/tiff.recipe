@@ -1,26 +1,42 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'tiff'
-    version = '4.0.10'
+    version = '4.5.0'
     stype = SourceType.TARBALL
     url = 'https://download.osgeo.org/libtiff/tiff-%(version)s.tar.gz'
-    tarball_checksum = '2c52d11ccaf767457db0c46795d9c7d1a8d8f76f68b0b800a3dfe45786b996e4'
-    licenses = [{License.BSD_like: ['COPYRIGHT']}]
+    tarball_checksum = 'c7a1d9296649233979fa3eacffef3fa024d73d05d589cb622727b5b08c423464'
+    licenses = [{License.BSD_like: ['LICENSE.md']}]
     deps = [ 'zlib', 'libjpeg-turbo' ]
-    configure_options = ' --disable-cxx no_gl=yes'
+    btype = BuildType.MESON
+    meson_options = {
+        # enabled options
+        'jpeg': 'enabled',
+        'zlib': 'enabled',
+        # disabled options
+        'gl': 'disabled',
+        'jbig': 'disabled',
+        'lerc': 'disabled',
+        'lzma': 'disabled',
+        'tests': 'disabled',
+        'webp': 'disabled',
+        'zstd': 'disabled',
+    }
+
+    patches = [
+        'tiff/0001-Add-meson-build-based-on-wrapdb-version-4.5.0-3.patch',
+        'tiff/0002-tiff-add-gl-option-to-disable-OpenGL-support.patch',
+        'tiff/0003-tiff-add-tests-option-to-disable-building-of-tests.patch',
+        'tiff/0004-tiff-fix-library-name-and-lib-versioning.patch',
+    ]
 
     files_libs = ['libtiff']
     files_devel = ['include/tiffvers.h', 'include/tiffio.h', 'include/tiff.h',
         'include/tiffconf.h', '%(libdir)s/pkgconfig/libtiff-4.pc']
 
-    def prepare(self):
-        if self.config.target_platform == Platform.ANDROID:
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
-                # FIXME: HACK to make projects using mmap compile with NDK 16
-                # we fail to compile with -D_FILE_OFFSET_BITS=64
-                # because we don't use clang and we use a platform < 21 (Lollipop)
-                # See $NDK_ROOT/sysroot/usr/include/sys/mman.h as one example
-                self.set_env('ac_cv_func_mmap', 'no')
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libtiff', None, None, None, self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

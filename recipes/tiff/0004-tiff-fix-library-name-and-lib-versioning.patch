@@ -1,0 +1,42 @@
+From 90bad09e75a14071fbf04b4d67711ec00bbdc794 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 25 Mar 2023 02:38:51 +0000
+Subject: [PATCH 4/4] tiff: fix library name and lib versioning
+
+---
+ libtiff/meson.build | 3 ++-
+ meson.build         | 2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/libtiff/meson.build b/libtiff/meson.build
+index cf57365..a82bcbf 100644
+--- a/libtiff/meson.build
++++ b/libtiff/meson.build
+@@ -58,9 +58,10 @@ sources = files(
+ )
+ 
+ tiff4_lib = library(
+-  'tiff4',
++  'tiff',
+   sources,
+   install: true,
++  version: libversion,
+   dependencies: [m_dep, jbig_dep, jpeg_dep, lerc_dep, lzma_dep, webp_dep, zlib_dep, zstd_dep],
+   vs_module_defs: 'libtiff.def',
+ )
+diff --git a/meson.build b/meson.build
+index 5188039..22d4537 100644
+--- a/meson.build
++++ b/meson.build
+@@ -5,6 +5,8 @@ project(
+   meson_version: '>=0.59.0',
+ )
+ 
++libversion = '6.0.0'
++
+ cc = meson.get_compiler('c')
+ m_dep = cc.find_library('m', required: false)
+ jbig_dep = cc.find_library('jbig', required: get_option('jbig'))
+-- 
+2.40.0
+

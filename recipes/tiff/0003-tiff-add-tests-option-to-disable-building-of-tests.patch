@@ -1,0 +1,40 @@
+From 9b081ee2d0d58ebce8843c2b8d1c9538629c957d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Sat, 25 Mar 2023 02:34:21 +0000
+Subject: [PATCH 3/4] tiff: add 'tests' option to disable building of tests
+
+---
+ meson.build       | 4 +++-
+ meson_options.txt | 4 ++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 1e24985..5188039 100644
+--- a/meson.build
++++ b/meson.build
+@@ -122,4 +122,6 @@ import('pkgconfig').generate(
+   description: 'Tag Image File Format (TIFF) library.',
+ )
+ 
+-subdir('test')
++if not get_option('tests').disabled()
++  subdir('test')
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+index a68e4e9..c2b61b8 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -18,6 +18,10 @@ option('lzma', type: 'feature',
+   description: 'Build with liblzma support'
+ )
+ 
++option('tests', type: 'feature', yield: true,
++  description: 'Build unit tests'
++)
++
+ option('webp', type: 'feature',
+   description: 'Build with libwebp support'
+ )
+-- 
+2.40.0
+
