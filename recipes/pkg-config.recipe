@@ -8,13 +8,26 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     url = 'https://pkgconfig.freedesktop.org/releases/pkg-config-%(version)s.tar.gz'
     tarball_checksum = '6fc69c01688c9458a57eb9a1664c9aba372ccda420a02bf4429fe610e7e7d591'
-    configure_options = '--with-internal-glib --disable-host-tool '
-    override_libtool = False
+    btype = BuildType.MESON
+    meson_options = {'host_tool': 'disabled', 'internal_glib': 'enabled'}
 
-    patches = ['pkg-config/0001-Automatically-detect-prefix-on-macOS-too.patch']
+    # We want to link these statically into pkg-config, so for proxy-libintl
+    # don't use the existing recipe which will build only a shared version
+    # but just download a separate copy for static linking. It's just two
+    # source files. For GLib we need to patch the GLib after the subproject
+    # download in order to disable gobject, gio, GRegexp and other external
+    # dependencies, and this will be done by meson as part of the subproject
+    # download and the diff_files in the glib.wrap.
+    meson_subprojects = ['glib', 'proxy-libintl']
+
+    patches = [
+        'pkg-config/0001-Automatically-detect-prefix-on-macOS-too.patch',
+        'pkg-config/0001-Add-Meson-build-optionally-with-internal-glib-subpro.patch',
+    ]
 
     files_bins = ['pkg-config']
     files_share = ['share/aclocal/pkg.m4']
 
     def prepare(self):
-        self.append_env('CFLAGS', '-Wno-error=format-nonliteral')
+        if not self.using_msvc():
+            self.append_env('CFLAGS', '-Wno-error=format-nonliteral')

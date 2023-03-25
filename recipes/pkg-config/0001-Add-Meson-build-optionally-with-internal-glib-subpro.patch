@@ -1,0 +1,524 @@
+From 4af5478ead316fe075c08a414539f5c5c1a3ecc3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 28 Dec 2022 01:30:01 +0100
+Subject: [PATCH] Add Meson build, optionally with internal glib subproject
+
+Pulls in GLib as a Meson subproject (if needed and/or requested)
+and patches it into a minimal GLib for pkg-config use and for
+static linking into pkg-config (which is useful for deployment
+on Windows so you can just download and copy around a single .exe):
+- no gobject, gio, gmodule, gthread
+- no GRegexp (pcre library)
+- no external deps (that would require pkg-config for lookup)
+
+This allows for easy bootstrapping of pkg-config on Windows,
+and is much faster than the autotools build as well.
+
+Can also be built against an external installed GLib of course.
+---
+ meson.build                                   | 119 +++++++++
+ meson_options.txt                             |  29 ++
+ subprojects/glib.wrap                         |  15 ++
+ ...ject-gio-gthread-gmodule-and-GRegex-.patch | 251 ++++++++++++++++++
+ ...lib-gthreadprivate.h-include-errno.h.patch |  34 +++
+ subprojects/proxy-libintl.wrap                |   5 +
+ 7 files changed, 458 insertions(+)
+ create mode 100644 meson.build
+ create mode 100644 meson_options.txt
+ create mode 100644 subprojects/glib.wrap
+ create mode 100644 subprojects/packagefiles/glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch
+ create mode 100644 subprojects/packagefiles/glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch
+ create mode 100644 subprojects/proxy-libintl.wrap
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..9f9fa1e
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,119 @@
++project('pkg-config', 'c', version: '0.29.2', meson_version: '>= 0.63')
++
++prefix = get_option('prefix')
++libdir = get_option('libdir')
++datadir = get_option('datadir')
++
++# Default pkg-config search path
++pc_path = get_option('pc_path')
++if pc_path == ''
++	pc_path='@0@/pkgconfig:@1@/pkgconfig'.format(prefix / libdir, prefix / datadir)
++  # This is slightly wrong, but hopefully causes less confusion than
++  # people being unable to find their .pc files in the standard location.
++  # (This 'NONE' business is copied from configure.ac, unclear how this
++  # is used or how it makes sense; the extra option is ours and new/questionable)
++	if prefix == 'NONE' or get_option('add_standard_system_pc_paths')
++	  # FIXME: what about paths with architecture?
++	  pc_path = pc_path + ':/usr/lib/pkgconfig:/usr/share/pkgconfig'
++	endif
++endif
++
++# System default -I paths
++system_include_path = get_option('system_include_path')
++if system_include_path == ''
++  system_include_path = '/usr/include'
++endif
++
++# System default -L paths
++system_library_path = get_option('system_library_path')
++if system_library_path == ''
++  # FIXME: what about plain /usr/lib:/lib? not sure I understand the configure.ac logic here
++  system_library_path = '@0@:@1@'.format('/usr' / libdir, '/' / libdir)
++endif
++
++summary({'Default .pc search path': pc_path,
++         'System include path': system_include_path,
++         'System library path': system_library_path,
++        }, section: 'Directories')
++
++define_prefix_option = get_option('define_prefix')
++if define_prefix_option.auto()
++  enable_define_prefix = host_machine.system() == 'windows'
++else
++  enable_define_prefix = define_prefix_option.enabled()
++endif
++
++indirect_deps_option = get_option('indirect_deps')
++if indirect_deps_option.auto()
++  enable_indirect_deps = false # FIXME: what's the right default here?! (we're not going to check libtool that's for sure)
++else
++  enable_indirect_deps = indirect_deps_option.enabled()
++endif
++
++# GLib
++
++internal_glib_options = [
++  'default_library=static',
++  'libelf=disabled',
++  'libmount=disabled',
++  'nls=disabled',
++  'selinux=disabled',
++  'tests=false',
++]
++
++opt_internal_glib = get_option('internal_glib')
++
++if opt_internal_glib.enabled()
++  subproject('glib', default_options: internal_glib_options)
++  glib_dep = dependency('glib-2.0')
++else
++  glib_dep = dependency('glib-2.0', version: '>= 2.16',
++    required: true,
++    allow_fallback: opt_internal_glib.allowed(),
++    default_options: internal_glib_options)
++endif
++
++summary({'Enable define_prefix at runtime': enable_define_prefix,
++         'Enable indirect deps': enable_indirect_deps,
++         'GLib source': glib_dep.name(),
++        }, section: 'Options')
++
++pkg_config_cargs = [
++  '-DVERSION="@0@"'.format(meson.project_version()),
++  '-DPKG_CONFIG_PC_PATH="@0@"'.format(pc_path),
++  '-DPKG_CONFIG_SYSTEM_INCLUDE_PATH="@0@"'.format(system_include_path),
++  '-DPKG_CONFIG_SYSTEM_LIBRARY_PATH="@0@"'.format(system_library_path),
++  '-DENABLE_DEFINE_PREFIX=@0@'.format(enable_define_prefix ? 'TRUE' : 'FALSE'),
++  '-DENABLE_INDIRECT_DEPS=@0@'.format(enable_indirect_deps ? 'TRUE' : 'FALSE'),
++]
++
++pkg_config = executable('pkg-config',
++  sources: ['pkg.c', 'parse.c', 'rpmvercmp.c', 'main.c'],
++  c_args: pkg_config_cargs,
++  dependencies: glib_dep,
++  install: true)
++
++# Various data files
++pkg_m4_cfg = configuration_data()
++pkg_m4_cfg.set('VERSION', meson.project_version())
++configure_file(output: 'pkg.m4', input: 'pkg.m4.in',
++  configuration: pkg_m4_cfg,
++  install_dir: datadir / 'aclocal')
++
++install_man('pkg-config.1')
++
++# Create symlink to $(host)-pkg-config$(exeext) if requested (untested!)
++if get_option('host_tool').enabled()
++  warning('host_tool option has not been tested!')
++  if host_machine.system() == 'windows'
++    exe_suffix = '.exe'
++  else
++    exe_suffix = ''
++  endif
++  host_exe_name = '@0@-pkg-config@1@'.format(host_machine.cpu(), exe_suffix)
++  exe_name = 'pkg-config@0@'.format(exe_suffix)
++  install_symlink(host_exe_name,
++    pointing_to: exe_name,
++    install_dir: get_option('bindir'),
++    install_tag: 'bin')
++endif
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..8dcab05
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,29 @@
++option('pc_path', type: 'string', value: '',
++  description: 'Default search path for .pc files')
++
++# FIXME: questionable option, might not be useful or needed actually
++# (or equivalent options should be added for include/library paths perhaps)
++option('add_standard_system_pc_paths', type: 'boolean', value: false,
++  description: 'Whether to always also look in /usr/lib/pkgconfig '
++                + 'and /usr/share/pkgconfig for .pc files '
++                + '(in addition to install prefix paths)')
++
++option('define_prefix', type: 'feature', value: 'auto',
++  description: 'Redefine prefix in .pc files at runtime '
++             + '(default: enabled on Windows, disabled elsewhere)')
++
++option('system_include_path', type: 'string', value: '',
++  description: 'Avoid -I flags from the given path')
++
++option('system_library_path', type: 'string', value: '',
++  description: 'Avoid -L flags from the given path')
++
++option('host_tool', type: 'feature', value: 'disabled',
++  description: 'Install link to pkg-config with $host- prefix')
++  
++option('indirect_deps', type: 'feature', value: 'disabled',
++  description: 'Whether to list both direct and indirect dependencies '
++             + 'or only direct dependencies')
++
++option('internal_glib', type: 'feature', value: 'auto',
++  description: 'Whether to use an external installed glib or build an internal static glib as a Meson subproject')
+diff --git a/subprojects/glib.wrap b/subprojects/glib.wrap
+new file mode 100644
+index 0000000..5da3786
+--- /dev/null
++++ b/subprojects/glib.wrap
+@@ -0,0 +1,15 @@
++[wrap-file]
++directory = glib-2.74.4
++source_url = https://download.gnome.org/sources/glib/2.74/glib-2.74.4.tar.xz
++source_fallback_url = https://ftp.acc.umu.se/pub/gnome/sources/glib/2.74/glib-2.74.4.tar.xz
++source_filename = glib-2.74.4.tar.xz
++source_hash = 0e82da5ea129b4444227c7e4a9e598f7288d1994bf63f129c44b90cfd2432172
++wrapdb_version = 2.74.4-1
++
++# Customise glib for static linking into pkg-config: no gobject, gio, gmodule, gthread, no GRegexp or external deps
++diff_files = glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch, glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch
++
++[provide]
++dependency_names = glib-2.0
++#dependency_names = gthread-2.0, gobject-2.0, gmodule-no-export-2.0, gmodule-export-2.0, gmodule-2.0, glib-2.0, gio-2.0, gio-windows-2.0, gio-unix-2.0
++#program_names = glib-genmarshal, glib-mkenums, glib-compile-schemas, glib-compile-resources, gio-querymodules, gdbus-codegen
+diff --git a/subprojects/packagefiles/glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch b/subprojects/packagefiles/glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch
+new file mode 100644
+index 0000000..fb55984
+--- /dev/null
++++ b/subprojects/packagefiles/glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch
+@@ -0,0 +1,251 @@
++From 54f4332b3aeab6bc7b81c37ce5c7ef43537323c6 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
++Date: Sat, 25 Mar 2023 15:18:28 +0000
++Subject: [PATCH] glib: Disable gobject, gio, gthread, gmodule and GRegex API
++
++We only need a minimal GLib for pkg-config.
++---
++ .../glib/glib-autocleanups.h      |  4 +-
++ glib/gregex.c         |  2 +
++ glib/gregex.h         |  3 +-
++ glib/meson.build      | 12 +++--
++ meson.build           | 52 +++++++++++--------
++ 5 files changed, 44 insertions(+), 29 deletions(-)
++
++diff --git a/glib/glib-autocleanups.h b/glib/glib-autocleanups.h
++index e2e0075..d98561e 100644
++--- a/glib/glib-autocleanups.h
+++++ b/glib/glib-autocleanups.h
++@@ -73,8 +73,8 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GPatternSpec, g_pattern_spec_free)
++ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GQueue, g_queue_free)
++ G_DEFINE_AUTO_CLEANUP_CLEAR_FUNC(GQueue, g_queue_clear)
++ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GRand, g_rand_free)
++-G_DEFINE_AUTOPTR_CLEANUP_FUNC(GRegex, g_regex_unref)
++-G_DEFINE_AUTOPTR_CLEANUP_FUNC(GMatchInfo, g_match_info_unref)
+++//G_DEFINE_AUTOPTR_CLEANUP_FUNC(GRegex, g_regex_unref)
+++//G_DEFINE_AUTOPTR_CLEANUP_FUNC(GMatchInfo, g_match_info_unref)
++ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GScanner, g_scanner_destroy)
++ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GSequence, g_sequence_free)
++ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GSList, g_slist_free)
++diff --git a/glib/gregex.c b/glib/gregex.c
++index 41ad675..3f0b704 100644
++--- a/glib/gregex.c
+++++ b/glib/gregex.c
++@@ -20,6 +20,7 @@
++  * You should have received a copy of the GNU Lesser General Public License
++  * along with this library; if not, see <http://www.gnu.org/licenses/>.
++  */
+++#if 0
++ 
++ #include "config.h"
++ 
++@@ -3655,3 +3656,4 @@ g_regex_escape_string (const gchar *string,
++ 
++   return g_string_free (escaped, FALSE);
++ }
+++#endif
++diff --git a/glib/gregex.h b/glib/gregex.h
++index 30eb387..bc4ad21 100644
++--- a/glib/gregex.h
+++++ b/glib/gregex.h
++@@ -19,7 +19,7 @@
++  * You should have received a copy of the GNU Lesser General Public License
++  * along with this library; if not, see <http://www.gnu.org/licenses/>.
++  */
++-
+++#if 0
++ #ifndef __G_REGEX_H__
++ #define __G_REGEX_H__
++ 
++@@ -618,3 +618,4 @@ gchar		**g_match_info_fetch_all	(const GMatchInfo    *match_info);
++ G_END_DECLS
++ 
++ #endif  /*  __G_REGEX_H__ */
+++#endif
++diff --git a/glib/meson.build b/glib/meson.build
++index c365901..62f5112 100644
++--- a/glib/meson.build
+++++ b/glib/meson.build
++@@ -412,30 +412,30 @@ meson.override_dependency('glib-2.0', libglib_dep)
++ if host_system == 'windows'
++   if host_machine.cpu_family() == 'x86'
++     executable('gspawn-win32-helper', 'gspawn-win32-helper.c',
++-      install : true,
+++      install : disabler(), # don't build
++       win_subsystem : 'windows',
++       include_directories : configinc,
++       dependencies : [libglib_dep])
++     executable('gspawn-win32-helper-console', 'gspawn-win32-helper.c',
++-      install : true,
+++      install : disabler(), # don't build
++       c_args : ['-DHELPER_CONSOLE'],
++       include_directories : configinc,
++       dependencies : [libglib_dep])
++   else
++     executable('gspawn-win64-helper', 'gspawn-win32-helper.c',
++-      install : true,
+++      install : disabler(), # don't build
++       win_subsystem : 'windows',
++       include_directories : configinc,
++       dependencies : [libglib_dep])
++     executable('gspawn-win64-helper-console', 'gspawn-win32-helper.c',
++-      install : true,
+++      install : disabler(),
++       c_args : ['-DHELPER_CONSOLE'],
++       include_directories : configinc,
++       dependencies : [libglib_dep])
++   endif
++ else
++   gtester = executable('gtester', 'gtester.c',
++-    install : true,
+++    install : disabler(), # don't build
++     install_tag : 'bin-devel',
++     c_args : ['-UG_DISABLE_ASSERT'],
++     include_directories : configinc,
++@@ -451,10 +451,12 @@ configure_file(
++   install_dir: get_option('bindir'),
++   install_tag : 'bin-devel',
++   configuration: report_conf,
+++  install: disabler(), # don't build
++   install_mode: 'rwxr-xr-x'
++ )
++ 
++ install_data('glib_gdb.py',
+++  disabler(), # don't install
++   install_dir : glib_pkgdatadir / 'gdb',
++   install_tag : 'devel',
++ )
++diff --git a/meson.build b/meson.build
++index be468c3..d2a4185 100644
++--- a/meson.build
+++++ b/meson.build
++@@ -73,9 +73,9 @@ darwin_versions = [current + 1, '@0@.@1@'.format(current + 1, interface_age)]
++ 
++ configinc = include_directories('.')
++ glibinc = include_directories('glib')
++-gobjectinc = include_directories('gobject')
++-gmoduleinc = include_directories('gmodule')
++-gioinc = include_directories('gio')
+++#gobjectinc = include_directories('gobject')
+++#gmoduleinc = include_directories('gmodule')
+++#gioinc = include_directories('gio')
++ 
++ glib_prefix = get_option('prefix')
++ glib_bindir = join_paths(glib_prefix, get_option('bindir'))
++@@ -123,14 +123,14 @@ endif
++ installed_tests_metadir = join_paths(glib_datadir, 'installed-tests', meson.project_name())
++ installed_tests_execdir = join_paths(glib_libexecdir, 'installed-tests', meson.project_name())
++ installed_tests_enabled = get_option('installed_tests')
++-installed_tests_template = files('tests/template.test.in')
++-installed_tests_template_tap = files('tests/template-tap.test.in')
+++#installed_tests_template = files('tests/template.test.in')
+++#installed_tests_template_tap = files('tests/template-tap.test.in')
++ 
++ # Don’t build the tests unless we can run them (either natively, in an exe wrapper, or by installing them for later use)
++ build_tests = get_option('tests') and (meson.can_run_host_binaries() or installed_tests_enabled)
++ 
++ # Allow the tests to be easily run under valgrind using --setup=valgrind
++-valgrind = find_program('valgrind', required: false)
+++valgrind = disabler() # find_program('valgrind', required: false)
++ if valgrind.found()
++   suppression_file = files('tools' / 'glib.supp')
++ 
++@@ -2060,6 +2060,10 @@ else
++   libiconv = dependency('iconv')
++ endif
++ 
+++pcre2 = []
+++
+++if false # skip pcre/regexp stuff
+++
++ pcre2 = dependency('libpcre2-8', version: '>= 10.32', required : false)
++ if not pcre2.found()
++   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
++@@ -2094,21 +2098,26 @@ else
++   use_pcre2_static_flag = false
++ endif
++ 
+++else
+++  use_pcre2_static_flag = false
+++endif # skip regexp
+++
++ # Import the gvdb sources as a subproject to avoid having the copylib in-tree
++-subproject('gvdb')
++-gvdb_dep = dependency('gvdb')
+++#subproject('gvdb')
+++#gvdb_dep = dependency('gvdb')
++ 
++ libm = cc.find_library('m', required : false)
++-libffi_dep = dependency('libffi', version : '>= 3.0.0', fallback : ['libffi', 'ffi_dep'])
+++#libffi_dep = dependency('libffi', version : '>= 3.0.0', fallback : ['libffi', 'ffi_dep'])
++ 
++-libz_dep = dependency('zlib')
+++#libz_dep = dependency('zlib')
++ 
++ # First check in libc, fallback to libintl, and as last chance build
++ # proxy-libintl subproject.
++ # FIXME: glib-gettext.m4 has much more checks to detect broken/uncompatible
++ # implementations. This could be extended if issues are found in some platforms.
++ libintl_deps = []
++-libintl = dependency('intl', required: false)
+++#libintl = dependency('intl', required: false)
+++libintl = disabler()
++ if libintl.found()
++   # libintl supports different threading APIs, which may not
++   # require additional flags, but it defaults to using pthreads if
++@@ -2134,7 +2143,7 @@ endif
++ if libintl.found()
++   have_bind_textdomain_codeset = cc.has_function('bind_textdomain_codeset', dependencies: libintl_deps)
++ else
++-  libintl = subproject('proxy-libintl').get_variable('intl_dep')
+++  libintl = subproject('proxy-libintl', default_options: ['default_library=static']).get_variable('intl_dep')
++   libintl_deps = [libintl]
++   have_bind_textdomain_codeset = true  # proxy-libintl supports it
++ endif
++@@ -2300,7 +2309,7 @@ endif
++ 
++ # Determine which user environment-dependent files that we want to install
++ have_bash = find_program('bash', required : false).found() # For completion scripts
++-bash_comp_dep = dependency('bash-completion', version: '>=2.0', required: false)
+++#bash_comp_dep = dependency('bash-completion', version: '>=2.0', required: false)
++ have_sh = find_program('sh', required : false).found() # For glib-gettextize
++ 
++ # Some installed tests require a custom environment
++@@ -2394,20 +2403,21 @@ test_timeout_slow = 180
++ pkg = import('pkgconfig')
++ windows = import('windows')
++ subdir('glib')
++-subdir('gobject')
++-subdir('gthread')
++-subdir('gmodule')
++-subdir('gio')
++-subdir('fuzzing')
++-subdir('tools')
+++# subdir('gobject')
+++# subdir('gthread')
+++# subdir('gmodule')
+++# subdir('gio')
+++# subdir('fuzzing')
+++# subdir('tools')
++ 
++ # xgettext is optional (on Windows for instance)
++ if find_program('xgettext', required : get_option('nls')).found()
++-  subdir('po')
+++  #subdir('po')
++ endif
++ 
++ # Install m4 macros that other projects use
++ install_data('m4macros/glib-2.0.m4', 'm4macros/glib-gettext.m4', 'm4macros/gsettings.m4',
+++  disabler(), # don't install
++   install_dir : get_option('datadir') / 'aclocal',
++   install_tag : 'devel',
++ )
++@@ -2436,4 +2446,4 @@ if get_option('man')
++ endif
++ 
++ gnome = import('gnome')
++-subdir('docs/reference')
+++#subdir('docs/reference')
++-- 
++2.40.0
++
+diff --git a/subprojects/packagefiles/glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch b/subprojects/packagefiles/glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch
+new file mode 100644
+index 0000000..9309456
+--- /dev/null
++++ b/subprojects/packagefiles/glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch
+@@ -0,0 +1,34 @@
++From 2fc8c978c8c6d40679170d59804f3cec955da0c3 Mon Sep 17 00:00:00 2001
++From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
++Date: Sat, 25 Mar 2023 15:36:06 +0000
++Subject: [PATCH] glib: gthreadprivate.h: include errno.h
++
++In file included from ../glib/gbitlock.c:34:
++../glib/gbitlock.c: In function 'g_futex_wait':
++../glib/gthreadprivate.h:68:20: error: 'errno' undeclared (first use in this function)
++   68 |     if (res < 0 && errno == ENOSYS)                                              \
++      |                    ^~~~~
++
++Fixed in newer GLib versions, but there are still some problems
++to iron out on some systems with that, so use older one for now
++and patch it until we can upgrade.
++---
++ glib/gthreadprivate.h | 2 ++
++ 1 file changed, 2 insertions(+)
++
++diff --git a/glib/gthreadprivate.h b/glib/gthreadprivate.h
++index 6eaf422..d436c5b 100644
++--- a/glib/gthreadprivate.h
+++++ b/glib/gthreadprivate.h
++@@ -27,6 +27,8 @@
++ 
++ #include "deprecated/gthread.h"
++ 
+++#include <errno.h>
+++
++ typedef struct _GRealThread GRealThread;
++ struct  _GRealThread
++ {
++-- 
++2.40.0
++
+diff --git a/subprojects/proxy-libintl.wrap b/subprojects/proxy-libintl.wrap
+new file mode 100644
+index 0000000..2cee36e
+--- /dev/null
++++ b/subprojects/proxy-libintl.wrap
+@@ -0,0 +1,5 @@
++[wrap-git]
++directory=proxy-libintl
++url=https://github.com/frida/proxy-libintl.git
++push-url=git@github.com:frida/proxy-libintl.git
++revision=0.4
+-- 
+2.40.0
+
