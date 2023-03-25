@@ -763,7 +763,7 @@ class Meson (Build, ModifyEnvBase) :
         if not self.make:
             self.make = ['ninja', '-v', '-d', 'keeprsp']
         if not self.make_install:
-            self.make_install = self.make + ['install']
+            self.make_install = [self.meson_sh, 'install', '--skip-subprojects']
         if not self.make_check:
             self.make_check = self.make + ['test']
         if not self.make_clean:
