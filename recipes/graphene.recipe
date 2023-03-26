@@ -24,15 +24,16 @@ class Recipe(recipe.Recipe):
     name = 'graphene'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    version = '1.10.2'
+    version = '1.10.8'
     url = 'https://github.com/ebassi/graphene/archive/{0}.tar.gz'.format(version)
-    tarball_checksum = '87c682291fa38a131aaf9aaee17d053d7bd4ea5309d305a356619c95784b9b4d'
+    tarball_checksum = '922dc109d2dc5dc56617a29bd716c79dd84db31721a8493a13a5f79109a4a4ed'
     licenses = [{License.MIT: ['LICENSE.txt']}]
     meson_options = {
         # XXX: check whether neon support works better
         'arm_neon' : 'false',
-        'introspection' : 'false',
+        'introspection' : 'disabled',
         'installed_tests': 'false',
+        'tests': 'false',
     }
 
     deps = ['glib']
@@ -50,7 +51,7 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         if self.config.variants.gi:
             self.deps.append("gobject-introspection")
-            self.meson_options['introspection'] = 'true'
+            self.meson_options['introspection'] = 'enabled'
 
         # Graphene don't support SSE2 dynamically, disable for now
         if self.config.target_arch == Architecture.X86:
