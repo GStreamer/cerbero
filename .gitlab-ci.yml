@@ -154,8 +154,8 @@ android fedora image:
     expire_in: '5 days'
     when: 'always'
     paths:
-      - "${CERBERO_HOME}/logs"
-      - "${CERBERO_HOME}/sources/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/logs"
+      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
       - "*.tar.*"
 
 # Template for Cerbero GStreamer Deps
@@ -218,8 +218,8 @@ build cerbero fedora x86_64:
     expire_in: '5 days'
     when: 'always'
     paths:
-      - "${CERBERO_HOME}/logs"
-      - "${CERBERO_HOME}/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/logs"
+      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
       - "*[0-9].tar.*"
 
 cerbero deps cross-android universal:
@@ -341,8 +341,8 @@ cerbero cross-android universal examples:
     expire_in: '5 days'
     when: 'always'
     paths:
-      - "${CERBERO_HOME}/logs"
-      - "${CERBERO_HOME}/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/logs"
+      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
 
@@ -374,8 +374,8 @@ build cerbero cross-macos universal:
     expire_in: '5 days'
     when: 'always'
     paths:
-      - "${CERBERO_HOME}/logs"
-      - "${CERBERO_HOME}/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/logs"
+      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
       - "gstreamer-1.0-*-ios-universal.pkg"
 
 cerbero deps cross-ios universal:
