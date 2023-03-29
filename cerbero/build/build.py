@@ -923,6 +923,12 @@ class Meson (Build, ModifyEnvBase) :
             binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
         if self.config.qt6_qmake_path:
             binaries['qmake'] = [self.config.qt6_qmake_path]
+        
+        # Point meson to rustc with correct arguments to ensure it's detected when cross-compiling
+        if self.config.cargo_home:
+            target_triple = self.config.rust_triple(self.config.target_arch,
+                self.config.target_platform, self.using_msvc())
+            binaries['rust'] = [self.config.cargo_home + '/bin/rustc', '--target', target_triple]
 
         # Try to detect build tools in the remaining env vars
         build_tool_paths = build_env['PATH'].get()
