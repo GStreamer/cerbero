@@ -339,7 +339,7 @@ Terminating.''', file=sys.stderr)
         elif d[0].strip() in ['arch', 'Arch Linux']:
             distro = Distro.ARCH
             distro_version = DistroVersion.ARCH_ROLLING
-        elif d[0].strip() in ['Gentoo Base System']:
+        elif d[0].strip() in ['Gentoo Base System', 'Gentoo']:
             distro = Distro.GENTOO
             distro_version = DistroVersion.GENTOO_VERSION
         else:
