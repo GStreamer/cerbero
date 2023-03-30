@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 import shutil
+import os
 from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
@@ -8,9 +9,16 @@ class Recipe(recipe.Recipe):
     version = '1.0.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
-    stype = SourceType.TARBALL
-    url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = 'd926b730de6f518728cc7c57bc5e701667bae0c3522f9e369427b2cc7839d3c1'
+
+    meson_commit = os.environ.get('MESON_COMMIT')
+    if meson_commit:
+        stype = SourceType.GIT
+        remotes = {'origin': 'https://github.com/mesonbuild/meson.git'}
+        commit = meson_commit
+    else:
+        stype = SourceType.TARBALL
+        url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
+        tarball_checksum = 'd926b730de6f518728cc7c57bc5e701667bae0c3522f9e369427b2cc7839d3c1'
 
     deps = ['ninja']
 

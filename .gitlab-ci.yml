@@ -19,6 +19,9 @@ variables:
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --timestamps
+  MESON_COMMIT:
+    description: "Overwrite the meson version installed on the CI images with the specified meson commit"
+    value: ""
 
 workflow:
   rules:
