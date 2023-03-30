@@ -255,6 +255,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
     SPURIOUS_RETRIES = 3
     SPURIOUS_ERRORS = {
         Platform.DARWIN: (
+            '(signal: 10, SIGBUS: access to undefined memory)',
             '(signal: 11, SIGSEGV: invalid memory reference)',
             '(signal: 6, SIGABRT: process abort signal)',
             'LLVM ERROR:',
