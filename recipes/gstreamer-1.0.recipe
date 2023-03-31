@@ -26,11 +26,6 @@ class Recipe(custom.GStreamer):
 
     files_misc = ['libexec/gstreamer-1.0/gst-plugin-scanner%(bext)s']
 
-    platform_files_misc = {
-        Platform.LINUX: ['libexec/gstreamer-1.0/gst-ptp-helper%(bext)s'],
-        Platform.DARWIN: ['libexec/gstreamer-1.0/gst-ptp-helper%(bext)s'],
-    }
-
     files_devel = [
             'include/gstreamer-1.0/gst/*.h',
             'include/gstreamer-1.0/gst/base',
@@ -80,3 +75,9 @@ class Recipe(custom.GStreamer):
                 self.meson_options['dbghelp'] = 'disabled'
             else:
                 self.meson_options['dbghelp'] = 'enabled'
+
+        # Ship the PTP helper process if the rust variant is enabled and this
+        # is not a mobile platform.
+        if self.config.variants.rust and \
+           self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
+            self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
