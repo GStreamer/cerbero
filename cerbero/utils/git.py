@@ -30,16 +30,17 @@ GIT = 'git'
 
 
 def ensure_user_is_set(git_dir, logfile=None):
-    # Set the user configuration for this repository so that Cerbero never warns
-    # about it or errors out (it errors out with git-for-windows)
+    # Set the user configuration for this repository
+    # so that commands that need the account's default identity
+    # (e.g., git commit), will not fail.
     try:
-        shell.new_call([GIT, 'config', 'user.email'], logfile=logfile)
+        shell.new_call([GIT, 'config', 'user.email'], git_dir, logfile=logfile)
     except FatalError:
         shell.new_call([GIT, 'config', 'user.email', 'cerbero@gstreamer.freedesktop.org'],
                    git_dir, logfile=logfile)
 
     try:
-        shell.new_call([GIT, 'config', 'user.name'], logfile=logfile)
+        shell.new_call([GIT, 'config', 'user.name'], git_dir, logfile=logfile)
     except FatalError:
         shell.new_call([GIT, 'config', 'user.name', 'Cerbero Build System'],
                    git_dir, logfile=logfile)
