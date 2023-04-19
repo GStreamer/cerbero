@@ -23,6 +23,7 @@ class Recipe(custom.GStreamer):
                      'aalib': 'disabled',
                      'dv1394': 'disabled',
                      'gtk3': 'disabled',
+                     'jack': 'disabled', # Enabled in prepare()
                      'libcaca': 'disabled',
                      'oss': 'disabled',
                      'oss4': 'disabled',
@@ -231,16 +232,19 @@ class Recipe(custom.GStreamer):
 
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['directsound'] = 'enabled'
+            self.enable_plugin('jack', 'sys')
         elif self.config.target_platform == Platform.DARWIN:
             self.meson_options['osxaudio'] = 'enabled'
             self.meson_options['osxvideo'] = 'enabled'
+            self.enable_plugin('jack', 'sys')
         elif self.config.target_platform == Platform.IOS:
             self.meson_options['osxaudio'] = 'enabled'
+        elif self.config.target_platform == Platform.LINUX:
+            self.enable_plugin('jack', 'sys')
 
         self.enable_plugin('video4linux2', 'capture', variant='v4l2', option='v4l2')
         self.enable_plugin('ximagesrc', 'capture', variant='x11')
         self.enable_plugin('pulseaudio', 'sys', variant='pulse', option='pulse')
-        self.enable_plugin('jack', 'sys', variant='jack')
 
         # Enable qt5 plugin if possible and selected
         can_enable_qt5 = True

@@ -83,7 +83,7 @@ def set_nofile_ulimit():
 
 class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
-    __disabled_variants = ['x11', 'alsa', 'pulse', 'jack', 'cdparanoia', 'v4l2',
+    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
                            'gi', 'unwind', 'rpi', 'visualstudio', 'mingw', 'uwp', 'qt5',
                            'intelmsdk', 'python', 'werror', 'vaapi', 'rust', 'qt6']
     __enabled_variants = ['debug', 'optimization', 'testspackage']
