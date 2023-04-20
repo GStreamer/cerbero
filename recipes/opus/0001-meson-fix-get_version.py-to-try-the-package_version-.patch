@@ -1,0 +1,73 @@
+From 5d1e9e2a728a290c8c66872875a36bad256bcfa5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Thu, 20 Apr 2023 17:27:24 +0100
+Subject: [PATCH] meson: fix get_version.py to try the package_version file
+ first
+
+We might have a local git repo that was created from the tarball
+release, in which case there is a package_version file but no
+tag from which to extract the version via git describe.
+
+Since the package_version file exists only in tarball releases
+we should always use that even if we're working in a git repo.
+---
+ meson/get-version.py | 36 +++++++++++++++++++++---------------
+ 1 file changed, 21 insertions(+), 15 deletions(-)
+
+diff --git a/meson/get-version.py b/meson/get-version.py
+index d3835f1..c1aa39f 100755
+--- a/meson/get-version.py
++++ b/meson/get-version.py
+@@ -29,28 +29,34 @@ if __name__ == '__main__':
+     if args.package_version:
+         package_version = None
+ 
+-        # check if git checkout
+-        git_dir = os.path.join(srcroot, '.git')
+-        is_git = os.path.isdir(git_dir) or os.path.isfile(git_dir)
+-        have_git = shutil.which('git') is not None
+-
+-        if is_git and have_git:
+-            git_cmd = subprocess.run(['git', '--git-dir=' + git_dir, 'describe', 'HEAD'], stdout=subprocess.PIPE)
+-            if git_cmd.returncode:
+-                print('ERROR: Could not extract package version via `git describe` in', srcroot, file=sys.stderr)
+-                sys.exit(-1)
+-            package_version = git_cmd.stdout.decode('ascii').strip().lstrip('v')
+-        else:
++        # Package_version file only exists in release tarballs, so try that
++        # first (we might have a git repository created from the tarball)
++        try:
+             with open(os.path.join(srcroot, 'package_version'), 'r') as f:
+                 for line in f:
+                     if line.startswith('PACKAGE_VERSION="'):
+                         package_version = line[17:].strip().lstrip('v').rstrip('"')
+                     if package_version:
+                         break
++        except:
++            # check if git checkout
++            git_dir = os.path.join(srcroot, '.git')
++            is_git = os.path.isdir(git_dir) or os.path.isfile(git_dir)
++            have_git = shutil.which('git') is not None
+ 
+-        if not package_version:
+-            print('ERROR: Could not extract package version from package_version file in', srcroot, file=sys.stderr)
+-            sys.exit(-1)
++            if is_git:
++                if have_git:
++                    git_cmd = subprocess.run(['git', '--git-dir=' + git_dir, 'describe', 'HEAD'], stdout=subprocess.PIPE)
++                    if git_cmd.returncode:
++                        print('ERROR: Could not extract package version via `git describe` in', srcroot, file=sys.stderr)
++                        sys.exit(-1)
++                    package_version = git_cmd.stdout.decode('ascii').strip().lstrip('v')
++                else:
++                    print('ERROR: Could not extract package version via "git describe" as the git tool is not available.', file=sys.stderr)
++                    sys.exit(-1)
++            else:
++                print('ERROR: Could not extract package version! There is no package_version file nor do we have a git repository', file=sys.stderr)
++                sys.exit(-1)
+ 
+         print(package_version)
+         sys.exit(0)
+-- 
+2.40.0
+
