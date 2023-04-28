@@ -316,6 +316,8 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.REDHAT_7
             elif d[1] == '8' or d[1].startswith('8.'):
                 distro_version = DistroVersion.REDHAT_8
+            elif d[1] == '9' or d[1].startswith('9.'):
+                distro_version = DistroVersion.REDHAT_9
             elif d[0] == 'Amazon Linux' and d[1].startswith('2'):
                 distro_version = DistroVersion.AMAZON_LINUX_2
             elif d[1] == 'amazon':
