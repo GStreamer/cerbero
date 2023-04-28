@@ -8,17 +8,13 @@ class Recipe(custom.GStreamer):
     meson_options = {'gpl': 'enabled',
                      # enabled plugins
                      'a52dec': 'enabled',
-                     'amrnb': 'enabled',
-                     'amrwbdec': 'enabled',
                      'dvdread': 'enabled',
                      'x264': 'enabled'}
-    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec', 'opencore-amr',
+    deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'a52dec',
             'libdvdread', 'x264']
 
     files_plugins_codecs_restricted = [
              '%(libdir)s/gstreamer-1.0/libgsta52dec%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstamrnb%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstamrwbdec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstasf%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstdvdsub%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec%(mext)s',
@@ -28,8 +24,6 @@ class Recipe(custom.GStreamer):
 
     files_plugins_codecs_restricted_devel = [
              '%(libdir)s/gstreamer-1.0/libgsta52dec.a', '%(libdir)s/gstreamer-1.0/libgsta52dec.la',
-             '%(libdir)s/gstreamer-1.0/libgstamrnb.a', '%(libdir)s/gstreamer-1.0/libgstamrnb.la',
-             '%(libdir)s/gstreamer-1.0/libgstamrwbdec.a', '%(libdir)s/gstreamer-1.0/libgstamrwbdec.la',
              '%(libdir)s/gstreamer-1.0/libgstasf.a', '%(libdir)s/gstreamer-1.0/libgstasf.la',
              '%(libdir)s/gstreamer-1.0/libgstdvdsub.a', '%(libdir)s/gstreamer-1.0/libgstdvdsub.la',
              '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.a', '%(libdir)s/gstreamer-1.0/libgstdvdlpcmdec.la',
@@ -57,8 +51,6 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('a52dec', 'codecs_restricted', dep='a52dec')
 
         if self.using_uwp():
-            self.disable_plugin('amrnb', 'codecs_restricted', dep='opencore-amr')
-            self.disable_plugin('amrwbdec', 'codecs_restricted', dep='opencore-amr')
             self.disable_plugin('x264', 'codecs_restricted', dep='x264')
 
         if self.config.variants.nodebug:

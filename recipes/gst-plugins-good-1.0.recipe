@@ -5,6 +5,8 @@ class Recipe(custom.GStreamer):
     btype = BuildType.MESON
     tarball_checksum = '582e617271e7f314d1a2211e3e3856ae2e4303c8c0d6114e9c4a5ea5719294b0'
     meson_options = {# enabled plugins
+                     'amrnb': 'enabled',
+                     'amrwbdec': 'enabled',
                      'adaptivedemux2': 'enabled',
                      'cairo': 'enabled',
                      'dv': 'enabled',
@@ -35,7 +37,7 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'libjpeg-turbo', 'libpng',
             'speex', 'gdk-pixbuf', 'libsoup', 'mpg123', 'lame',
             'orc', 'wavpack', 'flac', 'taglib', 'bzip2', 'zlib',
-            'libvpx', 'libdv', 'cairo']
+            'libvpx', 'libdv', 'cairo', 'opencore-amr']
     use_system_libs = True
 
 
@@ -104,6 +106,8 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs = [
              '%(libdir)s/gstreamer-1.0/libgstadaptivedemux2%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstalaw%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstamrnb%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstamrwbdec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstapetag%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstaudioparsers%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstauparse%(mext)s',
@@ -135,6 +139,8 @@ class Recipe(custom.GStreamer):
     files_plugins_codecs_devel = [
              '%(libdir)s/gstreamer-1.0/libgstadaptivedemux2.a', '%(libdir)s/gstreamer-1.0/libgstadaptivedemux2.la',
              '%(libdir)s/gstreamer-1.0/libgstalaw.a', '%(libdir)s/gstreamer-1.0/libgstalaw.la',
+             '%(libdir)s/gstreamer-1.0/libgstamrnb.a', '%(libdir)s/gstreamer-1.0/libgstamrnb.la',
+             '%(libdir)s/gstreamer-1.0/libgstamrwbdec.a', '%(libdir)s/gstreamer-1.0/libgstamrwbdec.la',
              '%(libdir)s/gstreamer-1.0/libgstapetag.a', '%(libdir)s/gstreamer-1.0/libgstapetag.la',
              '%(libdir)s/gstreamer-1.0/libgstaudioparsers.a', '%(libdir)s/gstreamer-1.0/libgstaudioparsers.la',
              '%(libdir)s/gstreamer-1.0/libgstauparse.a', '%(libdir)s/gstreamer-1.0/libgstauparse.la',
@@ -286,6 +292,8 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('directsound', 'sys')
             # External deps that haven't been ported to UWP
             self.disable_plugin('adaptivedemux2', 'codecs')
+            self.disable_plugin('amrnb', 'codecs', dep='opencore-amr')
+            self.disable_plugin('amrwbdec', 'codecs', dep='opencore-amr')
             self.disable_plugin('cairo', 'effects', dep='cairo')
             self.disable_plugin('flac', 'codecs', dep='flac')
             self.disable_plugin('gdkpixbuf', 'effects', option='gdk-pixbuf', dep='gdk-pixbuf')
