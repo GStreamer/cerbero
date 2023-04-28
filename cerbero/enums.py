@@ -121,6 +121,7 @@ class DistroVersion:
     REDHAT_6 = 'redhat_6'
     REDHAT_7 = 'redhat_7'
     REDHAT_8 = 'redhat_8'
+    REDHAT_9 = 'redhat_9'
     # Amazon Linux seems to be RedHat/CentOS-based
     AMAZON_LINUX = 'amazon_linux'
     AMAZON_LINUX_2 = 'amazon_linux_2'
