@@ -71,12 +71,25 @@ fix_build_tools() {
 
 # Produces runtime and devel tarball packages for linux/android or .pkg for macos
 cerbero_package_and_check() {
+    # Plugins that dlopen libs and will have 0 features on the CI, and hence
+    # won't be listed in `gst-inspect-1.0` output, and have to be inspected
+    # explicitly
+    local dlopen_plugins=(jack soup)
+    if [[ $CONFIG = win* ]]; then
+        dlopen_plugins+=(amfcodec mediafoundation msdk nvcodec qsv)
+    elif [[ $CONFIG = linux* ]]; then
+        dlopen_plugins+=(msdk nvcodec qsv va vaapi)
+    fi
+
     $CERBERO $CERBERO_ARGS package --offline ${CERBERO_PACKAGE_ARGS} -o "$(pwd_native)" gstreamer-1.0
 
     # Run gst-inspect-1.0 for some basic checks. Can't do this for cross-(android|ios)-universal, of course.
     if [[ $CONFIG != *universal* ]] && [[ $CONFIG != *cross-win* ]]; then
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX --version
         $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX
+        for plugin in $dlopen_plugins; do
+            $CERBERO $CERBERO_ARGS run gst-inspect-1.0$CERBERO_RUN_SUFFIX $plugin
+        done
     fi
 
     show_ccache_sum
