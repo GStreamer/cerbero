@@ -70,8 +70,21 @@ class Source (object):
                 self, _("'version' attribute is missing in the recipe"))
 
     @property
+    def check_cert(self):
+        if self.config.distro == Distro.REDHAT and self.config.distro_version <= DistroVersion.REDHAT_7:
+            return False
+        return True
+
+    @property
     def cargo_vendor_cache_dir(self):
         return f'{self.repo_dir}/cargo-vendor'
+
+    def _get_download_path(self, fname):
+        '''
+        Fetch download path dynamically because self.tarball_name may be
+        reset in prepare()
+        '''
+        return os.path.join(self.download_dir, fname)
 
     def have_cargo_lock_file(self):
         return os.path.exists(os.path.join(self.config_src_dir, 'Cargo.lock'))
@@ -100,6 +113,71 @@ class Source (object):
         with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
             f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
+
+    def parse_wrap(self, wrap_file):
+        # TODO: Switch this to the tomllib module when we require Python 3.11
+        items = {}
+        with open(wrap_file, 'r') as f:
+            line = f.readline()
+            if not line.startswith('[wrap-file]'):
+                raise FatalError('Only wrap-file meson wraps are supported at present')
+            line = f.readline().rstrip()
+            while line:
+                # Just enforce a whitespace style for wraps for now
+                key, value = line.split(' = ', maxsplit=1)
+                items[key] = value
+                line = f.readline().rstrip()
+        assert items['directory']
+        assert items['source_url']
+        assert items['source_filename']
+        assert items['source_hash']
+        return items
+
+    async def meson_subprojects_download(self, downloads, logfile):
+        m.log(f'Downloading meson subprojects: {", ".join(downloads.keys())}', logfile=logfile)
+        for (subproj_name, ((url, fallback_url), fpath, dname, fhash)) in downloads.items():
+            mirrors = self.config.extra_mirrors + DEFAULT_MIRRORS
+            if fallback_url:
+                # Our mirror implementation assumes that the basename is the same
+                mirrors.insert(0, os.path.dirname(fallback_url))
+            await shell.download(url, fpath, check_cert=self.check_cert,
+                overwrite=False, logfile=logfile, mirrors=mirrors)
+            self.verify(fpath, fhash)
+
+    async def meson_subprojects_extract(self, offline):
+        logfile = get_logfile(self)
+        subproj_dir = os.path.join(self.config_src_dir, 'subprojects')
+        # subproj_name: (url, filepath, directory, filehash)
+        downloads = {}
+        for subproj_name in self.meson_subprojects:
+            wrap_file = os.path.join(subproj_dir, f'{subproj_name}.wrap')
+            m.log(f'Parsing wrap file {wrap_file}', logfile=logfile)
+            items = self.parse_wrap(wrap_file)
+            fpath = self._get_download_path(items['source_filename'])
+            downloads[subproj_name] = (
+                (items['source_url'], items.get('source_fallback_url', None)),
+                fpath,
+                items['directory'],
+                items['source_hash'],
+            )
+
+        # Download, if not running in offline mode (or if we're fetching)
+        if not offline:
+            await self.meson_subprojects_download(downloads, logfile)
+
+        # Provide the subproject downloads, via symlink or a file copy
+        m.log(f'Providing meson subprojects: {", ".join(downloads.keys())}', logfile=logfile)
+        subproj_pkg_cache = os.path.join(subproj_dir, 'packagecache')
+        os.makedirs(subproj_pkg_cache, exist_ok=True)
+        for (_, ((url, _), fpath, _, _)) in downloads.items():
+            if not os.path.isfile(fpath):
+                raise FatalError(f'{url} is required and hasn\'t been downloaded yet')
+            fname = os.path.basename(fpath)
+            dst = os.path.join(subproj_pkg_cache, fname)
+            if self.config.platform != Platform.WINDOWS:
+                os.symlink(fpath, dst)
+            else:
+                shutil.copy(fpath, dst)
 
     async def fetch(self, **kwargs):
         self.fetch_impl(**kwargs)
@@ -208,31 +286,21 @@ class BaseTarball(object):
         if o.scheme in ('http', 'ftp'):
             raise FatalError('Download URL {!r} must use HTTPS'.format(self.url))
 
-    def _get_download_path(self):
-        '''
-        Fetch download path dynamically because self.tarball_name may be
-        reset in prepare()
-        '''
-        return os.path.join(self.download_dir, self.tarball_name)
-
     async def fetch(self, redownload=False):
-        fname = self._get_download_path()
+        fname = self._get_download_path(self.tarball_name)
         if self.offline:
             if not os.path.isfile(fname):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.download_dir))
-            self.verify(fname)
+            self.verify(fname, self.tarball_checksum)
             m.action(_('Found %s at %s') % (self.url, fname), logfile=get_logfile(self))
             return
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
-        cc = True
-        if self.config.distro == Distro.REDHAT and self.config.distro_version <= DistroVersion.REDHAT_7:
-            cc = False
-        await shell.download(self.url, fname, check_cert=cc,
+        await shell.download(self.url, fname, check_cert=self.check_cert,
             overwrite=redownload, logfile=get_logfile(self),
             mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS))
-        self.verify(fname)
+        self.verify(fname, self.tarball_checksum)
 
     @staticmethod
     def _checksum(fname):
@@ -244,13 +312,13 @@ class BaseTarball(object):
                 h.update(block)
         return h.hexdigest()
 
-    def verify(self, fname, fatal=True):
-        checksum = self._checksum(fname)
-        if self.tarball_checksum is None:
+    def verify(self, fname, checksum, fatal=True):
+        found_checksum = self._checksum(fname)
+        if checksum is None:
             raise FatalError('tarball_checksum is missing in {}.recipe for tarball {}\n'
                              'The SHA256 of the current file is {}\nPlease verify and '
-                             'add it to the recipe'.format(self.name, self.url, checksum))
-        if checksum != self.tarball_checksum:
+                             'add it to the recipe'.format(self.name, self.url, found_checksum))
+        if found_checksum != checksum:
             movedto = fname + '.failed-checksum'
             os.replace(fname, movedto)
             m.action(_('Checksum failed, tarball %s moved to %s') % (fname, movedto), logfile=get_logfile(self))
@@ -261,7 +329,7 @@ class BaseTarball(object):
         return True
 
     async def extract_tarball(self, unpack_dir):
-        fname = self._get_download_path()
+        fname = self._get_download_path(self.tarball_name)
         logfile = get_logfile(self)
         try:
             await shell.unpack(fname, unpack_dir, logfile=logfile, force_tarfile=self.force_tarfile)
@@ -296,13 +364,14 @@ class Tarball(BaseTarball, Source):
         BaseTarball.__init__(self)
 
     async def fetch(self, redownload=False):
-        fname = self._get_download_path()
+        fname = self._get_download_path(self.tarball_name)
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
 
         cached_file = os.path.join(self.config.cached_sources,
                                    self.package_name, self.tarball_name)
-        if not redownload and os.path.isfile(cached_file) and self.verify(cached_file, fatal=False):
+        if not redownload and os.path.isfile(cached_file) and \
+           self.verify(cached_file, self.tarball_checksum, fatal=False):
             m.action(_('Copying cached tarball from %s to %s instead of %s') %
                      (cached_file, fname, self.url), logfile=get_logfile(self))
             shutil.copy(cached_file, fname)
@@ -310,6 +379,9 @@ class Tarball(BaseTarball, Source):
             await super().fetch(redownload=redownload)
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project {self.name} to run cargo vendor', logfile=get_logfile(self))
+            await self.extract_impl(fetching=True)
+        elif self.btype == BuildType.MESON and self.meson_subprojects:
+            m.log(f'Extracting project {self.name} to fetch subprojects', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
 
     async def extract_impl(self, fetching=False):
@@ -337,6 +409,8 @@ class Tarball(BaseTarball, Source):
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
             await self.cargo_vendor(not fetching or self.offline)
+        elif self.btype == BuildType.MESON and self.meson_subprojects:
+            await self.meson_subprojects_extract(not fetching or self.offline)
 
     async def extract(self):
         await self.extract_impl()
@@ -415,6 +489,9 @@ class GitCache (Source):
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
+        elif self.btype == BuildType.MESON and self.meson_subprojects:
+            m.log(f'Extracting project {self.name} to download subprojects', logfile=get_logfile(self))
+            await self.extract_impl(fetching=True)
 
 
     def built_version(self):
@@ -471,6 +548,8 @@ class Git (GitCache):
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
             await self.cargo_vendor(not fetching or self.offline)
+        elif self.btype == BuildType.MESON and self.meson_subprojects:
+            await self.meson_subprojects_extract(not fetching or self.offline)
 
         return True
 

@@ -736,6 +736,7 @@ class Meson (Build, ModifyEnvBase) :
 
     meson_sh = None
     meson_options = None
+    meson_subprojects = None
     meson_backend = 'ninja'
     # All meson recipes are MSVC-compatible, except if the code itself isn't
     can_msvc = True
@@ -747,6 +748,7 @@ class Meson (Build, ModifyEnvBase) :
 
     def __init__(self):
         self.meson_options = self.meson_options or {}
+        self.meson_subprojects = self.meson_subprojects or []
 
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
