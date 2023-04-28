@@ -270,7 +270,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = "ubuntu_{number}_{name}".format(number=d[1].replace('.', '_'), name=distro_version)
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['RedHat', 'Fedora', 'Fedora Linux', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux']:
+        elif d[0] in ['RedHat', 'Fedora', 'Fedora Linux', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux', 'Rocky Linux']:
             distro = Distro.REDHAT
             if d[1] == '16':
                 distro_version = DistroVersion.FEDORA_16
