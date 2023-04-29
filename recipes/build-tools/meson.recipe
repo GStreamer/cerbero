@@ -27,7 +27,9 @@ class Recipe(recipe.Recipe):
 
     patches = [
         # https://github.com/mesonbuild/meson/pull/11101
-        'meson/0001-dependencies-qt-add-support-for-Qt-frameworks-refere.patch'
+        'meson/0001-dependencies-qt-add-support-for-Qt-frameworks-refere.patch',
+        # https://github.com/mesonbuild/meson/pull/11749
+        'meson/0001-wrap-Always-pass-posix-paths-to-patch.patch',
     ]
 
     async def install(self):
