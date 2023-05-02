@@ -254,6 +254,8 @@ class License:
             'GNU Lesser General Public License, version 2 or later')
     LGPLv2_1Plus = LicenseDescription('LGPL-2.1+',
             'GNU Lesser General Public License, version 2.1 or later')
+    LGPLv3 = LicenseDescription('LGPL-3',
+            'GNU Lesser General Public License, version 3')
     LGPLv3Plus = LicenseDescription('LGPL-3+',
             'GNU Lesser General Public License, version 3 or later')
     LibPNG = LicenseDescription('LibPNG',
