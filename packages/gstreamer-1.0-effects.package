@@ -11,6 +11,7 @@ class Package(custom.GStreamer, package.Package):
     deps = ['gstreamer-1.0-core']
 
     files = ['ladspa:libs',
+             'libltc:libs',
              'gst-plugins-base-1.0:plugins_effects',
              'gst-plugins-good-1.0:plugins_effects',
              'gst-plugins-ugly-1.0:plugins_effects',

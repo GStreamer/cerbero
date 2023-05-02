@@ -1,0 +1,261 @@
+From ec1fd5f06f21c1cf5d8946f3fe917a6052cc46cd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Tue, 2 May 2023 14:49:09 +0100
+Subject: [PATCH] Add minimal meson build system
+
+---
+ meson.build          | 38 +++++++++++++++++++++++
+ meson/get-version.py | 74 ++++++++++++++++++++++++++++++++++++++++++++
+ src/libltc.def       | 47 ++++++++++++++++++++++++++++
+ src/meson.build      | 17 ++++++++++
+ tests/meson.build    | 34 ++++++++++++++++++++
+ 5 files changed, 210 insertions(+)
+ create mode 100644 meson.build
+ create mode 100755 meson/get-version.py
+ create mode 100644 src/libltc.def
+ create mode 100644 src/meson.build
+ create mode 100644 tests/meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..8327af5
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,38 @@
++project('libltc', 'c',
++  version: run_command(find_program('meson/get-version.py'), '--package-version', check: true).stdout().strip())
++
++libversion = run_command('meson/get-version.py', '--libtool-version', check: true).stdout().strip()
++macosversion = run_command('meson/get-version.py', '--darwin-version', check: true).stdout().strip()
++
++# Not defining HAVE_CONFIG_H because we don't actually have anything to put into it
++# add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
++
++cc = meson.get_compiler('c')
++
++foreach header : ['stdio.h', 'stdlib.h', 'string.h', 'math.h', 'stdint.h', 'stddef.h']
++  if not cc.has_header(header)
++    error(f'Header <@header@> required but not found. Compiler:', cc.get_id(), cc.version())
++  endif
++endforeach
++
++if cc.get_define('__BYTE_ORDER__') == ''
++  if not cc.has_header('endian.h')
++    add_project_arguments([
++      '-D__BIG_ENDIAN__=4321',
++      '-D__LITTLE_ENDIAN__=1234',
++      '-D__BYTE_ORDER__=__@0@_ENDIAN__'.format(host_machine.endian().to_upper())
++    ], language: 'c')
++  endif
++endif
++
++libm = cc.find_library('m', required: false)
++
++subdir('src')
++subdir('tests')
++
++pkg = import('pkgconfig')
++pkg.generate(libltc,
++  filebase: 'ltc',
++  name: 'libltc',
++  description: 'linear/longitudinal timecode library',
++)
+diff --git a/meson/get-version.py b/meson/get-version.py
+new file mode 100755
+index 0000000..7e8f239
+--- /dev/null
++++ b/meson/get-version.py
+@@ -0,0 +1,74 @@
++#!/usr/bin/env python3
++#
++# libltc get-version.py
++#
++# Extracts versions for build:
++#  - libltc package version based on $srcroot/src/ltc.h
++#  - libtool version based on $srcroot/src/ltc.h
++#  - macos lib version based on $srcroot/src/ltc.h
++#
++# Usage:
++# get-version.py [--package-version | --libtool-version | --darwin-version]
++import argparse
++import subprocess
++import os
++import sys
++import shutil
++
++if __name__ == '__main__':
++    arg_parser = argparse.ArgumentParser(description='Extract libltc package version or libtool version')
++    group = arg_parser.add_mutually_exclusive_group(required=True)
++    group.add_argument('--libtool-version', action='store_true')
++    group.add_argument('--package-version', action='store_true')
++    group.add_argument('--darwin-version', action='store_true')
++    args = arg_parser.parse_args()
++
++    srcroot = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
++
++    # package version
++    if args.package_version:
++        package_version = None
++
++        with open(os.path.join(srcroot, 'src', 'ltc.h'), 'r') as f:
++            for line in f:
++                if line.startswith('#define LIBLTC_VERSION "'):
++                    package_version = line[24:].strip().rstrip('"')
++                if package_version:
++                    break
++
++        if not package_version:
++            print('ERROR: Could not extract package version from src/ltc.h file in', srcroot, file=sys.stderr)
++            sys.exit(-1)
++
++        print(package_version)
++        sys.exit(0)
++
++    # libtool version + darwin version
++    elif args.libtool_version or args.darwin_version:
++        libltc_lt_cur = None
++        libltc_lt_rev = None
++        libltc_lt_age = None
++
++        with open(os.path.join(srcroot, 'src', 'ltc.h'), 'r') as f:
++            for line in f:
++                if line.strip().startswith('#define LIBLTC_CUR '):
++                    libltc_lt_cur = line[19:].strip()
++                elif line.strip().startswith('#define LIBLTC_REV '):
++                    libltc_lt_rev = line[19:].strip()
++                elif line.strip().startswith('#define LIBLTC_AGE '):
++                    libltc_lt_age = line[19:].strip()
++
++        if libltc_lt_cur and libltc_lt_rev and libltc_lt_age:
++            libltc_lt_cur = int(libltc_lt_cur)
++            libltc_lt_rev = int(libltc_lt_rev)
++            libltc_lt_age = int(libltc_lt_age)
++            if args.libtool_version:
++              print('{}.{}.{}'.format(libltc_lt_cur - libltc_lt_age, libltc_lt_age, libltc_lt_rev))
++            elif args.darwin_version:
++              print('{}.{}.{}'.format(libltc_lt_cur + 1, 0, 0))
++            sys.exit(0)
++        else:
++            print('ERROR: Could not extract libtool version from src/ltc.h file in', srcroot, file=sys.stderr)
++            sys.exit(-1)
++    else:
++        sys.exit(-1)
+diff --git a/src/libltc.def b/src/libltc.def
+new file mode 100644
+index 0000000..50c654e
+--- /dev/null
++++ b/src/libltc.def
+@@ -0,0 +1,47 @@
++EXPORTS
++ltc_decoder_create
++ltc_decoder_free
++ltc_decoder_queue_flush
++ltc_decoder_queue_length
++ltc_decoder_read
++ltc_decoder_write
++ltc_decoder_write_double
++ltc_decoder_write_float
++ltc_decoder_write_s16
++ltc_decoder_write_u16
++ltc_encoder_buffer_flush
++ltc_encoder_copy_buffer
++ltc_encoder_create
++ltc_encoder_dec_timecode
++ltc_encoder_encode_byte
++ltc_encoder_encode_frame
++ltc_encoder_encode_reversed_frame
++ltc_encoder_end_encode
++ltc_encoder_free
++ltc_encoder_get_buffer
++ltc_encoder_get_bufferptr
++ltc_encoder_get_buffersize
++ltc_encoder_get_bufptr
++ltc_encoder_get_filter
++ltc_encoder_get_frame
++ltc_encoder_get_timecode
++ltc_encoder_get_volume
++ltc_encoder_inc_timecode
++ltc_encoder_reinit
++ltc_encoder_reset
++ltc_encoder_set_buffersize
++ltc_encoder_set_bufsize
++ltc_encoder_set_filter
++ltc_encoder_set_frame
++ltc_encoder_set_timecode
++ltc_encoder_set_user_bits
++ltc_encoder_set_volume
++ltc_frame_alignment
++ltc_frame_decrement
++ltc_frame_get_user_bits
++ltc_frame_increment
++ltc_frame_parse_bcg_flags
++ltc_frame_reset
++ltc_frame_set_parity
++ltc_frame_to_time
++ltc_time_to_frame
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..9812c9d
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,17 @@
++install_headers('ltc.h')
++
++ltc_incs = include_directories('.')
++
++libltc = library('ltc',
++  'ltc.c', 'decoder.c', 'encoder.c', 'timecode.c',
++  include_directories: [ltc_incs],
++  dependencies: [libm],
++  version: libversion,
++  darwin_versions: macosversion,
++  vs_module_defs: 'libltc.def',
++  install: true)
++
++ltc_dep = declare_dependency(
++  include_directories: [ltc_incs],
++  dependencies: libm,
++  link_with: libltc)
+diff --git a/tests/meson.build b/tests/meson.build
+new file mode 100644
+index 0000000..dc4c9d5
+--- /dev/null
++++ b/tests/meson.build
+@@ -0,0 +1,34 @@
++ltcencode = executable('ltcencode', 'ltcencode.c',
++  dependencies: ltc_dep,
++  include_directories: ltc_incs,
++  install: false)
++
++#test('ltcencode', ltcencode,
++#  args: ['encode-output.raw'])
++
++ltcdecode = executable('ltcdecode', 'ltcdecode.c',
++  dependencies: ltc_dep,
++  include_directories: ltc_incs,
++  install: false)
++
++#test('ltcdecode', ltcdecode,
++#  args: ['decode-output.raw'])
++
++fixme = '''
++	 @echo "-----------------------------------------------------------------"
++	 ./ltcencode output.raw
++	 ./ltcdecode output.raw | diff -q $(srcdir)/expect_48k_2sec.txt -
++	 @echo "-----------------------------------------------------------------"
++	 ./ltcencode output.raw 192000
++	 ./ltcdecode output.raw 7680 | diff -q $(srcdir)/expect_96k_2sec.txt -
++	 @echo "-----------------------------------------------------------------"
++	 ./ltcdecode $(srcdir)/timecode.raw 882 | diff -q $(srcdir)/timecode.txt -
++'''
++
++ltcloop = executable('ltcloop', 'ltcloop.c',
++  dependencies: ltc_dep,
++  include_directories: ltc_incs,
++  install: false)
++
++test('ltcloop', ltcloop) 
++
+-- 
+2.40.1
+

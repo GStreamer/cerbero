@@ -83,7 +83,7 @@ class Recipe(custom.GStreamer):
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
-            'srt', 'zbar']
+            'srt', 'zbar', 'libltc']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']

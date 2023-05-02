@@ -1,0 +1,24 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
+
+class Recipe(recipe.Recipe):
+    name = 'libltc'
+    version = '1.3.2'
+    stype = SourceType.TARBALL
+    url = 'https://github.com/x42/libltc/releases/download/v%(version)s/libltc-%(version)s.tar.gz'
+    tarball_checksum = '0a6d42cd6c21e925a27fa560dc45ac80057d275f23342102825909c02d3b1249'
+    licenses = [{License.LGPLv3: ['COPYING']}]
+    btype = BuildType.MESON
+    meson_options = {}
+
+    patches = ['libltc/0001-Add-minimal-meson-build-system.patch']
+
+    files_libs = ['libltc']
+    files_devel = ['include/ltc.h', '%(libdir)s/pkgconfig/ltc.pc']
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('ltc', None, None, None, self.config.libdir, self.config.target_platform)
+        libtool_la.save()
+        super().post_install()
