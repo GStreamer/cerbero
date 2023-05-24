@@ -266,6 +266,9 @@ build cerbero cross win64:
 # Build an Android App using the android binaries
 #
 .cross-android universal examples:
+  # Ensure that the runners it will be executed on
+  # will have plenty of space for the cache
+  tags: ['gstreamer']
   extends:
     - .android fedora image
     - .fdo.suffixed-image@fedora
