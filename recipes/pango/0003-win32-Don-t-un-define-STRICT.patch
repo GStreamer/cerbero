@@ -1,0 +1,38 @@
+From 030f52a9833bf4ae92ebee64d028f034ea842a75 Mon Sep 17 00:00:00 2001
+From: Benjamin Otte <otte@redhat.com>
+Date: Mon, 21 Oct 2024 06:17:30 +0200
+Subject: [PATCH 3/7] win32: Don't (un)define STRICT
+
+STRICT is meant to be defined by applications, not by public headers.
+
+This can lead to duplicate definitions and MSVC with -Werror doesn't
+like that.
+
+Neither do applications like when they #include more Windows headers
+after this header and suddenly STRICT is no longer defined.
+
+(cherry picked from commit 5d158518dbf119c33c69081f54dd5fe9f8b8710a)
+---
+ pango/pangowin32.h | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/pango/pangowin32.h b/pango/pangowin32.h
+index f17499a8..ece5e047 100644
+--- a/pango/pangowin32.h
++++ b/pango/pangowin32.h
+@@ -30,12 +30,10 @@
+ 
+ G_BEGIN_DECLS
+ 
+-#define STRICT
+ #ifndef _WIN32_WINNT
+ #define _WIN32_WINNT 0x0600	/* To get ClearType-related macros */
+ #endif
+ #include <windows.h>
+-#undef STRICT
+ 
+ /**
+  * PANGO_RENDER_TYPE_WIN32:
+-- 
+2.46.0
+

@@ -1,7 +1,7 @@
-From e87408cf591369f48cfcb283464e20f2ce225bc6 Mon Sep 17 00:00:00 2001
+From c61b5ccfd0719946f838e2c57595cf6c6d6cdb4b Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Wed, 23 Aug 2023 11:35:19 -0300
-Subject: [PATCH 4/4] utils: Check that help2man can run if found
+Subject: [PATCH 2/7] utils: Check that help2man can run if found
 
 Meson doesn't check Perl interpreters for consistency, leading to
 modules being not found only at run time.
@@ -10,7 +10,7 @@ modules being not found only at run time.
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/utils/meson.build b/utils/meson.build
-index 5072c1c..81db65e 100644
+index 5072c1cc..955d8bfc 100644
 --- a/utils/meson.build
 +++ b/utils/meson.build
 @@ -42,7 +42,8 @@ pango_view = executable('pango-view', pango_view_sources,
@@ -24,5 +24,5 @@ index 5072c1c..81db65e 100644
      '--no-info',
      '--section=1',
 -- 
-2.40.1.windows.1
+2.46.0
 

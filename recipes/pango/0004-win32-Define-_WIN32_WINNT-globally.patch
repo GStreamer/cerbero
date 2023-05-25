@@ -1,0 +1,45 @@
+From 2cc15112f92436cbd189e66342c462bb232d9258 Mon Sep 17 00:00:00 2001
+From: Matthias Clasen <mclasen@redhat.com>
+Date: Fri, 8 Nov 2024 10:33:58 -0500
+Subject: [PATCH 4/7] win32: Define _WIN32_WINNT globally
+
+Define this project-wide in meson.build.
+
+(cherry picked from commit 869ead9d01acb63be2faa4b210737d9a65ce9e60)
+---
+ meson.build        | 4 ++++
+ pango/pangowin32.h | 3 ---
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index bf78d322..cb706435 100644
+--- a/meson.build
++++ b/meson.build
+@@ -49,6 +49,10 @@ cc = meson.get_compiler('c')
+ cpp = meson.get_compiler('cpp')
+ host_system = host_machine.system()
+ 
++if host_system == 'windows'
++  add_project_arguments('-D_WIN32_WINNT=0x0600', language: 'c')
++endif
++
+ # Compiler and linker flags
+ common_cflags = []
+ common_cppflags = []
+diff --git a/pango/pangowin32.h b/pango/pangowin32.h
+index ece5e047..82aad684 100644
+--- a/pango/pangowin32.h
++++ b/pango/pangowin32.h
+@@ -30,9 +30,6 @@
+ 
+ G_BEGIN_DECLS
+ 
+-#ifndef _WIN32_WINNT
+-#define _WIN32_WINNT 0x0600	/* To get ClearType-related macros */
+-#endif
+ #include <windows.h>
+ 
+ /**
+-- 
+2.46.0
+

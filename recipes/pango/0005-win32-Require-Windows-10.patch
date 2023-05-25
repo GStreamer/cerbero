@@ -1,0 +1,29 @@
+From c2a8989cd34c622ef1a2443cbac1213fce5604ae Mon Sep 17 00:00:00 2001
+From: Matthias Clasen <mclasen@redhat.com>
+Date: Fri, 8 Nov 2024 10:36:20 -0500
+Subject: [PATCH 5/7] win32: Require Windows 10
+
+All versions older than Windows 10 are out of support and no longer
+receive updates, so we do not want to support them.
+
+(cherry picked from commit a8084420d0f03d47bbe670b3f08fd4ba7c340a4c)
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index cb706435..e474fc04 100644
+--- a/meson.build
++++ b/meson.build
+@@ -50,7 +50,7 @@ cpp = meson.get_compiler('cpp')
+ host_system = host_machine.system()
+ 
+ if host_system == 'windows'
+-  add_project_arguments('-D_WIN32_WINNT=0x0600', language: 'c')
++  add_project_arguments('-D_WIN32_WINNT=_WIN32_WINNT_WIN10', language: 'c')
+ endif
+ 
+ # Compiler and linker flags
+-- 
+2.46.0
+

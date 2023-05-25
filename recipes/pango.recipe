@@ -3,24 +3,26 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pango'
-    version = '1.50.11'
+    version = '1.54.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '8800f812d89ee61388188703203f3a7878963c22f8695aaf1fa0a1a1428d17ae'
+    tarball_checksum = '8a9eed75021ee734d7fc0fdf3a65c3bba51dfefe4ae51a9b414a60c70b2d1ed8'
     licenses = [License.LGPLv2Plus]
     deps = ['cairo', 'fontconfig', 'freetype', 'fribidi', 'harfbuzz']
     patches = [
-      # TODO: propose upstream for merging
-      'pango/0001-meson-fix-freetype-lookup-with-MSVC-using-pkg-config.patch',
-      # TODO: propose upstream for merging
+      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/673 (merged after 1.54.0)
       'pango/0001-pango-layout-fix-build-with-Android-s-bionic-libc.patch',
-      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/694
-      'pango/0001-win32-Fix-32bit-build-crash-on-DeleteDC.patch',
-      'pango/0004-utils-Check-that-help2man-can-run-if-found.patch',
-      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/740
-      'pango/0001-pangowin32-Fix-PangoCoverage-and-hb_set_t-leaks.patch',
-    ]
+      # TODO: propose upstream for merging
+      'pango/0002-utils-Check-that-help2man-can-run-if-found.patch',
+      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/749
+      'pango/0003-win32-Don-t-un-define-STRICT.patch',
+      # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/768
+      'pango/0004-win32-Define-_WIN32_WINNT-globally.patch',
+      'pango/0005-win32-Require-Windows-10.patch',
+      'pango/0006-win32-Require-dwrite_3.h.patch',
+      'pango/0007-win32-Clean-up-directwrite-code.patch',
+   ]
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']
     files_bins = ['pango-view']
@@ -39,6 +41,11 @@ class Recipe(recipe.Recipe):
         'PangoCairo-1.0',
         'PangoFT2-1.0'
     ]
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            # Allow using Win10 APIs if dwrite_3.h is found
+            self.append_env('CFLAGS', '-U_WIN32_WINNT')
 
     def post_install(self):
         LibtoolLibrary('pango-1.0', None, None, None, self.config.libdir,
