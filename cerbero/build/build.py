@@ -919,10 +919,9 @@ class Meson (Build, ModifyEnvBase) :
             binaries = {'cmake': ['false']}
         # Get qmake and moc paths
         if self.config.qt5_qmake_path:
-            binaries['qmake'] = [self.config.qt5_qmake_path]
-            binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
+            binaries['qmake5'] = [self.config.qt5_qmake_path]
         if self.config.qt6_qmake_path:
-            binaries['qmake'] = [self.config.qt6_qmake_path]
+            binaries['qmake6'] = [self.config.qt6_qmake_path]
 
         # Try to detect build tools in the remaining env vars
         build_tool_paths = build_env['PATH'].get()
