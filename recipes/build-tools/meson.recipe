@@ -6,7 +6,7 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '1.1.0'
+    version = '1.1.1'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
 
@@ -18,7 +18,7 @@ class Recipe(recipe.Recipe):
     else:
         stype = SourceType.TARBALL
         url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-        tarball_checksum = 'd9616c44cd6c53689ff8f05fc6958a693f2e17c3472a8daf83cee55dabff829f'
+        tarball_checksum = 'd04b541f97ca439fb82fab7d0d480988be4bd4e62563a5ca35fadb5400727b1c'
 
     deps = ['ninja']
 
@@ -28,8 +28,6 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://github.com/mesonbuild/meson/pull/11101
         'meson/0001-dependencies-qt-add-support-for-Qt-frameworks-refere.patch',
-        # https://github.com/mesonbuild/meson/pull/11749
-        'meson/0001-wrap-Always-pass-posix-paths-to-patch.patch',
     ]
 
     async def install(self):
