@@ -139,6 +139,14 @@ class Recipe(custom.GStreamer):
         'lib/pkgconfig/gstreamer-webrtc-nice-1.0.pc',
     ]
 
+    files_plugins_core = [
+             'lib/gstreamer-1.0/libgstswitchbin%(mext)s',
+    ]
+
+    files_plugins_core_devel = [
+             'lib/gstreamer-1.0/libgstswitchbin.a', 'lib/gstreamer-1.0/libgstswitchbin.la',
+    ]
+
     files_plugins_effects = [
              'lib/gstreamer-1.0/libgstaccurip%(mext)s',
              'lib/gstreamer-1.0/libgstaes%(mext)s',
