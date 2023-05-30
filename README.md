@@ -214,15 +214,17 @@ In the case of multiple enabling/disable of the same variant, then the last
 condition on the command line will take effect.  e.g. if novariantname is last
 then variantname is disabled.
 
-## Enabling Qt5 Support
+## Enabling Qt5 or Qt6 Support
 
-Starting with version 1.15.2, Cerbero has built-in support for building the Qt5
-QML GStreamer plugin. You can toggle that on by
-[enabling the `qt5` variant](#enabling-optional-features-with-variants).
+Cerbero has built-in support for building the Qt5 and Qt6 QML GStreamer
+plugins. You can toggle them on by [enabling the `qt5` and/or `qt6`
+variants](#enabling-optional-features-with-variants).
 
-You must also tell Cerbero where your Qt5 installation prefix is. You can do it
-by setting the `QMAKE` environment variable to point to the `qmake` that you
-want to use, f.ex. `/path/to/Qt5.12.0/5.12.0/ios/bin/qmake`
+You must also tell Cerbero where your Qt installation prefix is. You can do it
+by setting the environment variable `QMAKE` (for Qt5) or `QMAKE6` (for qt6) to
+the `qmake` that you want to use, f.ex.
+`QMAKE=/path/to/Qt5.12.0/5.12.0/ios/bin/qmake` or
+`QMAKE6=C:\Qt\6.5.0\msvc2019_64\bin\qmake6.exe`
 
 When building for Android Universal with Qt < 5.14, instead of `QMAKE`, you
 **must** set the `QT5_PREFIX` environment variable pointed to the directory
@@ -240,7 +242,10 @@ This will try to build the Qt5 QML plugin and error out if Qt5 could not be
 found or if the plugin could not be built. The plugin will be automatically
 added to the package outputted.
 
-**NOTE:** The package outputted will not contain a copy of the Qt5 libraries in
+Similarly, if you set `QMAKE6` and enable the `qt6` variant, the same will be
+done for Qt6.
+
+**NOTE:** The package outputted will not contain a copy of the Qt libraries in
 it. You must link to them while building your app yourself.
 
 ## Enabling Rust / Cargo Support

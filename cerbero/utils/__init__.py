@@ -619,7 +619,7 @@ def detect_qt6(platform, arch, is_universal):
     Returns None if qmake could not be found.
     '''
     path = None
-    qmake6_path = os.environ.get('QMAKE', None)
+    qmake6_path = os.environ.get('QMAKE6', None)
     if not qmake6_path:
         return None
     try:
