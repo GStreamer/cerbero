@@ -26,6 +26,8 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/pkgconfig/webrtc-audio-processing-1.pc',
     ]
 
+    patches = [name + '/0001-meson-Update-to-latest-wrap-install-required-absl-he.patch']
+
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
             # TODO add --enable-neon=runtime, there is a conflict with cerbero
