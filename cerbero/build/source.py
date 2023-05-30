@@ -134,8 +134,11 @@ class Source (object):
         return items
 
     async def meson_subprojects_download(self, downloads, logfile):
-        m.log(f'Downloading meson subprojects: {", ".join(downloads.keys())}', logfile=logfile)
-        for (subproj_name, ((url, fallback_url), fpath, dname, fhash)) in downloads.items():
+        subprojects = []
+        for (subproj_name, _) in downloads:
+            subprojects.append(subproj_name)
+        m.log(f'Downloading meson subprojects: {", ".join(subprojects)}', logfile=logfile)
+        for (subproj_name, ((url, fallback_url), fpath, fhash)) in downloads:
             mirrors = self.config.extra_mirrors + DEFAULT_MIRRORS
             if fallback_url:
                 # Our mirror implementation assumes that the basename is the same
@@ -148,28 +151,37 @@ class Source (object):
         logfile = get_logfile(self)
         subproj_dir = os.path.join(self.config_src_dir, 'subprojects')
         # subproj_name: (url, filepath, directory, filehash)
-        downloads = {}
+        downloads = []
         for subproj_name in self.meson_subprojects:
             wrap_file = os.path.join(subproj_dir, f'{subproj_name}.wrap')
             m.log(f'Parsing wrap file {wrap_file}', logfile=logfile)
             items = self.parse_wrap(wrap_file)
             fpath = self._get_download_path(items['source_filename'])
-            downloads[subproj_name] = (
+            downloads.append((subproj_name, (
                 (items['source_url'], items.get('source_fallback_url', None)),
                 fpath,
-                items['directory'],
                 items['source_hash'],
-            )
+            )))
+            if 'patch_url' in items:
+                fpath = self._get_download_path(items['patch_filename'])
+                downloads.append((subproj_name, (
+                    (items['patch_url'], None),
+                    fpath,
+                    items['patch_hash'],
+                )))
 
         # Download, if not running in offline mode (or if we're fetching)
         if not offline:
             await self.meson_subprojects_download(downloads, logfile)
 
         # Provide the subproject downloads, via symlink or a file copy
-        m.log(f'Providing meson subprojects: {", ".join(downloads.keys())}', logfile=logfile)
+        subprojects = []
+        for (subproj_name, _) in downloads:
+            subprojects.append(subproj_name)
+        m.log(f'Providing meson subprojects: {", ".join(subprojects)}', logfile=logfile)
         subproj_pkg_cache = os.path.join(subproj_dir, 'packagecache')
         os.makedirs(subproj_pkg_cache, exist_ok=True)
-        for (_, ((url, _), fpath, _, _)) in downloads.items():
+        for (_, ((url, _), fpath, _)) in downloads:
             if not os.path.isfile(fpath):
                 raise FatalError(f'{url} is required and hasn\'t been downloaded yet')
             fname = os.path.basename(fpath)
