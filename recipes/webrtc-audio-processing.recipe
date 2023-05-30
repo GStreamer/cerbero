@@ -4,47 +4,27 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'webrtc-audio-processing'
-    version = '0.2'
+    version = '1.1'
     licenses = [{License.BSD_like: ['COPYING']}]
     btype = BuildType.MESON
     stype = SourceType.TARBALL
-    url = 'https://freedesktop.org/software/pulseaudio/%(name)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '4b46a7f91a5d255c2451f9862c86e2a5de904902724b4bba1fd23e2854f21df5'
+    url = 'https://freedesktop.org/software/pulseaudio/%(name)s/%(name)s-%(version)s.tar.gz'
+    tarball_checksum = '59b3d47aedd32dd6fe4836478499ebb7c5bcad815f14dccddbbd70e752a99e5f'
 
     platform_deps = {Platform.ANDROID: ['gnustl']}
 
-    patches = [ 'webrtc-audio-processing/0000-Add-sal.h-as-it-s-missing-in-cerbero-mingw.patch',
-                'webrtc-audio-processing/0000-Add-fix_interlocked_exchange_pointer_win.h.patch',
-                'webrtc-audio-processing/0001-build-enforce-linking-with-no-undefined-add-explicit.patch',
-                'webrtc-audio-processing/0002-build-Make-sure-files-with-SSE2-code-are-compiled-wi.patch',
-                'webrtc-audio-processing/0003-Don-t-include-execinfo.h-for-windows.patch',
-                'webrtc-audio-processing/0004-Don-t-use-MSVC-specific-exception-handler-for-MINGW.patch',
-                'webrtc-audio-processing/0005-Add-missing-throw-in-destructor-override.patch',
-                'webrtc-audio-processing/0006-lrint-is-available-with-mingw.patch',
-                'webrtc-audio-processing/0007-Fix-case-sensitivity-issue-with-MinGW-cross-build.patch',
-                'webrtc-audio-processing/0008-Add-missing-windows-specific-headers.patch',
-                'webrtc-audio-processing/0009-Fix-build-on-win64.patch',
-                'webrtc-audio-processing/0010-Add-cerbero-gnustl-support-for-Android.patch',
-                'webrtc-audio-processing/0011-Disable-backtrace-on-android.patch',
-                'webrtc-audio-processing/0012-Don-t-blindly-link-to-pthread.patch',
-                'webrtc-audio-processing/0013-Add-required-define-for-Windows.patch',
-                'webrtc-audio-processing/0014-Properly-select-the-right-system-wrappers.patch',
-                'webrtc-audio-processing/0015-Fix-case-sensitivity-in-windows-include.patch',
-                'webrtc-audio-processing/0016-Define-MSVC-_WIN32-so-we-can-build-on-mingw.patch',
-                'webrtc-audio-processing/0017-Add-missing-windows-conditions-variable.patch',
-                'webrtc-audio-processing/0018-Protect-against-unsupported-CPU-types.patch',
-                'webrtc-audio-processing/0019-osx-Fix-type-OS_FLAGS-instead-of-OS_CFLAGS.patch',
-                'webrtc-audio-processing/0020-Sync-defines-and-libs-with-build.gn.patch',
-                'webrtc-audio-processing/0021-Use-no-undefined-to-support-both-clang-and-gcc.patch',
-                'webrtc-audio-processing/0022-Re-add-pthread-linking-on-linux.patch',
-                'webrtc-audio-processing/0023-Add-ARM-64bit-support.patch',
-                # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/merge_requests/1
-                'webrtc-audio-processing/0001-Initial-meson-build-files.patch',
-                # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/merge_requests/2
-                'webrtc-audio-processing/0001-build-meson-fix-compilation-on-arm64.patch',]
+    # webrtc-audio-processing links to abseil statically
+    meson_subprojects = ['abseil-cpp']
 
-    files_libs = ['libwebrtc_audio_processing']
-    files_devel = ['include/webrtc_audio_processing', '%(libdir)s/pkgconfig/webrtc-audio-processing.pc']
+    files_libs = [
+        'libwebrtc-audio-coding-1',
+        'libwebrtc-audio-processing-1',
+    ]
+    files_devel = [
+        'include/webrtc-audio-processing-1',
+        '%(libdir)s/pkgconfig/webrtc-audio-coding-1.pc',
+        '%(libdir)s/pkgconfig/webrtc-audio-processing-1.pc',
+    ]
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
@@ -53,19 +33,17 @@ class Recipe(recipe.Recipe):
             # system is doing it wrong, as it should add -mfpu=neon only for
             # the files that contains neon intrinsic.
             self.meson_options['gnustl'] = 'enabled'
-        elif self.config.target_platform == Platform.WINDOWS:
-            # This recipe requires at least Windows Vista
-            flags = ('-UWINVER', '-U_WIN32_WINNT', '-DWINVER=0x0600', '-D_WIN32_WINNT=0x0600')
-            self.append_env('CFLAGS', *flags)
-            self.append_env('CXXFLAGS', *flags)
-
 
     def post_install(self):
         dependency_libs = []
         if self.config.target_platform == Platform.ANDROID:
             dependency_libs += ['gnustl', '-llog']
 
-        lib = LibtoolLibrary('webrtc_audio_processing', None, None, None, self.config.libdir,
+        libac = LibtoolLibrary('webrtc-audio-coding-1', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=dependency_libs)
-        lib.save()
+        libac.save()
+        libap = LibtoolLibrary('webrtc-audio-processing-1', None, None, None, self.config.libdir,
+                self.config.target_platform, deps=dependency_libs)
+        libap.save()
+
         super().post_install()
