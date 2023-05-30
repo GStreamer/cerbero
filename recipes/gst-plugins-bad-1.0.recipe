@@ -178,6 +178,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgsttimecode%(mext)s',
              'lib/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
              'lib/gstreamer-1.0/libgstvideoframe_audiolevel%(mext)s',
+             'lib/gstreamer-1.0/libgstvideosignal%(mext)s',
              'lib/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
              'lib/gstreamer-1.0/libgstladspa%(mext)s',
     ]
@@ -213,6 +214,7 @@ class Recipe(custom.GStreamer):
              'lib/gstreamer-1.0/libgsttimecode.a', 'lib/gstreamer-1.0/libgsttimecode.la',
              'lib/gstreamer-1.0/libgstvideofiltersbad.a', 'lib/gstreamer-1.0/libgstvideofiltersbad.la',
              'lib/gstreamer-1.0/libgstvideoframe_audiolevel.a', 'lib/gstreamer-1.0/libgstvideoframe_audiolevel.la',
+             'lib/gstreamer-1.0/libgstvideosignal.a', 'lib/gstreamer-1.0/libgstvideosignal.la',
              'lib/gstreamer-1.0/libgstwebrtcdsp.a', 'lib/gstreamer-1.0/libgstwebrtcdsp.la',
              'lib/gstreamer-1.0/libgstladspa.a', 'lib/gstreamer-1.0/libgstladspa.la',
     ]
