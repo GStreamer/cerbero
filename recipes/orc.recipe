@@ -3,22 +3,17 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.33'
+    version = '0.4.34'
 
     stype = SourceType.TARBALL
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
-    tarball_checksum = '844e6d7db8086f793f57618d3d4b68d29d99b16034e71430df3c21cfd3c3542a'
+    tarball_checksum = '8f47abb3f097171e44eb807adcdabd860fba2effd37d8d3c4fbd5f341cadd41f'
     # These properties are only used when stype is GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
 
-    patches = [
-        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/87 (merged)
-        'orc/0001-Fix-usage-of-pthread_jit_write_protect_np-on-macOS-a.patch',
-        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/89 (merged)
-        'orc/0001-Fix-guard-around-usage-of-pthread_jit_write_protect.patch',
-    ]
+    patches = []
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]
