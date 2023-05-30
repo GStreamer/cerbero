@@ -178,6 +178,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsttimecode%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstvideosignal%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstladspa%(mext)s',
     ]
@@ -213,6 +214,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsttimecode.a', '%(libdir)s/gstreamer-1.0/libgsttimecode.la',
              '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad.a', '%(libdir)s/gstreamer-1.0/libgstvideofiltersbad.la',
              '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel.a', '%(libdir)s/gstreamer-1.0/libgstvideoframe_audiolevel.la',
+             '%(libdir)s/gstreamer-1.0/libgstvideosignal.a', '%(libdir)s/gstreamer-1.0/libgstvideosignal.la',
              '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp.a', '%(libdir)s/gstreamer-1.0/libgstwebrtcdsp.la',
              '%(libdir)s/gstreamer-1.0/libgstladspa.a', '%(libdir)s/gstreamer-1.0/libgstladspa.la',
     ]
