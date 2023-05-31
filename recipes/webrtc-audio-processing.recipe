@@ -42,6 +42,9 @@ class Recipe(recipe.Recipe):
                 # stdio, and enabling Android API 24 breaks the gst-examples build,
                 # so disable this for now.
                 self.append_env('CXXFLAGS', '-U_FILE_OFFSET_BITS')
+        if self.config.target_platform == Platform.WINDOWS:
+            # Does not export symbols correctly for DLLs, so just link statically
+            self.library_type = LibraryType.STATIC
 
     def post_install(self):
         dependency_libs = []
