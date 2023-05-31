@@ -16,7 +16,14 @@ class Recipe(recipe.Recipe):
     licenses = [{License.BSD: ['LICENSE']}]
     files_libs = ['libopenh264']
     files_devel = ['include/wels', '%(libdir)s/pkgconfig/openh264.pc']
-    patches = []
+    patches = ['openh264/0001-meson-add-option-to-disable-asm-optimisations.patch']
+
+    async def configure(self):
+        if self.config.target_platform == Platform.ANDROID and \
+                self.config.target_arch == Architecture.X86:
+            # Fails to link with lld citing relocation errors
+            self.meson_options['asm'] = 'disabled'
+        await super().configure()
 
     def post_install(self):
         # XXX: Don't forget to keep this in sync with the library version!

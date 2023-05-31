@@ -1,0 +1,651 @@
+From 74a25eb9424380646c68ff78eae7b2b6e9e745ec Mon Sep 17 00:00:00 2001
+From: Matthew Waters <matthew@centricular.com>
+Date: Tue, 30 May 2023 13:08:29 +1000
+Subject: [PATCH] meson: add option to disable asm optimisations
+
+---
+ codec/common/meson.build     | 100 ++++++++--------
+ codec/decoder/meson.build    |  60 +++++-----
+ codec/encoder/meson.build    |  92 +++++++--------
+ codec/processing/meson.build |  71 ++++++------
+ meson.build                  | 213 ++++++++++++++++++-----------------
+ meson_options.txt            |   1 +
+ 6 files changed, 274 insertions(+), 263 deletions(-)
+
+diff --git a/codec/common/meson.build b/codec/common/meson.build
+index 80c3d32..63c4ba1 100644
+--- a/codec/common/meson.build
++++ b/codec/common/meson.build
+@@ -18,58 +18,60 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if cpu_family in ['x86', 'x86_64']
+-  asm_sources = [
+-    'x86/cpuid.asm',
+-    'x86/dct.asm',
+-    'x86/deblock.asm',
+-    'x86/expand_picture.asm',
+-    'x86/intra_pred_com.asm',
+-    'x86/mb_copy.asm',
+-    'x86/mc_chroma.asm',
+-    'x86/mc_luma.asm',
+-    'x86/satd_sad.asm',
+-    'x86/vaa.asm',
+-  ]
+-  objs_asm += asm_gen.process(asm_sources)
+-elif cpu_family == 'arm'
+-  asm_sources = [
+-    'arm/copy_mb_neon.S',
+-    'arm/deblocking_neon.S',
+-    'arm/expand_picture_neon.S',
+-    'arm/intra_pred_common_neon.S',
+-    'arm/mc_neon.S',
+-  ]
+-  if use_asm_gen
+-    objs_asm = asm_gen.process(asm_sources)
+-  else
++if build_asm
++  if cpu_family in ['x86', 'x86_64']
++    asm_sources = [
++      'x86/cpuid.asm',
++      'x86/dct.asm',
++      'x86/deblock.asm',
++      'x86/expand_picture.asm',
++      'x86/intra_pred_com.asm',
++      'x86/mb_copy.asm',
++      'x86/mc_chroma.asm',
++      'x86/mc_luma.asm',
++      'x86/satd_sad.asm',
++      'x86/vaa.asm',
++    ]
++    objs_asm += asm_gen.process(asm_sources)
++  elif cpu_family == 'arm'
++    asm_sources = [
++      'arm/copy_mb_neon.S',
++      'arm/deblocking_neon.S',
++      'arm/expand_picture_neon.S',
++      'arm/intra_pred_common_neon.S',
++      'arm/mc_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family == 'aarch64'
++    asm_sources = [
++      'arm64/copy_mb_aarch64_neon.S',
++      'arm64/deblocking_aarch64_neon.S',
++      'arm64/expand_picture_aarch64_neon.S',
++      'arm64/intra_pred_common_aarch64_neon.S',
++      'arm64/mc_aarch64_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family in ['loongarch32', 'loongarch64']
++    asm_sources = [
++      'loongarch/copy_mb_lsx.c',
++      'loongarch/deblock_lsx.c',
++      'loongarch/intra_pred_com_lsx.c',
++      'loongarch/mc_chroma_lsx.c',
++      'loongarch/mc_horver_lsx.c',
++      'loongarch/satd_sad_lasx.c',
++    ]
+     cpp_sources += asm_sources
+-  endif
+-elif cpu_family == 'aarch64'
+-  asm_sources = [
+-    'arm64/copy_mb_aarch64_neon.S',
+-    'arm64/deblocking_aarch64_neon.S',
+-    'arm64/expand_picture_aarch64_neon.S',
+-    'arm64/intra_pred_common_aarch64_neon.S',
+-    'arm64/mc_aarch64_neon.S',
+-  ]
+-  if use_asm_gen
+-    objs_asm = asm_gen.process(asm_sources)
+   else
+-    cpp_sources += asm_sources
++    error('Unsupported cpu_family @0@'.format(cpu_family))
+   endif
+-elif cpu_family in ['loongarch32', 'loongarch64']
+-  asm_sources = [
+-    'loongarch/copy_mb_lsx.c',
+-    'loongarch/deblock_lsx.c',
+-    'loongarch/intra_pred_com_lsx.c',
+-    'loongarch/mc_chroma_lsx.c',
+-    'loongarch/mc_horver_lsx.c',
+-    'loongarch/satd_sad_lasx.c',
+-  ]
+-  cpp_sources += asm_sources
+-else
+-  error('Unsupported cpu_family @0@'.format(cpu_family))
+ endif
+ 
+ libcommon = static_library('common', cpp_sources, objs_asm,
+diff --git a/codec/decoder/meson.build b/codec/decoder/meson.build
+index cb984f7..973156d 100644
+--- a/codec/decoder/meson.build
++++ b/codec/decoder/meson.build
+@@ -23,39 +23,41 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if cpu_family in ['x86', 'x86_64']
+-  asm_sources = [
+-    'core/x86/dct.asm',
+-    'core/x86/intra_pred.asm',
+-  ]
+-  objs_asm = asm_gen.process(asm_sources)
+-elif cpu_family == 'arm'
+-  asm_sources = [
+-    'core/arm/block_add_neon.S',
+-    'core/arm/intra_pred_neon.S',
+-  ]
+-  if use_asm_gen
++if build_asm
++  if cpu_family in ['x86', 'x86_64']
++    asm_sources = [
++      'core/x86/dct.asm',
++      'core/x86/intra_pred.asm',
++    ]
+     objs_asm = asm_gen.process(asm_sources)
+-  else
++  elif cpu_family == 'arm'
++    asm_sources = [
++      'core/arm/block_add_neon.S',
++      'core/arm/intra_pred_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family == 'aarch64'
++    asm_sources = [
++      'core/arm64/block_add_aarch64_neon.S',
++      'core/arm64/intra_pred_aarch64_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family in ['loongarch32', 'loongarch64']
++    asm_sources = [
++      'core/loongarch/mb_aux_lsx.c',
++    ]
+     cpp_sources += asm_sources
+-  endif
+-elif cpu_family == 'aarch64'
+-  asm_sources = [
+-    'core/arm64/block_add_aarch64_neon.S',
+-    'core/arm64/intra_pred_aarch64_neon.S',
+-  ]
+-  if use_asm_gen
+-    objs_asm = asm_gen.process(asm_sources)
+   else
+-    cpp_sources += asm_sources
++    error('Unsupported cpu family @0@'.format(cpu_family))
+   endif
+-elif cpu_family in ['loongarch32', 'loongarch64']
+-  asm_sources = [
+-    'core/loongarch/mb_aux_lsx.c',
+-  ]
+-  cpp_sources += asm_sources
+-else
+-  error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+ 
+ libdecoder = static_library('decoder', cpp_sources, objs_asm,
+diff --git a/codec/encoder/meson.build b/codec/encoder/meson.build
+index 30b9ab2..3c227f8 100644
+--- a/codec/encoder/meson.build
++++ b/codec/encoder/meson.build
+@@ -34,55 +34,57 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if cpu_family in ['x86', 'x86_64']
+-  asm_sources = [
+-    'core/x86/coeff.asm',
+-    'core/x86/dct.asm',
+-    'core/x86/intra_pred.asm',
+-    'core/x86/matrix_transpose.asm',
+-    'core/x86/memzero.asm',
+-    'core/x86/quant.asm',
+-    'core/x86/sample_sc.asm',
+-    'core/x86/score.asm',
+-  ]
+-  objs_asm = asm_gen.process(asm_sources)
+-elif cpu_family == 'arm'
+-  asm_sources = [
+-    'core/arm/intra_pred_neon.S',
+-    'core/arm/intra_pred_sad_3_opt_neon.S',
+-    'core/arm/memory_neon.S',
+-    'core/arm/pixel_neon.S',
+-    'core/arm/reconstruct_neon.S',
+-    'core/arm/svc_motion_estimation.S',
+-  ]
+-  if use_asm_gen
++if build_asm
++  if cpu_family in ['x86', 'x86_64']
++    asm_sources = [
++      'core/x86/coeff.asm',
++      'core/x86/dct.asm',
++      'core/x86/intra_pred.asm',
++      'core/x86/matrix_transpose.asm',
++      'core/x86/memzero.asm',
++      'core/x86/quant.asm',
++      'core/x86/sample_sc.asm',
++      'core/x86/score.asm',
++    ]
+     objs_asm = asm_gen.process(asm_sources)
+-  else
++  elif cpu_family == 'arm'
++    asm_sources = [
++      'core/arm/intra_pred_neon.S',
++      'core/arm/intra_pred_sad_3_opt_neon.S',
++      'core/arm/memory_neon.S',
++      'core/arm/pixel_neon.S',
++      'core/arm/reconstruct_neon.S',
++      'core/arm/svc_motion_estimation.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family == 'aarch64'
++    asm_sources = [
++      'core/arm64/intra_pred_aarch64_neon.S',
++      'core/arm64/intra_pred_sad_3_opt_aarch64_neon.S',
++      'core/arm64/memory_aarch64_neon.S',
++      'core/arm64/pixel_aarch64_neon.S',
++      'core/arm64/reconstruct_aarch64_neon.S',
++      'core/arm64/svc_motion_estimation_aarch64_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family in ['loongarch32', 'loongarch64']
++    asm_sources = [
++      'core/loongarch/quant_lsx.c',
++      'core/loongarch/get_intra_predictor_lsx.c',
++      'core/loongarch/dct_lasx.c',
++    ]
+     cpp_sources += asm_sources
+-  endif
+-elif cpu_family == 'aarch64'
+-  asm_sources = [
+-    'core/arm64/intra_pred_aarch64_neon.S',
+-    'core/arm64/intra_pred_sad_3_opt_aarch64_neon.S',
+-    'core/arm64/memory_aarch64_neon.S',
+-    'core/arm64/pixel_aarch64_neon.S',
+-    'core/arm64/reconstruct_aarch64_neon.S',
+-    'core/arm64/svc_motion_estimation_aarch64_neon.S',
+-  ]
+-  if use_asm_gen
+-    objs_asm = asm_gen.process(asm_sources)
+   else
+-    cpp_sources += asm_sources
++    error('Unsupported cpu family @0@'.format(cpu_family))
+   endif
+-elif cpu_family in ['loongarch32', 'loongarch64']
+-  asm_sources = [
+-    'core/loongarch/quant_lsx.c',
+-    'core/loongarch/get_intra_predictor_lsx.c',
+-    'core/loongarch/dct_lasx.c',
+-  ]
+-  cpp_sources += asm_sources
+-else
+-  error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+ 
+ libencoder = static_library('encoder', cpp_sources, objs_asm,
+diff --git a/codec/processing/meson.build b/codec/processing/meson.build
+index f2b47d8..4320bd4 100644
+--- a/codec/processing/meson.build
++++ b/codec/processing/meson.build
+@@ -19,46 +19,47 @@ cpp_sources = [
+ ]
+ 
+ objs_asm = []
+-if cpu_family in ['x86', 'x86_64']
+-  asm_sources = [
+-    'src/x86/denoisefilter.asm',
+-    'src/x86/downsample_bilinear.asm',
+-    'src/x86/vaa.asm',
+-  ]
+-  objs_asm = asm_gen.process(asm_sources)
+-elif cpu_family == 'arm'
+-  asm_sources = [
+-    'src/arm/adaptive_quantization.S',
+-    'src/arm/down_sample_neon.S',
+-    'src/arm/pixel_sad_neon.S',
+-    'src/arm/vaa_calc_neon.S',
+-  ]
+-  if use_asm_gen
++if build_asm
++  if cpu_family in ['x86', 'x86_64']
++    asm_sources = [
++      'src/x86/denoisefilter.asm',
++      'src/x86/downsample_bilinear.asm',
++      'src/x86/vaa.asm',
++    ]
+     objs_asm = asm_gen.process(asm_sources)
+-  else
++  elif cpu_family == 'arm'
++    asm_sources = [
++      'src/arm/adaptive_quantization.S',
++      'src/arm/down_sample_neon.S',
++      'src/arm/pixel_sad_neon.S',
++      'src/arm/vaa_calc_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family == 'aarch64'
++    asm_sources = [
++          'src/arm64/adaptive_quantization_aarch64_neon.S',
++          'src/arm64/down_sample_aarch64_neon.S',
++          'src/arm64/pixel_sad_aarch64_neon.S',
++          'src/arm64/vaa_calc_aarch64_neon.S',
++    ]
++    if use_asm_gen
++      objs_asm = asm_gen.process(asm_sources)
++    else
++      cpp_sources += asm_sources
++    endif
++  elif cpu_family in ['loongarch32', 'loongarch64']
++    asm_sources = [
++      'src/loongarch/vaa_lsx.c',
++    ]
+     cpp_sources += asm_sources
+-  endif
+-elif cpu_family == 'aarch64'
+-  asm_sources = [
+-	'src/arm64/adaptive_quantization_aarch64_neon.S',
+-	'src/arm64/down_sample_aarch64_neon.S',
+-	'src/arm64/pixel_sad_aarch64_neon.S',
+-	'src/arm64/vaa_calc_aarch64_neon.S',
+-  ]
+-  if use_asm_gen
+-    objs_asm = asm_gen.process(asm_sources)
+   else
+-    cpp_sources += asm_sources
++    error('Unsupported cpu family @0@'.format(cpu_family))
+   endif
+-elif cpu_family in ['loongarch32', 'loongarch64']
+-  asm_sources = [
+-    'src/loongarch/vaa_lsx.c',
+-  ]
+-  cpp_sources += asm_sources
+-else
+-  error('Unsupported cpu family @0@'.format(cpu_family))
+ endif
+-
+ libprocessing = static_library('processing', cpp_sources, objs_asm,
+   include_directories: [inc, processing_inc, casm_inc],
+   dependencies: deps)
+diff --git a/meson.build b/meson.build
+index b276375..771f72b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -57,131 +57,134 @@ cpp_lib = '-lstdc++'
+ libm_dep = cpp.find_library('m', required : false)
+ deps += [libm_dep]
+ 
+-if ['linux', 'android', 'ios', 'darwin'].contains(system)
+-  asm_format32 = 'elf'
+-  asm_format64 = 'elf64'
+-  if ['ios', 'darwin'].contains(system)
+-    asm_format32 = 'macho32'
+-    asm_format64 = 'macho64'
+-  endif
+-  if cpu_family == 'x86'
+-    asm_format = asm_format32
+-    asm_args += ['-DX86_32', '-DHAVE_AVX2']
+-    add_project_arguments('-DHAVE_AVX2', language: 'cpp')
+-    add_project_arguments('-DHAVE_AVX2', '-DX86_ASM', '-DX86_32_ASM', language: 'c')
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+-  elif cpu_family == 'x86_64'
+-    asm_format = asm_format64
+-    asm_args += ['-DUNIX64', '-DHAVE_AVX2']
+-    add_project_arguments('-DHAVE_AVX2', language: 'cpp')
+-    add_project_arguments('-DHAVE_AVX2', '-DX86_ASM', language: 'c')
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+-  elif cpu_family == 'arm'
+-    asm_format = asm_format32
+-    add_project_arguments('-DHAVE_NEON', language: 'c')
+-    add_project_arguments('-DHAVE_NEON', language: 'c')
+-    casm_inc = include_directories(join_paths('codec', 'common', 'arm'))
+-  elif cpu_family == 'aarch64'
+-    asm_format = asm_format64
+-    add_project_arguments('-DHAVE_NEON_ARM64', language: 'c')
+-    add_project_arguments('-DHAVE_NEON_ARM64', language: 'cpp')
+-    casm_inc = include_directories(join_paths('codec', 'common', 'arm64'))
+-  elif cpu_family == 'loongarch32'
+-    asm_format = asm_format32
+-    add_project_arguments('-mlsx', '-mlasx', language: 'c')
+-    add_project_arguments('-DHAVE_LSX', '-DHAVE_LASX', language: 'cpp')
+-    casm_inc = include_directories(join_paths('codec', 'common', 'loongarch'))
+-  elif cpu_family == 'loongarch64'
+-    asm_format = asm_format64
+-    add_project_arguments('-mlsx', '-mlasx', language: 'c')
+-    add_project_arguments('-mlsx', '-DHAVE_LSX', '-mlasx', '-DHAVE_LASX', language: 'cpp')
+-    casm_inc = include_directories(join_paths('codec', 'common', 'loongarch'))
+-  else
+-    error('FIXME: unhandled CPU family @0@ for @1@'.format(cpu_family, system))
+-  endif
++use_asm_gen = false
++build_asm = get_option('asm').allowed()
++if build_asm
++  if ['linux', 'android', 'ios', 'darwin'].contains(system)
++    asm_format32 = 'elf'
++    asm_format64 = 'elf64'
++    if ['ios', 'darwin'].contains(system)
++      asm_format32 = 'macho32'
++      asm_format64 = 'macho64'
++    endif
++    if cpu_family == 'x86'
++      asm_format = asm_format32
++      asm_args += ['-DX86_32', '-DHAVE_AVX2']
++      add_project_arguments('-DHAVE_AVX2', language: 'cpp')
++      add_project_arguments('-DHAVE_AVX2', '-DX86_ASM', '-DX86_32_ASM', language: 'c')
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
++    elif cpu_family == 'x86_64'
++      asm_format = asm_format64
++      asm_args += ['-DUNIX64', '-DHAVE_AVX2']
++      add_project_arguments('-DHAVE_AVX2', language: 'cpp')
++      add_project_arguments('-DHAVE_AVX2', '-DX86_ASM', language: 'c')
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
++    elif cpu_family == 'arm'
++      asm_format = asm_format32
++      add_project_arguments('-DHAVE_NEON', language: 'c')
++      add_project_arguments('-DHAVE_NEON', language: 'c')
++      casm_inc = include_directories(join_paths('codec', 'common', 'arm'))
++    elif cpu_family == 'aarch64'
++      asm_format = asm_format64
++      add_project_arguments('-DHAVE_NEON_ARM64', language: 'c')
++      add_project_arguments('-DHAVE_NEON_ARM64', language: 'cpp')
++      casm_inc = include_directories(join_paths('codec', 'common', 'arm64'))
++    elif cpu_family == 'loongarch32'
++      asm_format = asm_format32
++      add_project_arguments('-mlsx', '-mlasx', language: 'c')
++      add_project_arguments('-DHAVE_LSX', '-DHAVE_LASX', language: 'cpp')
++      casm_inc = include_directories(join_paths('codec', 'common', 'loongarch'))
++    elif cpu_family == 'loongarch64'
++      asm_format = asm_format64
++      add_project_arguments('-mlsx', '-mlasx', language: 'c')
++      add_project_arguments('-mlsx', '-DHAVE_LSX', '-mlasx', '-DHAVE_LASX', language: 'cpp')
++      casm_inc = include_directories(join_paths('codec', 'common', 'loongarch'))
++    else
++      error('FIXME: unhandled CPU family @0@ for @1@'.format(cpu_family, system))
++    endif
+ 
+-  if ['ios', 'darwin', 'android'].contains(system)
+-    cpp_lib = '-lc++'
+-  endif
+-elif system == 'windows'
+-  if cpu_family == 'x86'
+-    asm_format = 'win32'
+-    asm_args += ['-DPREFIX', '-DX86_32']
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+-  elif cpu_family == 'x86_64'
+-    asm_format = 'win64'
+-    asm_args += ['-DWIN64']
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
+-  elif cpu_family == 'arm'
+-    if cpp.get_argument_syntax() == 'msvc'
++    if ['ios', 'darwin', 'android'].contains(system)
++      cpp_lib = '-lc++'
++    endif
++  elif system == 'windows'
++    if cpu_family == 'x86'
++      asm_format = 'win32'
++      asm_args += ['-DPREFIX', '-DX86_32']
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
++    elif cpu_family == 'x86_64'
++      asm_format = 'win64'
++      asm_args += ['-DWIN64']
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'x86', '')
++    elif cpu_family == 'arm'
++      if cpp.get_argument_syntax() == 'msvc'
++        asm_format = 'armasm'
++        asm_args += ['-nologo', '-DHAVE_NEON', '-ignore', '4509']
++        asm_cmds = ['armasm']
++      else
++        asm_format = 'clang'
++        asm_args += ['-DHAVE_NEON', '-mimplicit-it=always']
++        asm_cmds = cpp.cmd_array()
++      endif
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm', '')
++    elif cpu_family == 'aarch64'
+       asm_format = 'armasm'
+-      asm_args += ['-nologo', '-DHAVE_NEON', '-ignore', '4509']
+-      asm_cmds = ['armasm']
++      asm_args += ['-nologo', '-DHAVE_NEON_AARCH64']
++      asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm64', '')
+     else
+-      asm_format = 'clang'
+-      asm_args += ['-DHAVE_NEON', '-mimplicit-it=always']
+-      asm_cmds = cpp.cmd_array()
++      error('FIXME: unhandled CPU family @0@ for Windows'.format(cpu_family))
+     endif
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm', '')
+-  elif cpu_family == 'aarch64'
+-    asm_format = 'armasm'
+-    asm_args += ['-nologo', '-DHAVE_NEON_AARCH64']
+-    asm_inc = join_paths(meson.current_source_dir(), 'codec', 'common', 'arm64', '')
+   else
+-    error('FIXME: unhandled CPU family @0@ for Windows'.format(cpu_family))
++    error('FIXME: Unhandled system @0@'.format(system))
+   endif
+-else
+-  error('FIXME: Unhandled system @0@'.format(system))
+-endif
+ 
+-use_asm_gen = false
+-if cpu_family in ['x86', 'x86_64']
+-  nasm = find_program('nasm')
+-
+-  use_asm_gen = true
+-  asm_gen = generator(nasm,
+-    output : '@BASENAME@.o',
+-    arguments : [
+-      '-f', asm_format,
+-      '-i', asm_inc,
+-      '@INPUT@',
+-      '-o', '@OUTPUT@'] + asm_args)
+-elif system == 'windows'
+-  if  cpu_family == 'arm'
+-    # For ARM, gas-preprocessor is needed for converting the asm to be
+-    # buildable as thumb even with Clang.
++  if cpu_family in ['x86', 'x86_64']
++    nasm = find_program('nasm')
++
+     use_asm_gen = true
+-    gasprep = find_program('gas-preprocessor.pl')
+-    asm_gen = generator(gasprep,
+-      output : '@BASENAME@.obj',
++    asm_gen = generator(nasm,
++      output : '@BASENAME@.o',
+       arguments : [
+-        '-as-type', asm_format,
+-        '-force-thumb',
+-        '--'
+-        ] + asm_cmds + [
+-        '-I' + asm_inc] + asm_args + [
++        '-f', asm_format,
++        '-i', asm_inc,
+         '@INPUT@',
+-        '-c', '-o', '@OUTPUT@'])
+-  elif cpu_family == 'aarch64'
+-    # For ARM64, Clang can build the assembly as-is without needing to use
+-    # either gas-preprocessor or armasm64.
+-    if cpp.get_argument_syntax() == 'msvc'
++        '-o', '@OUTPUT@'] + asm_args)
++  elif system == 'windows'
++    if  cpu_family == 'arm'
++      # For ARM, gas-preprocessor is needed for converting the asm to be
++      # buildable as thumb even with Clang.
+       use_asm_gen = true
+       gasprep = find_program('gas-preprocessor.pl')
+       asm_gen = generator(gasprep,
+         output : '@BASENAME@.obj',
+         arguments : [
+           '-as-type', asm_format,
+-          '-arch', 'aarch64',
+-          '--',
+-          'armasm64',
++          '-force-thumb',
++          '--'
++          ] + asm_cmds + [
+           '-I' + asm_inc] + asm_args + [
+           '@INPUT@',
+           '-c', '-o', '@OUTPUT@'])
++    elif cpu_family == 'aarch64'
++      # For ARM64, Clang can build the assembly as-is without needing to use
++      # either gas-preprocessor or armasm64.
++      if cpp.get_argument_syntax() == 'msvc'
++        use_asm_gen = true
++        gasprep = find_program('gas-preprocessor.pl')
++        asm_gen = generator(gasprep,
++          output : '@BASENAME@.obj',
++          arguments : [
++            '-as-type', asm_format,
++            '-arch', 'aarch64',
++            '--',
++            'armasm64',
++            '-I' + asm_inc] + asm_args + [
++            '@INPUT@',
++            '-c', '-o', '@OUTPUT@'])
++      endif
++    else
++      # Windows only supports x86, x86_64, arm, arm64
++      error('unreachable code')
+     endif
+-  else
+-    # Windows only supports x86, x86_64, arm, arm64
+-    error('unreachable code')
+   endif
+ endif
+ 
+diff --git a/meson_options.txt b/meson_options.txt
+index a2c14d1..f83e815 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1 +1,2 @@
+ option('tests', type : 'feature', value : 'auto', yield : true)
++option('asm', type : 'feature', value : 'auto')
+-- 
+2.40.1
+
