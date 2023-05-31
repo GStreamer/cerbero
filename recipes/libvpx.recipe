@@ -110,16 +110,13 @@ class Recipe(recipe.Recipe):
                             '-Dandroid_setCpu=vpx_android_setCpu',
                             '-Dandroid_setCpuArm=vpx_android_setCpuArm')
 
-            if self.config.target_arch == Architecture.X86:
-                self.append_env('ASFLAGS', '-D__ANDROID__')
-                self.append_env('CFLAGS', '-D__ANDROID__')
-
             if self.config.target_arch == Architecture.ARM:
                 arch = 'armv5te'
             elif self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
                 raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
-            # Build system passes gcc arguments to $LD
+            # Build system passes gcc arguments to $LD/$AS
             self.set_env('LD', self.get_env('CC'))
+            self.set_env('AS', self.get_env('CC') + ' -c')
             self.configure_options.replace('--as=nasm', '')
         else:
             self.configure_options += '--enable-shared '
