@@ -925,7 +925,7 @@ class Meson (Build, ModifyEnvBase) :
             binaries['moc'] = [self._get_moc_path(self.config.qt5_qmake_path)]
         if self.config.qt6_qmake_path:
             binaries['qmake'] = [self.config.qt6_qmake_path]
-        
+
         # Point meson to rustc with correct arguments to ensure it's detected when cross-compiling
         if self.config.cargo_home:
             target_triple = self.config.rust_triple(self.config.target_arch,
@@ -973,6 +973,8 @@ class Meson (Build, ModifyEnvBase) :
         Get a toolchain configuration that points to the build machine's
         toolchain. On Windows, this is the MinGW toolchain that we ship. On
         Linux and macOS, this is the system-wide compiler.
+        When targetting android, we can use the NDK bundled clang compiler
+        for this purpose as well.
         '''
         false = ['false']
         if self.config.platform == Platform.WINDOWS:
@@ -985,6 +987,12 @@ class Meson (Build, ModifyEnvBase) :
             cc = ['clang']
             cxx = ['clang++']
             ar = ['ar']
+            objc = cc
+            objcxx = cxx
+        elif self.config.target_platform == Platform.ANDROID:
+            cc = ['clang']
+            cxx = ['clang++']
+            ar = ['llvm-ar']
             objc = cc
             objcxx = cxx
         else:
