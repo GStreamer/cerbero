@@ -73,7 +73,7 @@ default:
     # If you are hacking on them or need a them to rebuild, its enough
     # to change any part of the string of the image you want.
     ###
-    FDO_DISTRIBUTION_TAG: '2023-02-13.0'
+    FDO_DISTRIBUTION_TAG: '2023-05-31.0'
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "file git-core java-11-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz"
     FDO_DISTRIBUTION_EXEC: ci/docker_android_setup.sh $ANDROID_HOME $ANDROID_NDK_HOME $GST_UPSTREAM_BRANCH

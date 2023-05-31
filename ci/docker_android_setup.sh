@@ -6,12 +6,12 @@ DEFAULT_BRANCH=$3
 
 mkdir -p /android/sources
 
-curl -o /android/sources/android-ndk.zip https://dl.google.com/android/repository/android-ndk-r21-linux-x86_64.zip
+curl -o /android/sources/android-ndk.zip https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
 unzip /android/sources/android-ndk.zip -d ${ANDROID_NDK_HOME}/
 # remove the intermediate versioned directory
 mv ${ANDROID_NDK_HOME}/*/* ${ANDROID_NDK_HOME}/
 
-curl -o /android/sources/android-sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-6200805_latest.zip
+curl -o /android/sources/android-sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
 unzip /android/sources/android-sdk-tools.zip -d ${ANDROID_HOME}/
 mkdir -p ${ANDROID_HOME}/licenses
 
@@ -28,7 +28,7 @@ echo "e9acab5b5fbb560a72cfaecce8946896ff6aab9d" > ${ANDROID_HOME}/licenses/mips-
 
 # pre-cache deps
 export GSTREAMER_ROOT_ANDROID=/android/sources/gstreamer-android
-curl -o /android/sources/gstreamer-android.tar.xz https://gstreamer.freedesktop.org/data/pkg/android/1.20.0/gstreamer-1.0-android-universal-1.20.0.tar.xz
+curl -o /android/sources/gstreamer-android.tar.xz https://gstreamer.freedesktop.org/data/pkg/android/1.22.0/gstreamer-1.0-android-universal-1.22.0.tar.xz
 mkdir $GSTREAMER_ROOT_ANDROID
 tar -xvf /android/sources/gstreamer-android.tar.xz -C $GSTREAMER_ROOT_ANDROID
 ls $GSTREAMER_ROOT_ANDROID
