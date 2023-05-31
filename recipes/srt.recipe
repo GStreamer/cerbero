@@ -26,8 +26,6 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
         if self.config.target_platform == Platform.ANDROID:
             self.append_env('CXXFLAGS', '-frtti', '-fexceptions')
-            self.configure_options += ' -DUSE_GNUSTL=ON'
-            self.deps.append('gnustl')
 
     def post_install(self):
         libtool_la = LibtoolLibrary('srt', None, None, None, self.config.libdir,

@@ -14,7 +14,6 @@ class Recipe(recipe.Recipe):
     patches = [
                'soundtouch/0008-Fix-compilation-with-clang.patch',
                'soundtouch/0001-Add-minimal-meson-build-system.patch',
-               'soundtouch/0002-add-support-for-linking-with-gnustl-on-android.patch',
               ]
 
     files_libs = ['libSoundTouch']
@@ -30,7 +29,7 @@ class Recipe(recipe.Recipe):
     def post_install (self):
         dependency_libs = []
         if self.config.target_platform == Platform.ANDROID:
-            dependency_libs += ['gnustl', '-lm']
+            dependency_libs += ['-lm']
 
         lib = LibtoolLibrary('SoundTouch', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=dependency_libs)

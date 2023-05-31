@@ -12,8 +12,6 @@ class Recipe(recipe.Recipe):
     url = 'https://freedesktop.org/software/pulseaudio/%(name)s/%(name)s-%(version)s.tar.gz'
     tarball_checksum = '59b3d47aedd32dd6fe4836478499ebb7c5bcad815f14dccddbbd70e752a99e5f'
 
-    platform_deps = {Platform.ANDROID: ['gnustl']}
-
     # webrtc-audio-processing links to abseil statically
     meson_subprojects = ['abseil-cpp']
 
@@ -35,7 +33,6 @@ class Recipe(recipe.Recipe):
             # that defines -mfpu=vfp... plus webrtc-audio-processing build
             # system is doing it wrong, as it should add -mfpu=neon only for
             # the files that contains neon intrinsic.
-            self.meson_options['gnustl'] = 'enabled'
             android_api = DistroVersion.get_android_api_version(self.config.target_distro_version)
             if android_api < 24:
                 # -D_FILE_OFFSET_BITS=64 is broken with Android API < 24 for C++
@@ -46,10 +43,11 @@ class Recipe(recipe.Recipe):
             # Does not export symbols correctly for DLLs, so just link statically
             self.library_type = LibraryType.STATIC
 
+
     def post_install(self):
         dependency_libs = []
         if self.config.target_platform == Platform.ANDROID:
-            dependency_libs += ['gnustl', '-llog']
+            dependency_libs += ['-llog']
 
         libac = LibtoolLibrary('webrtc-audio-coding-1', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=dependency_libs)

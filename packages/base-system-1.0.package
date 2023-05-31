@@ -21,7 +21,7 @@ class Package(custom.GStreamer, package.Package):
         Platform.WINDOWS: ['proxy-libintl:libs:lang', 'mingw-runtime'],
         Platform.DARWIN: ['proxy-libintl:libs:lang'],
         Platform.LINUX: [],
-        Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang', 'gnustl'],
+        Platform.ANDROID: ['proxy-libintl:libs:lang', 'libiconv:libs:lang'],
         Platform.IOS: ['proxy-libintl:libs:lang']
         }
 

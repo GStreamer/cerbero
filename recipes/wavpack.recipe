@@ -68,8 +68,6 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         deps = ['-lm']
-        if self.config.target_platform == Platform.ANDROID:
-            deps.append('gnustl')
         libtool_la = LibtoolLibrary('wavpack', None, None, None, self.config.libdir,
                 self.config.target_platform, deps)
         libtool_la.save()
