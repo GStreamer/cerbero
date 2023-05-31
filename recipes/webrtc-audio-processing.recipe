@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.enums import DistroVersion
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
@@ -35,6 +36,12 @@ class Recipe(recipe.Recipe):
             # system is doing it wrong, as it should add -mfpu=neon only for
             # the files that contains neon intrinsic.
             self.meson_options['gnustl'] = 'enabled'
+            android_api = DistroVersion.get_android_api_version(self.config.target_distro_version)
+            if android_api < 24:
+                # -D_FILE_OFFSET_BITS=64 is broken with Android API < 24 for C++
+                # stdio, and enabling Android API 24 breaks the gst-examples build,
+                # so disable this for now.
+                self.append_env('CXXFLAGS', '-U_FILE_OFFSET_BITS')
 
     def post_install(self):
         dependency_libs = []
