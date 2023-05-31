@@ -38,6 +38,10 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.meson_options['iwmmxt'] = 'disabled'
+            if self.config.target_arch in [Architecture.ARMv7, Architecture.ARM64]:
+                # Needs https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/71
+                self.meson_options['neon'] = 'disabled'
+                self.meson_options['arm-simd'] = 'disabled'
             self.meson_options['cpu-features-path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
             # Prevent symbol conflicts
             self.append_env('CFLAGS',
