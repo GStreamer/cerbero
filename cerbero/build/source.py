@@ -60,6 +60,8 @@ class Source (object):
     patches = None
     strip = 1
     offline = False
+    _extract_locks = collections.defaultdict(asyncio.Lock)
+    _extract_done = set()
 
     def __init__(self):
         if self.patches is None:
@@ -101,21 +103,6 @@ class Source (object):
             f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
 
-    async def fetch(self, **kwargs):
-        self.fetch_impl(**kwargs)
-
-    def fetch_impl(self):
-        '''
-        Fetch the sources
-        '''
-        raise NotImplemented("'fetch' must be implemented by subclasses")
-
-    async def extract(self):
-        '''
-        Extracts the sources
-        '''
-        raise NotImplemented("'extract' must be implemented by subclasses")
-
     def expand_url_template(self, s):
         '''
         Expand a standard URL template (GNOME, SourceForge, GNU, etc)
@@ -156,6 +143,32 @@ class Source (object):
         if hasattr(self, '__file__'):
             files.append(self.__file__)
         return files
+
+    async def fetch(self, **kwargs):
+        self.fetch_impl(**kwargs)
+
+    def fetch_impl(self):
+        '''
+        Fetch the sources
+        '''
+        raise NotImplemented("'fetch' must be implemented by subclasses")
+
+    async def extract(self):
+        # Could have multiple recipes using the same git repo, or extract
+        # could've already been done in fetch by cargo recipes.
+        lock = self._extract_locks[self.config_src_dir]
+        async with lock:
+            if self.config_src_dir in self._extract_done:
+                m.log('Extract already completed', logfile=get_logfile(self))
+                return
+            await self.extract_impl()
+            self._extract_done.add(self.config_src_dir)
+
+    async def extract_impl(self):
+        '''
+        Extracts the sources
+        '''
+        raise NotImplemented("'extract' must be implemented by subclasses")
 
 
 class CustomSource (Source):
@@ -311,6 +324,7 @@ class Tarball(BaseTarball, Source):
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project {self.name} to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
+            self._extract_done.add(self.config_src_dir)
 
     async def extract_impl(self, fetching=False):
         m.action(_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
@@ -337,9 +351,6 @@ class Tarball(BaseTarball, Source):
                 shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
             await self.cargo_vendor(not fetching or self.offline)
-
-    async def extract(self):
-        await self.extract_impl()
 
 
 class GitCache (Source):
@@ -415,6 +426,7 @@ class GitCache (Source):
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
+            self._extract_done.add(self.config_src_dir)
 
 
     def built_version(self):
@@ -426,23 +438,11 @@ class Git (GitCache):
     Source handler for git repositories
     '''
 
-    _extract_locks = collections.defaultdict(asyncio.Lock)
-    _extract_done = set()
-
     def __init__(self):
         GitCache.__init__(self)
         if self.commit is None:
             # Used by recipes in recipes/toolchain/
             self.commit = 'origin/sdk-%s' % self.version
-
-    async def extract(self):
-        # Could have multiple recipes using the same repo.
-        lock = self._extract_locks[self.config_src_dir]
-        async with lock:
-            if self.config_src_dir in self._extract_done:
-                return
-            await self.extract_impl()
-            self._extract_done.add(self.config_src_dir)
 
     async def extract_impl(self, fetching=False):
         if os.path.exists(self.config_src_dir):
@@ -492,8 +492,8 @@ class GitExtractedTarball(Git):
         Git.__init__(self)
         self._files = {}
 
-    async def extract(self):
-        if not await Git.extract(self):
+    async def extract_impl(self):
+        if not await super().extract_impl():
             return False
         for match in self.matches:
             self._files[match] = []
@@ -556,7 +556,7 @@ class Svn(Source):
             await svn.checkout(self.url, self.repo_dir)
         await svn.update(self.repo_dir, self.revision)
 
-    async def extract(self):
+    async def extract_impl(self):
         if os.path.exists(self.config_src_dir):
             shutil.rmtree(self.config_src_dir)
 
