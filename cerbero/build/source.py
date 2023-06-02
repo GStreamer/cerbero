@@ -337,7 +337,7 @@ class BaseTarball(object):
             if not fatal:
                 return False
             raise FatalError('Checksum for {} is {!r} instead of {!r}'
-                             .format(fname, checksum, self.tarball_checksum))
+                             .format(fname, found_checksum, checksum))
         return True
 
     async def extract_tarball(self, unpack_dir):
