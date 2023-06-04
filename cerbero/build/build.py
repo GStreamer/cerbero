@@ -370,6 +370,12 @@ class Build(object):
         '''
         pass
 
+    def num_of_cpus(self):
+        if self.config.allow_parallel_build and getattr(self, 'allow_parallel_build', True) \
+                and self.config.num_of_cpus > 1:
+            return self.config.num_of_cpus
+        return None
+
 
 class CustomBuild(Build, ModifyEnvBase):
 
@@ -423,9 +429,9 @@ class MakefilesBase (Build, ModifyEnvBase):
         self.make_install = self.make_install or ['make', 'install']
         self.make_clean = self.make_clean or ['make', 'clean']
 
-        if self.config.allow_parallel_build and self.allow_parallel_build \
-                and self.config.num_of_cpus > 1:
-            self.make += ['-j%d' % self.config.num_of_cpus]
+        ncpu = self.num_of_cpus()
+        if ncpu:
+            self.make += ['-j%d' % ncpu]
 
         # Make sure user's env doesn't mess up with our build.
         self.set_env('MAKEFLAGS', when='now')
@@ -653,6 +659,11 @@ class CMake (MakefilesBase):
         if self.cmake_generator == 'ninja' or self.using_msvc():
             self.configure_options += ['-G', 'Ninja']
             self.make = ['ninja', '-v']
+            ncpu = self.num_of_cpus()
+            if ncpu:
+                self.make += ['-j%d' % ncpu]
+            else:
+                self.make += ['-j1']
             self.make_install = self.make + ['install']
         else:
             if self.config.platform == Platform.WINDOWS and \
@@ -764,6 +775,11 @@ class Meson (Build, ModifyEnvBase) :
         # Find ninja
         if not self.make:
             self.make = ['ninja', '-v', '-d', 'keeprsp']
+            ncpu = self.num_of_cpus()
+            if ncpu:
+                self.make += ['-j%d' % ncpu]
+            else:
+                self.make += ['-j1']
         if not self.make_install:
             self.make_install = [self.meson_sh, 'install', '--skip-subprojects']
         if not self.make_check:
