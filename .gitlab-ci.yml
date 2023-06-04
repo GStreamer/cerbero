@@ -155,6 +155,7 @@ android fedora image:
     # cmake takes forever to bootstrap from source
     - test $(uname) = Darwin && pip3 install cmake==3.24.*
     - ./ci/cerbero_setup.sh cerbero_before_script
+    - test $(uname) = Linux && cat /proc/self/limits
   cache:
     key: "${CI_JOB_NAME}"
     paths:
