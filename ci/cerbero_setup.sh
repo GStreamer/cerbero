@@ -114,6 +114,9 @@ cerbero_before_script() {
         echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
         echo 'vs_install_version = "vs16"' >> localconf.cbc
     fi
+    if [[ "x${FDO_CI_CONCURRENT}" != "x" ]]; then
+        echo "num_of_cpus = ${FDO_CI_CONCURRENT}" >> localconf.cbc
+    fi
     echo "recipes_commits = {'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'}" >> localconf.cbc
     echo "recipes_remotes = {'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}}" >> localconf.cbc
     cat localconf.cbc
