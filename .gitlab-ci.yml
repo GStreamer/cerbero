@@ -167,6 +167,8 @@ android fedora image:
     paths:
       - "*/logs"
       - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.tar.*"
 
 # Template for Cerbero GStreamer Deps
@@ -231,6 +233,8 @@ build cerbero fedora x86_64:
     paths:
       - "*/logs"
       - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*[0-9].tar.*"
 
 cerbero deps cross-android universal:
@@ -259,6 +263,8 @@ build cerbero cross-android universal:
     paths:
       - "*/logs"
       - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.msi"
 
 cerbero deps cross-windows x86:
@@ -367,6 +373,8 @@ cerbero cross-android universal examples:
     paths:
       - "*/logs"
       - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
 
@@ -400,6 +408,8 @@ build cerbero cross-macos universal:
     paths:
       - "*/logs"
       - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-*-ios-universal.pkg"
 
 cerbero deps cross-ios universal:
@@ -503,6 +513,8 @@ cerbero deps msvc x86_64 msi package:
     paths:
       - "*/logs"
       - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.msi"
   when: 'manual'
 
