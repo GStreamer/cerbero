@@ -10,8 +10,7 @@ class Package(custom.GStreamer, package.Package):
     uuid = 'f685219b-7ee8-46b9-af3c-338e3cbb4f94'
     deps = ['gstreamer-1.0-core']
 
-    files = ['libass:libs',
-             'gst-plugins-base-1.0:plugins_codecs_gpl',
+    files = ['gst-plugins-base-1.0:plugins_codecs_gpl',
              'gst-plugins-good-1.0:plugins_codecs_gpl',
              'gst-plugins-bad-1.0:plugins_codecs_gpl',
              'gst-plugins-ugly-1.0:plugins_codecs_gpl']
@@ -29,5 +28,4 @@ class Package(custom.GStreamer, package.Package):
             self.files_devel.append('gst-plugins-rs:plugins_codecs_gpl_devel')
 
         if self.config.variants.uwp:
-            self.files.remove('libass:libs')
             self.files.remove('libiconv:libs')
