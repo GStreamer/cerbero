@@ -320,7 +320,7 @@ def apply_patch(patch, directory, strip=1, logfile=None):
     @type strip: int
     '''
     m.log("Applying patch {}".format(patch), logfile)
-    call('%s -p%s -f -i %s' % (PATCH, strip, patch), directory)
+    new_call([PATCH, f'-p{strip}', '-f', '-i', patch], cmd_dir=directory, logfile=logfile)
 
 
 async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
