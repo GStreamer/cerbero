@@ -1,0 +1,26 @@
+--- a/include/MoltenVK/mvk_datatypes.h	2023-06-08 16:19:43.000000000 +0530
++++ b/include/MoltenVK/mvk_datatypes.h	2023-06-08 20:47:56.000000000 +0530
+@@ -221,11 +221,11 @@
+ /** Returns the Vulkan bit flags corresponding to the numeric sample count, which must be a PoT value. */
+ VkSampleCountFlagBits mvkVkSampleCountFlagBitsFromSampleCount(NSUInteger sampleCount);
+ 
+ /** Returns the Metal texture swizzle from the Vulkan component swizzle. */
+-MTLTextureSwizzle mvkMTLTextureSwizzleFromVkComponentSwizzle(VkComponentSwizzle vkSwizzle);
++MTLTextureSwizzle mvkMTLTextureSwizzleFromVkComponentSwizzle(VkComponentSwizzle vkSwizzle) API_AVAILABLE(macos(10.15), ios(13.0));
+ 
+ /** Returns all four Metal texture swizzles from the Vulkan component mapping. */
+-MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkComponentMapping(VkComponentMapping vkMapping);
++MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkComponentMapping(VkComponentMapping vkMapping) API_AVAILABLE(macos(10.15), ios(13.0));
+ 
+ 
+ #pragma mark Mipmaps
+@@ -362,8 +360,8 @@
+ /** Returns the Metal MTLStoreAction corresponding to the specified Vulkan VkAttachmentStoreOp. */
+ MTLStoreAction mvkMTLStoreActionFromVkAttachmentStoreOp(VkAttachmentStoreOp vkStoreOp, bool hasResolveAttachment);
+ 
+ /** Returns the Metal MTLMultisampleDepthResolveFilter corresponding to the specified Vulkan VkResolveModeFlagBits. */
+-MTLMultisampleDepthResolveFilter mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(VkResolveModeFlagBits vkResolveMode);
++MTLMultisampleDepthResolveFilter mvkMTLMultisampleDepthResolveFilterFromVkResolveModeFlagBits(VkResolveModeFlagBits vkResolveMode) API_AVAILABLE(macos(10.14), ios(9.0));
+ 
+ #if MVK_MACOS_OR_IOS
+ /** Returns the Metal MTLMultisampleStencilResolveFilter corresponding to the specified Vulkan VkResolveModeFlagBits. */

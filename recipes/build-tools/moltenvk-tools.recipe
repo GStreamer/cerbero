@@ -53,3 +53,8 @@ class Recipe(recipe.Recipe):
 
         for bin in self.files_bins:
             shutil.copy(os.path.join(srcdir, 'macOS', 'bin', bin), os.path.join(prefix, 'bin', bin))
+
+        patch = os.path.join(self.config.recipes_dir, 'build-tools',
+                             self.name, 'ifdef-new-metal-types.patch')
+        moltenvk_dir = os.path.join(self.config.moltenvk_prefix, 'MoltenVK')
+        shell.apply_patch(patch, moltenvk_dir, logfile=self.logfile)
