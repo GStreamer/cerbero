@@ -54,6 +54,7 @@ class Recipe(custom.GStreamer):
                      'curl-ssh2': 'disabled',
                      'dc1394': 'disabled',
                      'directfb': 'disabled',
+                     'dwrite': 'disabled',
                      'faac': 'disabled',
                      'faad': 'disabled',
                      'fbdev': 'disabled',
@@ -531,6 +532,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
             self.enable_plugin('win32ipc', 'sys')
+            self.enable_plugin('dwrite', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
