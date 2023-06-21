@@ -12,3 +12,8 @@ class Package(custom.GStreamer, package.Package):
 
     files = ['gst-plugins-good-1.0:plugins_qt6']
     files_devel = ['gst-plugins-good-1.0:plugins_qt6_devel']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            self.files.append('gst-plugins-bad-1.0:plugins_qt6')
+            self.files_devel.append('gst-plugins-bad-1.0:plugins_qt6_devel')

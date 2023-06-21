@@ -73,6 +73,7 @@ class Recipe(custom.GStreamer):
                      'openal': 'disabled',
                      'opencv': 'disabled',
                      'qsv': 'disabled',
+                     'qt6d3d11': 'disabled',
                      'sndfile': 'disabled',
                      'teletext': 'disabled',
                      'voamrwbenc': 'disabled',
@@ -533,6 +534,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('qsv', 'codecs')
             self.enable_plugin('win32ipc', 'sys')
             self.enable_plugin('dwrite', 'sys')
+            self.enable_plugin('qt6d3d11', 'qt6', 'qt6')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
