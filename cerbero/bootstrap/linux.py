@@ -66,8 +66,8 @@ class DebianBootstrapper (UnixBootstrapper):
     yes_arg = ['-y']
     packages = [
         'autotools-dev', 'automake', 'autoconf', 'libtool', 'g++', 'autopoint',
-        'make', 'cmake', 'bison', 'flex', 'nasm', 'pkg-config', 'libxv-dev',
-        'libx11-dev', 'libx11-xcb-dev', 'libpulse-dev', 'python3-dev',
+        'make', 'cmake', 'ninja-build', 'bison', 'flex', 'nasm', 'pkg-config',
+        'libxv-dev', 'libx11-dev', 'libx11-xcb-dev', 'libpulse-dev', 'python3-dev',
         'gettext', 'build-essential', 'pkg-config', 'libxext-dev', 'libxi-dev',
         'x11proto-record-dev', 'libxrender-dev', 'libgl1-mesa-dev',
         'libxfixes-dev', 'libxdamage-dev', 'libxcomposite-dev',
@@ -107,8 +107,8 @@ class RedHatBootstrapper (UnixBootstrapper):
     yes_arg = ['-y']
     packages = [
         'gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool', 'gettext-devel',
-        'make', 'cmake', 'bison', 'flex', 'nasm', 'pkgconfig', 'curl',
-        'intltool', 'rpm-build', 'redhat-rpm-config', 'python3-devel',
+        'make', 'cmake', 'ninja-build', 'bison', 'flex', 'nasm', 'pkgconfig',
+        'curl', 'intltool', 'rpm-build', 'redhat-rpm-config', 'python3-devel',
         'libXrender-devel', 'pulseaudio-libs-devel', 'libXv-devel',
         'mesa-libGL-devel', 'libXcomposite-devel', 'perl-ExtUtils-MakeMaker',
         'libXi-devel', 'perl-XML-Simple', 'gperf', 'wget', 'libXrandr-devel',
@@ -144,7 +144,7 @@ class OpenSuseBootstrapper (UnixBootstrapper):
     yes_arg = ['-y']
     packages = [
         'gcc', 'automake', 'autoconf', 'gcc-c++', 'libtool', 'gettext-tools',
-        'make', 'cmake', 'bison', 'flex', 'nasm', 'intltool',
+        'make', 'cmake', 'ninja-build', 'bison', 'flex', 'nasm', 'intltool',
         'patterns-openSUSE-devel_rpm_build', 'python3-devel',
         'xorg-x11-libXrender-devel', 'libpulse-devel', 'xorg-x11-libXv-devel',
         'Mesa-libGL-devel', 'libXcomposite-devel', 'libX11-devel',
@@ -164,7 +164,7 @@ class ArchBootstrapper (UnixBootstrapper):
     command = ['-S', '--needed']
     yes_arg = ['--noconfirm']
     packages = [
-        'intltool', 'cmake', 'libtool', 'bison', 'flex', 'automake',
+        'intltool', 'cmake', 'ninja', 'libtool', 'bison', 'flex', 'automake',
         'autoconf', 'make', 'gettext', 'nasm', 'gperf', 'libxrender', 'libxv',
         'mesa', 'python3', 'wget', 'git', 'xorg-util-macros', 'ccache',
         'openssl', 'alsa-lib',
@@ -193,12 +193,13 @@ class GentooBootstrapper (UnixBootstrapper):
     command = ['-u']
     yes_arg = [] # Does not seem interactive
     packages = [
-        'dev-util/intltool', 'dev-util/cmake', 'sys-devel/libtool',
-        'sys-devel/bison', 'sys-devel/flex', 'sys-devel/automake',
-        'sys-devel/autoconf', 'sys-devel/make', 'sys-devel/gettext',
-        'media-sound/pulseaudio', 'dev-lang/nasm', 'dev-util/gperf',
-        'x11-libs/libXrender', 'x11-libs/libXv', 'media-libs/mesa',
-        'net-misc/wget', 'dev-libs/openssl', 'media-libs/alsa-lib'
+        'dev-util/intltool', 'dev-util/cmake', 'dev-util/ninja',
+        'sys-devel/libtool', 'sys-devel/bison', 'sys-devel/flex',
+        'sys-devel/automake', 'sys-devel/autoconf', 'sys-devel/make',
+        'sys-devel/gettext', 'media-sound/pulseaudio', 'dev-lang/nasm',
+        'dev-util/gperf', 'x11-libs/libXrender', 'x11-libs/libXv',
+        'media-libs/mesa', 'net-misc/wget', 'dev-libs/openssl',
+        'media-libs/alsa-lib'
     ]
 
     def __init__(self, config, offline, assume_yes):

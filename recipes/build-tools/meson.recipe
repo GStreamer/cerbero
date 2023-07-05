@@ -20,8 +20,6 @@ class Recipe(recipe.Recipe):
         url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
         tarball_checksum = 'd04b541f97ca439fb82fab7d0d480988be4bd4e62563a5ca35fadb5400727b1c'
 
-    deps = ['ninja']
-
     files_bin = ['bin/meson']
     files_python = []
 

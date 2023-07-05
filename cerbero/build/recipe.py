@@ -283,6 +283,8 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         if self.config.prefix_is_build_tools():
             if self.btype == build.BuildType.MESON:
                 self.deps.append('meson')
+                if 'ninja' not in self.config.system_build_tools:
+                    self.deps.append('ninja')
             elif self.btype == build.BuildType.CMAKE:
                 if 'cmake' not in self.config.system_build_tools:
                     self.deps.append('cmake')

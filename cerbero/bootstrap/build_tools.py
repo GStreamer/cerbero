@@ -95,6 +95,8 @@ class BuildTools (BootstrapperBase, Fetch):
             'cmake': ('3.10.2', None),
             # dav1d requires nasm >=2.13.02
             'nasm': ('2.13.02', '-v'),
+            # meson requires ninja >=1.8.2
+            'ninja': ('1.8.2', None),
         }
         if self.config.platform in (Platform.LINUX, Platform.DARWIN):
             for tool, (version, arg) in tools.items():
