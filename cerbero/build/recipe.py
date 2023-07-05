@@ -284,9 +284,10 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             if self.btype == build.BuildType.MESON:
                 self.deps.append('meson')
             elif self.btype == build.BuildType.CMAKE:
-                self.deps.append('cmake')
-                if self.cmake_generator == 'ninja':
-                    self.deps.append('ninja')
+                if 'cmake' not in self.config.system_build_tools:
+                    self.deps.append('cmake')
+                    if self.cmake_generator == 'ninja':
+                        self.deps.append('ninja')
         self.env = env.copy()
         if self.bash_completions and config.target_platform in [Platform.LINUX]:
             config.bash_completions.update(self.bash_completions)

@@ -209,7 +209,7 @@ class Config (object):
                    'extra_bootstrap_packages', 'moltenvk_prefix',
                    'vs_install_path', 'vs_install_version', 'exe_suffix',
                    'rust_prefix', 'rustup_home', 'cargo_home', 'tomllib_path',
-                   'qt6_qmake_path']
+                   'qt6_qmake_path', 'system_build_tools']
 
     cookbook = None
 
@@ -589,6 +589,8 @@ class Config (object):
         self.set_property('build_tools_prefix', None)
         self.set_property('build_tools_sources', None)
         self.set_property('build_tools_cache', None)
+        # Build tools that are provided by the system (cmake, ninja, etc)
+        self.set_property('system_build_tools', [])
         self.set_property('recipes_commits', {})
         self.set_property('recipes_remotes', {})
         self.set_property('extra_build_tools', [])
@@ -713,6 +715,7 @@ class Config (object):
         self.build_tools_config.build_tools_logs = self.build_tools_logs
         self.build_tools_config.cache_file = self.build_tools_cache
         self.build_tools_config.build_tools_cache = self.build_tools_cache
+        self.build_tools_config.system_build_tools = self.system_build_tools
         self.build_tools_config.external_recipes = self.external_recipes
         self.build_tools_config.extra_mirrors = self.extra_mirrors
         self.build_tools_config.cached_sources = self.cached_sources
