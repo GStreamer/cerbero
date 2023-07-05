@@ -654,9 +654,11 @@ def get_tar_cmd():
         return TAR
 
 
-def check_tool_version(tool_name, needed, env, version_arg='--version'):
+def check_tool_version(tool_name, needed, env, version_arg=None):
     found = False
     newer = False
+    if version_arg is None:
+        version_arg = '--version'
     if env is None:
         env = os.environ.copy()
     tool = which(tool_name, env['PATH'])

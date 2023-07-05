@@ -86,15 +86,19 @@ class BuildTools (BootstrapperBase, Fetch):
         the user to install CMake using the installer.
         '''
         ret = []
-        if self.config.platform in (Platform.LINUX, Platform.DARWIN):
+        tools = {
             # need cmake > 3.10.2 for out-of-source-tree builds.
-            tool, found, newer = shell.check_tool_version('cmake' ,'3.10.2', env=None)
-            if not newer:
-                ret.append('cmake')
+            'cmake': ('3.10.2', None),
             # dav1d requires nasm >=2.13.02
-            tool, found, newer = shell.check_tool_version('nasm', '2.13.02', env=None, version_arg='-v')
-            if not newer:
-                ret.append('nasm')
+            'nasm': ('2.13.02', '-v'),
+        }
+        if self.config.platform in (Platform.LINUX, Platform.DARWIN):
+            for tool, (version, arg) in tools.items():
+                _, _, newer = shell.check_tool_version(tool, version, env=None, version_arg=arg)
+                if newer:
+                    self.config.system_build_tools.append(tool)
+                else:
+                    ret.append(tool)
         return ret
 
     def _setup_env(self):
