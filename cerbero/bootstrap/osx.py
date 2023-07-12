@@ -23,6 +23,7 @@ from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.config import Distro
 from cerbero.utils import shell
 from cerbero.utils import messages as m
+from cerbero.enums import Architecture
 
 CPANM_VERSION = '1.7044'
 CPANM_URL_TPL = 'https://raw.githubusercontent.com/miyagawa/cpanminus/{}/cpanm'
@@ -41,6 +42,9 @@ class OSXBootstrapper (BootstrapperBase):
         if not self.config.distro_packages_install:
             return
         self._install_perl_deps()
+        if self.config.arch == Architecture.ARM64:
+            m.message("Installing rosetta needed for some package installation scripts")
+            shell.new_call(['/usr/sbin/softwareupdate', '--install-rosetta', '--agree-to-license'])
 
     def _install_perl_deps(self):
         cpanm_installer = os.path.join(self.config.local_sources, 'cpanm')
