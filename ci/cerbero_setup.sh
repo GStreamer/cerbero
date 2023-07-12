@@ -110,9 +110,9 @@ cerbero_before_script() {
     echo "local_sources = \"$(pwd_native)/${CERBERO_SOURCES}\"" >> localconf.cbc
     echo "mingw_perl_prefix = \"${CERBERO_HOST_DIR}/cerbero-build/mingw/perl\"" >> localconf.cbc
     if [[ $CONFIG == win??.cbc ]] || [[ $CONFIG =~ uwp ]] ; then
-        # Visual Studio 2019 build tools install path
+        # Visual Studio 2022 build tools install path
         echo 'vs_install_path = "C:/BuildTools"' >> localconf.cbc
-        echo 'vs_install_version = "vs16"' >> localconf.cbc
+        echo 'vs_install_version = "vs17"' >> localconf.cbc
     fi
     if [[ "x${FDO_CI_CONCURRENT}" != "x" ]]; then
         echo "num_of_cpus = ${FDO_CI_CONCURRENT}" >> localconf.cbc
