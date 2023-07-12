@@ -29,20 +29,21 @@ use your package manager to install all other required packages during
 
 On macOS you will need to have install the following software:
 
- * XCode
- * Python 3.7+ https://www.python.org/downloads/
+* XCode
+* Python 3.7+ https://www.python.org/downloads/
 
 Cerbero will build all other required packages during [bootstrap](#Bootstrap).
 
 ### Windows Setup
 
-The initial setup on Windows is automated with the PowerShell script [bootstrap-windows][tools/bootstrap-windows.ps1].
-It installs the following tools:
-  * Visual Studio 19 Community Edition
-  * MSYS2
-  * Git
-  * Python 3
-  * Wix
+The initial setup on Windows is automated with the PowerShell script
+[bootstrap-windows][tools/bootstrap-windows.ps1]. It installs the following tools:
+
+* Visual Studio 2019 or 2022 Build Tools
+* MSYS2
+* Git
+* Python 3
+* WiX
 
 Start an admin PowerShell and run:
 
@@ -51,11 +52,18 @@ Start an admin PowerShell and run:
 $ Set-ExecutionPolicy -ExecutionPolicy Unrestricted
 
 # Run the bootstrap script
-$ .\tools\bootstrap-windows.ps
+$ .\tools\bootstrap-windows.ps1
 ```
 
-**IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows) requires a 64-bit operating system. The toolchain is only available for 64-bit and it can produce 32-bit or 64-bit binaries.
+**IMPORTANT:** If you choose to reuse an existing install of Visual Studio 2019
+or if you wish to install it yourself, please enable the Windows 11 SDK
+component by running the Visual Studio installer, clicking on "Modify" and
+searching for "Windows11SDK" in the search box. This step is not required
+when using Visual Studio 2022.
 
+**IMPORTANT:** Using cerbero on Windows with the [GCC/MinGW toolchain](docs/toolchains.md#Windows)
+requires a 64-bit operating system. The toolchain is only available for 64-bit
+and it can produce 32-bit or 64-bit binaries.
 
 # Running Cerbero
 
@@ -364,7 +372,7 @@ Create a `localconf.cbc` file and add the following:
 # Specify Visual Studio install path and version
 vs_install_path = 'C:/Path/To/Install'
 
-# This is the Visual Studio Compiler toolset version, vs16 is for Visual Studio 2019. vs15 is 2017.
+# This is the Visual Studio Compiler toolset version, vs16 is for Visual Studio 2019. vs15 is 2017, and so on
 vs_install_version = 'vs16'
 ```
 You can then run Cerbero with e.g.:
