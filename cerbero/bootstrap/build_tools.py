@@ -42,7 +42,7 @@ class BuildTools (BootstrapperBase, Fetch):
     PLAT_BUILD_TOOLS = {
         Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
                           'moltenvk-tools'],
-        Platform.WINDOWS: ['intltool', 'gperf', 'nasm'],
+        Platform.WINDOWS: ['nasm'],
         Platform.LINUX: ['intltool-m4'],
     }
 
@@ -53,7 +53,7 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.append('cargo-c')
 
         if self.config.target_platform in (Platform.IOS, Platform.WINDOWS):
-            # Used by ffmpeg and x264 on iOS, and by openn264 on Windows-ARM64
+            # Used by ffmpeg and x264 on iOS, and by openh264 on Windows-ARM64
             self.BUILD_TOOLS.append('gas-preprocessor')
 
         if self.config.platform == Platform.WINDOWS:
@@ -65,12 +65,10 @@ class BuildTools (BootstrapperBase, Fetch):
             self.BUILD_TOOLS.remove('libtool')
 
             if self.config.distro == Distro.MSYS:
-                if self.config.variants.uwp:
-                    # UWP config does not build any autotools recipes
-                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
-                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('gperf')
-            elif self.config.distro == Distro.MSYS2:
-                self.PLAT_BUILD_TOOLS[Platform.WINDOWS].remove('intltool')
+                self.PLAT_BUILD_TOOLS[Platform.WINDOWS].append('gperf')
+                # UWP config does not build any autotools recipes
+                if not self.config.variants.uwp:
+                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].append('intltool')
 
         if self.config.target_platform != Platform.LINUX and not \
            self.config.prefix_is_executable():

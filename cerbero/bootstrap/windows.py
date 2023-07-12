@@ -154,12 +154,12 @@ class MSYS2Bootstrapper(BootstrapperBase):
     Bootstrapper for native windows builds on top of MSYS2
     Installs the necessary MSYS2 packages and fixups
     '''
-    packages = ['flex', 'bison',  'intltool', 'gperf',
-                'nasm', 'make', 'diffutils',
-                # OpenSSL needs a perl version using '\' for the MSVC build
-                # and a perl version using '/' for the MinGW build
-                'mingw-w64-ucrt-x86_64-perl', 'perl',
-                ]
+    packages = [
+        'flex', 'bison', 'intltool', 'gperf', 'make', 'diffutils',
+        # OpenSSL needs a perl version using '\' for the MSVC build
+        # and a perl version using '/' for the MinGW build
+        'mingw-w64-ucrt-x86_64-perl', 'perl',
+    ]
 
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
