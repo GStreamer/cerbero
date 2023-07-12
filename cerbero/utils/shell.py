@@ -352,12 +352,14 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
         zf = zipfile.ZipFile(filepath, "r")
         zf.extractall(path=output_dir)
     elif filepath.endswith('.dmg'):
-        vol_name =  '/Volumes/' + os.path.splitext(os.path.split(filepath)[1])[0]
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        new_call(['hdiutil', 'attach', filepath], logfile=logfile)
-        new_call(['cp', '-r', vol_name, output_dir], logfile=logfile)
-        new_call(['hdiutil', 'detach', vol_name], logfile=logfile)
+        out_dir_name = os.path.splitext(os.path.split(filepath)[1])[0]
+        with tempfile.TemporaryDirectory() as vol_name:
+            output_dir = os.path.join(output_dir, out_dir_name)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            await async_call(['hdiutil', 'attach', '-readonly', '-mountpoint', vol_name, filepath], logfile=logfile, cpu_bound=False)
+            await async_call(['cp', '-r', vol_name + '/', output_dir], logfile=logfile, cpu_bound=False)
+            await async_call(['hdiutil', 'detach', vol_name], logfile=logfile, cpu_bound=False)
     else:
         raise FatalError("Unknown tarball format %s" % filepath)
 
