@@ -523,6 +523,8 @@ class Recipe(custom.GStreamer):
                 self.files_libs += ['libgstwinrt-1.0']
                 # WIC plugin supports only MSVC built for now
                 self.enable_plugin('wic', 'codecs')
+                # WGC support requires Windows 11 SDK from Visual Studio
+                self.meson_options['d3d11-wgc'] = 'enabled'
 
             self.files_libs += ['libgstd3d11-1.0']
             self.files_plugins_devel += [
