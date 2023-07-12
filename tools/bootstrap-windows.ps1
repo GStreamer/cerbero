@@ -1,6 +1,11 @@
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
 
-$msvc_2019_url = 'https://aka.ms/vs/16/release/vs_buildtools.exe'
+# Disable progress bars, which are super slow especially Invoke-WebRequest
+# which updates the progress bar for each byte
+$ProgressPreference = 'SilentlyContinue'
+
+$vs2019_url = 'https://aka.ms/vs/16/release/vs_buildtools.exe'
+$vs2022_url = 'https://aka.ms/vs/17/release/vs_buildtools.exe'
 $choco_url = 'https://chocolatey.org/install.ps1'
 
 Get-Date
@@ -33,21 +38,37 @@ C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -S -q --needed winpty perl'
 Add-Content C:\msys64\ucrt64.ini "`nMSYS2_PATH_TYPE=inherit"
 Copy-Item "data\msys2\profile.d\aliases.sh" -Destination "C:\msys64\etc\profile.d"
 
-$confirmation = Read-Host "Visual Studio 2019 build tools will be installed, do you want to proceed:[y/n]"
+$confirmation = Read-Host "Do you want to install Visual Studio build tools? [y/N] "
 if ($confirmation -eq 'y') {
+  $version = ''
+  $vs_arglist = '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
+  while (1) {
+    $version = Read-Host "Pick the Visual Studio version: 2019 or 2022? [2019/2022] "
+    if ($version -eq '2022') {
+      $vs_url = $vs2022_url
+      break
+    } elseif ($version -eq '2019') {
+      $vs_url = $vs2019_url
+      break
+    } elseif ($version -eq 'q') {
+      Write-Host "Windows Dependencies Installation Completed"
+      Exit 0
+    } else {
+      Write-Host "Selected invalid version $version, retry or press 'q' to quit"
+    }
+  }
   Get-Date
-  Write-Host "Downloading Visual Studio 2019 build tools"
-  Invoke-WebRequest -Uri $msvc_2019_url -OutFile C:\vs_buildtools.exe
+  Write-Host "Downloading Visual Studio $version build tools"
+  Invoke-WebRequest -Uri $vs_url -OutFile "$env:TEMP\vs_buildtools.exe"
 
   Get-Date
-  Write-Host "Installing Visual Studio 2019"
-  Start-Process -NoNewWindow -Wait C:\vs_buildtools.exe -ArgumentList '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
+  Write-Host "Installing Visual Studio $version build tools"
+  Start-Process -NoNewWindow -Wait "$env:TEMP\vs_buildtools.exe" -ArgumentList $vs_arglist
   if (!$?) {
-    Write-Host "Failed to install Visual Studio tools"
+    Write-Host "Failed to install Visual Studio build tools"
     Exit 1
   }
-  Remove-Item C:\vs_buildtools.exe -Force
+  Remove-Item "$env:TEMP\vs_buildtools.exe" -Force
 }
-
 
 Write-Host "Windows Dependencies Installation Completed"
