@@ -621,21 +621,20 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
         # We should remove the temporary directory
         # but there is a race with the bash process
     else:
-        tmp = tempfile.TemporaryDirectory()
-        rc_tmp = open(os.path.join(tmp.name, rc_file), 'w+')
-        rc_tmp.write(shellrc)
-        rc_tmp.flush()
-        if 'zsh' in shell:
-            env["ZDOTDIR"] = tmp.name
-            os.execlpe(shell, shell, env)
-        else:
-            # Check if the shell supports passing the rcfile
-            if os.system("%s %s %s -c echo 'test' > /dev/null 2>&1" % (shell, rc_opt, rc_tmp.name)) == 0:
-                os.execlpe(shell, shell, rc_opt, rc_tmp.name, env)
-            else:
-                env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+        with tempfile.TemporaryDirectory() as tmp:
+            rc_tmp = open(os.path.join(tmp, rc_file), 'w+')
+            rc_tmp.write(shellrc)
+            rc_tmp.flush()
+            if 'zsh' in shell:
+                env["ZDOTDIR"] = tmp.name
                 os.execlpe(shell, shell, env)
-        tmp.close()
+            else:
+                # Check if the shell supports passing the rcfile
+                if os.system("%s %s %s -c echo 'test' > /dev/null 2>&1" % (shell, rc_opt, rc_tmp.name)) == 0:
+                    os.execlpe(shell, shell, rc_opt, rc_tmp.name, env)
+                else:
+                    env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+                    os.execlpe(shell, shell, env)
 
 
 def which(pgm, path=None):
