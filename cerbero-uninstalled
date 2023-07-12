@@ -37,8 +37,17 @@ if [ "$OSTYPE" = "msys" ]; then
 fi
 
 case "$MSYS_VERSION" in
-    *1) PYTHON="py -3";;
-    *2) PYTHON="winpty py -3";;
+    1) PYTHON="py -3";;
+    2)
+        # winpty is needed to get stdin working in many cases, but it will
+        # immediately bail out if run in an environment without stdin, such as
+        # on CI.
+        if [ -n "$CI" ]; then
+            PYTHON="py -3"
+        else
+            PYTHON="winpty py -3"
+        fi
+        ;;
     *) PYTHON="python3";;
 esac
 
