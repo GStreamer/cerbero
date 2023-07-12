@@ -165,7 +165,7 @@ class MSYS2Bootstrapper(BootstrapperBase):
         super().__init__(config, offline)
 
     async def start(self, jobs=0):
-        shell.new_call(['pacman', '-Syu', '--noconfirm', '-q', '--needed'] +  self.packages)
+        shell.new_call(['pacman', '-Sy', '--noconfirm', '--needed'] +  self.packages)
 
 
 class MinGWBootstrapper(BootstrapperBase):
