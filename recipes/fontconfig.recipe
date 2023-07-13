@@ -18,6 +18,8 @@ class Recipe(recipe.Recipe):
         # Proper fix is pending, upstream issue is:
         # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/issues/247
         'fontconfig/0001-fcobjs-Remove-duplicate-function-prototypes.patch',
+        # https://gitlab.freedesktop.org/fontconfig/fontconfig/-/merge_requests/283
+        'fontconfig/0001-meson-Always-write-utf-8-files-with-LF-newlines.patch',
     ]
 
     files_libs = ['libfontconfig']
