@@ -353,7 +353,17 @@ class Config (object):
         else:
             m.message('Install prefix will be {}'.format(self.prefix))
             if self.distro == Distro.MSYS:
-                m.warning('Support for the old MSYS is now deprecated. Check the README to migrate to MSYS2 for faster build times')
+                import time
+                print('!!!!!!!!!!!!')
+                print('DEPRECATION: You are using the old MSYS which is deprecated and will be unsupported SOON!')
+                print('!!!!!!!!!!!!')
+                for i in range(0, 5):
+                    print('.', end='', flush=True)
+                    time.sleep(1)
+                print('')
+                print('!!!!!!!!!!!!')
+                print('DEPRECATION: Check the README to migrate to MSYS2 and get faster build times!')
+                print('!!!!!!!!!!!!')
 
         # Store current os.environ data
         arches = []

@@ -120,9 +120,6 @@ class BuildTools (BootstrapperBase, Fetch):
         if len(version) < 1 or int(version[0]) < 49:
             return
 
-        m.warning('detected setuptools >= 49.0.0, installing fallback site.py file. '
-            'See https://github.com/pypa/setuptools/issues/2295')
-
         # Since python-setuptools 49.0.0, site.py is not installed by
         # easy_install/setup.py anymore which breaks python installs outside
         # the system prefix.
