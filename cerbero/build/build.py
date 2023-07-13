@@ -34,6 +34,15 @@ from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, En
 from cerbero.utils import messages as m
 
 
+def get_path_minus_msys():
+    path = os.environ['PATH'].split(os.pathsep)
+    newpath = []
+    for p in path:
+        if 'C:\\msys64' not in p:
+            newpath.append(p)
+    return os.pathsep.join(newpath)
+
+
 def get_optimization_from_config(config):
     if config.variants.optimization:
         if config.target_platform in (Platform.ANDROID, Platform.IOS):
@@ -615,7 +624,7 @@ class CMake (MakefilesBase):
 
     cmake_generator = 'make'
     config_sh_needs_shell = False
-    config_sh = 'cmake'
+    config_sh = None
     configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s ' \
                     '-H%(make_dir)s ' \
                     '-B%(build_dir)s ' \
@@ -630,6 +639,8 @@ class CMake (MakefilesBase):
     def __init__(self):
         MakefilesBase.__init__(self)
         self.build_dir = os.path.join(self.build_dir, '_builddir')
+        # We do not want the MSYS2 CMake because it doesn't support MSVC
+        self.config_sh = shutil.which('cmake', path=get_path_minus_msys())
 
 
     @modify_environment
