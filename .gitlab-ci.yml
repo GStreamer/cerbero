@@ -485,9 +485,8 @@ cerbero cross-ios universal examples:
     - '2022'
   variables:
     CONFIG: 'win64.cbc'
-    ARCH: 'msvc_x86_64'
     CERBERO_HOST_DIR: "C:/cerbero"
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v visualstudio -v nowerror"
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror"
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
@@ -496,8 +495,19 @@ cerbero cross-ios universal examples:
 
 cerbero deps msvc x86_64:
   extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'msvc_x86_64'
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+
+cerbero deps mingw x86_64:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86_64'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
 
 cerbero deps msvc x86_64 msi package:
   extends: ['.cerbero deps', '.cerbero windows native']
@@ -519,8 +529,17 @@ cerbero deps msvc x86_64 msi package:
 
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86_64'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+
+build cerbero mingw x86_64:
+  extends: ['.cerbero mr', '.cerbero windows native']
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
+  when: 'manual'
 
 # FIXME: UWP build is disabled until build issues with latest GLib version are sorted out
 cerbero deps uwp universal:
