@@ -46,8 +46,8 @@ class Shell(Command):
             add_system_libs(config, env, config.env)
 
         shell.enter_build_environment(config.target_platform,
-                config.target_arch, sourcedir=None, env=env,
-                bash_completions=config.bash_completions)
+                config.target_arch, config.distro, sourcedir=None,
+                env=env, bash_completions=config.bash_completions)
 
 
 register_command(Shell)
