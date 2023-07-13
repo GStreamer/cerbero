@@ -12,6 +12,7 @@ class Package(custom.GStreamer, package.Package):
 
     files = ['ladspa:libs',
              'libltc:libs',
+             'webrtc-audio-processing:libs',
              'gst-plugins-base-1.0:plugins_effects',
              'gst-plugins-good-1.0:plugins_effects',
              'gst-plugins-ugly-1.0:plugins_effects',
@@ -24,7 +25,7 @@ class Package(custom.GStreamer, package.Package):
 
     def prepare(self):
         if not self.config.variants.visualstudio:
-            self.files += ['soundtouch:libs', 'webrtc-audio-processing:libs']
+            self.files += ['soundtouch:libs']
         if self.config.variants.uwp:
             self.files.remove('ladspa:libs')
 
