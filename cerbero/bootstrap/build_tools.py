@@ -89,20 +89,22 @@ class BuildTools (BootstrapperBase, Fetch):
         '''
         ret = []
         tools = {
-            # need cmake > 3.10.2 for out-of-source-tree builds.
-            'cmake': ('3.10.2', None),
-            # dav1d requires nasm >=2.13.02
-            'nasm': ('2.13.02', '-v'),
             # meson requires ninja >=1.8.2
             'ninja': ('1.8.2', None),
         }
         if self.config.platform in (Platform.LINUX, Platform.DARWIN):
-            for tool, (version, arg) in tools.items():
-                _, _, newer = shell.check_tool_version(tool, version, env=None, version_arg=arg)
-                if newer:
-                    self.config.system_build_tools.append(tool)
-                else:
-                    ret.append(tool)
+            tools.update({
+                # need cmake > 3.10.2 for out-of-source-tree builds.
+                'cmake': ('3.10.2', None),
+                # dav1d requires nasm >=2.13.02
+                'nasm': ('2.13.02', '-v'),
+            })
+        for tool, (version, arg) in tools.items():
+            _, _, newer = shell.check_tool_version(tool, version, env=None, version_arg=arg)
+            if newer:
+                self.config.system_build_tools.append(tool)
+            else:
+                ret.append(tool)
         return ret
 
     def _setup_env(self):
