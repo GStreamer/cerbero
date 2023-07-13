@@ -551,7 +551,7 @@ def files_checksum(paths):
     return m.digest()
 
 
-def enter_build_environment(platform, arch, sourcedir=None, bash_completions=None, env=None):
+def enter_build_environment(platform, arch, distro, sourcedir=None, bash_completions=None, env=None):
     '''
     Enters to a new shell with the build environment
     '''
@@ -561,14 +561,21 @@ source ~/{rc_file}
 fi
 {sourcedirsh}
 {prompt}
+# For some reason MSYS2 refuses to inherit PATH from the env, so force it
+if [ "$MSYSTEM" = "UCRT64" ]; then
+  PATH=$(cygpath -p "{path}")
+fi
 BASH_COMPLETION_SCRIPTS="{bash_completions}"
 BASH_COMPLETION_PATH="$CERBERO_PREFIX/share/bash-completion/completions"
 for f in $BASH_COMPLETION_SCRIPTS; do
   [ -f "$BASH_COMPLETION_PATH/$f" ] && . "$BASH_COMPLETION_PATH/$f"
 done
 '''
-    MSYSBAT =  '''
-start bash.exe --rcfile %s
+    MSYSBAT = '''
+C:\\MinGW\\msys\\1.0\\bin\\bash.exe --rcfile %s
+'''
+    MSYS2BAT =  '''
+C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c 'bash --rcfile %s'
 '''
     if sourcedir:
         sourcedirsh = 'cd ' + sourcedir
@@ -594,14 +601,18 @@ start bash.exe --rcfile %s
         prompt = 'PS1="\[\033[01;32m\][cerbero-{platform}-{arch}]\[\033[00m\] $PS1"'.format(
             platform=platform, arch=arch)
     shellrc = SHELLRC.format(rc_file=rc_file, sourcedirsh=sourcedirsh,
-        prompt=prompt, bash_completions=bash_completions)
+        prompt=prompt, bash_completions=bash_completions, path=env['PATH'])
 
     if PLATFORM == Platform.WINDOWS:
+        if distro == Distro.MSYS:
+            bat_tpl = MSYSBAT
+        else:
+            bat_tpl = MSYS2BAT
         msysbatdir = tempfile.mkdtemp()
         msysbat = os.path.join(msysbatdir, "msys.bat")
         bashrc = os.path.join(msysbatdir, "bash.rc")
         with open(msysbat, 'w+') as f:
-            f.write(MSYSBAT % bashrc)
+            f.write(bat_tpl % bashrc)
         with open(bashrc, 'w+') as f:
             f.write(shellrc)
         subprocess.check_call(msysbat, shell=True, env=env)

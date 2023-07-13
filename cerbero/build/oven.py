@@ -452,7 +452,7 @@ class Oven (object):
                 else:
                     source_dir = recipe.get_for_arch(be.arch, 'build_dir')
                 shell.enter_build_environment(self.config.target_platform,
-                        be.arch, source_dir, env=environ)
+                        be.arch, self.config.distro, source_dir, env=environ)
                 raise be
             elif action == RecoveryActions.RETRY_ALL:
                 shutil.rmtree(recipe.get_for_arch(be.arch, 'build_dir'))
