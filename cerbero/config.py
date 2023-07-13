@@ -328,15 +328,15 @@ class Config (object):
 
         self.do_setup_env()
 
-        if self.can_use_msvc():
-            m.message('Building recipes with Visual Studio {} whenever possible'
-                      .format(get_vs_year_version(self.msvc_version)))
-            if self.vs_install_path:
-                m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
 
         if self._is_build_tools_config:
             m.message('Build tools install prefix will be {}'.format(self.prefix))
         else:
+            if self.can_use_msvc():
+                m.message('Building recipes with Visual Studio {} whenever possible'
+                          .format(get_vs_year_version(self.msvc_version)))
+                if self.vs_install_path:
+                    m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
             m.message('Install prefix will be {}'.format(self.prefix))
             if self.distro == Distro.MSYS:
                 m.warning('Support for the old MSYS is now deprecated. Check the README to migrate to MSYS2 for faster build times')
