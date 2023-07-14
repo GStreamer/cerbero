@@ -113,7 +113,7 @@ cerbero_deps_script() {
     # plugins (and hence compile against gstreamer)
     local build_deps="gstreamer-1.0 gst-plugins-base-1.0 gst-plugins-good-1.0
         gst-plugins-bad-1.0 gst-plugins-ugly-1.0 gst-rtsp-server-1.0
-        gst-devtools-1.0 gst-editing-services-1.0 libnice"
+        gst-devtools-1.0 gst-editing-services-1.0 libnice gst-plugins-rs"
     # Deps that don't get picked up automatically because are only listed in
     # the package files
     local more_deps="glib-networking"
