@@ -8,52 +8,11 @@ show_ccache_sum() {
     fi
 }
 
-# XXX: This is copied and modified from the cerbero-uninstalled script
-# Use `mount` to get a list of MSYS mount points that the MSYS shell uses.
-# That's our reference point for translating from MSYS paths to Win32 paths.
-# We assume that the MSYS mount point directories are only in the filesystem
-# root. This will break if people add their own custom mount points beyond what
-# MSYS automatically creates, which is highly unlikely.
-#
-# /d -> d:/
-# /c -> c:/
-# /d/projects/cerbero -> d:/projects/cerbero/
-# /home/USERNAME/cerbero -> C:\\MinGW\\msys\\1.0/home/USERNAME/
-# /mingw -> C:\\MinGW/
-# /mingw/bin/foobar -> C:\\MinGW\\bin/foobar/
-# /tmp/baz -> C:\\Users\\USERNAME\\AppData\\Local\\Temp/baz/
-msys_dir_to_win32() {
-    set -e
-    local msys_path stripped_path mount_point path mounted_path
-    # If the path is already a native path, just return that
-    if [[ $1 == ?:/* ]] || [[ $1 == ?:\\* ]]; then
-      echo $1
-      return
-    fi
-    # Convert /c or /mingw etc to /c/ or /mingw/ etc; gives us a necessary
-    # anchor to split the path into components
-    msys_path="$1/"
-    # Strip leading slash
-    stripped_path="${msys_path#/}"
-    # Get the first path component, which may be a mount point
-    mount_point="/${stripped_path%%/*}"
-    # Get the path inside the mountp oint
-    path="/${stripped_path#*/}"
-    mounted_path="$(mount | sed -n "s|\(.*\) on $mount_point type.*|\1|p")"
-    # If it's not a mounted path (like /c or /tmp or /mingw), then it's in the
-    # general MSYS root mount
-    if [[ -z $mounted_path ]]; then
-        mounted_path="$(mount | sed -n "s|\(.*\) on / type.*|\1|p")"
-        path="$1"
-    fi
-    echo ${mounted_path}${path%/}
-}
-
 # Print the working directory in the native OS path format, but with forward
 # slashes
 pwd_native() {
     if [[ -n "$MSYSTEM" ]]; then
-        msys_dir_to_win32 "$(pwd)"
+        cygpath -m "$(pwd)"
     else
         pwd
     fi
@@ -163,10 +122,7 @@ cerbero_deps_script() {
         build_deps="$build_deps gst-libav-1.0"
         # Deps that don't get picked up automatically because they are
         # a runtime dep
-        # XXX: This is two separate comparisons because older bash (as on
-        # Cerbero's MSYS) requires `|` to be escaped, but newer bash
-        # (everywhere else) requires it to not be escaped.
-        if [[ $ARCH =~ darwin ]] || [[ $ARCH =~ msvc\|mingw ]]; then
+        if [[ $ARCH =~ darwin|msvc|mingw ]]; then
             more_deps="$more_deps pkg-config"
         fi
     fi
