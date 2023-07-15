@@ -148,6 +148,14 @@ class DistTarball(PackagerBase):
             self._write_tar(filename, package_prefix, files)
         return filename
 
+    def _compress_tar(self, tar_filename):
+        if self.compress == 'bz2':
+            compress_cmd = ['bzip2']
+        elif self.compress == 'xz':
+            compress_cmd = ['xz', '--verbose', '--threads', '0']
+        compress_cmd += ['-z', '-f', tar_filename]
+        shell.new_call(compress_cmd)
+
     def _write_tar_windows(self, filename, package_prefix, files):
         # MSYS tar is very old and creates broken archives, so we use Python's
         # tarfile module instead. However, tarfile's compression is very slow,
@@ -167,18 +175,18 @@ class DistTarball(PackagerBase):
         if self.compress == 'none':
             return
         # Compress the tarball
-        compress_cmd = ['-z', '-f', tar_filename]
-        if self.compress == 'bz2':
-            compress_cmd = ['bzip2'] + compress_cmd
-        elif self.compress == 'xz':
-            compress_cmd = ['xz', '--threads', '0'] + compress_cmd
-        shell.new_call(compress_cmd)
+        self._compress_tar(tar_filename)
 
     def _write_tar(self, filename, package_prefix, files):
-        tar_cmd = [shell.get_tar_cmd(), '-C', self.prefix, '--checkpoint=.250']
+        tar = shell.get_tar_cmd()
+        tar_cmd = [tar, '-C', self.prefix]
+        # --checkpoint is only supported by GNU tar
+        if tar == shell.TAR:
+            tar_cmd.append('--checkpoint=.250')
         # ensure we provide a unique list of files to tar to avoid
         # it creating hard links/copies
         files = sorted(set(files))
+
         if package_prefix:
             # Only transform the files (and not symbolic/hard links)
             tar_cmd += ['--transform', 'flags=r;s|^|{}/|'.format(package_prefix)]
@@ -189,15 +197,30 @@ class DistTarball(PackagerBase):
             else:
                 tar_cmd += ['--bzip2']
         elif self.compress == 'xz':
-            tar_cmd += ['--use-compress-program=xz --threads=0']
+            # bsdtar hangs when piping to an external compress-program, and
+            # --xz is very slow because it doesn't use XZ_OPT (probably uses
+            # libarchive) and single-threaded xz is 6-10x slower. So we create
+            # a plain tar using bsdtar first, then compress it with xz later.
+            filename = os.path.splitext(filename)[0]
         elif self.compress != 'none':
             raise AssertionError("Unknown tar compression: {}".format(self.compress))
+
         tar_cmd += ['-cf', filename]
-        try:
-            shell.new_call(tar_cmd + files)
-        except FatalError:
-            os.replace(filename, filename + '.partial')
-            raise
+        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+            fname = os.path.join(d, 'cerbero_files_list')
+            with open(fname, 'w', newline='\n', encoding='utf-8') as f:
+                for line in files:
+                    f.write(f'{line}\n')
+            try:
+                # Supply the files list using a file else the command can get
+                # too long to invoke, especially on Windows.
+                shell.new_call(tar_cmd + ['-T', fname])
+            except FatalError:
+                os.replace(filename, filename + '.partial')
+                raise
+        if self.compress == 'xz':
+            # We didn't compress it with tar, compress it now
+            self._compress_tar(filename)
 
 
 class Packager(object):
