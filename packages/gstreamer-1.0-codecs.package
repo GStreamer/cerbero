@@ -28,10 +28,6 @@ class Package(custom.GStreamer, package.Package):
     }
 
     def prepare(self):
-        if self.config.variants.rpi:
-            self.files.append('gst-omx-1.0:plugins_codecs')
-            self.files_devel.append('gst-omx-1.0:plugins_codecs_devel')
-
         if not self.config.variants.visualstudio:
             self.files += ['taglib:libs']
 
