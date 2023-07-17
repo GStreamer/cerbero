@@ -20,6 +20,7 @@ import os
 import sys
 import shlex
 import shutil
+import pathlib
 import argparse
 try:
     import sysconfig
@@ -43,6 +44,7 @@ from cerbero.utils import messages as m
 
 _ = gettext.gettext
 N_ = lambda x: x
+CYGPATH = shutil.which('cygpath')
 
 
 class ArgparseArgument(object):
@@ -88,7 +90,11 @@ def determine_num_of_cpus():
 
 def to_winpath(path):
     if path.startswith('/'):
-        path = '%s:%s' % (path[1], path[2:])
+        ppath = pathlib.PurePath(path)
+        if (len(ppath.parts) > 1 and ppath.parts[1] == path[1]) or not CYGPATH:
+            path = '%s:%s' % (path[1], path[2:])
+        else:
+            return shell.check_output(['cygpath', '-w', path])[:-1]
     return path.replace('/', '\\')
 
 
