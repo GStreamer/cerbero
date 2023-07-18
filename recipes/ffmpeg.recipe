@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'ffmpeg'
-    version = '5.0.1'
+    version = '5.0.3'
     licenses = [License.LGPLv2_1Plus]
     stype = SourceType.TARBALL
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = 'ef2efae259ce80a240de48ec85ecb062cecca26e4352ffb3fda562c21a93007b'
+    tarball_checksum = '04c70c377de233a4b217c2fdf76b19aeb225a287daeb2348bccd978c47b1a1db'
     patches = [
         name + '/0001-pkgconfig-fix-generation-to-use-prefix.patch',
     ]
