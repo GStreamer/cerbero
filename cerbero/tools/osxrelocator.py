@@ -79,11 +79,19 @@ class OSXRelocator(object):
         if depth > 1:
             rpaths += ['@loader_path/..', '@executable_path/..']
         existing_rpaths = self.list_rpaths(object_file)
+        # Remove absolute RPATHs, we don't want or need these
+        for p in existing_rpaths:
+            if not p.startswith('/'):
+                continue
+            cmd = [INT_CMD, '-delete_rpath', p, object_file]
+            shell.new_call(cmd, fail=False)
+        # Add relative RPATHs
         for p in rpaths:
             if p in existing_rpaths:
                 continue
             cmd = [INT_CMD, '-add_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
+        # Change dependent library names from absolute to @rpath/
         for lib in self.list_shared_libraries(object_file):
             if self.lib_prefix in lib:
                 new_lib = lib.replace(self.lib_prefix, '@rpath')
