@@ -529,14 +529,14 @@ cerbero deps msvc x86_64 msi package:
 
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
-  variables:
-    ARCH: 'mingw_x86_64'
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
 
 build cerbero mingw x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86_64'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
   script:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_script"
   when: 'manual'
