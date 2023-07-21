@@ -2,182 +2,62 @@
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 from cerbero.tools.libtool import LibtoolLibrary
+import os
 import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.12.0'
+    version = 'v1.13.0'
     stype = SourceType.TARBALL
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
-    tarball_checksum = 'f1acc15d0fd0cb431f4bf6eac32d5e932e40ea1186fe78e074254d6d003957bb'
+    tarball_checksum = 'cb2a393c9c1fae7aba76b950bb0ad393ba105409fe1a147ccd61b0aaa1501066'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
-    btype = BuildType.MAKEFILE
-    configure_tpl = "./configure --disable-dependency-tracking --prefix=%(prefix)s " \
-                    "--libdir=%(libdir)s %(options)s"
-    configure_options = "--enable-pic --as=nasm --disable-unit-tests --size-limit=16384x16384 " \
-                        "--enable-postproc --enable-multi-res-encoding --enable-temporal-denoising " \
-                        "--enable-vp9-temporal-denoising --enable-vp9-postproc --enable-vp9-highbitdepth " \
-                        "--disable-tools --disable-examples --disable-docs "
-    add_host_build_target = False
-    supports_cache_variables = False
-    can_use_configure_cache = False
-    make = ['make', 'HAVE_GNU_STRIP=no']
-    # The shell-based build system magically supports Visual Studio with the
-    # power of awesome hacks
-    can_msvc = True
+
+    btype = BuildType.MESON
+    library_type = LibraryType.STATIC
+    meson_options = {
+        'size_limit': '16384x16384',
+        'unit_tests': 'disabled',
+        'postproc': 'enabled',
+        'multi_res_encoding': 'enabled',
+        'temporal_denoising': 'enabled',
+        'vp9_temporal_denoising': 'enabled',
+        'vp9_postproc': 'enabled',
+        'vp9_highbitdepth': 'enabled',
+        'tools': 'disabled',
+        'examples': 'disabled',
+        'docs': 'disabled',
+    }
 
     patches = [
-        'libvpx/0001-build-Fix-the-min-version-flag-for-iOS-simulator-bui.patch',
-        'libvpx/0002-Include-Android-cpu-features.c-instead-of-.h.patch',
-        'libvpx/0004-Fix-pkg-config-file-library-list.patch',
-        'libvpx/0006-gen_msvs_vcxproj.sh-Select-current-Windows-SDK-if-av.patch',
-        'libvpx/0001-configure-Add-support-for-vs16-arm-arm64.patch',
-        'libvpx/0001-Add-support-for-Visual-Studio-2022.patch',
-        'libvpx/0001-libs.mk-Generate-pkgconfig-file-when-building-with-M.patch',
         'libvpx/0001-Fix-implicit-argument-conversion-on-UWP.patch',
+        'libvpx/0002-vp9_diamond_search_sad_neon-use-DECLARE_ALIGNED.patch',
+        'libvpx/0003-Add-Meson-build.patch',
     ]
 
     files_libs = ['libvpx']
     files_devel = ['include/vpx', '%(libdir)s/pkgconfig/vpx.pc']
 
-    # libvpx does not have check target
-    make_check = None
-
     def prepare(self):
-        compiler = 'gcc'
-        if self.config.target_arch == Architecture.X86_64:
-            arch = 'x86_64'
-        elif self.config.target_arch == Architecture.X86:
-            arch = 'x86'
-        elif self.config.target_arch == Architecture.ARM:
-            arch = 'arm'
-        elif self.config.target_arch == Architecture.ARMv7:
-            arch = 'armv7'
-        elif self.config.target_arch == Architecture.ARMv7S:
-            arch = 'armv7s'
-        elif self.config.target_arch == Architecture.ARM64:
-            arch = 'arm64'
-
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # make sure the linker uses the correct stdlib when building with
             # 10.13 which makes the usage of libstdc++ a hard error.
             self.append_env('LDFLAGS', '-stdlib=libc++')
-
         if self.config.target_platform == Platform.DARWIN:
-            self.configure_options += '--enable-shared '
-            if self.config.target_arch == Architecture.ARM64:
-                platform = 'darwin20'
-            else:
-                platform = 'darwin12'
+            self.library_type = LibraryType.SHARED
         elif self.config.target_platform == Platform.IOS:
-            if self.config.target_arch == Architecture.X86 or self.config.target_arch == Architecture.X86_64:
-                platform = 'iphonesimulator'
-            else:
-                platform = 'darwin'
-            if self.config.target_arch == Architecture.ARM:
-                arch = 'armv6'
             self.library_type = LibraryType.STATIC
         elif self.config.target_platform == Platform.WINDOWS:
-            # XXX: If we set CC when using msvc, libvpx runs configure checks that
-            # fail while linking. If we unset it, it's correctly auto-detected.
-            if self.using_msvc():
-                self.set_env('CC')
-            if self.config.target_arch in (Architecture.X86_64, Architecture.ARM64):
-                platform = 'win64'
-                if not self.using_msvc():
-                    # Error: invalid register for .seh_savexmm
-                    # Fix: # https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
-                    # GCC bug: # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65782
-                    self.append_env('CFLAGS', '-fno-asynchronous-unwind-tables')
-            else:
-                platform = 'win32'
-                if not self.using_msvc():
-                    self.append_env('CFLAGS', '-mstackrealign')
-            if self.using_msvc():
-                compiler = self.config.msvc_version
             self.library_type = LibraryType.STATIC
-        # FIXME:
         elif self.config.target_platform == Platform.ANDROID:
-            platform = 'android'
             self.library_type = LibraryType.STATIC
-            self.append_env('CFLAGS', '-Dandroid_getCpuFamily=vpx_android_getCpuFamily',
-                            '-Dandroid_getCpuFeatures=vpx_android_getCpuFeatures',
-                            '-Dandroid_getCpuCount=vpx_android_getCpuCount',
-                            '-Dandroid_cpuInit=vpx_android_cpuInit',
-                            '-Dandroid_cpuInitDummy=vpx_android_cpuInitDummy',
-                            '-Dandroid_getCpuIdArm=vpx_android_getCpuIdArm',
-                            '-Dandroid_setCpu=vpx_android_setCpu',
-                            '-Dandroid_setCpuArm=vpx_android_setCpuArm')
-
-            if self.config.target_arch == Architecture.ARM:
-                arch = 'armv5te'
-            elif self.config.target_arch not in [Architecture.ARMv7, Architecture.X86, Architecture.ARM64, Architecture.X86_64]:
-                raise FatalError("Unsupported Android architecture %s" % self.config.target_arch)
-            # Build system passes gcc arguments to $LD/$AS
-            self.set_env('LD', self.get_env('CC'))
-            self.set_env('AS', self.get_env('CC') + ' -c')
-            self.configure_options.replace('--as=nasm', '')
-        else:
-            self.configure_options += '--enable-shared '
-            platform = 'linux'
-            # Build system passes gcc arguments (f.ex., -m64) to $LD when
-            # checking for libraries (f.ex. -lpthread)
-            self.set_env('LD', self.get_env('CC'))
-
-        self.configure_options += ' --disable-examples '
-
-        self.configure_options += '--target=%s-%s-%s ' % (arch, platform, compiler)
-
-    async def configure(self):
-        if self.config.target_platform == Platform.ANDROID:
-            cpufeatures_path = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
-            o = os.path.join(cpufeatures_path, 'cpu-features.h')
-            f = os.path.join(self.make_dir, 'vpx_ports')
-            m.action("copying %s to %s" % (o, f), logfile=self.logfile)
-            shutil.copy(o, f)
-            f = self.make_dir
-            m.action("copying %s to %s" % (o, f), logfile=self.logfile)
-            shutil.copy(o, f)
-            o = os.path.join(cpufeatures_path, 'cpu-features.c')
-            f = os.path.join(self.make_dir, 'vpx_ports')
-            m.action("copying %s to %s" % (o, f), logfile=self.logfile)
-            shutil.copy(o, f)
-        elif self.using_msvc():
-            # Visual Studio solution hard-codes yasm
-            nasm = shell.which('nasm', path=self.config.env['PATH'])
-            shell.replace(os.path.join(self.build_dir, 'build/make/gen_msvs_vcxproj.sh'),
-                          {'yasm': nasm, '-Xvc -g cv8': '-Xvc -g -F cv8'})
-        await super().configure()
-
-    async def install(self):
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            shell.touch(os.path.join(self.build_dir, 'libvpx.a'))
-        await super().install()
+            # See https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/71
+            self.meson_options['cpu_features_path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
 
     def post_install(self):
-        if self.using_msvc():
-            if self.config.target_arch == Architecture.X86_64:
-                subdir = 'x64'
-            elif self.config.target_arch == Architecture.X86:
-                subdir = 'Win32'
-            elif self.config.target_arch == Architecture.ARM64:
-                subdir = 'ARM64'
-            elif Architecture.is_arm32(self.config.target_arch):
-                subdir = 'ARM'
-            else:
-                raise FatalError('Unsupported target arch: ' + self.config.target_arch)
-            os.replace(os.path.join(self.config.libdir, subdir, 'vpxmd.lib'),
-                       os.path.join(self.config.libdir, 'libvpx.a'))
+        # Meson does not generate la files
         LibtoolLibrary('vpx', None, None, None,
                        self.config.libdir, self.config.target_platform,
                        static_only=self.library_type == LibraryType.STATIC).save()
-
-        if self.config.target_platform == Platform.DARWIN:
-            # Fixup the id of the dylib
-            vpx_lib_with_ver = os.path.join(self.config.libdir, 'libvpx.7.dylib')
-            vpx_lib = os.path.join(self.config.libdir, 'libvpx.dylib')
-            shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib])
-            shell.new_call(['install_name_tool', '-id', vpx_lib_with_ver, vpx_lib_with_ver])
-
         super().post_install()
