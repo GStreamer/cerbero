@@ -491,6 +491,8 @@ cerbero cross-ios universal examples:
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
   before_script:
+    # Test that the powershell script works
+    - ./cerbero-uninstalled --help
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_before_script"
 
 cerbero deps msvc x86_64:
