@@ -37,9 +37,11 @@ Cerbero will build all other required packages during [bootstrap](#Bootstrap).
 ### Windows Setup
 
 The initial setup on Windows is automated with the PowerShell script
-[bootstrap-windows][tools/bootstrap-windows.ps1]. It installs the following tools:
+[bootstrap-windows](tools/bootstrap-windows.ps1). It will auto-detect and
+installs the necessary tools with [Chocolatey](https://chocolatey.org/):
 
 * Visual Studio 2019 or 2022 Build Tools
+* CMake
 * MSYS2
 * Git
 * Python 3
@@ -313,30 +315,30 @@ Note that Autotools recipes continue to require MinGW.
 
 #### Important Windows-specific Notes
 
-You should add the cerbero git directory to the list of excluded folders in your
+* MSYS2 comes with different [environments](https://www.msys2.org/docs/environments/).
+Cerbero must be run using the UCRT64, since it targets the same CRT as our toolchain.
+The UCRT64 shell can be launched with the application : `c:\msys64\ucrt64.exe`
+
+* You should add the cerbero git directory to the list of excluded folders in your
 anti-virus, or you will get random build failures when Autotools does file
 operations such as renames and deletions. It will also slow your build by
 about 3-4x.
 
-MSYS2 comes with different [environments](https://www.msys2.org/docs/environments/). Cerbero must be run using the UCRT64, since it targets the same CRT as our toolchain.
-
-The UCRT64 shell can be launched with the application : `c:\msys64\ucrt64.exe`.
-
-The path to your `$HOME` must not contain spaces. If your Windows username
-contains spaces, you can create a new directory in `/home` and execute:
-
-If you are using Windows 10, it is also highly recommended to enable "Developer
+* If you are using Windows 10, it is also highly recommended to enable "Developer
 Mode" in Windows Settings as shown below.
 
 ![Enable Developer Mode in Windows Settings](/data/images/windows-settings-developer-mode.png)
 
-```cmd
-$ echo 'export HOME=/home/newdir' > ~/.profile
-```
+* The path to your `$HOME` must not contain spaces. If your Windows username
+contains spaces, you can create a new directory in `/home` and execute:
 
-Then restart your shell and type `cd` to go to the new home directory.
+  ```cmd
+  $ echo 'export HOME=/home/newdir' > ~/.profile
+  ```
 
-Note that inside the shell, `/` is mapped to `C:\msys64`
+  Then restart your shell and type `cd` to go to the new home directory.
+
+  Note that inside the shell, `/` is mapped to `C:\msys64`
 
 # Customising Cerbero
 
