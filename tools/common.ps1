@@ -20,3 +20,38 @@ function Get-MSYS2 {
     }
   }
 }
+
+function Is-Installed($Name) {
+  $Shortcuts = Get-ChildItem -Recurse "$env:AppData\Microsoft\Windows\Start Menu" -Include *.lnk
+  $Shell = New-Object -ComObject WScript.Shell
+  foreach ($Shortcut in $Shortcuts) {
+    if ($Shortcut -clike "*\$Name.lnk") {
+      return $true
+    }
+    $WD = $Shell.CreateShortcut($Shortcut).TargetPath
+    if ($WD -clike "*\$Name.exe") {
+      return $true
+    }
+  }
+  return $false
+}
+
+function Is-Newer ($Name, $Version) {
+  $ErrorActionPreference = 'SilentlyContinue'
+  $have = (Get-Command $Name)
+  $ErrorActionPreference = 'Continue'
+  if (!$have) {
+    return $false
+  }
+  if ($have.Version -ge $Version) {
+    return $true
+  }
+
+  $have_version = $have.Version.ToString()
+  $confirm = Read-Host "$Name version $have_version is too old (need $Version), install a newer version with Choco? [Y/n] "
+  if ($confirm -eq 'n') {
+    Write-Host "Please upgrade $Name manually before running Cerbero"
+    return $true
+  }
+  return $false
+}

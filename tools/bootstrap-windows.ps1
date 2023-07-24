@@ -1,45 +1,61 @@
+# vim: set sts=2 sw=2 et :
+
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;
+
+. "$PSScriptRoot\common.ps1"
 
 # Disable progress bars, which are super slow especially Invoke-WebRequest
 # which updates the progress bar for each byte
 $ProgressPreference = 'SilentlyContinue'
 
+$cmake_req = '3.10.2'
+$git_req = '2.0' # placeholder
+$python_req = '3.7'
+$wix_req = '3.0' # placeholder
 $vs2019_url = 'https://aka.ms/vs/16/release/vs_buildtools.exe'
 $vs2022_url = 'https://aka.ms/vs/17/release/vs_buildtools.exe'
 $choco_url = 'https://chocolatey.org/install.ps1'
+$vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
 
-Get-Date
-Write-Host "Installing Chocolatey"
-Invoke-Expression ((New-Object System.Net.WebClient).DownloadString($choco_url))
-Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
-Update-SessionEnvironment
+function Check-VS {
+  if (!(Test-Path $vswhere)) {
+    return $false
+  }
 
-Write-Host "Installing vcredist140"
-choco install vcredist140
+  # Check whether we have VS 2019 or newer with the Windows 11 SDK installed
+  $json = (& $vswhere -utf8 -version 16 -nologo -format json -latest -all -prerelease -requires '*Windows11*')
+  if ($json) {
+    return $true
+  }
 
-Write-Host "Installing CMake"
-choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+  # Check whether we have a VS 2019 or newer install at all
+  $json = (& $vswhere -utf8 -version 16 -nologo -format json -latest -all -prerelease)
+  if (!$json) {
+    return $false
+  }
 
-Write-Host "Installing git"
-choco install git --params "/NoAutoCrlf /NoCredentialManager /NoShellHereIntegration /NoGuiHereIntegration /NoShellIntegration"
+  $latest = ConvertFrom-Json -InputObject "$json"
+  # VS newer than 2019, nothing special needed
+  if (!($latest.installationVersion -clike "16.*")) {
+    return $true
+  }
 
-Write-Host "Installing git-lfs"
-choco install git-lfs
+  $confirm = Read-Host "Need Windows 11 SDK with Visual Studio 2019, do you want to install it right now? [Y/n] "
+  if ($confirm -eq 'n') {
+    Write-Host "Please run the Visual Studio installer, click 'modify' and install the 'Windows 11 SDK' workload"
+    return $true
+  }
 
-Write-Host "Installing Python3"
-choco install python3
+  & $latest.properties.setupEngineFilePath modify `
+    --productId $latest.productId `
+    --channelId $latest.channelId `
+    --add Microsoft.VisualStudio.Component.Windows11SDK.22000 `
+    --quiet --nocache --norestart
 
-Write-Host "Installing Wix"
-choco install wixtoolset
+  return $true
+}
 
-Write-Host "Installing MSYS2"
-choco install msys2 --params "/InstallDir:C:\msys64"
-C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -S --needed winpty'
-Add-Content C:\msys64\ucrt64.ini "`nMSYS2_PATH_TYPE=inherit"
-Copy-Item "data\msys2\profile.d\aliases.sh" -Destination "C:\msys64\etc\profile.d"
-
-$confirmation = Read-Host "Do you want to install Visual Studio build tools? [y/N] "
-if ($confirmation -eq 'y') {
+function Install-VS {
   $version = ''
   $vs_arglist = '--wait --quiet --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
   while (1) {
@@ -52,8 +68,7 @@ if ($confirmation -eq 'y') {
       $vs_arglist += ' --add Microsoft.VisualStudio.Component.Windows11SDK.22000'
       break
     } elseif ($version -eq 'q') {
-      Write-Host "Windows Dependencies Installation Completed"
-      Exit 0
+      return $true
     } else {
       Write-Host "Selected invalid version $version, retry or press 'q' to quit"
     }
@@ -67,9 +82,76 @@ if ($confirmation -eq 'y') {
   Start-Process -NoNewWindow -Wait "$env:TEMP\vs_buildtools.exe" -ArgumentList $vs_arglist
   if (!$?) {
     Write-Host "Failed to install Visual Studio build tools"
-    Exit 1
+    return $false
   }
   Remove-Item "$env:TEMP\vs_buildtools.exe" -Force
+  return $true
+}
+
+Get-Date
+
+if (!(Is-Newer 'choco' '0.0')) {
+  Write-Host "Installing Chocolatey"
+  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString($choco_url))
+  Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+  Update-SessionEnvironment
+} else {
+  Write-Host "Found Chocolatey, upgrading it first"
+  choco upgrade -y chocolatey
+}
+
+choco feature enable --name="'useEnhancedExitCodes'"
+choco list vcredist140
+if (!$?) {
+  Write-Host "Installing vcredist140"
+  choco install -y vcredist140
+}
+
+if (!(Is-Newer 'cmake' $cmake_req)) {
+  Write-Host "CMake >= $cmake_req not found, installing..."
+  choco install -y cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+}
+
+if (!(Is-Newer 'git' $git_req)) {
+  Write-Host "git >= $git_req not found, installing..."
+  choco install -y git --params "/NoAutoCrlf /NoCredentialManager /NoShellHereIntegration /NoGuiHereIntegration /NoShellIntegration"
+}
+
+if (!(Is-Newer 'git-lfs' $git_req)) {
+  Write-Host "git-lfs not found, installing..."
+  choco install -y git-lfs
+}
+
+if (!(Is-Newer 'py' $python_req)) {
+  Write-Host "Python >= $python_req not found, installing..."
+  choco install -y python3
+}
+
+if (!(Is-Newer "$env:WIX\bin\light" $wix_req)) {
+  Write-Host "WiX >= $wix_req not found, installing..."
+  choco install -y wixtoolset
+}
+
+$MSYS2_Dir = (Get-MSYS2)
+if (!$MSYS2_Dir) {
+  Write-Host "MSYS2 not found, installing..."
+  choco install msys2 --params "/InstallDir:C:\msys64"
+}
+
+C:\msys64\usr\bin\bash -lc 'pacman -Qq winpty &>/dev/null'
+if (!$?) {
+  C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -S --needed winpty'
+}
+if (!((Get-Content "$MSYS2_Dir\ucrt64.ini") -clike "MSYS2_PATH_TYPE=inherit")) {
+  Add-Content "$MSYS2_Dir\ucrt64.ini" "`nMSYS2_PATH_TYPE=inherit"
+}
+Copy-Item "$PSScriptRoot\..\data\msys2\profile.d\aliases.sh" -Destination "$MSYS2_Dir\etc\profile.d"
+
+if (!(Check-VS)) {
+  $confirm = Read-Host "Visual Studio 2019 or 2022 not found, do you want to Visual Studio build tools now? [Y/n] "
+  if ($confirm -ne 'n' -and !(Install-VS)) {
+    exit 1
+  }
 }
 
 Write-Host "Windows Dependencies Installation Completed"
