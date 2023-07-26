@@ -136,11 +136,12 @@ $MSYS2_Dir = (Get-MSYS2)
 if (!$MSYS2_Dir) {
   Write-Host "MSYS2 not found, installing..."
   choco install msys2 --params "/InstallDir:C:\msys64"
+  $MSYS2_Dir = "C:\msys64"
 }
 
-C:\msys64\usr\bin\bash -lc 'pacman -Qq winpty &>/dev/null'
+& $MSYS2_Dir\usr\bin\bash -lc 'pacman -Qq winpty &>/dev/null'
 if (!$?) {
-  C:\msys64\usr\bin\bash -lc 'pacman --noconfirm -S --needed winpty'
+  & $MSYS2_Dir\usr\bin\bash -lc 'pacman --noconfirm -S --needed winpty'
 }
 if (!((Get-Content "$MSYS2_Dir\ucrt64.ini") -clike "MSYS2_PATH_TYPE=inherit")) {
   Add-Content "$MSYS2_Dir\ucrt64.ini" "`nMSYS2_PATH_TYPE=inherit"
