@@ -4,7 +4,7 @@
 class Recipe(custom.GStreamer):
     name = 'gst-plugins-ugly-1.0'
     btype = BuildType.MESON
-    tarball_checksum = 'ca3fb6abc9f6e981d204a736c254e50cc1786a2f5038d83023e42ea009b10246'
+    tarball_checksum = 'e761665bb3c66fb35ff3567a283b3763b494acf0fe1df8f4abeda047b22dbc55'
     meson_options = {'gpl': 'enabled',
                      # enabled plugins
                      'a52dec': 'enabled',
