@@ -34,8 +34,8 @@ from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, En
 from cerbero.utils import messages as m
 
 
-def get_path_minus_msys():
-    path = os.environ['PATH'].split(os.pathsep)
+def get_path_minus_msys(env):
+    path = env['PATH'].split(os.pathsep)
     newpath = []
     msys2_prefix = to_winpath('/')
     for p in path:
@@ -640,12 +640,10 @@ class CMake (MakefilesBase):
     def __init__(self):
         MakefilesBase.__init__(self)
         self.build_dir = os.path.join(self.build_dir, '_builddir')
-        # We do not want the MSYS2 CMake because it doesn't support MSVC
-        path = None
+        self.config_sh = 'cmake'
         if self.config.distro == Distro.MSYS2:
-            path = get_path_minus_msys()
-        self.config_sh = shutil.which('cmake', path=path)
-
+            # We do not want the MSYS2 CMake because it doesn't support MSVC
+            self.config_sh = shutil.which('cmake', path=get_path_minus_msys(self.env))
 
     @modify_environment
     async def configure(self):
