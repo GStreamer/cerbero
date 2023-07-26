@@ -90,14 +90,17 @@ function Install-VS {
 
 Get-Date
 
-if (!(Is-Newer 'choco' '0.0')) {
-  Write-Host "Installing Chocolatey"
-  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString($choco_url))
-  Import-Module "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+$choco_psm = "$env:ProgramData\chocolatey\helpers\chocolateyProfile.psm1"
+if (Test-Path $choco_psm) {
+  Import-Module $choco_psm
   Update-SessionEnvironment
-} else {
   Write-Host "Found Chocolatey, upgrading it first"
   choco upgrade -y chocolatey
+} else {
+  Write-Host "Installing Chocolatey"
+  Invoke-Expression ((New-Object System.Net.WebClient).DownloadString($choco_url))
+  Import-Module $choco_psm
+  Update-SessionEnvironment
 }
 
 choco feature enable --name="'useEnhancedExitCodes'"
