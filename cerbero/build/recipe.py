@@ -943,7 +943,9 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
         for arch, recipe in self._recipes.items():
             if step in (BuildSteps.CONFIGURE[1],) \
                or (step == BuildSteps.EXTRACT[1] \
-                   and self.stype in (source.SourceType.TARBALL,)):
+                   and self.stype in (source.SourceType.TARBALL,)) \
+               or (step == BuildSteps.COMPILE[1] \
+                   and self.btype == build.BuildType.CARGO_C):
                 tasks.append(asyncio.ensure_future(_async_run_step(recipe, step, arch)))
             else:
                 await _async_run_step(recipe, step, arch)
