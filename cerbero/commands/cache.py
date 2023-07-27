@@ -78,7 +78,7 @@ class BaseCache(Command):
 
     def get_distro_and_arch(self, config):
         distro = config.target_distro
-        arch = config.target_arch
+        target_arch = config.target_arch
         if distro == Distro.REDHAT:
             distro = 'fedora'
         if distro == Distro.OS_X:
@@ -92,7 +92,8 @@ class BaseCache(Command):
             distro = 'windows-' + toolchain
         if config.cross_compiling():
             distro = 'cross-' + distro
-        return distro, arch
+        target_distro = f'{distro}_{config.arch}'
+        return target_distro, target_arch
 
     def make_url(self, config, args, filename):
         branch = args.branch
