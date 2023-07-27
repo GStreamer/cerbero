@@ -411,6 +411,7 @@ cerbero cross-android universal examples:
   image: "ghcr.io/ystreet/macos-ventura-cerbero-main:2022-11-20"
   tags:
     - gst-mac-arm
+  when: 'manual'
 
 cerbero deps cross-macos universal arm64-host:
   extends:
