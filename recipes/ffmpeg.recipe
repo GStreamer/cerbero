@@ -9,137 +9,101 @@ class Recipe(recipe.Recipe):
     url = 'https://ffmpeg.org/releases/%(name)s-%(version)s.tar.xz'
     tarball_checksum = '57be87c22d9b49c112b6d24bc67d42508660e6b718b3db89c44e47e289137082'
     patches = [
-        name + '/0001-pkgconfig-fix-generation-to-use-prefix.patch',
+        name + '/0001-Add-Meson-build.patch',
     ]
 
-    btype = BuildType.MAKEFILE
-    configure_tpl = './configure --prefix=%(prefix)s --libdir=%(libdir)s \
-        --ar="$AR" --as="$AS" --cc="$CC" --ld="$CC" --nm="$NM" --ranlib="$RANLIB" \
-        --strip="$STRIP" --windres="$RC" \
-        --enable-static --enable-pic --enable-shared \
-        --disable-avdevice --disable-postproc --disable-swscale \
-        --disable-programs --disable-ffplay --disable-ffprobe --disable-ffmpeg \
-        --disable-encoder=flac --disable-protocols --disable-devices \
-        --disable-network --disable-hwaccels --disable-dxva2 --disable-vdpau \
-        --disable-filters --enable-filter=yadif --disable-doc --disable-d3d11va \
-        --disable-audiotoolbox --disable-videotoolbox --disable-vaapi --disable-crystalhd \
-        --disable-mediacodec --disable-mediafoundation --disable-nvenc --disable-mmal --disable-omx \
-        --disable-omx-rpi --disable-cuda --disable-cuvid --disable-libmfx \
-        --disable-libnpp --disable-iconv --disable-jni --disable-v4l2_m2m \
-        --disable-vulkan --disable-large-tests --disable-stripping \
-        --enable-optimizations --disable-nonfree --disable-version3 %(options)s'
+    btype = BuildType.MESON
+    meson_options = {
+        'avdevice': 'disabled',
+        'programs': 'disabled',
+        'flac_encoder': 'disabled',
+        'protocols': 'disabled',
+        'devices': 'disabled',
+        'network': 'disabled',
+        'hwaccels': 'disabled',
+        'dxva2': 'disabled',
+        'vdpau': 'disabled',
+        'filters': 'disabled',
+        'yadif_filter': 'enabled',
+        # Uncomment the following option once implemented in the port
+        # 'doc': 'disabled',
+        'd3d11va': 'disabled',
+        'audiotoolbox': 'disabled',
+        'videotoolbox': 'disabled',
+        'vaapi': 'disabled',
+        'crystalhd': 'disabled',
+        'mediacodec': 'disabled',
+        'mediafoundation' : 'disabled',
+        'nvenc': 'disabled',
+        'mmal': 'disabled',
+        'omx': 'disabled',
+        'omx_rpi': 'disabled',
+        'cuda': 'disabled',
+        'cuvid': 'disabled',
+        'libmfx': 'disabled',
+        'libnpp': 'disabled',
+        'libnpp': 'disabled',
+        'iconv': 'disabled',
+        'jni': 'disabled',
+        'v4l2_m2m': 'disabled',
+        'vulkan': 'disabled',
+        'tests': 'disabled', # To not waste time
+        # These two are redundant with Meson
+        # 'stripping': 'disabled',
+        # 'optimizations': 'enabled,
+        'nonfree': 'disabled',
+        'version3': 'disabled',
+    }
 
     deps = ['bzip2', 'zlib']
 
-    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter']
+    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter', 'libpostproc', 'libswscale']
     files_devel = []
 
     def prepare(self):
+        # Arch-specific flags
+        if self.config.target_arch == Architecture.X86:
+            if self.config.target_platform == Platform.IOS:
+                # Simulator doesn't like shared libs
+                self.library_type = LibraryType.STATIC
+            elif self.config.target_platform == Platform.ANDROID:
+                # ld.lld: error: relocation R_386_32 cannot be used against local symbol; recompile with -fPIC
+                # See https://github.com/FFmpeg/FFmpeg/blob/n6.0/libavutil/x86/x86inc.asm#L104-L108
+                self.meson_options['asm'] = 'disabled'
+
         # Populate self.files_devel
         files_devel_tpl = ['%(libdir)s/{}.la', '%(libdir)s/pkgconfig/{}.pc', 'include/{}']
-        # ffmpeg can only build either shared or static on Windows, not both
-        if self.config.target_platform == Platform.WINDOWS:
-            self.library_type = LibraryType.SHARED
-        else:
+        if self.library_type != LibraryType.SHARED:
             files_devel_tpl += ['%(libdir)s/{}.a']
         for lib in self.files_libs:
             self.files_devel += [tpl.format(lib) for tpl in files_devel_tpl]
 
-        # Default AS is $CC, except iOS (set below)
-        if Architecture.is_arm(self.config.target_arch):
-            if self.config.target_platform == Platform.IOS:
-                gas = self.get_env('GAS')
-                if gas:
-                    self.set_env('AS', gas)
-                    self.set_env('ASFLAGS', self.get_env('CPPFLAGS'))
-            else:
-                cc = self.get_env('CC')
-                if cc:
-                    self.set_env('AS', cc)
-
-        libavextraconf = ''
-        # Arch-specific flags
-        if self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch == Architecture.X86:
-              # libav internally aligns stacks, while Android doesn't
-                libavextraconf += " --extra-cflags='-mstackrealign'"
-            if self.config.target_arch in [Architecture.X86]:
-                # Fails to link into an android app with relocation warnings
-                # in the custom assembly
-                # https://stackoverflow.com/questions/34691970/ffmpeg-for-android-neon-build-has-text-relocations/34697703#34697703
-                # https://issuetracker.google.com/issues/37067983
-                # https://trac.ffmpeg.org/ticket/4928
-                libavextraconf += " --disable-asm"
-        elif self.config.target_platform == Platform.IOS:
-            # Some optimisations that were previously silently disabled
-            # cause warnings now. Ignore them
-            libavextraconf += " --extra-cflags='-Wno-ignored-optimization-argument' "
-            if self.config.target_arch == Architecture.X86:
-                # Fails to link in gst-libav due to text relocations in
-                # custom assembly:
-                # ld: illegal text-relocation to 'anon' in libavfilter.a(vf_yadif.o)
-                # from '_ff_yadif_filter_line_ssse3' in libavfilter.a(vf_yadif.o)
-                # for architecture i386
-                libavextraconf += ' --disable-asm  '
-
-        # On windows, being a multilib toolchain, we have to always configure
-        # the cross-prefix
-        if self.config.cross_compiling() or \
-                self.config.target_platform == Platform.WINDOWS:
-            libavextraconf += ' --enable-cross-compile'
-            target_os = self.config.target_platform
-            if target_os == Platform.WINDOWS:
-                target_os = 'mingw32'
-            elif target_os == Platform.IOS:
-                target_os = 'darwin'
-            target_arch = self.config.host.split('-', 1)[0]
-            if target_arch == 'aarch64':
-                target_arch = 'arm64'
-            libavextraconf += ' --target-os=' + target_os
-            libavextraconf += ' --arch=' + target_arch
-            libavextraconf += ' --cross-prefix={} '\
-                    .format(self.config.tools_prefix or self.config.host)
-
-        self.configure_options += libavextraconf
-        # On Windows, make fails if V=1 is passed with:
-        # `couldn't commit memory for cygwin heap, Win32 error 0`
-        if self.config.platform == Platform.WINDOWS:
-            self.make.remove('V=1')
-
-    async def configure(self):
-        await super(recipe.Recipe, self).configure()
-        libav_path = self.build_dir
-        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            if self.config.target_arch == Architecture.X86:
-                replacements = {'HAVE_EBX_AVAILABLE=yes': 'HAVE_EBX_AVAILABLE=no',
-                                'HAVE_EBX_AVAILABLE 1': 'HAVE_EBX_AVAILABLE 0',}
-                shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-        # log2 and log2f are not provided by bionic, but they are not checked
-        # properly
-        elif self.config.target_platform == Platform.ANDROID:
-                replacements = {'HAVE_LOG2 1': 'HAVE_LOG2 0',
-                                'HAVE_LOG2F 1': 'HAVE_LOG2F 0',}
-                shell.replace(os.path.join(libav_path, 'config.h'), replacements)
-
-                v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-                if self.config.target_arch in [Architecture.ARM, Architecture.ARMv7, Architecture.X86] and v < 21:
-                        replacements = {'-D_FILE_OFFSET_BITS=64': '',}
-                        shell.replace(os.path.join(libav_path, 'ffbuild', 'config.mak'), replacements)
-
     def post_install(self):
-        LibtoolLibrary('avutil', None, None, None,
-                       self.config.libdir, self.config.target_platform).save()
-        LibtoolLibrary('swresample', None, None, None,
-                       self.config.libdir, self.config.target_platform,
-                       deps=['avutil']).save()
+    # Meson does not generate la files
         LibtoolLibrary('avcodec', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['swresample', 'avutil', 'z']).save()
-        LibtoolLibrary('avformat', None, None, None,
-                       self.config.libdir, self.config.target_platform,
-                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z']).save()
+                       deps=['swresample', 'avutil', 'z'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
         LibtoolLibrary('avfilter', None, None, None,
                        self.config.libdir, self.config.target_platform,
-                       deps=['avformat', 'avcodec', 'swresample', 'avutil']).save()
+                       deps=['avformat', 'avcodec', 'swresample', 'avutil'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('avformat', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avcodec', 'swresample', 'avutil', 'bz2', 'z'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('avutil', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('postproc', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('swresample', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avutil'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('swscale', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avutil'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
         super().post_install()
