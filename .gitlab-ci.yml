@@ -479,6 +479,7 @@ cerbero deps cross-ios universal x86_64-host:
     - '.cerbero cross-ios universal'
   tags:
     - gst-ios-16
+  when: 'manual'
 
 build cerbero cross-ios universal x86_64-host:
   extends:
@@ -486,6 +487,7 @@ build cerbero cross-ios universal x86_64-host:
     - '.cerbero cross-ios universal'
   tags:
     - gst-ios-16
+  when: 'manual'
 
 #
 # Build an iOS App using the iOS binaries
@@ -532,6 +534,7 @@ cross-ios universal examples x86_64-host:
     - "build cerbero cross-ios universal x86_64-host"
   tags:
     - gst-ios-16
+  when: 'manual'
 
 cerbero cross-ios universal examples x86_64-host:
   extends:
@@ -541,6 +544,7 @@ cerbero cross-ios universal examples x86_64-host:
     - "cerbero deps cross-ios universal x86_64-host"
   tags:
     - gst-ios-16
+  when: 'manual'
 
 cross-ios universal examples arm64-host:
   extends:
