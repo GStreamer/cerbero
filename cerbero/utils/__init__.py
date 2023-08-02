@@ -344,7 +344,7 @@ Terminating.''', file=sys.stderr)
         elif d[0].strip() in ['openSUSE Tumbleweed']:
             distro = Distro.SUSE
             distro_version = DistroVersion.OPENSUSE_TUMBLEWEED
-        elif d[0].strip() in ['arch', 'Arch Linux']:
+        elif d[0].strip() in ['arch', 'Arch Linux', 'Manjaro Linux']:
             distro = Distro.ARCH
             distro_version = DistroVersion.ARCH_ROLLING
         elif d[0].strip() in ['Gentoo Base System', 'Gentoo']:
