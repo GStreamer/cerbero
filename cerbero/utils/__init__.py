@@ -741,7 +741,7 @@ class EnvVar:
                 'PKG_CONFIG_PATH', 'PKG_CONFIG_LIBDIR', 'GI_TYPELIB_PATH',
                 'XDG_DATA_DIRS', 'XDG_CONFIG_DIRS', 'GST_PLUGIN_PATH',
                 'GST_PLUGIN_PATH_1_0', 'PYTHONPATH', 'MONO_PATH', 'LIB',
-                'INCLUDE', 'PATHEXT')
+                'INCLUDE', 'PATHEXT', 'PERL5LIB')
 
     @staticmethod
     def is_arg(var):
