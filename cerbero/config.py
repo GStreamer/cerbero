@@ -58,6 +58,7 @@ RUST_TRIPLE_MAPPING = {
     (Platform.IOS, Architecture.X86_64): 'x86_64-apple-ios',
     (Platform.WINDOWS, Architecture.X86_64, 'gnu'): 'x86_64-pc-windows-gnu',
     (Platform.WINDOWS, Architecture.X86_64, 'msvc'): 'x86_64-pc-windows-msvc',
+    (Platform.WINDOWS, Architecture.ARM64, 'msvc'): 'aarch64-pc-windows-msvc',
     (Platform.WINDOWS, Architecture.X86, 'gnu'): 'i686-pc-windows-gnu',
     (Platform.WINDOWS, Architecture.X86, 'msvc'): 'i686-pc-windows-msvc',
 }
