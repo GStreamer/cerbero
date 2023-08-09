@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'cargo-c'
-    version = '0.9.22'
+    version = '0.9.23'
     stype = SourceType.TARBALL
     btype = BuildType.CARGO
-    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.22.tar.gz'
-    tarball_checksum = '6af542e3d76e4341693b2e9a9f50abf15b04d82c5f9d1b350110cfac7e914e73'
+    url = 'https://github.com/lu-zero/cargo-c/archive/refs/tags/v0.9.23.tar.gz'
+    tarball_checksum = 'bb6c119d72682095fe05fcb6b6eead33090f3eb6e71950f21b8f51a2013984ad'
     tarball_dirname = '%(name)s-%(version)s'
     # Need system openssl on Linux
     use_system_libs = True
