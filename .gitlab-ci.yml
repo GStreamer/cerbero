@@ -86,6 +86,8 @@ default:
   rules:
     # If this pipeline is triggered from gstreamer, trigger the pipeline automatically
     - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    # If this pipeline is triggered by a schedule, trigger the pipeline automatically
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
     # If this matches, it means the pipeline is running against either the main
     # or a stable branch, so make it automatic cause they need to update artifacts,
     # like the docs site or cerbero deps

@@ -145,8 +145,11 @@ cerbero_deps_script() {
     # doing something silly like [[ -n ${CERBERO_...} ]] because it will get
     # printed in the CI logs due to set -x
     if env | grep -q -e CERBERO_PRIVATE_SSH_KEY; then
-        time $CERBERO $CERBERO_ARGS gen-cache --branch "${GST_UPSTREAM_BRANCH}"
-        time $CERBERO $CERBERO_ARGS upload-cache --branch "${GST_UPSTREAM_BRANCH}"
+        # Don't generate and upload caches for scheduled pipelines on main branch
+        if [[ "x${CI_PIPELINE_SOURCE}" != "xschedule" ]]; then
+            time $CERBERO $CERBERO_ARGS gen-cache --branch "${GST_UPSTREAM_BRANCH}"
+            time $CERBERO $CERBERO_ARGS upload-cache --branch "${GST_UPSTREAM_BRANCH}"
+        fi
     fi
 
     cerbero_package_and_check
