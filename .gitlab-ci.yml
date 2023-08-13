@@ -636,6 +636,12 @@ cerbero deps msvc x86_64 msi package:
       # workaround for gitlab bug where it otherwise blocks the pipeline for manual jobs from rules
       allow_failure: true
 
+cerbero deps msvc x86 msi package:
+  extends: ['cerbero deps msvc x86_64 msi package']
+  variables:
+    ARCH: 'msvc_x86'
+    CONFIG: 'win32.cbc'
+
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
   script:
