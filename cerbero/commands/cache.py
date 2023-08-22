@@ -20,6 +20,8 @@ import os, sys
 import json
 import tempfile
 import shutil
+import pathlib
+import subprocess
 from hashlib import sha256
 
 from cerbero.commands import Command, register_command
@@ -280,15 +282,43 @@ class UploadCache(BaseCache):
         BaseCache.__init__(self, args)
 
     @staticmethod
-    def msys_scp_path_hack(config, path):
-        '''
-        MSYS scp doesn't understand Windows-style paths like C:/ for the src
-        argument. It tries to resolve `C:` as a network hostname. Convert C:/
-        to /C/ when running on Windows.
-        '''
-        if config.platform == Platform.WINDOWS:
-            return to_unixpath(path)
-        return path
+    def get_upload_cmds(config):
+        # MSYS ssh is very old, and fails to upload to the latest Debian stable
+        # on the artifact server with a cryptic: no hostkey algo
+        # So, let's just use the openssh-client that ships with Windows 10 in
+        # that case. We continue to use MSYS2 ssh because it's less brain-dead.
+        if config.distro == Distro.MSYS:
+            openssh_dir = pathlib.Path('C:/Windows/System32/OpenSSH')
+            ssh = openssh_dir / 'ssh.exe'
+            scp = openssh_dir / 'scp.exe'
+            if ssh.exists() and scp.exists():
+                return (str(ssh), str(scp))
+        return ('ssh', 'scp')
+
+    @staticmethod
+    def get_private_key_args(config, tmpdir, private_key):
+        # OpenSSH shipped by Windows rejects private keys we create using
+        # Python for having perms that are too lax, because the perms argument
+        # to os.open does nothing on Windows. Fixing the perms needs you to
+        # click on UI things. The only workaround is to pass it to ssh-agent
+        # over stdin. I have no words to describe how annoying this was to fix.
+        args = []
+        if config.distro == Distro.MSYS:
+            cmd = f'''Get-Service ssh-agent | Set-Service -StartupType Manual;
+                Start-Service ssh-agent;
+                Get-Service ssh-agent'''
+            shell.new_call(['powershell', '-Command', cmd], verbose=True)
+            ssh_add = ['C:\Windows\System32\OpenSSH\ssh-add.exe', '-k', '-']
+            p = subprocess.Popen(ssh_add, stdin=subprocess.PIPE, stderr=subprocess.STDOUT)
+            p.communicate(input=bytes(private_key, encoding='utf-8'))
+        else:
+            private_key_path = os.path.join(tmpdir, 'id_rsa')
+            with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
+                f.write(private_key)
+                f.write("\n")
+                f.close()
+            args = ['-i', private_key_path]
+        return args
 
     def upload_dep(self, config, args, deps):
         sha = self.get_git_sha(args.commit)
@@ -298,8 +328,7 @@ class UploadCache(BaseCache):
                 return
 
         tmpdir = tempfile.mkdtemp()
-        private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY');
-        private_key_path = os.path.join(tmpdir, 'id_rsa')
+        private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY')
 
         deps_filepath = self.get_deps_filepath(config)
         log_filepath = self.get_log_filepath(config)
@@ -310,13 +339,10 @@ class UploadCache(BaseCache):
             # Setup tempory private key from env
             ssh_opt = ['-o', 'StrictHostKeyChecking=no']
             if private_key:
-                with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
-                    f.write(private_key)
-                    f.write("\n")
-                    f.close()
-                ssh_opt += ['-i', private_key_path]
-            ssh_cmd = ['ssh'] + ssh_opt + [self.ssh_address]
-            scp_cmd = ['scp'] + ssh_opt
+                ssh_opt += self.get_private_key_args(config, tmpdir, private_key)
+            ssh, scp = self.get_upload_cmds(config)
+            ssh_cmd = [ssh] + ssh_opt + [self.ssh_address]
+            scp_cmd = [scp] + ssh_opt
 
             # Ensure directory sturcture is in place
             branch = args.branch
@@ -326,14 +352,12 @@ class UploadCache(BaseCache):
 
             # Upload the deps files first
             remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, deps_filepath),
-                                      '%s:%s' % (self.ssh_address, remote_deps_filepath)],
+            shell.new_call(scp_cmd + [deps_filepath, '%s:%s' % (self.ssh_address, remote_deps_filepath)],
                            verbose=True)
 
             # Upload the new log
             remote_tmp_log_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-            shell.new_call(scp_cmd + [self.msys_scp_path_hack(config, log_filepath),
-                                      '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)],
+            shell.new_call(scp_cmd + [log_filepath, '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)],
                            verbose=True)
 
             # Override the new log in a way that we reduce the risk of corrupted
