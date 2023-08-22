@@ -430,6 +430,7 @@ cerbero deps cross-macos universal x86_64-host:
     - '.cerbero cross-macos universal'
   tags:
     - gst-macos-13
+  when: 'manual'
 
 build cerbero cross-macos universal x86_64-host:
   extends:
@@ -437,6 +438,7 @@ build cerbero cross-macos universal x86_64-host:
     - '.cerbero cross-macos universal'
   tags:
     - gst-macos-13
+  when: 'manual'
 
 #
 # Cerbero iOS build
