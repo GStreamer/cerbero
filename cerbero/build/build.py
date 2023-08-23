@@ -1196,7 +1196,7 @@ class Cargo(Build, ModifyEnvBase):
         # crashes.
         # TODO: We don't ship split debuginfo (dSYM, PDB) in the packages yet:
         # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
-        if self.config.target_platform in (Platform.WINDOWS, Platform.DARWIN):
+        if self.config.target_platform == Platform.DARWIN or self.using_msvc():
             self.rustc_debuginfo = 'split'
         else:
             self.rustc_debuginfo = 'strip'
