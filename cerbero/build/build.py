@@ -1277,19 +1277,15 @@ class Cargo(Build, ModifyEnvBase):
             self.append_config_toml(s)
 
         if self.config.target_platform == Platform.ANDROID:
-            linker = self.env['LD']
+            # Use the compiler's forwarding
+            # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
+            linker = self.get_env('RUSTC_LINKER')
             link_args = []
-            args = iter(shlex.split(self.env['LDFLAGS']))
+            args = iter(shlex.split(self.get_env('LDFLAGS', '')))
             # We need to extract necessary linker flags from LDFLAGS which is
             # passed to the compiler
             for arg in args:
-                if arg.startswith('-L'):
-                    link_args.append(arg)
-                elif arg == '-gcc-toolchain':
-                    arg = next(args)
-                    for l in glob.glob(f'{arg}/lib/gcc/*/*/libgcc.a'):
-                        d = os.path.dirname(l)
-                        link_args.append(f'-L{d}')
+                link_args += ['-C', f"link-args={arg}"]
             s = f'[target.{self.target_triple}]\n' \
                 f'linker = "{linker}"\n' \
                 f'rustflags = {link_args!r}\n'
