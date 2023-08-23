@@ -18,6 +18,7 @@ class Recipe(recipe.Recipe):
       'pango/0001-pango-layout-fix-build-with-Android-s-bionic-libc.patch',
       # https://gitlab.gnome.org/GNOME/pango/-/merge_requests/694
       'pango/0001-win32-Fix-32bit-build-crash-on-DeleteDC.patch',
+      'pango/0004-utils-Check-that-help2man-can-run-if-found.patch',
     ]
 
     files_libs = ['libpangocairo-1.0', 'libpango-1.0', 'libpangoft2-1.0']

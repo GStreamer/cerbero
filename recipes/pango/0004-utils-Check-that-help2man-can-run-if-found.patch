@@ -1,0 +1,28 @@
+From e87408cf591369f48cfcb283464e20f2ce225bc6 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 23 Aug 2023 11:35:19 -0300
+Subject: [PATCH 4/4] utils: Check that help2man can run if found
+
+Meson doesn't check Perl interpreters for consistency, leading to
+modules being not found only at run time.
+---
+ utils/meson.build | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/utils/meson.build b/utils/meson.build
+index 5072c1c..81db65e 100644
+--- a/utils/meson.build
++++ b/utils/meson.build
+@@ -42,7 +42,8 @@ pango_view = executable('pango-view', pango_view_sources,
+ help2man = find_program('help2man', required: false)
+ # help2man has to run pango-view to generate the man page, which it can't do if
+ # we're cross building. We also can't tell help2man what exe wrapper to use.
+-if help2man.found() and not meson.is_cross_build()
++
++if help2man.found() and run_command(help2man, '--version', check: false).returncode() == 0 and not meson.is_cross_build()
+   help2man_opts = [
+     '--no-info',
+     '--section=1',
+-- 
+2.40.1.windows.1
+
