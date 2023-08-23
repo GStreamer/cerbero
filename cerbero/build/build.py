@@ -1275,6 +1275,9 @@ class Cargo(Build, ModifyEnvBase):
         if self.rustc_debuginfo == 'strip':
             s = '\n[profile.release]\nstrip = "debuginfo"\n'
             self.append_config_toml(s)
+        else:
+            s = '\n[profile.release]\nsplit-debuginfo = "packed"\n'
+            self.append_config_toml(s)
 
         if self.config.target_platform == Platform.ANDROID:
             # Use the compiler's forwarding
