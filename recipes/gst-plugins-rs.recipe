@@ -150,6 +150,7 @@ class Recipe(recipe.Recipe):
                 src = os.path.join(self.config.prefix, d, f'{name[3:]}')
                 dst = os.path.join(self.config.prefix, f)
                 os.replace(src, dst)
-                # .dll.a also needs renaming
-                os.replace(src + '.a', dst + '.a')
+                # if there's a .dll.a it also needs renaming
+                if os.path.exists(src + '.a'):
+                    os.copy(src + '.a', dst + '.a')
         super().post_install()
