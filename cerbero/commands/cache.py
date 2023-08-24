@@ -286,8 +286,8 @@ class UploadCache(BaseCache):
         # MSYS ssh is very old, and fails to upload to the latest Debian stable
         # on the artifact server with a cryptic: no hostkey algo
         # So, let's just use the openssh-client that ships with Windows 10 in
-        # that case. We continue to use MSYS2 ssh because it's less brain-dead.
-        if config.distro == Distro.MSYS:
+        # that case.
+        if config.platform == Platform.WINDOWS:
             openssh_dir = pathlib.Path('C:/Windows/System32/OpenSSH')
             ssh = openssh_dir / 'ssh.exe'
             scp = openssh_dir / 'scp.exe'
@@ -303,7 +303,7 @@ class UploadCache(BaseCache):
         # click on UI things. The only workaround is to pass it to ssh-agent
         # over stdin. I have no words to describe how annoying this was to fix.
         args = []
-        if config.distro == Distro.MSYS:
+        if config.platform == Platform.WINDOWS:
             cmd = f'''Get-Service ssh-agent | Set-Service -StartupType Manual;
                 Start-Service ssh-agent;
                 Get-Service ssh-agent'''
