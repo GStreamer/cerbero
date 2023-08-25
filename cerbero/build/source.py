@@ -58,6 +58,7 @@ class Source (object):
     '''
 
     patches = None
+    cargo_lock = None
     strip = 1
     offline = False
     _extract_locks = collections.defaultdict(asyncio.Lock)
@@ -102,6 +103,9 @@ class Source (object):
 
     async def cargo_vendor(self, offline):
         logfile = get_logfile(self)
+        if self.cargo_lock:
+            shutil.copy(self.relative_path(self.cargo_lock),
+                        os.path.join(self.config_src_dir, 'Cargo.lock'))
         if not self.have_cargo_lock_file():
             await self.retry_run(self.cargo_update, offline, logfile)
         m.log('Running cargo vendor to vendor sources', logfile=logfile)
