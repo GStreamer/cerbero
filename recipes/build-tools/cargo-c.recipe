@@ -23,3 +23,8 @@ class Recipe(recipe.Recipe):
     }
 
     files_bins = ['cargo-capi', 'cargo-cbuild', 'cargo-cinstall', 'cargo-ctest']
+
+    def prepare(self):
+        if self.config.platform == Platform.DARWIN:
+            self.set_env('OPENSSL_LIB_DIR', self.config.libdir)
+            self.set_env('OPENSSL_INCLUDE_DIR', os.path.join(self.config.prefix, 'include'))
