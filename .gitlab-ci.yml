@@ -408,7 +408,7 @@ cerbero cross-android universal examples:
       - "gstreamer-1.0-devel-1.*.pkg"
 
 .cerbero macos arm64 image:
-  image: "ghcr.io/ystreet/macos-ventura-cerbero-main:2023-07-27.5"
+  image: "registry.freedesktop.org/gstreamer/cerbero/macos-arm64/13-ventura:2023-07-27.5"
   tags:
     - gst-mac-arm
 
