@@ -16,7 +16,9 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+import functools
 import os
+import subprocess
 import sys
 import shlex
 import shutil
@@ -76,8 +78,8 @@ def user_is_root():
         ''' Check if the user running the process is root '''
         return hasattr(os, 'getuid') and os.getuid() == 0
 
-
-def determine_num_of_cpus():
+@functools.lru_cache()
+def determine_num_of_cpus() -> int:
     ''' Number of virtual or logical CPUs on this system '''
 
     # Python 2.6+
@@ -87,6 +89,26 @@ def determine_num_of_cpus():
     except (ImportError, NotImplementedError):
         return 1
 
+@functools.lru_cache()
+def determine_total_ram() -> int:
+    ''' Total amount of RAM in this system, in bytes '''
+
+    platform = system_info()[0]
+
+    if platform == Platform.DARWIN:
+        ram_size_query = subprocess.run([shutil.which('sysctl'), '-n', 'hw.memsize'], stdout=subprocess.PIPE, text=True)
+        if ram_size_query.returncode() == 0:
+            return int(ram_size_query.stdout.strip())
+    elif platform == Platform.WINDOWS:
+        ram_size_query = subprocess.run([shutil.which('wmic'), 'computersystem', 'get', 'totalphysicalmemory'], stdout=subprocess.PIPE, text=True)
+        if ram_size_query.returncode() == 0:
+            return int(ram_size_query.stdout.strip())
+    elif platform == Platform.LINUX:
+        ram_size_query = subprocess.run([shutil.which('free'), '-b'], stdout=subprocess.PIPE, text=True)
+        if ram_size_query.returncode() == 0:
+            return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
+
+    return 4 << 30 # Assume 4GB
 
 def to_winpath(path):
     if path.startswith('/'):
