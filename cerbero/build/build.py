@@ -22,6 +22,7 @@ import glob
 import copy
 import shutil
 import shlex
+import sys
 import subprocess
 import asyncio
 from pathlib import Path
@@ -29,7 +30,7 @@ from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
-from cerbero.utils import shell, to_unixpath, to_winpath, add_system_libs
+from cerbero.utils import shell, to_unixpath, to_winpath, add_system_libs, determine_num_of_cpus, determine_total_ram
 from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
 
@@ -385,7 +386,6 @@ class Build(object):
                 and self.config.num_of_cpus > 1:
             return self.config.num_of_cpus
         return None
-
 
 class CustomBuild(Build, ModifyEnvBase):
 
@@ -1215,14 +1215,35 @@ class Cargo(Build, ModifyEnvBase):
                     self.config.target_platform, self.using_msvc())
         except FatalError as e:
             raise InvalidRecipeError(self.name, e.msg)
+
         self.cargo_args = [
             '--verbose', '--offline',
             '--target', self.target_triple,
             '--target-dir', self.cargo_dir,
         ]
+
+        jobs = self.num_of_rustc_jobs()
+        if jobs is not None:
+            self.cargo_args += [f'-j{jobs}']
+
         # https://github.com/lu-zero/cargo-c/issues/278
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.library_type = LibraryType.STATIC
+
+    def num_of_rustc_jobs(self):
+        '''
+        Restricts parallelism with <= 4 threads or with <= 8 GB RAM.
+        '''
+        ncpu = super().num_of_cpus()
+        num_of_jobs = determine_num_of_cpus()
+        has_enough_ram = determine_total_ram() > (8 * 1 << 30) # 8 GB
+
+        if num_of_jobs <= 4 or not has_enough_ram:
+            return 1
+        elif ncpu:
+            return ncpu
+
+        return None
 
     def get_cargo_features_args(self):
         if not self.cargo_features:
