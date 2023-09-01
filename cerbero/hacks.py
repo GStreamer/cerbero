@@ -184,7 +184,7 @@ class ZipFile(zipfile_ZipFile):
         # destination.
         try:
             os.unlink(targetpath)
-        except FileNotFoundError:
+        except (FileNotFoundError, IsADirectoryError):
             pass
 
         if member.is_dir():
