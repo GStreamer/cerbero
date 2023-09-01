@@ -1,6 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
 from cerbero.utils import messages as m
+from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
@@ -155,4 +156,9 @@ class Recipe(recipe.Recipe):
                 # if there's a .dll.a it also needs renaming
                 if os.path.exists(src + '.a'):
                     os.copy(src + '.a', dst + '.a')
+            libraries = [f for f in self.devel_files_list()
+                         if f.endswith('.a')]
+            for f in libraries:
+                if self.config.target_platform == Platform.ANDROID:
+                    shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all', '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
         super().post_install()
