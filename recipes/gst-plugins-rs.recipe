@@ -2,6 +2,12 @@
 from custom import GStreamer
 from cerbero.utils import messages as m
 from cerbero.utils import shell
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import tempfile
+
 
 class Recipe(recipe.Recipe):
     name = 'gst-plugins-rs'
@@ -160,5 +166,88 @@ class Recipe(recipe.Recipe):
                          if f.endswith('.a')]
             for f in libraries:
                 if self.config.target_platform == Platform.ANDROID:
-                    shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all', '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
+                    shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all',
+                                   '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
+                elif self.config.target_platform == Platform.IOS:
+                    # Unlike ELF, for MachO Apple wants you to do
+                    # Single-Object Prelink
+                    source = Path(f)
+
+                    # Only global symbols
+                    # Only symbol names
+                    # Use portable output format
+                    # Skip undefined symbols
+                    # Write pathname of the object file
+                    manifest = subprocess.check_output([self.get_llvm_tool('nm'),
+                                                        '-gjPUA', source.absolute()],
+                                                       universal_newlines=True,
+                                                       text=True)
+
+                    # Now we need to match the symbols to the pattern
+
+                    # Here's the catch: Apple strip is silly enough to be unable to
+                    # -undefined suppress a .o because of the -two_level_namespace being
+                    # the default post-10.1. So we need to determine which objects have
+                    # matching symbols. The rest can be safely stripped.
+
+                    # The symbol listing format is as follows:
+                    #  ./libgstrswebrtc.a[gstrswebrtc-3a8116aacab254c2.2u9b7sba8k2fvc9v.rcgu.o]: _gst_plugin_rswebrtc_get_desc T 500 0
+                    # Field 1 has the object name between brackets.
+                    # Field 2 is the symbol name.
+                    symbol_pattern = re.compile('_gst_plugin_*')
+
+                    with tempfile.TemporaryDirectory(prefix='cerbero', dir=self.config.home_dir) as tmp:
+                        # List those symbols that will be kept
+                        symbols_to_keep = set()
+
+                        for line in manifest.stdout.splitlines():
+                            data = line.split(' ')
+                            symbol = data[1]
+
+                            if symbol_pattern.match(symbol):
+                                symbols_to_keep.add(symbol)
+
+                        module = (
+                            Path(tmp) / source.name).with_suffix('.symbols')
+
+                        with module.open('w', encoding='utf-8') as f:
+                            f.write('# Stripped by Cerbero\n')
+
+                            for symbol in symbols_to_keep:
+                                f.write(f'{symbol}\n')
+
+                        m.log(f'Symbols to preserve in {source.absolute()}:')
+                        for symbol in symbols_to_keep:
+                            m.log(f'\t{symbol}')
+
+                        # Unpack archive
+                        m.log(f"Unpacking {source.absolute()} with ar")
+                        shell.new_call(
+                            [shutil.which('ar'), 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
+
+                        # Now everything is flat in the pwd
+                        print('Performing Single-Object Prelinking')
+                        prelinked_obj = (
+                            Path(tmp) / source.name).with_suffix('.prelinked.o')
+                        cmd = ' '.join([
+                            shutil.which('ld'),
+                            '-r',
+                            '-exported_symbols_list',
+                            module,
+                            '-o',
+                            prelinked_obj,
+                            '*.o',
+                        ])
+                        shell.new_call(cmd, cmd_dir=tmp,
+                                       shell=True, logfile=self.logfile)
+
+                        # With the stripping done, all files now need to be rearchived
+                        dest = Path(tmp) / source.name
+                        print(f'Repacking library to {dest.absolute()}')
+                        shell.new_call([shutil.which('libtool'), '-static', '-o',
+                                       dest.absolute(), prelinked_obj.absolute()], logfile=self.logfile)
+
+                        # And now we paper over
+                        os.replace(dest.absolute(), f)
+
         super().post_install()
