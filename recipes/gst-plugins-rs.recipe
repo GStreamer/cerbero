@@ -138,7 +138,8 @@ class Recipe(recipe.Recipe):
             name = os.path.basename(f)
             src = os.path.join(self.config.libdir, 'pkgconfig', name)
             dst = os.path.join(self.config.prefix, f)
-            os.replace(src, dst)
+            if os.path.exists(src):
+                os.copy(src, dst)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
         if not self.using_msvc():
@@ -149,7 +150,8 @@ class Recipe(recipe.Recipe):
                 d = os.path.dirname(f)
                 src = os.path.join(self.config.prefix, d, f'{name[3:]}')
                 dst = os.path.join(self.config.prefix, f)
-                os.replace(src, dst)
+                if os.path.exists(src):
+                    os.copy(src, dst)
                 # if there's a .dll.a it also needs renaming
                 if os.path.exists(src + '.a'):
                     os.copy(src + '.a', dst + '.a')
