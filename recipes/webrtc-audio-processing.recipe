@@ -5,12 +5,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'webrtc-audio-processing'
-    version = '1.1'
+    version = '1.3'
     licenses = [{License.BSD_like: ['COPYING']}]
     btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'https://freedesktop.org/software/pulseaudio/%(name)s/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '59b3d47aedd32dd6fe4836478499ebb7c5bcad815f14dccddbbd70e752a99e5f'
+    tarball_checksum = '95552fc17faa0202133707bbb3727e8c2cf64d4266fe31bfdb2298d769c1db75'
 
     # webrtc-audio-processing links to abseil statically
     meson_subprojects = ['abseil-cpp']
@@ -24,8 +24,6 @@ class Recipe(recipe.Recipe):
         '%(libdir)s/pkgconfig/webrtc-audio-coding-1.pc',
         '%(libdir)s/pkgconfig/webrtc-audio-processing-1.pc',
     ]
-
-    patches = [name + '/0001-meson-Update-to-latest-wrap-install-required-absl-he.patch']
 
     def prepare(self):
         if self.config.target_platform == Platform.ANDROID:
