@@ -137,7 +137,10 @@ class BuildTools (BootstrapperBase, Fetch):
         shutil.copy(src_file, py_prefix / 'site.py')
 
     def setup_venv(self):
-        venv.create(self.config.build_tools_prefix, with_pip=True)
+        # Python relies on symlinks to work on macOS.
+        # See e.g.
+        # https://github.com/python-poetry/install.python-poetry.org/issues/24#issuecomment-1226504499
+        venv.create(self.config.build_tools_prefix, symlinks=self.config.platform != Platform.WINDOWS, with_pip=True)
         if self.config.platform == Platform.WINDOWS:
             # Python insists on using Scripts instead of bin on Windows for
             # scripts. Insist back, and use bin again.
