@@ -181,6 +181,9 @@ class Recipe(recipe.Recipe):
                     'glib/uwp/0025-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
                 ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            # https://gitlab.gnome.org/GNOME/glib/-/issues/2902
+            self.meson_options.update({'tests': 'false'})
+
             self.files_devel.append('%(libdir)s/glib-2.0/include/*/glibconfig.h')
             arch = self.config.target_arch
             if arch == Architecture.X86:
