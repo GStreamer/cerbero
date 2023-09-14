@@ -4,6 +4,94 @@ Date: Tue, 18 Apr 2023 22:16:49 -0300
 Subject: [PATCH] Add Meson build
 
 For more information, please see https://github.com/dragonCodecs/libvpx/tree/old-meson
+---
+ LICENSE.meson.md                            |   51 +
+ README.meson.md                             |   98 +
+ examples/meson.build                        |  452 +++++
+ examples/samples.dox.in                     |   14 +
+ meson.build                                 | 1900 +++++++++++++++++++
+ meson/arm_neon.h                            |   17 +
+ meson/capture_build_options.py              |   18 +
+ meson/check_test_data.py                    |   45 +
+ meson/gen_def.py                            |  100 +
+ meson/generate_component_dox.py             |   25 +
+ meson/generate_doxy.py                      |   28 +
+ meson/generate_doxyfile.py                  |   44 +
+ meson/parse_options.py                      |  171 ++
+ meson/parse_sources.py                      |  219 +++
+ meson/patch-configure.diff                  |   60 +
+ meson/stdinout_wrapper.py                   |   19 +
+ meson/transform_config.py                   |   53 +
+ meson/transform_config_asm.py               |   37 +
+ meson/vpx_config.c                          |   10 +
+ meson_options.txt                           |   49 +
+ subprojects/.gitignore                      |    3 +
+ subprojects/nasm-mac.wrap                   |    9 +
+ subprojects/nasm-win.wrap                   |    9 +
+ subprojects/packagefiles/nasm/meson.build   |   13 +
+ subprojects/packagefiles/nasm/patch_nasm.py |   15 +
+ subprojects/packagefiles/perl/meson.build   |    8 +
+ subprojects/perl-win.wrap                   |   10 +
+ test/meson.build                            | 1593 ++++++++++++++++
+ third_party/googletest/meson.build          |   33 +
+ third_party/libwebm/meson.build             |   52 +
+ third_party/libyuv/meson.build              |   49 +
+ third_party/meson.build                     |    9 +
+ tools/meson.build                           |   67 +
+ tools/tools.dox.in                          |    5 +
+ vp8/meson.build                             |  554 ++++++
+ vp9/meson.build                             |  595 ++++++
+ vpx/meson.build                             |  136 ++
+ vpx_dsp/arm/meson.build                     |   12 +
+ vpx_dsp/meson.build                         | 1206 ++++++++++++
+ vpx_mem/meson.build                         |   41 +
+ vpx_ports/meson.build                       |  157 ++
+ vpx_scale/meson.build                       |   71 +
+ vpx_util/meson.build                        |   61 +
+ 43 files changed, 8118 insertions(+)
+ create mode 100644 LICENSE.meson.md
+ create mode 100644 README.meson.md
+ create mode 100644 examples/meson.build
+ create mode 100644 examples/samples.dox.in
+ create mode 100644 meson.build
+ create mode 100644 meson/arm_neon.h
+ create mode 100644 meson/capture_build_options.py
+ create mode 100644 meson/check_test_data.py
+ create mode 100755 meson/gen_def.py
+ create mode 100644 meson/generate_component_dox.py
+ create mode 100644 meson/generate_doxy.py
+ create mode 100644 meson/generate_doxyfile.py
+ create mode 100644 meson/parse_options.py
+ create mode 100644 meson/parse_sources.py
+ create mode 100644 meson/patch-configure.diff
+ create mode 100644 meson/stdinout_wrapper.py
+ create mode 100644 meson/transform_config.py
+ create mode 100644 meson/transform_config_asm.py
+ create mode 100644 meson/vpx_config.c
+ create mode 100644 meson_options.txt
+ create mode 100644 subprojects/.gitignore
+ create mode 100644 subprojects/nasm-mac.wrap
+ create mode 100644 subprojects/nasm-win.wrap
+ create mode 100644 subprojects/packagefiles/nasm/meson.build
+ create mode 100644 subprojects/packagefiles/nasm/patch_nasm.py
+ create mode 100644 subprojects/packagefiles/perl/meson.build
+ create mode 100644 subprojects/perl-win.wrap
+ create mode 100644 test/meson.build
+ create mode 100644 third_party/googletest/meson.build
+ create mode 100644 third_party/libwebm/meson.build
+ create mode 100644 third_party/libyuv/meson.build
+ create mode 100644 third_party/meson.build
+ create mode 100644 tools/meson.build
+ create mode 100644 tools/tools.dox.in
+ create mode 100644 vp8/meson.build
+ create mode 100644 vp9/meson.build
+ create mode 100644 vpx/meson.build
+ create mode 100644 vpx_dsp/arm/meson.build
+ create mode 100644 vpx_dsp/meson.build
+ create mode 100644 vpx_mem/meson.build
+ create mode 100644 vpx_ports/meson.build
+ create mode 100644 vpx_scale/meson.build
+ create mode 100644 vpx_util/meson.build
 
 diff --git a/LICENSE.meson.md b/LICENSE.meson.md
 new file mode 100644
@@ -8382,7 +8470,7 @@ index 000000000..e39384421
 +
 +codec_headers += util_headers_sources
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 5d2c1a67d071bf14eab072219713a5e8942607b6 Mon Sep 17 00:00:00 2001
@@ -8390,6 +8478,12 @@ From: "L. E. Segovia" <amy@amyspark.me>
 Date: Tue, 18 Apr 2023 22:59:00 -0300
 Subject: [PATCH] Add GitLab CI
 
+---
+ .gitlab-ci.yml             | 335 +++++++++++++++++++++++++++++++++++++
+ ci/vs-arm64-cross-file.txt |  14 ++
+ 2 files changed, 349 insertions(+)
+ create mode 100644 .gitlab-ci.yml
+ create mode 100644 ci/vs-arm64-cross-file.txt
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 new file mode 100644
@@ -8753,7 +8847,7 @@ index 000000000..acfc9b5ad
 +cpp       = 'cl'
 +pkgconfig = 'false'
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 9d995f84e5baafe7070af3439fb172ab2751327b Mon Sep 17 00:00:00 2001
@@ -8762,6 +8856,11 @@ Date: Wed, 17 May 2023 20:08:48 -0300
 Subject: [PATCH] meson: Protect build system handled features with combo
  choices
 
+---
+ meson.build            | 34 +++++++++++++--------------
+ meson/parse_options.py | 29 ++++++++++++++++++++---
+ meson_options.txt      | 52 +++++++++++++++++++++---------------------
+ 3 files changed, 68 insertions(+), 47 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 78578a1f5..a2eeacf17 100644
@@ -8972,7 +9071,7 @@ index 7dc06dea5..c94df9ccf 100644
  option('vp8_decoder', type: 'feature', description: 'Enable the VP8 decoder only')
  option('vp9_encoder', type: 'feature', description: 'Enable the VP9 encoder only')
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From d6ed8fb620902f415871cd40f76b5788d40a9f82 Mon Sep 17 00:00:00 2001
@@ -8981,6 +9080,9 @@ Date: Tue, 4 Jul 2023 22:05:03 -0300
 Subject: [PATCH] meson: Fix dependency override's library name
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/4>
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index a2eeacf17..29a14dc86 100644
@@ -8996,7 +9098,7 @@ index a2eeacf17..29a14dc86 100644
  pkg = import('pkgconfig')
  
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 53674ba858612470cb63e23a88b0cbfa0ba44523 Mon Sep 17 00:00:00 2001
@@ -9005,6 +9107,10 @@ Date: Wed, 5 Jul 2023 14:16:50 -0300
 Subject: [PATCH] meson: Port thumb to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ build/make/thumb.py | 52 +++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
+ create mode 100755 build/make/thumb.py
 
 diff --git a/build/make/thumb.py b/build/make/thumb.py
 new file mode 100755
@@ -9065,7 +9171,7 @@ index 000000000..7b2c0c329
 +
 +    return l
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From f0590267f41f70a780e5bf584d4f389e26ddbfa8 Mon Sep 17 00:00:00 2001
@@ -9074,6 +9180,11 @@ Date: Wed, 5 Jul 2023 14:15:44 -0300
 Subject: [PATCH] meson: Port ads2armasm_ms to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ build/make/ads2armasm_ms.py | 33 +++++++++++++++++++++++++++++++++
+ meson.build                 |  2 +-
+ 2 files changed, 34 insertions(+), 1 deletion(-)
+ create mode 100755 build/make/ads2armasm_ms.py
 
 diff --git a/build/make/ads2armasm_ms.py b/build/make/ads2armasm_ms.py
 new file mode 100755
@@ -9128,7 +9239,7 @@ index 29a14dc86..18c05df82 100644
  			as_sfx = '.masm'
  			features.set('multithread', false)
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 9036099d143d9ee6867b7ea720b6b77aa186beba Mon Sep 17 00:00:00 2001
@@ -9137,6 +9248,11 @@ Date: Wed, 5 Jul 2023 14:15:55 -0300
 Subject: [PATCH] meson: Port ads2gas_apple to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ build/make/ads2gas_apple.py | 98 +++++++++++++++++++++++++++++++++++++
+ meson.build                 |  2 +-
+ 2 files changed, 99 insertions(+), 1 deletion(-)
+ create mode 100755 build/make/ads2gas_apple.py
 
 diff --git a/build/make/ads2gas_apple.py b/build/make/ads2gas_apple.py
 new file mode 100755
@@ -9256,7 +9372,7 @@ index 18c05df82..375740507 100644
  	elif tgt_os == 'linux'
  		features.set('linux', true)
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 08600713dff2b4e9651e2e12c0b97bd28c04e931 Mon Sep 17 00:00:00 2001
@@ -9265,6 +9381,11 @@ Date: Wed, 5 Jul 2023 14:16:44 -0300
 Subject: [PATCH] meson: Port ads2gas to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ build/make/ads2gas.py | 140 ++++++++++++++++++++++++++++++++++++++++++
+ meson.build           |   2 +-
+ 2 files changed, 141 insertions(+), 1 deletion(-)
+ create mode 100755 build/make/ads2gas.py
 
 diff --git a/build/make/ads2gas.py b/build/make/ads2gas.py
 new file mode 100755
@@ -9426,7 +9547,7 @@ index 375740507..4ab8451b8 100644
  		as_sfx = '.S'
  
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 631ed2cbd07ae7af6288d5875960ed5b0c86931a Mon Sep 17 00:00:00 2001
@@ -9435,6 +9556,19 @@ Date: Fri, 7 Jul 2023 22:10:48 -0300
 Subject: [PATCH] meson: Port rtcd.pl to Python
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ build/make/rtcd.py           |  436 +++++++++
+ meson.build                  |   14 +-
+ vp8/common/rtcd_defs.py      |  248 +++++
+ vp9/common/vp9_rtcd_defs.py  |  214 +++++
+ vpx_dsp/vpx_dsp_rtcd_defs.py | 1655 ++++++++++++++++++++++++++++++++++
+ vpx_scale/vpx_scale_rtcd.py  |   45 +
+ 6 files changed, 2605 insertions(+), 7 deletions(-)
+ create mode 100755 build/make/rtcd.py
+ create mode 100755 vp8/common/rtcd_defs.py
+ create mode 100755 vp9/common/vp9_rtcd_defs.py
+ create mode 100755 vpx_dsp/vpx_dsp_rtcd_defs.py
+ create mode 100755 vpx_scale/vpx_scale_rtcd.py
 
 diff --git a/build/make/rtcd.py b/build/make/rtcd.py
 new file mode 100755
@@ -12132,7 +12266,7 @@ index 000000000..c881053a3
 +    add_proto(*qw('void vpx_extend_frame_inner_borders'), "struct yv12_buffer_config *ybf")
 +    specialize(*qw('vpx_extend_frame_inner_borders dspr2'))
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From e8960d50b78adcb71534463a3ccf63aa5f4678cb Mon Sep 17 00:00:00 2001
@@ -12143,6 +12277,18 @@ Subject: [PATCH] Remove Perl as a dependency
 Fixes #1
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ .gitlab-ci.yml                            |  7 ++-----
+ meson.build                               | 10 +---------
+ subprojects/packagefiles/perl/meson.build |  8 --------
+ subprojects/perl-win.wrap                 | 10 ----------
+ vp8/meson.build                           |  2 +-
+ vp9/meson.build                           |  2 +-
+ vpx_dsp/meson.build                       |  2 +-
+ vpx_scale/meson.build                     |  2 +-
+ 8 files changed, 7 insertions(+), 36 deletions(-)
+ delete mode 100644 subprojects/packagefiles/perl/meson.build
+ delete mode 100644 subprojects/perl-win.wrap
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 251278731..872c5dfaf 100644
@@ -12301,7 +12447,7 @@ index c35d8830e..22a13650c 100644
  
  codec_rtcds += {
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 689a1b361101452cf50ad325f47f29603ccef473 Mon Sep 17 00:00:00 2001
@@ -12310,6 +12456,13 @@ Date: Sat, 8 Jul 2023 19:39:55 +0000
 Subject: [PATCH] meson: Add test for rtcd generation parity
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/5>
+---
+ meson.build           | 34 +++++++++++++++++++++++++++++++---
+ vp8/meson.build       |  8 +++-----
+ vp9/meson.build       |  9 ++++-----
+ vpx_dsp/meson.build   |  8 +++-----
+ vpx_scale/meson.build |  8 +++-----
+ 5 files changed, 44 insertions(+), 23 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 9d7a8a9a2..2d64b1184 100644
@@ -12458,7 +12611,7 @@ index 22a13650c..1450d97d7 100644
 -codec_headers += vpx_scale_rtcd_defs
 +codec_headers += files(vpx_scale_rtcd_defs)
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From dd7d5fa6f34df3c78542da4eeef1cfd830ad3e6a Mon Sep 17 00:00:00 2001
@@ -12467,6 +12620,30 @@ Date: Tue, 18 Jul 2023 10:57:25 -0300
 Subject: [PATCH] Backport NASM to GStreamer's manual execution and install
 
 Closes !3
+---
+ meson.build                                 | 60 ++++++++++------
+ subprojects/.gitignore                      |  2 -
+ subprojects/nasm-mac.wrap                   |  9 ---
+ subprojects/nasm-win.wrap                   |  9 ---
+ subprojects/nasm/.gitignore                 |  2 +
+ subprojects/nasm/download-binary.py         | 76 +++++++++++++++++++++
+ subprojects/nasm/meson.build                | 41 +++++++++++
+ subprojects/nasm/patch_nasm.py              | 15 ++++
+ subprojects/packagefiles/nasm/meson.build   | 13 ----
+ subprojects/packagefiles/nasm/patch_nasm.py | 15 ----
+ vp8/meson.build                             | 38 ++++++++---
+ vp9/meson.build                             | 38 ++++++++---
+ vpx_dsp/meson.build                         | 18 +++--
+ vpx_ports/meson.build                       | 22 +++---
+ 14 files changed, 256 insertions(+), 102 deletions(-)
+ delete mode 100644 subprojects/nasm-mac.wrap
+ delete mode 100644 subprojects/nasm-win.wrap
+ create mode 100644 subprojects/nasm/.gitignore
+ create mode 100755 subprojects/nasm/download-binary.py
+ create mode 100644 subprojects/nasm/meson.build
+ create mode 100755 subprojects/nasm/patch_nasm.py
+ delete mode 100644 subprojects/packagefiles/nasm/meson.build
+ delete mode 100644 subprojects/packagefiles/nasm/patch_nasm.py
 
 diff --git a/meson.build b/meson.build
 index 2d64b1184..4f9cde607 100644
@@ -13025,7 +13202,7 @@ index febfda80c..961ed54bd 100644
  		codec_srcs += comp_sources
  	endif
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 56d124f9b6a47b0dcc9c86cc8d5f5e8faa870e39 Mon Sep 17 00:00:00 2001
@@ -13035,6 +13212,9 @@ Subject: [PATCH] meson: Work around Meson bug when using @SOURCE_DIR@ in a
  subproject
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/7>
+---
+ meson.build | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 4f9cde607..5365af788 100644
@@ -13058,7 +13238,7 @@ index 4f9cde607..5365af788 100644
  	)
  elif asm_conversion_exe.found()
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From b61cfc48a81547e3f9e6b0aabf20c49b8ba8b8b2 Mon Sep 17 00:00:00 2001
@@ -13068,6 +13248,11 @@ Subject: [PATCH] meson: Fix several typos discovered when testing for Cerbero
  integration
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/8>
+---
+ meson.build         |  4 ++--
+ vp9/meson.build     |  4 ++--
+ vpx_dsp/meson.build | 12 ++++++------
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 5365af788..111c44cee 100644
@@ -13165,7 +13350,7 @@ index 182b14c11..04ec4b5d7 100644
  	else
  		codec_headers += comp_sources
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From dd3c30ef972094ff82b78963e1ead6016fc6f87d Mon Sep 17 00:00:00 2001
@@ -13179,6 +13364,9 @@ See:
 https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/8>
+---
+ meson.build | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/meson.build b/meson.build
 index 111c44cee..a237c3edf 100644
@@ -13200,7 +13388,7 @@ index 111c44cee..a237c3edf 100644
  
  codec_arch_prereqs = []
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 88723553bc84ce4b237e4986e85a6ac76f943275 Mon Sep 17 00:00:00 2001
@@ -13209,6 +13397,9 @@ Date: Sun, 30 Jul 2023 16:03:48 +0100
 Subject: [PATCH] ci: bump macos and ios images
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/9>
+---
+ .gitlab-ci.yml | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 872c5dfaf..c4f27d483 100644
@@ -13231,7 +13422,7 @@ index 872c5dfaf..c4f27d483 100644
      - |
        cat > ios-cross-file.txt <<EOF
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From db447e8b40177aefd5d38d197b85c67b3ad873f9 Mon Sep 17 00:00:00 2001
@@ -13240,6 +13431,9 @@ Date: Fri, 4 Aug 2023 23:09:33 +0000
 Subject: [PATCH] meson: Implement header installation
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ meson.build | 35 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
 diff --git a/meson.build b/meson.build
 index a237c3edf..d34c07045 100644
@@ -13288,7 +13482,7 @@ index a237c3edf..d34c07045 100644
  	link_with: libvpx,
  	dependencies: extra_libs,
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 5709e126a71cd40fce52110c10e7289b60b42904 Mon Sep 17 00:00:00 2001
@@ -13297,6 +13491,14 @@ Date: Fri, 4 Aug 2023 21:35:07 -0300
 Subject: [PATCH] meson: Fix internal flags not superseding toolchain's
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ examples/meson.build               |  30 +++++++
+ meson.build                        | 131 ++++++++++++++---------------
+ third_party/googletest/meson.build |   5 +-
+ third_party/libwebm/meson.build    |   5 +-
+ third_party/libyuv/meson.build     |   3 +-
+ tools/meson.build                  |   3 +-
+ 6 files changed, 104 insertions(+), 73 deletions(-)
 
 diff --git a/examples/meson.build b/examples/meson.build
 index 9c3df73ab..9b511686e 100644
@@ -13837,7 +14039,7 @@ index c46c8358b..47c9ee831 100644
  	dependencies: libvpx_dep,
  	install: get_option('install_bins'),
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 3d03b7f932d65c889da954de62306605c8d75a0e Mon Sep 17 00:00:00 2001
@@ -13846,6 +14048,9 @@ Date: Fri, 4 Aug 2023 21:48:05 -0300
 Subject: [PATCH] meson: Fix another typo discovered by Cerbero's
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ vpx_dsp/meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/vpx_dsp/meson.build b/vpx_dsp/meson.build
 index 04ec4b5d7..d8c83297c 100644
@@ -13861,7 +14066,7 @@ index 04ec4b5d7..d8c83297c 100644
  		),
  	}
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 6ee5fcba336808bec88285fc46d092af0ba0ff4b Mon Sep 17 00:00:00 2001
@@ -13875,6 +14080,11 @@ Content-Transfer-Encoding: 8bit
 With credits to Tim-Philipp Müller for the cpu-features lookup.
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ .gitlab-ci.yml    |  3 ++-
+ meson.build       | 40 +++++++++++++++++++++++++++++++++++++++-
+ meson_options.txt |  5 +++++
+ 3 files changed, 46 insertions(+), 2 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index c4f27d483..11fc1536a 100644
@@ -13980,7 +14190,7 @@ index c94df9ccf..100d17ad8 100644
 +  description : 'Path to platform-specific cpu-features.[ch] for systems that do not provide it (e.g. Android)',
 +)
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 510c6132fdeaeaa368294c8b453de4b3920674de Mon Sep 17 00:00:00 2001
@@ -13989,6 +14199,9 @@ Date: Sat, 5 Aug 2023 00:12:48 -0300
 Subject: [PATCH] meson: Fix missing PIC detection
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ meson.build | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 3105f67f2..2dd5730ca 100644
@@ -14012,7 +14225,7 @@ index 3105f67f2..2dd5730ca 100644
  		# must disable the warning to allow linking with lld. Unlike gold, ld which
  		# will silently allow text relocations, lld support must be explicit.
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From b0b6317f5079ce35002166b7c078643f4f2f49bf Mon Sep 17 00:00:00 2001
@@ -14021,6 +14234,9 @@ Date: Sat, 5 Aug 2023 00:10:23 -0300
 Subject: [PATCH] meson: Fix iOS Simulator build
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/10>
+---
+ meson.build | 49 +++++++++++++++++++++++++++----------------------
+ 1 file changed, 27 insertions(+), 22 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 2dd5730ca..3a72512cf 100644
@@ -14049,12 +14265,18 @@ index 2dd5730ca..3a72512cf 100644
 -	if tgt_os == 'darwin'
 -		# Detect if iOS, tvOS...
 -		xcrun_exe = find_program('xcrun', required: true)
--
++	# Detect if iOS, tvOS...
++	xcrun_exe = find_program('xcrun', required: true)
+ 
 -		# The only one actually used is the iPhone simulator-- see later
 -		# is_ios = c.get_define('TARGET_OS_MAC', prefix: '#include <TargetConditionals.h>')
 -		# is_tvos = c.get_define('TARGET_OS_TV', prefix: '#include <TargetConditionals.h>')
 -		is_simulator = c.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>')
--
++	# The only one actually used is the iPhone simulator-- see later
++	# is_ios = c.get_define('TARGET_OS_IOS', prefix: '#include <TargetConditionals.h>')
++	# is_tvos = c.get_define('TARGET_OS_TV', prefix: '#include <TargetConditionals.h>')
++	is_simulator = c.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>')
+ 
 -		# if is_ios.to_int() == 1
 -		# 	tgt_os = 'ios'
 -		# elif is_tvos.to_int() == 1
@@ -14063,14 +14285,6 @@ index 2dd5730ca..3a72512cf 100644
 -		if is_simulator.to_int() == 1
 -			tgt_os = 'iphonesimulator'
 -		endif
-+	# Detect if iOS, tvOS...
-+	xcrun_exe = find_program('xcrun', required: true)
-+
-+	# The only one actually used is the iPhone simulator-- see later
-+	# is_ios = c.get_define('TARGET_OS_IOS', prefix: '#include <TargetConditionals.h>')
-+	# is_tvos = c.get_define('TARGET_OS_TV', prefix: '#include <TargetConditionals.h>')
-+	is_simulator = c.get_define('TARGET_OS_SIMULATOR', prefix: '#include <TargetConditionals.h>')
-+
 +	# if is_ios.to_int() == 1
 +	# 	tgt_os = 'ios'
 +	# elif is_tvos.to_int() == 1
@@ -14132,7 +14346,7 @@ index 2dd5730ca..3a72512cf 100644
  		vs_module_defs: vpx_def,
  		install: features.get('install_libs'),
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 7d41e474c4ba3be47a262275935cbd9e582e1a28 Mon Sep 17 00:00:00 2001
@@ -14141,6 +14355,9 @@ Date: Mon, 7 Aug 2023 19:58:03 -0300
 Subject: [PATCH] meson: Allow introspection on feature flags
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/11>
+---
+ meson.build | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 3a72512cf..f177428f7 100644
@@ -14173,7 +14390,7 @@ index 3a72512cf..f177428f7 100644
  
  meson.override_dependency('vpx', libvpx_dep)
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 90d26fac0d895969a82cd873ad36e39737104c44 Mon Sep 17 00:00:00 2001
@@ -14182,6 +14399,9 @@ Date: Thu, 10 Aug 2023 22:59:26 -0300
 Subject: [PATCH] ci: Update Android jobs to R22b
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/12>
+---
+ .gitlab-ci.yml | 13 ++++++-------
+ 1 file changed, 6 insertions(+), 7 deletions(-)
 
 diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
 index 11fc1536a..54145dc9f 100644
@@ -14222,7 +14442,7 @@ index 11fc1536a..54145dc9f 100644
        pkgconfig = 'false'
        EOF
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From ce75861fbe41fef96ffc6ef23011ae77fdf4759c Mon Sep 17 00:00:00 2001
@@ -14234,6 +14454,10 @@ This is yet another instance of Meson calling Ninja from the root
 project's build directory, which mucks with the output of custom_target.
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/14>
+---
+ meson.build                | 1 +
+ meson/generate_doxyfile.py | 3 ++-
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index f177428f7..33618f9c7 100644
@@ -14269,7 +14493,7 @@ index edea48a6c..5ceb1b5b4 100644
  		paths_to_strip: str = ' '.join([f.as_posix() for f in args.strip])
  		f.write(f'STRIP_FROM_PATH += {paths_to_strip}\n')
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From 4d3e1ba334c9672f9df754672785f1127500a147 Mon Sep 17 00:00:00 2001
@@ -14281,6 +14505,9 @@ Subject: [PATCH] meson: Fix pthreads detection failure not disabling
 See gstreamer/gstreamer#2905
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/13>
+---
+ meson.build | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/meson.build b/meson.build
 index 33618f9c7..8ae4f7dee 100644
@@ -14306,7 +14533,7 @@ index 33618f9c7..8ae4f7dee 100644
  		features.set('pthread_h', false)
  	endif
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From c43209801cc0c780871b41ced55aad4819002b4d Mon Sep 17 00:00:00 2001
@@ -14320,6 +14547,28 @@ running the script through the Python executable.
 See gstreamer/cerbero#450
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/15>
+---
+ meson/capture_build_options.py  | 0
+ meson/check_test_data.py        | 0
+ meson/generate_component_dox.py | 0
+ meson/generate_doxy.py          | 0
+ meson/generate_doxyfile.py      | 0
+ meson/parse_options.py          | 0
+ meson/parse_sources.py          | 0
+ meson/stdinout_wrapper.py       | 0
+ meson/transform_config.py       | 0
+ meson/transform_config_asm.py   | 0
+ 10 files changed, 0 insertions(+), 0 deletions(-)
+ mode change 100644 => 100755 meson/capture_build_options.py
+ mode change 100644 => 100755 meson/check_test_data.py
+ mode change 100644 => 100755 meson/generate_component_dox.py
+ mode change 100644 => 100755 meson/generate_doxy.py
+ mode change 100644 => 100755 meson/generate_doxyfile.py
+ mode change 100644 => 100755 meson/parse_options.py
+ mode change 100644 => 100755 meson/parse_sources.py
+ mode change 100644 => 100755 meson/stdinout_wrapper.py
+ mode change 100644 => 100755 meson/transform_config.py
+ mode change 100644 => 100755 meson/transform_config_asm.py
 
 diff --git a/meson/capture_build_options.py b/meson/capture_build_options.py
 old mode 100644
@@ -14352,7 +14601,7 @@ diff --git a/meson/transform_config_asm.py b/meson/transform_config_asm.py
 old mode 100644
 new mode 100755
 -- 
-2.40.1
+2.42.0.windows.2
 
 
 From dea607b5da600f8a24a17e147c015dc53611f68e Mon Sep 17 00:00:00 2001
@@ -14366,6 +14615,9 @@ should also produce a valid executable.
 See gstreamer/cerbero#450
 
 Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/16>
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
 index 8ae4f7dee..79ebb514c 100644
@@ -14381,28 +14633,5 @@ index 8ae4f7dee..79ebb514c 100644
  		#include <stddef.h>
  		int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }''',
 -- 
-2.40.1
-
-
-From b2bd418b6f3bc28eedd8f94681cac5c1e4e5eb00 Mon Sep 17 00:00:00 2001
-From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
-Date: Mon, 9 Oct 2023 18:43:36 +0100
-Subject: [PATCH] meson: update to 1.13.1
-
-
-diff --git a/meson.build b/meson.build
-index 79ebb514c..09b9859f1 100644
---- a/meson.build
-+++ b/meson.build
-@@ -4,7 +4,7 @@
- project(
- 	'libvpx',
- 	'c', 'cpp',
--	version: '1.13.0',
-+	version: '1.13.1',
- 	default_options: [
- 		# Enforce c89 for c files. Don't be too strict about it though. Allow
- 		# gnu extensions like "//" for comments.
--- 
-2.40.1
+2.42.0.windows.2
 
