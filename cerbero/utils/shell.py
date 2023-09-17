@@ -186,7 +186,7 @@ def check_output(cmd, cmd_dir=None, fail=True, logfile=None, env=None, quiet=Fal
     return o
 
 
-def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False):
+def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False, interactive=False, shell=False):
     cmd = _cmd_string_to_array(cmd, env)
     if logfile:
         logfile.write(f'Running command {cmd!r} in {cmd_dir}\n')
@@ -200,7 +200,7 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False
     try:
         subprocess.check_call(cmd, cwd=cmd_dir, env=env,
                               stdout=logfile, stderr=subprocess.STDOUT,
-                              stdin=stdin)
+                              stdin=stdin, shell=shell)
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
         if not fail:
