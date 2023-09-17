@@ -41,7 +41,7 @@ class RustBootstrapper(BootstrapperBase):
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
     CHANNEL_URL_TPL = '{server}/dist/channel-rust-{version}.toml'
-    COMPONENTS = ('cargo', 'rustc', 'rust-std')
+    COMPONENTS = ('cargo', 'rustc', 'rust-std', 'llvm-tools-preview')
     # Update from https://pypi.org/project/tomli/#files
     TOMLI_URL = 'https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz'
     DOWNLOAD_CHECKSUMS = {
@@ -203,7 +203,8 @@ class RustBootstrapper(BootstrapperBase):
         st = os.stat(self.rustup)
         os.chmod(self.rustup, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         rustup_args = [self.rustup, '-y', '-v', '--no-modify-path',
-                '--default-host', self.build_triple, '--profile', 'minimal']
+                '--default-host', self.build_triple, '--profile', 'minimal',
+                '--component', 'llvm-tools-preview']
         for triple in self.target_triples:
             rustup_args += ['--target', triple]
         rustup_env = self.get_rustup_env()
