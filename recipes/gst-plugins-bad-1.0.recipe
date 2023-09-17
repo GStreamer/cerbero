@@ -512,6 +512,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['d3d11'] = 'enabled'
+            self.meson_options['d3d12'] = 'disabled'
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
@@ -525,6 +526,7 @@ class Recipe(custom.GStreamer):
                 self.enable_plugin('wic', 'codecs')
                 # WGC support requires Windows 11 SDK from Visual Studio
                 self.meson_options['d3d11-wgc'] = 'enabled'
+                self.enable_plugin('d3d12', 'sys')
 
             self.files_libs += ['libgstd3d11-1.0']
             self.files_plugins_devel += [
@@ -532,6 +534,10 @@ class Recipe(custom.GStreamer):
                 '%(libdir)s/gstreamer-1.0/include/gst/d3d11',
                 '%(libdir)s/pkgconfig/gstreamer-d3d11-1.0.pc',
             ]
+
+            # Decoder baseclass library for d3d11 and d3d12 plugins
+            self.files_libs += ['libgstdxva-1.0']
+
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')
             self.enable_plugin('win32ipc', 'sys')
