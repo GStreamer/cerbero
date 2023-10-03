@@ -41,6 +41,8 @@ class Recipe(recipe.Recipe):
             self.library_type = LibraryType.STATIC
         if self.config.cross_compiling() and self.config.target_platform not in [Platform.WINDOWS, Platform.DARWIN]:
             self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS_EXITCODE=0'
+        if self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' -DCOMPILER_SUPPORTS_SYMBOL_MAPS=TRUE'
 
     async def extract(self):
         await super().extract()
