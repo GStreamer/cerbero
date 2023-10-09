@@ -7,11 +7,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'libvpx'
-    version = 'v1.13.0'
+    version = 'v1.13.1'
     stype = SourceType.TARBALL
     url = 'https://github.com/webmproject/libvpx/archive/%(version)s.tar.gz'
     tarball_dirname = 'libvpx-' + version[1:]
-    tarball_checksum = 'cb2a393c9c1fae7aba76b950bb0ad393ba105409fe1a147ccd61b0aaa1501066'
+    tarball_checksum = '00dae80465567272abd077f59355f95ac91d7809a2d3006f9ace2637dd429d14'
     licenses = [{License.BSD: ['LICENSE'], License.Misc: ['PATENTS']}]
 
     btype = BuildType.MESON
