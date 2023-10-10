@@ -1,4 +1,4 @@
-From 18348bd65ce67bcd6f85e309f126792a96732943 Mon Sep 17 00:00:00 2001
+From 67a5aa982df5bdc9bd73d0e465ef141895e7575f Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 1 Sep 2022 21:33:29 +0530
 Subject: [PATCH] Fix linking with Android NDK linker
@@ -10,11 +10,11 @@ the other linker arguments passed by cargo do not have a -Wl prefix.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/target.rs b/src/target.rs
-index 0cc2018..4c9d369 100644
+index 975fde5..e1d5a58 100644
 --- a/src/target.rs
 +++ b/src/target.rs
-@@ -70,7 +70,7 @@ impl Target {
-         let env = &self.env;
+@@ -76,7 +76,7 @@ impl Target {
+         };
  
          if os == "android" {
 -            lines.push(format!("-Wl,-soname,lib{lib_name}.so"));
@@ -23,5 +23,5 @@ index 0cc2018..4c9d369 100644
              || os == "freebsd"
              || os == "dragonfly"
 -- 
-2.39.1
+2.41.0
 
