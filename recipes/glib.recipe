@@ -47,6 +47,8 @@ class Recipe(recipe.Recipe):
         'glib/0001-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
         # From post-2.74.4 glib upstream (remove when bumping version)
         'glib/0001-gthread-posix-need-to-include-errno.h.patch',
+        # Upstreamed since 2.75 (remove when bumping version)
+        'glib/0001-giomodule-Automatically-detect-modules-on-macOS.patch',
     ]
 
     files_libs = [
