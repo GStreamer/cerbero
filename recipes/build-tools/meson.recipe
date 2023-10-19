@@ -5,20 +5,15 @@ from pathlib import PurePath, Path
 
 class Recipe(recipe.Recipe):
     name = 'meson'
-    version = '1.1.1'
+    version = '1.2.3'
     licenses = [License.Apachev2]
     btype = BuildType.CUSTOM
     stype = SourceType.TARBALL
     url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
-    tarball_checksum = 'd04b541f97ca439fb82fab7d0d480988be4bd4e62563a5ca35fadb5400727b1c'
+    tarball_checksum = '4533a43c34548edd1f63a276a42690fce15bde9409bcf20c4b8fa3d7e4d7cac1'
 
     files_bin = ['bin/meson']
     files_python = []
-
-    patches = [
-        # https://github.com/mesonbuild/meson/pull/11101
-        'meson/0001-dependencies-qt-add-support-for-Qt-frameworks-refere.patch'
-    ]
 
     async def install(self):
         # setup.py barfs if using posix paths on Windows
