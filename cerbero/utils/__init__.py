@@ -365,7 +365,8 @@ Terminating.''', file=sys.stderr)
                 '8': DistroVersion.WINDOWS_8,
                 'post2012Server': DistroVersion.WINDOWS_8_1,
                 '8.1': DistroVersion.WINDOWS_8_1,
-                '10': DistroVersion.WINDOWS_10}
+                '10': DistroVersion.WINDOWS_10,
+                '11': DistroVersion.WINDOWS_11}
         if win32_ver in dmap:
             distro_version = dmap[win32_ver]
         else:

@@ -136,6 +136,7 @@ class DistroVersion:
     WINDOWS_8 = 'windows_08'
     WINDOWS_8_1 = 'windows_08_1'
     WINDOWS_10 = 'windows_10'
+    WINDOWS_11 = 'windows_11'
     OS_X_MAVERICKS = 'osx_mavericks'
     OS_X_MOUNTAIN_LION = 'osx_mountain_lion'
     OS_X_YOSEMITE = 'osx_yosemite'
