@@ -37,6 +37,7 @@ from pathlib import Path, PurePath
 from cerbero.enums import CERBERO_VERSION, Platform, Distro
 from cerbero.utils import _, system_info, split_version, CerberoSemaphore
 from cerbero.utils import messages as m
+from cerbero.utils import to_winpath
 from cerbero.errors import CommandError, FatalError
 
 
@@ -405,13 +406,13 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
                'ProgressPreference -Value \'SilentlyContinue\'; ' \
                f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} ' \
                '-Method Get -Uri %s']
-    elif which('wget'):
+    elif shutil.which('wget'):
         cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20',
                '--progress=dot:giga', '-O', dest]
         if not check_cert:
             cmd += ['--no-check-certificate']
         cmd += ['%s']
-    elif which('curl'):
+    elif shutil.which('curl'):
         cmd = ['curl', '-L', '--fail', '--user-agent', user_agent, '--retry', '2',
                '--connect-timeout', '20', '--progress-bar', '-o', dest]
         if not check_cert:
@@ -638,20 +639,6 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
                     os.execlpe(shell, shell, env)
 
 
-def which(pgm, path=None):
-    if path is None:
-        path = os.getenv('PATH')
-    for p in path.split(os.path.pathsep):
-        p = os.path.join(p, pgm)
-        if os.path.exists(p) and os.access(p, os.X_OK):
-            return p
-        if PLATFORM == Platform.WINDOWS:
-            for ext in os.getenv('PATHEXT').split(';'):
-                pext = p + ext
-                if os.path.exists(pext):
-                    return pext
-
-
 def get_tar_cmd():
     '''
     Returns the tar command to use
@@ -667,6 +654,16 @@ def get_tar_cmd():
         return TAR
 
 
+def get_path_minus_msys(path):
+    path = path.split(os.pathsep)
+    newpath = []
+    msys2_prefix = to_winpath('/')
+    for p in path:
+        if msys2_prefix not in p:
+            newpath.append(p)
+    return os.pathsep.join(newpath)
+
+
 def check_tool_version(tool_name, needed, env, version_arg=None):
     found = False
     newer = False
@@ -674,7 +671,11 @@ def check_tool_version(tool_name, needed, env, version_arg=None):
         version_arg = '--version'
     if env is None:
         env = os.environ.copy()
-    tool = which(tool_name, env['PATH'])
+    path = env['PATH']
+    # We do not want the MSYS2 CMake because it doesn't support MSVC
+    if tool_name == 'cmake' and DISTRO == Distro.MSYS2:
+        path = get_path_minus_msys(path)
+    tool = shutil.which(tool_name, path=path)
     if not tool:
         return None, False, False
     try:

@@ -1,6 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
-from cerbero.utils.shell import which
 from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):

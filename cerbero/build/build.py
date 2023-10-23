@@ -30,19 +30,9 @@ from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
-from cerbero.utils import shell, to_unixpath, to_winpath, add_system_libs, determine_num_of_cpus, determine_total_ram
+from cerbero.utils import shell, add_system_libs, determine_num_of_cpus, determine_total_ram
 from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
-
-
-def get_path_minus_msys(env):
-    path = env['PATH'].split(os.pathsep)
-    newpath = []
-    msys2_prefix = to_winpath('/')
-    for p in path:
-        if msys2_prefix not in p:
-            newpath.append(p)
-    return os.pathsep.join(newpath)
 
 
 def get_optimization_from_config(config):
@@ -649,7 +639,7 @@ class CMake (MakefilesBase):
         self.config_sh = 'cmake'
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
-            self.config_sh = shutil.which('cmake', path=get_path_minus_msys(self.env))
+            self.config_sh = shutil.which('cmake', path=shell.get_path_minus_msys(self.env['PATH']))
 
     @modify_environment
     async def configure(self):
