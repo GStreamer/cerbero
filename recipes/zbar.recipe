@@ -21,3 +21,6 @@ class Recipe(recipe.Recipe):
             self.set_env('CPPFLAGS', '')
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             self.autoreconf = True
+        # since MacOS 14.0 (sonoma), we can't seem to successfully find the iconv library so add it manually
+        if self.config.target_platform in [Platform.DARWIN]:
+            self.set_env('LDFLAGS', self.get_env('LDFLAGS') + ' -liconv')
