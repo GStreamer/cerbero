@@ -7,4 +7,5 @@ if (!$WD) {
 }
 Write-Host "Auto-detected MSYS2 install location as $WD"
 $CerberoDir = $PSScriptRoot.replace('\', '/')
+$args = $args.replace('\', '/')
 Invoke-Expression "$WD\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c `"$CerberoDir/cerbero-uninstalled $args`""
