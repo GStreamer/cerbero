@@ -1,0 +1,48 @@
+From 060db52c6eaf47273317de67522f54f87bbad5b3 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Fri, 27 Oct 2023 00:33:55 +0900
+Subject: [PATCH] Add DirectXMath wrap
+
+---
+ meson.build | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+ create mode 100644 meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..c7f9d46
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,29 @@
++project('directxmath', 'cpp', version: '3.1.8')
++
++incdirs = include_directories('Inc')
++
++directxmath_headers = files(
++  'Inc/DirectXCollision.h',
++  'Inc/DirectXCollision.inl',
++  'Inc/DirectXColors.h',
++  'Inc/DirectXMath.h',
++  'Inc/DirectXMathConvert.inl',
++  'Inc/DirectXMathMatrix.inl',
++  'Inc/DirectXMathMisc.inl',
++  'Inc/DirectXMathVector.inl',
++  'Inc/DirectXPackedVector.h',
++  'Inc/DirectXPackedVector.inl',
++)
++
++directxmath_dep = declare_dependency(
++  include_directories: incdirs
++)
++
++install_headers(directxmath_headers, subdir: 'directxmath')
++
++pkgconfig = import('pkgconfig')
++pkgconfig.generate(name: 'directxmath',
++    version: meson.project_version(),
++    subdirs: 'directxmath',
++    description: 'DirectXMath SIMD C++ math library')
++
+--
+2.42.0.windows.2
+
