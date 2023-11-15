@@ -123,9 +123,15 @@ class BuildTools (BootstrapperBase, Fetch):
                     os.remove(tof)
                 shutil.move(os.path.join(scriptsdir, f), tof)
             os.rmdir(scriptsdir)
+        python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
+        shell.new_call([python, '-m', 'pip', 'install', 'setuptools'])
 
     async def start(self, jobs=0):
-        self.setup_venv()
+        python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
+        if self.config.platform == Platform.WINDOWS:
+            python += '.exe'
+        if not os.path.exists(python):
+            self.setup_venv()
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()

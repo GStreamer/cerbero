@@ -1,7 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+import glob
 import shutil
-from pathlib import PurePath, Path
+from pathlib import PurePath
 
 class Recipe(recipe.Recipe):
     name = 'meson'
@@ -31,6 +32,17 @@ class Recipe(recipe.Recipe):
         # Our workaround is to only install the script into bin. This also
         # fixes things on Windows, where the script is installed into Scripts/
         # instead of bin/
-        await shell.async_call([self.config.python_exe, 'setup.py', 'install',
-                                '--prefix', prefix, '--install-scripts', '{}/bin'.format(prefix)],
+        await shell.async_call([self.config.python_exe, '-m', 'pip', 'install', '--prefix', prefix, '.'],
                                cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
+        if self.config.platform == Platform.WINDOWS:
+            # Python insists on using Scripts instead of bin on Windows for
+            # scripts. Insist back, and use bin again.
+            scriptsdir = os.path.join(prefix, 'Scripts')
+            bindir = os.path.join(prefix, 'bin')
+            os.makedirs(bindir, exist_ok=True)
+            for f in glob.glob('*', root_dir=scriptsdir):
+                tof = os.path.join(bindir, f)
+                if os.path.isfile(tof):
+                    os.remove(tof)
+                shutil.move(os.path.join(scriptsdir, f), tof)
+            os.rmdir(scriptsdir)
