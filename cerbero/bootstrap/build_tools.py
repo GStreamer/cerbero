@@ -106,30 +106,6 @@ class BuildTools (BootstrapperBase, Fetch):
         self.recipes = self.BUILD_TOOLS
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 
-    def insert_python_site(self):
-        try:
-            import setuptools.version as stv
-        except ImportError:
-            return
-
-        version = stv.__version__.split('.', 1)
-        if len(version) < 1 or int(version[0]) < 49:
-            return
-
-        # Since python-setuptools 49.0.0, site.py is not installed by
-        # easy_install/setup.py anymore which breaks python installs outside
-        # the system prefix.
-        # https://github.com/pypa/setuptools/issues/2295
-        #
-        # Install the previously installed site.py ourselves as a workaround
-        config = self.cookbook.get_config()
-
-        py_prefix = sysconfig.get_path('purelib', 'posix_prefix', vars={'base': ''})
-        # Must strip \/ to ensure that the path is relative
-        py_prefix = PurePath(config.prefix) / PurePath(py_prefix.strip('\\/'))
-        src_file = os.path.join(os.path.dirname(__file__), 'site-patch.py')
-        shutil.copy(src_file, py_prefix / 'site.py')
-
     def setup_venv(self):
         # Python relies on symlinks to work on macOS.
         # See e.g.
@@ -149,10 +125,7 @@ class BuildTools (BootstrapperBase, Fetch):
             os.rmdir(scriptsdir)
 
     async def start(self, jobs=0):
-        if sys.version_info >= (3, 11, 0):
-            self.setup_venv()
-        else:
-            self.insert_python_site()
+        self.setup_venv()
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()

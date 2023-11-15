@@ -20,7 +20,6 @@ from collections import defaultdict
 import os
 import pickle
 import time
-import imp
 import traceback
 
 from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro,\
@@ -28,7 +27,7 @@ from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro,\
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
-from cerbero.utils import _, shell, parse_file
+from cerbero.utils import _, shell, parse_file, imp_load_source
 from cerbero.utils import messages as m
 from cerbero.utils.manifest import Manifest
 from cerbero.build import recipe as crecipe
@@ -427,7 +426,7 @@ class CookBook (object):
             crecipe.Recipe._using_manifest_force_git = True
         m_path = os.path.join(repo, 'custom.py')
         if os.path.exists(m_path):
-            custom = imp.load_source('custom', m_path)
+            custom = imp_load_source('custom', m_path)
         for f in recipes_files:
             # Try to load recipes with the custom.py module located in the
             # recipes dir which can contain private classes and methods with
