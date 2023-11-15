@@ -17,7 +17,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import imp
 import traceback
 from collections import defaultdict
 
@@ -26,7 +25,7 @@ from cerbero.config import Platform, Architecture, Distro, DistroVersion,\
         License
 from cerbero.packages import package, PackageType
 from cerbero.errors import FatalError, PackageNotFoundError
-from cerbero.utils import _, shell, remove_list_duplicates, parse_file
+from cerbero.utils import _, shell, remove_list_duplicates, parse_file, imp_load_source
 from cerbero.utils import messages as m
 
 
@@ -165,7 +164,7 @@ class PackagesStore (object):
             custom = None
             m_path = os.path.join(repo, 'custom.py')
             if os.path.exists(m_path):
-                custom = imp.load_source('custom', m_path)
+                custom = imp_load_source('custom', m_path)
         except Exception as ex:
             # import traceback
             # traceback.print_exc()

@@ -24,6 +24,7 @@ import shlex
 import shutil
 import pathlib
 import argparse
+import importlib
 try:
     import sysconfig
 except:
@@ -661,6 +662,14 @@ def detect_qt6(platform, arch, is_universal):
         # QMAKE is not for Qt6
         return None
     return qmake6_path
+
+def imp_load_source(modname, fname):
+    loader = importlib.machinery.SourceFileLoader(modname, fname)
+    spec = importlib.util.spec_from_file_location(modname, fname, loader=loader)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module.__name__] = module
+    loader.exec_module(module)
+    return module
 
 # asyncio.Semaphore classes set their working event loop internally on
 # creation, so we need to ensure the proper loop has already been set by then.
