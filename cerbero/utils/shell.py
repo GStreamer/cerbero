@@ -33,10 +33,9 @@ import hashlib
 import urllib.request, urllib.error, urllib.parse
 import collections
 from pathlib import Path, PurePath
-from distutils.version import StrictVersion
 
 from cerbero.enums import CERBERO_VERSION, Platform, Distro
-from cerbero.utils import _, system_info, to_unixpath, determine_num_of_cpus, CerberoSemaphore
+from cerbero.utils import _, system_info, split_version, CerberoSemaphore
 from cerbero.utils import messages as m
 from cerbero.errors import CommandError, FatalError
 
@@ -683,7 +682,7 @@ def check_tool_version(tool_name, needed, env, version_arg=None):
     m = re.search(r'([0-9]+\.[0-9]+(\.[0-9]+)?)', out)
     if m:
         found = m.groups()[0]
-        newer = StrictVersion(found) >= StrictVersion(needed)
+        newer = split_version(found) >= split_version(needed)
 
     return tool, found, newer
 
