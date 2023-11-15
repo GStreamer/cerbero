@@ -470,8 +470,8 @@ def parse_file(filename, dict):
 
 def escape_path(path):
     path = path.replace('\\', '/')
-    path = path.replace('(', '\\\(').replace(')', '\\\)')
-    path = path.replace(' ', '\\\\ ')
+    path = path.replace('(', r'\\(').replace(')', r'\\)')
+    path = path.replace(' ', r'\\ ')
     return path
 
 

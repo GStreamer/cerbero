@@ -651,7 +651,7 @@ class MSI(WixBase):
         etree.SubElement(apps, 'RemoveFolder', Id='ApplicationProgramsFolder',
                          On='uninstall')
         etree.SubElement(apps, 'RegistryValue', Root='HKCU',
-                         Key='Software\Microsoft\%s' % self.package.name,
+                         Key=r'Software\Microsoft\%s' % self.package.name,
                          Name='installed', Type='integer', Value='1', KeyPath='yes')
         # Ref it in the main feature
         etree.SubElement(self.main_feature, 'ComponentRef',
