@@ -215,6 +215,11 @@ class Config (object):
             setattr(self, a, None)
 
         self.arch_config = {self.target_arch: self}
+        # Starting with Python 3.12, subprocess.py looks at these case-sensitively
+        if 'COMSPEC' in os.environ:
+            os.environ['ComSpec'] = os.environ['COMSPEC']
+        if 'SYSTEMROOT' in os.environ:
+            os.environ['SystemRoot'] = os.environ['SYSTEMROOT']
         # Store raw os.environ data
         self._pre_environ = os.environ.copy()
         self.config_env = os.environ.copy()
