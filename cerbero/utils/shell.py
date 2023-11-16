@@ -597,7 +597,7 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
         rc_file = '.bashrc'
         rc_opt = '--rcfile'
         prompt = os.environ.get('PS1', '')
-        prompt = 'PS1="\[\033[01;32m\][cerbero-{platform}-{arch}]\[\033[00m\] $PS1"'.format(
+        prompt = r'PS1="\[\033[01;32m\][cerbero-{platform}-{arch}]\[\033[00m\] $PS1"'.format(
             platform=platform, arch=arch)
     shellrc = SHELLRC.format(rc_file=rc_file, sourcedirsh=sourcedirsh,
         prompt=prompt, bash_completions=bash_completions, path=env['PATH'])
