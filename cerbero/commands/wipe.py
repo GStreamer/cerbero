@@ -84,9 +84,6 @@ class Wipe(Command):
             if not os.access(path, os.W_OK):
                 os.chmod(path, stat.S_IWUSR)
                 func(path)
-            # Handle "Directory is not empty" errors
-            elif exc_info[1][0] == 145:
-                shutil.rmtree(path, onerror=_onerror)
             else:
                 raise
 
