@@ -85,11 +85,6 @@ class BundleSource(Command):
         for p in packages:
             setup_args.append('--package=' + p)
 
-        for r in bundle_recipes:
-            setup_args.append('--recipe=' + r.name)
-            if r.stype != SourceType.CUSTOM:
-                bundle_dirs.append(r.repo_dir)
-
         if not args.no_bootstrap:
             build_tools = BuildTools(config, args.offline)
             bs_recipes = build_tools.BUILD_TOOLS + \
@@ -100,8 +95,14 @@ class BundleSource(Command):
             b_recipes = remove_list_duplicates(b_recipes)
 
             for r in b_recipes:
+                bundle_recipes.append(r)
                 if r.stype != SourceType.CUSTOM:
                     bundle_dirs.append(r.repo_dir)
+
+        for r in set(bundle_recipes):
+            setup_args.append('--recipe=' + r.name)
+            if r.stype != SourceType.CUSTOM:
+                bundle_dirs.append(r.repo_dir)
 
         setup_args.append('--source-dirs=' + ','.join(bundle_dirs))
 
