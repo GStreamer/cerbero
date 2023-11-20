@@ -452,7 +452,7 @@ class FilesProvider(object):
             return f
         else:
             pydir = os.path.basename(os.path.normpath(self.py_prefix))
-            pyversioname = re.sub("python|\.", '', pydir)
+            pyversioname = re.sub(r"python|\.", '', pydir)
             cpythonname = "cpython-" + pyversioname
 
             splitedext = os.path.splitext(f)
