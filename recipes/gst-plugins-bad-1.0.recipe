@@ -512,6 +512,7 @@ class Recipe(custom.GStreamer):
             self.meson_options['wasapi'] = 'enabled'
             self.meson_options['d3dvideosink'] = 'enabled'
             self.meson_options['d3d11'] = 'enabled'
+            self.meson_options['d3d11-math'] = 'enabled'
             self.meson_options['d3d12'] = 'disabled'
             self.meson_options['directsound'] = 'enabled'
             self.meson_options['winks'] = 'enabled'
@@ -526,9 +527,9 @@ class Recipe(custom.GStreamer):
                 self.enable_plugin('wic', 'codecs')
                 # WGC support requires Windows 11 SDK from Visual Studio
                 self.meson_options['d3d11-wgc'] = 'enabled'
-                self.enable_plugin('d3d12', 'sys')
                 # HLSL cross-compile is not supported
                 self.meson_options['d3d11-hlsl-precompile'] = 'enabled'
+                self.enable_plugin('d3d12', 'sys')
             else:
                 # mingw does not ship DirectXMath headers
                 self.deps += ['directxmath']
