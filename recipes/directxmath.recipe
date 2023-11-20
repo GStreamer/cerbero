@@ -14,5 +14,7 @@ class Recipe(recipe.Recipe):
     patches = [
         # https://wrapdb.mesonbuild.com/v2/directxmath_3.1.8-1/get_patch
         'directxmath/0001-Add-DirectXMath-wrap.patch',
+        # https://github.com/microsoft/DirectXMath/pull/172
+        'directxmath/0001-Inc-Use-two-argument-cpuid-when-using-recent-MinGW.patch',
     ]
 
