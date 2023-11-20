@@ -823,14 +823,14 @@ class Meson (Build, ModifyEnvBase) :
         with open(meson_options, 'r', encoding='utf-8') as f:
             options = f.read()
             # iterate over all option()s individually
-            option_regex = "option\s*\(\s*(?:'(?P<name>[^']+)')\s*,\s*(?P<entry>(?P<identifier>[a-zA-Z0-9]+)\s*:\s*(?:(?P<string>'[^']+')|[^'\),\s]+)\s*,?\s*)+\)"
+            option_regex = r"option\s*\(\s*(?:'(?P<name>[^']+)')\s*,\s*(?P<entry>(?P<identifier>[a-zA-Z0-9]+)\s*:\s*(?:(?P<string>'[^']+')|[^'\),\s]+)\s*,?\s*)+\)"
             for match in re.finditer(option_regex, options, re.MULTILINE):
                 option = match.group(0)
                 # find the option(), if it exists
                 opt_name = match.group('name')
                 if opt_name in opt_names:
                     # get the type of the option
-                    type_regex = "type\s*:\s*'(?P<type>[^']+)'"
+                    type_regex = r"type\s*:\s*'(?P<type>[^']+)'"
                     ty = re.search (type_regex, option, re.MULTILINE)
                     if ty:
                         if ty.group('type') in ('feature', 'boolean'):
