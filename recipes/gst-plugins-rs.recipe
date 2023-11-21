@@ -165,7 +165,7 @@ class Recipe(recipe.Recipe):
             libraries = [f for f in self.devel_files_list()
                          if f.endswith('.a')]
             for f in libraries:
-                if self.config.target_platform == Platform.ANDROID:
+                if self.config.target_platform in (Platform.ANDROID, Platform.LINUX):
                     shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all',
                                    '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
                 elif self.config.target_platform == Platform.IOS:
