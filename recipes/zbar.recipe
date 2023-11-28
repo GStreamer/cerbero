@@ -11,9 +11,8 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/zbar.h', '%(libdir)s/pkgconfig/zbar.pc']
 
     def prepare(self):
-        if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
-            self.deps.append('libiconv')
         if self.config.target_platform == Platform.WINDOWS:
+            self.deps.append('libiconv')
             # This flag should be removed in 0.24
             self.append_env('CFLAGS', '-std=c99')
             # zbar incorrectly passes CPPFLAGS to WINDRES, which then barfs on
@@ -24,3 +23,9 @@ class Recipe(recipe.Recipe):
         # since MacOS 14.0 (sonoma), we can't seem to successfully find the iconv library so add it manually
         if self.config.target_platform in [Platform.DARWIN]:
             self.set_env('LDFLAGS', self.get_env('LDFLAGS') + ' -liconv')
+        if self.config.target_platform == Platform.ANDROID:
+            # Android only provides libiconv with API level >=28 (Pie and newer)
+            if DistroVersion.get_android_api_version(self.config.target_distro_version) >= 28:
+                self.append_env('LDFLAGS', '-lc')
+            else:
+                self.deps.append('libiconv')

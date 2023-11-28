@@ -179,15 +179,19 @@ class DistroVersion:
     ANDROID_ICE_CREAM_SANDWICH = 'android_14_ice_cream_sandwich'  # API Level 14
     ANDROID_JELLY_BEAN = 'android_16_jelly_bean'  # API Level 16
     ANDROID_KITKAT = 'android_19_kitkat'  # API Level 19
-    ANDROID_LOLLIPOP = 'android_21_lollipop'  # API Level 21
-    ANDROID_LOLLIPOP_MR1 = 'android_22_lollipop_mr1'  # API Level 22
-    ANDROID_MARSHMALLOW = 'android_23_marshmallow'  # API Level 23
-    ANDROID_NOUGAT = 'android_24_nougat'  # API Level 24
-    ANDROID_NOUGAT_MR1 = 'android_25_nougat_mr1'  # API Level 25
-    ANDROID_OREO = 'android_26_oreo'  # API Level 26
-    ANDROID_OREO_MR1 = 'android_27_oreo_mr1'  # API Level 27
-    ANDROID_PIE = 'android_28_pie'  # API Level 28
-    ANDROID_Q = 'android_29_q'  # API Level 29
+    ANDROID_LOLLIPOP = 'android_21_lollipop' # API Level 21
+    ANDROID_LOLLIPOP_MR1 = 'android_22_lollipop_mr1' # API Level 22
+    ANDROID_MARSHMALLOW = 'android_23_marshmallow' # API Level 23
+    ANDROID_NOUGAT = 'android_24_nougat' # API Level 24
+    ANDROID_NOUGAT_MR1 = 'android_25_nougat_mr1' # API Level 25
+    ANDROID_OREO = 'android_26_oreo' # API Level 26
+    ANDROID_OREO_MR1 = 'android_27_oreo_mr1' # API Level 27
+    ANDROID_PIE = 'android_28_pie' # API Level 28
+    ANDROID_Q = 'android_29_q' # API Level 29
+    ANDROID_R = 'android_30_r' # API Level 30
+    ANDROID_S = 'android_31_s' # API Level 31
+    ANDROID_SV2 = 'android_32_sv2' # API Level 32
+    ANDROID_TIRAMISU = 'android_33_tiramisu' # API Level 33
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
@@ -220,6 +224,14 @@ class DistroVersion:
             return 28
         elif version == DistroVersion.ANDROID_Q:
             return 29
+        elif version == DistroVersion.ANDROID_R:
+            return 30
+        elif version == DistroVersion.ANDROID_S:
+            return 31
+        elif version == DistroVersion.ANDROID_SV2:
+            return 32
+        elif version == DistroVersion.ANDROID_TIRAMISU:
+            return 33
         else:
             raise FatalError('DistroVersion not supported')
 
