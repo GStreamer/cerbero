@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'harfbuzz'
-    version = '5.3.1'
+    version = '8.3.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/%(name)s/%(name)s/releases/download/%(version)s/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = '4a6ce097b75a8121facc4ba83b5b083bfec657f45b003cd5a3424f2ae6b4434d'
+    tarball_checksum = '109501eaeb8bde3eadb25fab4164e993fbace29c3d775bcaa1c1e58e2f15f847'
     licenses = [{License.BSD_like: ['COPYING']}]
     deps = ['fontconfig', 'cairo', 'glib', 'icu']
     meson_options = {'icu': 'enabled',
