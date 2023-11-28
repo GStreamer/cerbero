@@ -1,0 +1,27 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.utils import android
+
+class Recipe(recipe.Recipe):
+    name = 'wpebackend-android'
+    version = '0.1'
+    stype = SourceType.GIT
+    btype = BuildType.CMAKE
+    remotes = {'origin': 'https://github.com/Igalia/WPEBackend-android.git'}
+    commit = '2131855c6af435fdc7e99bd53e87d54e1a464aa6'
+    deps = ['glib', 'libwpe']
+
+    files_libs = ['libWPEBackend-android']
+    files_devel = ['include/wpe-android']
+
+    configure_options = '-DCMAKE_BUILD_TYPE=Release'
+
+    def prepare(self):
+        if self.config.target_platform != Platform.ANDROID:
+            raise InvalidRecipeError(self, "Invalid platform")
+        self.build_dir = os.path.join(self.config.sources, self.name)
+        self.config_src_dir = self.build_dir
+        self.make_dir = self.build_dir
+        arch_lib_name = android.get_android_arch_name(self.config.target_arch)
+        stl_libdir = os.path.join(self.config.toolchain_prefix, 'libs', arch_lib_name)
+        self.append_env('LDFLAGS', '-L' + stl_libdir, '-lc++_shared', '-llog', '-lgobject-2.0', '-O2')
