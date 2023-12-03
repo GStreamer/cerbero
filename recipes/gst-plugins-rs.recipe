@@ -1,7 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
 from cerbero.utils import messages as m
-from cerbero.utils import shell
+from cerbero.utils import shell, determine_num_cargo_jobs
 from pathlib import Path
 import re
 import shutil
@@ -61,6 +61,12 @@ class Recipe(recipe.Recipe):
         'webrtc',
         'webrtchttp',
     ]
+
+    # If the system has less than 8GB ram or less than 4 cores,
+    # block parallelism at both recipe and architectural level.
+    if determine_num_cargo_jobs() == 1:
+        allow_parallel_build = False
+        allow_universal_parallel_build = False
 
     # Needed for openssl
     use_system_libs = True

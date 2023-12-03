@@ -24,13 +24,12 @@ import asyncio
 import collections
 from subprocess import CalledProcessError
 
-from cerbero.enums import Architecture, Platform, LibraryType
+from cerbero.enums import Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
 from cerbero.utils import _, N_, shell, run_until_complete, run_tasks, determine_num_of_cpus
 from cerbero.utils import add_system_libs, messages as m
 from cerbero.utils.shell import BuildStatusPrinter
-from cerbero.build.recipe import BuildSteps
 
 import inspect
 
@@ -100,6 +99,9 @@ class Oven (object):
             self._build_lock = asyncio.Semaphore(self.jobs / 2)
         else:
             self._build_lock = asyncio.Semaphore(2)
+        # Add a separate lock for Rust tasks that will
+        # be required if only one concurrent job is allowed.
+        self._architecture_lock = asyncio.Semaphore(1)
         # Can't install in parallel because of the risk of two recipes writing
         # to the same file at the same time. TODO: Need to use DESTDIR + prefix
         # merging + file list tracking for collision detection before we can
@@ -300,6 +302,11 @@ class Oven (object):
                     return step
 
                 try:
+                    if hasattr(recipe, "allow_parallel_universal_build") \
+                       and not recipe.allow_parallel_universal_build:
+                        recipe._lock = self._architecture_lock
+                    else:
+                        recipe._lock = None
                     if lock:
                         async with lock:
                             step = await build_recipe_steps(step)

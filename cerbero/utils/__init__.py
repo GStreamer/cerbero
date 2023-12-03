@@ -92,6 +92,24 @@ def determine_num_of_cpus() -> int:
 
 
 @functools.lru_cache()
+def determine_num_cargo_jobs():
+    """
+    Returns 1 if <= 4 threads or with <= 8 GB RAM.
+    """
+
+    ncpu = determine_num_of_cpus()
+    ram = determine_total_ram()
+
+    if ncpu is None:
+        return 1
+
+    if ncpu <= 4 or ram <= (8 * 1 << 30):  # 8 GB
+        return 1
+
+    return max((ncpu - 1, 1))
+
+
+@functools.lru_cache()
 def determine_total_ram() -> int:
     """Total amount of RAM in this system, in bytes"""
 
@@ -108,9 +126,15 @@ def determine_total_ram() -> int:
         if ram_size_query.returncode == 0:
             return int(ram_size_query.stdout.strip().splitlines()[-1])
     elif platform == Platform.LINUX:
-        ram_size_query = subprocess.run([shutil.which('free'), '-b'], stdout=subprocess.PIPE, text=True)
-        if ram_size_query.returncode == 0:
-            return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
+        free_exe = shutil.which('free')
+        if free_exe:
+            ram_size_query = subprocess.run([free_exe, '-b'], stdout=subprocess.PIPE, text=True)
+            if ram_size_query.returncode == 0:
+                return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
+        # Fallback
+        proc_meminfo = Path('/proc/meminfo')
+        if proc_meminfo.exists():
+            return int(proc_meminfo.open().readlines()[0].split()[1]) * 1024
 
     return 4 << 30  # Assume 4GB
 

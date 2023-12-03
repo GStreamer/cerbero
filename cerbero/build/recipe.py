@@ -881,6 +881,7 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
         self._config = config
         self._recipes = {}
         self._proxy_recipe = None
+        self._lock = None
 
     def __str__(self):
         if list(self._recipes.values()):
@@ -934,6 +935,13 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
                 e.arch = arch
                 raise e
 
+        async def _async_run_with_lock(recipe, step, arch):
+            if self._lock:
+                with self._lock:
+                    await _async_run_step(recipe, step, arch)
+            else:
+                await _async_run_step(recipe, step, arch)
+
         if step == BuildSteps.FETCH[1]:
             arch, recipe = list(self._recipes.items())[0]
             await _async_run_step(recipe, step, arch)
@@ -946,7 +954,7 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
                    and self.stype in (source.SourceType.TARBALL,)) \
                or (step == BuildSteps.COMPILE[1] \
                    and self.btype == build.BuildType.CARGO_C):
-                tasks.append(asyncio.ensure_future(_async_run_step(recipe, step, arch)))
+                tasks.append(asyncio.ensure_future(_async_run_with_lock(recipe, step, arch)))
             else:
                 await _async_run_step(recipe, step, arch)
         if tasks:

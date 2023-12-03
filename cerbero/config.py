@@ -230,6 +230,7 @@ class Config(object):
         'logs',
         'install_dir',
         'allow_parallel_build',
+        'allow_universal_parallel_build',
         'num_of_cpus',
         'use_configure_cache',
         'packages_prefix',
@@ -641,6 +642,7 @@ class Config(object):
         self.set_property('cached_sources', self._relative_path('sources'))
         self.set_property('git_root', DEFAULT_GIT_ROOT)
         self.set_property('allow_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
+        self.set_property('allow_universal_parallel_build', DEFAULT_ALLOW_PARALLEL_BUILD)
         self.set_property('host', None)
         self.set_property('build', None)
         self.set_property('target', None)

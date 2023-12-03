@@ -30,7 +30,7 @@ from itertools import chain
 
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
-from cerbero.utils import shell, add_system_libs, determine_num_of_cpus, determine_total_ram
+from cerbero.utils import shell, add_system_libs, determine_num_cargo_jobs
 from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
 
@@ -1212,28 +1212,13 @@ class Cargo(Build, ModifyEnvBase):
             '--target-dir', self.cargo_dir,
         ]
 
-        jobs = self.num_of_rustc_jobs()
-        if jobs is not None:
+        jobs = self.num_of_cpus()
+        if jobs:
             self.cargo_args += [f'-j{jobs}']
 
         # https://github.com/lu-zero/cargo-c/issues/278
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.library_type = LibraryType.STATIC
-
-    def num_of_rustc_jobs(self):
-        '''
-        Restricts parallelism with <= 4 threads or with <= 8 GB RAM.
-        '''
-        ncpu = super().num_of_cpus()
-        num_of_jobs = determine_num_of_cpus()
-        has_enough_ram = determine_total_ram() > (8 * 1 << 30) # 8 GB
-
-        if num_of_jobs <= 4 or not has_enough_ram:
-            return 1
-        elif ncpu:
-            return ncpu
-
-        return None
 
     def get_cargo_features_args(self):
         if not self.cargo_features:
