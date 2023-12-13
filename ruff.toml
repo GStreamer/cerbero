@@ -1,0 +1,5 @@
+line-length = 120
+
+[format]
+# 5. Use single quotes for non-triple-quoted strings.
+quote-style = "single"

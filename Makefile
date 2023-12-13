@@ -13,12 +13,15 @@ install:
 dist-tarball:
 	python setup.py sdist --formats=bztar
 
-check-pep8:
-	find cerbero ! -regex cerbero/packages/debian.py -name \*.py | sort -u | xargs pep8 --ignore=E128 --repeat
+format:
+	ruff format .
+
+check-format:
+	ruff check .
 
 check:
 	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial test
-	make check-pep8
+	make check-format
 
 coverage:
 	rm -rf _trial_temp
