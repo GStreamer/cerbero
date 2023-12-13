@@ -30,8 +30,8 @@ from cerbero.utils import messages as m
 
 
 class GraphType:
-    RECIPE = 'recipe',
-    PACKAGE = 'package',
+    RECIPE = ('recipe',)
+    PACKAGE = ('package',)
     PACKAGE_RECIPES = 'package_recipes'
 
 
@@ -40,23 +40,28 @@ class Graph(Command):
     name = 'graph'
 
     def __init__(self):
-        Command.__init__(self,
-                         [ArgparseArgument('name', nargs=1,
-                                           help=_('name of the recipe or package to generate deps from')),
-                          ArgparseArgument('-r', '--recipe', action='store_true',
-                                           help=_('generate deps for the given recipe')),
-                          ArgparseArgument('-p', '--package', action='store_true',
-                                           help=_('generate deps for the given package')),
-                          ArgparseArgument('-pr', '--package-recipes', action='store_true',
-                                           help=_('generate recipe deps for the given package')),
-                          ArgparseArgument('-o', '--output', nargs=1,
-                                           help=_('output file for the SVG graph')),
-                          ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('name', nargs=1, help=_('name of the recipe or package to generate deps from')),
+                ArgparseArgument('-r', '--recipe', action='store_true', help=_('generate deps for the given recipe')),
+                ArgparseArgument('-p', '--package', action='store_true', help=_('generate deps for the given package')),
+                ArgparseArgument(
+                    '-pr',
+                    '--package-recipes',
+                    action='store_true',
+                    help=_('generate recipe deps for the given package'),
+                ),
+                ArgparseArgument('-o', '--output', nargs=1, help=_('output file for the SVG graph')),
+            ],
+        )
 
     def run(self, config, args):
         if args.recipe + args.package + args.package_recipes == 0:
-            m.error('Error: You need to specify either recipe, package or package-recipes '
-                    'mode to generate the dependency graph')
+            m.error(
+                'Error: You need to specify either recipe, package or package-recipes '
+                'mode to generate the dependency graph'
+            )
             return
 
         if args.recipe + args.package + args.package_recipes > 1:
@@ -64,8 +69,10 @@ class Graph(Command):
             return
 
         if not shutil.which('dot'):
-            m.error('Error: dot command not found. Please install graphviz it using '
-                    'your package manager. e.g. apt/dnf/brew install graphviz')
+            m.error(
+                'Error: dot command not found. Please install graphviz it using '
+                'your package manager. e.g. apt/dnf/brew install graphviz'
+            )
             return
 
         label = ''
@@ -77,7 +84,7 @@ class Graph(Command):
             label = 'package'
         elif args.package_recipes:
             self.graph_type = GraphType.PACKAGE_RECIPES
-            label = 'package\'s recipes'
+            label = "package's recipes"
 
         if self.graph_type == GraphType.RECIPE or self.graph_type == GraphType.PACKAGE_RECIPES:
             self.cookbook = CookBook(config)
@@ -93,7 +100,7 @@ class Graph(Command):
             f.write(dot)
 
         shell.new_call(['dot', '-Tsvg', tmp.name, '-o', output])
-        m.message("Dependency graph for %s generated at %s" % (name, output))
+        m.message('Dependency graph for %s generated at %s' % (name, output))
 
     def _dot_gen(self, name, graph_type, already_parsed=[]):
         already_parsed.append(name)

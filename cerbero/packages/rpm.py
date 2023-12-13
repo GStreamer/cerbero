@@ -30,7 +30,7 @@ from cerbero.utils import shell, _
 from functools import reduce
 
 
-SPEC_TPL = '''
+SPEC_TPL = """
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 %%undefine _debugsource_packages
@@ -88,10 +88,10 @@ rm -rf $RPM_BUILD_ROOT
 %(files)s
 
 %(devel_files)s
-'''
+"""
 
 
-DEVEL_PACKAGE_TPL = '''
+DEVEL_PACKAGE_TPL = """
 %%package devel
 %(requires)s
 Summary: %(summary)s
@@ -99,9 +99,9 @@ Provides: %(p_prefix)s%(name)s-devel
 
 %%description devel
 %(description)s
-'''
+"""
 
-META_SPEC_TPL = '''
+META_SPEC_TPL = """
 %%define _topdir %(topdir)s
 %%define _package_name %(package_name)s
 
@@ -134,7 +134,7 @@ rm -rf $RPM_BUILD_ROOT
 %%files
 
 %(devel_files)s
-'''
+"""
 
 REQUIRE_TPL = 'Requires: %s\n'
 DEVEL_TPL = '%%files devel \n%s'
@@ -145,7 +145,6 @@ POSTUN_TPL = '%%postun\n%s\n'
 
 
 class RPMPackager(LinuxPackager):
-
     def __init__(self, config, package, store):
         LinuxPackager.__init__(self, config, package, store)
 
@@ -155,8 +154,7 @@ class RPMPackager(LinuxPackager):
             tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
             for d in ['BUILD', 'SOURCES', 'RPMS', 'SRPMS', 'SPECS']:
                 os.mkdir(os.path.join(tmpdir, d))
-        return (tmpdir, os.path.join(tmpdir, 'RPMS'),
-                os.path.join(tmpdir, 'SOURCES'))
+        return (tmpdir, os.path.join(tmpdir, 'RPMS'), os.path.join(tmpdir, 'SOURCES'))
 
     def setup_source(self, tarball, tmpdir, packagedir, srcdir):
         # move the tarball to SOURCES
@@ -182,8 +180,7 @@ class RPMPackager(LinuxPackager):
 
         if isinstance(self.package, MetaPackage):
             template = META_SPEC_TPL
-            requires = \
-                self._get_meta_requires(PackageType.RUNTIME)
+            requires = self._get_meta_requires(PackageType.RUNTIME)
             self.package.has_devel_package = True
         else:
             self.package.has_devel_package = bool(devel_files)
@@ -197,34 +194,31 @@ class RPMPackager(LinuxPackager):
 
         scripts = ''
         if os.path.exists(self.package.resources_postinstall):
-            scripts += POST_TPL % \
-                open(self.package.resources_postinstall).read()
+            scripts += POST_TPL % open(self.package.resources_postinstall).read()
         if os.path.exists(self.package.resources_postremove):
-            scripts += POSTUN_TPL % \
-                open(self.package.resources_postremove).read()
+            scripts += POSTUN_TPL % open(self.package.resources_postremove).read()
 
         self._spec_str = template % {
-                'name': self.package.name,
-                'p_prefix': self.package_prefix,
-                'version': self.package.version,
-                'package_name': self.full_package_name,
-                'summary': self.package.shortdesc,
-                'description': self.package.longdesc != 'default' and \
-                        self.package.longdesc or self.package.shortdesc,
-                'licenses': ' and '.join([l.acronym for l in licenses]),
-                'packager': self.packager,
-                'vendor': self.package.vendor,
-                'url': URL_TPL % self.package.url if \
-                        self.package.url != 'default' else '',
-                'requires': requires,
-                'prefix': self.install_dir,
-                'source': tarname,
-                'topdir': tmpdir,
-                'devel_package': devel_package,
-                'devel_files': devel_files,
-                'files': runtime_files,
-                'sources_dir': self.config.sources,
-                'scripts': scripts}
+            'name': self.package.name,
+            'p_prefix': self.package_prefix,
+            'version': self.package.version,
+            'package_name': self.full_package_name,
+            'summary': self.package.shortdesc,
+            'description': self.package.longdesc != 'default' and self.package.longdesc or self.package.shortdesc,
+            'licenses': ' and '.join([l.acronym for l in licenses]),
+            'packager': self.packager,
+            'vendor': self.package.vendor,
+            'url': URL_TPL % self.package.url if self.package.url != 'default' else '',
+            'requires': requires,
+            'prefix': self.install_dir,
+            'source': tarname,
+            'topdir': tmpdir,
+            'devel_package': devel_package,
+            'devel_files': devel_files,
+            'files': runtime_files,
+            'sources_dir': self.config.sources,
+            'scripts': scripts,
+        }
 
         self.spec_path = os.path.join(tmpdir, '%s.spec' % self.package.name)
         with open(self.spec_path, 'w') as f:
@@ -236,15 +230,15 @@ class RPMPackager(LinuxPackager):
         elif self.config.target_arch == Architecture.X86_64:
             target = 'x86_64-redhat-linux'
         else:
-            raise FatalError(_('Architecture %s not supported') % \
-                             self.config.target_arch)
+            raise FatalError(_('Architecture %s not supported') % self.config.target_arch)
 
         extra_options = ''
         if self._rpmbuild_support_nodebuginfo():
             extra_options = '--nodebuginfo'
 
-        shell.new_call('rpmbuild -bb %s --buildroot %s/buildroot --target %s %s' % (
-            extra_options, tmpdir, target, self.spec_path))
+        shell.new_call(
+            'rpmbuild -bb %s --buildroot %s/buildroot --target %s %s' % (extra_options, tmpdir, target, self.spec_path)
+        )
 
         paths = []
         for d in os.listdir(packagedir):
@@ -260,12 +254,10 @@ class RPMPackager(LinuxPackager):
         if not self.config.distro == Distro.REDHAT:
             return False
 
-        if ("fedora" in self.config.distro_version
-           and self.config.distro_version > DistroVersion.FEDORA_26):
+        if 'fedora' in self.config.distro_version and self.config.distro_version > DistroVersion.FEDORA_26:
             return True
 
-        if ("redhat" in self.config.distro_version
-           and self.config.distro_version > DistroVersion.REDHAT_7):
+        if 'redhat' in self.config.distro_version and self.config.distro_version > DistroVersion.REDHAT_7:
             return True
 
         return False
@@ -274,8 +266,7 @@ class RPMPackager(LinuxPackager):
         devel_suffix = ''
         if package_type == PackageType.DEVEL:
             devel_suffix = '-devel'
-        requires, recommends, suggests = \
-            self.get_meta_requires(package_type, devel_suffix)
+        requires, recommends, suggests = self.get_meta_requires(package_type, devel_suffix)
         requires = ''.join([REQUIRE_TPL % x for x in requires + recommends])
         return requires
 
@@ -295,7 +286,7 @@ class RPMPackager(LinuxPackager):
                 files.append(f + 'c')
             if f + 'o' not in files:
                 files.append(f + 'o')
-        return '\n'.join([os.path.join('%{prefix}',  x) for x in files])
+        return '\n'.join([os.path.join('%{prefix}', x) for x in files])
 
     def _devel_package_and_files(self):
         args = {}
@@ -315,7 +306,6 @@ class RPMPackager(LinuxPackager):
 
 
 class Packager(object):
-
     def __new__(klass, config, package, store):
         return RPMPackager(config, package, store)
 
@@ -323,5 +313,6 @@ class Packager(object):
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
+
     register_packager(Distro.REDHAT, Packager)
     register_packager(Distro.SUSE, Packager)

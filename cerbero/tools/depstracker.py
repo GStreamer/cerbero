@@ -22,8 +22,7 @@ from cerbero.config import Platform
 from cerbero.utils import shell
 
 
-class RecursiveLister():
-
+class RecursiveLister:
     def list_file_deps(self, prefix, path):
         raise NotImplemented()
 
@@ -45,41 +44,33 @@ class RecursiveLister():
 
 
 class ObjdumpLister(RecursiveLister):
-
     def list_file_deps(self, prefix, path):
         env = os.environ.copy()
         env['LC_ALL'] = 'C'
         files = shell.check_output(['objdump', '-xw', path], env=env).splitlines()
-        prog = re.compile(r"(?i)^.*DLL[^:]*: (\S+\.dll)$")
-        files = [prog.sub(r"\1", x) for x in files if prog.match(x) is not None]
-        files = [os.path.join(prefix, 'bin', x) for x in files if
-                 x.lower().endswith('dll')]
+        prog = re.compile(r'(?i)^.*DLL[^:]*: (\S+\.dll)$')
+        files = [prog.sub(r'\1', x) for x in files if prog.match(x) is not None]
+        files = [os.path.join(prefix, 'bin', x) for x in files if x.lower().endswith('dll')]
         return [os.path.realpath(x) for x in files if os.path.exists(x)]
 
 
 class OtoolLister(RecursiveLister):
-
     def list_file_deps(self, prefix, path):
         files = shell.check_output(['otool', '-L', path]).splitlines()[1:]
         # Shared libraries might be relocated, we look for files with the
         # prefix or starting with @rpath
-        files = [x.strip().split(' ')[0] for x in files if prefix in x or "@rpath" in x]
-        return [x.replace("@rpath/", prefix) for x in files]
+        files = [x.strip().split(' ')[0] for x in files if prefix in x or '@rpath' in x]
+        return [x.replace('@rpath/', prefix) for x in files]
 
 
-class LddLister():
-
-    def list_deps(self, prefix,  path):
+class LddLister:
+    def list_deps(self, prefix, path):
         files = shell.check_output(['ldd', path]).splitlines()
         return [x.split(' ')[2] for x in files if prefix in x]
 
 
-class DepsTracker():
-
-    BACKENDS = {
-        Platform.WINDOWS: ObjdumpLister,
-        Platform.LINUX: LddLister,
-        Platform.DARWIN: OtoolLister}
+class DepsTracker:
+    BACKENDS = {Platform.WINDOWS: ObjdumpLister, Platform.LINUX: LddLister, Platform.DARWIN: OtoolLister}
 
     def __init__(self, platform, prefix):
         self.libs_deps = {}

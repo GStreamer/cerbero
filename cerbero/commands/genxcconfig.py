@@ -30,14 +30,16 @@ class GenXCodeConfig(Command):
     name = 'genxcconfig'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('-o', '--output_dir', default='.',
-                help=_('output directory where .xcconfig files will be saved')),
-            ArgparseArgument('-f', '--filename', default=None,
-                help=_('filename of the .xcconfig file')),
-            ArgparseArgument('libraries', nargs='*',
-                help=_('List of libraries to include')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument(
+                    '-o', '--output_dir', default='.', help=_('output directory where .xcconfig files will be saved')
+                ),
+                ArgparseArgument('-f', '--filename', default=None, help=_('filename of the .xcconfig file')),
+                ArgparseArgument('libraries', nargs='*', help=_('List of libraries to include')),
+            ],
+        )
 
     def run(self, config, args):
         self.runargs(config, args.output_dir, args.filename, args.libraries)
@@ -47,7 +49,7 @@ class GenXCodeConfig(Command):
             os.makedirs(output_dir)
 
         if len(libraries) == 0:
-            raise UsageError("You need to specify at least one library name")
+            raise UsageError('You need to specify at least one library name')
 
         filename = filename or libraries[0]
         filepath = os.path.join(output_dir, '%s.xcconfig' % filename)
@@ -56,8 +58,7 @@ class GenXCodeConfig(Command):
         xcconfig.create(filepath)
         m.action('Created %s.xcconfig' % filename)
 
-        m.message('XCode config file were sucessfully created in %s' %
-                  os.path.abspath(filepath))
+        m.message('XCode config file were sucessfully created in %s' % os.path.abspath(filepath))
 
 
 register_command(GenXCodeConfig)

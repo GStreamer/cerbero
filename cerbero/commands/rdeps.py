@@ -28,10 +28,12 @@ class RDeps(Command):
     name = 'rdeps'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('recipe', nargs=1,
-                             help=_('name of the recipe')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('recipe', nargs=1, help=_('name of the recipe')),
+            ],
+        )
 
     def run(self, config, args):
         cookbook = CookBook(config)
@@ -43,5 +45,6 @@ class RDeps(Command):
             return
         for recipe in recipes:
             m.message(recipe.name)
+
 
 register_command(RDeps)

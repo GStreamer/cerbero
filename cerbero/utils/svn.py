@@ -20,48 +20,50 @@ from cerbero.utils import shell
 
 
 async def checkout(url, dest):
-    '''
+    """
     Checkout a url to a given destination
 
     @param url: url to checkout
     @type url: string
     @param dest: path where to do the checkout
     @type url: string
-    '''
+    """
     await shell.async_call(['svn', 'co', '--non-interactive', '--trust-server-cert', url, dest], cpu_bound=False)
 
 
 async def update(repo, revision='HEAD'):
-    '''
+    """
     Update a repositry to a given revision
 
     @param repo: repository path
     @type revision: str
     @param revision: the revision to checkout
     @type revision: str
-    '''
-    await shell.async_call(['svn', 'up', '--non-interactive', '--trust-server-cert', '-r', revision], repo, cpu_bound=False)
+    """
+    await shell.async_call(
+        ['svn', 'up', '--non-interactive', '--trust-server-cert', '-r', revision], repo, cpu_bound=False
+    )
 
 
 def checkout_file(url, out_path):
-    '''
+    """
     Checkout a single file to out_path
 
     @param url: file URL
     @type url: str
     @param out_path: output path
     @type revision: str
-    '''
+    """
     shell.new_call(['svn', 'export', '--force', url, out_path])
 
 
 def revision(repo):
-    '''
+    """
     Get the current revision of a repository with svnversion
 
     @param repo: the path to the repository
     @type  repo: str
-    '''
+    """
     rev = shell.check_output(['svnversion'], cmd_dir=repo).splitlines()[0]
     if rev[-1] == 'M':
         rev = rev[:-1]

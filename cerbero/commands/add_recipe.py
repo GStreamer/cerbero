@@ -27,31 +27,26 @@ from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 
 
-RECEIPT_TPL =\
-'''# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+RECEIPT_TPL = """# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 
 class Recipe(recipe.Recipe):
 
     name = '%(name)s'
     version = '%(version)s'
-'''
+"""
 
-LICENSES_TPL = \
-'''    licenses = [%(licenses)s]
-'''
+LICENSES_TPL = """    licenses = [%(licenses)s]
+"""
 
-COMMIT_TPL = \
-'''    commit = '%(commit)s'
-'''
+COMMIT_TPL = """    commit = '%(commit)s'
+"""
 
-ORIGIN_TPL = \
-'''    remotes = {'origin': '%(origin)s'}
-'''
+ORIGIN_TPL = """    remotes = {'origin': '%(origin)s'}
+"""
 
-DEPS_TPL = \
-'''    deps = %(deps)s
-'''
+DEPS_TPL = """    deps = %(deps)s
+"""
 
 
 class AddRecipe(Command):
@@ -67,33 +62,35 @@ class AddRecipe(Command):
                 continue
             self.supported_licenses[attr.acronym] = name
 
-        Command.__init__(self,
-            [ArgparseArgument('name', nargs=1,
-                             help=_('name of the recipe')),
-            ArgparseArgument('version', nargs=1,
-                             help=_('version of the recipe')),
-            ArgparseArgument('-l', '--licenses', default='',
-                             help=_('comma separated list of the recipe '
-                                    'licenses. Supported licenses: %s') %
-                                    ', '.join(list(self.supported_licenses.keys()))),
-            ArgparseArgument('-c', '--commit', default='',
-                             help=_('commit to use '
-                                    '(default to "sdk-$version")')),
-            ArgparseArgument('-o', '--origin', default='',
-                             help=_('the origin repository of the recipe')),
-            ArgparseArgument('-d', '--deps', default='',
-                             help=_('comma separated list of the recipe '
-                                    'dependencies')),
-            ArgparseArgument('-f', '--force', action='store_true',
-                default=False, help=_('Replace recipe if existing'))])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('name', nargs=1, help=_('name of the recipe')),
+                ArgparseArgument('version', nargs=1, help=_('version of the recipe')),
+                ArgparseArgument(
+                    '-l',
+                    '--licenses',
+                    default='',
+                    help=_('comma separated list of the recipe ' 'licenses. Supported licenses: %s')
+                    % ', '.join(list(self.supported_licenses.keys())),
+                ),
+                ArgparseArgument('-c', '--commit', default='', help=_('commit to use ' '(default to "sdk-$version")')),
+                ArgparseArgument('-o', '--origin', default='', help=_('the origin repository of the recipe')),
+                ArgparseArgument(
+                    '-d', '--deps', default='', help=_('comma separated list of the recipe ' 'dependencies')
+                ),
+                ArgparseArgument(
+                    '-f', '--force', action='store_true', default=False, help=_('Replace recipe if existing')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         name = args.name[0]
         version = args.version[0]
         filename = os.path.join(config.recipes_dir, '%s.recipe' % name)
         if not args.force and os.path.exists(filename):
-            m.warning(_("Recipe '%s' (%s) already exists, "
-                "use -f to replace" % (name, filename)))
+            m.warning(_("Recipe '%s' (%s) already exists, " 'use -f to replace' % (name, filename)))
             return
 
         template_args = {}
@@ -106,9 +103,7 @@ class AddRecipe(Command):
             licenses = args.licenses.split(',')
             self.validate_licenses(licenses)
             template += LICENSES_TPL
-            template_args['licenses'] = ', '.join(
-                    ['License.' + self.supported_licenses[l] \
-                        for l in licenses])
+            template_args['licenses'] = ', '.join(['License.' + self.supported_licenses[l] for l in licenses])
 
         if args.commit:
             template += COMMIT_TPL
@@ -126,8 +121,7 @@ class AddRecipe(Command):
                 try:
                     recipe = cookbook.get_recipe(dname)
                 except RecipeNotFoundError as ex:
-                    raise UsageError(_("Error creating recipe: "
-                            "dependant recipe %s does not exist") % dname)
+                    raise UsageError(_('Error creating recipe: ' 'dependant recipe %s does not exist') % dname)
             template_args['deps'] = deps
 
         try:
@@ -135,16 +129,14 @@ class AddRecipe(Command):
             f.write(template % template_args)
             f.close()
 
-            m.action(_("Recipe '%s' successfully created in %s") %
-                    (name, filename))
+            m.action(_("Recipe '%s' successfully created in %s") % (name, filename))
         except IOError as ex:
-            raise FatalError(_("Error creating recipe: %s") % ex)
+            raise FatalError(_('Error creating recipe: %s') % ex)
 
     def validate_licenses(self, licenses):
         for l in licenses:
             if l and not l in self.supported_licenses:
-                raise UsageError(_("Error creating recipe: "
-                    "invalid license '%s'") % l)
+                raise UsageError(_('Error creating recipe: ' "invalid license '%s'") % l)
 
 
 register_command(AddRecipe)

@@ -28,32 +28,58 @@ from cerbero.bootstrap.build_tools import BuildTools
 NUMBER_OF_JOBS_IF_UNUSED = 2
 NUMBER_OF_JOBS_IF_USED = 2 * determine_num_of_cpus()
 
+
 class Bootstrap(Command):
     doc = N_('Bootstrap the build system installing all the dependencies')
     name = 'bootstrap'
 
     def __init__(self):
         args = [
-            ArgparseArgument('--build-tools-only', action='store_true',
-                default=False, help=argparse.SUPPRESS),
-            ArgparseArgument('--system-only', action='store_true',
-                default=False, help=argparse.SUPPRESS),
-            ArgparseArgument('--system', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Setup the system for building, such as by installing system packages'),
-            ArgparseArgument('--toolchains', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Setup any toolchains needed by the target platform'),
-            ArgparseArgument('--build-tools', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Compile the build tools needed while building'),
-            ArgparseArgument('--offline', action='store_true',
-                default=False, help=_('Use only the source cache, no network')),
-            ArgparseArgument('-y', '--assume-yes', action='store_true',
-                default=False, help=('Automatically say yes to prompts and run non-interactively')),
-            ArgparseArgument('--jobs', '-j', action='store', type=int,
-                default=0, help=_('How many recipes to build concurrently. '
-                        '0 = number of CPUs.'))]
+            ArgparseArgument('--build-tools-only', action='store_true', default=False, help=argparse.SUPPRESS),
+            ArgparseArgument('--system-only', action='store_true', default=False, help=argparse.SUPPRESS),
+            ArgparseArgument(
+                '--system',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Setup the system for building, such as by installing system packages',
+            ),
+            ArgparseArgument(
+                '--toolchains',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Setup any toolchains needed by the target platform',
+            ),
+            ArgparseArgument(
+                '--build-tools',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Compile the build tools needed while building',
+            ),
+            ArgparseArgument(
+                '--offline', action='store_true', default=False, help=_('Use only the source cache, no network')
+            ),
+            ArgparseArgument(
+                '-y',
+                '--assume-yes',
+                action='store_true',
+                default=False,
+                help=('Automatically say yes to prompts and run non-interactively'),
+            ),
+            ArgparseArgument(
+                '--jobs',
+                '-j',
+                action='store',
+                type=int,
+                default=0,
+                help=_('How many recipes to build concurrently. ' '0 = number of CPUs.'),
+            ),
+        ]
         Command.__init__(self, args)
 
     def run(self, config, args):
@@ -66,12 +92,15 @@ class Bootstrap(Command):
             # --system-only meant '--system=yes --toolchains=yes --build-tools=no'
             args.build_tools = False
             m.deprecation('Replace --system-only with --build-tools=no')
-        bootstrappers = Bootstrapper(config, args.system, args.toolchains,
-                args.build_tools, args.offline, args.assume_yes)
+        bootstrappers = Bootstrapper(
+            config, args.system, args.toolchains, args.build_tools, args.offline, args.assume_yes
+        )
         tasks = []
+
         async def bootstrap_fetch_extract(bs):
             await bs.fetch()
             await bs.extract()
+
         for bootstrapper in bootstrappers:
             tasks.append(bootstrap_fetch_extract(bootstrapper))
         run_until_complete(tasks)
@@ -91,19 +120,42 @@ class FetchBootstrap(Command):
 
     def __init__(self):
         args = [
-            ArgparseArgument('--build-tools-only', action='store_true',
-                default=False, help=argparse.SUPPRESS),
-            ArgparseArgument('--system', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Fetch sources to setup the system by the target platform'),
-            ArgparseArgument('--toolchains', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Setup any toolchains needed by the target platform'),
-            ArgparseArgument('--build-tools', action=StoreBool,
-                default=True, nargs='?', choices=('yes', 'no'),
-                help='Compile the build tools needed while building'),
-            ArgparseArgument('--jobs', '-j', action='store', nargs='?', type=int,
-                    const=NUMBER_OF_JOBS_IF_USED, default=NUMBER_OF_JOBS_IF_UNUSED, help=_('number of async jobs'))]
+            ArgparseArgument('--build-tools-only', action='store_true', default=False, help=argparse.SUPPRESS),
+            ArgparseArgument(
+                '--system',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Fetch sources to setup the system by the target platform',
+            ),
+            ArgparseArgument(
+                '--toolchains',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Setup any toolchains needed by the target platform',
+            ),
+            ArgparseArgument(
+                '--build-tools',
+                action=StoreBool,
+                default=True,
+                nargs='?',
+                choices=('yes', 'no'),
+                help='Compile the build tools needed while building',
+            ),
+            ArgparseArgument(
+                '--jobs',
+                '-j',
+                action='store',
+                nargs='?',
+                type=int,
+                const=NUMBER_OF_JOBS_IF_USED,
+                default=NUMBER_OF_JOBS_IF_UNUSED,
+                help=_('number of async jobs'),
+            ),
+        ]
         Command.__init__(self, args)
 
     def run(self, config, args):
@@ -111,8 +163,9 @@ class FetchBootstrap(Command):
             # --build-tools-only meant '--system=no --toolchains=no --build-tools=yes'
             args.toolchains = False
             m.deprecation('Replace --build-tools-only with --system=no --toolchains=no')
-        bootstrappers = Bootstrapper(config, args.system, args.toolchains,
-                args.build_tools, offline=False, assume_yes=False)
+        bootstrappers = Bootstrapper(
+            config, args.system, args.toolchains, args.build_tools, offline=False, assume_yes=False
+        )
         tasks = []
         build_tools_task = None
         for bootstrapper in bootstrappers:
@@ -125,6 +178,7 @@ class FetchBootstrap(Command):
         # tasks are complete, because we need that for cargo-c
         if build_tools_task:
             run_until_complete(build_tools_task)
+
 
 register_command(Bootstrap)
 register_command(FetchBootstrap)

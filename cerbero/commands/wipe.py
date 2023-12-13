@@ -30,18 +30,23 @@ class Wipe(Command):
     name = 'wipe'
 
     def __init__(self):
-        Command.__init__(self, [
-                ArgparseArgument('--force', action='store_true',
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument(
+                    '--force',
+                    action='store_true',
                     default=False,
-                    help=_('force the deletion of everything without user '
-                           'input')),
-                ArgparseArgument('--build-tools', action='store_true',
-                    default=False,
-                    help=_('wipe the build tools too')),
-                ArgparseArgument('--keep-sources', action='store_true',
-                    default=False,
-                    help=_('keep downloaded source files')),
-                ])
+                    help=_('force the deletion of everything without user ' 'input'),
+                ),
+                ArgparseArgument(
+                    '--build-tools', action='store_true', default=False, help=_('wipe the build tools too')
+                ),
+                ArgparseArgument(
+                    '--keep-sources', action='store_true', default=False, help=_('keep downloaded source files')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         to_remove = [os.path.join(config.home_dir, config.cache_file)]
@@ -61,25 +66,25 @@ class Wipe(Command):
             return
 
         options = ['yes', 'no']
-        en_msg = "WARNING!!!\n" \
-                "This command will delete cerbero's build cache"
+        en_msg = 'WARNING!!!\n' "This command will delete cerbero's build cache"
         if not args.keep_sources:
-            en_msg += ", the sources directory,"
-        en_msg += " and the builds directory " \
-                "to reset the build system to its initial state.\n" \
-                "The following paths will be removed:\n%s\n" \
-                "Do you want to continue?" % '\n'.join(to_remove)
+            en_msg += ', the sources directory,'
+        en_msg += (
+            ' and the builds directory '
+            'to reset the build system to its initial state.\n'
+            'The following paths will be removed:\n%s\n'
+            'Do you want to continue?' % '\n'.join(to_remove)
+        )
         msg = _(en_msg)
         # Ask once
         if shell.prompt(msg, options) == options[0]:
-            msg = _("Are you sure?")
+            msg = _('Are you sure?')
             # Ask twice
             if shell.prompt(msg, options) == options[0]:
                 # Start with the Apocalypse
                 self.wipe(to_remove)
 
     def wipe(self, paths):
-
         def _onerror(func, path, exc_info):
             if not os.access(path, os.W_OK):
                 os.chmod(path, stat.S_IWUSR)
@@ -88,7 +93,7 @@ class Wipe(Command):
                 raise
 
         for path in paths:
-            m.action(_("Removing path: %s") % path)
+            m.action(_('Removing path: %s') % path)
             if not os.path.exists(path):
                 continue
             if os.path.isfile(path):

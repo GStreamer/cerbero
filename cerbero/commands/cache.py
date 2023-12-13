@@ -28,6 +28,7 @@ from cerbero.errors import FatalError
 from cerbero.utils import _, N_, ArgparseArgument, git, shell, run_until_complete
 from cerbero.utils import messages as m
 
+
 class BaseCache(Command):
     base_url = 'https://artifacts.gstreamer-foundation.net/cerbero-deps/%s/%s/%s'
     ssh_address = 'cerbero-deps-uploader@artifacts.gstreamer-foundation.net'
@@ -38,10 +39,14 @@ class BaseCache(Command):
     log_size = 10
 
     def __init__(self, args=[]):
-        args.append(ArgparseArgument('--commit', action='store', type=str,
-                    default='HEAD', help=_('the commit to pick artifact from')))
-        args.append(ArgparseArgument('--branch', action='store', type=str,
-                    default='main', help=_('Git branch to search from')))
+        args.append(
+            ArgparseArgument(
+                '--commit', action='store', type=str, default='HEAD', help=_('the commit to pick artifact from')
+            )
+        )
+        args.append(
+            ArgparseArgument('--branch', action='store', type=str, default='main', help=_('Git branch to search from'))
+        )
         Command.__init__(self, args)
 
     # FIXME: move this to utils
@@ -63,7 +68,7 @@ class BaseCache(Command):
         return git.get_hash_is_ancestor(git_dir, commit)
 
     def json_get(self, url):
-        m.message("GET %s" % url)
+        m.message('GET %s' % url)
 
         tmpdir = tempfile.mkdtemp()
         tmpfile = os.path.join(tmpdir, 'deps.json')
@@ -99,7 +104,7 @@ class BaseCache(Command):
         branch = args.branch
         distro, arch = self.get_distro_and_arch(config)
         base_url = self.base_url % (branch, distro, arch)
-        return "%s/%s" % (base_url, filename)
+        return '%s/%s' % (base_url, filename)
 
     def get_deps(self, config, args):
         url = self.make_url(config, args, self.log_filename)
@@ -108,7 +113,7 @@ class BaseCache(Command):
         try:
             deps = self.json_get(url)
         except FatalError as e:
-            m.warning("Could not get cache list: %s" % e.msg)
+            m.warning('Could not get cache list: %s' % e.msg)
         return deps
 
     def get_deps_filepath(self, config):
@@ -119,17 +124,19 @@ class BaseCache(Command):
 
     def run(self, config, args):
         if not config.uninstalled:
-            raise FatalError(_("fetch-cache is only available with "
-                        "cerbero-uninstalled"))
+            raise FatalError(_('fetch-cache is only available with ' 'cerbero-uninstalled'))
+
 
 class FetchCache(BaseCache):
-    doc = N_('Fetch a cached build from external storage based on cerbero git '
-            'revision.')
+    doc = N_('Fetch a cached build from external storage based on cerbero git ' 'revision.')
     name = 'fetch-cache'
 
     def __init__(self, args=[]):
-        args.append(ArgparseArgument('--namespace', action='store', type=str,
-                    default='gstreamer', help=_('GitLab namespace to search from')))
+        args.append(
+            ArgparseArgument(
+                '--namespace', action='store', type=str, default='gstreamer', help=_('GitLab namespace to search from')
+            )
+        )
         BaseCache.__init__(self, args)
 
     def find_dep(self, deps, sha, allow_old=False):
@@ -138,14 +145,14 @@ class FetchCache(BaseCache):
                 m.message(f"Matching cache file is {dep['url']}")
                 return dep
         if allow_old:
-            m.message(f"Did not find cache for commit {sha}, looking for an older one...");
+            m.message(f'Did not find cache for commit {sha}, looking for an older one...')
             for dep in deps:
                 if self.get_git_sha_is_ancestor(dep['commit']):
                     m.message(f"Latest available cache file is {dep['url']}")
                     return dep
-            m.warning(f"Did not find any cache for commit {sha}")
+            m.warning(f'Did not find any cache for commit {sha}')
         else:
-            m.warning(f"Did not find cache for commit {sha}")
+            m.warning(f'Did not find cache for commit {sha}')
         return None
 
     async def fetch_dep(self, config, dep, namespace):
@@ -157,7 +164,7 @@ class FetchCache(BaseCache):
                 m.action(f'Unpacking deps cache {dep_path}')
                 await shell.unpack(dep_path, config.home_dir)
             else:
-                m.warning("Corrupted dependency file, ignoring.")
+                m.warning('Corrupted dependency file, ignoring.')
             m.action('Unpack complete, deleting artifact')
             os.remove(dep_path)
 
@@ -168,15 +175,15 @@ class FetchCache(BaseCache):
             # and Windows. It should instead be derived from CI env vars.
             if config.platform == Platform.LINUX:
                 origin = self.build_dir % namespace
-                m.action("Relocating from %s to %s" % (origin, config.home_dir))
+                m.action('Relocating from %s to %s' % (origin, config.home_dir))
                 # FIXME: Just a quick hack for now
-                shell.call(("grep -lnrIU %(origin)s | xargs "
-                            "sed \"s#%(origin)s#%(dest)s#g\" -i") % {
-                                'origin': origin, 'dest': config.home_dir},
-                            config.home_dir)
+                shell.call(
+                    ('grep -lnrIU %(origin)s | xargs ' 'sed "s#%(origin)s#%(dest)s#g" -i')
+                    % {'origin': origin, 'dest': config.home_dir},
+                    config.home_dir,
+                )
         except FatalError as e:
-            m.warning("Could not retrieve dependencies for commit %s: %s" % (
-                        dep['commit'], e.msg))
+            m.warning('Could not retrieve dependencies for commit %s: %s' % (dep['commit'], e.msg))
 
     def run(self, config, args):
         BaseCache.run(self, config, args)
@@ -188,6 +195,7 @@ class FetchCache(BaseCache):
             run_until_complete(self.fetch_dep(config, dep, args.namespace))
         m.message('All done!')
 
+
 class GenCache(BaseCache):
     doc = N_('Generate build cache from current state.')
     name = 'gen-cache'
@@ -197,13 +205,16 @@ class GenCache(BaseCache):
 
     def create_tarball_tarfile(self, workdir, out_file, *in_files, exclude=None):
         import tarfile
+
         m.action(f'Generating cache file with tarfile + xz')
+
         def exclude_filter(tarinfo):
             for each in exclude:
                 if each in tarinfo.name:
                     return None
             print(tarinfo.name)
             return tarinfo
+
         prev_cwd = os.getcwd()
         os.chdir(workdir)
         out_tar, _ = os.path.splitext(out_file)
@@ -219,7 +230,8 @@ class GenCache(BaseCache):
     def create_tarball_tar(self, workdir, out_file, *in_files, exclude=None):
         cmd = [
             shell.get_tar_cmd(),
-            '-C', workdir,
+            '-C',
+            workdir,
             '--verbose',
             '--use-compress-program=xz --threads=0',
         ]
@@ -242,22 +254,22 @@ class GenCache(BaseCache):
     def gen_dep(self, config, args, deps, sha):
         deps_filepath = self.get_deps_filepath(config)
         if os.path.exists(deps_filepath):
-          os.remove(deps_filepath)
+            os.remove(deps_filepath)
 
         log_filepath = self.get_log_filepath(config)
         if os.path.exists(log_filepath):
-          os.remove(log_filepath)
+            os.remove(log_filepath)
 
         workdir = config.home_dir
         platform_arch = '_'.join(config._get_toolchain_target_platform_arch())
         distdir = f'dist/{platform_arch}'
         try:
-            self.create_tarball(config, workdir, deps_filepath, 'build-tools',
-                                config.build_tools_cache, distdir,
-                                config.cache_file)
+            self.create_tarball(
+                config, workdir, deps_filepath, 'build-tools', config.build_tools_cache, distdir, config.cache_file
+            )
             url = self.make_url(config, args, '%s-%s' % (sha, self.deps_filename))
             deps.insert(0, {'commit': sha, 'checksum': self.checksum(deps_filepath), 'url': url})
-            deps = deps[0:self.log_size]
+            deps = deps[0 : self.log_size]
             with open(log_filepath, 'w') as outfile:
                 json.dump(deps, outfile, indent=1)
         except FatalError:
@@ -276,6 +288,7 @@ class GenCache(BaseCache):
         deps = self.get_deps(config, args)
         self.gen_dep(config, args, deps, sha)
 
+
 class UploadCache(BaseCache):
     doc = N_('Build build cache to external storage.')
     name = 'upload-cache'
@@ -291,7 +304,7 @@ class UploadCache(BaseCache):
                 return
 
         tmpdir = tempfile.mkdtemp()
-        private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY');
+        private_key = os.getenv('CERBERO_PRIVATE_SSH_KEY')
         private_key_path = os.path.join(tmpdir, 'id_rsa')
 
         deps_filepath = self.get_deps_filepath(config)
@@ -305,7 +318,7 @@ class UploadCache(BaseCache):
             if private_key:
                 with os.fdopen(os.open(private_key_path, os.O_WRONLY | os.O_CREAT, 0o600), 'w') as f:
                     f.write(private_key)
-                    f.write("\n")
+                    f.write('\n')
                     f.close()
                 ssh_opt += ['-i', private_key_path]
             ssh_cmd = ['ssh'] + ssh_opt + [self.ssh_address]
@@ -315,27 +328,26 @@ class UploadCache(BaseCache):
             branch = args.branch
             distro, arch = self.get_distro_and_arch(config)
             base_dir = os.path.join(branch, distro, arch)
-            shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir ], verbose=True)
+            shell.new_call(ssh_cmd + ['mkdir -p %s' % base_dir], verbose=True)
 
             # Upload the deps files first
             remote_deps_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.deps_filename))
-            shell.new_call(scp_cmd + [deps_filepath, '%s:%s' % (self.ssh_address, remote_deps_filepath)],
-                           verbose=True)
+            shell.new_call(scp_cmd + [deps_filepath, '%s:%s' % (self.ssh_address, remote_deps_filepath)], verbose=True)
 
             # Upload the new log
             remote_tmp_log_filepath = os.path.join(base_dir, '%s-%s' % (sha, self.log_filename))
-            shell.new_call(scp_cmd + [log_filepath, '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)],
-                           verbose=True)
+            shell.new_call(
+                scp_cmd + [log_filepath, '%s:%s' % (self.ssh_address, remote_tmp_log_filepath)], verbose=True
+            )
 
             # Override the new log in a way that we reduce the risk of corrupted
             # fetch.
             remote_log_filepath = os.path.join(base_dir, self.log_filename)
-            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath],
-                           verbose=True)
+            shell.new_call(ssh_cmd + ['mv', '-f', remote_tmp_log_filepath, remote_log_filepath], verbose=True)
             m.message('New deps cache uploaded and deps log updated')
 
             # Now remove the obsoleted dep file if needed
-            for dep in deps[self.log_size - 1:]:
+            for dep in deps[self.log_size - 1 :]:
                 old_remote_deps_filepath = os.path.join(base_dir, os.path.basename(dep['url']))
                 shell.new_call(ssh_cmd + ['rm', '-f', old_remote_deps_filepath], verbose=True)
         finally:
@@ -346,6 +358,7 @@ class UploadCache(BaseCache):
         deps = self.get_deps(config, args)
         self.upload_dep(config, args, deps)
         m.message('All done!')
+
 
 register_command(FetchCache)
 register_command(GenCache)

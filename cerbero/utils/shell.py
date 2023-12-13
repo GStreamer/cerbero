@@ -53,6 +53,7 @@ CPU_BOUND_SEMAPHORE = CerberoSemaphore(info[4])
 NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(2)
 DRY_RUN = False
 
+
 def _fix_mingw_cmd(path):
     reserved = ['/', ' ', '\\', ')', '(', '"']
     l_path = list(path)
@@ -62,14 +63,15 @@ def _fix_mingw_cmd(path):
                 l_path[i] = '/'
     return ''.join(l_path)
 
+
 def _resolve_cmd(cmd, env):
-    '''
+    """
     On Windows, we can't pass the PATH variable through the env= kwarg to
     subprocess.* and expect it to use that value to search for the command,
     because Python uses CreateProcess directly. Unlike execvpe, CreateProcess
     does not use the PATH env var in the env supplied to search for the
     executable. Hence, we need to search for it manually.
-    '''
+    """
     if PLATFORM != Platform.WINDOWS or env is None or 'PATH' not in env:
         return cmd
     if not os.path.isabs(cmd[0]):
@@ -79,10 +81,11 @@ def _resolve_cmd(cmd, env):
         cmd[0] = resolved_cmd
     return cmd
 
+
 def _cmd_string_to_array(cmd, env):
     if isinstance(cmd, list):
         return _resolve_cmd(cmd, env)
-    assert(isinstance(cmd, str))
+    assert isinstance(cmd, str)
     if PLATFORM == Platform.WINDOWS:
         # fix paths with backslashes
         cmd = _fix_mingw_cmd(cmd)
@@ -91,16 +94,19 @@ def _cmd_string_to_array(cmd, env):
     # platforms.
     return ['sh', '-c', cmd]
 
+
 def set_max_cpu_bound_calls(number):
     global CPU_BOUND_SEMAPHORE
     CPU_BOUND_SEMAPHORE = CerberoSemaphore(number)
+
 
 def set_max_non_cpu_bound_calls(number):
     global NON_CPU_BOUND_SEMAPHORE
     NON_CPU_BOUND_SEMAPHORE = CerberoSemaphore(number)
 
+
 def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
-    '''
+    """
     Run a shell command
     DEPRECATED: Use new_call and a cmd array wherever possible
 
@@ -110,7 +116,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
     @param cmd_dir: str
     @param fail: whether or not to raise an exception if the command fails
     @type fail: bool
-    '''
+    """
     try:
         if logfile is None:
             if verbose:
@@ -133,7 +139,7 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
             shell = False
         if DRY_RUN:
             # write to sdterr so it's filtered more easilly
-            m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+            m.error('cd %s && %s && cd %s' % (cmd_dir, cmd, os.getcwd()))
             ret = 0
         else:
             if env is not None:
@@ -144,11 +150,17 @@ def call(cmd, cmd_dir='.', fail=True, verbose=False, logfile=None, env=None):
             # Force python scripts to print their output on newlines instead
             # of on exit. Ensures that we get continuous output in log files.
             env['PYTHONUNBUFFERED'] = '1'
-            ret = subprocess.check_call(cmd, cwd=cmd_dir, bufsize=1,
-                                       stderr=subprocess.STDOUT, stdout=stream,
-                                       stdin=subprocess.DEVNULL,
-                                       universal_newlines=True,
-                                       env=env, shell=shell)
+            ret = subprocess.check_call(
+                cmd,
+                cwd=cmd_dir,
+                bufsize=1,
+                stderr=subprocess.STDOUT,
+                stdout=stream,
+                stdin=subprocess.DEVNULL,
+                universal_newlines=True,
+                env=env,
+                shell=shell,
+            )
     except SUBPROCESS_EXCEPTIONS as e:
         if fail:
             msg = ''
@@ -198,9 +210,9 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False
     else:
         stdin = None
     try:
-        subprocess.check_call(cmd, cwd=cmd_dir, env=env,
-                              stdout=logfile, stderr=subprocess.STDOUT,
-                              stdin=stdin, shell=shell)
+        subprocess.check_call(
+            cmd, cwd=cmd_dir, env=env, stdout=logfile, stderr=subprocess.STDOUT, stdin=stdin, shell=shell
+        )
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
         if not fail:
@@ -218,14 +230,14 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False
 
 
 async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, env=None):
-    '''
+    """
     Run a shell command
 
     @param cmd: the command to run
     @type cmd: str
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
-    '''
+    """
     global CPU_BOUND_SEMAPHORE, NON_CPU_BOUND_SEMAPHORE
     semaphore = CPU_BOUND_SEMAPHORE if cpu_bound else NON_CPU_BOUND_SEMAPHORE
 
@@ -241,16 +253,16 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, 
 
         if DRY_RUN:
             # write to sdterr so it's filtered more easilly
-            m.error("cd %s && %s && cd %s" % (cmd_dir, cmd, os.getcwd()))
+            m.error('cd %s && %s && cd %s' % (cmd_dir, cmd, os.getcwd()))
             return
 
         env = os.environ.copy() if env is None else env.copy()
         # Force python scripts to print their output on newlines instead
         # of on exit. Ensures that we get continuous output in log files.
         env['PYTHONUNBUFFERED'] = '1'
-        proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-                            stderr=subprocess.STDOUT, stdout=stream,
-                            stdin=subprocess.DEVNULL, env=env)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, cwd=cmd_dir, stderr=subprocess.STDOUT, stdout=stream, stdin=subprocess.DEVNULL, env=env
+        )
         await proc.wait()
         if proc.returncode != 0 and fail:
             msg = ''
@@ -262,14 +274,14 @@ async def async_call(cmd, cmd_dir='.', fail=True, logfile=None, cpu_bound=True, 
 
 
 async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env=None):
-    '''
+    """
     Run a shell command and get the output
 
     @param cmd: the command to run
     @type cmd: str
     @param cmd_dir: directory where the command will be run
     @param cmd_dir: str
-    '''
+    """
     global CPU_BOUND_SEMAPHORE, NON_CPU_BOUND_SEMAPHORE
     semaphore = CPU_BOUND_SEMAPHORE if cpu_bound else NON_CPU_BOUND_SEMAPHORE
 
@@ -282,6 +294,7 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
 
         if PLATFORM == Platform.WINDOWS:
             import cerbero.hacks
+
             # On Windows, create_subprocess_exec with a PIPE fails while creating
             # a named pipe using tempfile.mktemp because we override os.path.join
             # to use / on Windows. Override the tempfile module's reference to the
@@ -293,9 +306,9 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
             # used instead.
             tempfile.tempdir = str(PurePath(tempfile.gettempdir()))
 
-        proc = await asyncio.create_subprocess_exec(*cmd, cwd=cmd_dir,
-                stdout=subprocess.PIPE, stderr=logfile,
-                stdin=subprocess.DEVNULL, env=env)
+        proc = await asyncio.create_subprocess_exec(
+            *cmd, cwd=cmd_dir, stdout=subprocess.PIPE, stderr=logfile, stdin=subprocess.DEVNULL, env=env
+        )
         (output, unused_err) = await proc.communicate()
 
         if PLATFORM == Platform.WINDOWS:
@@ -311,7 +324,7 @@ async def async_call_output(cmd, cmd_dir=None, logfile=None, cpu_bound=True, env
 
 
 def apply_patch(patch, directory, strip=1, logfile=None):
-    '''
+    """
     Apply a patch
 
     @param patch: path of the patch file
@@ -320,13 +333,13 @@ def apply_patch(patch, directory, strip=1, logfile=None):
     @type: directory: str
     @param strip: strip
     @type strip: int
-    '''
-    m.log("Applying patch {}".format(patch), logfile)
+    """
+    m.log('Applying patch {}'.format(patch), logfile)
     new_call([PATCH, f'-p{strip}', '-f', '-i', patch], cmd_dir=directory, logfile=logfile)
 
 
 async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
-    '''
+    """
     Extracts a tarball
 
     @param filepath: path of the tarball
@@ -335,7 +348,7 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
     @type output_dir: str
     @param force_tarfile: forces use of tarfile
     @type force_tarfile: bool
-    '''
+    """
     m.log('Unpacking {} in {}'.format(filepath, output_dir), logfile)
 
     if filepath.endswith(TARBALL_SUFFIXES):
@@ -351,7 +364,7 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
             await async_call([get_tar_cmd(), '-C', output_dir, '-xf', filepath, '--no-same-owner'])
 
     elif filepath.endswith('.zip'):
-        zf = zipfile.ZipFile(filepath, "r")
+        zf = zipfile.ZipFile(filepath, 'r')
         zf.extractall(path=output_dir)
     elif filepath.endswith('.dmg'):
         out_dir_name = os.path.splitext(os.path.split(filepath)[1])[0]
@@ -359,15 +372,17 @@ async def unpack(filepath, output_dir, logfile=None, force_tarfile=False):
             output_dir = os.path.join(output_dir, out_dir_name)
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
-            await async_call(['hdiutil', 'attach', '-readonly', '-mountpoint', vol_name, filepath], logfile=logfile, cpu_bound=False)
+            await async_call(
+                ['hdiutil', 'attach', '-readonly', '-mountpoint', vol_name, filepath], logfile=logfile, cpu_bound=False
+            )
             await async_call(['cp', '-r', vol_name + '/', output_dir], logfile=logfile, cpu_bound=False)
             await async_call(['hdiutil', 'detach', vol_name], logfile=logfile, cpu_bound=False)
     else:
-        raise FatalError("Unknown tarball format %s" % filepath)
+        raise FatalError('Unknown tarball format %s' % filepath)
 
 
 async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mirrors=None):
-    '''
+    """
     Downloads a file
 
     @param url: url to download
@@ -382,17 +397,17 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
     @type logfile: str
     @param mirrors: list of mirrors to use as fallback
     @type logfile: list
-    '''
+    """
     user_agent = 'GStreamerCerbero/' + CERBERO_VERSION
 
     if not overwrite and os.path.exists(dest):
         if logfile is None:
-            logging.info("File %s already downloaded." % dest)
+            logging.info('File %s already downloaded.' % dest)
         return
     else:
         if not os.path.exists(os.path.dirname(dest)):
             os.makedirs(os.path.dirname(dest))
-        m.log("Downloading {}".format(url), logfile)
+        m.log('Downloading {}'.format(url), logfile)
 
     urls = [url]
     if mirrors is not None:
@@ -402,19 +417,34 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         urls += [urllib.parse.urljoin(u + '/', filename) for u in mirrors]
 
     if sys.platform.startswith('win'):
-        cmd = ['powershell', '-Command', 'Set-Variable -Name ' \
-               'ProgressPreference -Value \'SilentlyContinue\'; ' \
-               f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} ' \
-               '-Method Get -Uri %s']
+        cmd = [
+            'powershell',
+            '-Command',
+            'Set-Variable -Name '
+            "ProgressPreference -Value 'SilentlyContinue'; "
+            f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} '
+            '-Method Get -Uri %s',
+        ]
     elif shutil.which('wget'):
-        cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20',
-               '--progress=dot:giga', '-O', dest]
+        cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20', '--progress=dot:giga', '-O', dest]
         if not check_cert:
             cmd += ['--no-check-certificate']
         cmd += ['%s']
     elif shutil.which('curl'):
-        cmd = ['curl', '-L', '--fail', '--user-agent', user_agent, '--retry', '2',
-               '--connect-timeout', '20', '--progress-bar', '-o', dest]
+        cmd = [
+            'curl',
+            '-L',
+            '--fail',
+            '--user-agent',
+            user_agent,
+            '--retry',
+            '2',
+            '--connect-timeout',
+            '20',
+            '--progress-bar',
+            '-o',
+            dest,
+        ]
         if not check_cert:
             cmd += ['-k']
         cmd += ['%s']
@@ -428,8 +458,7 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
         tries = 2
         while tries > 0:
             try:
-                return await async_call(cmd + [url_fmt % murl], cpu_bound=False,
-                                        logfile=logfile)
+                return await async_call(cmd + [url_fmt % murl], cpu_bound=False, logfile=logfile)
             except Exception as ex:
                 if os.path.exists(dest):
                     os.remove(dest)
@@ -445,9 +474,10 @@ def _splitter(string, base_url):
     lines = string.split('\n')
     for line in lines:
         try:
-            yield "%s/%s" % (base_url, line.split(' ')[2])
+            yield '%s/%s' % (base_url, line.split(' ')[2])
         except:
             continue
+
 
 def ls_files(files, prefix):
     if not files:
@@ -457,6 +487,7 @@ def ls_files(files, prefix):
     for f in ' '.join(files).split():
         sfiles.update([i.relative_to(prefix).as_posix() for i in prefix.glob(f)])
     return list(tuple(sfiles))
+
 
 def ls_dir(dirpath, prefix):
     files = []
@@ -475,7 +506,7 @@ def find_newer_files(prefix, compfile):
 
 
 def replace(filepath, replacements):
-    ''' Replaces keys in the 'replacements' dict with their values in file '''
+    """Replaces keys in the 'replacements' dict with their values in file"""
     with open(filepath, 'r') as f:
         content = f.read()
     for k, v in replacements.items():
@@ -489,9 +520,9 @@ def find_files(pattern, prefix):
 
 
 def prompt(message, options=[]):
-    ''' Prompts the user for input with the message and options '''
+    """Prompts the user for input with the message and options"""
     if len(options) != 0:
-        message = "%s [%s] " % (message, '/'.join(options))
+        message = '%s [%s] ' % (message, '/'.join(options))
     res = input(message)
     while res not in [str(x) for x in options]:
         res = input(message)
@@ -499,10 +530,10 @@ def prompt(message, options=[]):
 
 
 def prompt_multiple(message, options):
-    ''' Prompts the user for input with using a list of string options'''
+    """Prompts the user for input with using a list of string options"""
     output = message + '\n'
     for i in range(len(options)):
-        output += "[%s] %s\n" % (i, options[i])
+        output += '[%s] %s\n' % (i, options[i])
     res = input(output)
     while res not in [str(x) for x in range(len(options))]:
         res = input(output)
@@ -534,21 +565,21 @@ def touch(path, create_if_not_exists=False, offset=0):
 
 
 def file_hash(path):
-    '''
+    """
     Get the file md5 hash
-    '''
+    """
     return hashlib.md5(open(path, 'rb').read()).digest()
 
 
 def files_checksum(paths):
-    '''
+    """
     Get the md5 checksum of the files
 
     @paths: list of paths
     @type: list
     @return: the md5 checksum
     @rtype: str
-    '''
+    """
     m = hashlib.md5()
     for f in paths:
         m.update(open(f, 'rb').read())
@@ -556,10 +587,10 @@ def files_checksum(paths):
 
 
 def enter_build_environment(platform, arch, distro, sourcedir=None, bash_completions=None, env=None):
-    '''
+    """
     Enters to a new shell with the build environment
-    '''
-    SHELLRC =  '''
+    """
+    SHELLRC = """
 if [ -e ~/{rc_file} ]; then
 source ~/{rc_file}
 fi
@@ -574,13 +605,13 @@ BASH_COMPLETION_PATH="$CERBERO_PREFIX/share/bash-completion/completions"
 for f in $BASH_COMPLETION_SCRIPTS; do
   [ -f "$BASH_COMPLETION_PATH/$f" ] && . "$BASH_COMPLETION_PATH/$f"
 done
-'''
-    MSYSBAT = '''
+"""
+    MSYSBAT = """
 C:\\MinGW\\msys\\1.0\\bin\\bash.exe --rcfile %s
-'''
-    MSYS2BAT =  '''
+"""
+    MSYS2BAT = """
 C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c 'bash --rcfile %s'
-'''
+"""
     if sourcedir:
         sourcedirsh = 'cd ' + sourcedir
     else:
@@ -597,15 +628,18 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
         rc_opt = '--rcs'
         prompt = os.environ.get('PROMPT', '')
         prompt = 'PROMPT="%{{$fg[green]%}}[cerbero-{platform}-{arch}]%{{$reset_color%}} $PROMPT"'.format(
-            platform=platform, arch=arch)
+            platform=platform, arch=arch
+        )
     else:
         rc_file = '.bashrc'
         rc_opt = '--rcfile'
         prompt = os.environ.get('PS1', '')
         prompt = r'PS1="\[\033[01;32m\][cerbero-{platform}-{arch}]\[\033[00m\] $PS1"'.format(
-            platform=platform, arch=arch)
-    shellrc = SHELLRC.format(rc_file=rc_file, sourcedirsh=sourcedirsh,
-        prompt=prompt, bash_completions=bash_completions, path=env['PATH'])
+            platform=platform, arch=arch
+        )
+    shellrc = SHELLRC.format(
+        rc_file=rc_file, sourcedirsh=sourcedirsh, prompt=prompt, bash_completions=bash_completions, path=env['PATH']
+    )
 
     if PLATFORM == Platform.WINDOWS:
         if distro == Distro.MSYS:
@@ -613,8 +647,8 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
         else:
             bat_tpl = MSYS2BAT
         msysbatdir = tempfile.mkdtemp()
-        msysbat = os.path.join(msysbatdir, "msys.bat")
-        bashrc = os.path.join(msysbatdir, "bash.rc")
+        msysbat = os.path.join(msysbatdir, 'msys.bat')
+        bashrc = os.path.join(msysbatdir, 'bash.rc')
         with open(msysbat, 'w+') as f:
             f.write(bat_tpl % bashrc)
         with open(bashrc, 'w+') as f:
@@ -628,24 +662,24 @@ C:\\msys64\\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -c '
             rc_tmp.write(shellrc)
             rc_tmp.flush()
             if 'zsh' in shell:
-                env["ZDOTDIR"] = tmp.name
+                env['ZDOTDIR'] = tmp.name
                 os.execlpe(shell, shell, env)
             else:
                 # Check if the shell supports passing the rcfile
                 if os.system("%s %s %s -c echo 'test' > /dev/null 2>&1" % (shell, rc_opt, rc_tmp.name)) == 0:
                     os.execlpe(shell, shell, rc_opt, rc_tmp.name, env)
                 else:
-                    env["CERBERO_ENV"] = "[cerbero-%s-%s]" % (platform, arch)
+                    env['CERBERO_ENV'] = '[cerbero-%s-%s]' % (platform, arch)
                     os.execlpe(shell, shell, env)
 
 
 def get_tar_cmd():
-    '''
+    """
     Returns the tar command to use
 
     @return: the tar command
     @rtype: str
-    '''
+    """
     # Use bsdtar with MSYS2 since tar hangs
     # https://github.com/msys2/MSYS2-packages/issues/1548
     if DISTRO == Distro.MSYS2:
@@ -689,13 +723,14 @@ def check_tool_version(tool_name, needed, env, version_arg=None):
 
     return tool, found, newer
 
+
 def windows_proof_rename(from_name, to_name):
-    '''
+    """
     On Windows, if you try to rename a file or a directory that you've newly
     created, an anti-virus may be holding a lock on it, and renaming it will
     yield a PermissionError. In this case, the only thing we can do is try and
     try again.
-    '''
+    """
     delays = [0.1, 0.1, 0.2, 0.2, 0.2, 0.5, 0.5, 1, 1, 1, 1, 2]
     if PLATFORM == Platform.WINDOWS:
         for d in delays:
@@ -707,6 +742,7 @@ def windows_proof_rename(from_name, to_name):
                 continue
     # Try one last time and throw an error if it fails again
     os.rename(from_name, to_name)
+
 
 def symlink(src, dst, working_dir=None):
     prev_wd = os.getcwd()
@@ -726,6 +762,7 @@ def symlink(src, dst, working_dir=None):
             shutil.copy(src, dst)
     finally:
         os.chdir(prev_wd)
+
 
 class BuildStatusPrinter:
     def __init__(self, steps, interactive):
@@ -749,23 +786,23 @@ class BuildStatusPrinter:
     def built(self, count, recipe_name):
         self.count += 1
         if self.interactive:
-            m.build_recipe_done(self.count, self.total, recipe_name, _("built"))
+            m.build_recipe_done(self.count, self.total, recipe_name, _('built'))
         self.remove_recipe(recipe_name)
 
     def already_built(self, count, recipe_name):
         self.count += 1
         if self.interactive:
-            m.build_recipe_done(self.count, self.total, recipe_name, _("already built"))
+            m.build_recipe_done(self.count, self.total, recipe_name, _('already built'))
         else:
-            m.build_recipe_done(count, self.total, recipe_name, _("already built"))
+            m.build_recipe_done(count, self.total, recipe_name, _('already built'))
         self.output_status_line()
 
-    def _get_completion_percent (self):
-        one_recipe = 100. / float (self.total)
-        one_step = one_recipe / len (self.steps)
+    def _get_completion_percent(self):
+        one_recipe = 100.0 / float(self.total)
+        one_step = one_recipe / len(self.steps)
         completed = float(self.count) * one_recipe
-        for i, step in enumerate (self.steps):
-            completed += len(self.step_to_recipe[step]) * (i+1) * one_step
+        for i, step in enumerate(self.steps):
+            completed += len(self.step_to_recipe[step]) * (i + 1) * one_step
         return int(completed)
 
     def update_recipe_step(self, count, recipe_name, step):
@@ -778,11 +815,11 @@ class BuildStatusPrinter:
             self.output_status_line()
 
     def generate_status_line(self):
-        s = "[(" + str(self.count) + "/" + str(self.total) + " @ " + str(self._get_completion_percent()) + "%)"
+        s = '[(' + str(self.count) + '/' + str(self.total) + ' @ ' + str(self._get_completion_percent()) + '%)'
         for step in self.steps:
             if self.step_to_recipe[step]:
-                s += " " + str(step).upper() + ": " + ", ".join(self.step_to_recipe[step])
-        s += "]"
+                s += ' ' + str(step).upper() + ': ' + ', '.join(self.step_to_recipe[step])
+        s += ']'
         return s
 
     def output_status_line(self):

@@ -26,6 +26,7 @@ import shutil
 
 if sys.platform == 'win32':
     import ctypes
+
     kernel32 = ctypes.windll.kernel32
 
 
@@ -33,8 +34,8 @@ ACTION_TPL = '-----> %s'
 DONE_STEP_TPL = '[(%s/%s) %s -> %s]'
 STEP_TPL = '[(%s/%s @ %d%%) %s -> %s]'
 START_TIME = None
-SHELL_CLEAR_LINE = "\r\033[K"
-SHELL_MOVE_UP = "\033[F"
+SHELL_CLEAR_LINE = '\r\033[K'
+SHELL_MOVE_UP = '\033[F'
 
 
 # Enable support fot VT-100 escapes in Windows 10
@@ -60,9 +61,10 @@ def log(msg, logfile):
     else:
         logfile.write(msg + '\n')
 
+
 class StdoutManager:
     def __init__(self):
-        self.status_line = ""
+        self.status_line = ''
         self.clear_lines = 0
 
     def output(self, msg):
@@ -70,12 +72,14 @@ class StdoutManager:
         self.clear_status()
         sys.stdout.write(msg)
         sys.stdout.flush()
-        self.status_line = ""
+        self.status_line = ''
         self.clear_lines = 0
 
-    def clear_status (self):
+    def clear_status(self):
         if console_is_interactive():
-            clear_prev_status = SHELL_CLEAR_LINE + "".join((SHELL_CLEAR_LINE + SHELL_MOVE_UP for i in range(self.clear_lines)))
+            clear_prev_status = SHELL_CLEAR_LINE + ''.join(
+                (SHELL_CLEAR_LINE + SHELL_MOVE_UP for i in range(self.clear_lines))
+            )
             sys.stdout.write(clear_prev_status)
             sys.stdout.flush()
 
@@ -87,9 +91,11 @@ class StdoutManager:
         self.status_line = status
 
         if console_is_interactive():
-            self.clear_lines = len (status) // shutil.get_terminal_size().columns
+            self.clear_lines = len(status) // shutil.get_terminal_size().columns
+
 
 STDOUT = StdoutManager()
+
 
 def prepend_time(end=' '):
     global START_TIME
@@ -99,6 +105,7 @@ def prepend_time(end=' '):
         s += end
     return s
 
+
 def output(msg, fd, end='\n'):
     prefix = prepend_time()
     if fd == sys.stdout:
@@ -106,6 +113,7 @@ def output(msg, fd, end='\n'):
     else:
         fd.write(prefix + msg + end)
         fd.flush()
+
 
 def output_status(msg):
     prefix = prepend_time()
@@ -127,11 +135,11 @@ def error(msg, logfile=None):
 
 
 def deprecation(msg, logfile=None):
-    error("DEPRECATION: %s" % msg, logfile=logfile)
+    error('DEPRECATION: %s' % msg, logfile=logfile)
 
 
 def warning(msg, logfile=None):
-    error("WARNING: %s" % msg, logfile=logfile)
+    error('WARNING: %s' % msg, logfile=logfile)
 
 
 def action(msg, logfile=None):
@@ -141,5 +149,6 @@ def action(msg, logfile=None):
 def build_step(recipe_i, total_recipes, completion_percent, recipe, step, logfile=None):
     message(STEP_TPL % (recipe_i, total_recipes, completion_percent, recipe, step), logfile=logfile)
 
-def build_recipe_done (recipe_i, total_recipes, recipe, msg, logfile=None):
+
+def build_recipe_done(recipe_i, total_recipes, recipe, msg, logfile=None):
     message(DONE_STEP_TPL % (recipe_i, total_recipes, recipe, msg), logfile=logfile)

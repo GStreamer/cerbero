@@ -25,29 +25,21 @@ from cerbero.utils import shell
 
 
 class Recipe1(recipe.Recipe):
-
     name = 'recipe1'
     licence = 'LGPL'
     uuid = '1'
 
     files_misc = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
-    platform_files_misc = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
+    platform_files_misc = {Platform.WINDOWS: ['windows'], Platform.LINUX: ['linux']}
 
     files_bins = ['gst-launch']
-    platform_files_bins = {
-        Platform.WINDOWS: ['windows'],
-        Platform.LINUX: ['linux']}
+    platform_files_bins = {Platform.WINDOWS: ['windows'], Platform.LINUX: ['linux']}
 
     files_libs = ['libgstreamer-0.10']
-    platform_files_libs = {
-        Platform.WINDOWS: ['libgstreamer-win32'],
-        Platform.LINUX: ['libgstreamer-x11']}
+    platform_files_libs = {Platform.WINDOWS: ['libgstreamer-win32'], Platform.LINUX: ['libgstreamer-x11']}
 
 
 class Recipe2(recipe.Recipe):
-
     name = 'recipe2'
     licence = 'GPL'
 
@@ -55,7 +47,6 @@ class Recipe2(recipe.Recipe):
 
 
 class Recipe3(recipe.Recipe):
-
     name = 'recipe3'
     licences = 'BSD'
 
@@ -63,7 +54,6 @@ class Recipe3(recipe.Recipe):
 
 
 class Recipe4(recipe.Recipe):
-
     name = 'recipe4'
     licence = 'LGPL'
 
@@ -71,7 +61,6 @@ class Recipe4(recipe.Recipe):
 
 
 class Recipe5(recipe.Recipe):
-
     name = 'recipe5'
     licence = 'LGPL'
 
@@ -85,7 +74,8 @@ def add_files(tmp):
     os.makedirs(bindir)
     os.makedirs(libdir)
     os.makedirs(gstlibdir)
-    shell.call('touch '
+    shell.call(
+        'touch '
         'windows '
         'linux '
         'README '
@@ -126,7 +116,8 @@ def add_files(tmp):
         'lib/libgstreamer-x11.la '
         'libexec/gstreamer-0.10/pluginsloader '
         'libexec/gstreamer-0.10/pluginsloader.exe ',
-        tmp)
+        tmp,
+    )
 
 
 def create_cookbook(config):

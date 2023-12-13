@@ -56,6 +56,7 @@ def register_command(command_class):
 
 def load_commands(subparsers):
     import os
+
     commands_dir = os.path.abspath(os.path.dirname(__file__))
 
     for name in os.listdir(commands_dir):
@@ -65,7 +66,7 @@ def load_commands(subparsers):
         try:
             __import__('cerbero.commands.%s' % name)
         except ImportError as e:
-            m.warning("Error importing command %s:\n %s" % (name, e))
+            m.warning('Error importing command %s:\n %s' % (name, e))
     for command in _commands.values():
         command.add_parser(subparsers)
 

@@ -30,10 +30,10 @@ from cerbero.enums import Platform, Architecture
 
 
 class RustBootstrapper(BootstrapperBase):
-    '''
+    """
     A class for installing a self-contained Rust and Cargo installation inside
     Cerbero's home dir
-    '''
+    """
 
     SERVER = 'https://static.rust-lang.org'
     RUSTUP_VERSION = '1.26.0'
@@ -84,8 +84,7 @@ class RustBootstrapper(BootstrapperBase):
             # toolchains, so ensure that we fetch and install both
             archs = {Architecture.X86_64, Architecture.X86}
             other_arch = (archs - {self.config.arch}).pop()
-            arch_triple = self.config.rust_triple(other_arch, self.config.platform,
-                                                  self.config.variants.visualstudio)
+            arch_triple = self.config.rust_triple(other_arch, self.config.platform, self.config.variants.visualstudio)
             if arch_triple not in self.target_triples:
                 self.target_triples.append(arch_triple)
         self.fetch_urls = self.get_fetch_urls()
@@ -97,10 +96,14 @@ class RustBootstrapper(BootstrapperBase):
             self.extract_steps += [(self.TOMLI_URL, True, self.config.rust_prefix)]
 
     def get_fetch_urls(self):
-        '''Get Rustup and Rust channel URLs'''
+        """Get Rustup and Rust channel URLs"""
         urls = []
-        m = {'server': self.SERVER, 'version': self.RUSTUP_VERSION,
-             'triple': self.build_triple, 'exe_suffix': self.config.exe_suffix}
+        m = {
+            'server': self.SERVER,
+            'version': self.RUSTUP_VERSION,
+            'triple': self.build_triple,
+            'exe_suffix': self.config.exe_suffix,
+        }
         # Rustup
         url = self.RUSTUP_URL_TPL.format(**m)
         name = self.RUSTUP_NAME_TPL.format(**m)
@@ -193,18 +196,27 @@ class RustBootstrapper(BootstrapperBase):
         return rustup_env
 
     async def install_toolchain(self):
-        '''
+        """
         Run rustup to install the downloaded toolchain. We pretend that
         RUST_VERSION is the latest stable release. That way when we upgrade the
         toolchain, rustup will automatically remove the older toolchain, which
         it wouldn't do if we installed a specific version.
-        '''
+        """
         # Install Rust toolchain with rustup-init
         st = os.stat(self.rustup)
         os.chmod(self.rustup, st.st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-        rustup_args = [self.rustup, '-y', '-v', '--no-modify-path',
-                '--default-host', self.build_triple, '--profile', 'minimal',
-                '--component', 'llvm-tools-preview']
+        rustup_args = [
+            self.rustup,
+            '-y',
+            '-v',
+            '--no-modify-path',
+            '--default-host',
+            self.build_triple,
+            '--profile',
+            'minimal',
+            '--component',
+            'llvm-tools-preview',
+        ]
         for triple in self.target_triples:
             rustup_args += ['--target', triple]
         rustup_env = self.get_rustup_env()

@@ -26,7 +26,7 @@ from cerbero.utils import remove_list_duplicates, messages as m
 
 
 class PackageBase(object):
-    '''
+    """
     Base class for packages with the common field to describe a package
 
     @cvar name: name of the package
@@ -82,7 +82,8 @@ class PackageBase(object):
     @type strip: list
     @cvar strip_excludes: files that won't be stripped
     @type strip_excludes: list
-    '''
+    """
+
     name = 'default'
     shortdesc = 'default'
     longdesc = 'default'
@@ -116,51 +117,49 @@ class PackageBase(object):
         self.package_mode = PackageType.RUNTIME
 
     def prepare(self):
-        '''
+        """
         Can be overrided by subclasses to modify conditionally the package
-        '''
+        """
         pass
 
     def load_files(self):
         pass
 
     def package_dir(self):
-        '''
+        """
         Gets the directory path where this package is stored
 
         @return: directory path
         @rtype: str
-        '''
+        """
         return os.path.dirname(self.__file__)
 
     def relative_path(self, path):
-        '''
+        """
         Gets a path relative to the package's directory
 
         @return: absolute path relative to the pacakge's directory
         @rtype: str
-        '''
+        """
         return os.path.abspath(os.path.join(self.package_dir(), path))
 
     def files_list(self):
         raise NotImplemented("'files_list' must be implemented by subclasses")
 
     def devel_files_list(self):
-        raise NotImplemented("'devel_files_list' must be implemented by "
-                             "subclasses")
+        raise NotImplemented("'devel_files_list' must be implemented by " 'subclasses')
 
     def all_files_list(self):
-        raise NotImplemented("'all_files_list' must be implemented by "
-                             "subclasses")
+        raise NotImplemented("'all_files_list' must be implemented by " 'subclasses')
 
     def pre_package(self):
-        '''
+        """
         Subclasses can override to to perform actions before packaging
-        '''
+        """
         pass
 
     def post_package(self, paths, output_dir):
-        '''
+        """
         Subclasses can override it to perform actions after packaging.
 
         @param paths: list of paths for the files created during packaging
@@ -170,9 +169,9 @@ class PackageBase(object):
         @type output_dir: str
         @return: list of paths with created files
         @rtype: list
-        '''
+        """
         if hasattr(self, 'post_install'):
-            m.warning("Package.post_install is deprecated, use Package.post_package instead.")
+            m.warning('Package.post_install is deprecated, use Package.post_package instead.')
             return self.post_install(paths)
         return paths
 
@@ -229,7 +228,7 @@ class PackageBase(object):
 
 
 class Package(PackageBase):
-    '''
+    """
     Describes a set of files to produce disctribution packages for the
     different target platforms. It provides the first level of packaging
     allowing to create modular installers by aggregating several of them.
@@ -256,7 +255,7 @@ class Package(PackageBase):
     @type platform_files_Devel: dict
     @cvar osx_framework_library: name and link for the Framework library
     @type osx_framework_library: tuple
-    '''
+    """
 
     deps = list()
     files = list()
@@ -270,10 +269,8 @@ class Package(PackageBase):
         self.cookbook = cookbook
 
     def load_files(self):
-        self._files = self.files + \
-                self.platform_files.get(self.config.target_platform, [])
-        self._files_devel = self.files_devel + \
-                self.platform_files_devel.get(self.config.target_platform, [])
+        self._files = self.files + self.platform_files.get(self.config.target_platform, [])
+        self._files_devel = self.files_devel + self.platform_files_devel.get(self.config.target_platform, [])
         self._parse_files()
 
     def recipes_dependencies(self, use_devel=True):
@@ -297,11 +294,9 @@ class Package(PackageBase):
             if len(categories) == 0 or FilesProvider.LIBS_CAT in categories:
                 r = self.cookbook.get_recipe(recipe_name)
                 if recipe_name in licenses:
-                    licenses[recipe_name].update(
-                            r.list_licenses_by_categories(categories))
+                    licenses[recipe_name].update(r.list_licenses_by_categories(categories))
                 else:
-                    licenses[recipe_name] = \
-                            r.list_licenses_by_categories(categories)
+                    licenses[recipe_name] = r.list_licenses_by_categories(categories)
         return licenses
 
     def files_list(self):
@@ -368,7 +363,7 @@ class Package(PackageBase):
 
 
 class MetaPackage(PackageBase):
-    '''
+    """
     Group of L{cerbero.packages.package.Package} used to build a a modular
     installer package.
 
@@ -396,7 +391,7 @@ class MetaPackage(PackageBase):
     @type resources_distribution: string
     @cvar user_resources: folders included in the .dmg for iOS packages
     @type user_resources: list
-    '''
+    """
 
     packages = []
     root_env_var = 'CERBERO_SDK_ROOT'
@@ -446,8 +441,7 @@ class MetaPackage(PackageBase):
             ret = attr[:]
             platform_attr_name = 'platform_%s' % name
             if hasattr(self, platform_attr_name):
-                platform_attr = PackageBase.__getattribute__(self,
-                        platform_attr_name)
+                platform_attr = PackageBase.__getattribute__(self, platform_attr_name)
                 if self.config.target_platform in platform_attr:
                     platform_list = platform_attr[self.config.target_platform]
                     # Add to packages list, but do not duplicate
@@ -460,7 +454,7 @@ class MetaPackage(PackageBase):
 
 
 class SDKPackage(MetaPackage):
-    '''
+    """
     Creates an installer for SDK's.
 
     On Windows the installer will add a new enviroment variable set in
@@ -480,7 +474,7 @@ class SDKPackage(MetaPackage):
     @cvar osx_framework_library: (name, path) of the lib used for the Framework
     @type osx_framework_library: tuple
 
-    '''
+    """
 
     # Can be overriden by the package file, f.ex.
     # packages/gstreamer-1.0/gstreamer-1.0.package
@@ -495,12 +489,12 @@ class SDKPackage(MetaPackage):
 
 
 class InstallerPackage(MetaPackage):
-    '''
+    """
     Creates an installer for a target SDK to extend it.
 
     @cvar windows_sdk_reg: name of the required SDK
     @type windows_sdk_reg: str
-    '''
+    """
 
     windows_sdk_reg = None
 
@@ -509,7 +503,7 @@ class InstallerPackage(MetaPackage):
 
 
 class App(Package):
-    '''
+    """
     Create packages for applications.
     An App package will not include development files and binaries could
     be stripped when required. The App packager will not create a development
@@ -542,7 +536,7 @@ class App(Package):
     @type osx_create_dmg: bool
     @cvar osx_create_pkg: Packages the app in a pkg
     @type osx_create_pkg: bool
-    '''
+    """
 
     app_name = None
     app_recipe = None
@@ -623,17 +617,18 @@ class App(Package):
         if wrapper is not None:
             wrapper_file = self.relative_path('%s_%s' % (platform, wrapper))
         else:
-            wrapper_file = os.path.join(self.config.data_dir, 'templates',
-                    '%s_%s' % (self.wrapper, platform))
+            wrapper_file = os.path.join(self.config.data_dir, 'templates', '%s_%s' % (self.wrapper, platform))
 
         if not os.path.exists(wrapper_file):
             return None
 
         with open(wrapper_file, 'r') as f:
             content = f.read()
-            content = content % {'prefix': self.config.prefix,
-                                 'py_prefix': self.config.py_prefix,
-                                 'cmd': self.config.prefix}
+            content = content % {
+                'prefix': self.config.prefix,
+                'py_prefix': self.config.py_prefix,
+                'cmd': self.config.prefix,
+            }
 
         return content
 
@@ -643,8 +638,7 @@ class App(Package):
             ret = attr[:]
             platform_attr_name = 'platform_%s' % name
             if hasattr(self, platform_attr_name):
-                platform_attr = PackageBase.__getattribute__(self,
-                        platform_attr_name)
+                platform_attr = PackageBase.__getattribute__(self, platform_attr_name)
                 if self.config.target_platform in platform_attr:
                     platform_list = platform_attr[self.config.target_platform]
                     ret.extend(platform_list)

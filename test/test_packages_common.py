@@ -23,7 +23,6 @@ from test.test_build_common import create_cookbook
 
 
 class Package1(package.Package):
-
     name = 'gstreamer-test1'
     shortdesc = 'GStreamer Test'
     version = '1.0'
@@ -33,13 +32,10 @@ class Package1(package.Package):
     deps = ['gstreamer-test2']
 
     files = ['recipe1:misc:libs:bins']
-    platform_files = {
-            Platform.WINDOWS: ['recipe5:libs']
-            }
+    platform_files = {Platform.WINDOWS: ['recipe5:libs']}
 
 
 class Package2(package.Package):
-
     name = 'gstreamer-test2'
     shortdesc = 'GStreamer Test 2'
     version = '1.0'
@@ -51,7 +47,6 @@ class Package2(package.Package):
 
 
 class Package3(package.Package):
-
     name = 'gstreamer-test3'
     shortdesc = 'GStreamer Test 3'
     version = '1.0'
@@ -63,53 +58,49 @@ class Package3(package.Package):
 
 
 class Package4(package.Package):
-
     name = 'gstreamer-test-bindings'
     shortdesc = 'GStreamer Bindings'
     version = '1.0'
     licences = ['LGPL']
     uuid = '1'
     vendor = 'GStreamer Project'
-    sys_deps = {Distro.DEBIAN: ['python'],
-            DistroVersion.FEDORA_16: ['python27']}
+    sys_deps = {Distro.DEBIAN: ['python'], DistroVersion.FEDORA_16: ['python27']}
 
     files = ['recipe4:misc']
 
 
 class MetaPackage(package.MetaPackage):
-
-    name = "gstreamer-runtime"
-    shortdesc = "GStreamer runtime"
-    longdesc = "GStreamer runtime"
-    title = "GStreamer runtime"
-    url = "http://www.gstreamer.net"
+    name = 'gstreamer-runtime'
+    shortdesc = 'GStreamer runtime'
+    longdesc = 'GStreamer runtime'
+    title = 'GStreamer runtime'
+    url = 'http://www.gstreamer.net'
     version = '1.0'
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
-    vendor = "GStreamer Project"
+    vendor = 'GStreamer Project'
     org = 'net.gstreamer'
     packages = [
-                ('gstreamer-test1', True, True),
-                ('gstreamer-test3', False, True),
-                ('gstreamer-test-bindings', False, False)]
-    platform_packages = {
-            Platform.LINUX: [('gstreamer-test2', False, False)]}
-    icon = "gstreamer.ico"
+        ('gstreamer-test1', True, True),
+        ('gstreamer-test3', False, True),
+        ('gstreamer-test-bindings', False, False),
+    ]
+    platform_packages = {Platform.LINUX: [('gstreamer-test2', False, False)]}
+    icon = 'gstreamer.ico'
 
 
 class App(package.App):
-
-    name = "gstreamer-app"
-    shortdesc = "GStreamer sample app"
-    longdesc = "GStreamer sample app"
-    title = "GStreamer sample app"
-    url = "http://www.gstreamer.net"
+    name = 'gstreamer-app'
+    shortdesc = 'GStreamer sample app'
+    longdesc = 'GStreamer sample app'
+    title = 'GStreamer sample app'
+    url = 'http://www.gstreamer.net'
     version = '1.0'
     uuid = '3ffe67b2-4565-411f-8287-e8faa892f853'
-    vendor = "GStreamer Project"
+    vendor = 'GStreamer Project'
     org = 'net.gstreamer'
     app_recipe = 'recipe3'
     deps = ['gstreamer-test1']
-    icon = "share/images/gstreamer.png"
+    icon = 'share/images/gstreamer.png'
     embed_deps = True
 
 

@@ -31,10 +31,12 @@ class CheckPackage(Command):
     name = 'checkpackage'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('package', nargs=1,
-                              help=_('name of the package to run checks on')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('package', nargs=1, help=_('name of the package to run checks on')),
+            ],
+        )
 
     def run(self, config, args):
         cookbook = CookBook(config)
@@ -47,7 +49,7 @@ class CheckPackage(Command):
 
         for recipe in ordered_recipes:
             if cookbook.recipe_needs_build(recipe.name):
-                raise CommandError(_("Recipe %s is not built yet" % recipe.name))
+                raise CommandError(_('Recipe %s is not built yet' % recipe.name))
 
         for recipe in ordered_recipes:
             # call step function
@@ -63,9 +65,9 @@ class CheckPackage(Command):
                     stepfunc()
                 except Exception as ex:
                     failed.append(recipe.name)
-                    m.warning(_("%s checks failed: %s") % (recipe.name, ex))
+                    m.warning(_('%s checks failed: %s') % (recipe.name, ex))
         if failed:
-            raise CommandError(_("Error running %s checks on:\n    " +
-                        "\n    ".join(failed)) % p_name)
+            raise CommandError(_('Error running %s checks on:\n    ' + '\n    '.join(failed)) % p_name)
+
 
 register_command(CheckPackage)

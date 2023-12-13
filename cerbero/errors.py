@@ -39,12 +39,15 @@ class UsageError(CerberoException):
 
 class FatalError(CerberoException):
     header = 'Fatal Error: '
+
     def __init__(self, msg='', arch=''):
         self.arch = arch
         CerberoException.__init__(self, msg)
 
+
 class CommandError(FatalError):
     header = 'Command Error: '
+
     def __init__(self, msg, cmd, returncode):
         msg = 'Running {!r} returned {}\n{}'.format(cmd, returncode, msg or '')
         FatalError.__init__(self, msg)
@@ -58,40 +61,34 @@ class BuildStepError(CerberoException):
         self.recipe = recipe
         self.step = step
         self.arch = arch
-        CerberoException.__init__(self, _("Recipe '%s' failed at the build "
-            "step '%s'\n%s") % (recipe, step, trace))
+        CerberoException.__init__(self, _("Recipe '%s' failed at the build " "step '%s'\n%s") % (recipe, step, trace))
 
 
 class RecipeNotFoundError(CerberoException):
-
     def __init__(self, recipe):
         CerberoException.__init__(self, _("Recipe '%s' not found") % recipe)
 
 
 class PackageNotFoundError(CerberoException):
-
     def __init__(self, package):
         CerberoException.__init__(self, _("Package '%s' not found") % package)
 
 
 class EmptyPackageError(CerberoException):
-
     def __init__(self, package):
         CerberoException.__init__(self, _("Package '%s' is empty") % package)
 
 
 class MissingPackageFilesError(CerberoException):
-
     def __init__(self, files):
-        CerberoException.__init__(self, _("The following files required by "
-            "this package are missing:\n %s") % '\n'.join(files))
+        CerberoException.__init__(
+            self, _('The following files required by ' 'this package are missing:\n %s') % '\n'.join(files)
+        )
 
 
 class InvalidRecipeError(CerberoException):
-
     def __init__(self, recipe, message=''):
-        CerberoException.__init__(self,
-                _("Recipe %s is invalid:\n%s") % (recipe, message))
+        CerberoException.__init__(self, _('Recipe %s is invalid:\n%s') % (recipe, message))
 
 
 class AbortedError(Exception):

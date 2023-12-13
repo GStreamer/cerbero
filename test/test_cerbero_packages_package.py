@@ -29,22 +29,18 @@ from test.test_common import DummyConfig
 
 
 class Config(DummyConfig):
-
     def __init__(self, tmp, platform):
         self.prefix = tmp
         self.target_platform = platform
 
 
 class PackageTest(unittest.TestCase):
-
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         win32config = Config(self.tmp, Platform.WINDOWS)
         linuxconfig = Config(self.tmp, Platform.LINUX)
-        self.win32package = Package1(win32config, create_store(win32config),
-                create_cookbook(win32config))
-        self.linuxpackage = Package1(linuxconfig, create_store(linuxconfig),
-                create_cookbook(linuxconfig))
+        self.win32package = Package1(win32config, create_store(win32config), create_cookbook(win32config))
+        self.linuxpackage = Package1(linuxconfig, create_store(linuxconfig), create_cookbook(linuxconfig))
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -55,47 +51,65 @@ class PackageTest(unittest.TestCase):
         self.linuxpackage.set_mode(PackageType.DEVEL)
         self.assertEqual(self.linuxpackage.package_mode, PackageType.DEVEL)
         self.assertEqual(self.linuxpackage.name, 'gstreamer-test1-devel')
-        self.assertEqual(self.linuxpackage.shortdesc,
-            'GStreamer Test (Development Files)')
+        self.assertEqual(self.linuxpackage.shortdesc, 'GStreamer Test (Development Files)')
 
     def testParseFiles(self):
-        self.assertEqual(self.win32package._recipes_files['recipe1'],
-                ['misc', 'libs', 'bins'])
+        self.assertEqual(self.win32package._recipes_files['recipe1'], ['misc', 'libs', 'bins'])
         self.assertEqual(self.win32package._recipes_files['recipe5'], ['libs'])
 
     def testListRecipesDeps(self):
-        self.assertEqual(self.win32package.recipes_dependencies(),
-                          ['recipe1', 'recipe5', 'recipe2'])
-        self.assertEqual(self.linuxpackage.recipes_dependencies(),
-                          ['recipe1', 'recipe2'])
+        self.assertEqual(self.win32package.recipes_dependencies(), ['recipe1', 'recipe5', 'recipe2'])
+        self.assertEqual(self.linuxpackage.recipes_dependencies(), ['recipe1', 'recipe2'])
 
     def testFilesList(self):
         add_files(self.tmp)
-        winfiles = ['README', 'bin/gst-launch.exe', 'bin/libgstreamer-win32.dll',
-                'bin/libgstreamer-0.10.dll', 'bin/windows.exe',
-                'libexec/gstreamer-0.10/pluginsloader.exe',
-                'windows', 'bin/libtest.dll']
-        linuxfiles = ['README', 'bin/gst-launch', 'bin/linux',
-                'lib/libgstreamer-x11.so.1', 'lib/libgstreamer-0.10.so.1',
-                'libexec/gstreamer-0.10/pluginsloader', 'linux']
+        winfiles = [
+            'README',
+            'bin/gst-launch.exe',
+            'bin/libgstreamer-win32.dll',
+            'bin/libgstreamer-0.10.dll',
+            'bin/windows.exe',
+            'libexec/gstreamer-0.10/pluginsloader.exe',
+            'windows',
+            'bin/libtest.dll',
+        ]
+        linuxfiles = [
+            'README',
+            'bin/gst-launch',
+            'bin/linux',
+            'lib/libgstreamer-x11.so.1',
+            'lib/libgstreamer-0.10.so.1',
+            'libexec/gstreamer-0.10/pluginsloader',
+            'linux',
+        ]
 
-        self.assertEqual(sorted(winfiles),
-            sorted(self.win32package.files_list()))
-        self.assertEqual(sorted(linuxfiles),
-            sorted(self.linuxpackage.files_list()))
+        self.assertEqual(sorted(winfiles), sorted(self.win32package.files_list()))
+        self.assertEqual(sorted(linuxfiles), sorted(self.linuxpackage.files_list()))
 
     def testDevelFilesList(self):
         add_files(self.tmp)
         devfiles = ['lib/libgstreamer-0.10.a', 'lib/libgstreamer-0.10.la']
-        linuxdevfiles = devfiles + ['lib/libgstreamer-0.10.so',
-            'lib/libgstreamer-x11.a', 'lib/libgstreamer-x11.la',
-            'lib/libgstreamer-x11.so']
-        windevfiles = devfiles + ['lib/libgstreamer-win32.a',
-            'lib/libgstreamer-win32.dll.a', 'lib/libgstreamer-win32.la',
-            'lib/libgstreamer-win32.def', 'lib/gstreamer-win32.lib',
-            'lib/libtest.a', 'lib/libtest.dll.a', 'lib/libtest.la',
-            'lib/libtest.def', 'lib/test.lib', 'lib/libgstreamer-0.10.dll.a',
-            'lib/libgstreamer-0.10.def', 'lib/gstreamer-0.10.lib']
+        linuxdevfiles = devfiles + [
+            'lib/libgstreamer-0.10.so',
+            'lib/libgstreamer-x11.a',
+            'lib/libgstreamer-x11.la',
+            'lib/libgstreamer-x11.so',
+        ]
+        windevfiles = devfiles + [
+            'lib/libgstreamer-win32.a',
+            'lib/libgstreamer-win32.dll.a',
+            'lib/libgstreamer-win32.la',
+            'lib/libgstreamer-win32.def',
+            'lib/gstreamer-win32.lib',
+            'lib/libtest.a',
+            'lib/libtest.dll.a',
+            'lib/libtest.la',
+            'lib/libtest.def',
+            'lib/test.lib',
+            'lib/libgstreamer-0.10.dll.a',
+            'lib/libgstreamer-0.10.def',
+            'lib/gstreamer-0.10.lib',
+        ]
 
         self.assertEqual(sorted(windevfiles), self.win32package.devel_files_list())
         self.assertEqual(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
@@ -112,7 +126,6 @@ class PackageTest(unittest.TestCase):
 
 
 class TestMetaPackages(unittest.TestCase):
-
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         config = Config(self.tmp, Platform.LINUX)
@@ -124,8 +137,7 @@ class TestMetaPackages(unittest.TestCase):
 
     def _compareList(self, func_name):
         list_func = getattr(self.package, func_name)
-        packages = [self.store.get_package(x) for x in \
-                    self.package.list_packages()]
+        packages = [self.store.get_package(x) for x in self.package.list_packages()]
         files = []
         for package in packages:
             list_func = getattr(package, func_name)
@@ -135,18 +147,15 @@ class TestMetaPackages(unittest.TestCase):
         self.assertEqual(sorted(files), list_func())
 
     def testListPackages(self):
-        expected = ['gstreamer-test1', 'gstreamer-test3',
-                'gstreamer-test-bindings', 'gstreamer-test2']
+        expected = ['gstreamer-test1', 'gstreamer-test3', 'gstreamer-test-bindings', 'gstreamer-test2']
         self.assertEqual(self.package.list_packages(), expected)
 
     def testPlatfromPackages(self):
         packages_attr = object.__getattribute__(self.package, 'packages')
         self.assertEqual(len(packages_attr), 3)
-        platform_packages_attr = object.__getattribute__(self.package,
-                                                         'platform_packages')
+        platform_packages_attr = object.__getattribute__(self.package, 'platform_packages')
         self.assertEqual(len(platform_packages_attr), 1)
-        self.assertEqual(len(self.package.packages),
-                len(packages_attr) + len(platform_packages_attr))
+        self.assertEqual(len(self.package.packages), len(packages_attr) + len(platform_packages_attr))
 
     def testFilesList(self):
         self._compareList('files_list')
@@ -159,7 +168,6 @@ class TestMetaPackages(unittest.TestCase):
 
 
 class AppPackageTest(unittest.TestCase):
-
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         config = Config(self.tmp, Platform.LINUX)

@@ -26,10 +26,9 @@ from cerbero.errors import UsageError
 
 
 class AndroidPackager(DistTarball):
-    ''' Creates a distribution tarball for Android '''
+    """Creates a distribution tarball for Android"""
 
-    def _create_tarball(self, output_dir, package_type, files, force,
-                        package_prefix):
+    def _create_tarball(self, output_dir, package_type, files, force, package_prefix):
         # Filter out some unwanted directories for the development package
         if package_type == PackageType.DEVEL:
             for filt in ['bin/', 'share/aclocal']:
@@ -44,12 +43,19 @@ class AndroidPackager(DistTarball):
         elif package_type == PackageType.RUNTIME:
             package_type = '-runtime'
 
-        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name,
-                self.config.target_platform, self.config.target_arch,
-                self.package.version, package_type, ext)
+        return '%s%s-%s-%s-%s%s.%s' % (
+            self.package_prefix,
+            self.package.name,
+            self.config.target_platform,
+            self.config.target_arch,
+            self.package.version,
+            package_type,
+            ext,
+        )
 
 
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
+
     register_packager(Distro.ANDROID, AndroidPackager)

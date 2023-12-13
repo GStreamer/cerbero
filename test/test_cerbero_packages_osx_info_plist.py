@@ -19,30 +19,28 @@
 import unittest
 import tempfile
 
-from cerbero.packages.osx.info_plist import InfoPlist, FrameworkPlist,\
-        ApplicationPlist, INFO_PLIST_TPL
+from cerbero.packages.osx.info_plist import InfoPlist, FrameworkPlist, ApplicationPlist, INFO_PLIST_TPL
 
 
 class InfoPlistTest(unittest.TestCase):
-    
-    PROPS_TPL = ('%(icon)s<key>CFBundleIdentifier</key>\n'
-                 '<string>test.org</string>\n'
-                 '<key>CFBundleName</key>\n'
-                 '<string>test</string>\n'
-                 '<key>CFBundlePackageGetInfoString</key>\n'
-                 '<string>Test package</string>\n'
-                 '<key>CFBundlePackageType</key>\n'
-                 '<string>%(ptype)s</string>\n'
-                 '<key>CFBundleVersion</key>\n'
-                 '<string>1.0</string>')
+    PROPS_TPL = (
+        '%(icon)s<key>CFBundleIdentifier</key>\n'
+        '<string>test.org</string>\n'
+        '<key>CFBundleName</key>\n'
+        '<string>test</string>\n'
+        '<key>CFBundlePackageGetInfoString</key>\n'
+        '<string>Test package</string>\n'
+        '<key>CFBundlePackageType</key>\n'
+        '<string>%(ptype)s</string>\n'
+        '<key>CFBundleVersion</key>\n'
+        '<string>1.0</string>'
+    )
 
     def setUp(self):
-        self.info_plist = InfoPlist('test', 'test.org', '1.0',
-                                    'Test package')
+        self.info_plist = InfoPlist('test', 'test.org', '1.0', 'Test package')
 
     def testFormatProperty(self):
-        self.assertEqual('<key>Key</key>\n<string>Value</string>',
-                self.info_plist._format_property('Key', 'Value'))
+        self.assertEqual('<key>Key</key>\n<string>Value</string>', self.info_plist._format_property('Key', 'Value'))
 
     def testGetPropertiesString(self):
         result = self.info_plist._get_properties_string()
@@ -50,15 +48,13 @@ class InfoPlistTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def testFrameworkPackageType(self):
-        self.info_plist = FrameworkPlist('test', 'test.org', '1.0',
-                                         'Test package')
+        self.info_plist = FrameworkPlist('test', 'test.org', '1.0', 'Test package')
         result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'FMWK', 'icon': ''}
         self.assertEqual(result, expected)
 
     def testApplicationPackageType(self):
-        self.info_plist = ApplicationPlist('test', 'test.org', '1.0',
-                                           'Test package')
+        self.info_plist = ApplicationPlist('test', 'test.org', '1.0', 'Test package')
         result = self.info_plist._get_properties_string()
         expected = self.PROPS_TPL % {'ptype': 'APPL', 'icon': ''}
         self.assertEqual(result, expected)
@@ -66,9 +62,10 @@ class InfoPlistTest(unittest.TestCase):
     def testGetPropertiesStringWithIcon(self):
         self.info_plist.icon = 'test.ico'
         result = self.info_plist._get_properties_string()
-        expected = self.PROPS_TPL % {'ptype': '', 'icon':
-            self.info_plist._format_property('CFBundleIconFile', 'test.ico') +
-            '\n'}
+        expected = self.PROPS_TPL % {
+            'ptype': '',
+            'icon': self.info_plist._format_property('CFBundleIconFile', 'test.ico') + '\n',
+        }
         self.info_plist.icon = None
         self.assertEqual(result, expected)
 
@@ -77,7 +74,9 @@ class InfoPlistTest(unittest.TestCase):
         self.info_plist.save(tmp.name)
         with open(tmp.name, 'r') as f:
             result = f.read()
-        expected = INFO_PLIST_TPL % (self.info_plist.BEGIN,
-                                     self.info_plist._get_properties_string(),
-                                     self.info_plist.END)
+        expected = INFO_PLIST_TPL % (
+            self.info_plist.BEGIN,
+            self.info_plist._get_properties_string(),
+            self.info_plist.END,
+        )
         self.assertEqual(result, expected)

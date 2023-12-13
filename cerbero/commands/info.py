@@ -23,14 +23,14 @@ from cerbero.packages.packagesstore import PackagesStore
 from cerbero.packages.package import MetaPackage
 
 
-INFO_TPL = '''
+INFO_TPL = """
 Name:          %(name)s
 Version:       %(version)s
 Homepage:      %(url)s
 Dependencies:  %(deps)s
 Licences:      %(licenses)s
 Description:   %(desc)s
-'''
+"""
 
 
 class PackageInfo(Command):
@@ -38,13 +38,19 @@ class PackageInfo(Command):
     name = 'packageinfo'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('package', nargs=1,
-                             help=_('name of the package')),
-            ArgparseArgument('-l', '--list-files', action='store_true',
-                default=False,
-                help=_('List all files installed by this package')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('package', nargs=1, help=_('name of the package')),
+                ArgparseArgument(
+                    '-l',
+                    '--list-files',
+                    action='store_true',
+                    default=False,
+                    help=_('List all files installed by this package'),
+                ),
+            ],
+        )
 
     def run(self, config, args):
         store = PackagesStore(config)
@@ -57,16 +63,19 @@ class PackageInfo(Command):
             if not isinstance(p, MetaPackage):
                 recipes_licenses = p.recipes_licenses()
                 recipes_licenses.update(p.devel_recipes_licenses())
-                for recipe_name, categories_licenses in \
-                        recipes_licenses.items():
+                for recipe_name, categories_licenses in recipes_licenses.items():
                     for category_licenses in categories_licenses.values():
                         licenses.extend(category_licenses)
             licenses = sorted(list(set(licenses)))
-            d = {'name': p.name, 'version': p.version, 'url': p.url,
-                 'licenses': ' and '.join([l.acronym for l in licenses]),
-                 'desc': p.shortdesc,
-                 'deps': ', '.join([p.name for p in
-                                    store.get_package_deps(p_name, True)])}
+            d = {
+                'name': p.name,
+                'version': p.version,
+                'url': p.url,
+                'licenses': ' and '.join([l.acronym for l in licenses]),
+                'desc': p.shortdesc,
+                'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)]),
+            }
             m.message(INFO_TPL % d)
+
 
 register_command(PackageInfo)

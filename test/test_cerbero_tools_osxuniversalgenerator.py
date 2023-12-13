@@ -27,7 +27,7 @@ from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 
 
-TEST_APP = '''\
+TEST_APP = """\
 #include<stdio.h>
 
 extern int foo1(int r);
@@ -36,28 +36,26 @@ int main(int arg_count,char ** arg_values)
 {
  printf("Hello World %%d\\n", foo1(1));
  return 0;
-}'''
+}"""
 
 
-TEST_LIB = '''\
+TEST_LIB = """\
 
 int foo1(int r);
 
 int foo1(int r) {
   return r;
-}'''
+}"""
 
 
 SHARED_LIBRARY = {
     Architecture.X86: 'Mach-O dynamically linked shared library i386',
-    Architecture.X86_64: 'Mach-O 64-bit dynamically linked shared library x86_64'}
-EXECUTABLE = {
-    Architecture.X86: 'Mach-O executable i386',
-    Architecture.X86_64: 'Mach-O 64-bit executable x86_64'}
+    Architecture.X86_64: 'Mach-O 64-bit dynamically linked shared library x86_64',
+}
+EXECUTABLE = {Architecture.X86: 'Mach-O executable i386', Architecture.X86_64: 'Mach-O 64-bit executable x86_64'}
 
 
-class  OSXUniversalGeneratorTest(unittest.TestCase):
-
+class OSXUniversalGeneratorTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         self._create_tree()
@@ -73,7 +71,7 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
         os.makedirs(self.tmp_sources)
 
     def _compile(self, arch):
-        main_c = os.path.join(self.tmp_sources,  'main.c')
+        main_c = os.path.join(self.tmp_sources, 'main.c')
         foo_c = os.path.join(self.tmp_sources, 'foo.c')
 
         libdir = os.path.join(self.tmp, arch, 'lib')
@@ -86,9 +84,7 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
         if arch == Architecture.X86:
             arch = 'i386'
         shell.call('gcc -arch %s -o %s -shared %s' % (arch, libfoo, foo_c))
-        shell.call('gcc -arch %s -o %s %s -L%s -lfoo' %
-                   (arch, test_app, main_c, libdir))
-
+        shell.call('gcc -arch %s -o %s %s -L%s -lfoo' % (arch, test_app, main_c, libdir))
 
     def _get_file_type(self, path):
         cmd = 'file -bh %s'
@@ -96,62 +92,50 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
 
     def _check_compiled_files(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
-            res = self._get_file_type(
-                    os.path.join(self.tmp, arch, 'lib', 'libfoo.so'))
+            res = self._get_file_type(os.path.join(self.tmp, arch, 'lib', 'libfoo.so'))
             self.assertEqual(res, SHARED_LIBRARY[arch])
-            res = self._get_file_type(
-                    os.path.join(self.tmp, arch, 'bin', 'test_app'))
+            res = self._get_file_type(os.path.join(self.tmp, arch, 'bin', 'test_app'))
             self.assertEqual(res, EXECUTABLE[arch])
 
     def testMergeDirs(self):
         self._compile(Architecture.X86)
         self._compile(Architecture.X86_64)
         self._check_compiled_files()
-        gen = OSXUniversalGenerator(
-                os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_dirs([
-                os.path.join(self.tmp, Architecture.X86),
-                os.path.join(self.tmp, Architecture.X86_64)])
+        gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
+        gen.merge_dirs([os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)])
 
-        # bash-3.2$ file libfoo.so 
+        # bash-3.2$ file libfoo.so
         # libfoo.so: Mach-O universal binary with 2 architectures
         # libfoo.so (for architecture i386):	Mach-O dynamically linked shared library i386
         # libfoo.so (for architecture x86_64):	Mach-O 64-bit dynamically linked shared library x86_64
 
-        ftype = self._get_file_type(os.path.join(self.tmp,
-            Architecture.UNIVERSAL, 'lib', 'libfoo.so'))
+        ftype = self._get_file_type(os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'libfoo.so'))
         for arch in [Architecture.X86, Architecture.X86_64]:
             self.assertTrue(SHARED_LIBRARY[arch] in ftype)
-        ftype = self._get_file_type(os.path.join(self.tmp,
-            Architecture.UNIVERSAL, 'bin', 'test_app'))
+        ftype = self._get_file_type(os.path.join(self.tmp, Architecture.UNIVERSAL, 'bin', 'test_app'))
         for arch in [Architecture.X86, Architecture.X86_64]:
             self.assertTrue(EXECUTABLE[arch] in ftype)
 
     def testMergeFiles(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
             with open(os.path.join(self.tmp, arch, 'share', 'test'), 'w') as f:
-                f.write("test")
-        gen = OSXUniversalGenerator(
-                os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_files(['share/test'],
-                [os.path.join(self.tmp, Architecture.X86),
-                 os.path.join(self.tmp, Architecture.X86_64)])
-        self.assertTrue(os.path.exists(os.path.join(self.tmp,
-        Architecture.UNIVERSAL, 'share', 'test')))
+                f.write('test')
+        gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
+        gen.merge_files(
+            ['share/test'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+        )
+        self.assertTrue(os.path.exists(os.path.join(self.tmp, Architecture.UNIVERSAL, 'share', 'test')))
 
     def testMergeCopyAndLink(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
             file1 = os.path.join(self.tmp, arch, 'share', 'test1')
             file2 = os.path.join(self.tmp, arch, 'share', 'test2')
             with open(file1, 'w') as f:
-                f.write("test")
+                f.write('test')
             os.symlink(file1, file2)
 
-        gen = OSXUniversalGenerator(
-                os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_dirs([
-                os.path.join(self.tmp, Architecture.X86),
-                os.path.join(self.tmp, Architecture.X86_64)])
+        gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
+        gen.merge_dirs([os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)])
 
         file1 = os.path.join(self.tmp, Architecture.UNIVERSAL, 'share', 'test1')
         file2 = os.path.join(self.tmp, Architecture.UNIVERSAL, 'share', 'test2')
@@ -165,14 +149,12 @@ class  OSXUniversalGeneratorTest(unittest.TestCase):
             pc_file = os.path.join(self.tmp, arch, 'test.pc')
             with open(pc_file, 'w') as f:
                 f.write(os.path.join(self.tmp, arch, 'lib', 'test'))
-        gen = OSXUniversalGenerator(
-                os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_files(['test.pc'],
-                [os.path.join(self.tmp, Architecture.X86),
-                 os.path.join(self.tmp, Architecture.X86_64)])
+        gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
+        gen.merge_files(
+            ['test.pc'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+        )
         pc_file = os.path.join(self.tmp, Architecture.UNIVERSAL, 'test.pc')
-        self.assertEqual(open(pc_file).readline(),
-                os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))
+        self.assertEqual(open(pc_file).readline(), os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))
 
     def testMergedLibraryPaths(self):
         def check_prefix(path):

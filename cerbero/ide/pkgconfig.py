@@ -25,10 +25,11 @@ from cerbero.enums import Distro
 from cerbero.errors import FatalError
 from cerbero.utils import shell, to_winpath
 
+
 class PkgConfig(object):
-    '''
+    """
     pkg-config wrapper
-    '''
+    """
 
     cmd = 'pkg-config'
 
@@ -90,7 +91,7 @@ class PkgConfig(object):
             d = pkgconfig.include_dirs()
             for p in d:
                 if not os.path.isabs(p):
-                    raise FatalError("pkg-config file %s contains relative include dir %s" % (pc, p))
+                    raise FatalError('pkg-config file %s contains relative include dir %s' % (pc, p))
                 # Normalize before appending
                 include_dirs.append(os.path.abspath(p))
         return list(set(include_dirs))

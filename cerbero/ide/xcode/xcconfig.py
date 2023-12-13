@@ -22,20 +22,20 @@ from cerbero.ide.pkgconfig import PkgConfig
 from functools import reduce
 
 
-XCCONFIG_TPL = '''
+XCCONFIG_TPL = """
 ALWAYS_SEARCH_USER_PATHS = YES
 USER_HEADER_SEARCH_PATHS = %(hsp)s
 LIBRARY_SEARCH_PATHS = %(lsp)s
 OTHER_LDFLAGS = %(libs)s
-'''
+"""
 
 
 class XCConfig(object):
-    '''
+    """
     Creates an xcode config file to compile and link against the SDK using
     pkgconfig to guess the headers search path, the libraries search path and
     the libraries that need to be linked.
-    '''
+    """
 
     def __init__(self, libraries, env=None):
         self.pkgconfig = PkgConfig(libraries, env=env)
@@ -49,14 +49,13 @@ class XCConfig(object):
         args = dict()
         args['hsp'] = ' '.join(self.pkgconfig.include_dirs())
         args['lsp'] = ' '.join(self.pkgconfig.libraries_dirs())
-        args['libs'] = reduce(lambda x, y: '%s -l%s' % (x, y),
-                              self.pkgconfig.libraries(), '')
+        args['libs'] = reduce(lambda x, y: '%s -l%s' % (x, y), self.pkgconfig.libraries(), '')
         return args
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print("usage: xcconfig output_file libraries")
+        print('usage: xcconfig output_file libraries')
         sys.exit(1)
     xcconfig = XCConfig(sys.argv[2:])
     xcconfig.create(sys.argv[1])

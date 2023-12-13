@@ -22,7 +22,6 @@ from cerbero.build.source import BaseTarball, Source
 
 
 class BootstrapTarball(BaseTarball, Source):
-
     def __init__(self, config, offline, url, checksum, download_dir, tarball_name=None):
         self.config = config
         self.offline = offline
@@ -38,7 +37,7 @@ class BootstrapTarball(BaseTarball, Source):
         return super().verify(fname, fatal)
 
 
-class BootstrapperBase (object):
+class BootstrapperBase(object):
     # List of URLs to be fetched
     fetch_urls = None
     # A function that returns more URLs to fetch and a function to call that
@@ -59,14 +58,15 @@ class BootstrapperBase (object):
         raise NotImplemented("'start' must be implemented by subclasses")
 
     async def fetch_urls_impl(self, urls):
-        for (url, name, checksum) in urls:
-            source = BootstrapTarball(self.config, self.offline, url, checksum,
-                                      self.config.local_sources, tarball_name=name)
+        for url, name, checksum in urls:
+            source = BootstrapTarball(
+                self.config, self.offline, url, checksum, self.config.local_sources, tarball_name=name
+            )
             self.sources[url] = source
             await source.fetch()
 
     async def fetch(self):
-        'Fetch bootstrap binaries'
+        "Fetch bootstrap binaries"
         await self.fetch_urls_impl(self.fetch_urls)
         next_func = self.fetch_urls_func
         while next_func:
@@ -74,11 +74,11 @@ class BootstrapperBase (object):
             await self.fetch_urls_impl(more_urls)
 
     async def fetch_recipes(self, jobs):
-        'Fetch build-tools recipes; only called by fetch-bootstrap'
+        "Fetch build-tools recipes; only called by fetch-bootstrap"
         pass
 
     async def extract(self):
-        for (url, unpack, unpack_dir) in self.extract_steps:
+        for url, unpack, unpack_dir in self.extract_steps:
             if unpack:
                 await self.sources[url].extract_tarball(unpack_dir)
             else:

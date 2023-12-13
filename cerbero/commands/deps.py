@@ -28,15 +28,21 @@ class Deps(Command):
     name = 'deps'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('recipe', nargs=1,
-                             help=_('name of the recipe')),
-            ArgparseArgument('--all', action='store_true', default=False,
-                             help=_('list all dependencies, including the '
-                                    'build ones')),
-            ArgparseArgument('--graph', action='store_true', default=False,
-                             help=_('show the depencies as a graph')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('recipe', nargs=1, help=_('name of the recipe')),
+                ArgparseArgument(
+                    '--all',
+                    action='store_true',
+                    default=False,
+                    help=_('list all dependencies, including the ' 'build ones'),
+                ),
+                ArgparseArgument(
+                    '--graph', action='store_true', default=False, help=_('show the depencies as a graph')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         cookbook = CookBook(config)
@@ -47,8 +53,7 @@ class Deps(Command):
         if all_deps:
             recipes = cookbook.list_recipe_deps(recipe_name)
         else:
-            recipes = [cookbook.get_recipe(x) for x in
-                        cookbook.get_recipe(recipe_name).list_deps()]
+            recipes = [cookbook.get_recipe(x) for x in cookbook.get_recipe(recipe_name).list_deps()]
 
         if len(recipes) == 0:
             m.message(_('%s has 0 dependencies') % recipe_name)
@@ -60,14 +65,17 @@ class Deps(Command):
                     continue
                 m.message(recipe.name)
         else:
+
             def print_dep(cookbook, recipe, level=0, already_shown=[]):
-                m.message("%s%s" %( " " * 3 * level, recipe.name))
+                m.message('%s%s' % (' ' * 3 * level, recipe.name))
                 already_shown.append(recipe)
                 for r in [cookbook.get_recipe(x) for x in recipe.list_deps()]:
                     if not r in already_shown:
                         print_dep(cookbook, r, level + 1, already_shown)
                     elif not r.name == recipe.name:
-                        m.message("%s(%s)" % ( " " * 3 * (level + 1), r.name))
+                        m.message('%s(%s)' % (' ' * 3 * (level + 1), r.name))
+
             print_dep(cookbook, cookbook.get_recipe(recipe_name))
+
 
 register_command(Deps)

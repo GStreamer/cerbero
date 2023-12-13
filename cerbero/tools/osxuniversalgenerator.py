@@ -25,7 +25,7 @@ import sys
 import asyncio
 import os.path
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Add cerbero dir to path when invoked as a script so
     # that the cerbero imports below resolve correctly.
     parent = os.path.dirname(__file__)
@@ -36,12 +36,14 @@ if __name__ == "__main__":
 from cerbero.utils import shell, run_tasks, run_until_complete
 from cerbero.tools.osxrelocator import OSXRelocator
 
+
 def get_parent_prefix(f, dirs):
     dirs = dirs[:]
     while dirs:
         dir_ = os.path.join(os.path.realpath(dirs.pop(0)), '')
         if f.startswith(dir_):
-            yield(dir_)
+            yield (dir_)
+
 
 file_types = [
     ('Mach-O', 'merge'),
@@ -69,8 +71,9 @@ file_types = [
     ('directory', 'recurse'),
 ]
 
+
 class OSXUniversalGenerator(object):
-    '''
+    """
     Wrapper for OS X's lipo command to help generating universal binaries
     from single arch binaries.
 
@@ -85,16 +88,16 @@ class OSXUniversalGenerator(object):
     as they should be results from building the same project to different
     architectures
 
-    '''
+    """
 
     LIPO_CMD = 'lipo'
     FILE_CMD = 'file'
 
     def __init__(self, output_root, logfile=None):
-        '''
+        """
         @output_root: the output directory where the result will be generated
 
-        '''
+        """
         self.output_root = output_root
         if self.output_root.endswith('/'):
             self.output_root = self.output_root[:-1]
@@ -124,8 +127,7 @@ class OSXUniversalGenerator(object):
             tmp_inputs.append(tmp)
             shutil.copy(f, tmp.name)
             prefix_to_replace = [d for d in dirs if d in f][0]
-            relocator = OSXRelocator (self.output_root, prefix_to_replace,
-                                      False, logfile=self.logfile)
+            relocator = OSXRelocator(self.output_root, prefix_to_replace, False, logfile=self.logfile)
             # since we are using a temporary file, we must force the library id
             # name to real one and not based on the filename
             relocator.relocate_file(tmp.name, f)
@@ -136,14 +138,14 @@ class OSXUniversalGenerator(object):
             tmp.close()
 
     def get_file_type(self, filepath):
-        return shell.check_output([self.FILE_CMD, '-bh', filepath])[:-1] #remove trailing \n
+        return shell.check_output([self.FILE_CMD, '-bh', filepath])[:-1]  # remove trailing \n
 
     async def _detect_merge_action(self, files_list):
         actions = []
         for f in files_list:
             if not os.path.exists(f):
-                continue #TODO what can we do here? fontconfig has
-                         #some random generated filenames it seems
+                continue  # TODO what can we do here? fontconfig has
+                # some random generated filenames it seems
             ftype = self.get_file_type(f)
             action = ''
             for ft in file_types:
@@ -161,18 +163,17 @@ class OSXUniversalGenerator(object):
                     raise Exception('Unexpected file type %s %s' % (str(ftype), f))
             actions.append(action)
         if len(actions) == 0:
-            return 'skip' #we should skip this one, the file doesn't exist
+            return 'skip'  # we should skip this one, the file doesn't exist
         all_same = all(x == actions[0] for x in actions)
         if not all_same:
-            raise Exception('Different file types found: %s : %s' \
-                             % (str(ftype), str(files_list)))
+            raise Exception('Different file types found: %s : %s' % (str(ftype), str(files_list)))
         return actions[0]
 
     async def do_merge(self, filepath, dirs):
         full_filepaths = [os.path.join(d, filepath) for d in dirs]
         action = await self._detect_merge_action(full_filepaths)
 
-        #pick the first file as the base one in case of copying/linking
+        # pick the first file as the base one in case of copying/linking
         current_file = full_filepaths[0]
         output_file = os.path.join(self.output_root, filepath)
         output_dir = os.path.dirname(output_file)
@@ -188,9 +189,9 @@ class OSXUniversalGenerator(object):
                 os.makedirs(output_dir)
             await self.create_universal_file(output_file, full_filepaths, dirs)
         elif action == 'skip':
-            pass #just pass
+            pass  # just pass
         elif action == 'recurse':
-            self.merge_dirs (full_filepaths, output_file)
+            self.merge_dirs(full_filepaths, output_file)
         else:
             raise Exception('unexpected action %s' % action)
 
@@ -198,11 +199,13 @@ class OSXUniversalGenerator(object):
         self.missing = []
 
         queue = asyncio.Queue()
+
         async def parse_dirs_worker():
             while True:
                 current_file, dirs = await queue.get()
                 await self.do_merge(current_file, dirs)
                 queue.task_done()
+
         async def queue_done():
             await queue.join()
 
@@ -226,15 +229,15 @@ class OSXUniversalGenerator(object):
                 if filters is not None and os.path.splitext(f)[1] not in filters:
                     continue
                 current_file = os.path.join(current_dir, f)
-                queue.put_nowait ((current_file, dirs))
+                queue.put_nowait((current_file, dirs))
 
         async def parse_dirs_main():
             tasks = []
             for i in range(4):
-                tasks.append(asyncio.ensure_future (parse_dirs_worker()))
-            await run_tasks (tasks, queue_done())
+                tasks.append(asyncio.ensure_future(parse_dirs_worker()))
+            await run_tasks(tasks, queue_done())
 
-        print ("parsing dirs")
+        print('parsing dirs')
         run_until_complete(parse_dirs_main())
 
     def _copy(self, src, dest):
@@ -246,14 +249,14 @@ class OSXUniversalGenerator(object):
         self._copy(src, dest)
         replacements = {}
         for d in dirs:
-            replacements[d]=self.output_root
+            replacements[d] = self.output_root
         shell.replace(dest, replacements)
 
     def _link(self, src, dest, filepath):
         if not os.path.exists(os.path.dirname(dest)):
             os.makedirs(os.path.dirname(dest))
         if os.path.lexists(dest):
-            return #link exists, skip it
+            return  # link exists, skip it
 
         # read the link, and extract the relative filepath
         target = os.readlink(src)
@@ -270,14 +273,13 @@ class OSXUniversalGenerator(object):
 
 
 class Main(object):
-
     def run(self):
         # We use OptionParser instead of ArgumentsParse because this script might
         # be run in OS X 10.6 or older, which do not provide the argparse module
         import optparse
-        usage = "usage: %prog [options] outputdir inputdir1 inputdir2 ..."
-        description='Merges multiple architecture build trees into a single '\
-                    'universal binary build tree'
+
+        usage = 'usage: %prog [options] outputdir inputdir1 inputdir2 ...'
+        description = 'Merges multiple architecture build trees into a single ' 'universal binary build tree'
         parser = optparse.OptionParser(usage=usage, description=description)
         options, args = parser.parse_args()
         if len(args) < 3:
@@ -287,6 +289,7 @@ class Main(object):
         generator.merge_dirs(args[1:])
         exit(0)
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     main = Main()
     main.run()

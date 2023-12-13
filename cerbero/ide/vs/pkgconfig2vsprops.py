@@ -28,15 +28,11 @@ from cerbero.utils import messages as m
 
 
 class PkgConfig2VSProps(object):
-
     generators = {'vs2008': VSProps, 'vs2010': Props}
 
-    def __init__(self, libname, target='vs2010', prefix=None,
-            prefix_replacement=None, inherit_common=False, env=None):
-
+    def __init__(self, libname, target='vs2010', prefix=None, prefix_replacement=None, inherit_common=False, env=None):
         if target not in self.generators:
-            raise FatalError('Target version must be one of %s' %
-                             list(generators.keys()))
+            raise FatalError('Target version must be one of %s' % list(generators.keys()))
 
         pkgconfig = PkgConfig([libname], False, env=env)
         requires = pkgconfig.requires()
@@ -45,25 +41,19 @@ class PkgConfig2VSProps(object):
 
         libs = pkgconfig.libraries()
         if None not in [prefix_replacement, prefix]:
-            libraries_dirs = [x.replace(prefix, prefix_replacement)
-                    for x in libraries_dirs]
-            include_dirs = [x.replace(prefix, prefix_replacement)
-                    for x in include_dirs]
-        self.vsprops = self.generators[target](libname, requires, include_dirs,
-                libraries_dirs, libs, inherit_common)
+            libraries_dirs = [x.replace(prefix, prefix_replacement) for x in libraries_dirs]
+            include_dirs = [x.replace(prefix, prefix_replacement) for x in include_dirs]
+        self.vsprops = self.generators[target](libname, requires, include_dirs, libraries_dirs, libs, inherit_common)
 
     def create(self, outdir):
         self.vsprops.create(outdir)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Creates VS property '
-        'sheets with pkg-config')
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Creates VS property ' 'sheets with pkg-config')
     parser.add_argument('library', help='Library name')
-    parser.add_argument('-o', type=str, default='.',
-                    help='Output directory for generated files')
-    parser.add_argument('-c', type=str, default='vs2010',
-                    help='Target version (vs2008 or vs2010) name')
+    parser.add_argument('-o', type=str, default='.', help='Output directory for generated files')
+    parser.add_argument('-c', type=str, default='vs2010', help='Target version (vs2008 or vs2010) name')
 
     generators = {'vs2008': VSProps, 'vs2010': Props}
     args = parser.parse_args(sys.argv[1:])
@@ -72,6 +62,7 @@ if __name__ == "__main__":
         p2v.create(args.o)
     except Exception as e:
         import traceback
+
         traceback.print_exc()
         m.error(str(e))
         exit(1)

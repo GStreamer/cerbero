@@ -23,6 +23,7 @@ from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import ArgparseArgument
 
+
 class List(Command):
     doc = N_('List all the available recipes')
     name = 'list'
@@ -31,14 +32,14 @@ class List(Command):
         cookbook = CookBook(config)
         recipes = cookbook.get_recipes_list()
         if len(recipes) == 0:
-            m.message(_("No recipes found"))
+            m.message(_('No recipes found'))
         for recipe in recipes:
             try:
-                current = recipe.built_version().split("\n")[0]
+                current = recipe.built_version().split('\n')[0]
             except:
-                current = "Not checked out"
+                current = 'Not checked out'
 
-            m.message("%s - %s (current checkout: %s) - %s" % (recipe.name, recipe.version, current, recipe.__file__))
+            m.message('%s - %s (current checkout: %s) - %s' % (recipe.name, recipe.version, current, recipe.__file__))
 
 
 class ListPackages(Command):
@@ -49,9 +50,10 @@ class ListPackages(Command):
         store = PackagesStore(config)
         packages = store.get_packages_list()
         if len(packages) == 0:
-            m.message(_("No packages found"))
+            m.message(_('No packages found'))
         for p in packages:
-            m.message("%s - %s - %s" % (p.name, p.version, p.__file__))
+            m.message('%s - %s - %s' % (p.name, p.version, p.__file__))
+
 
 class ShowConfig(Command):
     doc = N_('Show configuration settings')
@@ -62,13 +64,13 @@ class ShowConfig(Command):
 
     def run(self, config, args):
         for n in config._properties:
-            if n == "variants":
-                print("%25s :" % (n))
+            if n == 'variants':
+                print('%25s :' % (n))
                 variants = getattr(config, n).__dict__
                 for v in variants:
-                    print("%30s : %s" % (v, variants[v]))
+                    print('%30s : %s' % (v, variants[v]))
             else:
-                print("%25s : %s" % (n, getattr(config, n)))
+                print('%25s : %s' % (n, getattr(config, n)))
 
 
 register_command(List)

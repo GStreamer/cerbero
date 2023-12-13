@@ -27,6 +27,7 @@ import re
 import io
 from xml.dom import minidom
 from cerbero.utils import etree
+
 oldwrite = etree.ElementTree.write
 
 
@@ -43,12 +44,12 @@ def write(self, file_or_filename, encoding=None, pretty_print=False):
     tmpfile = io.BytesIO()
     oldwrite(self, tmpfile, encoding)
     tmpfile.seek(0)
-    if hasattr(file_or_filename, "write"):
+    if hasattr(file_or_filename, 'write'):
         out_file = file_or_filename
     else:
-        out_file = open(file_or_filename, "wb")
+        out_file = open(file_or_filename, 'wb')
     out_file.write(pretify(tmpfile.read()).encode())
-    if not hasattr(file_or_filename, "write"):
+    if not hasattr(file_or_filename, 'write'):
         out_file.close()
 
 
@@ -108,17 +109,19 @@ import shutil
 from shutil import rmtree as shutil_rmtree
 from cerbero.utils.shell import new_call as shell_call
 
+
 def rmtree(path, ignore_errors=False, onerror=None):
-    '''
+    """
     shutil.rmtree often fails with access denied. On Windows this happens when
     a file is readonly. On Linux this can happen when a directory doesn't have
     the appropriate permissions (Ex: chmod 200) and many other cases.
-    '''
+    """
+
     def force_removal(func, path, excinfo):
-        '''
+        """
         This is the only way to ensure that readonly files are deleted by
         rmtree on Windows. See: http://bugs.python.org/issue19643
-        '''
+        """
         # Due to the way 'onerror' is implemented in shutil.rmtree, errors
         # encountered while listing directories cannot be recovered from. So if
         # a directory cannot be listed, shutil.rmtree assumes that it is empty
@@ -131,11 +134,13 @@ def rmtree(path, ignore_errors=False, onerror=None):
             func(path)
         except OSError:
             shell_call('rm -rf ' + path)
+
     # We try to not use `rm` because on Windows because it's about 20-30x slower
     if not onerror:
         shutil_rmtree(path, ignore_errors, onerror=force_removal)
     else:
         shutil_rmtree(path, ignore_errors, onerror)
+
 
 shutil.rmtree = rmtree
 
@@ -147,10 +152,11 @@ shutil.rmtree = rmtree
 import zipfile
 from zipfile import ZipFile as zipfile_ZipFile
 
+
 class ZipFile(zipfile_ZipFile):
     def _extract_member(self, member, targetpath, pwd):
         """Extract the ZipInfo object 'member' to a physical
-           file on the path targetpath.
+        file on the path targetpath.
         """
         if not isinstance(member, zipfile.ZipInfo):
             member = self.getinfo(member)
@@ -165,8 +171,7 @@ class ZipFile(zipfile_ZipFile):
         # UNC path, redundant separators, "." and ".." components.
         arcname = os.path.splitdrive(arcname)[1]
         invalid_path_parts = ('', os.path.curdir, os.path.pardir)
-        arcname = os.path.sep.join(x for x in arcname.split(os.path.sep)
-                                   if x not in invalid_path_parts)
+        arcname = os.path.sep.join(x for x in arcname.split(os.path.sep) if x not in invalid_path_parts)
         if os.path.sep == '\\':
             # filter illegal characters on Windows
             arcname = self._sanitize_windows_name(arcname, os.path.sep)
@@ -197,8 +202,7 @@ class ZipFile(zipfile_ZipFile):
             os.symlink(self.read(member), targetpath)
             return targetpath
 
-        with self.open(member, pwd=pwd) as source, \
-             open(targetpath, "wb") as target:
+        with self.open(member, pwd=pwd) as source, open(targetpath, 'wb') as target:
             shutil.copyfileobj(source, target)
 
         attr = member.external_attr >> 16
@@ -206,6 +210,7 @@ class ZipFile(zipfile_ZipFile):
             os.chmod(targetpath, attr)
 
         return targetpath
+
 
 zipfile.ZipFile = ZipFile
 
@@ -218,9 +223,11 @@ zipfile.ZipFile = ZipFile
 from pathlib import WindowsPath
 from os import symlink as os_symlink
 
+
 def symlink(src, dst, **kwargs):
     src = str(WindowsPath(src))
     os_symlink(src, dst, **kwargs)
+
 
 if sys.platform.startswith('win'):
     os.symlink = symlink
@@ -234,6 +241,7 @@ if sys.platform.startswith('win'):
 
 import tarfile
 
+
 def symlink_overwrite(src, dst, **kwargs):
     # Allow overwriting symlinks
     try:
@@ -242,6 +250,7 @@ def symlink_overwrite(src, dst, **kwargs):
     except OSError:
         pass
     symlink(src, dst, **kwargs)
+
 
 if sys.platform.startswith('win'):
     tarfile.os.symlink = symlink_overwrite

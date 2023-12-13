@@ -22,8 +22,10 @@ from cerbero.errors import FatalError
 # Safest place to define this since this file imports very few modules
 CERBERO_VERSION = '1.23.0.1'
 
+
 class Platform:
-    ''' Enumeration of supported platforms '''
+    """Enumeration of supported platforms"""
+
     LINUX = 'linux'
     WINDOWS = 'windows'
     DARWIN = 'darwin'
@@ -32,7 +34,8 @@ class Platform:
 
 
 class Architecture:
-    ''' Enumeration of supported acrchitectures '''
+    """Enumeration of supported acrchitectures"""
+
     X86 = 'x86'
     X86_64 = 'x86_64'
     UNIVERSAL = 'universal'
@@ -43,12 +46,11 @@ class Architecture:
 
     @staticmethod
     def is_arm(arch):
-        '''Returns whether the architecture is an ARM based one.
+        """Returns whether the architecture is an ARM based one.
         Note that it will include 32bit *and* 64bit ARM targets. If you
         wish to do something special for 64bit you should first check for
-        that before calling this method.'''
-        return arch in [Architecture.ARM, Architecture.ARMv7,
-                Architecture.ARMv7S, Architecture.ARM64]
+        that before calling this method."""
+        return arch in [Architecture.ARM, Architecture.ARMv7, Architecture.ARMv7S, Architecture.ARM64]
 
     @staticmethod
     def is_arm32(arch):
@@ -56,13 +58,14 @@ class Architecture:
 
 
 class Distro:
-    ''' Enumeration of supported distributions '''
+    """Enumeration of supported distributions"""
+
     DEBIAN = 'debian'
     REDHAT = 'redhat'
     SUSE = 'suse'
-    WINDOWS = 'windows' # To be used as target_distro
-    MSYS = 'msys'       # When running on a native Windows with MSYS
-    MSYS2 = 'msys2'     # When running on a native Windows with MSYS2
+    WINDOWS = 'windows'  # To be used as target_distro
+    MSYS = 'msys'  # When running on a native Windows with MSYS
+    MSYS2 = 'msys2'  # When running on a native Windows with MSYS2
     ARCH = 'arch'
     OS_X = 'osx'
     IOS = 'ios'
@@ -72,7 +75,8 @@ class Distro:
 
 
 class DistroVersion:
-    ''' Enumeration of supported distribution versions, withing each distro, they must be sortable'''
+    """Enumeration of supported distribution versions, withing each distro, they must be sortable"""
+
     DEBIAN_SQUEEZE = 'debian_06_squeeze'
     DEBIAN_WHEEZY = 'debian_07_wheezy'
     DEBIAN_JESSIE = 'debian_08_jessie'
@@ -175,21 +179,21 @@ class DistroVersion:
     ANDROID_ICE_CREAM_SANDWICH = 'android_14_ice_cream_sandwich'  # API Level 14
     ANDROID_JELLY_BEAN = 'android_16_jelly_bean'  # API Level 16
     ANDROID_KITKAT = 'android_19_kitkat'  # API Level 19
-    ANDROID_LOLLIPOP = 'android_21_lollipop' # API Level 21
-    ANDROID_LOLLIPOP_MR1 = 'android_22_lollipop_mr1' # API Level 22
-    ANDROID_MARSHMALLOW = 'android_23_marshmallow' # API Level 23
-    ANDROID_NOUGAT = 'android_24_nougat' # API Level 24
-    ANDROID_NOUGAT_MR1 = 'android_25_nougat_mr1' # API Level 25
-    ANDROID_OREO = 'android_26_oreo' # API Level 26
-    ANDROID_OREO_MR1 = 'android_27_oreo_mr1' # API Level 27
-    ANDROID_PIE = 'android_28_pie' # API Level 28
-    ANDROID_Q = 'android_29_q' # API Level 29
+    ANDROID_LOLLIPOP = 'android_21_lollipop'  # API Level 21
+    ANDROID_LOLLIPOP_MR1 = 'android_22_lollipop_mr1'  # API Level 22
+    ANDROID_MARSHMALLOW = 'android_23_marshmallow'  # API Level 23
+    ANDROID_NOUGAT = 'android_24_nougat'  # API Level 24
+    ANDROID_NOUGAT_MR1 = 'android_25_nougat_mr1'  # API Level 25
+    ANDROID_OREO = 'android_26_oreo'  # API Level 26
+    ANDROID_OREO_MR1 = 'android_27_oreo_mr1'  # API Level 27
+    ANDROID_PIE = 'android_28_pie'  # API Level 28
+    ANDROID_Q = 'android_29_q'  # API Level 29
     NONE_UCLIBC = 'none_uclibc'
     NONE_GLIBC = 'none_glibc'
 
     @staticmethod
     def get_android_api_version(version):
-        '''Returns the corresponding android api version'''
+        """Returns the corresponding android api version"""
         if version == DistroVersion.ANDROID_GINGERBREAD:
             return 9
         elif version == DistroVersion.ANDROID_ICE_CREAM_SANDWICH:
@@ -217,7 +221,7 @@ class DistroVersion:
         elif version == DistroVersion.ANDROID_Q:
             return 29
         else:
-            raise FatalError("DistroVersion not supported")
+            raise FatalError('DistroVersion not supported')
 
     @staticmethod
     def get_ios_sdk_version(version):
@@ -225,8 +229,8 @@ class DistroVersion:
             raise FatalError('Not an iOS version: ' + version)
         return [int(s) for s in version[4:].split('_')]
 
-class LicenseDescription:
 
+class LicenseDescription:
     def __init__(self, acronym, pretty_name):
         self.acronym = acronym
         self.pretty_name = pretty_name
@@ -235,45 +239,31 @@ class LicenseDescription:
         return self.acronym < other.acronym
 
     def __repr__(self):
-        return "LicenseDescription(%s)" % self.acronym
+        return 'LicenseDescription(%s)' % self.acronym
+
 
 class License:
-    ''' Enumeration of licensesversions '''
-    Apachev2 = LicenseDescription('Apache-2.0',
-            'Apache License, version 2.0')
-    BSD = LicenseDescription('BSD',
-            'BSD License')
-    BSD_like = LicenseDescription('BSD-like',
-            'BSD-like License')
-    FreeType = LicenseDescription('FreeType',
-            'FreeType License')
-    GPLv2Plus = LicenseDescription('GPL-2+',
-            'GNU General Public License, version 2 or later')
-    GPLv3Plus = LicenseDescription('GPL-3+',
-            'GNU General Public License, version 3 or later')
-    LGPLv2Plus = LicenseDescription('LGPL-2+',
-            'GNU Lesser General Public License, version 2 or later')
-    LGPLv2_1Plus = LicenseDescription('LGPL-2.1+',
-            'GNU Lesser General Public License, version 2.1 or later')
-    LGPLv3 = LicenseDescription('LGPL-3',
-            'GNU Lesser General Public License, version 3')
-    LGPLv3Plus = LicenseDescription('LGPL-3+',
-            'GNU Lesser General Public License, version 3 or later')
-    LibPNG = LicenseDescription('LibPNG',
-            'LibPNG License')
-    MPLv1_1 = LicenseDescription('MPL-1.1',
-            'Mozilla Public License Version 1.1')
-    MPLv2 = LicenseDescription('MPL-2',
-            'Mozilla Public License Version 2.0')
-    MIT = LicenseDescription('MIT',
-            'MIT License')
-    OPENSSL = LicenseDescription('OpenSSL',
-            'OpenSSL License')
-    Proprietary = LicenseDescription('Proprietary',
-            'Proprietary License')
+    """Enumeration of licensesversions"""
+
+    Apachev2 = LicenseDescription('Apache-2.0', 'Apache License, version 2.0')
+    BSD = LicenseDescription('BSD', 'BSD License')
+    BSD_like = LicenseDescription('BSD-like', 'BSD-like License')
+    FreeType = LicenseDescription('FreeType', 'FreeType License')
+    GPLv2Plus = LicenseDescription('GPL-2+', 'GNU General Public License, version 2 or later')
+    GPLv3Plus = LicenseDescription('GPL-3+', 'GNU General Public License, version 3 or later')
+    LGPLv2Plus = LicenseDescription('LGPL-2+', 'GNU Lesser General Public License, version 2 or later')
+    LGPLv2_1Plus = LicenseDescription('LGPL-2.1+', 'GNU Lesser General Public License, version 2.1 or later')
+    LGPLv3 = LicenseDescription('LGPL-3', 'GNU Lesser General Public License, version 3')
+    LGPLv3Plus = LicenseDescription('LGPL-3+', 'GNU Lesser General Public License, version 3 or later')
+    LibPNG = LicenseDescription('LibPNG', 'LibPNG License')
+    MPLv1_1 = LicenseDescription('MPL-1.1', 'Mozilla Public License Version 1.1')
+    MPLv2 = LicenseDescription('MPL-2', 'Mozilla Public License Version 2.0')
+    MIT = LicenseDescription('MIT', 'MIT License')
+    OPENSSL = LicenseDescription('OpenSSL', 'OpenSSL License')
+    Proprietary = LicenseDescription('Proprietary', 'Proprietary License')
     PublicDomain = LicenseDescription('PublicDomain', 'Public Domain')
-    Misc = LicenseDescription('Misc',
-            'Miscellaneous license information')
+    Misc = LicenseDescription('Misc', 'Miscellaneous license information')
+
 
 class LibraryType:
     NONE = 'none'

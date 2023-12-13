@@ -18,7 +18,7 @@
 import os
 from cerbero.enums import Architecture
 
-DISTRO_XML_TPL = '''\
+DISTRO_XML_TPL = """\
 <?xml version="1.0"?>
 <installer-gui-script minSpecVesion="1">
   <options require-scripts="false" hostArchitectures="%(archs)s"/>
@@ -33,10 +33,11 @@ DISTRO_XML_TPL = '''\
   %(choices_desc)s
   %(pkg_refs)s
 </installer-gui-script>
-'''
+"""
+
 
 class DistributionXML(object):
-    ''' Creates a Distribution.xml for productbuild '''
+    """Creates a Distribution.xml for productbuild"""
 
     TAG_CHOICE = 'choice'
     TAG_CHOICES_OUTLINE = 'choices-outline'
@@ -45,8 +46,9 @@ class DistributionXML(object):
 
     PROP_ENABLE_ANYWHERE = 'false'
 
-    def __init__(self, package, store, out_dir, packages_paths, emptypkgs,
-                 package_type, target_arch, home_folder=False):
+    def __init__(
+        self, package, store, out_dir, packages_paths, emptypkgs, package_type, target_arch, home_folder=False
+    ):
         self.package = package
         self.store = store
         self.out_dir = out_dir
@@ -72,16 +74,18 @@ class DistributionXML(object):
             archs = 'arm64,x86_64'
         else:
             archs = self.target_arch
-        return self.template % {'background': self.package.resources_background,
-                                'background_dark': self.package.resources_background_dark,
-                                'archs': archs,
-                                'license': self.package.resources_license_rtf,
-                                'ehome': self.enable_user_home,
-                                'elocal': self.enable_local_system,
-                                'title': self.package.shortdesc,
-                                'choices': self.choices,
-                                'choices_desc': self.choices_desc,
-                                'pkg_refs': self.pkg_refs}
+        return self.template % {
+            'background': self.package.resources_background,
+            'background_dark': self.package.resources_background_dark,
+            'archs': archs,
+            'license': self.package.resources_license_rtf,
+            'ehome': self.enable_user_home,
+            'elocal': self.enable_local_system,
+            'title': self.package.shortdesc,
+            'choices': self.choices,
+            'choices_desc': self.choices_desc,
+            'pkg_refs': self.pkg_refs,
+        }
 
     def _add_choices(self):
         self.choices = ''
@@ -100,9 +104,11 @@ class DistributionXML(object):
             self._add_choice(package, not required, selected)
 
     def _add_choice(self, package, enabled, selected):
-        self.choices_desc += '<choice description="default" id="%s" start_enabled="%s"'\
-                             ' title="%s">\n' % \
-            (package.identifier(), enabled, package.longdesc)
+        self.choices_desc += '<choice description="default" id="%s" start_enabled="%s"' ' title="%s">\n' % (
+            package.identifier(),
+            enabled,
+            package.longdesc,
+        )
 
         packages = [package] + self.store.get_package_deps(package)
         for package in packages:
@@ -111,8 +117,11 @@ class DistributionXML(object):
             package.set_mode(self.package_type)
             self.choices_desc += '<pkg-ref id="%s"/>\n' % package.identifier()
             if package not in self.packagerefs:
-                self.pkg_refs += '<pkg-ref id="%s" version="%s">%s</pkg-ref>\n' % \
-                    (package.identifier(), package.version, self.packages_paths[package])
+                self.pkg_refs += '<pkg-ref id="%s" version="%s">%s</pkg-ref>\n' % (
+                    package.identifier(),
+                    package.version,
+                    self.packages_paths[package],
+                )
                 self.packagerefs.append(package)
         self.choices_desc += '</choice>\n'
 

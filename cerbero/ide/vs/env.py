@@ -36,7 +36,7 @@ VCVARSALLS = {
             r'Microsoft Visual Studio\2017\BuildTools',
             r'Microsoft Visual Studio\2017\Preview',
         ),
-        r'VC\Auxiliary\Build\vcvarsall.bat'
+        r'VC\Auxiliary\Build\vcvarsall.bat',
     ),
     'vs16': (
         (
@@ -46,7 +46,7 @@ VCVARSALLS = {
             r'Microsoft Visual Studio\2019\BuildTools',
             r'Microsoft Visual Studio\2019\Preview',
         ),
-        r'VC\Auxiliary\Build\vcvarsall.bat'
+        r'VC\Auxiliary\Build\vcvarsall.bat',
     ),
     'vs17': (
         (
@@ -56,9 +56,10 @@ VCVARSALLS = {
             r'Microsoft Visual Studio\2022\BuildTools',
             r'Microsoft Visual Studio\2022\Preview',
         ),
-        r'VC\Auxiliary\Build\vcvarsall.bat'
+        r'VC\Auxiliary\Build\vcvarsall.bat',
     ),
 }
+
 
 def get_program_files_dir():
     if 'PROGRAMFILES(X86)' in os.environ:
@@ -69,6 +70,7 @@ def get_program_files_dir():
         return Path(os.environ['PROGRAMFILES'])
     raise FatalError('Could not find path to 32-bit Program Files directory')
 
+
 def get_vs_year_version(vcver):
     if vcver == 'vs15':
         return '2017'
@@ -78,6 +80,7 @@ def get_vs_year_version(vcver):
         return '2022'
     raise RuntimeError('Unknown toolset value {!r}'.format(vcver))
 
+
 def _get_custom_vs_install(vs_version, vs_install_path):
     path = Path(vs_install_path)
     if not path.is_dir():
@@ -85,21 +88,23 @@ def _get_custom_vs_install(vs_version, vs_install_path):
     suffix = VCVARSALLS[vs_version][1]
     path = path / suffix
     if not path.is_file():
-        raise FatalError('Can\'t find vcvarsall.bat inside vs_install_path {!r}'.format(path))
+        raise FatalError("Can't find vcvarsall.bat inside vs_install_path {!r}".format(path))
     return path.as_posix(), vs_version
+
 
 def _sort_vs_installs(installs):
     return sorted(installs, reverse=True, key=lambda x: x['installationVersion'])
 
+
 def _get_vswhere_vs_install(vswhere, vs_versions):
     import json
+
     vswhere_exe = str(vswhere)
     # Get a list of installation paths for all installed Visual Studio
     # instances, from VS 2013 to the latest one, sorted from newest to
     # oldest, and including preview releases.
     # Will not include BuildTools installations.
-    out = check_output([vswhere_exe, '-legacy', '-prerelease', '-format',
-                        'json', '-utf8'])
+    out = check_output([vswhere_exe, '-legacy', '-prerelease', '-format', 'json', '-utf8'])
     installs = _sort_vs_installs(json.loads(out))
     program_files = get_program_files_dir()
     for install in installs:
@@ -113,19 +118,26 @@ def _get_vswhere_vs_install(vswhere, vs_versions):
         # Find the location of the Visual Studio installation
         if path.is_file():
             return path.as_posix(), vs_version
-    m.warning('vswhere.exe could not find Visual Studio version(s) {}. Falling '
-              'back to manual searching...' .format(', '.join(vs_versions)))
+    m.warning(
+        'vswhere.exe could not find Visual Studio version(s) {}. Falling ' 'back to manual searching...'.format(
+            ', '.join(vs_versions)
+        )
+    )
     return None
+
 
 def get_vcvarsall(vs_version, vs_install_path):
     known_vs_versions = sorted(VCVARSALLS.keys(), reverse=True)
     if vs_version:
         if vs_version not in VCVARSALLS:
-            raise FatalError('Requested Visual Studio version {} is not one of: '
-                             '{}'.format(vs_version, ', '.join(known_vs_versions)))
+            raise FatalError(
+                'Requested Visual Studio version {} is not one of: ' '{}'.format(
+                    vs_version, ', '.join(known_vs_versions)
+                )
+            )
     # Do we want to use a specific known Visual Studio installation?
     if vs_install_path:
-        assert(vs_version)
+        assert vs_version
         return _get_custom_vs_install(vs_version, vs_install_path)
     # Start searching.
     if vs_version:
@@ -154,8 +166,11 @@ def get_vcvarsall(vs_version, vs_install_path):
             # Find the location of the Visual Studio installation
             if path.is_file():
                 return path.as_posix(), vs_version
-    raise FatalError('Microsoft Visual Studio not found. If you installed it, '
-                     'please file a bug. We looked for: ' + ', '.join(vs_versions))
+    raise FatalError(
+        'Microsoft Visual Studio not found. If you installed it, '
+        'please file a bug. We looked for: ' + ', '.join(vs_versions)
+    )
+
 
 def append_path(var, path, sep=';'):
     if var and not var.endswith(sep):
@@ -164,6 +179,7 @@ def append_path(var, path, sep=';'):
         path += sep
     var += path
     return var
+
 
 def get_vcvarsall_arg(arch, target_arch):
     if target_arch == Architecture.X86:
@@ -188,8 +204,9 @@ def get_vcvarsall_arg(arch, target_arch):
     elif arch == Architecture.ARM64 and target_arch == Architecture.ARM64:
         return 'arm64'
     elif Architecture.is_arm(arch) and Architecture.is_arm(target_arch):
-            return 'arm'
+        return 'arm'
     raise FatalError('Unsupported arch/target_arch: {0}/{1}'.format(arch, target_arch))
+
 
 def run_and_get_env(cmd):
     env = os.environ.copy()
@@ -199,19 +216,19 @@ def run_and_get_env(cmd):
     # GITLAB_USER_NAME when the name of the user triggering the pipeline has
     # non-ascii characters.
     # The env vars set by MSVC will always be correctly encoded.
-    output = subprocess.check_output(cmd, shell=True, env=env,
-                                     universal_newlines=True,
-                                     errors='ignore')
+    output = subprocess.check_output(cmd, shell=True, env=env, universal_newlines=True, errors='ignore')
     lines = []
     for line in output.split('\n'):
         if '=' in line:
             lines.append(line)
     return lines
 
+
 # For a specific env var, get only the values that were prepended to it by MSVC
 def get_envvar_msvc_values(msvc, nomsvc, sep=';'):
     index = msvc.index(nomsvc)
     return msvc[0:index]
+
 
 @lru_cache()
 def get_msvc_env(arch, target_arch, uwp, version=None, vs_install_path=None):

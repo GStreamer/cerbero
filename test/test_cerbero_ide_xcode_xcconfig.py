@@ -23,7 +23,7 @@ import tempfile
 from cerbero.ide.xcode.xcconfig import XCConfig
 
 
-XCCONFIG = '''
+XCCONFIG = """
 ALWAYS_SEARCH_USER_PATHS = YES
 USER_HEADER_SEARCH_PATHS = /usr/include/gstreamer-0.10\
  /usr/include/glib-2.0 /usr/lib/glib-2.0/include\
@@ -31,10 +31,10 @@ USER_HEADER_SEARCH_PATHS = /usr/include/gstreamer-0.10\
 LIBRARY_SEARCH_PATHS = 
 OTHER_LDFLAGS =  -lgstreamer-0.10 \
 -lgobject-2.0 -lgmodule-2.0 -lxml2 -lgthread-2.0 -lrt -lglib-2.0
-'''
+"""
+
 
 class TestPkgConfig(unittest.TestCase):
-
     def setUp(self):
         pc_path = os.path.join(os.path.dirname(__file__), 'pkgconfig')
         os.environ['PKG_CONFIG_LIBDIR'] = pc_path
@@ -42,13 +42,13 @@ class TestPkgConfig(unittest.TestCase):
 
     def testFill(self):
         xcconfig = XCConfig('gstreamer-0.10')
-        expected = \
-            {'libs': ' -lgstreamer-0.10 -lgobject-2.0 -lgmodule-2.0 '
-                     '-lxml2 -lgthread-2.0 -lrt -lglib-2.0',
-             'hsp': '/usr/include/gstreamer-0.10 /usr/include/glib-2.0 '
-                    '/usr/lib/glib-2.0/include '
-                    '/usr/include/libxml2',
-             'lsp': ''}
+        expected = {
+            'libs': ' -lgstreamer-0.10 -lgobject-2.0 -lgmodule-2.0 ' '-lxml2 -lgthread-2.0 -lrt -lglib-2.0',
+            'hsp': '/usr/include/gstreamer-0.10 /usr/include/glib-2.0 '
+            '/usr/lib/glib-2.0/include '
+            '/usr/include/libxml2',
+            'lsp': '',
+        }
         self.assertEqual(expected, xcconfig._fill())
 
     def testXCConfig(self):

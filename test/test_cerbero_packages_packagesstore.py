@@ -21,13 +21,12 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.errors import PackageNotFoundError
-from cerbero.packages.package import Package, MetaPackage, SDKPackage,\
-    InstallerPackage, App
+from cerbero.packages.package import Package, MetaPackage, SDKPackage, InstallerPackage, App
 from cerbero.packages.packagesstore import PackagesStore
 from test import test_packages_common as common
 
 
-PACKAGE = '''
+PACKAGE = """
 class Package(package.Package):
 
     name = 'test-package'
@@ -37,22 +36,22 @@ class Package(package.Package):
         Distro.WINDOWS
         DistroVersion.WINDOWS_7
         Architecture.X86
-'''
+"""
 
-SDKPACKAGE = '''
+SDKPACKAGE = """
 class SDKPackage(package.SDKPackage):
 
     name = 'test-package'
-'''
+"""
 
-INSTALLERPACKAGE = '''
+INSTALLERPACKAGE = """
 class InstallerPackage(package.InstallerPackage):
 
     name = 'test-package'
-'''
+"""
+
 
 class PackageTest(unittest.TestCase):
-
     def setUp(self):
         self.config = common.DummyConfig()
         self.config.packages_dir = '/test'
@@ -72,8 +71,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(package, self.store.get_package(package.name))
 
     def testPackageNotFound(self):
-        self.assertRaises(PackageNotFoundError, self.store.get_package,
-            'unknown')
+        self.assertRaises(PackageNotFoundError, self.store.get_package, 'unknown')
 
     def testPackagesList(self):
         package = common.Package1(self.config, None, None)
@@ -84,28 +82,24 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(l, self.store.get_packages_list())
 
     def testPackageDeps(self):
-        package = common.Package1(self.config, None,  None)
+        package = common.Package1(self.config, None, None)
         package2 = common.Package2(self.config, None, None)
         self.store.add_package(package)
         self.store.add_package(package2)
-        self.assertEqual(package.deps,
-            [x.name for x in self.store.get_package_deps(package.name)])
+        self.assertEqual(package.deps, [x.name for x in self.store.get_package_deps(package.name)])
 
     def testMetaPackageDeps(self):
         metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(metapackage)
         # the metapackage depends on package that are not yet in the store
-        self.assertRaises(PackageNotFoundError,
-            self.store.get_package_deps, metapackage.name)
-        for klass in [common.Package1, common.Package2, common.Package3,
-                common.Package4]:
+        self.assertRaises(PackageNotFoundError, self.store.get_package_deps, metapackage.name)
+        for klass in [common.Package1, common.Package2, common.Package3, common.Package4]:
             p = klass(self.config, None, None)
             self.store.add_package(p)
         for klass in [common.MetaPackage]:
             p = klass(self.config, None)
             self.store.add_package(p)
-        deps = ['gstreamer-test-bindings', 'gstreamer-test1',
-                'gstreamer-test2', 'gstreamer-test3']
+        deps = ['gstreamer-test-bindings', 'gstreamer-test1', 'gstreamer-test2', 'gstreamer-test3']
         res = [x.name for x in self.store.get_package_deps(metapackage.name)]
         self.assertEqual(sorted(deps), sorted(res))
 
@@ -118,8 +112,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual('test-package', p.name)
 
     def testLoadMetaPackageFromFile(self):
-        for x, t in [(SDKPACKAGE, SDKPackage),
-                (INSTALLERPACKAGE, InstallerPackage)]:
+        for x, t in [(SDKPACKAGE, SDKPackage), (INSTALLERPACKAGE, InstallerPackage)]:
             package_file = tempfile.NamedTemporaryFile()
             package_file.write(x)
             package_file.flush()
@@ -137,4 +130,4 @@ class PackageTest(unittest.TestCase):
         try:
             p.test_imports()
         except ImportError as e:
-            self.fail("Import error raised, %s", e)
+            self.fail('Import error raised, %s', e)

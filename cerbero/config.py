@@ -40,7 +40,7 @@ USER_CONFIG_FILENAME = 'cerbero.%s' % CONFIG_EXT
 USER_CONFIG_FILE = os.path.join(USER_CONFIG_DIR, USER_CONFIG_FILENAME)
 DEFAULT_GIT_ROOT = 'https://gitlab.freedesktop.org/gstreamer'
 DEFAULT_ALLOW_PARALLEL_BUILD = True
-DEFAULT_PACKAGER = "Default <default@change.me>"
+DEFAULT_PACKAGER = 'Default <default@change.me>'
 CERBERO_UNINSTALLED = 'CERBERO_UNINSTALLED'
 DEFAULT_MIRRORS = ['https://gstreamer.freedesktop.org/src/mirror/']
 RUST_TRIPLE_MAPPING = {
@@ -65,11 +65,11 @@ RUST_TRIPLE_MAPPING = {
 
 
 def set_nofile_ulimit():
-    '''
+    """
     Some newer toolchains such as our GCC 8.2 cross toolchain exceed the
     1024 file ulimit, so let's increase it.
     See: https://gitlab.freedesktop.org/gstreamer/cerbero/issues/165
-    '''
+    """
     try:
         import resource
     except ImportError:
@@ -82,11 +82,29 @@ def set_nofile_ulimit():
         except (OSError, ValueError):
             print('Failed to increase file ulimit, you may see linker failures')
 
+
 class Variants(object):
     # Variants that are booleans, and are unset when prefixed with 'no'
-    __disabled_variants = ['x11', 'alsa', 'pulse', 'cdparanoia', 'v4l2',
-                           'gi', 'unwind', 'rpi', 'visualstudio', 'mingw', 'uwp', 'qt5',
-                           'intelmsdk', 'python', 'werror', 'vaapi', 'rust', 'qt6']
+    __disabled_variants = [
+        'x11',
+        'alsa',
+        'pulse',
+        'cdparanoia',
+        'v4l2',
+        'gi',
+        'unwind',
+        'rpi',
+        'visualstudio',
+        'mingw',
+        'uwp',
+        'qt5',
+        'intelmsdk',
+        'python',
+        'werror',
+        'vaapi',
+        'rust',
+        'qt6',
+    ]
     __enabled_variants = ['debug', 'optimization', 'testspackage']
     __bool_variants = __enabled_variants + __disabled_variants
     # Variants that are `key: (values)`, with the first value in the tuple
@@ -142,13 +160,13 @@ class Variants(object):
                 self.vscrt = 'mdd'
 
     def __setattr__(self, attr, value):
-            if '-' in attr:
-                raise AssertionError('Variant name {!r} must not contain \'-\''.format(attr))
-            super().__setattr__(attr, value)
-            # UWP implies Visual Studio
-            if attr == 'uwp' and value:
-                self.visualstudio = True
-                self.mingw = False
+        if '-' in attr:
+            raise AssertionError("Variant name {!r} must not contain '-'".format(attr))
+        super().__setattr__(attr, value)
+        # UWP implies Visual Studio
+        if attr == 'uwp' and value:
+            self.visualstudio = True
+            self.mingw = False
 
     def __getattr__(self, name):
         if name.startswith('no') and name[2:] in self.bools():
@@ -167,8 +185,8 @@ class Variants(object):
         return sorted(self.__mapping_variants)
 
 
-class Config (object):
-    '''
+class Config(object):
+    """
     Holds the configuration for the build
 
     @ivar build_tools_config: Configuration for build tools
@@ -181,36 +199,95 @@ class Config (object):
     @type py_win_prefix: str
     @ivar py_prefixes: List of python prefixes
     @type py_prefixes: list
-    '''
+    """
 
-    _properties = ['platform', 'target_platform', 'arch', 'target_arch',
-                   'prefix', 'recipes_dir', 'host', 'build', 'target',
-                   'sources', 'local_sources', 'lib_suffix', 'git_root',
-                   'distro', 'target_distro', 'environ_dir', 'cache_file',
-                   'toolchain_prefix', 'toolchain_version', 'distro_version',
-                   'target_distro_version', 'allow_system_libs',
-                   'packages_dir', 'py_prefix', 'logs',
-                   'install_dir', 'allow_parallel_build', 'num_of_cpus',
-                   'use_configure_cache', 'packages_prefix', 'packager',
-                   'data_dir', 'min_osx_sdk_version', 'external_recipes',
-                   'external_packages', 'use_ccache', 'force_git_commit',
-                   'universal_archs', 'osx_target_sdk_version', 'variants',
-                   'build_tools_prefix', 'build_tools_sources', 'build_tools_logs',
-                   'build_tools_cache', 'home_dir', 'recipes_commits',
-                   'recipes_remotes', 'ios_platform', 'extra_build_tools',
-                   'distro_packages_install', 'interactive', 'bash_completions',
-                   'target_arch_flags', 'sysroot', 'isysroot',
-                   'extra_lib_path', 'cached_sources', 'tools_prefix',
-                   'ios_min_version', 'toolchain_path', 'mingw_perl_prefix',
-                   'msvc_env_for_toolchain', 'mingw_env_for_toolchain',
-                   'msvc_env_for_build_system', 'mingw_env_for_build_system',
-                   'msvc_version', 'meson_properties', 'manifest',
-                   'extra_properties', 'qt5_qmake_path', 'qt5_pkgconfigdir',
-                   'for_shell', 'package_tarball_compression', 'extra_mirrors',
-                   'extra_bootstrap_packages', 'moltenvk_prefix',
-                   'vs_install_path', 'vs_install_version', 'exe_suffix',
-                   'rust_prefix', 'rustup_home', 'cargo_home', 'tomllib_path',
-                   'qt6_qmake_path', 'system_build_tools']
+    _properties = [
+        'platform',
+        'target_platform',
+        'arch',
+        'target_arch',
+        'prefix',
+        'recipes_dir',
+        'host',
+        'build',
+        'target',
+        'sources',
+        'local_sources',
+        'lib_suffix',
+        'git_root',
+        'distro',
+        'target_distro',
+        'environ_dir',
+        'cache_file',
+        'toolchain_prefix',
+        'toolchain_version',
+        'distro_version',
+        'target_distro_version',
+        'allow_system_libs',
+        'packages_dir',
+        'py_prefix',
+        'logs',
+        'install_dir',
+        'allow_parallel_build',
+        'num_of_cpus',
+        'use_configure_cache',
+        'packages_prefix',
+        'packager',
+        'data_dir',
+        'min_osx_sdk_version',
+        'external_recipes',
+        'external_packages',
+        'use_ccache',
+        'force_git_commit',
+        'universal_archs',
+        'osx_target_sdk_version',
+        'variants',
+        'build_tools_prefix',
+        'build_tools_sources',
+        'build_tools_logs',
+        'build_tools_cache',
+        'home_dir',
+        'recipes_commits',
+        'recipes_remotes',
+        'ios_platform',
+        'extra_build_tools',
+        'distro_packages_install',
+        'interactive',
+        'bash_completions',
+        'target_arch_flags',
+        'sysroot',
+        'isysroot',
+        'extra_lib_path',
+        'cached_sources',
+        'tools_prefix',
+        'ios_min_version',
+        'toolchain_path',
+        'mingw_perl_prefix',
+        'msvc_env_for_toolchain',
+        'mingw_env_for_toolchain',
+        'msvc_env_for_build_system',
+        'mingw_env_for_build_system',
+        'msvc_version',
+        'meson_properties',
+        'manifest',
+        'extra_properties',
+        'qt5_qmake_path',
+        'qt5_pkgconfigdir',
+        'for_shell',
+        'package_tarball_compression',
+        'extra_mirrors',
+        'extra_bootstrap_packages',
+        'moltenvk_prefix',
+        'vs_install_path',
+        'vs_install_version',
+        'exe_suffix',
+        'rust_prefix',
+        'rustup_home',
+        'cargo_home',
+        'tomllib_path',
+        'qt6_qmake_path',
+        'system_build_tools',
+    ]
 
     cookbook = None
 
@@ -219,9 +296,9 @@ class Config (object):
         self.build_tools_config = None
         self._is_build_tools_config = is_build_tools_config
         self.py_prefixes = []
-        self.py_prefix = ""
-        self.py_plat_prefix = ""
-        self.py_win_prefix = ""
+        self.py_prefix = ''
+        self.py_plat_prefix = ''
+        self.py_win_prefix = ''
 
         for a in self._properties:
             setattr(self, a, None)
@@ -320,13 +397,13 @@ class Config (object):
                 config.prefix = os.path.join(self.prefix)
             # qmake_path is different for each arch in android-universal, but
             # not in ios-universal.
-            qtpkgdir, qmake5 = detect_qt5(config.target_platform, config.target_arch,
-                                          self.target_arch == Architecture.UNIVERSAL)
+            qtpkgdir, qmake5 = detect_qt5(
+                config.target_platform, config.target_arch, self.target_arch == Architecture.UNIVERSAL
+            )
             config.set_property('qt5_qmake_path', qmake5)
             config.set_property('qt5_pkgconfigdir', qtpkgdir)
             # Qt6
-            qmake6 = detect_qt6(config.target_platform, config.target_arch,
-                                          self.target_arch == Architecture.UNIVERSAL)
+            qmake6 = detect_qt6(config.target_platform, config.target_arch, self.target_arch == Architecture.UNIVERSAL)
             config.set_property('qt6_qmake_path', qmake6)
             # We already called these functions on `self` above
             if config is not self:
@@ -339,8 +416,7 @@ class Config (object):
         # Ensure that variants continue to override all other configuration
         self.variants.override(variants_override)
         if not self.prefix_is_executable() and self.variants.gi:
-            m.warning(_("gobject introspection requires an executable "
-                        "prefix, 'gi' variant will be removed"))
+            m.warning(_('gobject introspection requires an executable ' "prefix, 'gi' variant will be removed"))
             self.variants.gi = False
 
         for c in list(self.arch_config.values()):
@@ -348,18 +424,21 @@ class Config (object):
 
         self.do_setup_env()
 
-
         if self._is_build_tools_config:
             m.message('Build tools install prefix will be {}'.format(self.prefix))
         else:
             if self.can_use_msvc():
-                m.message('Building recipes with Visual Studio {} whenever possible'
-                          .format(get_vs_year_version(self.msvc_version)))
+                m.message(
+                    'Building recipes with Visual Studio {} whenever possible'.format(
+                        get_vs_year_version(self.msvc_version)
+                    )
+                )
                 if self.vs_install_path:
                     m.message('Using Visual Studio installed at {!r}'.format(self.vs_install_path))
             m.message('Install prefix will be {}'.format(self.prefix))
             if self.distro == Distro.MSYS:
                 import time
+
                 print('!!!!!!!!!!!!')
                 print('DEPRECATION: You are using the old MSYS which is deprecated and will be unsupported SOON!')
                 print('!!!!!!!!!!!!')
@@ -380,7 +459,6 @@ class Config (object):
         if arches:
             m.message('Building the following arches: ' + ' '.join(arches))
 
-
     def do_setup_env(self):
         self._create_paths()
 
@@ -391,12 +469,12 @@ class Config (object):
         self.env = self.get_env(self.prefix, libdir)
 
     def get_wine_runtime_env(self, prefix, env):
-        '''
+        """
         When we're creating a cross-winXX shell, these runtime environment
         variables are only useful if the built binaries will be run using Wine,
         so convert them to values that can be understood by programs running
         under Wine.
-        '''
+        """
         runtime_env = (
             'GI_TYPELIB_PATH',
             'XDG_DATA_DIRS',
@@ -432,8 +510,10 @@ class Config (object):
             elif EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k):
                 ret_env[k] = new_v
             else:
-                raise FatalError("Don't know how to combine the environment "
-                    "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v))
+                raise FatalError(
+                    "Don't know how to combine the environment "
+                    "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
+                )
         for k in old_env.keys():
             if k not in new_env:
                 ret_env[k] = old_env[k]
@@ -451,25 +531,20 @@ class Config (object):
         xdgconfigdir = os.path.join(prefix, 'etc', 'xdg')
         xcursordir = os.path.join(prefix, 'share', 'icons')
         aclocalflags = '-I{} -I{}'.format(
-            os.path.join(prefix, 'share', 'aclocal'),
-            os.path.join(self.build_tools_prefix, 'share', 'aclocal'))
+            os.path.join(prefix, 'share', 'aclocal'), os.path.join(self.build_tools_prefix, 'share', 'aclocal')
+        )
 
-        perlversionpath = os.path.join(libdir, 'perl5', 'site_perl',
-                                       self._perl_version())
+        perlversionpath = os.path.join(libdir, 'perl5', 'site_perl', self._perl_version())
         if self.target_platform == Platform.WINDOWS:
             # On windows even if perl version is 5.8.8, modules can be
             # installed in 5.8
             perlversionpath = perlversionpath.rsplit('.', 1)[0]
 
-        perl5lib = ':'.join(
-            [to_unixpath(os.path.join(libdir, 'perl5')),
-            to_unixpath(perlversionpath)])
+        perl5lib = ':'.join([to_unixpath(os.path.join(libdir, 'perl5')), to_unixpath(perlversionpath)])
         gstpluginpath = os.path.join(libdir, 'gstreamer-0.10')
         gstpluginpath10 = os.path.join(libdir, 'gstreamer-1.0')
-        gstregistry = os.path.join('~', '.gstreamer-0.10',
-                                   'cerbero-registry-%s' % self.target_arch)
-        gstregistry10 = os.path.join('~', '.cache', 'gstreamer-1.0',
-                                   'cerbero-registry-%s' % self.target_arch)
+        gstregistry = os.path.join('~', '.gstreamer-0.10', 'cerbero-registry-%s' % self.target_arch)
+        gstregistry10 = os.path.join('~', '.cache', 'gstreamer-1.0', 'cerbero-registry-%s' % self.target_arch)
         gstregistry = os.path.expanduser(gstregistry)
         gstregistry10 = os.path.expanduser(gstregistry10)
 
@@ -482,7 +557,7 @@ class Config (object):
         pythonpath = os.pathsep.join(pythonpath)
 
         if self.platform == Platform.LINUX:
-            xdgdatadir += ":/usr/share:/usr/local/share"
+            xdgdatadir += ':/usr/share:/usr/local/share'
 
         ldflags = self.config_env.get('LDFLAGS', '')
         ldflags_libdir = '-L%s ' % libdir
@@ -491,8 +566,7 @@ class Config (object):
 
         path = self.config_env.get('PATH', None)
         if not self._is_build_tools_config:
-            path = self._join_path(
-                os.path.join(self.build_tools_config.prefix, 'bin'), path)
+            path = self._join_path(os.path.join(self.build_tools_config.prefix, 'bin'), path)
         if self.variants.rust:
             path = self._join_path(os.path.join(self.cargo_home, 'bin'), path)
         # Add the prefix bindir after the build-tools bindir so that on Windows
@@ -507,36 +581,35 @@ class Config (object):
         if self.extra_lib_path is not None:
             ld_library_path = self._join_path(ld_library_path, self.extra_lib_path)
         if self.toolchain_prefix is not None:
-            ld_library_path = self._join_path(ld_library_path,
-                os.path.join(self.toolchain_prefix, 'lib'))
-            includedir = self._join_path(includedir,
-                os.path.join(self.toolchain_prefix, 'include'))
+            ld_library_path = self._join_path(ld_library_path, os.path.join(self.toolchain_prefix, 'lib'))
+            includedir = self._join_path(includedir, os.path.join(self.toolchain_prefix, 'include'))
         # Most of these variables are extracted from jhbuild
-        env = {'LD_LIBRARY_PATH': ld_library_path,
-               'LDFLAGS': ldflags,
-               'PATH': path,
-               'MANPATH': manpathdir,
-               'INFOPATH': infopathdir,
-               'GI_TYPELIB_PATH': typelibpath,
-               'XDG_DATA_DIRS': xdgdatadir,
-               'XDG_CONFIG_DIRS': xdgconfigdir,
-               'XCURSOR_PATH': xcursordir,
-               'ACLOCAL_FLAGS': aclocalflags,
-               'ACLOCAL': "aclocal",
-               'PERL5LIB': perl5lib,
-               'GST_PLUGIN_PATH': gstpluginpath,
-               'GST_PLUGIN_PATH_1_0': gstpluginpath10,
-               'GST_REGISTRY': gstregistry,
-               'GST_REGISTRY_1_0': gstregistry10,
-               'PYTHONPATH': pythonpath,
-               'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
-               'MONO_GAC_PREFIX': prefix,
-               'GSTREAMER_ROOT': prefix,
-               'CERBERO_PREFIX': self.prefix,
-               'CERBERO_HOST_SOURCES': self.sources,
-               'RUSTUP_HOME': self.rustup_home,
-               'CARGO_HOME': self.cargo_home,
-               }
+        env = {
+            'LD_LIBRARY_PATH': ld_library_path,
+            'LDFLAGS': ldflags,
+            'PATH': path,
+            'MANPATH': manpathdir,
+            'INFOPATH': infopathdir,
+            'GI_TYPELIB_PATH': typelibpath,
+            'XDG_DATA_DIRS': xdgdatadir,
+            'XDG_CONFIG_DIRS': xdgconfigdir,
+            'XCURSOR_PATH': xcursordir,
+            'ACLOCAL_FLAGS': aclocalflags,
+            'ACLOCAL': 'aclocal',
+            'PERL5LIB': perl5lib,
+            'GST_PLUGIN_PATH': gstpluginpath,
+            'GST_PLUGIN_PATH_1_0': gstpluginpath10,
+            'GST_REGISTRY': gstregistry,
+            'GST_REGISTRY_1_0': gstregistry10,
+            'PYTHONPATH': pythonpath,
+            'MONO_PATH': os.path.join(libdir, 'mono', '4.5'),
+            'MONO_GAC_PREFIX': prefix,
+            'GSTREAMER_ROOT': prefix,
+            'CERBERO_PREFIX': self.prefix,
+            'CERBERO_HOST_SOURCES': self.sources,
+            'RUSTUP_HOME': self.rustup_home,
+            'CARGO_HOME': self.cargo_home,
+        }
 
         PkgConfig.set_executable(env, self)
         PkgConfig.set_default_search_dir(os.path.join(prefix, 'share', 'pkgconfig'), env, self)
@@ -657,12 +730,13 @@ class Config (object):
         # On Windows, building 32-bit on 64-bit is not cross-compilation since
         # 32-bit Windows binaries run on 64-bit Windows via WOW64.
         if self.platform == Platform.WINDOWS:
-            if self.arch == Architecture.X86_64 and \
-               self.target_arch == Architecture.X86:
+            if self.arch == Architecture.X86_64 and self.target_arch == Architecture.X86:
                 return False
-        return self.target_platform != self.platform or \
-                self.target_arch != self.arch or \
-                self.target_distro_version != self.distro_version
+        return (
+            self.target_platform != self.platform
+            or self.target_arch != self.arch
+            or self.target_distro_version != self.distro_version
+        )
 
     def cross_universal_type(self):
         if not self.cross_compiling():
@@ -684,8 +758,7 @@ class Config (object):
         if self.variants.uwp:
             return False
         if self.target_arch != self.arch:
-            if self.target_arch == Architecture.X86 and \
-                    self.arch == Architecture.X86_64:
+            if self.target_arch == Architecture.X86 and self.arch == Architecture.X86_64:
                 return True
             return False
         return True
@@ -694,7 +767,7 @@ class Config (object):
         return self._is_build_tools_config
 
     def target_distro_version_gte(self, distro_version):
-        assert distro_version.startswith(self.target_distro + "_")
+        assert distro_version.startswith(self.target_distro + '_')
         return self.target_distro_version >= distro_version
 
     def _create_paths(self):
@@ -709,7 +782,6 @@ class Config (object):
 
         if self._is_build_tools_config:
             self._create_path(os.path.join(self.prefix, 'var', 'tmp'))
-
 
     def _create_build_tools_config(self):
         # Use a common prefix for the build tools for all the configurations
@@ -749,13 +821,13 @@ class Config (object):
         #    a framework path, but setuptools defaults to a posix prefix
         # So just use a posix prefix everywhere consistently.
         pyvars = {'base': '.', 'platbase': '.'}
-        self.py_prefix =  sysconfig.get_path('purelib', 'posix_prefix', vars=pyvars)
+        self.py_prefix = sysconfig.get_path('purelib', 'posix_prefix', vars=pyvars)
         self.py_plat_prefix = sysconfig.get_path('platlib', 'posix_prefix', vars=pyvars)
         # Make sure we also include the default non-versioned path on
         # Windows in addition to the posix path.
         self.py_win_prefix = sysconfig.get_path('purelib', 'nt', vars=pyvars)
 
-        self.py_prefixes = [self.py_prefix ,self.py_plat_prefix]
+        self.py_prefixes = [self.py_prefix, self.py_plat_prefix]
         if self.platform == Platform.WINDOWS:
             self.py_prefixes.append(self.py_win_prefix)
         self.py_prefixes = list(set(self.py_prefixes))
@@ -773,8 +845,7 @@ class Config (object):
                 self._create_path(path)
 
     def _parse(self, filename, reset=True):
-        config = {'os': os, '__file__': filename, 'env': self.config_env,
-                  'cross': self.cross_compiling()}
+        config = {'os': os, '__file__': filename, 'env': self.config_env, 'cross': self.cross_compiling()}
         if not reset:
             for prop in self._properties:
                 if hasattr(self, prop):
@@ -783,20 +854,17 @@ class Config (object):
         try:
             parse_file(filename, config)
         except:
-            raise ConfigurationError(_('Could not include config file (%s)') %
-                             filename)
+            raise ConfigurationError(_('Could not include config file (%s)') % filename)
         for key in self._properties:
             if key in config:
                 self.set_property(key, config[key], True)
 
     def _validate_properties(self):
         if not validate_packager(self.packager):
-            raise FatalError(_('packager "%s" must be in the format '
-                               '"Name <email>"') % self.packager)
+            raise FatalError(_('packager "%s" must be in the format ' '"Name <email>"') % self.packager)
 
     def _check_windows_is_x86_64(self):
-         if self.target_platform == Platform.WINDOWS and \
-                self.arch == Architecture.X86:
+        if self.target_platform == Platform.WINDOWS and self.arch == Architecture.X86:
             raise ConfigurationError('The GCC/MinGW toolchain requires an x86 64-bit OS.')
 
     def _check_uninstalled(self):
@@ -832,19 +900,16 @@ class Config (object):
                 # Check if the config specified is a complete path, else search
                 # in the user config directory
                 if not os.path.exists(f):
-                    f = os.path.join(USER_CONFIG_DIR, f + "." + CONFIG_EXT)
+                    f = os.path.join(USER_CONFIG_DIR, f + '.' + CONFIG_EXT)
 
                 if os.path.exists(f):
                     self._parse(f, reset=False)
                 else:
-                    raise ConfigurationError(_("Configuration file %s doesn't "
-                                               "exist") % f)
+                    raise ConfigurationError(_("Configuration file %s doesn't " 'exist') % f)
 
     def _load_platform_config(self):
-        platform_config = os.path.join(self.environ_dir, '%s.config' %
-                                       self.target_platform)
-        arch_config = os.path.join(self.environ_dir, '%s_%s.config' %
-                                   (self.target_platform, self.target_arch))
+        platform_config = os.path.join(self.environ_dir, '%s.config' % self.target_platform)
+        arch_config = os.path.join(self.environ_dir, '%s_%s.config' % (self.target_platform, self.target_arch))
 
         for config_path in [platform_config, arch_config]:
             if os.path.exists(config_path):
@@ -871,19 +936,16 @@ class Config (object):
 
     def _load_last_defaults(self):
         # Set build tools defaults
-        self.set_property('build_tools_prefix',
-                os.path.join(self.home_dir, 'build-tools'))
-        self.set_property('build_tools_sources',
-                os.path.join(self.home_dir, 'sources', 'build-tools'))
-        self.set_property('build_tools_logs',
-                os.path.join(self.home_dir, 'logs', 'build-tools'))
+        self.set_property('build_tools_prefix', os.path.join(self.home_dir, 'build-tools'))
+        self.set_property('build_tools_sources', os.path.join(self.home_dir, 'sources', 'build-tools'))
+        self.set_property('build_tools_logs', os.path.join(self.home_dir, 'logs', 'build-tools'))
         self.set_property('build_tools_cache', 'build-tools.cache')
         # Set target platform defaults
         platform_arch = '_'.join(self._get_toolchain_target_platform_arch())
-        self.set_property('prefix', os.path.join(self.home_dir, "dist", platform_arch))
-        self.set_property('sources', os.path.join(self.home_dir, "sources", platform_arch))
-        self.set_property('logs', os.path.join(self.home_dir, "logs", platform_arch))
-        self.set_property('cache_file', platform_arch + ".cache")
+        self.set_property('prefix', os.path.join(self.home_dir, 'dist', platform_arch))
+        self.set_property('sources', os.path.join(self.home_dir, 'sources', platform_arch))
+        self.set_property('logs', os.path.join(self.home_dir, 'logs', platform_arch))
+        self.set_property('cache_file', platform_arch + '.cache')
         self.set_property('install_dir', self.prefix)
         self.set_property('local_sources', self._default_local_sources_dir())
         self.set_property('rust_prefix', os.path.join(self.home_dir, 'rust'))
@@ -902,18 +964,16 @@ class Config (object):
 
     def _find_data_dir(self):
         if self.uninstalled:
-            self.data_dir = os.path.join(os.path.dirname(__file__),
-                                         '..', 'data')
+            self.data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
             self.data_dir = os.path.abspath(self.data_dir)
             return
         curdir = os.path.dirname(__file__)
-        while not os.path.exists(os.path.join(curdir, 'share', 'cerbero',
-                'config')):
+        while not os.path.exists(os.path.join(curdir, 'share', 'cerbero', 'config')):
             curdir = os.path.abspath(os.path.join(curdir, '..'))
             if curdir == '/' or curdir[1:] == ':/':
                 # We reached the root without finding the data dir, which
                 # shouldn't happen
-                raise FatalError("Data dir not found")
+                raise FatalError('Data dir not found')
         self.data_dir = os.path.join(curdir, 'share', 'cerbero')
 
     def _relative_path(self, path):
@@ -950,9 +1010,9 @@ class Config (object):
     @lru_cache()
     def _perl_version(self):
         try:
-            version = shell.check_output("perl -e 'print \"$]\";'")
+            version = shell.check_output('perl -e \'print "$]";\'')
         except FatalError:
-            m.warning(_("Perl not found, you may need to run bootstrap."))
+            m.warning(_('Perl not found, you may need to run bootstrap.'))
             version = '0.000000'
         # FIXME: when perl's mayor is >= 10
         mayor = str(version[0])
@@ -991,6 +1051,7 @@ class Config (object):
 
     def find_toml_module(self, system_only=False):
         import importlib
+
         if sys.version_info >= (3, 11, 0):
             return importlib.import_module('tomllib')
         for m in ('tomli', 'toml', 'tomlkit'):

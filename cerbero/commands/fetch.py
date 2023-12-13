@@ -23,7 +23,15 @@ from cerbero.build.cookbook import CookBook
 from cerbero.enums import LibraryType
 from cerbero.errors import FatalError
 from cerbero.packages.packagesstore import PackagesStore
-from cerbero.utils import _, N_, ArgparseArgument, remove_list_duplicates, shell, determine_num_of_cpus, run_until_complete
+from cerbero.utils import (
+    _,
+    N_,
+    ArgparseArgument,
+    remove_list_duplicates,
+    shell,
+    determine_num_of_cpus,
+    run_until_complete,
+)
 from cerbero.utils import messages as m
 from cerbero.utils.shell import BuildStatusPrinter
 from cerbero.build.source import Tarball
@@ -31,18 +39,39 @@ from cerbero.build.source import Tarball
 NUMBER_OF_JOBS_IF_UNUSED = 2
 NUMBER_OF_JOBS_IF_USED = 2 * determine_num_of_cpus()
 
-class Fetch(Command):
 
+class Fetch(Command):
     def __init__(self, args=[]):
-        args.append(ArgparseArgument('--reset-rdeps', action='store_true',
-                    default=False, help=_('reset the status of reverse '
-                    'dependencies too')))
-        args.append(ArgparseArgument('--print-only', action='store_true',
-                    default=False, help=_('print all source URLs to stdout')))
-        args.append(ArgparseArgument('--full-reset', action='store_true',
-                    default=False, help=_('reset to extract step if rebuild is needed')))
-        args.append(ArgparseArgument('--jobs', '-j', action='store', nargs='?', type=int,
-                    const=NUMBER_OF_JOBS_IF_USED, default=NUMBER_OF_JOBS_IF_UNUSED, help=_('number of async jobs')))
+        args.append(
+            ArgparseArgument(
+                '--reset-rdeps',
+                action='store_true',
+                default=False,
+                help=_('reset the status of reverse ' 'dependencies too'),
+            )
+        )
+        args.append(
+            ArgparseArgument(
+                '--print-only', action='store_true', default=False, help=_('print all source URLs to stdout')
+            )
+        )
+        args.append(
+            ArgparseArgument(
+                '--full-reset', action='store_true', default=False, help=_('reset to extract step if rebuild is needed')
+            )
+        )
+        args.append(
+            ArgparseArgument(
+                '--jobs',
+                '-j',
+                action='store',
+                nargs='?',
+                type=int,
+                const=NUMBER_OF_JOBS_IF_USED,
+                default=NUMBER_OF_JOBS_IF_UNUSED,
+                help=_('number of async jobs'),
+            )
+        )
         Command.__init__(self, args)
 
     @staticmethod
@@ -55,12 +84,14 @@ class Fetch(Command):
         else:
             for recipe in recipes:
                 fetch_recipes += cookbook.list_recipe_deps(recipe)
-            fetch_recipes = remove_list_duplicates (fetch_recipes)
-        m.message(_("Fetching the following recipes using %s async job(s): %s") %
-                  (jobs, ' '.join([x.name for x in fetch_recipes])))
+            fetch_recipes = remove_list_duplicates(fetch_recipes)
+        m.message(
+            _('Fetching the following recipes using %s async job(s): %s')
+            % (jobs, ' '.join([x.name for x in fetch_recipes]))
+        )
         shell.set_max_non_cpu_bound_calls(jobs)
         to_rebuild = []
-        printer = BuildStatusPrinter (('fetch',), cookbook.get_config().interactive)
+        printer = BuildStatusPrinter(('fetch',), cookbook.get_config().interactive)
         printer.total = len(fetch_recipes)
 
         async def fetch_print_wrapper(recipe_name, stepfunc):
@@ -73,7 +104,7 @@ class Fetch(Command):
             if print_only:
                 # For now just print tarball URLs
                 if isinstance(recipe, Tarball):
-                    m.message("TARBALL: {} {}".format(recipe.url, recipe.tarball_name))
+                    m.message('TARBALL: {} {}'.format(recipe.url, recipe.tarball_name))
                 continue
             stepfunc = getattr(recipe, 'fetch')
             if asyncio.iscoroutinefunction(stepfunc):
@@ -84,7 +115,7 @@ class Fetch(Command):
                 printer.count += 1
                 printer.remove_recipe(recipe.name)
 
-        m.message("All async fetch jobs finished")
+        m.message('All async fetch jobs finished')
 
         # Checking the current built version against the fetched one
         # needs to be done *after* actually fetching
@@ -104,10 +135,11 @@ class Fetch(Command):
                             cookbook.reset_recipe_status(r.name)
 
         if to_rebuild:
-            to_rebuild = sorted(list(set(to_rebuild)), key=lambda r:r.name)
-            m.message(_("These recipes have been updated and will "
-                        "be rebuilt:\n%s") %
-                        '\n'.join([x.name for x in to_rebuild]))
+            to_rebuild = sorted(list(set(to_rebuild)), key=lambda r: r.name)
+            m.message(
+                _('These recipes have been updated and will ' 'be rebuilt:\n%s')
+                % '\n'.join([x.name for x in to_rebuild])
+            )
 
 
 class FetchRecipes(Fetch):
@@ -116,25 +148,25 @@ class FetchRecipes(Fetch):
 
     def __init__(self):
         args = [
-                ArgparseArgument('recipes', nargs='*',
-                    help=_('list of the recipes to fetch (fetch all if none '
-                           'is passed)')),
-                ArgparseArgument('--no-deps', action='store_true',
-                    default=False, help=_('do not fetch dependencies')),
-                ]
+            ArgparseArgument(
+                'recipes', nargs='*', help=_('list of the recipes to fetch (fetch all if none ' 'is passed)')
+            ),
+            ArgparseArgument('--no-deps', action='store_true', default=False, help=_('do not fetch dependencies')),
+        ]
         Fetch.__init__(self, args)
 
     def run(self, config, args):
         cookbook = CookBook(config)
         recipes = []
         for recipe in args.recipes:
-          found = cookbook.get_closest_recipe(recipe)
-          if found:
-            recipes.append(found)
-          else:
-            recipes.append(recipe)
-        task = self.fetch(cookbook, recipes, args.no_deps,
-                          args.reset_rdeps, args.full_reset, args.print_only, args.jobs)
+            found = cookbook.get_closest_recipe(recipe)
+            if found:
+                recipes.append(found)
+            else:
+                recipes.append(recipe)
+        task = self.fetch(
+            cookbook, recipes, args.no_deps, args.reset_rdeps, args.full_reset, args.print_only, args.jobs
+        )
         return run_until_complete(task)
 
 
@@ -144,20 +176,25 @@ class FetchPackage(Fetch):
 
     def __init__(self):
         args = [
-                ArgparseArgument('package', nargs=1,
-                    help=_('package to fetch')),
-                ArgparseArgument('--deps', action='store_false',
-                    default=True, help=_('also fetch dependencies')),
-                ]
+            ArgparseArgument('package', nargs=1, help=_('package to fetch')),
+            ArgparseArgument('--deps', action='store_false', default=True, help=_('also fetch dependencies')),
+        ]
         Fetch.__init__(self, args)
 
     def run(self, config, args):
         store = PackagesStore(config)
         package = store.get_package(args.package[0])
-        task = self.fetch(store.cookbook, package.recipes_dependencies(),
-                          args.deps, args.reset_rdeps, args.full_reset,
-                          args.print_only, args.jobs)
+        task = self.fetch(
+            store.cookbook,
+            package.recipes_dependencies(),
+            args.deps,
+            args.reset_rdeps,
+            args.full_reset,
+            args.print_only,
+            args.jobs,
+        )
         return run_until_complete(task)
+
 
 register_command(FetchRecipes)
 register_command(FetchPackage)

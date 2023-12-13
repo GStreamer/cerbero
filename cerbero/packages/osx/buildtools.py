@@ -21,13 +21,12 @@ from cerbero.utils import shell
 
 
 class PackageBuild(object):
-    ''' Wrapper for the packagebuild application '''
+    """Wrapper for the packagebuild application"""
 
     CMD = 'pkgbuild'
 
-    def create_package(self, root, pkg_id, version, title, output_file,
-                       destination='/opt/', scripts_path=None):
-        '''
+    def create_package(self, root, pkg_id, version, title, output_file, destination='/opt/', scripts_path=None):
+        """
         Creates an osx flat package, where all files are properly bundled in a
         directory that is set as the package root
 
@@ -45,9 +44,8 @@ class PackageBuild(object):
         @type  destination: str
         @param scripts_path: relative path for package scripts
         @type  scripts_path: str
-        '''
-        args = {'root': root, 'identifier': pkg_id, 'version': version,
-                'install-location': destination}
+        """
+        args = {'root': root, 'identifier': pkg_id, 'version': version, 'install-location': destination}
         if scripts_path is not None:
             args['scripts'] = scripts_path
         shell.new_call(self._cmd_with_args(args, output_file))
@@ -59,8 +57,8 @@ class PackageBuild(object):
         return [self.CMD] + args_arr + [output]
 
 
-class ProductBuild (object):
-    ''' Wrapper for the packagebuild application '''
+class ProductBuild(object):
+    """Wrapper for the packagebuild application"""
 
     CMD = 'productbuild'
 

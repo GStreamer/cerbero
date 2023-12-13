@@ -27,21 +27,25 @@ from cerbero.packages.package import Package
 
 
 class DebugPackages(Command):
-    doc = N_('Outputs debug information about package, like duplicates files '
-             'or files that do not belong to any package')
+    doc = N_(
+        'Outputs debug information about package, like duplicates files ' 'or files that do not belong to any package'
+    )
     name = 'debug-packages'
 
     def __init__(self):
-        Command.__init__(self, [
-            ArgparseArgument('-e', '--exclude',  nargs='*', default=[],
-                help=_('Filter pattern to exclude files from the search')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument(
+                    '-e', '--exclude', nargs='*', default=[], help=_('Filter pattern to exclude files from the search')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         store = PackagesStore(config)
 
-        allfiles = [p.all_files_list() for p in store.get_packages_list() if\
-                    isinstance(p, Package)]
+        allfiles = [p.all_files_list() for p in store.get_packages_list() if isinstance(p, Package)]
         allfiles = list(itertools.chain(*allfiles))
 
         self.find_duplicates(allfiles)
@@ -51,8 +55,8 @@ class DebugPackages(Command):
         count = collections.Counter(allfiles)
         duplicates = [x for x in count if count[x] > 1]
         if len(duplicates) > 0:
-            m.message("Found duplicates files in packages:")
-            m.message("%r" % duplicates)
+            m.message('Found duplicates files in packages:')
+            m.message('%r' % duplicates)
 
     def find_orphan_files(self, allfiles, prefix, excludes=[]):
         cmd = ['find', '.', '-type', 'f']
@@ -64,7 +68,7 @@ class DebugPackages(Command):
         orphan = sorted(list((set(distfiles) - set(allfiles))))
 
         if len(orphan) > 0:
-            m.message("Found orphan files:")
+            m.message('Found orphan files:')
             m.message('\n'.join(orphan))
 
 

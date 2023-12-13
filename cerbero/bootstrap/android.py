@@ -33,8 +33,8 @@ NDK_CHECKSUMS = {
     'android-ndk-r25c-windows.zip': 'f70093964f6cbbe19268f9876a20f92d3a593db3ad2037baadd25fd8d71e84e2',
 }
 
-class AndroidBootstrapper (BootstrapperBase):
 
+class AndroidBootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         self.prefix = self.config.toolchain_prefix

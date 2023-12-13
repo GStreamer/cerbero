@@ -30,12 +30,15 @@ class Check(Command):
     name = 'check'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('recipe', nargs=1,
-                             help=_('name of the recipe to run checks on')),
-            ArgparseArgument('--recursive', action='store_true', default=False,
-                             help=_('Recursively run checks on dependencies')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('recipe', nargs=1, help=_('name of the recipe to run checks on')),
+                ArgparseArgument(
+                    '--recursive', action='store_true', default=False, help=_('Recursively run checks on dependencies')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         cookbook = CookBook(config)
@@ -51,7 +54,7 @@ class Check(Command):
 
         for recipe in ordered_recipes:
             if cookbook.recipe_needs_build(recipe.name):
-                raise FatalError(_("Recipe %s is not built yet" % recipe.name))
+                raise FatalError(_('Recipe %s is not built yet' % recipe.name))
 
         for recipe in ordered_recipes:
             # call step function
@@ -70,7 +73,7 @@ class Check(Command):
                 except FatalError as e:
                     raise e
                 except Exception as ex:
-                    raise FatalError(_("Error running %s checks: %s") %
-                        (recipe.name, ex))
+                    raise FatalError(_('Error running %s checks: %s') % (recipe.name, ex))
+
 
 register_command(Check)

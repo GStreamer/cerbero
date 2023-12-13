@@ -28,10 +28,12 @@ class Run(Command):
     name = 'run'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('cmd', nargs=argparse.REMAINDER,
-                             help=_('command to run')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('cmd', nargs=argparse.REMAINDER, help=_('command to run')),
+            ],
+        )
 
     def run(self, config, args):
         sys.exit(shell.new_call(args.cmd, fail=False, env=config.env))

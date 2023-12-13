@@ -28,11 +28,12 @@ from cerbero.errors import FatalError
 
 
 class GenLib(object):
-    '''
+    """
     Generates an import library that can be used in Visual Studio from a DLL,
     using 'gendef' to create a .def file and then libtool to create the import
     library (.lib)
-    '''
+    """
+
     warned_dlltool = False
     filename = 'unknown'
 
@@ -62,8 +63,9 @@ class GenLib(object):
 
     def gendef(self, dllpath, outputdir, libname):
         defname = libname + '.def'
-        def_contents = shell.check_output(self.gendef_bin + ['-', dllpath], outputdir,
-                                          logfile=self.logfile, env=self.config.env)
+        def_contents = shell.check_output(
+            self.gendef_bin + ['-', dllpath], outputdir, logfile=self.logfile, env=self.config.env
+        )
         # If the output doesn't contain a 'LIBRARY' directive, gendef errored
         # out. However, gendef always returns 0 so we need to inspect the
         # output and guess.
@@ -105,9 +107,11 @@ class GenLib(object):
             shell.new_call(cmd, outputdir, logfile=self.logfile, env=env)
         else:
             if not GenLib.warned_dlltool:
-                m.warning("Using dlltool instead of lib.exe! All generated .lib "
-                          "files will have problems with Visual Studio, see "
-                          "http://sourceware.org/bugzilla/show_bug.cgi?id=12633")
+                m.warning(
+                    'Using dlltool instead of lib.exe! All generated .lib '
+                    'files will have problems with Visual Studio, see '
+                    'http://sourceware.org/bugzilla/show_bug.cgi?id=12633'
+                )
                 GenLib.warned_dlltool = True
             self.dlltool(defname, dllname, outputdir)
         return os.path.join(outputdir, self.filename)
@@ -122,8 +126,9 @@ class GenLib(object):
         paths = self.config.msvc_env_for_toolchain['PATH'].get()
         return shutil.which('lib', path=paths), paths
 
+
 class GenGnuLib(GenLib):
-    '''
+    """
     Generates an import library (libfoo.dll.a; not foo.lib) that is in a format
     that allows GNU ld to resolve all symbols exported by a DLL created by MSVC.
 
@@ -132,7 +137,7 @@ class GenGnuLib(GenLib):
     symbols from the import library. It can find them if you pass it the DLL
     directly, but that's a terrible idea and breaks how library searching works,
     so we create a GNU-compatible import library which will always work.
-    '''
+    """
 
     def create(self, libname, dllpath, platform, target_arch, outputdir):
         # libfoo.dll.a must start with 'lib'

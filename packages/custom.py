@@ -3,9 +3,9 @@
 from cerbero.packages import package
 from cerbero.enums import License
 
-class GStreamer:
 
-    url = "http://gstreamer.freedesktop.org"
+class GStreamer:
+    url = 'http://gstreamer.freedesktop.org'
     version = '1.23.0.1'
     vendor = 'GStreamer Project'
     licenses = [License.LGPLv2Plus]

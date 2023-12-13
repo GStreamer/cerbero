@@ -30,7 +30,7 @@ from cerbero.tools import strip
 
 
 class DistTarball(PackagerBase):
-    ''' Creates a distribution tarball '''
+    """Creates a distribution tarball"""
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
@@ -43,19 +43,20 @@ class DistTarball(PackagerBase):
         if self.compress not in ('none', 'bz2', 'xz'):
             raise UsageError('Invalid compression type {!r}'.format(self.compress))
 
-    def pack(self, output_dir, devel=True, force=False, keep_temp=False,
-             split=True, package_prefix='', strip_binaries=False):
+    def pack(
+        self, output_dir, devel=True, force=False, keep_temp=False, split=True, package_prefix='', strip_binaries=False
+    ):
         try:
             dist_files = self.files_list(PackageType.RUNTIME, force)
         except EmptyPackageError:
-            m.warning(_("The runtime package is empty"))
+            m.warning(_('The runtime package is empty'))
             dist_files = []
 
         if devel:
             try:
                 devel_files = self.files_list(PackageType.DEVEL, force)
             except EmptyPackageError:
-                m.warning(_("The development package is empty"))
+                m.warning(_('The development package is empty'))
                 devel_files = []
         else:
             devel_files = []
@@ -69,16 +70,15 @@ class DistTarball(PackagerBase):
         filenames = []
         if dist_files:
             if not strip_binaries:
-                runtime = self._create_tarball(output_dir, PackageType.RUNTIME,
-                                               dist_files, force, package_prefix)
+                runtime = self._create_tarball(output_dir, PackageType.RUNTIME, dist_files, force, package_prefix)
             else:
-                runtime = self._create_tarball_stripped(output_dir, PackageType.RUNTIME,
-                                                        dist_files, force, package_prefix)
+                runtime = self._create_tarball_stripped(
+                    output_dir, PackageType.RUNTIME, dist_files, force, package_prefix
+                )
             filenames.append(runtime)
 
         if split and devel and len(devel_files) != 0:
-            devel = self._create_tarball(output_dir, PackageType.DEVEL,
-                                         devel_files, force, package_prefix)
+            devel = self._create_tarball(output_dir, PackageType.DEVEL, devel_files, force, package_prefix)
             filenames.append(devel)
         return filenames
 
@@ -104,11 +104,17 @@ class DistTarball(PackagerBase):
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
 
-        return "%s%s-%s-%s-%s%s.%s" % (self.package_prefix, self.package.name, platform,
-                self.config.target_arch, self.package.version, package_type, ext)
+        return '%s%s-%s-%s-%s%s.%s' % (
+            self.package_prefix,
+            self.package.name,
+            platform,
+            self.config.target_arch,
+            self.package.version,
+            package_type,
+            ext,
+        )
 
-    def _create_tarball_stripped(self, output_dir, package_type, files, force,
-                                 package_prefix):
+    def _create_tarball_stripped(self, output_dir, package_type, files, force, package_prefix):
         tmpdir = tempfile.mkdtemp(dir=self.config.home_dir)
 
         if hasattr(self.package, 'strip_excludes'):
@@ -127,21 +133,19 @@ class DistTarball(PackagerBase):
 
         prefix_restore = self.prefix
         self.prefix = tmpdir
-        tarball = self._create_tarball(output_dir, package_type,
-                                       files, force, package_prefix)
+        tarball = self._create_tarball(output_dir, package_type, files, force, package_prefix)
         self.prefix = prefix_restore
         shutil.rmtree(tmpdir)
 
         return tarball
 
-    def _create_tarball(self, output_dir, package_type, files, force,
-                        package_prefix):
+    def _create_tarball(self, output_dir, package_type, files, force, package_prefix):
         filename = os.path.join(output_dir, self._get_name(package_type))
         if os.path.exists(filename):
             if force:
                 os.remove(filename)
             else:
-                raise UsageError("File %s already exists" % filename)
+                raise UsageError('File %s already exists' % filename)
         if self.config.distro == Distro.MSYS:
             self._write_tar_windows(filename, package_prefix, files)
         else:
@@ -203,7 +207,7 @@ class DistTarball(PackagerBase):
             # a plain tar using bsdtar first, then compress it with xz later.
             filename = os.path.splitext(filename)[0]
         elif self.compress != 'none':
-            raise AssertionError("Unknown tar compression: {}".format(self.compress))
+            raise AssertionError('Unknown tar compression: {}'.format(self.compress))
 
         tar_cmd += ['-cf', filename]
         with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
@@ -224,14 +228,13 @@ class DistTarball(PackagerBase):
 
 
 class Packager(object):
-
     def __new__(klass, config, package, store):
         return DistTarball(config, package, store)
-
 
 
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
+
     register_packager(Distro.NONE, Packager)
     register_packager(Distro.GENTOO, Packager)

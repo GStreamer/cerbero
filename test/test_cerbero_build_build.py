@@ -24,7 +24,6 @@ from cerbero.build import build
 
 
 class MakefilesBase(build.MakefilesBase):
-
     srcdir = ''
     build_dir = ''
 
@@ -44,7 +43,6 @@ class MakefilesBase(build.MakefilesBase):
 
 
 class ModifyEnvTest(unittest.TestCase):
-
     def setUp(self):
         self.var = 'TEST_VAR'
         self.val1 = 'test'
@@ -55,7 +53,7 @@ class ModifyEnvTest(unittest.TestCase):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEqual(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, '%s %s' % (self.val1, self.val2))
 
     def testAppendNonExistentEnv(self):
         if self.var in os.environ:
@@ -83,15 +81,14 @@ class ModifyEnvTest(unittest.TestCase):
         self.mk.config.allow_system_libs = True
         self.mk.use_system_libs = True
         val = self.mk.get_env_var('PKG_CONFIG_PATH')
-        self.assertEqual(val,'/path/2:/usr/lib/pkgconfig:'
-            '/usr/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig')
+        self.assertEqual(val, '/path/2:/usr/lib/pkgconfig:' '/usr/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig')
         val = self.mk.get_env_var('PKG_CONFIG_LIBDIR')
-        self.assertEqual(val,'/path/2')
+        self.assertEqual(val, '/path/2')
 
     def testNestedModif(self):
         os.environ[self.var] = self.val1
         self.mk.append_env = {self.var: self.val2}
         val = self.mk.get_env_var(self.var)
-        self.assertEqual(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, '%s %s' % (self.val1, self.val2))
         val = self.mk.get_env_var_nested(self.var)
-        self.assertEqual(val, "%s %s" % (self.val1, self.val2))
+        self.assertEqual(val, '%s %s' % (self.val1, self.val2))

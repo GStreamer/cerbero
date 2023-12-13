@@ -24,7 +24,6 @@ from cerbero.ide.pkgconfig import PkgConfig
 
 
 class TestPkgConfig(unittest.TestCase):
-
     def setUp(self):
         pc_path = os.path.join(os.path.dirname(__file__), 'pkgconfig')
         os.environ['PKG_CONFIG_LIBDIR'] = pc_path
@@ -33,14 +32,24 @@ class TestPkgConfig(unittest.TestCase):
         self.pkgconfig2 = PkgConfig('gstreamer-0.10', False)
 
     def testListAll(self):
-        expected = ['gobject-2.0', 'gmodule-2.0', 'libxml-2.0', 'gthread-2.0',
-                'glib-2.0', 'gmodule-no-export-2.0', 'gstreamer-0.10']
+        expected = [
+            'gobject-2.0',
+            'gmodule-2.0',
+            'libxml-2.0',
+            'gthread-2.0',
+            'glib-2.0',
+            'gmodule-no-export-2.0',
+            'gstreamer-0.10',
+        ]
         self.assertEqual(sorted(PkgConfig.list_all()), sorted(expected))
 
     def testIncludeDirs(self):
-        expected = ['/usr/include/gstreamer-0.10', '/usr/include/glib-2.0',
-                    '/usr/lib/glib-2.0/include',
-                    '/usr/include/libxml2']
+        expected = [
+            '/usr/include/gstreamer-0.10',
+            '/usr/include/glib-2.0',
+            '/usr/lib/glib-2.0/include',
+            '/usr/include/libxml2',
+        ]
         self.assertEqual(self.pkgconfig.include_dirs(), expected)
         expected = ['/usr/include/gstreamer-0.10']
         self.assertEqual(self.pkgconfig2.include_dirs(), expected)
@@ -58,15 +67,13 @@ class TestPkgConfig(unittest.TestCase):
         self.assertEqual(self.pkgconfig2.libraries_dirs(), expected)
 
     def testLibraries(self):
-        expected = ['gstreamer-0.10', 'gobject-2.0', 'gmodule-2.0', 'xml2',
-                    'gthread-2.0', 'rt', 'glib-2.0']
+        expected = ['gstreamer-0.10', 'gobject-2.0', 'gmodule-2.0', 'xml2', 'gthread-2.0', 'rt', 'glib-2.0']
         self.assertEqual(self.pkgconfig.libraries(), expected)
         expected = ['gstreamer-0.10']
         self.assertEqual(self.pkgconfig2.libraries(), expected)
 
     def testRequires(self):
-        expected = ['glib-2.0', 'gobject-2.0', 'gmodule-no-export-2.0',
-                    'gthread-2.0', 'libxml-2.0']
+        expected = ['glib-2.0', 'gobject-2.0', 'gmodule-no-export-2.0', 'gthread-2.0', 'libxml-2.0']
         self.assertEqual(self.pkgconfig.requires(), expected)
         self.assertEqual(self.pkgconfig2.requires(), expected)
 

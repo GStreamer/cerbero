@@ -33,15 +33,18 @@ class GenLibraryFiles(Command):
     name = 'genlibfiles'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('-o', '--output_dir', default=None,
-                help=_('output directory where .lib files will be saved')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument(
+                    '-o', '--output_dir', default=None, help=_('output directory where .lib files will be saved')
+                ),
+            ],
+        )
 
     def run(self, config, args):
         if config.target_platform != Platform.WINDOWS:
-            raise UsageError(_('%s command can only be used targetting '
-                             'Windows platforms') % self.name)
+            raise UsageError(_('%s command can only be used targetting ' 'Windows platforms') % self.name)
 
         if args.output_dir is not None and not os.path.exists(args.output_dir):
             os.makedirs(args.output_dir)
@@ -52,8 +55,7 @@ class GenLibraryFiles(Command):
             try:
                 recipe.gen_library_file(args.output_dir)
             except Exception as e:
-                m.message(_("Error generaring library files for %s:\n %s") %
-                          (recipe.name, e))
+                m.message(_('Error generaring library files for %s:\n %s') % (recipe.name, e))
 
 
 register_command(GenLibraryFiles)

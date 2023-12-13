@@ -24,14 +24,13 @@ from cerbero.utils import _
 
 
 class PackageType(object):
-
     RUNTIME = ''
     DEVEL = '-devel'
     DEBUG = '-debug'
 
 
 class PackagerBase(object):
-    ''' Base class for packagers '''
+    """Base class for packagers"""
 
     def __init__(self, config, package, store):
         self.config = config
@@ -39,7 +38,7 @@ class PackagerBase(object):
         self.store = store
 
     def pack(self, output_dir, devel=True, force=False, keep_temp=False):
-        '''
+        """
         Creates a package and puts it the the output directory
 
         @param output_dir: output directory where the package will be saved
@@ -53,7 +52,7 @@ class PackagerBase(object):
 
         @return: list of filenames for the packages created
         @rtype: list
-        '''
+        """
         self.output_dir = os.path.realpath(output_dir)
         if not os.path.exists(self.output_dir):
             os.makedirs(self.output_dir)
@@ -73,8 +72,7 @@ class PackagerBase(object):
         diff = list(set(files) - set(real_files))
         if len(diff) != 0:
             if force:
-                m.warning(_("Some files required by this package are missing "
-                            "in the prefix:\n%s" % '\n'.join(diff)))
+                m.warning(_('Some files required by this package are missing ' 'in the prefix:\n%s' % '\n'.join(diff)))
             else:
                 raise MissingPackageFilesError(diff)
         if len(real_files) == 0:

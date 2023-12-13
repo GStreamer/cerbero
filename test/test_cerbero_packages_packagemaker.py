@@ -31,7 +31,6 @@ from test.test_common import DummyConfig
 
 
 class PackageMakerTest(unittest.TestCase):
-
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         self.config = DummyConfig()
@@ -60,7 +59,8 @@ class PackageMakerTest(unittest.TestCase):
         os.makedirs(bindir)
         os.makedirs(libdir)
         os.makedirs(os.path.join(self.tmp, 'libexec', 'gstreamer-0.10'))
-        shell.call('touch '
+        shell.call(
+            'touch '
             'README '
             'linux '
             'libexec/gstreamer-0.10/pluginsloader '
@@ -69,31 +69,30 @@ class PackageMakerTest(unittest.TestCase):
             'lib/libgstreamer-0.10.so.1 '
             'lib/libgstreamer-x11.so.1 '
             'lib/notincluded1 '
-            'notincluded2 ', self.tmp)
+            'notincluded2 ',
+            self.tmp,
+        )
 
 
 class DummyPackageMaker(PackageMaker):
-
     def _execute(self, cmd):
         self.cmd = cmd
 
 
 class TestPackageMaker(unittest.TestCase):
-    
-
     def testFillArgs(self):
         pm = PackageMaker()
-        args = {'r': 'root', 'i': 'pkg_id', 'n': 'version', 't': 'title',
-                'l': 'destination', 'o': 'output_file'}
+        args = {'r': 'root', 'i': 'pkg_id', 'n': 'version', 't': 'title', 'l': 'destination', 'o': 'output_file'}
         cmd = pm._cmd_with_args(args)
-        self.assertEqual(cmd,
-            "./PackageMaker  -i 'pkg_id' -l 'destination' -o 'output_file' "
-            "-n 'version' -r 'root' -t 'title'")
+        self.assertEqual(
+            cmd, "./PackageMaker  -i 'pkg_id' -l 'destination' -o 'output_file' " "-n 'version' -r 'root' -t 'title'"
+        )
 
     def testCreatePackage(self):
         pm = DummyPackageMaker()
-        pm.create_package('root', 'pkg_id', 'version', 'title',
-                          'output_file', 'destination')
-        self.assertEqual(pm.cmd,
+        pm.create_package('root', 'pkg_id', 'version', 'title', 'output_file', 'destination')
+        self.assertEqual(
+            pm.cmd,
             "./PackageMaker  -g '10.6' -i 'pkg_id' -l 'destination' -o 'output_file' "
-            "-n 'version' -r 'root' -t 'title'")
+            "-n 'version' -r 'root' -t 'title'",
+        )

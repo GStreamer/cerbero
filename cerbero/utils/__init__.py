@@ -25,6 +25,7 @@ import shutil
 import pathlib
 import argparse
 import importlib
+
 try:
     import sysconfig
 except:
@@ -50,7 +51,6 @@ CYGPATH = shutil.which('cygpath')
 
 
 class ArgparseArgument(object):
-
     def __init__(self, *name, **kwargs):
         self.name = name
         self.args = kwargs
@@ -60,7 +60,6 @@ class ArgparseArgument(object):
 
 
 class StoreBool(argparse.Action):
-
     def __init__(self, option_strings, dest, nargs=None, **kwargs):
         super().__init__(option_strings, dest, **kwargs)
 
@@ -75,23 +74,26 @@ class StoreBool(argparse.Action):
 
 
 def user_is_root():
-        ''' Check if the user running the process is root '''
-        return hasattr(os, 'getuid') and os.getuid() == 0
+    """Check if the user running the process is root"""
+    return hasattr(os, 'getuid') and os.getuid() == 0
+
 
 @functools.lru_cache()
 def determine_num_of_cpus() -> int:
-    ''' Number of virtual or logical CPUs on this system '''
+    """Number of virtual or logical CPUs on this system"""
 
     # Python 2.6+
     try:
         import multiprocessing
+
         return multiprocessing.cpu_count()
     except (ImportError, NotImplementedError):
         return 1
 
+
 @functools.lru_cache()
 def determine_total_ram() -> int:
-    ''' Total amount of RAM in this system, in bytes '''
+    """Total amount of RAM in this system, in bytes"""
 
     platform = system_info()[0]
 
@@ -100,7 +102,9 @@ def determine_total_ram() -> int:
         if ram_size_query.returncode() == 0:
             return int(ram_size_query.stdout.strip())
     elif platform == Platform.WINDOWS:
-        ram_size_query = subprocess.run([shutil.which('wmic'), 'computersystem', 'get', 'totalphysicalmemory'], stdout=subprocess.PIPE, text=True)
+        ram_size_query = subprocess.run(
+            [shutil.which('wmic'), 'computersystem', 'get', 'totalphysicalmemory'], stdout=subprocess.PIPE, text=True
+        )
         if ram_size_query.returncode() == 0:
             return int(ram_size_query.stdout.strip())
     elif platform == Platform.LINUX:
@@ -108,7 +112,8 @@ def determine_total_ram() -> int:
         if ram_size_query.returncode() == 0:
             return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
 
-    return 4 << 30 # Assume 4GB
+    return 4 << 30  # Assume 4GB
+
 
 def to_winpath(path):
     if path.startswith('/'):
@@ -154,12 +159,13 @@ def windows_arch():
             raise FatalError(_('Unable to detect Windows architecture'))
     return arch
 
+
 def system_info():
-    '''
+    """
     Get the system information.
     Return a tuple with the platform type, the architecture and the
     distribution
-    '''
+    """
     # Get the platform info
     platform = os.environ.get('OS', '').lower()
     if not platform:
@@ -171,7 +177,7 @@ def system_info():
     elif platform.startswith('linux'):
         platform = Platform.LINUX
     else:
-        raise FatalError(_("Platform %s not supported") % platform)
+        raise FatalError(_('Platform %s not supported') % platform)
 
     # Get the architecture info
     if platform == Platform.WINDOWS:
@@ -181,7 +187,7 @@ def system_info():
         elif arch == 'x86':
             arch = Architecture.X86
         else:
-            raise FatalError(_("Windows arch %s is not supported") % arch)
+            raise FatalError(_('Windows arch %s is not supported') % arch)
     else:
         uname = os.uname()
         arch = uname[4]
@@ -196,7 +202,7 @@ def system_info():
         elif arch.startswith('arm'):
             arch = Architecture.ARM
         else:
-            raise FatalError(_("Architecture %s not supported") % arch)
+            raise FatalError(_('Architecture %s not supported') % arch)
 
     # Get the distro info
     if platform == Platform.LINUX:
@@ -204,9 +210,12 @@ def system_info():
             try:
                 import distro
             except ImportError:
-                print('''Python >= 3.8 detected and the 'distro' python package was not found.
+                print(
+                    """Python >= 3.8 detected and the 'distro' python package was not found.
 Please install the 'python3-distro' or 'python-distro' package from your linux package manager or from pypi using pip.
-Terminating.''', file=sys.stderr)
+Terminating.""",
+                    file=sys.stderr,
+                )
                 sys.exit(1)
             d = distro.linux_distribution()
         else:
@@ -226,12 +235,12 @@ Terminating.''', file=sys.stderr)
                         for line in f:
                             # skip empty lines and comment lines
                             if line.strip() and not line.lstrip().startswith('#'):
-                                k,v = line.rstrip().split("=")
+                                k, v = line.rstrip().split('=')
                                 if k == 'NAME':
                                     name = v.strip('"')
                                 elif k == 'VERSION_ID':
                                     version = v.strip('"')
-                        d = (name, version, '');
+                        d = (name, version, '')
 
         if d[0] in ['Ubuntu', 'debian', 'Debian GNU/Linux', 'LinuxMint', 'Linux Mint']:
             distro = Distro.DEBIAN
@@ -293,12 +302,21 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.DEBIAN_SID
             elif d[0] in ['debian', 'Debian GNU/Linux']:
                 number = int(d[1]) if d[1].isnumeric() else 0
-                distro_version = "debian_{number:02d}_{name}".format(number=number, name=d[2])
+                distro_version = 'debian_{number:02d}_{name}'.format(number=number, name=d[2])
             elif d[0] in ['Ubuntu']:
-                distro_version = "ubuntu_{number}_{name}".format(number=d[1].replace('.', '_'), name=distro_version)
+                distro_version = 'ubuntu_{number}_{name}'.format(number=d[1].replace('.', '_'), name=distro_version)
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
-        elif d[0] in ['RedHat', 'Fedora', 'Fedora Linux', 'CentOS', 'Red Hat Enterprise Linux Server', 'CentOS Linux', 'Amazon Linux', 'Rocky Linux']:
+        elif d[0] in [
+            'RedHat',
+            'Fedora',
+            'Fedora Linux',
+            'CentOS',
+            'Red Hat Enterprise Linux Server',
+            'CentOS Linux',
+            'Amazon Linux',
+            'Rocky Linux',
+        ]:
             distro = Distro.REDHAT
             if d[1] == '16':
                 distro_version = DistroVersion.FEDORA_16
@@ -361,8 +379,7 @@ Terminating.''', file=sys.stderr)
                 distro_version = DistroVersion.OPENSUSE_42_3
             else:
                 # FIXME Fill this
-                raise FatalError("Distribution OpenSuse '%s' "
-                                 "not supported" % str(d))
+                raise FatalError("Distribution OpenSuse '%s' " 'not supported' % str(d))
         elif d[0].strip() in ['openSUSE Tumbleweed']:
             distro = Distro.SUSE
             distro_version = DistroVersion.OPENSUSE_TUMBLEWEED
@@ -380,15 +397,17 @@ Terminating.''', file=sys.stderr)
         else:
             distro = Distro.MSYS2
         win32_ver = pplatform.win32_ver()[0]
-        dmap = {'xp': DistroVersion.WINDOWS_XP,
-                'vista': DistroVersion.WINDOWS_VISTA,
-                '7': DistroVersion.WINDOWS_7,
-                'post2008Server': DistroVersion.WINDOWS_8,
-                '8': DistroVersion.WINDOWS_8,
-                'post2012Server': DistroVersion.WINDOWS_8_1,
-                '8.1': DistroVersion.WINDOWS_8_1,
-                '10': DistroVersion.WINDOWS_10,
-                '11': DistroVersion.WINDOWS_11}
+        dmap = {
+            'xp': DistroVersion.WINDOWS_XP,
+            'vista': DistroVersion.WINDOWS_VISTA,
+            '7': DistroVersion.WINDOWS_7,
+            'post2008Server': DistroVersion.WINDOWS_8,
+            '8': DistroVersion.WINDOWS_8,
+            'post2012Server': DistroVersion.WINDOWS_8_1,
+            '8.1': DistroVersion.WINDOWS_8_1,
+            '10': DistroVersion.WINDOWS_10,
+            '11': DistroVersion.WINDOWS_11,
+        }
         if win32_ver in dmap:
             distro_version = dmap[win32_ver]
         else:
@@ -415,7 +434,7 @@ Terminating.''', file=sys.stderr)
         elif ver.startswith('10.8'):
             distro_version = DistroVersion.OS_X_MOUNTAIN_LION
         else:
-            distro_version = "osx_%s" % ver
+            distro_version = 'osx_%s' % ver
 
     num_of_cpus = determine_num_of_cpus()
 
@@ -424,8 +443,7 @@ Terminating.''', file=sys.stderr)
 
 def validate_packager(packager):
     # match packager in the form 'Name <email>'
-    expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@'\
-        '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
+    expr = r'(.*\s)*[<]([a-zA-Z0-9+_\-\.]+@' '[0-9a-zA-Z][.-0-9a-zA-Z]*.[a-zA-Z]+)[>]$'
     return bool(re.match(expr, packager))
 
 
@@ -442,15 +460,15 @@ def copy_files(origdir, destdir, files, extensions, target_platform, logfile=Non
             relprefix = destdir[1:]
         orig = os.path.join(origdir, relprefix, f)
         dest = os.path.join(destdir, f)
-        m.action("copying %s to %s" % (orig, dest), logfile=logfile)
+        m.action('copying %s to %s' % (orig, dest), logfile=logfile)
         try:
             shutil.copy(orig, dest)
         except IOError:
-            m.warning("Could not copy %s to %s" % (orig, dest))
+            m.warning('Could not copy %s to %s' % (orig, dest))
 
 
 def remove_list_duplicates(seq):
-    ''' Remove list duplicates maintaining the order '''
+    """Remove list duplicates maintaining the order"""
     seen = set()
     seen_add = seen.add
     return [x for x in seq if x not in seen and not seen_add(x)]
@@ -463,6 +481,7 @@ def parse_file(filename, dict):
         exec(compile(open(filename).read(), filename, 'exec'), dict)
     except Exception as ex:
         import traceback
+
         traceback.print_exc()
         raise ex
 
@@ -489,11 +508,12 @@ def get_wix_prefix(config):
         raise FatalError("The required packaging tool 'WiX' was not found")
     return escape_path(to_unixpath(wix_prefix))
 
+
 def add_system_libs(config, new_env, old_env=None):
-    '''
+    """
     Add /usr/lib/pkgconfig to PKG_CONFIG_PATH so the system's .pc file
     can be found.
-    '''
+    """
     arch = config.target_arch
     libdir = 'lib'
 
@@ -519,12 +539,10 @@ def add_system_libs(config, new_env, old_env=None):
 
     search_paths = []
     if old_env.get('PKG_CONFIG_LIBDIR', None):
-       search_paths += [old_env['PKG_CONFIG_LIBDIR']]
+        search_paths += [old_env['PKG_CONFIG_LIBDIR']]
     if old_env.get('PKG_CONFIG_PATH', None):
-       search_paths += [old_env['PKG_CONFIG_PATH']]
-    search_paths += [
-        os.path.join(sysroot, 'usr', libdir, 'pkgconfig'),
-        os.path.join(sysroot, 'usr/share/pkgconfig')]
+        search_paths += [old_env['PKG_CONFIG_PATH']]
+    search_paths += [os.path.join(sysroot, 'usr', libdir, 'pkgconfig'), os.path.join(sysroot, 'usr/share/pkgconfig')]
 
     if config.target_distro == Distro.DEBIAN:
         host = None
@@ -543,20 +561,21 @@ def add_system_libs(config, new_env, old_env=None):
 
     new_env['PKG_CONFIG_PATH'] = ':'.join(search_paths)
 
-    search_paths = [os.environ.get('ACLOCAL_PATH', ''),
-        os.path.join(sysroot, 'usr/share/aclocal')]
+    search_paths = [os.environ.get('ACLOCAL_PATH', ''), os.path.join(sysroot, 'usr/share/aclocal')]
     new_env['ACLOCAL_PATH'] = ':'.join(search_paths)
+
 
 def split_version(s):
     return tuple(int(e) for e in s.split('.'))
 
+
 def needs_xcode8_sdk_workaround(config):
-    '''
+    """
     Returns whether the XCode 8 clock_gettime, mkostemp, getentropy workaround
     from https://bugzilla.gnome.org/show_bug.cgi?id=772451 is needed
 
     These symbols are only available on macOS 10.12+ and iOS 10.0+
-    '''
+    """
     if config.target_platform == Platform.DARWIN:
         if split_version(config.min_osx_sdk_version) < (10, 12):
             return True
@@ -565,23 +584,25 @@ def needs_xcode8_sdk_workaround(config):
             return True
     return False
 
+
 def _qmake_or_pkgdir(qmake):
     qmake_path = Path(qmake)
     if not qmake_path.is_file():
         m.warning('QMAKE={!r} does not exist'.format(str(qmake_path)))
         return (None, None)
-    pkgdir = (qmake_path.parent.parent / 'lib/pkgconfig')
+    pkgdir = qmake_path.parent.parent / 'lib/pkgconfig'
     if pkgdir.is_dir():
         return (pkgdir.as_posix(), qmake_path.as_posix())
     return (None, qmake_path.as_posix())
 
+
 def detect_qt5(platform, arch, is_universal):
-    '''
+    """
     Returns both the path to the pkgconfig directory and the path to qmake:
     (pkgdir, qmake). If `pkgdir` could not be found, it will be None
 
     Returns (None, None) if nothing was found.
-    '''
+    """
     path = None
     qt5_prefix = os.environ.get('QT5_PREFIX', None)
     qmake_path = os.environ.get('QMAKE', None)
@@ -600,12 +621,12 @@ def detect_qt5(platform, arch, is_universal):
         if len(qt_version) >= 1 and qt_version[0] != 5:
             # QMAKE is not for Qt5
             return (None, None)
-        if len(qt_version) >= 2 and qt_version[:2] < [5, 14] and \
-           is_universal and platform == Platform.ANDROID:
+        if len(qt_version) >= 2 and qt_version[:2] < [5, 14] and is_universal and platform == Platform.ANDROID:
             # require QT5_PREFIX before Qt 5.14 with android universal
             if not qt5_prefix:
-                m.warning('Please set QT5_PREFIX if you want to build '
-                          'the Qt5 plugin for android-universal with Qt < 5.14')
+                m.warning(
+                    'Please set QT5_PREFIX if you want to build ' 'the Qt5 plugin for android-universal with Qt < 5.14'
+                )
                 return (None, None)
         else:
             ret = _qmake_or_pkgdir(qmake_path)
@@ -644,12 +665,13 @@ def detect_qt5(platform, arch, is_universal):
         m.warning('Unsupported arch {!r} on platform {!r}'.format(arch, platform))
     return ret
 
+
 def detect_qt6(platform, arch, is_universal):
-    '''
+    """
     Returns the path to qmake:
 
     Returns None if qmake could not be found.
-    '''
+    """
     path = None
     qmake6_path = os.environ.get('QMAKE6', None)
     if not qmake6_path:
@@ -665,6 +687,7 @@ def detect_qt6(platform, arch, is_universal):
         return None
     return qmake6_path
 
+
 def imp_load_source(modname, fname):
     loader = importlib.machinery.SourceFileLoader(modname, fname)
     spec = importlib.util.spec_from_file_location(modname, fname, loader=loader)
@@ -673,14 +696,16 @@ def imp_load_source(modname, fname):
     loader.exec_module(module)
     return module
 
+
 # asyncio.Semaphore classes set their working event loop internally on
 # creation, so we need to ensure the proper loop has already been set by then.
 # This is especially important if we create global semaphores that are
 # initialized at the very beginning, since on Windows, the default
 # SelectorEventLoop is not available.
 def CerberoSemaphore(value=1):
-    get_event_loop() # this ensures the proper event loop is already created
+    get_event_loop()  # this ensures the proper event loop is already created
     return asyncio.Semaphore(value)
+
 
 def get_event_loop():
     try:
@@ -691,21 +716,20 @@ def get_event_loop():
 
     # On Windows the default SelectorEventLoop is not available:
     # https://docs.python.org/3.5/library/asyncio-subprocess.html#windows-event-loop
-    if sys.platform == 'win32' and \
-       not isinstance(loop, asyncio.ProactorEventLoop):
+    if sys.platform == 'win32' and not isinstance(loop, asyncio.ProactorEventLoop):
         loop = asyncio.ProactorEventLoop()
         asyncio.set_event_loop(loop)
 
     # Avoid spammy BlockingIOError warnings with older python versions
-    if sys.platform != 'win32' and \
-       sys.version_info < (3, 8, 0):
+    if sys.platform != 'win32' and sys.version_info < (3, 8, 0):
         asyncio.set_child_watcher(asyncio.FastChildWatcher())
         asyncio.get_child_watcher().attach_loop(loop)
 
     return loop
 
+
 def run_until_complete(tasks):
-    '''
+    """
     Runs one or many tasks, blocking until all of them have finished.
     @param tasks: A single Future or a list of Futures to run
     @type tasks: Future or list of Futures
@@ -713,7 +737,7 @@ def run_until_complete(tasks):
              one task) or a list of all results in case of multiple
              tasks. Result is None if operation is cancelled.
     @rtype: any type or list of any types in case of multiple tasks
-    '''
+    """
     loop = get_event_loop()
 
     try:
@@ -725,21 +749,24 @@ def run_until_complete(tasks):
     except asyncio.CancelledError:
         return None
 
+
 async def run_tasks(tasks, done_async=None):
     """
     Runs @tasks until completion or until @done_async returns
     """
+
     class QueueDone(Exception):
         pass
 
     if done_async:
+
         async def queue_done():
             # This is how we exit the asyncio.wait once everything is done
             # as otherwise asyncio.wait will wait for our tasks to complete
             await done_async
             raise QueueDone()
 
-        task = asyncio.ensure_future (queue_done())
+        task = asyncio.ensure_future(queue_done())
         tasks.append(task)
 
     async def shutdown(abnormal=True):
@@ -752,9 +779,7 @@ async def run_tasks(tasks, done_async=None):
         for e in ret:
             if isinstance(e, asyncio.CancelledError):
                 cancelled = e
-            if isinstance(e, Exception) \
-               and not isinstance(e, asyncio.CancelledError) \
-               and not isinstance(e, QueueDone):
+            if isinstance(e, Exception) and not isinstance(e, asyncio.CancelledError) and not isinstance(e, QueueDone):
                 raise e
         if abnormal and cancelled:
             # use cancelled as a last resort we would prefer to throw any
@@ -775,28 +800,67 @@ async def run_tasks(tasks, done_async=None):
 class EnvVar:
     @staticmethod
     def is_path(var):
-        return var in ('LD_LIBRARY_PATH', 'PATH', 'MANPATH', 'INFOPATH',
-                'PKG_CONFIG_PATH', 'PKG_CONFIG_LIBDIR', 'GI_TYPELIB_PATH',
-                'XDG_DATA_DIRS', 'XDG_CONFIG_DIRS', 'GST_PLUGIN_PATH',
-                'GST_PLUGIN_PATH_1_0', 'PYTHONPATH', 'MONO_PATH', 'LIB',
-                'INCLUDE', 'PATHEXT', 'PERL5LIB')
+        return var in (
+            'LD_LIBRARY_PATH',
+            'PATH',
+            'MANPATH',
+            'INFOPATH',
+            'PKG_CONFIG_PATH',
+            'PKG_CONFIG_LIBDIR',
+            'GI_TYPELIB_PATH',
+            'XDG_DATA_DIRS',
+            'XDG_CONFIG_DIRS',
+            'GST_PLUGIN_PATH',
+            'GST_PLUGIN_PATH_1_0',
+            'PYTHONPATH',
+            'MONO_PATH',
+            'LIB',
+            'INCLUDE',
+            'PATHEXT',
+            'PERL5LIB',
+        )
 
     @staticmethod
     def is_arg(var):
-        return var in ('CFLAGS', 'CPPFLAGS', 'CXXFLAGS', 'LDFLAGS',
-                'OBJCFLAGS', 'OBJCXXFLAGS', 'OBJLDFLAGS', 'CCASFLAGS')
+        return var in (
+            'CFLAGS',
+            'CPPFLAGS',
+            'CXXFLAGS',
+            'LDFLAGS',
+            'OBJCFLAGS',
+            'OBJCXXFLAGS',
+            'OBJLDFLAGS',
+            'CCASFLAGS',
+        )
 
     @staticmethod
     def is_cmd(var):
-        return var in ('AR', 'AS', 'CC', 'CPP', 'CXX', 'DLLTOOL', 'GENDEF',
-                'LD', 'NM', 'OBJC', 'OBJCOPY', 'OBJCXX', 'PERL', 'PYTHON',
-                'RANLIB', 'RC', 'STRIP', 'WINDRES')
+        return var in (
+            'AR',
+            'AS',
+            'CC',
+            'CPP',
+            'CXX',
+            'DLLTOOL',
+            'GENDEF',
+            'LD',
+            'NM',
+            'OBJC',
+            'OBJCOPY',
+            'OBJCXX',
+            'PERL',
+            'PYTHON',
+            'RANLIB',
+            'RC',
+            'STRIP',
+            'WINDRES',
+        )
 
 
 class EnvValue(list):
-    '''
+    """
     Env var value (list of strings) with an associated separator
-    '''
+    """
 
     def __init__(self, sep, *values):
         self.sep = sep
@@ -817,9 +881,9 @@ class EnvValue(list):
 
 
 class EnvValueSingle(EnvValue):
-    '''
+    """
     Env var with a single value
-    '''
+    """
 
     def __init__(self, *values):
         if len(values) == 1:
@@ -839,9 +903,9 @@ class EnvValueSingle(EnvValue):
 
 
 class EnvValueArg(EnvValue):
-    '''
+    """
     Env var containing a list of quoted arguments separated by space
-    '''
+    """
 
     def __init__(self, *values):
         if len(values) == 1 and not isinstance(values[0], list):
@@ -853,9 +917,9 @@ class EnvValueArg(EnvValue):
 
 
 class EnvValueCmd(EnvValueArg):
-    '''
+    """
     Env var containing a command and a list of arguments separated by space
-    '''
+    """
 
     def __iadd__(self, new):
         if isinstance(new, EnvValueCmd):
@@ -864,9 +928,10 @@ class EnvValueCmd(EnvValueArg):
 
 
 class EnvValuePath(EnvValue):
-    '''
+    """
     Env var containing a list of paths separated by os.pathsep, which is `:` or `;`
-    '''
+    """
+
     def __init__(self, *values):
         if len(values) == 1 and not isinstance(values[0], list):
             values = (values[0].split(os.pathsep),)

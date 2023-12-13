@@ -35,13 +35,11 @@ from cerbero.enums import Platform, Distro
 
 from pathlib import PurePath
 
-class BuildTools (BootstrapperBase, Fetch):
 
-    BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
-                   'orc', 'gettext-m4', 'meson']
+class BuildTools(BootstrapperBase, Fetch):
+    BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config', 'orc', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
-                          'moltenvk-tools'],
+        Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex', 'moltenvk-tools'],
         Platform.WINDOWS: ['nasm'],
         Platform.LINUX: ['intltool-m4'],
     }
@@ -70,35 +68,35 @@ class BuildTools (BootstrapperBase, Fetch):
                 if not self.config.variants.uwp:
                     self.PLAT_BUILD_TOOLS[Platform.WINDOWS].append('intltool')
 
-        if self.config.target_platform != Platform.LINUX and not \
-           self.config.prefix_is_executable():
+        if self.config.target_platform != Platform.LINUX and not self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal
             self.BUILD_TOOLS.append('glib-tools')
-        if self.config.target_platform == Platform.WINDOWS and \
-           self.config.platform == Platform.LINUX:
-                self.BUILD_TOOLS.append('wix')
+        if self.config.target_platform == Platform.WINDOWS and self.config.platform == Platform.LINUX:
+            self.BUILD_TOOLS.append('wix')
 
         self.BUILD_TOOLS += self.config.extra_build_tools
         self._setup_env()
 
     def check_build_tools(self):
-        '''
+        """
         Check whether the build tools we have are new enough, and if not, build
         them ourselves. On Windows, we always build nasm ourselves, and we tell
         the user to install CMake using the installer.
-        '''
+        """
         ret = []
         tools = {
             # meson requires ninja >=1.8.2
             'ninja': ('1.8.2', None),
         }
         if self.config.platform in (Platform.LINUX, Platform.DARWIN):
-            tools.update({
-                # need cmake > 3.10.2 for out-of-source-tree builds.
-                'cmake': ('3.10.2', None),
-                # dav1d requires nasm >=2.13.02
-                'nasm': ('2.13.02', '-v'),
-            })
+            tools.update(
+                {
+                    # need cmake > 3.10.2 for out-of-source-tree builds.
+                    'cmake': ('3.10.2', None),
+                    # dav1d requires nasm >=2.13.02
+                    'nasm': ('2.13.02', '-v'),
+                }
+            )
         for tool, (version, arg) in tools.items():
             _, _, newer = shell.check_tool_version(tool, version, env=None, version_arg=arg)
             if newer:

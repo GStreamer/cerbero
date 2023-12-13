@@ -21,24 +21,21 @@ from cerbero.utils import etree, to_winpath
 
 
 class PropsBase(object):
-
     def __init__(self, name):
         self.name = name
         self._add_root()
         self._add_skeleton()
 
     def _add_root(self):
-        self.root = etree.Element('Project', ToolsVersion='4.0',
-                xmlns='http://schemas.microsoft.com/developer/msbuild/2003')
+        self.root = etree.Element(
+            'Project', ToolsVersion='4.0', xmlns='http://schemas.microsoft.com/developer/msbuild/2003'
+        )
 
     def _add_skeleton(self):
-        self.import_group = etree.SubElement(self.root, 'ImportGroup',
-                Label='PropertySheets')
-        self.user_macros_group = etree.SubElement(self.root, 'PropertyGroup',
-                Label='UserMacros')
+        self.import_group = etree.SubElement(self.root, 'ImportGroup', Label='PropertySheets')
+        self.user_macros_group = etree.SubElement(self.root, 'PropertyGroup', Label='UserMacros')
         self.property_group = etree.SubElement(self.root, 'PropertyGroup')
-        self.item_definition_group = etree.SubElement(self.root,
-                'ItemDefinitionGroup')
+        self.item_definition_group = etree.SubElement(self.root, 'ItemDefinitionGroup')
         self.item_group = etree.SubElement(self.root, 'ItemGroup')
 
     def _add_macro(self, name, value):
@@ -52,36 +49,29 @@ class PropsBase(object):
 
     def _import_property(self, name):
         cond = '$(%sImported)!=true' % self._format_name(name)
-        etree.SubElement(self.import_group, 'Import', Condition=cond,
-                         Project='%s.props' % name)
+        etree.SubElement(self.import_group, 'Import', Condition=cond, Project='%s.props' % name)
 
     def create(self, outdir):
         el = etree.ElementTree(self.root)
-        el.write(os.path.join(outdir, '%s.props' % self.name),
-                 encoding='utf-8', pretty_print=True)
+        el.write(os.path.join(outdir, '%s.props' % self.name), encoding='utf-8', pretty_print=True)
 
     def _add_compiler_props(self):
-        self.compiler = etree.SubElement(self.item_definition_group,
-                'ClCompile')
+        self.compiler = etree.SubElement(self.item_definition_group, 'ClCompile')
 
     def _add_linker_props(self):
         self.linker = etree.SubElement(self.item_definition_group, 'Link')
 
     def _add_include_dirs(self, dirs):
-        self._add_var(self.compiler, 'AdditionalIncludeDirectories',
-            self._format_paths(dirs))
+        self._add_var(self.compiler, 'AdditionalIncludeDirectories', self._format_paths(dirs))
 
     def _add_libs_dirs(self, dirs):
-        self._add_var(self.linker, 'AdditionalLibraryDirectories',
-            self._format_paths(dirs))
+        self._add_var(self.linker, 'AdditionalLibraryDirectories', self._format_paths(dirs))
 
     def _add_libs(self, libs):
-        self._add_var(self.linker, 'AdditionalDependencies',
-            self._format_libs(libs))
+        self._add_var(self.linker, 'AdditionalDependencies', self._format_libs(libs))
 
     def _add_imported_variable(self):
-        el = etree.SubElement(self.property_group, '%sImported' %
-                              self._format_name(self.name))
+        el = etree.SubElement(self.property_group, '%sImported' % self._format_name(self.name))
         el.text = 'true'
 
     def _add_var(self, parent, name, content):
@@ -103,7 +93,6 @@ class PropsBase(object):
 
 
 class CommonProps(PropsBase):
-
     def __init__(self, prefix_macro):
         PropsBase.__init__(self, 'Common')
         self._add_root()
@@ -114,17 +103,16 @@ class CommonProps(PropsBase):
 
 
 class Props(PropsBase):
-    '''
+    """
     Creates a MSBUILD properties sheet that imitaties a pkgconfig files to link
     against a library from VS:
       * inherits from others properties sheets
       * add additional includes directories
       * add additional libraries directories
       * add link libraries
-    '''
+    """
 
-    def __init__(self, name, requires, include_dirs, libs_dirs, libs,
-                 inherit_common=False):
+    def __init__(self, name, requires, include_dirs, libs_dirs, libs, inherit_common=False):
         PropsBase.__init__(self, name)
         if inherit_common:
             requires.append('Common')

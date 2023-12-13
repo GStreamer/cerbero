@@ -33,13 +33,20 @@ class GenVSProps(Command):
     name = 'genvsprops'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('-o', '--output_dir', default='.',
-                help=_('output directory where .vsprops files will be saved')),
-             ArgparseArgument('-p', '--prefix', default=DEFAULT_PREFIX_MACRO,
-                 help=_('name of the prefix environment variable '
-                        '(eg:CERBERO_SDK_ROOT_X86)')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument(
+                    '-o', '--output_dir', default='.', help=_('output directory where .vsprops files will be saved')
+                ),
+                ArgparseArgument(
+                    '-p',
+                    '--prefix',
+                    default=DEFAULT_PREFIX_MACRO,
+                    help=_('name of the prefix environment variable ' '(eg:CERBERO_SDK_ROOT_X86)'),
+                ),
+            ],
+        )
 
     def run(self, config, args):
         self.runargs(config, args.output_dir, args.prefix)
@@ -49,17 +56,16 @@ class GenVSProps(Command):
             os.makedirs(output_dir)
 
         for pc in PkgConfig.list_all(env=config.env):
-            p2v = PkgConfig2VSProps(pc, prefix=config.prefix,
-                    inherit_common=True,
-                    prefix_replacement='$(%s)' % prefix, env=config.env)
+            p2v = PkgConfig2VSProps(
+                pc, prefix=config.prefix, inherit_common=True, prefix_replacement='$(%s)' % prefix, env=config.env
+            )
             p2v.create(output_dir)
             m.action('Created %s.props' % pc)
 
         common = CommonProps(prefix)
         common.create(output_dir)
 
-        m.message('Property sheets files were sucessfully created in %s' %
-                  os.path.abspath(output_dir))
+        m.message('Property sheets files were sucessfully created in %s' % os.path.abspath(output_dir))
 
 
 register_command(GenVSProps)

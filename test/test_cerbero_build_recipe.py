@@ -27,7 +27,6 @@ from test.test_build_common import Recipe1
 
 
 class Class1(object):
-
     test = None
 
     def __init__(self):
@@ -38,13 +37,11 @@ class Class1(object):
 
 
 class Class2(object):
-
     class2_method = lambda x: None
     fetch = lambda x: 'CODEPASS'
 
 
 class Recipe(recipe.Recipe):
-
     btype = Class1
     stype = Class2
 
@@ -63,13 +60,11 @@ class Recipe(recipe.Recipe):
 
 
 class Class3(object, metaclass=recipe.MetaUniversalRecipe):
-
     def _do_step(self, name):
         return name
 
 
 class TestReceiptMetaClass(unittest.TestCase):
-
     def setUp(self):
         self.config = DummyConfig()
         self.config.local_sources = ''
@@ -99,7 +94,6 @@ class TestReceiptMetaClass(unittest.TestCase):
 
 
 class TestReceipt(unittest.TestCase):
-
     def setUp(self):
         self.config = DummyConfig()
         self.config.local_sources = 'path1'
@@ -131,7 +125,6 @@ class TestReceipt(unittest.TestCase):
 
 
 class TestLicenses(unittest.TestCase):
-
     def setUp(self):
         self.config = DummyConfig()
         self.config.local_sources = ''
@@ -156,7 +149,6 @@ class TestLicenses(unittest.TestCase):
 
 
 class TestMetaUniveralRecipe(unittest.TestCase):
-
     def testBuildSteps(self):
         obj = Class3()
         for _, step in recipe.BuildSteps():
@@ -166,7 +158,6 @@ class TestMetaUniveralRecipe(unittest.TestCase):
 
 
 class TestUniversalRecipe(unittest.TestCase):
-
     def setUp(self):
         self.config = DummyConfig()
         self.config.target_platform = Platform.LINUX
@@ -194,10 +185,8 @@ class TestUniversalRecipe(unittest.TestCase):
 
     def testAddRecipe(self):
         self.recipe.add_recipe(self.recipe_x86)
-        self.assertEqual(self.recipe._recipes[Architecture.X86],
-                          self.recipe_x86)
-        self.assertEqual(self.recipe._proxy_recipe,
-                          self.recipe_x86)
+        self.assertEqual(self.recipe._recipes[Architecture.X86], self.recipe_x86)
+        self.assertEqual(self.recipe._proxy_recipe, self.recipe_x86)
 
     def testDifferentRecipe(self):
         self.recipe.add_recipe(self.recipe_x86)
@@ -209,5 +198,4 @@ class TestUniversalRecipe(unittest.TestCase):
         self.assertEqual(self.recipe.steps, [])
         self.recipe.add_recipe(self.recipe_x86)
         self.recipe.add_recipe(self.recipe_x86_64)
-        self.assertEqual(self.recipe.steps,
-                recipe.BuildSteps() + [recipe.BuildSteps.MERGE])
+        self.assertEqual(self.recipe.steps, recipe.BuildSteps() + [recipe.BuildSteps.MERGE])

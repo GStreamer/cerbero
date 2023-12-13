@@ -29,9 +29,8 @@ CPANM_VERSION = '1.7044'
 CPANM_URL_TPL = 'https://raw.githubusercontent.com/miyagawa/cpanminus/{}/cpanm'
 CPANM_CHECKSUM = '22b92506243649a73cfb55c5990cedd24cdbb20b15b4530064d2496d94d1642b'
 
-class OSXBootstrapper (BootstrapperBase):
 
-
+class OSXBootstrapper(BootstrapperBase):
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
         url = CPANM_URL_TPL.format(CPANM_VERSION)
@@ -43,7 +42,7 @@ class OSXBootstrapper (BootstrapperBase):
             return
         self._install_perl_deps()
         if self.config.arch == Architecture.ARM64:
-            m.message("Installing rosetta needed for some package installation scripts")
+            m.message('Installing rosetta needed for some package installation scripts')
             shell.new_call(['/usr/sbin/softwareupdate', '--install-rosetta', '--agree-to-license'])
 
     def _install_perl_deps(self):
@@ -51,7 +50,7 @@ class OSXBootstrapper (BootstrapperBase):
         shell.new_call(['chmod', '+x', cpanm_installer])
         # Install XML::Parser, required for intltool
         cmd = ['sudo', cpanm_installer, 'XML::Parser']
-        m.message("Installing XML::Parser, may require a password for running \'" + " ".join(cmd) + "\'")
+        m.message("Installing XML::Parser, may require a password for running '" + ' '.join(cmd) + "'")
         shell.new_call(cmd, interactive=True)
 
 

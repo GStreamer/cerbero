@@ -39,24 +39,19 @@ class EditCache(Command):
         self.recipe_status = RecipeStatus('filepath')
         self.recipe_attributes = list(set(dir(self.recipe_status)) - set(dir(RecipeStatus)))
         arguments = [
-            ArgparseArgument('recipe', nargs='*',
-                             help=_('Recipe to work with')),
-            ArgparseArgument('--bootstrap', action='store_true', default=False,
-                             help=_('Use bootstrap\'s cache file')),
-            ArgparseArgument('--touch', action='store_true', default=False,
-                             help=_('Touch recipe modifying its mtime')),
-            ArgparseArgument('--reset', action='store_true', default=False,
-                             help=_('Clean entirely the cache for the recipe'))
+            ArgparseArgument('recipe', nargs='*', help=_('Recipe to work with')),
+            ArgparseArgument('--bootstrap', action='store_true', default=False, help=_("Use bootstrap's cache file")),
+            ArgparseArgument('--touch', action='store_true', default=False, help=_('Touch recipe modifying its mtime')),
+            ArgparseArgument(
+                '--reset', action='store_true', default=False, help=_('Clean entirely the cache for the recipe')
+            ),
         ]
 
         for attr in self.recipe_attributes:
             attr_nargs = '*' if isinstance(getattr(self.recipe_status, attr), list) else None
             attr_type = type(getattr(self.recipe_status, attr))
             arg_type = str if attr_type == bool or attr_type == list else attr_type
-            arguments.append(
-                ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type,
-                                 help=_('Modify ' + attr))
-            )
+            arguments.append(ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type, help=_('Modify ' + attr)))
         Command.__init__(self, arguments)
 
     def run(self, config, args):
@@ -74,8 +69,9 @@ class EditCache(Command):
         global_status = cookbook.status
         recipes = args.recipe or list(global_status.keys())
 
-        m.message('{} cache values for recipes: {}'.format(
-            'Showing' if not is_modifying else 'Modifying', ', '.join(recipes)))
+        m.message(
+            '{} cache values for recipes: {}'.format('Showing' if not is_modifying else 'Modifying', ', '.join(recipes))
+        )
 
         for recipe in recipes:
             if recipe not in global_status.keys():

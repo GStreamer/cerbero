@@ -29,10 +29,10 @@ from cerbero.utils import shell
 
 
 class BundlePackagerBase(PackagerBase):
-    '''
+    """
     Creates a package with the basic structure of a bundle, to be included
     in a MetaPackage.
-    '''
+    """
 
     def __init__(self, package, pkgname, desc, uuid):
         self.package = Package(package.config, package.store, None)
@@ -55,45 +55,41 @@ class BundlePackagerBase(PackagerBase):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-        path = self._create_package(output_dir, self.package.get_install_dir(),
-                self.package.version, root)
+        path = self._create_package(output_dir, self.package.get_install_dir(), self.package.version, root)
         return [path, None]
 
-
     def _create_package(self, output_dir, install_dir, version, root):
-        output_file = os.path.join(output_dir, '%s-%s-%s.pkg' %
-                (self.name, self.package.version,
-                 self.config.target_arch))
+        output_file = os.path.join(
+            output_dir, '%s-%s-%s.pkg' % (self.name, self.package.version, self.config.target_arch)
+        )
         if not root:
             root = self.create_bundle()
 
         resources = tempfile.mkdtemp()
         if os.path.exists(self.package.resources_preinstall):
-            shutil.copy(os.path.join(self.package.resources_preinstall),
-                        os.path.join(resources, 'preinstall'))
+            shutil.copy(os.path.join(self.package.resources_preinstall), os.path.join(resources, 'preinstall'))
         if os.path.exists(self.package.resources_postinstall):
-            shutil.copy(os.path.join(self.package.resources_postinstall),
-                        os.path.join(resources, 'postinstall'))
+            shutil.copy(os.path.join(self.package.resources_postinstall), os.path.join(resources, 'postinstall'))
         packagebuild = PackageBuild()
-        packagebuild.create_package(root, self.package.identifier(),
-            self.package.version, self.title, output_file, install_dir,
-            resources)
+        packagebuild.create_package(
+            root, self.package.identifier(), self.package.version, self.title, output_file, install_dir, resources
+        )
         shutil.rmtree(resources)
         return output_file
 
     def create_bundle(self, target_dir=None):
-        '''
+        """
         Creates the bundle structure
-        '''
+        """
         raise NotImplemented('Subclasses should implement create_bundle')
 
 
 class FrameworkBundlePackager(BundlePackagerBase):
-    '''
+    """
     Creates a package with the basic structure of a framework bundle,
     adding links for Headears, Libraries, Commands, and Current Versions,
     and the Framework info.
-    '''
+    """
 
     name = 'osx-framework'
     title = 'Framework Bundle'
@@ -103,7 +99,7 @@ class FrameworkBundlePackager(BundlePackagerBase):
         self.name = filename
 
     def create_bundle(self, target_dir=None):
-        '''
+        """
         Creates the bundle structure
 
         Commands -> Versions/Current/Commands
@@ -113,33 +109,38 @@ class FrameworkBundlePackager(BundlePackagerBase):
         Resources -> Versions/Current/Resources
         Versions/Current -> Version/$VERSION/$ARCH
         Framework -> Versions/Current/Famework
-        '''
+        """
         if target_dir:
             tmp = target_dir
         else:
             tmp = tempfile.mkdtemp()
 
-        #if self.config.target_arch == Architecture.UNIVERSAL:
+        # if self.config.target_arch == Architecture.UNIVERSAL:
         #    arch_dir = ''
-        #else:
+        # else:
         #    arch_dir = self.config.target_arch
 
-        vdir = os.path.join('Versions', self.package.sdk_version) #, arch_dir)
+        vdir = os.path.join('Versions', self.package.sdk_version)  # , arch_dir)
         rdir = '%s/Resources/' % vdir
-        os.makedirs (os.path.join(tmp, rdir), exist_ok=True if target_dir else False)
+        os.makedirs(os.path.join(tmp, rdir), exist_ok=True if target_dir else False)
 
-        links = {'Versions/Current': '%s' % self.package.sdk_version,
-                 'Resources': 'Versions/Current/Resources',
-                 'Commands': 'Versions/Current/Commands',
-                 'Headers': 'Versions/Current/Headers',
-                 'Libraries': 'Versions/Current/Libraries'}
-        inner_links = {'Commands': 'bin',
-                       'Libraries': 'lib'}
+        links = {
+            'Versions/Current': '%s' % self.package.sdk_version,
+            'Resources': 'Versions/Current/Resources',
+            'Commands': 'Versions/Current/Commands',
+            'Headers': 'Versions/Current/Headers',
+            'Libraries': 'Versions/Current/Libraries',
+        }
+        inner_links = {'Commands': 'bin', 'Libraries': 'lib'}
 
         # Create the frameworks Info.plist file
-        framework_plist = FrameworkPlist(self.package.name,
-            self.package.org, self.package.version, self.package.shortdesc,
-            self.package.config.min_osx_sdk_version)
+        framework_plist = FrameworkPlist(
+            self.package.name,
+            self.package.org,
+            self.package.version,
+            self.package.shortdesc,
+            self.package.config.min_osx_sdk_version,
+        )
         framework_plist.save(os.path.join(tmp, rdir, 'Info.plist'))
 
         # Add a link from Framework to Versions/Current/Framework
@@ -150,34 +151,32 @@ class FrameworkBundlePackager(BundlePackagerBase):
 
         # Create all links
         for dest, src in links.items():
-            shell.symlink (src, dest, tmp)
+            shell.symlink(src, dest, tmp)
         inner_tmp = os.path.join(tmp, vdir)
         for dest, src in inner_links.items():
-            shell.symlink (src, dest, inner_tmp)
+            shell.symlink(src, dest, inner_tmp)
 
         # Copy the framework library to Versions/$VERSION/$ARCH/Framework
-        if self.package.osx_framework_library is not None \
-                and os.path.exists(os.path.join(self.config.prefix, link)):
-            shutil.copy(os.path.join(self.config.prefix, link),
-                        os.path.join(tmp, vdir, name))
+        if self.package.osx_framework_library is not None and os.path.exists(os.path.join(self.config.prefix, link)):
+            shutil.copy(os.path.join(self.config.prefix, link), os.path.join(tmp, vdir, name))
         return tmp
 
 
 class ApplicationBundlePackager(object):
-    '''
+    """
     Creates a package with the basic structure of an Application bundle.
-    '''
+    """
 
     def __init__(self, package):
         self.package = package
 
     def create_bundle(self, tmp=None):
-        '''
+        """
         Creates the Application bundle structure
 
         Contents/MacOS/MainExectuable -> Contents/Home/bin/main-executable
         Contents/Info.plist
-        '''
+        """
         tmp = tmp or tempfile.mkdtemp()
 
         contents = os.path.join(tmp, 'Contents')
@@ -192,11 +191,15 @@ class ApplicationBundlePackager(object):
         plist_tpl = None
         if os.path.exists(self.package.resources_info_plist):
             plist_tpl = open(self.package.resources_info_plist).read()
-        framework_plist = ApplicationPlist(self.package.app_name,
-            self.package.org, self.package.version, self.package.shortdesc,
+        framework_plist = ApplicationPlist(
+            self.package.app_name,
+            self.package.org,
+            self.package.version,
+            self.package.shortdesc,
             self.package.config.min_osx_sdk_version,
             os.path.basename(self.package.resources_icon_icns),
-            plist_tpl)
+            plist_tpl,
+        )
         framework_plist.save(os.path.join(contents, 'Info.plist'))
 
         # Copy app icon to Resources

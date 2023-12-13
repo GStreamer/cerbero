@@ -27,7 +27,6 @@ from test.test_build_common import Recipe1
 
 
 class PackageTest(unittest.TestCase):
-
     def setUp(self):
         self.config = Config()
         self.config.cache_file = '/dev/null'
@@ -65,8 +64,7 @@ class PackageTest(unittest.TestCase):
 
     def testAddGetRecipe(self):
         recipe = Recipe1(self.config)
-        self.assertRaises(RecipeNotFoundError, self.cookbook.get_recipe,
-                              recipe.name)
+        self.assertRaises(RecipeNotFoundError, self.cookbook.get_recipe, recipe.name)
         self.cookbook.add_recipe(recipe)
         self.assertEqual(recipe, self.cookbook.recipes[recipe.name])
         self.assertEqual(recipe, self.cookbook.get_recipe(recipe.name))

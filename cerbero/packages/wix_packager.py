@@ -33,7 +33,6 @@ from cerbero.config import Platform
 
 
 class MergeModulePackager(PackagerBase):
-
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
@@ -45,19 +44,16 @@ class MergeModulePackager(PackagerBase):
         paths = []
 
         # create runtime package
-        p = self.create_merge_module(output_dir, PackageType.RUNTIME, force,
-                                     self.package.version, keep_temp)
+        p = self.create_merge_module(output_dir, PackageType.RUNTIME, force, self.package.version, keep_temp)
         paths.append(p)
 
         if devel:
-            p = self.create_merge_module(output_dir, PackageType.DEVEL, force,
-                                         self.package.version, keep_temp)
+            p = self.create_merge_module(output_dir, PackageType.DEVEL, force, self.package.version, keep_temp)
             paths.append(p)
 
         return paths
 
-    def create_merge_module(self, output_dir, package_type, force, version,
-                            keep_temp, keep_strip_temp_dir=False):
+    def create_merge_module(self, output_dir, package_type, force, version, keep_temp, keep_strip_temp_dir=False):
         self.package.set_mode(package_type)
         files_list = self.files_list(package_type, force)
         if isinstance(self.package, VSTemplatePackage):
@@ -82,21 +78,20 @@ class MergeModulePackager(PackagerBase):
         package_name = self._package_name(version)
         if self.package.wix_use_fragment:
             mergemodule = Fragment(self.config, files_list, self.package)
-            sources = [os.path.join(output_dir, "%s-fragment.wxs" % package_name)]
-            wixobjs = [os.path.join(output_dir, "%s-fragment.wixobj" % package_name)]
+            sources = [os.path.join(output_dir, '%s-fragment.wxs' % package_name)]
+            wixobjs = [os.path.join(output_dir, '%s-fragment.wixobj' % package_name)]
         else:
             mergemodule = MergeModule(self.config, files_list, self.package)
-            sources = [os.path.join(output_dir, "%s.wxs" % package_name)]
-            wixobjs = [os.path.join(output_dir, "%s.wixobj" % package_name)]
+            sources = [os.path.join(output_dir, '%s.wxs' % package_name)]
+            wixobjs = [os.path.join(output_dir, '%s.wixobj' % package_name)]
 
         if tmpdir:
             mergemodule.prefix = tmpdir
         mergemodule.write(sources[0])
 
         for x in ['utils']:
-            wixobjs.append(os.path.join(output_dir, "%s.wixobj" % x))
-            sources.append(os.path.join(os.path.abspath(self.config.data_dir),
-                                        'wix/%s.wxs' % x))
+            wixobjs.append(os.path.join(output_dir, '%s.wixobj' % x))
+            sources.append(os.path.join(os.path.abspath(self.config.data_dir), 'wix/%s.wxs' % x))
         if self._with_wine:
             final_wixobjs = ['"{}"'.format(to_winepath(x)) for x in wixobjs]
             final_sources = ['"{}"'.format(to_winepath(x)) for x in sources]
@@ -140,12 +135,10 @@ class MergeModulePackager(PackagerBase):
             platform = 'mingw'
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
-        return "%s-%s-%s-%s" % (self.package.name, platform,
-                                self.config.target_arch, version)
+        return '%s-%s-%s-%s' % (self.package.name, platform, self.config.target_arch, version)
 
 
 class MSIPackager(PackagerBase):
-
     UI_EXT = '-ext WixUIExtension'
     UTIL_EXT = '-ext WixUtilExtension'
 
@@ -176,8 +169,7 @@ class MSIPackager(PackagerBase):
         # create zip with merge modules
         if not self.package.wix_use_fragment:
             self.package.set_mode(PackageType.RUNTIME)
-            zipf = ZipFile(os.path.join(self.output_dir, '%s-merge-modules.zip' %
-                                        self._package_name()), 'w')
+            zipf = ZipFile(os.path.join(self.output_dir, '%s-merge-modules.zip' % self._package_name()), 'w')
             for p in self.merge_modules[PackageType.RUNTIME]:
                 zipf.write(p)
             zipf.close()
@@ -198,8 +190,7 @@ class MSIPackager(PackagerBase):
             platform = 'mingw'
         if self.config.variants.visualstudio and self.config.variants.vscrt == 'mdd':
             platform += '+debug'
-        return "%s-%s-%s-%s" % (self.package.name, platform,
-                                self.config.target_arch, self.package.version)
+        return '%s-%s-%s-%s' % (self.package.name, platform, self.config.target_arch, self.package.version)
 
     def _create_msi_installer(self, package_type):
         self.package.set_mode(package_type)
@@ -216,17 +207,17 @@ class MSIPackager(PackagerBase):
         for package in self.packagedeps:
             package.set_mode(package_type)
             package.wix_use_fragment = self.package.wix_use_fragment
-            m.action("Creating Merge Module for %s" % package)
+            m.action('Creating Merge Module for %s' % package)
             packager = MergeModulePackager(self.config, package, self.store)
             try:
-                path = packager.create_merge_module(self.output_dir,
-                                                    package_type, self.force, self.package.version,
-                                                    self.keep_temp, True)
+                path = packager.create_merge_module(
+                    self.output_dir, package_type, self.force, self.package.version, self.keep_temp, True
+                )
                 packagedeps[package] = path[0]
                 if path[1]:
                     tmp_dirs.append(path[1])
             except EmptyPackageError:
-                m.warning("Package %s is empty" % package)
+                m.warning('Package %s is empty' % package)
         self.packagedeps = packagedeps
         self.merge_modules[package_type] = list(packagedeps.values())
         return tmp_dirs
@@ -237,21 +228,17 @@ class MSIPackager(PackagerBase):
         return config_path
 
     def _create_msi(self, config_path, tmp_dirs):
-        sources = [os.path.join(self.output_dir, "%s.wxs" %
-                                self._package_name())]
-        msi = MSI(self.config, self.package, self.packagedeps, config_path,
-                  self.store)
+        sources = [os.path.join(self.output_dir, '%s.wxs' % self._package_name())]
+        msi = MSI(self.config, self.package, self.packagedeps, config_path, self.store)
         msi.write(sources[0])
 
-        wixobjs = [os.path.join(self.output_dir, "%s.wixobj" %
-                                self._package_name())]
+        wixobjs = [os.path.join(self.output_dir, '%s.wixobj' % self._package_name())]
         if self.package.wix_use_fragment:
             wixobjs.extend(self.merge_modules[self.package.package_mode])
 
         for x in ['utils']:
-            wixobjs.append(os.path.join(self.output_dir, "%s.wixobj" % x))
-            sources.append(os.path.join(os.path.abspath(self.config.data_dir),
-                                        'wix/%s.wxs' % x))
+            wixobjs.append(os.path.join(self.output_dir, '%s.wixobj' % x))
+            sources.append(os.path.join(os.path.abspath(self.config.data_dir), 'wix/%s.wxs' % x))
 
         if self._with_wine:
             final_wixobjs = ['"{}"'.format(to_winepath(x)) for x in wixobjs]
@@ -262,8 +249,7 @@ class MSIPackager(PackagerBase):
 
         candle = Candle(self.wix_prefix, self._with_wine)
         candle.compile(' '.join(final_sources), self.output_dir, env=self.config.env)
-        light = Light(self.wix_prefix, self._with_wine,
-                      "%s %s" % (self.UI_EXT, self.UTIL_EXT))
+        light = Light(self.wix_prefix, self._with_wine, '%s %s' % (self.UI_EXT, self.UTIL_EXT))
         path = light.compile(final_wixobjs, self._package_name(), self.output_dir, env=self.config.env)
 
         # Clean up
@@ -284,7 +270,6 @@ class MSIPackager(PackagerBase):
 
 
 class Packager(object):
-
     def __new__(klass, config, package, store):
         if isinstance(package, Package):
             return MergeModulePackager(config, package, store)
@@ -293,7 +278,7 @@ class Packager(object):
 
 
 class Candle(object):
-    ''' Compile WiX objects with candle '''
+    """Compile WiX objects with candle"""
 
     cmd = '%(wine)s %(q)s%(prefix)s/candle.exe%(q)s %(source)s'
 
@@ -314,10 +299,9 @@ class Candle(object):
 
 
 class Light(object):
-    ''' Compile WiX objects with light'''
+    """Compile WiX objects with light"""
 
-    cmd = '%(wine)s %(q)s%(prefix)s/light.exe%(q)s %(objects)s -o '\
-          '%(msi)s.%(ext)s -sval %(extra)s'
+    cmd = '%(wine)s %(q)s%(prefix)s/light.exe%(q)s %(objects)s -o ' '%(msi)s.%(ext)s -sval %(extra)s'
 
     def __init__(self, wix_prefix, with_wine, extra=''):
         self.options = {}
@@ -338,8 +322,7 @@ class Light(object):
         else:
             self.options['ext'] = 'msi'
         shell.new_call(self.cmd % self.options, output_dir, env=env)
-        msi_file_path = os.path.join(output_dir,
-                                     '%(msi)s.%(ext)s' % self.options)
+        msi_file_path = os.path.join(output_dir, '%(msi)s.%(ext)s' % self.options)
         if self.options['wine'] == 'wine':
             shell.new_call(['chmod', '0755', msi_file_path])
         return msi_file_path
@@ -348,4 +331,5 @@ class Light(object):
 def register():
     from cerbero.packages.packager import register_packager
     from cerbero.config import Distro
+
     register_packager(Distro.WINDOWS, Packager)

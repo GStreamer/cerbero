@@ -4,7 +4,6 @@ import sys
 
 
 class Presentation:
-
     def __init__(self, name, lines, covered):
         self.name = name
         self.lines = lines
@@ -21,7 +20,6 @@ class Presentation:
 
 
 class Coverage:
-
     def __init__(self):
         self.files = []
         self.total_lines = 0
@@ -66,20 +64,16 @@ class Coverage:
     def show_one(self, filename):
         f = open(filename)
         # Grab all executables lines
-        lines = [line for line in f.readlines()
-                 if self.codeline_matcher.match(line)]
+        lines = [line for line in f.readlines() if self.codeline_matcher.match(line)]
 
         # Find out which of them were not executed
-        uncovered_lines = [line for line in lines
-                                   if line.startswith('>>>>>>')]
+        uncovered_lines = [line for line in lines if line.startswith('>>>>>>')]
         if not lines:
             return
 
         filename = self._strip_filename(filename)
 
-        p = Presentation(filename,
-                         len(lines),
-                         len(lines) - len(uncovered_lines))
+        p = Presentation(filename, len(lines), len(lines) - len(uncovered_lines))
         p.show(self.maxlen)
 
         self.total_lines += p.lines
@@ -98,6 +92,7 @@ def main(args):
         c.add_file(file)
 
     c.show_results()
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

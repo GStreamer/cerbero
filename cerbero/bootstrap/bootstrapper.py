@@ -34,13 +34,14 @@ def register_system_bootstrapper(distro, klass, distro_version=None):
         system_bootstrappers[distro] = {}
     system_bootstrappers[distro][distro_version] = klass
 
+
 def register_toolchain_bootstrapper(distro, klass, distro_version=None):
     if not distro in toolchain_bootstrappers:
         toolchain_bootstrappers[distro] = {}
     toolchain_bootstrappers[distro][distro_version] = klass
 
 
-class Bootstrapper (object):
+class Bootstrapper(object):
     def __new__(klass, config, system, toolchains, build_tools, offline, assume_yes):
         bs = []
 
@@ -60,7 +61,7 @@ class Bootstrapper (object):
         if system:
             d, v = build
             if d not in system_bootstrappers:
-                raise FatalError(_("No system bootstrapper for %s" % d))
+                raise FatalError(_('No system bootstrapper for %s' % d))
             if v not in system_bootstrappers[d]:
                 v = None
             bs.append(system_bootstrappers[d][v](config, offline, assume_yes))
@@ -85,6 +86,7 @@ class Bootstrapper (object):
             bs.append(BuildTools(config, offline))
 
         return bs
+
 
 from cerbero.bootstrap import linux, windows, android, osx, ios
 

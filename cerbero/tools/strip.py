@@ -25,7 +25,7 @@ from cerbero.utils import shell, run_until_complete, messages as m
 
 
 class Strip(object):
-    '''Wrapper for the strip tool'''
+    """Wrapper for the strip tool"""
 
     def __init__(self, config, excludes=None, keep_symbols=None):
         self.config = config

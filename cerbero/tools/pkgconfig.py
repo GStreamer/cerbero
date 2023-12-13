@@ -20,16 +20,15 @@ import os
 
 
 class PkgConfigWritter(object):
-
-    VARIABLES_TPL = '''\
+    VARIABLES_TPL = """\
 prefix=%(prefix)s
 exec_prefix=${prefix}
 libdir=${prefix}/%(rel_libdir)s
 includedir=${prefix}/%(rel_incldir)s
 datarootdir=${prefix}/%(rel_sharedir)s
 datadir=${datarootdir}
-'''
-    BODY_TPL = '''\
+"""
+    BODY_TPL = """\
 
 Name: %(name)s
 Description: %(desc)s
@@ -39,7 +38,7 @@ Requires.private: %(req_priv)s
 Libs: %(libs)s
 Libs.private: %(libs_priv)s
 Cflags: %(cflags)s
-'''
+"""
 
     rel_incldir = 'include'
     rel_sharedir = 'share'
@@ -68,7 +67,8 @@ Cflags: %(cflags)s
             'prefix': self.prefix,
             'rel_libdir': self.rel_libdir,
             'rel_incldir': self.rel_incldir,
-            'rel_sharedir': self.rel_sharedir}
+            'rel_sharedir': self.rel_sharedir,
+        }
 
     def _get_body(self):
         return self.BODY_TPL % {
@@ -79,4 +79,5 @@ Cflags: %(cflags)s
             'req_priv': self.req_priv,
             'libs': self.libs,
             'libs_priv': self.libs_priv,
-            'cflags': self.cflags}
+            'cflags': self.cflags,
+        }

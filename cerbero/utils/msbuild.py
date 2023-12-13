@@ -24,9 +24,7 @@ from cerbero.utils import fix_winpath, shell
 
 
 class MSBuild(object):
-
-    def __init__(self, solution, arch=Architecture.X86, config='Release',
-                 sdk='Windows7.1SDK', **properties):
+    def __init__(self, solution, arch=Architecture.X86, config='Release', sdk='Windows7.1SDK', **properties):
         self.properties = {}
         if arch == Architecture.X86:
             self.properties['Platform'] = 'Win32'
@@ -43,16 +41,14 @@ class MSBuild(object):
     @staticmethod
     def get_msbuild_tools_path():
         reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-        key = winreg.OpenKey(reg,
-                r"SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0")
+        key = winreg.OpenKey(reg, r'SOFTWARE\Microsoft\MSBuild\ToolsVersions\4.0')
         path = winreg.QueryValueEx(key, 'MSBuildToolsPath')[0]
         return fix_winpath(path)
 
     @staticmethod
     def get_vs_path():
         reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-        key = winreg.OpenKey(reg,
-                r"SOFTWARE\Microsoft\VisualStudio\SxS\VC7")
+        key = winreg.OpenKey(reg, r'SOFTWARE\Microsoft\VisualStudio\SxS\VC7')
         path = winreg.QueryValueEx(key, '10.0')[0]
         path = str(path)
         path = path.replace('\\VC', '\\Common7\\IDE')
@@ -66,11 +62,9 @@ class MSBuild(object):
         if self.properties['Platform'] == 'Win32':
             os.environ['PATH'] = '%s;%s' % (os.environ['PATH'], vs_path)
         try:
-            shell.new_call(['msbuild.exe', self.solution, *properties, '/target:%s' %
-                       (command,)], msbuildpath)
+            shell.new_call(['msbuild.exe', self.solution, *properties, '/target:%s' % (command,)], msbuildpath)
         finally:
             os.environ['PATH'] = old_path
 
     def _format_properties(self):
-        return ['/property:%s=%s' % (k, v) for k, v in
-                 self.properties.items()]
+        return ['/property:%s=%s' % (k, v) for k, v in self.properties.items()]

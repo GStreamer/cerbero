@@ -33,16 +33,14 @@ class BundleSource(Command):
 
     def __init__(self, args=[]):
         args = [
-            ArgparseArgument('bundlepackages', nargs='+', 
-                             help=_('packages to bundle')),
-            ArgparseArgument('--add-recipe', action='append',
-                             default=[],
-                             help=_('additional recipes to bundle')),
-            ArgparseArgument('--no-bootstrap', action='store_true',
-                             default=False,
-                             help=_('Don\'t include bootstrep sources')),
-            ArgparseArgument('--offline', action='store_true',
-                default=False, help=_('Use only the source cache, no network')),
+            ArgparseArgument('bundlepackages', nargs='+', help=_('packages to bundle')),
+            ArgparseArgument('--add-recipe', action='append', default=[], help=_('additional recipes to bundle')),
+            ArgparseArgument(
+                '--no-bootstrap', action='store_true', default=False, help=_("Don't include bootstrep sources")
+            ),
+            ArgparseArgument(
+                '--offline', action='store_true', default=False, help=_('Use only the source cache, no network')
+            ),
         ]
         Command.__init__(self, args)
 
@@ -54,7 +52,7 @@ class BundleSource(Command):
         setup_args = ['sdist']
 
         if not config.uninstalled:
-            m.error("Can only be run on cerbero-uninstalled")
+            m.error('Can only be run on cerbero-uninstalled')
 
         store = PackagesStore(config)
         cookbook = CookBook(config)
@@ -87,8 +85,7 @@ class BundleSource(Command):
 
         if not args.no_bootstrap:
             build_tools = BuildTools(config, args.offline)
-            bs_recipes = build_tools.BUILD_TOOLS + \
-                         build_tools.PLAT_BUILD_TOOLS.get(config.platform, [])
+            bs_recipes = build_tools.BUILD_TOOLS + build_tools.PLAT_BUILD_TOOLS.get(config.platform, [])
             b_recipes = []
             for r in bs_recipes:
                 b_recipes += cookbook.list_recipe_deps(r)
@@ -108,5 +105,6 @@ class BundleSource(Command):
 
         command = str(config._relative_path('setup.py'))
         run_setup(command, setup_args)
+
 
 register_command(BundleSource)

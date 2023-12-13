@@ -24,21 +24,16 @@ from cerbero.utils import messages as m
 
 
 class Tag(Command):
-    doc = N_('Tag a git recipe or all git recipes using their '
-            'sdk-$version branch')
+    doc = N_('Tag a git recipe or all git recipes using their ' 'sdk-$version branch')
     name = 'tag'
 
     def __init__(self):
         args = [
-            ArgparseArgument('recipe',
-                help=_('name of the recipe to tag or "all" to '
-                        'tag all recipes')),
-            ArgparseArgument('tagname',
-                help=_('name of the tag to use')),
-            ArgparseArgument('tagdescription',
-                help=_('description of the tag')),
-            ArgparseArgument('-f', '--force', action='store_true',
-                default=False, help=_('Replace tag if existing'))]
+            ArgparseArgument('recipe', help=_('name of the recipe to tag or "all" to ' 'tag all recipes')),
+            ArgparseArgument('tagname', help=_('name of the tag to use')),
+            ArgparseArgument('tagdescription', help=_('description of the tag')),
+            ArgparseArgument('-f', '--force', action='store_true', default=False, help=_('Replace tag if existing')),
+        ]
         Command.__init__(self, args)
 
     def run(self, config, args):
@@ -48,34 +43,30 @@ class Tag(Command):
         else:
             recipes = [cookbook.get_recipe(args.recipe)]
         if len(recipes) == 0:
-            m.message(_("No recipes found"))
+            m.message(_('No recipes found'))
         tagname = args.tagname
         tagdescription = args.tagdescription
         force = args.force
         for recipe in recipes:
             try:
-                if recipe.stype != SourceType.GIT and \
-                   recipe.stype != SourceType.GIT_TARBALL:
-                    m.message(_("Recipe '%s' has a custom source repository, "
-                            "skipping") % recipe.name)
+                if recipe.stype != SourceType.GIT and recipe.stype != SourceType.GIT_TARBALL:
+                    m.message(_("Recipe '%s' has a custom source repository, " 'skipping') % recipe.name)
                     continue
 
                 recipe.fetch(checkout=False)
 
                 tags = git.list_tags(recipe.repo_dir)
-                exists = (tagname in tags)
+                exists = tagname in tags
                 if exists:
                     if not force:
-                        m.warning(_("Recipe '%s' tag '%s' already exists, "
-                                "not updating" % (recipe.name, tagname)))
+                        m.warning(_("Recipe '%s' tag '%s' already exists, " 'not updating' % (recipe.name, tagname)))
                         continue
                     git.delete_tag(recipe.repo_dir, tagname)
 
                 commit = 'origin/sdk-%s' % recipe.version
-                git.create_tag(recipe.repo_dir, tagname, tagdescription,
-                        commit)
+                git.create_tag(recipe.repo_dir, tagname, tagdescription, commit)
             except:
-                m.warning(_("Error tagging recipe %s" % recipe.name))
+                m.warning(_('Error tagging recipe %s' % recipe.name))
 
 
 register_command(Tag)

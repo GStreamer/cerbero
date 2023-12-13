@@ -28,7 +28,7 @@ class DummyConfig(object):
     sources = ''
     local_sources = ''
     wix_prefix = ''
-    py_prefix= ''
+    py_prefix = ''
     git_root = ''
     allow_parallel_build = False
     num_of_cpus = 1
@@ -39,21 +39,19 @@ class DummyConfig(object):
     install_dir = ''
 
 
-class XMLMixin():
-
+class XMLMixin:
     def find_one(self, el, tag):
         children = list(el.iterfind(tag))
         if len(children) == 0:
-            self.fail("Element with tag %s not found in parent %s" % (tag, el))
-        return children[0] 
+            self.fail('Element with tag %s not found in parent %s' % (tag, el))
+        return children[0]
 
     def check_attrib(self, parent, tag, attrib, value):
         n = self.find_one(parent, tag)
         if attrib not in n.attrib:
-            self.fail("Attribute %s not found in %s" % (attrib, n))
+            self.fail('Attribute %s not found in %s' % (attrib, n))
         self.assertEqual(n.attrib[attrib], value)
 
     def check_text(self, parent, tag, value):
         n = self.find_one(parent, tag)
         self.assertEqual(n.text, value)
-        

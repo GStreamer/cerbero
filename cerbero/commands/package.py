@@ -34,50 +34,92 @@ class Package(Command):
     name = 'package'
 
     def __init__(self):
-        Command.__init__(self,
-            [ArgparseArgument('package', nargs=1,
-                             help=_('name of the package to create')),
-            ArgparseArgument('-o', '--output-dir', default='.',
-                             help=_('Output directory for the tarball file')),
-            ArgparseArgument('-t', '--tarball', action='store_true',
-                default=False,
-                help=_('Creates a tarball instead of a native package')),
-            ArgparseArgument('-n', '--no-split', action='store_true',
-                default=False,
-                help=_('(only meaningfull when --tarball is set) Create one single '
-                       'tarball with devel and runtime files')),
-            ArgparseArgument('-f', '--force', action='store_true',
-                default=False, help=_('Delete any existing package file')),
-            ArgparseArgument('-d', '--no-devel', action='store_false',
-                default=True, help=_('Do not create the development version '
-                    'of this package')),
-            ArgparseArgument('-s', '--skip-deps-build', action='store_true',
-                default=False, help=_('Do not build the recipes needed to '
-                    'create this package (conflicts with --only-build-deps)')),
-            ArgparseArgument('-b', '--only-build-deps', action='store_true',
-                default=False, help=_('Only build the recipes needed to '
-                    'create this package (conflicts with --skip-deps-build)')),
-            ArgparseArgument('-k', '--keep-temp', action='store_true',
-                default=False, help=_('Keep temporary files for debug')),
-            ArgparseArgument('--offline', action='store_true',
-                default=False, help=_('Use only the source cache, no network')),
-            ArgparseArgument('--dry-run', action='store_true',
-                default=False, help=_('Only print the packages that will be built')),
-            ArgparseArgument('--compress-method', type=str,
-                choices=['default', 'xz', 'bz2', 'none'], default='default',
-                help=_('Select compression method for tarballs')),
-            ArgparseArgument('--jobs', '-j', action='store', type=int,
-                default=0, help=_('How many recipes to build concurrently. '
-                    '0 = number of CPUs.')),
-            ])
+        Command.__init__(
+            self,
+            [
+                ArgparseArgument('package', nargs=1, help=_('name of the package to create')),
+                ArgparseArgument('-o', '--output-dir', default='.', help=_('Output directory for the tarball file')),
+                ArgparseArgument(
+                    '-t',
+                    '--tarball',
+                    action='store_true',
+                    default=False,
+                    help=_('Creates a tarball instead of a native package'),
+                ),
+                ArgparseArgument(
+                    '-n',
+                    '--no-split',
+                    action='store_true',
+                    default=False,
+                    help=_(
+                        '(only meaningfull when --tarball is set) Create one single '
+                        'tarball with devel and runtime files'
+                    ),
+                ),
+                ArgparseArgument(
+                    '-f', '--force', action='store_true', default=False, help=_('Delete any existing package file')
+                ),
+                ArgparseArgument(
+                    '-d',
+                    '--no-devel',
+                    action='store_false',
+                    default=True,
+                    help=_('Do not create the development version ' 'of this package'),
+                ),
+                ArgparseArgument(
+                    '-s',
+                    '--skip-deps-build',
+                    action='store_true',
+                    default=False,
+                    help=_(
+                        'Do not build the recipes needed to ' 'create this package (conflicts with --only-build-deps)'
+                    ),
+                ),
+                ArgparseArgument(
+                    '-b',
+                    '--only-build-deps',
+                    action='store_true',
+                    default=False,
+                    help=_(
+                        'Only build the recipes needed to ' 'create this package (conflicts with --skip-deps-build)'
+                    ),
+                ),
+                ArgparseArgument(
+                    '-k', '--keep-temp', action='store_true', default=False, help=_('Keep temporary files for debug')
+                ),
+                ArgparseArgument(
+                    '--offline', action='store_true', default=False, help=_('Use only the source cache, no network')
+                ),
+                ArgparseArgument(
+                    '--dry-run',
+                    action='store_true',
+                    default=False,
+                    help=_('Only print the packages that will be built'),
+                ),
+                ArgparseArgument(
+                    '--compress-method',
+                    type=str,
+                    choices=['default', 'xz', 'bz2', 'none'],
+                    default='default',
+                    help=_('Select compression method for tarballs'),
+                ),
+                ArgparseArgument(
+                    '--jobs',
+                    '-j',
+                    action='store',
+                    type=int,
+                    default=0,
+                    help=_('How many recipes to build concurrently. ' '0 = number of CPUs.'),
+                ),
+            ],
+        )
 
     def run(self, config, args):
         self.store = PackagesStore(config, offline=args.offline)
         p = self.store.get_package(args.package[0])
 
         if args.skip_deps_build and args.only_build_deps:
-            raise UsageError(_("Cannot use --skip-deps-build together with "
-                    "--only-build-deps"))
+            raise UsageError(_('Cannot use --skip-deps-build together with ' '--only-build-deps'))
 
         if not args.skip_deps_build:
             self._build_deps(config, p, args.no_devel, args.offline, args.dry_run, args.jobs)
@@ -95,8 +137,7 @@ class Package(Command):
         p.pre_package()
         packager_class = Packager
         if args.tarball:
-            if config.target_platform == Platform.ANDROID and \
-               config.target_arch == Architecture.UNIVERSAL:
+            if config.target_platform == Platform.ANDROID and config.target_arch == Architecture.UNIVERSAL:
                 packager_class = AndroidPackager
             else:
                 packager_class = DistTarball
@@ -108,27 +149,30 @@ class Package(Command):
             args.no_split = True
             packager_class = DistTarball
 
-        m.action(_("Creating package for %s") % p.name)
+        m.action(_('Creating package for %s') % p.name)
         pkg = packager_class(config, p, self.store)
         output_dir = os.path.abspath(args.output_dir)
         if isinstance(pkg, DistTarball):
-            paths = pkg.pack(output_dir, args.no_devel, args.force,
-                             args.keep_temp, split=not args.no_split,
-                             strip_binaries=p.strip)
+            paths = pkg.pack(
+                output_dir, args.no_devel, args.force, args.keep_temp, split=not args.no_split, strip_binaries=p.strip
+            )
         else:
-            paths = pkg.pack(output_dir, args.no_devel,
-                             args.force, args.keep_temp)
+            paths = pkg.pack(output_dir, args.no_devel, args.force, args.keep_temp)
         if None in paths:
             paths.remove(None)
         paths = p.post_package(paths, output_dir) or paths
-        m.action(_("Package successfully created in %s") %
-                 ' '.join([os.path.abspath(x) for x in paths]))
+        m.action(_('Package successfully created in %s') % ' '.join([os.path.abspath(x) for x in paths]))
 
     def _build_deps(self, config, package, has_devel, offline, dry_run, jobs):
         build_command = build.Build()
-        build_command.runargs(config, package.recipes_dependencies(has_devel),
-            cookbook=self.store.cookbook, dry_run=dry_run, offline=offline,
-            jobs=jobs)
+        build_command.runargs(
+            config,
+            package.recipes_dependencies(has_devel),
+            cookbook=self.store.cookbook,
+            dry_run=dry_run,
+            offline=offline,
+            jobs=jobs,
+        )
 
 
 register_command(Package)

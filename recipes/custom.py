@@ -7,6 +7,7 @@ from cerbero.build.source import SourceType
 from cerbero.build.cookbook import CookBook
 from cerbero.enums import License, FatalError
 
+
 def running_on_cerbero_ci():
     if os.environ.get('CI_PROJECT_NAME', '') != 'cerbero':
         return False
@@ -16,6 +17,7 @@ def running_on_cerbero_ci():
     if os.environ.get('CI_GSTREAMER_TRIGGERED', '') == 'true':
         return False
     return True
+
 
 class GStreamer(recipe.Recipe):
     licenses = [License.LGPLv2Plus]
@@ -134,9 +136,16 @@ class GStreamer(recipe.Recipe):
 def list_gstreamer_1_0_plugins_by_category(config):
     cookbook = CookBook(config)
     plugins = defaultdict(list)
-    recipes = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'gst-plugins-good-1.0',
-        'gst-plugins-bad-1.0', 'gst-plugins-ugly-1.0', 'libnice',
-        'gst-libav-1.0', 'gst-editing-services-1.0', 'gst-rtsp-server-1.0'
+    recipes = [
+        'gstreamer-1.0',
+        'gst-plugins-base-1.0',
+        'gst-plugins-good-1.0',
+        'gst-plugins-bad-1.0',
+        'gst-plugins-ugly-1.0',
+        'libnice',
+        'gst-libav-1.0',
+        'gst-editing-services-1.0',
+        'gst-rtsp-server-1.0',
     ]
     if config.variants.rust:
         recipes.append('gst-plugins-rs')
@@ -144,10 +153,10 @@ def list_gstreamer_1_0_plugins_by_category(config):
         r = cookbook.get_recipe(r)
         for attr_name in dir(r):
             if attr_name.startswith('files_plugins_') and attr_name.endswith('devel'):
-                cat_name = attr_name[len('files_plugins_'):-len('_devel')]
+                cat_name = attr_name[len('files_plugins_') : -len('_devel')]
                 plugins_list = getattr(r, attr_name)
             elif attr_name.startswith('platform_files_plugins_') and attr_name.endswith('devel'):
-                cat_name = attr_name[len('platform_files_plugins_'):-len('_devel')]
+                cat_name = attr_name[len('platform_files_plugins_') : -len('_devel')]
                 plugins_dict = getattr(r, attr_name)
                 plugins_list = plugins_dict.get(config.target_platform, [])
             else:

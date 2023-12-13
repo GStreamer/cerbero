@@ -1,4 +1,3 @@
-
 # cerbero - a multi-platform build system for Open Source software
 # Copyright (C) 2012 Andoni Morales Alastruey <ylatuya@gmail.com>
 #
@@ -17,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-INFO_PLIST_TPL='''\
+INFO_PLIST_TPL = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -43,16 +42,15 @@ INFO_PLIST_TPL='''\
 %(extra)s
 </dict>
 </plist>
-'''
+"""
 
 
 class InfoPlist(object):
-    ''' Create a Info.plist file '''
+    """Create a Info.plist file"""
 
     package_type = ''
 
-    def __init__(self, name, identifier, version, info, minosxversion,
-            icon=None, plist_tpl=None):
+    def __init__(self, name, identifier, version, info, minosxversion, icon=None, plist_tpl=None):
         self.name = name
         self.identifier = identifier
         self.version = version
@@ -66,34 +64,38 @@ class InfoPlist(object):
             f.write(self.plist_tpl % self._get_properties())
 
     def _get_properties(self):
-        properties = {'id': self.identifier, 'name': self.name,
-                'desc': self.info, 'ptype': self.package_type,
-                'icon': self.icon, 'version_str': self.version,
-                'version': self.version.replace('.', ''),
-                'minosxversion': self.minosxversion, 'extra':''}
+        properties = {
+            'id': self.identifier,
+            'name': self.name,
+            'desc': self.info,
+            'ptype': self.package_type,
+            'icon': self.icon,
+            'version_str': self.version,
+            'version': self.version.replace('.', ''),
+            'minosxversion': self.minosxversion,
+            'extra': '',
+        }
         if self.icon:
-            properties['extra'] = '<key>CFBundleIconFile</key>\n' \
-                '<string>%s</string>' % self.icon
+            properties['extra'] = '<key>CFBundleIconFile</key>\n' '<string>%s</string>' % self.icon
         return properties
 
 
 class FrameworkPlist(InfoPlist):
-    ''' Create a Info.plist file for frameworks '''
+    """Create a Info.plist file for frameworks"""
 
     package_type = 'FMWK'
 
 
-
 class ApplicationPlist(InfoPlist):
-    ''' Create a Info.plist file for applications '''
+    """Create a Info.plist file for applications"""
 
     package_type = 'APPL'
 
 
-class ComponentPropertyPlist():
-    ''' Create a component property list to be used with pkgbuild '''
+class ComponentPropertyPlist:
+    """Create a component property list to be used with pkgbuild"""
 
-    COMPONENT_TPL='''\
+    COMPONENT_TPL = """\
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -110,11 +112,12 @@ class ComponentPropertyPlist():
 </dict>
 </array>
 </plist>
-'''
+"""
+
     def __init__(self, description, rel_path):
         self.desc = description
         self.rel_path = rel_path
 
     def save(self, filename):
         with open(filename, 'w+') as f:
-            f.write(INFO_PLIST_TPL  % (self.rel_path, self.key))
+            f.write(INFO_PLIST_TPL % (self.rel_path, self.key))

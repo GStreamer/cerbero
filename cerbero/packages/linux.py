@@ -31,7 +31,6 @@ import shutil
 
 
 class LinuxPackager(PackagerBase):
-
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self.package_prefix = ''
@@ -40,8 +39,7 @@ class LinuxPackager(PackagerBase):
         self.packager = self.config.packager
         self._check_packager()
 
-    def pack(self, output_dir, devel=True, force=False, keep_temp=False,
-             pack_deps=True, tmpdir=None):
+    def pack(self, output_dir, devel=True, force=False, keep_temp=False, pack_deps=True, tmpdir=None):
         self.install_dir = self.package.get_install_dir()
         self.devel = devel
         self.force = force
@@ -58,10 +56,10 @@ class LinuxPackager(PackagerBase):
 
         if not isinstance(self.package, MetaPackage):
             # create a tarball with all the package's files
-            tarball_packager = DistTarball(self.config, self.package,
-                    self.store)
-            tarball = tarball_packager.pack(tmpdir, devel, True, split=False,
-                    package_prefix=self.full_package_name, strip_binaries=False)[0]
+            tarball_packager = DistTarball(self.config, self.package, self.store)
+            tarball = tarball_packager.pack(
+                tmpdir, devel, True, split=False, package_prefix=self.full_package_name, strip_binaries=False
+            )[0]
             tarname = self.setup_source(tarball, tmpdir, packagedir, srcdir)
         else:
             # metapackages only contains Requires dependencies with
@@ -108,8 +106,7 @@ class LinuxPackager(PackagerBase):
                 # already built, skipping
                 continue
 
-            m.action(_('Packing dependency %s for package %s') %
-                     (p.name, self.package.name))
+            m.action(_('Packing dependency %s for package %s') % (p.name, self.package.name))
             packager = self.__class__(self.config, p, self.store)
             try:
                 packager.pack(output_dir, self.devel, force, True, True, tmpdir)
@@ -160,7 +157,7 @@ class LinuxPackager(PackagerBase):
         # Development packages should depend on the runtime package
         if package_type == PackageType.DEVEL:
             if self._has_runtime_package(self.package):
-                deps.append("%s%s" % (self._package_prefix(self.package), self.package.name))
+                deps.append('%s%s' % (self._package_prefix(self.package), self.package.name))
 
         deps.extend(self.package.get_sys_deps(package_type))
         return sorted(deps)
@@ -186,13 +183,11 @@ class LinuxPackager(PackagerBase):
         return ''
 
     def _full_package_name(self):
-        return '%s%s-%s' % (self.package_prefix, self.package.name,
-                            self.package.version)
+        return '%s%s-%s' % (self.package_prefix, self.package.name, self.package.version)
 
     def _check_packager(self):
         if self.packager == DEFAULT_PACKAGER:
-            m.warning(_('No packager defined, using default '
-                        'packager "%s"') % self.packager)
+            m.warning(_('No packager defined, using default ' 'packager "%s"') % self.packager)
 
     def _has_runtime_package(self, package):
         if hasattr(package, 'has_runtime_package'):

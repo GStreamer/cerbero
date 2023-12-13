@@ -4,10 +4,11 @@ import xml.etree.ElementTree as ET
 from cerbero.utils import _
 from cerbero.errors import FatalError
 
+
 class Manifest(object):
-    '''
+    """
     Parse and store the content of a manifest file
-    '''
+    """
 
     remotes = {}
     projects = {}
@@ -21,7 +22,7 @@ class Manifest(object):
         try:
             tree = ET.parse(self.manifest_path)
         except Exception as ex:
-            raise FatalError(_("Error loading manifest in file %s") % ex)
+            raise FatalError(_('Error loading manifest in file %s') % ex)
 
         root = tree.getroot()
 
@@ -32,8 +33,7 @@ class Manifest(object):
                 self.default_remote = child.attrib['remote'] or self.default_remote
                 self.default_revision = child.attrib['revision'] or self.default_revision
             if child.tag == 'project':
-                project = namedtuple('Project', ['name', 'remote',
-                    'revision', 'fetch_uri'])
+                project = namedtuple('Project', ['name', 'remote', 'revision', 'fetch_uri'])
 
                 project.name = child.attrib['name']
                 if project.name.endswith('.git'):
@@ -48,7 +48,7 @@ class Manifest(object):
         try:
             return self.projects[name]
         except KeyError as ex:
-            raise FatalError(_("Could not find project %s in manifes") % name)
+            raise FatalError(_('Could not find project %s in manifes') % name)
 
     def get_fetch_uri(self, project, remote):
         fetch = self.remotes[remote]
