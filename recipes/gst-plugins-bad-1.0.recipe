@@ -529,6 +529,8 @@ class Recipe(custom.GStreamer):
                 self.meson_options['d3d11-wgc'] = 'enabled'
                 # HLSL cross-compile is not supported
                 self.meson_options['d3d11-hlsl-precompile'] = 'enabled'
+                # D3D12 needs newer SDK than system installed one with helper library
+                self.deps.append('directx-headers')
                 self.enable_plugin('d3d12', 'sys')
             else:
                 # mingw does not ship DirectXMath headers

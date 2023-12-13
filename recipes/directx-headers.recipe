@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    version = '1.611.0'
+    name = 'directx-headers'
+    licenses = [{License.MIT: ['LICENSE']}]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = 'https://github.com/microsoft/DirectX-Headers/archive/refs/tags/v%(version)s.tar.gz'
+    tarball_checksum = 'edb8b52b1379f841df5d0d5e11dde08e0c3912508179fb3711f163382e88865c'
+
