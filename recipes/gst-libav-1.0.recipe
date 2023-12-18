@@ -4,7 +4,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-libav-1.0'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    tarball_checksum = '1525b917141b895fe5cf618fe8867622b2528278a0286e9f727b5f37317daca1'
+    tarball_checksum = 'be39349bc07ab4cdbd9a5fd6ea9848c601c7560ba5a0577ad5200b83bd424981'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'ffmpeg']
 
     files_plugins_codecs_restricted = ['lib/gstreamer-1.0/libgstlibav%(mext)s']
