@@ -5,6 +5,7 @@ include:
 
 stages:
   - 'build docker'
+  - 'check sources'
   - 'build'
   # Use the resulting binaries
   - 'integrate'
@@ -22,6 +23,7 @@ variables:
   MESON_COMMIT:
     description: "Overwrite the meson version installed on the CI images with the specified meson commit"
     value: ""
+  PRE_COMMIT_HOME: '/pre-commit'
 
 workflow:
   # https://docs.gitlab.com/ee/ci/yaml/index.html#switch-between-branch-pipelines-and-merge-request-pipelines
@@ -65,6 +67,21 @@ default:
     FDO_DISTRIBUTION_EXEC: ci/docker_setup.sh
     FDO_UPSTREAM_REPO: gstreamer/cerbero
 
+.checks fedora image:
+  variables:
+    ###
+    # IMPORTANT
+    # These are the version tags for the docker images the CI runs against.
+    # If you are hacking on them or need a them to rebuild, its enough
+    # to change any part of the string of the image you want.
+    ###
+    FDO_DISTRIBUTION_TAG: '2023-12-19.1'
+    FDO_DISTRIBUTION_VERSION: '37'
+    FDO_DISTRIBUTION_PACKAGES: "git-core python3-pip"
+    FDO_DISTRIBUTION_EXEC: ci/checks_setup.sh
+    FDO_UPSTREAM_REPO: gstreamer/cerbero
+    FDO_REPO_SUFFIX: checks
+
 .android fedora image:
   variables:
     ###
@@ -104,6 +121,14 @@ fedora image:
   extends:
     - .manual trigger
     - .fedora image
+    - .fdo.container-build@fedora
+  variables:
+    GIT_STRATEGY: none
+
+checks fedora image:
+  stage: "build docker"
+  extends:
+    - .checks fedora image
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
@@ -222,6 +247,16 @@ android fedora image:
     - '.cerbero mr rules'
   script:
     - ./ci/cerbero_setup.sh cerbero_script
+
+pre-commit checks:
+  extends:
+    - .checks fedora image
+    - .fdo.suffixed-image@fedora
+  needs:
+    - "checks fedora image"
+  stage: 'check sources'
+  script:
+    pre-commit run --all-files
 
 #
 # Cerbero Linux X86_64 build
