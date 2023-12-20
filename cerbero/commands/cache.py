@@ -206,7 +206,7 @@ class GenCache(BaseCache):
     def create_tarball_tarfile(self, workdir, out_file, *in_files, exclude=None):
         import tarfile
 
-        m.action(f'Generating cache file with tarfile + xz')
+        m.action('Generating cache file with tarfile + xz')
 
         def exclude_filter(tarinfo):
             for each in exclude:

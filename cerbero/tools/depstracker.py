@@ -24,7 +24,7 @@ from cerbero.utils import shell
 
 class RecursiveLister:
     def list_file_deps(self, prefix, path):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def find_deps(self, prefix, lib, state={}, ordered=[]):
         if state.get(lib, 'clean') == 'processed':

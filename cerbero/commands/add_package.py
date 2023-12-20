@@ -203,7 +203,7 @@ class AddPackage(Command):
             for dname in deps:
                 try:
                     package = store.get_package(dname)
-                except Exception as ex:
+                except Exception:
                     raise UsageError(_('Error creating package: ' 'dependant package %s does not exist') % dname)
             template_args['deps'] = deps
 
@@ -218,7 +218,7 @@ class AddPackage(Command):
             for pname in includes:
                 try:
                     package = store.get_package(pname)
-                except Exception as ex:
+                except Exception:
                     raise UsageError(_('Error creating package: ' 'included package %s does not exist') % pname)
                 include_files.extend(package.files)
                 include_files_devel.extend(package.files_devel)
@@ -278,13 +278,13 @@ class AddPackage(Command):
 
     def validate_licenses(self, licenses):
         for l in licenses:
-            if l and not l in self.supported_licenses:
+            if l and l not in self.supported_licenses:
                 raise UsageError(_('Error creating package: ' "invalid license '%s'") % l)
 
     def validate_platform_files(self, platform_files):
         for f in platform_files:
             platform = f[: f.index(':')]
-            if not platform in self.supported_platforms:
+            if platform not in self.supported_platforms:
                 raise UsageError(_('Error creating package: ' "invalid platform '%s'") % platform)
 
     def parse_platform_files(self, platform_files, extra_files):
@@ -300,7 +300,7 @@ class AddPackage(Command):
                 platform_index = desc.index(':')
                 platform = desc[:platform_index]
                 files = desc[platform_index + 1 :]
-                if not platform in parsed_files:
+                if platform not in parsed_files:
                     parsed_files[platform] = [files]
                 else:
                     parsed_files[platform].append(files)

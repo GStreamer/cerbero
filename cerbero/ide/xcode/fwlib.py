@@ -77,7 +77,7 @@ class FrameworkLibrary(object):
         return libspaths
 
     def _create_framework_library(self, libraries):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _get_lib_file_name(self, lib):
         return lib

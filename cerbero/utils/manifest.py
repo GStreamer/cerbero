@@ -47,7 +47,7 @@ class Manifest(object):
     def find_project(self, name):
         try:
             return self.projects[name]
-        except KeyError as ex:
+        except KeyError:
             raise FatalError(_('Could not find project %s in manifes') % name)
 
     def get_fetch_uri(self, project, remote):

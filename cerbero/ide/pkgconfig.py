@@ -17,13 +17,10 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import subprocess
 import os
-import sys
 
-from cerbero.enums import Distro
 from cerbero.errors import FatalError
-from cerbero.utils import shell, to_winpath
+from cerbero.utils import shell
 
 
 class PkgConfig(object):

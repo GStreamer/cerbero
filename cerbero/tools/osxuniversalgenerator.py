@@ -18,7 +18,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import subprocess
 import shutil
 import tempfile
 import sys

@@ -19,7 +19,6 @@
 import unittest
 import io
 
-from cerbero import hacks
 from cerbero.build import recipe
 from cerbero.config import Platform
 from cerbero.packages import package

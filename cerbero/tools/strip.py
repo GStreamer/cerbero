@@ -18,7 +18,6 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import asyncio
 import shlex
 from cerbero.config import Platform
 from cerbero.utils import shell, run_until_complete, messages as m

@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Distro, Platform
+from cerbero.config import Distro
 from cerbero.errors import FatalError
 from cerbero.utils import _, get_wix_prefix
 from cerbero.utils import messages as m
@@ -26,7 +26,7 @@ _packagers = {}
 
 
 def register_packager(distro, klass, distro_version=None):
-    if not distro in _packagers:
+    if distro not in _packagers:
         _packagers[distro] = {}
     _packagers[distro][distro_version] = klass
 

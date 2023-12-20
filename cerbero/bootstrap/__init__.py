@@ -55,7 +55,7 @@ class BootstrapperBase(object):
         self.sources = {}
 
     async def start(self):
-        raise NotImplemented("'start' must be implemented by subclasses")
+        raise NotImplementedError("'start' must be implemented by subclasses")
 
     async def fetch_urls_impl(self, urls):
         for url, name, checksum in urls:

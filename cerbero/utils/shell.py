@@ -19,7 +19,6 @@
 import logging
 import subprocess
 import asyncio
-import shlex
 import sys
 import os
 import re

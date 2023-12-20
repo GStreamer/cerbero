@@ -70,7 +70,7 @@ class Deps(Command):
                 m.message('%s%s' % (' ' * 3 * level, recipe.name))
                 already_shown.append(recipe)
                 for r in [cookbook.get_recipe(x) for x in recipe.list_deps()]:
-                    if not r in already_shown:
+                    if r not in already_shown:
                         print_dep(cookbook, r, level + 1, already_shown)
                     elif not r.name == recipe.name:
                         m.message('%s(%s)' % (' ' * 3 * (level + 1), r.name))

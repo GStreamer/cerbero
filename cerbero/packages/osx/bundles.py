@@ -20,7 +20,6 @@ import os
 import tempfile
 import shutil
 
-from cerbero.config import Architecture
 from cerbero.packages import PackagerBase
 from cerbero.packages.package import Package
 from cerbero.packages.osx.buildtools import PackageBuild
@@ -81,7 +80,7 @@ class BundlePackagerBase(PackagerBase):
         """
         Creates the bundle structure
         """
-        raise NotImplemented('Subclasses should implement create_bundle')
+        raise NotImplementedError('Subclasses should implement create_bundle')
 
 
 class FrameworkBundlePackager(BundlePackagerBase):

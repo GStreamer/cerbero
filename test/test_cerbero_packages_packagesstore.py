@@ -21,7 +21,7 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.errors import PackageNotFoundError
-from cerbero.packages.package import Package, MetaPackage, SDKPackage, InstallerPackage, App
+from cerbero.packages.package import Package, SDKPackage, InstallerPackage
 from cerbero.packages.packagesstore import PackagesStore
 from test import test_packages_common as common
 

@@ -17,23 +17,16 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import sys
 import venv
 import glob
-import sysconfig
 import shutil
 
-from cerbero.config import Config
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.build.oven import Oven
 from cerbero.build.cookbook import CookBook
 from cerbero.commands.fetch import Fetch
-from cerbero.utils import _, shell
-from cerbero.utils import messages as m
-from cerbero.errors import FatalError, ConfigurationError
+from cerbero.utils import shell
 from cerbero.enums import Platform, Distro
-
-from pathlib import PurePath
 
 
 class BuildTools(BootstrapperBase, Fetch):

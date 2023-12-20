@@ -21,7 +21,6 @@ import asyncio
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
 from cerbero.enums import LibraryType
-from cerbero.errors import FatalError
 from cerbero.packages.packagesstore import PackagesStore
 from cerbero.utils import (
     _,

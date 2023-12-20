@@ -23,7 +23,6 @@
 import base64
 import os.path
 import re
-import sys
 import textwrap
 
 objects = []
@@ -112,7 +111,7 @@ for obj in objects:
 
 for obj in objects:
     if obj['CKA_CLASS'] == 'CKO_CERTIFICATE':
-        if not obj['CKA_LABEL'] in trust or not trust[obj['CKA_LABEL']]:
+        if obj['CKA_LABEL'] not in trust or not trust[obj['CKA_LABEL']]:
             continue
         fname = (
             obj['CKA_LABEL'][1:-1]

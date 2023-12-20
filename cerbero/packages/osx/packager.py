@@ -25,7 +25,7 @@ from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.xcode.fwlib import StaticFrameworkLibrary
 from cerbero.errors import EmptyPackageError, FatalError
 from cerbero.packages import PackagerBase, PackageType
-from cerbero.packages.package import Package, MetaPackage, App, PackageBase, SDKPackage
+from cerbero.packages.package import Package, MetaPackage, App, SDKPackage
 from cerbero.packages.osx.distribution import DistributionXML
 from cerbero.packages.osx.bundles import FrameworkBundlePackager, ApplicationBundlePackager
 from cerbero.packages.osx.buildtools import PackageBuild, ProductBuild

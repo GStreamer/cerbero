@@ -16,7 +16,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero import hacks
+from cerbero import hacks  # noqa: F401
 
 import argparse
 import sys
@@ -190,7 +190,7 @@ class Main(object):
             self.log_error(exc, True, command)
         except BuildStepError as exc:
             self.log_error(exc.msg, False, command)
-        except AbortedError as exc:
+        except AbortedError:
             self.log_error('', False, command)
         except CerberoException as exc:
             self.log_error(exc, False, command)

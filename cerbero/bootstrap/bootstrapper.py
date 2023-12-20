@@ -16,11 +16,9 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-import logging
 
 from cerbero.errors import FatalError
 from cerbero.utils import _
-from cerbero.utils import messages as m
 from cerbero.bootstrap.build_tools import BuildTools
 from cerbero.bootstrap.rust import RustBootstrapper
 
@@ -30,13 +28,13 @@ system_bootstrappers = {}
 
 
 def register_system_bootstrapper(distro, klass, distro_version=None):
-    if not distro in system_bootstrappers:
+    if distro not in system_bootstrappers:
         system_bootstrappers[distro] = {}
     system_bootstrappers[distro][distro_version] = klass
 
 
 def register_toolchain_bootstrapper(distro, klass, distro_version=None):
-    if not distro in toolchain_bootstrappers:
+    if distro not in toolchain_bootstrappers:
         toolchain_bootstrappers[distro] = {}
     toolchain_bootstrappers[distro][distro_version] = klass
 

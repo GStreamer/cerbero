@@ -161,7 +161,7 @@ class PackagesStore(object):
             m_path = os.path.join(repo, 'custom.py')
             if os.path.exists(m_path):
                 custom = imp_load_source('custom', m_path)
-        except Exception as ex:
+        except Exception:
             # import traceback
             # traceback.print_exc()
             # m.warning("Error loading package %s" % ex)

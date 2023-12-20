@@ -17,10 +17,8 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-import sys
 import stat
 import shutil
-import subprocess
 from urllib.parse import urlparse
 
 from cerbero.bootstrap import BootstrapperBase

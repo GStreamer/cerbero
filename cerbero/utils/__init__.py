@@ -25,15 +25,10 @@ import shutil
 import pathlib
 import argparse
 import importlib
-
 try:
-    import sysconfig
-except:
-    from distutils import sysconfig
-try:
-    import xml.etree.cElementTree as etree
+    import xml.etree.cElementTree as etree # noqa: F401
 except ImportError:
-    from lxml import etree
+    from lxml import etree  # noqa: F401
 import gettext
 import platform as pplatform
 import re

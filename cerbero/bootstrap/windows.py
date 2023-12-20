@@ -24,9 +24,9 @@ from pathlib import Path
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
-from cerbero.config import Architecture, Distro, Platform
+from cerbero.config import Distro, Platform
 from cerbero.errors import ConfigurationError
-from cerbero.utils import shell, _, fix_winpath, to_unixpath, git
+from cerbero.utils import shell, git
 from cerbero.utils import messages as m
 
 # Toolchain

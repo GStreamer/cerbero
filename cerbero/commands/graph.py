@@ -19,7 +19,6 @@
 
 
 import shutil
-import argparse
 import tempfile
 
 from cerbero.commands import Command, register_command

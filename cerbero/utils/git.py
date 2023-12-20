@@ -18,11 +18,10 @@
 
 import os
 import time
-import shutil
 import cerbero.utils.messages as m
 
 from cerbero.config import Platform
-from cerbero.utils import shell, run_until_complete, _
+from cerbero.utils import shell, _
 from cerbero.errors import FatalError
 
 

@@ -20,7 +20,6 @@ import os
 import sys
 import copy
 import sysconfig
-import itertools
 from functools import lru_cache
 from pathlib import PurePath, Path
 

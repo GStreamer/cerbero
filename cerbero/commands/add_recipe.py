@@ -120,7 +120,7 @@ class AddRecipe(Command):
             for dname in deps:
                 try:
                     recipe = cookbook.get_recipe(dname)
-                except RecipeNotFoundError as ex:
+                except RecipeNotFoundError:
                     raise UsageError(_('Error creating recipe: ' 'dependant recipe %s does not exist') % dname)
             template_args['deps'] = deps
 
@@ -135,7 +135,7 @@ class AddRecipe(Command):
 
     def validate_licenses(self, licenses):
         for l in licenses:
-            if l and not l in self.supported_licenses:
+            if l and l not in self.supported_licenses:
                 raise UsageError(_('Error creating recipe: ' "invalid license '%s'") % l)
 
 

@@ -144,13 +144,13 @@ class PackageBase(object):
         return os.path.abspath(os.path.join(self.package_dir(), path))
 
     def files_list(self):
-        raise NotImplemented("'files_list' must be implemented by subclasses")
+        raise NotImplementedError("'files_list' must be implemented by subclasses")
 
     def devel_files_list(self):
-        raise NotImplemented("'devel_files_list' must be implemented by " 'subclasses')
+        raise NotImplementedError("'devel_files_list' must be implemented by " 'subclasses')
 
     def all_files_list(self):
-        raise NotImplemented("'all_files_list' must be implemented by " 'subclasses')
+        raise NotImplementedError("'all_files_list' must be implemented by " 'subclasses')
 
     def pre_package(self):
         """

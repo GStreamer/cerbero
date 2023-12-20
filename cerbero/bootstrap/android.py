@@ -21,8 +21,7 @@ import shutil
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
-from cerbero.config import Distro, FatalError
-from cerbero.utils import _, shell
+from cerbero.config import Distro
 
 NDK_VERSION = 'r25c'
 NDK_BASE_URL = 'https://dl.google.com/android/repository/android-ndk-%s-%s.zip'
