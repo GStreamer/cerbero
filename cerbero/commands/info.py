@@ -71,7 +71,7 @@ class PackageInfo(Command):
                 'name': p.name,
                 'version': p.version,
                 'url': p.url,
-                'licenses': ' and '.join([l.acronym for l in licenses]),
+                'licenses': ' and '.join([license.acronym for license in licenses]),
                 'desc': p.shortdesc,
                 'deps': ', '.join([p.name for p in store.get_package_deps(p_name, True)]),
             }

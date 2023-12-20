@@ -116,7 +116,7 @@ class MergeModulePackager(PackagerBase):
                     os.remove(f)
                     try:
                         os.remove(f.replace('.wixobj', '.wixpdb'))
-                    except:
+                    except Exception:
                         pass
 
         if keep_strip_temp_dir:
@@ -259,7 +259,7 @@ class MSIPackager(PackagerBase):
                 os.remove(f)
                 try:
                     os.remove(f.replace('.wixobj', '.wixpdb'))
-                except:
+                except Exception:
                     pass
             os.remove(config_path)
 

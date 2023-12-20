@@ -19,7 +19,7 @@
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_system_bootstrapper
 from cerbero.enums import Platform, Architecture, Distro, DistroVersion
-from cerbero.errors import ConfigurationError
+from cerbero.errors import ConfigurationError, CommandError
 from cerbero.utils import user_is_root, shell
 from cerbero.utils import messages as m
 

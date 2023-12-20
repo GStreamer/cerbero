@@ -61,15 +61,15 @@ class Packager(object):
         if d == Distro.WINDOWS and config.cross_compiling():
             try:
                 get_wix_prefix(config)
-            except:
+            except Exception:
                 m.warning('Cross-compiling for Windows and WIX not found, overriding Packager')
                 d = Distro.NONE
 
         return _packagers[d][v](config, package, store)
 
 
-from cerbero.packages import wix_packager, rpm, debian, android, disttarball
-from cerbero.packages.osx import packager as osx_packager
+from cerbero.packages import wix_packager, rpm, debian, android, disttarball  # noqa: E402
+from cerbero.packages.osx import packager as osx_packager  # noqa: E402
 
 wix_packager.register()
 osx_packager.register()

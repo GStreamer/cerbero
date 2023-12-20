@@ -65,7 +65,7 @@ class Tag(Command):
 
                 commit = 'origin/sdk-%s' % recipe.version
                 git.create_tag(recipe.repo_dir, tagname, tagdescription, commit)
-            except:
+            except Exception:
                 m.warning(_('Error tagging recipe %s' % recipe.name))
 
 

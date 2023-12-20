@@ -16,6 +16,8 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
+# ruff: noqa: E402
+
 import os
 import sys
 import pathlib
@@ -26,7 +28,11 @@ import pathlib
 import re
 import io
 from xml.dom import minidom
-from cerbero.utils import etree
+
+try:
+    import xml.etree.cElementTree as etree
+except ImportError:
+    from lxml import etree
 
 oldwrite = etree.ElementTree.write
 
@@ -103,11 +109,9 @@ if sys.platform.startswith('win'):
     # am_cv_python_platform
     os.environ.encodekey = os.environ.encodevalue
 
-
 import stat
 import shutil
 from shutil import rmtree as shutil_rmtree
-from cerbero.utils.shell import new_call as shell_call
 
 
 def rmtree(path, ignore_errors=False, onerror=None):
@@ -133,6 +137,9 @@ def rmtree(path, ignore_errors=False, onerror=None):
             os.chmod(path, stat.S_IWRITE)
             func(path)
         except OSError:
+            # Import here to avoid circular import
+            from cerbero.utils.shell import new_call as shell_call
+
             shell_call('rm -rf ' + path)
 
     # We try to not use `rm` because on Windows because it's about 20-30x slower

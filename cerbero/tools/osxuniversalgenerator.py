@@ -110,7 +110,7 @@ class OSXUniversalGenerator(object):
             await self.do_merge(f, dirs)
 
     def merge_dirs(self, input_roots, output_root=None):
-        if output_root == None:
+        if output_root is None:
             output_root = self.output_root
         if not os.path.exists(output_root):
             os.makedirs(output_root)

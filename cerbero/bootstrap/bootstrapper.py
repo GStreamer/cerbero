@@ -86,7 +86,7 @@ class Bootstrapper(object):
         return bs
 
 
-from cerbero.bootstrap import linux, windows, android, osx, ios
+from cerbero.bootstrap import linux, windows, android, osx, ios  # noqa: E402
 
 linux.register_all()
 windows.register_all()

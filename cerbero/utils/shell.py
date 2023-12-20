@@ -29,7 +29,9 @@ import time
 import glob
 import shutil
 import hashlib
-import urllib.request, urllib.error, urllib.parse
+import urllib.request
+import urllib.error
+import urllib.parse
 import collections
 from pathlib import Path, PurePath
 
@@ -474,7 +476,7 @@ def _splitter(string, base_url):
     for line in lines:
         try:
             yield '%s/%s' % (base_url, line.split(' ')[2])
-        except:
+        except Exception:
             continue
 
 
@@ -500,7 +502,7 @@ def ls_dir(dirpath, prefix):
 
 def find_newer_files(prefix, compfile):
     cmd = ['find', '.', '-type', 'f', '-cnewer', compfile]
-    out = check_call(cmd, cmd_dir=prefix, fail=False)
+    out = subprocess.check_call(cmd, cmd_dir=prefix, fail=False)
     return out.strip().split('\n')
 
 

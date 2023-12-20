@@ -55,9 +55,8 @@ class AddRecipe(Command):
 
     def __init__(self):
         self.supported_licenses = {}
-        l = License
-        for name in l.__dict__:
-            attr = getattr(l, name)
+        for name in License.__dict__:
+            attr = getattr(License, name)
             if not isinstance(attr, LicenseDescription):
                 continue
             self.supported_licenses[attr.acronym] = name
@@ -103,7 +102,7 @@ class AddRecipe(Command):
             licenses = args.licenses.split(',')
             self.validate_licenses(licenses)
             template += LICENSES_TPL
-            template_args['licenses'] = ', '.join(['License.' + self.supported_licenses[l] for l in licenses])
+            template_args['licenses'] = ', '.join(['License.' + self.supported_licenses[lic] for lic in licenses])
 
         if args.commit:
             template += COMMIT_TPL
@@ -119,7 +118,7 @@ class AddRecipe(Command):
             cookbook = CookBook(config)
             for dname in deps:
                 try:
-                    recipe = cookbook.get_recipe(dname)
+                    cookbook.get_recipe(dname)
                 except RecipeNotFoundError:
                     raise UsageError(_('Error creating recipe: ' 'dependant recipe %s does not exist') % dname)
             template_args['deps'] = deps
@@ -134,9 +133,9 @@ class AddRecipe(Command):
             raise FatalError(_('Error creating recipe: %s') % ex)
 
     def validate_licenses(self, licenses):
-        for l in licenses:
-            if l and l not in self.supported_licenses:
-                raise UsageError(_('Error creating recipe: ' "invalid license '%s'") % l)
+        for license in licenses:
+            if license and license not in self.supported_licenses:
+                raise UsageError(_('Error creating recipe: ' "invalid license '%s'") % license)
 
 
 register_command(AddRecipe)

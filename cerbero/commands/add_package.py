@@ -71,9 +71,8 @@ class AddPackage(Command):
 
     def __init__(self):
         self.supported_licenses = {}
-        l = License
-        for name in l.__dict__:
-            attr = getattr(l, name)
+        for name in License.__dict__:
+            attr = getattr(License, name)
             if not isinstance(attr, LicenseDescription):
                 continue
             self.supported_licenses[attr.acronym] = name
@@ -277,9 +276,9 @@ class AddPackage(Command):
         return ret
 
     def validate_licenses(self, licenses):
-        for l in licenses:
-            if l and l not in self.supported_licenses:
-                raise UsageError(_('Error creating package: ' "invalid license '%s'") % l)
+        for license in licenses:
+            if license and license not in self.supported_licenses:
+                raise UsageError(_('Error creating package: ' "invalid license '%s'") % license)
 
     def validate_platform_files(self, platform_files):
         for f in platform_files:

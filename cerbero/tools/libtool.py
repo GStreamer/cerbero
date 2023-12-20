@@ -28,7 +28,6 @@ def get_libtool_versions(version, soversion=0):
     if not parts or len(parts) > 3:
         raise FatalError('Version must contain three or fewer parts: {!r}' ''.format(version))
     try:
-        major = int(parts[0])
         minor = 0
         micro = 0
         if len(parts) > 1:
@@ -123,13 +122,11 @@ libdir='%(libdir)s'
         dlname_base = '%s.%s' % (libname, shared_ext)
         dlname = dlname_base
         dlname_all = dlname_base
-        major_str = ''
         minor_str = ''
         micro_str = ''
 
         if major is not None:
             dlname = '%s.%s' % (dlname_base, major)
-            major_str = major
             if minor is not None:
                 dlname_all = '%s.%s' % (dlname, minor)
                 minor_str = minor

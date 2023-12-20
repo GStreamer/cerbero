@@ -76,9 +76,9 @@ class GenSdkShell(Command):
         env=None,
         prefix_env_name='GSTREAMER_ROOT',
     ):
-        if cmd == None:
+        if cmd is None:
             cmd = self.DEFAULT_CMD
-        if env == None:
+        if env is None:
             env = {}
         else:
             env = env.copy()

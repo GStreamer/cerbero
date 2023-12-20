@@ -25,6 +25,8 @@ from cerbero.errors import FatalError
 from test.test_common import DummyConfig
 from test.test_build_common import Recipe1
 
+# ruff: noqa: E731
+
 
 class Class1(object):
     test = None

@@ -566,7 +566,7 @@ class MSI(WixBase):
         # archdir has to be toolchain-specific: mingw_x86_64, uwp-debug_arm64, etc
         platform_arch = '_'.join(self.config._get_toolchain_target_platform_arch())
         root_env_var = self.package.get_root_env_var(platform_arch)
-        env = etree.SubElement(
+        etree.SubElement(
             envcomponent,
             'Environment',
             Id='SdkRootEnv',

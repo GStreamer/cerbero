@@ -25,8 +25,9 @@ import shutil
 import pathlib
 import argparse
 import importlib
+
 try:
-    import xml.etree.cElementTree as etree # noqa: F401
+    import xml.etree.cElementTree as etree  # noqa: F401
 except ImportError:
     from lxml import etree  # noqa: F401
 import gettext
@@ -40,8 +41,12 @@ from cerbero.enums import Platform, Architecture, Distro, DistroVersion
 from cerbero.errors import FatalError, CommandError
 from cerbero.utils import messages as m
 
+# We use shell from cerbero.utils but we can't import it directly because
+# it would create a circular dependency
+import cerbero.utils as utils
+
 _ = gettext.gettext
-N_ = lambda x: x
+N_ = lambda x: x  # noqa: E731
 CYGPATH = shutil.which('cygpath')
 
 
@@ -116,7 +121,7 @@ def to_winpath(path):
         if (len(ppath.parts) > 1 and ppath.parts[1] == path[1]) or not CYGPATH:
             path = '%s:%s' % (path[1], path[2:])
         else:
-            return shell.check_output(['cygpath', '-w', path])[:-1]
+            return utils.shell.check_output(['cygpath', '-w', path])[:-1]
     return path.replace('/', '\\')
 
 
@@ -598,7 +603,6 @@ def detect_qt5(platform, arch, is_universal):
 
     Returns (None, None) if nothing was found.
     """
-    path = None
     qt5_prefix = os.environ.get('QT5_PREFIX', None)
     qmake_path = os.environ.get('QMAKE', None)
     if not qt5_prefix and not qmake_path:
@@ -608,7 +612,7 @@ def detect_qt5(platform, arch, is_universal):
         return (None, None)
     if qmake_path:
         try:
-            qt_version = shell.check_output([qmake_path, '-query', 'QT_VERSION']).strip()
+            qt_version = utils.shell.check_output([qmake_path, '-query', 'QT_VERSION']).strip()
             qt_version = [int(v) for v in qt_version.split('.')]
         except CommandError as e:
             m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake_path), str(e)))
@@ -667,12 +671,11 @@ def detect_qt6(platform, arch, is_universal):
 
     Returns None if qmake could not be found.
     """
-    path = None
     qmake6_path = os.environ.get('QMAKE6', None)
     if not qmake6_path:
         return None
     try:
-        qt_version = shell.check_output([qmake6_path, '-query', 'QT_VERSION']).strip()
+        qt_version = utils.shell.check_output([qmake6_path, '-query', 'QT_VERSION']).strip()
         qt_version = [int(v) for v in qt_version.split('.')]
     except CommandError as e:
         m.warning('QMAKE={!r} failed to execute:\n{}'.format(str(qmake6_path), str(e)))

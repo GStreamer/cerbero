@@ -218,8 +218,5 @@ class InstallerTest(unittest.TestCase):
     def testAddMergeModules(self):
         pass
 
-    def testAddMergeModules(self):
-        pass
-
     def testRender(self):
         pass

@@ -206,8 +206,8 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             m.warning('The static library contains duplicated symbols')
         for k, v in dups.items():
             m.message(k)  # symbol name
-            for l in v:
-                m.message('     %s' % l[0])  # file
+            for line in v:
+                m.message('     %s' % line[0])  # file
 
     def _create_framework_library(self, libraries):
         tmpdir = tempfile.mkdtemp()
@@ -236,7 +236,6 @@ class StaticFrameworkLibrary(FrameworkLibrary):
             while True:
                 lib, thin_arch = await split_queue.get()
 
-                tmpdir_thinarch = os.path.join(tmpdir, thin_arch)
                 libprefix = os.path.split(lib)[-1].replace('.', '_')
 
                 if len(archs) > 1:  # should be a fat file, split only to the arch we want
@@ -280,7 +279,7 @@ class StaticFrameworkLibrary(FrameworkLibrary):
                         try:
                             # Hard link source file to the target name
                             os.link(obj_path, tmpdir_thinarch + '/' + target_name)
-                        except:
+                        except Exception:
                             # Fall back to cp if hard link doesn't work for any reason
                             await shell.async_call(['cp', obj_path, target_name], tmpdir_thinarch, env=self.env)
 

@@ -854,7 +854,7 @@ class Config(object):
 
         try:
             parse_file(filename, config)
-        except:
+        except Exception:
             raise ConfigurationError(_('Could not include config file (%s)') % filename)
         for key in self._properties:
             if key in config:
@@ -875,7 +875,7 @@ class Config(object):
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
-            except:
+            except Exception:
                 raise FatalError(_('directory (%s) can not be created') % path)
 
     def _join_values(self, value1, value2, sep=' '):
@@ -917,7 +917,6 @@ class Config(object):
                 self._parse(config_path, reset=False)
 
     def _get_toolchain_target_platform_arch(self):
-        platform_arch = '{}_' + self.target_arch
         if self.target_platform != Platform.WINDOWS or self._is_build_tools_config:
             return (self.target_platform, self.target_arch)
         if not self.variants.visualstudio:
@@ -1055,9 +1054,9 @@ class Config(object):
 
         if sys.version_info >= (3, 11, 0):
             return importlib.import_module('tomllib')
-        for m in ('tomli', 'toml', 'tomlkit'):
+        for mod in ('tomli', 'toml', 'tomlkit'):
             try:
-                return importlib.import_module(m)
+                return importlib.import_module(mod)
             except ModuleNotFoundError:
                 continue
         if not system_only and os.path.exists(self.tomllib_path):

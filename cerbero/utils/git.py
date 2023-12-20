@@ -263,7 +263,7 @@ def add_remote(git_dir, name, url, logfile=None):
     """
     try:
         shell.new_call([GIT, 'remote', 'add', name, url], git_dir, logfile=logfile)
-    except:
+    except Exception:
         shell.new_call([GIT, 'remote', 'set-url', name, url], git_dir, logfile=logfile)
 
 

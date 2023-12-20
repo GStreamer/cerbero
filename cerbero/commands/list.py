@@ -35,7 +35,7 @@ class List(Command):
         for recipe in recipes:
             try:
                 current = recipe.built_version().split('\n')[0]
-            except:
+            except Exception:
                 current = 'Not checked out'
 
             m.message('%s - %s (current checkout: %s) - %s' % (recipe.name, recipe.version, current, recipe.__file__))

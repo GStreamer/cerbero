@@ -136,11 +136,11 @@ class PackagesStore(object):
         return remove_list_duplicates(deps)
 
     def _list_metapackage_files(self, metapackage):
-        l = []
+        deps = []
         for p in self._list_metapackage_deps(metapackage):
-            l.extend(p.files_list())
+            deps.extend(p.files_list())
         # remove duplicates and sort
-        return sorted(list(set(l)))
+        return sorted(list(set(deps)))
 
     def _load_packages(self):
         self._packages = {}

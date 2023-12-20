@@ -393,7 +393,7 @@ class DebianPackager(LinuxPackager):
         if isinstance(self.package, MetaPackage):
             return COPYRIGHT_TPL_META % args
 
-        args['recipes_licenses'] = ',\n    '.join([l.pretty_name for l in self.recipes_licenses()])
+        args['recipes_licenses'] = ',\n    '.join([lic.pretty_name for lic in self.recipes_licenses()])
         return COPYRIGHT_TPL % args
 
     def _deb_rules(self):

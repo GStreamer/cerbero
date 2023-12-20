@@ -61,7 +61,7 @@ class Check(Command):
             stepfunc = None
             try:
                 stepfunc = getattr(recipe, 'check')
-            except:
+            except Exception:
                 m.message('%s has no check step, skipped' % recipe.name)
 
             if stepfunc:

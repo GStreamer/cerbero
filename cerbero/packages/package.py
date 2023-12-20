@@ -181,7 +181,7 @@ class PackageBase(object):
     def get_install_dir(self):
         try:
             return self.install_dir[self.config.target_platform]
-        except:
+        except Exception:
             return self.config.install_dir
 
     def get_sys_deps(self, package_mode=None):
@@ -335,18 +335,18 @@ class Package(PackageBase):
     def _parse_files(self):
         self._recipes_files = {}
         for r in self._files:
-            l = r.split(':')
-            if l[0] in self._recipes_files:
-                self._recipes_files[l[0]] += l[1:]
+            line = r.split(':')
+            if line[0] in self._recipes_files:
+                self._recipes_files[line[0]] += line[1:]
             else:
-                self._recipes_files[l[0]] = l[1:]
+                self._recipes_files[line[0]] = line[1:]
         self._recipes_files_devel = {}
         for r in self._files_devel:
-            l = r.split(':')
-            if l[0] in self._recipes_files_devel:
-                self._recipes_files_devel[l[0]] += l[1:]
+            line = r.split(':')
+            if line[0] in self._recipes_files_devel:
+                self._recipes_files_devel[line[0]] += line[1:]
             else:
-                self._recipes_files_devel[l[0]] = l[1:]
+                self._recipes_files_devel[line[0]] = line[1:]
 
     def _list_licenses(self, recipes_files):
         licenses = {}

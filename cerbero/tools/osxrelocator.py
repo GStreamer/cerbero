@@ -54,7 +54,6 @@ class OSXRelocator(object):
 
     def change_id(self, object_file, id=None):
         id = id or object_file.replace(self.lib_prefix, '@rpath')
-        filename = os.path.basename(object_file)
         if not self._is_mach_o_file(object_file):
             return
         cmd = [INT_CMD, '-id', id, object_file]
@@ -102,7 +101,7 @@ class OSXRelocator(object):
         for lib in self.list_shared_libraries(object_file):
             if old_path in lib:
                 new_path = lib.replace(old_path, new_path)
-                cmd = [INT_CMD, '-change', lib, new_path, object_path]
+                cmd = [INT_CMD, '-change', lib, new_path, object_file]
                 shell.new_call(cmd, fail=True, logfile=self.logfile)
 
     def parse_dir(self, dir_path, filters=None):
@@ -133,7 +132,7 @@ class OSXRelocator(object):
         for line in i:
             if 'LC_RPATH' not in line:
                 continue
-            cmdsize_line = next(i)
+            next(i)
             path_line = next(i)
             # Extract the path from a line that looks like this:
             #          path @loader_path/.. (offset 12)

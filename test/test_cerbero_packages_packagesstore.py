@@ -78,8 +78,8 @@ class PackageTest(unittest.TestCase):
         metapackage = common.MetaPackage(self.config, None)
         self.store.add_package(package)
         self.store.add_package(metapackage)
-        l = sorted([package, metapackage], key=lambda x: x.name)
-        self.assertEqual(l, self.store.get_packages_list())
+        packages = sorted([package, metapackage], key=lambda x: x.name)
+        self.assertEqual(packages, self.store.get_packages_list())
 
     def testPackageDeps(self):
         package = common.Package1(self.config, None, None)
