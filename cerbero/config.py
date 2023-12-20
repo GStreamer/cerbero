@@ -24,7 +24,9 @@ import itertools
 from functools import lru_cache
 from pathlib import PurePath, Path
 
-from cerbero.enums import Architecture, Platform, Distro, DistroVersion, License, LibraryType
+# FIXME: these unused imports are here for backwards compatibility with modules
+# that import them cerbero.config instead of cerbero.enums
+from cerbero.enums import Architecture, Platform, Distro, DistroVersion, License, LibraryType  # noqa: F401
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5, detect_qt6
