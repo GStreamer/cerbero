@@ -5,7 +5,7 @@ repos:
     hooks:
       # FIXME: Add the linter once all errors are fixed
       # Run the linter.
-      #- id: ruff
-      #  args: [ --fix ]
+      - id: ruff
+        args: [ --fix ]
       # Run the formatter.
       - id: ruff-format

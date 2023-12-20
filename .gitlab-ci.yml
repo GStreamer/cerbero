@@ -75,7 +75,7 @@ default:
     # If you are hacking on them or need a them to rebuild, its enough
     # to change any part of the string of the image you want.
     ###
-    FDO_DISTRIBUTION_TAG: '2023-12-19.1'
+    FDO_DISTRIBUTION_TAG: '2023-12-19.2'
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "git-core python3-pip"
     FDO_DISTRIBUTION_EXEC: ci/checks_setup.sh
