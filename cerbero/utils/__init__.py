@@ -99,17 +99,17 @@ def determine_total_ram() -> int:
 
     if platform == Platform.DARWIN:
         ram_size_query = subprocess.run([shutil.which('sysctl'), '-n', 'hw.memsize'], stdout=subprocess.PIPE, text=True)
-        if ram_size_query.returncode() == 0:
+        if ram_size_query.returncode == 0:
             return int(ram_size_query.stdout.strip())
     elif platform == Platform.WINDOWS:
         ram_size_query = subprocess.run(
             [shutil.which('wmic'), 'computersystem', 'get', 'totalphysicalmemory'], stdout=subprocess.PIPE, text=True
         )
-        if ram_size_query.returncode() == 0:
-            return int(ram_size_query.stdout.strip())
+        if ram_size_query.returncode == 0:
+            return int(ram_size_query.stdout.strip().splitlines()[-1])
     elif platform == Platform.LINUX:
         ram_size_query = subprocess.run([shutil.which('free'), '-b'], stdout=subprocess.PIPE, text=True)
-        if ram_size_query.returncode() == 0:
+        if ram_size_query.returncode == 0:
             return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
 
     return 4 << 30  # Assume 4GB
