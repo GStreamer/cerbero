@@ -23,7 +23,6 @@ variables:
   MESON_COMMIT:
     description: "Overwrite the meson version installed on the CI images with the specified meson commit"
     value: ""
-  PRE_COMMIT_HOME: '/pre-commit'
 
 workflow:
   # https://docs.gitlab.com/ee/ci/yaml/index.html#switch-between-branch-pipelines-and-merge-request-pipelines
@@ -75,7 +74,7 @@ default:
     # If you are hacking on them or need a them to rebuild, its enough
     # to change any part of the string of the image you want.
     ###
-    FDO_DISTRIBUTION_TAG: '2023-12-19.2'
+    FDO_DISTRIBUTION_TAG: '2023-01-12.0'
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "git-core python3-pip"
     FDO_DISTRIBUTION_EXEC: ci/checks_setup.sh
@@ -257,6 +256,8 @@ pre-commit checks:
   stage: 'check sources'
   script:
     pre-commit run --all-files
+  variables:
+    PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
 
 #
 # Cerbero Linux X86_64 build
