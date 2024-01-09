@@ -149,7 +149,16 @@ class Recipe(recipe.Recipe):
                 shutil.copy(src, dst)
         # Cargo-C names MinGW DLLs as foo.dll instead of libfoo.dll
         # https://github.com/lu-zero/cargo-c/issues/280
-        if not self.using_msvc():
+        # It also follows MSVC convention for static/import libraries
+        if self.using_msvc():
+            for f in self.files_list_by_category(self.DEVEL_CAT):
+                if not f.endswith('.a'):
+                    continue
+                dst = Path(self.config.prefix) / f
+                src = dst.with_name(f'{dst.stem[3:]}.lib')
+                if src.exists():
+                    shutil.copy(src, dst)
+        else:
             for f in self.dist_files_list():
                 if not f.endswith('.dll'):
                     continue
