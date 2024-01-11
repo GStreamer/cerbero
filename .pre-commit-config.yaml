@@ -3,7 +3,6 @@ repos:
     # Ruff version.
     rev: v0.1.8
     hooks:
-      # FIXME: Add the linter once all errors are fixed
       # Run the linter.
       - id: ruff
         args: [ --fix ]
