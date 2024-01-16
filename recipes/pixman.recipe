@@ -7,22 +7,18 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
-    version = '0.40.0'
+    version = '0.43.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = 'https://cairographics.org/releases/pixman-%(version)s.tar.gz'
-    tarball_checksum = '6d200dec3740d9ec4ec8d1180e25779c00bc749f94278c8b9021f5534db223fc'
+    url = 'https://www.x.org/releases/individual/lib/pixman-%(version)s.tar.xz'
+    tarball_checksum = '5ba00c2879932c32d2ef878b6e802e3f898dda14c07e881dcfcc6a8f670e0cdc'
     meson_options = {'openmp': 'disabled',
                      'gtk': 'disabled',
                      'libpng': 'disabled',
+                     'demos' : 'disabled',
                      'tests' : 'disabled'}
     licenses = [{License.MIT: ['COPYING']}]
-    patches = [
-        # https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/36
-        'pixman/0001-meson-add-option-to-skip-building-of-tests-and-demos.patch',
-        # https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/37
-        'pixman/0002-meson-add-cpu-features-path-option-for-Android.patch'
-    ]
+    patches = []
 
     files_libs = ['libpixman-1']
     files_devel = ['include/pixman-1', '%(libdir)s/pkgconfig/pixman-1.pc']
@@ -39,9 +35,11 @@ class Recipe(recipe.Recipe):
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.meson_options['iwmmxt'] = 'disabled'
             if self.config.target_arch in [Architecture.ARMv7, Architecture.ARM64]:
-                # Needs https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/71
+                # Needs https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/78/
                 self.meson_options['neon'] = 'disabled'
                 self.meson_options['arm-simd'] = 'disabled'
+                if self.config.target_arch == Architecture.ARM64:
+                    self.meson_options['a64-neon'] = 'enabled'
             self.meson_options['cpu-features-path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
             # Prevent symbol conflicts
             self.append_env('CFLAGS',
