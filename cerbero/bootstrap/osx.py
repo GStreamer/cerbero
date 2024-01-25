@@ -24,31 +24,16 @@ from cerbero.config import Distro
 from cerbero.utils import shell
 from cerbero.utils import messages as m
 
-CPANM_VERSION = '1.7044'
-CPANM_URL_TPL = 'https://raw.githubusercontent.com/miyagawa/cpanminus/{}/cpanm'
-CPANM_CHECKSUM = '22b92506243649a73cfb55c5990cedd24cdbb20b15b4530064d2496d94d1642b'
-
 class OSXBootstrapper (BootstrapperBase):
 
 
     def __init__(self, config, offline, assume_yes):
         super().__init__(config, offline)
-        url = CPANM_URL_TPL.format(CPANM_VERSION)
-        self.fetch_urls.append((url, None, CPANM_CHECKSUM))
 
     async def start(self, jobs=0):
         # skip system package install if not needed
         if not self.config.distro_packages_install:
             return
-        self._install_perl_deps()
-
-    def _install_perl_deps(self):
-        cpanm_installer = os.path.join(self.config.local_sources, 'cpanm')
-        shell.new_call(['chmod', '+x', cpanm_installer])
-        # Install XML::Parser, required for intltool
-        cmd = ['sudo', cpanm_installer, 'XML::Parser']
-        m.message("Installing XML::Parser, may require a password for running \'" + " ".join(cmd) + "\'")
-        shell.new_call(cmd, interactive=True)
 
 
 def register_all():

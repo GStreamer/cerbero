@@ -40,7 +40,7 @@ class BuildTools (BootstrapperBase, Fetch):
     BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config',
                    'orc', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex',
+        Platform.DARWIN: ['sed', 'gperf', 'bison', 'flex',
                           'moltenvk-tools'],
         Platform.WINDOWS: ['nasm'],
         Platform.LINUX: ['intltool-m4'],
