@@ -99,7 +99,6 @@ class DebianBootstrapper(UnixBootstrapper):
         'libegl1-mesa-dev',
         'git',
         'xutils-dev',
-        'intltool',
         'ccache',
         'python3-setuptools',
         'libssl-dev',
@@ -153,7 +152,6 @@ class RedHatBootstrapper(UnixBootstrapper):
         'nasm',
         'pkgconfig',
         'curl',
-        'intltool',
         'rpm-build',
         'redhat-rpm-config',
         'python3-devel',
@@ -217,7 +215,6 @@ class OpenSuseBootstrapper(UnixBootstrapper):
         'bison',
         'flex',
         'nasm',
-        'intltool',
         'patterns-openSUSE-devel_rpm_build',
         'python3-devel',
         'xorg-x11-libXrender-devel',
@@ -249,7 +246,6 @@ class ArchBootstrapper(UnixBootstrapper):
     command = ['-S', '--needed']
     yes_arg = ['--noconfirm']
     packages = [
-        'intltool',
         'cmake',
         'ninja',
         'libtool',
@@ -296,7 +292,6 @@ class GentooBootstrapper(UnixBootstrapper):
     command = ['-u']
     yes_arg = []  # Does not seem interactive
     packages = [
-        'dev-util/intltool',
         'dev-util/cmake',
         'dev-util/ninja',
         'sys-devel/libtool',

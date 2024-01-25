@@ -32,9 +32,8 @@ from cerbero.enums import Platform, Distro
 class BuildTools(BootstrapperBase, Fetch):
     BUILD_TOOLS = ['automake', 'autoconf', 'libtool', 'pkg-config', 'orc', 'gettext-m4', 'meson']
     PLAT_BUILD_TOOLS = {
-        Platform.DARWIN: ['intltool', 'sed', 'gperf', 'bison', 'flex', 'moltenvk-tools'],
+        Platform.DARWIN: ['sed', 'gperf', 'bison', 'flex', 'moltenvk-tools'],
         Platform.WINDOWS: ['nasm'],
-        Platform.LINUX: ['intltool-m4'],
     }
 
     def __init__(self, config, offline):
@@ -57,9 +56,6 @@ class BuildTools(BootstrapperBase, Fetch):
 
             if self.config.distro == Distro.MSYS:
                 self.PLAT_BUILD_TOOLS[Platform.WINDOWS].append('gperf')
-                # UWP config does not build any autotools recipes
-                if not self.config.variants.uwp:
-                    self.PLAT_BUILD_TOOLS[Platform.WINDOWS].append('intltool')
 
         if self.config.target_platform != Platform.LINUX and not self.config.prefix_is_executable():
             # For glib-mkenums and glib-genmarshal

@@ -53,8 +53,6 @@ KHRONOS_WGL_TPL = 'https://raw.githubusercontent.com/KhronosGroup/OpenGL-Registr
 WGL_CHECKSUM = '8961c809d180e3590fca32053341fe3a83394edcb936f7699f0045feadb16115'
 
 # Extra binary dependencies
-INTLTOOL_URL = 'https://download.gnome.org/binaries/win32/intltool/0.40/intltool_0.40.4-1_win32.zip'
-INTLTOOL_CHECKSUM = '7180a780cee26c5544c06a73513c735b7c8c107db970b40eb7486ea6c936cb33'
 XZ_URL = 'https://tukaani.org/xz/xz-5.2.5-windows.zip'
 XZ_CHECKSUM = 'd83b82ca75dfab39a13dda364367b34970c781a9df4d41264db922ac3a8f622d'
 
@@ -76,11 +74,6 @@ class MSYSBootstrapper(BootstrapperBase):
         url = MINGW_PERL_TPL.format(PERL_VERSION)
         self.fetch_urls.append((url, None, MINGW_PERL_CHECKSUM))
         self.extract_steps.append((url, True, self.perl_prefix))
-        # Newer versions of binary deps such as intltool. Must be extracted
-        # after the MinGW toolchain from above is extracted so that it
-        # replaces the older files.
-        self.fetch_urls.append((INTLTOOL_URL, None, INTLTOOL_CHECKSUM))
-        self.extract_steps.append((INTLTOOL_URL, True, self.prefix))
         # Newer version of xz that supports multithreaded compression. Need
         # to extract to a temporary directory, then overwrite the existing
         # lzma/xz binaries.
@@ -92,7 +85,6 @@ class MSYSBootstrapper(BootstrapperBase):
         self.install_mingwget_deps()  # FIXME: This uses the network
         self.fix_mingw_unused()
         self.fix_openssl_mingw_perl()
-        self.fix_bin_deps()
         self.install_xz()
 
     def install_mingwget_deps(self):
@@ -145,12 +137,6 @@ class MSYSBootstrapper(BootstrapperBase):
         for b in ('xz.exe', 'xzdec.exe', 'lzmadec.exe', 'lzmainfo.exe'):
             shutil.copy2(os.path.join(src, b), os.path.join(msys_bindir, b))
 
-    def fix_bin_deps(self):
-        # replace /opt/perl/bin/perl in intltool
-        files = shell.ls_files(['bin/intltool*'], self.prefix)
-        for f in files:
-            shell.replace(os.path.join(self.prefix, f), {'/opt/perl/bin/perl': '/bin/perl'})
-
 
 class MSYS2Bootstrapper(BootstrapperBase):
     """
@@ -161,7 +147,6 @@ class MSYS2Bootstrapper(BootstrapperBase):
     packages = [
         'flex',
         'bison',
-        'intltool',
         'gperf',
         'make',
         'diffutils',
