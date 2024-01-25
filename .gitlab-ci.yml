@@ -255,7 +255,7 @@ pre-commit checks:
     - "checks fedora image"
   stage: 'check sources'
   script:
-    pre-commit run --all-files
+    pre-commit run --all-files --show-diff-on-failure
   variables:
     PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
 
