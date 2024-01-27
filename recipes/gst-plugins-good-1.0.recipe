@@ -283,10 +283,6 @@ class Recipe(custom.GStreamer):
             #    completely useless
             self.meson_options['qt-method'] = 'qmake'
 
-        if self.using_msvc():
-            # plugin is C++, library is Autotools
-            self.disable_plugin('taglib', 'codecs', dep='taglib')
-
         if self.using_uwp():
             # Uses unavailable APIs
             self.disable_plugin('directsound', 'sys')
