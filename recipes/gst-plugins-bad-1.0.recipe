@@ -518,8 +518,6 @@ class Recipe(custom.GStreamer):
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
             if self.using_msvc():
-                # plugin is C++, library is Autotools
-                self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
                 self.enable_plugin('wasapi2', 'sys', 'visualstudio')
                 # This dll is used by wasapi2 and mediafoundation UWP build
                 self.files_libs += ['libgstwinrt-1.0']

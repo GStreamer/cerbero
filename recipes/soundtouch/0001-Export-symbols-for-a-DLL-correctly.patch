@@ -1,4 +1,4 @@
-From 0f852e729589851edf75d31100ea8cdff19986e4 Mon Sep 17 00:00:00 2001
+From 1faa2a6ab7456e2c52c9bcd33997cfc1092ac79d Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 8 Feb 2024 08:48:19 +0530
 Subject: [PATCH] Export symbols for a DLL correctly
@@ -6,17 +6,86 @@ Subject: [PATCH] Export symbols for a DLL correctly
 Fixes the MSVC build, which requires this. GCC (MinGW/Autotools)
 simply exports everything.
 ---
- include/SoundTouch.h          | 11 +++++++++++
- source/SoundTouch/meson.build |  6 ++++++
- 2 files changed, 17 insertions(+)
+ include/BPMDetect.h           | 6 +++---
+ include/FIFOSampleBuffer.h    | 2 +-
+ include/FIFOSamplePipe.h      | 4 ++--
+ include/STTypes.h             | 9 +++++++++
+ include/SoundTouch.h          | 2 +-
+ source/SoundTouch/meson.build | 6 ++++++
+ 6 files changed, 22 insertions(+), 7 deletions(-)
 
-diff --git a/include/SoundTouch.h b/include/SoundTouch.h
-index f2addc1..e02f559 100644
---- a/include/SoundTouch.h
-+++ b/include/SoundTouch.h
-@@ -164,7 +164,18 @@ namespace soundtouch
- ///   tempo/pitch/rate/samplerate settings.
- #define SETTING_INITIAL_LATENCY             8
+diff --git a/include/BPMDetect.h b/include/BPMDetect.h
+index 8ece784..24a82e5 100644
+--- a/include/BPMDetect.h
++++ b/include/BPMDetect.h
+@@ -68,14 +68,14 @@ namespace soundtouch
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+ 
+-    typedef struct
++    typedef struct SOUNDTOUCH_API
+     {
+         float pos;
+         float strength;
+     } BEAT;
+ 
+ 
+-    class IIR2_filter
++    class SOUNDTOUCH_API IIR2_filter
+     {
+         double coeffs[5];
+         double prev[5];
+@@ -87,7 +87,7 @@ namespace soundtouch
+ 
+ 
+     /// Class for calculating BPM rate for audio data.
+-    class BPMDetect
++    class SOUNDTOUCH_API BPMDetect
+     {
+     protected:
+         /// Auto-correlation accumulator bins.
+diff --git a/include/FIFOSampleBuffer.h b/include/FIFOSampleBuffer.h
+index de298dd..4b9232b 100644
+--- a/include/FIFOSampleBuffer.h
++++ b/include/FIFOSampleBuffer.h
+@@ -49,7 +49,7 @@ namespace soundtouch
+ ///
+ /// Notice that in case of stereo audio, one sample is considered to consist of 
+ /// both channel data.
+-class FIFOSampleBuffer : public FIFOSamplePipe
++class SOUNDTOUCH_API FIFOSampleBuffer : public FIFOSamplePipe
+ {
+ private:
+     /// Sample buffer.
+diff --git a/include/FIFOSamplePipe.h b/include/FIFOSamplePipe.h
+index 38ef31a..a9727d2 100644
+--- a/include/FIFOSamplePipe.h
++++ b/include/FIFOSamplePipe.h
+@@ -49,7 +49,7 @@ namespace soundtouch
+ {
+ 
+ /// Abstract base class for FIFO (first-in-first-out) sample processing classes.
+-class FIFOSamplePipe
++class SOUNDTOUCH_API FIFOSamplePipe
+ {
+ protected:
+ 
+@@ -135,7 +135,7 @@ public:
+ /// When samples are input to this class, they're first processed and then put to 
+ /// the FIFO pipe that's defined as output of this class. This output pipe can be
+ /// either other processing stage or a FIFO sample buffer.
+-class FIFOProcessor :public FIFOSamplePipe
++class SOUNDTOUCH_API FIFOProcessor :public FIFOSamplePipe
+ {
+ protected:
+     /// Internal pipe where processed samples are put.
+diff --git a/include/STTypes.h b/include/STTypes.h
+index 862505e..0c823d6 100644
+--- a/include/STTypes.h
++++ b/include/STTypes.h
+@@ -42,6 +42,15 @@ typedef unsigned long   ulong;
+     typedef ulong ulongptr;
+ #endif
  
 +#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(SOUNDTOUCH_STATIC_COMPILATION)
 +    #ifdef DLL_EXPORTS
@@ -27,14 +96,24 @@ index f2addc1..e02f559 100644
 +#else
 +    #define SOUNDTOUCH_API
 +#endif
-+
  
-+SOUNDTOUCH_API
- class SoundTouch : public FIFOProcessor
+ // Helper macro for aligning pointer up to next 16-byte boundary
+ #define SOUNDTOUCH_ALIGN_POINTER_16(x)      ( ( (ulongptr)(x) + 15 ) & ~(ulongptr)15 )
+diff --git a/include/SoundTouch.h b/include/SoundTouch.h
+index f2addc1..5ead697 100644
+--- a/include/SoundTouch.h
++++ b/include/SoundTouch.h
+@@ -165,7 +165,7 @@ namespace soundtouch
+ #define SETTING_INITIAL_LATENCY             8
+ 
+ 
+-class SoundTouch : public FIFOProcessor
++class SOUNDTOUCH_API SoundTouch : public FIFOProcessor
  {
  private:
+     /// Rate transposer class instance
 diff --git a/source/SoundTouch/meson.build b/source/SoundTouch/meson.build
-index 9bfcf96..2826165 100644
+index 9bfcf96..e184fcd 100644
 --- a/source/SoundTouch/meson.build
 +++ b/source/SoundTouch/meson.build
 @@ -52,8 +52,14 @@ extra_libs += [
@@ -43,7 +122,7 @@ index 9bfcf96..2826165 100644
  
 +exports_arg = []
 +if host_machine.system() == 'windows' and get_option('default_library') != 'static'
-+  exports_args = ['-DDLL_EXPORTS']
++  exports_arg += ['-DDLL_EXPORTS']
 +endif
 +
  libsoundtouch = library('SoundTouch',
@@ -53,5 +132,5 @@ index 9bfcf96..2826165 100644
      version: libversion,
      soversion: soversion,
 -- 
-2.41.0
+2.43.0.windows.1
 
