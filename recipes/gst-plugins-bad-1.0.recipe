@@ -514,8 +514,6 @@ class Recipe(custom.GStreamer):
             self.meson_options['winks'] = 'enabled'
             self.meson_options['winscreencap'] = 'enabled'
             if self.using_msvc():
-                # plugin is C++, library is Autotools
-                self.disable_plugin('soundtouch', 'effects', dep='soundtouch')
                 # Plugin is C++ and hence webrtc-audio-processing must also be
                 # built with MSVC, it uses Meson but it doesn't build:
                 # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/issues/2
