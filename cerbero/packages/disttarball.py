@@ -210,7 +210,7 @@ class DistTarball(PackagerBase):
             raise AssertionError('Unknown tar compression: {}'.format(self.compress))
 
         tar_cmd += ['-cf', filename]
-        with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as d:
+        with tempfile.TemporaryDirectory() as d:
             fname = os.path.join(d, 'cerbero_files_list')
             with open(fname, 'w', newline='\n', encoding='utf-8') as f:
                 for line in files:
