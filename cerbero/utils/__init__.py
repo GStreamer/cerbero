@@ -130,7 +130,7 @@ def determine_total_ram() -> int:
         if free_exe:
             ram_size_query = subprocess.run([free_exe, '-b'], stdout=subprocess.PIPE, text=True)
             if ram_size_query.returncode == 0:
-                return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1]))
+                return int(re.split(r'\s+', ram_size_query.stdout.splitlines()[1])[1])
         # Fallback
         proc_meminfo = Path('/proc/meminfo')
         if proc_meminfo.exists():
