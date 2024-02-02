@@ -100,8 +100,12 @@ class BuildTools(BootstrapperBase, Fetch):
         self.recipes += self.PLAT_BUILD_TOOLS.get(self.config.platform, [])
 
     def setup_venv(self):
-        # Python relies on symlinks to work on macOS.
-        # See e.g.
+        # Remove previous venv, which could've used an old version of python
+        # that no longer exists
+        python_glob = os.path.join(self.config.build_tools_prefix, 'bin', 'python*')
+        for f in glob.glob(python_glob):
+            os.remove(f)
+        # Python relies on symlinks to work on macOS. See e.g.
         # https://github.com/python-poetry/install.python-poetry.org/issues/24#issuecomment-1226504499
         venv.create(self.config.build_tools_prefix, symlinks=self.config.platform != Platform.WINDOWS, with_pip=True)
         if self.config.platform == Platform.WINDOWS:
@@ -120,11 +124,7 @@ class BuildTools(BootstrapperBase, Fetch):
         shell.new_call([python, '-m', 'pip', 'install', 'setuptools'])
 
     async def start(self, jobs=0):
-        python = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
-        if self.config.platform == Platform.WINDOWS:
-            python += '.exe'
-        if not os.path.exists(python):
-            self.setup_venv()
+        self.setup_venv()
         # Check and these at the last minute because we may have installed them
         # in system bootstrap
         self.recipes += self.check_build_tools()
