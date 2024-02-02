@@ -129,7 +129,7 @@ class Recipe(recipe.Recipe):
                       '-plugin-tracers', '-rtp', '-sdp', '-utils', '-video', '-webrtc')
         for each in components:
             self.cargo_features.append(f'gst{each}/v1_22')
-        self.cargo_features.append('gst-plugin-webrtc/gst1_22')
+        self.cargo_features.append('gst-plugin-webrtc/v1_22')
 
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version
