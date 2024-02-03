@@ -42,6 +42,7 @@ from cerbero.errors import CommandError, FatalError
 
 PATCH = 'patch'
 TAR = 'tar'
+HOMEBREW_TAR = 'gtar'
 TARBALL_SUFFIXES = ('tar.gz', 'tgz', 'tar.bz2', 'tbz2', 'tar.xz')
 SUBPROCESS_EXCEPTIONS = (FileNotFoundError, PermissionError, subprocess.CalledProcessError)
 
@@ -662,6 +663,10 @@ def get_tar_cmd():
     # https://github.com/msys2/MSYS2-packages/issues/1548
     if DISTRO == Distro.MSYS2:
         return 'bsdtar'
+    # Allow using Homebrewed tar since it's GNU compatible
+    # (macOS uses FreeBSD tar)
+    elif shutil.which(HOMEBREW_TAR):
+        return HOMEBREW_TAR
     else:
         return TAR
 
