@@ -185,7 +185,7 @@ class DistTarball(PackagerBase):
         tar = shell.get_tar_cmd()
         tar_cmd = [tar, '-C', self.prefix]
         # --checkpoint is only supported by GNU tar
-        if tar == shell.TAR:
+        if tar == shell.HOMEBREW_TAR or (self.config.platform != Platform.DARWIN and tar == shell.TAR):
             tar_cmd.append('--checkpoint=.250')
         # ensure we provide a unique list of files to tar to avoid
         # it creating hard links/copies
