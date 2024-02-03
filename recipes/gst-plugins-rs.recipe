@@ -1,11 +1,11 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
+from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import tempfile
 
 
@@ -74,14 +74,14 @@ class Recipe(recipe.Recipe):
         'gst-plugins-bad-1.0', 'dav1d']
 
     def enable_plugin(self, name, category):
-        if LibraryType.SHARED in self.library_type:
+        if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
             attr = f'files_plugins_{category}'
             if not hasattr(self, attr):
                 setattr(self, attr, [])
                 self.update_categories()
             f = getattr(self, attr)
             f += [f'%(libdir)s/gstreamer-1.0/libgst{name}%(mext)s']
-        if LibraryType.STATIC in self.library_type:
+        if self.library_type in (LibraryType.STATIC, LibraryType.BOTH):
             attr = f'files_plugins_{category}_devel'
             if not hasattr(self, attr):
                 setattr(self, attr, [])
@@ -92,12 +92,10 @@ class Recipe(recipe.Recipe):
             ]
 
     def prepare(self):
-        # See "static plugins" bullet point in phase 2 at
-        # https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/381
         if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
             self.library_type = LibraryType.STATIC
         else:
-            self.library_type = LibraryType.SHARED
+            self.library_type = LibraryType.BOTH
 
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
@@ -181,20 +179,20 @@ class Recipe(recipe.Recipe):
                 if self.config.target_platform in (Platform.ANDROID, Platform.LINUX):
                     shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all',
                                    '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
-                elif self.config.target_platform == Platform.IOS:
+                elif self.config.target_platform in (Platform.IOS, Platform.DARWIN):
                     # Unlike ELF, for MachO Apple wants you to do
                     # Single-Object Prelink
-                    source = Path(f)
+                    source = Path(self.config.prefix) / f
 
                     # Only global symbols
                     # Only symbol names
                     # Use portable output format
                     # Skip undefined symbols
                     # Write pathname of the object file
-                    manifest = subprocess.check_output([self.get_llvm_tool('nm'),
-                                                        '-gjPUA', source.absolute()],
-                                                       universal_newlines=True,
-                                                       text=True)
+                    manifest = shell.check_output(
+                        [self.get_llvm_tool("llvm-nm"), "-gjPUA", source.absolute()],
+                        env=self.env,
+                    )
 
                     # Now we need to match the symbols to the pattern
 
@@ -213,8 +211,8 @@ class Recipe(recipe.Recipe):
                         # List those symbols that will be kept
                         symbols_to_keep = set()
 
-                        for line in manifest.stdout.splitlines():
-                            data = line.split(' ')
+                        for line in manifest.splitlines():
+                            data = line.split(sep=" ")
                             symbol = data[1]
 
                             if symbol_pattern.match(symbol):
@@ -229,38 +227,69 @@ class Recipe(recipe.Recipe):
                             for symbol in symbols_to_keep:
                                 f.write(f'{symbol}\n')
 
-                        m.log(f'Symbols to preserve in {source.absolute()}:')
+                        m.log(
+                            f"Symbols to preserve in {source.absolute()}:", self.logfile
+                        )
                         for symbol in symbols_to_keep:
-                            m.log(f'\t{symbol}')
+                            m.log(f"\t{symbol}", self.logfile)
 
                         # Unpack archive
-                        m.log(f"Unpacking {source.absolute()} with ar")
+                        m.log(f"Unpacking {source.absolute()} with ar", self.logfile)
                         shell.new_call(
                             [shutil.which('ar'), 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
 
                         # Now everything is flat in the pwd
-                        print('Performing Single-Object Prelinking')
+                        m.log("Performing Single-Object Prelinking", self.logfile)
                         prelinked_obj = (
                             Path(tmp) / source.name).with_suffix('.prelinked.o')
-                        cmd = ' '.join([
-                            shutil.which('ld'),
-                            '-r',
-                            '-exported_symbols_list',
-                            module,
-                            '-o',
-                            prelinked_obj,
-                            '*.o',
-                        ])
-                        shell.new_call(cmd, cmd_dir=tmp,
-                                       shell=True, logfile=self.logfile)
+
+                        ld = shutil.which("ld")
+
+                        if ld is None:
+                            raise FatalError(f'ld not found')
+
+                        # DO NOT split this into an array unless
+                        # you wrap this into a 'sh -c' call.
+                        # It needs the glob to be parsed by the shell!
+                        shell.new_call(
+                            ' '.join([
+                                ld,
+                                "-r",
+                                "-exported_symbols_list",
+                                str(module.absolute()),
+                                "-o",
+                                str(prelinked_obj.absolute()),
+                                "*.o",
+                            ]),
+                            cmd_dir=tmp,
+                            logfile=self.logfile,
+                        )
 
                         # With the stripping done, all files now need to be rearchived
                         dest = Path(tmp) / source.name
-                        print(f'Repacking library to {dest.absolute()}')
-                        shell.new_call([shutil.which('libtool'), '-static', '-o',
-                                       dest.absolute(), prelinked_obj.absolute()], logfile=self.logfile)
+                        m.log(f"Repacking library to {dest.absolute()}", self.logfile)
+
+                        libtool = shutil.which("libtool")
+
+                        if libtool is None:
+                            raise FatalError(f'libtool not found')
+
+                        # (again) DO NOT split this into an array unless
+                        # you wrap this into a 'sh -c' call.
+                        # It needs the glob to be parsed by the shell!
+                        shell.new_call(
+                            ' '.join([
+                                libtool,
+                                "-static",
+                                str(prelinked_obj.absolute()),
+                                "-o",
+                                str(dest.absolute()),
+                            ]),
+                            cmd_dir=tmp,
+                            logfile=self.logfile,
+                        )
 
                         # And now we paper over
-                        os.replace(dest.absolute(), f)
+                        os.replace(dest.absolute(), source.absolute())
 
         super().post_install()

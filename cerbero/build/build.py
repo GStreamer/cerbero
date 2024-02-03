@@ -1241,12 +1241,17 @@ class Cargo(Build, ModifyEnvBase):
         '''
         Gets one of the LLVM tools matching the current Rust toolchain.
         '''
-        root_dir = subprocess.run([self.config.cargo_home + '/bin/rustc',
-                                   '--print', 'sysroot'], capture_text=True, text=True, check=True).stdout.strip()
-        tools = glob.glob(f'**/{tool}', root_dir=root_dir)
+        root_dir = shell.check_output(
+            ["rustc", "--print", "sysroot"], env=self.env
+        ).strip()
+
+        tools = list(Path(root_dir).glob(f"**/{tool}"))
+
         if len(tools) == 0:
-            raise FatalError('Rust {tool} tool not found, try re-running bootstrap')
-        return (Path(root_dir) / tools[0]).resolve()
+            raise FatalError(
+                f"Rust {tool} tool not found at {root_dir}, try re-running bootstrap"
+            )
+        return tools[0]
 
     def get_cargo_toml_version(self):
         tomllib = self.config.find_toml_module()
