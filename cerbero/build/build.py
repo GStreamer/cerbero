@@ -1220,6 +1220,11 @@ class Cargo(Build, ModifyEnvBase):
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):
             self.library_type = LibraryType.STATIC
 
+    def num_of_cpus(self):
+        if self.config.allow_parallel_build and getattr(self, 'allow_parallel_build', True):
+            return min(determine_num_cargo_jobs(), self.config.num_of_cpus)
+        return 1
+
     def get_cargo_features_args(self):
         if not self.cargo_features:
             return []
