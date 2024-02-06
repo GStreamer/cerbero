@@ -221,6 +221,8 @@ class RustBootstrapper(BootstrapperBase):
         for suffix in ('', '.asc', '.sha256'):
             stable_channel = f'{os.path.dirname(self.channel)}/channel-rust-stable.toml'
             shutil.copyfile(self.channel + suffix, stable_channel + suffix)
+        if os.path.exists(self.config.rustup_home):
+            shutil.rmtree(self.config.rustup_home)
         # Use async_call_output to discard stdout which contains messages that will confuse the user
         await shell.async_call_output(rustup_args, cpu_bound=False, env=rustup_env)
         m.message('Rust toolchain v{} installed at {}'.format(self.RUST_VERSION, self.config.rust_prefix))
