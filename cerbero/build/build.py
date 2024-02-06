@@ -1257,16 +1257,11 @@ class Cargo(Build, ModifyEnvBase):
         tomllib = self.config.find_toml_module()
         if not tomllib:
             raise FatalError('toml module not found, try re-running bootstrap')
-        cargo_toml_list = [os.path.join(self.config_src_dir, 'Cargo.toml')]
-        cargo_toml_list += glob.glob(f'{self.config_src_dir}/**/Cargo.toml', recursive=True)
-        for cargo_toml in cargo_toml_list:
-            with open(cargo_toml, 'r', encoding='utf-8') as f:
-                data = tomllib.loads(f.read())
-            try:
-                version = data['package']['version']
-            except KeyError:
-                continue
-            return version
+        with open(os.path.join(self.config_src_dir, 'Cargo.toml'), 'r', encoding='utf-8') as f:
+            data = tomllib.loads(f.read())
+        if 'workspace' in data:
+            return data['workspace']['package']['version']
+        return data['package']['version']
 
     async def configure(self):
         if os.path.exists(self.cargo_dir):
