@@ -103,7 +103,8 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
 
         plugin_files = {
-            'core': ['fallbackswitch', 'livesync', 'togglerecord', 'rstracers'],
+            'core': ['fallbackswitch', 'livesync', 'rstracers', 'threadshare',
+                    'togglerecord'],
             'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'raptorq', 'rsrtp',
                     'reqwest', 'webrtchttp', 'rswebrtc'],
             'effects': ['rsaudiofx', 'rsvideofx'],
@@ -112,9 +113,6 @@ class Recipe(recipe.Recipe):
                        'rspng', 'regex', 'textwrap', 'textahead'],
             'playback': ['uriplaylistbin'],
         }
-        # https://gitlab.freedesktop.org/gstreamer/gst-plugins-rs/-/issues/326
-        if self.library_type != LibraryType.STATIC:
-            plugin_files['core'].append('threadshare')
         for category, names in plugin_files.items():
             for name in names:
                 self.enable_plugin(name, category)
