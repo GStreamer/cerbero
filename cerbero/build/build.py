@@ -1285,11 +1285,10 @@ class Cargo(Build, ModifyEnvBase):
             # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
             linker = self.get_env('RUSTC_LINKER')
             link_args = []
-            args = iter(shlex.split(self.get_env('LDFLAGS', '')))
             # We need to extract necessary linker flags from LDFLAGS which is
             # passed to the compiler
-            for arg in args:
-                link_args += ['-C', f"link-args={arg}"]
+            for arg in shlex.split(self.get_env('LDFLAGS', '')):
+                link_args += ['-C', f"link-arg={arg}"]
             s = f'[target.{self.target_triple}]\n' \
                 f'linker = "{linker}"\n' \
                 f'rustflags = {link_args!r}\n'
