@@ -1173,9 +1173,11 @@ class Cargo(Build, ModifyEnvBase):
     srcdir = '.'
     can_msvc = True
     cargo_features = None
+    cargo_packages = None
 
     def __init__(self):
         self.cargo_features = self.cargo_features or []
+        self.cargo_packages = self.cargo_packages or []
 
         Build.__init__(self)
         ModifyEnvBase.__init__(self)
@@ -1225,10 +1227,13 @@ class Cargo(Build, ModifyEnvBase):
             return min(determine_num_cargo_jobs(), self.config.num_of_cpus)
         return 1
 
-    def get_cargo_features_args(self):
-        if not self.cargo_features:
-            return []
-        return ['--features=' + ','.join(self.cargo_features)]
+    def get_cargo_args(self):
+        args = self.cargo_args[:]
+        if self.cargo_features:
+            args += ['--features=' + ','.join(self.cargo_features)]
+        for package in self.cargo_packages:
+            args += ['-p', package]
+        return args
 
     def append_config_toml(self, s):
         dot_cargo = os.path.join(self.config_src_dir, '.cargo')
@@ -1308,7 +1313,7 @@ class Cargo(Build, ModifyEnvBase):
             self.cargo, 'install',
             '--path', self.config_src_dir,
             '--root', self.config.prefix,
-        ] + self.cargo_args + self.get_cargo_features_args()
+        ] + self.get_cargo_args()
         await self.retry_run(shell.async_call, cmd, logfile=self.logfile, env=self.env)
 
 
@@ -1318,10 +1323,7 @@ class CargoC(Cargo):
     '''
     srcdir = '.'
 
-    cargoc_packages = None
-
     def __init__(self):
-        self.cargoc_packages = self.cargoc_packages or []
         Cargo.__init__(self)
 
     def get_cargoc_args(self):
@@ -1335,11 +1337,7 @@ class CargoC(Cargo):
             cargoc_args += ['--library-type', 'staticlib']
         if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
             cargoc_args += ['--library-type', 'cdylib']
-        cargoc_args += self.cargo_args
-        for package in self.cargoc_packages:
-            args = ['-p', package]
-            cargoc_args += args
-        cargoc_args += self.get_cargo_features_args()
+        cargoc_args += self.get_cargo_args()
         return cargoc_args
 
     @modify_environment

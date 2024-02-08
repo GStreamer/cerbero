@@ -26,7 +26,7 @@ class Recipe(recipe.Recipe):
     }]
 
     btype = BuildType.CARGO_C
-    cargoc_packages = [
+    cargo_packages = [
         'audiofx',
         'aws',
         'cdg',
@@ -115,7 +115,7 @@ class Recipe(recipe.Recipe):
             for name in names:
                 self.enable_plugin(name, category)
 
-        self.cargoc_packages = [f'gst-plugin-{pkg}' for pkg in self.cargoc_packages]
+        self.cargo_packages = [f'gst-plugin-{pkg}' for pkg in self.cargo_packages]
         # Build with Cerbero's latest glib version as minimum version
         self.cargo_features += ['glib/v2_74', 'gio/v2_74']
         # Enable assembly optimizations via nasm
