@@ -30,6 +30,8 @@ class Package(custom.GStreamer, package.Package):
     def prepare(self):
         if not self.config.variants.visualstudio:
             self.files += ['taglib:libs']
+        else:
+            self.files_devel.append('directx-headers:files_devel')
 
         if self.config.variants.vaapi:
             self.files.append('gstreamer-vaapi-1.0:plugins_codecs')
