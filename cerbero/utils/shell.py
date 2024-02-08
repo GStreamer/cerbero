@@ -212,8 +212,8 @@ def new_call(cmd, cmd_dir=None, fail=True, logfile=None, env=None, verbose=False
     else:
         stdin = None
     try:
-        subprocess.check_call(
-            cmd, cwd=cmd_dir, env=env, stdout=logfile, stderr=subprocess.STDOUT, stdin=stdin, shell=shell
+        subprocess.run(
+            cmd, cwd=cmd_dir, env=env, stdout=logfile, stderr=subprocess.STDOUT, stdin=stdin, shell=shell, check=True
         )
     except SUBPROCESS_EXCEPTIONS as e:
         returncode = getattr(e, 'returncode', -1)
