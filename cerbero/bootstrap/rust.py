@@ -35,7 +35,7 @@ class RustBootstrapper(BootstrapperBase):
 
     SERVER = 'https://static.rust-lang.org'
     RUSTUP_VERSION = '1.26.0'
-    RUST_VERSION = '1.75.0'
+    RUST_VERSION = '1.76.0'
     RUSTUP_URL_TPL = '{server}/rustup/archive/{version}/{triple}/rustup-init{exe_suffix}'
     RUSTUP_NAME_TPL = 'rustup-init-{version}-{triple}{exe_suffix}'
     CHANNEL_URL_TPL = '{server}/dist/channel-rust-{version}.toml'
@@ -44,7 +44,7 @@ class RustBootstrapper(BootstrapperBase):
     TOMLI_URL = 'https://files.pythonhosted.org/packages/c0/3f/d7af728f075fb08564c5949a9c95e44352e23dee646869fa104a3b2060a3/tomli-2.0.1.tar.gz'
     DOWNLOAD_CHECKSUMS = {
         # Rust packages metadata
-        'channel-rust-1.75.0.toml': '49746d02e3b822a34e42afa72dbaec0c56d593edda540f0d369499b0a9551fff',
+        'channel-rust-1.76.0.toml': '7b89a56897a1581ca66312468276ee08e6d596a3254128a567c1658c6f733c76',
         # Tomli Python module
         'tomli-2.0.1.tar.gz': 'de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f',
         # Rustup
