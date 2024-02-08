@@ -1,0 +1,57 @@
+From 0f852e729589851edf75d31100ea8cdff19986e4 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Thu, 8 Feb 2024 08:48:19 +0530
+Subject: [PATCH] Export symbols for a DLL correctly
+
+Fixes the MSVC build, which requires this. GCC (MinGW/Autotools)
+simply exports everything.
+---
+ include/SoundTouch.h          | 11 +++++++++++
+ source/SoundTouch/meson.build |  6 ++++++
+ 2 files changed, 17 insertions(+)
+
+diff --git a/include/SoundTouch.h b/include/SoundTouch.h
+index f2addc1..e02f559 100644
+--- a/include/SoundTouch.h
++++ b/include/SoundTouch.h
+@@ -164,7 +164,18 @@ namespace soundtouch
+ ///   tempo/pitch/rate/samplerate settings.
+ #define SETTING_INITIAL_LATENCY             8
+ 
++#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(SOUNDTOUCH_STATIC_COMPILATION)
++    #ifdef DLL_EXPORTS
++        #define SOUNDTOUCH_API __declspec(dllexport)
++    #else
++        #define SOUNDTOUCH_API __declspec(dllimport)
++    #endif
++#else
++    #define SOUNDTOUCH_API
++#endif
++
+ 
++SOUNDTOUCH_API
+ class SoundTouch : public FIFOProcessor
+ {
+ private:
+diff --git a/source/SoundTouch/meson.build b/source/SoundTouch/meson.build
+index 9bfcf96..2826165 100644
+--- a/source/SoundTouch/meson.build
++++ b/source/SoundTouch/meson.build
+@@ -52,8 +52,14 @@ extra_libs += [
+   )
+ ]
+ 
++exports_arg = []
++if host_machine.system() == 'windows' and get_option('default_library') != 'static'
++  exports_args = ['-DDLL_EXPORTS']
++endif
++
+ libsoundtouch = library('SoundTouch',
+     soundtouch_sources,
++    cpp_args: exports_arg,
+     link_with: extra_libs,
+     version: libversion,
+     soversion: soversion,
+-- 
+2.41.0
+
