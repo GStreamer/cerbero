@@ -27,6 +27,7 @@ class Recipe(custom.GStreamer):
                      'hls': 'enabled',
                      'hls-crypto': 'openssl',
                      'isac': 'enabled',
+                     'ivfparse': 'enabled',
                      'ladspa': 'auto', # lrdf is optional
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
@@ -236,6 +237,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdvdspu%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgsthls%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstid3tag%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstivfparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmidi%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstmxf%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstopenh264%(mext)s',
@@ -270,6 +272,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstdvdspu.a', '%(libdir)s/gstreamer-1.0/libgstdvdspu.la',
              '%(libdir)s/gstreamer-1.0/libgsthls.a', '%(libdir)s/gstreamer-1.0/libgsthls.la',
              '%(libdir)s/gstreamer-1.0/libgstid3tag.a', '%(libdir)s/gstreamer-1.0/libgstid3tag.la',
+             '%(libdir)s/gstreamer-1.0/libgstivfparse.a', '%(libdir)s/gstreamer-1.0/libgstivfparse.la',
              '%(libdir)s/gstreamer-1.0/libgstmidi.a', '%(libdir)s/gstreamer-1.0/libgstmidi.la',
              '%(libdir)s/gstreamer-1.0/libgstmxf.a', '%(libdir)s/gstreamer-1.0/libgstmxf.la',
              '%(libdir)s/gstreamer-1.0/libgstopenh264.a', '%(libdir)s/gstreamer-1.0/libgstopenh264.la',
