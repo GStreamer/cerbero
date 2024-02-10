@@ -302,8 +302,8 @@ class Oven (object):
                     return step
 
                 try:
-                    if hasattr(recipe, "allow_parallel_universal_build") \
-                       and not recipe.allow_parallel_universal_build:
+                    if hasattr(recipe, "allow_universal_parallel_build") \
+                       and not recipe.allow_universal_parallel_build:
                         recipe._lock = self._architecture_lock
                     else:
                         recipe._lock = None
