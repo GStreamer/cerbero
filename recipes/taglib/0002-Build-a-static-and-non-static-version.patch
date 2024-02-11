@@ -19,18 +19,18 @@ index 4f8c876..5f894db 100644
 +add_library(tag SHARED ${tag_LIB_SRCS} ${tag_HDRS})
 +add_library(tag_static STATIC ${tag_LIB_SRCS} ${tag_HDRS})
 +set_target_properties(tag_static PROPERTIES COMPILE_DEFINITIONS TAGLIB_STATIC)
+ set_property(TARGET tag PROPERTY CXX_STANDARD 98)
  
- if(ZLIB_FOUND)
-   target_link_libraries(tag ${ZLIB_LIBRARIES})
+ if(HAVE_ZLIB AND NOT HAVE_ZLIB_SOURCE)
 @@ -372,7 +374,7 @@ if(BUILD_FRAMEWORK)
-   set_target_properties(tag PROPERTIES FRAMEWORK TRUE)
+       )
  endif()
  
 -install(TARGETS tag
 +install(TARGETS tag tag_static
    FRAMEWORK DESTINATION ${FRAMEWORK_INSTALL_DIR}
-   LIBRARY DESTINATION ${LIB_INSTALL_DIR}
-   RUNTIME DESTINATION ${BIN_INSTALL_DIR}
+   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 -- 
 2.11.0
 
