@@ -171,12 +171,6 @@ class Recipe(custom.GStreamer):
         ]
 
     def prepare(self):
-        # Disable Cocoa NSApp integration since we enable the Cocoa MainLoop
-        # integration in the GLib recipe
-        if self.config.target_platform in (Platform.DARWIN, Platform.IOS):
-            self.append_env('CFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
-            self.append_env('OBJCFLAGS', '-DGSTREAMER_GLIB_COCOA_NSAPPLICATION=1')
-
         self.enable_plugin('cdparanoia', 'sys', 'cdparanoia', dep='cdparanoia')
         self.enable_plugin('ximagesink', 'sys', 'x11', option='x11')
         self.enable_plugin('xvimagesink', 'sys', 'x11', option='xvideo')
