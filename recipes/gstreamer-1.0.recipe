@@ -4,7 +4,7 @@ import shutil
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '1e7124d347e8cdc80f08ec1d370c201be513002af1102bb20e83c5279cb48ebd'
+    tarball_checksum = '969aaef396f252ce925132a4be2aa004e0320f5c1baf0acaaae09c544a6759f4'
     deps = ['glib']
     bash_completions = ['gst-inspect-1.0', 'gst-launch-1.0']
 
