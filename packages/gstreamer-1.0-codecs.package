@@ -14,7 +14,7 @@ class Package(custom.GStreamer, package.Package):
             'libogg:libs', 'speex:libs', 'libass:libs',
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'opus:libs', 'libvorbis:libs', 'openjpeg:libs',
-            'openh264:libs', 'tiff:libs', 'spandsp:libs',
+            'openh264:libs', 'taglib:libs', 'tiff:libs', 'spandsp:libs',
             'sbc:libs', 'mpg123:libs', 'lame:libs', 'zbar:libs',
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
             'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
@@ -28,9 +28,7 @@ class Package(custom.GStreamer, package.Package):
     }
 
     def prepare(self):
-        if not self.config.variants.visualstudio:
-            self.files += ['taglib:libs']
-        else:
+        if self.config.variants.visualstudio:
             self.files_devel.append('directx-headers:files_devel')
 
         if self.config.variants.vaapi:
