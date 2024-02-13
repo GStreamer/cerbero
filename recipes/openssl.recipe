@@ -181,6 +181,8 @@ class Recipe(recipe.Recipe):
 
         if self.config.target_platform == Platform.IOS:
             self.library_type = LibraryType.STATIC
+        if self.config.target_platform == Platform.ANDROID:
+            self.prepend_env('PATH', self.get_env('ANDROID_NDK_TOOLCHAIN_BIN'), sep=os.pathsep)
 
 
     @modify_environment

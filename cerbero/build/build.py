@@ -725,6 +725,9 @@ cpu_family = '{cpu_family}'
 cpu = '{cpu}'
 endian = '{endian}'
 
+[constants]
+toolchain = '{toolchain}'
+
 [properties]
 {extra_properties}
 
@@ -976,6 +979,7 @@ class Meson (Build, ModifyEnvBase) :
                 cpu_family=self._get_target_cpu_family(),
                 # Assume all supported target archs are little endian
                 endian='little',
+                toolchain='',
                 CC=cc,
                 CXX=cxx,
                 OBJC=objc,
@@ -1008,9 +1012,9 @@ class Meson (Build, ModifyEnvBase) :
             objc = cc
             objcxx = cxx
         elif self.config.target_platform == Platform.ANDROID:
-            cc = ['clang']
-            cxx = ['clang++']
-            ar = ['llvm-ar']
+            cc = "toolchain / 'clang'"
+            cxx = "toolchain / 'clang++'"
+            ar = "toolchain / 'llvm-ar'"
             objc = cc
             objcxx = cxx
         else:
@@ -1026,6 +1030,7 @@ class Meson (Build, ModifyEnvBase) :
                 cpu=self.config.arch,
                 cpu_family=self.config.arch,
                 endian='little',
+                toolchain=self.get_env('ANDROID_NDK_TOOLCHAIN_BIN', ''),
                 CC=cc,
                 CXX=cxx,
                 OBJC=objc,
@@ -1051,6 +1056,7 @@ class Meson (Build, ModifyEnvBase) :
                 cpu=self.config.arch,
                 cpu_family=self.config.arch,
                 endian='little',
+                toolchain='',
                 CC=false,
                 CXX=false,
                 OBJC=false,
