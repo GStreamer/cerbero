@@ -14,7 +14,7 @@ class Package(custom.GStreamer, package.Package):
             'libogg:libs', 'speex:libs', 'libass:libs',
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'opus:libs', 'libvorbis:libs', 'openjpeg:libs',
-            'openh264:libs', 'tiff:libs', 'spandsp:libs',
+            'openh264:libs', 'taglib:libs', 'tiff:libs', 'spandsp:libs',
             'sbc:libs', 'mpg123:libs', 'lame:libs', 'zbar:libs',
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
             'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
@@ -33,9 +33,6 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.rpi:
             self.files.append('gst-omx-1.0:plugins_codecs')
             self.files_devel.append('gst-omx-1.0:plugins_codecs_devel')
-
-        if not self.config.variants.visualstudio:
-            self.files += ['taglib:libs']
 
         if self.config.variants.vaapi:
             self.files.append('gstreamer-vaapi-1.0:plugins_codecs')
