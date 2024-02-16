@@ -39,6 +39,7 @@ class Recipe(recipe.Recipe):
         'gif',
         'hlssink3',
         'hsv',
+        'inter',
         'json',
         'livesync',
         'lewton',
@@ -51,6 +52,7 @@ class Recipe(recipe.Recipe):
         'raptorq',
         'png',
         'rtp',
+        'rtsp',
         'textahead',
         'textwrap',
         'threadshare',
@@ -101,10 +103,10 @@ class Recipe(recipe.Recipe):
             self.deps.append('openssl')
 
         plugin_files = {
-            'core': ['fallbackswitch', 'livesync', 'rstracers', 'threadshare',
-                    'togglerecord'],
-            'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'raptorq', 'rsrtp',
-                    'reqwest', 'webrtchttp', 'rswebrtc'],
+            'core': ['fallbackswitch', 'livesync', 'rsinter', 'rstracers',
+                     'threadshare', 'togglerecord'],
+            'net': ['aws', 'hlssink3', 'ndi', 'rsonvif', 'raptorq', 'reqwest',
+                    'rsrtp', 'rsrtsp', 'webrtchttp', 'rswebrtc'],
             'effects': ['rsaudiofx', 'rsvideofx'],
             'codecs': ['cdg', 'claxon', 'dav1d', 'rsclosedcaption', 'ffv1',
                        'fmp4', 'mp4', 'gif', 'hsv', 'lewton', 'rav1e', 'json',
