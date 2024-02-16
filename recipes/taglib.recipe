@@ -20,6 +20,8 @@ class Recipe(recipe.Recipe):
         -DBUILD_SHARED_LIBS=1 \
         -DBUILD_STATIC_LIBS=1 \
         -DCMAKE_DISABLE_FIND_PACKAGE_Boost=TRUE'
+    deps = ['zlib']
+
     can_msvc = True
     cmake_generator = 'ninja'
 
