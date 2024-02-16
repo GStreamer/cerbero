@@ -266,6 +266,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         ),
         Platform.WINDOWS: (
             'fatal error C1083: Cannot open compiler generated file:',
+            'STATUS_STACK_BUFFER_OVERRUN',
         ),
     }
 
