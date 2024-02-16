@@ -10,7 +10,6 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
     sdk_version = '1.0'
     uuid = 'b1b4b712-0d09-4a34-8117-8a69b6deecc2'
     ignore_package_prefix = True
-    wix_use_fragment = True
     packages =[
                # (name, required, selected)
                ('gstreamer-1.0-core', True, True),
@@ -63,6 +62,10 @@ class SDKPackage(custom.GStreamer, package.SDKPackage):
     def prepare(self):
         if self.config.variants.uwp:
             self.platform_packages[Platform.WINDOWS] = []
+
+        # Breaks feature selection in MSIs
+        if self.config.platform != Platform.WINDOWS:
+            self.wix_use_fragment = True
 
         if self.config.variants.visualstudio or \
            self.config.target_platform in (Platform.ANDROID, Platform.IOS):
