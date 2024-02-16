@@ -29,17 +29,8 @@ class Recipe(recipe.Recipe):
             prefix = str(PurePath(self.config.prefix))
         else:
             prefix = self.config.prefix
-        # Some distros have changed the default sysconfig scheme to
-        # manually add 'local' to all install dirs for setuptools.
-        # Reverting this is far too much work and will be fragile as heck,
-        # so just accept it and move on.
-        # Fedora: https://src.fedoraproject.org/rpms/python3.10/blob/f36/f/00251-change-user-install-location.patch
-        # Debian: https://salsa.debian.org/cpython-team/python3/-/blob/3.10.4-4/debian/patches/sysconfig-debian-schemes.diff
-        #
-        # Our workaround is to only install the script into bin. This also
-        # fixes things on Windows, where the script is installed into Scripts/
-        # instead of bin/
-        await shell.async_call([self.config.python_exe, '-m', 'pip', 'install', '--prefix', prefix, '.'],
+        python_exe = os.path.join(self.config.build_tools_prefix, 'bin', 'python')
+        await shell.async_call([python_exe, '-m', 'pip', 'install', '--prefix', prefix, '.'],
                                cmd_dir=self.build_dir, env=self.env, logfile=self.logfile)
         if self.config.platform == Platform.WINDOWS:
             # Python insists on using Scripts instead of bin on Windows for
