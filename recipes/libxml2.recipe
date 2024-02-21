@@ -1,28 +1,27 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.9.9'
+    version = '2.11.6'
     stype = SourceType.TARBALL
-    # Upstream still has a broken SSL certificate, use our mirror
-    #url = 'https://xmlsoft.org/sources/libxml2-%(version)s.tar.gz'
-    url = 'https://gstreamer.freedesktop.org/src/mirror/libxml2-%(version)s.tar.gz'
-    tarball_checksum = '94fb70890143e3c6549f265cee93ec064c80a84c42ad0f23e85ee1fd6540a871'
-    licenses = [{License.MIT: ['COPYING']}]
-    configure_options = '--with-python=no'
+    btype = BuildType.MESON
+    url = 'gnome://'
+    tarball_checksum = 'c90eee7506764abbe07bb616b82da452529609815aefef423d66ef080eb0c300'
+    licenses = [{License.MIT: ['Copyright']}]
 
     deps = [ 'zlib' ]
 
-    files_libs = ['libxml2']
-    files_devel = ['include/libxml2', '%(libdir)s/xml2Conf.sh', 'bin/xml2-config',
-                   '%(libdir)s/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
 
-    def prepare(self):
-        if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' --without-threads'
-        elif self.config.target_platform == Platform.ANDROID:
-            v = DistroVersion.get_android_api_version(self.config.target_distro_version)
-            if v < 21:
-                self.append_env('CFLAGS', '-D_FILE_OFFSET_BITS=32')
-                self.append_env('CPPFLAGS', '-D_FILE_OFFSET_BITS=32')
+    files_libs = ['libxml2']
+    files_devel = ['include/libxml2', '%(libdir)s/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
+ 
+    def post_install(self):
+        LibtoolLibrary(self.name, 2, 11, 6,
+                        self.config.libdir, self.config.target_platform,
+                        deps=['z'],
+                        static_only=self.library_type == LibraryType.STATIC).save()
+        super().post_install()
