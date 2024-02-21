@@ -13,6 +13,11 @@ class Recipe(recipe.Recipe):
     licenses_bins = [License.GPLv2Plus]
     deps = ['glib']
 
+    patches = [
+        # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/448
+        name + '/0001-giscanner-Allow-passing-full-paths-to-libraries-with.patch',
+    ]
+
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
     files_libs = ['libgirepository-1.0']
     files_typelibs = ['cairo-1.0',

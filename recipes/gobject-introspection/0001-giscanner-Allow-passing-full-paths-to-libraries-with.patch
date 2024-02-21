@@ -1,0 +1,61 @@
+From 912d605421eff8385881e0a4bd0d6bfbc9e1c4a2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Fri, 16 Feb 2024 21:37:45 -0300
+Subject: [PATCH] giscanner: Allow passing full paths to libraries with MSVC
+
+This is used by Meson's generate_gir call.
+---
+ giscanner/ccompiler.py | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/giscanner/ccompiler.py b/giscanner/ccompiler.py
+index 2912fe0e..b397ba20 100644
+--- a/giscanner/ccompiler.py
++++ b/giscanner/ccompiler.py
+@@ -253,13 +253,16 @@ class CCompiler(object):
+             runtime_paths.append(library_path)
+ 
+         for library in libraries + extra_libraries:
+-            if self.check_is_msvc():
++            if os.path.isfile(library):
++                # If we get a real filename, just use it as-is
++                args.append(library)
++            elif self.check_is_msvc():
+                 # Note that Visual Studio builds do not use libtool!
+                 if library != 'm':
+                     args.append(library + '.lib')
+             else:
+                 # If we get a real filename, just use it as-is
+-                if library.endswith(".la") or os.path.isfile(library):
++                if library.endswith(".la"):
+                     args.append(library)
+                 else:
+                     args.append('-l' + library)
+@@ -277,10 +280,13 @@ class CCompiler(object):
+         # of GLib in gobject-introspection itself.
+ 
+         for library in libraries:
+-            if self.check_is_msvc():
+-                # Visual Studio: don't attempt to link to m.lib
++            if os.path.isfile(library):
++                # If we get a real filename, just use it as-is
++                args.append(library)
++            elif self.check_is_msvc():
++                # Note that Visual Studio builds do not use libtool!
+                 if library != 'm':
+-                    args.append(library + ".lib")
++                    args.append(library + '.lib')
+             else:
+                 if library.endswith(".la"):  # explicitly specified libtool library
+                     args.append(library)
+@@ -390,6 +396,7 @@ class CCompiler(object):
+             found = False
+             candidates = [
+                 'lib%s.dll.a' % lib,
++                'lib%s.dll.lib' % lib, # rust cdylib
+                 'lib%s.a' % lib,
+                 '%s.dll.a' % lib,
+                 '%s.a' % lib,
+-- 
+2.42.0.windows.2
+
