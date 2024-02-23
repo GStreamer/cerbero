@@ -6,7 +6,7 @@ class Recipe(custom.GStreamer):
     name = 'gst-devtools-1.0'
     btype = BuildType.MESON
     meson_options = {'debug_viewer': 'disabled'}
-    tarball_checksum = 'f3a7106ea44123324aac5d649892919b94e99a351866b05265bc00da25adef3e'
+    tarball_checksum = '84d2a7e198d6bc9dff2f3aca3f1e0464c06aa44a88958ca8d0bbbc3d5dd75f67'
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'json-glib', 'gst-rtsp-server-1.0']
 
     files_bins = ['gst-validate-1.0', 'gst-validate-transcoding-1.0', 'gst-validate-media-check-1.0',
