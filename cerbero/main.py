@@ -71,6 +71,8 @@ class Main(object):
         """Initialize logging"""
         if self.args.timestamps:
             m.START_TIME = time.monotonic()
+        if self.args.clocktime:
+            m.PRINT_CLOCK_TIME = True
         logging.getLogger().setLevel(logging.INFO)
         logging.getLogger().addHandler(logging.StreamHandler())
 
@@ -91,6 +93,12 @@ class Main(object):
             action='store_true',
             default=False,
             help=_('Print timestamps with every message printed'),
+        )
+        self.parser.add_argument(
+            '--clocktime',
+            action='store_true',
+            default=False,
+            help=_('Print absolute clock times with every message printed'),
         )
         self.parser.add_argument(
             '--list-variants', action='store_true', default=False, help=_('List available variants')

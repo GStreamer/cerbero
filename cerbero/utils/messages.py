@@ -36,6 +36,7 @@ STEP_TPL = '[(%s/%s @ %d%%) %s -> %s]'
 START_TIME = None
 SHELL_CLEAR_LINE = '\r\033[K'
 SHELL_MOVE_UP = '\033[F'
+PRINT_CLOCK_TIME = False
 
 
 # Enable support fot VT-100 escapes in Windows 10
@@ -98,9 +99,16 @@ STDOUT = StdoutManager()
 
 
 def prepend_time(end=' '):
+    global PRINT_CLOCK_TIME
     global START_TIME
     s = ''
+    if PRINT_CLOCK_TIME:
+        s += str(datetime.datetime.now().strftime('%H:%M:%S'))
+        if START_TIME is None:
+            s += end
     if START_TIME is not None:
+        if PRINT_CLOCK_TIME:
+            s += ' | '
         s += str(datetime.timedelta(microseconds=int((time.monotonic() - START_TIME) * 1e6)))
         s += end
     return s
