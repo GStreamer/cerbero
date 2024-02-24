@@ -114,7 +114,7 @@ import shutil
 from shutil import rmtree as shutil_rmtree
 
 
-def rmtree(path, ignore_errors=False, onerror=None):
+def rmtree(path, ignore_errors=False, onerror=None, **kwargs):
     """
     shutil.rmtree often fails with access denied. On Windows this happens when
     a file is readonly. On Linux this can happen when a directory doesn't have
@@ -144,9 +144,9 @@ def rmtree(path, ignore_errors=False, onerror=None):
 
     # We try to not use `rm` because on Windows because it's about 20-30x slower
     if not onerror:
-        shutil_rmtree(path, ignore_errors, onerror=force_removal)
+        shutil_rmtree(path, ignore_errors=ignore_errors, onerror=force_removal, **kwargs)
     else:
-        shutil_rmtree(path, ignore_errors, onerror)
+        shutil_rmtree(path, ignore_errors=ignore_errors, onerror=onerror, **kwargs)
 
 
 shutil.rmtree = rmtree
