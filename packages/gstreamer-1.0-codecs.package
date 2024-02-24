@@ -29,6 +29,7 @@ class Package(custom.GStreamer, package.Package):
 
     def prepare(self):
         if self.config.variants.visualstudio:
+            self.files_devel.append('directxmath:files_devel')
             self.files_devel.append('directx-headers:files_devel')
 
         if self.config.variants.vaapi:

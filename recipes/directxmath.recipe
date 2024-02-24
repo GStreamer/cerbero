@@ -11,6 +11,8 @@ class Recipe(recipe.Recipe):
     tarball_name = 'dec2022.tar.gz'
     tarball_dirname = 'DirectXMath-dec2022'
 
+    files_devel = []
+
     patches = [
         # https://wrapdb.mesonbuild.com/v2/directxmath_3.1.8-1/get_patch
         'directxmath/0001-Add-DirectXMath-wrap.patch',
