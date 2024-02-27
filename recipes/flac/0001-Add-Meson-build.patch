@@ -1,0 +1,374 @@
+From 4772cc08efd4c6d4254124aba73c3f777b5b9f87 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Wed, 21 Feb 2024 09:19:00 -0300
+Subject: [PATCH 1/1] Add Meson build
+
+Source: https://wrapdb.mesonbuild.com/v2/flac_1.4.3-2/flac.wrap
+---
+ LICENSE.build                              |  19 ++++
+ meson.build                                | 103 +++++++++++++++++++++
+ src/flac/meson.build                       |  15 +++
+ src/libFLAC++/meson.build                  |   1 +
+ src/libFLAC/meson.build                    |  77 +++++++++++++++
+ src/meson.build                            |  13 +++
+ src/metaflac/meson.build                   |  17 ++++
+ src/share/getopt/meson.build               |   6 ++
+ src/share/grabbag/meson.build              |  12 +++
+ src/share/replaygain_analysis/meson.build  |   1 +
+ src/share/replaygain_synthesis/meson.build |   1 +
+ src/share/utf8/meson.build                 |   1 +
+ 12 files changed, 266 insertions(+)
+ create mode 100644 LICENSE.build
+ create mode 100644 meson.build
+ create mode 100644 src/flac/meson.build
+ create mode 100644 src/libFLAC++/meson.build
+ create mode 100644 src/libFLAC/meson.build
+ create mode 100644 src/meson.build
+ create mode 100644 src/metaflac/meson.build
+ create mode 100644 src/share/getopt/meson.build
+ create mode 100644 src/share/grabbag/meson.build
+ create mode 100644 src/share/replaygain_analysis/meson.build
+ create mode 100644 src/share/replaygain_synthesis/meson.build
+ create mode 100644 src/share/utf8/meson.build
+
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..5a62a28
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,103 @@
++project(
++  'flac',
++  'c',
++  version: '1.4.3',
++  meson_version: '>=0.54.1',
++)
++
++cc = meson.get_compiler('c')
++
++add_project_arguments('-DHAVE_CONFIG_H', language: 'c')
++if host_machine.system() == 'darwin'
++  add_project_arguments('-D_DARWIN_C_SOURCE', language: 'c')
++endif
++
++if cc.get_argument_syntax() == 'msvc'
++  add_project_arguments('-D_CRT_SECURE_NO_WARNINGS', cc.get_supported_arguments('-Wno-deprecated-declarations'), language: 'c')
++endif
++
++ogg_dep = dependency('ogg')
++m_dep = cc.find_library('m', required: false)
++if meson.version().version_compare('>= 0.60')
++  iconv_dep = dependency('iconv', required: false)
++elif cc.links('#include <iconv.h>\nint main(){iconv_open("", "");}')
++  iconv_dep = declare_dependency()
++else
++  iconv_dep = cc.find_library('iconv', required: false)
++endif
++
++cdata = configuration_data()
++
++cheaders = [
++  'byteswap.h',
++  'inttypes.h',
++  'memory.h',
++  'stdint.h',
++  'stdlib.h',
++  'string.h',
++  'sys/ioctl.h',
++  'sys/param.h',
++  'sys/stat.h',
++  'sys/types.h',
++  'termios.h',
++  'unistd.h',
++]
++
++foreach h : cheaders
++  cdata.set('HAVE_' + h.underscorify().to_upper(), cc.has_header(h))
++endforeach
++
++cdata.set('HAVE_CPUID_H', cc.check_header('cpuid.h'))
++cdata.set('HAVE_X86INTRIN_H', cc.check_header('x86intrin.h'))
++cdata.set10('FLAC__HAS_NEONINTRIN', cc.check_header('arm_neon.h'))
++cdata.set10('FLAC__HAS_A64NEONINTRIN', cc.check_header('arm_neon.h') and host_machine.cpu_family() == 'aarch64')
++cdata.set('FLAC__USE_ALTIVEC', cc.check_header('altivec.h'))
++cdata.set('WITH_AVX', cc.check_header('immintrin.h'))
++
++cdata.set('PROJECT_VERSION', meson.project_version())
++cdata.set10('CPU_IS_BIG_ENDIAN', host_machine.endian() == 'big')
++cdata.set10('CPU_IS_LITTLE_ENDIAN', host_machine.endian() == 'little')
++cdata.set('FLAC__CPU_ARM64', host_machine.cpu_family() == 'aarch64')
++cdata.set('FLAC__CPU_PPC', host_machine.cpu_family() == 'ppc')
++cdata.set('FLAC__CPU_PPC64', host_machine.cpu_family() == 'ppc64')
++cdata.set('FLAC__ALIGN_MALLOC_DATA', host_machine.cpu_family() == 'x86_64')
++cdata.set10('FLAC__HAS_X86INTRIN', cdata.get('HAVE_X86INTRIN_H'))
++cdata.set('FLAC__SYS_DARWIN', host_machine.system() == 'darwin')
++cdata.set('FLAC__SYS_LINUX', host_machine.system() == 'linux')
++cdata.set10('OGG_FOUND', ogg_dep.found())
++cdata.set('HAVE_ICONV', iconv_dep.found())
++cdata.set10('HAVE_CLOCK_GETTIME', cc.has_function('clock_gettime'))
++cdata.set10('HAVE_FSEEKO', cc.has_function('fseeko'))
++cdata.set10('HAVE_GETOPT_LONG', cc.has_function('getopt_long'))
++cdata.set10('HAVE_LROUND', cc.has_function('lround', dependencies: m_dep))
++cdata.set('HAVE_BSWAP16', cc.has_function('__builtin_bswap16'))
++cdata.set('HAVE_BSWAP32', cc.has_function('__builtin_bswap32'))
++
++cdata.set('SIZEOF_OFF_T', cc.sizeof('off_t'))
++cdata.set('SIZEOF_VOIDP', cc.sizeof('void*'))
++
++configure_file(
++  input: 'config.cmake.h.in',
++  output: 'config.h',
++  format: 'cmake@',
++  configuration: cdata,
++)
++
++main_inc = include_directories('include', '.')
++
++win32_utf8 = host_machine.system() == 'windows' ? files('src/share/win_utf8_io/win_utf8_io.c') : []
++
++subdir('src')
++
++install_headers(
++  'include/FLAC/all.h',
++  'include/FLAC/assert.h',
++  'include/FLAC/callback.h',
++  'include/FLAC/export.h',
++  'include/FLAC/format.h',
++  'include/FLAC/metadata.h',
++  'include/FLAC/ordinals.h',
++  'include/FLAC/stream_decoder.h',
++  'include/FLAC/stream_encoder.h',
++  subdir: 'FLAC',
++)
+diff --git a/src/flac/meson.build b/src/flac/meson.build
+new file mode 100644
+index 0000000..f33d094
+--- /dev/null
++++ b/src/flac/meson.build
+@@ -0,0 +1,15 @@
++executable(
++  'flac',
++  'analyze.c',
++  'decode.c',
++  'encode.c',
++  'foreign_metadata.c',
++  'main.c',
++  'local_string_utils.c',
++  'utils.c',
++  'vorbiscomment.c',
++  win32_utf8,
++  dependencies: [flac_dep, m_dep],
++  link_with: [grabbag, libgetopt, replaygain_synthesis, utf8lib],
++  install: true,
++)
+diff --git a/src/libFLAC++/meson.build b/src/libFLAC++/meson.build
+new file mode 100644
+index 0000000..db0d440
+--- /dev/null
++++ b/src/libFLAC++/meson.build
+@@ -0,0 +1 @@
++subdir_done()
+diff --git a/src/libFLAC/meson.build b/src/libFLAC/meson.build
+new file mode 100644
+index 0000000..c0cc65a
+--- /dev/null
++++ b/src/libFLAC/meson.build
+@@ -0,0 +1,77 @@
++if get_option('default_library') != 'static'
++  extra_args = ['-DFLAC_API_EXPORTS', '-DFLAC__USE_VISIBILITY_ATTR']
++else
++  extra_args = ['-DFLAC__NO_DLL']
++endif
++
++avx2_args = []
++
++if cc.get_argument_syntax() == 'msvc' and cdata.get('WITH_AVX')
++  avx2_args += '/arch:AVX2'
++endif
++
++flac_avx2_lib = static_library(
++  'flac_avx2',
++  files(
++    'fixed_intrin_avx2.c',
++    'lpc_intrin_avx2.c',
++    'lpc_intrin_fma.c',
++    'stream_encoder_intrin_avx2.c',
++  ),
++  include_directories: [main_inc, 'include'],
++  c_args: [avx2_args, extra_args],
++  install: false,
++)
++
++flac_lib = library(
++  'FLAC',
++  'bitmath.c',
++  'bitreader.c',
++  'bitwriter.c',
++  'cpu.c',
++  'crc.c',
++  'fixed.c',
++  'fixed_intrin_sse2.c',
++  'fixed_intrin_ssse3.c',
++  'fixed_intrin_sse42.c',
++  'float.c',
++  'format.c',
++  'lpc.c',
++  'lpc_intrin_neon.c',
++  'lpc_intrin_sse2.c',
++  'lpc_intrin_sse41.c',
++  'md5.c',
++  'memory.c',
++  'metadata_iterators.c',
++  'metadata_object.c',
++  'stream_decoder.c',
++  'stream_encoder.c',
++  'stream_encoder_intrin_sse2.c',
++  'stream_encoder_intrin_ssse3.c',
++  'stream_encoder_framing.c',
++  'window.c',
++  'ogg_decoder_aspect.c',
++  'ogg_encoder_aspect.c',
++  'ogg_helper.c',
++  'ogg_mapping.c',
++  win32_utf8,
++  include_directories: [main_inc, 'include'],
++  link_whole: flac_avx2_lib,
++  c_args: extra_args,
++  version: '8.3.0',
++  soversion: '8',
++  dependencies: [ogg_dep, m_dep],
++  install: true,
++)
++
++flac_dep = declare_dependency(
++  compile_args: get_option('default_library') != 'static' ? [] : '-DFLAC__NO_DLL',
++  include_directories: main_inc,
++  link_with: flac_lib,
++)
++
++pconf.generate(
++  flac_lib,
++  name: 'flac',
++  description: 'Free Lossless Audio Codec Library',
++)
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..db0d9c2
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,13 @@
++pconf = import('pkgconfig')
++
++subdir('libFLAC')
++subdir('libFLAC++')
++
++subdir('share/replaygain_analysis')
++subdir('share/replaygain_synthesis')
++subdir('share/getopt')
++subdir('share/utf8')
++subdir('share/grabbag')
++
++subdir('flac')
++subdir('metaflac')
+diff --git a/src/metaflac/meson.build b/src/metaflac/meson.build
+new file mode 100644
+index 0000000..5f642d2
+--- /dev/null
++++ b/src/metaflac/meson.build
+@@ -0,0 +1,17 @@
++executable(
++  'metaflac',
++  'main.c',
++  'operations.c',
++  'operations_shorthand_cuesheet.c',
++  'operations_shorthand_picture.c',
++  'operations_shorthand_seektable.c',
++  'operations_shorthand_streaminfo.c',
++  'operations_shorthand_vorbiscomment.c',
++  'options.c',
++  'usage.c',
++  'utils.c',
++  win32_utf8,
++  dependencies: [flac_dep, m_dep],
++  link_with: [grabbag, libgetopt, utf8lib],
++  install: true,
++)
+diff --git a/src/share/getopt/meson.build b/src/share/getopt/meson.build
+new file mode 100644
+index 0000000..af7c86f
+--- /dev/null
++++ b/src/share/getopt/meson.build
+@@ -0,0 +1,6 @@
++if meson.version().version_compare('>= 0.59')
++  intl_dep = dependency('intl', required: false)
++else
++  intl_dep = dependency('', required: false)
++endif
++libgetopt = static_library('getopt', 'getopt.c', 'getopt1.c', include_directories: main_inc, dependencies: intl_dep)
+diff --git a/src/share/grabbag/meson.build b/src/share/grabbag/meson.build
+new file mode 100644
+index 0000000..e9d78e9
+--- /dev/null
++++ b/src/share/grabbag/meson.build
+@@ -0,0 +1,12 @@
++grabbag = static_library(
++  'grabbag',
++  'alloc.c',
++  'cuesheet.c',
++  'file.c',
++  'picture.c',
++  'replaygain.c',
++  'seektable.c',
++  'snprintf.c',
++  dependencies: flac_dep,
++  link_with: replaygain_analysis,
++)
+diff --git a/src/share/replaygain_analysis/meson.build b/src/share/replaygain_analysis/meson.build
+new file mode 100644
+index 0000000..9f2f214
+--- /dev/null
++++ b/src/share/replaygain_analysis/meson.build
+@@ -0,0 +1 @@
++replaygain_analysis = static_library('replaygain_analysis', 'replaygain_analysis.c', include_directories: main_inc)
+diff --git a/src/share/replaygain_synthesis/meson.build b/src/share/replaygain_synthesis/meson.build
+new file mode 100644
+index 0000000..5dc6d5e
+--- /dev/null
++++ b/src/share/replaygain_synthesis/meson.build
+@@ -0,0 +1 @@
++replaygain_synthesis = static_library('replaygain_synthesis', 'replaygain_synthesis.c', include_directories: main_inc)
+diff --git a/src/share/utf8/meson.build b/src/share/utf8/meson.build
+new file mode 100644
+index 0000000..b24623c
+--- /dev/null
++++ b/src/share/utf8/meson.build
+@@ -0,0 +1 @@
++utf8lib = static_library('utf8', 'charset.c', 'iconvert.c', 'utf8.c', include_directories: main_inc, dependencies: iconv_dep)
+-- 
+2.42.0.windows.2
+

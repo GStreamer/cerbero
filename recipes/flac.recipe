@@ -4,14 +4,19 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'flac'
-    version = '1.3.3'
+    version = '1.4.3'
     # only libraries are Xiph.org (aka BSD-like), tools are GPLv2+ and defined below
     licenses = [{License.BSD_like: ['COPYING.Xiph']}]
     stype = SourceType.TARBALL
     url = 'xiph://'
-    tarball_checksum = '213e82bd716c9de6db2f98bcadbc4c24c7e2efe8c75939a1a84e28539c4e1748'
+    tarball_checksum = '6c58e69cd22348f441b861092b825e591d0b822e106de6eb0ee4d05d27205b70'
     deps = ['libogg']
-    configure_options = ' --disable-cpplibs --enable-static'
+
+    btype = BuildType.MESON
+
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
 
     files_libs = ['libFLAC']
 
@@ -23,25 +28,10 @@ class Recipe(recipe.Recipe):
         'include/FLAC',
     ]
 
-    # Skipping because it takes too long
-    make_check = None
-
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             if self.config.target_arch == Architecture.X86:
-                self.configure_options += ' --disable-asm-optimizations'
-        if self.config.target_platform in [Platform.ANDROID, Platform.IOS]:
-            self.autoreconf = True
+                self.append_env('CFLAGS', '-DFLAC__NO_ASM')
         if self.config.target_platform == Platform.WINDOWS:
             # Newer MinGW requires this define for sscanf in stdio.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
-
-    async def configure(self):
-        if self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch == Architecture.X86:
-                # for missing sys/ucontext.h
-                shell.replace(os.path.join(self.build_dir, 'src', 'libFLAC',
-                    'cpu.c'),
-                    {'#  undef USE_OBSOLETE_SIGCONTEXT_FLAVOR':
-                     '#define USE_OBSOLETE_SIGCONTEXT_FLAVOR'})
-        await super(Recipe, self).configure()
