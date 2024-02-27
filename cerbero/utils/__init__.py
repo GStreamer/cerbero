@@ -340,6 +340,7 @@ Terminating.""",
             'CentOS Linux',
             'Amazon Linux',
             'Rocky Linux',
+            'AlmaLinux',
         ]:
             distro = Distro.REDHAT
             if d[1] == '16':
