@@ -3,12 +3,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'orc'
-    version = '0.4.37'
+    version = '0.4.38'
 
     stype = SourceType.TARBALL
     # These properties are only used when stype is TARBALL
     url = 'https://gstreamer.freedesktop.org/src/orc/orc-%(version)s.tar.xz'
-    tarball_checksum = '85638c0d447d989cd0d7e03406adbfbc380e67db2a622a4727a0ce3d440b2974'
+    tarball_checksum = 'a55a98d4772567aa3faed8fb84d540c3db77eaba16d3e2e10b044fbc9228668d'
     # These properties are only used when stype is GIT
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
@@ -22,7 +22,7 @@ class Recipe(recipe.Recipe):
 
     files_libs = ['liborc-0.4']
     files_devel = ['include/orc-0.4', '%(libdir)s/pkgconfig/orc-0.4.pc',
-        'share/aclocal/orc.m4', 'bin/orcc%(bext)s']
+        'bin/orcc%(bext)s']
 
     def prepare(self):
         # Don't build testing helper library on ios
