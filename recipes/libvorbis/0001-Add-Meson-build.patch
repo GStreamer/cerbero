@@ -1,0 +1,349 @@
+From 9a38c3c35d1296732783234cdd27f517b57128b6 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 28 Feb 2024 13:28:49 -0300
+Subject: [PATCH 1/1] Add Meson build
+
+Source: https://wrapdb.mesonbuild.com/v2/vorbis_1.3.7-4/vorbis.wrap
+
+---
+ LICENSE.build    | 19 +++++++++++
+ lib/meson.build  | 89 ++++++++++++++++++++++++++++++++++++++++++++++++
+ meson.build      | 37 ++++++++++++++++++++
+ test/meson.build |  9 +++++
+ vorbis.def       | 50 +++++++++++++++++++++++++++
+ vorbisenc.def    | 10 ++++++
+ vorbisfile.def   | 38 +++++++++++++++++++++
+ vq/meson.build   | 20 +++++++++++
+ 8 files changed, 272 insertions(+)
+ create mode 100644 LICENSE.build
+ create mode 100644 lib/meson.build
+ create mode 100644 meson.build
+ create mode 100644 test/meson.build
+ create mode 100644 vorbis.def
+ create mode 100644 vorbisenc.def
+ create mode 100644 vorbisfile.def
+ create mode 100644 vq/meson.build
+
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/lib/meson.build b/lib/meson.build
+new file mode 100644
+index 0000000..e696aa1
+--- /dev/null
++++ b/lib/meson.build
+@@ -0,0 +1,89 @@
++vorbis_sources = [
++  'analysis.c',
++  'bitrate.c',
++  'block.c',
++  'codebook.c',
++  'envelope.c',
++  'floor0.c',
++  'floor1.c',
++  'info.c',
++  'lookup.c',
++  'lpc.c',
++  'lsp.c',
++  'mapping0.c',
++  'mdct.c',
++  'psy.c',
++  'registry.c',
++  'res0.c',
++  'sharedbook.c',
++  'smallft.c',
++  'synthesis.c',
++  'window.c',
++]
++
++vorbisfile_sources = ['vorbisfile.c']
++
++vorbisenc_sources = ['vorbisenc.c']
++
++math_dep = meson.get_compiler('c').find_library('m', required: false)
++pkgconfig = import('pkgconfig')
++
++vorbis_lib = library('vorbis', vorbis_sources,
++  include_directories : [incdir],
++  dependencies : [ogg_dep, math_dep],
++  vs_module_defs: '../vorbis.def',
++  version: lib_version,
++  soversion: lib_soversion,
++  install: true,
++)
++
++vorbis_dep = declare_dependency(link_with : vorbis_lib,
++  include_directories : incdir,
++  dependencies: [ogg_dep, math_dep])
++
++pkgconfig.generate(vorbis_lib,
++  description: 'vorbis is the primary Ogg Vorbis library',
++)
++
++vorbisfile_lib = library('vorbisfile', vorbisfile_sources,
++  include_directories : [incdir],
++  link_with: vorbis_lib,
++  dependencies : [ogg_dep, math_dep],
++  vs_module_defs: '../vorbisfile.def',
++  version: vorbisfile_version,
++  soversion: vorbisfile_soversion,
++  install: true,
++)
++
++vorbisfile_dep = declare_dependency(link_with : vorbisfile_lib,
++  include_directories : incdir)
++
++pkgconfig.generate(vorbisfile_lib,
++  description: 'vorbisfile is a library that provides a convenient high-level API for decoding and basic manipulation of all Vorbis I audio streams',
++)
++
++vorbisenc_lib = library('vorbisenc', vorbisenc_sources,
++  include_directories : [incdir],
++  link_with: vorbis_lib,
++  dependencies : [ogg_dep, math_dep],
++  vs_module_defs: '../vorbisenc.def',
++  version: vorbisenc_version,
++  soversion: vorbisenc_soversion,
++  install: true,
++)
++
++vorbisenc_dep = declare_dependency(link_with : vorbisenc_lib,
++  include_directories : incdir)
++
++pkgconfig.generate(vorbisenc_lib,
++  description: 'vorbisenc is a library that provides a convenient API for setting up an encoding environment using libvorbis',
++)
++
++test_sharedbook = executable('test_sharedbook', 'sharedbook.c',
++  c_args : '-D_V_SELFTEST',
++  include_directories : [incdir],
++  link_with : vorbis_lib,
++  dependencies: [ogg_dep, math_dep],
++)
++
++test('sharedbook', test_sharedbook)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..8303343
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,37 @@
++project('vorbis', 'c', version : '1.3.7', license : 'bsd-style')
++
++ogg_dep = dependency('ogg')
++
++# configure.ac
++lib_current = 4
++lib_revision = 9
++lib_age = 4
++lib_soversion = lib_current - lib_age
++lib_version = '@0@.@1@.@2@'.format(lib_soversion, lib_age, lib_revision)
++
++file_lib_current = 6
++file_lib_revision = 8
++file_lib_age = 3
++vorbisfile_soversion = file_lib_current - file_lib_age
++vorbisfile_version = '@0@.@1@.@2@'.format(vorbisfile_soversion, file_lib_age, file_lib_revision)
++
++enc_lib_current = 2
++enc_lib_revision = 12
++enc_lib_age = 0
++vorbisenc_soversion = enc_lib_current - enc_lib_age
++vorbisenc_version = '@0@.@1@.@2@'.format(vorbisenc_soversion, enc_lib_age, enc_lib_revision)
++
++headers = files(
++  'include/vorbis/codec.h',
++  'include/vorbis/vorbisenc.h',
++  'include/vorbis/vorbisfile.h'
++)
++install_headers(headers, subdir: 'vorbis')
++
++incdir = include_directories('include')
++subdir('lib')
++if host_machine.system() != 'windows'
++  # These don't seem to build on Windows.
++  subdir('vq')
++endif
++subdir('test')
+diff --git a/test/meson.build b/test/meson.build
+new file mode 100644
+index 0000000..29f807b
+--- /dev/null
++++ b/test/meson.build
+@@ -0,0 +1,9 @@
++c_args = meson.get_compiler('c').get_argument_syntax() == 'msvc' ? ['-D_USE_MATH_DEFINES'] : []
++
++testexe = executable('testbin',
++  'util.c', 'write_read.c', 'test.c',
++  c_args: c_args,
++  dependencies : [vorbisenc_dep, vorbis_dep, ogg_dep],
++)
++
++test('vorbistest', testexe, timeout: 90)
+diff --git a/vorbis.def b/vorbis.def
+new file mode 100644
+index 0000000..de14385
+--- /dev/null
++++ b/vorbis.def
+@@ -0,0 +1,50 @@
++; vorbis.def
++; 
++EXPORTS
++_floor_P
++_mapping_P
++_residue_P
++;
++vorbis_info_init
++vorbis_info_clear
++vorbis_info_blocksize
++;
++vorbis_comment_init
++vorbis_comment_add
++vorbis_comment_add_tag
++vorbis_comment_query
++vorbis_comment_query_count
++vorbis_comment_clear
++;
++vorbis_block_init
++vorbis_block_clear
++vorbis_dsp_clear
++vorbis_granule_time
++;
++vorbis_analysis_init
++vorbis_commentheader_out
++vorbis_analysis_headerout
++vorbis_analysis_buffer
++vorbis_analysis_wrote
++vorbis_analysis_blockout
++vorbis_analysis
++vorbis_bitrate_addblock
++vorbis_bitrate_flushpacket
++;
++vorbis_synthesis_headerin
++vorbis_synthesis_init
++vorbis_synthesis_restart
++vorbis_synthesis
++vorbis_synthesis_trackonly
++vorbis_synthesis_blockin
++vorbis_synthesis_pcmout
++vorbis_synthesis_lapout
++vorbis_synthesis_read
++vorbis_packet_blocksize
++vorbis_synthesis_halfrate
++vorbis_synthesis_halfrate_p
++vorbis_synthesis_idheader
++;
++vorbis_window
++;_analysis_output_always
++vorbis_version_string
+diff --git a/vorbisenc.def b/vorbisenc.def
+new file mode 100644
+index 0000000..5d7b102
+--- /dev/null
++++ b/vorbisenc.def
+@@ -0,0 +1,10 @@
++; vorbisenc.def
++;
++EXPORTS
++vorbis_encode_init
++vorbis_encode_setup_managed
++vorbis_encode_setup_vbr
++vorbis_encode_init_vbr
++vorbis_encode_setup_init
++vorbis_encode_ctl
++
+diff --git a/vorbisfile.def b/vorbisfile.def
+new file mode 100644
+index 0000000..243795d
+--- /dev/null
++++ b/vorbisfile.def
+@@ -0,0 +1,38 @@
++; vorbisfile.def
++;
++EXPORTS
++ov_clear
++ov_open
++ov_open_callbacks
++ov_bitrate
++ov_bitrate_instant
++ov_streams
++ov_seekable
++ov_serialnumber
++ov_raw_total
++ov_pcm_total
++ov_time_total
++ov_raw_seek
++ov_pcm_seek
++ov_pcm_seek_page
++ov_time_seek
++ov_time_seek_page
++ov_raw_seek_lap
++ov_pcm_seek_lap
++ov_pcm_seek_page_lap
++ov_time_seek_lap
++ov_time_seek_page_lap
++ov_raw_tell
++ov_pcm_tell
++ov_time_tell
++ov_info
++ov_comment
++ov_read
++ov_read_float
++ov_test
++ov_test_callbacks
++ov_test_open
++ov_crosslap
++ov_halfrate
++ov_halfrate_p
++ov_fopen
+diff --git a/vq/meson.build b/vq/meson.build
+new file mode 100644
+index 0000000..67e1812
+--- /dev/null
++++ b/vq/meson.build
+@@ -0,0 +1,20 @@
++latticebuild = executable('latticebuild',
++  'latticebuild.c',
++  'vqgen.c',
++  'bookutil.c',
++  dependencies : vorbis_dep,
++)
++
++latticetune = executable('latticetune',
++  'latticetune.c',
++  'vqgen.c',
++  'bookutil.c',
++  dependencies : vorbis_dep,
++)
++
++huffbuild = executable('huffbuild',
++  'huffbuild.c',
++  'vqgen.c',
++  'bookutil.c',
++  dependencies : vorbis_dep,
++)
+-- 
+2.42.0.windows.2
+
