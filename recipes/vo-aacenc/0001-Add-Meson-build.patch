@@ -1,0 +1,508 @@
+From a81f58309d2e3800b616a019a28f86c6057e40b2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Thu, 14 Mar 2024 11:30:08 -0300
+Subject: [PATCH 1/1] Add Meson build
+
+Source: https://wrapdb.mesonbuild.com/v2/vo-aacenc_0.1.3-1/get_patch
+---
+ .vscode/settings.json      |   4 +
+ LICENSE.build              |  19 +++++
+ aacenc/meson.build         |  55 +++++++++++++
+ common/include/meson.build |  24 ++++++
+ common/include/stddef.h.in |   7 ++
+ common/meson.build         |  10 +++
+ meson.build                | 161 +++++++++++++++++++++++++++++++++++++
+ meson/makedef.py           | 143 ++++++++++++++++++++++++++++++++
+ meson_options.txt          |   1 +
+ 9 files changed, 424 insertions(+)
+ create mode 100644 .vscode/settings.json
+ create mode 100644 LICENSE.build
+ create mode 100644 aacenc/meson.build
+ create mode 100644 common/include/meson.build
+ create mode 100644 common/include/stddef.h.in
+ create mode 100644 common/meson.build
+ create mode 100644 meson.build
+ create mode 100755 meson/makedef.py
+ create mode 100644 meson_options.txt
+
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+new file mode 100644
+index 0000000..a2abe88
+--- /dev/null
++++ b/.vscode/settings.json
+@@ -0,0 +1,4 @@
++{
++    "C_Cpp.default.compileCommands": "e:\\wraps\\vo-aacenc-0.1.3\\build/compile_commands.json",
++    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
++}
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+diff --git a/aacenc/meson.build b/aacenc/meson.build
+new file mode 100644
+index 0000000..96603bf
+--- /dev/null
++++ b/aacenc/meson.build
+@@ -0,0 +1,55 @@
++libvo_aacenc_sources = files(
++    'basic_op/basicop2.c',
++    'basic_op/oper_32b.c',
++    'src/aac_rom.c',
++    'src/aacenc.c',
++    'src/aacenc_core.c',
++    'src/adj_thr.c',
++    'src/band_nrg.c',
++    'src/bit_cnt.c',
++    'src/bitbuffer.c',
++    'src/bitenc.c',
++    'src/block_switch.c',
++    'src/channel_map.c',
++    'src/dyn_bits.c',
++    'src/grp_data.c',
++    'src/interface.c',
++    'src/line_pe.c',
++    'src/memalign.c',
++    'src/ms_stereo.c',
++    'src/pre_echo_control.c',
++    'src/psy_configuration.c',
++    'src/psy_main.c',
++    'src/qc_main.c',
++    'src/quantize.c',
++    'src/sf_estim.c',
++    'src/spreading.c',
++    'src/stat_bits.c',
++    'src/tns.c',
++    'src/transform.c',
++)
++
++if armv7neon
++    libvo_aacenc_sources += files(
++        'src/asm/ARMV5E/AutoCorrelation_v5.s',
++        'src/asm/ARMV5E/CalcWindowEnergy_v5.s',
++        'src/asm/ARMV5E/band_nrg_v5.s',
++        'src/asm/ARMV7/PrePostMDCT_v7.s',
++        'src/asm/ARMV7/R4R8First_v7.s',
++        'src/asm/ARMV7/Radix4FFT_v7.s',
++    )
++elif armv5e
++    libvo_aacenc_sources += files(
++        'src/asm/ARMV5E/AutoCorrelation_v5.s',
++        'src/asm/ARMV5E/CalcWindowEnergy_v5.s',
++        'src/asm/ARMV5E/band_nrg_v5.s',
++        'src/asm/ARMV5E/PrePostMDCT_v5.s',
++        'src/asm/ARMV5E/R4R8First_v5.s',
++        'src/asm/ARMV5E/Radix4FFT_v5.s',
++    )
++endif
++
++libvo_aacenc_includes += [
++    include_directories('basic_op'),
++    include_directories('inc'),
++]
+diff --git a/common/include/meson.build b/common/include/meson.build
+new file mode 100644
+index 0000000..6aa9e3a
+--- /dev/null
++++ b/common/include/meson.build
+@@ -0,0 +1,24 @@
++aacencinclude_headers = files(
++    'cmnMemory.h',
++    'voAAC.h',
++    'voAMRWB.h',
++    'voAudio.h',
++    'voIndex.h',
++    'voMem.h',
++    'voType.h',
++)
++
++libvo_aacenc_includes += [
++    include_directories('.')
++]
++
++# MSVC defines intptr_t in stddef.h, but LLVM does in stdint.h
++if cc.get_define('_MSC_VER') != '' and cc.get_define('__clang__') != ''
++    libvo_aacenc_sources += [
++        configure_file(
++            input: 'stddef.h.in',
++            output: 'stddef.h',
++            copy: true,
++        )
++    ]
++endif
+diff --git a/common/include/stddef.h.in b/common/include/stddef.h.in
+new file mode 100644
+index 0000000..59d4b21
+--- /dev/null
++++ b/common/include/stddef.h.in
+@@ -0,0 +1,7 @@
++#ifndef PATCH_CLANG_CL_H
++#define PATCH_CLANG_CL_H
++#include <stddef.h>
++#if defined(_MSC_VER) && defined(__clang__)
++#include <stdint.h>
++#endif
++#endif // PATCH_CLANG_CL_H
+diff --git a/common/meson.build b/common/meson.build
+new file mode 100644
+index 0000000..10ea023
+--- /dev/null
++++ b/common/meson.build
+@@ -0,0 +1,10 @@
++libvo_aacenc_sources += files(
++    'cmnMemory.c',
++)
++
++subdir('include')
++
++install_headers(
++    aacencinclude_headers,
++    subdir: 'vo-aacenc',
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..9ae76bc
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,161 @@
++project(
++  'vo-aacenc',
++  'c',
++
++  default_options: [
++    'c_std=c11', # c99 is not recognised by MSVC
++    'b_lundef=true',
++    'pkgconfig.relocatable=true',
++  ],
++  license: 'Apache-2.0',
++  version: '0.1.3',
++  meson_version: '>= 0.52.0',
++)
++
++armv7neon = false
++armv5e    = false
++
++cc      = meson.get_compiler('c')
++python3 = import('python').find_installation()
++makedef = find_program('meson/makedef.py', native: true)
++system  = host_machine.system()
++cpu     = host_machine.cpu()
++
++if cpu == 'arm'
++    asm_as_checks = [
++        ['qadd r0, r0, r0', 'armv5te'],
++        ['vadd.i16 q0, q0, q0', 'neon'],
++    ]
++    foreach check : asm_as_checks
++        f = configure_file(
++            command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(check[0])],
++            input: files(
++                'configure'
++            ),
++            output: '@0@.S'.format(check[1]),
++            capture: true,
++        )
++        set_variable(check[1], cc.compiles(
++            f,
++            name: check[1]
++        ))
++    endforeach
++endif
++
++cflags = []
++
++if armv7neon
++    cflags += [
++        '-DARMV5E',
++        '-DARMV7Neon',
++        '-DARM_INASM',
++        '-DARMV5_INASM',
++        '-DARMV6_INASM',
++    ]
++elif armv5e
++    cflags += [
++        '-DARMV5E',
++        '-DARM_INASM',
++        '-DARMV5_INASM',
++    ]
++endif
++
++# Disable all warnings emitted by Clang
++cflags += cc.get_supported_arguments(
++    '-Wno-unused-but-set-variable',
++    '-Wno-unused-function',
++    '-Wno-unused-variable',
++    '-Wno-parentheses-equality',
++    '-Wno-misleading-indentation',
++)
++
++libvo_aacenc_includes = []
++
++subdir('aacenc')
++subdir('common')
++
++makedef_args = [
++  makedef,
++  '--regex',
++  '^(vo|cmn)'
++]
++
++if system in ['darwin', 'ios']
++  makedef_args += ['--os', 'darwin']
++elif system in ['windows', 'cygwin']
++  makedef_args += ['--os', 'win']
++else
++  makedef_args += ['--os', 'linux']
++endif
++
++if cc.symbols_have_underscore_prefix()
++  makedef_args += ['--prefix', '_']
++else
++  makedef_args += ['--prefix', '']
++endif
++
++libvo_def = configure_file(
++  command: [makedef_args, '--list', '@INPUT@'],
++  input: files(
++    'vo-aacenc.sym'
++  ),
++  output: 'vo-aacenc.def',
++  capture: true,
++)
++
++libvo_ver = configure_file(
++  command: [makedef_args, '--list', '@INPUT@'],
++  input: files(
++    'vo-aacenc.sym'
++  ),
++  output: 'vo-aacenc.ver',
++  capture: true,
++)
++
++version_script = meson.current_build_dir() / 'vo-aacenc.ver'
++
++if host_machine.system() in ['darwin', 'ios']
++  vflag = '-Wl,-exported_symbols_list,@0@'.format(version_script)
++else
++  vflag = '-Wl,--version-script,@0@'.format(version_script)
++endif
++
++libvo_aacenc = library(
++    'vo-aacenc',
++    libvo_aacenc_sources,
++    c_args: cflags,
++    link_args: cc.get_supported_link_arguments([vflag]),
++    link_depends: libvo_ver,
++    dependencies: cc.find_library('m', required: false),
++    include_directories: libvo_aacenc_includes,
++    vs_module_defs: libvo_def,
++    install: true,
++    version: meson.project_version(),
++)
++
++libvo_aacenc_dep = declare_dependency(
++    link_with: libvo_aacenc,
++    include_directories: libvo_aacenc_includes,
++)
++
++if not get_option('example').disabled()
++    example = executable(
++        'aac-enc',
++        files(
++            'aac-enc.c',
++            'wavreader.c',
++        ),
++        include_directories: include_directories('.'),
++        dependencies: libvo_aacenc_dep,
++        install: false,
++    )
++endif
++
++pkg = import('pkgconfig')
++
++pkg.generate(
++    libvo_aacenc,
++    filebase: meson.project_name(),
++    name: 'VisualOn AAC Encoder',
++    description: 'AAC codec library',
++)
+diff --git a/meson/makedef.py b/meson/makedef.py
+new file mode 100755
+index 0000000..a617354
+--- /dev/null
++++ b/meson/makedef.py
+@@ -0,0 +1,143 @@
++#!/usr/bin/env python3
++# This file is part of the FFmpeg Meson build
++#
++# SPDX-FileCopyrightText: 2022 L. E. Segovia <amy@amyspark.me>
++# SPDX-License-Identifier: LGPL-2.1-or-later
++
++import argparse
++import errno
++import os
++import pathlib
++import re
++import subprocess
++
++
++def output(platform, symbols):
++    if platform == 'win':
++        print("EXPORTS")
++        print(*[f'    {symbol}' for symbol in sorted(set(symbols))], sep='\n')
++    elif platform == 'darwin':
++        print(*[f'{prefix}{symbol}' for symbol in sorted(set(symbols))], sep='\n')
++    else:
++        print('{')
++        print('    global:')
++        print(
++            *[f'        {prefix}{symbol};' for symbol in sorted(set(symbols))], sep='\n')
++        print('    local:')
++        print('        *;')
++        print('};')
++
++
++if __name__ == '__main__':
++    arg_parser = argparse.ArgumentParser(
++        description='Craft the symbols exports file')
++
++    arg_parser.add_argument('--prefix', metavar='PREFIX',
++                            help='Prefix for extern symbols')
++    g = arg_parser.add_argument_group('Library parsing tool')
++    group = g.add_mutually_exclusive_group(required=True)
++    group.add_argument('--nm', metavar='NM_PATH', type=pathlib.Path,
++                       help='If specified, runs this instead of dumpbin (MinGW)')
++    group.add_argument('--dumpbin', metavar='DUMPBIN_PATH', type=pathlib.Path,
++                       help='If specified, runs this instead of nm (MSVC)')
++    group.add_argument(
++        '--list', action='store_true', help='If specified, consider FILE as an exported symbols list instead of a library')
++    g = arg_parser.add_argument_group('Symbol naming')
++    group = g.add_mutually_exclusive_group(required=True)
++    group.add_argument('--regex', metavar='REGEX', type=str,
++                       nargs='+',
++                       help='Regular expression for exported symbols')
++    group.add_argument('--vscript', metavar='VERSION_SCRIPT',
++                       type=argparse.FileType('r'), help='Version script')
++    arg_parser.add_argument('--os', type=str, choices=('win', 'linux', 'darwin'),
++                            default='linux', required=True,
++                            help='Target operating system for the exports file (win = MSVC module definition file, linux = version script, darwin = exported symbols list)')
++    arg_parser.add_argument('libname', metavar='FILE', type=pathlib.Path,
++                            help='Source file to parse')
++
++    args = arg_parser.parse_args()
++
++    libname = args.libname
++
++    if not libname.exists():
++        raise FileNotFoundError(
++            errno.ENOENT, os.strerror(errno.ENOENT), libname)
++
++    prefix = args.prefix or ''
++    started = 0
++    regex = []
++
++    if args.vscript:
++        for line in args.vscript:
++            # We only care about global symbols
++            if re.match(r'^\s+global:', line):
++                started = 1
++                line = re.sub(r'^\s+global: *', '', line)
++            else:
++                if re.match('^\s+local:', line):
++                    started = 0
++
++            if started == 0:
++                continue
++
++            line = line.replace(';', '')
++
++            for exp in line.split():
++                # Remove leading and trailing whitespace
++                regex.append(exp.strip())
++    else:
++        regex.extend(args.regex)
++
++    if args.list:
++        dump = libname.open('r', encoding='utf-8').readlines()
++        # Strip whitespaces
++        dump = [x.strip() for x in dump]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++    elif args.nm is not None:
++        # Use eval, since NM="nm -g"
++        # Add -j to ensure only symbol names are output (otherwise in macOS
++        # a race condition can occur in the redirection)
++        s = subprocess.run([args.nm, '--defined-only',
++                            '-g', '-j', libname], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, check=False)
++        if s.returncode != 0:
++            # -j was added only in Binutils 2.37
++            s = subprocess.run([args.nm, '--defined-only',
++                                '-g', libname], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, universal_newlines=True, check=True)
++        dump = s.stdout.splitlines()
++        # Exclude lines with ':' (object name)
++        dump = [x for x in dump if ":" not in x]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++        # Subst the prefix out
++        dump = [re.sub(f'^{prefix}', '', x) for x in dump]
++    else:
++        dump = subprocess.run([args.dumpbin, '-linkermember:1', libname],
++                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True).stdout.splitlines()
++        # Find the index of the first line with
++        # "public symbols", keep the rest
++        # Then the line with " Summary",
++        # delete it and the rest
++        for i, line in enumerate(dump):
++            if 'public symbols' in line:
++                start = i
++            elif re.match(r'\s+Summary', line):
++                end = i
++        dump = dump[start:end]
++        # Substitute prefix out
++        dump = [re.sub(f'\s+{prefix}', ' ', x) for x in dump]
++        # Substitute big chonky spaces out
++        dump = [re.sub(f'\s+', ' ', x) for x in dump]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++        # Take only the *second* field (split by spaces)
++        # Python's split excludes whitespace at the beginning
++        dump = [x.split()[1] for x in dump]
++
++    symbols = []
++    for exp in regex:
++        for i in dump:
++            if re.match(exp, i):
++                symbols.append(i)
++
++    output(args.os, symbols)
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..39d8ec4
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1 @@
++option('example', type: 'feature', value: 'disabled', description: 'Build example encoding program')
+-- 
+2.42.0.windows.2
+

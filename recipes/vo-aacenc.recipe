@@ -1,10 +1,12 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
     name = 'vo-aacenc'
     version = '0.1.3'
     licenses = [License.Apachev2]
+    btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'sf://opencore-amr/%(name)s-%(version)s.tar.gz'
     tarball_checksum = 'e51a7477a359f18df7c4f82d195dab4e14e7414cbd48cf79cc195fc446850f36'
@@ -13,6 +15,12 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/vo-aacenc',
         '%(libdir)s/pkgconfig/vo-aacenc.pc']
 
-    def prepare(self):
-        if self.config.platform != Platform.WINDOWS:
-            self.autoreconf = True
+    patches = [
+        # https://wrapdb.mesonbuild.com/v2/vo-aacenc_0.1.3-1/get_patch
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
+
+    def post_install(self):
+        LibtoolLibrary('vo-aacenc', 0, 1, 3, self.config.libdir,
+                self.config.target_platform).save()
+        super().post_install()
