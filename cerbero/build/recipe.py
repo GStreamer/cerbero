@@ -939,7 +939,7 @@ class BaseUniversalRecipe(object, metaclass=MetaUniversalRecipe):
 
         async def _async_run_with_lock(recipe, step, arch):
             if self._lock:
-                with self._lock:
+                async with self._lock:
                     await _async_run_step(recipe, step, arch)
             else:
                 await _async_run_step(recipe, step, arch)
