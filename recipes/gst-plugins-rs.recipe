@@ -2,7 +2,7 @@
 from custom import GStreamer
 from cerbero.errors import FatalError
 from cerbero.utils import messages as m
-from cerbero.utils import shell, determine_num_cargo_jobs
+from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
 from pathlib import Path
 import re
 import shutil
@@ -68,6 +68,13 @@ class Recipe(recipe.Recipe):
     # block parallelism at both recipe and architectural level.
     if determine_num_cargo_jobs() == 1:
         allow_parallel_build = False
+        allow_universal_parallel_build = False
+    elif determine_total_ram() <= (32 << 30):
+        # gst-plugins-rs peaks at ~17GB per architectural build.
+        # Let's assume that > 32GB is enough, but that can be upped
+        # afterwards. Currently a 32GB box freezes when trying the
+        # universal build, as soon as it reaches the gstrswebrtc and
+        # gstaws crates.
         allow_universal_parallel_build = False
 
     # Needed for openssl
