@@ -7,11 +7,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'pixman'
-    version = '0.43.2'
+    version = '0.43.4'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://www.x.org/releases/individual/lib/pixman-%(version)s.tar.xz'
-    tarball_checksum = 'b43dc9549c02c598fb11321d6fca47151f739a076c73fcd8971b5c023a06949e'
+    tarball_checksum = '48d8539f35488d694a2fef3ce17394d1153ed4e71c05d1e621904d574be5df19'
     meson_options = {'openmp': 'disabled',
                      'gtk': 'disabled',
                      'libpng': 'disabled',
@@ -24,22 +24,20 @@ class Recipe(recipe.Recipe):
     files_devel = ['include/pixman-1', '%(libdir)s/pkgconfig/pixman-1.pc']
 
     def prepare(self):
+        if self.config.target_arch in Architecture.ARMv7:
+            self.meson_options['neon'] = 'enabled'
+        if self.config.target_arch == Architecture.ARM64:
+            self.meson_options['a64-neon'] = 'enabled'
         # clang from xcode has a known bug, avoid codepath that trigger it
         # More info : https://github.com/Homebrew/homebrew/issues/41056
-        if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ] and \
-           self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
+        if self.config.target_platform in (Platform.DARWIN, Platform.IOS) and \
+           self.config.target_arch in (Architecture.X86, Architecture.X86_64):
             self.meson_options['mmx'] = 'disabled'
         if self.config.target_platform == Platform.IOS:
             self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:
             # FIXME: Fails to link because of undefined __builtin_* symbols
             self.meson_options['iwmmxt'] = 'disabled'
-            if self.config.target_arch in [Architecture.ARMv7, Architecture.ARM64]:
-                # Needs https://gitlab.freedesktop.org/pixman/pixman/-/merge_requests/78/
-                self.meson_options['neon'] = 'disabled'
-                self.meson_options['arm-simd'] = 'disabled'
-                if self.config.target_arch == Architecture.ARM64:
-                    self.meson_options['a64-neon'] = 'enabled'
             self.meson_options['cpu-features-path'] = os.path.join(self.config.toolchain_prefix, 'sources', 'android', 'cpufeatures')
             # Prevent symbol conflicts
             self.append_env('CFLAGS',
