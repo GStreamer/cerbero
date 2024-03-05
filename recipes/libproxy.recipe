@@ -1,0 +1,44 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
+class Recipe(recipe.Recipe):
+
+    name = 'libproxy'
+    version = '0.5.4'
+    licenses = [License.LGPLv2Plus]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = f'https://github.com/libproxy/libproxy/archive/refs/tags/{version}.tar.gz'
+    tarball_checksum = 'a6e2220349b2025de9b6d9d7f8bb347bf0c728f02a921761ad5f9f66c7436de9'
+
+    # Symbol export in MSVS (all compilers) is broken,
+    # relies on -fvisibility=default
+    can_msvc = False
+
+    deps = ['glib']
+
+    meson_options = {
+        'docs': 'false',
+        'tests': 'false',
+        'vapi': 'false',
+        'introspection': 'false',
+        'config-gnome': 'false',
+        'config-osx': 'true',
+         # the following are needed if PAC is enabled
+        'pacrunner-duktape': 'false',
+        'curl': 'false',
+    }
+
+    files_libs = ['libproxy']
+    files_devel = ['include/libproxy', '%(libdir)s/pkgconfig/libproxy-1.0.pc']
+
+    def prepare(self):
+        if self.config.target_platform == Platform.IOS:
+            # https://github.com/libproxy/libproxy/pull/284
+            self.meson_options['config-osx'] = 'false'
+
+    def post_install(self):
+        LibtoolLibrary('libproxy', 0, 5, 4, self.config.libdir,
+                self.config.target_platform).save()
+        super().post_install()
+

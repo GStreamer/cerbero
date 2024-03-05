@@ -1,0 +1,35 @@
+From 5a56b054cdeb6957760dba0022f65feffb46b2d6 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 5 Mar 2024 16:41:07 -0300
+Subject: [PATCH 5/5] environment-proxy-module: Mark plugin functions as
+ exports on Windows
+
+Related: #185
+---
+ proxy/environment/genvironmentproxyresolver.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/proxy/environment/genvironmentproxyresolver.h b/proxy/environment/genvironmentproxyresolver.h
+index 4915092..0bf9654 100644
+--- a/proxy/environment/genvironmentproxyresolver.h
++++ b/proxy/environment/genvironmentproxyresolver.h
+@@ -24,12 +24,16 @@
+ #include <glib-object.h>
+ #include <gio/gio.h>
+ 
++#include "visibility.h"
++
+ G_BEGIN_DECLS
+ 
+ #define G_TYPE_ENVIRONMENT_PROXY_RESOLVER         (g_environment_proxy_resolver_get_type ())
+ 
++GLIB_NETWORKING_EXPORT
+ G_DECLARE_FINAL_TYPE (GEnvironmentProxyResolver, g_environment_proxy_resolver, G, ENVIRONMENT_PROXY_RESOLVER, GObject)
+ 
++GLIB_NETWORKING_EXPORT
+ void g_environment_proxy_resolver_register (GIOModule *module);
+ 
+ G_END_DECLS
+-- 
+2.42.0.windows.2
+

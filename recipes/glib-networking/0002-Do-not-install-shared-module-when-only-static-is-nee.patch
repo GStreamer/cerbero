@@ -1,0 +1,122 @@
+From fc04dc17db90e33863b90b05f11535dd0d76f6b1 Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Thu, 6 Oct 2022 12:25:55 -0400
+Subject: [PATCH 2/5] Do not install shared module when only static is needed
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/223>
+---
+ meson.build                   | 3 +++
+ proxy/environment/meson.build | 4 ++--
+ proxy/gnome/meson.build       | 4 ++--
+ proxy/libproxy/meson.build    | 4 ++--
+ tls/gnutls/meson.build        | 4 ++--
+ tls/openssl/meson.build       | 4 ++--
+ 6 files changed, 13 insertions(+), 10 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index a39eac5..349d5c9 100644
+--- a/meson.build
++++ b/meson.build
+@@ -33,6 +33,9 @@ common_flags = [
+   '-DGLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_2_70'
+ ]
+ 
++build_static = get_option('static_modules') or get_option('default_library') != 'shared'
++build_shared = get_option('default_library') != 'static'
++
+ add_project_arguments(common_flags, language: 'c')
+ 
+ cflags = cc.get_supported_arguments(['-Werror=declaration-after-statement',
+diff --git a/proxy/environment/meson.build b/proxy/environment/meson.build
+index fb2d9d5..86c0099 100644
+--- a/proxy/environment/meson.build
++++ b/proxy/environment/meson.build
+@@ -24,11 +24,11 @@ module = shared_module(
+   link_args: module_ldflags,
+   link_depends: symbol_map,
+   name_suffix: module_suffix,
+-  install: true,
++  install: build_shared,
+   install_dir: gio_module_dir
+ )
+ 
+-if get_option('static_modules') or get_option('default_library') != 'shared'
++if build_static
+   gioenvironmentproxy_lib = static_library('gioenvironmentproxy',
+     objects: module.extract_all_objects(recursive: true),
+     dependencies: deps,
+diff --git a/proxy/gnome/meson.build b/proxy/gnome/meson.build
+index 2cd8876..b2f70e2 100644
+--- a/proxy/gnome/meson.build
++++ b/proxy/gnome/meson.build
+@@ -21,11 +21,11 @@ module = shared_module(
+   link_args: module_ldflags,
+   link_depends: symbol_map,
+   name_suffix: module_suffix,
+-  install: true,
++  install: build_shared,
+   install_dir: gio_module_dir
+ )
+ 
+-if get_option('static_modules') or get_option('default_library') != 'shared'
++if build_static
+   giognomeproxy_lib = static_library('giognomeproxy',
+     objects: module.extract_all_objects(recursive: true),
+     dependencies: deps,
+diff --git a/proxy/libproxy/meson.build b/proxy/libproxy/meson.build
+index 1efa99c..f516790 100644
+--- a/proxy/libproxy/meson.build
++++ b/proxy/libproxy/meson.build
+@@ -45,11 +45,11 @@ module = shared_module(
+   link_args: module_ldflags,
+   link_depends: symbol_map,
+   name_suffix: module_suffix,
+-  install: true,
++  install: build_shared,
+   install_dir: gio_module_dir
+ )
+ 
+-if get_option('static_modules') or get_option('default_library') != 'shared'
++if build_static
+   giolibproxy_lib = static_library('giolibproxy',
+     objects: module.extract_all_objects(recursive: true),
+     dependencies: deps,
+diff --git a/tls/gnutls/meson.build b/tls/gnutls/meson.build
+index 286990e..75312de 100644
+--- a/tls/gnutls/meson.build
++++ b/tls/gnutls/meson.build
+@@ -30,11 +30,11 @@ module = shared_module(
+   link_args: module_ldflags,
+   link_depends: symbol_map,
+   name_suffix: module_suffix,
+-  install: true,
++  install: build_shared,
+   install_dir: gio_module_dir,
+ )
+ 
+-if get_option('static_modules') or get_option('default_library') != 'shared'
++if build_static
+   giognutls_lib = static_library('giognutls',
+     objects: module.extract_all_objects(recursive: true),
+     dependencies: deps,
+diff --git a/tls/openssl/meson.build b/tls/openssl/meson.build
+index b1adab7..bc1aedb 100644
+--- a/tls/openssl/meson.build
++++ b/tls/openssl/meson.build
+@@ -43,11 +43,11 @@ module = shared_module(
+   link_args: module_ldflags,
+   link_depends: symbol_map,
+   name_suffix: module_suffix,
+-  install: true,
++  install: build_shared,
+   install_dir: gio_module_dir,
+ )
+ 
+-if get_option('static_modules') or get_option('default_library') != 'shared'
++if build_static
+   gioopenssl_lib = static_library('gioopenssl',
+     objects: module.extract_all_objects(recursive: true),
+     dependencies: deps,
+-- 
+2.42.0.windows.2
+
