@@ -11,29 +11,45 @@ class Recipe(recipe.Recipe):
     url = 'gnome://'
     tarball_checksum = '1f185aaef094123f8e25d8fa55661b3fd71020163a0174adb35a37685cda613b'
 
-    meson_options = {'libproxy': 'disabled', 'gnome_proxy': 'disabled',
+    meson_options = {'libproxy': 'enabled', 'gnome_proxy': 'disabled',
                      'gnutls': 'disabled', 'openssl': 'enabled',
-                     # Also build static modules on all platforms
+                     # Also build static modules on some platforms
+                     # (see below)
                      'static_modules': 'true'}
-    deps = ['glib']
+    deps = ['glib', 'libproxy']
     # openssl on Linux
     use_system_libs = True
 
-    # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
-    patches = [name + '/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch']
+    patches = [
+        # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
+        f'{name}/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch',
+        # To apply 0004 and 0005 cleanly
+        f'{name}/0002-Do-not-install-shared-module-when-only-static-is-nee.patch',
+        f'{name}/0003-Fix-static-link-on-Windows.patch',
+        f'{name}/0004-libproxy-proxy-module-Mark-plugin-functions-as-expor.patch',
+        f'{name}/0005-environment-proxy-module-Mark-plugin-functions-as-ex.patch',
+    ]
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
-    files_devel = ['%(libdir)s/gio/modules/libgioopenssl.a']
+    files_devel = []
 
     def prepare(self):
+        # Glib doesn't support static libraries on Windows yet
+        if self.config.target_platform == Platform.WINDOWS:
+            self.meson_options['static_modules'] = 'false'
+            self.library_type = LibraryType.SHARED
+        else:
+            self.files_devel.append(
+                '%(libdir)s/gio/modules/libgioopenssl.a')
         # Pick system openssl if on Linux and not cross-compiling
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
 
     def post_install(self):
-        # Meson does not generate la files
-        LibtoolLibrary('gioopenssl', None, None, None,
-                os.path.join(self.config.libdir, 'gio', 'modules'),
-                self.config.target_platform, deps=['ssl', 'crypto']).save()
+        if self.config.target_platform != Platform.WINDOWS:
+            # Meson does not generate la files
+            LibtoolLibrary('gioopenssl', None, None, None,
+                    os.path.join(self.config.libdir, 'gio', 'modules'),
+                    self.config.target_platform, deps=['ssl', 'crypto']).save()
         super().post_install()

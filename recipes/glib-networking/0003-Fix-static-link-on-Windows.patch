@@ -1,0 +1,149 @@
+From 38e7b358434b5b39b6c3c2e0c93ca93533e543af Mon Sep 17 00:00:00 2001
+From: Xavier Claessens <xavier.claessens@collabora.com>
+Date: Thu, 6 Oct 2022 11:25:02 -0400
+Subject: [PATCH 3/5] Fix static link on Windows
+
+When making a static module on Windows, we should not have `dllexport`
+on g_io_* functions. However, G_MODULE_EXPORT is defined to always have
+`dllexport` on Windows because it is made for shared modules only.
+
+Building both shared and static modules is not supported on Windows.
+
+Part-of: <https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/223>
+---
+ meson.build                      | 6 ++++++
+ proxy/gnome/gnome-proxy-module.c | 7 ++++---
+ tls/gnutls/gnutls-module.c       | 7 ++++---
+ tls/openssl/openssl-module.c     | 7 ++++---
+ visibility.h                     | 9 +++++++++
+ 5 files changed, 27 insertions(+), 9 deletions(-)
+ create mode 100644 visibility.h
+
+diff --git a/meson.build b/meson.build
+index 349d5c9..0070052 100644
+--- a/meson.build
++++ b/meson.build
+@@ -35,6 +35,12 @@ common_flags = [
+ 
+ build_static = get_option('static_modules') or get_option('default_library') != 'shared'
+ build_shared = get_option('default_library') != 'static'
++if build_static and build_shared and (host_system == 'windows' or host_system == 'cygwin')
++  error('On Windows default_library must be "shared" or "static" but not "both"')
++endif
++if build_static and not build_shared
++  common_flags += '-DGLIB_NETWORKING_STATIC_COMPILATION'
++endif
+ 
+ add_project_arguments(common_flags, language: 'c')
+ 
+diff --git a/proxy/gnome/gnome-proxy-module.c b/proxy/gnome/gnome-proxy-module.c
+index b125810..bde925e 100644
+--- a/proxy/gnome/gnome-proxy-module.c
++++ b/proxy/gnome/gnome-proxy-module.c
+@@ -24,9 +24,10 @@
+ #include <glib/gi18n-lib.h>
+ 
+ #include "gproxyresolvergnome.h"
++#include "visibility.h"
+ 
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_gnomeproxy_load (GIOModule *module)
+ {
+   gchar *locale_dir;
+@@ -49,12 +50,12 @@ g_io_gnomeproxy_load (GIOModule *module)
+   g_free (locale_dir);
+ }
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_gnomeproxy_unload (GIOModule *module)
+ {
+ }
+ 
+-G_MODULE_EXPORT gchar **
++GLIB_NETWORKING_EXPORT gchar **
+ g_io_gnomeproxy_query (void)
+ {
+   gchar *eps[] = {
+diff --git a/tls/gnutls/gnutls-module.c b/tls/gnutls/gnutls-module.c
+index 8dd09ca..e7b624f 100644
+--- a/tls/gnutls/gnutls-module.c
++++ b/tls/gnutls/gnutls-module.c
+@@ -28,9 +28,10 @@
+ #include <glib/gi18n-lib.h>
+ 
+ #include "gtlsbackend-gnutls.h"
++#include "visibility.h"
+ 
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_gnutls_load (GIOModule *module)
+ {
+   gchar *locale_dir;
+@@ -53,12 +54,12 @@ g_io_gnutls_load (GIOModule *module)
+   g_free (locale_dir);
+ }
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_gnutls_unload (GIOModule *module)
+ {
+ }
+ 
+-G_MODULE_EXPORT gchar **
++GLIB_NETWORKING_EXPORT gchar **
+ g_io_gnutls_query (void)
+ {
+   gchar *eps[] = {
+diff --git a/tls/openssl/openssl-module.c b/tls/openssl/openssl-module.c
+index 374e424..a436774 100644
+--- a/tls/openssl/openssl-module.c
++++ b/tls/openssl/openssl-module.c
+@@ -29,9 +29,10 @@
+ #include <gio/gio.h>
+ 
+ #include "gtlsbackend-openssl.h"
++#include "visibility.h"
+ 
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_openssl_load (GIOModule *module)
+ {
+   gchar *locale_dir;
+@@ -54,12 +55,12 @@ g_io_openssl_load (GIOModule *module)
+   g_free (locale_dir);
+ }
+ 
+-G_MODULE_EXPORT void
++GLIB_NETWORKING_EXPORT void
+ g_io_openssl_unload (GIOModule *module)
+ {
+ }
+ 
+-G_MODULE_EXPORT gchar **
++GLIB_NETWORKING_EXPORT gchar **
+ g_io_openssl_query (void)
+ {
+   return g_strsplit (G_TLS_BACKEND_EXTENSION_POINT_NAME, "!", -1);
+diff --git a/visibility.h b/visibility.h
+new file mode 100644
+index 0000000..9f7c1d5
+--- /dev/null
++++ b/visibility.h
+@@ -0,0 +1,9 @@
++#pragma once
++
++#if (defined(_WIN32) || defined(__CYGWIN__)) && !defined(GLIB_NETWORKING_STATIC_COMPILATION)
++#  define GLIB_NETWORKING_EXPORT __declspec(dllexport)
++#elif __GNUC__ >= 4
++#  define GLIB_NETWORKING_EXPORT __attribute__((visibility("default")))
++#else
++#  define GLIB_NETWORKING_EXPORT
++#endif
+-- 
+2.42.0.windows.2
+
