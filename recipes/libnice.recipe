@@ -3,11 +3,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libnice'
-    version = '0.1.21'
+    version = '0.1.22'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://nice.freedesktop.org/releases/%(name)s-%(version)s.tar.gz'
-    tarball_checksum = '72e73a2acf20f59093e21d5601606e405873503eb35f346fa621de23e99b3b39'
+    tarball_checksum = 'a5f724cf09eae50c41a7517141d89da4a61ec9eaca32da4a0073faed5417ad7e'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, License.MPLv1_1]
     meson_options = {'tests' : 'disabled',
