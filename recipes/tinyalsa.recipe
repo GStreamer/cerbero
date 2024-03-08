@@ -1,36 +1,39 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
-import os
-import shutil
 
 class Recipe(recipe.Recipe):
-    """
-    Sets up build based on the tinyalsa library.
-    """
-    name = 'tinyalsa'
-    version = '0.1'
-    licenses = [License.Apachev2]
-    btype = BuildType.MAKEFILE
-    remotes = {'origin': 'https://github.com/tinyalsa/tinyalsa'}
-    commit = '1.1.1'
 
-    files_devel = [ 'include/tinyalsa/asoundlib.h' ]
+    name = 'tinyalsa'
+    version = '2.0.0'
+    licenses = [{License.BSD_like: ['NOTICE']}]
+    stype = SourceType.TARBALL
+    btype = BuildType.MESON
+    url = f'https://github.com/tinyalsa/tinyalsa/archive/refs/tags/v{version}.tar.gz'
+    tarball_checksum = '573ae0b2d3480851c1d2a12503ead2beea27f92d44ed47b74b553ba947994ef1'
+
+    patches = [
+        # https://github.com/tinyalsa/tinyalsa/pull/216
+        f'{name}/0001-meson-add-attributes-h-and-plugin-h.patch',
+    ]
+
+    meson_options = {
+        'docs': 'disabled',
+        'examples': 'disabled',
+        'utils': 'disabled',
+    }
 
     files_libs = [ 'libtinyalsa' ]
 
+    files_devel = [ 'include/tinyalsa', '%(libdir)s/pkgconfig/tinyalsa.pc' ]
+
     def prepare(self):
-        if self.config.target_platform != Platform.LINUX and self.config.target_platform != Platform.ANDROID:
-            raise InvalidRecipeError(self, "Invalid platform")
+        if self.config.target_platform not in (Platform.LINUX, Platform.ANDROID):
+            raise InvalidRecipeError(self, "Invalid platform") 
+        # ALSA
+        self.use_system_libs = not self.config.cross_compiling()
 
-    async def install(self):
-        include_path = os.path.join(self.config.prefix, 'include', 'tinyalsa')
-        library_path = self.config.libdir
-
-        tinyalsa_header = os.path.join(self.build_dir, 'include', 'tinyalsa', 'asoundlib.h')
-        tinyalsa_lib = os.path.join(self.build_dir, 'src', 'libtinyalsa.a')
-
-        if not os.path.exists(include_path):
-            os.makedirs(include_path)
-
-        shutil.copy(tinyalsa_header, include_path)
-        shutil.copy(tinyalsa_lib, library_path)
+    def post_install(self):
+        LibtoolLibrary('tinyalsa', 2, 0, 0, self.config.libdir,
+                self.config.target_platform).save()
+        super().post_install()
