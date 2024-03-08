@@ -36,3 +36,7 @@ class Package(custom.GStreamer, package.Package):
         if self.config.variants.rust:
             self.files.append('gst-plugins-rs:plugins_sys')
             self.files_devel.append('gst-plugins-rs:plugins_sys_devel')
+
+        if self.config.target_platform == Platform.ANDROID:
+            self.files += ['tinyalsa:libs']
+            self.files_devel += ['tinyalsa:files-devel']

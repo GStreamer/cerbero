@@ -579,6 +579,7 @@ class Recipe(custom.GStreamer):
             self.deps += ['moltenvk']
         if self.config.target_platform in (Platform.ANDROID):
             self.deps += ['vulkan-android']
+            self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
 
         # TODO: Vulkan support on Linux and Windows
         # No MoltenVK available for iOS x86_64
