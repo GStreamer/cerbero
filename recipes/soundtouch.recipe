@@ -4,32 +4,41 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'soundtouch'
-    version = '2.1.0'
+    version = '2.3.2'
     btype = BuildType.MESON
     stype = SourceType.TARBALL
-    url = 'https://gitlab.com/soundtouch/soundtouch/-/archive/%(version)s/soundtouch-%(version)s.tar.gz'
-    tarball_checksum = '454712b08bf758f6a4c0df8821350c323e5b274443a20e21d193d17c5dc3d0d5'
-    licenses = [License.LGPLv2_1Plus]
+    url = 'https://codeberg.org/soundtouch/soundtouch/archive/%(version)s.tar.gz'
+    tarball_dirname = 'soundtouch'
+    tarball_checksum = 'ed714f84a3e748de87b24f385ec69d3bdc51ca47b7f4710d2048b84b2761e7ff'
 
     patches = [
-               'soundtouch/0008-Fix-compilation-with-clang.patch',
-               'soundtouch/0001-Add-minimal-meson-build-system.patch',
-               'soundtouch/0001-Export-symbols-for-a-DLL-correctly.patch',
-              ]
+        # https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-1/get_patch
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
+
+    licenses = [License.LGPLv2_1Plus]
 
     files_libs = ['libSoundTouch']
     files_devel = ['include/soundtouch', '%(libdir)s/pkgconfig/soundtouch.pc']
 
-    def prepare (self):
-      if self.config.target_platform == Platform.ANDROID:
-        self.append_env('CXXFLAGS', '-fexceptions -DST_NO_EXCEPTION_HANDLING')
+    def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            # tar and bsdtar fail extracting the symbolic link in
+            # source/SoundTouchDLL/LazarusTest/libSoundTouchDll.so
+            # as it's a placeholder
+            self.force_tarfile = True
+        # FIXME: change to self.using_msvc() once the Windows cross
+        # builds update their GCC
+        if self.config.target_platform == Platform.WINDOWS:
+            # This library doesn't use export macros except on SoundTouchDLL
+            self.library_type = LibraryType.STATIC
 
     def post_install (self):
         dependency_libs = []
         if self.config.target_platform == Platform.ANDROID:
+            dependency_libs += ['-lm', '-llog']
+        elif self.config.target_platform == Platform.LINUX:
             dependency_libs += ['-lm']
-
-        lib = LibtoolLibrary('SoundTouch', None, None, None, self.config.libdir,
-                self.config.target_platform, deps=dependency_libs)
-        lib.save()
+        LibtoolLibrary('SoundTouch', 2, 3, 2, self.config.libdir,
+                self.config.target_platform, deps=dependency_libs).save()
         super().post_install()
