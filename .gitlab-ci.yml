@@ -208,6 +208,9 @@ android fedora image:
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.tar.*"
+    exclude:
+      - .git
+      - .git/**/*
 
 .cerbero fedora base:
   extends:
@@ -295,6 +298,9 @@ build cerbero fedora x86_64:
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*[0-9].tar.*"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-android universal:
   extends:
@@ -329,6 +335,9 @@ build cerbero cross-android universal:
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.msi"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-windows x86:
   extends: '.cerbero deps cross-windows'
@@ -445,6 +454,9 @@ cerbero cross-android universal examples:
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
+    exclude:
+      - .git
+      - .git/**/*
 
 .cerbero macos arm64 image:
   image: "registry.freedesktop.org/gstreamer/cerbero/macos-arm64/14-sonoma:2023-10-25.2"
@@ -501,6 +513,9 @@ build cerbero cross-macos universal x86_64-host:
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-*-ios-universal.pkg"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-ios universal arm64-host:
   extends:
@@ -665,6 +680,9 @@ cerbero deps msvc x86_64 msi package:
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
       - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
       - "*.msi"
+    exclude:
+      - .git
+      - .git/**/*
   rules:
     # This is an extended rule of .cerbero not-mr rules
     # Run automatically if it's a scheduled pipeline
