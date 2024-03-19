@@ -51,6 +51,7 @@ class Recipe(custom.GStreamer):
                      'zbar': 'enabled',
                      # disabled plugins
                      'amfcodec': 'disabled',
+                     'asio': 'disabled',
                      'curl': 'disabled',
                      'curl-ssh2': 'disabled',
                      'dc1394': 'disabled',
@@ -546,6 +547,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('win32ipc', 'sys')
             self.enable_plugin('dwrite', 'sys')
             self.enable_plugin('qt6d3d11', 'qt6', 'qt6')
+            self.enable_plugin('asio', 'sys')
 
         if self.config.target_platform in (Platform.LINUX, Platform.WINDOWS):
             self.enable_plugin('nvcodec', 'codecs')
