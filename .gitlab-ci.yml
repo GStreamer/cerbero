@@ -463,22 +463,6 @@ build cerbero cross-macos universal arm64-host:
     - '.cerbero cross-macos universal'
     - '.cerbero macos arm64 image'
 
-cerbero deps cross-macos universal x86_64-host:
-  extends:
-    - '.cerbero deps'
-    - '.cerbero cross-macos universal'
-  tags:
-    - gst-macos-13
-  when: 'manual'
-
-build cerbero cross-macos universal x86_64-host:
-  extends:
-    - '.cerbero mr'
-    - '.cerbero cross-macos universal'
-  tags:
-    - gst-macos-13
-  when: 'manual'
-
 #
 # Cerbero iOS build
 #
@@ -513,22 +497,6 @@ build cerbero cross-ios universal arm64-host:
     - '.cerbero mr'
     - '.cerbero cross-ios universal'
     - '.cerbero macos arm64 image'
-
-cerbero deps cross-ios universal x86_64-host:
-  extends:
-    - '.cerbero deps'
-    - '.cerbero cross-ios universal'
-  tags:
-    - gst-ios-16
-  when: 'manual'
-
-build cerbero cross-ios universal x86_64-host:
-  extends:
-    - '.cerbero mr'
-    - '.cerbero cross-ios universal'
-  tags:
-    - gst-ios-16
-  when: 'manual'
 
 #
 # Build an iOS App using the iOS binaries
@@ -566,26 +534,6 @@ build cerbero cross-ios universal x86_64-host:
   after_script:
     - rm -rf gstreamer
   cache: []
-
-cross-ios universal examples x86_64-host:
-  extends:
-    - '.cross-ios universal examples'
-    - '.cerbero mr rules'
-  needs:
-    - "build cerbero cross-ios universal x86_64-host"
-  tags:
-    - gst-ios-16
-  when: 'manual'
-
-cerbero cross-ios universal examples x86_64-host:
-  extends:
-    - '.cross-ios universal examples'
-    - '.cerbero not-mr rules'
-  needs:
-    - "cerbero deps cross-ios universal x86_64-host"
-  tags:
-    - gst-ios-16
-  when: 'manual'
 
 cross-ios universal examples arm64-host:
   extends:
