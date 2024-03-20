@@ -21,6 +21,16 @@ index 58ff478..2bbf6dd 100644
  AC_CONFIG_HEADERS([include/config.h])
  
  ifdef([AM_SILENT_RULES],[AM_SILENT_RULES])
+diff --git a/Makefile.am b/Makefile.am
+index 12a85d3..0123e0d 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,4 +1,4 @@
+-SUBDIRS=. tools tests doc
++SUBDIRS=. # tools tests doc
+ 
+ OGGDIR=built-streams
+ kateincdir=$(includedir)/kate
 -- 
 2.1.4
 
