@@ -30,9 +30,10 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # clang from xcode has a known bug, avoid codepath that trigger it
         # More info : https://github.com/Homebrew/homebrew/issues/41056
-        if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ] and \
-           self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
-            self.meson_options['mmx'] = 'disabled'
+        if self.config.target_platform in [ Platform.DARWIN, Platform.IOS ]:
+            self.append_env('CFLAGS', '-Wno-error=incompatible-function-pointer-types')
+            if self.config.target_arch in [ Architecture.X86, Architecture.X86_64 ]:
+                self.meson_options['mmx'] = 'disabled'
         if self.config.target_platform == Platform.IOS:
             self.append_env('CFLAGS', '-DPIXMAN_NO_TLS')
         if self.config.target_platform == Platform.ANDROID:

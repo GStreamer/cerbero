@@ -198,6 +198,7 @@ class Recipe(recipe.Recipe):
                 extra_flags = ['-DGST_SDK_IOS=1']
                 # XXX: Why did we disable these for iOS?
                 #self.configure_options += ' --disable-carbon --disable-modular-tests --disable-cocoa'
+            extra_flags += ['-Wno-error=int-conversion']
             self.append_env('CFLAGS', *extra_flags)
 
         elif self.config.target_platform == Platform.LINUX:

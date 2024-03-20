@@ -17,4 +17,4 @@ class Recipe(recipe.Recipe):
     files_share = ['share/aclocal/pkg.m4']
 
     def prepare(self):
-        self.append_env('CFLAGS', '-Wno-error=format-nonliteral')
+        self.append_env('CFLAGS', '-Wno-error=format-nonliteral -Wno-error=int-conversion')
