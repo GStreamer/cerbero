@@ -80,4 +80,5 @@ class Recipe(custom.GStreamer):
         # is not a mobile platform.
         if self.config.variants.rust and \
            self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
+            self.meson_options['ptp-helper'] = 'enabled'
             self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
