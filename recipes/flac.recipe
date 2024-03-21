@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
@@ -35,3 +35,8 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             # Newer MinGW requires this define for sscanf in stdio.h
             self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
+
+    def post_install(self):
+        # Meson does not generate la files
+        LibtoolLibrary('libFLAC', None, None, None, self.config.libdir, self.config.target_platform).save()
+        super().post_install()
