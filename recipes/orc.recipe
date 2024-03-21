@@ -13,7 +13,11 @@ class Recipe(recipe.Recipe):
     remotes = {'origin': 'https://gitlab.freedesktop.org/gstreamer/orc.git'}
     commit = 'origin/main'
 
-    patches = []
+    patches = [
+        # Remove after the iOS Orc situation is resolved
+        # https://gitlab.freedesktop.org/gstreamer/orc/-/merge_requests/175
+        'orc/0001-orccpu-arm-Only-enable-on-Apple-arm64-if-running-on-.patch',
+    ]
 
     btype = BuildType.MESON
     licenses = [{License.BSD_like: ['COPYING']}]

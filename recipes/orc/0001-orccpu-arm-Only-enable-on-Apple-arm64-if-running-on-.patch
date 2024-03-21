@@ -1,0 +1,35 @@
+From 3f09e583e8e03f60492711614db7bfdee5213b04 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Piotr=20Brzezi=C5=84ski?= <piotr@centricular.com>
+Date: Thu, 21 Mar 2024 17:45:48 +0100
+Subject: [PATCH] orccpu-arm: Only enable on Apple arm64 if running on macOS
+
+---
+ orc/orccpu-arm.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/orc/orccpu-arm.c b/orc/orccpu-arm.c
+index 865df59..8e65cee 100644
+--- a/orc/orccpu-arm.c
++++ b/orc/orccpu-arm.c
+@@ -47,6 +47,9 @@
+ #if defined(__linux__)
+ #include <linux/auxvec.h>
+ #endif
++#ifdef __APPLE__
++#include <TargetConditionals.h>
++#endif
+ 
+ /***** arm *****/
+ 
+@@ -120,7 +123,7 @@ orc_cpu_arm_getflags_cpuinfo ()
+ #if defined (_WIN32) && defined (_M_ARM64)
+   /* On Windows, for desktop applications, we are on always on ARMv8 (aarch64)*/
+   ret = ORC_TARGET_ARM_EDSP | ORC_TARGET_NEON_NEON;
+-#elif defined (__APPLE__) && defined (__arm64__)
++#elif defined (__APPLE__) && defined (__arm64__) && TARGET_OS_OSX
+   ret = ORC_TARGET_ARM_EDSP | ORC_TARGET_NEON_NEON;
+ #else
+   char *cpuinfo;
+-- 
+2.39.3 (Apple Git-145)
+
