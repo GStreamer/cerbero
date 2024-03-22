@@ -26,3 +26,6 @@ class Recipe(recipe.Recipe):
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
             self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
+
+        if self.config.platform == Platform.DARWIN:
+            self.append_env('CFLAGS', '-Wno-error=int-conversion')
