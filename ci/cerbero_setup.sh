@@ -76,8 +76,21 @@ cerbero_before_script() {
     if [[ "x${FDO_CI_CONCURRENT}" != "x" ]]; then
         echo "num_of_cpus = ${FDO_CI_CONCURRENT}" >> localconf.cbc
     fi
-    echo "recipes_commits = {'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'}" >> localconf.cbc
-    echo "recipes_remotes = {'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}}" >> localconf.cbc
+
+    # These vars are set for pipelines via trigger_cerbero_pipeline.py in
+    # gstreamer and gst-plugins-rs CI
+    echo "recipes_commits = {" >> localconf.cbc
+    echo "  'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'," >> localconf.cbc
+    if [[ -n $CI_GST_PLUGINS_RS_REF_NAME ]]; then
+        echo "  'gst-plugins-rs-1.0': 'ci/${CI_GST_PLUGINS_RS_REF_NAME}'," >> localconf.cbc
+    fi
+    echo "}" >> localconf.cbc
+    echo "recipes_remotes = {" >> localconf.cbc
+    echo "  'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}," >> localconf.cbc
+    if [[ -n $CI_GST_PLUGINS_RS_URL ]]; then
+        echo "  'gst-plugins-rs-1.0': {'ci': '${CI_GST_PLUGINS_RS_URL}'}," >> localconf.cbc
+    fi
+    echo "}" >> localconf.cbc
     cat localconf.cbc
 
     # GitLab runner does not always wipe the image after each job, so do that
