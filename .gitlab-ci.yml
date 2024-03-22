@@ -147,14 +147,14 @@ android fedora image:
 # Used when a GStreamer MR is used using the triggered pipeline
 .cerbero mr rules:
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED == "true" && $CI_PROJECT_NAMESPACE == "gstreamer"'
+    - if: '$CI_GSTREAMER_TRIGGERED == "true"'
   # Don't interrupt gstreamer MR CI when cerbero main gets pushes
   interruptible: false
 
 # Used when any other usage is encountered, cerbero MR, branch push, etc
 .cerbero not-mr rules:
   rules:
-    - if: '$CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer"'
+    - if: '$CI_GSTREAMER_TRIGGERED != "true"'
 
 # Template for all Cerbero GStreamer builds
 #
@@ -581,9 +581,9 @@ cerbero deps msvc x86_64:
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
   rules:
     # This is an extended rule of .cerbero not-mr rules
-    - if: ($CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer") && $CI_PIPELINE_SOURCE != "schedule"
+    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE != "schedule"
     # Don't run automatically for scheduled pipeline
-    - if: ($CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer") && $CI_PIPELINE_SOURCE == "schedule"
+    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE == "schedule"
       when: 'manual'
       # workaround for gitlab bug where it otherwise blocks the pipeline for manual jobs from rules
       allow_failure: true
@@ -616,9 +616,9 @@ cerbero deps msvc x86_64 msi package:
   rules:
     # This is an extended rule of .cerbero not-mr rules
     # Run automatically if it's a scheduled pipeline
-    - if: ($CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer") && $CI_PIPELINE_SOURCE == "schedule"
+    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE == "schedule"
     # Otherwise require manual trigger
-    - if: ($CI_GSTREAMER_TRIGGERED != "true" || $CI_PROJECT_NAMESPACE != "gstreamer") && $CI_PIPELINE_SOURCE != "schedule"
+    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE != "schedule"
       when: 'manual'
       # workaround for gitlab bug where it otherwise blocks the pipeline for manual jobs from rules
       allow_failure: true
