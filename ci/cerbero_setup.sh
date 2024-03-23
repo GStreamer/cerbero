@@ -110,11 +110,6 @@ cerbero_script() {
 
     $CERBERO $CERBERO_ARGS fetch-cache --branch "${GST_UPSTREAM_BRANCH}"
 
-    if [[ -n ${CERBERO_OVERRIDDEN_DIST_DIR} && -d "${CERBERO_HOME}/dist/${ARCH}" ]]; then
-        mkdir -p "${CERBERO_OVERRIDDEN_DIST_DIR}"
-        time rsync -aH "${CERBERO_HOME}/dist/${ARCH}/" "${CERBERO_OVERRIDDEN_DIST_DIR}"
-    fi
-
     $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
     fix_build_tools
 
@@ -148,11 +143,6 @@ cerbero_deps_script() {
     $CERBERO $CERBERO_ARGS bootstrap --offline --system=$CERBERO_BOOTSTRAP_SYSTEM
     $CERBERO $CERBERO_ARGS build-deps --offline $build_deps
     $CERBERO $CERBERO_ARGS build --offline $more_deps
-
-    if [[ -n ${CERBERO_OVERRIDDEN_DIST_DIR} ]]; then
-        mkdir -p "${CERBERO_HOME}/dist/${ARCH}"
-        time rsync -aH "${CERBERO_OVERRIDDEN_DIST_DIR}/" "${CERBERO_HOME}/dist/${ARCH}"
-    fi
 
     # Check that the env var is set. Don't expand this protected variable by
     # doing something silly like [[ -n ${CERBERO_...} ]] because it will get

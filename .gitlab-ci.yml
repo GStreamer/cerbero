@@ -184,8 +184,6 @@ android fedora image:
     CERBERO_RUN_SUFFIX: "" # '.exe' on cross-winXX
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: "yes"
-    # used by macos packages as we only ever install to a fixed directory
-    CERBERO_OVERRIDDEN_DIST_DIR: ""
     # location where the cerbero git repo is stored on the image
     CERBERO_HOST_DIR: "/"
   before_script:
