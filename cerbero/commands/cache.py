@@ -60,7 +60,8 @@ class BaseCache(Command):
 
     def get_cache_home_dir(self, config, namespace):
         ci_builds_dir = self.get_ci_builds_dir(config)
-        return f'{ci_builds_dir}/{namespace}/cerbero/cerbero-build'
+        ci_home_dir = os.environ.get('CERBERO_HOME', 'cerbero-build')
+        return f'{ci_builds_dir}/{namespace}/cerbero/{ci_home_dir}'
 
     def get_gnu_sed(self, config):
         if config.platform == Platform.DARWIN:
