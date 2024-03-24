@@ -525,8 +525,9 @@ class Recipe(custom.GStreamer):
                 self.enable_plugin('wic', 'codecs')
                 # WGC support requires Windows 11 SDK from Visual Studio
                 self.meson_options['d3d11-wgc'] = 'enabled'
+                self.meson_options['d3d12-wgc'] = 'enabled'
                 # HLSL cross-compile is not supported
-                self.meson_options['d3d11-hlsl-precompile'] = 'enabled'
+                self.meson_options['d3d-hlsl-precompile'] = 'enabled'
                 # D3D12 needs newer SDK than system installed one with helper library
                 self.deps.append('directx-headers')
                 self.enable_plugin('d3d12', 'sys')
@@ -543,6 +544,9 @@ class Recipe(custom.GStreamer):
 
             # Decoder baseclass library for d3d11 and d3d12 plugins
             self.files_libs += ['libgstdxva-1.0']
+
+            # d3d11/d3d12 HLSL shader library
+            self.files_libs += ['libgstd3dshader-1.0']
 
             self.enable_plugin('amfcodec', 'codecs')
             self.enable_plugin('qsv', 'codecs')

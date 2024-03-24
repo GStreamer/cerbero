@@ -486,6 +486,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             'gstwinrt-1.0': None,
             'gstwebrtcnice-1.0': 'gstreamer-webrtc-nice-1.0',
             'gstdxva-1.0' : None,
+            'gstd3dshader-1.0' : None,
         }
         generated_libs = []
 
