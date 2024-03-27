@@ -8470,7 +8470,7 @@ index 000000000..e39384421
 +
 +codec_headers += util_headers_sources
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 5d2c1a67d071bf14eab072219713a5e8942607b6 Mon Sep 17 00:00:00 2001
@@ -8847,7 +8847,7 @@ index 000000000..acfc9b5ad
 +cpp       = 'cl'
 +pkgconfig = 'false'
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 9d995f84e5baafe7070af3439fb172ab2751327b Mon Sep 17 00:00:00 2001
@@ -9071,7 +9071,7 @@ index 7dc06dea5..c94df9ccf 100644
  option('vp8_decoder', type: 'feature', description: 'Enable the VP8 decoder only')
  option('vp9_encoder', type: 'feature', description: 'Enable the VP9 encoder only')
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From d6ed8fb620902f415871cd40f76b5788d40a9f82 Mon Sep 17 00:00:00 2001
@@ -9098,7 +9098,7 @@ index a2eeacf17..29a14dc86 100644
  pkg = import('pkgconfig')
  
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 53674ba858612470cb63e23a88b0cbfa0ba44523 Mon Sep 17 00:00:00 2001
@@ -9171,7 +9171,7 @@ index 000000000..7b2c0c329
 +
 +    return l
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From f0590267f41f70a780e5bf584d4f389e26ddbfa8 Mon Sep 17 00:00:00 2001
@@ -9239,7 +9239,7 @@ index 29a14dc86..18c05df82 100644
  			as_sfx = '.masm'
  			features.set('multithread', false)
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 9036099d143d9ee6867b7ea720b6b77aa186beba Mon Sep 17 00:00:00 2001
@@ -9372,7 +9372,7 @@ index 18c05df82..375740507 100644
  	elif tgt_os == 'linux'
  		features.set('linux', true)
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 08600713dff2b4e9651e2e12c0b97bd28c04e931 Mon Sep 17 00:00:00 2001
@@ -9547,7 +9547,7 @@ index 375740507..4ab8451b8 100644
  		as_sfx = '.S'
  
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 631ed2cbd07ae7af6288d5875960ed5b0c86931a Mon Sep 17 00:00:00 2001
@@ -12266,7 +12266,7 @@ index 000000000..c881053a3
 +    add_proto(*qw('void vpx_extend_frame_inner_borders'), "struct yv12_buffer_config *ybf")
 +    specialize(*qw('vpx_extend_frame_inner_borders dspr2'))
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From e8960d50b78adcb71534463a3ccf63aa5f4678cb Mon Sep 17 00:00:00 2001
@@ -12447,7 +12447,7 @@ index c35d8830e..22a13650c 100644
  
  codec_rtcds += {
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 689a1b361101452cf50ad325f47f29603ccef473 Mon Sep 17 00:00:00 2001
@@ -12611,7 +12611,7 @@ index 22a13650c..1450d97d7 100644
 -codec_headers += vpx_scale_rtcd_defs
 +codec_headers += files(vpx_scale_rtcd_defs)
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From dd7d5fa6f34df3c78542da4eeef1cfd830ad3e6a Mon Sep 17 00:00:00 2001
@@ -13202,7 +13202,7 @@ index febfda80c..961ed54bd 100644
  		codec_srcs += comp_sources
  	endif
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 56d124f9b6a47b0dcc9c86cc8d5f5e8faa870e39 Mon Sep 17 00:00:00 2001
@@ -13238,7 +13238,7 @@ index 4f9cde607..5365af788 100644
  	)
  elif asm_conversion_exe.found()
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From b61cfc48a81547e3f9e6b0aabf20c49b8ba8b8b2 Mon Sep 17 00:00:00 2001
@@ -13350,7 +13350,7 @@ index 182b14c11..04ec4b5d7 100644
  	else
  		codec_headers += comp_sources
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From dd3c30ef972094ff82b78963e1ead6016fc6f87d Mon Sep 17 00:00:00 2001
@@ -13388,7 +13388,7 @@ index 111c44cee..a237c3edf 100644
  
  codec_arch_prereqs = []
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 88723553bc84ce4b237e4986e85a6ac76f943275 Mon Sep 17 00:00:00 2001
@@ -13422,7 +13422,7 @@ index 872c5dfaf..c4f27d483 100644
      - |
        cat > ios-cross-file.txt <<EOF
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From db447e8b40177aefd5d38d197b85c67b3ad873f9 Mon Sep 17 00:00:00 2001
@@ -13482,7 +13482,7 @@ index a237c3edf..d34c07045 100644
  	link_with: libvpx,
  	dependencies: extra_libs,
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 5709e126a71cd40fce52110c10e7289b60b42904 Mon Sep 17 00:00:00 2001
@@ -14039,7 +14039,7 @@ index c46c8358b..47c9ee831 100644
  	dependencies: libvpx_dep,
  	install: get_option('install_bins'),
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 3d03b7f932d65c889da954de62306605c8d75a0e Mon Sep 17 00:00:00 2001
@@ -14066,7 +14066,7 @@ index 04ec4b5d7..d8c83297c 100644
  		),
  	}
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 6ee5fcba336808bec88285fc46d092af0ba0ff4b Mon Sep 17 00:00:00 2001
@@ -14190,7 +14190,7 @@ index c94df9ccf..100d17ad8 100644
 +  description : 'Path to platform-specific cpu-features.[ch] for systems that do not provide it (e.g. Android)',
 +)
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 510c6132fdeaeaa368294c8b453de4b3920674de Mon Sep 17 00:00:00 2001
@@ -14225,7 +14225,7 @@ index 3105f67f2..2dd5730ca 100644
  		# must disable the warning to allow linking with lld. Unlike gold, ld which
  		# will silently allow text relocations, lld support must be explicit.
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From b0b6317f5079ce35002166b7c078643f4f2f49bf Mon Sep 17 00:00:00 2001
@@ -14346,7 +14346,7 @@ index 2dd5730ca..3a72512cf 100644
  		vs_module_defs: vpx_def,
  		install: features.get('install_libs'),
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 7d41e474c4ba3be47a262275935cbd9e582e1a28 Mon Sep 17 00:00:00 2001
@@ -14390,7 +14390,7 @@ index 3a72512cf..f177428f7 100644
  
  meson.override_dependency('vpx', libvpx_dep)
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 90d26fac0d895969a82cd873ad36e39737104c44 Mon Sep 17 00:00:00 2001
@@ -14442,7 +14442,7 @@ index 11fc1536a..54145dc9f 100644
        pkgconfig = 'false'
        EOF
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From ce75861fbe41fef96ffc6ef23011ae77fdf4759c Mon Sep 17 00:00:00 2001
@@ -14493,7 +14493,7 @@ index edea48a6c..5ceb1b5b4 100644
  		paths_to_strip: str = ' '.join([f.as_posix() for f in args.strip])
  		f.write(f'STRIP_FROM_PATH += {paths_to_strip}\n')
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From 4d3e1ba334c9672f9df754672785f1127500a147 Mon Sep 17 00:00:00 2001
@@ -14533,7 +14533,7 @@ index 33618f9c7..8ae4f7dee 100644
  		features.set('pthread_h', false)
  	endif
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From c43209801cc0c780871b41ced55aad4819002b4d Mon Sep 17 00:00:00 2001
@@ -14601,7 +14601,7 @@ diff --git a/meson/transform_config_asm.py b/meson/transform_config_asm.py
 old mode 100644
 new mode 100755
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
 
 
 From dea607b5da600f8a24a17e147c015dc53611f68e Mon Sep 17 00:00:00 2001
@@ -14633,5 +14633,70 @@ index 8ae4f7dee..79ebb514c 100644
  		#include <stddef.h>
  		int main(void) { return pthread_create(NULL, NULL, NULL, NULL); }''',
 -- 
-2.42.0.windows.2
+2.44.0.windows.1
+
+
+From b2bd418b6f3bc28eedd8f94681cac5c1e4e5eb00 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Mon, 9 Oct 2023 18:43:36 +0100
+Subject: [PATCH] meson: update to 1.13.1
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 79ebb514c..09b9859f1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -4,7 +4,7 @@
+ project(
+ 	'libvpx',
+ 	'c', 'cpp',
+-	version: '1.13.0',
++	version: '1.13.1',
+ 	default_options: [
+ 		# Enforce c89 for c files. Don't be too strict about it though. Allow
+ 		# gnu extensions like "//" for comments.
+-- 
+2.44.0.windows.1
+
+
+From e6448852b9ae239beb767d31f369eea576557447 Mon Sep 17 00:00:00 2001
+From: Seungmin Kim <66779-ehf@users.noreply.gitlab.freedesktop.org>
+Date: Wed, 27 Mar 2024 13:47:31 +0000
+Subject: [PATCH] Fix ads2gas.py to be used in Python 3.8
+
+Aesthetic change
+
+Fixes #3
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/19>
+---
+ build/make/ads2gas.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/build/make/ads2gas.py b/build/make/ads2gas.py
+index c8025a971..0574135dd 100755
+--- a/build/make/ads2gas.py
++++ b/build/make/ads2gas.py
+@@ -4,6 +4,7 @@
+ # SPDX-License-Identifier: BSD-3-Clause
+ 
+ from argparse import ArgumentParser
++from typing import List
+ import re
+ import sys
+ import thumb
+@@ -23,7 +24,7 @@ if __name__ == '__main__':
+         print('\t.thumb')
+ 
+     # Stack of procedure names.
+-    proc_stack: list[str] = []
++    proc_stack: List[str] = []
+ 
+     f = iter(sys.stdin.readlines())
+     for line in f:
+-- 
+2.44.0.windows.1
 
