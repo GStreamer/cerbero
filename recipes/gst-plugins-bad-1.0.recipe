@@ -79,6 +79,7 @@ class Recipe(custom.GStreamer):
                      'sndfile': 'disabled',
                      'teletext': 'disabled',
                      'voamrwbenc': 'disabled',
+                     'webview2': 'disabled',
                      'wic': 'disabled',
                      'win32ipc': 'disabled',
                      'wildmidi': 'disabled',
@@ -531,6 +532,9 @@ class Recipe(custom.GStreamer):
                 # D3D12 needs newer SDK than system installed one with helper library
                 self.deps.append('directx-headers')
                 self.enable_plugin('d3d12', 'sys')
+                # Download webview2 nuget package
+                self.deps.append('webview2')
+                self.enable_plugin('webview2', 'sys')
             else:
                 # mingw does not ship DirectXMath headers
                 self.deps += ['directxmath']

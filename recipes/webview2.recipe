@@ -1,0 +1,44 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+import shutil
+from pathlib import Path
+
+class Recipe(recipe.Recipe):
+    name = 'webview2'
+    version = '1.0.2420.47'
+    licenses = [{License.BSD_like: ['LICENSE.txt']}]
+    btype = BuildType.CUSTOM
+    stype = SourceType.TARBALL
+    url = 'https://www.nuget.org/api/v2/package/Microsoft.Web.WebView2/%(version)s'
+    tarball_name = '%(name)s-%(version)s.zip'
+    tarball_is_bomb = True
+    tarball_checksum = '8e5a7307d71507edbbe02cac27215d71058bbd82cd256cef60f06b945907610a'
+    library_type = LibraryType.STATIC
+
+    files_libs = ['WebView2LoaderStatic']
+    files_headers = ['include/WebView2.h', 'include/WebView2EnvironmentOptions.h']
+
+    can_msvc = True
+
+    def install(self):
+        bdir = Path(self.build_dir) / 'build/native'
+        if self.config.target_arch == Architecture.ARM64:
+            libdir = bdir / 'arm64'
+        elif self.config.target_arch == Architecture.X86_64:
+            libdir = bdir / 'x64'
+        elif self.config.target_arch == Architecture.X86:
+            libdir = bdir / 'x86'
+        else:
+            raise AssertionError
+
+        if self.config.target_platform != Platform.WINDOWS:
+            raise InvalidRecipeError(self, "webview2 only works on Windows")
+
+        # Copy libraries
+        for f in self.files_libs:
+            shutil.copy2(str(libdir / (f + '.lib')), self.config.libdir)
+
+        # Copy headers
+        for d in self.files_headers:
+            dst = Path(self.config.prefix) / d
+            src = bdir / d
+            shutil.copy2(str(src), str(dst))
