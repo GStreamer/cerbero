@@ -49,6 +49,12 @@ class Recipe(recipe.Recipe):
         'glib/0001-gthread-posix-need-to-include-errno.h.patch',
         # Upstreamed since 2.75 (remove when bumping version)
         'glib/0001-giomodule-Automatically-detect-modules-on-macOS.patch',
+        # futex_time64 is seccomp blocked in Android API level < 30
+        # Upstreamed since 2.81 (remove when bumping version)
+        f'{name}/0009-glib-gthread-posix-Block-futex_time64-usage-on-Andro.patch',
+        f'{name}/0010-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
+        f'{name}/0011-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
+        f'{name}/0012-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch'
     ]
 
     files_libs = [

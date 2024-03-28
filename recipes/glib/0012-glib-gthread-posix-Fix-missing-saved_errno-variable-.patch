@@ -1,0 +1,26 @@
+From b03f60ff07ff610bbbdcd2e8df12dc0b45d55434 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 2 Apr 2024 18:45:23 -0300
+Subject: [PATCH 12/12] glib/gthread-posix: Fix missing saved_errno variable in
+ Android's g_futex_simple
+
+(cherry picked from commit bfebf55d18647092d3a2e83cbda5d6967f8e2a68)
+---
+ glib/gthreadprivate.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/glib/gthreadprivate.h b/glib/gthreadprivate.h
+index a3a89e72e..9d858f6a3 100644
+--- a/glib/gthreadprivate.h
++++ b/glib/gthreadprivate.h
+@@ -71,6 +71,7 @@ struct  _GRealThread
+ #define g_futex_simple(uaddr, futex_op, ...)                                     \
+   G_STMT_START                                                                   \
+   {                                                                              \
++    int saved_errno = errno;                                                     \
+     int res = 0;                                                                 \
+     if (__builtin_available (android 30, *))                                     \
+       {                                                                          \
+-- 
+2.44.0.windows.1
+
