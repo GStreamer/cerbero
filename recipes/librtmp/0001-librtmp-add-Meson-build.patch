@@ -1,0 +1,202 @@
+From f8442ea23f73f0acf9f02afc9844f8b226eb5be2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Tim-Philipp=20M=C3=BCller?= <tim@centricular.com>
+Date: Wed, 20 Apr 2016 12:17:35 +0100
+Subject: [PATCH] librtmp: add Meson build
+
+---
+ librtmp/librtmp.def | 111 ++++++++++++++++++++++++++++++++++++++++++++
+ librtmp/meson.build |  32 +++++++++++++
+ meson.build         |  24 ++++++++++
+ 3 files changed, 167 insertions(+)
+ create mode 100644 librtmp/librtmp.def
+ create mode 100644 librtmp/meson.build
+ create mode 100644 meson.build
+
+diff --git a/librtmp/librtmp.def b/librtmp/librtmp.def
+new file mode 100644
+index 0000000..4c4b3b9
+--- /dev/null
++++ b/librtmp/librtmp.def
+@@ -0,0 +1,111 @@
++EXPORTS
++AMF3CD_AddProp
++AMF3CD_GetProp
++AMF3_Decode
++AMF3Prop_Decode
++AMF3ReadInteger
++AMF3ReadString
++AMF_AddProp
++AMF_CountProp
++AMF_Decode
++AMF_DecodeArray
++AMF_DecodeBoolean
++AMF_DecodeInt16
++AMF_DecodeInt24
++AMF_DecodeInt32
++AMF_DecodeLongString
++AMF_DecodeNumber
++AMF_DecodeString
++AMF_Dump
++AMF_Encode
++AMF_EncodeArray
++AMF_EncodeBoolean
++AMF_EncodeEcmaArray
++AMF_EncodeInt16
++AMF_EncodeInt24
++AMF_EncodeInt32
++AMF_EncodeNamedBoolean
++AMF_EncodeNamedNumber
++AMF_EncodeNamedString
++AMF_EncodeNumber
++AMF_EncodeString
++AMF_GetProp
++AMFProp_Decode
++AMFProp_Dump
++AMFProp_Encode
++AMFProp_GetBoolean
++AMFProp_GetName
++AMFProp_GetNumber
++AMFProp_GetObject
++AMFProp_GetString
++AMFProp_GetType
++AMFProp_IsValid
++AMFProp_Reset
++AMFProp_SetName
++AMF_Reset
++HTTP_get
++RTMP_Alloc
++RTMP_ClientPacket
++RTMP_Close
++RTMP_Connect
++RTMP_Connect0
++RTMP_Connect1
++RTMP_ConnectStream
++RTMP_DeleteStream
++RTMP_DropRequest
++RTMP_EnableWrite
++RTMP_FindFirstMatchingProperty
++RTMP_FindPrefixProperty
++RTMP_Free
++RTMP_GetDuration
++RTMP_GetNextMediaPacket
++RTMP_GetTime
++RTMP_HashSWF
++RTMP_Init
++RTMP_IsConnected
++RTMP_IsTimedout
++RTMP_LibVersion
++RTMP_Log
++RTMP_LogGetLevel
++RTMP_LogHex
++RTMP_LogHexString
++RTMP_LogPrintf
++RTMP_LogSetCallback
++RTMP_LogSetLevel
++RTMP_LogSetOutput
++RTMP_LogStatus
++RTMPPacket_Alloc
++RTMPPacket_Dump
++RTMPPacket_Free
++RTMPPacket_Reset
++RTMP_ParsePlaypath
++RTMP_ParseURL
++RTMP_Pause
++RTMP_Read
++RTMP_ReadPacket
++RTMP_ReconnectStream
++RTMP_SendChunk
++RTMP_SendClientBW
++RTMP_SendCreateStream
++RTMP_SendCtrl
++RTMP_SendPacket
++RTMP_SendPause
++RTMP_SendSeek
++RTMP_SendServerBW
++RTMP_Serve
++RTMP_SetBufferMS
++RTMP_SetOpt
++RTMP_SetupStream
++RTMP_SetupURL
++RTMPSockBuf_Close
++RTMPSockBuf_Fill
++RTMPSockBuf_Send
++RTMP_Socket
++RTMP_TLS_Accept
++RTMP_TLS_AllocServerContext
++RTMP_TLS_FreeServerContext
++RTMP_TLS_Init
++RTMP_ToggleStream
++RTMP_UpdateBufferMS
++RTMP_UserInterrupt
++RTMP_Write
+diff --git a/librtmp/meson.build b/librtmp/meson.build
+new file mode 100644
+index 0000000..b5eaf40
+--- /dev/null
++++ b/librtmp/meson.build
+@@ -0,0 +1,32 @@
++libversion = '1'
++
++librtmp_sources = ['amf.c', 'hashswf.c', 'log.c', 'parseurl.c', 'rtmp.c']
++
++librtmp_c_args = [crypto_args]
++
++librtmp_incs = include_directories('.')
++
++install_headers(['amf.h', 'http.h', 'log.h', 'rtmp.h'], install_dir: 'include/librtmp')
++
++librtmp_c_args += cc.get_supported_arguments(['-Wno-pointer-sign', '-Wno-unused-but-set-variable'])
++
++# Lots of deprecation warnings with OpenSSL 3.0
++librtmp_c_args += cc.get_supported_arguments(['-Wno-deprecated-declarations'])
++
++librtmp = library('rtmp',
++  librtmp_sources,
++  version: libversion,
++  c_args: librtmp_c_args,
++  include_directories: librtmp_incs,
++  install: true,
++  dependencies: [crypto_dep, zlib_dep, sys_deps],
++  vs_module_defs: 'librtmp.def',
++)
++
++pkg_config = import('pkgconfig')
++pkg_config.generate(libraries : librtmp,
++  version : '2.4',
++  name : 'librtmp',
++  filebase : 'librtmp',
++  description : 'RTMP implementation',
++)
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..d68e322
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,24 @@
++project('librtmp', 'c', version : '2.4')
++
++cc = meson.get_compiler('c')
++
++crypto_dep = dependency('openssl')
++zlib_dep = dependency('zlib')
++
++threads_dep = dependency('threads')
++
++sys_deps = [threads_dep]
++
++if host_machine.system() == 'windows'
++  sys_deps += [
++    cc.find_library('ws2_32'),
++    cc.find_library('winmm'),
++    cc.find_library('gdi32')
++  ]
++endif
++
++crypto_args = ['-DUSE_OPENSSL']
++
++subdir('librtmp')
++
++# Not building programs
+-- 
+2.43.0
+

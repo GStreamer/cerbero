@@ -1,12 +1,11 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.tools.libtool import LibtoolLibrary
 
-
 class Recipe(recipe.Recipe):
     name = 'librtmp'
     version = '2.4_p20200229'
     stype = SourceType.TARBALL
-    btype = BuildType.MAKEFILE
+    btype = BuildType.MESON
     url = 'https://gstreamer.freedesktop.org/data/src/mirror/rtmpdump-%(version)s.tar.xz'
     tarball_checksum = 'ac4ebe131254da6f49d17b77df42b1419155fb09d38d8a8bf785fdc16bfca418'
     # Binaries are GPLv2+, but we don't distribute them
@@ -15,14 +14,13 @@ class Recipe(recipe.Recipe):
     tarball_dirname = 'rtmpdump-%(version)s'
     patches = [
         # Our patches, upstream is non-existent
-        name + '/0001-Fix-support-for-cross-compilation.patch',
+        name + '/0001-librtmp-add-Meson-build.patch',
         # vcpkg patches, porting to openssl and fixing windows bugs, since
         # upstream is non-existent
         name + '/0003-Port-to-openssl-1.1.1.patch',
         name + '/0004-Port-to-newer-MSVC.patch',
         name + '/0005-Fix-debug-build.patch',
         name + '/0006-Add-license-for-vcpkg-changes.patch',
-        name + '/0007-Make-libdir-configurable.patch',
     ]
     # openssl on Linux
     use_system_libs = True
@@ -34,34 +32,9 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
 
-        if self.config.target_platform == Platform.WINDOWS:
-            system = 'mingw'
-        elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            system = 'darwin'
-        elif self.config.target_platform in [Platform.LINUX, Platform.ANDROID]:
-            system = 'posix'
-        # LDFLAGS are passed via XLDFLAGS, and are needed for at least Android
-        cc = self.get_env('CC')
-        ld = self.get_env('LD')
-        prefix = self.config.prefix
-        cflags = self.get_env('CFLAGS')
-        ldflags = self.get_env('LDFLAGS')
-        self.make += ['SYS=' + system, 'prefix=' + prefix, 'CRYPTO=OPENSSL', 'XCFLAGS=' + cflags,
-                      'XLDFLAGS=' + ldflags, 'CC=' + cc, 'LD=' + ld, 'libdir=' + self.config.libdir]
-        self.make_install = self.make + ['install']
-
     def post_install(self):
-        soversion = 1
-        # On Windows, rtmp installs a duplicate DLL by trying to symlink which
-        # results in a copy under MinGW since symlinks aren't supported there.
-        if self.config.target_platform == Platform.WINDOWS:
-            dlldir = os.path.join(self.config.prefix, 'bin')
-            real_rtmp_dll = os.path.join(dlldir, 'librtmp-{}.dll'.format(soversion))
-            dupe_rtmp_dll = os.path.join(dlldir, 'librtmp.dll')
-            if os.path.isfile(dupe_rtmp_dll) and os.path.isfile(real_rtmp_dll):
-                os.remove(dupe_rtmp_dll)
-        deps = ['ssl', 'crypto']
-        libtool_la = LibtoolLibrary('rtmp', soversion, None, None,
+        deps = ['ssl', 'crypto', 'z']
+        libtool_la = LibtoolLibrary('rtmp', None, None, None,
                 self.config.libdir, self.config.target_platform, deps)
         libtool_la.save()
         super().post_install()
