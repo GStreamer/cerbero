@@ -185,12 +185,8 @@ class Recipe(recipe.Recipe):
             libraries = [f for f in self.devel_files_list()
                          if f.endswith('.a')]
             for f in libraries:
-                if self.config.target_platform in (Platform.ANDROID, Platform.LINUX):
-                    shell.new_call([self.env['STRIP'], '--wildcard', '--strip-all',
-                                   '--keep-symbol=gst_plugin_*', f], self.config.prefix, env=self.env)
-                elif self.config.target_platform in (Platform.IOS, Platform.DARWIN):
-                    # Unlike ELF, for MachO Apple wants you to do
-                    # Single-Object Prelink
+                if self.config.target_platform in (Platform.IOS, Platform.DARWIN):
+                    # Apple wants you to do Single-Object Prelink
                     source = Path(self.config.prefix) / f
 
                     # Only global symbols
@@ -276,26 +272,120 @@ class Recipe(recipe.Recipe):
 
                         # With the stripping done, all files now need to be rearchived
                         dest = Path(tmp) / source.name
-                        m.log(f"Repacking library to {dest.absolute()}", self.logfile)
+                        m.log(f"Repacking library to {dest.absolute()}", self.logfile) 
 
                         libtool = shutil.which("libtool")
 
                         if libtool is None:
                             raise FatalError(f'libtool not found')
 
-                        # (again) DO NOT split this into an array unless
+                        shell.new_call([
+                                libtool,
+                                "-static",
+                                prelinked_obj.absolute(),
+                                "-o",
+                                dest.absolute(),
+                            ],
+                            cmd_dir=tmp,
+                            logfile=self.logfile,
+                        )
+
+                        # And now we paper over
+                        os.replace(dest.absolute(), source.absolute())
+                elif self.config.target_platform in (Platform.LINUX, Platform.ANDROID): 
+                    # This is a very similar approach, however Clang
+                    # will itself do a really bad job if one supplies
+                    # a LD version script -- that'll suppress 99% of
+                    # the things needed for a working .o file.
+                    # The result, just like using
+                    # `strip --wildcard --keep-symbol=gst_plugin_*`,
+                    # is a .o that has all the symbols you want, but
+                    # placeholders/duds/broken references for all unfortunate
+                    # .rodata symbols referenced in the exported functions.
+                    #
+                    # See https://maskray.me/blog/2022-11-21-relocatable-linking
+                    source = Path(self.config.prefix) / f
+
+                    with tempfile.TemporaryDirectory(prefix='cerbero', dir=self.config.home_dir) as tmp:
+                        # Unpack archive
+                        m.log(f"Unpacking {source.absolute()} with ar", self.logfile)
+                        if self.config.target_platform == Platform.ANDROID:
+                            ar = shutil.which('llvm-ar',
+                                                path=self.config.env['ANDROID_NDK_TOOLCHAIN_BIN'])
+                        else:
+                            ar = shutil.which('llvm-ar')
+                            if not ar:
+                                ar = shutil.which('ar')
+                        if ar is None:
+                            raise FatalError('ar not found')
+                        shell.new_call(
+                            [ar, 'xv', source.absolute()], cmd_dir=tmp, logfile=self.logfile)
+
+                        # Now everything is flat in the pwd
+                        m.log("Performing Single-Object Prelinking", self.logfile)
+                        prelinked_obj = (
+                            Path(tmp) / source.name).with_suffix('.prelinked.o')
+
+                        if self.config.target_platform == Platform.ANDROID:
+                            ld = shutil.which("ld.lld",
+                                                path=self.config.env['ANDROID_NDK_TOOLCHAIN_BIN'])
+                        else:
+                            ld = shutil.which('ld')
+                        if ld is None:
+                            raise FatalError('ld not found')
+
+                        # DO NOT split this into an array unless
                         # you wrap this into a 'sh -c' call.
                         # It needs the glob to be parsed by the shell!
                         shell.new_call(
                             ' '.join([
-                                libtool,
-                                "-static",
-                                str(prelinked_obj.absolute()),
+                                ld,
+                                "--relocatable",
+                                "--export-dynamic-symbol=gst_plugin_*",
                                 "-o",
-                                str(dest.absolute()),
+                                str(prelinked_obj.absolute()),
+                                "*.o",
                             ]),
                             cmd_dir=tmp,
                             logfile=self.logfile,
+                        )
+
+                        # WE ARE NOT DONE! ld.lld merged all the files,
+                        # stripping those not referenced in the dynamic symbol
+                        # glob, but we still need to hide all the Rust cruft.
+                        if self.config.target_platform == Platform.ANDROID:
+                            objcopy = shutil.which("llvm-objcopy",
+                                                path=self.config.env['ANDROID_NDK_TOOLCHAIN_BIN'])
+                        else:
+                            objcopy = shutil.which("llvm-objcopy")
+                            if objcopy is None:
+                                objcopy = shutil.which("objcopy")
+                        if objcopy is None:
+                            raise FatalError('objcopy not found')
+                        shell.new_call(
+                            [
+                                objcopy,
+                                "--wildcard",
+                                "--keep-global-symbol=gst_plugin_*",
+                                prelinked_obj.absolute(),
+                            ],
+                            cmd_dir=tmp,
+                            logfile=self.logfile,
+                        )
+
+                        # With the stripping (really) done, all files now need to be rearchived
+                        dest = Path(tmp) / source.name
+                        m.log(f"Repacking library to {dest.absolute()}", self.logfile)
+
+                        shell.new_call(
+                            [
+                                ar,
+                                'rs',
+                                dest.absolute(),
+                                prelinked_obj.absolute()
+                            ],
+                            cmd_dir=tmp,
+                            logfile=self.logfile
                         )
 
                         # And now we paper over
