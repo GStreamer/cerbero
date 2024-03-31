@@ -532,6 +532,11 @@ class Recipe(custom.GStreamer):
                 # D3D12 needs newer SDK than system installed one with helper library
                 self.deps.append('directx-headers')
                 self.enable_plugin('d3d12', 'sys')
+                self.files_libs += ['libgstd3d12-1.0']
+                self.files_plugins_devel += [
+                    'include/gstreamer-1.0/gst/d3d12',
+                    '%(libdir)s/pkgconfig/gstreamer-d3d12-1.0.pc',
+                ]
                 # Download webview2 nuget package
                 self.deps.append('webview2')
                 self.enable_plugin('webview2', 'sys')
