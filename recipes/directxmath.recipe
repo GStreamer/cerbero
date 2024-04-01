@@ -1,22 +1,20 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
 class Recipe(recipe.Recipe):
-    version = '3.1.8'
+    version = '3.1.9'
     name = 'directxmath'
     licenses = [{License.MIT: ['LICENSE']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
-    url = 'https://github.com/microsoft/DirectXMath/archive/refs/tags/dec2022.tar.gz'
-    tarball_checksum = '70a18f35343ff07084d31afa7a7978b3b59160f0533424365451c72475ff480f'
-    tarball_name = 'dec2022.tar.gz'
-    tarball_dirname = 'DirectXMath-dec2022'
+    url = 'https://github.com/microsoft/DirectXMath/archive/refs/tags/feb2024.tar.gz'
+    tarball_checksum = 'f78bb400dcbedd987f2876b2fb6fe12199d795cd6a912f965ef3a2141c78303d'
+    tarball_name = 'feb2024.tar.gz'
+    tarball_dirname = 'DirectXMath-feb2024'
 
     files_devel = []
 
     patches = [
-        # https://wrapdb.mesonbuild.com/v2/directxmath_3.1.8-1/get_patch
+        # https://wrapdb.mesonbuild.com/v2/directxmath_3.1.9-1/get_patch
         'directxmath/0001-Add-DirectXMath-wrap.patch',
-        # https://github.com/microsoft/DirectXMath/pull/172
-        'directxmath/0001-Inc-Use-two-argument-cpuid-when-using-recent-MinGW.patch',
     ]
 

@@ -14,7 +14,7 @@ index 0000000..c7f9d46
 --- /dev/null
 +++ b/meson.build
 @@ -0,0 +1,29 @@
-+project('directxmath', 'cpp', version: '3.1.8')
++project('directxmath', 'cpp', version: '3.1.9')
 +
 +incdirs = include_directories('Inc')
 +
