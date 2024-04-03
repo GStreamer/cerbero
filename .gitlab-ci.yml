@@ -2,6 +2,9 @@ include:
   - project: 'freedesktop/ci-templates'
     ref: 'master'
     file: '/templates/fedora.yml'
+  - project: 'freedesktop/ci-templates'
+    ref: 'master'
+    file: '/templates/ubuntu.yml'
 
 stages:
   - 'build docker'
@@ -99,6 +102,31 @@ default:
     ANDROID_HOME: "/android/sdk"
     ANDROID_NDK_HOME: "/android/ndk"
 
+.ubuntu image:
+  variables:
+    ###
+    # IMPORTANT
+    # These are the version tags for the docker images the CI runs against.
+    # If you are hacking on them or need a them to rebuild, its enough
+    # to change any part of the string of the image you want.
+    ###
+    FDO_DISTRIBUTION_TAG: "2024-04-03.1"
+    FDO_DISTRIBUTION_VERSION: "22.04"
+    FDO_DISTRIBUTION_PACKAGES: >-
+      bash
+      ca-certificates
+      curl
+      git
+      lbzip2
+      python3-distro
+      python3-distro-info
+      python3-venv
+      python3-setuptools
+      rsync
+      sudo
+    FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
+    FDO_UPSTREAM_REPO: "gstreamer/cerbero"
+
 .manual trigger:
   rules:
     # If this pipeline is triggered from gstreamer, trigger the pipeline automatically
@@ -139,6 +167,15 @@ android fedora image:
     - .manual trigger
     - .android fedora image
     - .fdo.container-build@fedora
+  variables:
+    GIT_STRATEGY: none
+
+ubuntu image:
+  stage: "build docker"
+  extends:
+    - .manual trigger
+    - .ubuntu image
+    - .fdo.container-build@ubuntu
   variables:
     GIT_STRATEGY: none
 
@@ -217,6 +254,13 @@ android fedora image:
   needs:
     - "fedora image"
 
+.cerbero ubuntu base:
+  extends:
+    - .ubuntu image
+    - .fdo.distribution-image@ubuntu
+  needs:
+    - "ubuntu image"
+
 # Template for Cerbero GStreamer Deps
 #
 # This template is used by cerbero/ project to pre-built the GStreamer
@@ -275,6 +319,21 @@ cerbero deps fedora x86_64:
 build cerbero fedora x86_64:
   extends:
     - '.cerbero fedora base'
+    - '.cerbero mr'
+  variables:
+    CONFIG: "linux.config"
+
+cerbero deps ubuntu x86_64:
+  extends:
+    - '.cerbero ubuntu base'
+    - '.cerbero deps'
+  variables:
+    CONFIG: "linux.config"
+    ARCH: "linux_x86_64"
+
+build cerbero ubuntu x86_64:
+  extends:
+    - '.cerbero ubuntu base'
     - '.cerbero mr'
   variables:
     CONFIG: "linux.config"
