@@ -5,6 +5,13 @@ include:
   - project: 'freedesktop/ci-templates'
     ref: 'master'
     file: '/templates/ubuntu.yml'
+  ###
+  # IMPORTANT
+  # These are the version tags for the docker images the CI runs against.
+  # If you are hacking on them or need a them to rebuild, its enough
+  # to change any part of the string of the image you want.
+  ###
+  - local: '.gitlab-image-tags.yml'
 
 stages:
   - 'build docker'
@@ -19,7 +26,6 @@ variables:
   CI_GSTREAMER_URL: 'https://gitlab.freedesktop.org/gstreamer/gstreamer.git'
   CI_GSTREAMER_TRIGGERED: 'false'
   GST_UPSTREAM_BRANCH: 'main'
-  WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-07-14.0-main'
   DEFAULT_CERBERO_ARGS: >
     --variants werror
     --clocktime
@@ -58,13 +64,7 @@ default:
 
 .fedora image:
   variables:
-    ###
-    # IMPORTANT
-    # These are the version tags for the docker images the CI runs against.
-    # If you are hacking on them or need a them to rebuild, its enough
-    # to change any part of the string of the image you want.
-    ###
-    FDO_DISTRIBUTION_TAG: '2023-06-08.0'
+    FDO_DISTRIBUTION_TAG: "$FEDORA_TAG"
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "sudo git-core lbzip2 rsync wine which python3-distro python3-distro-info"
     FDO_DISTRIBUTION_EXEC: ci/docker_setup.sh
@@ -72,13 +72,7 @@ default:
 
 .checks fedora image:
   variables:
-    ###
-    # IMPORTANT
-    # These are the version tags for the docker images the CI runs against.
-    # If you are hacking on them or need a them to rebuild, its enough
-    # to change any part of the string of the image you want.
-    ###
-    FDO_DISTRIBUTION_TAG: '2023-01-12.0'
+    FDO_DISTRIBUTION_TAG: "$CHECKS_FEDORA_TAG"
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "git-core python3-pip"
     FDO_DISTRIBUTION_EXEC: ci/checks_setup.sh
@@ -87,13 +81,7 @@ default:
 
 .android fedora image:
   variables:
-    ###
-    # IMPORTANT
-    # These are the version tags for the docker images the CI runs against.
-    # If you are hacking on them or need a them to rebuild, its enough
-    # to change any part of the string of the image you want.
-    ###
-    FDO_DISTRIBUTION_TAG: '2023-05-31.0'
+    FDO_DISTRIBUTION_TAG: "$ANDROID_FEDORA_TAG"
     FDO_DISTRIBUTION_VERSION: '37'
     FDO_DISTRIBUTION_PACKAGES: "file git-core java-11-openjdk-devel lbzip2 python3-distro python3-distro-info make pkg-config unzip which xz"
     FDO_DISTRIBUTION_EXEC: ci/docker_android_setup.sh $ANDROID_HOME $ANDROID_NDK_HOME $GST_UPSTREAM_BRANCH
@@ -104,13 +92,7 @@ default:
 
 .ubuntu image:
   variables:
-    ###
-    # IMPORTANT
-    # These are the version tags for the docker images the CI runs against.
-    # If you are hacking on them or need a them to rebuild, its enough
-    # to change any part of the string of the image you want.
-    ###
-    FDO_DISTRIBUTION_TAG: "2024-04-03.1"
+    FDO_DISTRIBUTION_TAG: "$UBUNTU_TAG"
     FDO_DISTRIBUTION_VERSION: "22.04"
     FDO_DISTRIBUTION_PACKAGES: >-
       bash
