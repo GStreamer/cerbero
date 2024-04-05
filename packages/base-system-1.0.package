@@ -12,7 +12,7 @@ class Package(custom.GStreamer, package.Package):
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc', 'libffi:libs',
              'freetype:libs', 'glib:libs:lang:bins:schemas', 'orc:libs',
              'pango:libs:modules', 'libpng:libs', 'libjpeg-turbo:libs',
-             'tiff:libs', 'gdk-pixbuf:bins:libs:modules:lang', 'libcroco:libs',
+             'tiff:libs', 'gdk-pixbuf:bins:libs:modules:lang',
              'libxml2:libs', 'pixman:libs', 'fribidi:libs',
              'zlib:libs', 'bzip2:libs', 'harfbuzz:libs', 'json-glib:bins:libs',
              'pcre2:libs']
