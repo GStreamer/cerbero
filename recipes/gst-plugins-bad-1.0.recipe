@@ -43,7 +43,6 @@ class Recipe(custom.GStreamer):
                      'srtp': 'enabled',
                      'resindvd': 'enabled',
                      'rist' : 'enabled',
-                     'rsvg': 'enabled',
                      'voaacenc': 'enabled',
                      'vulkan': 'enabled',
                      'webrtc': 'enabled',
@@ -87,7 +86,7 @@ class Recipe(custom.GStreamer):
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',
             'zlib', 'openh264', 'opus', 'librtmp', 'libxml2',
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
-            'soundtouch', 'vo-aacenc', 'librsvg', 'openjpeg',
+            'soundtouch', 'vo-aacenc', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
             'srt', 'zbar', 'libltc']
     use_system_libs = True
@@ -262,7 +261,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsty4mdec%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstjpegformat%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstgdp%(mext)s',
-             '%(libdir)s/gstreamer-1.0/libgstrsvg%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstopenjpeg%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstspandsp%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsbc%(mext)s',
@@ -297,7 +295,6 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgsty4mdec.a', '%(libdir)s/gstreamer-1.0/libgsty4mdec.la',
              '%(libdir)s/gstreamer-1.0/libgstjpegformat.a', '%(libdir)s/gstreamer-1.0/libgstjpegformat.la',
              '%(libdir)s/gstreamer-1.0/libgstgdp.a', '%(libdir)s/gstreamer-1.0/libgstgdp.la',
-             '%(libdir)s/gstreamer-1.0/libgstrsvg.a', '%(libdir)s/gstreamer-1.0/libgstrsvg.la',
              '%(libdir)s/gstreamer-1.0/libgstopenjpeg.a', '%(libdir)s/gstreamer-1.0/libgstopenjpeg.la',
              '%(libdir)s/gstreamer-1.0/libgstspandsp.a', '%(libdir)s/gstreamer-1.0/libgstspandsp.la',
              '%(libdir)s/gstreamer-1.0/libgstsbc.a', '%(libdir)s/gstreamer-1.0/libgstsbc.la',
@@ -514,6 +511,7 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('mediafoundation', 'sys', 'visualstudio')
         self.enable_plugin('directshow', 'sys', 'visualstudio')
 
+        self.enable_plugin('rsvg', 'codecs', variant='rust', dep='librsvg')
         self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
 
         if self.config.target_platform == Platform.WINDOWS:
@@ -627,7 +625,6 @@ class Recipe(custom.GStreamer):
             self.disable_plugin('spandsp', 'codecs', dep='spandsp')
             self.disable_plugin('smoothstreaming', 'codecs', dep='libxml2')
             self.disable_plugin('srt', 'net', dep='srt')
-            self.disable_plugin('rsvg', 'codecs', dep='librsvg')
             self.disable_plugin('voaacenc', 'codecs_restricted', dep='vo-aacenc')
             self.disable_plugin('zbar', 'codecs', dep='zbar')
             # amf, nvcodec, and qsv all load dlls which wouldn't work on UWP

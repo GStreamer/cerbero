@@ -1,68 +1,113 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.utils import to_winpath
 from pathlib import Path
-
-from cerbero.build.build import modify_environment
-
+import shlex
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.40.20'
+    version = '2.58.93'
     licenses = [License.LGPLv2Plus]
-    deps = ['libcroco', 'gdk-pixbuf', 'pango', 'cairo']
+    deps = ['gdk-pixbuf', 'pango', 'cairo', 'libxml2']
+    btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'cff4dd3c3b78bfe99d8fcfad3b8ba1eee3289a0823c0e118d78106be6b84c92b'
-    configure_options = ' --disable-always-build-tests --disable-tools '
+    tarball_checksum = 'f116eaf8196fc8261b0bbbdf996a4fe1bc97dc25664f953b328194d049a0dada'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
     licenses_bins = [License.GPLv2Plus]
     files_loader = ['%(libdir)s/gdk-pixbuf-2.0/2.10.0/loaders/libpixbufloader-svg%(mext)s']
     files_devel = ['include/librsvg-2.0/librsvg/*.h',
-                   '%(libdir)s/pkgconfig/librsvg-2.0.pc',
-                   '%(libdir)s/librsvg-2.a', '%(libdir)s/librsvg-2.la']
+                   '%(libdir)s/pkgconfig/librsvg-2.0.pc']
     files_typelibs = ['Rsvg-2.0']
 
-    patches = [
-        f'{name}/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch',
-        f'{name}/0004-Add-missing-libcroco-dependency.patch',
-    ]
+    meson_options = {
+        'introspection': 'disabled',
+        'docs': 'disabled',
+        'vala': 'disabled',
+        'tests': 'false',
+    }
+
+    def append_config_toml(self, s):
+        dot_cargo = Path(self.config_src_dir) / '.cargo'
+        dot_cargo.mkdir(exist_ok=True)
+        # Append so we don't overwrite cargo vendor settings
+        with (dot_cargo / 'config.toml').open('a') as f:
+            f.write(s)
+
+    def get_llvm_tool(self, tool: str) -> Path:
+        '''
+        Gets one of the LLVM tools matching the current Rust toolchain.
+        '''
+        root_dir = shell.check_output(
+            ["rustc", "--print", "sysroot"], env=self.env
+        ).strip()
+
+        tools = list(Path(root_dir).glob(f"**/{tool}"))
+
+        if len(tools) == 0:
+            raise FatalError(
+                f"Rust {tool} tool not found at {root_dir}, try re-running bootstrap"
+            )
+        return tools[0]
 
     def prepare(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            # Cargo tries to look up an import lib when LibraryType.BOTH
+            # librsvg only generates the shared library
+            self.library_type = LibraryType.SHARED
+        self.target_triple = self.config.rust_triple(self.config.target_arch,
+            self.config.target_platform, self.using_msvc())
+        self.meson_options['triplet'] = self.target_triple
+
+    async def configure(self):
+        # AppleClang's nm is too old
+        # This should be injected as in android.config
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
-            self.configure_options += ' --disable-Bsymbolic'
-        # Fails on cross-ios and cross-win32
-        if self.config.cross_compiling():
-            self.configure_options += ' --disable-pixbuf-loader'
-            self.files_loader.clear()
+            self.env['NM'] = str(self.get_llvm_tool("llvm-nm"))
+        if self.config.target_platform == Platform.DARWIN or self.using_msvc():
+            s = '\n[profile.release]\nstrip = "debuginfo"\n'
+            self.append_config_toml(s)
+        elif self.config.target_platform != Platform.ANDROID:
+            s = '\n[profile.release]\nsplit-debuginfo = "packed"\n'
+            self.append_config_toml(s)
+        s = '[build]\n' \
+            f'target = "{self.target_triple}"\n'
+        self.append_config_toml(s)
+        if self.config.target_platform == Platform.ANDROID:
+            # Use the compiler's forwarding
+            # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
+            linker = self.get_env('RUSTC_LINKER')
+            link_args = []
+            # We need to extract necessary linker flags from LDFLAGS which is
+            # passed to the compiler
+            for arg in shlex.split(self.get_env('LDFLAGS', '')):
+                link_args += ['-C', f"link-arg={arg}"]
+            s = f'[target.{self.target_triple}]\n' \
+                f'linker = "{linker}"\n' \
+                f'rustflags = {link_args!r}\n'
+            self.append_config_toml(s)
 
-        if self.config.platform != Platform.WINDOWS:
-            # GTK3 support just builds rsvg-view-3, which is useless for Cerbero
-            self.configure_options += ' --without-gtk3 '
-            self.autoreconf = True
-            self.autoreconf_sh = 'mkdir -p m4 && autoreconf -fiv'
-            self.patches += [
-                'librsvg/option-enable-disable-gtk.patch',
-                'librsvg/0001-Use-ACLOCAL_FLAGS.patch',
-            ]
-        else:
-            self.autoreconf = False
-        if self.config.platform == Platform.WINDOWS:
-            # MSYS2 does not add . to PATH, so we need to add this ourselves
-            # so that our python3 wrapper script is found"
-            self.prepend_env('PATH', self.make_dir, sep=os.pathsep)
+        if self.using_msvc():
+            # Making MSYS2's `env` available mucks up Meson
+            # https://github.com/mesonbuild/meson/blob/30c38e2bd69b2bab74b6e76da1c626f3c9853613/mesonbuild/backend/backends.py#L638
+            # Code should be kept in sync with shell.get_path_minus_msys()
+            path = self.env['PATH'].split(os.pathsep)
+            msys2_prefix = to_winpath('/')
+            for p in path:
+                if msys2_prefix in p:
+                    self.remove_env('PATH', p, sep=os.pathsep)
+        await super().configure()
 
-
-    @modify_environment
     async def compile(self):
-        # glib-mkenums has #!/usr/bin/env python3, which looks for `python3`,
-        # but on Windows Python 3 is `python.exe`. Meson already handles this
-        # for us, but Autotools can't.
-        # NOTE: Remove this when the recipe is ported to Meson.
-        if self.config.platform == Platform.WINDOWS:
-            python3 = Path(self.build_dir) / 'python3'
-            with python3.open('w') as f:
-                f.write('#!/bin/sh\n"{}" "$@"'.format(self.config.python_exe))
-            shell.new_call(['chmod', '+x', str(python3)])
-
+        # This recipe mixes Meson with Rust!
+        # Pass through the number of Ninja jobs as an upper limit
+        self.set_env('CARGO_BUILD_JOBS', f'{self.num_of_cpus()}')
         await super().compile()
+
+    def post_install(self):
+        LibtoolLibrary('librsvg', None, None, None, self.config.libdir,
+                self.config.target_platform).save()
+        super().post_install()
