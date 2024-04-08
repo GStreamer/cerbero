@@ -96,6 +96,7 @@ class Recipe(custom.GStreamer):
 
     files_libs = [
         'libgstadaptivedemux-1.0',
+        'libgstanalytics-1.0',
         'libgstbadaudio-1.0',
         'libgstbasecamerabinsrc-1.0',
         'libgstcodecparsers-1.0',
@@ -103,6 +104,7 @@ class Recipe(custom.GStreamer):
         'libgstinsertbin-1.0',
         'libgstisoff-1.0',
         'libgstmpegts-1.0',
+        'libgstmse-1.0',
         'libgstphotography-1.0',
         'libgstplay-1.0',
         'libgstplayer-1.0',
@@ -115,6 +117,7 @@ class Recipe(custom.GStreamer):
     ]
 
     files_plugins_devel = [
+        'include/gstreamer-1.0/gst/analytics',
         'include/gstreamer-1.0/gst/audio',
         'include/gstreamer-1.0/gst/base',
         'include/gstreamer-1.0/gst/basecamerabinsrc',
@@ -123,16 +126,19 @@ class Recipe(custom.GStreamer):
         'include/gstreamer-1.0/gst/interfaces',
         'include/gstreamer-1.0/gst/isoff',
         'include/gstreamer-1.0/gst/mpegts',
+        'include/gstreamer-1.0/gst/mse',
         'include/gstreamer-1.0/gst/play',
         'include/gstreamer-1.0/gst/player',
         'include/gstreamer-1.0/gst/sctp',
         'include/gstreamer-1.0/gst/transcoder',
         'include/gstreamer-1.0/gst/vulkan',
         'include/gstreamer-1.0/gst/webrtc',
+        '%(libdir)s/pkgconfig/gstreamer-analytics-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-bad-audio-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-codecparsers-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-insertbin-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-mpegts-1.0.pc',
+        '%(libdir)s/pkgconfig/gstreamer-mse-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-photography-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-play-1.0.pc',
         '%(libdir)s/pkgconfig/gstreamer-player-1.0.pc',
