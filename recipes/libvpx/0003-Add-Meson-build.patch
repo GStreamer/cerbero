@@ -14700,3 +14700,62 @@ index c8025a971..0574135dd 100755
 -- 
 2.44.0.windows.1
 
+
+From 79c9a635d61f2a200a5c79c268e95c54c8bd79f7 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 8 Apr 2024 22:20:37 -0300
+Subject: [PATCH] meson: Fix wrong instruction set flags for MSVC builds
+
+
+diff --git a/meson.build b/meson.build
+index 09b9859f1..1df26ca88 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1587,9 +1587,9 @@ if tgt_cc == 'msvs'
+ 		'sse3': [],
+ 		'ssse3': [],
+ 		'sse4_1': [],
+-		'avx': c.get_supported_arguments('-march:avx'),
+-		'avx2': c.get_supported_arguments('-march:avx2'),
+-		'avx512': c.get_supported_arguments('-march:avx512'),
++		'avx': c.get_supported_arguments('/arch:AVX'),
++		'avx2': c.get_supported_arguments('/arch:AVX2'),
++		'avx512': c.get_supported_arguments('/arch:AVX512'),
+ 	}
+ else
+ 	arch_flags = {
+-- 
+2.44.0.windows.1
+
+
+From ed41095230adb8d9edf0054164a33c2cc8ce9461 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 8 Apr 2024 22:21:12 -0300
+Subject: [PATCH] meson: Fix missing CPUID detection for x86* builds
+
+This fixes a crash with illegal instruction on non-Intel or pre-AVX512
+CPUs when attempting to encode or decode a stream.
+
+diff --git a/meson.build b/meson.build
+index 1df26ca88..765d032b8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -936,11 +936,11 @@ elif tgt_isa.startswith('x86')
+ 	endif
+ 
+ 	feature = 'runtime_cpu_detect'
+-	if features.get(tgt_isa, true) # soft_enabled
+-		if not features.has(tgt_isa)
+-			message('\tenabling @0@'.format(tgt_isa))
++	if features.get(feature, true) # soft_enabled
++		if not features.has(feature)
++			message('\tenabling @0@'.format(feature))
+ 		endif
+-		features.set(tgt_isa, true)
++		features.set(feature, true)
+ 	endif
+ 
+ 	# Unline the original, we do can test cflags here :)
+-- 
+2.44.0.windows.1
+
