@@ -17,6 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import shutil
 import time
 import cerbero.utils.messages as m
 
@@ -24,8 +25,11 @@ from cerbero.config import Platform
 from cerbero.utils import shell, _
 from cerbero.errors import FatalError
 
-
-GIT = 'git'
+if shell.PLATFORM == Platform.WINDOWS:
+    # We do not want the MSYS2 Git because it mucks consumption by Cargo
+    GIT = shutil.which('git', path=shell.get_path_minus_msys(os.environ['PATH']))
+else:
+    GIT = 'git'
 
 
 def ensure_user_is_set(git_dir, logfile=None):
