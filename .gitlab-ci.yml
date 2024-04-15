@@ -262,6 +262,7 @@ pre-commit checks:
     pre-commit run --all-files --show-diff-on-failure
   variables:
     PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
+  tags: [ 'placeholder-job' ]
 
 #
 # Cerbero Linux X86_64 build
