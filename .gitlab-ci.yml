@@ -134,6 +134,7 @@ fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 checks fedora image:
   stage: "build docker"
@@ -142,6 +143,7 @@ checks fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 android fedora image:
   stage: "build docker"
@@ -151,6 +153,7 @@ android fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 ubuntu image:
   stage: "build docker"
@@ -160,6 +163,7 @@ ubuntu image:
     - .fdo.container-build@ubuntu
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 # Rules for when to use a specific job
 
