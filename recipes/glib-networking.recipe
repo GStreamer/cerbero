@@ -19,8 +19,12 @@ class Recipe(recipe.Recipe):
     # openssl on Linux
     use_system_libs = True
 
-    # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
-    patches = [name + '/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch']
+    patches = [
+        # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
+        name + '/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch',
+        # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/240
+        name + '/0001-tls-tests-disable-PKCS-11-tests-if-not-available.patch'
+    ]
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
