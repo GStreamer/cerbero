@@ -400,7 +400,7 @@ index 0000000..afb4897
 +# SPDX-License-Identifier: Apache-2.0
 +project('opencore-amr', 'c', 'cpp', version: '0.1.6',
 +  meson_version: '>= 0.64.0',
-+  default_options: ['buildtype=debugoptimized'])
++  default_options: ['buildtype=debugoptimized', 'c_std=c11', 'cpp_std=c++11'])
 +
 +libversion = '0.0.5'
 +
