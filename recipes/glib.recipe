@@ -58,6 +58,7 @@ class Recipe(recipe.Recipe):
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
         # backported into 2.74.6
         'glib/0001-Fix-safe_wspawnve-define.patch',
+        'glib/0009-Fix-GIO-module-load-paths.patch'
     ]
 
     files_libs = [
