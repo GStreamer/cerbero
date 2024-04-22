@@ -39,6 +39,9 @@ class Strip(object):
             m.warning('Strip command is not defined')
             return
 
+        if os.path.islink(path):
+            return
+
         for f in self.excludes:
             if f in path:
                 return
