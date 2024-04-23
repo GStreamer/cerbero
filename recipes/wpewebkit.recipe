@@ -1,0 +1,214 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'wpewebkit'
+    version = '2.42.1'
+    stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
+    url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
+    tarball_checksum = '18a2cf547a503420f4cb8f523a2f4c24b4dc2773abbe74c7d585e6d23cb27bac'
+    deps = [
+        'icu',
+        'cairo',
+        'freetype',
+        'gettext',
+        'gstreamer-1.0',
+        'gst-plugins-base-1.0',
+        'gst-plugins-good-1.0',
+        'gst-plugins-bad-1.0',
+        'harfbuzz',
+        'libepoxy',
+        'libgcrypt',
+        'libjpeg-turbo',
+        'libpng',
+        'libsoup',
+        'libtasn1',
+        'libxslt',
+        'libwebp',
+        'libwpe',
+        'openjpeg',
+    ]
+    # TODO: support accessibility woff2
+    configure_options = '\
+        -DPORT=WPE \
+        -DENABLE_ACCESSIBILITY=OFF \
+        -DUSE_GSTREAMER_GL=ON \
+        -DUSE_GSTREAMER_NATIVE_VIDEO=ON \
+        -DUSE_GSTREAMER_NATIVE_AUDIO=ON \
+        -DUSE_WOFF2=OFF \
+        -DENABLE_DOCUMENTATION=OFF \
+        -DENABLE_INTROSPECTION=OFF \
+        -DENABLE_JOURNALD_LOG=OFF \
+        -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+        -DUSE_SOUP2=ON \
+        -DUSE_LCMS=OFF \
+        -DUSE_AVIF=OFF \
+        -DUSE_GBM=OFF \
+        -DUSE_JPEGXL=OFF \
+        -DENABLE_WEBDRIVER=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+    '
+    cmake_generator = 'ninja'
+
+    files_libs = [
+        'libWPEWebKit-1.0',
+        'libWPEWebDriver'
+    ]
+
+    files_misc = [
+        'lib/wpe-webkit-1.0/libWPEWebInspectorResources.so',
+        'lib/wpe-webkit-1.0/injected-bundle/libWPEInjectedBundle.so'
+    ]
+
+    files_devel = [
+        'include/wpe-webkit-1.0/jsc/JSCAutocleanups.h',
+        'include/wpe-webkit-1.0/jsc/JSCClass.h',
+        'include/wpe-webkit-1.0/jsc/JSCContext.h',
+        'include/wpe-webkit-1.0/jsc/JSCDefines.h',
+        'include/wpe-webkit-1.0/jsc/JSCException.h',
+        'include/wpe-webkit-1.0/jsc/JSCOptions.h',
+        'include/wpe-webkit-1.0/jsc/JSCValue.h',
+        'include/wpe-webkit-1.0/jsc/JSCVersion.h',
+        'include/wpe-webkit-1.0/jsc/JSCVirtualMachine.h',
+        'include/wpe-webkit-1.0/jsc/JSCWeakValue.h',
+        'include/wpe-webkit-1.0/jsc/jsc.h',
+        'include/wpe-webkit-1.0/wpe/WebKitApplicationInfo.h',
+        'include/wpe-webkit-1.0/wpe/WebKitAuthenticationRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitAutocleanups.h',
+        'include/wpe-webkit-1.0/wpe/WebKitAutomationSession.h',
+        'include/wpe-webkit-1.0/wpe/WebKitBackForwardList.h',
+        'include/wpe-webkit-1.0/wpe/WebKitBackForwardListItem.h',
+        'include/wpe-webkit-1.0/wpe/WebKitColor.h',
+        'include/wpe-webkit-1.0/wpe/WebKitConsoleMessage.h',
+        'include/wpe-webkit-1.0/wpe/WebKitContextMenu.h',
+        'include/wpe-webkit-1.0/wpe/WebKitContextMenuActions.h',
+        'include/wpe-webkit-1.0/wpe/WebKitContextMenuItem.h',
+        'include/wpe-webkit-1.0/wpe/WebKitCookieManager.h',
+        'include/wpe-webkit-1.0/wpe/WebKitCredential.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDOMDefines.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDOMDocument.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDOMElement.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDOMNode.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDOMObject.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDefines.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDeviceInfoPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitDownload.h',
+        'include/wpe-webkit-1.0/wpe/WebKitEditingCommands.h',
+        'include/wpe-webkit-1.0/wpe/WebKitEditorState.h',
+        'include/wpe-webkit-1.0/wpe/WebKitEnumTypes.h',
+        'include/wpe-webkit-1.0/wpe/WebKitError.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFaviconDatabase.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFeature.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFileChooserRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFindController.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFormSubmissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitFrame.h',
+        'include/wpe-webkit-1.0/wpe/WebKitGeolocationManager.h',
+        'include/wpe-webkit-1.0/wpe/WebKitGeolocationPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitHitTestResult.h',
+        'include/wpe-webkit-1.0/wpe/WebKitInputMethodContext.h',
+        'include/wpe-webkit-1.0/wpe/WebKitInstallMissingMediaPluginsPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitJavascriptResult.h',
+        'include/wpe-webkit-1.0/wpe/WebKitMediaKeySystemPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitMemoryPressureSettings.h',
+        'include/wpe-webkit-1.0/wpe/WebKitMimeInfo.h',
+        'include/wpe-webkit-1.0/wpe/WebKitNavigationAction.h',
+        'include/wpe-webkit-1.0/wpe/WebKitNavigationPolicyDecision.h',
+        'include/wpe-webkit-1.0/wpe/WebKitNetworkProxySettings.h',
+        'include/wpe-webkit-1.0/wpe/WebKitNotification.h',
+        'include/wpe-webkit-1.0/wpe/WebKitNotificationPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitOptionMenu.h',
+        'include/wpe-webkit-1.0/wpe/WebKitOptionMenuItem.h',
+        'include/wpe-webkit-1.0/wpe/WebKitPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitPermissionStateQuery.h',
+        'include/wpe-webkit-1.0/wpe/WebKitPlugin.h',
+        'include/wpe-webkit-1.0/wpe/WebKitPolicyDecision.h',
+        'include/wpe-webkit-1.0/wpe/WebKitRectangle.h',
+        'include/wpe-webkit-1.0/wpe/WebKitResponsePolicyDecision.h',
+        'include/wpe-webkit-1.0/wpe/WebKitScriptDialog.h',
+        'include/wpe-webkit-1.0/wpe/WebKitScriptWorld.h',
+        'include/wpe-webkit-1.0/wpe/WebKitSecurityManager.h',
+        'include/wpe-webkit-1.0/wpe/WebKitSecurityOrigin.h',
+        'include/wpe-webkit-1.0/wpe/WebKitSettings.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURIRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURIResponse.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURISchemeRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURISchemeResponse.h',
+        'include/wpe-webkit-1.0/wpe/WebKitURIUtilities.h',
+        'include/wpe-webkit-1.0/wpe/WebKitUserContent.h',
+        'include/wpe-webkit-1.0/wpe/WebKitUserContentFilterStore.h',
+        'include/wpe-webkit-1.0/wpe/WebKitUserContentManager.h',
+        'include/wpe-webkit-1.0/wpe/WebKitUserMediaPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitUserMessage.h',
+        'include/wpe-webkit-1.0/wpe/WebKitVersion.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebContext.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebEditor.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebExtension.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebExtensionAutocleanups.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebHitTestResult.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebPage.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebProcessEnumTypes.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebResource.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebView.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebViewBackend.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebViewSessionState.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebsiteData.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebsiteDataAccessPermissionRequest.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebsiteDataManager.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWebsitePolicies.h',
+        'include/wpe-webkit-1.0/wpe/WebKitWindowProperties.h',
+        'include/wpe-webkit-1.0/wpe/webkit-web-extension.h',
+        'include/wpe-webkit-1.0/wpe/webkit.h',
+        'include/wpe-webkit-1.0/wpe/webkitdom.h',
+        'lib/pkgconfig/wpe-webkit-1.0.pc',
+        'lib/pkgconfig/wpe-web-extension-1.0.pc'
+    ]
+
+    files_libexec = [
+        'libexec/wpe-webkit-1.0/WPENetworkProcess',
+        'libexec/wpe-webkit-1.0/WPEWebProcess',
+    ]
+
+    def prepare(self):
+        self.configure_options += f' \
+            -DICU_ROOT={self.config.prefix} \
+            -DZLIB_ROOT={self.config.prefix} \
+            -DFREETYPE_LIBRARY={self.config.prefix}/lib/libfreetype.so \
+            -DFREETYPE_INCLUDE_DIR_ft2build={self.config.prefix}/include/freetype2 \
+            -DFREETYPE_INCLUDE_DIR_freetype2={self.config.prefix}/include/freetype2 \
+            -DJPEG_LIBRARY={self.config.prefix}/lib/libjpeg.so \
+            -DJPEG_INCLUDE_DIR={self.config.prefix}/include \
+            -DPNG_LIBRARY={self.config.prefix}/lib/libpng.so \
+            -DPNG_INCLUDE_DIR={self.config.prefix}/include \
+            '
+        if self.config.target_platform in (Platform.ANDROID):
+            arch_src_name = self.config.target_arch
+            if self.config.target_arch == Architecture.ARMv7:
+                arch_src_name = 'arm'
+            self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + arch_src_name
+            self.configure_options += ' -DANDROID=1'
+            self.append_env('LDFLAGS', '-landroid -llog -lm -lintl -lc++_shared -O2')
+            # Android libc does not have bcmp()
+            self.append_env('CXXFLAGS', ' -Dbcmp=memcmp ')
+            self.append_env('CFLAGS', ' -Dbcmp=memcmp ')
+            # XXX: CMake fails to check for this properly
+            self.append_env('CXXFLAGS', ' -DHAVE_MISSING_STD_FILESYSTEM_PATH_CONSTRUCTOR=1')
+            self.append_env('CXXFLAGS', ' -DWPE_ENABLE_PROCESS=1 -Dis_android=1 -DLOG_DISABLED=1 -D__ANDROID__=1 -DANDROID=1')
+            # Placeholder to allow enabling debug externally
+            self.append_env('WEBKIT_DEBUG', '')
+            self.patches += [
+                'wpewebkit/0001-Android-logging-macro.patch',
+                'wpewebkit/0002-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
+                'wpewebkit/0003-Scroll-related-changes.patch',
+                'wpewebkit/0004-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
+                'wpewebkit/0005-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
+                'wpewebkit/0006-Use-ASharedMemory-instead-of-shm.patch',
+                'wpewebkit/0007-Fix-ENABLE_JIT-on-armv7.patch',
+                'wpewebkit/0008-Enable-Android-on-ANGLE-for-WebGL-support.patch',
+                'wpewebkit/0009-Compile-WebDriver-as-a-library.patch',
+                'wpewebkit/0010-wpe-automation-Scale-mouse-location-according-to-dev.patch',
+                'wpewebkit/0011-wpe-inspector-Fix-inspector-resource-lib-loadin.patch'
+            ]
+        else:
+            self.append_env('LDFLAGS', '-lrt')
+            self.configure_options += ' -DCMAKE_SYSTEM_PROCESSOR=' + self.config.target_arch

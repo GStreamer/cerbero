@@ -1,0 +1,48 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class SDKPackage(package.SDKPackage):
+    name = 'wpewebkit'
+    version = '2.42.1'
+    shortdesc = 'Web Platform for Embedded'
+    longdesc = 'WPE WebKit allows embedders to create simple and performant \
+        systems based on Web platform technologies. It is a WebKit port designed \
+        with flexibility and hardware acceleration in mind, leveraging commond 3D \
+        graphics APIs for best performance'
+    vendor = 'Igalia'
+    uuid = '5c8655ac-6e87-4cfa-b41c-4af5a814687a'
+    strip = True
+    strip_excludes = [
+        'libc.so',
+        'libm.so',
+        'libstdc++.so',
+        '.mo',
+        '.scenario',
+        '.conf',
+        '.py',
+        'gst-env',
+        'gst-shell',
+        'gst-validate-launcher',
+        'README'
+    ]
+
+    packages = [
+        # (name, required, selected)
+       ('wpewebkit-core', True, True),
+       ('gstreamer-1.0-core', True, True),
+       ('gstreamer-1.0-system', False, True),
+       ('gstreamer-1.0-playback', False, True),
+       ('gstreamer-1.0-codecs', False, True),
+       ('gstreamer-1.0-qt5', False, False),
+       ('gstreamer-1.0-effects', False, True),
+       ('gstreamer-1.0-net', False, True),
+       ('gstreamer-1.0-visualizers', False, True),
+       ('gstreamer-1.0-codecs-gpl', False, True),
+       ('gstreamer-1.0-codecs-restricted', False, True),
+       ('gstreamer-1.0-net-restricted', False, True),
+       ('gstreamer-1.0-dvd', False, False),
+       ('gstreamer-1.0-libav', False, False),
+       ('gstreamer-1.0-encoding', False, False),
+       ('gstreamer-1.0-capture', False, False),
+       ('gstreamer-1.0-editing', False, False),
+       ('gstreamer-1.0-devtools', False, False),
+    ]

@@ -1,0 +1,130 @@
+From 4d994adf2f275db786c96d89a5544c03c3df173d Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Wed, 28 Sep 2022 15:13:08 +0300
+Subject: [PATCH 6/7] Use ASharedMemory instead of shm
+
+---
+ .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 63 +++++++++----------
+ 1 file changed, 31 insertions(+), 32 deletions(-)
+
+diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+index eab1e468ce01..d48a01f6c579 100644
+--- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
++++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+@@ -50,6 +50,8 @@
+ #include <sys/syscall.h>
+ #endif
+ 
++#include <android/sharedmem.h>
++
+ namespace WebKit {
+ 
+ UnixFileDescriptor SharedMemoryHandle::releaseHandle()
+@@ -70,60 +72,37 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+     return PROT_READ | PROT_WRITE;
+ }
+ 
+-static UnixFileDescriptor createSharedMemory()
++static UnixFileDescriptor createSharedMemory(size_t size)
+ {
+     int fileDescriptor = -1;
+ 
+-#if HAVE(LINUX_MEMFD_H)
+-    static bool isMemFdAvailable = true;
+-    if (isMemFdAvailable) {
+-        do {
+-            fileDescriptor = syscall(__NR_memfd_create, "WebKitSharedMemory", MFD_CLOEXEC);
+-        } while (fileDescriptor == -1 && errno == EINTR);
+-
+-        if (fileDescriptor != -1)
+-            return UnixFileDescriptor { fileDescriptor, UnixFileDescriptor::Adopt };
+-
+-        if (errno != ENOSYS)
+-            return { };
+-
+-        isMemFdAvailable = false;
+-    }
+-#endif
+-
+-#if HAVE(SHM_ANON)
+-    do {
+-        fileDescriptor = shm_open(SHM_ANON, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+-    } while (fileDescriptor == -1 && errno == EINTR);
+-#else
+     CString tempName;
+     for (int tries = 0; fileDescriptor == -1 && tries < 10; ++tries) {
+         auto name = makeString("/WK2SharedMemory.", cryptographicallyRandomNumber<unsigned>());
+         tempName = name.utf8();
+ 
+         do {
+-            fileDescriptor = shm_open(tempName.data(), O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
++            fileDescriptor = ASharedMemory_create(tempName.data(), size);
+         } while (fileDescriptor == -1 && errno == EINTR);
+     }
+ 
+-    if (fileDescriptor != -1)
+-        shm_unlink(tempName.data());
+-#endif
+ 
+     return UnixFileDescriptor { fileDescriptor, UnixFileDescriptor::Adopt };
+ }
+ 
+ RefPtr<SharedMemory> SharedMemory::allocate(size_t size)
+ {
+-    auto fileDescriptor = createSharedMemory();
++    auto fileDescriptor = createSharedMemory(size);
+     if (!fileDescriptor) {
+         WTFLogAlways("Failed to create shared memory: %s", safeStrerror(errno).data());
+         return nullptr;
+     }
+ 
+-    while (ftruncate(fileDescriptor.value(), size) == -1) {
+-        if (errno != EINTR)
+-            return nullptr;
++    int err = ASharedMemory_setProt(fileDescriptor.value(), PROT_READ | PROT_WRITE);
++    if (err < 0) {
++        WTFLogAlways("Error %d when setting protection of ashmem", err);
++        return nullptr;
++
+     }
+ 
+     void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor.value(), 0);
+@@ -171,7 +150,20 @@ SharedMemory::~SharedMemory()
+     munmap(m_data, m_size);
+ }
+ 
+-auto SharedMemory::createHandle(Protection) -> std::optional<Handle>
++static inline int accessModeFile(SharedMemory::Protection protection)
++{
++    switch (protection) {
++    case SharedMemory::Protection::ReadOnly:
++        return PROT_READ;
++    case SharedMemory::Protection::ReadWrite:
++        return PROT_READ | PROT_WRITE;
++    }
++
++    ASSERT_NOT_REACHED();
++    return O_RDWR;
++}
++
++auto SharedMemory::createHandle(Protection protection) -> std::optional<Handle>
+ {
+     Handle handle;
+     ASSERT_ARG(handle, handle.isNull());
+@@ -185,6 +177,13 @@ auto SharedMemory::createHandle(Protection) -> std::optional<Handle>
+         ASSERT_NOT_REACHED();
+         return std::nullopt;
+     }
++
++    int err = ASharedMemory_setProt(duplicate.value(), accessModeFile(protection));
++    if (err < 0) {
++        ASSERT_NOT_REACHED();
++        return std::nullopt;
++    }
++
+     handle.m_handle = WTFMove(duplicate);
+     handle.m_size = m_size;
+     return { WTFMove(handle) };
+-- 
+2.34.1
+

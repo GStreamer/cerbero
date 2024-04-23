@@ -1,0 +1,56 @@
+From 8bc4ca03adfcff66240d3ac57195a43161c60e7b Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Wed, 25 Oct 2023 23:46:04 +0300
+Subject: [PATCH] Enable Android on ANGLE for WebGL support
+
+---
+ Source/ThirdParty/ANGLE/CMakeLists.txt                      | 2 ++
+ Source/ThirdParty/ANGLE/PlatformWPE.cmake                   | 6 +++++-
+ .../platform/graphics/angle/PlatformDisplayANGLE.cpp        | 2 ++
+ 3 files changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/Source/ThirdParty/ANGLE/CMakeLists.txt b/Source/ThirdParty/ANGLE/CMakeLists.txt
+index 2e4c31b2433f..4e9fbde2054f 100644
+--- a/Source/ThirdParty/ANGLE/CMakeLists.txt
++++ b/Source/ThirdParty/ANGLE/CMakeLists.txt
+@@ -7,6 +7,8 @@ elseif (WIN32)
+     set(angle_enable_d3d9 TRUE)
+     set(angle_enable_d3d11 TRUE)
+     set(angle_is_winuwp FALSE)
++elseif (ANDROID)
++    set(is_android TRUE)
+ elseif (UNIX)
+     set(is_linux TRUE)
+ endif ()
+diff --git a/Source/ThirdParty/ANGLE/PlatformWPE.cmake b/Source/ThirdParty/ANGLE/PlatformWPE.cmake
+index f734f599b385..d5792550bec7 100644
+--- a/Source/ThirdParty/ANGLE/PlatformWPE.cmake
++++ b/Source/ThirdParty/ANGLE/PlatformWPE.cmake
+@@ -1,4 +1,8 @@
+-list(APPEND ANGLE_DEFINITIONS ANGLE_PLATFORM_LINUX EGL_NO_PLATFORM_SPECIFIC_TYPES)
++if (is_android)
++    list(APPEND ANGLE_DEFINITIONS ANGLE_PLATFORM_ANDROID)
++else ()
++    list(APPEND ANGLE_DEFINITIONS ANGLE_PLATFORM_LINUX EGL_NO_PLATFORM_SPECIFIC_TYPES)
++endif ()
+ include(linux.cmake)
+ 
+ if (USE_OPENGL)
+diff --git a/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp b/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
+index 49301b43d075..9c697f0538f3 100644
+--- a/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
++++ b/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
+@@ -44,8 +44,10 @@ EGLDisplay PlatformDisplay::angleEGLDisplay() const
+ 
+     Vector<EGLint> displayAttributes {
+         EGL_PLATFORM_ANGLE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_TYPE_OPENGLES_ANGLE,
++#if !defined(__ANDROID__) && !defined(ANDROID)
+         EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE, EGL_PLATFORM_ANGLE_DEVICE_TYPE_EGL_ANGLE,
+         EGL_PLATFORM_ANGLE_NATIVE_PLATFORM_TYPE_ANGLE, m_anglePlatform.value(),
++#endif
+         EGL_NONE,
+     };
+ 
+-- 
+2.34.1
+

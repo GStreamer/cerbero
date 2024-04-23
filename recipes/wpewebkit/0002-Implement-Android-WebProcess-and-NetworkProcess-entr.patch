@@ -1,0 +1,95 @@
+From c95144abebf46cffc05ad3fa2add4473bc6bf58a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
+Date: Tue, 25 May 2021 13:51:14 +0200
+Subject: [PATCH 2/7] Implement Android WebProcess and NetworkProcess entry
+ points
+
+---
+ .../soup/NetworkProcessMainSoup.cpp           | 34 ++++++++-----------
+ .../WebProcess/wpe/WebProcessMainWPE.cpp      | 13 +++++++
+ Source/WebKit/webkitglib-symbols.map          |  1 +
+ 3 files changed, 28 insertions(+), 20 deletions(-)
+
+diff --git a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
+index f98cd65a0ea1..3dae162d5cfa 100644
+--- a/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
++++ b/Source/WebKit/NetworkProcess/soup/NetworkProcessMainSoup.cpp
+@@ -37,28 +37,22 @@
+ 
+ namespace WebKit {
+ 
+-class NetworkProcessMainSoup final: public AuxiliaryProcessMainBaseNoSingleton<NetworkProcess> {
+-public:
+-    bool platformInitialize() override
+-    {
+-#if USE(GCRYPT)
+-        PAL::GCrypt::initialize();
+-#endif
+-        return true;
+-    }
+-
+-    void platformFinalize() override
+-    {
+-        // FIXME: Is this still needed? We should probably destroy all existing sessions at this point instead.
+-        // Needed to destroy the SoupSession and SoupCookieJar, e.g. to avoid
+-        // leaking SQLite temporary journaling files.
+-        process().destroySession(PAL::SessionID::defaultSessionID());
+-    }
+-};
+-
+ int NetworkProcessMain(int argc, char** argv)
+ {
+-    return AuxiliaryProcessMain<NetworkProcessMainSoup>(argc, argv);
++    return AuxiliaryProcessMain<AuxiliaryProcessMainBaseNoSingleton<NetworkProcess>>(argc, argv);
+ }
+ 
+ } // namespace WebKit
++
++extern "C" {
++
++__attribute__((visibility("default")))
++int android_NetworkProcess_main(int argc, char** argv)
++{
++    ALOGV("android_NetworkProcess_main() argc %d, argv %p\n", argc, argv);
++    for (int i = 0; i < argc; ++i)
++        ALOGV("  argv[%d] -- %s\n", i, argv[i]);
++    return WebKit::NetworkProcessMain(argc, argv);
++}
++
++}
+diff --git a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
+index ff5eeeb0f0ab..f55e412ffefc 100644
+--- a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
++++ b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
+@@ -76,3 +76,16 @@ int WebProcessMain(int argc, char** argv)
+ }
+ 
+ } // namespace WebKit
++
++extern "C" {
++
++__attribute__((visibility("default")))
++int android_WebProcess_main(int argc, char** argv)
++{
++    ALOGV("android_WebProcess_main() argc %d, argv %p\n", argc, argv);
++    for (int i = 0; i < argc; ++i)
++        ALOGV("  argv[%d] -- %s\n", i, argv[i]);
++    return WebKit::WebProcessMain(argc, argv);
++}
++
++}
+diff --git a/Source/WebKit/webkitglib-symbols.map b/Source/WebKit/webkitglib-symbols.map
+index 8b5340f55b9f..2288372b709a 100644
+--- a/Source/WebKit/webkitglib-symbols.map
++++ b/Source/WebKit/webkitglib-symbols.map
+@@ -9,6 +9,7 @@ global:
+     "WebKit::WebProcessExtensionManager::singleton()";
+     "WebKit::WebProcessMain(int, char**)";
+   };
++  android_*;
+ local:
+   *;
+ };
+-- 
+2.34.1
+

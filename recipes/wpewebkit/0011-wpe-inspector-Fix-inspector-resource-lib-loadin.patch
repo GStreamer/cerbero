@@ -1,0 +1,32 @@
+From 56dc6c33e5bee92e3e7ba9d8165b621d5016fb3a Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Sun, 17 Mar 2024 18:51:15 +0200
+Subject: [PATCH] [wpe][inspector] Fix inspector resource lib loadin. Need the
+ bug URL (OOPS!).
+
+Reviewed by NOBODY (OOPS!).
+
+Android lib loading doesn't support subdirectories in libs path
+
+* Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp:
+(Inspector::backendCommands):
+---
+ .../inspector/remote/glib/RemoteInspectorUtils.cpp              | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
+index 9421a8b66d2a..86ee45291fcd 100644
+--- a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
++++ b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
+@@ -42,7 +42,7 @@ GRefPtr<GBytes> backendCommands()
+ #if PLATFORM(WPE)
+     static std::once_flag flag;
+     std::call_once(flag, [] {
+-        const char* libDir = PKGLIBDIR;
++        const char* libDir = "";
+ #if ENABLE(DEVELOPER_MODE)
+         // Probably no need for a specific env var here. Assume the inspector resources.so file is
+         // in the same directory as the injected bundle lib, for developer builds.
+-- 
+2.34.1
+

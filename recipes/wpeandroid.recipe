@@ -1,0 +1,37 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+import shutil
+
+class Recipe(recipe.Recipe):
+    name = 'wpeandroid'
+    version = '0.1'
+    stype = SourceType.CUSTOM
+    btype = BuildType.CUSTOM
+
+    deps = ['wpewebkit']
+
+    files_stl = [
+        'lib/libc++_shared.so',
+    ]
+
+    files_libs = [
+        'libandroid',
+        'libc',
+        'libdl',
+        'libEGL',
+        'liblog',
+        'libm',
+        'libstdc++'
+    ]
+
+    async def install(self):
+        api_version = DistroVersion.get_android_api_version(self.config.target_distro_version)
+        target_triple = self.config.rust_triple(self.config.target_arch, self.config.target_platform, self.using_msvc())
+        for lib_name in self.files_libs:
+            lib_path_src = os.path.join(self.config.sysroot, 'usr', 'lib', target_triple, str(api_version), lib_name + '.so')
+            lib_path_dest = os.path.join(self.config.prefix, 'lib', lib_name + '.so')
+            shutil.copy(lib_path_src, lib_path_dest)
+
+        libc_path_src = os.path.join(self.config.sysroot, 'usr', 'lib', target_triple, 'libc++_shared.so')
+        libc_path_dest = os.path.join(self.config.prefix, 'lib', 'libc++_shared.so')
+        shutil.copy(libc_path_src, libc_path_dest)
