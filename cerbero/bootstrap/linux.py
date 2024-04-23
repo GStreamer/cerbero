@@ -183,8 +183,11 @@ class RedHatBootstrapper(UnixBootstrapper):
             self.tool = ['yum']
         elif self.config.distro_version in [DistroVersion.REDHAT_6, DistroVersion.REDHAT_7]:
             self.tool = ['yum']
-        elif self.config.distro_version == DistroVersion.REDHAT_8:
-            self.tool = ['yum', '--enablerepo=PowerTools']
+        elif self.config.distro_version.startswith('redhat_8'):
+            if self.config.distro_version < 'redhat_8.3':
+                self.tool = ['yum', '--enablerepo=PowerTools']
+            else:
+                self.tool = ['dnf', '--enablerepo=powertools']
 
         if self.config.target_platform == Platform.WINDOWS:
             if self.config.arch == Architecture.X86_64:
