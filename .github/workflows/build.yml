@@ -1,0 +1,59 @@
+name: Build and Deploy
+on:
+  workflow_dispatch:
+    inputs:
+      upload_packages:
+        description: 'Upload packages'
+        required: true
+        type: choice
+        default: 'on-merge'
+        options:
+          - 'on-merge'
+          - 'dry-run'
+          - 'skip'
+          - 'yes'
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - closed
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    if: ${{ (github.event_name == 'workflow_dispatch') || (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        target: [arm64, x86_64]
+    steps:
+      - name: Fetch source code
+        uses: actions/checkout@v3.1.0
+      - name: Bootstrap Cerbero
+        run: |
+          ANDROID_CONFIG=${{ matrix.target }}
+          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
+          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} bootstrap -y
+      - name: Package dependencies
+        run: |
+          ANDROID_CONFIG=${{ matrix.target }}
+          ANDROID_CONFIG=cross-android-${ANDROID_CONFIG//_/-}.cbc
+          ./cerbero-uninstalled -c ./config/${ANDROID_CONFIG} package -f wpewebkit
+      - name: Store packages
+        uses: actions/upload-artifact@v3.1.1
+        with:
+          name: wpe-deps-${{ matrix.target }}
+          path: ./wpewebkit-android-${{ matrix.target }}*
+          if-no-files-found: error
+      - name: Upload packages to wpewebkit.org
+        if: ${{ inputs.upload_packages == 'yes' || inputs.upload_packages == 'dry-run' || (github.event.pull_request.merged == true && inputs.upload_packages == 'on-merge') }}
+        run: |
+          python3 ./.github/workflows/upload.py "./wpewebkit-android-${{ matrix.target }}*" || \
+          echo "**:warning: WARNING :warning:** Cannot upload ./wpewebkit-android-${{ matrix.target }}... files to wpewebkit.org" >> $GITHUB_STEP_SUMMARY
+          exit 0
+        env:
+          UPLOAD_DRY_RUN: ${{ inputs.upload_packages == 'dry-run' }}
+          UPLOAD_KEY_PASSWD: ${{ secrets.UPLOAD_KEY_PASSWD }}
+          UPLOAD_SSH_KNOWN_HOSTS: ${{ secrets.UPLOAD_SSH_KNOWN_HOSTS }}
