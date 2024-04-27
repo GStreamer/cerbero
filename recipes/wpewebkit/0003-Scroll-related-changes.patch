@@ -1,26 +1,26 @@
-From cc1ca1feba21deda1142f7b3a2ab2bf09c4fdf4a Mon Sep 17 00:00:00 2001
+From a878f30e33e80dc79a0754b4bdd4d137c9c171d3 Mon Sep 17 00:00:00 2001
 From: Fernando Jimenez Moreno <fjimenez@igalia.com>
 Date: Fri, 16 Apr 2021 17:32:06 +0200
-Subject: [PATCH 3/7] Scroll related changes
+Subject: [PATCH 03/10] Scroll related changes
 
 ---
- Source/WebKit/UIProcess/API/wpe/WPEView.cpp                 | 4 +++-
+ Source/WebKit/UIProcess/API/wpe/WPEWebView.cpp              | 4 +++-
  Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp | 2 +-
  2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-index d6f4b65c9dd7..3a5dbb2b766b 100644
---- a/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-+++ b/Source/WebKit/UIProcess/API/wpe/WPEView.cpp
-@@ -87,6 +87,7 @@ View::View(struct wpe_view_backend* backend, const API::PageConfiguration& baseC
+diff --git a/Source/WebKit/UIProcess/API/wpe/WPEWebView.cpp b/Source/WebKit/UIProcess/API/wpe/WPEWebView.cpp
+index ae6daa5aa343..3162d891a8e3 100644
+--- a/Source/WebKit/UIProcess/API/wpe/WPEWebView.cpp
++++ b/Source/WebKit/UIProcess/API/wpe/WPEWebView.cpp
+@@ -104,6 +104,7 @@ View::View(struct wpe_view_backend* backend, WPEDisplay* display, const API::Pag
          configuration->setProcessPool(pool);
      }
      m_pageProxy = pool->createWebPage(*m_pageClient, WTFMove(configuration));
 +    m_pageProxy->setIntrinsicDeviceScaleFactor(2.0);
  
- #if ENABLE(MEMORY_SAMPLER)
-     if (getenv("WEBKIT_SAMPLE_MEMORY"))
-@@ -391,8 +392,9 @@ void View::selectionDidChange()
+ #if ENABLE(WPE_PLATFORM)
+     if (display) {
+@@ -573,8 +574,9 @@ void View::selectionDidChange()
  void View::setSize(const WebCore::IntSize& size)
  {
      m_size = size;
@@ -32,10 +32,10 @@ index d6f4b65c9dd7..3a5dbb2b766b 100644
  
  void View::setViewState(OptionSet<WebCore::ActivityState> flags)
 diff --git a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
-index bd06c8ceb241..357de4071ea6 100644
+index 4bcfdb1d2866..fa979c49c09d 100644
 --- a/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
 +++ b/Source/WebKit/WebProcess/WebCoreSupport/WebChromeClient.cpp
-@@ -199,7 +199,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
+@@ -202,7 +202,7 @@ void WebChromeClient::setWindowRect(const FloatRect& windowFrame)
  
  FloatRect WebChromeClient::windowRect() const
  {
@@ -43,7 +43,7 @@ index bd06c8ceb241..357de4071ea6 100644
 +#if PLATFORM(IOS_FAMILY) || PLATFORM(WPE)
      return FloatRect();
  #else
- #if PLATFORM(MAC)
+     auto page = protectedPage();
 -- 
 2.34.1
 

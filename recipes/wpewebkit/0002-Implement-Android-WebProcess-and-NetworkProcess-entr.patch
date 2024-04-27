@@ -1,7 +1,7 @@
-From c95144abebf46cffc05ad3fa2add4473bc6bf58a Mon Sep 17 00:00:00 2001
+From 3e51ac2a9cd6f3cba126a893db9b32d822b2cc72 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH 2/7] Implement Android WebProcess and NetworkProcess entry
+Subject: [PATCH 02/10] Implement Android WebProcess and NetworkProcess entry
  points
 
 ---
@@ -58,7 +58,7 @@ index f98cd65a0ea1..3dae162d5cfa 100644
 +
 +}
 diff --git a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
-index ff5eeeb0f0ab..f55e412ffefc 100644
+index 066fdb879253..0bd96093b358 100644
 --- a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 +++ b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 @@ -76,3 +76,16 @@ int WebProcessMain(int argc, char** argv)

@@ -1,8 +1,8 @@
-From 56dc6c33e5bee92e3e7ba9d8165b621d5016fb3a Mon Sep 17 00:00:00 2001
+From ef2695c33e88cb9065421ef868b0ee0db32af22e Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Sun, 17 Mar 2024 18:51:15 +0200
-Subject: [PATCH] [wpe][inspector] Fix inspector resource lib loadin. Need the
- bug URL (OOPS!).
+Subject: [PATCH 10/10] Fix inspector resource lib loading
+ (OOPS!).
 
 Reviewed by NOBODY (OOPS!).
 

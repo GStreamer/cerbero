@@ -1,7 +1,7 @@
-From d00a3af4c47bc277fb7539deef790e5a420bec52 Mon Sep 17 00:00:00 2001
+From e0a75aca3d5e23e641b282720d3257cfd283fe8c Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 17 Jan 2024 23:14:09 +0200
-Subject: [PATCH] Compile WebDriver as a library
+Subject: [PATCH 08/10] Compile WebDriver as a library
 
 ---
  Source/WebDriver/CMakeLists.txt           |  4 ++--
@@ -15,7 +15,7 @@ Subject: [PATCH] Compile WebDriver as a library
  8 files changed, 39 insertions(+), 20 deletions(-)
 
 diff --git a/Source/WebDriver/CMakeLists.txt b/Source/WebDriver/CMakeLists.txt
-index 2ce0c46d..6e647017 100644
+index 2ce0c46d4086..6e64701763ed 100644
 --- a/Source/WebDriver/CMakeLists.txt
 +++ b/Source/WebDriver/CMakeLists.txt
 @@ -60,13 +60,13 @@ MAKE_JS_FILE_ARRAYS(
@@ -35,7 +35,7 @@ index 2ce0c46d..6e647017 100644
  install(TARGETS WebDriver
      RUNTIME DESTINATION "${EXEC_INSTALL_DIR}"
 diff --git a/Source/WebDriver/SessionHost.h b/Source/WebDriver/SessionHost.h
-index 90d69669..d4da4255 100644
+index 90d69669cf29..d4da4255ee8c 100644
 --- a/Source/WebDriver/SessionHost.h
 +++ b/Source/WebDriver/SessionHost.h
 @@ -56,9 +56,7 @@ public:
@@ -66,7 +66,7 @@ index 90d69669..d4da4255 100644
  };
  
 diff --git a/Source/WebDriver/WebDriverMain.cpp b/Source/WebDriver/WebDriverMain.cpp
-index cbe30a6f..d83ffe8f 100644
+index cbe30a6f434a..d83ffe8f7be0 100644
 --- a/Source/WebDriver/WebDriverMain.cpp
 +++ b/Source/WebDriver/WebDriverMain.cpp
 @@ -29,8 +29,15 @@
@@ -93,7 +93,7 @@ index cbe30a6f..d83ffe8f 100644
 +
 +}
 diff --git a/Source/WebDriver/WebDriverService.cpp b/Source/WebDriver/WebDriverService.cpp
-index 58f0821c..89a33cad 100644
+index 492b8013807e..4653f8bf81a1 100644
 --- a/Source/WebDriver/WebDriverService.cpp
 +++ b/Source/WebDriver/WebDriverService.cpp
 @@ -59,11 +59,10 @@ int WebDriverService::run(int argc, char** argv)
@@ -152,7 +152,7 @@ index 58f0821c..89a33cad 100644
          if (error) {
              completionHandler(CommandResult::fail(CommandResult::ErrorCode::SessionNotCreated, makeString("Failed to connect to browser: ", error.value())));
 diff --git a/Source/WebDriver/WebDriverService.h b/Source/WebDriver/WebDriverService.h
-index 7bb1680e..ab033d32 100644
+index 7bb1680e7870..ab033d3278b3 100644
 --- a/Source/WebDriver/WebDriverService.h
 +++ b/Source/WebDriver/WebDriverService.h
 @@ -143,10 +143,8 @@ private:
@@ -167,7 +167,7 @@ index 7bb1680e..ab033d32 100644
  
  } // namespace WebDriver
 diff --git a/Source/WebDriver/config.h b/Source/WebDriver/config.h
-index 9c74f967..31c0b544 100644
+index 9c74f967b636..31c0b5443c51 100644
 --- a/Source/WebDriver/config.h
 +++ b/Source/WebDriver/config.h
 @@ -37,4 +37,7 @@
@@ -179,7 +179,7 @@ index 9c74f967..31c0b544 100644
 +
  #endif // __cplusplus
 diff --git a/Source/WebDriver/glib/SessionHostGlib.cpp b/Source/WebDriver/glib/SessionHostGlib.cpp
-index fd5d9b2d..d055c831 100644
+index 2c33644dc0f3..6fd65d5228fa 100644
 --- a/Source/WebDriver/glib/SessionHostGlib.cpp
 +++ b/Source/WebDriver/glib/SessionHostGlib.cpp
 @@ -100,8 +100,12 @@ void SessionHost::connectToBrowser(Function<void (std::optional<String> error)>&
@@ -240,10 +240,10 @@ index fd5d9b2d..d055c831 100644
      m_socketConnection = nullptr;
  }
 diff --git a/Source/cmake/WebKitCommon.cmake b/Source/cmake/WebKitCommon.cmake
-index d85ee181..92fd19f9 100644
+index f20a8d06d914..6fdf6ecb9a7e 100644
 --- a/Source/cmake/WebKitCommon.cmake
 +++ b/Source/cmake/WebKitCommon.cmake
-@@ -157,6 +157,7 @@ if (NOT HAS_RUN_WEBKIT_COMMON)
+@@ -166,6 +166,7 @@ if (NOT HAS_RUN_WEBKIT_COMMON)
      set(WebKitLegacy_LIBRARY_TYPE SHARED)
      set(WebKit_LIBRARY_TYPE SHARED)
      set(WebCoreTestSupport_LIBRARY_TYPE STATIC)

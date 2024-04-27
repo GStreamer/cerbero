@@ -1,8 +1,8 @@
-From 8bbb44a14a4008f1dd349348c1e4f1e2ab77db12 Mon Sep 17 00:00:00 2001
+From f86c7d872c370c9f18e81927439798e06b717819 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Sun, 17 Mar 2024 09:21:25 +0200
-Subject: [PATCH] [wpe][automation] Scale mouse location according to device
- scale factor. Need the bug URL (OOPS!).
+Subject: [PATCH 09/10] Scale mouse location according to device scale factor.
+ Need the bug URL (OOPS!).
 
 Reviewed by NOBODY (OOPS!).
 

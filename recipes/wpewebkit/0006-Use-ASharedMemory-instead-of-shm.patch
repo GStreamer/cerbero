@@ -1,26 +1,26 @@
-From 4d994adf2f275db786c96d89a5544c03c3df173d Mon Sep 17 00:00:00 2001
+From 0069e870a605af926920bcc86dd4c7725359633a Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 28 Sep 2022 15:13:08 +0300
-Subject: [PATCH 6/7] Use ASharedMemory instead of shm
+Subject: [PATCH 06/10] Use ASharedMemory instead of shm
 
 ---
- .../WebKit/Platform/unix/SharedMemoryUnix.cpp | 63 +++++++++----------
- 1 file changed, 31 insertions(+), 32 deletions(-)
+ .../platform/unix/SharedMemoryUnix.cpp        | 63 +++++++++----------
+ 1 file changed, 30 insertions(+), 33 deletions(-)
 
-diff --git a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-index eab1e468ce01..d48a01f6c579 100644
---- a/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
-+++ b/Source/WebKit/Platform/unix/SharedMemoryUnix.cpp
+diff --git a/Source/WebCore/platform/unix/SharedMemoryUnix.cpp b/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
+index c516acfa4b2b..bab2342b8af2 100644
+--- a/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
++++ b/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
 @@ -50,6 +50,8 @@
  #include <sys/syscall.h>
  #endif
  
 +#include <android/sharedmem.h>
 +
- namespace WebKit {
+ namespace WebCore {
  
  UnixFileDescriptor SharedMemoryHandle::releaseHandle()
-@@ -70,60 +72,37 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
+@@ -70,60 +72,35 @@ static inline int accessModeMMap(SharedMemory::Protection protection)
      return PROT_READ | PROT_WRITE;
  }
  
@@ -65,7 +65,7 @@ index eab1e468ce01..d48a01f6c579 100644
 -    if (fileDescriptor != -1)
 -        shm_unlink(tempName.data());
 -#endif
- 
+-
      return UnixFileDescriptor { fileDescriptor, UnixFileDescriptor::Adopt };
  }
  
@@ -85,11 +85,10 @@ index eab1e468ce01..d48a01f6c579 100644
 +    if (err < 0) {
 +        WTFLogAlways("Error %d when setting protection of ashmem", err);
 +        return nullptr;
-+
      }
  
      void* data = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fileDescriptor.value(), 0);
-@@ -171,7 +150,20 @@ SharedMemory::~SharedMemory()
+@@ -170,7 +147,20 @@ SharedMemory::~SharedMemory()
      munmap(m_data, m_size);
  }
  
@@ -109,9 +108,9 @@ index eab1e468ce01..d48a01f6c579 100644
 +
 +auto SharedMemory::createHandle(Protection protection) -> std::optional<Handle>
  {
-     Handle handle;
-     ASSERT_ARG(handle, handle.isNull());
-@@ -185,6 +177,13 @@ auto SharedMemory::createHandle(Protection) -> std::optional<Handle>
+     // FIXME: Handle the case where the passed Protection is ReadOnly.
+     // See https://bugs.webkit.org/show_bug.cgi?id=131542.
+@@ -180,6 +170,13 @@ auto SharedMemory::createHandle(Protection) -> std::optional<Handle>
          ASSERT_NOT_REACHED();
          return std::nullopt;
      }
@@ -122,9 +121,9 @@ index eab1e468ce01..d48a01f6c579 100644
 +        return std::nullopt;
 +    }
 +
-     handle.m_handle = WTFMove(duplicate);
-     handle.m_size = m_size;
-     return { WTFMove(handle) };
+     return { Handle(WTFMove(duplicate), m_size) };
+ }
+ 
 -- 
 2.34.1
 

@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'libwpe'
-    version = '1.14.1'
+    version = '1.16.0'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://wpewebkit.org/releases/libwpe-{0}.tar.xz'.format(version)
-    tarball_checksum = 'b1d0cdcf0f8dbb494e65b0f7913e357106da9a0d57f4fbb7b9d1238a6dbe9ade'
+    tarball_checksum = 'c7f3a3c6b3d006790d486dc7cceda2b6d2e329de07f33bc47dfc53f00f334b2a'
     deps = ['xkbcommon']
     meson_options = {}
 

@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.42.1'
+    version = '2.44.1'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '18a2cf547a503420f4cb8f523a2f4c24b4dc2773abbe74c7d585e6d23cb27bac'
+    tarball_checksum = '2c9fbf4fcf8884d34102283e2b008ce0b0bc2cf07de78f564a8b34347e7bc19b'
     deps = [
         'icu',
         'cairo',
@@ -40,11 +40,14 @@ class Recipe(recipe.Recipe):
         -DENABLE_INTROSPECTION=OFF \
         -DENABLE_JOURNALD_LOG=OFF \
         -DENABLE_BUBBLEWRAP_SANDBOX=OFF \
+        -DUSE_ATK=OFF \
         -DUSE_SOUP2=ON \
         -DUSE_LCMS=OFF \
         -DUSE_AVIF=OFF \
         -DUSE_GBM=OFF \
+        -DUSE_LIBDRM=OFF \
         -DUSE_JPEGXL=OFF \
+        -DUSE_LIBBACKTRACE=OFF \
         -DENABLE_WEBDRIVER=ON \
         -DCMAKE_BUILD_TYPE=Release \
     '
@@ -203,11 +206,10 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0004-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
                 'wpewebkit/0005-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
                 'wpewebkit/0006-Use-ASharedMemory-instead-of-shm.patch',
-                'wpewebkit/0007-Fix-ENABLE_JIT-on-armv7.patch',
-                'wpewebkit/0008-Enable-Android-on-ANGLE-for-WebGL-support.patch',
-                'wpewebkit/0009-Compile-WebDriver-as-a-library.patch',
-                'wpewebkit/0010-wpe-automation-Scale-mouse-location-according-to-dev.patch',
-                'wpewebkit/0011-wpe-inspector-Fix-inspector-resource-lib-loadin.patch'
+                'wpewebkit/0007-Enable-Android-on-ANGLE-for-WebGL-support.patch',
+                'wpewebkit/0008-Compile-WebDriver-as-a-library.patch',
+                'wpewebkit/0009-Scale-mouse-location-according-to-device-scale-facto.patch',
+                'wpewebkit/0010-Fix-inspector-resource-lib-loading.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
