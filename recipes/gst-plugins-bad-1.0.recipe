@@ -9,7 +9,7 @@ class Recipe(custom.GStreamer):
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['ext/sctp/usrsctp/LICENSE.md']}]
     else:
       licenses = [{License.LGPLv2Plus: None, License.BSD_like: ['subprojects/gst-plugins-bad/ext/sctp/usrsctp/LICENSE.md']}]
-    tarball_checksum = '808d3b33fc4c71aeb2561c364a87c2e8a3e2343319a83244c8391be4b09499c8'
+    tarball_checksum = '388b4c4412f42e36a38b17cc34119bc11879bd4d9fbd4ff6d03b2c7fc6b4d494'
     # Explicitly enable plugins that we provide dependencies for to ensure that
     # we error out if they weren't found.
     meson_options = {'gpl': 'enabled',
