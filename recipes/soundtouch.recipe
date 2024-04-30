@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'ed714f84a3e748de87b24f385ec69d3bdc51ca47b7f4710d2048b84b2761e7ff'
 
     patches = [
-        # https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-1/get_patch
+        # https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-4/get_patch
         f'{name}/0001-Add-Meson-build.patch',
     ]
 

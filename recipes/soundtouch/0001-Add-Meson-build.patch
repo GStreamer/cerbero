@@ -1,20 +1,21 @@
-From f871f346f9af397a2e0ced987640fe9751319298 Mon Sep 17 00:00:00 2001
-From: "L. E. Segovia" <amy@centricular.com>
-Date: Fri, 15 Mar 2024 21:40:37 -0300
+From bb3c46416624a573c62cb0ad09533a5d433b65e7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Lo=C3=AFc=20Le=20Page?= <llepage@igalia.com>
+Date: Tue, 30 Apr 2024 21:17:12 +0200
 Subject: [PATCH 1/1] Add Meson build
 
-Source: https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-1/get_patch
 ---
+ LICENSE.build                       |  19 +++++
  include/meson.build                 |  19 +++++
- meson.build                         | 121 ++++++++++++++++++++++++++++
- meson_options.txt                   |   9 +++
+ meson.build                         | 122 ++++++++++++++++++++++++++++
+ meson_options.txt                   |   9 ++
  source/Android-lib/meson.build      |  12 +++
  source/SoundStretch/meson.build     |  16 ++++
  source/SoundTouch/meson.build       |  48 +++++++++++
  source/SoundTouchDLL/meson.build    |  47 +++++++++++
  source/SoundTouchDLL/meson/afxres.h |   1 +
  source/meson.build                  |   6 ++
- 9 files changed, 279 insertions(+)
+ 10 files changed, 299 insertions(+)
+ create mode 100644 LICENSE.build
  create mode 100644 include/meson.build
  create mode 100644 meson.build
  create mode 100644 meson_options.txt
@@ -25,9 +26,34 @@ Source: https://wrapdb.mesonbuild.com/v2/soundtouch_2.3.2-1/get_patch
  create mode 100644 source/SoundTouchDLL/meson/afxres.h
  create mode 100644 source/meson.build
 
+diff --git a/LICENSE.build b/LICENSE.build
+new file mode 100644
+index 0000000..b59833d
+--- /dev/null
++++ b/LICENSE.build
+@@ -0,0 +1,19 @@
++Copyright (c) 2021 The Meson development team
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
 diff --git a/include/meson.build b/include/meson.build
 new file mode 100644
-index 0000000..d19e1b3
+index 0000000..a395462
 --- /dev/null
 +++ b/include/meson.build
 @@ -0,0 +1,19 @@
@@ -52,10 +78,10 @@ index 0000000..d19e1b3
 +)
 diff --git a/meson.build b/meson.build
 new file mode 100644
-index 0000000..5372da2
+index 0000000..1977d0d
 --- /dev/null
 +++ b/meson.build
-@@ -0,0 +1,121 @@
+@@ -0,0 +1,122 @@
 +project(
 +    'soundtouch',
 +    'c', 'cpp',
@@ -71,7 +97,7 @@ index 0000000..5372da2
 +        'cpp_eh=default',
 +        'pkgconfig.relocatable=true',
 +    ],
-+    meson_version: '>= 0.52',
++    meson_version: '>= 0.53',
 +)
 +
 +cpp = meson.get_compiler('cpp')
@@ -112,7 +138,7 @@ index 0000000..5372da2
 +
 +neon_cpu = cpu in ['arm', 'aarch64']
 +
-+# Use ARM instruction set instead of Thumb for improved calculation performance in ARM CPUs	
++# Use ARM instruction set instead of Thumb for improved calculation performance in ARM CPUs
 +if cpu == 'arm' and system == 'android'
 +    if cpp.get_define('__thumb__') != ''
 +        soundtouch_args += cpp.get_supported_arguments('-marm')
@@ -175,11 +201,12 @@ index 0000000..5372da2
 +    soundtouch_lib,
 +    name: 'SoundTouch',
 +    description: 'SoundTouch is an open-source audio processing library for changing the Tempo, Pitch and Playback Rates of audio streams or files',
-+    filebase: 'soundtouch'
++    filebase: 'soundtouch',
++    subdirs: 'soundtouch'
 +)
 diff --git a/meson_options.txt b/meson_options.txt
 new file mode 100644
-index 0000000..091e335
+index 0000000..9aa9714
 --- /dev/null
 +++ b/meson_options.txt
 @@ -0,0 +1,9 @@
@@ -194,7 +221,7 @@ index 0000000..091e335
 +option('openmp', type: 'feature', value: 'disabled', description: 'Use parallel multicore calculation through OpenMP')
 diff --git a/source/Android-lib/meson.build b/source/Android-lib/meson.build
 new file mode 100644
-index 0000000..62f15ea
+index 0000000..38adee2
 --- /dev/null
 +++ b/source/Android-lib/meson.build
 @@ -0,0 +1,12 @@
@@ -212,7 +239,7 @@ index 0000000..62f15ea
 +)
 diff --git a/source/SoundStretch/meson.build b/source/SoundStretch/meson.build
 new file mode 100644
-index 0000000..560ae59
+index 0000000..aebf564
 --- /dev/null
 +++ b/source/SoundStretch/meson.build
 @@ -0,0 +1,16 @@
@@ -234,7 +261,7 @@ index 0000000..560ae59
 +endif
 diff --git a/source/SoundTouch/meson.build b/source/SoundTouch/meson.build
 new file mode 100644
-index 0000000..a4a246b
+index 0000000..26911bd
 --- /dev/null
 +++ b/source/SoundTouch/meson.build
 @@ -0,0 +1,48 @@
@@ -256,9 +283,9 @@ index 0000000..a4a246b
 +)
 +
 +# This library requires WINDOWS_EXPORT_ALL_SYMBOLS to export all the relevant
-+# classes. That's beyond mindbending to do for C++, see how it's done:
++# classes under MSVC. That's beyond mindbending to do for C++, see how it's done:
 +# https://github.com/Kitware/CMake/blob/master/Source/bindexplib.cxx#L237
-+if system in ['windows', 'cygwin']
++if cpp.get_linker_id() in ['link', 'lld-link'] # MSVC relies on __declspec
 +    soundtouch_lib = static_library(
 +        'SoundTouch',
 +        soundtouch_sources,
@@ -267,7 +294,7 @@ index 0000000..a4a246b
 +        include_directories: soundtouch_includes,
 +        install: true
 +    )
-+else
++else # GCC and Clang etc. do not
 +    soundtouch_lib = library(
 +        'SoundTouch',
 +        soundtouch_sources,
@@ -288,7 +315,7 @@ index 0000000..a4a246b
 +)
 diff --git a/source/SoundTouchDLL/meson.build b/source/SoundTouchDLL/meson.build
 new file mode 100644
-index 0000000..af142e5
+index 0000000..b0b41b5
 --- /dev/null
 +++ b/source/SoundTouchDLL/meson.build
 @@ -0,0 +1,47 @@
@@ -341,14 +368,14 @@ index 0000000..af142e5
 +endif
 diff --git a/source/SoundTouchDLL/meson/afxres.h b/source/SoundTouchDLL/meson/afxres.h
 new file mode 100644
-index 0000000..f6d2545
+index 0000000..776a87c
 --- /dev/null
 +++ b/source/SoundTouchDLL/meson/afxres.h
 @@ -0,0 +1 @@
 +#include <windows.h>
 diff --git a/source/meson.build b/source/meson.build
 new file mode 100644
-index 0000000..f59e855
+index 0000000..6b809f5
 --- /dev/null
 +++ b/source/meson.build
 @@ -0,0 +1,6 @@
@@ -359,5 +386,5 @@ index 0000000..f59e855
 +subdir('SoundStretch')
 +subdir('SoundTouchDLL')
 -- 
-2.42.0.windows.2
+2.34.1
 
