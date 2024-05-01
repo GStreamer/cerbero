@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
+from pathlib import Path
 import shutil
 from cerbero.utils import shell
 from custom import list_gstreamer_1_0_plugins_by_category
@@ -20,9 +21,13 @@ class Recipe(recipe.Recipe):
         'share/gst-android/ndk-build/gstreamer-1.0.mk',
         'share/gst-android/ndk-build/gstreamer_prebuilt.mk',
         'share/gst-android/ndk-build/tools.mk',
+        'share/gst-android/ndk-build/plugins.cmake',
         'share/gst-android/ndk-build/plugins.mk',
         'share/gst-android/ndk-build/tools',
         'share/gst-android/ndk-build/fontconfig',
+        'share/gst-android/ndk-build/GStreamer.java',
+        'share/cmake/GStreamer/gstreamer_android-1.0.c.in',
+        'share/cmake/FindGStreamerMobile.cmake',
     ]
 
     def prepare(self):
@@ -30,22 +35,47 @@ class Recipe(recipe.Recipe):
             self.deps.append('gst-plugins-rs')
 
     async def install(self):
-        ndk_build_dir_dst = os.path.join(self.config.prefix, 'share', 'gst-android', 'ndk-build')
-        if not os.path.exists(ndk_build_dir_dst):
-            os.makedirs(ndk_build_dir_dst)
-        ndk_build_dir_src = os.path.join(self.config.data_dir, 'ndk-build')
+        ndk_build_dir_dst = Path(self.config.prefix) / \
+            'share' / 'gst-android' / 'ndk-build'
+        ndk_build_dir_dst.mkdir(parents=True, exist_ok=True)
+        ndk_build_dir_src = Path(self.config.data_dir) / 'ndk-build'
         for f in self.files_devel:
             fname = os.path.basename(f)
-            s = os.path.join(ndk_build_dir_src, fname)
-            d = os.path.join(ndk_build_dir_dst, fname)
-            if os.path.isfile(s):
+            s = ndk_build_dir_src / fname
+            d = ndk_build_dir_dst / fname
+            if s.is_file():
                 shutil.copy(s, d)
             else:
                 shell.copy_dir(s, d)
 
         plugins = list_gstreamer_1_0_plugins_by_category(self.config)
-        f = open(os.path.join(ndk_build_dir_dst, 'plugins.mk'), 'w')
-        for c, p in plugins.items():
-            p = ' '.join(p)
-            f.write('GSTREAMER_PLUGINS_%s := %s\n' % (c.upper(), p))
-        f.close()
+        plugins_mk = ndk_build_dir_dst / 'plugins.mk'
+        with plugins_mk.open('w', encoding='utf-8') as f:
+            categories = [
+                f"GSTREAMER_PLUGINS_{c.upper()} := {' '.join(p)}\n"
+                for c, p in plugins.items()
+            ]
+            f.writelines(categories)
+
+        plugins_cmake = ndk_build_dir_dst / 'plugins.cmake'
+        with plugins_cmake.open('w', encoding='utf-8') as f:
+            categories = [
+                f"set(GSTREAMER_PLUGINS_{c.upper()} {' '.join(p)})\n"
+                for c, p in plugins.items()
+            ]
+            f.writelines(categories)
+
+        dest_dir = os.path.join(self.config.prefix, 'share', 'cmake')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'FindGStreamerMobile.cmake'),
+            dest_dir
+        )
+        dest_dir = os.path.join(dest_dir, 'GStreamer')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'gstreamer_android-1.0.c.in'),
+            dest_dir
+        )

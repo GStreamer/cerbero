@@ -1,5 +1,5 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-from cerbero.utils import shell
+import shutil
 
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
@@ -37,11 +37,8 @@ class Recipe(custom.GStreamer):
             '%(libdir)s/pkgconfig/gstreamer-base-1.0.pc',
             '%(libdir)s/pkgconfig/gstreamer-controller-1.0.pc',
             '%(libdir)s/pkgconfig/gstreamer-net-1.0.pc',
+            'share/cmake/FindGStreamer.cmake',
     ]
-
-    platform_files_devel = {
-        Platform.ANDROID: ['share/gst-android/ndk-build/GStreamer.java'],
-    }
 
     files_lang = ['gstreamer-1.0']
 

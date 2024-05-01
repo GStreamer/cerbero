@@ -1,5 +1,7 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from collections import defaultdict
+import os
+import shutil
 from cerbero.utils import shell
 from custom import list_gstreamer_1_0_plugins_by_category
 
@@ -24,6 +26,8 @@ class Recipe(recipe.Recipe):
 
     files_devel = [
         'share/xcode/templates/ios/',
+        'share/cmake/GStreamer/gst_ios_init.m.in',
+        'share/cmake/FindGStreamerMobile.cmake',
     ]
 
     def prepare(self):
@@ -59,3 +63,18 @@ class Recipe(recipe.Recipe):
         shell.replace (iosinit_m, {
             '@GST_IOS_PLUGINS_DECLARE@': '\n'.join(decls),
             '@GST_IOS_PLUGINS_REGISTER@': '\n'.join(regs)})
+
+        dest_dir = os.path.join(self.config.prefix, 'share', 'cmake')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'FindGStreamerMobile.cmake'),
+            dest_dir
+        )
+        dest_dir = os.path.join(dest_dir, 'GStreamer')
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
+        shutil.copy(
+            os.path.join(self.config.data_dir, 'mobile', 'gst_ios_init.m.in'),
+            dest_dir
+        )
