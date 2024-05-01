@@ -23,7 +23,10 @@ class Recipe(recipe.Recipe):
                    '%(libdir)s/librsvg-2.a', '%(libdir)s/librsvg-2.la']
     files_typelibs = ['Rsvg-2.0']
 
-    patches = ['librsvg/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch']
+    patches = [
+        f'{name}/0001-build-Fix-enumtypes-on-MinGW-inside-MSYS-Windows.patch',
+        f'{name}/0004-Add-missing-libcroco-dependency.patch',
+    ]
 
     def prepare(self):
         if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
