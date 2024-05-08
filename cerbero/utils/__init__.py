@@ -511,10 +511,7 @@ def parse_file(filename, dict):
 
 
 def escape_path(path):
-    path = path.replace('\\', '/')
-    path = path.replace('(', r'\\(').replace(')', r'\\)')
-    path = path.replace(' ', r'\\ ')
-    return path
+    return Path(path).as_posix()
 
 
 def get_wix_prefix(config):
@@ -530,6 +527,8 @@ def get_wix_prefix(config):
             wix_prefix = wix_prefix % ' (x86)'
     if not os.path.exists(wix_prefix):
         raise FatalError("The required packaging tool 'WiX' was not found")
+    if sys.platform == 'win32':
+        return escape_path(wix_prefix)
     return escape_path(to_unixpath(wix_prefix))
 
 
