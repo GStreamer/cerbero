@@ -68,10 +68,11 @@ class Packager(object):
         return _packagers[d][v](config, package, store)
 
 
-from cerbero.packages import wix_packager, rpm, debian, android, disttarball  # noqa: E402
+from cerbero.packages import rpm, debian, android, disttarball  # noqa: E402
+from cerbero.packages.windows import wix_on_ninja  # noqa: E402
 from cerbero.packages.osx import packager as osx_packager  # noqa: E402
 
-wix_packager.register()
+wix_on_ninja.register()
 osx_packager.register()
 rpm.register()
 debian.register()
