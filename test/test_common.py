@@ -16,27 +16,13 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 
-from cerbero.config import Platform, Distro, Architecture, DEFAULT_PACKAGER
+from cerbero.config import Config
 
 
-class DummyConfig(object):
-    prefix = '/test/'
-    target_platform = Platform.WINDOWS
-    target_distro = Distro.WINDOWS
-    target_arch = Architecture.X86
-    platform = None
-    sources = ''
-    local_sources = ''
-    wix_prefix = ''
-    py_prefix = ''
-    git_root = ''
-    allow_parallel_build = False
-    num_of_cpus = 1
-    target_version = None
-    target_distro_version = None
-    packages_prefix = ''
-    packager = DEFAULT_PACKAGER
-    install_dir = ''
+class DummyConfig(Config):
+    def __init__(self, is_build_tools_config=False):
+        super().__init__(is_build_tools_config=is_build_tools_config)
+        self.load()
 
 
 class XMLMixin:
