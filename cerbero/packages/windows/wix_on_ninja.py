@@ -294,7 +294,12 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
         # Execute ninja on the chosen output directory
         m.action('Building Merge Module in {self.output_dir}')
-        shell.new_call(['ninja'], cmd_dir=self.output_dir, env=self.config.env)
+
+        # Ensure all the WiX temporary files are reaped at the end of execution
+        with tempfile.TemporaryDirectory(prefix='wix-') as tmp:
+            env = self.config.env.copy()
+            env['TMP'] = tmp
+            shell.new_call(['ninja'], cmd_dir=self.output_dir, env=env)
 
         # Copy the outputs to the output directory
         for p in paths:
@@ -442,7 +447,12 @@ class MSIWithNinjaPackager(PackagerBase):
 
         # Execute ninja on the chosen output directory
         m.action(f'Building {self._package_name()} in {self.output_dir}')
-        shell.new_call(['ninja'], cmd_dir=self.output_dir, env=self.config.env)
+
+        # Ensure all the WiX temporary files are reaped at the end of execution
+        with tempfile.TemporaryDirectory(prefix='wix-') as tmp:
+            env = self.config.env.copy()
+            env['TMP'] = tmp
+            shell.new_call(['ninja'], cmd_dir=self.output_dir, env=env)
 
         # Copy the outputs to the output directory
         for p in paths:
