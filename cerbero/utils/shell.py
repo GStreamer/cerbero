@@ -427,6 +427,11 @@ async def download(url, dest, check_cert=True, overwrite=False, logfile=None, mi
             f'Invoke-WebRequest -UserAgent {user_agent} -OutFile {dest} '
             '-Method Get -Uri %s',
         ]
+    elif shutil.which('wget2'):
+        cmd = ['wget2', '--user-agent', user_agent, '--tries=2', '--timeout=20', '-O', dest]
+        if not check_cert:
+            cmd += ['--no-check-certificate']
+        cmd += ['%s']
     elif shutil.which('wget'):
         cmd = ['wget', '--user-agent', user_agent, '--tries=2', '--timeout=20', '--progress=dot:giga', '-O', dest]
         if not check_cert:
