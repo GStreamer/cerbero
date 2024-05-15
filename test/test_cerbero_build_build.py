@@ -29,13 +29,15 @@ class MakefilesBase(build.MakefilesBase):
 
     def __init__(self, config):
         self.config = config
+        self.config_src_dir = os.path.join(config.sources, 'test')
+        self.env = {}
         build.MakefilesBase.__init__(self)
 
     @build.modify_environment
     def get_env_var(self, var):
-        if var not in os.environ:
+        if var not in self.env:
             return None
-        return os.environ[var]
+        return self.env[var]
 
     @build.modify_environment
     def get_env_var_nested(self, var):
@@ -50,44 +52,34 @@ class ModifyEnvTest(unittest.TestCase):
         self.mk = MakefilesBase(DummyConfig())
 
     def testAppendEnv(self):
-        os.environ[self.var] = self.val1
-        self.mk.append_env = {self.var: self.val2}
+        self.mk.env[self.var] = self.val1
+        self.mk.append_env(self.var, self.val2)
         val = self.mk.get_env_var(self.var)
         self.assertEqual(val, '%s %s' % (self.val1, self.val2))
 
     def testAppendNonExistentEnv(self):
-        if self.var in os.environ:
-            del os.environ[self.var]
-        self.mk.append_env = {self.var: self.val2}
+        if self.var in self.mk.env:
+            del self.mk.env[self.var]
+        self.mk.append_env(self.var, self.val2)
         val = self.mk.get_env_var(self.var)
-        self.assertEqual(val, ' %s' % self.val2)
-
-    def testNewEnv(self):
-        os.environ[self.var] = self.val1
-        self.mk.new_env = {self.var: self.val2}
-        val = self.mk.get_env_var(self.var)
-        self.assertEqual(val, self.val2)
-
-    def testAppendAndNewEnv(self):
-        os.environ[self.var] = ''
-        self.mk.append_env = {self.var: self.val1}
-        self.mk.new_env = {self.var: self.val2}
-        val = self.mk.get_env_var(self.var)
-        self.assertEqual(val, self.val2)
+        self.assertEqual(val, '%s' % self.val2)
 
     def testSystemLibs(self):
-        os.environ['PKG_CONFIG_PATH'] = '/path/1'
-        os.environ['PKG_CONFIG_LIBDIR'] = '/path/2'
+        self.mk.env['PKG_CONFIG_PATH'] = '/path/1'
+        self.mk.env['PKG_CONFIG_LIBDIR'] = '/path/2'
         self.mk.config.allow_system_libs = True
         self.mk.use_system_libs = True
+        self.mk.maybe_add_system_libs('configure')
         val = self.mk.get_env_var('PKG_CONFIG_PATH')
-        self.assertEqual(val, '/path/2:/usr/lib/pkgconfig:' '/usr/share/pkgconfig:/usr/lib/i386-linux-gnu/pkgconfig')
+        self.assertEqual(
+            val, '/path/2:/path/1:/usr/lib/pkgconfig:' '/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig'
+        )
         val = self.mk.get_env_var('PKG_CONFIG_LIBDIR')
         self.assertEqual(val, '/path/2')
 
     def testNestedModif(self):
-        os.environ[self.var] = self.val1
-        self.mk.append_env = {self.var: self.val2}
+        self.mk.env[self.var] = self.val1
+        self.mk.append_env(self.var, self.val2)
         val = self.mk.get_env_var(self.var)
         self.assertEqual(val, '%s %s' % (self.val1, self.val2))
         val = self.mk.get_env_var_nested(self.var)
