@@ -20,7 +20,7 @@ import shutil
 import unittest
 import tempfile
 
-from cerbero.build import filesprovider
+from cerbero.build import recipe
 from cerbero.config import Platform, License
 from test.test_build_common import add_files
 from test.test_common import DummyConfig
@@ -28,16 +28,20 @@ from test.test_common import DummyConfig
 
 class Config(DummyConfig):
     def __init__(self, tmp, platform):
+        super().__init__()
         self.prefix = tmp
         self.target_platform = platform
+        self.env['DLLTOOL'] = 'dlltool'
 
 
-class FilesProvider(filesprovider.FilesProvider):
+class Recipe(recipe.Recipe):
+    name = 'filesprovider-test'
+    version = '0.0.1'
     files_misc = ['README', 'libexec/gstreamer-0.10/pluginsloader%(bext)s']
     files_libs = ['libgstreamer-0.10']
     files_bins = ['gst-launch']
     files_devel = ['include/gstreamer.h']
-    licenses_devel = [License.LGPL]
+    licenses_devel = [License.LGPLv2_1Plus]
     platform_files_bins = {Platform.WINDOWS: ['windows'], Platform.LINUX: ['linux']}
     platform_files_libs = {Platform.WINDOWS: ['libgstreamer-win32'], Platform.LINUX: ['libgstreamer-x11']}
 
@@ -47,8 +51,14 @@ class PackageTest(unittest.TestCase):
         self.tmp = tempfile.mkdtemp()
         win32config = Config(self.tmp, Platform.WINDOWS)
         linuxconfig = Config(self.tmp, Platform.LINUX)
-        self.win32recipe = FilesProvider(win32config)
-        self.linuxrecipe = FilesProvider(linuxconfig)
+        # FIXME config.py should initialize this
+        win32config.mingw_env_for_toolchain = dict()
+        win32config.mingw_env_for_build_system = dict()
+        win32config.msvc_env_for_toolchain = dict()
+        win32config.msvc_env_for_build_system = dict()
+
+        self.win32recipe = Recipe(win32config, {})
+        self.linuxrecipe = Recipe(linuxconfig, {})
 
         self.winbin = ['bin/gst-launch.exe', 'bin/windows.exe']
         self.linuxbin = ['bin/gst-launch', 'bin/linux']

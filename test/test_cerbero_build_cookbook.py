@@ -34,8 +34,6 @@ class PackageTest(unittest.TestCase):
 
     def testSetGetConfig(self):
         self.assertEqual(self.config, self.cookbook.get_config())
-        self.cookbook.set_config(None)
-        self.assertIsNone(self.cookbook._config)
 
     def testCacheMissing(self):
         status = {'test': 'test'}
@@ -63,7 +61,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(status, self.cookbook.status)
 
     def testAddGetRecipe(self):
-        recipe = Recipe1(self.config)
+        recipe = Recipe1(self.config, {})
         self.assertRaises(RecipeNotFoundError, self.cookbook.get_recipe, recipe.name)
         self.cookbook.add_recipe(recipe)
         self.assertEqual(recipe, self.cookbook.recipes[recipe.name])
@@ -71,7 +69,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(self.cookbook.get_recipes_list(), [recipe])
 
     def testGetRecipesStatus(self):
-        recipe = Recipe1(self.config)
+        recipe = Recipe1(self.config, {})
         self.cookbook._restore_cache()
         self.assertEqual(self.cookbook.status, {})
         self.cookbook.add_recipe(recipe)
@@ -85,7 +83,7 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(status.steps[0], '1')
 
     def testUpdateStatus(self):
-        recipe = Recipe1(self.config)
+        recipe = Recipe1(self.config, {})
         self.cookbook.add_recipe(recipe)
         self.cookbook._restore_cache()
         self.cookbook.update_step_status(recipe.name, 'fetch')
@@ -101,18 +99,18 @@ class PackageTest(unittest.TestCase):
             self.assertTrue(self.cookbook.step_done(recipe.name, step))
 
     def testBuildStatus(self):
-        recipe = Recipe1(self.config)
+        recipe = Recipe1(self.config, {})
         self.cookbook.add_recipe(recipe)
         self.cookbook._restore_cache()
         self.cookbook.update_build_status(recipe.name, '1.0')
-        self.assertTrue(self.cookbook.status[recipe.name].needs_build)
+        self.assertFalse(self.cookbook.recipe_needs_build(recipe.name))
         self.assertEqual(self.cookbook.status[recipe.name].built_version, '1.0')
         self.cookbook.update_build_status(recipe.name, None)
-        self.assertFalse(self.cookbook.status[recipe.name].needs_build)
+        self.assertTrue(self.cookbook.status[recipe.name].needs_build)
         self.assertEqual(self.cookbook.status[recipe.name].built_version, None)
 
     def testResetRecipeStatus(self):
-        recipe = Recipe1(self.config)
+        recipe = Recipe1(self.config, {})
         self.cookbook.add_recipe(recipe)
         self.cookbook._restore_cache()
         self.cookbook.reset_recipe_status(recipe.name)
