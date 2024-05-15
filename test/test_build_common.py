@@ -24,8 +24,15 @@ from cerbero.build import recipe
 from cerbero.utils import shell
 
 
-class Recipe1(recipe.Recipe):
+# We create a common Recipe to make the MetaRecipe do its magic
+# for recipes not named Recipe, like Recipe1
+class Recipe(recipe.Recipe):
+    pass
+
+
+class Recipe1(Recipe):
     name = 'recipe1'
+    version = '0.0.1'
     licence = 'LGPL'
     uuid = '1'
 
@@ -39,29 +46,33 @@ class Recipe1(recipe.Recipe):
     platform_files_libs = {Platform.WINDOWS: ['libgstreamer-win32'], Platform.LINUX: ['libgstreamer-x11']}
 
 
-class Recipe2(recipe.Recipe):
+class Recipe2(Recipe):
     name = 'recipe2'
+    version = '0.0.1'
     licence = 'GPL'
 
     files_misc = ['README2']
 
 
-class Recipe3(recipe.Recipe):
+class Recipe3(Recipe):
     name = 'recipe3'
+    version = '0.0.1'
     licences = 'BSD'
 
     files_misc = ['README3']
 
 
-class Recipe4(recipe.Recipe):
+class Recipe4(Recipe):
     name = 'recipe4'
+    version = '0.0.1'
     licence = 'LGPL'
 
     files_misc = ['README4']
 
 
-class Recipe5(recipe.Recipe):
+class Recipe5(Recipe):
     name = 'recipe5'
+    version = '0.0.1'
     licence = 'LGPL'
 
     files_libs = ['libtest']
