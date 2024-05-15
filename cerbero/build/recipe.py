@@ -112,29 +112,29 @@ def log_step_output(recipe, stepfunc):
         return wrapped
 
 class MetaRecipe(type):
-    ''' This metaclass modifies the base classes of a Receipt, adding 2 new
+    ''' This metaclass modifies the base classes of a Recipe, adding 2 new
     base classes based on the class attributes 'stype' and 'btype'.
 
-    class NewReceipt(Receipt):
-        btype = Class1    ------>  class NewReceipt(Receipt, Class1, Class2)
+    class NewRecipe(Recipe):
+        btype = Class1    ------>  class NewRecipe(Recipe, Class1, Class2)
         stype = Class2
     '''
 
     def __new__(cls, name, bases, dct):
         clsname = '%s.%s' % (dct['__module__'], name)
         recipeclsname = '%s.%s' % (cls.__module__, 'Recipe')
-        # only modify it for Receipt's subclasses
+        # only modify it for Recipe's subclasses
         if clsname != recipeclsname and name == 'Recipe':
-            # get the default build and source classes from Receipt
-            # Receipt(DefaultSourceType, DefaultBaseType)
+            # get the default build and source classes from Recipe
+            # Recipe(DefaultSourceType, DefaultBaseType)
             basedict = {'btype': bases[0].btype, 'stype': bases[0].stype}
             # if this class define stype or btype, override the default one
-            # Receipt(OverridenSourceType, OverridenBaseType)
+            # Recipe(OverridenSourceType, OverridenBaseType)
             for base in ['stype', 'btype']:
                 if base in dct:
                     basedict[base] = dct[base]
-            # finally add this classes the Receipt bases
-            # Receipt(BaseClass, OverridenSourceType, OverridenBaseType)
+            # finally add this classes the Recipe bases
+            # Recipe(BaseClass, OverridenSourceType, OverridenBaseType)
             bases = bases + tuple(basedict.values())
         return type.__new__(cls, name, bases, dct)
 
