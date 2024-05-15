@@ -271,8 +271,9 @@ class MergeModuleWithNinjaPackager(PackagerBase):
                 self.package.version,
                 stripped_dir=tmpdirs.get(PackageType.RUNTIME, None),
             )
-            paths.append(p)
-            writer.newline()
+            if p:
+                paths.append(p)
+                writer.newline()
 
             # set rules for devel package
             if devel:
@@ -285,8 +286,9 @@ class MergeModuleWithNinjaPackager(PackagerBase):
                     self.package.version,
                     stripped_dir=tmpdirs.get(PackageType.RUNTIME, None),
                 )
-                paths.append(p)
-                writer.newline()
+                if p:
+                    paths.append(p)
+                    writer.newline()
 
             writer.close()
 
@@ -312,7 +314,11 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
     def create_merge_module(self, writer: Writer, package_type: PackageType, force: bool, version, stripped_dir=None):
         self.package.set_mode(package_type)
-        files_list: list[str] = self.files_list(package_type, force)
+        try:
+            files_list: list[str] = self.files_list(package_type, force)
+        except EmptyPackageError:
+            m.warning('Package %s is empty, skipping module generation' % self.package.name)
+            return None
         if isinstance(self.package, VSTemplatePackage):
             mergemodule = VSMergeModule(self.config, files_list, self.package)
         else:
@@ -492,18 +498,16 @@ class MSIWithNinjaPackager(PackagerBase):
             package.wix_use_fragment = self.package.wix_use_fragment
             m.action('Creating Merge Module for %s' % package)
             packager = MergeModuleWithNinjaPackager(self.config, package, self.store)
-            try:
-                tmpdir = packager.strip_files(package_type, self.force)
-                # FIXME: this should be passed correctly
-                packager.output_dir = self.output_dir
-                path = packager.create_merge_module(
-                    writer, package_type, self.force, self.package.version, stripped_dir=tmpdir
-                )
+            tmpdir = packager.strip_files(package_type, self.force)
+            # FIXME: this should be passed correctly
+            packager.output_dir = self.output_dir
+            path = packager.create_merge_module(
+                writer, package_type, self.force, self.package.version, stripped_dir=tmpdir
+            )
+            if path:
                 packagedeps[package] = path
                 if tmpdir:
                     tmp_dirs.append(tmpdir)
-            except EmptyPackageError:
-                m.warning('Package %s is empty' % package)
         self.packagedeps = packagedeps
         self.merge_modules[package_type] = list(packagedeps.values())
         return tmp_dirs
