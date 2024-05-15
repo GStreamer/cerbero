@@ -20,12 +20,12 @@ check-format:
 	ruff check .
 
 check:
-	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial test
+	CERBERO_UNINSTALLED=1 PYTHONPATH=$(PYTHONPATH):./test:./cerbero trial3 test
 	make check-format
 
 coverage:
 	rm -rf _trial_temp
-	PYTHONPATH=$(PYTHONPATH):./test:./cerbero; trial --coverage test
+	CERBERO_UNINSTALLED=1 PYTHONPATH=$(PYTHONPATH):./test:./cerbero trial3 --coverage test
 	make show-coverage
 
 show-coverage:
