@@ -45,17 +45,23 @@ class MergeModulePackager(PackagerBase):
 
         # create runtime package
         p = self.create_merge_module(output_dir, PackageType.RUNTIME, force, self.package.version, keep_temp)
-        paths.append(p)
+        if p:
+            paths.append(p)
 
         if devel:
             p = self.create_merge_module(output_dir, PackageType.DEVEL, force, self.package.version, keep_temp)
-            paths.append(p)
+            if p:
+                paths.append(p)
 
         return paths
 
     def create_merge_module(self, output_dir, package_type, force, version, keep_temp, keep_strip_temp_dir=False):
         self.package.set_mode(package_type)
-        files_list = self.files_list(package_type, force)
+        try:
+            files_list = self.files_list(package_type, force)
+        except EmptyPackageError:
+            m.warning('Package %s is empty, skipping module generation' % self.package.name)
+            return None
         if isinstance(self.package, VSTemplatePackage):
             mergemodule = VSMergeModule(self.config, files_list, self.package)
         else:
@@ -209,15 +215,13 @@ class MSIPackager(PackagerBase):
             package.wix_use_fragment = self.package.wix_use_fragment
             m.action('Creating Merge Module for %s' % package)
             packager = MergeModulePackager(self.config, package, self.store)
-            try:
-                path = packager.create_merge_module(
-                    self.output_dir, package_type, self.force, self.package.version, self.keep_temp, True
-                )
+            path = packager.create_merge_module(
+                self.output_dir, package_type, self.force, self.package.version, self.keep_temp, True
+            )
+            if path:
                 packagedeps[package] = path[0]
                 if path[1]:
                     tmp_dirs.append(path[1])
-            except EmptyPackageError:
-                m.warning('Package %s is empty' % package)
         self.packagedeps = packagedeps
         self.merge_modules[package_type] = list(packagedeps.values())
         return tmp_dirs
