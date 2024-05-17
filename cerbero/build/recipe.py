@@ -125,15 +125,15 @@ class MetaRecipe(type):
         # only modify it for Recipe's subclasses
         if clsname != recipeclsname and name == 'Recipe':
             # get the default build and source classes from Recipe
-            # Recipe(DefaultSourceType, DefaultBaseType)
+            # Recipe(DefaultSourceType, DefaultBuildType)
             basedict = {'btype': bases[0].btype, 'stype': bases[0].stype}
             # if this class define stype or btype, override the default one
-            # Recipe(OverridenSourceType, OverridenBaseType)
+            # Recipe(OverridenSourceType, OverridenBuildType)
             for base in ['stype', 'btype']:
                 if base in dct:
                     basedict[base] = dct[base]
             # finally add this classes the Recipe bases
-            # Recipe(BaseClass, OverridenSourceType, OverridenBaseType)
+            # Recipe(BaseClass, OverridenSourceType, OverridenBuildType)
             bases = bases + tuple(basedict.values())
         return type.__new__(cls, name, bases, dct)
 
