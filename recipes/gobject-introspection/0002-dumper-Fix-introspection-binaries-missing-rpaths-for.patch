@@ -1,0 +1,44 @@
+From 7e77e10a5f683958786efaa23b173f52ed489ad1 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Fri, 17 May 2024 21:39:10 +0000
+Subject: [PATCH 5/5] dumper: Fix introspection binaries missing rpaths for
+ relative dylibs
+
+Apple expects dylibs to have an ID of the form `@rpath/libyadda.dylib`.
+For this convention to work, a RPATH entry pointing to the library
+prefix and/or to the relative location of said prefix w.r.t the
+dependent executable or library, must be inserted.
+
+This need previously did not arose because gobject-introspection
+implicitly relied on the consumers having IDs set to their absolute
+paths. This is no longer the case with GStreamer's Cerbero, which now
+sanitizes RPATHs, load commands, and dylib IDs at install time.
+
+The simplest and most obvious fix is to ensure that, for each library
+load path, the corresponding rpath entry is inserted.
+
+(cherry picked from commit 6ffb7c06a35c05661dce997af4dfd83e8b3e024d)
+---
+ giscanner/dumper.py | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/giscanner/dumper.py b/giscanner/dumper.py
+index 74a494b8..cdb5400d 100644
+--- a/giscanner/dumper.py
++++ b/giscanner/dumper.py
+@@ -252,6 +252,12 @@ class DumpCompiler(object):
+             args.extend(pkg_config_libs)
+             self._compiler.get_external_link_flags(args, self._options.libraries)
+ 
++        if sys.platform == 'darwin':
++            # If the libraries' ID are of the form (@rpath/libfoo.dylib),
++            # then nothing previously can have added the needed rpaths
++            rpath_entries_to_add = [lib.replace('-L/', '-Wl,-rpath,/') for lib in pkg_config_libs if lib.startswith('-L/')]
++            args.extend(rpath_entries_to_add)
++
+         if not self._compiler.check_is_msvc():
+             for ldflag in shlex.split(os.environ.get('LDFLAGS', '')):
+                 args.append(ldflag)
+-- 
+2.47.0.windows.2
+

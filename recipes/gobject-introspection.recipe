@@ -80,6 +80,7 @@ class Recipe(recipe.Recipe):
         f'{name}/0001-giscanner-remove-dependency-on-distutils.msvccompile.patch',
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/503
         f'{name}/0001-meson-Use-the-specified-python-if-it-s-custom.patch',
+        f'{name}/0002-dumper-Fix-introspection-binaries-missing-rpaths-for.patch'
     ]
 
     def prepare(self):
