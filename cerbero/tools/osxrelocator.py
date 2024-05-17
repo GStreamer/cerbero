@@ -53,6 +53,11 @@ class OSXRelocator(object):
         self.change_libs_path(object_file, original_file)
 
     def change_id(self, object_file, id=None):
+        """
+        Changes the `LC_ID_DYLIB` of the given object file.
+        @object_file: Path to the object file
+        @id: New ID; if None, it'll be `@rpath/<basename>`
+        """
         id = id or object_file.replace(self.lib_prefix, '@rpath')
         if not self._is_mach_o_file(object_file):
             return
@@ -60,42 +65,68 @@ class OSXRelocator(object):
         shell.new_call(cmd, fail=False, logfile=self.logfile)
 
     def change_libs_path(self, object_file, original_file=None):
-        # @object_file: the actual file location
-        # @original_file: where the file will end up in the output directory
-        # structure and the basis of how to calculate rpath entries.  This may
-        # be different from where the file is currently located e.g. when
-        # creating a fat binary from copy of the original file in a temporary
-        # location.
-        if original_file is None:
-            original_file = object_file
-        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/')) - 1
-        p_depth = '/..' * depth
-        rpaths = ['.']
-        rpaths += ['@loader_path' + p_depth, '@executable_path' + p_depth]
-        rpaths += ['@loader_path' + '/../lib', '@executable_path' + '/../lib']
+        """
+        Sanitizes the `LC_LOAD_DYLIB` and `LC_RPATH` load commands,
+        setting the former to be of the form `@rpath/libyadda.dylib`,
+        and the latter to point to the /lib folder within the GStreamer prefix.
+        @object_file: the actual file location
+        @original_file: where the file will end up in the output directory
+        structure and the basis of how to calculate rpath entries.  This may
+        be different from where the file is currently located e.g. when
+        creating a fat binary from copy of the original file in a temporary
+        location.
+        """
         if not self._is_mach_o_file(object_file):
             return
+        if original_file is None:
+            original_file = object_file
+        # First things first: ensure the load command of future consumers
+        # points to the real ID of this library
+        # This used to be done only at Universal lipo time, but by then
+        # it's too late -- unless one wants to run through all load commands
+        self.change_id(object_file, id='@rpath/{}'.format(os.path.basename(original_file)))
+        # With that out of the way, we need to sort out how many parents
+        # need to be navigated to reach the root of the GStreamer prefix
+        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/')) - 1
+        p_depth = '/..' * depth
+        rpaths = [
+            # From a deeply nested library
+            f'@loader_path{p_depth}',
+            # From a deeply nested framework or binary
+            f'@executable_path{p_depth}',
+            # From a library within the prefix
+            '@loader_path/../lib',
+            # From a binary within the prefix
+            '@executable_path/../lib',
+        ]
         if depth > 1:
-            rpaths += ['@loader_path/..', '@executable_path/..']
-        existing_rpaths = self.list_rpaths(object_file)
+            rpaths += [
+                # Allow loading from the parent (e.g. GIO plugin)
+                '@loader_path/..',
+                '@executable_path/..',
+            ]
+        # Make them unique
+        rpaths = list(set(rpaths))
         # Remove absolute RPATHs, we don't want or need these
-        for p in existing_rpaths:
-            if not p.startswith('/'):
-                continue
+        existing_rpaths = list(set(self.list_rpaths(object_file)))
+        for p in filter(lambda p: p.startswith('/'), self.list_rpaths(object_file)):
             cmd = [INT_CMD, '-delete_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
         # Add relative RPATHs
-        for p in rpaths:
-            if p in existing_rpaths:
-                continue
+        for p in filter(lambda p: p not in existing_rpaths, rpaths):
             cmd = [INT_CMD, '-add_rpath', p, object_file]
             shell.new_call(cmd, fail=False)
-        # Change dependent library names from absolute to @rpath/
+        # Change dependencies' paths from absolute to @rpath/
         for lib in self.list_shared_libraries(object_file):
             if self.lib_prefix in lib:
                 new_lib = lib.replace(self.lib_prefix, '@rpath')
-                cmd = [INT_CMD, '-change', lib, new_lib, object_file]
-                shell.new_call(cmd, fail=False, logfile=self.logfile)
+            elif '@rpath/lib/' in lib:
+                # These are leftovers from meson thinking RPATH == prefix
+                new_lib = lib.replace('@rpath/lib/', '@rpath/')
+            else:
+                continue
+            cmd = [INT_CMD, '-change', lib, new_lib, object_file]
+            shell.new_call(cmd, fail=False, logfile=self.logfile)
 
     def change_lib_path(self, object_file, old_path, new_path):
         for lib in self.list_shared_libraries(object_file):
