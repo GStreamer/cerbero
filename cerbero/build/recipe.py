@@ -89,20 +89,22 @@ def log_step_output(recipe, stepfunc):
     def wrapped(*args, **kwargs):
         open_file()
         try:
-            stepfunc(*args, **kwargs)
+            ret = stepfunc(*args, **kwargs)
         except FatalError:
             handle_exception()
             raise
         close_file()
+        return ret
 
     async def async_wrapped(*args, **kwargs):
         open_file()
         try:
-            await stepfunc(*args, **kwargs)
+            ret = await stepfunc(*args, **kwargs)
         except FatalError:
             handle_exception()
             raise
         close_file()
+        return ret
 
     if asyncio.iscoroutinefunction(stepfunc):
         return async_wrapped
@@ -867,7 +869,8 @@ class MetaUniversalRecipe(type):
             async def doit(recipe, step_name=step):
                 ret = step_func(recipe, step_name)
                 if asyncio.iscoroutine(ret):
-                    await ret
+                    ret = await ret
+                return ret
 
             if step_func:
                 setattr(cls, step, doit)
