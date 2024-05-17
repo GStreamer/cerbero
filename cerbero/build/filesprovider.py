@@ -416,18 +416,17 @@ class FilesProvider(object):
             # add it using the .la entry.
             if f.startswith(self.extensions['libdir'] + '/gstreamer-1.0/') and f.endswith('.la'):
                 fs.append(self._get_plugin_pc(f))
-        # fill directories
-        dirs = [x for x in fs if os.path.isdir(os.path.join(self.config.prefix, x))]
-        for directory in dirs:
-            fs.remove(directory)
-            fs.extend(self._ls_dir(os.path.join(self.config.prefix, directory)))
-        # fill paths with pattern expansion *
-        paths = [x for x in fs if '*' in x]
-        if len(paths) != 0:
-            for path in paths:
-                fs.remove(path)
-            fs.extend(shell.ls_files(paths, self.config.prefix))
-        return fs
+
+        # Validate all the files with the ones in the prefix
+        vfs = []
+        for f in fs:
+            # fill directories
+            if os.path.isdir(os.path.join(self.config.prefix, f)):
+                vfs.extend(self._ls_dir(os.path.join(self.config.prefix,
+                                                    f)))
+            else:
+                vfs.extend(shell.ls_files([f], self.config.prefix))
+        return vfs
 
     def _search_binaries(self, files):
         """
