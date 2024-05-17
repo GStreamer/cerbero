@@ -15,7 +15,8 @@ class Recipe(recipe.Recipe):
 
     patches = [
         # https://gitlab.gnome.org/GNOME/gobject-introspection/-/merge_requests/448
-        name + '/0001-giscanner-Allow-passing-full-paths-to-libraries-with.patch',
+        f'{name}/0001-giscanner-Allow-passing-full-paths-to-libraries-with.patch',
+        f'{name}/0002-dumper-Fix-introspection-binaries-missing-rpaths-for.patch'
     ]
 
     files_bins = ['g-ir-annotation-tool', 'g-ir-compiler', 'g-ir-doc-tool', 'g-ir-generate', 'g-ir-scanner']
