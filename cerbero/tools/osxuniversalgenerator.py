@@ -127,10 +127,7 @@ class OSXUniversalGenerator(object):
             shutil.copy(f, tmp.name)
             prefix_to_replace = [d for d in dirs if d in f][0]
             relocator = OSXRelocator(self.output_root, prefix_to_replace, False, logfile=self.logfile)
-            # since we are using a temporary file, we must force the library id
-            # name to real one and not based on the filename
             relocator.relocate_file(tmp.name, f)
-            relocator.change_id(tmp.name, id='@rpath/{}'.format(os.path.basename(f)))
         cmd = [self.LIPO_CMD, '-create'] + [f.name for f in tmp_inputs] + ['-output', output]
         shell.new_call(cmd)
         for tmp in tmp_inputs:

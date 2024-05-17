@@ -576,7 +576,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             return fp.split('/')[0] in ['lib', 'bin', 'libexec'] and \
                     os.path.splitext(fp)[1] not in ['.a', '.pc', '.la']
 
-        relocator = OSXRelocator(self.config.prefix, self.config.prefix, True,
+        relocator = OSXRelocator(self.config.prefix, self.config.libdir, True,
                 logfile=self.logfile)
         # Only relocate files are that are potentially relocatable and
         # remove duplicates by symbolic links so we relocate libs only
