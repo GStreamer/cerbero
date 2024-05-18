@@ -436,8 +436,7 @@ class FilesProvider(object):
         """
         binaries = []
         for f in files:
-            self.extensions['file'] = f
-            binaries.append('bin/%(file)s%(bext)s' % self.extensions)
+            binaries.append('bin/%(file)s%(bext)s' % {"file": f, **self.extensions})
         return binaries
 
     def _search_libraries(self, files):
