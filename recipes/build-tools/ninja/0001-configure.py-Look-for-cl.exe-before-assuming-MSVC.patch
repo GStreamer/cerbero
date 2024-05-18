@@ -1,4 +1,4 @@
-From b6784276d7ccea28ab1a5d5936f98b8342e8eb57 Mon Sep 17 00:00:00 2001
+From 97d00158834d0489a0be9ef289623c77b5cae9a3 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Wed, 16 May 2018 13:32:14 +0530
 Subject: [PATCH] configure.py: Look for cl.exe before assuming MSVC
@@ -10,18 +10,18 @@ incorrectly.
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/configure.py b/configure.py
-index a443748..a627f46 100644
+index 6ee64a8..26d0bba 100755
 --- a/configure.py
 +++ b/configure.py
-@@ -27,6 +27,7 @@ import pipes
- import string
+@@ -24,6 +24,7 @@ import os
+ import shlex
  import subprocess
  import sys
 +import shutil
  
  sourcedir = os.path.dirname(os.path.realpath(__file__))
  sys.path.insert(0, os.path.join(sourcedir, 'misc'))
-@@ -53,7 +54,10 @@ class Platform(object):
+@@ -50,7 +51,10 @@ class Platform(object):
          elif self._platform.startswith('mingw'):
              self._platform = 'mingw'
          elif self._platform.startswith('win'):
@@ -34,5 +34,5 @@ index a443748..a627f46 100644
              self._platform = 'bitrig'
          elif self._platform.startswith('netbsd'):
 -- 
-2.12.2.windows.2
+2.43.0
 
