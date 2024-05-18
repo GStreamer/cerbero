@@ -635,7 +635,7 @@ class CMake (MakefilesBase):
 
     def __init__(self):
         MakefilesBase.__init__(self)
-        self.build_dir = os.path.join(self.build_dir, '_builddir')
+        self.build_dir = os.path.join(self.build_dir, 'b')
         self.config_sh = 'cmake'
         if self.config.distro == Distro.MSYS2:
             # We do not want the MSYS2 CMake because it doesn't support MSVC
@@ -759,7 +759,7 @@ class Meson (Build, ModifyEnvBase) :
     can_msvc = True
     # Build files require a build machine compiler when cross-compiling
     meson_needs_build_machine_compiler = False
-    meson_builddir = "_builddir"
+    meson_builddir = "b"
     # We do not use cmake dependency files by default, speed up the build by disabling it
     need_cmake = False
 
@@ -1194,7 +1194,7 @@ class Cargo(Build, ModifyEnvBase):
 
         self.config_src_dir = os.path.abspath(os.path.join(self.build_dir,
                                                            self.srcdir))
-        self.cargo_dir = os.path.join(self.config_src_dir, '_builddir')
+        self.cargo_dir = os.path.join(self.config_src_dir, 'b')
         self.cargo = os.path.join(self.config.cargo_home, 'bin',
                 'cargo' + self.config._get_exe_suffix())
 

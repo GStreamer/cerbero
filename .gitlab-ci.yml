@@ -204,9 +204,9 @@ android fedora image:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.tar.*"
     exclude:
       - .git
@@ -294,9 +294,9 @@ build cerbero fedora x86_64:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "*[0-9].tar.*"
     exclude:
       - .git
@@ -331,9 +331,9 @@ build cerbero cross-android universal:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.msi"
     exclude:
       - .git
@@ -449,9 +449,9 @@ cerbero cross-android universal examples:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
     exclude:
@@ -509,9 +509,9 @@ build cerbero cross-macos universal x86_64-host:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-*-ios-universal.pkg"
     exclude:
       - .git
@@ -676,9 +676,9 @@ cerbero deps msvc x86_64 msi package:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.msi"
     exclude:
       - .git
