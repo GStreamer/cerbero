@@ -202,6 +202,13 @@ class FilesProvider(object):
             self.extensions['sdir'] = self.extensions['libdir']
         if self._dylib_plugins():
             self.extensions['mext'] = '.dylib'
+        self._validatelib = None
+        if self.extensions['sregex']:
+            self._validatelib = find_shlib_regex
+        elif self.config.target_platform == Platform.WINDOWS:
+            self._validatelib = find_dll_implib
+        else:
+            raise AssertionError
         self.py_prefixes = config.py_prefixes
         self.add_files_bins_devel()
         self.add_license_files()
@@ -457,17 +464,11 @@ class FilesProvider(object):
         libdir = self.extensions['sdir']
         libext = self.extensions['srext']
         libregex = self.extensions['sregex']
-        if libregex:
-            find_func = find_shlib_regex
-        elif self.config.target_platform == Platform.WINDOWS:
-            find_func = find_dll_implib
-        else:
-            raise AssertionError
-
         libsmatch = {}
         notfound = []
         for f in files:
-            libsmatch[f] = find_func(self.config, f[3:], self.config.prefix, libdir, libext, libregex)
+            libsmatch[f] = self._validatelib(self.config, f[3:], self.config.prefix,
+                                     libdir, libext, libregex)
             if not libsmatch[f]:
                 notfound.append(f)
 
