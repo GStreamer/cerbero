@@ -200,7 +200,7 @@ ubuntu image:
     # shared across everything really
     CCACHE_MAXSIZE: "50G"
 
-    CERBERO_HOME: "cerbero-build"
+    CERBERO_HOME: "cb"
     CERBERO_SOURCES: "cerbero-sources"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS}"
     CERBERO: "./cerbero-uninstalled -c config/${CONFIG} -c localconf.cbc"
