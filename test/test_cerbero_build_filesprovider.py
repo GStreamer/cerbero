@@ -22,7 +22,6 @@ import tempfile
 
 from cerbero.build import recipe
 from cerbero.config import Platform, License
-from test.test_build_common import add_files
 from test.test_common import DummyConfig
 
 
@@ -32,7 +31,6 @@ class Config(DummyConfig):
         self.prefix = tmp
         self.target_platform = platform
         self.env['DLLTOOL'] = 'dlltool'
-        self.variants.override(['nodebug'])
 
 
 class Recipe(recipe.Recipe):
@@ -47,10 +45,15 @@ class Recipe(recipe.Recipe):
     platform_files_libs = {Platform.WINDOWS: ['libgstreamer-win32'], Platform.LINUX: ['libgstreamer-x11']}
 
 
+def to_config_path(config, paths):
+    return [x % {'libdir': config.rel_libdir} for x in paths]
+
+
 class PackageTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         win32config = Config(self.tmp, Platform.WINDOWS)
+        win32config.variants.override(['nodebug'])
         linuxconfig = Config(self.tmp, Platform.LINUX)
         # FIXME config.py should initialize this
         win32config.mingw_env_for_toolchain = dict()
@@ -64,31 +67,41 @@ class PackageTest(unittest.TestCase):
         self.winbin = ['bin/gst-launch.exe', 'bin/windows.exe']
         self.linuxbin = ['bin/gst-launch', 'bin/linux']
         self.winlib = ['bin/libgstreamer-0.10.dll', 'bin/libgstreamer-win32.dll']
-        self.linuxlib = ['lib/x86_64-linux-gnu/*libgstreamer-0.10*.so*', 'lib/x86_64-linux-gnu/*libgstreamer-x11*.so*']
+        self.linuxlib = to_config_path(
+            linuxconfig, ['%(libdir)s/*libgstreamer-0.10*.so*', '%(libdir)s/*libgstreamer-x11*.so*']
+        )
         self.winmisc = ['README', 'libexec/gstreamer-0.10/pluginsloader.exe']
         self.linuxmisc = ['README', 'libexec/gstreamer-0.10/pluginsloader']
         devfiles = [
             'include/gstreamer.h',
-            'lib/x86_64-linux-gnu/libgstreamer-0.10.a',
-            'lib/x86_64-linux-gnu/libgstreamer-0.10.la',
+            '%(libdir)s/libgstreamer-0.10.a',
+            '%(libdir)s/libgstreamer-0.10.la',
         ]
 
-        self.windevfiles = devfiles + [
-            'lib/x86_64-linux-gnu/libgstreamer-win32.a',
-            'lib/x86_64-linux-gnu/libgstreamer-win32.la',
-            'lib/x86_64-linux-gnu/libgstreamer-win32.dll.a',
-            'lib/x86_64-linux-gnu/libgstreamer-win32.def',
-            'lib/x86_64-linux-gnu/gstreamer-win32.lib',
-            'lib/x86_64-linux-gnu/libgstreamer-0.10.dll.a',
-            'lib/x86_64-linux-gnu/libgstreamer-0.10.def',
-            'lib/x86_64-linux-gnu/gstreamer-0.10.lib',
-        ]
-        self.lindevfiles = devfiles + [
-            'lib/x86_64-linux-gnu/libgstreamer-0.10.so',
-            'lib/x86_64-linux-gnu/libgstreamer-x11.a',
-            'lib/x86_64-linux-gnu/libgstreamer-x11.la',
-            'lib/x86_64-linux-gnu/libgstreamer-x11.so',
-        ]
+        self.windevfiles = to_config_path(
+            win32config,
+            devfiles
+            + [
+                '%(libdir)s/libgstreamer-win32.a',
+                '%(libdir)s/libgstreamer-win32.la',
+                '%(libdir)s/libgstreamer-win32.dll.a',
+                '%(libdir)s/libgstreamer-win32.def',
+                '%(libdir)s/gstreamer-win32.lib',
+                '%(libdir)s/libgstreamer-0.10.dll.a',
+                '%(libdir)s/libgstreamer-0.10.def',
+                '%(libdir)s/gstreamer-0.10.lib',
+            ],
+        )
+        self.lindevfiles = to_config_path(
+            linuxconfig,
+            devfiles
+            + [
+                '%(libdir)s/libgstreamer-0.10.so',
+                '%(libdir)s/libgstreamer-x11.a',
+                '%(libdir)s/libgstreamer-x11.la',
+                '%(libdir)s/libgstreamer-x11.so',
+            ],
+        )
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -99,27 +112,33 @@ class PackageTest(unittest.TestCase):
     def testListBinaries(self):
         self.assertEqual(self.win32recipe.files_list_by_category('bins', False), sorted(self.winbin))
         self.assertEqual(self.linuxrecipe.files_list_by_category('bins', False), sorted(self.linuxbin))
+        self.assertEqual(self.win32recipe.files_list_by_category('bins'), [])
+        self.assertEqual(self.linuxrecipe.files_list_by_category('bins'), [])
 
     def testListLibraries(self):
-        add_files(self.tmp)
         self.assertEqual(self.win32recipe.files_list_by_category('libs', False), sorted(self.winlib))
         self.assertEqual(self.linuxrecipe.files_list_by_category('libs', False), sorted(self.linuxlib))
+        self.assertEqual(self.win32recipe.files_list_by_category('libs'), [])
+        self.assertEqual(self.linuxrecipe.files_list_by_category('libs'), [])
 
     def testDevelFiles(self):
-        add_files(self.tmp)
         self.assertEqual(self.win32recipe.devel_files_list(False), sorted(self.windevfiles))
         self.assertEqual(self.linuxrecipe.devel_files_list(False), sorted(self.lindevfiles))
+        self.assertEqual(self.win32recipe.devel_files_list(), [])
+        self.assertEqual(self.linuxrecipe.devel_files_list(), [])
 
     def testDistFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc
-        add_files(self.tmp)
         self.assertEqual(self.win32recipe.dist_files_list(False), sorted(win32files))
         self.assertEqual(self.linuxrecipe.dist_files_list(False), sorted(linuxfiles))
+        self.assertEqual(self.win32recipe.dist_files_list(), [])
+        self.assertEqual(self.linuxrecipe.dist_files_list(), [])
 
     def testGetAllFiles(self):
         win32files = self.winlib + self.winbin + self.winmisc + self.windevfiles
         linuxfiles = self.linuxlib + self.linuxbin + self.linuxmisc + self.lindevfiles
-        add_files(self.tmp)
         self.assertEqual(self.win32recipe.files_list(False), sorted(win32files))
         self.assertEqual(self.linuxrecipe.files_list(False), sorted(linuxfiles))
+        self.assertEqual(self.win32recipe.files_list(), [])
+        self.assertEqual(self.linuxrecipe.files_list(), [])
