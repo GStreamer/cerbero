@@ -1,0 +1,744 @@
+From 656cb64107e98e01d7e6989da364de380fba78e6 Mon Sep 17 00:00:00 2001
+From: saraboule <Sara.Boule@laerdal.com>
+Date: Tue, 16 Apr 2024 14:01:53 -0400
+Subject: [PATCH] Remove Gslice without breaking anything
+
+---
+ agent/address.c                     |  6 ++---
+ agent/agent.c                       | 40 ++++++++++++++---------------
+ agent/candidate.c                   |  4 +--
+ agent/component.c                   | 24 ++++++++---------
+ agent/conncheck.c                   | 18 ++++++-------
+ agent/discovery.c                   |  4 +--
+ agent/outputstream.c                |  4 +--
+ agent/pseudotcp.c                   | 24 ++++++++---------
+ socket/http.c                       |  6 ++---
+ socket/pseudossl.c                  |  6 ++---
+ socket/socks5.c                     |  6 ++---
+ socket/tcp-active.c                 |  6 ++---
+ tests/test-bsd.c                    | 14 +++++-----
+ tests/test-udp-turn-fragmentation.c |  2 +-
+ 14 files changed, 81 insertions(+), 83 deletions(-)
+
+diff --git a/agent/address.c b/agent/address.c
+index 81795ae..b9abd9d 100644
+--- a/agent/address.c
++++ b/agent/address.c
+@@ -102,7 +102,7 @@ nice_address_init (NiceAddress *addr)
+ NICEAPI_EXPORT NiceAddress *
+ nice_address_new (void)
+ {
+-  NiceAddress *addr = g_slice_new0 (NiceAddress);
++  NiceAddress *addr = g_new0 (NiceAddress, 1);
+   nice_address_init (addr);
+   return addr;
+ }
+@@ -299,7 +299,7 @@ nice_address_equal (const NiceAddress *a, const NiceAddress *b)
+ NICEAPI_EXPORT NiceAddress *
+ nice_address_dup (const NiceAddress *a)
+ {
+-  NiceAddress *dup = g_slice_new0 (NiceAddress);
++  NiceAddress *dup = g_new0 (NiceAddress, 1);
+ 
+   *dup = *a;
+   return dup;
+@@ -309,7 +309,7 @@ nice_address_dup (const NiceAddress *a)
+ NICEAPI_EXPORT void
+ nice_address_free (NiceAddress *addr)
+ {
+-  g_slice_free (NiceAddress, addr);
++  g_free (addr);
+ }
+ 
+ 
+diff --git a/agent/agent.c b/agent/agent.c
+index fe7a299..628aec3 100644
+--- a/agent/agent.c
++++ b/agent/agent.c
+@@ -203,8 +203,8 @@ free_queued_signal (QueuedSignal *sig)
+     g_value_unset (&sig->params[i + 1]);
+   }
+ 
+-  g_slice_free1 (sizeof(GValue) * (sig->query.n_params + 1), sig->params);
+-  g_slice_free (QueuedSignal, sig);
++  //g_free_sized (sig->params, sizeof(GValue) * (sig->query.n_params + 1));
++  g_free (sig);
+ }
+ 
+ void
+@@ -233,11 +233,11 @@ agent_queue_signal (NiceAgent *agent, guint signal_id, ...)
+   gchar *error = NULL;
+   va_list var_args;
+ 
+-  sig = g_slice_new (QueuedSignal);
++  sig = g_new (QueuedSignal, 1);
+   g_signal_query (signal_id, &sig->query);
+ 
+   sig->signal_id = signal_id;
+-  sig->params = g_slice_alloc0 (sizeof(GValue) * (sig->query.n_params + 1));
++  sig->params = g_malloc0 (sizeof(GValue) * (sig->query.n_params + 1));
+ 
+   g_value_init (&sig->params[0], G_TYPE_OBJECT);
+   g_value_set_object (&sig->params[0], agent);
+@@ -2476,7 +2476,7 @@ process_queued_tcp_packets (NiceAgent *agent, NiceStream *stream,
+ 
+     g_queue_pop_head (&component->queued_tcp_packets);
+     g_free ((gpointer) vec->buffer);
+-    g_slice_free (GOutputVector, vec);
++    g_free (vec);
+   }
+ }
+ 
+@@ -2681,7 +2681,7 @@ priv_add_new_candidate_discovery_stun (NiceAgent *agent,
+   /* note: no need to check for redundant candidates, as this is
+    *       done later on in the process */
+ 
+-  cdisco = g_slice_new0 (CandidateDiscovery);
++  cdisco = g_new0 (CandidateDiscovery, 1);
+ 
+   cdisco->type = NICE_CANDIDATE_TYPE_SERVER_REFLEXIVE;
+   cdisco->nicesock = nicesock;
+@@ -2723,7 +2723,7 @@ stun_server_resolved_cb (GObject *src, GAsyncResult *result,
+   if (agent == NULL)
+     return;
+   stream_id = data->stream_id;
+-  g_slice_free (struct StunResolverData, data);
++  g_free (data);
+ 
+   agent->stun_resolving_list = g_slist_remove_all (agent->stun_resolving_list,
+       data);
+@@ -2888,7 +2888,7 @@ priv_add_new_candidate_discovery_turn (NiceAgent *agent,
+   /* note: no need to check for redundant candidates, as this is
+    *       done later on in the process */
+ 
+-  cdisco = g_slice_new0 (CandidateDiscovery);
++  cdisco = g_new0 (CandidateDiscovery, 1);
+   cdisco->type = NICE_CANDIDATE_TYPE_RELAYED;
+ 
+   if (turn->type == NICE_RELAY_TYPE_TURN_UDP) {
+@@ -2978,7 +2978,7 @@ priv_add_new_candidate_discovery_turn (NiceAgent *agent,
+   return;
+ 
+ skip:
+-  g_slice_free (CandidateDiscovery, cdisco);
++  g_free (cdisco);
+ }
+ 
+ NICEAPI_EXPORT guint
+@@ -3039,7 +3039,7 @@ turn_server_resolved_cb (GObject *src, GAsyncResult *result,
+ 
+   component = g_weak_ref_get (&rd->component_ref);
+   g_weak_ref_clear (&rd->component_ref);
+-  g_slice_free (struct TurnResolverData, rd);
++  g_free (rd);
+   if (component == NULL) {
+     turn_server_unref (turn);
+     return;
+@@ -3160,7 +3160,7 @@ resolve_turn_in_context (NiceAgent *agent, gpointer data)
+   if (component == NULL) {
+     g_weak_ref_clear (&rd->component_ref);
+     turn_server_unref (rd->turn);
+-    g_slice_free (struct TurnResolverData, rd);
++    g_free (rd);
+ 
+     return G_SOURCE_REMOVE;
+   }
+@@ -3235,7 +3235,7 @@ nice_agent_set_relay_info(NiceAgent *agent,
+ 
+   if (!nice_address_is_valid (&turn->server)) {
+     GSource *source = NULL;
+-    struct TurnResolverData *rd = g_slice_new (struct TurnResolverData);
++    struct TurnResolverData *rd = g_new (struct TurnResolverData, 1);
+ 
+     g_weak_ref_init (&rd->component_ref, component);
+     rd->turn = turn_server_ref (turn);
+@@ -3713,7 +3713,7 @@ nice_agent_gather_candidates (
+ 
+   if (agent->full_mode && agent->stun_server_ip && !agent->force_relay)
+   {
+-    struct StunResolverData *rd = g_slice_new (struct StunResolverData);
++    struct StunResolverData *rd = g_new (struct StunResolverData, 1);
+     GSource *source = NULL;
+ 
+     g_weak_ref_init (&rd->agent_ref, agent);
+@@ -4882,7 +4882,7 @@ agent_recv_message_unlocked (
+        * to process them now, fail to send the ACKs, and incur a timeout in our
+        * pseudo-TCP state machine. */
+       if (component->selected_pair.local == NULL) {
+-        GOutputVector *vec = g_slice_new (GOutputVector);
++        GOutputVector *vec = g_new (GOutputVector, 1);
+         vec->buffer = compact_input_message (message, &vec->size);
+         g_queue_push_tail (&component->queued_tcp_packets, vec);
+         nice_debug ("%s: Queued %" G_GSSIZE_FORMAT " bytes for agent %p.",
+@@ -5391,8 +5391,8 @@ nice_agent_recv_messages_blocking_or_nonblocking (NiceAgent *agent,
+         if (messages_orig == NULL)
+           messages_orig = g_memdup (messages,
+               sizeof (NiceInputMessage) * n_messages);
+-        vec = g_slice_new (GInputVector);
+-        vec->buffer = g_slice_alloc (1280);
++        vec = g_new (GInputVector, 1);
++        vec->buffer = g_malloc (1280);
+         vec->size = 1280;
+         messages[i].buffers = vec;
+         messages[i].n_buffers = 1;
+@@ -5577,8 +5577,8 @@ done:
+         memcpy_buffer_to_input_message (&messages_orig[i],
+             messages[i].buffers[0].buffer, messages[i].length);
+ 
+-        g_slice_free1 (1280, messages[i].buffers[0].buffer);
+-        g_slice_free (GInputVector, messages[i].buffers);
++        g_free (messages[i].buffers[0].buffer);
++        g_free (messages[i].buffers);
+ 
+         messages[i].buffers = messages_orig[i].buffers;
+         messages[i].n_buffers = messages_orig[i].n_buffers;
+@@ -6717,14 +6717,14 @@ static void
+ timeout_data_destroy (TimeoutData *data)
+ {
+   g_weak_ref_clear (&data->agent_ref);
+-  g_slice_free (TimeoutData, data);
++  g_free (data);
+ }
+ 
+ static TimeoutData *
+ timeout_data_new (NiceAgent *agent, NiceTimeoutLockedCallback function,
+     gpointer user_data)
+ {
+-  TimeoutData *data = g_slice_new0 (TimeoutData);
++  TimeoutData *data = g_new0 (TimeoutData, 1);
+ 
+   g_weak_ref_init (&data->agent_ref, agent);
+   data->function = function;
+diff --git a/agent/candidate.c b/agent/candidate.c
+index 4d18ff7..a0b872d 100644
+--- a/agent/candidate.c
++++ b/agent/candidate.c
+@@ -68,7 +68,7 @@ nice_candidate_new (NiceCandidateType type)
+ {
+   NiceCandidateImpl *c;
+ 
+-  c = g_slice_new0 (NiceCandidateImpl);
++  c = g_new0 (NiceCandidateImpl, 1);
+   c->c.type = type;
+   return (NiceCandidate *) c;
+ }
+@@ -91,7 +91,7 @@ nice_candidate_free (NiceCandidate *candidate)
+   if (c->stun_server)
+     nice_address_free (c->stun_server);
+ 
+-  g_slice_free (NiceCandidateImpl, c);
++  g_free (c);
+ }
+ 
+ 
+diff --git a/agent/component.c b/agent/component.c
+index 92347b1..bf9063e 100644
+--- a/agent/component.c
++++ b/agent/component.c
+@@ -92,7 +92,7 @@ void
+ incoming_check_free (IncomingCheck *icheck)
+ {
+   g_free (icheck->username);
+-  g_slice_free (IncomingCheck, icheck);
++  g_free (icheck);
+ }
+ 
+ /* Must *not* take the agent lock, since it’s called from within
+@@ -150,7 +150,7 @@ socket_source_free (SocketSource *source)
+   socket_source_detach (source);
+   nice_socket_free (source->socket);
+ 
+-  g_slice_free (SocketSource, source);
++  g_free (source);
+ }
+ 
+ NiceComponent *
+@@ -384,7 +384,7 @@ nice_component_close (NiceAgent *agent, NiceStream *stream, NiceComponent *cmp)
+ 
+   while ((vec = g_queue_pop_head (&cmp->queued_tcp_packets)) != NULL) {
+     g_free ((gpointer) vec->buffer);
+-    g_slice_free (GOutputVector, vec);
++    g_free (vec);
+   }
+ 
+   g_free (cmp->recv_buffer);
+@@ -668,7 +668,7 @@ nice_component_attach_socket (NiceComponent *component, NiceSocket *nicesock)
+   if (l != NULL) {
+     socket_source = l->data;
+   } else {
+-    socket_source = g_slice_new0 (SocketSource);
++    socket_source = g_new0 (SocketSource, 1);
+     socket_source->socket = nicesock;
+     socket_source->component = component;
+     component->socket_sources =
+@@ -869,7 +869,7 @@ io_callback_data_new (const guint8 *buf, gsize buf_len)
+ {
+   IOCallbackData *data;
+ 
+-  data = g_slice_new0 (IOCallbackData);
++  data = g_new0 (IOCallbackData, 1);
+   data->buf = g_memdup (buf, buf_len);
+   data->buf_len = buf_len;
+   data->offset = 0;
+@@ -881,7 +881,7 @@ void
+ io_callback_data_free (IOCallbackData *data)
+ {
+   g_free (data->buf);
+-  g_slice_free (IOCallbackData, data);
++  g_free (data);
+ }
+ 
+ /* This is called with the global agent lock released. It does not take that
+@@ -1400,7 +1400,7 @@ component_source_prepare (GSource *source, gint *timeout_)
+     if (childl)
+       break;
+ 
+-    child_socket_source = g_slice_new0 (SocketSource);
++    child_socket_source = g_new0 (SocketSource, 1);
+     child_socket_source->socket = parent_socket_source->socket;
+     child_socket_source->source =
+         g_socket_create_source (child_socket_source->socket->fileno, G_IO_IN,
+@@ -1424,7 +1424,7 @@ component_source_prepare (GSource *source, gint *timeout_)
+     /* If this is not a currently used socket, remove the relevant source */
+     if (!parentl) {
+       g_source_remove_child_source (source, child_socket_source->source);
+-      g_slice_free (SocketSource, child_socket_source);
++      g_free (child_socket_source);
+       component_source->socket_sources =
+           g_slist_delete_link (component_source->socket_sources, childl);
+     }
+@@ -1457,7 +1457,7 @@ component_source_dispatch (GSource *source, GSourceFunc callback,
+ static void
+ free_child_socket_source (gpointer data)
+ {
+-  g_slice_free (SocketSource, data);
++  g_free (data);
+ }
+ 
+ static void
+@@ -1562,7 +1562,7 @@ TurnServer *
+ turn_server_new (const gchar *server_ip, guint server_port,
+     const gchar *username, const gchar *password, NiceRelayType type)
+ {
+-  TurnServer *turn = g_slice_new0 (TurnServer);
++  TurnServer *turn = g_new0 (TurnServer, 1);
+ 
+   nice_address_init (&turn->server);
+ 
+@@ -1602,14 +1602,14 @@ turn_server_unref (TurnServer *turn)
+     g_free (turn->password);
+     g_free (turn->decoded_username);
+     g_free (turn->decoded_password);
+-    g_slice_free (TurnServer, turn);
++    g_free (turn);
+   }
+ }
+ 
+ TurnServer *
+ turn_server_copy (TurnServer *turn)
+ {
+-  TurnServer *copy = g_slice_new0 (TurnServer);
++  TurnServer *copy = g_new0 (TurnServer, 1);
+ 
+   copy->ref_count = 1;
+   copy->server = turn->server;
+diff --git a/agent/conncheck.c b/agent/conncheck.c
+index 4b45080..88f1999 100644
+--- a/agent/conncheck.c
++++ b/agent/conncheck.c
+@@ -556,7 +556,7 @@ conn_check_stun_transactions_count (NiceAgent *agent)
+ static StunTransaction *
+ priv_add_stun_transaction (CandidateCheckPair *pair)
+ {
+-  StunTransaction *stun = g_slice_new0 (StunTransaction);
++  StunTransaction *stun = g_new0 (StunTransaction, 1);
+   pair->stun_transactions = g_slist_prepend (pair->stun_transactions, stun);
+   pair->retransmit = TRUE;
+   return stun;
+@@ -584,7 +584,7 @@ priv_forget_stun_transaction (gpointer data, gpointer user_data)
+ static void
+ priv_free_stun_transaction (gpointer data)
+ {
+-  g_slice_free (StunTransaction, data);
++  g_free (data);
+ }
+ 
+ /*
+@@ -1981,7 +1981,7 @@ conn_check_remote_candidates_set(NiceAgent *agent, NiceStream *stream,
+ 
+     if (icheck->username)
+       g_free (icheck->username);
+-    g_slice_free (IncomingCheck, icheck);
++    g_free (icheck);
+     g_queue_delete_link (&component->incoming_checks, i);
+     i = i_next;
+   }
+@@ -2362,7 +2362,7 @@ static CandidateCheckPair *priv_add_new_check_pair (NiceAgent *agent,
+   }
+ 
+   stream = agent_find_stream (agent, stream_id);
+-  pair = g_slice_new0 (CandidateCheckPair);
++  pair = g_new0 (CandidateCheckPair, 1);
+ 
+   pair->stream_id = stream_id;
+   pair->component_id = component->id;
+@@ -2605,7 +2605,7 @@ static void candidate_check_pair_free (NiceAgent *agent,
+ {
+   priv_remove_pair_from_triggered_check_queue (agent, pair);
+   priv_free_all_stun_transactions (pair, NULL);
+-  g_slice_free (CandidateCheckPair, pair);
++  g_free (pair);
+ }
+ 
+ /*
+@@ -3320,7 +3320,7 @@ static IncomingCheck *priv_store_pending_check (NiceAgent *agent, NiceComponent
+ 
+   nice_debug ("Agent %p : Storing pending check.", agent);
+ 
+-  icheck = g_slice_new0 (IncomingCheck);
++  icheck = g_new0 (IncomingCheck, 1);
+   icheck->from = *from;
+   icheck->local_socket = sockptr;
+   icheck->priority = priority;
+@@ -3335,7 +3335,7 @@ static IncomingCheck *priv_store_pending_check (NiceAgent *agent, NiceComponent
+     IncomingCheck *old_icheck = g_queue_pop_head (&component->incoming_checks);
+ 
+     g_free (old_icheck->username);
+-    g_slice_free (IncomingCheck, old_icheck);
++    g_free (old_icheck);
+ 
+     nice_debug ("Agent %p : WARN: Over %d early checks, dropping the oldest",
+         agent, max_incoming_checks);
+@@ -3352,7 +3352,7 @@ static IncomingCheck *priv_store_pending_check (NiceAgent *agent, NiceComponent
+  */
+ static CandidateCheckPair *priv_add_peer_reflexive_pair (NiceAgent *agent, guint stream_id, NiceComponent *component, NiceCandidateImpl *local_cand, CandidateCheckPair *parent_pair)
+ {
+-  CandidateCheckPair *pair = g_slice_new0 (CandidateCheckPair);
++  CandidateCheckPair *pair = g_new0 (CandidateCheckPair, 1);
+   NiceStream *stream = agent_find_stream (agent, stream_id);
+ 
+   pair->stream_id = stream_id;
+@@ -3901,7 +3901,7 @@ priv_add_new_turn_refresh (NiceAgent *agent, CandidateDiscovery *cdisco,
+        agent->compatibility == NICE_COMPATIBILITY_OC2007R2))
+     return;
+ 
+-  cand = g_slice_new0 (CandidateRefresh);
++  cand = g_new0 (CandidateRefresh, 1);
+ 
+   cand->candidate = relay_cand;
+   cand->nicesock = cdisco->nicesock;
+diff --git a/agent/discovery.c b/agent/discovery.c
+index ace338d..ccb669e 100644
+--- a/agent/discovery.c
++++ b/agent/discovery.c
+@@ -70,7 +70,7 @@ static void discovery_free_item (CandidateDiscovery *cand)
+   if (cand->turn)
+     turn_server_unref (cand->turn);
+ 
+-  g_slice_free (CandidateDiscovery, cand);
++  g_free (cand);
+ }
+ 
+ /*
+@@ -173,7 +173,7 @@ void refresh_free (NiceAgent *agent, CandidateRefresh *cand)
+     cand->destroy_cb (cand->destroy_cb_data);
+   }
+ 
+-  g_slice_free (CandidateRefresh, cand);
++  g_free (cand);
+ }
+ 
+ static gboolean on_refresh_remove_timeout (NiceAgent *agent,
+diff --git a/agent/outputstream.c b/agent/outputstream.c
+index 8ff2b8a..6768d70 100644
+--- a/agent/outputstream.c
++++ b/agent/outputstream.c
+@@ -335,7 +335,7 @@ write_data_unref (WriteData *write_data)
+   if (g_atomic_int_dec_and_test (&write_data->ref_count)) {
+     g_cond_clear (&write_data->cond);
+     g_mutex_clear (&write_data->mutex);
+-    g_slice_free (WriteData, write_data);
++    g_free (write_data);
+   }
+ }
+ 
+@@ -398,7 +398,7 @@ nice_output_stream_write (GOutputStream *stream, const void *buffer, gsize count
+    * since nice_agent_recv() is blocking. Currently this uses a fairly dodgy
+    * GCond solution; would be much better for nice_agent_send() to block
+    * properly in the main loop. */
+-  write_data = g_slice_new0 (WriteData);
++  write_data = g_new0 (WriteData, 1);
+   write_data->ref_count = 1;
+   g_mutex_init (&write_data->mutex);
+   g_cond_init (&write_data->cond);
+diff --git a/agent/pseudotcp.c b/agent/pseudotcp.c
+index f1488c0..ee2e61f 100644
+--- a/agent/pseudotcp.c
++++ b/agent/pseudotcp.c
+@@ -284,7 +284,7 @@ typedef struct {
+ static void
+ pseudo_tcp_fifo_init (PseudoTcpFifo *b, gsize size)
+ {
+-  b->buffer = g_slice_alloc (size);
++  b->buffer = g_malloc (size);
+   b->buffer_length = size;
+ }
+ 
+@@ -292,7 +292,7 @@ static void
+ pseudo_tcp_fifo_clear (PseudoTcpFifo *b)
+ {
+   if (b->buffer)
+-    g_slice_free1 (b->buffer_length, b->buffer);
++    g_free (b->buffer);
+   b->buffer = NULL;
+   b->buffer_length = 0;
+ }
+@@ -310,13 +310,13 @@ pseudo_tcp_fifo_set_capacity (PseudoTcpFifo *b, gsize size)
+     return FALSE;
+ 
+   if (size != b->data_length) {
+-    guint8 *buffer = g_slice_alloc (size);
++    guint8 *buffer = g_malloc (size);
+     gsize copy = b->data_length;
+     gsize tail_copy = min (copy, b->buffer_length - b->read_position);
+ 
+     memcpy (buffer, &b->buffer[b->read_position], tail_copy);
+     memcpy (buffer + tail_copy, &b->buffer[0], copy - tail_copy);
+-    g_slice_free1 (b->buffer_length, b->buffer);
++    g_free (b->buffer);
+     b->buffer = buffer;
+     b->buffer_length = size;
+     b->read_position = 0;
+@@ -778,11 +778,11 @@ pseudo_tcp_socket_finalize (GObject *object)
+     return;
+ 
+   while ((sseg = g_queue_pop_head (&priv->slist)))
+-    g_slice_free (SSegment, sseg);
++    g_free (sseg);
+   g_queue_clear (&priv->unsent_slist);
+   for (i = priv->rlist; i; i = i->next) {
+     RSegment *rseg = i->data;
+-    g_slice_free (RSegment, rseg);
++    g_free (rseg);
+   }
+   g_list_free (priv->rlist);
+   priv->rlist = NULL;
+@@ -1387,7 +1387,7 @@ queue (PseudoTcpSocket *self, const gchar * data, guint32 len, TcpFlags flags)
+       (((SSegment *)g_queue_peek_tail (&priv->slist))->xmit == 0)) {
+     ((SSegment *)g_queue_peek_tail (&priv->slist))->len += len;
+   } else {
+-    SSegment *sseg = g_slice_new0 (SSegment);
++    SSegment *sseg = g_new0 (SSegment, 1);
+     gsize snd_buffered = pseudo_tcp_fifo_get_buffered (&priv->sbuf);
+ 
+     sseg->seq = priv->snd_una + snd_buffered;
+@@ -1725,7 +1725,7 @@ process(PseudoTcpSocket *self, Segment *seg)
+           priv->largest = data->len;
+         }
+         nFree -= data->len;
+-        g_slice_free (SSegment, data);
++        g_free (data);
+         g_queue_pop_head (&priv->slist);
+       }
+     }
+@@ -2018,13 +2018,13 @@ process(PseudoTcpSocket *self, Segment *seg)
+             priv->rcv_nxt += nAdjust;
+             priv->rcv_wnd -= nAdjust;
+           }
+-          g_slice_free (RSegment, priv->rlist->data);
++          g_free (priv->rlist->data);
+           priv->rlist = g_list_delete_link (priv->rlist, priv->rlist);
+           iter = priv->rlist;
+         }
+       } else {
+         GList *iter = NULL;
+-        RSegment *rseg = g_slice_new0 (RSegment);
++        RSegment *rseg = g_new0 (RSegment, 1);
+ 
+         DEBUG (PSEUDO_TCP_DEBUG_NORMAL, "Saving %u bytes (%u -> %u)",
+             seg->len, seg->seq, seg->seq + seg->len);
+@@ -2114,7 +2114,7 @@ transmit(PseudoTcpSocket *self, SSegment *segment, guint32 now)
+   }
+ 
+   if (nTransmit < segment->len) {
+-    SSegment *subseg = g_slice_new0 (SSegment);
++    SSegment *subseg = g_new0 (SSegment, 1);
+     subseg->seq = segment->seq + nTransmit;
+     subseg->len = segment->len - nTransmit;
+     subseg->flags = segment->flags;
+@@ -2244,7 +2244,7 @@ attempt_send(PseudoTcpSocket *self, SendFlags sflags)
+ 
+     // If the segment is too large, break it into two
+     if (sseg->len > nAvailable && sflags != sfFin && sflags != sfRst) {
+-      SSegment *subseg = g_slice_new0 (SSegment);
++      SSegment *subseg = g_new0 (SSegment, 1);
+       subseg->seq = sseg->seq + nAvailable;
+       subseg->len = sseg->len - nAvailable;
+       subseg->flags = sseg->flags;
+diff --git a/socket/http.c b/socket/http.c
+index d16b317..2e7286c 100644
+--- a/socket/http.c
++++ b/socket/http.c
+@@ -113,8 +113,8 @@ nice_http_socket_new (NiceSocket *base_socket,
+   NiceSocket *sock = NULL;
+ 
+   if (addr) {
+-    sock = g_slice_new0 (NiceSocket);
+-    sock->priv = priv = g_slice_new0 (HttpPriv);
++    sock = g_new0 (NiceSocket, 1);
++    sock->priv = priv = g_new0 (HttpPriv, 1);
+ 
+     priv->base_socket = base_socket;
+     priv->addr = *addr;
+@@ -210,7 +210,7 @@ socket_close (NiceSocket *sock)
+ 
+   nice_socket_free_send_queue (&priv->send_queue);
+ 
+-  g_slice_free(HttpPriv, sock->priv);
++  g_free(sock->priv);
+   sock->priv = NULL;
+ }
+ 
+diff --git a/socket/pseudossl.c b/socket/pseudossl.c
+index 052725c..c83088a 100644
+--- a/socket/pseudossl.c
++++ b/socket/pseudossl.c
+@@ -137,8 +137,8 @@ nice_pseudossl_socket_new (NiceSocket *base_socket,
+     return NULL;
+   }
+ 
+-  sock = g_slice_new0 (NiceSocket);
+-  sock->priv = priv = g_slice_new0 (PseudoSSLPriv);
++  sock = g_new0 (NiceSocket, 1);
++  sock->priv = priv = g_new0 (PseudoSSLPriv, 1);
+ 
+   priv->handshaken = FALSE;
+   priv->base_socket = base_socket;
+@@ -174,7 +174,7 @@ socket_close (NiceSocket *sock)
+ 
+   nice_socket_free_send_queue (&priv->send_queue);
+ 
+-  g_slice_free(PseudoSSLPriv, sock->priv);
++  g_free(sock->priv);
+   sock->priv = NULL;
+ }
+ 
+diff --git a/socket/socks5.c b/socket/socks5.c
+index d15fc29..d628fe3 100644
+--- a/socket/socks5.c
++++ b/socket/socks5.c
+@@ -92,8 +92,8 @@ nice_socks5_socket_new (NiceSocket *base_socket,
+   NiceSocket *sock = NULL;
+ 
+   if (addr) {
+-    sock = g_slice_new0 (NiceSocket);
+-    sock->priv = priv = g_slice_new0 (Socks5Priv);
++    sock = g_new0 (NiceSocket, 1);
++    sock->priv = priv = g_new0 (Socks5Priv, 1);
+ 
+     priv->base_socket = base_socket;
+     priv->addr = *addr;
+@@ -156,7 +156,7 @@ socket_close (NiceSocket *sock)
+ 
+   nice_socket_free_send_queue (&priv->send_queue);
+ 
+-  g_slice_free(Socks5Priv, sock->priv);
++  g_free(sock->priv);
+   sock->priv = NULL;
+ }
+ 
+diff --git a/socket/tcp-active.c b/socket/tcp-active.c
+index 0d3ccd2..6d72609 100644
+--- a/socket/tcp-active.c
++++ b/socket/tcp-active.c
+@@ -110,9 +110,9 @@ nice_tcp_active_socket_new (GMainContext *ctx, NiceAddress *addr)
+     ctx = g_main_context_default ();
+   }
+ 
+-  sock = g_slice_new0 (NiceSocket);
++  sock = g_new0 (NiceSocket, 1);
+ 
+-  sock->priv = priv = g_slice_new0 (TcpActivePriv);
++  sock->priv = priv = g_new0 (TcpActivePriv, 1);
+ 
+   priv->context = g_main_context_ref (ctx);
+   priv->local_addr = gaddr;
+@@ -141,7 +141,7 @@ socket_close (NiceSocket *sock)
+   if (priv->local_addr)
+     g_object_unref (priv->local_addr);
+ 
+-  g_slice_free(TcpActivePriv, sock->priv);
++  g_free(sock->priv);
+ }
+ 
+ static gint socket_recv_messages (NiceSocket *sock,
+diff --git a/tests/test-bsd.c b/tests/test-bsd.c
+index f8185a5..f539353 100644
+--- a/tests/test-bsd.c
++++ b/tests/test-bsd.c
+@@ -281,7 +281,7 @@ test_multi_message_recv (guint n_sends, guint n_receives,
+ 
+     for (i = 0; i < n_sends; i++) {
+       for (j = 0; j < n_bufs_per_message; j++) {
+-        guint8 *buf = g_slice_alloc (send_buf_size);
++        guint8 *buf = g_malloc (send_buf_size);
+ 
+         send_bufs[i * n_bufs_per_message + j].buffer = buf;
+         send_bufs[i * n_bufs_per_message + j].size = send_buf_size;
+@@ -302,7 +302,7 @@ test_multi_message_recv (guint n_sends, guint n_receives,
+     for (i = 0; i < n_receives; i++) {
+       for (j = 0; j < n_bufs_per_message; j++) {
+         recv_bufs[i * n_bufs_per_message + j].buffer =
+-            g_slice_alloc (recv_buf_size);
++            g_malloc (recv_buf_size);
+         recv_bufs[i * n_bufs_per_message + j].size = recv_buf_size;
+ 
+         /* Initialise the buffer to try to catch out-of-bounds accesses. */
+@@ -328,7 +328,7 @@ test_multi_message_recv (guint n_sends, guint n_receives,
+ 
+     /* Check all of the things. The sizes should not have been modified. */
+     expected_recv_buf_len = recv_buf_size * n_bufs_per_message;
+-    _expected_recv_buf = g_slice_alloc (expected_recv_buf_len);
++    _expected_recv_buf = g_malloc (expected_recv_buf_len);
+ 
+     for (i = 0; i < expected_n_received_messages; i++) {
+       NiceInputMessage *message = &recv_messages[i];
+@@ -354,19 +354,17 @@ test_multi_message_recv (guint n_sends, guint n_receives,
+       }
+     }
+ 
+-    g_slice_free1 (expected_recv_buf_len, _expected_recv_buf);
++    g_free (_expected_recv_buf);
+ 
+     for (i = 0; i < n_receives; i++) {
+       for (j = 0; j < n_bufs_per_message; j++) {
+-        g_slice_free1 (recv_buf_size,
+-                       recv_bufs[i * n_bufs_per_message + j].buffer);
++        g_free (recv_bufs[i * n_bufs_per_message + j].buffer);
+       }
+     }
+ 
+     for (i = 0; i < n_sends; i++) {
+       for (j = 0; j < n_bufs_per_message; j++) {
+-        g_slice_free1 (send_buf_size,
+-                       (gpointer) send_bufs[i * n_bufs_per_message + j].buffer);
++        g_free ((gpointer) send_bufs[i * n_bufs_per_message + j].buffer);
+       }
+     }
+ 
+diff --git a/tests/test-udp-turn-fragmentation.c b/tests/test-udp-turn-fragmentation.c
+index 99337a2..181bc21 100644
+--- a/tests/test-udp-turn-fragmentation.c
++++ b/tests/test-udp-turn-fragmentation.c
+@@ -119,7 +119,7 @@ test_socket_close (NiceSocket *sock) {
+ static NiceSocket *
+ test_socket_new (GSList *msg_data)
+ {
+-  NiceSocket *sock = g_slice_new0 (NiceSocket);
++  NiceSocket *sock = g_new0 (NiceSocket,1);
+   TestSocketPriv *priv = g_new0 (TestSocketPriv, 1);
+   priv->msg_data = msg_data;
+   priv->current_msg = msg_data;
+-- 
+2.33.1.windows.1
+
