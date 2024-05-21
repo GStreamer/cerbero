@@ -220,10 +220,7 @@ class PackagesStore(object):
         # a package may need to call something that needs it
         # e.g. prepare() may call self.relative_path(), which uses __file__
         p.__file__ = os.path.abspath(filepath)
-        p.prepare()
-        # reload files from package now that we called prepare that
-        # may have changed it
-        p.load_files()
+        p.load()
         return p
 
     def _is_package_class(self, cls):

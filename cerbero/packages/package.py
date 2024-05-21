@@ -116,6 +116,12 @@ class PackageBase(object):
         self.store = store
         self.package_mode = PackageType.RUNTIME
 
+    def load(self):
+        self.prepare()
+        # reload files from package now that we called prepare that
+        # may have changed it
+        self.load_files()
+
     def prepare(self):
         """
         Can be overrided by subclasses to modify conditionally the package
