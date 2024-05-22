@@ -13,6 +13,29 @@ class Recipe(recipe.Recipe):
                      'dtrace': 'false', 'iconv': 'auto', 'selinux' : 'disabled'}
     deps = ['libffi', 'zlib', 'pkg-config']
 
+    # Without these, the relocator won't take effect on macOS
+    files_bins = [
+        'gtester',
+        'gobject-query',
+        'gio',
+        'gresource',
+        'gio-querymodules',
+        'glib-compile-schemas',
+        'glib-compile-resources',
+        'gsettings',
+        'gdbus',
+        'glib-mkenums',
+    ]
+
+    files_devel = [
+        'bin/gtester-report',
+        'bin/glib-genmarshal',
+        'bin/glib-mkenums',
+        'bin/glib-genmarshal',
+        'bin/gdbus-codegen',
+        'bin/glib-gettextize',
+    ]
+
     def prepare(self):
         # On Linux we must use the system gettext
         if self.config.platform != Platform.LINUX:
