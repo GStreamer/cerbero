@@ -1,5 +1,27 @@
+From 656cb64107e98e01d7e6989da364de380fba78e6 Mon Sep 17 00:00:00 2001
+From: saraboule <Sara.Boule@laerdal.com>
+Date: Tue, 16 Apr 2024 14:01:53 -0400
+Subject: [PATCH] Remove Gslice without breaking anything
+
+---
+ agent/address.c                     |  6 ++---
+ agent/agent.c                       | 40 ++++++++++++++---------------
+ agent/candidate.c                   |  4 +--
+ agent/component.c                   | 24 ++++++++---------
+ agent/conncheck.c                   | 18 ++++++-------
+ agent/discovery.c                   |  4 +--
+ agent/outputstream.c                |  4 +--
+ agent/pseudotcp.c                   | 24 ++++++++---------
+ socket/http.c                       |  6 ++---
+ socket/pseudossl.c                  |  6 ++---
+ socket/socks5.c                     |  6 ++---
+ socket/tcp-active.c                 |  6 ++---
+ tests/test-bsd.c                    | 14 +++++-----
+ tests/test-udp-turn-fragmentation.c |  2 +-
+ 14 files changed, 81 insertions(+), 83 deletions(-)
+
 diff --git a/agent/address.c b/agent/address.c
-index 81795ae..479ab6e 100644
+index 81795ae..b9abd9d 100644
 --- a/agent/address.c
 +++ b/agent/address.c
 @@ -102,7 +102,7 @@ nice_address_init (NiceAddress *addr)
@@ -30,14 +52,16 @@ index 81795ae..479ab6e 100644
  
  
 diff --git a/agent/agent.c b/agent/agent.c
-index fe7a299..50db6de 100644
+index fe7a299..628aec3 100644
 --- a/agent/agent.c
 +++ b/agent/agent.c
-@@ -204,7 +204,7 @@ free_queued_signal (QueuedSignal *sig)
+@@ -203,8 +203,8 @@ free_queued_signal (QueuedSignal *sig)
+     g_value_unset (&sig->params[i + 1]);
    }
  
-   g_slice_free1 (sizeof(GValue) * (sig->query.n_params + 1), sig->params);
+-  g_slice_free1 (sizeof(GValue) * (sig->query.n_params + 1), sig->params);
 -  g_slice_free (QueuedSignal, sig);
++  g_slice_free1 (sizeof(GValue) * (sig->query.n_params + 1), sig->params);
 +  g_free (sig);
  }
  
@@ -186,7 +210,7 @@ index fe7a299..50db6de 100644
    g_weak_ref_init (&data->agent_ref, agent);
    data->function = function;
 diff --git a/agent/candidate.c b/agent/candidate.c
-index 4d18ff7..b07bb44 100644
+index 4d18ff7..a0b872d 100644
 --- a/agent/candidate.c
 +++ b/agent/candidate.c
 @@ -68,7 +68,7 @@ nice_candidate_new (NiceCandidateType type)
@@ -208,7 +232,7 @@ index 4d18ff7..b07bb44 100644
  
  
 diff --git a/agent/component.c b/agent/component.c
-index 92347b1..9aba0c5 100644
+index 92347b1..bf9063e 100644
 --- a/agent/component.c
 +++ b/agent/component.c
 @@ -92,7 +92,7 @@ void
@@ -319,7 +343,7 @@ index 92347b1..9aba0c5 100644
    copy->ref_count = 1;
    copy->server = turn->server;
 diff --git a/agent/conncheck.c b/agent/conncheck.c
-index 4b45080..751573f 100644
+index 4b45080..88f1999 100644
 --- a/agent/conncheck.c
 +++ b/agent/conncheck.c
 @@ -556,7 +556,7 @@ conn_check_stun_transactions_count (NiceAgent *agent)
@@ -404,7 +428,7 @@ index 4b45080..751573f 100644
    cand->candidate = relay_cand;
    cand->nicesock = cdisco->nicesock;
 diff --git a/agent/discovery.c b/agent/discovery.c
-index ace338d..b9a6b65 100644
+index ace338d..ccb669e 100644
 --- a/agent/discovery.c
 +++ b/agent/discovery.c
 @@ -70,7 +70,7 @@ static void discovery_free_item (CandidateDiscovery *cand)
@@ -426,7 +450,7 @@ index ace338d..b9a6b65 100644
  
  static gboolean on_refresh_remove_timeout (NiceAgent *agent,
 diff --git a/agent/outputstream.c b/agent/outputstream.c
-index 8ff2b8a..9a9850a 100644
+index 8ff2b8a..6768d70 100644
 --- a/agent/outputstream.c
 +++ b/agent/outputstream.c
 @@ -335,7 +335,7 @@ write_data_unref (WriteData *write_data)
@@ -448,7 +472,7 @@ index 8ff2b8a..9a9850a 100644
    g_mutex_init (&write_data->mutex);
    g_cond_init (&write_data->cond);
 diff --git a/agent/pseudotcp.c b/agent/pseudotcp.c
-index f1488c0..f87655c 100644
+index f1488c0..ee2e61f 100644
 --- a/agent/pseudotcp.c
 +++ b/agent/pseudotcp.c
 @@ -284,7 +284,7 @@ typedef struct {
@@ -552,7 +576,7 @@ index f1488c0..f87655c 100644
        subseg->len = sseg->len - nAvailable;
        subseg->flags = sseg->flags;
 diff --git a/socket/http.c b/socket/http.c
-index d16b317..219a3df 100644
+index d16b317..2e7286c 100644
 --- a/socket/http.c
 +++ b/socket/http.c
 @@ -113,8 +113,8 @@ nice_http_socket_new (NiceSocket *base_socket,
@@ -576,7 +600,7 @@ index d16b317..219a3df 100644
  }
  
 diff --git a/socket/pseudossl.c b/socket/pseudossl.c
-index 052725c..45ca6a6 100644
+index 052725c..c83088a 100644
 --- a/socket/pseudossl.c
 +++ b/socket/pseudossl.c
 @@ -137,8 +137,8 @@ nice_pseudossl_socket_new (NiceSocket *base_socket,
@@ -600,7 +624,7 @@ index 052725c..45ca6a6 100644
  }
  
 diff --git a/socket/socks5.c b/socket/socks5.c
-index d15fc29..408d0c2 100644
+index d15fc29..d628fe3 100644
 --- a/socket/socks5.c
 +++ b/socket/socks5.c
 @@ -92,8 +92,8 @@ nice_socks5_socket_new (NiceSocket *base_socket,
@@ -624,7 +648,7 @@ index d15fc29..408d0c2 100644
  }
  
 diff --git a/socket/tcp-active.c b/socket/tcp-active.c
-index 0d3ccd2..867ddca 100644
+index 0d3ccd2..6d72609 100644
 --- a/socket/tcp-active.c
 +++ b/socket/tcp-active.c
 @@ -110,9 +110,9 @@ nice_tcp_active_socket_new (GMainContext *ctx, NiceAddress *addr)
@@ -649,7 +673,7 @@ index 0d3ccd2..867ddca 100644
  
  static gint socket_recv_messages (NiceSocket *sock,
 diff --git a/tests/test-bsd.c b/tests/test-bsd.c
-index f8185a5..981f3eb 100644
+index f8185a5..f539353 100644
 --- a/tests/test-bsd.c
 +++ b/tests/test-bsd.c
 @@ -281,7 +281,7 @@ test_multi_message_recv (guint n_sends, guint n_receives,
@@ -703,7 +727,7 @@ index f8185a5..981f3eb 100644
      }
  
 diff --git a/tests/test-udp-turn-fragmentation.c b/tests/test-udp-turn-fragmentation.c
-index 99337a2..a5f7e2e 100644
+index 99337a2..181bc21 100644
 --- a/tests/test-udp-turn-fragmentation.c
 +++ b/tests/test-udp-turn-fragmentation.c
 @@ -119,7 +119,7 @@ test_socket_close (NiceSocket *sock) {
@@ -715,3 +739,6 @@ index 99337a2..a5f7e2e 100644
    TestSocketPriv *priv = g_new0 (TestSocketPriv, 1);
    priv->msg_data = msg_data;
    priv->current_msg = msg_data;
+-- 
+2.33.1.windows.1
+
