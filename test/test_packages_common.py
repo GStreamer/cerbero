@@ -104,10 +104,6 @@ class App(package.App):
     embed_deps = True
 
 
-class DummyConfig(object):
-    pass
-
-
 def create_store(config):
     cookbook = create_cookbook(config)
     store = PackagesStore(config, False)
@@ -115,9 +111,11 @@ def create_store(config):
     for klass in [Package1, Package2, Package3, Package4, App]:
         package = klass(config, store, cookbook)
         package.__file__ = 'test/test_packages_common.py'
+        package.load()
         store.add_package(package)
     for klass in [MetaPackage]:
         package = klass(config, store)
         package.__file__ = 'test/test_packages_common.py'
+        package.load()
         store.add_package(package)
     return store

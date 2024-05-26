@@ -30,6 +30,7 @@ from test.test_common import DummyConfig
 
 class Config(DummyConfig):
     def __init__(self, tmp, platform):
+        super().__init__()
         self.prefix = tmp
         self.target_platform = platform
 

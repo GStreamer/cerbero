@@ -135,7 +135,7 @@ def create_cookbook(config):
     cb = CookBook(config, False)
 
     for klass in [Recipe1, Recipe2, Recipe3, Recipe4, Recipe5]:
-        r = klass(config)
+        r = klass(config, {})
         r.__file__ = 'test/test_build_common.py'
         cb.add_recipe(r)
     return cb

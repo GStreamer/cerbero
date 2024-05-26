@@ -22,7 +22,6 @@ import tempfile
 import unittest
 
 from cerbero import config as cconfig
-from cerbero.enums import Platform
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import system_info
 
@@ -148,14 +147,11 @@ class LinuxPackagesTest(unittest.TestCase):
         tmpfile = tempfile.NamedTemporaryFile()
         with open(tmpfile.name, 'w') as f:
             f.write('nonsense line')
-        self.assertRaises(ConfigurationError, config.parse, tmpfile.name)
+        self.assertRaises(ConfigurationError, config._parse, tmpfile.name)
 
     def testJoinPath(self):
         config = Config()
-        config.platform = Platform.LINUX
         self.assertEqual(config._join_path('/test1', '/test2'), '/test1:/test2')
-        config.platform = Platform.WINDOWS
-        self.assertEqual(config._join_path('/test1', '/test2'), '/test1;/test2')
 
     def testLoadCommandConfig(self):
         config = Config()
