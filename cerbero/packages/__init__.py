@@ -48,7 +48,7 @@ class PackagerBase(object):
         @param force: forces the creation of the package
         @type  force: bool
         @param keep_temp: do not delete temporary files
-        @type  force: bool
+        @type  keep_temp: bool
 
         @return: list of filenames for the packages created
         @rtype: list
