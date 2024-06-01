@@ -202,14 +202,13 @@ class Recipe(recipe.Recipe):
             self.patches += [
                 'wpewebkit/0001-Android-logging-macro.patch',
                 'wpewebkit/0002-Implement-Android-WebProcess-and-NetworkProcess-entr.patch',
-                'wpewebkit/0003-Scroll-related-changes.patch',
-                'wpewebkit/0004-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
-                'wpewebkit/0005-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
-                'wpewebkit/0006-Use-ASharedMemory-instead-of-shm.patch',
-                'wpewebkit/0007-Enable-Android-on-ANGLE-for-WebGL-support.patch',
-                'wpewebkit/0008-Compile-WebDriver-as-a-library.patch',
-                'wpewebkit/0009-Scale-mouse-location-according-to-device-scale-facto.patch',
-                'wpewebkit/0010-Fix-inspector-resource-lib-loading.patch'
+                'wpewebkit/0003-Remove-absolute-path-from-libWPEInjectedBundle.so-on.patch',
+                'wpewebkit/0004-Workaround-for-Android-emulator-samplerExternalOES-p.patch',
+                'wpewebkit/0005-Use-ASharedMemory-instead-of-shm.patch',
+                'wpewebkit/0006-Enable-Android-on-ANGLE-for-WebGL-support.patch',
+                'wpewebkit/0007-Compile-WebDriver-as-a-library.patch',
+                'wpewebkit/0008-Scale-mouse-location-according-to-device-scale-facto.patch',
+                'wpewebkit/0009-Fix-inspector-resource-lib-loading.patch'
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')
