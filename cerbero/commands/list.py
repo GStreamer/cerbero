@@ -82,15 +82,14 @@ class ShowConfig(Command):
 
     def _print_config(self, config):
         for n in config._properties:
-            if n == 'variants':
-                print('%25s :' % (n))
-                variants = getattr(config, n).__dict__
-                for v in variants:
-                    if v.startswith('_'):
-                        continue
-                    print('%30s : %s' % (v, variants[v]))
-            else:
-                print('%25s : %s' % (n, getattr(config, n)))
+            print('%25s : %s' % (n, getattr(config, n)))
+        # Now the variants
+        print('%25s :' % 'variants')
+        variants = config.variants.__dict__
+        for v in variants:
+            if v.startswith('_'):
+                continue
+            print('%30s : %s' % (v, variants[v]))
 
 
 register_command(List)
