@@ -118,8 +118,7 @@ class PackageBase(object):
 
     def load(self):
         self.prepare()
-        # reload files from package now that we called prepare that
-        # may have changed it
+        # reload files after calling prepare
         self.load_files()
 
     def prepare(self):
@@ -577,9 +576,9 @@ class App(Package):
         return remove_list_duplicates(deps)
 
     def files_list(self):
-        # for each package, call the function that list files
-        files = Package.files_list(self)
+        files = super().files_list()
         if self.embed_deps:
+            # for each package, call the function that list files
             packages_deps = [self.store.get_package(x) for x in self.deps]
             for package in packages_deps:
                 packages_deps.extend(self.store.get_package_deps(package))
@@ -656,4 +655,4 @@ class App(Package):
                     ret.extend(platform_list)
             return ret
         else:
-            return PackageBase.__getattribute__(self, name)
+            return super().__getattribute__(name)
