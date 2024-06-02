@@ -120,26 +120,27 @@ class Variants(object):
         # Keeps a list of variants overriden by the user after initialization
         self.__overridden_variants = set()
         # Set default values
+        self.reset()
+        self.override(variants)
+
+    def reset(self):
         for v in self.__enabled_variants:
             setattr(self, v, True)
         for v in self.__disabled_variants:
             setattr(self, v, False)
         for v, choices in self.__mapping_variants.items():
             setattr(self, v, choices[0])
-        self.override(variants)
         # reset after all inits
         self.__overridden_variants.clear()
 
     def set_bool(self, key):
+        val = True
         if key.startswith('no'):
             key = key[2:]
-            if key not in self.__bool_variants:
-                m.warning('Variant {!r} is unknown or obsolete'.format(key))
-            setattr(self, key, False)
-        else:
-            if key not in self.__bool_variants:
-                m.warning('Variant {!r} is unknown or obsolete'.format(key))
-            setattr(self, key, True)
+            val = False
+        if key not in self.__bool_variants:
+            m.warning('Variant {!r} is unknown or obsolete'.format(key))
+        setattr(self, key, val)
 
     def override(self, variants, force=True):
         """
@@ -178,6 +179,9 @@ class Variants(object):
         if '-' in attr:
             raise AssertionError("Variant name {!r} must not contain '-'".format(attr))
         super().__setattr__(attr, value)
+        if attr in ['_Variants__overridden_variants']:
+            return
+
         self.__overridden_variants.add(attr)
         # UWP implies Visual Studio
         if attr == 'uwp' and value:
@@ -344,6 +348,8 @@ class Config(object):
         # Store raw os.environ data
         self._pre_environ = os.environ.copy()
         self.config_env = os.environ.copy()
+        # Initialize variants
+        self.variants = Variants([])
 
     def _copy(self, arch):
         c = copy.deepcopy(self)
@@ -359,8 +365,9 @@ class Config(object):
         if variants_override is None:
             variants_override = []
 
-        # Initialize variants
-        self.variants = Variants(variants_override)
+        # Reset variants
+        self.variants.reset()
+        self.variants.override(variants_override)
 
         # First load the default configuration
         self.load_defaults()
