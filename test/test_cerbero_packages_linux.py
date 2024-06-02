@@ -45,7 +45,7 @@ class DummyPackager(linux.LinuxPackager):
 
 
 class DummyTarballPackager(PackagerBase):
-    def pack(self, output_dir, devel=True, force=False, split=True, package_prefix=''):
+    def pack(self, output_dir, devel=True, force=False, split=True, package_prefix='', strip_binaries=False):
         return ['test']
 
 
@@ -117,17 +117,21 @@ class LinuxPackagesTest(unittest.TestCase):
 
         # test devel packages
         requires = self.packager.get_meta_requires(PackageType.DEVEL, '-dev')
-        self.assertEqual(([], [], []), requires)
+        self.assertEqual((['gstreamer-runtime'], [], []), requires)
 
         # test empty packages
         self.store.get_package('gstreamer-test1').has_devel_package = True
         requires = self.packager.get_meta_requires(PackageType.DEVEL, '-dev')
-        self.assertEqual((['gstreamer-test1-dev'], [], []), requires)
+        self.assertEqual((['gstreamer-test1-dev', 'gstreamer-runtime'], [], []), requires)
 
         for p in [self.store.get_package(x[0]) for x in expected]:
             p.has_devel_package = True
         requires = self.packager.get_meta_requires(PackageType.DEVEL, '-dev')
-        expected = (['gstreamer-test1-dev'], ['gstreamer-test3-dev'], ['gstreamer-test-bindings-dev'])
+        expected = (
+            ['gstreamer-test1-dev', 'gstreamer-runtime'],
+            ['gstreamer-test3-dev'],
+            ['gstreamer-test-bindings-dev'],
+        )
         self.assertEqual(expected, requires)
 
     def testPackDeps(self):

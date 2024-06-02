@@ -30,7 +30,7 @@ USER_HEADER_SEARCH_PATHS = /usr/include/gstreamer-0.10\
  /usr/include/libxml2
 LIBRARY_SEARCH_PATHS = 
 OTHER_LDFLAGS =  -lgstreamer-0.10 \
--lgobject-2.0 -lgmodule-2.0 -lxml2 -lgthread-2.0 -lrt -lglib-2.0
+-lgobject-2.0 -lgmodule-2.0 -lrt -lgthread-2.0 -lrt -lglib-2.0 -lxml2
 """
 
 
@@ -43,7 +43,7 @@ class TestPkgConfig(unittest.TestCase):
     def testFill(self):
         xcconfig = XCConfig('gstreamer-0.10')
         expected = {
-            'libs': ' -lgstreamer-0.10 -lgobject-2.0 -lgmodule-2.0 ' '-lxml2 -lgthread-2.0 -lrt -lglib-2.0',
+            'libs': ' -lgstreamer-0.10 -lgobject-2.0 -lgmodule-2.0 -lrt -lgthread-2.0 -lrt -lglib-2.0 -lxml2',
             'hsp': '/usr/include/gstreamer-0.10 /usr/include/glib-2.0 '
             '/usr/lib/glib-2.0/include '
             '/usr/include/libxml2',

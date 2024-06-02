@@ -23,7 +23,6 @@ import tempfile
 
 from cerbero.config import Platform
 from cerbero.packages import PackageType
-from cerbero.packages.osx.packagemaker import PackageMaker
 from cerbero.packages.osx.packager import OSXPackage
 from cerbero.utils import shell
 from test.test_packages_common import create_store
@@ -47,8 +46,8 @@ class PackageMakerTest(unittest.TestCase):
         self.files = p.files_list()
         packager = OSXPackage(self.config, p, self.store)
         files = OSXPackage.files_list(packager, PackageType.RUNTIME, False)
-        tmpdest = packager._create_bundle(files, PackageType.RUNTIME)[0]
-        bundlefiles = shell.check_call('find . -type f ', tmpdest).split('\n')
+        tmpdest = packager._create_bundle(files, PackageType.RUNTIME)[1]
+        bundlefiles = shell.check_output('find . -type f ', tmpdest).split('\n')
         bundlefiles = sorted([f[2:] for f in bundlefiles])[1:]
         self.assertEqual(bundlefiles, self.files)
         shutil.rmtree(tmpdest)
@@ -71,28 +70,4 @@ class PackageMakerTest(unittest.TestCase):
             'lib/notincluded1 '
             'notincluded2 ',
             self.tmp,
-        )
-
-
-class DummyPackageMaker(PackageMaker):
-    def _execute(self, cmd):
-        self.cmd = cmd
-
-
-class TestPackageMaker(unittest.TestCase):
-    def testFillArgs(self):
-        pm = PackageMaker()
-        args = {'r': 'root', 'i': 'pkg_id', 'n': 'version', 't': 'title', 'l': 'destination', 'o': 'output_file'}
-        cmd = pm._cmd_with_args(args)
-        self.assertEqual(
-            cmd, "./PackageMaker  -i 'pkg_id' -l 'destination' -o 'output_file' " "-n 'version' -r 'root' -t 'title'"
-        )
-
-    def testCreatePackage(self):
-        pm = DummyPackageMaker()
-        pm.create_package('root', 'pkg_id', 'version', 'title', 'output_file', 'destination')
-        self.assertEqual(
-            pm.cmd,
-            "./PackageMaker  -g '10.6' -i 'pkg_id' -l 'destination' -o 'output_file' "
-            "-n 'version' -r 'root' -t 'title'",
         )

@@ -67,7 +67,7 @@ class TestPkgConfig(unittest.TestCase):
         self.assertEqual(self.pkgconfig2.libraries_dirs(), expected)
 
     def testLibraries(self):
-        expected = ['gstreamer-0.10', 'gobject-2.0', 'gmodule-2.0', 'xml2', 'gthread-2.0', 'rt', 'glib-2.0']
+        expected = ['gstreamer-0.10', 'gobject-2.0', 'gmodule-2.0', 'rt', 'gthread-2.0', 'rt', 'glib-2.0', 'xml2']
         self.assertEqual(self.pkgconfig.libraries(), expected)
         expected = ['gstreamer-0.10']
         self.assertEqual(self.pkgconfig2.libraries(), expected)

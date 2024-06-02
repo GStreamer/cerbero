@@ -44,7 +44,7 @@ class DistTarballTest(unittest.TestCase):
         # Creates one package with the runtime files
         filenames = self.packager.pack(self.tmp, devel=False)
         self.assertEqual(len(filenames), 1)
-        tar = tarfile.open(filenames[0], 'r:bz2')
+        tar = tarfile.open(filenames[0], 'r:xz')
         tarfiles = sorted([x.path for x in tar.getmembers()])
         self.assertEqual(tarfiles, self.package.files_list())
 
@@ -53,10 +53,10 @@ class DistTarballTest(unittest.TestCase):
         # devel files
         filenames = self.packager.pack(self.tmp, devel=True)
         self.assertEqual(len(filenames), 2)
-        tar = tarfile.open(filenames[0], 'r:bz2')
+        tar = tarfile.open(filenames[0], 'r:xz')
         tarfiles = sorted([x.path for x in tar.getmembers()])
         self.assertEqual(tarfiles, self.package.files_list())
-        tar = tarfile.open(filenames[1], 'r:bz2')
+        tar = tarfile.open(filenames[1], 'r:xz')
         tarfiles = sorted([x.path for x in tar.getmembers()])
         self.assertEqual(tarfiles, self.package.devel_files_list())
 
@@ -64,6 +64,6 @@ class DistTarballTest(unittest.TestCase):
         # Creates 1 package, with the runtime files and the devel files
         filenames = self.packager.pack(self.tmp, devel=True, split=False)
         self.assertEqual(len(filenames), 1)
-        tar = tarfile.open(filenames[0], 'r:bz2')
+        tar = tarfile.open(filenames[0], 'r:xz')
         tarfiles = sorted([x.path for x in tar.getmembers()])
         self.assertEqual(tarfiles, self.package.all_files_list())

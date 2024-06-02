@@ -51,7 +51,8 @@ class ConfigVariantsTest(unittest.TestCase):
         self.assertFalse(self.variants.mingw)
         self.assertFalse(self.variants._is_overridden('mingw'))
         self.assertEqual(self.variants.vscrt, 'md')
-        self.assertFalse(self.variants._is_overridden('vscrt'))
+        # vscrt is overriden by cerbero itself if the value is 'auto'
+        self.assertTrue(self.variants._is_overridden('vscrt'))
         with self.assertRaises(AttributeError):
             self.variants.novscrt  # not bool, no no-* variant
 

@@ -20,7 +20,7 @@ import shutil
 import unittest
 import tempfile
 
-from cerbero.config import Platform, Distro, DistroVersion
+from cerbero.config import Platform, Distro
 from cerbero.packages import PackageType
 from test.test_packages_common import Package1, Package4, MetaPackage, App
 from test.test_build_common import create_cookbook, add_files
@@ -39,9 +39,25 @@ class PackageTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
         win32config = Config(self.tmp, Platform.WINDOWS)
+        # FIXME config.py should initialize this
+        win32config.mingw_env_for_toolchain = dict()
+        win32config.mingw_env_for_build_system = dict()
+        win32config.msvc_env_for_toolchain = dict()
+        win32config.msvc_env_for_build_system = dict()
+
         linuxconfig = Config(self.tmp, Platform.LINUX)
-        self.win32package = Package1(win32config, create_store(win32config), create_cookbook(win32config))
-        self.linuxpackage = Package1(linuxconfig, create_store(linuxconfig), create_cookbook(linuxconfig))
+        self.win32store = create_store(win32config)
+        self.win32package = Package1(win32config, self.win32store, create_cookbook(win32config))
+        # FIXME we pass the store, but we need to explicitly add it
+        self.win32store.add_package(self.win32package)
+
+        self.linuxstore = create_store(linuxconfig)
+        self.linuxpackage = Package1(linuxconfig, self.linuxstore, create_cookbook(linuxconfig))
+        # FIXME we pass the store, but we need to explicitly add it
+        self.linuxstore.add_package(self.linuxpackage)
+
+        self.win32package.load()
+        self.linuxpackage.load()
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
@@ -78,40 +94,40 @@ class PackageTest(unittest.TestCase):
             'README',
             'bin/gst-launch',
             'bin/linux',
-            'lib/libgstreamer-x11.so.1',
-            'lib/libgstreamer-0.10.so.1',
+            'lib/x86_64-linux-gnu/libgstreamer-x11.so.1',
+            'lib/x86_64-linux-gnu/libgstreamer-0.10.so.1',
             'libexec/gstreamer-0.10/pluginsloader',
             'linux',
         ]
-
+        self.win32package.load()
+        self.linuxpackage.load()
         self.assertEqual(sorted(winfiles), sorted(self.win32package.files_list()))
         self.assertEqual(sorted(linuxfiles), sorted(self.linuxpackage.files_list()))
 
     def testDevelFilesList(self):
         add_files(self.tmp)
-        devfiles = ['lib/libgstreamer-0.10.a', 'lib/libgstreamer-0.10.la']
+        devfiles = ['lib/x86_64-linux-gnu/libgstreamer-0.10.a', 'lib/x86_64-linux-gnu/libgstreamer-0.10.la']
         linuxdevfiles = devfiles + [
-            'lib/libgstreamer-0.10.so',
-            'lib/libgstreamer-x11.a',
-            'lib/libgstreamer-x11.la',
-            'lib/libgstreamer-x11.so',
+            'lib/x86_64-linux-gnu/libgstreamer-0.10.so',
+            'lib/x86_64-linux-gnu/libgstreamer-x11.a',
+            'lib/x86_64-linux-gnu/libgstreamer-x11.la',
+            'lib/x86_64-linux-gnu/libgstreamer-x11.so',
         ]
         windevfiles = devfiles + [
-            'lib/libgstreamer-win32.a',
-            'lib/libgstreamer-win32.dll.a',
-            'lib/libgstreamer-win32.la',
-            'lib/libgstreamer-win32.def',
-            'lib/gstreamer-win32.lib',
-            'lib/libtest.a',
-            'lib/libtest.dll.a',
-            'lib/libtest.la',
-            'lib/libtest.def',
-            'lib/test.lib',
-            'lib/libgstreamer-0.10.dll.a',
-            'lib/libgstreamer-0.10.def',
-            'lib/gstreamer-0.10.lib',
+            'lib/x86_64-linux-gnu/libgstreamer-win32.a',
+            'lib/x86_64-linux-gnu/libgstreamer-win32.dll.a',
+            'lib/x86_64-linux-gnu/libgstreamer-win32.la',
+            'lib/x86_64-linux-gnu/gstreamer-win32.lib',
+            'lib/x86_64-linux-gnu/libtest.a',
+            'lib/x86_64-linux-gnu/libtest.dll.a',
+            'lib/x86_64-linux-gnu/libtest.la',
+            'lib/x86_64-linux-gnu/test.lib',
+            'lib/x86_64-linux-gnu/libgstreamer-0.10.dll.a',
+            'lib/x86_64-linux-gnu/gstreamer-0.10.lib',
         ]
 
+        self.win32package.load()
+        self.linuxpackage.load()
         self.assertEqual(sorted(windevfiles), self.win32package.devel_files_list())
         self.assertEqual(sorted(linuxdevfiles), self.linuxpackage.devel_files_list())
 
@@ -121,7 +137,7 @@ class PackageTest(unittest.TestCase):
         package = Package4(config, None, None)
         self.assertEqual(package.get_sys_deps(), ['python'])
         config.target_distro = Distro.REDHAT
-        config.target_distro_version = DistroVersion.FEDORA_16
+        config.target_distro_version = 'fedora_16'
         package = Package4(config, None, None)
         self.assertEqual(package.get_sys_deps(), ['python27'])
 
@@ -175,19 +191,13 @@ class AppPackageTest(unittest.TestCase):
         self.store = create_store(config)
         self.cookbook = create_cookbook(config)
         self.app = App(config, self.store, self.cookbook)
+        self.app.load()
+        add_files(self.tmp)
 
     def tearDown(self):
         shutil.rmtree(self.tmp)
 
-    def testListFilesWithEmbededDepsOnLinux(self):
-        self.app.embed_deps = True
-        expected = self.app._app_recipe.files_list()
-        result = self.app.files_list()
-        self.assertEqual(expected, result)
-
-    def testListFilesWithEmbededDeps(self):
-        self.app.embed_deps = True
-        self.app.config.target_platform = Platform.WINDOWS
+    def listFilesWithEmbededDeps(self):
         files = []
         packages_deps = [self.store.get_package(x) for x in self.app.deps]
         for dep in self.app.deps:
@@ -197,7 +207,20 @@ class AppPackageTest(unittest.TestCase):
             files.extend(package.files_list())
         files.extend(self.app._app_recipe.files_list())
         files = sorted(set(files))
-        self.assertEqual(files, self.app.files_list())
+        return files
+
+    def testListFilesWithEmbededDepsOnLinux(self):
+        self.app.embed_deps = True
+        expected = self.listFilesWithEmbededDeps()
+        result = self.app.files_list()
+        self.assertEqual(expected, result)
+
+    def testListFilesWithEmbededDepsOnWindows(self):
+        self.app.embed_deps = True
+        self.app.config.target_platform = Platform.WINDOWS
+        expected = self.listFilesWithEmbededDeps()
+        result = self.app.files_list()
+        self.assertEqual(expected, result)
 
     def testListFilesWithoutEmbededDeps(self):
         self.app.embed_deps = False
@@ -209,4 +232,6 @@ class AppPackageTest(unittest.TestCase):
         self.assertEqual(self.app.devel_files_list(), [])
 
     def testAllFilesList(self):
+        self.assertNotEqual(self.app.files_list(), [])
+        self.assertNotEqual(self.app.all_files_list(), [])
         self.assertEqual(self.app.files_list(), self.app.all_files_list())

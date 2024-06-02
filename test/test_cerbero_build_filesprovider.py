@@ -85,11 +85,11 @@ class PackageTest(unittest.TestCase):
                 '%(libdir)s/libgstreamer-win32.a',
                 '%(libdir)s/libgstreamer-win32.la',
                 '%(libdir)s/libgstreamer-win32.dll.a',
-                '%(libdir)s/libgstreamer-win32.def',
                 '%(libdir)s/gstreamer-win32.lib',
+                '%(libdir)s/gstreamer-win32.def',
                 '%(libdir)s/libgstreamer-0.10.dll.a',
-                '%(libdir)s/libgstreamer-0.10.def',
                 '%(libdir)s/gstreamer-0.10.lib',
+                '%(libdir)s/gstreamer-0.10.def',
             ],
         )
         self.lindevfiles = to_config_path(

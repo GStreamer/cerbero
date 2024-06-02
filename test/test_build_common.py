@@ -80,7 +80,7 @@ class Recipe5(Recipe):
 
 def add_files(tmp):
     bindir = os.path.join(tmp, 'bin')
-    libdir = os.path.join(tmp, 'lib')
+    libdir = os.path.join(tmp, 'lib', 'x86_64-linux-gnu')
     gstlibdir = os.path.join(tmp, 'libexec', 'gstreamer-0.10')
     os.makedirs(bindir)
     os.makedirs(libdir)
@@ -101,30 +101,30 @@ def add_files(tmp):
         'bin/libgstreamer-0.10.dll '
         'bin/libgstreamer-win32.dll '
         'bin/libtest.dll '
-        'lib/libtest.so.1 '
-        'lib/libtest.la '
-        'lib/libtest.a '
-        'lib/libtest.so '
-        'lib/libtest.dll.a '
-        'lib/libtest.def '
-        'lib/test.lib '
-        'lib/libgstreamer-0.10.so.1 '
-        'lib/libgstreamer-0.10.la '
-        'lib/libgstreamer-0.10.a '
-        'lib/libgstreamer-0.10.so '
-        'lib/libgstreamer-0.10.dll.a '
-        'lib/gstreamer-0.10.lib '
-        'lib/libgstreamer-0.10.def '
-        'lib/libgstreamer-win32.la '
-        'lib/libgstreamer-win32.a '
-        'lib/libgstreamer-win32.so '
-        'lib/libgstreamer-win32.dll.a '
-        'lib/gstreamer-win32.lib '
-        'lib/libgstreamer-win32.def '
-        'lib/libgstreamer-x11.so.1 '
-        'lib/libgstreamer-x11.so '
-        'lib/libgstreamer-x11.a '
-        'lib/libgstreamer-x11.la '
+        'lib/x86_64-linux-gnu/libtest.so.1 '
+        'lib/x86_64-linux-gnu/libtest.la '
+        'lib/x86_64-linux-gnu/libtest.a '
+        'lib/x86_64-linux-gnu/libtest.so '
+        'lib/x86_64-linux-gnu/libtest.dll.a '
+        'lib/x86_64-linux-gnu/libtest.def '
+        'lib/x86_64-linux-gnu/test.lib '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.so.1 '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.la '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.a '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.so '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.dll.a '
+        'lib/x86_64-linux-gnu/gstreamer-0.10.lib '
+        'lib/x86_64-linux-gnu/libgstreamer-0.10.def '
+        'lib/x86_64-linux-gnu/libgstreamer-win32.la '
+        'lib/x86_64-linux-gnu/libgstreamer-win32.a '
+        'lib/x86_64-linux-gnu/libgstreamer-win32.so '
+        'lib/x86_64-linux-gnu/libgstreamer-win32.dll.a '
+        'lib/x86_64-linux-gnu/gstreamer-win32.lib '
+        'lib/x86_64-linux-gnu/libgstreamer-win32.def '
+        'lib/x86_64-linux-gnu/libgstreamer-x11.so.1 '
+        'lib/x86_64-linux-gnu/libgstreamer-x11.so '
+        'lib/x86_64-linux-gnu/libgstreamer-x11.a '
+        'lib/x86_64-linux-gnu/libgstreamer-x11.la '
         'libexec/gstreamer-0.10/pluginsloader '
         'libexec/gstreamer-0.10/pluginsloader.exe ',
         tmp,

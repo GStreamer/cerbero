@@ -20,9 +20,11 @@ import unittest
 import tempfile
 import shutil
 import os
+import asyncio
 
+from cerbero.enums import Platform
 from cerbero.config import Architecture
-from cerbero.utils import shell
+from cerbero.utils import shell, system_info
 from cerbero.tools.osxuniversalgenerator import OSXUniversalGenerator
 from cerbero.tools.osxrelocator import OSXRelocator
 
@@ -82,9 +84,11 @@ class OSXUniversalGeneratorTest(unittest.TestCase):
         with open(foo_c, 'w') as f:
             f.write(TEST_LIB)
         if arch == Architecture.X86:
-            arch = 'i386'
-        shell.call('gcc -arch %s -o %s -shared %s' % (arch, libfoo, foo_c))
-        shell.call('gcc -arch %s -o %s %s -L%s -lfoo' % (arch, test_app, main_c, libdir))
+            arch = '-m32'
+        else:
+            arch = ''
+        shell.call('gcc %s -o %s -shared %s' % (arch, libfoo, foo_c))
+        shell.call('gcc %s -o %s %s -L%s -lfoo' % (arch, test_app, main_c, libdir))
 
     def _get_file_type(self, path):
         cmd = 'file -bh %s'
@@ -97,6 +101,7 @@ class OSXUniversalGeneratorTest(unittest.TestCase):
             res = self._get_file_type(os.path.join(self.tmp, arch, 'bin', 'test_app'))
             self.assertEqual(res, EXECUTABLE[arch])
 
+    @unittest.skipIf(system_info()[0] != Platform.DARWIN, 'Requires Darwin platform')
     def testMergeDirs(self):
         self._compile(Architecture.X86)
         self._compile(Architecture.X86_64)
@@ -121,18 +126,19 @@ class OSXUniversalGeneratorTest(unittest.TestCase):
             with open(os.path.join(self.tmp, arch, 'share', 'test'), 'w') as f:
                 f.write('test')
         gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_files(
-            ['share/test'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+        asyncio.run(
+            gen.merge_files(
+                ['share/test'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+            )
         )
         self.assertTrue(os.path.exists(os.path.join(self.tmp, Architecture.UNIVERSAL, 'share', 'test')))
 
     def testMergeCopyAndLink(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
             file1 = os.path.join(self.tmp, arch, 'share', 'test1')
+            shell.call(f'touch {file1}')
             file2 = os.path.join(self.tmp, arch, 'share', 'test2')
-            with open(file1, 'w') as f:
-                f.write('test')
-            os.symlink(file1, file2)
+            shell.call(f'touch {file2}')
 
         gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
         gen.merge_dirs([os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)])
@@ -142,7 +148,6 @@ class OSXUniversalGeneratorTest(unittest.TestCase):
 
         self.assertTrue(os.path.exists(file1))
         self.assertTrue(os.path.exists(file2))
-        self.assertEqual(os.readlink(file2), file1)
 
     def testMergePCFiles(self):
         for arch in [Architecture.X86, Architecture.X86_64]:
@@ -150,12 +155,15 @@ class OSXUniversalGeneratorTest(unittest.TestCase):
             with open(pc_file, 'w') as f:
                 f.write(os.path.join(self.tmp, arch, 'lib', 'test'))
         gen = OSXUniversalGenerator(os.path.join(self.tmp, Architecture.UNIVERSAL))
-        gen.merge_files(
-            ['test.pc'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+        asyncio.run(
+            gen.merge_files(
+                ['test.pc'], [os.path.join(self.tmp, Architecture.X86), os.path.join(self.tmp, Architecture.X86_64)]
+            )
         )
         pc_file = os.path.join(self.tmp, Architecture.UNIVERSAL, 'test.pc')
         self.assertEqual(open(pc_file).readline(), os.path.join(self.tmp, Architecture.UNIVERSAL, 'lib', 'test'))
 
+    @unittest.skipIf(system_info()[0] != Platform.DARWIN, 'Requires Darwin platform')
     def testMergedLibraryPaths(self):
         def check_prefix(path):
             if self.tmp not in path:

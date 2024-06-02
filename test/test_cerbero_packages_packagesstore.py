@@ -24,7 +24,7 @@ from cerbero.errors import PackageNotFoundError
 from cerbero.packages.package import Package, SDKPackage, InstallerPackage
 from cerbero.packages.packagesstore import PackagesStore
 from test import test_packages_common as common
-
+from test.test_common import DummyConfig
 
 PACKAGE = """
 class Package(package.Package):
@@ -53,7 +53,7 @@ class InstallerPackage(package.InstallerPackage):
 
 class PackageTest(unittest.TestCase):
     def setUp(self):
-        self.config = common.DummyConfig()
+        self.config = DummyConfig()
         self.config.packages_dir = '/test'
         self.config.target_platform = Platform.LINUX
         self.store = PackagesStore(self.config, False)
@@ -104,30 +104,32 @@ class PackageTest(unittest.TestCase):
         self.assertEqual(sorted(deps), sorted(res))
 
     def testLoadPackageFromFile(self):
-        package_file = tempfile.NamedTemporaryFile()
+        package_file = tempfile.NamedTemporaryFile(mode='wt')
         package_file.write(PACKAGE)
         package_file.flush()
-        p = self.store._load_package_from_file(package_file.name)
-        self.assertIsInstance(p, Package)
-        self.assertEqual('test-package', p.name)
+        p = self.store._load_packages_from_file(package_file.name)
+        self.assertEqual(len(p), 1)
+        self.assertIsInstance(p[0], Package)
+        self.assertEqual('test-package', p[0].name)
 
     def testLoadMetaPackageFromFile(self):
         for x, t in [(SDKPACKAGE, SDKPackage), (INSTALLERPACKAGE, InstallerPackage)]:
-            package_file = tempfile.NamedTemporaryFile()
+            package_file = tempfile.NamedTemporaryFile(mode='wt')
             package_file.write(x)
             package_file.flush()
-            p = self.store._load_package_from_file(package_file.name)
-            print(p, type(p))
-            self.assertIsInstance(p, t)
-            self.assertEqual('test-package', p.name)
+            p = self.store._load_packages_from_file(package_file.name)
+            self.assertEqual(len(p), 1)
+            self.assertIsInstance(p[0], t)
+            self.assertEqual('test-package', p[0].name)
 
     def testImports(self):
-        package_file = tempfile.NamedTemporaryFile()
+        package_file = tempfile.NamedTemporaryFile(mode='wt')
         package_file.write(PACKAGE)
         package_file.flush()
-        p = self.store._load_package_from_file(package_file.name)
-        self.assertIsInstance(p, Package)
+        p = self.store._load_packages_from_file(package_file.name)
+        self.assertEqual(len(p), 1)
+        self.assertIsInstance(p[0], Package)
         try:
-            p.test_imports()
+            p[0].test_imports()
         except ImportError as e:
             self.fail('Import error raised, %s', e)
