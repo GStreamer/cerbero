@@ -432,7 +432,6 @@ class MakefilesBase(Build, ModifyEnvBase):
     make_clean = None
     allow_parallel_build = True
     srcdir = '.'
-    requires_non_src_build = False
     # recipes often use shell constructs
     config_sh_needs_shell = True
 
@@ -445,10 +444,8 @@ class MakefilesBase(Build, ModifyEnvBase):
         if not self.using_msvc():
             self.setup_buildtype_env_ops()
 
-        if self.requires_non_src_build:
-            self.make_dir = os.path.join(self.config_src_dir, 'cerbero-build-dir')
-        else:
-            self.make_dir = os.path.abspath(os.path.join(self.config_src_dir, self.srcdir))
+        self.make_dir = os.path.abspath(os.path.join(self.config_src_dir,
+                                                           self.srcdir))
 
         self.make = self.make or ['make', 'V=1']
         self.make_install = self.make_install or ['make', 'install']
@@ -472,8 +469,6 @@ class MakefilesBase(Build, ModifyEnvBase):
         """
         if not os.path.exists(self.make_dir):
             os.makedirs(self.make_dir)
-        if self.requires_non_src_build:
-            self.config_sh = os.path.join('../', self.config_sh)
 
         substs = {
             'config-sh': self.config_sh,
