@@ -56,37 +56,36 @@ class Package(package.Package):
 
 
 MERGE_MODULE = """\
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='utf-8'?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 	<Module Id="_gstreamer_test" Version="1.0.0" Guid="1" Language="1033">
-		<SummaryInformation Description="GStreamer Test" Manufacturer="GStreamer Project"/>
+		<SummaryInformation Description="GStreamer Test" Manufacturer="GStreamer Project" />
 		<Component Id="_readme" Guid="1">
-			<File Id="_readme_1" Name="README" Source="z:%(prefix)s\README"/>
+			<File Id="_readme_1" Name="README" Source="z:%(prefix)s\README" />
 		</Component>
 		<Directory Id="_bin" Name="bin">
 			<Component Id="_test.exe" Guid="1">
-				<File Id="_testexe" Name="test.exe" Source="z:%(prefix)s\\bin\\test.exe"/>
+				<File Id="_testexe" Name="test.exe" Source="z:%(prefix)s\\bin\\test.exe" />
 			</Component>
 			<Component Id="_test2.exe" Guid="1">
-				<File Id="_test2exe" Name="test2.exe" Source="z:%(prefix)s\\bin\\test2.exe"/>
+				<File Id="_test2exe" Name="test2.exe" Source="z:%(prefix)s\\bin\\test2.exe" />
 			</Component>
 			<Component Id="_test3.exe" Guid="1">
-				<File Id="_test3exe" Name="test3.exe" Source="z:%(prefix)s\\bin\\test3.exe"/>
+				<File Id="_test3exe" Name="test3.exe" Source="z:%(prefix)s\\bin\\test3.exe" />
 			</Component>
 		</Directory>
 		<Directory Id="_lib" Name="lib">
 			<Directory Id="_gstreamer_0.10" Name="gstreamer-0.10">
 				<Component Id="_libgstplugins.dll" Guid="1">
-					<File Id="_libgstpluginsdll" Name="libgstplugins.dll" Source="z:%(prefix)s\\lib\\gstreamer-0.10\\libgstplugins.dll"/>
+					<File Id="_libgstpluginsdll" Name="libgstplugins.dll" Source="z:%(prefix)s\\lib\\gstreamer-0.10\\libgstplugins.dll" />
 				</Component>
 			</Directory>
 			<Component Id="_libfoo.dll" Guid="1">
-				<File Id="_libfoodll" Name="libfoo.dll" Source="z:%(prefix)s\\lib\\libfoo.dll"/>
+				<File Id="_libfoodll" Name="libfoo.dll" Source="z:%(prefix)s\\lib\\libfoo.dll" />
 			</Component>
 		</Directory>
 	</Module>
-</Wix>
-"""
+</Wix>"""
 
 
 class MergeModuleTest(unittest.TestCase):

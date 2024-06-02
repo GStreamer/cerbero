@@ -18,7 +18,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-from cerbero.utils import etree, to_winpath, xmlwrite
+from cerbero.utils import etree, to_winpath
 
 
 class VSPropsBase(object):
@@ -30,7 +30,8 @@ class VSPropsBase(object):
 
     def create(self, outdir):
         el = etree.ElementTree(self.root)
-        xmlwrite(el, os.path.join(outdir, '%s.vsprops' % self.name))
+        etree.indent(el, space='\t')
+        el.write(os.path.join(outdir, '%s.vsprops' % self.name), encoding='unicode', xml_declaration=True)
 
 
 class CommonVSProps(VSPropsBase):

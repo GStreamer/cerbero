@@ -21,7 +21,7 @@ import uuid
 import shutil
 from pathlib import Path
 
-from cerbero.utils import etree, to_winepath, shell, xmlwrite
+from cerbero.utils import etree, to_winepath, shell
 from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
@@ -84,7 +84,8 @@ class WixBase:
     def write(self, filepath):
         self.fill()
         tree = etree.ElementTree(self.root)
-        xmlwrite(tree, filepath)
+        etree.indent(tree, space='\t')
+        tree.write(filepath, encoding='unicode', xml_declaration=True)
 
     def _format_level(self, selected):
         return selected and '1' or '4'

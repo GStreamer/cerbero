@@ -995,13 +995,3 @@ def merge_env_value_env(old_env, new_env):
         if k not in new_env:
             ret_env[k] = old_env[k]
     return ret_env
-
-
-### XML Hacks ###
-def xmlwrite(tree: etree.ElementTree, filepath, encoding='utf-8'):
-    import xml
-    from xml.dom import minidom
-
-    xmlstr = xml.etree.ElementTree.tostring(tree.getroot())
-    xmlstr = minidom.parseString(xmlstr).toprettyxml(indent='\t')
-    open(filepath, 'w', encoding=encoding).write(xmlstr)
