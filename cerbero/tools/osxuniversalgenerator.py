@@ -233,7 +233,6 @@ class OSXUniversalGenerator(object):
                 tasks.append(asyncio.ensure_future(parse_dirs_worker()))
             await run_tasks(tasks, queue_done())
 
-        print('parsing dirs')
         run_until_complete(parse_dirs_main())
 
     def _copy(self, src, dest):
