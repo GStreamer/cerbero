@@ -13,7 +13,8 @@ class Recipe(recipe.Recipe):
     meson_options = {'tests' : 'disabled',
                      'gupnp' : 'disabled',
                      'gstreamer' : 'enabled',
-                     'crypto-library' : 'openssl'}
+                     'crypto-library' : 'openssl',
+                     'c_args': '-DG_DISABLE_ASSERT'}
     deps = ['glib', 'gstreamer-1.0']
 
     patches = ['libnice/0001-Remove-Gslice-without-breaking-anything.patch']
