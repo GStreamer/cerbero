@@ -107,7 +107,7 @@ class Recipe(recipe.Recipe):
         # To generate correctly the introspection data g-ir-scanner must use
         # the final glibconfig.h instead of the intermediate
         if self.config.target_platform == Platform.DARWIN:
-            meson_build = os.path.join(self.build_dir, 'gir', 'meson.build')
+            meson_build = os.path.join(self.src_dir, 'gir', 'meson.build')
             shell.replace(meson_build, {
                 "'glibconfig.h'": "'{}/glibconfig.h'".format(self.config.target_arch)
             })

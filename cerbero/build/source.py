@@ -74,7 +74,7 @@ class Source(object):
 
         if not self.version:
             raise InvalidRecipeError(self, N_("'version' attribute is missing in the recipe"))
-        self.config_src_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
+        self.src_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
         self.repo_dir = os.path.abspath(os.path.join(self.config.local_sources, self.package_name))
 
     @property
@@ -95,7 +95,7 @@ class Source(object):
         return os.path.join(self.download_dir, fname)
 
     def have_cargo_lock_file(self):
-        return os.path.exists(os.path.join(self.config_src_dir, 'Cargo.lock'))
+        return os.path.exists(os.path.join(self.src_dir, 'Cargo.lock'))
 
     def get_fallback_urls(self, url):
         urls = []
@@ -120,7 +120,7 @@ class Source(object):
         m.log('Running cargo update to generate Cargo.lock', logfile=logfile)
         await shell.async_call(
             [self.cargo, 'update'] + update_args,
-            cmd_dir=self.config_src_dir,
+            cmd_dir=self.src_dir,
             logfile=logfile,
             env=self.env,
             cpu_bound=False,
@@ -129,7 +129,7 @@ class Source(object):
     async def cargo_vendor(self, offline):
         logfile = get_logfile(self)
         if self.cargo_lock:
-            shutil.copy(self.relative_path(self.cargo_lock), os.path.join(self.config_src_dir, 'Cargo.lock'))
+            shutil.copy(self.relative_path(self.cargo_lock), os.path.join(self.src_dir, 'Cargo.lock'))
         if not self.have_cargo_lock_file():
             await self.retry_run(self.cargo_update, offline, logfile)
         m.log('Running cargo vendor to vendor sources', logfile=logfile)
@@ -138,13 +138,13 @@ class Source(object):
             vendor_args += ['--frozen', '--offline']
         ct = await shell.async_call_output(
             [self.cargo, 'vendor'] + vendor_args,
-            cmd_dir=self.config_src_dir,
+            cmd_dir=self.src_dir,
             env=self.env,
             cpu_bound=False,
             logfile=logfile,
         )
-        os.makedirs(os.path.join(self.config_src_dir, '.cargo'))
-        with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
+        os.makedirs(os.path.join(self.src_dir, '.cargo'))
+        with open(os.path.join(self.src_dir, '.cargo', 'config.toml'), 'w') as f:
             f.write(ct)
         m.log('Created cargo vendor config.toml', logfile=logfile)
 
@@ -184,7 +184,7 @@ class Source(object):
 
     async def meson_subprojects_extract(self, offline):
         logfile = get_logfile(self)
-        subproj_dir = os.path.join(self.config_src_dir, 'subprojects')
+        subproj_dir = os.path.join(self.src_dir, 'subprojects')
         # subproj_name: (url, filepath, directory, filehash)
         downloads = []
         for subproj_name in self.meson_subprojects:
@@ -290,13 +290,13 @@ class Source(object):
         # Could have multiple recipes using the same git repo, or extract
         # could've already been done in fetch by cargo recipes or meson
         # recipes that need subprojects.
-        lock = self._extract_locks[self.config_src_dir]
+        lock = self._extract_locks[self.src_dir]
         async with lock:
-            if self.config_src_dir in self._extract_done:
+            if self.src_dir in self._extract_done:
                 m.log('Extract already completed', logfile=get_logfile(self))
                 return
             await self.extract_impl()
-            self._extract_done.add(self.config_src_dir)
+            self._extract_done.add(self.src_dir)
 
     async def extract_impl(self):
         """
@@ -456,34 +456,34 @@ class Tarball(BaseTarball, Source):
         if issubclass(self.btype, BuildType.CARGO):
             m.log(f'Extracting project {self.name} to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
-            self._extract_done.add(self.config_src_dir)
+            self._extract_done.add(self.src_dir)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
             m.log(f'Extracting project {self.name} to fetch subprojects', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
-            self._extract_done.add(self.config_src_dir)
+            self._extract_done.add(self.src_dir)
 
     async def extract_impl(self, fetching=False):
-        m.action(N_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
-        if os.path.exists(self.config_src_dir):
-            shutil.rmtree(self.config_src_dir)
+        m.action(N_('Extracting tarball to %s') % self.src_dir, logfile=get_logfile(self))
+        if os.path.exists(self.src_dir):
+            shutil.rmtree(self.src_dir)
         unpack_dir = self.config.sources
         if self.tarball_is_bomb:
-            unpack_dir = self.config_src_dir
+            unpack_dir = self.src_dir
         await self.extract_tarball(unpack_dir)
 
         if self.tarball_dirname is not None:
             extracted = os.path.join(unpack_dir, self.tarball_dirname)
             # Since we just extracted this, a Windows anti-virus might still
             # have a lock on files inside it.
-            shell.windows_proof_rename(extracted, self.config_src_dir)
-        git.init_directory(self.config_src_dir, logfile=get_logfile(self))
+            shell.windows_proof_rename(extracted, self.src_dir)
+        git.init_directory(self.src_dir, logfile=get_logfile(self))
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
             if self.strip == 1:
-                git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
+                git.apply_patch(patch, self.src_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
+                shell.apply_patch(patch, self.src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
             await self.cargo_vendor(not fetching or self.offline)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
@@ -564,11 +564,11 @@ class GitCache(Source):
         if issubclass(self.btype, BuildType.CARGO):
             m.log('Extracting project to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
-            self._extract_done.add(self.config_src_dir)
+            self._extract_done.add(self.src_dir)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
             m.log(f'Extracting project {self.name} to download subprojects', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
-            self._extract_done.add(self.config_src_dir)
+            self._extract_done.add(self.src_dir)
 
     def built_version(self):
         return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self)))
@@ -586,22 +586,22 @@ class Git(GitCache):
             self.commit = 'origin/sdk-%s' % self.version
 
     async def extract_impl(self, fetching=False):
-        if os.path.exists(self.config_src_dir):
+        if os.path.exists(self.src_dir):
             try:
                 commit_hash = git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self))
-                checkout_hash = git.get_hash(self.config_src_dir, 'HEAD', logfile=get_logfile(self))
+                checkout_hash = git.get_hash(self.src_dir, 'HEAD', logfile=get_logfile(self))
                 if commit_hash == checkout_hash and not self.patches:
                     m.log('Already checked out, nothing to do')
                     return False
             except Exception:
                 pass
-            shutil.rmtree(self.config_src_dir)
-        if not os.path.exists(self.config_src_dir):
-            os.makedirs(self.config_src_dir)
+            shutil.rmtree(self.src_dir)
+        if not os.path.exists(self.src_dir):
+            os.makedirs(self.src_dir)
 
         # checkout the current version
         await git.local_checkout(
-            self.config_src_dir,
+            self.src_dir,
             self.repo_dir,
             self.commit,
             logfile=get_logfile(self),
@@ -613,9 +613,9 @@ class Git(GitCache):
                 patch = self.relative_path(patch)
 
             if self.strip == 1:
-                git.apply_patch(patch, self.config_src_dir, logfile=get_logfile(self))
+                git.apply_patch(patch, self.src_dir, logfile=get_logfile(self))
             else:
-                shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
+                shell.apply_patch(patch, self.src_dir, self.strip, logfile=get_logfile(self))
         if issubclass(self.btype, BuildType.CARGO):
             await self.cargo_vendor(not fetching or self.offline)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
@@ -646,8 +646,8 @@ class GitExtractedTarball(Git):
             return False
         for match in self.matches:
             self._files[match] = []
-        self._find_files(self.config_src_dir)
-        self._files['.in'] = [x for x in self._files['.in'] if os.path.join(self.config_src_dir, 'm4') not in x]
+        self._find_files(self.src_dir)
+        self._files['.in'] = [x for x in self._files['.in'] if os.path.join(self.src_dir, 'm4') not in x]
         self._fix_ts()
 
     def _fix_ts(self):
@@ -707,15 +707,15 @@ class Svn(Source):
         await svn.update(self.repo_dir, self.revision)
 
     async def extract_impl(self):
-        if os.path.exists(self.config_src_dir):
-            shutil.rmtree(self.config_src_dir)
+        if os.path.exists(self.src_dir):
+            shutil.rmtree(self.src_dir)
 
-        shutil.copytree(self.repo_dir, self.config_src_dir)
+        shutil.copytree(self.repo_dir, self.src_dir)
 
         for patch in self.patches:
             if not os.path.isabs(patch):
                 patch = self.relative_path(patch)
-            shell.apply_patch(patch, self.config_src_dir, self.strip, logfile=get_logfile(self))
+            shell.apply_patch(patch, self.src_dir, self.strip, logfile=get_logfile(self))
 
     def built_version(self):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))

@@ -9,7 +9,6 @@ class Recipe(recipe.Recipe):
     configure_options = '--enable-shared --enable-static'
     add_host_build_target = False
     autoreconf = True
-    requires_non_src_build = True
     stype = SourceType.CUSTOM
     deps = ['mingw-w64-crt']
     files_all = [
@@ -47,13 +46,13 @@ class Recipe(recipe.Recipe):
         self.sysroot = f'{self.config.prefix}/{self.host}/sysroot'
         self.configure_options.append(f'--with-sysroot={self.sysroot}')
         self.make_install += [f'DESTDIR={self.sysroot}']
-        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-libraries', 'winpthreads')
-        self.build_dir = self.config_src_dir
-        self.make_dir = self.build_dir
+        self.src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-libraries', 'winpthreads')
+        self.config_src_dir = self.src_dir
+        self.build_dir = self.src_dir
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
-        self.build_dir_32 = os.path.join(self.make_dir, 'cerbero-build-dir-32')
-        self.build_dir_64 = os.path.join(self.make_dir, 'cerbero-build-dir-64')
+        self.build_dir_32 = os.path.join(self.build_dir, 'cerbero-build-dir-32')
+        self.build_dir_64 = os.path.join(self.build_dir, 'cerbero-build-dir-64')
 
     @modify_environment
     async def configure(self):
@@ -98,4 +97,4 @@ class Recipe(recipe.Recipe):
         shutil.move(src_winpthread_dll, libdir)
         # and to <toolchain>/bin because dlltool depends on it
         bindir = os.path.join(self.config.prefix, 'bin')
-        shutil.copy(libdir / "libwinpthread-1.dll", bindir)
+        shutil.copy(os.path.join(libdir, "libwinpthread-1.dll"), bindir)

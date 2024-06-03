@@ -282,8 +282,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         self.config = config
         if self.package_name is None:
             self.package_name = '%s-%s' % (self.name, self.version)
-        self.build_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
-        self.config_src_dir = self.build_dir
         self.deps = self.deps or []
         if self.config.prefix_is_build_tools():
             if self.btype == build.BuildType.MESON:
@@ -642,7 +640,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
                 raise RuntimeError('{}.recipe: license file collision: {!r}'.format(self.name, LICENSE_INFO_FILENAME))
             dest = str(install_dir / fname)
 
-            src = os.path.join(self.config_src_dir, f)
+            src = os.path.join(self.src_dir, f)
             if shell.DRY_RUN:
                 print('Copying {!r} to {!r}'.format(src, dest))
             else:

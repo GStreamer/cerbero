@@ -42,14 +42,12 @@ class Recipe(recipe.Recipe):
         elif self.config.target_arch == Architecture.X86:
             # on x86 it tries to use the high bank of AVX
             self.configure_options.append('-DENABLE_ASSEMBLY=OFF')
-        self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')
-        self.build_dir = os.path.join(self.config_src_dir, 'b')
-        self.make_dir = self.config_src_dir
-        Path(self.build_dir).mkdir(parents=True, exist_ok=True)
 
         prefix = '' if self.using_msvc() else 'lib'
-        self.hdr10lib = Path(self.config_src_dir) / 'b-10bit' / f'{prefix}x265-10bit.a'
-        self.hdr12lib = Path(self.config_src_dir) / 'b-12bit' / f'{prefix}x265-12bit.a'
+        self.config_src_dir = os.path.join(self.config.sources, f'x265-src-{self.version}', 'source')
+        self.configure_dir = self.config_src_dir
+        self.hdr10lib = Path(self.config.sources) / f'x265-10bit-{self.version}' / 'b' / f'{prefix}x265-10bit.a'
+        self.hdr12lib = Path(self.config.sources) / f'x265-12bit-{self.version}' / 'b' / f'{prefix}x265-12bit.a'
         self.configure_options.append(f'-DEXTRA_LIB={self.hdr10lib.as_posix()};{self.hdr12lib.as_posix()}')
 
     def post_install(self):

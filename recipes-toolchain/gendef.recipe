@@ -3,10 +3,9 @@ class Recipe(recipe.Recipe):
     version = 'v12.0.0'
     licenses = [License.GPLv3Plus]
     stype = SourceType.CUSTOM
-    requires_non_src_build = True
     deps = ['mingw-w64-sources']
 
     def prepare(self):
-        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-tools', 'gendef')
-        self.build_dir = os.path.join(self.config_src_dir, 'cerbero-build-dir')
-        self.make_dir = self.build_dir
+        self.src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-tools', 'gendef')
+        self.config_src_dir = self.src_dir
+        self.build_dir = os.path.join(self.src_dir, 'cerbero-build-dir')

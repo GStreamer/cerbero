@@ -11,7 +11,6 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     add_host_build_target = False
     override_libtool = False
-    requires_non_src_build = True
     deps = ['gcc-sources', 'mingw-w64-crt', 'winpthreads', 'gmp', 'mpc', 'mpfr',
             'isl', 'windows-default-manifest']
 
@@ -65,18 +64,14 @@ class Recipe(recipe.Recipe):
             self.configure_options.append(f'--host={self._target}')
         # Point to mingw-w64-headers's sysroot (see configure_tpl)
         self.configure_options.append(f'--with-native-system-header-dir=/usr/{self._target}/include')
-        self.config_src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
-        self.build_dir = os.path.join(self.config_src_dir, 'gcc_build_final')
-        self.make_dir = self.build_dir
+        self.src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
+        self.config_src_dir = self.src_dir
+        self.build_dir = os.path.join(self.src_dir, 'gcc_build_final')
         self.make += ['all']
         self.make_install = ['install-strip' if i == 'install' else i for i in self.make_install]
         # Describe version for future reference
         version = shell.check_output([GIT, 'describe'], cmd_dir=Path(__file__).parent, logfile=self.logfile, env=self.env, quiet=True).strip()
         self.configure_options = [opt.replace('GStreamer', f'GStreamer ({version})') for opt in self.configure_options]
-
-    async def configure(self):
-        Path(self.make_dir).mkdir(exist_ok=True)
-        await super(Recipe, self).configure()
 
     def post_install(self):
         if self.config.target_platform == Platform.WINDOWS:
@@ -87,6 +82,6 @@ class Recipe(recipe.Recipe):
             os.remove(os.path.join(bindir, 'libstdc++-6.dll'))
             stdc64 = 'x86_64-w64-mingw32/libstdc++-v3/src/.libs/libstdc++-6.dll'
             stdc32 = 'x86_64-w64-mingw32/32/libstdc++-v3/src/.libs/libstdc++-6.dll'
-            shutil.copy(os.path.join(self.make_dir, stdc64), libdir)
-            shutil.copy(os.path.join(self.make_dir, stdc32), lib32dir)
+            shutil.copy(os.path.join(self.build_dir, stdc64), libdir)
+            shutil.copy(os.path.join(self.build_dir, stdc32), lib32dir)
         super().post_install()

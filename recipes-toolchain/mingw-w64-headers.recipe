@@ -1,4 +1,5 @@
 import os
+from cerbero.utils import messages as m
 
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-headers'
@@ -12,7 +13,6 @@ class Recipe(recipe.Recipe):
     add_host_build_target = False
     deps = ['mingw-w64-sources']
     can_msvc = False
-    requires_non_src_build = True
 
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
@@ -23,17 +23,17 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != self.config.platform:
             self.configure_options.append(f'--host={self.host}')
             self.configure_options.append(f'--target={self.host}')
-        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)
+        self.src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)
+        self.config_src_dir = self.src_dir
+        self.build_dir = os.path.join(self.src_dir, "cerbero-build-dir")
         self.make_install += [f'DESTDIR={self._sysroot}']
-        self.build_dir = os.path.join(self.config_src_dir, "cerbero-build-dir")
-        self.make_dir = self.build_dir
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
 
     # NOTE: PLEASE BE VERY CAREFUL WITH THIS SYMLINK!
     # If you don't specify it, you need to execute the below lines
     # in the gcc-bootstrap recipe:
-    # header = os.path.join(self.config_src_dir, 'gcc/config/i386/mingw32.h')
+    # header = os.path.join(self.src_dir, 'gcc/config/i386/mingw32.h')
     # shell.replace(header, {'/mingw': f'/usr/{self._target}'})
     # Otherwise https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70936 happens !
     # For further information, see:

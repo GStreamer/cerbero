@@ -26,8 +26,8 @@ class Recipe(recipe.Recipe):
         self.make_install += [f'DESTDIR={self.sysroot}']
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
-        self.build_dir_32 = os.path.join(self.make_dir, 'cerbero-build-dir-32')
-        self.build_dir_64 = os.path.join(self.make_dir, 'cerbero-build-dir-64')
+        self.build_dir_32 = os.path.join(self.build_dir, 'cerbero-build-dir-32')
+        self.build_dir_64 = os.path.join(self.build_dir, 'cerbero-build-dir-64')
 
     @modify_environment
     async def configure(self):

@@ -279,7 +279,7 @@ class Recipe(recipe.Recipe):
                                      'include', arch)
             if not os.path.exists(arch_dir):
                 os.makedirs(arch_dir)
-            shutil.copyfile(os.path.join(self.meson_dir, 'glib', 'glibconfig.h'),
+            shutil.copyfile(os.path.join(self.build_dir, 'glib', 'glibconfig.h'),
                         os.path.join(arch_dir, 'glibconfig.h'))
             with open(os.path.join(self.config.libdir, 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:

@@ -23,15 +23,12 @@ from test.test_common import DummyConfig
 from cerbero.build import build
 
 
-class MakefilesBase(build.MakefilesBase):
-    srcdir = ''
-    build_dir = ''
-
+class ModifyEnvBase(build.ModifyEnvBase):
     def __init__(self, config):
-        self.config = config
-        self.config_src_dir = os.path.join(config.sources, 'test')
         self.env = {}
-        build.MakefilesBase.__init__(self)
+        self.config = config
+        self.src_dir = os.path.join(config.sources, 'test')
+        build.ModifyEnvBase.__init__(self)
 
     @build.modify_environment
     def get_env_var(self, var):
@@ -49,7 +46,7 @@ class ModifyEnvTest(unittest.TestCase):
         self.var = 'TEST_VAR'
         self.val1 = 'test'
         self.val2 = 'test2'
-        self.mk = MakefilesBase(DummyConfig())
+        self.mk = ModifyEnvBase(DummyConfig())
 
     def testAppendEnv(self):
         self.mk.env[self.var] = self.val1

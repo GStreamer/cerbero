@@ -26,7 +26,6 @@ class Recipe(recipe.Recipe):
         '--enable-languages=c,c++,lto',
         '--enable-multiarch'
     ]
-    requires_non_src_build = True
     use_system_libs = True
     add_host_build_target = False
     deps = ['gcc-sources', 'mingw-w64-headers', 'gmp', 'mpfr', 'mpc', 'isl']
@@ -42,15 +41,14 @@ class Recipe(recipe.Recipe):
         self.configure_options.append(f'--target={self._target}')
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options.append(f'--host={self._target}')
-        self.config_src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
-        self.build_dir = os.path.join(self.config_src_dir, 'gcc_build_core')
-        self.make_dir = self.build_dir
+        self.src_dir = os.path.join(self.config.sources, f'gcc-sources-{self.version}')
+        self.config_src_dir = self.src_dir
+        self.build_dir = os.path.join(self.src_dir, 'gcc_build_core')
         self.make += ['all-gcc']
         self.make_install = ['install-strip-gcc' if i == 'install' else i for i in self.make_install]
 
     async def configure(self):
         # https://github.com/msys2/MINGW-packages/commit/54101537025a9a3a381a1e292fb9bc967e374bd2
-        header = os.path.join(self.config_src_dir, 'gcc/config/i386/mingw32.h')
+        header = os.path.join(self.src_dir, 'gcc/config/i386/mingw32.h')
         shell.replace(header, {'/mingw': f'/usr/{self._target}'})
-        Path(self.make_dir).mkdir(exist_ok=True)
         await super(Recipe, self).configure()

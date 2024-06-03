@@ -110,7 +110,7 @@ class Recipe(recipe.Recipe):
         self.openssl_platform = self._get_openssl_platform()
         # Need this include first, otherwise on compilation openssl will prefer
         # the headers in the prefix over those in its sources dir
-        srcdir_include = f'-I{self.config_src_dir}/include '
+        srcdir_include = f'-I{self.src_dir}/include '
         cflags = srcdir_include + self.get_env('CFLAGS')
         ldflags = self.get_env('LDFLAGS')
 

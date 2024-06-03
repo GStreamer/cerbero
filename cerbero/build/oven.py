@@ -476,7 +476,7 @@ class Oven(object):
                 if recipe.use_system_libs:
                     add_system_libs(recipe.config, environ, environ)
                 if be.step == BuildSteps.EXTRACT[1]:
-                    source_dir = recipe.get_for_arch(be.arch, 'config_src_dir')
+                    source_dir = recipe.get_for_arch(be.arch, 'src_dir')
                 else:
                     source_dir = recipe.get_for_arch(be.arch, 'build_dir')
                 shell.enter_build_environment(

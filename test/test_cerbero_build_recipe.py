@@ -33,6 +33,7 @@ class Class1(build.Build):
 
     def __init__(self):
         self.test = 'CODEPASS'
+        super().__init__()
 
     class1_method = lambda x: None
 

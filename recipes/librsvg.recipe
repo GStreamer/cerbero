@@ -39,7 +39,7 @@ class Recipe(recipe.Recipe):
     }
 
     def append_config_toml(self, s):
-        dot_cargo = Path(self.config_src_dir) / '.cargo'
+        dot_cargo = Path(self.src_dir) / '.cargo'
         dot_cargo.mkdir(exist_ok=True)
         # Append so we don't overwrite cargo vendor settings
         with (dot_cargo / 'config.toml').open('a') as f:

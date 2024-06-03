@@ -57,8 +57,9 @@ class GStreamer(recipe.Recipe):
             # different subproject from it.
             subproject = self.name.replace('-1.0', '')
             self.repo_dir = os.path.abspath(os.path.join(self.config.local_sources, 'gstreamer-1.0'))
-            self.config_src_dir = os.path.abspath(os.path.join(self.config.sources, 'gstreamer-1.0'))
-            self.build_dir = os.path.join(self.config_src_dir, 'subprojects', subproject)
+            self.src_dir = os.path.abspath(os.path.join(self.config.sources, 'gstreamer-1.0'))
+            self.build_dir = os.path.join(self.src_dir, 'subprojects', subproject, '_builddir')
+            self.config_src_dir = os.path.join(self.src_dir, 'subprojects', subproject)
             # Force using the commit/remotes from 'gstreamer-1.0' recipe, if set
             # in the config, on all gstreamer recipes because they share the same
             # git repository.
