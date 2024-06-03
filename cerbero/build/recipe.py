@@ -282,9 +282,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n"""
         self.config = config
         if self.package_name is None:
             self.package_name = '%s-%s' % (self.name, self.version)
-        if not hasattr(self, 'repo_dir'):
-            self.repo_dir = os.path.join(self.config.local_sources, self.package_name)
-        self.repo_dir = os.path.abspath(self.repo_dir)
         self.build_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
         self.config_src_dir = self.build_dir
         self.deps = self.deps or []

@@ -74,6 +74,8 @@ class Source(object):
 
         if not self.version:
             raise InvalidRecipeError(self, N_("'version' attribute is missing in the recipe"))
+        self.config_src_dir = os.path.abspath(os.path.join(self.config.sources, self.package_name))
+        self.repo_dir = os.path.abspath(os.path.join(self.config.local_sources, self.package_name))
 
     @property
     def check_cert(self):
@@ -464,7 +466,6 @@ class Tarball(BaseTarball, Source):
         m.action(N_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
         if os.path.exists(self.config_src_dir):
             shutil.rmtree(self.config_src_dir)
-
         unpack_dir = self.config.sources
         if self.tarball_is_bomb:
             unpack_dir = self.config_src_dir
