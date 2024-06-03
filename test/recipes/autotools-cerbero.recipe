@@ -1,0 +1,11 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'autotools-cerbero'
+    version = '0.0.1'
+    autoreconf = True
+    stype = SourceType.LOCAL_DIR
+    btype = BuildType.AUTOTOOLS
+    path = os.path.join(os.path.dirname(__file__), '..', 'projects', 'autotools')
+
+    files_share = ['share/autotools-cerbero/file1.txt']

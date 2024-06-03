@@ -1,0 +1,10 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'cmake-cerbero'
+    version = '0.0.1'
+    stype = SourceType.LOCAL_DIR
+    btype = BuildType.CMAKE
+    path = os.path.join(os.path.dirname(__file__), '..', 'projects', 'cmake')
+
+    files_share = ['share/cmake-cerbero/file1.txt']

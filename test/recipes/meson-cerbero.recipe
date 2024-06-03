@@ -1,0 +1,10 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'meson-cerbero'
+    version = '0.0.1'
+    stype = SourceType.LOCAL_DIR
+    btype = BuildType.MESON
+    path = os.path.join(os.path.dirname(__file__), '..', 'projects', 'meson')
+
+    files_share = ['share/meson-cerbero/file1.txt']

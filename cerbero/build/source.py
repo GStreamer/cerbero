@@ -721,9 +721,31 @@ class Svn(Source):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))
 
 
+class LocalDir(Source):
+    """
+    Source handler for local files
+    """
+
+    path = None
+
+    def __init__(self):
+        if not self.path:
+            raise FatalError('Missing path. It is mandatory')
+        Source.__init__(self)
+        # Overwrite the source dir to not be relative to the prefix
+        self.src_dir = os.path.abspath(self.path)
+
+    def fetch_impl(self):
+        pass
+
+    async def extract(self):
+        pass
+
+
 class SourceType(object):
     CUSTOM = CustomSource
     TARBALL = Tarball
     GIT = Git
     GIT_TARBALL = GitExtractedTarball
     SVN = Svn
+    LOCAL_DIR = LocalDir
