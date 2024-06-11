@@ -87,13 +87,13 @@ class OSXRelocator(object):
         self.change_id(object_file, id='@rpath/{}'.format(os.path.basename(original_file)))
         # With that out of the way, we need to sort out how many parents
         # need to be navigated to reach the root of the GStreamer prefix
-        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/')) - 1
+        depth = len(original_file.split('/')) - len(self.lib_prefix.split('/'))
         p_depth = '/..' * depth
         rpaths = [
             # From a deeply nested library
-            f'@loader_path{p_depth}',
+            f'@loader_path{p_depth}/lib',
             # From a deeply nested framework or binary
-            f'@executable_path{p_depth}',
+            f'@executable_path{p_depth}/lib',
             # From a library within the prefix
             '@loader_path/../lib',
             # From a binary within the prefix
