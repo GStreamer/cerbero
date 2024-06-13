@@ -1,14 +1,22 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
-
+from cerbero.tools.libtool import LibtoolLibrary
+from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'libass'
-    version = '0.15.2'
+    version = '0.17.2'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
     url = 'https://github.com/libass/libass/releases/download/{0}/libass-{0}.tar.xz'.format(version)
-    tarball_checksum = '1be2df9c4485a57d78bb18c0a8ed157bc87a5a8dd48c661961c625cb112832fd'
+    tarball_checksum = 'e8261b51d66ba933fe99248c6fdd8767ed96c5a7e5363c83992c735a2c2fbf74'
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi', 'harfbuzz']
+    btype = BuildType.MESON
+    meson_options = {}
+
+    patches = [
+        # Fixes build with host_system=ios until we move to host_system=darwin, subsystem=ios
+        'libass/0001-meson-fix-build-on-iOS-with-host_system-set-to-iOS.patch',
+    ]
 
     files_libs = ['libass']
     files_devel = ['include/ass', '%(libdir)s/pkgconfig/libass.pc']
@@ -22,4 +30,12 @@ class Recipe(recipe.Recipe):
             self.deps.append('libiconv')
         if self.config.target_platform == Platform.ANDROID:
             if self.config.target_arch in (Architecture.X86,):
-                self.configure_options += ' --disable-asm'
+                self.meson_options['asm'] = 'disabled'
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libass', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=['freetype', 'fontconfig', 'png16', 'fribidi', 'harfbuzz'])
+        libtool_la.save()
+        super().post_install()
