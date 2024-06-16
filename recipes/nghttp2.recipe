@@ -1,0 +1,12 @@
+# -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+
+class Recipe(recipe.Recipe):
+    name = 'nghttp2'
+    version = '1.52.0'
+    stype = SourceType.TARBALL
+    btype = BuildType.CMAKE
+    url = 'https://github.com/nghttp2/nghttp2/releases/download/v{0}/nghttp2-{0}.tar.xz'.format(version)
+    tarball_checksum = '3ea9f0439e60469ad4d39cb349938684ffb929dd7e8e06a7bffe9f9d21f8ba7d'
+
+    files_libs = ['libnghttp2']
+    files_devel = ['include/nghttp2', '%(libdir)s/pkgconfig/libnghttp2.pc']
