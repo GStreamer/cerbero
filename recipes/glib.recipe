@@ -251,6 +251,11 @@ class Recipe(recipe.Recipe):
                 raise FatalError(_("Add specific for other Linux distributions here"))
             self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
+        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
+            # Meson doesn't yet introduce rpaths properly.
+            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
+            self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')
+
     def post_install(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             # For the universal build we need to ship glibconfig.h of both

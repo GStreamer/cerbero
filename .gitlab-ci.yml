@@ -124,6 +124,7 @@ fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 checks fedora image:
   stage: "build docker"
@@ -132,6 +133,7 @@ checks fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 android fedora image:
   stage: "build docker"
@@ -141,6 +143,7 @@ android fedora image:
     - .fdo.container-build@fedora
   variables:
     GIT_STRATEGY: none
+  tags: [ 'placeholder-job' ]
 
 # Rules for when to use a specific job
 
@@ -176,7 +179,7 @@ android fedora image:
     # shared across everything really
     CCACHE_MAXSIZE: "50G"
 
-    CERBERO_HOME: "cerbero-build"
+    CERBERO_HOME: "cb"
     CERBERO_SOURCES: "cerbero-sources"
     CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS}"
     CERBERO: "./cerbero-uninstalled -c config/${CONFIG} -c localconf.cbc"
@@ -204,10 +207,13 @@ android fedora image:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.tar.*"
+    exclude:
+      - .git
+      - .git/**/*
 
 .cerbero fedora base:
   extends:
@@ -259,6 +265,7 @@ pre-commit checks:
     pre-commit run --all-files --show-diff-on-failure
   variables:
     PRE_COMMIT_HOME: '/cache/${CI_PROJECT_NAMESPACE}/pre-commit'
+  tags: [ 'placeholder-job' ]
 
 #
 # Cerbero Linux X86_64 build
@@ -291,10 +298,13 @@ build cerbero fedora x86_64:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "*[0-9].tar.*"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-android universal:
   extends:
@@ -325,10 +335,13 @@ build cerbero cross-android universal:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.msi"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-windows x86:
   extends: '.cerbero deps cross-windows'
@@ -440,11 +453,14 @@ cerbero cross-android universal examples:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-1.*.pkg"
       - "gstreamer-1.0-devel-1.*.pkg"
+    exclude:
+      - .git
+      - .git/**/*
 
 .cerbero macos arm64 image:
   image: "registry.freedesktop.org/gstreamer/cerbero/macos-arm64/14-sonoma:2023-10-25.2"
@@ -497,10 +513,13 @@ build cerbero cross-macos universal x86_64-host:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/*/b/CMakeFiles/CMakeLog.log"
       - "gstreamer-1.0-*-ios-universal.pkg"
+    exclude:
+      - .git
+      - .git/**/*
 
 cerbero deps cross-ios universal arm64-host:
   extends:
@@ -661,10 +680,13 @@ cerbero deps msvc x86_64 msi package:
     when: 'always'
     paths:
       - "*/logs"
-      - "*/sources/*/*/_builddir/meson-logs/meson-log.txt"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeError.log"
-      - "*/sources/*/*/_builddir/CMakeFiles/CMakeLog.log"
+      - "*/sources/*/*/b/meson-logs/meson-log.txt"
+      - "*/sources/*/*/b/CMakeFiles/CMakeError.log"
+      - "*/sources/*/*/b/CMakeFiles/CMakeLog.log"
       - "*.msi"
+    exclude:
+      - .git
+      - .git/**/*
   rules:
     # This is an extended rule of .cerbero not-mr rules
     # Run automatically if it's a scheduled pipeline

@@ -257,16 +257,22 @@ class Package(PackageBase):
     @type osx_framework_library: tuple
     """
 
-    deps = list()
-    files = list()
-    platform_files = dict()
-    files_devel = list()
-    platform_files_devel = dict()
+    deps = None
+    files = None
+    platform_files = None
+    files_devel = None
+    platform_files_devel = None
     osx_framework_library = None
 
     def __init__(self, config, store, cookbook):
         PackageBase.__init__(self, config, store)
         self.cookbook = cookbook
+        self.deps = self.deps or []
+        self.files = self.files or []
+        self.platform_files = self.platform_files or {}
+        self.files_devel = self.files_devel or []
+        self.platform_files_devel = self.platform_files_devel or {}
+        self.osx_framework_library = self.osx_framework_library or None
 
     def load_files(self):
         self._files = self.files + self.platform_files.get(self.config.target_platform, [])

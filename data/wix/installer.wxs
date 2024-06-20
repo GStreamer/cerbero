@@ -9,7 +9,7 @@
 			Description="$(var.Description)" InstallPrivileges="elevated"
 			Manufacturer="$(var.Manufacturer)"/>
 
-		<Media Cabinet="product.cab" EmbedCab="yes" Id="1"/>
+		<MediaTemplate EmbedCab="yes" MaximumUncompressedMediaSize="50" />
 
 		<!-- Upgrades -->
 		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit"/>
