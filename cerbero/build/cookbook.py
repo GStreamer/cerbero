@@ -501,7 +501,6 @@ class CookBook (object):
             recipe = crecipe.UniversalRecipe(self._config)
         for c in list(self._config.arch_config.keys()):
             conf = self._config.arch_config[c]
-            conf.prefix = os.path.join(self._config.prefix, c)
             # For univeral recipes, we need to parse again the recipe file.
             # Otherwise, class variables with mutable types like the "deps"
             # dictionary are reused in new instances

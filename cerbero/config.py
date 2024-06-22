@@ -396,7 +396,7 @@ class Config(object):
         for config in list(self.arch_config.values()):
             if self.target_arch == Architecture.UNIVERSAL:
                 config.sources = os.path.join(self.sources, config.target_arch)
-                config.prefix = os.path.join(self.prefix)
+                config.prefix = os.path.join(self.prefix, config.target_arch)
             # qmake_path is different for each arch in android-universal, but
             # not in ios-universal.
             qtpkgdir, qmake5 = detect_qt5(
