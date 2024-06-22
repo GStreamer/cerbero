@@ -4,12 +4,12 @@ from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'opus'
-    version = '1.4'
+    version = '1.5.2'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'xiph://.tar.gz'
-    tarball_checksum = 'c9b32b4253be5ae63d1ff16eea06b94b5f0f2951b7a02aceef58e3a3ce49c51f'
+    tarball_checksum = '65c1d2f78b9f2fb20082c38cbe47c951ad5839345876e46941612ee87f9a7ce1'
     meson_options = {
         'rtcd': 'enabled',
         'intrinsics': 'enabled',
@@ -22,8 +22,6 @@ class Recipe(recipe.Recipe):
         'opus/0001-celt-Force-stack-alignment-for-functions-using-__m12.patch',
         # https://gitlab.xiph.org/xiph/opus/-/merge_requests/58
         'opus/0001-meson-fix-get_version.py-to-try-the-package_version-.patch',
-        # https://gitlab.xiph.org/xiph/opus/-/merge_requests/59
-        'opus/0001-meson-fix-build-on-arm64.patch',
     ]
 
     files_libs = ['libopus']
