@@ -370,11 +370,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                 retries -= 1
                 m.action(f'Retrying, caught spurious failure: {ret.strip()}')
 
-    def _get_arch_prefix(self):
-        if self.config.cross_universal_type() == 'flat':
-            return os.path.join(self.config.prefix, self.config.target_arch)
-        return self.config.prefix
-
     def _get_la_deps_from_pc (self, laname, pcname, env):
         pkgc = PkgConfig([pcname], env=env)
         libs =  set(pkgc.static_libraries())
@@ -420,7 +415,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         for f in self.files_list_by_category(self.DEVEL_CAT):
             if not f.endswith('.pc'):
                 continue
-            fpath = os.path.join(self._get_arch_prefix(), f)
+            fpath = os.path.join(self.config.prefix, f)
             if not os.path.isfile(fpath):
                 m.warning(f'{self.config.target_arch} {fpath} not found')
                 continue
@@ -507,7 +502,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
                 libtype = 'plugin'
             else:
                 libtype = 'library'
-            fpath = os.path.join(self._get_arch_prefix(), f)
+            fpath = os.path.join(self.config.prefix, f)
             if not os.path.isfile(fpath):
                 arch = self.config.target_arch
                 m.warning('{} {} {!r} not found'.format(arch, libtype, fpath))
@@ -515,7 +510,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
             pcname = os.path.basename(f)[3:-6 if f.endswith('.dll.a') else -2]
             la_path = os.path.splitext(f)[0]
             ladir, laname = os.path.split(la_path)
-            ladir = os.path.join(self._get_arch_prefix(), ladir)
+            ladir = os.path.join(self.config.prefix, ladir)
 
             major = minor = micro = None
             if libtype == 'library':

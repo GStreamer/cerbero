@@ -741,17 +741,6 @@ class Config(object):
             or self.target_distro_version != self.distro_version
         )
 
-    def cross_universal_type(self):
-        if not self.cross_compiling():
-            return None
-        # cross-ios-universal, each arch prefix is merged and flattened into one prefix
-        if isinstance(self.universal_archs, list):
-            return 'flat'
-        # cross-android-universal, each arch prefix is separate
-        if isinstance(self.universal_archs, dict):
-            return 'normal'
-        return None
-
     def prefix_is_executable(self):
         """Can the binaries from the target platform can be executed in the
         build env?"""
