@@ -588,11 +588,7 @@ class Recipe(custom.GStreamer):
             self.enable_plugin('tinyalsa', 'sys', dep='tinyalsa')
 
         # TODO: Vulkan support on Linux and Windows
-        # No MoltenVK available for iOS x86_64
-        # Disabled on macOS ARM64 due to https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/361
-        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID) or \
-                (self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64) or \
-                (self.config.target_platform == Platform.DARWIN and self.config.target_arch == Architecture.ARM64):
+        if self.config.target_platform not in (Platform.DARWIN, Platform.IOS, Platform.ANDROID):
             self.disable_plugin('vulkan', 'vulkan', library_name='vulkan')
 
         if self.config.target_platform in (Platform.ANDROID, Platform.IOS):

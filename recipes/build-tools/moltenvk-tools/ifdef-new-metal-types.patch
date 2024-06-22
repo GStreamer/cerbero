@@ -11,9 +11,9 @@
  /** Returns all four Metal texture swizzles from the Vulkan component mapping. */
 -MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkComponentMapping(VkComponentMapping vkMapping);
 +MTLTextureSwizzleChannels mvkMTLTextureSwizzleChannelsFromVkComponentMapping(VkComponentMapping vkMapping) API_AVAILABLE(macos(10.15), ios(13.0));
- 
- 
- #pragma mark Mipmaps
+
+ /** Maps a clear color according to the specified VkComponentSwizzle. */
+ float mvkVkClearColorFloatValueFromVkComponentSwizzle(float *colors, uint32_t index, VkComponentSwizzle vkSwizzle);
 @@ -362,8 +360,8 @@
  /** Returns the Metal MTLStoreAction corresponding to the specified Vulkan VkAttachmentStoreOp. */
  MTLStoreAction mvkMTLStoreActionFromVkAttachmentStoreOp(VkAttachmentStoreOp vkStoreOp, bool hasResolveAttachment);

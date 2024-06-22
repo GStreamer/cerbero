@@ -1,30 +1,32 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import shutil
-from cerbero.utils import shell
-
-from cerbero.tools.libtool import LibtoolLibrary
+from pathlib import Path
 
 class Recipe(recipe.Recipe):
     name = 'moltenvk'
-    version = '1.2.182.0'
+    version = '1.3.283.0'
     licenses = [License.Apachev2]
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
 
-    files_bins = [
-        'glslangValidator',
-        'glslc',
-        'spirv-as',
-        'spirv-cfg',
-        'spirv-cross',
-        'spirv-dis',
-        'spirv-link',
-        'spirv-opt',
-        'spirv-reduce',
-        'spirv-remap',
-        'spirv-val',
-        'vulkaninfo',
-    ]
+    platform_files_bins = {
+        Platform.DARWIN: [
+            'glslang',
+            'glslangValidator',
+            'glslc',
+            'spirv-as',
+            'spirv-cfg',
+            'spirv-cross',
+            'spirv-dis',
+            'spirv-link',
+            'spirv-opt',
+            'spirv-reduce',
+            'spirv-remap',
+            'spirv-val',
+            'vulkaninfo',
+        ],
+        Platform.IOS: [],
+    }
 
     files_libs = [
         'libMoltenVK'
@@ -33,109 +35,141 @@ class Recipe(recipe.Recipe):
     files_devel = [
         'include/vulkan',
         'include/MoltenVK',
+        'include/vk_video',
     ]
 
     def prepare(self):
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
-            raise InvalidRecipeError(self, "Invalid platform")
+            raise InvalidRecipeError(self, f'Invalid platform {self.config.target_platform}')
+        if self.config.target_arch not in [Architecture.ARM64, Architecture.X86_64]:
+            raise InvalidRecipeError(self, f'Invalid arch {self.config.target_arch}')
 
-        # no binaries available on iOS
         if self.config.target_platform == Platform.IOS:
-            self.files_bins = []
             self.library_type = LibraryType.STATIC
-
-        if self.config.target_platform == Platform.DARWIN:
-            # FIXME: libvulkan.dylib doesn't currently work with the
-            # id/signature modifications we do later and may need to be rebuilt
-            #self.files_libs += ['libvulkan']
-            # no libvulkan.a
+        elif self.config.target_platform == Platform.DARWIN:
             self.library_type = LibraryType.BOTH
 
+        # Relocation just never works on anything in the SDK because:
+        # link edit information does not fill the __LINKEDIT segment
+        self.skip_steps = [BuildSteps.RELOCATE_OSX_LIBRARIES]
+        # For universal iOS and macOS builds, we need to ship "fat" (merged)
+        # libraries and executables.
+        #
+        # The MoltenVK SDK already provides those for macOS, so for macOS
+        # universal we just ship them as-is, which means disabling merge and
+        # code-sign steps (see below).
+        #
+        # For non-universal builds on macOS, we use `lipo` to strip the extra arches.
+        #
+        # The MoltenVK SDK provides an xcframework for iOS, which has separate
+        # libMoltenVK.a for each target:
+        # * iOS (arm64)
+        # * iOS Simulator (arm64+x86_64)
+        # * tvOS (arm64+arm64e)
+        # * tvOS Simulator (arm64+x86_64)
+        # However, our packaging is currently lacking (TODO), and we ship "fat"
+        # archives with arm64 (ios) and x86_64 (ios-simulator) merged. So we need to
+        # extract the x86_64 archive and place it in the arch-specific prefix,
+        # and let cerbero merge it with the ios-arm64 one (and then sign it).
+        #
+        # For non-universal builds on iOS, no extra steps are necessary.
+        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
+            self.skip_steps += [BuildSteps.MERGE, BuildSteps.CODE_SIGN]
+
     async def install(self):
-        # only copy once for the architectures supported by the libraries
-        if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
-            return;
+        srcdir = Path(self.config.moltenvk_prefix)
 
-        if self.config.target_platform == Platform.IOS and self.config.target_arch != Architecture.ARM64:
-            return;
+        incs = ['vulkan', 'MoltenVK', 'vk_video']
+        lib = f'lib{self.config.lib_suffix}'
+        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
+            uprefix = Path(self.config.universal_prefix)
+            # Add dangling symlinks into the arch-specific prefix so that
+            # recipes can find and link to these
+            dst = Path(self.config.prefix, 'bin', 'glslc')
+            relsrc = os.path.relpath(uprefix / 'bin', dst.parent)
+            dst.unlink(missing_ok=True)
+            os.symlink(f'{relsrc}/glslc', dst)
 
-        if self.config.target_platform == Platform.DARWIN \
-               and self.config.target_arch not in [Architecture.ARM64, Architecture.X86_64]:
-            return
+            dst = Path(self.config.libdir, 'libMoltenVK.dylib')
+            relsrc = os.path.relpath(uprefix / lib, dst.parent)
+            dst.unlink(missing_ok=True)
+            os.symlink(f'{relsrc}/libMoltenVK.dylib', dst)
+            for d in incs:
+                dst = Path(self.config.prefix, 'include', d)
+                relsrc = os.path.relpath(uprefix / 'include', dst.parent)
+                if dst.is_dir() and not dst.is_symlink():
+                    # Handle migration of a pre-existing prefix
+                    shutil.rmtree(dst)
+                else:
+                    dst.unlink(missing_ok=True)
+                os.symlink(f'{relsrc}/{d}', dst)
+            if self.config.target_arch != Architecture.ARM64:
+                return;
+            # Now, we install everything into the post-merge (universal) prefix
+            prefix = Path(self.config.universal_prefix)
+        else:
+            prefix = Path(self.config.prefix)
 
-        srcdir = self.config.moltenvk_prefix
-
-        prefix = self.config.prefix
-        bindir = os.path.join(prefix, 'bin')
-        libdir = self.config.libdir
+        bindir = prefix / 'bin'
+        libdir = prefix / lib
+        bins = self.platform_files_bins[self.config.target_platform]
 
         to_copy = []
 
-        for bin in self.files_bins:
-            to_copy += [
-                (os.path.join(srcdir, 'macOS', 'bin', bin),
-                 os.path.join(bindir, bin), False)
-            ]
+        for b in bins:
+            to_copy += [(srcdir / 'macOS/bin' / b, bindir)]
 
-        for d in ('vulkan', 'MoltenVK', 'vulkan-portability'):
-            to_copy += [
-                (os.path.join(srcdir, 'MoltenVK', 'include', d),
-                 os.path.join(prefix, 'include', d), True)
-            ]
+        for d in incs:
+            to_copy += [(srcdir / 'macOS/include' / d, prefix / 'include')]
 
-        libmoltenvk_shared = os.path.join(libdir, 'libMoltenVK.dylib')
-        libmoltenvk_static = os.path.join(libdir, 'libMoltenVK.a')
-        libvulkan = os.path.join(libdir, 'libvulkan.dylib')
-        libvulkan1 = os.path.join(libdir, 'libvulkan.1.dylib')
-
+        src_libdir = srcdir / 'macOS/lib'
         if self.config.target_platform == Platform.DARWIN:
-            to_copy += [
-                #(os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.dylib'),
-                # libvulkan, False),
-                #(os.path.join(srcdir, 'macOS', 'lib', 'libvulkan.1.dylib'),
-                # libvulkan1, False),
-                (os.path.join(srcdir, 'MoltenVK', 'dylib', 'macOS', 'libMoltenVK.dylib'),
-                 libmoltenvk_shared, False),
-                (os.path.join(srcdir, 'MoltenVK', 'MoltenVK.xcframework', 'macos-arm64_x86_64', 'libMoltenVK.a'),
-                 libmoltenvk_static, False)
-            ]
+            for f in ('libMoltenVK.dylib', 'MoltenVK.xcframework/macos-arm64_x86_64/libMoltenVK.a'):
+                to_copy += [(src_libdir / f, libdir)]
         elif self.config.target_platform == Platform.IOS:
-            to_copy += [
-                (os.path.join(srcdir, 'MoltenVK', 'dylib', 'iOS', 'libMoltenVK.dylib'),
-                         libmoltenvk_shared, False),
-                (os.path.join(srcdir, 'MoltenVK', 'MoltenVK.xcframework', 'ios-arm64', 'libMoltenVK.a'),
-                         libmoltenvk_static, False)
-            ]
-
-        for src, dest, is_dir in to_copy:
-            if is_dir:
-                shell.copy_dir(src, dest)
+            arch = self.config.target_arch
+            if arch == Architecture.ARM64:
+                d = 'ios-arm64'
+            elif arch == Architecture.X86_64:
+                d = 'ios-arm64_x86_64-simulator'
             else:
-                if not os.path.exists(os.path.dirname(dest)):
-                    os.makedirs(os.path.dirname(dest))
-                shutil.copy(src, dest)
+                raise BuildStepError(f'Unsupported target arch {arch}')
+            to_copy += [(src_libdir / 'MoltenVK.xcframework' / d / 'libMoltenVK.a', libdir)]
 
-        if self.config.target_platform == Platform.DARWIN:
-            binaries = [os.path.join(bindir, x) for x in self.files_bins]
-            for f in [libmoltenvk_shared]: # libvulkan, libvulkan1
-                # Because we are editing the binary, we need to the remove the signature.
-                # The process would crash otherwise as not loadable
-                await shell.async_call(['codesign', '--remove-signature', f], logfile=self.logfile)
-                # we need to remove the @rpath from the libname
-                await shell.async_call(['install_name_tool', '-id', f, f], logfile=self.logfile)
-                # The SDK provides universal binaries, we need to convert them into thin binaries so
-                # that the merge step can merge them back
-                await shell.async_call(['lipo', '-thin', self.config.target_arch, f, '-output', f], logfile=self.logfile)
-            # no need to change id for static libraries
-            for f in binaries + [libmoltenvk_static]:
-                # Because we are editing the binary, we need to the remove the signature.
-                # The process would crash otherwise as not loadable
-                await shell.async_call(['codesign', '--remove-signature', f], logfile=self.logfile)
-                # The SDK provides universal binaries, we need to convert them into thin binaries so
-                # that the merge step can merge them back
-                await shell.async_call(['lipo', '-thin', self.config.target_arch, f, '-output', f], logfile=self.logfile)
+        for (src, dest_dir) in to_copy:
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            dest = dest_dir / src.name
+            if src.is_dir():
+                shutil.copytree(src, dest, symlinks=True, dirs_exist_ok=True)
+            else:
+                if dest.exists():
+                    dest.unlink()
+                shutil.copy2(src, dest, follow_symlinks=False)
 
-        LibtoolLibrary('vulkan', None, None, None, libdir,
-                self.config.target_platform).save()
-        LibtoolLibrary('MoltenVK', None, None, None, libdir,
-                self.config.target_platform).save()
+        files = []
+
+        if self.config.target_platform == Platform.DARWIN and not self.config.universal_prefix:
+            # Need to thin all libs if we're not building cross-macos-universal,
+            # while skipping symlinks
+            files += [libdir / x for x in ('libMoltenVK.dylib', 'libMoltenVK.a')]
+            # Thinning the binaries causes them to become unloadable, so just skip it
+            #files += [bindir / x for x in bins if x != 'glslangValidator']
+        elif self.config.target_platform == Platform.IOS and self.config.target_arch == Architecture.X86_64:
+            # Simulator lib is fat (universal), needs thinning
+            files += [libdir / 'libMoltenVK.a']
+
+        for f in files:
+            f = str(f)
+            # Because we are editing the binary, we need to remove the signature.
+            # The process would crash otherwise as not loadable
+            await shell.async_call(['codesign', '--remove-signature', f], logfile=self.logfile)
+            await shell.async_call(['lipo', '-thin', self.config.target_arch, f, '-output', f], logfile=self.logfile)
+
+    def post_install(self):
+        super().post_install()
+        if self.config.target_platform == Platform.DARWIN and self.config.universal_prefix is not None:
+            src = Path(self.config.prefix, 'share/licenses/moltenvk')
+            dst = Path(self.config.universal_prefix, 'share/licenses/moltenvk')
+            dst.mkdir(parents=True, exist_ok=True)
+            for f in ('Apache-2.0.txt', 'README-LICENSE-INFO.txt'):
+                shutil.copy2(src / f, dst / f)

@@ -298,7 +298,7 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         self.platform_deps = self.platform_deps or {}
 
         self.skip_steps = self.skip_steps or []
-        allowed_skip = {BuildSteps.RELOCATE_OSX_LIBRARIES, BuildSteps.CODE_SIGN}
+        allowed_skip = {BuildSteps.MERGE, BuildSteps.RELOCATE_OSX_LIBRARIES, BuildSteps.CODE_SIGN}
         bad_skip = set(self.skip_steps) - allowed_skip
         if bad_skip:
             raise FatalError(f"Can only skip steps {allowed_skip}, not {bad_skip}")
@@ -1005,6 +1005,9 @@ class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
             recipe.relocate_osx_libraries()
 
     async def merge(self):
+        if BuildSteps.MERGE in self.skip_steps:
+            return
+
         arch_inputs = {}
         for arch, recipe in self._recipes.items():
             arch_inputs[arch] = set(recipe.files_list())
