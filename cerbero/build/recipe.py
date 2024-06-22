@@ -88,19 +88,19 @@ def log_step_output(recipe, stepfunc):
             if data:
                 print(data)
 
-    def wrapped():
+    def wrapped(*args, **kwargs):
         open_file()
         try:
-            stepfunc()
+            stepfunc(*args, **kwargs)
         except FatalError:
             handle_exception()
             raise
         close_file()
 
-    async def async_wrapped():
+    async def async_wrapped(*args, **kwargs):
         open_file()
         try:
-            await stepfunc()
+            await stepfunc(*args, **kwargs)
         except FatalError:
             handle_exception()
             raise
