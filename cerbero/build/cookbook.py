@@ -496,7 +496,7 @@ class CookBook (object):
     def _load_universal_recipe(self, globals_dict, recipe_cls,
             recipe_cls_key, filepath, custom=None):
         if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
-            recipe = crecipe.UniversalFlatRecipe(self._config)
+            recipe = crecipe.UniversalMergedRecipe(self._config)
         else:
             recipe = crecipe.UniversalRecipe(self._config)
         for c in list(self._config.arch_config.keys()):

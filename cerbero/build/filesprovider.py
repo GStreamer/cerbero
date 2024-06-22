@@ -656,7 +656,7 @@ class UniversalFilesProvider(FilesProvider):
             return self._aggregate_libraries(category)
         return self._aggregate_files(category)
 
-class UniversalFlatFilesProvider(UniversalFilesProvider):
+class UniversalMergedFilesProvider(UniversalFilesProvider):
 
     def get_arch_file(self, arch, f):
         '''

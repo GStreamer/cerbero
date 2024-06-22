@@ -242,6 +242,7 @@ class Config(object):
         'use_ccache',
         'force_git_commit',
         'universal_archs',
+        'universal_prefix',
         'osx_target_sdk_version',
         'variants',
         'build_tools_prefix',
@@ -397,6 +398,9 @@ class Config(object):
             if self.target_arch == Architecture.UNIVERSAL:
                 config.sources = os.path.join(self.sources, config.target_arch)
                 config.prefix = os.path.join(self.prefix, config.target_arch)
+                # A universal prefix is only available if arch-prefixes are merged during build
+                if self.cross_universal_type() == 'merged':
+                    config.universal_prefix = self.prefix
             # qmake_path is different for each arch in android-universal, but
             # not in ios-universal.
             qtpkgdir, qmake5 = detect_qt5(
@@ -740,6 +744,14 @@ class Config(object):
             or self.target_arch != self.arch
             or self.target_distro_version != self.distro_version
         )
+
+    def cross_universal_type(self):
+        if not self.cross_compiling() or self.target_arch != Architecture.UNIVERSAL:
+            return None
+        # cross-{macos,ios}-universal, each arch prefix is merged and flattened into one prefix
+        if self.target_platform in (Platform.IOS, Platform.DARWIN):
+            return 'merged'
+        return 'split'
 
     def prefix_is_executable(self):
         """Can the binaries from the target platform can be executed in the

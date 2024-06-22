@@ -28,7 +28,7 @@ from pathlib import Path
 
 from cerbero.enums import License, LicenseDescription, LibraryType
 from cerbero.build import build, source
-from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalFlatFilesProvider
+from cerbero.build.filesprovider import FilesProvider, UniversalFilesProvider, UniversalMergedFilesProvider
 from cerbero.config import Platform
 from cerbero.errors import FatalError, CommandError
 from cerbero.ide.pkgconfig import PkgConfig
@@ -975,15 +975,15 @@ class UniversalRecipe(BaseUniversalRecipe, UniversalFilesProvider):
         UniversalFilesProvider.__init__(self, config)
 
 
-class UniversalFlatRecipe(BaseUniversalRecipe, UniversalFlatFilesProvider):
+class UniversalMergedRecipe(BaseUniversalRecipe, UniversalMergedFilesProvider):
     '''
-    Unversal recipe for iOS and OS X creating flat libraries
+    Unversal recipe for iOS and OS X creating merged (fat) libraries
     in the target prefix instead of subdirs for each architecture
     '''
 
     def __init__(self, config):
         super().__init__(config)
-        UniversalFlatFilesProvider.__init__(self, config)
+        UniversalMergedFilesProvider.__init__(self, config)
 
     @property
     def steps(self):
