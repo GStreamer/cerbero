@@ -82,13 +82,3 @@ class Recipe(custom.GStreamer):
            self.config.target_platform not in [Platform.IOS, Platform.ANDROID]:
             self.meson_options['ptp-helper'] = 'enabled'
             self.files_misc.append('libexec/gstreamer-1.0/gst-ptp-helper%(bext)s')
-
-    def post_install(self):
-        if self.config.platform in (Platform.DARWIN, Platform.IOS):
-            files = [
-                f'{self.config.libdir}/pkgconfig/gstreamer-1.0.pc',
-            ]
-            for f in files:
-                shell.replace(f, {'Libs:': 'Libs: -Wl,-rpath,${libdir}'})
-
-        super().post_install()

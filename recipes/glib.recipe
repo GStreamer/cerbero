@@ -250,11 +250,6 @@ class Recipe(recipe.Recipe):
                 raise FatalError(_("Add specific for other Linux distributions here"))
             self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
-            # Meson doesn't yet introduce rpaths properly.
-            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
-            self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')
-
     def post_install(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             # For the universal build we need to ship glibconfig.h of both
@@ -277,6 +272,16 @@ class Recipe(recipe.Recipe):
             with open(os.path.join(self.config.libdir, 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:
                 f.write(GLIB_CONFIG_UNVERSAL)
+
+        if self.config.platform in (Platform.DARWIN, Platform.IOS):
+            # Meson doesn't yet introduce rpaths properly.
+            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
+            files = [
+                f'{self.config.libdir}/pkgconfig/glib-2.0.pc',
+            ]
+            for f in files:
+                shell.replace(f, {'Libs:': 'Libs: -Wl,-rpath,${libdir}'})
+
         major, minor, micro = get_libtool_versions(self.version)
         # Meson does not generate la files
         LibtoolLibrary('glib-2.0', major, minor, micro,

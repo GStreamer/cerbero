@@ -46,11 +46,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform != Platform.LINUX or self.config.cross_compiling():
             self.deps.append('openssl')
 
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
-            # Meson doesn't yet introduce rpaths properly.
-            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
-            self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')
-
     def post_install(self):
         if self.config.target_platform != Platform.WINDOWS:
             # Meson does not generate la files
