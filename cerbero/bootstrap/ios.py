@@ -23,9 +23,12 @@
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 
+import os
+from cerbero.utils import shell
+from cerbero.utils import messages as m
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.bootstrap.bootstrapper import register_toolchain_bootstrapper
-from cerbero.config import Distro
+from cerbero.enums import Distro, Architecture
 
 
 class IOSBootstrapper(BootstrapperBase):
@@ -33,8 +36,9 @@ class IOSBootstrapper(BootstrapperBase):
         super().__init__(config, offline)
 
     async def start(self, jobs=0):
-        # FIXME: enable it when buildbots are properly configured
-        return
+        if self.config.arch == Architecture.ARM64 and not os.path.exists('/Library/Apple/usr/lib/libRosettaAot.dylib'):
+            m.message('Installing rosetta needed for some package installation scripts')
+            shell.new_call(['/usr/sbin/softwareupdate', '--install-rosetta', '--agree-to-license'])
 
 
 def register_all():

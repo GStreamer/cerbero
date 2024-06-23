@@ -35,13 +35,6 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             raise InvalidRecipeError(self, "Invalid platform")
 
-    async def extract(self):
-        if self.config.arch == Architecture.ARM64:
-            m.message("Installing rosetta needed for some package installation scripts")
-            await shell.async_call(['/usr/sbin/softwareupdate', '--install-rosetta', '--agree-to-license'], logfile=self.logfile)
-
-        await super().extract()
-
     async def install(self):
         srcdir = self.config.moltenvk_prefix
         prefix = self.config.prefix
