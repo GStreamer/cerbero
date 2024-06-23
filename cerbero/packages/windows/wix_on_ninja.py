@@ -40,8 +40,10 @@ class Candle(object):
         """
         The template rule for compiling Wix objects
         """
-        command = ['wine'] if with_wine else []
-        command.extend([(Path(wix_prefix) / 'candle.exe').as_posix(), '-nologo', '-out', '$outdir', '-wx', '$in'])
+        command = [f'{Path(__file__).parent}/wrapper.py', 'wine'] if with_wine else []
+        outdir = 'posix:$outdir' if with_wine else '$outdir'
+        inflag = '--' if with_wine else ''
+        command.extend([(Path(wix_prefix) / 'candle.exe').as_posix(), '-nologo', '-out', outdir, '-wx', inflag, '$in'])
 
         writer.rule(
             'candle',
@@ -80,10 +82,12 @@ class Light(object):
         """
         The template rule for linking Wix objects into Merge Modules or MSI installers
         """
-        command = ['wine'] if with_wine else []
+        command = [f'{Path(__file__).parent}/wrapper.py', 'wine'] if with_wine else []
+        outobj = 'posix:$out' if with_wine else '$out'
+        inflag = '--' if with_wine else ''
         # FIXME: remove -sval once the string overflows in component/file keys are solved
         command.extend(
-            [(Path(wix_prefix) / 'light.exe').as_posix(), '-nologo', '-out', '$out', '$extra', '-sval', '$in']
+            [(Path(wix_prefix) / 'light.exe').as_posix(), '-nologo', '-out', outobj, '$extra', '-sval', inflag, '$in']
         )
 
         if with_wine:
