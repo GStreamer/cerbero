@@ -11,7 +11,7 @@ do
     if test "x$WIPE" = "x1"; then
       ./cerbero-uninstalled -c config/mingw-multilib-$p.cbc wipe --force
     fi
-  ./cerbero-uninstalled -c config/mingw-multilib-$p.cbc bootstrap --build-tools-only
+  ./cerbero-uninstalled -c config/mingw-multilib-$p.cbc bootstrap --system=no --toolchains=no
   ./cerbero-uninstalled -c config/mingw-multilib-$p.cbc build toolchain
 
   ARCH=x86_64
