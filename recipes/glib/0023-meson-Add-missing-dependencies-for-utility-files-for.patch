@@ -1,0 +1,109 @@
+From 6531c0a77a3125d29dd74acc51c233d166029ba7 Mon Sep 17 00:00:00 2001
+From: Philip Withnall <philip@tecnocode.co.uk>
+Date: Thu, 2 Nov 2023 14:14:04 +0000
+Subject: [PATCH 23/24] meson: Add missing dependencies for utility files for
+ gdbus-codegen
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Various parts of the build (such as `objectmanager-rst-gen`) depend on
+running `gdbus-codegen` after it’s been built, but they currently only
+encode a dependency to the main codegen Python file and not the
+supporting files. This can cause `gdbus-codegen` to fail with an
+`ImportError` if the build races so that `objectmanager-rst-gen` is
+built before the codegen supporting files.
+
+Example failure here: https://gitlab.gnome.org/pwithnall/glib/-/jobs/3266471
+```
+FAILED: gio/tests/gdbus-object-manager-example/objectmanager-rst-gen-org.gtk.GDBus.Example.ObjectManager.Animal.rst gio/tests/gdbus-object-manager-example/objectmanager-rst-gen-org.gtk.GDBus.Example.ObjectManager.Cat.rst
+/usr/bin/python3 gio/gdbus-2.0/codegen/gdbus-codegen --interface-prefix org.gtk.GDBus.Example.ObjectManager. --generate-rst objectmanager-rst-gen --output-directory gio/tests/gdbus-object-manager-example ../gio/tests/gdbus-object-manager-example/gdbus-example-objectmanager.xml
+Traceback (most recent call last):
+  File "/builds/pwithnall/glib/_build/gio/gdbus-2.0/codegen/gdbus-codegen", line 53, in <module>
+    from codegen import codegen_main
+  File "/builds/pwithnall/glib/_build/gio/gdbus-2.0/codegen/codegen_main.py", line 29, in <module>
+    from . import dbustypes
+  File "/builds/pwithnall/glib/_build/gio/gdbus-2.0/codegen/dbustypes.py", line 22, in <module>
+    from . import utils
+ImportError: cannot import name 'utils' from 'codegen' (/builds/pwithnall/glib/_build/gio/gdbus-2.0/codegen/__init__.py)
+```
+
+Signed-off-by: Philip Withnall <philip@tecnocode.co.uk>
+(cherry picked from commit 1fdbc0638580c384f122a7021f570398ad1adb7e)
+---
+ gio/tests/gdbus-object-manager-example/meson.build | 7 ++++++-
+ gio/tests/meson.build                              | 5 +++++
+ 2 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/gio/tests/gdbus-object-manager-example/meson.build b/gio/tests/gdbus-object-manager-example/meson.build
+index ce0335e11..c4810312f 100644
+--- a/gio/tests/gdbus-object-manager-example/meson.build
++++ b/gio/tests/gdbus-object-manager-example/meson.build
+@@ -15,7 +15,10 @@ gdbus_example_objectmanager_generated = custom_target('objectmanager-gen',
+              '--generate-docbook', 'objectmanager-gen',
+              '--symbol-decorator', '_GLIB_EXTERN',
+              '--symbol-decorator-define', 'HAVE_CONFIG_H',
+-             '@INPUT@'])
++             '@INPUT@'],
++  depend_files : gdbus_codegen_built_files,
++  depends : gdbus_codegen_built_targets,
++)
+ 
+ gdbus_example_objectmanager_rst_gen = custom_target('objectmanager-rst-gen',
+   input: gdbus_example_objectmanager_xml,
+@@ -31,6 +34,8 @@ gdbus_example_objectmanager_rst_gen = custom_target('objectmanager-rst-gen',
+     '--output-directory', '@OUTDIR@',
+     '@INPUT@',
+   ],
++  depend_files: gdbus_codegen_built_files,
++  depends: gdbus_codegen_built_targets,
+ )
+ 
+ libgdbus_example_objectmanager = library('gdbus-example-objectmanager',
+diff --git a/gio/tests/meson.build b/gio/tests/meson.build
+index fdb8f5e22..9bd561452 100644
+--- a/gio/tests/meson.build
++++ b/gio/tests/meson.build
+@@ -296,6 +296,7 @@ if host_machine.system() != 'windows'
+         output :  ['gdbus-test-codegen-generated.h',
+                    'gdbus-test-codegen-generated.c'],
+         depend_files : gdbus_codegen_built_files,
++        depends : gdbus_codegen_built_targets,
+         command : [python, gdbus_codegen,
+                    '--interface-prefix', 'org.project.',
+                    '--output-directory', '@OUTDIR@',
+@@ -312,6 +313,7 @@ if host_machine.system() != 'windows'
+         output :  ['gdbus-test-codegen-generated-min-required-2-64.h',
+                    'gdbus-test-codegen-generated-min-required-2-64.c'],
+         depend_files : gdbus_codegen_built_files,
++        depends : gdbus_codegen_built_targets,
+         command : [python, gdbus_codegen,
+                    '--glib-min-required', '2.64',
+                    '--interface-prefix', 'org.project.',
+@@ -328,6 +330,7 @@ if host_machine.system() != 'windows'
+           input :   ['test-codegen.xml'],
+           output :  ['gdbus-test-codegen-generated-interface-info.h'],
+           depend_files : gdbus_codegen_built_files,
++          depends : gdbus_codegen_built_targets,
+           command : [python, gdbus_codegen,
+                      '--interface-info-header',
+                      annotate_args,
+@@ -337,6 +340,7 @@ if host_machine.system() != 'windows'
+           input :   ['test-codegen.xml'],
+           output :  ['gdbus-test-codegen-generated-interface-info.c'],
+           depend_files : gdbus_codegen_built_files,
++          depends : gdbus_codegen_built_targets,
+           command : [python, gdbus_codegen,
+                      '--interface-info-body',
+                      annotate_args,
+@@ -416,6 +420,7 @@ if host_machine.system() != 'windows'
+         output :  ['fake-document-portal-generated.h',
+                    'fake-document-portal-generated.c'],
+         depend_files : gdbus_codegen_built_files,
++        depends : gdbus_codegen_built_targets,
+         command : [python, gdbus_codegen,
+                    '--interface-prefix', 'org.freedesktop.portal.',
+                    '--output-directory', '@OUTDIR@',
+-- 
+2.44.0.windows.1
+

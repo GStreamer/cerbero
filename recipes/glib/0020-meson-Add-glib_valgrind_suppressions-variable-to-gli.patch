@@ -1,0 +1,94 @@
+From 5cedffc2c5671f6bf8a8d315539ac3592e17783c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Marco=20Trevisan=20=28Trevi=C3=B1o=29?= <mail@3v1n0.net>
+Date: Wed, 5 Apr 2023 17:07:58 +0200
+Subject: [PATCH 20/24] meson: Add glib_valgrind_suppressions variable to glib
+ pkg-config file
+
+Various projects are running tests under valgrind, and they are using
+the GLib suppresions to avoid false-positive results.
+
+While this is stored in a well-known path for some years, and easy to
+figure out from the GLib prefix, it's better to expose it through a
+proper pkgconfig variable so that it's easy to get it from any build
+system.
+
+(cherry picked from commit fcad56e3133c8d2e829f125c3d051eeb98474879)
+---
+ glib/meson.build  | 7 ++++++-
+ meson.build       | 9 ++++++---
+ tools/meson.build | 4 ++--
+ 3 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/glib/meson.build b/glib/meson.build
+index c365901a1..baad0e806 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -397,9 +397,14 @@ pkg.generate(libglib,
+   subdirs : ['glib-2.0'],
+   extra_cflags : ['-I${libdir}/glib-2.0/include'] + win32_cflags,
+   variables : ['bindir=' + join_paths('${prefix}', get_option('bindir')),
++               'datadir=' + join_paths('${prefix}', get_option('datadir')),
+                'glib_genmarshal=' + join_paths('${bindir}', 'glib-genmarshal'),
+                'gobject_query=' + join_paths('${bindir}', 'gobject-query'),
+-               'glib_mkenums=' + join_paths('${bindir}', 'glib-mkenums')],
++               'glib_mkenums=' + join_paths('${bindir}', 'glib-mkenums'),
++               'glib_valgrind_suppressions=' + join_paths('${datadir}',
++                 valgrind_suppression_file_install_subdir,
++                 fs.name(valgrind_suppression_file)),
++  ],
+   version : glib_version,
+   install_dir : glib_pkgconfigreldir,
+   filebase : 'glib-2.0',
+diff --git a/meson.build b/meson.build
+index be468c3f3..2151ab179 100644
+--- a/meson.build
++++ b/meson.build
+@@ -9,6 +9,8 @@ project('glib', 'c',
+   ]
+ )
+ 
++fs = import('fs')
++
+ cc = meson.get_compiler('c')
+ have_cxx = add_languages('cpp', native: false, required: get_option('oss_fuzz').enabled())
+ if have_cxx
+@@ -131,9 +133,10 @@ build_tests = get_option('tests') and (meson.can_run_host_binaries() or installe
+ 
+ # Allow the tests to be easily run under valgrind using --setup=valgrind
+ valgrind = find_program('valgrind', required: false)
+-if valgrind.found()
+-  suppression_file = files('tools' / 'glib.supp')
++valgrind_suppression_file = files('tools' / 'glib.supp')[0]
++valgrind_suppression_file_install_subdir = 'glib-2.0' / 'valgrind'
+ 
++if valgrind.found()
+   add_test_setup('valgrind',
+     exclude_suites: [ 'no-valgrind' ],
+     exe_wrapper: [
+@@ -147,7 +150,7 @@ if valgrind.found()
+       '--show-leak-kinds=definite,possible',
+       '--show-error-list=yes',
+       '--suppressions=@0@'.format(meson.project_source_root() /
+-        '@0@'.format(suppression_file[0])),
++        '@0@'.format(valgrind_suppression_file)),
+     ],
+     timeout_multiplier: 10,
+   )
+diff --git a/tools/meson.build b/tools/meson.build
+index e91c8a2f9..dd54ea5b2 100644
+--- a/tools/meson.build
++++ b/tools/meson.build
+@@ -17,8 +17,8 @@ endif
+ if host_system != 'windows'
+   # Install Valgrind suppression file (except on Windows,
+   # as Valgrind is currently not supported on Windows)
+-  install_data('glib.supp',
+-    install_dir : get_option('datadir') / 'glib-2.0' / 'valgrind',
++  install_data(fs.name(valgrind_suppression_file),
++    install_dir : get_option('datadir') / valgrind_suppression_file_install_subdir,
+     install_tag : 'devel',
+   )
+ endif
+-- 
+2.44.0.windows.1
+

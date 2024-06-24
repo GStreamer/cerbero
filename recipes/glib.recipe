@@ -58,6 +58,19 @@ class Recipe(recipe.Recipe):
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
         # backported into 2.74.6
         'glib/0001-Fix-safe_wspawnve-define.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3361
+        # (import fs needed for the patches below)
+        'glib/0020-meson-Add-glib_valgrind_suppressions-variable-to-gli.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3666
+        'glib/0021-build-Change-configure_file-to-fs.copyfile-when-copy.patch',
+        # Upstream commit a61888bceb2b4d23bdc82e579fa3c99c69a7a9fa, landed in 2.79.0
+        'glib/0022-tests-Fix-dependency-of-test.gresource-on-test-gener.patch',
+        # Upstream commit 1fdbc0638580c384f122a7021f570398ad1adb7e, landed in 2.79.0
+        # (backported into 2.74.6)
+        'glib/0023-meson-Add-missing-dependencies-for-utility-files-for.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4125
+        # From 2.81.1, backported into 2.74.6
+        'glib/0024-Merge-branch-pr-fix_some_windows_testsuite_failures-.patch',
     ]
 
     files_libs = [
