@@ -1,0 +1,121 @@
+From f5673d679c7327fb4defea83ed5fe102dc76da5f Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=D9=85=D9=87=D8=AF=D9=8A=20=D8=B4=D9=8A=D9=86=D9=88=D9=86?=
+ =?UTF-8?q?=20=28Mehdi=20Chinoune=29?= <mehdi.chinoune@hotmail.com>
+Date: Sat, 14 Jan 2023 20:59:56 +0100
+Subject: [PATCH] binutils: update to 2.40
+
+Last updated at:
+
+https://github.com/msys2/MINGW-packages/commit/594c064fd4150f4fad50e1ec19f86af58e5357fd
+---
+ binutils/strings.c | 6 +++---
+ gas/as.h           | 6 +++---
+ gold/configure     | 2 +-
+ gold/configure.ac  | 2 +-
+ include/ansidecl.h | 4 ++--
+ 5 files changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/binutils/strings.c b/binutils/strings.c
+index ec02e1d5..b410a726 100644
+--- a/binutils/strings.c
++++ b/binutils/strings.c
+@@ -633,7 +633,7 @@ print_filename_and_address (const char * filename, file_ptr address)
+     case 8:
+       if (sizeof (address) > sizeof (long))
+ 	{
+-#ifndef __MSVCRT__
++#if !defined(__MSVCRT__) || defined(__USE_MINGW_ANSI_STDIO)
+ 	  printf ("%7llo ", (unsigned long long) address);
+ #else
+ 	  printf ("%7I64o ", (unsigned long long) address);
+@@ -646,7 +646,7 @@ print_filename_and_address (const char * filename, file_ptr address)
+     case 10:
+       if (sizeof (address) > sizeof (long))
+ 	{
+-#ifndef __MSVCRT__
++#if !defined(__MSVCRT__) || defined(__USE_MINGW_ANSI_STDIO)
+ 	  printf ("%7llu ", (unsigned long long) address);
+ #else
+ 	  printf ("%7I64d ", (unsigned long long) address);
+@@ -659,7 +659,7 @@ print_filename_and_address (const char * filename, file_ptr address)
+     case 16:
+       if (sizeof (address) > sizeof (long))
+ 	{
+-#ifndef __MSVCRT__
++#if !defined(__MSVCRT__) || defined(__USE_MINGW_ANSI_STDIO)
+ 	  printf ("%7llx ", (unsigned long long) address);
+ #else
+ 	  printf ("%7I64x ", (unsigned long long) address);
+diff --git a/gas/as.h b/gas/as.h
+index 69d7ae2c..2926cee2 100644
+--- a/gas/as.h
++++ b/gas/as.h
+@@ -443,14 +443,14 @@ typedef struct _pseudo_type pseudo_typeS;
+ 
+ #define PRINTF_LIKE(FCN) \
+   void FCN (const char *format, ...) \
+-    __attribute__ ((__format__ (__printf__, 1, 2)))
++    __attribute__ ((__format__ (gnu_printf, 1, 2)))
+ #define PRINTF_WHERE_LIKE(FCN) \
+   void FCN (const char *file, unsigned int line, const char *format, ...) \
+-    __attribute__ ((__format__ (__printf__, 3, 4)))
++    __attribute__ ((__format__ (gnu_printf, 3, 4)))
+ #define PRINTF_INDENT_LIKE(FCN) \
+   void FCN (const char *file, unsigned int line, unsigned int indent, \
+ 	    const char *format, ...) \
+-    __attribute__ ((__format__ (__printf__, 4, 5)))
++    __attribute__ ((__format__ (gnu_printf, 4, 5)))
+ 
+ #else /* __GNUC__ < 2 || defined(VMS) */
+ 
+diff --git a/gold/configure b/gold/configure
+index c92f4478..6396c082 100644
+--- a/gold/configure
++++ b/gold/configure
+@@ -13635,7 +13635,7 @@ else
+ /* end confdefs.h.  */
+ 
+ template<typename T> extern void foo(const char*, ...)
+-  __attribute__ ((__format__ (__printf__, 1, 2)));
++  __attribute__ ((__format__ (gnu_printf, 1, 2)));
+ template<typename T> void foo(const char* format, ...) {}
+ void bar() { foo<int>("%s\n", "foo"); }
+ 
+diff --git a/gold/configure.ac b/gold/configure.ac
+index 2c7a969b..ddcb2c4a 100644
+--- a/gold/configure.ac
++++ b/gold/configure.ac
+@@ -711,7 +711,7 @@ AC_CACHE_CHECK([whether we can use attributes with template functions],
+ [gold_cv_template_attribute],
+ [AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+ template<typename T> extern void foo(const char*, ...)
+-  __attribute__ ((__format__ (__printf__, 1, 2)));
++  __attribute__ ((__format__ (gnu_printf, 1, 2)));
+ template<typename T> void foo(const char* format, ...) {}
+ void bar() { foo<int>("%s\n", "foo"); }
+ ])], [gold_cv_template_attribute=yes], [gold_cv_template_attribute=no])])
+diff --git a/include/ansidecl.h b/include/ansidecl.h
+index 653d9186..e78c9687 100644
+--- a/include/ansidecl.h
++++ b/include/ansidecl.h
+@@ -154,7 +154,7 @@ So instead we use the macro below and test it against specific values.  */
+    before GCC 3.3, but as of 3.3 we need to add the `nonnull'
+    attribute to retain this behavior.  */
+ #ifndef ATTRIBUTE_PRINTF
+-#define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (__printf__, m, n))) ATTRIBUTE_NONNULL(m)
++#define ATTRIBUTE_PRINTF(m, n) __attribute__ ((__format__ (gnu_printf, m, n))) ATTRIBUTE_NONNULL(m)
+ #define ATTRIBUTE_PRINTF_1 ATTRIBUTE_PRINTF(1, 2)
+ #define ATTRIBUTE_PRINTF_2 ATTRIBUTE_PRINTF(2, 3)
+ #define ATTRIBUTE_PRINTF_3 ATTRIBUTE_PRINTF(3, 4)
+@@ -182,7 +182,7 @@ So instead we use the macro below and test it against specific values.  */
+    NULL format specifier was allowed as of gcc 3.3.  */
+ #ifndef ATTRIBUTE_NULL_PRINTF
+ # if (GCC_VERSION >= 3003)
+-#  define ATTRIBUTE_NULL_PRINTF(m, n) __attribute__ ((__format__ (__printf__, m, n)))
++#  define ATTRIBUTE_NULL_PRINTF(m, n) __attribute__ ((__format__ (gnu_printf, m, n)))
+ # else
+ #  define ATTRIBUTE_NULL_PRINTF(m, n)
+ # endif /* GNUC >= 3.3 */
+-- 
+2.44.0.windows.1
+

@@ -1,0 +1,98 @@
+From 6feec2cc68d4fbf6eb12e44e9381d1c0ae37524b Mon Sep 17 00:00:00 2001
+From: Alexey Pavlov <alexpux@gmail.com>
+Date: Tue, 26 Sep 2017 10:39:03 +0300
+Subject: [PATCH] binutils: Update to 2.29.1
+
+Configure scripts tend to do things like this:
+nm -B /dev/null
+which, on Windows, turn into:
+nm -B nul
+and nul here acts like a normal file with 0 size as far as stat() is
+concerned.
+Check harder for the file in question being unusual (isatty() does see
+that).
+And since configure script expects /dev/nul, do report it that way.
+
+Last updated at:
+
+https://github.com/msys2/MINGW-packages/commit/3b7171c0cec4efee59bab8d028ee68a3c1eab0a5
+---
+ binutils/bucomm.c  | 20 ++++++++++++++++++--
+ binutils/elfedit.c | 15 ++++++++++++++-
+ 2 files changed, 32 insertions(+), 3 deletions(-)
+
+diff --git a/binutils/bucomm.c b/binutils/bucomm.c
+index d51d1349..e005e0aa 100644
+--- a/binutils/bucomm.c
++++ b/binutils/bucomm.c
+@@ -620,6 +620,15 @@ get_file_size (const char * file_name)
+   if (file_name == NULL)
+     return (off_t) -1;
+ 
++  int f, t;
++  t = -1;
++  f = open (file_name, O_RDONLY | O_BINARY);
++  if (f != 0)
++    {
++      t = isatty (f);
++      close (f);
++    }
++
+   if (stat (file_name, &statbuf) < 0)
+     {
+       if (errno == ENOENT)
+@@ -630,8 +639,15 @@ get_file_size (const char * file_name)
+     }
+   else if (S_ISDIR (statbuf.st_mode))
+     non_fatal (_("Warning: '%s' is a directory"), file_name);
+-  else if (! S_ISREG (statbuf.st_mode))
+-    non_fatal (_("Warning: '%s' is not an ordinary file"), file_name);
++  else if (! S_ISREG (statbuf.st_mode) || t > 0)
++    {
++#ifdef _WIN32
++      /* libtool passes /dev/null and checks for /dev/null in the output */
++      if (stricmp (file_name, "nul") == 0)
++        file_name = "/dev/null";
++#endif
++      non_fatal (_("Warning: '%s' is not an ordinary file"), file_name);
++    }
+   else if (statbuf.st_size < 0)
+     non_fatal (_("Warning: '%s' has negative size, probably it is too large"),
+                file_name);
+diff --git a/binutils/elfedit.c b/binutils/elfedit.c
+index 76316365..075ce8d8 100644
+--- a/binutils/elfedit.c
++++ b/binutils/elfedit.c
+@@ -725,6 +725,14 @@ static int
+ check_file (const char *file_name, struct stat *statbuf_p)
+ {
+   struct stat statbuf;
++  int f, t;
++  t = -1;
++  f = open (file_name, O_RDONLY | O_BINARY);
++  if (f != 0)
++    {
++      t = isatty (f);
++      close (f);
++    }
+ 
+   if (statbuf_p == NULL)
+     statbuf_p = &statbuf;
+@@ -753,8 +761,13 @@ check_file (const char *file_name, struct stat *statbuf_p)
+     }
+ #endif
+ 
+-  if (! S_ISREG (statbuf_p->st_mode))
++  if (! S_ISREG (statbuf_p->st_mode) || t > 0)
+     {
++#ifdef _WIN32
++      /* libtool passes /dev/null and checks for /dev/null in the output */
++      if (stricmp (file_name, "nul") == 0)
++        file_name = "/dev/null";
++#endif
+       error (_("'%s' is not an ordinary file\n"), file_name);
+       return 1;
+     }
+-- 
+2.44.0.windows.1
+

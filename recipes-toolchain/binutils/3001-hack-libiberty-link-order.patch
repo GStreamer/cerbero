@@ -1,0 +1,40 @@
+From a58851f8b6dbc5708349d08fc5216db5bd9466ae Mon Sep 17 00:00:00 2001
+From: Christoph Reiter <reiter.christoph@gmail.com>
+Date: Tue, 30 Jan 2024 08:16:34 +0100
+Subject: [PATCH] binutils: Update to 2.42
+
+Remove all backports which are included in this new release.
+
+Remove specify-timestamp.patch, looks like this was implemented upstream
+in:
+https://sourceware.org/git/?p=binutils-gdb.git;a=commit;h=6badd1020f5bebd3f
+and it seems to work here.
+
+Work around binutils linking against the system libiberty instead of
+the included one.
+
+Also binutils now links against libintl, so add gettext as a dependency
+
+See: https://github.com/msys2/MINGW-packages/commit/ffc97b98c28d074f697561fdadcd3798a5caca3a
+---
+ ld/Makefile.in | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/ld/Makefile.in b/ld/Makefile.in
+index abb05657..cb082c8a 100644
+--- a/ld/Makefile.in
++++ b/ld/Makefile.in
+@@ -1038,8 +1038,8 @@ ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmai
+ ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
+ 		      $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL_DEP) $(JANSSON_LIBS)
+ 
+-ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) \
+-	       $(LIBIBERTY) $(LIBINTL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
++ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(LIBIBERTY) $(BFDLIB) $(LIBCTF) \
++	       $(LIBINTL) $(ZLIB) $(ZSTD_LIBS) $(JANSSON_LIBS)
+ 
+ #
+ #
+-- 
+2.44.0.windows.1
+

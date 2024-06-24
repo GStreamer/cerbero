@@ -3,11 +3,11 @@ import shutil
 
 class Recipe(recipe.Recipe):
     name = 'binutils'
-    version = '2.31.1'
+    version = '2.42'
     licenses = [License.LGPLv2Plus]
     licenses_bins = [License.GPLv2Plus]
     url = 'https://ftpmirror.gnu.org/gnu/binutils/binutils-%(version)s.tar.bz2'
-    tarball_checksum = 'ffcc382695bf947da6135e7436b8ed52d991cf270db897190f19d6f9838564d0'
+    tarball_checksum = 'aa54850ebda5064c72cd4ec2d9b056c294252991486350d9a97ab2a6dfdfaf12'
     stype = SourceType.TARBALL
     autoreconf = True
     configure_options = '--enable-ld=yes ' \
@@ -47,12 +47,25 @@ class Recipe(recipe.Recipe):
     files_lang = ['bfd', 'binutils', 'gas', 'gprof',
                   'ld', 'opcodes']
 
+    patches = [
+        f'{name}/0002-check-for-unusual-file-harder.patch',
+        f'{name}/0010-bfd-Increase-_bfd_coff_max_nscns-to-65279.patch',
+        f'{name}/0110-binutils-mingw-gnu-print.patch',
+        f'{name}/2001-ld-option-to-move-default-bases-under-4GB.patch',
+        f'{name}/2003-Restore-old-behaviour-of-windres-so-that-options-con.patch',
+        f'{name}/reproducible-import-libraries.patch',
+        f'{name}/libiberty-unlink-handle-windows-nul.patch',
+        f'{name}/3001-hack-libiberty-link-order.patch',
+    ]
+    can_msvc = False
+    override_libtool = False
+
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
             raise InvalidRecipeError(self)
         self.target = 'x86_64-w64-mingw32'
         self.configure_options += ' --target=%s ' % self.target
-        self.configure_options += '--with-sysroot=$CERBERO_PREFIX/%s/sysroot ' % self.target
+        self.configure_options += f' --with-sysroot={self.config.prefix}/{self.target}/sysroot'
         if self.config.target_platform == Platform.WINDOWS:
             self.configure_options += ' --host=%s' % self.target
 
@@ -65,11 +78,6 @@ class Recipe(recipe.Recipe):
         files.extend([x % {'host': 'mingw', 'bext': '%(bext)s'} for x in
                       self.files_binutils])
         self.files_binutils = files
-
-    async def configure(self):
-        for d in ['bfd', 'opcodes', 'gas', 'binutils', 'gprof', 'ld']:
-            shell.new_call(['autoreconf', '-ivf'], os.path.join(self.build_dir, d))
-        await super().configure()
 
     def post_install(self):
         # Prefix binaries with the host triplet

@@ -1,0 +1,40 @@
+From ee527dfc08ba380c781564dd8b874b60f91694d5 Mon Sep 17 00:00:00 2001
+From: Christoph Reiter <reiter.christoph@gmail.com>
+Date: Mon, 16 Aug 2021 08:17:06 +0200
+Subject: [PATCH] binutils: take reproducibility patches from debian
+
+It's a nice property to have.
+
+They also use --enable-deterministic-archives, so do that too.
+
+----
+
+Description: Make DLL import libraries reproducible
+Author: Benjamin Moody <benjamin.moody@gmail.com>
+Bug-Debian: https://bugs.debian.org/915055
+
+Index: binutils-mingw-w64/upstream/ld/pe-dll.c
+
+----
+
+Source:
+https://github.com/msys2/MINGW-packages/commit/c24c06db7bb7f19b9420a27bb77ba37ceeb4dffd
+---
+ ld/pe-dll.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ld/pe-dll.c b/ld/pe-dll.c
+index 95eef84f..c55f4412 100644
+--- a/ld/pe-dll.c
++++ b/ld/pe-dll.c
+@@ -2945,6 +2945,7 @@ pe_dll_generate_implib (def_file *def, const char *impfilename, struct bfd_link_
+ 
+   bfd_set_format (outarch, bfd_archive);
+   outarch->has_armap = 1;
++  outarch->flags |= BFD_DETERMINISTIC_OUTPUT;
+ 
+   /* Work out a reasonable size of things to put onto one line.  */
+   ar_head = make_head (outarch);
+-- 
+2.44.0.windows.1
+
