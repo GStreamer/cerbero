@@ -375,10 +375,19 @@ class CookBook (object):
         recipes = defaultdict(dict)
         recipes_repos = self._config.get_recipes_repos()
         for reponame, (repodir, priority) in recipes_repos.items():
-            recipes[int(priority)].update(self._load_recipes_from_dir(repodir, skip_errors))
+            new_recipes = self._load_recipes_from_dir(repodir, skip_errors)
+            priority_recipes = recipes[int(priority)]
+            overridden = set(new_recipes) & set(priority_recipes)
+            if overridden:
+                m.warning(f"Overriding recipes during repo {reponame} ({repodir}, {priority}): {overridden}")
+            priority_recipes.update(new_recipes)
         # Add recipes by asceding pripority
         for key in sorted(recipes.keys()):
-            self.recipes.update(recipes[key])
+            new_recipes = recipes[key]
+            overridden = set(new_recipes) & set(self.recipes)
+            if overridden:
+                m.warning(f"Overriding recipes during priority {key}: {overridden}")
+            self.recipes.update(new_recipes)
 
         # Check for updates in the recipe file to reset the status
         for recipe in list(self.recipes.values()):
@@ -438,6 +447,8 @@ class CookBook (object):
             if recipes_from_file is None:
                 continue
             for recipe in recipes_from_file:
+                if recipe.name in recipes:
+                    m.warning(f"Overriding {recipes[recipe.name]} by {recipe} from {f}")
                 recipes[recipe.name] = recipe
         return recipes
 
