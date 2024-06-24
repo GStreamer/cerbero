@@ -1,0 +1,27 @@
+From 5af89c67817cccca3bcfde2b6dbad06da9f926dd Mon Sep 17 00:00:00 2001
+From: Alexpux <alexey.pawlow@gmail.com>
+Date: Tue, 9 Jun 2015 14:30:31 +0300
+Subject: [PATCH] isl: Update to 0.14.1
+
+Source:
+https://github.com/msys2/MINGW-packages/blob/b194e5fa2d87e8b43ab82674036b7c40e634a0dc/mingw-w64-isl/isl-0.14.1-no-undefined.patch
+---
+ Makefile.am | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile.am b/Makefile.am
+index 35da88f..b5c0d9b 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -234,7 +234,7 @@ libisl_la_SOURCES = \
+ 	isl_vertices.c \
+ 	isl_yaml.h
+ libisl_la_LIBADD = @MP_LIBS@
+-libisl_la_LDFLAGS = -version-info @versioninfo@ \
++libisl_la_LDFLAGS = -version-info @versioninfo@ -no-undefined \
+ 	@MP_LDFLAGS@
+ 
+ isl_test_LDFLAGS = @MP_LDFLAGS@
+-- 
+2.44.0.windows.1
+
