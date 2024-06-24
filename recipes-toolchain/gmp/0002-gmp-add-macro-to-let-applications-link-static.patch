@@ -1,0 +1,43 @@
+From 71d12888f2f0db29028f2a51662e8a902ab5d106 Mon Sep 17 00:00:00 2001
+From: Jeroen Ooms <jeroenooms@gmail.com>
+Date: Wed, 13 Sep 2023 19:36:46 +0200
+Subject: [PATCH 2/2] gmp: add macro to let applications link static
+
+Source:
+
+https://github.com/msys2/MINGW-packages/commit/19a497b647dea2939e4fe9cc2ad5818f83b1632f
+---
+ gmp-h.in  | 4 ++++
+ gmp.pc.in | 1 +
+ 2 files changed, 5 insertions(+)
+
+diff --git a/gmp-h.in b/gmp-h.in
+index 340dd9e..42594cd 100644
+--- a/gmp-h.in
++++ b/gmp-h.in
+@@ -59,8 +59,12 @@ see https://www.gnu.org/licenses/.  */
+ /* Instantiated by configure. */
+ #if ! defined (__GMP_WITHIN_CONFIGURE)
+ @DEFN_LONG_LONG_LIMB@
++#ifdef GMP_STATICLIB
++#define __GMP_LIBGMP_DLL  0
++#else
+ #define __GMP_LIBGMP_DLL  @LIBGMP_DLL@
+ #endif
++#endif
+ 
+ 
+ /* __GMP_DECLSPEC supports Windows DLL versions of libgmp, and is empty in
+diff --git a/gmp.pc.in b/gmp.pc.in
+index bf1c799..0aa509e 100644
+--- a/gmp.pc.in
++++ b/gmp.pc.in
+@@ -8,4 +8,5 @@ Description: GNU Multiple Precision Arithmetic Library
+ URL: https://gmplib.org
+ Version: @PACKAGE_VERSION@
+ Cflags: -I${includedir}
++Cflags.private: -DGMP_STATICLIB
+ Libs: -L${libdir} -lgmp
+-- 
+2.44.0.windows.1
+

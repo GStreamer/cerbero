@@ -1,18 +1,29 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
-
 class Recipe(recipe.Recipe):
     name = 'gmp'
-    version = '6.1.2'
+    version = '6.3.0'
     url = 'https://gmplib.org/download/gmp/gmp-%(version)s.tar.bz2'
     tarball_dirname = 'gmp-%(version)s'
-    tarball_checksum = '5275bb04f4863a13516b2f39392ac5e272f5e1bb8057b18aec1c9b79d73d8fb2'
+    tarball_checksum = 'ac28211a7cfb609bae2e2c8d6058d66c8fe96434f740cf6fe2e47b000d1c20cb'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
     configure_options = "--disable-shared --enable-static"
 
     files_libs = ['libgmp']
     files_devel = ['include/gmp.h']
+
+    patches = [
+        f'{name}/0001-gmp-Do-not-declare-functions-as-dllimport.patch',
+        f'{name}/0002-gmp-add-macro-to-let-applications-link-static.patch',
+    ]
+    can_msvc = False
+
+    def prepare(self):
+        # https://github.com/crosstool-ng/crosstool-ng/pull/1751
+        if self.config.platform != self.config.target_platform:
+            self.set_env('CC_FOR_BUILD', f'{self.config.build}-gcc')
+            self.set_env('CPP_FOR_BUILD', f'{self.config.build}-cpp')
 
     def gen_library_file(self, output_dir=None):
         return
