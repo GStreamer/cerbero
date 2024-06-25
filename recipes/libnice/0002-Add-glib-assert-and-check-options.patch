@@ -1,0 +1,70 @@
+From a834638700e74fa72e362f0622c8283f62034e5f Mon Sep 17 00:00:00 2001
+From: Jeffery Wilson <jeff@jeffalwilson.com>
+Date: Thu, 27 Jun 2024 13:14:32 -0400
+Subject: [PATCH] Add glib assert and check options
+
+---
+ meson.build       | 12 ++++++++++++
+ meson_options.txt |  5 +++++
+ tests/meson.build |  7 ++++++-
+ 3 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index badce49..3ae1177 100644
+--- a/meson.build
++++ b/meson.build
+@@ -85,6 +85,18 @@ add_project_arguments('-D_GNU_SOURCE',
+   '-DNICE_VERSION_NANO=' + version_nano,
+   language: 'c')
+ 
++glib_asserts = get_option('glib-asserts')
++if glib_asserts.disabled() or (glib_asserts.auto() and version_nano == '0')
++  message('Disabling GLib asserts')
++  add_project_arguments('-DG_DISABLE_ASSERT', language: 'c')
++endif
++
++glib_checks = get_option('glib-checks')
++if glib_checks.disabled() or (glib_checks.auto() and not gst_version_is_dev)
++  message('Disabling GLib checks')
++  add_project_arguments('-DG_DISABLE_CHECKS', language: 'c')
++endif
++
+ cdata = configuration_data()
+ 
+ cdata.set_quoted('PACKAGE_STRING', meson.project_name())
+diff --git a/meson_options.txt b/meson_options.txt
+index cd980cb..bd624c3 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -15,3 +15,8 @@ option('gtk_doc', type : 'feature', value : 'disabled', yield : true,
+   description: 'Generate API documentation with gtk-doc')
+ option('introspection', type : 'feature', value : 'auto', yield : true,
+   description : 'Generate gobject-introspection bindings')
++
++option('glib-asserts', type : 'feature', value : 'enabled', yield : true,
++       description: 'Enable GLib assertion (auto = enabled for development, disabled for stable releases)')
++option('glib-checks', type : 'feature', value : 'enabled', yield : true,
++       description: 'Enable GLib checks such as API guards (auto = enabled for development, disabled for stable releases)')
+diff --git a/tests/meson.build b/tests/meson.build
+index f149550..c66ffbd 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -76,9 +76,14 @@ if gst_dep.found() and not static_build
+   gst_check = dependency('gstreamer-check-1.0', required: get_option('gstreamer'),
+                          fallback : ['gstreamer', 'gst_check_dep'])
+   if gst_check.found()
++    test_defines = [
++      '-DG_LOG_DOMAIN="libnice-tests"',
++      '-UG_DISABLE_ASSERT',
++      '-UG_DISABLE_CAST_CHECKS',
++    ]
+     exe = executable('nice-test-gstreamer',
+       'test-gstreamer.c', extra_src,
+-      c_args: '-DG_LOG_DOMAIN="libnice-tests"',
++      c_args: test_defines,
+       include_directories: nice_incs,
+       dependencies: [nice_deps, gst_check, libm],
+       link_with: libnice,
+-- 
+2.45.2
+

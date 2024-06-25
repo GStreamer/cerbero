@@ -16,7 +16,10 @@ class Recipe(recipe.Recipe):
                      'crypto-library' : 'openssl'}
     deps = ['glib', 'gstreamer-1.0']
 
-    patches = ['libnice/0001-Remove-Gslice-without-breaking-anything.patch']
+    patches = [
+        'libnice/0001-Remove-Gslice-without-breaking-anything.patch',
+        'libnice/0002-Add-glib-assert-and-check-options.patch',
+    ]
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
