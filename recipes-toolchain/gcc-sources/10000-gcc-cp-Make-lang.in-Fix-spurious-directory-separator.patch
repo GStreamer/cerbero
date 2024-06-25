@@ -1,0 +1,28 @@
+From 384f0c850f88ea16db7724dbc9e2c6d9bd5cbd09 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 26 Jun 2024 15:12:48 -0300
+Subject: [PATCH 16/16] gcc: cp: Make-lang.in: Fix spurious directory separator
+ on DESTDIR
+
+If someone attempts a sysrooted build on Windows with this file, they'll
+end up with /drive:/.... which is an invalid path.
+---
+ gcc/cp/Make-lang.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gcc/cp/Make-lang.in b/gcc/cp/Make-lang.in
+index f153891a1..a893f1d71 100644
+--- a/gcc/cp/Make-lang.in
++++ b/gcc/cp/Make-lang.in
+@@ -344,7 +344,7 @@ c++.install-plugin: installdirs
+ # Install import library.
+ ifeq ($(plugin_implib),yes)
+ 	$(mkinstalldirs) $(DESTDIR)$(plugin_resourcesdir)
+-	$(INSTALL_DATA) cc1plus$(exeext).a $(DESTDIR)/$(plugin_resourcesdir)/cc1plus$(exeext).a
++	$(INSTALL_DATA) cc1plus$(exeext).a $(DESTDIR)$(plugin_resourcesdir)/cc1plus$(exeext).a
+ endif
+ 
+ c++.uninstall:
+-- 
+2.44.0.windows.1
+

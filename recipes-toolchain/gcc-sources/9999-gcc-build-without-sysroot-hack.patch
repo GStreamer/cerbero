@@ -1,0 +1,26 @@
+From 0f9a92cb8149382ab23b1f9f5e1de0b1f3f27431 Mon Sep 17 00:00:00 2001
+From: Alexey Borzenkov <snaury@gmail.com>
+Date: Mon, 13 Jan 2014 17:39:53 +0400
+Subject: [PATCH 15/15] gcc: build without sysroot hack
+
+Source: https://github.com/msys2/MINGW-packages/commit/fd87286156cc41c693c0d44f6a1a7722f051b1d7
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 042681c27..b16ab8e43 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -3608,7 +3608,7 @@ case "$target" in
+   x86_64-*mingw* | *-w64-mingw*)
+   # MinGW-w64 does not use newlib, nor does it use winsup. It may,
+   # however, use a symlink named 'mingw' in ${prefix} .
+-    FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L${prefix}/${target}/lib -L${prefix}/mingw/lib -isystem ${prefix}/${target}/include -isystem ${prefix}/mingw/include'
++    FLAGS_FOR_TARGET=$FLAGS_FOR_TARGET' -L${prefix}/${target}/lib -L${prefix}/lib -isystem ${prefix}/${target}/include -isystem ${prefix}/include'
+     ;;
+   *-mingw*)
+   # MinGW can't be handled as Cygwin above since it does not use newlib.
+-- 
+2.44.0.windows.1
+

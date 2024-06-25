@@ -1,0 +1,41 @@
+From 89c0df9070ca96a33e9fc53bfcf9f3cf396005c1 Mon Sep 17 00:00:00 2001
+From: Alexey Pavlov <alexey.pawlow@gmail.com>
+Date: Wed, 5 Aug 2015 23:36:19 +0100
+Subject: [PATCH 05/15] Prettify linking -no-undefined
+
+It might be better to put this change in a
+conditional block for Windows only?
+---
+ libgfortran/Makefile.am | 2 +-
+ libgfortran/Makefile.in | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libgfortran/Makefile.am b/libgfortran/Makefile.am
+index 9f8a4f698..e3d32db7e 100644
+--- a/libgfortran/Makefile.am
++++ b/libgfortran/Makefile.am
+@@ -62,7 +62,7 @@ libgfortran_la_DEPENDENCIES = $(version_dep) libgfortran.spec $(LIBQUADLIB_DEP)
+ cafexeclib_LTLIBRARIES = libcaf_single.la
+ cafexeclibdir = $(libdir)/gcc/$(target_alias)/$(gcc_version)$(MULTISUBDIR)
+ libcaf_single_la_SOURCES = caf/single.c
+-libcaf_single_la_LDFLAGS = -static
++libcaf_single_la_LDFLAGS = -static -no-undefined
+ libcaf_single_la_DEPENDENCIES = caf/libcaf.h
+ libcaf_single_la_LINK = $(LINK) $(libcaf_single_la_LDFLAGS)
+ 
+diff --git a/libgfortran/Makefile.in b/libgfortran/Makefile.in
+index 30d1dc56d..50409d29f 100644
+--- a/libgfortran/Makefile.in
++++ b/libgfortran/Makefile.in
+@@ -765,7 +765,7 @@ libgfortran_la_DEPENDENCIES = $(version_dep) libgfortran.spec $(LIBQUADLIB_DEP)
+ cafexeclib_LTLIBRARIES = libcaf_single.la
+ cafexeclibdir = $(libdir)/gcc/$(target_alias)/$(gcc_version)$(MULTISUBDIR)
+ libcaf_single_la_SOURCES = caf/single.c
+-libcaf_single_la_LDFLAGS = -static
++libcaf_single_la_LDFLAGS = -static -no-undefined
+ libcaf_single_la_DEPENDENCIES = caf/libcaf.h
+ libcaf_single_la_LINK = $(LINK) $(libcaf_single_la_LDFLAGS)
+ @IEEE_SUPPORT_TRUE@fincludedir = $(libdir)/gcc/$(target_alias)/$(gcc_version)$(MULTISUBDIR)/finclude
+-- 
+2.44.0.windows.1
+

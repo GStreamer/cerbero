@@ -1,0 +1,33 @@
+From fcac928829934e9e637ce8851a259a9af002c738 Mon Sep 17 00:00:00 2001
+From: Christoph Reiter <reiter.christoph@gmail.com>
+Date: Sun, 12 May 2024 20:25:41 +0200
+Subject: [PATCH 14/15] gcc: apply proposed upstream patch for seh_cfa_offset
+ ICE regression
+
+Patch taken from https://gcc.gnu.org/bugzilla/show_bug.cgi?id=115038#c4
+
+Fixes #20879
+Fixes #20864
+Fixes #20861
+
+Source: https://github.com/msys2/MINGW-packages/commit/3127522154b79ff94dedc07a5c5a613c98c17a41
+---
+ gcc/fold-mem-offsets.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/gcc/fold-mem-offsets.cc b/gcc/fold-mem-offsets.cc
+index 2e15b0552..84b962305 100644
+--- a/gcc/fold-mem-offsets.cc
++++ b/gcc/fold-mem-offsets.cc
+@@ -491,7 +491,7 @@ fold_offsets (rtx_insn *insn, rtx reg, bool analyze, bitmap foldable_insns)
+ {
+   rtx_insn *def = get_single_def_in_bb (insn, reg);
+ 
+-  if (!def || GET_CODE (PATTERN (def)) != SET)
++  if (!def || RTX_FRAME_RELATED_P (def) || GET_CODE (PATTERN (def)) != SET)
+     return 0;
+ 
+   rtx dest = SET_DEST (PATTERN (def));
+-- 
+2.44.0.windows.1
+

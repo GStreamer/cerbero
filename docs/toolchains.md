@@ -30,8 +30,8 @@ The final goal on Windows is to use the Visual Studio studio toolchain for all t
 The GCC + MinGW toolchain is a multilib toolchain that can generate 32 and 64 bits binaries.
 
 It uses the following versions and configurations:
- * GCC: 8.2.0
- * MinGW: 6.0.0
+ * GCC: 14.1.0
+ * MinGW: 11.0.1
  * Threads: posix
  * Exception handling:
    * 32 bits: SJLJ
