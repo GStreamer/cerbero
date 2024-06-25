@@ -1,10 +1,12 @@
 class Recipe(recipe.Recipe):
     name = 'gendef'
-    version = 'v6.0.0'
-    licenses = [License.LGPLv2Plus]
+    version = 'v11.0.1'
+    licenses = [License.GPLv3Plus]
     stype = SourceType.CUSTOM
-    files_bin = ['bin/gendef.exe']
+    requires_non_src_build = True
+    deps = ['mingw-w64-sources']
 
     def prepare(self):
-        self.build_dir = self.config_src_dir = os.path.join(self.config.sources, 'mingw-w64-%s' % self.version)
-        self.make_dir = os.path.join(self.build_dir, 'mingw-w64-tools', 'gendef')
+        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-tools', 'gendef')
+        self.build_dir = os.path.join(self.config_src_dir, 'cerbero-build-dir')
+        self.make_dir = self.build_dir

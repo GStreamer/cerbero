@@ -1,28 +1,40 @@
+import os
+
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-headers'
-    version = 'v6.0.0'
-    licenses = [License.LGPLv2Plus]
+    version = 'v11.0.1'
+    licenses = [{License.BSD_like: ['../COPYING']}]
     stype = SourceType.CUSTOM
-    srcdir = 'mingw-w64-headers'
-    configure_options='--enable-sdk=all --enable-secure-api \
-            --with-default-msvcrt=ucrtbase '
+    configure_options=' --enable-sdk=all --with-default-msvcrt=ucrt '
     add_host_build_target = False
     deps = ['mingw-w64-sources']
+    can_msvc = False
+    requires_non_src_build = True
 
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
             raise InvalidRecipeError(self)
         self.host = 'x86_64-w64-mingw32'
-        self._sysroot = os.path.join(self.config.prefix, self.host, 'sysroot')
-        self.configure_options += ' --host=%s' % self.host
-        self.configure_options += ' --with-sysroot=%s ' % self._sysroot
-        self.make_install = ['make', 'install', 'DESTDIR=' + self._sysroot]
-        self.build_dir = os.path.join(self.config.sources,
-                'mingw-w64-%s' % self.version)
-        self.make_dir = os.path.join(self.build_dir, 'mingw-w64-headers')
+        self._sysroot = f'{self.config.prefix}/{self.host}/sysroot'
+        self.configure_options += f' --with-sysroot={self._sysroot}'
+        if self.config.target_platform != self.config.platform:
+            self.configure_options += ' --host=%s' % self.host
+            self.configure_options += ' --target=%s' % self.host
+        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)
+        self.make_install += [f'DESTDIR={self._sysroot}']
+        self.build_dir = os.path.join(self.config_src_dir, "cerbero-build-dir")
+        self.make_dir = self.build_dir
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
 
+    # NOTE: PLEASE BE VERY CAREFUL WITH THIS SYMLINK!
+    # If you don't specify it, you need to execute the below lines
+    # in the gcc-bootstrap recipe:
+    # header = os.path.join(self.config_src_dir, 'gcc/config/i386/mingw32.h')
+    # shell.replace(header, {'/mingw': f'/usr/{self._target}'})
+    # Otherwise https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70936 happens !
+    # For further information, see:
+    # https://github.com/msys2/MINGW-packages/commit/54101537025a9a3a381a1e292fb9bc967e374bd2
     def post_install(self):
         if not os.path.exists(os.path.join(self._sysroot, 'mingw')):
             shell.symlink('usr/%(host)s' % {'host': self.host}, 'mingw', self._sysroot)

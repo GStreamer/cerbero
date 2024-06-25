@@ -1,11 +1,13 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-crt'
-    version = 'v6.0.0'
-    licenses = [License.LGPLv2Plus]
+    version = 'v11.0.1'
+    licenses = [{License.BSD_like: ['../COPYING']}]
     stype = SourceType.CUSTOM
     add_host_build_target = False
-    configure_options = ' --with-default-msvcrt=ucrtbase '
+    configure_options = ' --with-default-msvcrt=ucrt '
     deps = ['mingw-w64-sources', 'binutils']
+    requires_non_src_build = True
+    can_msvc = False
 
     def prepare(self):
         if self.config.target_arch == Architecture.X86:
@@ -15,16 +17,18 @@ class Recipe(recipe.Recipe):
         # Since we are cross-compiling we have to reset all the env
         # variables set by cerbero (eg: we don't want -m64 overriding
         # a i386 build or gcc being used instead of x86_64-mingw32-w64-gcc)
-        for v in ['CC', 'LD', 'CPP', 'AS', 'RC', 'CXX','CFLAGS', 'LDFLAGS',
-                'CXXFLAGS', 'CCASFLAGS']:
+        for v in ['CC', 'LD', 'CPP', 'AS', 'RC', 'CXX', 'RANLIB', 'AR', 'STRIP',
+                'WINDRES', 'NM', 'CFLAGS', 'CXXFLAGS', 'CCASFLAGS', 'CPPFLAGS']:
             self.set_env(v)
         self.host = 'x86_64-w64-mingw32'
-        sysroot = os.path.join(self.config.prefix, self.host, 'sysroot')
+        self.sysroot = f'{self.config.prefix}/{self.host}/sysroot'
+        self.configure_options += f' --with-sysroot={self.sysroot} '
+        self.make_install += [f'DESTDIR={self.sysroot}']
         self.configure_options += ' --host=%s' % self.host
-        self.configure_options += ' --with-sysroot=%s ' % sysroot
-        self.make_install = ['make', 'install', 'DESTDIR=' + sysroot]
-        self.build_dir = os.path.join(self.config.sources,
-                'mingw-w64-%s' % self.version)
-        self.make_dir = os.path.join(self.build_dir, 'mingw-w64-crt')
+        if self.config.platform == self.config.target_platform:
+            self.configure_options += ' --build=%s' % self.host
         self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
                 "--libdir /usr/%(host)s/lib %%(options)s" % {'host': self.host}
+        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', self.name)
+        self.build_dir = os.path.join(self.config_src_dir, 'cerbero-build-dir')
+        self.make_dir = self.build_dir
