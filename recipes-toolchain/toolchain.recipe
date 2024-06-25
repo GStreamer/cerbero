@@ -4,3 +4,5 @@ class Recipe(recipe.Recipe):
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
     deps = ['gcc', 'gendef']
+    can_msvc = False
+
