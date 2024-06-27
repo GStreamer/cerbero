@@ -550,15 +550,15 @@ class MSI(WixBase):
             (self.LICENSE_RTF, 'LicenseRtf'),
         ]:
             path = self.package.relative_path(path)
-            if self._with_wine:
-                path = to_winepath(path)
             if os.path.exists(path):
+                if self._with_wine:
+                    path = to_winepath(path)
                 etree.SubElement(self.product, 'WixVariable', Id='WixUI%s' % var, Value=path)
         # Icon
         path = self.package.relative_path(self.ICON)
-        if self._with_wine:
-            path = to_winepath(path)
         if os.path.exists(path):
+            if self._with_wine:
+                path = to_winepath(path)
             etree.SubElement(self.product, 'Icon', Id='MainIcon', SourceFile=path)
 
     def _add_sdk_root_env_variable(self):
