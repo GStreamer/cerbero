@@ -1,6 +1,6 @@
 class Recipe(recipe.Recipe):
     name = 'toolchain'
-    version = '8.2.0'
+    version = '14.1.0'
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
     deps = ['gcc', 'gendef']
