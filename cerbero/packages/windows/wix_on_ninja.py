@@ -228,7 +228,7 @@ class MergeModuleWithNinjaPackager(PackagerBase):
         # Let's make a temporary directory, that can be cleaned up in one go
         # This is the directory where Ninja will run
         output_dir = Path(output_dir).absolute()
-        self.output_dir = Path(tempfile.mkdtemp(prefix=f'merge-module-{self._package_name()}-'))
+        self.output_dir = Path(tempfile.mkdtemp(prefix=f'merge-module-{self._package_name()}-', dir=output_dir))
         # These are the outputs of the Ninja process
         # All the paths must be understood relative to self.output_dir
         paths: list[Path] = []
@@ -404,7 +404,7 @@ class MSIWithNinjaPackager(PackagerBase):
         PackagerBase.pack(self, output_dir, devel, force, keep_temp)
         # This is the directory where Ninja will run
         output_dir = Path(output_dir).absolute()
-        self.output_dir = Path(tempfile.mkdtemp(prefix=f'msi-{self._package_name()}-'))
+        self.output_dir = Path(tempfile.mkdtemp(prefix=f'msi-{self._package_name()}-', dir=output_dir))
         # These are the outputs of the Ninja process
         # All the paths must be understood relative to self.output_dir
         paths: list[Path] = []
