@@ -14,6 +14,7 @@ class Recipe(recipe.Recipe):
                      'gupnp' : 'disabled',
                      'gstreamer' : 'enabled',
                      'crypto-library' : 'openssl'}
+
     deps = ['glib', 'gstreamer-1.0']
 
     patches = [
@@ -40,6 +41,12 @@ class Recipe(recipe.Recipe):
         else:
             # openssl on Linux
             self.use_system_libs = True
+
+        if self.config.variants.noasserts:
+            self.meson_options.update({'glib-asserts': 'disabled'})
+
+        if self.config.variants.nochecks:
+            self.meson_options.update({'glib-checks': 'disabled'})
 
     def post_install (self):
         nice_deps = ['gio-2.0', 'gthread-2.0', 'ssl', 'crypto']
