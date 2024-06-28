@@ -28,6 +28,10 @@ fix_build_tools() {
     fi
 }
 
+user_branch_exists_in() {
+    ./ci/exists_branch_in_user_repo.sh "$1" "$2"
+}
+
 # Produces runtime and devel tarball packages for linux/android or .pkg for macos
 cerbero_package_and_check() {
     # Plugins that dlopen libs and will have 0 features on the CI, and hence
@@ -55,8 +59,20 @@ cerbero_package_and_check() {
 }
 
 cerbero_before_script() {
+    local gst_user_branch=
+    local gstrs_user_branch=
     pwd
     ls -lha
+
+    if [[ -n ${CI_COMMIT_REF_NAME} ]]; then
+        local ci_project_ns_url="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}"
+        if user_branch_exists_in gstreamer "${CI_COMMIT_REF_NAME}"; then
+            gst_user_branch=1
+        fi
+        if user_branch_exists_in gst-plugins-rs "${CI_COMMIT_REF_NAME}"; then
+            gstrs_user_branch=1
+        fi
+    fi
 
     # If there's no cerbero-sources directory in the runner cache, copy it from
     # the image cache
@@ -80,16 +96,34 @@ cerbero_before_script() {
     # These vars are set for pipelines via trigger_cerbero_pipeline.py in
     # gstreamer and gst-plugins-rs CI
     echo "recipes_commits = {" >> localconf.cbc
-    echo "  'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'," >> localconf.cbc
+    if [[ -n $gst_user_branch ]]; then
+        echo "  'gstreamer-1.0': 'ci/${CI_COMMIT_REF_NAME}'," >> localconf.cbc
+    else
+        echo "  'gstreamer-1.0': 'ci/${CI_GSTREAMER_REF_NAME}'," >> localconf.cbc
+    fi
     if [[ -n $CI_GST_PLUGINS_RS_REF_NAME ]]; then
         echo "  'gst-plugins-rs-1.0': 'ci/${CI_GST_PLUGINS_RS_REF_NAME}'," >> localconf.cbc
+    elif [[ -n $gstrs_user_branch ]]; then
+        echo "  'gst-plugins-rs-1.0': 'ci/${CI_COMMIT_REF_NAME}'," >> localconf.cbc
     fi
     echo "}" >> localconf.cbc
+
     echo "recipes_remotes = {" >> localconf.cbc
-    echo "  'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}," >> localconf.cbc
+
+    # Add gstreamer monorepo remote
+    if [[ -n $gst_user_branch ]]; then
+        echo "  'gstreamer-1.0': {'ci': '${ci_project_ns_url}/gstreamer'}," >> localconf.cbc
+    else
+        echo "  'gstreamer-1.0': {'ci': '${CI_GSTREAMER_URL}'}," >> localconf.cbc
+    fi
+
+    # Add gst-plugins-rs remote
     if [[ -n $CI_GST_PLUGINS_RS_URL ]]; then
         echo "  'gst-plugins-rs-1.0': {'ci': '${CI_GST_PLUGINS_RS_URL}'}," >> localconf.cbc
+    elif [[ -n $gstrs_user_branch ]]; then
+        echo "  'gst-plugins-rs-1.0': {'ci': '${ci_project_ns_url}/gst-plugins-rs'}," >> localconf.cbc
     fi
+
     echo "}" >> localconf.cbc
     cat localconf.cbc
 
