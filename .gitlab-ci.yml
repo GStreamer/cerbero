@@ -395,7 +395,12 @@ build cerbero cross win64:
   script:
     # Clone gstreamer repository to get gst-examples and gst-docs
     - rm -rf gstreamer
-    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1 gstreamer/
+    - |-
+      if ./ci/exists_branch_in_user_repo.sh gstreamer "${CI_COMMIT_REF_NAME}"; then
+        git clone "${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer" -b "${CI_COMMIT_REF_NAME}" --depth 1 gstreamer/
+      else
+        git clone "$CI_GSTREAMER_URL" -b "${CI_GSTREAMER_REF_NAME}" --depth 1 gstreamer/
+      fi
     - mkdir -p ${OUTPUT_DIR}
 
     # extract our binaries
@@ -576,8 +581,12 @@ build cerbero cross-ios universal x86_64-host:
     - installer -pkg gstreamer-1.0-devel-*-ios-universal.pkg -target CurrentUserHomeDirectory -verbose
 
     # Clone gstreamer repository to get gst-examples and gst-docs
-    - git clone $CI_GSTREAMER_URL -b $CI_GSTREAMER_REF_NAME --depth 1 gstreamer/
-
+    - |-
+      if ./ci/exists_branch_in_user_repo.sh gstreamer "${CI_COMMIT_REF_NAME}"; then
+        git clone "${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}/gstreamer" -b "${CI_COMMIT_REF_NAME}" --depth 1 gstreamer/
+      else
+        git clone "$CI_GSTREAMER_URL" -b "${CI_GSTREAMER_REF_NAME}" --depth 1 gstreamer/
+      fi
     # dump some useful information
     - xcodebuild -version
     - xcodebuild -showsdks
