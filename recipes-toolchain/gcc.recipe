@@ -1,5 +1,8 @@
 from pathlib import Path
 import shutil
+from cerbero.utils.git import GIT
+from cerbero.utils import shell
+
 
 class Recipe(recipe.Recipe):
     name = 'gcc'
@@ -66,6 +69,9 @@ class Recipe(recipe.Recipe):
         self.make_dir = self.build_dir
         self.make += ['all']
         self.make_install = ['install-strip' if i == 'install' else i for i in self.make_install]
+        # Describe version for future reference
+        version = shell.check_output([GIT, 'describe'], cmd_dir=Path(__file__).parent, logfile=self.logfile, env=self.env, quiet=True).strip()
+        self.configure_options = self.configure_options.replace('GStreamer', f'GStreamer ({version})')
 
     async def configure(self):
         Path(self.make_dir).mkdir(exist_ok=True)
