@@ -3,6 +3,6 @@ class Recipe(recipe.Recipe):
     version = '14.1.0'
     stype = SourceType.CUSTOM
     btype = BuildType.CUSTOM
-    deps = ['gcc', 'gendef']
+    deps = ['gcc', 'gendef', 'winstorecompat']
     can_msvc = False
 

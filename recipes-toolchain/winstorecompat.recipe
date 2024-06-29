@@ -1,0 +1,63 @@
+from pathlib import Path
+from cerbero.build.build import modify_environment
+
+class Recipe(recipe.Recipe):
+    name = 'winstorecompat'
+    version = 'v12.0.0'
+    licenses = [{License.MIT: ['COPYING']}]
+    requires_non_src_build = True
+    stype = SourceType.CUSTOM
+    deps = ['mingw-w64-crt', 'gcc']
+    override_libtool = False
+
+    def prepare(self):
+        if self.config.target_arch == Architecture.X86:
+            raise InvalidRecipeError(self)
+        # Since we are cross-compiling we have to reset all the env
+        # variables set by cerbero (eg: we don't want -m64 overriding
+        # a i386 build or gcc being used instead of x86_64-mingw32-w64-gcc)
+        for v in ['CC', 'LD', 'CPP', 'AS', 'RC', 'CXX', 'CFLAGS', 'LDFLAGS',
+                'CXXFLAGS', 'CCASFLAGS', 'CPPFLAGS']:
+            self.set_env(v)
+        self.host = 'x86_64-w64-mingw32'
+        self.sysroot = f'{self.config.prefix}/{self.host}/sysroot'
+        self.make_install += [f'DESTDIR={self.sysroot}']
+        self.config_src_dir = os.path.join(self.config.sources, f'mingw-w64-sources-{self.version}', 'mingw-w64-libraries', 'winstorecompat')
+        self.build_dir = self.config_src_dir
+        self.make_dir = self.build_dir
+        self.configure_tpl = "%%(config-sh)s --prefix /usr/%(host)s "\
+                "--libdir /usr/%(host)s %%(options)s" % {'host': self.host}
+        self.build_dir_32 = os.path.join(self.make_dir, 'cerbero-build-dir-32')
+        self.build_dir_64 = os.path.join(self.make_dir, 'cerbero-build-dir-64')
+
+    @modify_environment
+    async def configure(self):
+        # Since the toolchain is built with multilib support
+        # this recipe builds winpthreads for both x86_64 and x86
+        Path(self.build_dir_32).mkdir(exist_ok=True)
+        flags = "CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-cpp RC=x86_64-w64-mingw32-windres " \
+                "LD=x86_64-w64-mingw32-ld LDFLAGS=' -m32' CFLAGS=' -m32' CXXFLAGS=' -m32' " \
+                "RCFLAGS='-F pe-i386' DLLTOOLFLAGS='-m i386'"
+        host = 'i386-w64-mingw32'
+        libdir = "/usr/%s/lib32" % self.host
+        # i686 is always a cross build
+        shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
+                (flags, libdir, libdir, host, host, self.configure_options),
+                self.build_dir_32, logfile=self.logfile, env=self.env)
+
+        Path(self.build_dir_64).mkdir(exist_ok=True)
+        flags = "CC=x86_64-w64-mingw32-gcc CPP=x86_64-w64-mingw32-cpp RC=x86_64-w64-mingw32-windres " \
+                "LD=x86_64-w64-mingw32-ld LDFLAGS=' -m64' CFLAGS=' -m64' CXXFLAGS=' -m64' "
+        host = 'x86_64-w64-mingw32'
+        libdir = "/usr/%s/lib" % self.host
+        shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
+                (flags, libdir, libdir, host, host, self.configure_options),
+                self.build_dir_64, logfile=self.logfile, env=self.env)
+
+    async def compile(self):
+        shell.new_call(self.make, self.build_dir_32, logfile=self.logfile, env=self.env)
+        shell.new_call(self.make, self.build_dir_64, logfile=self.logfile, env=self.env)
+
+    async def install(self):
+        shell.new_call(self.make_install, self.build_dir_32, logfile=self.logfile, env=self.env)
+        shell.new_call(self.make_install, self.build_dir_64, logfile=self.logfile, env=self.env)
