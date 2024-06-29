@@ -1,6 +1,6 @@
 class Recipe(recipe.Recipe):
     name = 'gendef'
-    version = 'v11.0.1'
+    version = 'v12.0.0'
     licenses = [License.GPLv3Plus]
     stype = SourceType.CUSTOM
     requires_non_src_build = True

@@ -31,7 +31,7 @@ The GCC + MinGW toolchain is a multilib toolchain that can generate 32 and 64 bi
 
 It uses the following versions and configurations:
  * GCC: 14.1.0
- * MinGW: 11.0.1
+ * MinGW: 12.0.0
  * Threads: posix
  * Exception handling:
    * 32 bits: SJLJ

@@ -1,6 +1,6 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-crt'
-    version = 'v11.0.1'
+    version = 'v12.0.0'
     licenses = [{License.BSD_like: ['../COPYING']}]
     stype = SourceType.CUSTOM
     add_host_build_target = False

@@ -4,7 +4,7 @@ from cerbero.build.build import modify_environment
 
 class Recipe(recipe.Recipe):
     name = 'winpthreads'
-    version = 'v11.0.1'
+    version = 'v12.0.0'
     licenses = [{License.BSD_like: ['COPYING']}]
     configure_options = '--enable-shared --enable-static'
     add_host_build_target = False

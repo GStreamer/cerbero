@@ -1,14 +1,15 @@
 class Recipe(recipe.Recipe):
     name = 'mingw-w64-sources'
-    version = 'v11.0.1'
+    version = 'v12.0.0'
     licenses = [{License.BSD_like: ['COPYING']}]
     url = 'https://downloads.sourceforge.net/project/mingw-w64/mingw-w64/mingw-w64-release/mingw-w64-%(version)s.tar.bz2'
-    tarball_checksum = '3f66bce069ee8bed7439a1a13da7cb91a5e67ea6170f21317ac7f5794625ee10'
+    tarball_checksum = 'cc41898aac4b6e8dd5cffd7331b9d9515b912df4420a3a612b5ea2955bbeed2f'
     stype = SourceType.TARBALL
     btype = BuildType.CUSTOM
     patches = [
         'mingw-w64/0001-Allow-to-use-bessel-and-complex-functions-without-un.patch',
-        ]
+        'mingw-w64/0002-Bug-1829971-Update-to-MinGW-trunk-r-firefox-build-sy.patch'
+    ]
     tarball_dirname = 'mingw-w64-%(version)s'
 
     def prepare(self):
