@@ -105,6 +105,7 @@ default:
       python3-venv
       python3-setuptools
       rsync
+      ssh-client
       sudo
     FDO_DISTRIBUTION_EXEC: "ci/docker_setup.sh"
     FDO_UPSTREAM_REPO: "gstreamer/cerbero"

@@ -11,6 +11,6 @@ variables:
 
   ANDROID_FEDORA_TAG: '2023-05-31.0'
 
-  UBUNTU_TAG: '2024-04-03.1'
+  UBUNTU_TAG: '2024-06-30.0'
 
   WINDOWS_IMAGE: 'registry.freedesktop.org/gstreamer/gstreamer/amd64/windows:2023-07-14.0-main'
