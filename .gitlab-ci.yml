@@ -628,41 +628,11 @@ cerbero cross-ios universal examples arm64-host:
     CERBERO_RUN_SUFFIX: ".exe"
     CERBERO_BOOTSTRAP_SYSTEM: "no"
     HAVE_CCACHE: ""
+    CERBERO_PACKAGE_ARGS: ""
   before_script:
     # Test that the powershell script works
     - ./cerbero-uninstalled --help
     - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_before_script"
-
-cerbero deps msvc x86_64:
-  extends: ['.cerbero deps', '.cerbero windows native']
-  variables:
-    ARCH: 'msvc_x86_64'
-  script:
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
-  rules:
-    # This is an extended rule of .cerbero not-mr rules
-    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE != "schedule"
-    # Don't run automatically for scheduled pipeline
-    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE == "schedule"
-      when: 'manual'
-      # workaround for gitlab bug where it otherwise blocks the pipeline for manual jobs from rules
-      allow_failure: true
-
-cerbero deps mingw x86_64:
-  extends: ['.cerbero deps', '.cerbero windows native']
-  variables:
-    ARCH: 'mingw_x86_64'
-    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
-  script:
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
-  when: 'manual'
-
-cerbero deps msvc x86_64 msi package:
-  extends: ['.cerbero deps', '.cerbero windows native']
-  variables:
-    CERBERO_PACKAGE_ARGS: ""
-  script:
-    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
   artifacts:
     name: "${CI_JOB_NAME}_${CI_COMMIT_SHA}"
     expire_in: '5 days'
@@ -676,21 +646,22 @@ cerbero deps msvc x86_64 msi package:
     exclude:
       - .git
       - .git/**/*
-  rules:
-    # This is an extended rule of .cerbero not-mr rules
-    # Run automatically if it's a scheduled pipeline
-    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE == "schedule"
-    # Otherwise require manual trigger
-    - if: ($CI_GSTREAMER_TRIGGERED != "true") && $CI_PIPELINE_SOURCE != "schedule"
-      when: 'manual'
-      # workaround for gitlab bug where it otherwise blocks the pipeline for manual jobs from rules
-      allow_failure: true
 
-cerbero deps msvc x86 msi package:
-  extends: ['cerbero deps msvc x86_64 msi package']
+cerbero deps msvc x86_64:
+  extends: ['.cerbero deps', '.cerbero windows native']
   variables:
-    ARCH: 'msvc_x86'
-    CONFIG: 'win32.cbc'
+    ARCH: 'msvc_x86_64'
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+
+cerbero deps mingw x86_64:
+  extends: ['.cerbero deps', '.cerbero windows native']
+  variables:
+    ARCH: 'mingw_x86_64'
+    CERBERO_ARGS: "${DEFAULT_CERBERO_ARGS} -v nowerror,mingw"
+  script:
+    - C:\msys64\msys2_shell.cmd -ucrt64 -defterm -no-start -here -use-full-path -lc "./ci/cerbero_setup.sh cerbero_deps_script"
+  when: 'manual'
 
 build cerbero msvc x86_64:
   extends: ['.cerbero mr', '.cerbero windows native']
