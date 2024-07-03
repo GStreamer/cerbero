@@ -280,13 +280,13 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
-        key: ${{ steps.restore-cerbero-deps-cache.cache-primary-key }}
+        key: ${{ steps.restore-cerbero-sources-cache.outputs.cache-primary-key }}
 
     - if: ${{ steps.bootstrap-cerbero.outcome == 'success' && ! steps.restore-cerbero-deps-cache.outputs.cache-hit }}
       uses: actions/cache/save@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
-        key: ${{ steps.restore-cerbero-deps-cache.cache-primary-key }}
+        key: ${{ steps.restore-cerbero-deps-cache.outputs.cache-primary-key }}
 
     - id: build-packages
       if: ${{ steps.variables.outputs.do-build }}
