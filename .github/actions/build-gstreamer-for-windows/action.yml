@@ -200,21 +200,31 @@ runs:
         echo "CERBERO_ARGS=${CERBERO_ARGS}" >> $GITHUB_ENV
         echo "CERBERO_PACKAGE_ARGS=${CERBERO_PACKAGE_ARGS}" >> $GITHUB_ENV
 
-    - id: restore-cerbero-cache
+        config_hash=$(echo "${CERBERO_ARGS}${{ inputs.config }}" | sha256sum | cut -d' ' -f1)
+        echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
+
+    - id: restore-cerbero-sources-cache
       if: ${{ steps.variables.outputs.do-build }}
       uses: actions/cache/restore@v4
       with:
-        path: |
-          ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
-          ${{ steps.cerbero-config.outputs.cerbero-sources }}
+        path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
         key: |
-          ${{ runner.os }}-cerbero-bootstrap-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ runner.name }}
+          cerbero-sources-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}
         restore-keys: |
-          ${{ runner.os }}-cerbero-bootstrap-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-
-          ${{ runner.os }}-cerbero-bootstrap-${{ steps.version-info.outputs.gstreamer-version }}-
-          ${{ runner.os }}-cerbero-bootstrap-
+          cerbero-sources-${{ steps.version-info.outputs.gstreamer-version }}-
+          cerbero-sources-
 
-    - if: ${{ steps.variables.outputs.do-build && steps.restore-cerbero-cache.outputs.cache-matched-key }}
+    - id: restore-cerbero-deps-cache
+      if: ${{ steps.variables.outputs.do-build }}
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
+        key: |
+          ${{ runner.os }}-cerbero-deps-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-${{ runner.name }}
+        restore-keys: |
+          ${{ runner.os }}-cerbero-deps-${{ steps.version-info.outputs.gstreamer-version }}-${{ steps.cerbero-config.outputs.cerbero-sha }}-${{ steps.cerbero-config.outputs.config-hash }}-
+
+    - if: ${{ steps.variables.outputs.do-build && steps.restore-cerbero-deps-cache.outputs.cache-matched-key }}
       shell: msys2 -eo pipefail {0}
       run: |
         # Restore Cerbero dependencies
@@ -266,14 +276,17 @@ runs:
         group_cmd "$CERBERO $CERBERO_ARGS build --offline $more_deps" | tee -a "${LOG_PATH}/3_build-deps.log"
         group_cmd "$CERBERO $CERBERO_ARGS gen-cache" | tee "${LOG_PATH}/4_cache.log"
 
-    - id: cache-cerbero-bootstrap
-      if: ${{ steps.bootstrap-cerbero.outcome == 'success' && ! steps.restore-cerbero-cache.outputs.cache-hit }}
+    - if: ${{ steps.bootstrap-cerbero.outcome == 'success' && ! steps.restore-cerbero-sources-cache.outputs.cache-hit }}
       uses: actions/cache/save@v4
       with:
-        path: |
-          ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
-          ${{ steps.cerbero-config.outputs.cerbero-sources }}
-        key: ${{ steps.restore-cerbero-cache.outputs.cache-primary-key }}
+        path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
+        key: ${{ steps.restore-cerbero-deps-cache.cache-primary-key }}
+
+    - if: ${{ steps.bootstrap-cerbero.outcome == 'success' && ! steps.restore-cerbero-deps-cache.outputs.cache-hit }}
+      uses: actions/cache/save@v4
+      with:
+        path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
+        key: ${{ steps.restore-cerbero-deps-cache.cache-primary-key }}
 
     - id: build-packages
       if: ${{ steps.variables.outputs.do-build }}
