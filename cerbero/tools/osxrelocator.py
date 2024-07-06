@@ -19,6 +19,7 @@
 
 import os
 
+from cerbero.errors import FatalError
 from cerbero.utils import shell
 
 
@@ -84,11 +85,21 @@ class OSXRelocator(object):
         # points to the real ID of this library
         # This used to be done only at Universal lipo time, but by then
         # it's too late -- unless one wants to run through all load commands
-        self.change_id(object_file, id='@rpath/{}'.format(os.path.basename(original_file)))
+        # If the library isn't a dylib, it's a framework, in which case
+        # assert that it's already rpath'd
+        dylib_id = self.get_dylib_id(object_file)
+        is_dylib = dylib_id is not None
+        is_framework = is_dylib and not object_file.endswith('.dylib')
+        if not is_framework:
+            self.change_id(object_file, id='@rpath/{}'.format(os.path.basename(original_file)))
+        elif '@rpath' not in dylib_id:
+            raise FatalError(f'Cannot relocate a fixed location framework: {dylib_id}')
         # With that out of the way, we need to sort out how many parents
         # need to be navigated to reach the root of the GStreamer prefix
         depth = len(original_file.split('/')) - len(self.lib_prefix.split('/'))
         p_depth = '/..' * depth
+        # These paths assume that the file being relocated resides within
+        # <GStreamer root>/lib
         rpaths = [
             # From a deeply nested library
             f'@loader_path{p_depth}/lib',
@@ -105,6 +116,11 @@ class OSXRelocator(object):
                 '@loader_path/..',
                 '@executable_path/..',
             ]
+        if is_framework:
+            # Start with framework's libraries
+            rpaths = [
+                '@loader_path/lib',
+            ] + rpaths
         # Make them unique
         rpaths = list(set(rpaths))
         # Remove absolute RPATHs, we don't want or need these
@@ -143,6 +159,11 @@ class OSXRelocator(object):
                 self.change_libs_path(os.path.join(dirpath, f))
             if not self.recursive:
                 break
+
+    @staticmethod
+    def get_dylib_id(object_file):
+        res = shell.check_output([OTOOL_CMD, '-D', object_file]).splitlines()
+        return res[-1] if len(res) > 1 else None
 
     @staticmethod
     def list_shared_libraries(object_file):
