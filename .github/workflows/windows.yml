@@ -51,6 +51,7 @@ jobs:
         with:
           cerbero-repo: ${{ inputs.cerbero-repo || github.repository }}
           cerbero-ref: ${{ inputs.cerbero-ref || github.ref }}
+          cerbero-args: --clocktime --timestamps -v visualstudio,noasserts,nochecks
           force: true
           bootstrap-system: true
           s3-download-paths: >-
