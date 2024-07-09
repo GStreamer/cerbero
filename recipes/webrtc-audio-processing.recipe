@@ -15,6 +15,12 @@ class Recipe(recipe.Recipe):
     # webrtc-audio-processing links to abseil statically
     meson_subprojects = ['abseil-cpp']
 
+    patches = [
+        # https://gitlab.freedesktop.org/pulseaudio/webrtc-audio-processing/-/merge_requests/40
+        'webrtc-audio-processing/0001-build-Appease-MSYS2-UCRT64-GCC-13.patch',
+        'webrtc-audio-processing/0002-file_wrapper.h-Fix-build-with-GCC13.patch',
+    ]
+
     files_libs = [
         'libwebrtc-audio-coding-1',
         'libwebrtc-audio-processing-1',
