@@ -54,8 +54,8 @@ class RustBootstrapper(BootstrapperBase):
         'rustup-init-1.27.0-x86_64-apple-darwin': '02a2d8501a567bfd43e8e0ee18ba7af0c09c84997ae7510e0f620c46293f32e0',
         'rustup-init-1.27.0-i686-pc-windows-msvc.exe': '6f9ad11abd642a7cba4ee6f386b84d56045ee12f921c5d9832913d937e0f3547',
         'rustup-init-1.27.0-x86_64-pc-windows-msvc.exe': '743bbd6b5a622ddc5c5234ce0fd3eab6ca74499a119fbf484dc55755a6a7e443',
-        'rustup-init-1.27.0-i686-pc-windows-gnu.exe': '5d45dc8f088a04c312a451c9b7d6fc49b3c68f3a85819cef2e0da020a9b75637',
-        'rustup-init-1.27.0-x86_64-pc-windows-gnu.exe': '32e9128a82ac130043012463ca5f9cb507c349a3f16e3c2b98a3f7a32e294e59',
+        'rustup-init-1.27.0-i686-pc-windows-gnu.exe': '375ea2cee4615ebcc51cab62b3b3d4d71293d1461ca3fb8bf270ac1a52ee994e',
+        'rustup-init-1.27.0-x86_64-pc-windows-gnu.exe': '5d45dc8f088a04c312a451c9b7d6fc49b3c68f3a85819cef2e0da020a9b75637',
     }
     # The triple for the build platform/arch
     build_triple = None
