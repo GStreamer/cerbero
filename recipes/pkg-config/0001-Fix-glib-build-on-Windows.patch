@@ -1,0 +1,61 @@
+From ff8cd94c1b4c1cfbf7efa1aa20d2570a398cfcd8 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Tue, 9 Jul 2024 21:44:21 +0900
+Subject: [PATCH] Fix glib build on Windows
+
+---
+ subprojects/glib.wrap                         |  5 +++-
+ .../0001-Fix-safe_wspawnve-define.patch       | 25 +++++++++++++++++++
+ 2 files changed, 29 insertions(+), 1 deletion(-)
+ create mode 100644 subprojects/packagefiles/glib-2.74.4/0001-Fix-safe_wspawnve-define.patch
+
+diff --git a/subprojects/glib.wrap b/subprojects/glib.wrap
+index 5da3786..6e687b4 100644
+--- a/subprojects/glib.wrap
++++ b/subprojects/glib.wrap
+@@ -7,7 +7,10 @@ source_hash = 0e82da5ea129b4444227c7e4a9e598f7288d1994bf63f129c44b90cfd2432172
+ wrapdb_version = 2.74.4-1
+ 
+ # Customise glib for static linking into pkg-config: no gobject, gio, gmodule, gthread, no GRegexp or external deps
+-diff_files = glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch, glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch
++diff_files =
++  glib-2.74.4/0001-glib-Disable-gobject-gio-gthread-gmodule-and-GRegex-.patch,
++  glib-2.74.4/0002-glib-gthreadprivate.h-include-errno.h.patch,
++  glib-2.74.4/0001-Fix-safe_wspawnve-define.patch
+ 
+ [provide]
+ dependency_names = glib-2.0
+diff --git a/subprojects/packagefiles/glib-2.74.4/0001-Fix-safe_wspawnve-define.patch b/subprojects/packagefiles/glib-2.74.4/0001-Fix-safe_wspawnve-define.patch
+new file mode 100644
+index 0000000..12ab13e
+--- /dev/null
++++ b/subprojects/packagefiles/glib-2.74.4/0001-Fix-safe_wspawnve-define.patch
+@@ -0,0 +1,25 @@
++From 4c4448debd314c8069d7c6af53144aaab089ffd2 Mon Sep 17 00:00:00 2001
++From: Hernan Martinez <hernan.c.martinez@gmail.com>
++Date: Thu, 26 Jan 2023 10:23:41 +0000
++Subject: [PATCH] Fix safe_wspawnve #define
++
++---
++ glib/gspawn-win32.c | 2 +-
++ 1 file changed, 1 insertion(+), 1 deletion(-)
++
++diff --git a/glib/gspawn-win32.c b/glib/gspawn-win32.c
++index 665d7313e..e8bc10e9a 100644
++--- a/glib/gspawn-win32.c
+++++ b/glib/gspawn-win32.c
++@@ -163,7 +163,7 @@ safe_wspawnvpe (int _Mode,
++ 
++ #else
++ 
++-#define safe_wspawnve _spawnve
+++#define safe_wspawnve _wspawnve
++ #define safe_wspawnvpe _wspawnvpe
++ 
++ #endif /* _UCRT */
++-- 
++2.44.0.windows.1
++
+-- 
+2.44.0.windows.1
+
