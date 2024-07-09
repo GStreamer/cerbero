@@ -13,11 +13,14 @@ class Recipe(recipe.Recipe):
     meson_options = {'tests' : 'disabled',
                      'gupnp' : 'disabled',
                      'gstreamer' : 'enabled',
-                     'crypto-library' : 'openssl',
-                     'c_args': '-DG_DISABLE_ASSERT'}
+                     'crypto-library' : 'openssl'}
+
     deps = ['glib', 'gstreamer-1.0']
 
-    patches = ['libnice/0001-Remove-Gslice-without-breaking-anything.patch']
+    patches = [
+        'libnice/0001-Remove-Gslice-without-breaking-anything.patch',
+        'libnice/0002-Add-glib-assert-and-check-options.patch',
+    ]
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
@@ -38,6 +41,12 @@ class Recipe(recipe.Recipe):
         else:
             # openssl on Linux
             self.use_system_libs = True
+
+        if self.config.variants.noasserts:
+            self.meson_options.update({'glib-asserts': 'disabled'})
+
+        if self.config.variants.nochecks:
+            self.meson_options.update({'glib-checks': 'disabled'})
 
     def post_install (self):
         nice_deps = ['gio-2.0', 'gthread-2.0', 'ssl', 'crypto']

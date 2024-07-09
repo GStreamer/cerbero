@@ -106,7 +106,7 @@ class Variants(object):
         'rust',
         'qt6',
     ]
-    __enabled_variants = ['debug', 'optimization', 'testspackage']
+    __enabled_variants = ['debug', 'optimization', 'testspackage', 'asserts', 'checks']
     __bool_variants = __enabled_variants + __disabled_variants
     # Variants that are `key: (values)`, with the first value in the tuple
     # being the default

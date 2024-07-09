@@ -256,6 +256,12 @@ class Recipe(recipe.Recipe):
             # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
             self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')
 
+        if self.config.variants.noasserts:
+            self.meson_options.update({'glib_assert': 'false'})
+
+        if self.config.variants.nochecks:
+            self.meson_options.update({'glib_checks': 'false'})
+
     def post_install(self):
         if self.config.target_platform in [Platform.IOS, Platform.DARWIN]:
             # For the universal build we need to ship glibconfig.h of both

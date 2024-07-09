@@ -1094,13 +1094,21 @@ class Meson (Build, ModifyEnvBase) :
         # Automatically disable examples
         self._set_option({'examples'}, None)
 
+        if self.config.variants.noasserts and 'b_ndebug' not in self.meson_options:
+            self.meson_options['b_ndebug'] = 'true'
+
         # NOTE: self.tagged_for_release is set in recipes/custom.py
         is_gstreamer_recipe = hasattr(self, 'tagged_for_release')
-        # Enable -Werror for gstreamer recipes and when running under CI
-        if is_gstreamer_recipe and self.config.variants.werror:
-            # Let recipes override the value
-            if 'werror' not in self.meson_options:
+        if is_gstreamer_recipe:
+            # Enable -Werror for gstreamer recipes and when running under CI but let recipes override the value
+            if self.config.variants.werror and 'werror' not in self.meson_options:
                 self.meson_options['werror'] = 'true'
+
+            if 'glib-asserts' not in self.meson_options:
+                self._set_option({'glib-asserts'}, 'asserts')
+
+            if 'glib-checks' not in self.meson_options:
+                self._set_option({'glib-checks'}, 'checks')
 
         debug = 'true' if self.config.variants.debug else 'false'
         opt = get_optimization_from_config(self.config)
@@ -1343,6 +1351,12 @@ class CargoC(Cargo):
             cargoc_args += ['--library-type', 'staticlib']
         if self.library_type in (LibraryType.SHARED, LibraryType.BOTH):
             cargoc_args += ['--library-type', 'cdylib']
+
+        if self.config.variants.noasserts:
+            cargoc_args += ['--config', 'debug-assertions=false']
+        if self.config.variants.nochecks:
+            cargoc_args += ['--config', 'overflow-checks=false']
+
         cargoc_args += self.get_cargo_args()
         return cargoc_args
 
