@@ -54,7 +54,10 @@ class Recipe(recipe.Recipe):
         f'{name}/0009-glib-gthread-posix-Block-futex_time64-usage-on-Andro.patch',
         f'{name}/0010-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
         f'{name}/0011-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
-        f'{name}/0012-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch'
+        f'{name}/0012-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
+        # backported into 2.74.6
+        'glib/0001-Fix-safe_wspawnve-define.patch',
     ]
 
     files_libs = [
