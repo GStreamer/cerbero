@@ -1,0 +1,25 @@
+From db8d19c563eb20cb2db3662c03c3ba0e231775c3 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Tue, 9 Jul 2024 20:51:22 +0900
+Subject: [PATCH] Fix Windows build
+
+../tests/ltcdecode.c:62:9: error: implicit declaration of function '_set_fmode';
+---
+ tests/ltcdecode.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tests/ltcdecode.c b/tests/ltcdecode.c
+index 04e25d3..0ef10c6 100644
+--- a/tests/ltcdecode.c
++++ b/tests/ltcdecode.c
+@@ -28,6 +28,7 @@
+ 
+ #ifdef _WIN32
+ #include <fcntl.h> // for _fmode
++#include <stdlib.h> // _set_fmode
+ #endif
+ 
+ #define BUFFER_SIZE (1024)
+-- 
+2.44.0.windows.1
+
