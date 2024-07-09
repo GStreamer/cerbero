@@ -4,10 +4,11 @@ inputs:
   cerbero-repo:
     description: 'Repository to use for Cerbero'
     required: false
-    default: $GITHUB_ACTION_REPOSITORY
+    default: ${{ github.action_repository || github.repository }}
   cerbero-ref:
     description: 'Ref to use for Cerbero'
-    required: true
+    required: false
+    default: ${{ github.action_ref || github.ref }}
   config:
     description: 'Name of the configuration file to use'
     required: false
