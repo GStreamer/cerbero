@@ -5,6 +5,7 @@ from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
 from pathlib import Path
 import re
+import shlex
 import shutil
 import tempfile
 
@@ -136,6 +137,17 @@ class Recipe(recipe.Recipe):
         for each in components:
             self.cargo_features.append(f'gst{each}/v1_22')
         self.cargo_features.append('gst-plugin-webrtc/v1_22')
+
+        # The LIBRARY_PATH setting affects all invocations of GCC underneath
+        # Cargo, in particular those that link build scripts (that are meant to
+        # run on the host machine, not through wine).
+        # When creating these, a value for LIBRARY_PATH present will cause
+        # cross-mingw GCC to prefer libpthread.a for MinGW-w64 over the system
+        # libpthread, and hell breaks loose.
+        if self.config.target_platform == Platform.WINDOWS and \
+            self.config.platform != self.config.target_platform:
+            self.set_env('LDFLAGS')
+            self.set_env('LIBRARY_PATH')
 
     async def configure(self):
         # Check that the Cargo.toml version matches the recipe version

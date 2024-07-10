@@ -81,18 +81,21 @@ class RustBootstrapper(BootstrapperBase):
         self.build_triple = self.config.rust_build_triple
         self.target_triples = self.config.rust_target_triples
         if self.config.platform == Platform.WINDOWS:
-            # On Windows, build-tools always use MSVC so we need to always
-            # bootstrap $arch-windows-msvc
-            bs_triple = self.config.rust_triple(self.config.arch, self.config.platform, True)
-            if bs_triple not in self.target_triples:
-                self.target_triples.append(bs_triple)
+            tgt = set(self.target_triples)
+            # On Windows, build tools must be built using MSVC. However,
+            # the current variant determines the default target.
+            # So we need to always bootstrap $arch-windows-msvc,
+            # and override the build triple accordingly
+            self.build_triple = self.config.rust_triple(self.config.arch, self.config.platform, True)
+            tgt.add(self.build_triple)
             # rustup-init wants to always install both 64-bit and 32-bit
             # toolchains, so ensure that we fetch and install both
             archs = {Architecture.X86_64, Architecture.X86}
             other_arch = (archs - {self.config.arch}).pop()
-            arch_triple = self.config.rust_triple(other_arch, self.config.platform, self.config.variants.visualstudio)
-            if arch_triple not in self.target_triples:
-                self.target_triples.append(arch_triple)
+            # in both MSVC and MinGW ABIs
+            tgt.add(self.config.rust_triple(other_arch, self.config.platform, True))
+            tgt.add(self.config.rust_triple(other_arch, self.config.platform, False))
+            self.target_triples = list(tgt)
         self.fetch_urls = self.get_fetch_urls()
         self.fetch_urls_func = self.get_more_fetch_urls
         self.extract_steps = []
@@ -179,10 +182,14 @@ class RustBootstrapper(BootstrapperBase):
             entry = channel_data['pkg'][c]['target'][self.build_triple]
             urls += list(get_entry_urls(entry))
 
-        # And then maybe also rust-std for the target machine
+        # Then maybe also rust-std for the target machine
         for triple in self.target_triples:
             if triple != self.build_triple:
                 entry = channel_data['pkg']['rust-std']['target'][triple]
+                urls += list(get_entry_urls(entry))
+            # And rust-mingw for any MinGW targets
+            if 'windows-gnu' in triple:
+                entry = channel_data['pkg']['rust-mingw']['target'][triple]
                 urls += list(get_entry_urls(entry))
 
         return (urls, self.install_toolchain_for_cargoc_fetch)

@@ -1369,6 +1369,19 @@ class CargoC(Cargo):
     def __init__(self):
         Cargo.__init__(self)
 
+        # cargo-c ignores config.toml's rustflags, which are necessary for i386
+        # cross-build
+        self.target_triple = self.config.rust_triple(
+            self.config.target_arch, self.config.target_platform, self.using_msvc()
+        )
+        if self.target_triple == 'i686-pc-windows-gnu':
+            tgt = self.target_triple.upper().replace('-', '_')
+            self.set_env(f'CARGO_TARGET_{tgt}_LINKER', self.get_env('RUSTC_LINKER'))
+            link_args = []
+            for arg in shlex.split(self.get_env('RUSTC_LDFLAGS')):
+                link_args += ['-C', f'link-arg={arg}']
+            self.set_env('RUSTFLAGS', ' '.join(link_args))
+
     def get_cargoc_args(self):
         cargoc_args = [
             '--release',

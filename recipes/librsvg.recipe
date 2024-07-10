@@ -70,6 +70,10 @@ class Recipe(recipe.Recipe):
             # Cargo tries to look up an import lib when LibraryType.BOTH
             # librsvg only generates the shared library
             self.library_type = LibraryType.SHARED
+            # GCC willfully obeys LIBRARY_PATH
+            if self.config.platform != self.config.target_platform:
+                self.set_env('LDFLAGS')
+                self.set_env('LIBRARY_PATH')
         self.target_triple = self.config.rust_triple(self.config.target_arch,
             self.config.target_platform, self.using_msvc())
         self.meson_options['triplet'] = self.target_triple
@@ -88,6 +92,7 @@ class Recipe(recipe.Recipe):
         s = '[build]\n' \
             f'target = "{self.target_triple}"\n'
         self.append_config_toml(s)
+
         if self.config.target_platform == Platform.ANDROID:
             # Use the compiler's forwarding
             # See https://android.googlesource.com/platform/ndk/+/master/docs/BuildSystemMaintainers.md#linkers
@@ -95,7 +100,7 @@ class Recipe(recipe.Recipe):
             link_args = []
             # We need to extract necessary linker flags from LDFLAGS which is
             # passed to the compiler
-            for arg in shlex.split(self.get_env('LDFLAGS', '')):
+            for arg in shlex.split(self.get_env('RUSTC_LDFLAGS', self.get_env('LDFLAGS'))):
                 link_args += ['-C', f"link-arg={arg}"]
             s = f'[target.{self.target_triple}]\n' \
                 f'linker = "{linker}"\n' \
@@ -111,6 +116,7 @@ class Recipe(recipe.Recipe):
             for p in path:
                 if msys2_prefix in p:
                     self.remove_env('PATH', p, sep=os.pathsep)
+
         await super().configure()
 
     async def compile(self):
