@@ -34,7 +34,7 @@ class Strip(object):
         if 'STRIP' in config.env:
             self.strip_cmd = shlex.split(config.env['STRIP'])
 
-    async def _async_strip_file(self, path):
+    async def async_strip_file(self, path):
         if not self.strip_cmd:
             m.warning('Strip command is not defined')
             return
@@ -57,7 +57,7 @@ class Strip(object):
             m.warning(e)
 
     def strip_file(self, path):
-        run_until_complete(self._async_strip_file(path))
+        run_until_complete(self.async_strip_file(path))
 
     def strip_dir(self, dir_path):
         if not self.strip_cmd:
@@ -67,5 +67,5 @@ class Strip(object):
         tasks = []
         for dirpath, dirnames, filenames in os.walk(dir_path):
             for f in filenames:
-                tasks.append(self._async_strip_file(os.path.join(dirpath, f)))
+                tasks.append(self.async_strip_file(os.path.join(dirpath, f)))
         run_until_complete(tasks)
