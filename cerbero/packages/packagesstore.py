@@ -208,6 +208,8 @@ class PackagesStore(object):
             p = package_cls(self._config, self, self.cookbook)
         elif issubclass(package_cls, package.SDKPackage):
             p = package_cls(self._config, self)
+        elif issubclass(package_cls, package.MetaPackage):
+            p = package_cls(self._config, self)
         elif issubclass(package_cls, package.InstallerPackage):
             p = package_cls(self._config, self)
         elif issubclass(package_cls, package.Package):
