@@ -16,7 +16,8 @@ class Recipe(recipe.Recipe):
                      'crypto-library' : 'openssl'}
     deps = ['glib', 'gstreamer-1.0']
 
-    patches = []
+    # https://gitlab.freedesktop.org/libnice/libnice/-/merge_requests/277, remove on bump
+    patches = ['libnice/0001-meson-Add-glib-debug-assert-and-check-options.patch']
 
     files_bins = ['stunbdc', 'stund']
     files_libs = ['libnice']
@@ -37,6 +38,12 @@ class Recipe(recipe.Recipe):
         else:
             # openssl on Linux
             self.use_system_libs = True
+
+        if self.config.variants.noassert:
+            self.meson_options.update({'glib_assert': 'false'})
+
+        if self.config.variants.nochecks:
+            self.meson_options.update({'glib_checks': 'false'})
 
     def post_install (self):
         nice_deps = ['gio-2.0', 'gthread-2.0', 'ssl', 'crypto']
