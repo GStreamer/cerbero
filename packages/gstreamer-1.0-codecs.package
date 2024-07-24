@@ -15,7 +15,7 @@ class Package(custom.GStreamer, package.Package):
             'libtheora:libs', 'wavpack:libs', 'libvpx:libs',
             'opus:libs', 'libvorbis:libs', 'openjpeg:libs',
             'openh264:libs', 'taglib:libs', 'tiff:libs', 'spandsp:libs',
-            'sbc:libs', 'mpg123:libs', 'lame:libs', 'zbar:libs',
+            'sbc:libs', 'mpg123:libs', 'lame:libs', 'zbar:libs', 'svt-av1:libs',
             'gst-plugins-base-1.0:plugins_codecs', 'gst-plugins-good-1.0:plugins_codecs',
             'gst-plugins-bad-1.0:plugins_codecs', 'gst-plugins-ugly-1.0:plugins_codecs',
             ]

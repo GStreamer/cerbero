@@ -514,6 +514,8 @@ class Recipe(custom.GStreamer):
         self.enable_plugin('mediafoundation', 'sys', 'visualstudio')
         self.enable_plugin('directshow', 'sys', 'visualstudio')
 
+        self.enable_plugin('svtav1', 'codecs', dep='svt-av1')
+
         if self.config.target_platform == Platform.WINDOWS:
             self.meson_options['wasapi2'] = 'disabled'
             self.meson_options['wasapi'] = 'enabled'
