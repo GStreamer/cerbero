@@ -19,13 +19,11 @@ class Recipe(recipe.Recipe):
         stype = SourceType.TARBALL
         url = 'https://github.com/mesonbuild/meson/releases/download/%(version)s/meson-%(version)s.tar.gz'
         tarball_checksum = '1b8aad738a5f6ae64294cc8eaba9a82988c1c420204484ac02ef782e5bba5f49'
+        # Remove when bumping to 1.5.1
+        patches = [name + '/0001-nasm-Add-mms-bitfields-to-the-list-of-ignored-flags.patch']
 
     files_bin = ['bin/meson']
     files_python = []
-
-    patches = [
-        f'{name}/0001-nasm-Add-mms-bitfields-to-the-list-of-ignored-flags.patch'
-    ]
 
     async def install(self):
         # setup.py barfs if using posix paths on Windows
