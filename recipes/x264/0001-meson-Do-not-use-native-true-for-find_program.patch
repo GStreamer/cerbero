@@ -1,0 +1,83 @@
+From 11908032ed077c9e9b75d8dd09358c70817c9055 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 26 Jul 2024 06:04:16 +0530
+Subject: [PATCH] meson: Do not use native: true for find_program
+
+All these usages are incorrect. find_program(..., native: true) is
+*not* the same as executable(..., native: true), etc. It does not
+select host vs target for the output or for running the program. It
+simply selects whether to search for the program using the native-file
+or the cross-file.
+---
+ meson.build | 22 +++++++++++-----------
+ 1 file changed, 11 insertions(+), 11 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 4cd117cd..49b7c936 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,5 +1,5 @@
+ project('x264', 'c',
+-  version: run_command(find_program('version.py', native: true), '--package-version', check: true).stdout().strip(),
++  version: run_command(find_program('version.py'), '--package-version', check: true).stdout().strip(),
+   default_options: ['optimization=2', 'c_std=c11'],
+   meson_version: '>= 0.52'
+ )
+@@ -7,7 +7,7 @@ project('x264', 'c',
+ x264_ver = meson.project_version()
+ x264_rev = meson.project_version().split('.')[2]
+ x264_build = meson.project_version().split('.')[1]
+-x264_commit = run_command(find_program('version.py', native: true), '--commit-hash', check: true).stdout().strip()
++x264_commit = run_command(find_program('version.py'), '--commit-hash', check: true).stdout().strip()
+ 
+ message('build: ' + x264_build)
+ message('commit: ' + x264_commit)
+@@ -179,10 +179,10 @@ endif
+ 
+ if ['x86', 'x86_64'].contains(host_cpu)
+   if not get_option('asm').disabled()
+-    nasm = find_program('nasm', native: true, required: false)
++    nasm = find_program('nasm', required: false)
+     if not nasm.found()
+       subproject('win-nasm')
+-      nasm = find_program('nasm', native: true, required: get_option('asm').enabled())
++      nasm = find_program('nasm', required: get_option('asm'))
+     endif
+   endif
+   if host_cpu == 'x86'
+@@ -241,25 +241,25 @@ elif host_cpu == 'aarch64'
+       asflags += ['-arch', 'arm64']
+     endif
+   elif host_system == 'windows'
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
+-    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
++    armasm = find_program('armasm', required: get_option('asm'))
+     if compiler_style == 'MS'
+       asflags += ['-arch', 'aarch64', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo']
+     endif
+   endif
+ elif host_cpu == 'arm'
+   if host_system == 'windows' and compiler_style == 'MS'
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
+-    armasm = find_program('armasm', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
++    armasm = find_program('armasm', required: get_option('asm'))
+     asflags += ['-arch', 'arm', '-as-type', 'armasm', '-force-thumb', '--', armasm, '-nologo', '-ignore', '4509']
+   elif host_system == 'windows'
+     # FIXME once Meson exposes the compiler command line
+-    nasm = find_program('tools/gas-preprocessor.pl', native: true, required: get_option('asm'))
++    nasm = find_program('tools/gas-preprocessor.pl', required: get_option('asm'))
+     gcc = disabler()
+     if cc.get_id().contains('clang')
+-      gcc = find_program('clang', native: true, required: get_option('asm'))
++      gcc = find_program('clang', required: get_option('asm'))
+     else
+-      gcc = find_program('gcc', native: true, required: get_option('asm'))
++      gcc = find_program('gcc', required: get_option('asm'))
+     endif
+     asflags += ['-arch', 'arm', '-as-type', 'clang', '-force-thumb', '--', gcc, '-mimplicit-it=always']
+   endif
+-- 
+2.45.2
+
