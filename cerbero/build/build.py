@@ -728,6 +728,9 @@ endian = '{endian}'
 [constants]
 toolchain = '{toolchain}'
 
+[built-in options]
+{builtin_options}
+
 [properties]
 {extra_properties}
 
@@ -918,20 +921,20 @@ class Meson (Build, ModifyEnvBase) :
         build_env.pop('CPP', None)
         build_env.pop('LD', None)
 
-        # Operate on a copy of the recipe properties to avoid accumulating args
-        # from all archs when doing universal builds
-        props = {}
+        builtins = {}
+        builtins['c_args'] = build_env.pop('CFLAGS', [])
+        builtins['cpp_args'] = build_env.pop('CXXFLAGS', [])
+        builtins['objc_args'] = build_env.pop('OBJCFLAGS', [])
+        builtins['objcpp_args'] = build_env.pop('OBJCXXFLAGS', [])
+        # Link args
+        builtins['c_link_args'] = build_env.pop('LDFLAGS', [])
+        builtins['cpp_link_args'] = builtins['c_link_args']
+        builtins['objc_link_args'] = build_env.pop('OBJLDFLAGS', builtins['c_link_args'])
+        builtins['objcpp_link_args'] = builtins['objc_link_args']
         build_env.pop('CPP', None) # Meson does not read this
         build_env.pop('CPPFLAGS', None) # Meson does not read this, and it's duplicated in *FLAGS
-        props['c_args'] = build_env.pop('CFLAGS', [])
-        props['cpp_args'] = build_env.pop('CXXFLAGS', [])
-        props['objc_args'] = build_env.pop('OBJCFLAGS', [])
-        props['objcpp_args'] = build_env.pop('OBJCXXFLAGS', [])
-        # Link args
-        props['c_link_args'] = build_env.pop('LDFLAGS', [])
-        props['cpp_link_args'] = props['c_link_args']
-        props['objc_link_args'] = build_env.pop('OBJLDFLAGS', props['c_link_args'])
-        props['objcpp_link_args'] = props['objc_link_args']
+
+        props = {}
         for key, value in self.config.meson_properties.items():
             if key not in props:
                 props[key] = value
@@ -966,6 +969,10 @@ class Meson (Build, ModifyEnvBase) :
             if tool and shutil.which(tool[0], path=build_tool_paths):
                 binaries[name.lower()] = tool
 
+        builtin_options = ''
+        for k, v in builtins.items():
+            builtin_options += '{} = {}\n'.format(k, str(v))
+
         extra_properties = ''
         for k, v in props.items():
             extra_properties += '{} = {}\n'.format(k, str(v))
@@ -989,6 +996,7 @@ class Meson (Build, ModifyEnvBase) :
                 NASM="'nasm'",
                 PKG_CONFIG="'pkg-config'",
                 extra_binaries=extra_binaries,
+                builtin_options=builtin_options,
                 extra_properties=extra_properties)
         return contents
 
@@ -1041,6 +1049,7 @@ class Meson (Build, ModifyEnvBase) :
                 NASM="'nasm'",
                 PKG_CONFIG=false,
                 extra_binaries=extra_binaries,
+                builtin_options='',
                 extra_properties='')
         return contents
 
@@ -1068,6 +1077,7 @@ class Meson (Build, ModifyEnvBase) :
                 NASM=false,
                 PKG_CONFIG=false,
                 extra_binaries=extra_binaries,
+                builtin_options='',
                 extra_properties='')
         return contents
 
