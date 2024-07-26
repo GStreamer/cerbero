@@ -1,5 +1,6 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from custom import GStreamer
+from cerbero.build.build import modify_environment
 from cerbero.errors import FatalError
 from cerbero.utils import messages as m
 from cerbero.utils import shell, determine_num_cargo_jobs, determine_total_ram
@@ -71,12 +72,9 @@ class Recipe(recipe.Recipe):
     if determine_num_cargo_jobs() == 1:
         allow_parallel_build = False
         allow_universal_parallel_build = False
-    elif determine_total_ram() <= (32 << 30):
-        # gst-plugins-rs peaks at ~17GB per architectural build.
-        # Let's assume that > 32GB is enough, but that can be upped
-        # afterwards. Currently a 32GB box freezes when trying the
-        # universal build, as soon as it reaches the gstrswebrtc and
-        # gstaws crates.
+    elif determine_total_ram() <= (64 << 30):
+        # gst-plugins-rs has bloated to the point where a 64GB machine OOMs if
+        # too many architectures are built in parallel.
         allow_universal_parallel_build = False
 
     # Needed for openssl
@@ -159,6 +157,21 @@ class Recipe(recipe.Recipe):
             else:
                 m.warning(msg)
         await super().configure()
+
+    @modify_environment
+    async def compile(self):
+        if not getattr(self, 'allow_universal_parallel_build', True):
+            all_pkgs = set(self.cargo_packages)
+            pkgs = set(filter(lambda x: x.endswith('aws') or x.endswith('webrtc'), all_pkgs))
+            all_pkgs = all_pkgs - pkgs
+            all_pkgs_features = set(self.cargo_features)
+            # First compile all the known good behaving packages
+            # (caching all deps)
+            await super().compile(all_pkgs, all_pkgs_features - set(['gst-plugin-webrtc/v1_22']))
+            pkgs_features = all_pkgs_features - set(['glib/v2_74', 'gst-pbutils/v1_22', 'gst-plugin-rav1e/asm', 'gst-plugin-tracers/v1_22'])
+            # Now compile the two mischievous ones
+            return await super().compile(pkgs, pkgs_features)
+        return await super().compile()
 
     def post_install(self):
         # Cargo-C currently can't install pc files into custom dirs, so we need
