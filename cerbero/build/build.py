@@ -738,7 +738,7 @@ objc = {OBJC}
 objcpp = {OBJCXX}
 ar = {AR}
 nasm = {NASM}
-pkgconfig = {PKG_CONFIG}
+pkg-config = {PKG_CONFIG}
 {extra_binaries}
 '''
 
