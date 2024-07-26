@@ -737,6 +737,7 @@ cpp = {CXX}
 objc = {OBJC}
 objcpp = {OBJCXX}
 ar = {AR}
+nasm = {NASM}
 pkgconfig = {PKG_CONFIG}
 {extra_binaries}
 '''
@@ -985,6 +986,7 @@ class Meson (Build, ModifyEnvBase) :
                 OBJC=objc,
                 OBJCXX=objcxx,
                 AR=ar,
+                NASM="'nasm'",
                 PKG_CONFIG="'pkg-config'",
                 extra_binaries=extra_binaries,
                 extra_properties=extra_properties)
@@ -1036,6 +1038,7 @@ class Meson (Build, ModifyEnvBase) :
                 OBJC=objc,
                 OBJCXX=objcxx,
                 AR=ar,
+                NASM="'nasm'",
                 PKG_CONFIG=false,
                 extra_binaries=extra_binaries,
                 extra_properties='')
@@ -1062,6 +1065,7 @@ class Meson (Build, ModifyEnvBase) :
                 OBJC=false,
                 OBJCXX=false,
                 AR=false,
+                NASM=false,
                 PKG_CONFIG=false,
                 extra_binaries=extra_binaries,
                 extra_properties='')
