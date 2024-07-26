@@ -10,9 +10,11 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'eae425da50f0015c21f7b3a9c7262a910f0218af469e22e2931462fed3c50959'
     deps = ['freetype', 'fontconfig', 'libpng', 'fribidi', 'harfbuzz']
     btype = BuildType.MESON
-    meson_options = {}
+    meson_options = {'asm': 'enabled'}
 
     patches = [
+        # https://github.com/libass/libass/pull/808
+        'libass/0001-android-support.patch',
         # Fixes build with host_system=ios until we move to host_system=darwin, subsystem=ios
         'libass/0001-meson-fix-build-on-iOS-with-host_system-set-to-iOS.patch',
     ]
@@ -27,9 +29,13 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform in (Platform.WINDOWS, Platform.ANDROID):
             # Needed for codepage conversion support in subtitles
             self.deps.append('libiconv')
-        if self.config.target_platform == Platform.ANDROID:
-            if self.config.target_arch in (Architecture.X86,):
-                self.meson_options['asm'] = 'disabled'
+        if self.config.target_arch == Architecture.ARMv7:
+            # Not supported
+            self.meson_options['asm'] = 'disabled'
+        if self.config.target_platform == Platform.ANDROID and \
+            self.config.target_arch == Architecture.X86:
+            # Text relocation errors
+            self.meson_options['asm'] = 'disabled'
 
     def post_install(self):
         # Meson does not generate la files

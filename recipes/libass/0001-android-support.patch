@@ -1,0 +1,26 @@
+From f31f69cca14b40161da4e1cf9bc23d40cb531dd6 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Fri, 26 Jul 2024 05:13:40 +0530
+Subject: [PATCH] meson: Add support for android, identical to linux
+
+Subset of the upstream MR: https://github.com/libass/libass/pull/808
+---
+ meson.build | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 593b0ca..97bc9b1 100644
+--- a/meson.build
++++ b/meson.build
+@@ -281,7 +281,7 @@ if not asm_option.disabled()
+                 endif
+             elif host_system == 'darwin'
+                 nasm_args += ['-DPREFIX', '-DSTACK_ALIGNMENT=16']
+-            elif host_system in ['linux', 'sunos', 'haiku', 'gnu']
++            elif host_system in ['linux', 'sunos', 'haiku', 'gnu', 'android']
+                 nasm_args += ['-DSTACK_ALIGNMENT=16']
+             elif host_system == 'dragonfly' or host_system.endswith('bsd')
+                 nasm_args += []
+-- 
+2.45.2
+
