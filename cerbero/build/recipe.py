@@ -414,9 +414,6 @@ SOFTWARE LICENSE COMPLIANCE.\n\n'''
         Make all .pc files relocatable by setting `prefix` relative to
         ${pcfiledir}
         '''
-        if self.config.platform == Platform.LINUX:
-            return
-
         for f in self.files_list_by_category(self.DEVEL_CAT):
             if not f.endswith('.pc'):
                 continue
