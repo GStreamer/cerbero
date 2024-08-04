@@ -18,7 +18,7 @@
 
 from cerbero.commands import Command, register_command
 from cerbero.build.cookbook import CookBook
-from cerbero.utils import _, N_
+from cerbero.utils import _, N_, ArgparseArgument
 from cerbero.utils import messages as m
 from cerbero.packages.packagesstore import PackagesStore
 
@@ -59,9 +59,20 @@ class ShowConfig(Command):
     name = 'show-config'
 
     def __init__(self):
-        Command.__init__(self, [])
+        arguments = [
+            ArgparseArgument(
+                '--build-tools', action='store_true', default=False, help=_('Show also the boot tools config if any')
+            ),
+        ]
+        Command.__init__(self, arguments)
 
     def run(self, config, args):
+        self._print_config(config, args)
+        if args.build_tools and config.build_tools_config:
+            print('Build tools config:')
+            self._print_config(config.build_tools_config, args)
+
+    def _print_config(self, config, args):
         for n in config._properties:
             if n == 'variants':
                 print('%25s :' % (n))
