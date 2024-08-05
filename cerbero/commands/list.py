@@ -60,6 +60,7 @@ class ShowConfig(Command):
 
     def __init__(self):
         arguments = [
+            ArgparseArgument('--archs', action='store_true', default=False, help=_('Show also the arch config if any')),
             ArgparseArgument(
                 '--build-tools', action='store_true', default=False, help=_('Show also the boot tools config if any')
             ),
@@ -67,12 +68,19 @@ class ShowConfig(Command):
         Command.__init__(self, arguments)
 
     def run(self, config, args):
-        self._print_config(config, args)
+        self._print_config(config)
+        if args.archs and config.arch_config and len(config.arch_config) > 0 and tuple(config.arch_config) != (None,):
+            archs = list(config.arch_config.keys())
+            archs.sort()
+            print('Arch configs:', ', '.join(archs))
+            for a in archs:
+                print(a, 'arch:')
+                self._print_config(config.arch_config[a])
         if args.build_tools and config.build_tools_config:
             print('Build tools config:')
-            self._print_config(config.build_tools_config, args)
+            self._print_config(config.build_tools_config)
 
-    def _print_config(self, config, args):
+    def _print_config(self, config):
         for n in config._properties:
             if n == 'variants':
                 print('%25s :' % (n))
