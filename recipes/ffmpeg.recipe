@@ -14,11 +14,11 @@ class Recipe(recipe.Recipe):
 
     btype = BuildType.MESON
     meson_options = {
-        'avdevice': 'disabled',
+        'avdevice': 'enabled',
         'programs': 'disabled',
         'flac_encoder': 'disabled',
         'protocols': 'disabled',
-        'devices': 'disabled',
+        'devices': 'enabled',
         'network': 'disabled',
         'hwaccels': 'disabled',
         'dxva2': 'disabled',
@@ -51,13 +51,13 @@ class Recipe(recipe.Recipe):
         # These two are redundant with Meson
         # 'stripping': 'disabled',
         # 'optimizations': 'enabled,
-        'nonfree': 'disabled',
-        'version3': 'disabled',
+        'nonfree': 'enabled',
+        'version3': 'enabled',
     }
 
     deps = ['bzip2', 'zlib']
 
-    files_libs = ['libavcodec', 'libavformat', 'libavutil', 'libswresample', 'libavfilter', 'libpostproc', 'libswscale']
+    files_libs = ['libavcodec', 'libavdevice', 'libavformat', 'libavutil', 'libswresample', 'libavfilter', 'libpostproc', 'libswscale']
     files_devel = []
 
     def prepare(self):
@@ -83,6 +83,10 @@ class Recipe(recipe.Recipe):
         LibtoolLibrary('avcodec', None, None, None,
                        self.config.libdir, self.config.target_platform,
                        deps=['swresample', 'avutil', 'z'],
+                       static_only=self.library_type == LibraryType.STATIC).save()
+        LibtoolLibrary('avdevice', None, None, None,
+                       self.config.libdir, self.config.target_platform,
+                       deps=['avformat', 'avutil', 'z'],
                        static_only=self.library_type == LibraryType.STATIC).save()
         LibtoolLibrary('avfilter', None, None, None,
                        self.config.libdir, self.config.target_platform,
