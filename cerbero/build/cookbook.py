@@ -22,8 +22,7 @@ import pickle
 import time
 import traceback
 
-from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro,\
-    DistroVersion, License, LibraryType
+from cerbero.config import USER_CONFIG_DIR, Platform, Architecture, Distro, DistroVersion, License, LibraryType
 from cerbero.build.build import BuildType
 from cerbero.build.source import SourceType
 from cerbero.errors import FatalError, RecipeNotFoundError, InvalidRecipeError
@@ -37,8 +36,8 @@ COOKBOOK_NAME = 'cookbook'
 USER_COOKBOOK_FILE = os.path.join(USER_CONFIG_DIR, COOKBOOK_NAME)
 
 
-class RecipeStatus (object):
-    '''
+class RecipeStatus(object):
+    """
     Stores the current build status of a L{cerbero.recipe.Recipe}
 
     @ivar steps: list of steps currently done
@@ -55,10 +54,9 @@ class RecipeStatus (object):
     @type built_version: str
     @ivar file_hash: hash of the file with the recipe description
     @type file_hash: int
-    '''
+    """
 
-    def __init__(self, filepath, steps=[], needs_build=True,
-                 mtime=time.time(), built_version='', file_hash=0):
+    def __init__(self, filepath, steps=[], needs_build=True, mtime=time.time(), built_version='', file_hash=0):
         self.steps = steps
         self.needs_build = needs_build
         self.mtime = mtime
@@ -67,16 +65,22 @@ class RecipeStatus (object):
         self.file_hash = file_hash
 
     def touch(self):
-        ''' Touches the recipe updating its modification time '''
+        """Touches the recipe updating its modification time"""
         self.mtime = time.time()
 
     def __repr__(self):
-        return "steps: %r, needs_build: %r, mtime: %r, filepath: %r, built_version: %r, file_hash: %r" % \
-            (self.steps, self.needs_build, self.mtime, self.filepath, self.built_version, self.file_hash.hex())
+        return 'steps: %r, needs_build: %r, mtime: %r, filepath: %r, built_version: %r, file_hash: %r' % (
+            self.steps,
+            self.needs_build,
+            self.mtime,
+            self.filepath,
+            self.built_version,
+            self.file_hash.hex(),
+        )
 
 
-class CookBook (object):
-    '''
+class CookBook(object):
+    """
     Stores a list of recipes and their build status saving it's state to a
     cache file
 
@@ -84,7 +88,7 @@ class CookBook (object):
     @type recipes: dict
     @ivar status: dictionary with the L{cerbero.cookbook.RecipeStatus}
     @type status: dict
-    '''
+    """
 
     RECIPE_EXT = '.recipe'
 
@@ -92,7 +96,7 @@ class CookBook (object):
         self.offline = offline
         self.set_config(config)
         self.recipes = {}  # recipe_name -> recipe
-        self._invalid_recipes = {} # recipe -> error
+        self._invalid_recipes = {}  # recipe -> error
         self._mtimes = {}
 
         if not load:
@@ -101,75 +105,74 @@ class CookBook (object):
         self._restore_cache()
 
         if not os.path.exists(config.recipes_dir):
-            raise FatalError(_("Recipes dir %s not found") %
-                             config.recipes_dir)
+            raise FatalError(_('Recipes dir %s not found') % config.recipes_dir)
         self.update(skip_errors)
 
     def set_config(self, config):
-        '''
+        """
         Set the configuration used
 
         @param config: configuration used
         @type config: L{cerbero.config.Config}
-        '''
+        """
         self._config = config
         config.cookbook = self
         for c in config.arch_config.keys():
             config.arch_config[c].cookbook = self
 
     def get_config(self):
-        '''
+        """
         Gets the configuration used
 
         @return: current configuration
         @rtype: L{cerbero.config.Config}
-        '''
+        """
         return self._config
 
     def set_status(self, status):
-        '''
+        """
         Sets the recipes status
 
         @param status: the recipes status
         @rtype: dict
-        '''
+        """
         self.status = status
 
     def update(self, skip_errors):
-        '''
+        """
         Reloads the recipes list and updates the cookbook
-        '''
+        """
         self._load_recipes(skip_errors)
         self._load_manifest()
         self.save()
 
     def get_recipes_list(self):
-        '''
+        """
         Gets the list of recipes
 
         @return: list of recipes
         @rtype: list
-        '''
+        """
         recipes = list(self.recipes.values())
         recipes.sort(key=lambda x: x.name)
         return recipes
 
     def add_recipe(self, recipe):
-        '''
+        """
         Adds a new recipe to the cookbook
 
         @param recipe: the recipe to add
         @type  recipe: L{cerbero.build.cookbook.Recipe}
-        '''
+        """
         self.recipes[recipe.name] = recipe
 
     def get_recipe(self, name):
-        '''
+        """
         Gets a recipe from its name
 
         @param name: name of the recipe
         @type name: str
-        '''
+        """
         if name not in self.recipes:
             if name in self._invalid_recipes:
                 raise self._invalid_recipes[name]
@@ -177,14 +180,14 @@ class CookBook (object):
         return self.recipes[name]
 
     def update_step_status(self, recipe_name, step):
-        '''
+        """
         Updates the status of a recipe's step
 
         @param recipe_name: name of the recipe
         @type recipe: str
         @param step: name of the step
         @type step: str
-        '''
+        """
         status = self._recipe_status(recipe_name)
         status.steps.append(step)
         status.touch()
@@ -192,68 +195,68 @@ class CookBook (object):
         self.save()
 
     def update_build_status(self, recipe_name, built_version):
-        '''
+        """
         Updates the recipe's build status
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
         @param built_version: built version or None to reset it
         @type built_version: str
-        '''
+        """
         status = self._recipe_status(recipe_name)
-        status.needs_build = built_version == None
+        status.needs_build = built_version is None
         status.built_version = built_version
         status.touch()
         self.status[recipe_name] = status
         self.save()
 
-    def recipe_built_version (self, recipe_name):
-        '''
+    def recipe_built_version(self, recipe_name):
+        """
         Get the las built version of a recipe from the build status
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
-        '''
+        """
         try:
             return self._recipe_status(recipe_name).built_version
-        except:
+        except Exception:
             return None
 
     def step_done(self, recipe_name, step):
-        '''
+        """
         Whether is step is done or not
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
         @param step: name of the step
         @type step: bool
-        '''
+        """
         return step in self._recipe_status(recipe_name).steps
 
     def reset_recipe_status(self, recipe_name):
-        '''
+        """
         Resets the build status of a recipe
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
-        '''
+        """
         if recipe_name in self.status:
             del self.status[recipe_name]
             self.save()
 
     def recipe_needs_build(self, recipe_name):
-        '''
+        """
         Whether a recipe needs to be build or not
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
         @return: True if the recipe needs to be build
         @rtype: bool
-        '''
+        """
         return self._recipe_status(recipe_name).needs_build
 
     def list_recipe_deps(self, recipe_name):
-        '''
+        """
         List the dependencies that needs to be built in the correct build
         order for a recipe
 
@@ -261,24 +264,24 @@ class CookBook (object):
         @type recipe_name: str
         @return: list of L{cerbero.recipe.Recipe}
         @rtype: list
-        '''
+        """
         recipe = self.get_recipe(recipe_name)
         return self._find_deps(recipe, {}, [])
 
     def list_recipe_reverse_deps(self, recipe_name):
-        '''
+        """
         List the dependencies that depends on this recipe
 
         @param recipe_name: name of the recipe
         @type recipe_name: str
         @return: list of reverse dependencies L{cerbero.recipe.Recipe}
         @rtype: list
-        '''
+        """
         recipe = self.get_recipe(recipe_name)
         return [r for r in list(self.recipes.values()) if recipe.name in r.deps]
 
-    def get_closest_recipe (self, name):
-        '''
+    def get_closest_recipe(self, name):
+        """
         Gets the closest recipe name from name in
         the cookbook if only one recipe name
         matches.
@@ -287,7 +290,7 @@ class CookBook (object):
         @type recipe_name: str
         @return: the closest recipe name
         @rtype: str
-        '''
+        """
         # If there's an exact match, just return it
         if name in self.recipes:
             return name
@@ -301,11 +304,11 @@ class CookBook (object):
                 recipe_name = r
 
         if recipe_name:
-            m.message("Found a recipe %s matching name %s" % (recipe_name, name))
+            m.message('Found a recipe %s matching name %s' % (recipe_name, name))
 
         return recipe_name
 
-    def _runtime_deps (self):
+    def _runtime_deps(self):
         return [x.name for x in list(self.recipes.values()) if x.runtime_dep]
 
     def _cache_file(self, config):
@@ -324,7 +327,7 @@ class CookBook (object):
             with open(cachefile, 'rb') as f:
                 self.status = pickle.load(f)
         except Exception:
-            m.warning(_("Could not recover status"))
+            m.warning(_('Could not recover status'))
 
     def save(self):
         try:
@@ -334,23 +337,22 @@ class CookBook (object):
             with open(cache_file, 'wb') as f:
                 pickle.dump(self.status, f)
         except IOError as ex:
-            m.warning(_("Could not cache the CookBook: %s") % ex)
+            m.warning(_('Could not cache the CookBook: %s') % ex)
 
     def _find_deps(self, recipe, state={}, ordered=[]):
         if state.get(recipe, 'clean') == 'processed':
             return
         if state.get(recipe, 'clean') == 'in-progress':
-            raise FatalError(_("Dependency Cycle: {0}".format(recipe.name)))
+            raise FatalError(_('Dependency Cycle: {0}'.format(recipe.name)))
         state[recipe] = 'in-progress'
         recipe_deps = recipe.list_deps()
         if not recipe.runtime_dep:
-            recipe_deps = self._runtime_deps () + recipe_deps
+            recipe_deps = self._runtime_deps() + recipe_deps
         for recipe_name in recipe_deps:
             try:
                 recipedep = self.get_recipe(recipe_name)
-            except RecipeNotFoundError as e:
-                raise FatalError(_("Recipe %s has a unknown dependency %s"
-                                 % (recipe.name, recipe_name)))
+            except RecipeNotFoundError:
+                raise FatalError(_('Recipe %s has a unknown dependency %s' % (recipe.name, recipe_name)))
             try:
                 self._find_deps(recipedep, state, ordered)
             except FatalError:
@@ -366,8 +368,7 @@ class CookBook (object):
             filepath = None
             if hasattr(recipe, '__file__'):
                 filepath = recipe.__file__
-            self.status[recipe_name] = RecipeStatus(filepath, steps=[],
-                    file_hash=recipe.get_checksum())
+            self.status[recipe_name] = RecipeStatus(filepath, steps=[], file_hash=recipe.get_checksum())
         return self.status[recipe_name]
 
     def _load_recipes(self, skip_errors):
@@ -379,14 +380,14 @@ class CookBook (object):
             priority_recipes = recipes[int(priority)]
             overridden = set(new_recipes) & set(priority_recipes)
             if overridden:
-                m.warning(f"Overriding recipes during repo {reponame} ({repodir}, {priority}): {overridden}")
+                m.warning(f'Overriding recipes during repo {reponame} ({repodir}, {priority}): {overridden}')
             priority_recipes.update(new_recipes)
         # Add recipes by asceding pripority
         for key in sorted(recipes.keys()):
             new_recipes = recipes[key]
             overridden = set(new_recipes) & set(self.recipes)
             if overridden:
-                m.warning(f"Overriding recipes during priority {key}: {overridden}")
+                m.warning(f'Overriding recipes during priority {key}: {overridden}')
             self.recipes.update(new_recipes)
 
         # Check for updates in the recipe file to reset the status
@@ -404,7 +405,7 @@ class CookBook (object):
             # allow safe relocation of the recipes.
             if recipe.__file__ != st.filepath:
                 st.filepath = recipe.__file__
-                st.mtime = 0;
+                st.mtime = 0
             # Need to check the version too, because the version can be
             # inherited from a different file, f.ex. recipes/custom.py
             if recipe.built_version() != st.built_version:
@@ -443,46 +444,53 @@ class CookBook (object):
             try:
                 recipes_from_file = self._load_recipes_from_file(f, skip_errors, custom)
             except RecipeNotFoundError:
-                m.warning(_("Could not found a valid recipe in %s") % f)
+                m.warning(_('Could not found a valid recipe in %s') % f)
             if recipes_from_file is None:
                 continue
             for recipe in recipes_from_file:
                 if recipe.name in recipes:
-                    m.warning(f"Overriding {recipes[recipe.name]} by {recipe} from {f}")
+                    m.warning(f'Overriding {recipes[recipe.name]} by {recipe} from {f}')
                 recipes[recipe.name] = recipe
         return recipes
 
     def _load_recipes_from_file(self, filepath, skip_errors, custom):
         recipes = []
-        d = {'Platform': Platform, 'Architecture': Architecture,
-                'BuildType': BuildType, 'SourceType': SourceType,
-                'Distro': Distro, 'DistroVersion': DistroVersion,
-                'License': License, 'recipe': crecipe, 'os': os,
-                'BuildSteps': crecipe.BuildSteps,
-                'InvalidRecipeError': InvalidRecipeError,
-                'FatalError': FatalError,
-                'custom': custom, '_': _, 'shell': shell,
-                'LibraryType' : LibraryType}
+        d = {
+            'Platform': Platform,
+            'Architecture': Architecture,
+            'BuildType': BuildType,
+            'SourceType': SourceType,
+            'Distro': Distro,
+            'DistroVersion': DistroVersion,
+            'License': License,
+            'recipe': crecipe,
+            'os': os,
+            'BuildSteps': crecipe.BuildSteps,
+            'InvalidRecipeError': InvalidRecipeError,
+            'FatalError': FatalError,
+            'custom': custom,
+            '_': _,
+            'shell': shell,
+            'LibraryType': LibraryType,
+        }
         d_keys = set(list(d.keys()))
         try:
-            new_d = d.copy ()
+            new_d = d.copy()
             parse_file(filepath, new_d)
             # List new objects parsed added to the globals dict
             diff_keys = [x for x in set(new_d.keys()) - d_keys]
             # Find all objects inheriting from Recipe
             for recipe_cls_key in [x for x in diff_keys if self._is_recipe_class(new_d[x])]:
                 if self._config.target_arch != Architecture.UNIVERSAL:
-                    recipe = self._load_recipe_from_class(
-                        new_d[recipe_cls_key], self._config, filepath)
+                    recipe = self._load_recipe_from_class(new_d[recipe_cls_key], self._config, filepath)
                 else:
-                    recipe = self._load_universal_recipe(d, new_d[recipe_cls_key],
-                        recipe_cls_key, filepath)
+                    recipe = self._load_universal_recipe(d, new_d[recipe_cls_key], recipe_cls_key, filepath)
 
                 if recipe is not None:
                     recipes.append(recipe)
         except Exception:
             if not skip_errors:
-                m.warning("Error loading recipe in file %s" % (filepath))
+                m.warning('Error loading recipe in file %s' % (filepath))
                 print(traceback.format_exc())
         return recipes
 
@@ -490,9 +498,7 @@ class CookBook (object):
         # The final check for 'builtins' is to make sure we only take in
         # account classes defined in the recipe file and not the imported
         # ones in the, for example base classes that inherit from Recipe
-        return isinstance(cls, type) and \
-            issubclass (cls, crecipe.Recipe) and \
-            cls.__module__ == 'builtins'
+        return isinstance(cls, type) and issubclass(cls, crecipe.Recipe) and cls.__module__ == 'builtins'
 
     def _load_recipe_from_class(self, recipe_cls, config, filepath):
         try:
@@ -504,8 +510,7 @@ class CookBook (object):
         except InvalidRecipeError as e:
             self._invalid_recipes[recipe_cls.name] = e
 
-    def _load_universal_recipe(self, globals_dict, recipe_cls,
-            recipe_cls_key, filepath, custom=None):
+    def _load_universal_recipe(self, globals_dict, recipe_cls, recipe_cls_key, filepath, custom=None):
         if self._config.target_platform in [Platform.IOS, Platform.DARWIN]:
             recipe = crecipe.UniversalMergedRecipe(self._config)
         else:
@@ -531,19 +536,17 @@ class CookBook (object):
         manifest_path = self._config.manifest
 
         if not manifest_path:
-         return
+            return
 
         manifest = Manifest(manifest_path)
         manifest.parse()
 
         for project in manifest.projects.values():
             for recipe in self.recipes.values():
-                if recipe.stype not in [SourceType.GIT,
-                                        SourceType.GIT_TARBALL]:
-                    continue;
+                if recipe.stype not in [SourceType.GIT, SourceType.GIT_TARBALL]:
+                    continue
 
                 default_fetch = manifest.get_fetch_uri(project, manifest.default_remote)
-                if recipe.remotes['origin'] in [default_fetch,
-                                                default_fetch[:-4]]:
+                if recipe.remotes['origin'] in [default_fetch, default_fetch[:-4]]:
                     recipe.remotes['origin'] = project.fetch_uri
                     recipe.commit = project.revision

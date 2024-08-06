@@ -20,13 +20,15 @@ import os
 import shutil
 import zipfile
 import tarfile
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 import collections
 import asyncio
 from hashlib import sha256
 
 from cerbero.config import Distro, DistroVersion, Platform, DEFAULT_MIRRORS
-from cerbero.utils import git, svn, shell, _, run_until_complete
+from cerbero.utils import git, svn, shell, N_
 from cerbero.errors import FatalError, CommandError, InvalidRecipeError
 from cerbero.build.build import BuildType
 import cerbero.utils.messages as m
@@ -39,12 +41,14 @@ URL_TEMPLATES = {
     'xiph': ('https://downloads.xiph.org/releases/', '%(name)s/%(name)s-%(version)s', '.tar.xz'),
 }
 
+
 def get_logfile(instance):
     # only Recipe has the logfile attr.  Bootstraping doesn't
     return getattr(instance, 'logfile') if hasattr(instance, 'logfile') else None
 
-class Source (object):
-    '''
+
+class Source(object):
+    """
     Base class for sources handlers
 
     @ivar recipe: the parent recipe
@@ -55,7 +59,7 @@ class Source (object):
     @type patches: list
     @cvar strip: number passed to the --strip 'patch' option
     @type patches: int
-    '''
+    """
 
     patches = None
     cargo_lock = None
@@ -69,8 +73,7 @@ class Source (object):
             self.patches = []
 
         if not self.version:
-            raise InvalidRecipeError(
-                self, _("'version' attribute is missing in the recipe"))
+            raise InvalidRecipeError(self, N_("'version' attribute is missing in the recipe"))
 
     @property
     def check_cert(self):
@@ -83,10 +86,10 @@ class Source (object):
         return f'{self.repo_dir}/cargo-vendor'
 
     def _get_download_path(self, fname):
-        '''
+        """
         Fetch download path dynamically because self.tarball_name may be
         reset in prepare()
-        '''
+        """
         return os.path.join(self.download_dir, fname)
 
     def have_cargo_lock_file(self):
@@ -97,24 +100,31 @@ class Source (object):
         if offline:
             update_args += ['--offline']
         m.log('Running cargo update to generate Cargo.lock', logfile=logfile)
-        await shell.async_call([self.cargo, 'update'] + update_args,
-                               cmd_dir=self.config_src_dir, logfile=logfile,
-                               env=self.env, cpu_bound=False)
+        await shell.async_call(
+            [self.cargo, 'update'] + update_args,
+            cmd_dir=self.config_src_dir,
+            logfile=logfile,
+            env=self.env,
+            cpu_bound=False,
+        )
 
     async def cargo_vendor(self, offline):
         logfile = get_logfile(self)
         if self.cargo_lock:
-            shutil.copy(self.relative_path(self.cargo_lock),
-                        os.path.join(self.config_src_dir, 'Cargo.lock'))
+            shutil.copy(self.relative_path(self.cargo_lock), os.path.join(self.config_src_dir, 'Cargo.lock'))
         if not self.have_cargo_lock_file():
             await self.retry_run(self.cargo_update, offline, logfile)
         m.log('Running cargo vendor to vendor sources', logfile=logfile)
         vendor_args = [self.cargo_vendor_cache_dir]
         if offline:
             vendor_args += ['--frozen', '--offline']
-        ct = await shell.async_call_output([self.cargo, 'vendor'] + vendor_args,
-                                           cmd_dir=self.config_src_dir, env=self.env,
-                                           cpu_bound=False, logfile=logfile)
+        ct = await shell.async_call_output(
+            [self.cargo, 'vendor'] + vendor_args,
+            cmd_dir=self.config_src_dir,
+            env=self.env,
+            cpu_bound=False,
+            logfile=logfile,
+        )
         os.makedirs(os.path.join(self.config_src_dir, '.cargo'))
         with open(os.path.join(self.config_src_dir, '.cargo', 'config.toml'), 'w') as f:
             f.write(ct)
@@ -141,16 +151,17 @@ class Source (object):
 
     async def meson_subprojects_download(self, downloads, logfile):
         subprojects = []
-        for (subproj_name, _) in downloads:
+        for subproj_name, _ in downloads:
             subprojects.append(subproj_name)
         m.log(f'Downloading meson subprojects: {", ".join(subprojects)}', logfile=logfile)
-        for (subproj_name, ((url, fallback_url), fpath, fhash)) in downloads:
+        for subproj_name, ((url, fallback_url), fpath, fhash) in downloads:
             mirrors = self.config.extra_mirrors + DEFAULT_MIRRORS
             if fallback_url:
                 # Our mirror implementation assumes that the basename is the same
                 mirrors.insert(0, os.path.dirname(fallback_url))
-            await shell.download(url, fpath, check_cert=self.check_cert,
-                overwrite=False, logfile=logfile, mirrors=mirrors)
+            await shell.download(
+                url, fpath, check_cert=self.check_cert, overwrite=False, logfile=logfile, mirrors=mirrors
+            )
             self.verify(fpath, fhash)
 
     async def meson_subprojects_extract(self, offline):
@@ -163,18 +174,28 @@ class Source (object):
             m.log(f'Parsing wrap file {wrap_file}', logfile=logfile)
             items = self.parse_wrap(wrap_file)
             fpath = self._get_download_path(items['source_filename'])
-            downloads.append((subproj_name, (
-                (items['source_url'], items.get('source_fallback_url', None)),
-                fpath,
-                items['source_hash'],
-            )))
+            downloads.append(
+                (
+                    subproj_name,
+                    (
+                        (items['source_url'], items.get('source_fallback_url', None)),
+                        fpath,
+                        items['source_hash'],
+                    ),
+                )
+            )
             if 'patch_url' in items:
                 fpath = self._get_download_path(items['patch_filename'])
-                downloads.append((subproj_name, (
-                    (items['patch_url'], None),
-                    fpath,
-                    items['patch_hash'],
-                )))
+                downloads.append(
+                    (
+                        subproj_name,
+                        (
+                            (items['patch_url'], None),
+                            fpath,
+                            items['patch_hash'],
+                        ),
+                    )
+                )
 
         # Download, if not running in offline mode (or if we're fetching)
         if not offline:
@@ -182,14 +203,14 @@ class Source (object):
 
         # Provide the subproject downloads, via symlink or a file copy
         subprojects = []
-        for (subproj_name, _) in downloads:
+        for subproj_name, _ in downloads:
             subprojects.append(subproj_name)
         m.log(f'Providing meson subprojects: {", ".join(subprojects)}', logfile=logfile)
         subproj_pkg_cache = os.path.join(subproj_dir, 'packagecache')
         os.makedirs(subproj_pkg_cache, exist_ok=True)
-        for (_, ((url, _), fpath, _)) in downloads:
+        for _, ((url, _), fpath, _) in downloads:
             if not os.path.isfile(fpath):
-                raise FatalError(f'{url} is required and hasn\'t been downloaded yet')
+                raise FatalError(f"{url} is required and hasn't been downloaded yet")
             fname = os.path.basename(fpath)
             dst = os.path.join(subproj_pkg_cache, fname)
             if self.config.platform != Platform.WINDOWS:
@@ -198,10 +219,10 @@ class Source (object):
                 shutil.copy(fpath, dst)
 
     def expand_url_template(self, s):
-        '''
+        """
         Expand a standard URL template (GNOME, SourceForge, GNU, etc)
         and get a URL that just needs the name and version substituted.
-        '''
+        """
         schemes = tuple(s + '://' for s in URL_TEMPLATES.keys())
         if s.startswith(schemes):
             scheme, url = s.split('://', 1)
@@ -214,9 +235,9 @@ class Source (object):
         return s
 
     def replace_name_and_version(self, string):
-        '''
+        """
         Replaces name and version in strings
-        '''
+        """
         name = self.name
         if name.startswith('gst') and name.endswith('-1.0'):
             # gst-libav-1.0, etc is useless for substitution, convert to 'gst-libav'
@@ -225,14 +246,14 @@ class Source (object):
         return string % {'name': name, 'version': self.version, 'maj_ver': maj_ver}
 
     def _get_files_dependencies(self):
-        '''
+        """
         Subclasses should override this funtion to provide any file that
         this recipe depends on, including the recipe's file
 
         @return: the recipe file and other files this recipes depends on
                  like patches
         @rtype: list
-        '''
+        """
         files = list(map(self.relative_path, self.patches))
         if hasattr(self, '__file__'):
             files.append(self.__file__)
@@ -242,10 +263,10 @@ class Source (object):
         self.fetch_impl(**kwargs)
 
     def fetch_impl(self):
-        '''
+        """
         Fetch the sources
-        '''
-        raise NotImplemented("'fetch' must be implemented by subclasses")
+        """
+        raise NotImplementedError("'fetch' must be implemented by subclasses")
 
     async def extract(self):
         # Could have multiple recipes using the same git repo, or extract
@@ -260,14 +281,13 @@ class Source (object):
             self._extract_done.add(self.config_src_dir)
 
     async def extract_impl(self):
-        '''
+        """
         Extracts the sources
-        '''
-        raise NotImplemented("'extract' must be implemented by subclasses")
+        """
+        raise NotImplementedError("'extract' must be implemented by subclasses")
 
 
-class CustomSource (Source):
-
+class CustomSource(Source):
     async def fetch(self):
         pass
 
@@ -276,7 +296,7 @@ class CustomSource (Source):
 
 
 class BaseTarball(object):
-    '''
+    """
     Source handler for tarballs
 
     @cvar url: download URL for the tarball
@@ -296,7 +316,7 @@ class BaseTarball(object):
 
     @cvar force_tarfile: forces the use of python's tarfile instead of tar
     @type force_tarfile: bool
-    '''
+    """
 
     url = None
     tarball_name = None
@@ -324,13 +344,18 @@ class BaseTarball(object):
                 msg = 'Offline mode: tarball {!r} not found in local sources ({})'
                 raise FatalError(msg.format(self.tarball_name, self.download_dir))
             self.verify(fname, self.tarball_checksum)
-            m.action(_('Found %s at %s') % (self.url, fname), logfile=get_logfile(self))
+            m.action(N_('Found %s at %s') % (self.url, fname), logfile=get_logfile(self))
             return
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
-        await shell.download(self.url, fname, check_cert=self.check_cert,
-            overwrite=redownload, logfile=get_logfile(self),
-            mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS))
+        await shell.download(
+            self.url,
+            fname,
+            check_cert=self.check_cert,
+            overwrite=redownload,
+            logfile=get_logfile(self),
+            mirrors=(self.config.extra_mirrors + DEFAULT_MIRRORS),
+        )
         self.verify(fname, self.tarball_checksum)
 
     @staticmethod
@@ -346,17 +371,18 @@ class BaseTarball(object):
     def verify(self, fname, checksum, fatal=True):
         found_checksum = self._checksum(fname)
         if checksum is None:
-            raise FatalError('tarball_checksum is missing in {}.recipe for tarball {}\n'
-                             'The SHA256 of the current file is {}\nPlease verify and '
-                             'add it to the recipe'.format(self.name, self.url, found_checksum))
+            raise FatalError(
+                'tarball_checksum is missing in {}.recipe for tarball {}\n'
+                'The SHA256 of the current file is {}\nPlease verify and '
+                'add it to the recipe'.format(self.name, self.url, found_checksum)
+            )
         if found_checksum != checksum:
             movedto = fname + '.failed-checksum'
             os.replace(fname, movedto)
-            m.action(_('Checksum failed, tarball %s moved to %s') % (fname, movedto), logfile=get_logfile(self))
+            m.action(N_('Checksum failed, tarball %s moved to %s') % (fname, movedto), logfile=get_logfile(self))
             if not fatal:
                 return False
-            raise FatalError('Checksum for {} is {!r} instead of {!r}'
-                             .format(fname, found_checksum, checksum))
+            raise FatalError('Checksum for {} is {!r} instead of {!r}'.format(fname, found_checksum, checksum))
         return True
 
     async def extract_tarball(self, unpack_dir):
@@ -367,8 +393,9 @@ class BaseTarball(object):
         except (CommandError, tarfile.ReadError, zipfile.BadZipFile):
             movedto = fname + '.failed-extract'
             os.replace(fname, movedto)
-            m.action('Corrupted or partial tarball {} moved to {}, redownloading...'.format(fname, movedto),
-                     logfile=logfile)
+            m.action(
+                'Corrupted or partial tarball {} moved to {}, redownloading...'.format(fname, movedto), logfile=logfile
+            )
             if self.offline:
                 # Can't fetch in offline mode
                 raise
@@ -377,20 +404,16 @@ class BaseTarball(object):
 
 
 class Tarball(BaseTarball, Source):
-
     def __init__(self):
         Source.__init__(self)
         if not self.url:
-            raise InvalidRecipeError(
-                self, _("'url' attribute is missing in the recipe"))
+            raise InvalidRecipeError(self, N_("'url' attribute is missing in the recipe"))
         self.url = self.expand_url_template(self.url)
         self.url = self.replace_name_and_version(self.url)
         if self.tarball_name is not None:
-            self.tarball_name = \
-                self.replace_name_and_version(self.tarball_name)
+            self.tarball_name = self.replace_name_and_version(self.tarball_name)
         if self.tarball_dirname is not None:
-            self.tarball_dirname = \
-                self.replace_name_and_version(self.tarball_dirname)
+            self.tarball_dirname = self.replace_name_and_version(self.tarball_dirname)
         self.download_dir = self.repo_dir
         BaseTarball.__init__(self)
 
@@ -399,12 +422,16 @@ class Tarball(BaseTarball, Source):
         if not os.path.exists(self.download_dir):
             os.makedirs(self.download_dir)
 
-        cached_file = os.path.join(self.config.cached_sources,
-                                   self.package_name, self.tarball_name)
-        if not redownload and os.path.isfile(cached_file) and \
-           self.verify(cached_file, self.tarball_checksum, fatal=False):
-            m.action(_('Copying cached tarball from %s to %s instead of %s') %
-                     (cached_file, fname, self.url), logfile=get_logfile(self))
+        cached_file = os.path.join(self.config.cached_sources, self.package_name, self.tarball_name)
+        if (
+            not redownload
+            and os.path.isfile(cached_file)
+            and self.verify(cached_file, self.tarball_checksum, fatal=False)
+        ):
+            m.action(
+                N_('Copying cached tarball from %s to %s instead of %s') % (cached_file, fname, self.url),
+                logfile=get_logfile(self),
+            )
             shutil.copy(cached_file, fname)
         else:
             await super().fetch(redownload=redownload)
@@ -418,7 +445,7 @@ class Tarball(BaseTarball, Source):
             self._extract_done.add(self.config_src_dir)
 
     async def extract_impl(self, fetching=False):
-        m.action(_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
+        m.action(N_('Extracting tarball to %s') % self.config_src_dir, logfile=get_logfile(self))
         if os.path.exists(self.config_src_dir):
             shutil.rmtree(self.config_src_dir)
 
@@ -446,10 +473,10 @@ class Tarball(BaseTarball, Source):
             await self.meson_subprojects_extract(not fetching or self.offline)
 
 
-class GitCache (Source):
-    '''
+class GitCache(Source):
+    """
     Base class for source handlers using a Git repository
-    '''
+    """
 
     remotes = None
     commit = None
@@ -465,16 +492,15 @@ class GitCache (Source):
             url = self.replace_name_and_version(self.remotes['origin'])
             o = urllib.parse.urlparse(url)
             if o.scheme in ('http', 'git'):
-                raise FatalError('git remote origin URL {!r} must use HTTPS not {!r}'
-                                 ''.format(url, o.scheme))
+                raise FatalError('git remote origin URL {!r} must use HTTPS not {!r}' ''.format(url, o.scheme))
             if o.scheme in ('file', 'ssh'):
-                m.warning('git remote origin URL {!r} uses {!r}, please only use this '
-                          'for testing'.format(url, o.scheme))
+                m.warning(
+                    'git remote origin URL {!r} uses {!r}, please only use this ' 'for testing'.format(url, o.scheme)
+                )
             self.remotes['origin'] = url
         else:
             # XXX: When is this used?
-            self.remotes['origin'] = '%s/%s.git' % \
-                                     (self.config.git_root, self.name)
+            self.remotes['origin'] = '%s/%s.git' % (self.config.git_root, self.name)
         self.repo_dir = os.path.join(self.config.local_sources, self.name)
         # For forced commits in the config
         self.commit = self.config.recipe_commit(self.name) or self.commit
@@ -491,7 +517,7 @@ class GitCache (Source):
 
     async def fetch_impl(self, checkout):
         # First try to get the sources from the cached dir if there is one
-        cached_dir = os.path.join(self.config.cached_sources,  self.name)
+        cached_dir = os.path.join(self.config.cached_sources, self.name)
 
         if not os.path.exists(self.repo_dir):
             if not cached_dir and self.offline:
@@ -499,9 +525,9 @@ class GitCache (Source):
                 raise FatalError(msg.format(self.name, self.config.cached_sources, self.repo_dir))
             git.init(self.repo_dir, logfile=get_logfile(self))
 
-        if os.path.isdir(os.path.join(cached_dir, ".git")):
+        if os.path.isdir(os.path.join(cached_dir, '.git')):
             for remote, url in self.remotes.items():
-                git.add_remote(self.repo_dir, remote, "file://" + cached_dir, logfile=get_logfile(self))
+                git.add_remote(self.repo_dir, remote, 'file://' + cached_dir, logfile=get_logfile(self))
             await git.fetch(self.repo_dir, fail=False, logfile=get_logfile(self))
         else:
             cached_dir = None
@@ -515,9 +541,11 @@ class GitCache (Source):
         if checkout:
             await git.checkout(self.repo_dir, self.commit, logfile=get_logfile(self))
             if self.use_submodules:
-                await git.submodules_update(self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self))
+                await git.submodules_update(
+                    self.repo_dir, cached_dir, fail=False, offline=self.offline, logfile=get_logfile(self)
+                )
         if issubclass(self.btype, BuildType.CARGO):
-            m.log(f'Extracting project to run cargo vendor', logfile=get_logfile(self))
+            m.log('Extracting project to run cargo vendor', logfile=get_logfile(self))
             await self.extract_impl(fetching=True)
             self._extract_done.add(self.config_src_dir)
         elif self.btype == BuildType.MESON and self.meson_subprojects:
@@ -525,15 +553,14 @@ class GitCache (Source):
             await self.extract_impl(fetching=True)
             self._extract_done.add(self.config_src_dir)
 
-
     def built_version(self):
         return '%s+git~%s' % (self.version, git.get_hash(self.repo_dir, self.commit, logfile=get_logfile(self)))
 
 
-class Git (GitCache):
-    '''
+class Git(GitCache):
+    """
     Source handler for git repositories
-    '''
+    """
 
     def __init__(self):
         GitCache.__init__(self)
@@ -556,7 +583,13 @@ class Git (GitCache):
             os.makedirs(self.config_src_dir)
 
         # checkout the current version
-        await git.local_checkout(self.config_src_dir, self.repo_dir, self.commit, logfile=get_logfile(self), use_submodules=self.use_submodules)
+        await git.local_checkout(
+            self.config_src_dir,
+            self.repo_dir,
+            self.commit,
+            logfile=get_logfile(self),
+            use_submodules=self.use_submodules,
+        )
 
         for patch in self.patches:
             if not os.path.isabs(patch):
@@ -575,7 +608,7 @@ class Git (GitCache):
 
 
 class GitExtractedTarball(Git):
-    '''
+    """
     Source handle for git repositories with an extracted tarball
 
     Git doesn't conserve timestamps, which are reset after clonning the repo.
@@ -583,7 +616,7 @@ class GitExtractedTarball(Git):
     to autoconf, aclocal, autoheaders or automake.
     For instance after doing './configure && make', 'configure' is called
     again if 'configure.ac' is newer than 'configure'.
-    '''
+    """
 
     matches = ['.m4', '.in', 'configure']
 
@@ -597,8 +630,7 @@ class GitExtractedTarball(Git):
         for match in self.matches:
             self._files[match] = []
         self._find_files(self.config_src_dir)
-        self._files['.in'] = [x for x in self._files['.in'] if
-                os.path.join(self.config_src_dir, 'm4') not in x]
+        self._files['.in'] = [x for x in self._files['.in'] if os.path.join(self.config_src_dir, 'm4') not in x]
         self._fix_ts()
 
     def _fix_ts(self):
@@ -619,9 +651,9 @@ class GitExtractedTarball(Git):
 
 
 class Svn(Source):
-    '''
+    """
     Source handler for svn repositories
-    '''
+    """
 
     url = None
     revision = 'HEAD'
@@ -633,11 +665,13 @@ class Svn(Source):
 
     async def fetch(self):
         cached_dir = os.path.join(self.config.cached_sources, self.package_name)
-        if os.path.isdir(os.path.join(cached_dir, ".svn")):
+        if os.path.isdir(os.path.join(cached_dir, '.svn')):
             if os.path.exists(self.repo_dir):
                 shutil.rmtree(self.repo_dir)
-            m.action(_('Copying cached repo from %s to %s instead of %s') %
-                     (cached_dir, self.repo_dir, self.url), logfile=get_logfile(self))
+            m.action(
+                N_('Copying cached repo from %s to %s instead of %s') % (cached_dir, self.repo_dir, self.url),
+                logfile=get_logfile(self),
+            )
             shell.copy_dir(cached_dir, self.repo_dir)
             return
 
@@ -670,8 +704,7 @@ class Svn(Source):
         return '%s+svn~%s' % (self.version, svn.revision(self.repo_dir))
 
 
-class SourceType (object):
-
+class SourceType(object):
     CUSTOM = CustomSource
     TARBALL = Tarball
     GIT = Git

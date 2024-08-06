@@ -50,8 +50,8 @@ class EditCache(Command):
         for attr in self.recipe_attributes:
             attr_nargs = '*' if isinstance(getattr(self.recipe_status, attr), list) else None
             attr_type = type(getattr(self.recipe_status, attr))
-            arg_type = str if attr_type == bool or attr_type == list else attr_type
-            arguments.append(ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type, help=_('Modify ' + attr)))
+            arg_type = str if attr_type is bool or attr_type is list else attr_type
+            arguments.append(ArgparseArgument('--' + attr, nargs=attr_nargs, type=arg_type, help=N_('Modify ' + attr)))
         Command.__init__(self, arguments)
 
     def run(self, config, args):

@@ -27,36 +27,42 @@ from subprocess import CalledProcessError
 from cerbero.enums import Platform, LibraryType
 from cerbero.errors import BuildStepError, FatalError, AbortedError
 from cerbero.build.recipe import Recipe, BuildSteps
-from cerbero.utils import _, N_, shell, run_until_complete, run_tasks, determine_num_of_cpus
+from cerbero.utils import N_, shell, run_tasks, determine_num_of_cpus
 from cerbero.utils import add_system_libs, messages as m
 from cerbero.utils.shell import BuildStatusPrinter
 
-import inspect
 
 class RecoveryActions(object):
-    '''
+    """
     Enumeration factory for recovery actions after an error
-    '''
+    """
 
-    SHELL = N_("Enter the shell")
-    RETRY_ALL = N_("Rebuild the recipe from scratch")
-    RETRY_STEP = N_("Rebuild starting from the failed step")
-    SKIP = N_("Skip recipe")
-    ABORT = N_("Abort")
+    SHELL = N_('Enter the shell')
+    RETRY_ALL = N_('Rebuild the recipe from scratch')
+    RETRY_STEP = N_('Rebuild starting from the failed step')
+    SKIP = N_('Skip recipe')
+    ABORT = N_('Abort')
 
     def __new__(klass):
-        return [RecoveryActions.SHELL, RecoveryActions.RETRY_ALL,
-                RecoveryActions.RETRY_STEP, RecoveryActions.SKIP,
-                RecoveryActions.ABORT]
+        return [
+            RecoveryActions.SHELL,
+            RecoveryActions.RETRY_ALL,
+            RecoveryActions.RETRY_STEP,
+            RecoveryActions.SKIP,
+            RecoveryActions.ABORT,
+        ]
+
 
 class RetryRecipeError(Exception):
     pass
 
+
 class SkipRecipeError(Exception):
     pass
 
-class Oven (object):
-    '''
+
+class Oven(object):
+    """
     This oven cooks recipes with all their ingredients
 
     @ivar recipes: Recipes to build
@@ -75,11 +81,20 @@ class Oven (object):
     @type deps_only: bool
     @ivar steps_filter: only executes the steps in the list
     @type steps_filter: list
-    '''
+    """
 
-    def __init__(self, recipes, cookbook, force=False, no_deps=False,
-                 missing_files=False, dry_run=False, deps_only=False, jobs=None,
-                 steps_filter =None):
+    def __init__(
+        self,
+        recipes,
+        cookbook,
+        force=False,
+        no_deps=False,
+        missing_files=False,
+        dry_run=False,
+        deps_only=False,
+        jobs=None,
+        steps_filter=None,
+    ):
         if isinstance(recipes, Recipe):
             recipes = [recipes]
         self.recipes = recipes
@@ -109,9 +124,9 @@ class Oven (object):
         self._install_lock = asyncio.Lock()
 
     async def start_cooking(self):
-        '''
+        """
         Cooks the recipe and all its dependencies
-        '''
+        """
         recipes = [self.cookbook.get_recipe(x) for x in self.recipes]
 
         if self.no_deps:
@@ -127,15 +142,13 @@ class Oven (object):
         if self.deps_only:
             ordered_recipes = [x for x in ordered_recipes if x not in recipes]
 
-        m.message(_("Building the following recipes: %s") %
-                  ' '.join([x.name for x in ordered_recipes]))
+        m.message(N_('Building the following recipes: %s') % ' '.join([x.name for x in ordered_recipes]))
 
         steps = [step[1] for step in recipes[0].steps]
         if self.steps_filter is not None:
             steps = [s for s in steps if s in self.steps_filter]
             if len(steps) == 0:
-                raise FatalError(_('No valid steps found in %s') %
-                                 self.steps_filter)
+                raise FatalError(N_('No valid steps found in %s') % self.steps_filter)
         self._build_status_printer = BuildStatusPrinter(steps, self.interactive)
         self._static_libraries_built = []
 
@@ -143,8 +156,8 @@ class Oven (object):
 
     async def _cook_recipes(self, recipes):
         recipes = set(recipes)
-        built_recipes = set()       # recipes we have successfully built
-        building_recipes = set()    # recipes that are queued or are in progress
+        built_recipes = set()  # recipes we have successfully built
+        building_recipes = set()  # recipes that are queued or are in progress
 
         def all_deps_without_recipe(recipe_name):
             return set((dep.name for dep in self.cookbook.list_recipe_deps(recipe_name) if recipe_name != dep.name))
@@ -201,7 +214,8 @@ class Oven (object):
                         path = find_recipe_dep_path(f, t)
                         if path:
                             yield len(path)
-            return max((l for l in yield_path_lengths()))
+
+            return max((length for length in yield_path_lengths()))
 
         def find_buildable_recipes():
             # This is a dumb algorithm that only looks for all available
@@ -225,6 +239,7 @@ class Oven (object):
         class MutableInt:
             def __init__(self):
                 self.i = 0
+
         counter = MutableInt()
 
         class RecipeStepPriority:
@@ -243,17 +258,16 @@ class Oven (object):
                 if step is BuildSteps.INSTALL[1]:
                     # buf installs
                     self.inverse_priority *= 8
-                if hasattr(recipe, "allow_parallel_build") \
-                       and not recipe.allow_parallel_build:
+                if hasattr(recipe, 'allow_parallel_build') and not recipe.allow_parallel_build:
                     self.inverse_priority *= 2
 
             def __lt__(self, other):
                 # return lower for larger path lengths
                 return self.inverse_priority > other.inverse_priority
 
-        def recipe_next_step (recipe, step):
-            assert (step is not None)
-            if step == "init":
+        def recipe_next_step(recipe, step):
+            assert step is not None
+            if step == 'init':
                 return recipe.steps[0][1]
             found_current = False
             for _, s in recipe.steps:
@@ -265,9 +279,9 @@ class Oven (object):
         def add_buildable_recipes(recipe):
             built_recipes.add(recipe.name)
             building_recipes.remove(recipe.name)
-            for buildable in find_buildable_recipes ():
+            for buildable in find_buildable_recipes():
                 building_recipes.add(buildable.name)
-                default_queue.put_nowait(RecipeStepPriority(buildable, 0, "init"))
+                default_queue.put_nowait(RecipeStepPriority(buildable, 0, 'init'))
 
         async def cook_recipe_worker(q, steps):
             while True:
@@ -276,19 +290,18 @@ class Oven (object):
                 step = recipe_d.step
                 count = recipe_d.count
 
-                if step == "init":
+                if step == 'init':
                     counter.i += 1
                     count = counter.i
-                    if self._cook_start_recipe (recipe, count):
+                    if self._cook_start_recipe(recipe, count):
                         add_buildable_recipes(recipe)
                         q.task_done()
                         continue
-                    step = recipe_next_step (recipe, step)
+                    step = recipe_next_step(recipe, step)
 
                 lock = locks[step]
                 if step == BuildSteps.COMPILE[1]:
-                    if not hasattr(recipe, "allow_parallel_build") \
-                       or not recipe.allow_parallel_build:
+                    if not hasattr(recipe, 'allow_parallel_build') or not recipe.allow_parallel_build:
                         # only allow a limited number of recipes that can fill all
                         # CPU cores to execute concurrently.  Any recipe that does
                         # not support parallel builds will always be executed
@@ -297,13 +310,12 @@ class Oven (object):
                 async def build_recipe_steps(step):
                     # run the steps
                     while step in steps:
-                        await self._cook_recipe_step_with_prompt (recipe, step, count)
-                        step = recipe_next_step (recipe, step)
+                        await self._cook_recipe_step_with_prompt(recipe, step, count)
+                        step = recipe_next_step(recipe, step)
                     return step
 
                 try:
-                    if hasattr(recipe, "allow_universal_parallel_build") \
-                       and not recipe.allow_universal_parallel_build:
+                    if hasattr(recipe, 'allow_universal_parallel_build') and not recipe.allow_universal_parallel_build:
                         recipe._lock = self._architecture_lock
                     else:
                         recipe._lock = None
@@ -313,12 +325,12 @@ class Oven (object):
                     else:
                         step = await build_recipe_steps(step)
                 except RetryRecipeError:
-                    step = "init"
+                    step = 'init'
                 except SkipRecipeError:
                     step = None
 
                 if step is None:
-                    self._cook_finish_recipe (recipe, counter.i)
+                    self._cook_finish_recipe(recipe, counter.i)
                     add_buildable_recipes(recipe)
                     next_queue = None
                 else:
@@ -329,11 +341,11 @@ class Oven (object):
                     next_queue.put_nowait(RecipeStepPriority(recipe, count, step))
 
         # all the steps we are performing
-        all_steps = ["init"] + [s[1] for s in next(iter(recipes)).steps]
+        all_steps = ['init'] + [s[1] for s in next(iter(recipes)).steps]
 
         # async queues used for each step
         default_queue = asyncio.PriorityQueue()
-        queues = {step : default_queue for step in all_steps}
+        queues = {step: default_queue for step in all_steps}
 
         # find the install steps for ensuring consistency between all of them
         install_steps = []
@@ -343,7 +355,7 @@ class Oven (object):
             step = recipe_next_step(next(iter(recipes)), step)
 
         # allocate jobs
-        job_allocation = collections.defaultdict(lambda : 0)
+        job_allocation = collections.defaultdict(lambda: 0)
         if self.jobs > 4:
             queues[BuildSteps.COMPILE[1]] = asyncio.PriorityQueue()
             job_allocation[BuildSteps.COMPILE[1]] = 2
@@ -374,7 +386,7 @@ class Oven (object):
             queues[BuildSteps.FETCH[1]] = asyncio.PriorityQueue()
 
         # async locks used to synchronize step execution
-        locks = collections.defaultdict(lambda : None)
+        locks = collections.defaultdict(lambda: None)
 
         # create the jobs
         tasks = []
@@ -398,17 +410,27 @@ class Oven (object):
                 used_steps.append(step)
             used_jobs += count
         general_jobs = self.jobs - used_jobs
-        assert (general_jobs > 0)
+        assert general_jobs > 0
 
         if job_allocation[BuildSteps.INSTALL[1]] == 0 and general_jobs > 1:
             locks[BuildSteps.INSTALL[1]] = self._install_lock
         if job_allocation[BuildSteps.COMPILE[1]] > 2 or job_allocation[BuildSteps.COMPILE[1]] == 0 and general_jobs > 2:
             locks[BuildSteps.COMPILE[1]] = self._build_lock
 
-        job_allocation_msg = ", ".join([str(step) + ": " + str(count) for step, count in job_allocation.items() if count > 0])
+        job_allocation_msg = ', '.join(
+            [str(step) + ': ' + str(count) for step, count in job_allocation.items() if count > 0]
+        )
         if used_jobs > 0:
-            job_allocation_msg += ", and "
-        m.output ("Building using " + str(self.jobs) + " job(s) with the following job subdivisions: " + job_allocation_msg + str(self.jobs - used_jobs) + " general job(s)", sys.stdout)
+            job_allocation_msg += ', and '
+        m.output(
+            'Building using '
+            + str(self.jobs)
+            + ' job(s) with the following job subdivisions: '
+            + job_allocation_msg
+            + str(self.jobs - used_jobs)
+            + ' general job(s)',
+            sys.stdout,
+        )
 
         for i in range(self.jobs - used_jobs):
             tasks.append(asyncio.ensure_future(cook_recipe_worker(default_queue, set(all_steps) - set(used_steps))))
@@ -427,16 +449,15 @@ class Oven (object):
 
             heartbeat_task.cancel()
 
-
         # push the initial set of recipes that have no dependencies to start
         # building
-        for recipe in find_buildable_recipes ():
+        for recipe in find_buildable_recipes():
             building_recipes.add(recipe.name)
-            default_queue.put_nowait(RecipeStepPriority(recipe, 0, "init"))
+            default_queue.put_nowait(RecipeStepPriority(recipe, 0, 'init'))
 
         try:
             await run_tasks(tasks, recipes_done())
-            m.output(_("All done!"), sys.stdout)
+            m.output(N_('All done!'), sys.stdout)
         except Exception as e:
             raise e
 
@@ -448,7 +469,7 @@ class Oven (object):
                 raise be
             print()
             msg = be.msg
-            msg += _("Select an action to proceed:")
+            msg += N_('Select an action to proceed:')
             action = shell.prompt_multiple(msg, RecoveryActions())
             if action == RecoveryActions.SHELL:
                 environ = recipe.get_recipe_env()
@@ -458,8 +479,9 @@ class Oven (object):
                     source_dir = recipe.get_for_arch(be.arch, 'config_src_dir')
                 else:
                     source_dir = recipe.get_for_arch(be.arch, 'build_dir')
-                shell.enter_build_environment(self.config.target_platform,
-                        be.arch, self.config.distro, source_dir, env=environ)
+                shell.enter_build_environment(
+                    self.config.target_platform, be.arch, self.config.distro, source_dir, env=environ
+                )
                 raise be
             elif action == RecoveryActions.RETRY_ALL:
                 shutil.rmtree(recipe.get_for_arch(be.arch, 'build_dir'))
@@ -486,7 +508,7 @@ class Oven (object):
             stepfunc = getattr(recipe, step)
             if not stepfunc:
                 self._build_status_printer.update_recipe_step(count, recipe.name, step)
-                raise FatalError(_('Step %s not found') % step)
+                raise FatalError(N_('Step %s not found') % step)
 
             self._build_status_printer.update_recipe_step(count, recipe.name, step)
             ret = stepfunc()
@@ -521,8 +543,7 @@ class Oven (object):
             if len(set(self._static_libraries_built) & set(recipe.deps)) != 0:
                 self.cookbook.reset_recipe_status(recipe.name)
 
-        if not self.cookbook.recipe_needs_build(recipe.name) and \
-                not self.force:
+        if not self.cookbook.recipe_needs_build(recipe.name) and not self.force:
             self._build_status_printer.already_built(count, recipe.name)
             return True
 
@@ -553,17 +574,14 @@ class Oven (object):
 
     def _print_missing_files(self, recipe, tmp):
         recipe_files = set(recipe.files_list())
-        installed_files = set(shell.find_newer_files(recipe.config.prefix,
-                                                     tmp.name))
+        installed_files = set(shell.find_newer_files(recipe.config.prefix, tmp.name))
         not_in_recipe = list(installed_files - recipe_files)
         not_installed = list(recipe_files - installed_files)
 
         if len(not_in_recipe) != 0:
-            m.message(_("The following files were installed, but are not "
-                        "listed in the recipe:"))
+            m.message(N_('The following files were installed, but are not ' 'listed in the recipe:'))
             m.message('\n'.join(sorted(not_in_recipe)))
 
         if len(not_installed) != 0:
-            m.message(_("The following files are listed in the recipe, but "
-                        "were not installed:"))
+            m.message(N_('The following files are listed in the recipe, but ' 'were not installed:'))
             m.message('\n'.join(sorted(not_installed)))
