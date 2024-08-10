@@ -29,8 +29,6 @@ import time
 import glob
 import shutil
 import hashlib
-import urllib.request
-import urllib.error
 import urllib.parse
 import collections
 from pathlib import Path, PurePath
