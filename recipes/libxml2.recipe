@@ -3,24 +3,29 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libxml2'
-    version = '2.11.6'
+    version = '2.13.3'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = 'c90eee7506764abbe07bb616b82da452529609815aefef423d66ef080eb0c300'
+    tarball_checksum = '0805d7c180cf09caad71666c7a458a74f041561a532902454da5047d83948138'
     licenses = [{License.MIT: ['Copyright']}]
+
+    # Note: Many options were converted to feature options post-2.13.1
+    # Tests require API level 28 on Android
+    meson_options = {'python': 'false', 'zlib': 'enabled', 'tests': 'false'}
 
     deps = [ 'zlib' ]
 
     patches = [
-        f'{name}/0001-Add-Meson-build.patch',
+        f'{name}/0001-meson-Make-tests-optional.patch',
+        f'{name}/0002-meson-Fix-subdirs-missing-in-the-pkg-config-module.patch',
     ]
 
     files_libs = ['libxml2']
     files_devel = ['include/libxml2', '%(libdir)s/pkgconfig/libxml-2.0.pc', 'bin/xmllint%(bext)s']
  
     def post_install(self):
-        LibtoolLibrary(self.name, 2, 11, 6,
+        LibtoolLibrary(self.name, None, None, None,
                         self.config.libdir, self.config.target_platform,
                         deps=['z'],
                         static_only=self.library_type == LibraryType.STATIC).save()

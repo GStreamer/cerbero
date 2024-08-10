@@ -1,0 +1,24 @@
+From b967580e759cfa79295e09845a5e4cd18d991bf0 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 13 Aug 2024 18:08:38 +0000
+Subject: [PATCH 2/2] meson: Fix subdirs missing in the pkg-config module
+
+---
+ meson.build | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/meson.build b/meson.build
+index 9536840..bef1eb3 100644
+--- a/meson.build
++++ b/meson.build
+@@ -765,6 +765,7 @@ pkgmod.generate(
+     description: 'libXML library version2.',
+     filebase: 'libxml-2.0',
+     name: 'libXML',
++    subdirs: meson.project_name(),
+     variables: 'modules=' + dl_dep.found().to_string('1', '0'),
+ )
+ 
+-- 
+2.46.0
+
