@@ -17,9 +17,18 @@
 # Boston, MA 02111-1307, USA.
 
 import os
+import sys
 import stat
 import shutil
 from urllib.parse import urlparse
+
+if __name__ == '__main__':
+    # Add cerbero dir to path when invoked as a script so
+    # that the cerbero imports below resolve correctly.
+    parent = os.path.dirname(__file__)
+    parent = os.path.dirname(parent)
+    parent = os.path.dirname(parent)
+    sys.path.append(parent)
 
 from cerbero.bootstrap import BootstrapperBase
 from cerbero.utils import shell
@@ -229,3 +238,95 @@ class RustBootstrapper(BootstrapperBase):
 
     async def start(self, jobs=0):
         await self.install_toolchain()
+
+
+if __name__ == '__main__':
+    import re
+    import argparse
+    import urllib.request
+    from hashlib import sha256
+    from cerbero.config import RUST_TRIPLE_MAPPING
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('rust_version', nargs='?', help='Rust version to update to')
+    parser.add_argument('rustup_version', nargs='?', help='Rustup version to update to')
+    args = parser.parse_args()
+
+    def get_rustup_version():
+        d = urllib.request.urlopen('https://sh.rustup.rs', timeout=20)
+        s = d.read().decode('utf-8')
+        m = re.search('rustup-init ([0-9.]+)', s)
+        return m.groups(0)[0]
+
+    def get_tomllib():
+        import importlib
+
+        if sys.version_info >= (3, 11, 0):
+            return importlib.import_module('tomllib')
+        for mod in ('tomli', 'toml', 'tomlkit'):
+            try:
+                return importlib.import_module(mod)
+            except ModuleNotFoundError:
+                continue
+        raise RuntimeError('No toml python module available')
+
+    def get_rust_version():
+        d = urllib.request.urlopen('https://static.rust-lang.org/dist/channel-rust-stable.toml', timeout=20)
+        tomllib = get_tomllib()
+        data = tomllib.loads(d.read().decode('utf-8'))
+        return data['pkg']['rust']['version'].split()[0]
+
+    def get_checksum(url):
+        print(url + ' ', end='', flush=True)
+        d = urllib.request.urlopen(url, timeout=20)
+        h = sha256()
+        while True:
+            chunk = d.read(1024 * 1024)
+            if not chunk:
+                break
+            h.update(chunk)
+            print('.', end='', flush=True)
+        print('')
+        return h.hexdigest()
+
+    cls = RustBootstrapper
+    kwargs = {'server': cls.SERVER}
+    checksums = {}
+
+    rust_version = args.rust_version
+    if not rust_version:
+        rust_version = get_rust_version()
+    if rust_version != cls.RUST_VERSION:
+        kwargs['version'] = rust_version
+        name = f'channel-rust-{rust_version}.toml'
+        checksums[name] = get_checksum(cls.CHANNEL_URL_TPL.format(**kwargs))
+
+    rustup_version = args.rustup_version
+    if not rustup_version:
+        rustup_version = get_rustup_version()
+    if rustup_version != cls.RUSTUP_VERSION:
+        kwargs['version'] = rustup_version
+        kwargs['exe_suffix'] = ''
+        for platform in (Platform.LINUX, Platform.DARWIN):
+            for arch in (Architecture.X86_64, Architecture.ARM64):
+                kwargs['triple'] = RUST_TRIPLE_MAPPING[(platform, arch)]
+                name = cls.RUSTUP_NAME_TPL.format(**kwargs)
+                checksums[name] = get_checksum(cls.RUSTUP_URL_TPL.format(**kwargs))
+
+        platform = Platform.WINDOWS
+        kwargs['exe_suffix'] = '.exe'
+        for toolchain in ('gnu', 'msvc'):
+            for arch in (Architecture.X86_64, Architecture.ARM64):
+                if toolchain == 'gnu' and arch == Architecture.ARM64:
+                    continue
+                kwargs['triple'] = RUST_TRIPLE_MAPPING[(platform, arch, toolchain)]
+                name = cls.RUSTUP_NAME_TPL.format(**kwargs)
+                checksums[name] = get_checksum(cls.RUSTUP_URL_TPL.format(**kwargs))
+
+    for key, value in checksums.items():
+        print(' ' * 8, end='')
+        print(f"'{key}': '{value}',")
+    if rustup_version != cls.RUSTUP_VERSION:
+        print(f"RUSTUP_VERSION = '{rustup_version}'")
+    if rust_version != cls.RUST_VERSION:
+        print(f"RUST_VERSION = '{rust_version}'")
