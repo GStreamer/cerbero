@@ -30,6 +30,10 @@ class Recipe(recipe.Recipe):
         'tests': 'false',
     }
 
+    patches = [
+        name + '/0002-makedef-rework-flags-to-work-with-Ubuntu-and-Fedora.patch',
+    ]
+
     def append_config_toml(self, s):
         dot_cargo = Path(self.config_src_dir) / '.cargo'
         dot_cargo.mkdir(exist_ok=True)
