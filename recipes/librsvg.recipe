@@ -7,13 +7,15 @@ import shlex
 
 class Recipe(recipe.Recipe):
     name = 'librsvg'
-    version = '2.58.93'
+    version = '2.58.93.1'
     licenses = [License.LGPLv2Plus]
     deps = ['gdk-pixbuf', 'pango', 'cairo', 'libxml2']
     btype = BuildType.MESON
     stype = SourceType.TARBALL
-    url = 'gnome://'
-    tarball_checksum = 'f116eaf8196fc8261b0bbbdf996a4fe1bc97dc25664f953b328194d049a0dada'
+    # Can't use 2.58.93 tarball, switch back to 'gnome://' on bump
+    url = 'https://download.gnome.org/sources/librsvg/2.58/librsvg-2.58.92.tar.xz'
+    tarball_checksum = 'edd55458dafd374d94d8b2cd0cd623d2d766d2916de2459e2d3add9236bfea83'
+    tarball_dirname = 'librsvg-2.58.92'
 
     files_libs = ['librsvg-2']
     files_bins = ['rsvg-convert']
@@ -31,7 +33,10 @@ class Recipe(recipe.Recipe):
     }
 
     patches = [
+        name + '/2.58.93.patch',
+        name + '/2.58.93-main-a71ab8053.patch',
         name + '/0002-makedef-rework-flags-to-work-with-Ubuntu-and-Fedora.patch',
+        name + '/0001-meson-Downgrade-MSRV-to-1.77.patch',
     ]
 
     def append_config_toml(self, s):

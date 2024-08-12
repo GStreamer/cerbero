@@ -1,0 +1,1916 @@
+From ea6d3cea7171d89615edf6045dae4d977215ff49 Mon Sep 17 00:00:00 2001
+From: "Jan Alexander Steffens (heftig)" <heftig@archlinux.org>
+Date: Wed, 7 Aug 2024 14:34:58 +0200
+Subject: [PATCH 01/17] cargo: Fix embedded AVIF images
+
+The `image` crate's AVIF decoding feature is named `avif-native`. `avif`
+is the encoding feature.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ rsvg/Cargo.toml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rsvg/Cargo.toml b/rsvg/Cargo.toml
+index 077049f8..c1957934 100644
+--- a/rsvg/Cargo.toml
++++ b/rsvg/Cargo.toml
+@@ -38,7 +38,7 @@ fontconfig = { version = "1.7" }
+ pangoft2 = { version = "1.50" }
+ 
+ [features]
+-avif = ["image/avif"]
++avif = ["image/avif-native"]
+ capi = []
+ test-utils = ["yeslogic-fontconfig-sys"]
+ 
+-- 
+2.46.0
+
+
+From 0edbc59308aa0c403404646a4f80ae3fed74ac4a Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 11:49:29 -0600
+Subject: [PATCH 02/17] Add test for decoding AVIF images
+
+We didn't have one; that's why we didn't notice the incorrect name for
+the cargo feature that the image crate uses for decoding AVIF.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ .../fixtures/reftests/avif-image-1003-ref.svg     |   3 +++
+ rsvg/tests/fixtures/reftests/avif-image-1003.svg  |   3 +++
+ rsvg/tests/fixtures/reftests/rectangle.avif       | Bin 0 -> 303 bytes
+ rsvg/tests/primitives.rs                          |   6 ++++++
+ 4 files changed, 12 insertions(+)
+ create mode 100644 rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
+ create mode 100644 rsvg/tests/fixtures/reftests/avif-image-1003.svg
+ create mode 100644 rsvg/tests/fixtures/reftests/rectangle.avif
+
+diff --git a/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg b/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
+new file mode 100644
+index 00000000..682b78fe
+--- /dev/null
++++ b/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
+@@ -0,0 +1,3 @@
++<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="10">
++  <rect x="0" y="0" width="10" height="10" fill="#7eff02"/>
++</svg>
+diff --git a/rsvg/tests/fixtures/reftests/avif-image-1003.svg b/rsvg/tests/fixtures/reftests/avif-image-1003.svg
+new file mode 100644
+index 00000000..8978037e
+--- /dev/null
++++ b/rsvg/tests/fixtures/reftests/avif-image-1003.svg
+@@ -0,0 +1,3 @@
++<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="10">
++  <image xlink:href="rectangle.avif" x="0" y="0"/>
++</svg>
+diff --git a/rsvg/tests/fixtures/reftests/rectangle.avif b/rsvg/tests/fixtures/reftests/rectangle.avif
+new file mode 100644
+index 0000000000000000000000000000000000000000..58a48cb69308b9510d125eb7487eb2223788b788
+GIT binary patch
+literal 303
+zcmXw!O-jR15XXPd7KtGiiHco_Sl#H(cmhFpUcl`mO>iVHdBjJlyINd&2zBQfbma*=
+zg$qw16PtnI|1raS0Q+Tl@OCC8fTEK!b7EEhx*}NhfywQ(YF8XDdFXi`BQL>q!T?87
+zHMy#*3ry!=M*pb8fMb!mTiUt1QkTV=){LHUmMOgx-+JI$eBJ=tc~iA@Ud=IVvc3Qk
+zJIgK~Nwj@O?tP&Ih*!DgWiDzAq9_9P#Jm0_gBhCTU<jPLsSPRd#yI)8Ih?$FFV533
+S@yXj0ygz?^yr#<o`}qfZ(KEXM
+
+literal 0
+HcmV?d00001
+
+diff --git a/rsvg/tests/primitives.rs b/rsvg/tests/primitives.rs
+index a7ef0f80..81db262d 100644
+--- a/rsvg/tests/primitives.rs
++++ b/rsvg/tests/primitives.rs
+@@ -369,3 +369,9 @@ test_svg_reference!(
+     "tests/fixtures/reftests/invalid-element-type-for-paint-server.svg",
+     "tests/fixtures/reftests/invalid-element-type-for-paint-server-ref.svg"
+ );
++
++test_svg_reference!(
++    can_decode_avif_image_1003,
++    "tests/fixtures/reftests/avif-image-1003.svg",
++    "tests/fixtures/reftests/avif-image-1003-ref.svg"
++);
+-- 
+2.46.0
+
+
+From 54f261eae23e147bcfb827076deefcce00635af7 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 11:56:35 -0600
+Subject: [PATCH 03/17] Update Cargo.lock for the avif-native feature of the
+ image crate
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ Cargo.lock | 352 ++++++++++++++++++++---------------------------------
+ 1 file changed, 132 insertions(+), 220 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index e2934a14..f40149f8 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -8,6 +8,18 @@ version = "1.0.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "f26201604c87b1e01bd3d98f8d5d9a8fcbb815e8cedb41ffccbeb4bf593a35fe"
+ 
++[[package]]
++name = "ahash"
++version = "0.8.11"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e89da841a80418a9b391ebaea17f5c112ffaaa96f621d2c285b5174da76b9011"
++dependencies = [
++ "cfg-if",
++ "once_cell",
++ "version_check",
++ "zerocopy",
++]
++
+ [[package]]
+ name = "aho-corasick"
+ version = "1.1.3"
+@@ -17,12 +29,6 @@ dependencies = [
+  "memchr",
+ ]
+ 
+-[[package]]
+-name = "aligned-vec"
+-version = "0.5.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4aa90d7ce82d4be67b64039a3d588d38dbcc6736577de4a847025ce5b0c468d1"
+-
+ [[package]]
+ name = "android-tzdata"
+ version = "0.1.1"
+@@ -108,29 +114,6 @@ dependencies = [
+  "num-traits",
+ ]
+ 
+-[[package]]
+-name = "arbitrary"
+-version = "1.3.2"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7d5a26814d8dcb93b0e5a0ff3c6d80a8843bafb21b39e8e18a6f05471870e110"
+-
+-[[package]]
+-name = "arg_enum_proc_macro"
+-version = "0.3.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0ae92a5119aa49cdbcf6b9f893fe4e1d98b04ccbf82ee0584ad948a44a734dea"
+-dependencies = [
+- "proc-macro2",
+- "quote",
+- "syn",
+-]
+-
+-[[package]]
+-name = "arrayvec"
+-version = "0.7.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "96d30a06541fbafbc7f82ed10c06164cfbd2c401138f6addd8404629c4b16711"
+-
+ [[package]]
+ name = "assert_cmd"
+ version = "2.0.14"
+@@ -153,26 +136,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0c4b4d0bd25bd0b74681c0ad21497610ce1b7c91b1022cd21c80c6fbdd9476b0"
+ 
+ [[package]]
+-name = "av1-grain"
+-version = "0.2.3"
++name = "av-data"
++version = "0.4.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6678909d8c5d46a42abcf571271e15fdbc0a225e3646cf23762cd415046c78bf"
++checksum = "d75b98a3525d00f920df9a2d44cc99b9cc5b7dc70d7fbb612cd755270dbe6552"
+ dependencies = [
+- "anyhow",
+- "arrayvec",
+- "log",
+- "nom",
++ "byte-slice-cast",
++ "bytes",
++ "num-derive",
+  "num-rational",
+- "v_frame",
+-]
+-
+-[[package]]
+-name = "avif-serialize"
+-version = "0.8.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "876c75a42f6364451a033496a14c44bffe41f5f4a8236f697391f11024e596d2"
+-dependencies = [
+- "arrayvec",
++ "num-traits",
++ "thiserror",
+ ]
+ 
+ [[package]]
+@@ -203,10 +177,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b048fb63fd8b5923fc5aa7b340d8e156aec7ec02f0c78fa8a6ddc2613f6f71de"
+ 
+ [[package]]
+-name = "bitstream-io"
+-version = "2.5.0"
++name = "bitreader"
++version = "0.3.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3dcde5f311c85b8ca30c2e4198d4326bc342c76541590106f5fa4a50946ea499"
++checksum = "bdd859c9d97f7c468252795b35aeccc412bdbb1e90ee6969c4fa6328272eaeff"
++dependencies = [
++ "cfg-if",
++]
+ 
+ [[package]]
+ name = "block"
+@@ -234,18 +211,18 @@ dependencies = [
+  "serde",
+ ]
+ 
+-[[package]]
+-name = "built"
+-version = "0.7.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "236e6289eda5a812bc6b53c3b024039382a2895fbbeef2d748b2931546d392c4"
+-
+ [[package]]
+ name = "bumpalo"
+ version = "3.16.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "79296716171880943b8470b5f8d03aa55eb2e645a4874bdbb28adb49162e012c"
+ 
++[[package]]
++name = "byte-slice-cast"
++version = "1.2.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
++
+ [[package]]
+ name = "bytemuck"
+ version = "1.16.1"
+@@ -264,6 +241,12 @@ version = "0.1.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
+ 
++[[package]]
++name = "bytes"
++version = "1.6.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a12916984aab3fa6e39d655a33e09c0071eb36d6ab3aea5c2d78551f1df6d952"
++
+ [[package]]
+ name = "cairo-rs"
+ version = "0.20.0"
+@@ -299,10 +282,6 @@ name = "cc"
+ version = "1.1.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "324c74f2155653c90b04f25b2a47a8a631360cb908f92a772695f430c7e31052"
+-dependencies = [
+- "jobserver",
+- "libc",
+-]
+ 
+ [[package]]
+ name = "cfg-expr"
+@@ -541,6 +520,38 @@ version = "0.3.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "5c297a1c74b71ae29df00c3e22dd9534821d60eb9af5a0192823fa2acea70c2a"
+ 
++[[package]]
++name = "dav1d"
++version = "0.10.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "0d4b54a40baf633a71c6f0fb49494a7e4ee7bc26f3e727212b6cb915aa1ea1e1"
++dependencies = [
++ "av-data",
++ "bitflags 2.6.0",
++ "dav1d-sys",
++ "static_assertions",
++]
++
++[[package]]
++name = "dav1d-sys"
++version = "0.8.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6ecb1c5e8f4dc438eedc1b534a54672fb0e0a56035dae6b50162787bd2c50e95"
++dependencies = [
++ "libc",
++ "system-deps 6.2.2",
++]
++
++[[package]]
++name = "dcv-color-primitives"
++version = "0.6.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "07ad62edfed069700a5b33af6babd29c498d7e33eb01d96ffa8841ee1841634c"
++dependencies = [
++ "paste",
++ "wasm-bindgen",
++]
++
+ [[package]]
+ name = "deranged"
+ version = "0.3.11"
+@@ -638,6 +649,15 @@ dependencies = [
+  "windows-sys",
+ ]
+ 
++[[package]]
++name = "fallible_collections"
++version = "0.4.9"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a88c69768c0a15262df21899142bc6df9b9b823546d4b4b9a7bc2d6c448ec6fd"
++dependencies = [
++ "hashbrown 0.13.2",
++]
++
+ [[package]]
+ name = "fastrand"
+ version = "2.1.0"
+@@ -922,6 +942,15 @@ dependencies = [
+  "crunchy",
+ ]
+ 
++[[package]]
++name = "hashbrown"
++version = "0.13.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "43a3c133739dddd0d2990f9a4bdf8eb4b21ef50e4851ca85ab661199821d510e"
++dependencies = [
++ "ahash",
++]
++
+ [[package]]
+ name = "hashbrown"
+ version = "0.14.5"
+@@ -982,12 +1011,13 @@ dependencies = [
+  "bytemuck",
+  "byteorder-lite",
+  "color_quant",
++ "dav1d",
++ "dcv-color-primitives",
+  "gif",
+  "image-webp",
++ "mp4parse",
+  "num-traits",
+  "png",
+- "ravif",
+- "rgb",
+  "zune-core",
+  "zune-jpeg",
+ ]
+@@ -1002,12 +1032,6 @@ dependencies = [
+  "quick-error 2.0.1",
+ ]
+ 
+-[[package]]
+-name = "imgref"
+-version = "1.10.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "44feda355f4159a7c757171a77de25daf6411e217b4cabd03bd6650690468126"
+-
+ [[package]]
+ name = "indexmap"
+ version = "2.2.6"
+@@ -1015,18 +1039,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
+ dependencies = [
+  "equivalent",
+- "hashbrown",
+-]
+-
+-[[package]]
+-name = "interpolate_name"
+-version = "0.2.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c34819042dc3d3971c46c2190835914dfbe0c3c13f61449b2997f4e9722dfa60"
+-dependencies = [
+- "proc-macro2",
+- "quote",
+- "syn",
++ "hashbrown 0.14.5",
+ ]
+ 
+ [[package]]
+@@ -1055,15 +1068,6 @@ dependencies = [
+  "either",
+ ]
+ 
+-[[package]]
+-name = "itertools"
+-version = "0.12.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+-dependencies = [
+- "either",
+-]
+-
+ [[package]]
+ name = "itertools"
+ version = "0.13.0"
+@@ -1079,15 +1083,6 @@ version = "1.0.11"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "49f1f14873335454500d59611f1cf4a4b0f786f9ac11f4312a78e4cf2566695b"
+ 
+-[[package]]
+-name = "jobserver"
+-version = "0.1.32"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "48d1dbcbbeb6a7fec7e059840aa538bd62aaccf972c7346c4d9d2059312853d0"
+-dependencies = [
+- "libc",
+-]
+-
+ [[package]]
+ name = "js-sys"
+ version = "0.3.69"
+@@ -1115,17 +1110,6 @@ version = "0.2.155"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
+ 
+-[[package]]
+-name = "libfuzzer-sys"
+-version = "0.4.7"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a96cfd5557eb82f2b83fed4955246c988d331975a002961b07c81584d107e7f7"
+-dependencies = [
+- "arbitrary",
+- "cc",
+- "once_cell",
+-]
+-
+ [[package]]
+ name = "libloading"
+ version = "0.8.4"
+@@ -1274,15 +1258,6 @@ version = "0.4.22"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
+ 
+-[[package]]
+-name = "loop9"
+-version = "0.1.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0fae87c125b03c1d2c0150c90365d7d6bcc53fb73a9acaef207d2d065860f062"
+-dependencies = [
+- "imgref",
+-]
+-
+ [[package]]
+ name = "lopdf"
+ version = "0.33.0"
+@@ -1348,15 +1323,6 @@ dependencies = [
+  "rawpointer",
+ ]
+ 
+-[[package]]
+-name = "maybe-rayon"
+-version = "0.1.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8ea1f30cedd69f0a2954655f7188c6a834246d2bcf1e315e2ac40c4b24dc9519"
+-dependencies = [
+- "cfg-if",
+-]
+-
+ [[package]]
+ name = "md-5"
+ version = "0.10.6"
+@@ -1389,6 +1355,20 @@ dependencies = [
+  "simd-adler32",
+ ]
+ 
++[[package]]
++name = "mp4parse"
++version = "0.17.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "63a35203d3c6ce92d5251c77520acb2e57108c88728695aa883f70023624c570"
++dependencies = [
++ "bitreader",
++ "byteorder",
++ "fallible_collections",
++ "log",
++ "num-traits",
++ "static_assertions",
++]
++
+ [[package]]
+ name = "nalgebra"
+ version = "0.33.0"
+@@ -1432,12 +1412,6 @@ dependencies = [
+  "minimal-lexical",
+ ]
+ 
+-[[package]]
+-name = "noop_proc_macro"
+-version = "0.3.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0676bb32a98c1a483ce53e500a81ad9c3d5b3f7c920c28c24e9cb0980d0b5bc8"
+-
+ [[package]]
+ name = "normalize-line-endings"
+ version = "0.3.0"
+@@ -1861,25 +1835,6 @@ dependencies = [
+  "unicode-ident",
+ ]
+ 
+-[[package]]
+-name = "profiling"
+-version = "1.0.15"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "43d84d1d7a6ac92673717f9f6d1518374ef257669c24ebc5ac25d5033828be58"
+-dependencies = [
+- "profiling-procmacros",
+-]
+-
+-[[package]]
+-name = "profiling-procmacros"
+-version = "1.0.15"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8021cf59c8ec9c432cfc2526ac6b8aa508ecaf29cd415f271b8406c1b851c3fd"
+-dependencies = [
+- "quote",
+- "syn",
+-]
+-
+ [[package]]
+ name = "proptest"
+ version = "1.5.0"
+@@ -1960,55 +1915,6 @@ dependencies = [
+  "rand_core",
+ ]
+ 
+-[[package]]
+-name = "rav1e"
+-version = "0.7.1"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "cd87ce80a7665b1cce111f8a16c1f3929f6547ce91ade6addf4ec86a8dda5ce9"
+-dependencies = [
+- "arbitrary",
+- "arg_enum_proc_macro",
+- "arrayvec",
+- "av1-grain",
+- "bitstream-io",
+- "built",
+- "cfg-if",
+- "interpolate_name",
+- "itertools 0.12.1",
+- "libc",
+- "libfuzzer-sys",
+- "log",
+- "maybe-rayon",
+- "new_debug_unreachable",
+- "noop_proc_macro",
+- "num-derive",
+- "num-traits",
+- "once_cell",
+- "paste",
+- "profiling",
+- "rand",
+- "rand_chacha",
+- "simd_helpers",
+- "system-deps 6.2.2",
+- "thiserror",
+- "v_frame",
+- "wasm-bindgen",
+-]
+-
+-[[package]]
+-name = "ravif"
+-version = "0.11.9"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5797d09f9bd33604689e87e8380df4951d4912f01b63f71205e2abd4ae25e6b6"
+-dependencies = [
+- "avif-serialize",
+- "imgref",
+- "loop9",
+- "quick-error 2.0.1",
+- "rav1e",
+- "rgb",
+-]
+-
+ [[package]]
+ name = "rawpointer"
+ version = "0.2.1"
+@@ -2272,15 +2178,6 @@ version = "0.3.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "d66dc143e6b11c1eddc06d5c423cfc97062865baf299914ab64caa38182078fe"
+ 
+-[[package]]
+-name = "simd_helpers"
+-version = "0.1.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "95890f873bec569a0362c235787f3aca6e1e887302ba4840839bcc6459c42da6"
+-dependencies = [
+- "quote",
+-]
+-
+ [[package]]
+ name = "siphasher"
+ version = "0.3.11"
+@@ -2308,6 +2205,12 @@ version = "1.2.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+ 
++[[package]]
++name = "static_assertions"
++version = "1.1.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
++
+ [[package]]
+ name = "string_cache"
+ version = "0.8.7"
+@@ -2589,17 +2492,6 @@ version = "0.2.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
+ 
+-[[package]]
+-name = "v_frame"
+-version = "0.3.8"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d6f32aaa24bacd11e488aa9ba66369c7cd514885742c9fe08cfe85884db3e92b"
+-dependencies = [
+- "aligned-vec",
+- "num-traits",
+- "wasm-bindgen",
+-]
+-
+ [[package]]
+ name = "version-compare"
+ version = "0.2.0"
+@@ -2870,6 +2762,26 @@ dependencies = [
+  "pkg-config",
+ ]
+ 
++[[package]]
++name = "zerocopy"
++version = "0.7.35"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
++dependencies = [
++ "zerocopy-derive",
++]
++
++[[package]]
++name = "zerocopy-derive"
++version = "0.7.35"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fa4f8080344d4671fb4e831a13ad1e68092748387dfc4f55e356242fae12ce3e"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn",
++]
++
+ [[package]]
+ name = "zune-core"
+ version = "0.4.12"
+-- 
+2.46.0
+
+
+From 63dac8a68efc371bf6ea48408e004894df2ee1a6 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 11:57:56 -0600
+Subject: [PATCH 04/17] CI: install dav1d-devel to be able to decode AVIF
+ images
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ ci/container_builds.yml | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ci/container_builds.yml b/ci/container_builds.yml
+index e148a476..f5e2a530 100644
+--- a/ci/container_builds.yml
++++ b/ci/container_builds.yml
+@@ -5,7 +5,7 @@ include:
+ variables:
+   # When branching change the suffix to avoid conflicts with images
+   # from the main branch
+-  BASE_TAG: "2024-07-31.1-main"
++  BASE_TAG: "2024-08-07.0-main"
+   RUST_STABLE: "1.79.0"
+   RUST_MINIMUM: "1.78.0"
+   RUST_NIGHTLY: "nightly-2024-07-14"
+@@ -28,6 +28,7 @@ variables:
+       clang
+       clang-tools
+       curl
++      dav1d-devel
+       diffutils
+       findutils
+       flex
+-- 
+2.46.0
+
+
+From 7e3273349bc9ad27b98f67825a8309505b208b36 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 13:45:52 -0600
+Subject: [PATCH 05/17] Only compile the AVIF test if the avif feature is
+ enabled
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ rsvg/tests/primitives.rs | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/rsvg/tests/primitives.rs b/rsvg/tests/primitives.rs
+index 81db262d..7687acaf 100644
+--- a/rsvg/tests/primitives.rs
++++ b/rsvg/tests/primitives.rs
+@@ -370,6 +370,7 @@ test_svg_reference!(
+     "tests/fixtures/reftests/invalid-element-type-for-paint-server-ref.svg"
+ );
+ 
++#[cfg(feature = "avif")]
+ test_svg_reference!(
+     can_decode_avif_image_1003,
+     "tests/fixtures/reftests/avif-image-1003.svg",
+-- 
+2.46.0
+
+
+From 3c2014ee295b5b784b1be9ba98f34dc1be43850c Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 15:39:41 -0600
+Subject: [PATCH 06/17] wip: use the correct color for the test reference image
+
+I forgot about SRGB correction.  Or something.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg b/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
+index 682b78fe..83a2e25d 100644
+--- a/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
++++ b/rsvg/tests/fixtures/reftests/avif-image-1003-ref.svg
+@@ -1,3 +1,3 @@
+ <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="10">
+-  <rect x="0" y="0" width="10" height="10" fill="#7eff02"/>
++  <rect x="0" y="0" width="10" height="10" fill="#78e400"/>
+ </svg>
+-- 
+2.46.0
+
+
+From 0ce545e0e56bef0b0b7f838d997abd75499e4e27 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 16:48:40 -0600
+Subject: [PATCH 07/17] Update deny.toml to the new syntax
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ deny.toml | 152 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 144 insertions(+), 8 deletions(-)
+
+diff --git a/deny.toml b/deny.toml
+index 15f4ab3d..4fed4d9e 100644
+--- a/deny.toml
++++ b/deny.toml
+@@ -1,13 +1,149 @@
++[graph]
++# When creating the dependency graph used as the source of truth when checks are
++# executed, this field can be used to prune crates from the graph, removing them
++# from the view of cargo-deny. This is an extremely heavy hammer, as if a crate
++# is pruned from the graph, all of its dependencies will also be pruned unless
++# they are connected to another crate in the graph that hasn't been pruned,
++# so it should be used with care. The identifiers are [Package ID Specifications]
++# (https://doc.rust-lang.org/cargo/reference/pkgid-spec.html)
++#exclude = []
++# If true, metadata will be collected with `--all-features`. Note that this can't
++# be toggled off if true, if you want to conditionally enable `--all-features` it
++# is recommended to pass `--all-features` on the cmd line instead
++#all-features = true
++
++# This section is considered when running `cargo deny check advisories`
++# More documentation for the advisories section can be found here:
++# https://embarkstudios.github.io/cargo-deny/checks/advisories/cfg.html
+ [advisories]
++# The path where the advisory databases are cloned/fetched into
+ db-path = "~/.cargo/advisory-db"
+-db-urls = ["https://github.com/rustsec/advisory-db"]
+-vulnerability = "deny"
+-unmaintained = "warn"
+-yanked = "warn"
+-notice = "warn"
++# The url(s) of the advisory databases to use
++#db-urls = ["https://github.com/rustsec/advisory-db"]
++# A list of advisory IDs to ignore. Note that ignored advisories will still
++# output a note when they are encountered.
++ignore = [
++    #"RUSTSEC-0000-0000",
++    #{ id = "RUSTSEC-0000-0000", reason = "you can specify a reason the advisory is ignored" },
++    #"a-crate-that-is-yanked@0.1.1", # you can also ignore yanked crate versions if you wish
++    #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
++]
+ 
++# This section is considered when running `cargo deny check licenses`
++# More documentation for the licenses section can be found here:
++# https://embarkstudios.github.io/cargo-deny/checks/licenses/cfg.html
+ [licenses]
+-unlicensed = "deny"
+-copyleft = "allow"
+-allow-osi-fsf-free = "either"
++# List of explicitly allowed licenses
++# See https://spdx.org/licenses/ for list of possible licenses
++# [possible values: any SPDX 3.11 short identifier (+ optional exception)].
++allow = [
++    "LGPL-2.1",
++    "MIT",
++    "BSD-3-Clause",
++    "ISC",
++    "Unicode-DFS-2016",
++    "Apache-2.0",
++    "Apache-2.0 WITH LLVM-exception",
++    "MPL-2.0",
++]
++# The confidence threshold for detecting a license from license text.
++# The higher the value, the more closely the license text must be to the
++# canonical license text of a valid SPDX license file.
++# [possible values: any between 0.0 and 1.0].
+ confidence-threshold = 0.8
++# Allow 1 or more licenses on a per-crate basis, so that particular licenses
++# aren't accepted for every possible crate as with the normal allow list
++exceptions = [
++    # Each entry is the crate and version constraint, and its specific allow
++    # list
++    #{ allow = ["Zlib"], crate = "adler32" },
++]
++
++# This section is considered when running `cargo deny check bans`.
++# More documentation about the 'bans' section can be found here:
++# https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html
++[bans]
++# Lint level for when multiple versions of the same crate are detected
++multiple-versions = "warn"
++# Lint level for when a crate version requirement is `*`
++wildcards = "allow"
++# The graph highlighting used when creating dotgraphs for crates
++# with multiple versions
++# * lowest-version - The path to the lowest versioned duplicate is highlighted
++# * simplest-path - The path to the version with the fewest edges is highlighted
++# * all - Both lowest-version and simplest-path are used
++highlight = "all"
++# The default lint level for `default` features for crates that are members of
++# the workspace that is being checked. This can be overridden by allowing/denying
++# `default` on a crate-by-crate basis if desired.
++workspace-default-features = "allow"
++# The default lint level for `default` features for external crates that are not
++# members of the workspace. This can be overridden by allowing/denying `default`
++# on a crate-by-crate basis if desired.
++external-default-features = "allow"
++# List of crates that are allowed. Use with care!
++allow = [
++    #"ansi_term@0.11.0",
++    #{ crate = "ansi_term@0.11.0", reason = "you can specify a reason it is allowed" },
++]
++# List of crates to deny
++deny = [
++    #"ansi_term@0.11.0",
++    #{ crate = "ansi_term@0.11.0", reason = "you can specify a reason it is banned" },
++    # Wrapper crates can optionally be specified to allow the crate when it
++    # is a direct dependency of the otherwise banned crate
++    #{ crate = "ansi_term@0.11.0", wrappers = ["this-crate-directly-depends-on-ansi_term"] },
++]
++
++# List of features to allow/deny
++# Each entry the name of a crate and a version range. If version is
++# not specified, all versions will be matched.
++#[[bans.features]]
++#crate = "reqwest"
++# Features to not allow
++#deny = ["json"]
++# Features to allow
++#allow = [
++#    "rustls",
++#    "__rustls",
++#    "__tls",
++#    "hyper-rustls",
++#    "rustls",
++#    "rustls-pemfile",
++#    "rustls-tls-webpki-roots",
++#    "tokio-rustls",
++#    "webpki-roots",
++#]
++# If true, the allowed features must exactly match the enabled feature set. If
++# this is set there is no point setting `deny`
++#exact = true
++
++# Certain crates/versions that will be skipped when doing duplicate detection.
++skip = [
++    #"ansi_term@0.11.0",
++    #{ crate = "ansi_term@0.11.0", reason = "you can specify a reason why it can't be updated/removed" },
++]
++# Similarly to `skip` allows you to skip certain crates during duplicate
++# detection. Unlike skip, it also includes the entire tree of transitive
++# dependencies starting at the specified crate, up to a certain depth, which is
++# by default infinite.
++skip-tree = [
++    #"ansi_term@0.11.0", # will be skipped along with _all_ of its direct and transitive dependencies
++    #{ crate = "ansi_term@0.11.0", depth = 20 },
++]
++
++# This section is considered when running `cargo deny check sources`.
++# More documentation about the 'sources' section can be found here:
++# https://embarkstudios.github.io/cargo-deny/checks/sources/cfg.html
++[sources]
++# Lint level for what to happen when a crate from a crate registry that is not
++# in the allow list is encountered
++unknown-registry = "deny"
++# Lint level for what to happen when a crate from a git repository that is not
++# in the allow list is encountered
++unknown-git = "deny"
++# List of URLs for allowed crate registries. Defaults to the crates.io index
++# if not specified. If it is specified but empty, no registries are allowed.
++allow-registry = ["https://github.com/rust-lang/crates.io-index"]
++# List of URLs for allowed Git repositories
++allow-git = []
+-- 
+2.46.0
+
+
+From 47754841e6bf46c328d2b35abc3ad6af75bf56a5 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 16:48:47 -0600
+Subject: [PATCH 08/17] Update bytemuck to prevent yanked version 1.16.1
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ Cargo.lock | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index f40149f8..e1fbbfd4 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -225,9 +225,9 @@ checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
+ 
+ [[package]]
+ name = "bytemuck"
+-version = "1.16.1"
++version = "1.16.3"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
++checksum = "102087e286b4677862ea56cf8fc58bb2cdfa8725c40ffb80fe3a008eb7f2fc83"
+ 
+ [[package]]
+ name = "byteorder"
+-- 
+2.46.0
+
+
+From 41ed011538d8b53a50ce4a332f6b9c37d0a1ce27 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 16:55:32 -0600
+Subject: [PATCH 09/17] Update crates
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ Cargo.lock | 195 ++++++++++++++++++++++++++++-------------------------
+ 1 file changed, 105 insertions(+), 90 deletions(-)
+
+diff --git a/Cargo.lock b/Cargo.lock
+index e1fbbfd4..3898adbc 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -52,9 +52,9 @@ checksum = "4b46cbb362ab8752921c97e041f5e366ee6297bd428a31275b9fcf1e380f7299"
+ 
+ [[package]]
+ name = "anstream"
+-version = "0.6.14"
++version = "0.6.15"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "418c75fa768af9c03be99d17643f93f79bbba589895012a80e3452a19ddda15b"
++checksum = "64e15c1ab1f89faffbf04a634d5e1962e9074f2741eef6d97f3c4e322426d526"
+ dependencies = [
+  "anstyle",
+  "anstyle-parse",
+@@ -67,36 +67,36 @@ dependencies = [
+ 
+ [[package]]
+ name = "anstyle"
+-version = "1.0.7"
++version = "1.0.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "038dfcf04a5feb68e9c60b21c9625a54c2c0616e79b72b0fd87075a056ae1d1b"
++checksum = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1"
+ 
+ [[package]]
+ name = "anstyle-parse"
+-version = "0.2.4"
++version = "0.2.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c03a11a9034d92058ceb6ee011ce58af4a9bf61491aa7e1e59ecd24bd40d22d4"
++checksum = "eb47de1e80c2b463c735db5b217a0ddc39d612e7ac9e2e96a5aed1f57616c1cb"
+ dependencies = [
+  "utf8parse",
+ ]
+ 
+ [[package]]
+ name = "anstyle-query"
+-version = "1.1.0"
++version = "1.1.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ad186efb764318d35165f1758e7dcef3b10628e26d41a44bc5550652e6804391"
++checksum = "6d36fc52c7f6c869915e99412912f22093507da8d9e942ceaf66fe4b7c14422a"
+ dependencies = [
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+ name = "anstyle-wincon"
+-version = "3.0.3"
++version = "3.0.4"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "61a38449feb7068f52bb06c12759005cf459ee52bb4adc1d5a7c4322d716fb19"
++checksum = "5bf74e1b6e971609db8ca7a9ce79fd5768ab6ae46441c572e46cf596f59e57f8"
+ dependencies = [
+  "anstyle",
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+@@ -116,9 +116,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "assert_cmd"
+-version = "2.0.14"
++version = "2.0.15"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ed72493ac66d5804837f480ab3766c72bdfab91a65e565fc54fa9e42db0073a8"
++checksum = "bc65048dd435533bb1baf2ed9956b9a278fbfdcf90301b39ee117f06c0199d37"
+ dependencies = [
+  "anstyle",
+  "bstr",
+@@ -202,9 +202,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "bstr"
+-version = "1.9.1"
++version = "1.10.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "05efc5cfd9110c8416e471df0e96702d58690178e206e61b7173706673c93706"
++checksum = "40723b8fb387abc38f4f4a37c09073622e41dd12327033091ef8950659e6dc0c"
+ dependencies = [
+  "memchr",
+  "regex-automata",
+@@ -243,9 +243,9 @@ checksum = "8f1fe948ff07f4bd06c30984e69f5b4899c516a3ef74f34df92a2df2ab535495"
+ 
+ [[package]]
+ name = "bytes"
+-version = "1.6.1"
++version = "1.7.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a12916984aab3fa6e39d655a33e09c0071eb36d6ab3aea5c2d78551f1df6d952"
++checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
+ 
+ [[package]]
+ name = "cairo-rs"
+@@ -279,9 +279,9 @@ checksum = "37b2a672a2cb129a2e41c10b1224bb368f9f37a2b16b612598138befd7b37eb5"
+ 
+ [[package]]
+ name = "cc"
+-version = "1.1.5"
++version = "1.1.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "324c74f2155653c90b04f25b2a47a8a631360cb908f92a772695f430c7e31052"
++checksum = "504bdec147f2cc13c8b57ed9401fd8a147cc66b67ad5cb241394244f2c947549"
+ 
+ [[package]]
+ name = "cfg-expr"
+@@ -340,9 +340,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "clap"
+-version = "4.5.9"
++version = "4.5.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "64acc1846d54c1fe936a78dc189c34e28d3f5afc348403f28ecf53660b9b8462"
++checksum = "0fbb260a053428790f3de475e304ff84cdbc4face759ea7a3e64c1edd938a7fc"
+ dependencies = [
+  "clap_builder",
+  "clap_derive",
+@@ -350,9 +350,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "clap_builder"
+-version = "4.5.9"
++version = "4.5.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6fb8393d67ba2e7bfaf28a23458e4e2b543cc73a99595511eb207fdb8aede942"
++checksum = "64b17d7ea74e9f833c7dbf2cbe4fb12ff26783eda4782a8975b72f895c9b4d99"
+ dependencies = [
+  "anstream",
+  "anstyle",
+@@ -362,18 +362,18 @@ dependencies = [
+ 
+ [[package]]
+ name = "clap_complete"
+-version = "4.5.8"
++version = "4.5.12"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5b4be9c4c4b1f30b78d8a750e0822b6a6102d97e62061c583a6c1dea2dfb33ae"
++checksum = "a8670053e87c316345e384ca1f3eba3006fc6355ed8b8a1140d104e109e3df34"
+ dependencies = [
+  "clap",
+ ]
+ 
+ [[package]]
+ name = "clap_derive"
+-version = "4.5.8"
++version = "4.5.13"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2bac35c6dafb060fd4d275d9a4ffae97917c13a6327903a8be2153cd964f7085"
++checksum = "501d359d5f3dcaf6ecdeee48833ae73ec6e42723a1e52419c79abf9507eec0a0"
+ dependencies = [
+  "heck",
+  "proc-macro2",
+@@ -383,9 +383,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "clap_lex"
+-version = "0.7.1"
++version = "0.7.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
++checksum = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97"
+ 
+ [[package]]
+ name = "color_quant"
+@@ -395,9 +395,9 @@ checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
+ 
+ [[package]]
+ name = "colorchoice"
+-version = "1.0.1"
++version = "1.0.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0b6a852b24ab71dffc585bcb46eaf7959d175cb865a7152e35b348d1b2960422"
++checksum = "d3fd119d74b830634cea2a0f58bbd0d54540518a14397557951e79340abc28c0"
+ 
+ [[package]]
+ name = "core-foundation-sys"
+@@ -646,7 +646,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "534c5cf6194dfab3db3242765c03bbe257cf92f22b38f6bc0c58d59108a820ba"
+ dependencies = [
+  "libc",
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+@@ -675,9 +675,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "flate2"
+-version = "1.0.30"
++version = "1.0.31"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5f54427cfd1c7829e2a139fcefea601bf088ebca651d2bf53ebc600eac295dae"
++checksum = "7f211bbe8e69bbd0cfdea405084f128ae8b4aaa6b0b522fc8f2b009084797920"
+ dependencies = [
+  "crc32fast",
+  "miniz_oxide",
+@@ -873,7 +873,7 @@ dependencies = [
+  "gobject-sys",
+  "libc",
+  "system-deps 7.0.1",
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+@@ -1034,9 +1034,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "indexmap"
+-version = "2.2.6"
++version = "2.3.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "168fb715dda47215e360912c096649d23d58bf392ac62f73919e831745e40f26"
++checksum = "de3fc2e30ba82dd1b3911c8de1ffc143c74a914a14e99514d7637e3099df5ea0"
+ dependencies = [
+  "equivalent",
+  "hashbrown 0.14.5",
+@@ -1050,14 +1050,14 @@ checksum = "f23ff5ef2b80d608d61efee834934d862cd92461afc0560dedf493e4c033738b"
+ dependencies = [
+  "hermit-abi",
+  "libc",
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+ name = "is_terminal_polyfill"
+-version = "1.70.0"
++version = "1.70.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f8478577c03552c21db0e2724ffb8986a5ce7af88107e6be5d2ee6e158c12800"
++checksum = "7943c866cc5cd64cbc25b2e01621d07fa8eb2a1a23160ee81ce38704e97b8ecf"
+ 
+ [[package]]
+ name = "itertools"
+@@ -1112,9 +1112,9 @@ checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
+ 
+ [[package]]
+ name = "libloading"
+-version = "0.8.4"
++version = "0.8.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "e310b3a6b5907f99202fcdb4960ff45b93735d7c7d96b760fcff8db2dc0e103d"
++checksum = "4979f22fdb869068da03c9f7528f8297c6fd2606bc3a4affe42e6a823fdb8da4"
+ dependencies = [
+  "cfg-if",
+  "windows-targets",
+@@ -1315,9 +1315,9 @@ checksum = "2532096657941c2fea9c289d370a250971c689d4f143798ff67113ec042024a5"
+ 
+ [[package]]
+ name = "matrixmultiply"
+-version = "0.3.8"
++version = "0.3.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "7574c1cf36da4798ab73da5b215bbf444f50718207754cb522201d78d1cd0ff2"
++checksum = "9380b911e3e96d10c1f415da0876389aaf1b56759054eeb0de7df940c456ba1a"
+ dependencies = [
+  "autocfg",
+  "rawpointer",
+@@ -1777,9 +1777,12 @@ checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
+ 
+ [[package]]
+ name = "ppv-lite86"
+-version = "0.2.17"
++version = "0.2.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "5b40af805b3121feab8a3c29f04d8ad262fa8e0561883e7653e024ae4479e6de"
++checksum = "77957b295656769bb8ad2b6a6b09d897d94f05c41b069aede1fcdaa675eaea04"
++dependencies = [
++ "zerocopy",
++]
+ 
+ [[package]]
+ name = "precomputed-hash"
+@@ -1789,9 +1792,9 @@ checksum = "925383efa346730478fb4838dbe9137d2a47675ad789c546d150a6e1dd4ab31c"
+ 
+ [[package]]
+ name = "predicates"
+-version = "3.1.0"
++version = "3.1.2"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "68b87bfd4605926cdfefc1c3b5f8fe560e3feca9d5552cf68c466d3d8236c7e8"
++checksum = "7e9086cc7640c29a356d1a29fd134380bee9d8f79a17410aa76e7ad295f42c97"
+ dependencies = [
+  "anstyle",
+  "difflib",
+@@ -1803,15 +1806,15 @@ dependencies = [
+ 
+ [[package]]
+ name = "predicates-core"
+-version = "1.0.6"
++version = "1.0.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b794032607612e7abeb4db69adb4e33590fa6cf1149e95fd7cb00e634b92f174"
++checksum = "ae8177bee8e75d6846599c6b9ff679ed51e882816914eec639944d7c9aa11931"
+ 
+ [[package]]
+ name = "predicates-tree"
+-version = "1.0.9"
++version = "1.0.11"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "368ba315fb8c5052ab692e68a0eefec6ec57b23a36959c14496f0b0df2c0cecf"
++checksum = "41b740d195ed3166cd147c8047ec98db0e22ec019eb8eeb76d343b795304fb13"
+ dependencies = [
+  "predicates-core",
+  "termtree",
+@@ -1958,9 +1961,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "regex"
+-version = "1.10.5"
++version = "1.10.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b91213439dad192326a0d7c6ee3955910425f441d7038e0d6933b0aec5c4517f"
++checksum = "4219d74c6b67a3654a9fbebc4b419e22126d13d2f3c4a07ee0cb61ff79a79619"
+ dependencies = [
+  "aho-corasick",
+  "memchr",
+@@ -1987,9 +1990,9 @@ checksum = "7a66a03ae7c801facd77a29370b4faec201768915ac14a721ba36f20bc9c209b"
+ 
+ [[package]]
+ name = "rgb"
+-version = "0.8.45"
++version = "0.8.48"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ade4539f42266ded9e755c605bdddf546242b2c961b03b06a7375260788a0523"
++checksum = "0f86ae463694029097b846d8f99fd5536740602ae00022c0c50c5600720b2f71"
+ dependencies = [
+  "bytemuck",
+ ]
+@@ -2040,7 +2043,7 @@ dependencies = [
+  "errno",
+  "libc",
+  "linux-raw-sys",
+- "windows-sys",
++ "windows-sys 0.52.0",
+ ]
+ 
+ [[package]]
+@@ -2126,20 +2129,21 @@ dependencies = [
+ 
+ [[package]]
+ name = "serde_json"
+-version = "1.0.120"
++version = "1.0.122"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4e0d21c9a8cae1235ad58a00c11cb40d4b1e5c784f1ef2c537876ed6ffd8b7c5"
++checksum = "784b6203951c57ff748476b126ccb5e8e2959a5c19e5c617ab1956be3dbc68da"
+ dependencies = [
+  "itoa",
++ "memchr",
+  "ryu",
+  "serde",
+ ]
+ 
+ [[package]]
+ name = "serde_spanned"
+-version = "0.6.6"
++version = "0.6.7"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "79e674e01f999af37c49f70a6ede167a8a60b2503e56c5599532a65baa5969a0"
++checksum = "eb5b1b31579f3811bf615c144393417496f152e12ac8b7663bf664f4a815306d"
+ dependencies = [
+  "serde",
+ ]
+@@ -2245,9 +2249,9 @@ checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
+ 
+ [[package]]
+ name = "syn"
+-version = "2.0.71"
++version = "2.0.72"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b146dcf730474b4bcd16c311627b31ede9ab149045db4d6088b3becaea046462"
++checksum = "dc4b9b9bf2add8093d3f2c0204471e951b2285580335de42f9d2534f3ae7a8af"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -2282,20 +2286,21 @@ dependencies = [
+ 
+ [[package]]
+ name = "target-lexicon"
+-version = "0.12.15"
++version = "0.12.16"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4873307b7c257eddcb50c9bedf158eb669578359fb28428bef438fec8e6ba7c2"
++checksum = "61c41af27dd6d1e27b1b16b489db798443478cef1f06a660c96db617ba5de3b1"
+ 
+ [[package]]
+ name = "tempfile"
+-version = "3.10.1"
++version = "3.12.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "85b77fafb263dd9d05cbeac119526425676db3784113aa9295c88498cbf8bff1"
++checksum = "04cbcdd0c794ebb0d4cf35e88edd2f7d2c4c3e9a5a6dab322839b321c6a87a64"
+ dependencies = [
+  "cfg-if",
+  "fastrand",
++ "once_cell",
+  "rustix",
+- "windows-sys",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -2317,18 +2322,18 @@ checksum = "3369f5ac52d5eb6ab48c6b4ffdc8efbcad6b89c765749064ba298f2c68a16a76"
+ 
+ [[package]]
+ name = "thiserror"
+-version = "1.0.62"
++version = "1.0.63"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "f2675633b1499176c2dff06b0856a27976a8f9d436737b4cf4f312d4d91d8bbb"
++checksum = "c0342370b38b6a11b6cc11d6a805569958d54cfa061a29969c3b5ce2ea405724"
+ dependencies = [
+  "thiserror-impl",
+ ]
+ 
+ [[package]]
+ name = "thiserror-impl"
+-version = "1.0.62"
++version = "1.0.63"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d20468752b09f49e909e55a5d338caa8bedf615594e9d80bc4c565d30faf798c"
++checksum = "a4558b58466b9ad7ca0f102865eccc95938dca1a74a856f2b57b6629050da261"
+ dependencies = [
+  "proc-macro2",
+  "quote",
+@@ -2393,21 +2398,21 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
+ 
+ [[package]]
+ name = "toml"
+-version = "0.8.14"
++version = "0.8.19"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "6f49eb2ab21d2f26bd6db7bf383edc527a7ebaee412d17af4d40fdccd442f335"
++checksum = "a1ed1f98e3fdc28d6d910e6737ae6ab1a93bf1985935a1193e68f93eeb68d24e"
+ dependencies = [
+  "serde",
+  "serde_spanned",
+  "toml_datetime",
+- "toml_edit 0.22.15",
++ "toml_edit 0.22.20",
+ ]
+ 
+ [[package]]
+ name = "toml_datetime"
+-version = "0.6.6"
++version = "0.6.8"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4badfd56924ae69bcc9039335b2e017639ce3f9b001c393c1b2d1ef846ce2cbf"
++checksum = "0dd7358ecb8fc2f8d014bf86f6f638ce72ba252a2c3a2572f2a795f1d23efb41"
+ dependencies = [
+  "serde",
+ ]
+@@ -2425,15 +2430,15 @@ dependencies = [
+ 
+ [[package]]
+ name = "toml_edit"
+-version = "0.22.15"
++version = "0.22.20"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "d59a3a72298453f564e2b111fa896f8d07fabb36f51f06d7e875fc5e0b5a3ef1"
++checksum = "583c44c02ad26b0c3f3066fe629275e50627026c51ac2e595cca4c230ce1ce1d"
+ dependencies = [
+  "indexmap",
+  "serde",
+  "serde_spanned",
+  "toml_datetime",
+- "winnow 0.6.13",
++ "winnow 0.6.18",
+ ]
+ 
+ [[package]]
+@@ -2500,9 +2505,9 @@ checksum = "852e951cb7832cb45cb1169900d19760cfa39b82bc0ea9c0e5a14ae88411c98b"
+ 
+ [[package]]
+ name = "version_check"
+-version = "0.9.4"
++version = "0.9.5"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
++checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
+ 
+ [[package]]
+ name = "wait-timeout"
+@@ -2601,9 +2606,9 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
+ 
+ [[package]]
+ name = "wide"
+-version = "0.7.25"
++version = "0.7.26"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2caba658a80831539b30698ae9862a72db6697dfdd7151e46920f5f2755c3ce2"
++checksum = "901e8597c777fa042e9e245bd56c0dc4418c5db3f845b6ff94fbac732c6a0692"
+ dependencies = [
+  "bytemuck",
+  "safe_arch",
+@@ -2627,11 +2632,11 @@ checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
+ 
+ [[package]]
+ name = "winapi-util"
+-version = "0.1.8"
++version = "0.1.9"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "4d4cc384e1e73b93bafa6fb4f1df8c41695c8a91cf9c4c64358067d15a7b6c6b"
++checksum = "cf221c93e13a30d793f7645a0e7762c55d169dbb0a49671918a2319d289b10bb"
+ dependencies = [
+- "windows-sys",
++ "windows-sys 0.59.0",
+ ]
+ 
+ [[package]]
+@@ -2658,6 +2663,15 @@ dependencies = [
+  "windows-targets",
+ ]
+ 
++[[package]]
++name = "windows-sys"
++version = "0.59.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b"
++dependencies = [
++ "windows-targets",
++]
++
+ [[package]]
+ name = "windows-targets"
+ version = "0.52.6"
+@@ -2733,9 +2747,9 @@ dependencies = [
+ 
+ [[package]]
+ name = "winnow"
+-version = "0.6.13"
++version = "0.6.18"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "59b5e5f6c299a3c7890b876a2a587f3115162487e704907d9b6cd29473052ba1"
++checksum = "68a9bda4691f099d435ad181000724da8e5899daa10713c2d432552b9ccd3a6f"
+ dependencies = [
+  "memchr",
+ ]
+@@ -2768,6 +2782,7 @@ version = "0.7.35"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1b9b4fd18abc82b8136838da5d50bae7bdea537c574d8dc1a34ed098d6c166f0"
+ dependencies = [
++ "byteorder",
+  "zerocopy-derive",
+ ]
+ 
+-- 
+2.46.0
+
+
+From f85316748943bf21a4a2c356f6e7fb0972e297c1 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 16:55:38 -0600
+Subject: [PATCH 10/17] Add exception for the duplicate version of bitflags
+ that the png crate requires
+
+Per https://github.com/image-rs/image-png/pull/400, updating the png
+crate for the new bitflags would cause a breaking change.  Looks like
+the maintainers want to wait.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ deny.toml | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/deny.toml b/deny.toml
+index 4fed4d9e..4d16813d 100644
+--- a/deny.toml
++++ b/deny.toml
+@@ -120,6 +120,7 @@ deny = [
+ 
+ # Certain crates/versions that will be skipped when doing duplicate detection.
+ skip = [
++     { crate = "bitflags@1.3.2", reason = "will cause breaking change in png crate https://github.com/image-rs/image-png/pull/400" },
+     #"ansi_term@0.11.0",
+     #{ crate = "ansi_term@0.11.0", reason = "you can specify a reason why it can't be updated/removed" },
+ ]
+-- 
+2.46.0
+
+
+From 76971a48c5696d791825e896c303aa04262b20f2 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 17:10:39 -0600
+Subject: [PATCH 11/17] librsvg-rebind: use the workspace versions of glib/gio
+
+Duplicates pointed out by cargo-deny
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ librsvg-rebind/librsvg-rebind/Cargo.toml | 8 ++------
+ 1 file changed, 2 insertions(+), 6 deletions(-)
+
+diff --git a/librsvg-rebind/librsvg-rebind/Cargo.toml b/librsvg-rebind/librsvg-rebind/Cargo.toml
+index c0359041..f18f6a73 100644
+--- a/librsvg-rebind/librsvg-rebind/Cargo.toml
++++ b/librsvg-rebind/librsvg-rebind/Cargo.toml
+@@ -18,6 +18,8 @@ exclude = ["Gir.toml"]
+ libc.workspace = true
+ bitflags.workspace = true
+ cairo-rs.workspace = true
++glib.workspace = true
++gio.workspace = true
+ 
+ [dev-dependencies]
+ cairo-rs = { workspace = true, features = ['png'] }
+@@ -27,12 +29,6 @@ package = "librsvg-rebind-sys"
+ version = "0.1"
+ path = "./sys"
+ 
+-[dependencies.glib]
+-version = "0.20"
+-
+-[dependencies.gio]
+-version = "0.20"
+-
+ [package.metadata.docs.rs]
+ rustc-args = ["--cfg", "docsrs"]
+ rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
+-- 
+2.46.0
+
+
+From 84f7546992fa4e8fb09dcdb2e6f39d33d6334c74 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Wed, 7 Aug 2024 18:25:05 -0600
+Subject: [PATCH 12/17] Add lint exception for cfg(check) in gkd-pixbuf-loader
+
+This started failing in the msys2-mingw64 job.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1003>
+---
+ gdk-pixbuf-loader/Cargo.toml | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/gdk-pixbuf-loader/Cargo.toml b/gdk-pixbuf-loader/Cargo.toml
+index 2f79cd84..10cc337c 100644
+--- a/gdk-pixbuf-loader/Cargo.toml
++++ b/gdk-pixbuf-loader/Cargo.toml
+@@ -25,3 +25,6 @@ librsvg = { name = "librsvg-2.0-uninstalled", version = "2.57", fallback-names =
+ 
+ [package.metadata.capi.header]
+ enabled = false
++
++[lints.rust]
++unexpected_cfgs = { level = "warn", check-cfg = ['cfg(check)'] }
+-- 
+2.46.0
+
+
+From 0cecc2067afbb7254b1cc28f3eaa9005a2c00c54 Mon Sep 17 00:00:00 2001
+From: Sophie Herold <sophie@hemio.de>
+Date: Mon, 12 Aug 2024 12:07:29 +0000
+Subject: [PATCH 13/17] doap: Remove marge-bot maintainer entry
+
+marge-bot has had GNOME wide Developer access for a while, which should be sufficient.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1004>
+---
+ librsvg.doap | 7 -------
+ 1 file changed, 7 deletions(-)
+
+diff --git a/librsvg.doap b/librsvg.doap
+index 29caba61..b82c0840 100644
+--- a/librsvg.doap
++++ b/librsvg.doap
+@@ -33,11 +33,4 @@
+     </foaf:Person>
+   </maintainer>
+ 
+-  <maintainer>
+-    <foaf:Person>
+-      <foaf:name>Marge Bot</foaf:name>
+-      <gnome:userid>marge-bot</gnome:userid>
+-    </foaf:Person>
+-  </maintainer>
+-
+ </Project>
+-- 
+2.46.0
+
+
+From a8d695226185e87862bf8ea1d651307c32fa2272 Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 12 Aug 2024 18:50:48 +0530
+Subject: [PATCH 14/17] meson: Don't use required: kwarg to cc.compiles
+
+This kwarg was added in 1.5.0, but we require 1.2.0. Anyway, an
+explicit error message is much clearer to the user.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1006>
+---
+ meson.build | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 844ac598..685f526d 100644
+--- a/meson.build
++++ b/meson.build
+@@ -33,14 +33,16 @@ makedef = find_program('meson/makedef.py', native: true)
+ if host_system in ['darwin', 'ios']
+   # Validate unconditional presence of getentropy and CCRandomGenerateBytes.
+   # https://github.com/rust-lang/rust/pull/116319
+-  cc.compiles('''#include <Availability.h>
++  ret = cc.compiles('''#include <Availability.h>
+ #include <TargetConditionals.h>
+ #if !((TARGET_OS_OSX && __MAC_OS_X_VERSION_MIN_REQUIRED >= 101200L) || (TARGET_OS_IOS && __IPHONE_OS_VERSION_MIN_REQUIRED >= 100000L))
+ # error "https://gitlab.gnome.org/GNOME/librsvg/-/issues/1097"
+ #endif''',
+     name: 'Targets at least macOS 10.12 or iOS 10',
+-    required: rustc.version().version_compare('>= 1.75.0')
+   )
++  if rustc.version().version_compare('>= 1.75.0') and not ret
++    error('When using rustc >=1.75, you must target at least macOS 10.12 or iOS 10')
++  endif
+ endif
+ 
+ py = import('python')
+-- 
+2.46.0
+
+
+From 529fbd6aa76c92d60f21cbebcd95d4fe01f7ba8a Mon Sep 17 00:00:00 2001
+From: Nirbheek Chauhan <nirbheek@centricular.com>
+Date: Mon, 12 Aug 2024 18:51:20 +0530
+Subject: [PATCH 15/17] Delete a broken symlink that breaks extracting on
+ Windows with bsdtar
+
+Change all references to ./gir/generator.py and add a note about
+running git submodule update.
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1006>
+---
+ librsvg-rebind/README.md    | 2 +-
+ librsvg-rebind/generator.py | 1 -
+ librsvg-rebind/regen.sh     | 4 ++--
+ 3 files changed, 3 insertions(+), 4 deletions(-)
+ delete mode 120000 librsvg-rebind/generator.py
+
+diff --git a/librsvg-rebind/README.md b/librsvg-rebind/README.md
+index b2e464be..141c7672 100644
+--- a/librsvg-rebind/README.md
++++ b/librsvg-rebind/README.md
+@@ -4,4 +4,4 @@ See [librsvg-rebind/README.md] for the use cases of these crates.
+ 
+ ## Regenerate bindings
+ 
+-To regenerate the bindings you can call `./regen.sh`.
+\ No newline at end of file
++To regenerate the bindings you can call `./regen.sh` after running `git submodule update --init --recursive`.
+diff --git a/librsvg-rebind/regen.sh b/librsvg-rebind/regen.sh
+index ec1e600e..c7fffba1 100755
+--- a/librsvg-rebind/regen.sh
++++ b/librsvg-rebind/regen.sh
+@@ -14,5 +14,5 @@ fi
+ 
+ meson compile -C ../builddir
+ 
+-./generator.py --no-fmt --gir-files-directories "$BUILDDIR/rsvg" gir-files/ $@
+-cargo fmt --all
+\ No newline at end of file
++./gir/generator.py --no-fmt --gir-files-directories "$BUILDDIR/rsvg" gir-files/ $@
++cargo fmt --all
+-- 
+2.46.0
+
+
+From 1eeafc69222c0f08330408041384536b70236069 Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Mon, 12 Aug 2024 19:20:15 -0600
+Subject: [PATCH 16/17] (#1117): Fix assertion failure with large Hue value
+
+Fuzz testing found that the cssparser-color crate's hsl_to_rgb()
+asserts that it is handed values in [0.0, 1.0].
+
+Fixes https://gitlab.gnome.org/GNOME/librsvg/-/issues/1117
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1007>
+---
+ rsvg/src/color.rs | 32 ++++++++++++++++++++++++++++++--
+ 1 file changed, 30 insertions(+), 2 deletions(-)
+
+diff --git a/rsvg/src/color.rs b/rsvg/src/color.rs
+index d99661ba..3bc71fc9 100644
+--- a/rsvg/src/color.rs
++++ b/rsvg/src/color.rs
+@@ -104,13 +104,24 @@ impl Parse for cssparser::Color {
+     }
+ }
+ 
++/// Normalizes `h` (a hue value in degrees) to be in the interval `[0.0, 1.0]`.
++///
++/// Rust-cssparser (the cssparser-color crate) provides
++/// [`hsl_to_rgb()`], but it assumes that the hue is between 0 and 1.
++/// `normalize_hue()` takes a value with respect to a scale of 0 to
++/// 360 degrees and converts it to that different scale.
++fn normalize_hue(h: f32) -> f32 {
++    h.rem_euclid(360.0) / 360.0
++}
++
+ pub fn color_to_rgba(color: &Color) -> RGBA {
+     match color {
+         Color::Rgba(rgba) => *rgba,
+ 
+         Color::Hsl(hsl) => {
++            let hue = normalize_hue(hsl.hue.unwrap_or(0.0));
+             let (red, green, blue) = hsl_to_rgb(
+-                hsl.hue.unwrap_or(0.0) / 360.0,
++                hue,
+                 hsl.saturation.unwrap_or(0.0),
+                 hsl.lightness.unwrap_or(0.0),
+             );
+@@ -119,8 +130,9 @@ pub fn color_to_rgba(color: &Color) -> RGBA {
+         }
+ 
+         Color::Hwb(hwb) => {
++            let hue = normalize_hue(hwb.hue.unwrap_or(0.0));
+             let (red, green, blue) = hwb_to_rgb(
+-                hwb.hue.unwrap_or(0.0) / 360.0,
++                hue,
+                 hwb.whiteness.unwrap_or(0.0),
+                 hwb.blackness.unwrap_or(0.0),
+             );
+@@ -167,4 +179,20 @@ mod tests {
+         assert!(Color::parse_str("var(--foo, this is not a color)").is_err());
+         assert!(Color::parse_str("var(--foo, #112233, blah)").is_err());
+     }
++
++    #[test]
++    fn normalizes_hue() {
++        assert_eq!(normalize_hue(0.0), 0.0);
++        assert_eq!(normalize_hue(360.0), 0.0);
++        assert_eq!(normalize_hue(90.0), 0.25);
++        assert_eq!(normalize_hue(-90.0), 0.75);
++        assert_eq!(normalize_hue(450.0), 0.25); // 360 + 90 degrees
++        assert_eq!(normalize_hue(-450.0), 0.75);
++    }
++
++    // Bug #1117
++    #[test]
++    fn large_hue_value() {
++        let _ = color_to_rgba(&Color::parse_str("hsla(70000000000000,4%,10%,.2)").unwrap());
++    }
+ }
+-- 
+2.46.0
+
+
+From 03057056a72b9b98a67eacb5acba40c753e03ffa Mon Sep 17 00:00:00 2001
+From: Federico Mena Quintero <federico@gnome.org>
+Date: Mon, 12 Aug 2024 20:20:51 -0600
+Subject: [PATCH 17/17] (#1115): Limit the baseFrequency for feTurbulence to
+ avoid integer overflow.
+
+The baseFrequency gets multiplied by the pixel coordinate within tile
+size to obtain the base value for computing that pixel's noise
+function.  Avoid integer overflow by limiting the maximum
+baseFrequency to a reasonable value (currently 32768, which is
+pixman's maximum image size).
+
+Fixes https://gitlab.gnome.org/GNOME/librsvg/-/issues/1115
+
+Part-of: <https://gitlab.gnome.org/GNOME/librsvg/-/merge_requests/1007>
+---
+ rsvg/src/filters/turbulence.rs                | 20 +++++++++++++++++--
+ .../bug1115-feTurbulence-overflow.svg         |  6 ++++++
+ rsvg/tests/render_crash.rs                    |  1 +
+ 3 files changed, 25 insertions(+), 2 deletions(-)
+ create mode 100644 rsvg/tests/fixtures/render-crash/bug1115-feTurbulence-overflow.svg
+
+diff --git a/rsvg/src/filters/turbulence.rs b/rsvg/src/filters/turbulence.rs
+index 8320956a..0650c25e 100644
+--- a/rsvg/src/filters/turbulence.rs
++++ b/rsvg/src/filters/turbulence.rs
+@@ -371,10 +371,26 @@ impl Turbulence {
+         // "Negative values are unsupported" -> set to the initial value which is 0.0
+         //
+         // https://drafts.fxtf.org/filter-effects/#element-attrdef-feturbulence-basefrequency
++        //
++        // Later in the algorithm, the base_frequency gets multiplied by the coordinates within the
++        // tile.  So, limit the base_frequency to avoid overflow later.  We impose an arbitrary
++        // upper limit for the frequency.  If it crosses that limit, we consider it invalid
++        // and revert back to the initial value.  See bug #1115.
+         let base_frequency = {
+             let NumberOptionalNumber(base_freq_x, base_freq_y) = self.base_frequency;
+-            let x = base_freq_x.max(0.0);
+-            let y = base_freq_y.max(0.0);
++
++            let x = if base_freq_x > 32768.0 {
++                0.0
++            } else {
++                base_freq_x.max(0.0)
++            };
++
++            let y = if base_freq_y > 32768.0 {
++                0.0
++            } else {
++                base_freq_y.max(0.0)
++            };
++
+             (x, y)
+         };
+ 
+diff --git a/rsvg/tests/fixtures/render-crash/bug1115-feTurbulence-overflow.svg b/rsvg/tests/fixtures/render-crash/bug1115-feTurbulence-overflow.svg
+new file mode 100644
+index 00000000..ffd23160
+--- /dev/null
++++ b/rsvg/tests/fixtures/render-crash/bug1115-feTurbulence-overflow.svg
+@@ -0,0 +1,6 @@
++<svg xmlns="http://www.w3.org/2000/svg">
++	<filter id="f" x="-25%" y="-25%" width="100%" height="100%">
++		<feTurbulence type="turbulence" baseFrequency="99999999999999999999999999999990.01" numOctaves="1"></feTurbulence>
++	</filter>
++	<rect x="75" y="75" width="100" height="100" filter="url(#f)"/>
++</svg>
+diff --git a/rsvg/tests/render_crash.rs b/rsvg/tests/render_crash.rs
+index 8f45ae4c..02b79c81 100644
+--- a/rsvg/tests/render_crash.rs
++++ b/rsvg/tests/render_crash.rs
+@@ -67,6 +67,7 @@ mod tests {
+     t!(bug1060_zero_sized_image_from_data_uri,          "bug1060-zero-sized-image-from-data-uri.svg");
+     t!(bug1062_feturbulence_limit_numoctaves,           "bug1062-feTurbulence-limit-numOctaves.svg");
+     t!(bug1092_fuzz_recursive_use_stack_overflow,       "bug1092-fuzz-recursive-use-stack-overflow.svg");
++    t!(bug1115_feturbulence_overflow,                   "bug1115-feTurbulence-overflow.svg");
+     t!(femerge_color_interpolation_srgb_svg,            "feMerge-color-interpolation-srgb.svg");
+     t!(filters_non_invertible_paffine_svg,              "filters-non-invertible-paffine.svg");
+     t!(gradient_with_empty_bbox_svg,                    "gradient-with-empty-bbox.svg");
+-- 
+2.46.0
+
