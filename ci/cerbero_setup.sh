@@ -64,7 +64,7 @@ cerbero_before_script() {
     pwd
     ls -lha
 
-    if [[ -n ${CI_COMMIT_REF_NAME} ]]; then
+    if [[ -n ${CI_COMMIT_REF_NAME} ]] && [[ ${CI_COMMIT_REF_NAME} != ${GST_UPSTREAM_BRANCH} ]]; then
         local ci_project_ns_url="${CI_SERVER_URL}/${CI_PROJECT_NAMESPACE}"
         if user_branch_exists_in gstreamer "${CI_COMMIT_REF_NAME}"; then
             gst_user_branch=1
