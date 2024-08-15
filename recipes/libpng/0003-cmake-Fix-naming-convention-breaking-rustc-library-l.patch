@@ -1,0 +1,42 @@
+From 1f677287ca12bd45b71e939369646ca9487668e1 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@amyspark.me>
+Date: Sat, 24 Aug 2024 22:24:37 -0300
+Subject: [PATCH 3/3] cmake: Fix naming convention breaking rustc library
+ lookup
+
+See e.g. https://github.com/rust-lang/rust/issues/122455
+---
+ CMakeLists.txt | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ab27aec..8dee9eb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -670,14 +670,20 @@ endif()
+ set(PNG_LIBRARY_TARGETS "")
+ 
+ # Initialize the libpng library file names.
+-if(UNIX
+-   OR (WIN32 AND NOT CMAKE_SHARED_LIBRARY_PREFIX STREQUAL "")
+-   OR (WIN32 AND NOT CMAKE_STATIC_LIBRARY_PREFIX STREQUAL ""))
++if(UNIX OR MINGW OR CYGWIN)
+   # We are on a Unix or Unix-like toolchain like the GNU toolchain on Windows.
+   # Library file names are expected to have an implicit prefix such as "lib".
+   # Let CMake prepend and append its usual prefixes and suffixes by default.
+   set(PNG_SHARED_OUTPUT_NAME "png${PNGLIB_ABI_VERSION}")
+   set(PNG_STATIC_OUTPUT_NAME "png${PNGLIB_ABI_VERSION}")
++elseif(MSVC)
++  # MSVC does not use prefixes for its libraries. Using one breaks Cargo.
++  # Let CMake prepend and append its usual prefixes and suffixes by default.
++  # We also need to use a custom suffix, in order to distinguish between the
++  # shared import library name and the static library name.
++  # -- amyspark
++  set(PNG_SHARED_OUTPUT_NAME "png${PNGLIB_ABI_VERSION}")
++  set(PNG_STATIC_OUTPUT_NAME "png${PNGLIB_ABI_VERSION}_static")
+ else()
+   # We are, most likely, on a Windows toolchain like MSVC, Clang on Windows,
+   # Borland/Embarcadero, etc. We need to specify the "libpng" name explicitly.
+-- 
+2.44.0.windows.1
+
