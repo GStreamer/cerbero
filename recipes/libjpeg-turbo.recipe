@@ -1,19 +1,62 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
     name = 'libjpeg-turbo'
-    version = '1.5.3'
+    version = '3.0.3'
     licenses = [{License.BSD_like: ['LICENSE.md']}]
     stype = SourceType.TARBALL
-    url = 'sf://.tar.gz'
-    tarball_checksum = 'b24890e2bb46e12e72a79f7e965f409f4e16466d00e1dd15d93d73ee6b592523'
+    btype = BuildType.CMAKE
+    library_type = LibraryType.BOTH
+    cmake_generator = 'ninja'
+    can_msvc = True
+    url = 'https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
+    tarball_checksum = '343e789069fc7afbcdfe44dbba7dbbf45afa98a15150e079a38e60e44578865d'
 
-    configure_tpl = "%(config-sh)s --prefix=%(prefix)s "\
-                    "--libdir=%(libdir)s"
-    configure_options = " --with-jpeg8"
-    patches = []
+    configure_options = ' -DWITH_JPEG8=ON -DWITH_TURBOJPEG=ON '
 
     files_libs = ['libjpeg','libturbojpeg']
     files_devel = ['include/jpeglib.h', 'include/jerror.h', 'include/jconfig.h',
                    'include/jmorecfg.h','include/turbojpeg.h', '%(libdir)s/pkgconfig/libjpeg.pc']
+
+    async def configure(self):
+        if self.config.target_platform == Platform.WINDOWS:
+            system_name = 'Windows'
+        elif self.config.target_platform == Platform.LINUX:
+            system_name = 'Linux'
+        elif self.config.target_platform == Platform.DARWIN:
+            system_name = 'Darwin'
+        elif self.config.target_platform == Platform.IOS:
+            system_name = 'iOS'
+
+        # We always need a toolchain file because CMakeLists.txt requires these values to be set.
+        # The Android NDK provides one, so we use that as-is.
+        # This recipe uses these to decide which cpuinfo implementation to use:
+        # https://github.com/libjpeg-turbo/libjpeg-turbo/blob/3.0.3/CMakeLists.txt#L92
+        if self.config.target_platform == Platform.ANDROID:
+            arch = self.config.target_arch
+            if self.config.target_arch == Architecture.ARMv7:
+                arch = 'armeabi-v7a'
+            elif self.config.target_arch == Architecture.ARM64:
+                arch = 'arm64-v8a'
+            self.configure_options += f" -DCMAKE_TOOLCHAIN_FILE={self.config.env['ANDROID_NDK_HOME']}/build/cmake/android.toolchain.cmake -DANDROID_ABI={arch}"
+        else:
+            with open(f'{self.config_src_dir}/toolchain.cmake', 'w') as f:
+                f.write(f'set(CMAKE_SYSTEM_NAME {system_name})\n')
+                f.write(f'set(CMAKE_SYSTEM_PROCESSOR {self.config.target_arch})\n')
+            self.configure_options += f' -DCMAKE_TOOLCHAIN_FILE={self.config_src_dir}/toolchain.cmake'
+
+        await super().configure()
+
+    def post_install(self):
+        # Meson does not generate la files
+        libtool_la = LibtoolLibrary('libjpeg', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=[])
+        libtool_la.save()
+        libtool_la = LibtoolLibrary('libturbojpeg', None, None, None,
+                                    self.config.libdir, self.config.target_platform,
+                                    deps=[])
+        libtool_la.save()
+        super().post_install()
