@@ -1,14 +1,14 @@
-From 18f113d934c736953f915d6accddc90cb91db6d1 Mon Sep 17 00:00:00 2001
+From 14d856db55054662db9f8b086cf22b19b094fbd5 Mon Sep 17 00:00:00 2001
 From: Andoni Morales Alastruey <ylatuya@gmail.com>
 Date: Mon, 28 Oct 2013 13:26:35 +0100
-Subject: [PATCH] neon: fix function export names for iOS armv7
+Subject: [PATCH 1/2] neon: fix function export names for iOS armv7
 
 ---
  arm/filter_neon.S | 16 +++++++++++-----
  1 file changed, 11 insertions(+), 5 deletions(-)
 
 diff --git a/arm/filter_neon.S b/arm/filter_neon.S
-index 3b061d6..ac08afa 100644
+index 2308aad..9e957e4 100644
 --- a/arm/filter_neon.S
 +++ b/arm/filter_neon.S
 @@ -22,6 +22,12 @@
@@ -50,5 +50,5 @@ index 3b061d6..ac08afa 100644
  
  func    png_read_filter_row_sub4_neon, export=1
 -- 
-2.1.0
+2.46.0
 
