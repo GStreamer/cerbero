@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<?include $(sys.CURRENTDIR)\Config.wxi?>
 	<Product Id="$(var.ProductID)" Language="$(var.Language)" Manufacturer="$(var.Manufacturer)"
 			Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)"
 			Version="$(var.Version)">

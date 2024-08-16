@@ -352,8 +352,8 @@ class WixConfig(WixBase):
             self.ui_type = 'WixUI_Mondo'
 
     def write(self, output_dir):
-        config_out_path = os.path.join(output_dir, os.path.basename(self.wix_config))
-        shutil.copy(self.config_path, os.path.join(output_dir, os.path.basename(self.wix_config)))
+        config_out_path = os.path.join(output_dir, os.path.basename(self.wix_config) + self.package.package_mode)
+        shutil.copy(self.config_path, config_out_path)
         replacements = {
             '@ProductID@': '*',
             '@UpgradeCode@': self.package.get_wix_upgrade_code(),
