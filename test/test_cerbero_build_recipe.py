@@ -161,7 +161,7 @@ class TestUniversalRecipe(unittest.TestCase):
         self.config_x86_64 = DummyConfig()
         self.config_x86_64.target_platform = Platform.LINUX
         self.config_x86_64.target_arch = Architecture.X86_64
-        self.recipe = recipe.UniversalFlatRecipe(self.config)
+        self.recipe = recipe.UniversalMergedRecipe(self.config)
         self.recipe_x86 = Recipe(self.config_x86, {})
         self.recipe_x86_64 = Recipe(self.config_x86_64, {})
 
