@@ -654,4 +654,7 @@ class Recipe(custom.GStreamer):
                 self.config.target_platform, deps=['gstreamer-1.0', 'gstapp-1.0', 'gstbase-1.0']).save()
         LibtoolLibrary('gstisoff-1.0', None, None, None, self.config.libdir,
                 self.config.target_platform, deps=['gstreamer-1.0']).save()
+        LibtoolLibrary('gstcodecs-1.0', None, None, None, self.config.libdir,
+                self.config.target_platform,
+                deps=['gstreamer-1.0', 'gstvideo-1.0', 'gstcodecparsers-1.0']).save()
         super().post_install()
