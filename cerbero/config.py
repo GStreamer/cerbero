@@ -117,6 +117,8 @@ class Variants(object):
     }
 
     def __init__(self, variants):
+        # Keeps a list of variants overriden by the user after initialization
+        self.__overridden_variants = set()
         # Set default values
         for v in self.__enabled_variants:
             setattr(self, v, True)
@@ -125,6 +127,8 @@ class Variants(object):
         for v, choices in self.__mapping_variants.items():
             setattr(self, v, choices[0])
         self.override(variants)
+        # reset after all inits
+        self.__overridden_variants.clear()
 
     def set_bool(self, key):
         if key.startswith('no'):
@@ -137,9 +141,19 @@ class Variants(object):
                 m.warning('Variant {!r} is unknown or obsolete'.format(key))
             setattr(self, key, True)
 
-    def override(self, variants):
+    def override(self, variants, force=True):
+        """
+        Override existing variants using value (str) or values (list) from `variants`.
+
+        If `force` is `False`, do not override those variants that are already overridden
+        after the object initialization.
+        """
+
         if not isinstance(variants, list):
             variants = [variants]
+        if not force:
+            variants = [v for v in variants if not self._is_overridden(v)]
+
         # Set the configured values
         for v in variants:
             if '=' in v:
@@ -164,10 +178,13 @@ class Variants(object):
         if '-' in attr:
             raise AssertionError("Variant name {!r} must not contain '-'".format(attr))
         super().__setattr__(attr, value)
+        self.__overridden_variants.add(attr)
         # UWP implies Visual Studio
         if attr == 'uwp' and value:
             self.visualstudio = True
+            self.__overridden_variants.add('visualstudio')
             self.mingw = False
+            self.__overridden_variants.add('mingw')
 
     def __getattr__(self, name):
         if name.startswith('no') and name[2:] in self.bools():
@@ -184,6 +201,17 @@ class Variants(object):
 
     def mappings(self):
         return sorted(self.__mapping_variants)
+
+    def _is_overridden(self, variant):
+        if not isinstance(variant, str):
+            return False
+        if variant.startswith('no'):
+            real_name = variant[2:]
+            if real_name not in self.bools():
+                return False
+        else:
+            real_name = variant
+        return real_name in self.__overridden_variants
 
 
 class Config(object):

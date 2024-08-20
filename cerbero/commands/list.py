@@ -86,6 +86,8 @@ class ShowConfig(Command):
                 print('%25s :' % (n))
                 variants = getattr(config, n).__dict__
                 for v in variants:
+                    if v.startswith('_'):
+                        continue
                     print('%30s : %s' % (v, variants[v]))
             else:
                 print('%25s : %s' % (n, getattr(config, n)))
