@@ -1,14 +1,32 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
 
 
 class Recipe(recipe.Recipe):
     name = 'expat'
-    version = '2.4.8'
+    version = '2.6.2'
     licenses = [{License.BSD_like: ['COPYING']}]
     stype = SourceType.TARBALL
-    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_4_8/%(name)s-%(version)s.tar.xz'
-    tarball_checksum = 'f79b8f904b749e3e0d20afeadecf8249c55b2e32d4ebb089ae378df479dcaf25'
-    configure_options = '--without-docbook'
+    btype = BuildType.CMAKE
+    url = 'https://github.com/libexpat/libexpat/releases/download/R_2_6_2/%(name)s-%(version)s.tar.xz'
+    tarball_checksum = 'ee14b4c5d8908b1bec37ad937607eab183d4d9806a08adee472c3c3121d27364'
+    cmake_generator = 'ninja'
+    can_msvc = True
+    configure_options = '-DEXPAT_BUILD_EXAMPLES=OFF -DEXPAT_BUILD_TESTS=OFF -DEXPAT_BUILD_DOCS=OFF -DEXPAT_BUILD_FUZZERS=OFF -DEXPAT_BUILD_PKGCONFIG=ON'
 
     files_libs = ['libexpat']
     files_devel = ['include/expat.h', 'include/expat_external.h', '%(libdir)s/pkgconfig/expat.pc']
+
+    def prepare(self):
+        # We only want static libs on iOS and Android
+        if self.config.target_platform in (Platform.IOS, Platform.ANDROID):
+            self.configure_options += ' -DBUILD_SHARED_LIBS=OFF '
+            self.library_type = LibraryType.STATIC
+        else:
+            self.library_type = LibraryType.SHARED
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('libexpat', None, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
+        super().post_install()
