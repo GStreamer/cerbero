@@ -477,21 +477,20 @@ def escape_path(path):
 
 
 def get_wix_prefix(config):
-    if 'WIX' in config.env:
-        wix_prefix = os.path.join(config.env['WIX'], 'bin')
-    else:
-        wix_prefix = 'C:/Program Files%s/Windows Installer XML v3.5/bin'
+    wix_prefix = None
+    if config.cross_compiling():
+        return 'C:/Program Files/WiX Toolset v5.0/bin'
+    elif 'WIX5' in os.environ:
+        wix_prefix = os.path.join(os.environ['WIX5'], 'bin')
+    if not wix_prefix or not os.path.exists(wix_prefix):
+        wix_prefix = 'C:/Program Files%s/WiX Toolset v5.0/bin'
+        wix_prefix_x86 = wix_prefix % ' (x86)'
+        wix_prefix = wix_prefix % ''
         if not os.path.exists(wix_prefix):
-            wix_prefix = wix_prefix % ' (x86)'
-    if not os.path.exists(wix_prefix):
-        wix_prefix = 'C:/Program Files%s/Wix Toolset v3.11/bin'
-        if not os.path.exists(wix_prefix):
-            wix_prefix = wix_prefix % ' (x86)'
+            wix_prefix = wix_prefix_x86
     if not os.path.exists(wix_prefix):
         raise FatalError("The required packaging tool 'WiX' was not found")
-    if sys.platform == 'win32':
-        return escape_path(wix_prefix)
-    return escape_path(to_unixpath(wix_prefix))
+    return escape_path(wix_prefix)
 
 
 def add_system_libs(config, new_env, old_env=None):

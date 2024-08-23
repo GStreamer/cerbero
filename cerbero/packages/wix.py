@@ -26,7 +26,14 @@ from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
 from cerbero.packages.package import Package, SDKPackage, App, InstallerPackage
 
-WIX_SCHEMA = 'http://schemas.microsoft.com/wix/2006/wi'
+WIX_SCHEMA = 'http://wixtoolset.org/schemas/v4/wxs'
+WIX_UI_SCHEMA = 'http://wixtoolset.org/schemas/v4/wxs/ui'
+WIX_VS_SCHEMA = 'http://wixtoolset.org/schemas/v4/wxs/vs'
+
+NS = {'': WIX_SCHEMA, 'ui': WIX_UI_SCHEMA, 'vs': WIX_VS_SCHEMA}
+
+for k, v in NS.items():
+    etree.register_namespace(k, v)
 
 
 class VSTemplatePackage(Package):
@@ -82,7 +89,7 @@ class WixBase:
         return selected and '1' or '4'
 
     def _format_absent(self, required):
-        return required and 'disallow' or 'allow'
+        return required and 'yes' or 'no'
 
     def _add_root(self):
         self.root = etree.Element('Wix', xmlns=WIX_SCHEMA)
@@ -162,8 +169,6 @@ class MergeModule(WixBase):
     def _fill(self):
         self._add_root()
         self._add_module()
-        self._add_package()
-        self._add_root_dir()
         self._add_files()
 
     def _add_module(self):
@@ -172,22 +177,16 @@ class MergeModule(WixBase):
             'Module',
             Id=self._format_id(self.package.name),
             Version=self._format_version(self.package.version),
+            Guid=self.package.uuid or self._get_uuid(),
             Language='1033',
         )
-
-    def _add_package(self):
-        self.pkg = etree.SubElement(
+        self.summary = etree.SubElement(
             self.module,
-            'Package',
-            Id=self.package.uuid or self._get_uuid(),
+            'SummaryInformation',
             Description=self.package.shortdesc,
-            Comments=self.package.longdesc,
             Manufacturer=self.package.vendor,
         )
-
-    def _add_root_dir(self):
-        self.rdir = etree.SubElement(self.module, 'Directory', Id='TARGETDIR', Name='SourceDir')
-        self._dirnodes[''] = self.rdir
+        self._dirnodes[''] = self.module
 
     def _add_files(self):
         for f in self.files_list:
@@ -350,6 +349,11 @@ class WixConfig(WixBase):
             self.ui_type = 'WixUI_InstallDir'
         else:
             self.ui_type = 'WixUI_Mondo'
+        # Wine doesn't support other than mszip
+        if config.cross_compiling():
+            self.compression = 'mszip'
+        else:
+            self.compression = 'high'
 
     def write(self, output_dir):
         config_out_path = os.path.join(output_dir, os.path.basename(self.wix_config) + self.package.package_mode)
@@ -367,6 +371,7 @@ class WixConfig(WixBase):
             '@ProgramFilesFolder@': self._program_folder(),
             '@Platform@': self._platform(),
             '@UIType@': self.ui_type,
+            '@Compression@': self.compression,
         }
         shell.replace(config_out_path, replacements)
         return config_out_path
@@ -406,19 +411,17 @@ class MSI(WixBase):
         self.store = store
         self.wix_config = wix_config
         self._parse_sources()
+        self.product = self.root.find('Package', namespaces=NS)
+        if not self.product:
+            raise RuntimeError
         self._add_include()
         self._customize_ui()
-        self.product = self.root.find('.//Product')
         self._add_vs_properties()
 
     def _parse_sources(self):
         sources_path = self.package.resources_wix_installer or os.path.join(self.config.data_dir, self.wix_sources)
-        with open(sources_path, 'r') as f:
+        with open(sources_path, 'r', encoding='utf-8') as f:
             self.root = etree.fromstring(f.read())
-        for element in self.root.iter():
-            element.tag = element.tag[len(WIX_SCHEMA) + 2 :]
-        self.root.set('xmlns', WIX_SCHEMA)
-        self.product = self.root.find('Product')
 
     def _add_include(self):
         if self._with_wine:
@@ -515,10 +518,9 @@ class MSI(WixBase):
         return tdir
 
     def _add_install_dir(self):
-        self.target_dir = self._add_dir(self.product, 'TARGETDIR', 'SourceDir')
-        # FIXME: Add a way to install to ProgramFilesFolder
+        self.target_dir = etree.SubElement(self.product, 'StandardDirectory', Id='ProgramFiles6432Folder')
         if isinstance(self.package, App):
-            installdir = self._add_dir(self.target_dir, '$(var.PlatformProgramFilesFolder)', 'ProgramFilesFolder')
+            installdir = self.target_dir
             self.installdir = self._add_dir(installdir, 'INSTALLDIR', '$(var.ProductName)')
             self.bindir = self._add_dir(self.installdir, 'INSTALLBINDIR', 'bin')
         else:
@@ -632,7 +634,7 @@ class MSI(WixBase):
         key = self._registry_key(name)
 
         # Get INSTALLDIR from the registry key
-        installdir_prop = etree.SubElement(self.product, 'Property', Id='INSTALLDIR')
+        installdir_prop = etree.SubElement(self.product, 'Property', Id='GSTINSTALLDIR')
         etree.SubElement(
             installdir_prop, 'RegistrySearch', Id=name, Type='raw', Root=self.REG_ROOT, Key=key, Name='InstallDir'
         )
@@ -646,8 +648,9 @@ class MSI(WixBase):
             Title=package.shortdesc,
             Level=self._format_level(selected),
             Display='expand',
-            Absent=self._format_absent(required),
         )
+        if required:
+            feature.set('AllowAbsent', 'no')
         deps = self.store.get_package_deps(package, True)
 
         # Add all the merge modules required by this package, but excluding
@@ -664,8 +667,7 @@ class MSI(WixBase):
             etree.SubElement(feature, 'MergeRef', Id=self._package_id(p.name))
         etree.SubElement(feature, 'MergeRef', Id=self._package_id(package.name))
         if isinstance(package, VSTemplatePackage):
-            c = etree.SubElement(feature, 'Condition', Level='0')
-            c.text = 'NOT VS2010DEVENV AND NOT VC2010EXPRESS_IDE'
+            etree.SubElement(feature, 'Level', Value='0', Condition='NOT VS2010DEVENV AND NOT VC2010EXPRESS_IDE')
 
     def _add_start_menu_shortcuts(self):
         # Create a folder with the application name in the Start Menu folder
@@ -700,5 +702,6 @@ class MSI(WixBase):
         etree.SubElement(self.main_feature, 'ComponentRef', Id='ApplicationShortcut')
 
     def _add_vs_properties(self):
+        etree.SubElement(self.product, f'{{{WIX_VS_SCHEMA}}}FindVisualStudio')
         etree.SubElement(self.product, 'PropertyRef', Id='VS2010DEVENV')
         etree.SubElement(self.product, 'PropertyRef', Id='VC2010EXPRESS_IDE')

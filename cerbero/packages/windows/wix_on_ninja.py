@@ -2,13 +2,14 @@
 # SPDX-License-Ref: LGPL-2.1-or-later
 
 from __future__ import annotations
+from enum import Enum
 from pathlib import Path
 import shlex
 import shutil
 import tempfile
 from zipfile import ZipFile
 
-from cerbero.config import Platform
+from cerbero.config import Platform, Architecture
 from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
@@ -17,58 +18,23 @@ from cerbero.packages.wix import Fragment, MergeModule, MSI, VSMergeModule, VSTe
 from cerbero.utils import get_wix_prefix, m, shell
 
 
-class Candle(object):
-    """Compile WiX objects with candle"""
-
-    options = {}
-
-    def compile(self, writer: Writer, inputs: list[str], output: str, implicit_outputs=None, implicit_deps=None):
-        """
-        Write the rules to compile $inputs into $output_dir/$outputs
-        """
-        writer.build(
-            output,
-            'candle',
-            inputs,
-            implicit_outputs=implicit_outputs,
-            implicit=implicit_deps,
-            # Fixes error CNDL0050 : Access to the path '(...)\gstreamer-1.0-net-restricted.wxs.d' is denied.
-            variables={'outdir': f'{Path(output).parent.as_posix()}/'},
-        )
-        writer.newline()
-
-    def rule(writer: Writer, wix_prefix: str, with_wine: bool) -> None:
-        """
-        The template rule for compiling Wix objects
-        """
-        command = [f'{Path(__file__).parent}/wrapper.py', 'wine'] if with_wine else []
-        outdir = 'posix:$outdir' if with_wine else '$outdir'
-        inflag = '--' if with_wine else ''
-        command.extend([(Path(wix_prefix) / 'candle.exe').as_posix(), '-nologo', '-out', outdir, '-wx', inflag, '$in'])
-
-        writer.rule(
-            'candle',
-            ' '.join(command),
-            description='Compiling WiX module $out',
-        )
-        writer.newline()
-
-
 class Light(object):
     """Link WiX objects with light"""
 
     options = {}
 
+    Output = Enum('Output', ['MSM', 'MSI', 'WIXLIB'])
+
     def __init__(self, extra=None):
         self.options['extra'] = [] if extra is None else extra
 
-    def compile(self, writer: Writer, objects: list[str], msi_name: str, merge_module=False, implicit_deps=None):
+    def compile(self, writer: Writer, objects: list[str], msi_name: str, merge_module=Output.MSI, implicit_deps=None):
         """
         Write the rules to link WiX objects together into a MSM/MSI
         """
         if not objects:
             raise RuntimeError('Objects cannot be empty')
-        wix_bin_name = f"{msi_name}.{'msm' if merge_module else 'msi'}"
+        wix_bin_name = f'{msi_name}.{merge_module.name.lower()}'
         writer.build(
             wix_bin_name,
             'light',
@@ -81,15 +47,16 @@ class Light(object):
 
     def rule(writer: Writer, wix_prefix: str, with_wine: bool) -> None:
         """
-        The template rule for linking Wix objects into Merge Modules or MSI installers
+        The template rule for compiling Wix wxs files into Merge Modules or MSI installers
         """
         command = [f'{Path(__file__).parent}/wrapper.py', 'wine'] if with_wine else []
         outobj = 'posix:$out' if with_wine else '$out'
-        inflag = '--' if with_wine else ''
-        # FIXME: remove -sval once the string overflows in component/file keys are solved
-        command.extend(
-            [(Path(wix_prefix) / 'light.exe').as_posix(), '-nologo', '-out', outobj, '$extra', '-sval', inflag, '$in']
-        )
+        if with_wine:
+            # Ninja uses a shell underneath, don't allow splitting on spaces
+            command.extend([f"'{(Path(wix_prefix) / 'wix.exe').as_posix()}'"])
+        else:
+            command.extend([(Path(wix_prefix) / 'wix.exe').as_posix()])
+        command.extend(['build', '-out', outobj, '$extra', '$in'])
 
         if with_wine:
             command.extend(['&&', 'chmod', '0755', '$out'])
@@ -97,7 +64,7 @@ class Light(object):
         writer.rule(
             'light',
             ' '.join(command),
-            description='Linking $out',
+            description='Compiling $out',
         )
 
 
@@ -256,7 +223,6 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             # Set Candle and Light rules up
             writer.comment('Incantations for the WiX Toolkit')
             writer.newline()
-            Candle.rule(writer, self.wix_prefix, self._with_wine)
             Light.rule(writer, self.wix_prefix, self._with_wine)
             StripRule.rule(writer, self.config)
             writer.newline()
@@ -336,21 +302,12 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
         package_name = self.package.name
 
-        implicit_wixobjs = []
         if self.package.wix_use_fragment:
             mergemodule = Fragment(self.config, files_list, self.package)
-            sources = [f'{package_name}-fragment.wxs']
-            wixobj = f'{package_name}-fragment.wxs.d/{package_name}-fragment.wixobj'
+            sources = f'{package_name}-fragment.wxs'
         else:
             mergemodule = MergeModule(self.config, files_list, self.package)
-            sources = [f'{package_name}.wxs']
-            wixobj = f'{package_name}.wxs.d/{package_name}.wixobj'
-
-        sources.append((Path(self.config.data_dir).absolute() / 'wix' / 'utils.wxs').as_posix())
-        if self.package.wix_use_fragment:
-            implicit_wixobjs = [f'{package_name}-fragment.wxs.d/utils.wixobj']
-        else:
-            implicit_wixobjs = [f'{package_name}.wxs.d/utils.wixobj']
+            sources = f'{package_name}.wxs'
 
         # There's a ready-made stripped folder here
         implicit_deps = None
@@ -358,21 +315,20 @@ class MergeModuleWithNinjaPackager(PackagerBase):
             implicit_deps = [stripped_dir]
             mergemodule.prefix = Path(self.output_dir / stripped_dir).as_posix()
 
-        mergemodule_path = Path(self.output_dir / sources[0]).absolute()
+        mergemodule_path = Path(self.output_dir / sources).absolute()
         if mergemodule_path.exists():
             raise RuntimeError(f'Merge module manifest {mergemodule_path} already exists')
         mergemodule.write(mergemodule_path.as_posix())
 
-        # Insert rules
-        Candle().compile(writer, sources, wixobj, implicit_wixobjs, implicit_deps)
-
         # Render deliverables
-        if self.package.wix_use_fragment:
-            path = wixobj
-        else:
-            wixobjs = [wixobj]
-            wixobjs.extend(implicit_wixobjs)
-            path = Light().compile(writer, wixobjs, package_name, merge_module=True)
+        wixobjs = [mergemodule_path.as_posix()]
+        path = Light().compile(
+            writer,
+            wixobjs,
+            package_name,
+            implicit_deps=implicit_deps,
+            merge_module=Light.Output.WIXLIB if self.package.wix_use_fragment else Light.Output.MSM,
+        )
 
         return path
 
@@ -389,12 +345,13 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
 
 class MSIWithNinjaPackager(PackagerBase):
-    UI_EXT = ['-ext', 'WixUIExtension']
-    UTIL_EXT = ['-ext', 'WixUtilExtension']
+    UI_EXT = ['-ext', 'WiXToolset.UI.wixext']
+    VS_EXT = ['-ext', 'WixToolset.VisualStudio.wixext']
 
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
+        self.architecture = config.target_arch
         self.wix_prefix = get_wix_prefix(config)
 
     def pack(self, output_dir, devel=False, force=False, keep_temp=False):
@@ -431,7 +388,6 @@ class MSIWithNinjaPackager(PackagerBase):
 
             # Set Candle and Light rules up
             writer.comment('Incantations for the WiX Toolkit')
-            Candle.rule(writer, self.wix_prefix, self._with_wine)
             Light.rule(writer, self.wix_prefix, self._with_wine)
             StripRule.rule(writer, self.config)
 
@@ -533,7 +489,6 @@ class MSIWithNinjaPackager(PackagerBase):
         return config_path
 
     def _create_msi(self, writer: Writer, config_path) -> Path:
-        sources = []
         wixobjs = []
 
         # Make the MSI manifest relative to the Ninja root.
@@ -542,29 +497,21 @@ class MSIWithNinjaPackager(PackagerBase):
         MSI(self.config, self.package, self.packagedeps, config_path, self.store).write(
             (self.output_dir / msi_manifest).as_posix()
         )
-        sources.append(msi_manifest)
-        sources.append((Path(self.config.data_dir).absolute() / 'wix' / 'utils.wxs').as_posix())
+        wixobjs.append(msi_manifest)
 
-        # List the object files that Candle will generate.
-        # (Again, relative to the output_dir)
-        wixobj = f'{self._package_name()}.msi.d/{self._package_name()}.wixobj'
-
-        implicit_wixobjs = [f'{self._package_name()}.msi.d/utils.wixobj']
-
-        # Insert the rules into the Ninja file.
-        Candle().compile(writer, sources, wixobj, implicit_wixobjs)
-
-        wixobjs = [wixobj]
-        wixobjs.extend(implicit_wixobjs)
         if self.package.wix_use_fragment:
             wixobjs.extend(self.merge_modules[self.package.package_mode])
             implicit_deps = []
         else:
             implicit_deps = self.merge_modules[self.package.package_mode]
 
-        path = Light([*self.UI_EXT, *self.UTIL_EXT]).compile(
-            writer, wixobjs, self._package_name(), implicit_deps=implicit_deps
-        )
+        args = [*self.UI_EXT, *self.VS_EXT]
+        if self.architecture == Architecture.X86_64:
+            args += ['-arch', 'x64']
+        else:
+            args += ['-arch', self.architecture]
+
+        path = Light(args).compile(writer, wixobjs, self._package_name(), implicit_deps=implicit_deps)
 
         return path
 

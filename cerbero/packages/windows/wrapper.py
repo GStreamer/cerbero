@@ -34,4 +34,5 @@ if __name__ == '__main__':
         new_argv,
         stdout=stdout,
         stderr=stderr,
+        shell=False,  # Disallow interpreting the path to WiX v5
     )

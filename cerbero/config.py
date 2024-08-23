@@ -520,7 +520,6 @@ class Config(object):
         )
         for each in runtime_env:
             env[each] = to_winepath(env[each])
-        env['WIX'] = os.path.join(self.build_tools_prefix, 'lib', 'wix')
         # NOTE: Ensure that whatever directory this goes into is ignored by the
         # .cerbero deps CI job otherwise we will tar up ~1GB of generated data.
         env['WINEPREFIX'] = os.path.join(self.build_tools_prefix, 'var', 'tmp', 'wine')

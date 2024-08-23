@@ -6,12 +6,10 @@
 <?define Language = "@Language@" ?>
 <?define Manufacturer = "@Manufacturer@" ?>
 <?define Version = "@Version@" ?>
-<?define PackageComments = "@PackageComments@" ?>
 <?define Description = "@Description@" ?>
-<?define WebSiteName = "@ProjectURL" ?>
+<?define WebSiteName = "@ProjectURL@" ?>
 <?define ProductName = "@ProductName@" ?>
-<?define PlatformProgramFilesFolder = "@ProgramFilesFolder@" ?>
-<?define Platform = "@Platform@" ?>
 <?define UIType = "@UIType@" ?>
+<?define Compression = "@Compression@" ?>
 
 </Include>

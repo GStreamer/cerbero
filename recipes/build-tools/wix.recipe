@@ -1,32 +1,28 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 import os
-import shutil
 from cerbero.utils import shell
 
 
 class Recipe(recipe.Recipe):
     name = 'wix'
-    version = '3.11.1'
+    version = '5.0.1'
     stype = SourceType.TARBALL
-    url = 'https://github.com/wixtoolset/wix3/releases/download/wix3111rtm/wix311-binaries.zip'
-    tarball_checksum = '37f0a533b0978a454efb5dc3bd3598becf9660aaf4287e55bf68ca6b527d051d'
+    url = 'https://github.com/wixtoolset/wix/releases/download/v%(version)s/wix-cli-x64.msi'
+    tarball_checksum = 'c07686d17feed239b9dfa2fc2c14967e0fa03d693b87a4da49548a17b74229a9'
     deps = ['winetricks', 'wine-mono']
     btype = BuildType.CUSTOM
 
     async def extract(self):
-        if os.path.exists(self.build_dir):
-            shutil.rmtree(self.build_dir)
-        os.makedirs(self.build_dir)
-        await shell.unpack(os.path.join(self.download_dir, self.tarball_name), self.build_dir)
+        pass
 
     async def install(self):
-        shell.copy_dir(self.build_dir, os.path.join(self.config.prefix, 'lib', 'wix', 'bin'))
-        # wineconsole fails trying to get env var in a VT with DISPLAY.
-        # This is working on docker buildbot and on a real terminal.
-        winetricks_tool = os.path.join(self.config.prefix, 'bin', 'winetricks')
-        if not 'DISPLAY' in self.env:
-          self.env['WINE'] = "wineconsole"
-        if self.config.target_platform == Platform.WINDOWS and \
-           self.config.platform == Platform.LINUX:
-          await shell.async_call([winetricks_tool, '-q', 'dotnet40'], env=self.env)
-
+        if self.config.platform == Platform.LINUX:
+            wine_path = os.path.join(self.config.prefix, 'share', 'wine')
+            if not os.path.exists(wine_path):
+                os.makedirs(wine_path)
+            # Override the environment with the Wine prefix
+            env = self.config.get_wine_runtime_env(self.config.prefix, self.env)
+            winetricks_tool = os.path.join(self.config.prefix, 'bin', 'winetricks')
+            await shell.async_call(['xvfb-run', winetricks_tool, '-q', 'dotnet6'], env=env, logfile=self.logfile)
+            await shell.async_call(['wine', 'msiexec', '/i', os.path.join(self.download_dir, self.tarball_name)],
+                cmd_dir=wine_path, env=env, logfile=self.logfile)

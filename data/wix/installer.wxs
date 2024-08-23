@@ -1,14 +1,8 @@
-<?xml version="1.0" ?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-	<Product Id="$(var.ProductID)" Language="$(var.Language)" Manufacturer="$(var.Manufacturer)"
-			Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)"
-			Version="$(var.Version)">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui" xmlns:vs="http://wixtoolset.org/schemas/v4/wxs/vs">
+	<Package Language="$(var.Language)" Manufacturer="$(var.Manufacturer)" Name="$(var.ProductName)" UpgradeCode="$(var.UpgradeCode)" Version="$(var.Version)" ProductCode="$(var.ProductID)">
+		<SummaryInformation Description="$(var.Description)" Manufacturer="$(var.Manufacturer)"/>
 
-		<Package Comments="$(var.PackageComments)" Compressed="yes"
-			Description="$(var.Description)" InstallPrivileges="elevated"
-			Manufacturer="$(var.Manufacturer)"/>
-
-		<MediaTemplate EmbedCab="yes" MaximumUncompressedMediaSize="50" />
+		<MediaTemplate EmbedCab="yes" MaximumUncompressedMediaSize="50" CompressionLevel="$(var.Compression)"/>
 
 		<!-- Upgrades -->
 		<MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed. Setup will now exit"/>
@@ -17,15 +11,9 @@
 		<Property Id="ARPPRODUCTICON" Value="MainIcon" />
 		<Property Id="ARPCONTACT" Value="$(var.Manufacturer)" />
 		<Property Id="ARPURLINFOABOUT" Value="$(var.WebSiteName)" />
-		<Property Id="ALLUSERS">1</Property>
 		
 		<!-- UI -->
-		<CustomAction Execute="firstSequence" Id="SetWixUIInstallDir" Property="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
-		<InstallUISequence>
-			<Custom Action="SetWixUIInstallDir" Before="CostInitialize"/>
-		</InstallUISequence>
-		<Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR"/>
-
-		<UIRef Id="$(var.UIType)"/>
-	</Product>
+		<SetProperty Id="INSTALLDIR" Value="[GSTINSTALLDIR]" Before="CostInitialize" Sequence="both" Condition="GSTINSTALLDIR"/>
+		<ui:WixUI Id="$(var.UIType)" InstallDirectory="INSTALLDIR"/>
+	</Package>
 </Wix>
