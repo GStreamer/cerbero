@@ -17,7 +17,7 @@
 # Boston, MA 02111-1307, USA.
 
 import os
-from cerbero.utils import etree, to_winpath
+from cerbero.utils import etree, to_winpath, xmlwrite
 
 
 class PropsBase(object):
@@ -53,7 +53,7 @@ class PropsBase(object):
 
     def create(self, outdir):
         el = etree.ElementTree(self.root)
-        el.write(os.path.join(outdir, '%s.props' % self.name), encoding='utf-8', pretty_print=True)
+        xmlwrite(el, os.path.join(outdir, '%s.props' % self.name))
 
     def _add_compiler_props(self):
         self.compiler = etree.SubElement(self.item_definition_group, 'ClCompile')

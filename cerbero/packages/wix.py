@@ -20,7 +20,7 @@ import os
 import uuid
 import shutil
 
-from cerbero.utils import etree, to_winepath, shell
+from cerbero.utils import etree, to_winepath, shell, xmlwrite
 from cerbero.errors import FatalError
 from cerbero.config import Platform, Architecture
 from cerbero.packages import PackageType
@@ -83,7 +83,7 @@ class WixBase:
     def write(self, filepath):
         self.fill()
         tree = etree.ElementTree(self.root)
-        tree.write(filepath, encoding='utf-8', pretty_print=True)
+        xmlwrite(tree, filepath)
 
     def _format_level(self, selected):
         return selected and '1' or '4'

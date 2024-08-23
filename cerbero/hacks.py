@@ -23,45 +23,6 @@ import sys
 import pathlib
 
 
-### XML Hacks ###
-
-import re
-import io
-from xml.dom import minidom
-
-try:
-    import xml.etree.cElementTree as etree
-except ImportError:
-    from lxml import etree
-
-oldwrite = etree.ElementTree.write
-
-
-def pretify(string, pretty_print=True):
-    parsed = minidom.parseString(string)
-    # See:http://www.hoboes.com/Mimsy/hacks/geektool-taskpaper-and-xml/
-    fix = re.compile(r'((?<=>)(\n[\t]*)(?=[^<\t]))|(?<=[^>\t])(\n[\t]*)(?=<)')
-    return re.sub(fix, '', parsed.toprettyxml())
-
-
-def write(self, file_or_filename, encoding=None, pretty_print=False):
-    if not pretty_print:
-        return oldwrite(self, file_or_filename, encoding)
-    tmpfile = io.BytesIO()
-    oldwrite(self, tmpfile, encoding)
-    tmpfile.seek(0)
-    if hasattr(file_or_filename, 'write'):
-        out_file = file_or_filename
-    else:
-        out_file = open(file_or_filename, 'wb')
-    out_file.write(pretify(tmpfile.read()).encode())
-    if not hasattr(file_or_filename, 'write'):
-        out_file.close()
-
-
-etree.ElementTree.write = write
-
-
 ### Windows Hacks ###
 
 # we don't want backlashes in paths as it breaks shell commands
