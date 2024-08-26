@@ -4,18 +4,27 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'json-glib'
-    version = '1.6.2'
+    version = '1.9.2'
     licenses = [License.LGPLv2_1Plus]
     btype = BuildType.MESON
     stype = SourceType.TARBALL
     url = 'gnome://'
-    tarball_checksum = 'a33d66c6d038bda46b910c6c6d59c4e15db014e363dc997a0414c2e07d134f24'
+    tarball_checksum = '8f9f04e0045bda82affd464ee575796600fe29014b817392a3b72ceb2d10c595'
     deps = ['glib']
 
     files_bins = ['json-glib-validate', 'json-glib-format']
     files_libs = ['libjson-glib-1.0']
     files_devel  = ['include/json-glib-1.0', '%(libdir)s/pkgconfig/json-glib-1.0.pc']
     files_typelibs = ['Json-1.0']
+
+    patches = [
+        f'{name}/0001-Fix-compiler-error-with-clang-17.patch',
+    ]
+
+    def prepare(self):
+        if self.config.platform == Platform.WINDOWS:
+            # COPYING is a symlink
+            self.force_tarfile = True
 
     def post_install (self):
         lib = LibtoolLibrary('json-glib-1.0', None, None, None, self.config.libdir,
