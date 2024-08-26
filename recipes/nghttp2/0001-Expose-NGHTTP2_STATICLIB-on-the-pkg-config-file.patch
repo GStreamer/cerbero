@@ -1,0 +1,39 @@
+From b5fc31efb6c100da399c3660f3ad313b223142cc Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 27 Aug 2024 21:13:41 -0300
+Subject: [PATCH] Expose NGHTTP2_STATICLIB on the pkg-config file
+
+---
+ CMakeLists.txt       | 5 +++++
+ lib/libnghttp2.pc.in | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d500bb4..47c6d43 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -393,6 +393,11 @@ set(exec_prefix     "${CMAKE_INSTALL_PREFIX}")
+ set(libdir          "${CMAKE_INSTALL_FULL_LIBDIR}")
+ set(includedir      "${CMAKE_INSTALL_FULL_INCLUDEDIR}")
+ set(VERSION         "${PACKAGE_VERSION}")
++if(BUILD_SHARED_LIBS OR NOT WIN32)
++  set(DEFINE_EXPORT)
++else()
++  set(DEFINE_EXPORT "-DNGHTTP2_STATICLIB")
++endif()
+ # For init scripts and systemd service file (in contrib/)
+ set(bindir          "${CMAKE_INSTALL_FULL_BINDIR}")
+ set(sbindir         "${CMAKE_INSTALL_FULL_SBINDIR}")
+diff --git a/lib/libnghttp2.pc.in b/lib/libnghttp2.pc.in
+index da6938f..2820c84 100644
+--- a/lib/libnghttp2.pc.in
++++ b/lib/libnghttp2.pc.in
+@@ -30,4 +30,4 @@ Description: HTTP/2 C library
+ URL: https://github.com/tatsuhiro-t/nghttp2
+ Version: @VERSION@
+ Libs: -L${libdir} -lnghttp2
+-Cflags: -I${includedir}
++Cflags: -I${includedir} @DEFINE_EXPORT@
+-- 
+2.44.0.windows.1
+
