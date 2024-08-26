@@ -4,31 +4,20 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'glib-networking'
-    version = '2.74.0'
+    version = '2.80.0'
     licenses = [{License.LGPLv2Plus: None, License.Misc: ['LICENSE_EXCEPTION']}]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '1f185aaef094123f8e25d8fa55661b3fd71020163a0174adb35a37685cda613b'
+    tarball_checksum = 'd8f4f1aab213179ae3351617b59dab5de6bcc9e785021eee178998ebd4bb3acf'
 
+    # static_modules is now governed by default_library
+    # https://gitlab.gnome.org/GNOME/glib-networking/-/commit/270d54a5ef9a3c9cb96997dbe0fbcb329dbf80e8
     meson_options = {'libproxy': 'enabled', 'gnome_proxy': 'disabled',
-                     'gnutls': 'disabled', 'openssl': 'enabled',
-                     # Also build static modules on some platforms
-                     # (see below)
-                     'static_modules': 'true'}
+                     'gnutls': 'disabled', 'openssl': 'enabled'}
     deps = ['glib', 'libproxy']
     # openssl on Linux
     use_system_libs = True
-
-    patches = [
-        # https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/229
-        f'{name}/0001-Don-t-try-to-use-keychain-CA-certificates-on-iOS.patch',
-        # To apply 0004 and 0005 cleanly
-        f'{name}/0002-Do-not-install-shared-module-when-only-static-is-nee.patch',
-        f'{name}/0003-Fix-static-link-on-Windows.patch',
-        f'{name}/0004-libproxy-proxy-module-Mark-plugin-functions-as-expor.patch',
-        f'{name}/0005-environment-proxy-module-Mark-plugin-functions-as-ex.patch',
-    ]
 
     files_misc = ['%(libdir)s/gio/modules/libgioopenssl%(mext)s']
     files_lang = ['glib-networking']
@@ -37,7 +26,6 @@ class Recipe(recipe.Recipe):
     def prepare(self):
         # Glib doesn't support static libraries on Windows yet
         if self.config.target_platform == Platform.WINDOWS:
-            self.meson_options['static_modules'] = 'false'
             self.library_type = LibraryType.SHARED
         else:
             self.files_devel.append(
