@@ -1,0 +1,43 @@
+From 49d06a2cb9f244fc8b4d83b4561484ce10fa1913 Mon Sep 17 00:00:00 2001
+From: Seungha Yang <seungha@centricular.com>
+Date: Thu, 22 Apr 2021 15:11:34 +0900
+Subject: [PATCH 24/24] meson: Add workaround for Visual Studio 2019 ARM build
+
+See https://developercommunity.visualstudio.com/t/vs2019-1662-c2039-wait-for-is-not-a-member-of-winr/1080777
+---
+ glib/meson.build | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/glib/meson.build b/glib/meson.build
+index 9a53f777d..e33c6e219 100644
+--- a/glib/meson.build
++++ b/glib/meson.build
+@@ -355,6 +355,7 @@ glib_sources += files(
+ 
+ platform_deps = []
+ 
++extra_cpp_args = []
+ if host_system == 'windows'
+   if glib_build_shared
+     glib_win_rc = configure_file(
+@@ -368,6 +369,9 @@ if host_system == 'windows'
+   glib_sources += files('gwin32.c', 'gspawn-win32.c', 'giowin32.c')
+   if glib_conf.has('G_WINAPI_ONLY_APP')
+     glib_sources += files('gutils-winrt.cpp')
++    # Visual Studio 2019
++    # https://developercommunity.visualstudio.com/t/vs2019-1662-c2039-wait-for-is-not-a-member-of-winr/1080777
++    extra_cpp_args += ['/Zc:twoPhase-']
+   endif
+   platform_deps = [winsock2, cc.find_library('winmm')]
+   if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
+@@ -433,6 +437,7 @@ libglib = library('glib-2.0',
+     thread_dep,
+   ],
+   c_args : glib_c_args,
++  cpp_args : glib_c_args + extra_cpp_args,
+   objc_args : glib_c_args,
+   gnu_symbol_visibility : 'hidden',
+ )
+-- 
+2.44.0.windows.1
+

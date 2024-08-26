@@ -1,0 +1,53 @@
+From 981d2278bdb9482a93f51906884ba213e7397061 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 10 Sep 2024 10:55:56 -0300
+Subject: [PATCH 2/2] Revert "build: Do not install generated GLib GIR files"
+
+This reverts commit afbe7697e019e95a4267088891adbbb4ddeccc3d.
+---
+ gir/meson.build | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/gir/meson.build b/gir/meson.build
+index 69740b1c..9aafc8b0 100644
+--- a/gir/meson.build
++++ b/gir/meson.build
+@@ -238,6 +238,8 @@ glib_gir = custom_target('gir-glib',
+   output: 'GLib-2.0.gir',
+   depends: [gir_giscanner_pymod, glib_gir_dep, gdump],
+   depend_files: gir_giscanner_built_files,
++  install: true,
++  install_dir: girdir,
+   env: g_ir_scanner_env,
+   command: glib_command + [
+     '--cflags-begin'] + glib_includes + extra_giscanner_cflags + [
+@@ -305,6 +307,8 @@ gobject_gir = custom_target('gir-gobject',
+   output: 'GObject-2.0.gir',
+   depends: [glib_gir, gir_giscanner_pymod, gobject_gir_dep, gdump],
+   depend_files: gir_giscanner_built_files,
++  install: true,
++  install_dir: girdir,
+   env: g_ir_scanner_env,
+   command: gobject_command + [
+     '--include-uninstalled=' + glib_gir.full_path(),
+@@ -357,6 +361,8 @@ gir_files += custom_target('gir-gmodule',
+   output: 'GModule-2.0.gir',
+   depends: [glib_gir, gir_giscanner_pymod, gmodule_gir_dep, gdump],
+   depend_files: gir_giscanner_built_files,
++  install: true,
++  install_dir: girdir,
+   env: g_ir_scanner_env,
+   command: gmodule_command + [
+     '--include-uninstalled=' + glib_gir.full_path(),
+@@ -452,6 +458,8 @@ gio_gir = custom_target('gir-gio',
+   output: 'Gio-2.0.gir',
+   depends: [gobject_gir, gir_giscanner_pymod, gio_gir_dep, gdump],
+   depend_files: gir_giscanner_built_files,
++  install: true,
++  install_dir: girdir,
+   env: g_ir_scanner_env,
+   command: gio_command + [
+     '--include-uninstalled=' + gobject_gir.full_path(),
+-- 
+2.44.0.windows.1
+

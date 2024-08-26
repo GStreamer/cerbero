@@ -1,7 +1,7 @@
-From e4b268180159559b768065025c5608d64c8ce75f Mon Sep 17 00:00:00 2001
+From 12a6b6c0a123edb04a9878f913d01e00eb592b94 Mon Sep 17 00:00:00 2001
 From: Nirbheek Chauhan <nirbheek@centricular.com>
 Date: Thu, 9 Jul 2020 00:04:22 +0530
-Subject: [PATCH 03/25] gpoll: UWP does not need to poll a msg_fd
+Subject: [PATCH 03/24] gpoll: UWP does not need to poll a msg_fd
 
 msg_fd is only set when we need to handle win32 Window Messages, which
 are not available when building with UWP.
@@ -10,7 +10,7 @@ are not available when building with UWP.
  1 file changed, 14 insertions(+)
 
 diff --git a/glib/gpoll.c b/glib/gpoll.c
-index 5afc759..148f551 100644
+index 5afc7596d..148f55107 100644
 --- a/glib/gpoll.c
 +++ b/glib/gpoll.c
 @@ -151,8 +151,15 @@ poll_rest (GPollFD *msg_fd,
@@ -46,5 +46,5 @@ index 5afc759..148f551 100644
      ready = WaitForMultipleObjects (nthreads, thread_handles, FALSE, timeout);
  
 -- 
-2.38.1
+2.44.0.windows.1
 

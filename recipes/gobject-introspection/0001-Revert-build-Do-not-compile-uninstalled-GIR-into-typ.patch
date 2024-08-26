@@ -1,0 +1,123 @@
+From d99b55c7c175e203754baf2b7fcc37bfa4b2926d Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 10 Sep 2024 10:55:41 -0300
+Subject: [PATCH 1/2] Revert "build: Do not compile uninstalled GIR into
+ typelib"
+
+This reverts commit 6a5fe47496336578806c9d74adba02e9f86fbba8.
+---
+ gir/meson.build | 46 ++++++++++------------------------------------
+ 1 file changed, 10 insertions(+), 36 deletions(-)
+
+diff --git a/gir/meson.build b/gir/meson.build
+index 3a016831..69740b1c 100644
+--- a/gir/meson.build
++++ b/gir/meson.build
+@@ -12,9 +12,6 @@ gir_files = [
+   'xrandr-1.3.gir',
+   'win32-1.0.gir',
+ ]
+-
+-uninstalled_gir_files = []
+-
+ # Copy gir files to build directory to have them all in a single place.
+ # This is needed when gobject-introspection is a subproject because Meson
+ # will add --includedir pointing to build directory automatically.
+@@ -253,7 +250,7 @@ glib_gir = custom_target('gir-glib',
+   ]
+ )
+ 
+-uninstalled_gir_files += glib_gir
++gir_files += glib_gir
+ 
+ # GObject
+ gobject_files = []
+@@ -319,7 +316,7 @@ gobject_gir = custom_target('gir-gobject',
+   ]
+ )
+ 
+-uninstalled_gir_files += gobject_gir
++gir_files += gobject_gir
+ 
+ # GModule
+ gmodule_files = []
+@@ -355,7 +352,7 @@ endif
+ # out of date.
+ gmodule_files += files('gmodule-2.0.c')
+ 
+-uninstalled_gir_files += custom_target('gir-gmodule',
++gir_files += custom_target('gir-gmodule',
+   input: gmodule_files,
+   output: 'GModule-2.0.gir',
+   depends: [glib_gir, gir_giscanner_pymod, gmodule_gir_dep, gdump],
+@@ -466,7 +463,7 @@ gio_gir = custom_target('gir-gio',
+   ]
+ )
+ 
+-uninstalled_gir_files += gio_gir
++gir_files += gio_gir
+ 
+ # GIRepository
+ 
+@@ -507,19 +504,17 @@ gir_files += custom_target('gir-girepository',
+ 
+ typelibs = []
+ if get_option('gi_cross_binary_wrapper') != ''
+-  gircompiler_command = [get_option('gi_cross_binary_wrapper'), gircompiler.full_path(), ]
++    gircompiler_command = [get_option('gi_cross_binary_wrapper'), gircompiler.full_path(), ]
+ else
+-  gircompiler_command = [gircompiler, ]
++    gircompiler_command = [gircompiler, ]
+ endif
+ 
+-gircompiler_command += [
+-  '-o', '@OUTPUT@',
+-  '@INPUT@',
+-  '--includedir', meson.current_build_dir(),
+-  '--includedir', meson.current_source_dir(),
++gircompiler_command += [ '-o', '@OUTPUT@', '@INPUT@',
++              '--includedir', meson.current_build_dir(),
++              '--includedir', meson.current_source_dir(),
+ ]
+ 
+-foreach gir: gir_files
++foreach gir : gir_files
+   typelibs += custom_target('generate-typelib-@0@'.format(gir).underscorify(),
+     input: gir,
+     output: '@BASENAME@.typelib',
+@@ -530,15 +525,6 @@ foreach gir: gir_files
+   )
+ endforeach
+ 
+-foreach gir: uninstalled_gir_files
+-  typelibs += custom_target('generate-typelib-@0@'.format(gir).underscorify(),
+-    input: gir,
+-    output: '@BASENAME@.typelib',
+-    depends: [gobject_gir, gircompiler, ],
+-    command: gircompiler_command,
+-  )
+-endforeach
+-
+ rnc2rng = find_program('rnc2rng', native: true, required: false)
+ if rnc2rng.found()
+   validate_gir = find_program('../misc/validate-gir.py')
+@@ -554,16 +540,4 @@ if rnc2rng.found()
+       workdir: meson.current_build_dir(),
+     )
+   endforeach
+-
+-  foreach gir: uninstalled_gir_files
+-    gir_name = gir.full_path().split('/')[-1]
+-    test('validate-@0@'.format(gir_name).underscorify(),
+-      python,
+-      args: [
+-        validate_gir.full_path(),
+-        '--schema=@0@'.format(meson.current_source_dir() / '../docs/gir-1.2.rnc'),
+-        gir,
+-      ],
+-    )
+-  endforeach
+ endif
+-- 
+2.44.0.windows.1
+
