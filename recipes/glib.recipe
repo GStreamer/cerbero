@@ -22,55 +22,42 @@ GLIB_CONFIG_UNVERSAL='''\
 '''
 
 class Recipe(recipe.Recipe):
-    name = 'glib'
-    version = '2.74.4'
+    ###
+    # Glib now requires gobject-introspection to be available beforehand.
+    # To break the circular dependency, they recommend building a
+    # introspection-less Glib first, then gobject-introspection.
+    # See https://gitlab.gnome.org/GNOME/glib/-/commit/fe32c3f5c5155eab5cd4838867b0c95beefa2239
+    ###
+
+    name = 'glib' # 'glib-base'
+    version = '2.80.5'
     stype = SourceType.TARBALL
-    url = 'gnome://'
-    tarball_checksum = '0e82da5ea129b4444227c7e4a9e598f7288d1994bf63f129c44b90cfd2432172'
+    url = 'gnome://glib/%(maj_ver)s/glib-%(version)s.tar.xz'
+    tarball_dirname = 'glib-%(version)s'
+    tarball_checksum = '9f23a9de803c695bbfde7e37d6626b18b9a83869689dd79019bf3ae66c3e6771'
     licenses = [License.LGPLv2Plus]
     btype = BuildType.MESON
-    meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'iconv': 'auto'}
+    meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'tests': 'true', 'introspection': 'disabled'}
     deps = ['libffi', 'zlib', 'pcre2']
 
     patches = [
-        'glib/0003-Add-support-for-loading-GIO-modules-from-the-distro-.patch',
-        'glib/0004-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch',
-        'glib/0006-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
-        'glib/0008-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
+        'glib/0001-Add-support-for-loading-GIO-modules-from-the-distro-.patch',
+        'glib/0002-Allow-for-a-second-distro-GIO-module-path-as-used-on.patch',
+        'glib/0003-giomodule-do-not-try-to-load-modules-from-gio-module.patch',
+        'glib/0004-Unhide-_g_io_modules_ensure_extension_points_registe.patch',
         # TODO upstreaming
-        'glib/0001-meson-Fix-detection-of-a-system-provided-proxy-libin.patch',
+        'glib/0005-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
         # TODO upstreaming
-        'glib/0001-gio-gsocket-fix-compiler-warnings-on-armv7-Android.patch',
-        # TODO upstreaming
-        'glib/0001-gtypes.h-workaround-for-g_uint64_checked_mul-issue-w.patch',
-        # TODO upstreaming
-        'glib/0001-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
-        # From post-2.74.4 glib upstream (remove when bumping version)
-        'glib/0001-gthread-posix-need-to-include-errno.h.patch',
-        # Upstreamed since 2.75 (remove when bumping version)
-        'glib/0001-giomodule-Automatically-detect-modules-on-macOS.patch',
+        'glib/0006-gio-fix-duplicate-g_trace_-symbols-in-static-libs-wi.patch',
         # futex_time64 is seccomp blocked in Android API level < 30
         # Upstreamed since 2.81 (remove when bumping version)
-        f'{name}/0009-glib-gthread-posix-Block-futex_time64-usage-on-Andro.patch',
-        f'{name}/0010-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
-        f'{name}/0011-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
-        f'{name}/0012-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch',
-        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
-        # backported into 2.74.6
-        'glib/0001-Fix-safe_wspawnve-define.patch',
-        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3361
-        # (import fs needed for the patches below)
-        'glib/0020-meson-Add-glib_valgrind_suppressions-variable-to-gli.patch',
-        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3666
-        'glib/0021-build-Change-configure_file-to-fs.copyfile-when-copy.patch',
-        # Upstream commit a61888bceb2b4d23bdc82e579fa3c99c69a7a9fa, landed in 2.79.0
-        'glib/0022-tests-Fix-dependency-of-test.gresource-on-test-gener.patch',
-        # Upstream commit 1fdbc0638580c384f122a7021f570398ad1adb7e, landed in 2.79.0
-        # (backported into 2.74.6)
-        'glib/0023-meson-Add-missing-dependencies-for-utility-files-for.patch',
+        'glib/0007-glib-gthread-posix-Block-futex_time64-usage-on-Andro.patch',
+        'glib/0008-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
+        'glib/0009-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
+        'glib/0010-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch',
         # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/4125
         # From 2.81.1, backported into 2.74.6
-        'glib/0024-Merge-branch-pr-fix_some_windows_testsuite_failures-.patch',
+        'glib/0011-Merge-branch-pr-fix_some_windows_testsuite_failures-.patch',
     ]
 
     files_libs = [
@@ -166,6 +153,8 @@ class Recipe(recipe.Recipe):
             # Want secure versions of stdlib functions. Glib already defines
             # _WIN32_WINNT, so undefine it on the cmdline to avoid warnings
             self.append_env('CFLAGS', '-DMINGW_HAS_SECURE_API=1', '-U_WIN32_WINNT')
+            # Old MinGW requires this define for using llu in inttypes.h
+            self.append_env('CFLAGS', '-D__USE_MINGW_ANSI_STDIO=1')
             # TODO: upstream
             if self.config.variants.uwp:
                 # gdbus is completely disabled at present
@@ -177,30 +166,29 @@ class Recipe(recipe.Recipe):
                     'glib/uwp/0002-glib-Never-use-MessageBox-on-UWP-apps.patch',
                     'glib/uwp/0003-gpoll-UWP-does-not-need-to-poll-a-msg_fd.patch',
                     'glib/uwp/0004-win_iconv-Use-LoadPackagedLibrary-when-building-UWP-.patch',
-                    'glib/uwp/0005-glib-getpid-is-available-on-Win32-but-not-WinRT.patch',
-                    'glib/uwp/0006-goption-Do-not-call-GetCommandlineW-on-UWP.patch',
-                    'glib/uwp/0007-gmodule-Fix-some-more-WinRT-incompatibilities.patch',
-                    'glib/uwp/0008-gutils-Can-t-fetch-the-username-on-UWP.patch',
-                    'glib/uwp/0009-gutils-GetWindowsDirectory-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0010-gutils-GetModuleHandle-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0011-glocalfile-File-user-info-is-not-supported-on-WinRT.patch',
-                    'glib/uwp/0012-gwin32-Stub-out-all-version-checking-on-WinRT.patch',
-                    'glib/uwp/0013-gsocket-if_nametoindex-is-not-available-on-WinRT.patch',
-                    'glib/uwp/0014-gio-ginetaddress-Fix-build-on-WinRT.patch',
+                    'glib/uwp/0005-goption-Do-not-call-GetCommandlineW-on-UWP.patch',
+                    'glib/uwp/0006-gmodule-Fix-some-more-WinRT-incompatibilities.patch',
+                    'glib/uwp/0007-gutils-Can-t-fetch-the-username-on-UWP.patch',
+                    'glib/uwp/0008-gutils-GetWindowsDirectory-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0009-gutils-GetModuleHandle-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0010-glocalfile-File-user-info-is-not-supported-on-WinRT.patch',
+                    'glib/uwp/0011-gwin32-Stub-out-all-version-checking-on-WinRT.patch',
+                    'glib/uwp/0012-gsocket-if_nametoindex-is-not-available-on-WinRT.patch',
+                    'glib/uwp/0013-gio-ginetaddress-Fix-build-on-WinRT.patch',
                     # Need some more work
-                    'glib/uwp/0015-WIP-gspawn-Do-not-allow-spawning-or-making-pipes-on-.patch',
-                    'glib/uwp/0016-WIP-glib-giowin32-Disallow-invalid-usage-of-GIOChann.patch',
-                    'glib/uwp/0017-WIP-glocalfile-Trash-as-a-concept-does-not-exist-on-.patch',
-                    'glib/uwp/0018-TODO-gdate-gstdio-Abort-when-trying-to-use-unsupport.patch',
-                    'glib/uwp/0019-gio-Disable-win32-API-and-modules-when-unavailable-o.patch',
-                    'glib/uwp/0020-TODO-gdbus-Completely-disable-when-building-for-WinR.patch',
-                    'glib/uwp/0021-WIP-glib-Implement-get_special_folder-for-UWP-apps.patch',
-                    'glib/uwp/0022-WIP-gtimezone-Partially-port-to-WinRT.patch',
-                    'glib/uwp/0023-TODO-gutils-Hard-code-windows-version-detection-in-g.patch',
+                    'glib/uwp/0014-WIP-gspawn-Do-not-allow-spawning-or-making-pipes-on-.patch',
+                    'glib/uwp/0015-WIP-glib-giowin32-Disallow-invalid-usage-of-GIOChann.patch',
+                    'glib/uwp/0016-WIP-glocalfile-Trash-as-a-concept-does-not-exist-on-.patch',
+                    'glib/uwp/0017-TODO-gdate-gstdio-Abort-when-trying-to-use-unsupport.patch',
+                    'glib/uwp/0018-gio-Disable-win32-API-and-modules-when-unavailable-o.patch',
+                    'glib/uwp/0019-TODO-gdbus-Completely-disable-when-building-for-WinR.patch',
+                    'glib/uwp/0020-WIP-glib-Implement-get_special_folder-for-UWP-apps.patch',
+                    'glib/uwp/0021-WIP-gtimezone-Partially-port-to-WinRT.patch',
+                    'glib/uwp/0022-TODO-gutils-Hard-code-windows-version-detection-in-g.patch',
                     # Need a lot more work
-                    'glib/uwp/0024-TODO-gio-gcontenttype-Needs-porting-to-WinRT-model.patch',
+                    'glib/uwp/0023-TODO-gio-gcontenttype-Needs-porting-to-WinRT-model.patch',
                     # Visual Studio 2019 workaround
-                    'glib/uwp/0025-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
+                    'glib/uwp/0024-meson-Add-workaround-for-Visual-Studio-2019-ARM-buil.patch',
                 ]
         elif self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
             # https://gitlab.gnome.org/GNOME/glib/-/issues/2902
@@ -322,3 +310,18 @@ class Recipe(recipe.Recipe):
                 self.config.libdir, self.config.target_platform,
                 deps=['gobject-2.0', 'gmodule-2.0', 'z']).save()
         super().post_install()
+
+# Uncomment the following when reenabling introspection support
+# class GlibWithIntrospection(Recipe):
+#     name = 'glib'
+#     meson_options = {'libmount': 'disabled', 'dtrace': 'false', 'tests': 'true' }
+
+#     def prepare(self):
+#         Recipe.prepare(self)
+
+#         # gobject-introspection is now required, but upstream is not aware of
+#         # cross-compilation; it assumes the Python interpreter to be Meson's
+#         # but uses the host machine's compiler
+#         if self.config.variants.gi:
+#             self.deps.append('gobject-introspection')
+
