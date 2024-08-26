@@ -1,12 +1,39 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 
+from cerbero.tools.libtool import LibtoolLibrary
+
+
 class Recipe(recipe.Recipe):
     name = 'nghttp2'
-    version = '1.52.0'
+    version = '1.64.0'
+    licenses = [{License.MIT: ['COPYING']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
-    url = 'https://github.com/nghttp2/nghttp2/releases/download/v{0}/nghttp2-{0}.tar.xz'.format(version)
-    tarball_checksum = '3ea9f0439e60469ad4d39cb349938684ffb929dd7e8e06a7bffe9f9d21f8ba7d'
+    url = 'https://github.com/nghttp2/nghttp2/releases/download/v%(version)s/%(name)s-%(version)s.tar.gz'
+    tarball_checksum = '20e73f3cf9db3f05988996ac8b3a99ed529f4565ca91a49eb0550498e10621e8'
+    cmake_generator = 'ninja'
+    can_msvc = True
+    configure_options = ' -DENABLE_LIB_ONLY=ON -DENABLE_DOC=OFF -DWITH_LIBXML2=OFF -DWITH_JEMALLOC=OFF -DBUILD_STATIC_LIBS=ON '
+    library_type = LibraryType.STATIC
 
     files_libs = ['libnghttp2']
-    files_devel = ['include/nghttp2', '%(libdir)s/pkgconfig/libnghttp2.pc']
+    files_devel = ['include/nghttp2/nghttp2.h', '%(libdir)s/pkgconfig/libnghttp2.pc']
+
+    patches = [
+        f'{name}/0001-Expose-NGHTTP2_STATICLIB-on-the-pkg-config-file.patch'
+    ]
+
+    def prepare(self):
+        # Although it can build both types of library, the static ones
+        # have the `_static` suffix and throw off FilesProvider
+        if self.using_msvc():
+            self.configure_options += ' -DBUILD_SHARED_LIBS=OFF '
+            self.library_type = LibraryType.STATIC
+        else:
+            self.library_type = LibraryType.BOTH
+
+    def post_install(self):
+        libtool_la = LibtoolLibrary('nghttp2', None, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

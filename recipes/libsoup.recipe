@@ -4,12 +4,12 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libsoup'
-    version = '3.4.0'
+    version = '3.6.4'
     licenses = [License.LGPLv2Plus]
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'gnome://'
-    tarball_checksum = '23efff6ac70f2c1e873507dac52649eec032c1597a4ae951762ce3123789acc9'
+    tarball_checksum = '9b54c76f5276b05bebcaf2b6c2a141a188fc7bb1d0624eda259dac13a6665c8a'
     meson_options = {'vapi': 'disabled', 'tls_check': 'false', 'tests' : 'false'}
     deps = ['libxml2', 'glib', 'glib-networking', 'libpsl', 'nghttp2']
 
@@ -29,7 +29,7 @@ class Recipe(recipe.Recipe):
 
     def post_install(self):
         soup_deps = ['gio-2.0', 'gmodule-2.0', 'gobject-2.0', 'glib-2.0',
-                     'ffi', 'xml2', 'psl', 'z']
+                     'ffi', 'xml2', 'psl', 'z', 'nghttp2']
         if self.config.target_platform not in (Platform.IOS, Platform.DARWIN):
             soup_deps += ['sqlite3']
         # Meson does not generate la files
