@@ -222,6 +222,9 @@ class Recipe(recipe.Recipe):
             else:
                 raise AssertionError
 
+        if self.config.platform == Platform.WINDOWS:
+            config_sh += ' no-tests '
+
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)
 
