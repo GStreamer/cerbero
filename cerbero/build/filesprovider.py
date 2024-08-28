@@ -256,7 +256,7 @@ class FilesProvider(object):
 
     def _search_library_pdb(self, file):
         f = os.path.basename(file)
-        pdbs = find_pdb_implib(self.config, f[:-3], self.config.prefix)
+        pdbs = find_pdb_implib(self.config, f[:-4], self.config.prefix)
         return pdbs
 
     def _validate_existing(self, files, only_existing=True):
@@ -654,7 +654,7 @@ class FilesProvider(object):
                 # PDB names are derived from DLL library names (which are
                 # arbitrary), so we must use the same search function for them.
                 if self.have_pdbs():
-                    pdb = '%(sdir)s/%(f)s.pdb' % {'f': x, **self.extensions}
+                    pdb = '%(sdir)s/%(f)s.pdb' % {'f': x[3:], **self.extensions}
                     devel_libs[pdb] = self._search_library_pdb
 
         return devel_libs
