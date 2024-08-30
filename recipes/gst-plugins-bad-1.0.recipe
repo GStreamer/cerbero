@@ -90,6 +90,10 @@ class Recipe(custom.GStreamer):
             'srt', 'zbar', 'libltc']
     use_system_libs = True
 
+    patches = [
+        'gst-plugins-bad/0001-gst-plugins-bad-Only-Android-API-33-and-higher-suppo.patch'
+    ]
+
     files_lang = ['gst-plugins-bad-1.0']
 
     files_libs = [

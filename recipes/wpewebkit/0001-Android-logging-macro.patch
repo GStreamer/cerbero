@@ -1,7 +1,7 @@
 From a4510dc330282c5c56228dc1a7d6a11d100c680b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 15:32:57 +0200
-Subject: [PATCH 01/10] Android logging macro
+Subject: [PATCH 1/8] Android logging macro
 
 ---
  Source/WebKit/config.h | 3 +++
@@ -19,5 +19,5 @@ index 03f33943875e..cf0a70bcce8a 100644
 +#include <android/log.h>
 +#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WPEDebug", __VA_ARGS__)
 -- 
-2.34.1
+2.43.0
 

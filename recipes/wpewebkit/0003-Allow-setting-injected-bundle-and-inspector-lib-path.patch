@@ -1,0 +1,50 @@
+From 2e0f928912f43bfa0921e082d7766e8438fafc81 Mon Sep 17 00:00:00 2001
+From: Jani Hautakangas <jani@igalia.com>
+Date: Thu, 24 Mar 2022 09:41:17 +0200
+Subject: [PATCH 3/8] Allow setting injected bundle and inspector lib paths in
+ non dev mode
+
+---
+ .../inspector/remote/glib/RemoteInspectorUtils.cpp            | 4 ++--
+ Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp         | 2 --
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
+index 9421a8b66d2a..ba21ead35b89 100644
+--- a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
++++ b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
+@@ -43,13 +43,13 @@ GRefPtr<GBytes> backendCommands()
+     static std::once_flag flag;
+     std::call_once(flag, [] {
+         const char* libDir = PKGLIBDIR;
+-#if ENABLE(DEVELOPER_MODE)
++
+         // Probably no need for a specific env var here. Assume the inspector resources.so file is
+         // in the same directory as the injected bundle lib, for developer builds.
+         const char* path = g_getenv("WEBKIT_INJECTED_BUNDLE_PATH");
+         if (path && g_file_test(path, G_FILE_TEST_IS_DIR))
+             libDir = path;
+-#endif
++
+         GUniquePtr<char> bundleFilename(g_build_filename(libDir, "libWPEWebInspectorResources.so", nullptr));
+         GModule* resourcesModule = g_module_open(bundleFilename.get(), G_MODULE_BIND_LAZY);
+         if (!resourcesModule) {
+diff --git a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+index d897f14bbc9c..3dc279b7cbfb 100644
+--- a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
++++ b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
+@@ -331,11 +331,9 @@ void webkitWebContextWillCloseAutomationSession(WebKitWebContext* webContext)
+ 
+ static const char* injectedBundleDirectory()
+ {
+-#if ENABLE(DEVELOPER_MODE)
+     const char* bundleDirectory = g_getenv("WEBKIT_INJECTED_BUNDLE_PATH");
+     if (bundleDirectory && g_file_test(bundleDirectory, G_FILE_TEST_IS_DIR))
+         return bundleDirectory;
+-#endif
+ 
+     static const char* injectedBundlePath = PKGLIBDIR G_DIR_SEPARATOR_S "injected-bundle" G_DIR_SEPARATOR_S;
+     return injectedBundlePath;
+-- 
+2.43.0
+

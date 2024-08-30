@@ -1,7 +1,7 @@
-From e0a75aca3d5e23e641b282720d3257cfd283fe8c Mon Sep 17 00:00:00 2001
+From 3ad4cbed1f22413ba3bd2cc953a8a7319b99aad4 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 17 Jan 2024 23:14:09 +0200
-Subject: [PATCH 08/10] Compile WebDriver as a library
+Subject: [PATCH 7/8] Compile WebDriver as a library
 
 ---
  Source/WebDriver/CMakeLists.txt           |  4 ++--
@@ -252,5 +252,5 @@ index f20a8d06d914..6fdf6ecb9a7e 100644
      set(CMAKE_POSITION_INDEPENDENT_CODE True)
  
 -- 
-2.34.1
+2.43.0
 

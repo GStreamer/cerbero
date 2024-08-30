@@ -1,7 +1,7 @@
-From 0bf1a0eea42c8ba52ed9712a2a93df694f039c5f Mon Sep 17 00:00:00 2001
+From 2d5c4b69d14981725059645e8aec162182ae958e Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Sun, 22 May 2022 23:03:03 +0300
-Subject: [PATCH 05/10] Workaround for Android emulator samplerExternalOES
+Subject: [PATCH 4/8] Workaround for Android emulator samplerExternalOES
  precision issue
 
 For some unknown reason glShaderSource fails with 0x505 GL_OUT_OF_MEMORY
@@ -27,5 +27,5 @@ index 57cd9d1b4865..68461913f7f6 100644
          GLSL_DIRECTIVE(define SamplerExternalOESType sampler2D) \
      GLSL_DIRECTIVE(endif)
 -- 
-2.34.1
+2.43.0
 

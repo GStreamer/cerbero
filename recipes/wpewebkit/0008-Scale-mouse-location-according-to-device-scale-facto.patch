@@ -1,7 +1,7 @@
-From f86c7d872c370c9f18e81927439798e06b717819 Mon Sep 17 00:00:00 2001
+From 21af0505b2fae4b9b759e770a160bcab26152bfd Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Sun, 17 Mar 2024 09:21:25 +0200
-Subject: [PATCH 09/10] Scale mouse location according to device scale factor.
+Subject: [PATCH 8/8] Scale mouse location according to device scale factor.
  Need the bug URL (OOPS!).
 
 Reviewed by NOBODY (OOPS!).
@@ -105,5 +105,5 @@ index 11c0b942a731..fdcd7f5c83f5 100644
      }
  #endif
 -- 
-2.34.1
+2.43.0
 

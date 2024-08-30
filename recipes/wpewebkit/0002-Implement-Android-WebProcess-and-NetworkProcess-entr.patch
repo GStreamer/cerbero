@@ -1,7 +1,7 @@
 From 3e51ac2a9cd6f3cba126a893db9b32d822b2cc72 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH 02/10] Implement Android WebProcess and NetworkProcess entry
+Subject: [PATCH 2/8] Implement Android WebProcess and NetworkProcess entry
  points
 
 ---
@@ -91,5 +91,5 @@ index 8b5340f55b9f..2288372b709a 100644
    *;
  };
 -- 
-2.34.1
+2.43.0
 
