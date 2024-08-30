@@ -14,7 +14,7 @@ from cerbero.errors import EmptyPackageError
 from cerbero.packages import PackagerBase, PackageType
 from cerbero.packages.package import Package, App
 from cerbero.packages.ninja_syntax import Writer
-from cerbero.packages.wix import Fragment, MergeModule, MSI, VSMergeModule, VSTemplatePackage, WixConfig
+from cerbero.packages.wix import Fragment, MergeModule, MSI, VSFragment, VSTemplatePackage, WixConfig
 from cerbero.utils import get_wix_prefix, m, shell
 
 
@@ -146,6 +146,8 @@ class StripRule(object):
 
 
 class MergeModuleWithNinjaPackager(PackagerBase):
+    VS_EXT = ['-ext', 'WixToolset.VisualStudio.wixext']
+
     def __init__(self, config, package, store):
         PackagerBase.__init__(self, config, package, store)
         self._with_wine = config.platform != Platform.WINDOWS
@@ -295,18 +297,24 @@ class MergeModuleWithNinjaPackager(PackagerBase):
         except EmptyPackageError:
             m.warning('Package %s is empty, skipping module generation' % self.package.name)
             return None
-        if isinstance(self.package, VSTemplatePackage):
-            mergemodule = VSMergeModule(self.config, files_list, self.package)
-        else:
-            mergemodule = MergeModule(self.config, files_list, self.package)
 
         package_name = self.package.name
 
+        args = []
+
         if self.package.wix_use_fragment:
             mergemodule = Fragment(self.config, files_list, self.package)
+            mergeoutput = Light.Output.WIXLIB
+            sources = f'{package_name}-fragment.wxs'
+        # FIXME (remove this special casing): https://github.com/wixtoolset/issues/issues/8558
+        elif isinstance(self.package, VSTemplatePackage):
+            mergemodule = VSFragment(self.config, files_list, self.package)
+            args = [*self.VS_EXT]
+            mergeoutput = Light.Output.WIXLIB
             sources = f'{package_name}-fragment.wxs'
         else:
             mergemodule = MergeModule(self.config, files_list, self.package)
+            mergeoutput = Light.Output.MSM
             sources = f'{package_name}.wxs'
 
         # There's a ready-made stripped folder here
@@ -322,12 +330,12 @@ class MergeModuleWithNinjaPackager(PackagerBase):
 
         # Render deliverables
         wixobjs = [mergemodule_path.as_posix()]
-        path = Light().compile(
+        path = Light(args).compile(
             writer,
             wixobjs,
             package_name,
             implicit_deps=implicit_deps,
-            merge_module=Light.Output.WIXLIB if self.package.wix_use_fragment else Light.Output.MSM,
+            merge_module=mergeoutput,
         )
 
         return path
@@ -499,11 +507,15 @@ class MSIWithNinjaPackager(PackagerBase):
         )
         wixobjs.append(msi_manifest)
 
+        implicit_deps = []
         if self.package.wix_use_fragment:
             wixobjs.extend(self.merge_modules[self.package.package_mode])
-            implicit_deps = []
         else:
-            implicit_deps = self.merge_modules[self.package.package_mode]
+            for dep in self.merge_modules[self.package.package_mode]:
+                if dep.endswith(Light.Output.WIXLIB.name.lower()):
+                    wixobjs.append(dep)
+                else:
+                    implicit_deps.append(dep)
 
         args = [*self.UI_EXT, *self.VS_EXT]
         if self.architecture == Architecture.X86_64:

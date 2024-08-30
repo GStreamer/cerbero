@@ -3,12 +3,34 @@
 from cerbero.packages.wix import VSTemplatePackage
 
 
-class Package(custom.GStreamer, VSTemplatePackage):
+class Package2015(custom.GStreamer, VSTemplatePackage):
+    year = '2015'
+    name = 'gstreamer-1.0-vs-templates-2015'
+    shortdesc = 'GStreamer 1.0 Visual Studio 2015 templates'
+    vs_template_dir = 'share/vs/2010/gst-template'
+    vs_wizard_dir = 'share/vs/2010/wizard'
+    vs_template_name = 'GStreamer'
 
-    name = 'gstreamer-1.0-vs-templates'
-    shortdesc = 'GStreamer 1.0 VS templates'
-    longdesc = 'GStreamer 1.0 Visual Studio templates'
-    uuid = '42b3ba90-bd6a-4d94-a40d-5f2adf7ce441'
-    vs_template_dir = 'share/vs/2010/gst-sdk-template'
+class Package2017(custom.GStreamer, VSTemplatePackage):
+    year = '2017'
+    name = 'gstreamer-1.0-vs-templates-2017'
+    shortdesc = 'GStreamer 1.0 Visual Studio 2017 templates'
+    vs_template_dir = 'share/vs/2010/gst-template'
+    vs_wizard_dir = 'share/vs/2010/wizard'
+    vs_template_name = 'GStreamer'
+
+class Package2019(custom.GStreamer, VSTemplatePackage):
+    year = '2019'
+    name = 'gstreamer-1.0-vs-templates-2019'
+    shortdesc = 'GStreamer 1.0 Visual Studio 2019 templates'
+    vs_template_dir = 'share/vs/2010/gst-template'
+    vs_wizard_dir = 'share/vs/2010/wizard'
+    vs_template_name = 'GStreamer'
+
+class Package2022(custom.GStreamer, VSTemplatePackage):
+    year = '2022'
+    name = 'gstreamer-1.0-vs-templates-2022'
+    shortdesc = 'GStreamer 1.0 Visual Studio 2022 templates'
+    vs_template_dir = 'share/vs/2010/gst-template'
     vs_wizard_dir = 'share/vs/2010/wizard'
     vs_template_name = 'GStreamer'

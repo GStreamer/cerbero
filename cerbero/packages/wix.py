@@ -305,37 +305,59 @@ class VSMergeModule(MergeModule):
 
     def __init__(self, config, files_list, package):
         MergeModule.__init__(self, config, files_list, package)
+        self.year = self.package.year
 
-    def _add_root_dir(self):
-        MergeModule._add_root_dir(self)
+    def _add_module(self):
+        MergeModule._add_module(self)
         self._add_vs_templates()
 
     def _add_vs_templates(self):
-        etree.SubElement(self.module, 'PropertyRef', Id='VS_PROJECTTEMPLATES_DIR')
-        etree.SubElement(self.module, 'PropertyRef', Id='VS_WIZARDS_DIR')
-        etree.SubElement(self.module, 'CustomActionRef', Id='VS2010InstallVSTemplates')
-        etree.SubElement(self.module, 'CustomActionRef', Id='VC2010InstallVSTemplates')
-        prop = etree.SubElement(
-            self.module,
-            'SetProperty',
-            Id='VSPROJECTTEMPLATESDIR',
-            After='AppSearch',
-            Value='[VS_PROJECTTEMPLATES_DIR]\\%s' % self.package.vs_template_name or '',
-        )
-        prop.text = 'VS_PROJECTTEMPLATES_DIR'
-        prop = etree.SubElement(
-            self.module,
-            'SetProperty',
-            Id='VSWIZARDSDIR',
-            After='AppSearch',
-            Value='[VS_WIZARDS_DIR]\\%s' % os.path.split(self.package.vs_template_dir)[1],
-        )
-        prop.text = 'VS_WIZARDS_DIR'
+        self.root.attrib['xmlns:vs'] = WIX_VS_SCHEMA
 
-        self._wizard_dir = etree.SubElement(self.rdir, 'Directory', Id='VSPROJECTTEMPLATESDIR')
-        self._tpl_dir = etree.SubElement(self.rdir, 'Directory', Id='VSWIZARDSDIR')
-        self._dirnodes[self.package.vs_template_dir] = self._tpl_dir
+        etree.SubElement(self.module, 'CustomActionRef', Id=f'VS{self.year}InstallVSTemplates')
+        etree.SubElement(self.module, 'PropertyRef', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
+        tpl_base = etree.SubElement(self.module, 'Directory', Id='VS{self.year}_PROJECTTEMPLATES_DIR')
+        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Name=f"{self.package.vs_template_name or '.'}")
         self._dirnodes[self.package.vs_wizard_dir] = self._wizard_dir
+        # In 2015 onwards they all go into the same folder
+        self._dirnodes[self.package.vs_template_dir] = self._wizard_dir
+
+
+class VSFragment(Fragment):
+    """
+    Creates a Merge Module for Visual Studio templates
+
+    @ivar package: package with the info to build the merge package
+    @type pacakge: L{cerbero.packages.package.Package}
+
+    FIXME (remove this special casing): https://github.com/wixtoolset/issues/issues/8558
+    """
+
+    def __init__(self, config, files_list, package):
+        Fragment.__init__(self, config, files_list, package)
+        self.year = self.package.year
+
+    def _fill(self):
+        self._add_root()
+        self._add_fragment()
+        self._add_component_group()
+        self._add_vs_templates()
+        self._add_files()
+
+    def _add_vs_templates(self):
+        self.root.attrib['xmlns:vs'] = WIX_VS_SCHEMA
+
+        etree.SubElement(self.fragment, 'CustomActionRef', Id=f'VS{self.year}InstallVSTemplates')
+        etree.SubElement(self.fragment, 'PropertyRef', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
+        tpl_base = etree.SubElement(self.fragment, 'Directory', Id=f'VS{self.year}_PROJECTTEMPLATES_DIR')
+        dirpath = f"{self.package.vs_template_name or '.'}"
+        dirid = self._format_dir_id(self.package.name, dirpath)
+        self._wizard_dir = etree.SubElement(tpl_base, 'Directory', Id=dirid, Name=dirpath)
+        self._dirnodes[self.package.vs_wizard_dir] = self._wizard_dir
+        self._dirids[self.package.vs_wizard_dir] = dirid
+        # In 2015 onwards they all go into the same folder
+        self._dirnodes[self.package.vs_template_dir] = self._wizard_dir
+        self._dirids[self.package.vs_template_dir] = dirid
 
 
 class WixConfig(WixBase):
@@ -503,6 +525,9 @@ class MSI(WixBase):
         for package, path in self.packages_deps.items():
             if self.package.wix_use_fragment:
                 etree.SubElement(self.main_feature, 'ComponentGroupRef', Id=self._format_group_id(package.name))
+            # FIXME: https://github.com/wixtoolset/issues/issues/8558
+            elif isinstance(package, VSTemplatePackage):
+                etree.SubElement(self.main_feature, 'ComponentGroupRef', Id=self._format_group_id(package.name))
             else:
                 etree.SubElement(
                     self.installdir,
@@ -665,9 +690,12 @@ class MSI(WixBase):
 
         for p in mergerefs:
             etree.SubElement(feature, 'MergeRef', Id=self._package_id(p.name))
-        etree.SubElement(feature, 'MergeRef', Id=self._package_id(package.name))
+        # FIXME (remove this special casing): https://github.com/wixtoolset/issues/issues/8558
         if isinstance(package, VSTemplatePackage):
-            etree.SubElement(feature, 'Level', Value='0', Condition='NOT VS2010DEVENV AND NOT VC2010EXPRESS_IDE')
+            etree.SubElement(feature, 'ComponentGroupRef', Id=self._format_group_id(package.name))
+            etree.SubElement(feature, 'Level', Value='0', Condition=f'NOT VS{package.year}DEVENV')
+        else:
+            etree.SubElement(feature, 'MergeRef', Id=self._package_id(package.name))
 
     def _add_start_menu_shortcuts(self):
         # Create a folder with the application name in the Start Menu folder
@@ -703,5 +731,7 @@ class MSI(WixBase):
 
     def _add_vs_properties(self):
         etree.SubElement(self.product, f'{{{WIX_VS_SCHEMA}}}FindVisualStudio')
-        etree.SubElement(self.product, 'PropertyRef', Id='VS2010DEVENV')
-        etree.SubElement(self.product, 'PropertyRef', Id='VC2010EXPRESS_IDE')
+        etree.SubElement(self.product, 'PropertyRef', Id='VS2015DEVENV')
+        etree.SubElement(self.product, 'PropertyRef', Id='VS2017DEVENV')
+        etree.SubElement(self.product, 'PropertyRef', Id='VS2019DEVENV')
+        etree.SubElement(self.product, 'PropertyRef', Id='VS2022DEVENV')
