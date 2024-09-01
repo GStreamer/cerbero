@@ -4,10 +4,10 @@ from cerbero.tools.libtool import get_libtool_versions
 
 class Recipe(recipe.Recipe):
     name = 'cairo'
-    version = '1.18.0'
+    version = '1.18.2'
     stype = SourceType.TARBALL
     url = 'https://cairographics.org/releases/cairo-%(version)s.tar.xz'
-    tarball_checksum = '243a0736b978a33dee29f9cca7521733b78a65b5418206fef7bd1c3d4cf10b64'
+    tarball_checksum = 'a62b9bb42425e844cc3d6ddde043ff39dbabedd1542eba57a2eb79f85889d45a'
     # Either LGPL-2.1+ or MPL-1.1
     licenses = [License.LGPLv2_1Plus, {License.MPLv1_1: ['COPYING-MPL-1.1']}]
     deps = ['glib', 'libpng', 'zlib', 'pixman', 'fontconfig', 'freetype']
@@ -18,14 +18,7 @@ class Recipe(recipe.Recipe):
         'tests': 'disabled',
         'xcb': 'disabled',
         'xlib': 'disabled'}
-    patches = [
-        'cairo/0001-cairo-ps-surface-fix-Walloc-size.patch',
-        'cairo/0001-Copy-font-options-during-creation-of-a-fallback-font.patch',
-        'cairo/0001-Fix-alloca-undefined-with-MSVC.patch',
-        'cairo/0001-Fix-surface-type-mismatch-error-in-pdf-interchange.patch',
-        'cairo/0001-quartz-Fix-Cairo-1.18.0-doesn-t-draw-italic-or-bold-.patch',
-        'cairo/0001-util-remove-malloc-stats.patch',
-    ]
+    patches = []
 
     files_libs = ['libcairo', 'libcairo-gobject', 'libcairo-script-interpreter']
     files_devel = [
