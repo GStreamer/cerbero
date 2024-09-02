@@ -16932,3 +16932,63 @@ index e9314966c..c1c63f044 100644
 -- 
 2.44.0.windows.1
 
+
+From 6f80ad7c656f3b0373afaf5fac8698c794b084f2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 2 Sep 2024 12:51:27 -0300
+Subject: [PATCH] meson: Fix missing install of vpx_tpl.h header
+
+See gstreamer/gstreamer#3765
+
+Part-of: <https://gitlab.freedesktop.org/gstreamer/meson-ports/libvpx/-/merge_requests/23>
+
+diff --git a/meson.build b/meson.build
+index 0ad31918a..e34ab284b 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1970,7 +1970,7 @@ if features.get('vp8_encoder', false) or features.get('vp9_encoder', false)
+ 	headers += files(
+ 		'vpx/vp8.h',
+ 		'vpx/vp8cx.h',
+-  		'vpx/vpx_ext_ratectrl.h',
++		'vpx/vpx_ext_ratectrl.h',
+ 	)
+ endif
+ if features.get('vp8_decoder', false) or features.get('vp9_decoder', false)
+@@ -1987,6 +1987,7 @@ endif
+ if features.get('encoders', false)
+ 	headers += files(
+ 		'vpx/vpx_encoder.h',
++		'vpx/vpx_tpl.h',
+ 	)
+ endif
+ 
+@@ -2146,3 +2147,4 @@ if features.get('install_docs', false)
+ 		install_dir: get_option('datadir') / meson.project_name(),
+ 	)
+ endif
++
+diff --git a/vpx/meson.build b/vpx/meson.build
+index 854e49f75..23600e597 100644
+--- a/vpx/meson.build
++++ b/vpx/meson.build
+@@ -26,7 +26,6 @@ api_headers_sources = files(
+ 	'vpx_image.h',
+ 	'vpx_integer.h',
+ 	'vpx_ext_ratectrl.h',
+-	'vpx_tpl.h',
+ )
+ 
+ api_headers_optional_sources = {
+@@ -94,7 +93,7 @@ foreach comp_name, comp_sources : optional_sources
+ 			comp_name: codec_arch_headers.get(comp_name, []) + comp_sources
+ 		}
+ 	else
+-		api_headers_sources += comp_sources
++		codec_headers += comp_sources
+ 	endif
+ endforeach
+ 
+-- 
+2.44.0.windows.1
+
