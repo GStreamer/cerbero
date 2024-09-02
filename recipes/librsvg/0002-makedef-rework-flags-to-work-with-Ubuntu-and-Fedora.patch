@@ -1,18 +1,18 @@
-From 5f611705660a7c7b3e8da37fb3354cc804347e3b Mon Sep 17 00:00:00 2001
+From 035d3d04d0474956a5028d9a0c2c37a7b36a21db Mon Sep 17 00:00:00 2001
 From: "L. E. Segovia" <amy@centricular.com>
 Date: Mon, 12 Aug 2024 14:46:16 +0000
 Subject: [PATCH 2/2] makedef: rework flags to work with Ubuntu and Fedora
 
 This partially reverts commit 28b95fcba6b1e6040e539e0ce60b5d32037b32fe.
 ---
- meson/makedef.py | 13 +++++++++++--
- 1 file changed, 11 insertions(+), 2 deletions(-)
+ meson/makedef.py | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 diff --git a/meson/makedef.py b/meson/makedef.py
-index a04cba043..1df47c49b 100755
+index 2f457d0..8aba426 100755
 --- a/meson/makedef.py
 +++ b/meson/makedef.py
-@@ -129,10 +129,19 @@ if __name__ == '__main__':
+@@ -129,6 +129,15 @@ if __name__ == '__main__':
              universal_newlines=True,
              check=False,
          )
@@ -27,21 +27,7 @@ index a04cba043..1df47c49b 100755
 +            )
          if s.returncode != 0:
              # If it fails, retry without skipping LLVM bitcode (macOS flag)
-             s = subprocess.run(
--                [args.nm, '-U', '-g', '-j', libname_path_posix],
-+                [args.nm, '--defined-only', '-g', '-j', libname_path_posix],
-                 stdout=subprocess.PIPE,
-                 stderr=subprocess.STDOUT,
-                 universal_newlines=True,
-@@ -141,7 +150,7 @@ if __name__ == '__main__':
-         if s.returncode != 0:
-             # -j was added only in Binutils 2.37
-             s = subprocess.run(
--                [args.nm, '-U', '-g', libname_path_posix],
-+                [args.nm, '--defined-only', '-g', libname_path_posix],
-                 stdout=subprocess.PIPE,
-                 stderr=subprocess.DEVNULL,
-                 universal_newlines=True,
+             # Don't use -U, as that was an alias for --unicode= instead of
 -- 
 2.46.0
 
