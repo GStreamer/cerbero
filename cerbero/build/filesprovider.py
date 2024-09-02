@@ -642,7 +642,7 @@ class FilesProvider(object):
                     patterns.append('%(libdir)s/%(f)s.so')
                 elif self.platform == Platform.WINDOWS:
                     patterns.append('%(libdir)s/%(f)s.dll.a')
-                    patterns.append('%(libdir)s/%(f)s.def')
+                    patterns.append('%(libdir)s/%(fnolib)s.def')
                     patterns.append('%(libdir)s/%(fnolib)s.lib')
                 elif self.platform in [Platform.DARWIN, Platform.IOS]:
                     patterns.append('%(libdir)s/%(f)s.dylib')
