@@ -38,6 +38,7 @@ class Recipe(recipe.Recipe):
 
     patches = [
         f"{name}/0002-makedef-rework-flags-to-work-with-Ubuntu-and-Fedora.patch",
+        f"{name}/0003-meson-Consider-native-dependencies-also-on-Linux.patch",
     ]
 
     def append_config_toml(self, s):
