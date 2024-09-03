@@ -31,6 +31,8 @@ class Recipe(recipe.Recipe):
         # https://github.com/openssl/openssl/pull/12400
         'openssl/0001-crypto-win-Don-t-use-disallowed-APIs-on-UWP.patch',
         'openssl/0002-win-onecore-Build-with-APPCONTAINER-for-UWP-compat.patch',
+        # Android support
+        'openssl/0003-openssl-Support-loading-ca-certificates-on-Android.patch',
     ]
 
     files_bins = ['openssl']
@@ -221,6 +223,9 @@ class Recipe(recipe.Recipe):
                 config_sh += ' --debug '
             else:
                 raise AssertionError
+
+        if self.config.target_platform == Platform.ANDROID:
+            config_sh += ' --openssldir=/system/etc/security '
 
         await shell.async_call(config_sh + self.openssl_platform, self.build_dir,
                                logfile=self.logfile, env=self.env)
