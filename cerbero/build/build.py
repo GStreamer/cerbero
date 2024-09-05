@@ -27,7 +27,6 @@ from itertools import chain
 from cerbero.enums import Platform, Architecture, Distro, LibraryType
 from cerbero.errors import FatalError, InvalidRecipeError
 from cerbero.utils import shell, add_system_libs, determine_num_cargo_jobs
-from cerbero.utils import EnvValue, EnvValueSingle, EnvValueArg, EnvValueCmd, EnvValuePath
 from cerbero.utils import messages as m
 
 
@@ -891,50 +890,9 @@ class Meson(Build, ModifyEnvBase):
         cross-compiling or not.
         """
 
-        def merge_env(old_env, new_env):
-            ret_env = {}
-            # Set/merge new values
-            for k, new_v in new_env.items():
-                new_v = EnvValue.from_key(k, new_v)
-                if k not in old_env:
-                    ret_env[k] = new_v
-                    continue
-                old_v = old_env[k]
-                assert isinstance(old_v, EnvValue)
-                if isinstance(old_v, (EnvValueSingle, EnvValueCmd)) or (new_v == old_v):
-                    ret_env[k] = new_v
-                elif isinstance(old_v, (EnvValuePath, EnvValueArg)):
-                    ret_env[k] = new_v + old_v
-                else:
-                    raise FatalError(
-                        "Don't know how to combine the environment "
-                        "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
-                    )
-            # Set remaining old values
-            for k in old_env.keys():
-                if k not in new_env:
-                    ret_env[k] = old_env[k]
-            return ret_env
-
-        # Extract toolchain config for the build system from the appropriate
-        # config env dict. Start with `self.env`, since it contains toolchain
-        # config set by the recipe and when building for target platforms other
-        # than Windows, it also contains build tools and the env for the
-        # toolchain set by config/*.config.
-        #
-        # On Windows, the toolchain config is `self.config.msvc_env_for_build_system`
-        # or `self.config.mingw_env_for_build_system` depending on which toolchain
-        # this recipe will use.
-        if self.config.target_platform == Platform.WINDOWS:
-            if self.using_msvc():
-                build_env = dict(self.config.msvc_env_for_build_system)
-            else:
-                build_env = dict(self.config.mingw_env_for_build_system)
-        else:
-            build_env = {}
         # Override/merge toolchain env with recipe env and return a new dict
         # with values as EnvValue objects
-        build_env = merge_env(build_env, self.env)
+        build_env = self.config.get_build_env(self.env, self.using_msvc())
 
         cc = build_env.pop('CC')
         cxx = build_env.pop('CXX')

@@ -29,7 +29,7 @@ from cerbero.enums import Architecture, Platform, Distro, DistroVersion, License
 from cerbero.errors import FatalError, ConfigurationError
 from cerbero.utils import _, system_info, validate_packager, shell
 from cerbero.utils import to_unixpath, to_winepath, parse_file, detect_qt5, detect_qt6
-from cerbero.utils import EnvVar, EnvValue
+from cerbero.utils import merge_str_env, merge_env_value_env
 from cerbero.utils import messages as m
 from cerbero.ide.pkgconfig import PkgConfig
 from cerbero.ide.vs.env import get_vs_year_version
@@ -500,31 +500,6 @@ class Config(object):
         env['WINEDEBUG'] = 'fixme-all'
         return env
 
-    def _merge_env(self, old_env, new_env, override_env=()):
-        ret_env = {}
-        for k in new_env.keys():
-            new_v = new_env[k]
-            # Must not accidentally use this with EnvValue objects
-            if isinstance(new_v, EnvValue):
-                raise AssertionError('{!r}: {!r}'.format(k, new_v))
-            if k not in old_env or k in override_env:
-                ret_env[k] = new_v
-                continue
-            old_v = old_env[k]
-            if new_v == old_v:
-                ret_env[k] = new_v
-            elif EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k):
-                ret_env[k] = new_v
-            else:
-                raise FatalError(
-                    "Don't know how to combine the environment "
-                    "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
-                )
-        for k in old_env.keys():
-            if k not in new_env:
-                ret_env[k] = old_env[k]
-        return ret_env
-
     @lru_cache(maxsize=None)
     def get_env(self, prefix, libdir):
         # Get paths for environment variables
@@ -630,7 +605,7 @@ class Config(object):
 
         # merge the config env with this new env
         # LDFLAGS and PATH were already merged above
-        new_env = self._merge_env(self.config_env, env, override_env=('LDFLAGS', 'PATH'))
+        new_env = merge_str_env(self.config_env, env, override_env=('LDFLAGS', 'PATH'))
 
         if self.target_platform == Platform.WINDOWS and self.platform != Platform.WINDOWS:
             new_env = self.get_wine_runtime_env(prefix, new_env)
@@ -1067,3 +1042,29 @@ class Config(object):
             sys.path.insert(0, os.path.abspath(tomli_dir))
             return importlib.import_module('tomli')
         return None
+
+    def get_build_env(self, in_env=None, using_msvc=False):
+        """
+        Override/merge toolchain env with `in_env` and return a new dict
+        with values as EnvValue objects
+        if `in_env` is empty, `self.env` is used.
+        """
+
+        # Extract toolchain config for the build system from the appropriate
+        # config env dict. Start with `in_env`, since it contains toolchain
+        # config set by the recipe and when building for target platforms other
+        # than Windows, it also contains build tools and the env for the
+        # toolchain set by config/*.config.
+        #
+        # On Windows, the toolchain config is `msvc_env_for_build_system`
+        # or `mingw_env_for_build_system` depending on which toolchain
+        # this recipe will use.
+        if self.target_platform == Platform.WINDOWS:
+            if using_msvc:
+                build_env = dict(self.msvc_env_for_build_system)
+            else:
+                build_env = dict(self.mingw_env_for_build_system)
+        else:
+            build_env = {}
+
+        return merge_env_value_env(build_env, in_env or self.env)

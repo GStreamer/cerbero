@@ -958,3 +958,57 @@ class EnvValuePath(EnvValue):
         if len(values) == 1 and not isinstance(values[0], list):
             values = (values[0].split(os.pathsep),)
         super().__init__(os.pathsep, *values)
+
+
+def merge_str_env(old_env, new_env, override_env=()):
+    ret_env = {}
+    for k in new_env.keys():
+        new_v = new_env[k]
+        # Must not accidentally use this with EnvValue objects
+        if not isinstance(new_v, str):
+            raise AssertionError('new value {!r}: {!r}'.format(k, new_v))
+        if k not in old_env or k in override_env:
+            ret_env[k] = new_v
+            continue
+        old_v = old_env[k]
+        if not isinstance(old_v, str):
+            raise AssertionError('old value {!r}: {!r}'.format(k, new_v))
+        if new_v == old_v:
+            ret_env[k] = new_v
+        elif EnvVar.is_path(k) or EnvVar.is_arg(k) or EnvVar.is_cmd(k):
+            ret_env[k] = new_v
+        else:
+            raise FatalError(
+                "Don't know how to combine the environment "
+                "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
+            )
+    for k in old_env.keys():
+        if k not in new_env:
+            ret_env[k] = old_env[k]
+    return ret_env
+
+
+def merge_env_value_env(old_env, new_env):
+    ret_env = {}
+    # Set/merge new values
+    for k, new_v in new_env.items():
+        new_v = EnvValue.from_key(k, new_v)
+        if k not in old_env:
+            ret_env[k] = new_v
+            continue
+        old_v = old_env[k]
+        assert isinstance(old_v, EnvValue)
+        if isinstance(old_v, (EnvValueSingle, EnvValueCmd)) or (new_v == old_v):
+            ret_env[k] = new_v
+        elif isinstance(old_v, (EnvValuePath, EnvValueArg)):
+            ret_env[k] = new_v + old_v
+        else:
+            raise FatalError(
+                "Don't know how to combine the environment "
+                "variable '%s' with values '%s' and '%s'" % (k, new_v, old_v)
+            )
+    # Set remaining old values
+    for k in old_env.keys():
+        if k not in new_env:
+            ret_env[k] = old_env[k]
+    return ret_env
