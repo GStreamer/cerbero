@@ -329,6 +329,12 @@ Terminating.""",
                 distro_version = 'debian_{number:02d}_{name}'.format(number=number, name=d[2])
             elif d[0] in ['Ubuntu']:
                 distro_version = 'ubuntu_{number}_{name}'.format(number=d[1].replace('.', '_'), name=distro_version)
+            elif d[0] in ['LinuxMint', 'Linux Mint'] and d[1].startswith('20'):
+                distro_version = DistroVersion.UBUNTU_FOCAL
+            elif d[0] in ['LinuxMint', 'Linux Mint'] and d[1].startswith('21'):
+                distro_version = 'ubuntu_22_04_jammy'
+            elif d[0] in ['LinuxMint', 'Linux Mint'] and d[1].startswith('22'):
+                distro_version = 'ubuntu_24_04_noble'
             else:
                 raise FatalError("Distribution '%s' not supported" % str(d))
         elif d[0] in [
