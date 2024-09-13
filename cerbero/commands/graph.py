@@ -101,7 +101,9 @@ class Graph(Command):
         shell.new_call(['dot', '-Tsvg', tmp.name, '-o', output])
         m.message('Dependency graph for %s generated at %s' % (name, output))
 
-    def _dot_gen(self, name, graph_type, already_parsed=[]):
+    def _dot_gen(self, name, graph_type, already_parsed=None):
+        if already_parsed is None:
+            already_parsed = []
         already_parsed.append(name)
         if graph_type == GraphType.RECIPE:
             deps = self.cookbook.get_recipe(name).list_deps()

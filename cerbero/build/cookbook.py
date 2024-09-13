@@ -56,8 +56,8 @@ class RecipeStatus(object):
     @type file_hash: int
     """
 
-    def __init__(self, filepath, steps=[], needs_build=True, mtime=time.time(), built_version='', file_hash=0):
-        self.steps = steps
+    def __init__(self, filepath, steps=None, needs_build=True, mtime=time.time(), built_version='', file_hash=0):
+        self.steps = [] if steps is None else steps
         self.needs_build = needs_build
         self.mtime = mtime
         self.filepath = filepath
@@ -339,7 +339,11 @@ class CookBook(object):
         except IOError as ex:
             m.warning(_('Could not cache the CookBook: %s') % ex)
 
-    def _find_deps(self, recipe, state={}, ordered=[]):
+    def _find_deps(self, recipe, state=None, ordered=None):
+        if state is None:
+            state = {}
+        if ordered is None:
+            ordered = []
         if state.get(recipe, 'clean') == 'processed':
             return
         if state.get(recipe, 'clean') == 'in-progress':

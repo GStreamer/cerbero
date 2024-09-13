@@ -40,7 +40,9 @@ NUMBER_OF_JOBS_IF_USED = 2 * determine_num_of_cpus()
 
 
 class Fetch(Command):
-    def __init__(self, args=[]):
+    def __init__(self, args=None):
+        if args is None:
+            args = []
         args.append(
             ArgparseArgument(
                 '--reset-rdeps',

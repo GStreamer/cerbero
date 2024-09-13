@@ -58,7 +58,9 @@ class DebugPackages(Command):
             m.message('Found duplicates files in packages:')
             m.message('%r' % duplicates)
 
-    def find_orphan_files(self, allfiles, prefix, excludes=[]):
+    def find_orphan_files(self, allfiles, prefix, excludes=None):
+        if excludes is None:
+            excludes = []
         cmd = ['find', '.', '-type', 'f']
         for x in excludes:
             cmd += ['(', '!', '-name', x, ')']

@@ -31,8 +31,8 @@ class Command:
     doc = ''
     name = None
 
-    def __init__(self, arguments=[]):
-        self.arguments = arguments
+    def __init__(self, arguments=None):
+        self.arguments = [] if arguments is None else arguments
 
     def run(self, config, args):
         """The body of the command"""

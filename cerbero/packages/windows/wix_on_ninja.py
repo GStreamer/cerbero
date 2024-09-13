@@ -59,8 +59,8 @@ class Light(object):
 
     options = {}
 
-    def __init__(self, extra=[]):
-        self.options['extra'] = extra
+    def __init__(self, extra=None):
+        self.options['extra'] = [] if extra is None else extra
 
     def compile(self, writer: Writer, objects: list[str], msi_name: str, merge_module=False, implicit_deps=None):
         """

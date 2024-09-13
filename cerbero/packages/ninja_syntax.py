@@ -214,12 +214,15 @@ def escape(string: str) -> str:
     return string.replace('$', '$$')
 
 
-def expand(string: str, vars: Dict[str, str], local_vars: Dict[str, str] = {}) -> str:
+def expand(string: str, vars: Dict[str, str], local_vars: Dict[str, str] = None) -> str:
     """Expand a string containing $vars as Ninja would.
 
     Note: doesn't handle the full Ninja variable syntax, but it's enough
     to make configure.py's use of it work.
     """
+
+    if local_vars is None:
+        local_vars = {}
 
     def exp(m: Match[str]) -> str:
         var = m.group(1)

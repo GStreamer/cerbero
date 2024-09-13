@@ -120,7 +120,11 @@ class PackagesStore(object):
         self._packages[package.name] = package
 
     def _list_metapackage_deps(self, metapackage):
-        def get_package_deps(package_name, visited=[], depslist=[]):
+        def get_package_deps(package_name, visited=None, depslist=None):
+            if visited is None:
+                visited = []
+            if depslist is None:
+                depslist = []
             if package_name in visited:
                 return
             visited.append(package_name)

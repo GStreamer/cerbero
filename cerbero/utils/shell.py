@@ -532,8 +532,10 @@ def find_files(pattern, prefix):
     return glob.glob(os.path.join(prefix, pattern))
 
 
-def prompt(message, options=[]):
+def prompt(message, options=None):
     """Prompts the user for input with the message and options"""
+    if options is None:
+        options = []
     if len(options) != 0:
         message = '%s [%s] ' % (message, '/'.join(options))
     res = input(message)

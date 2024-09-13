@@ -39,7 +39,9 @@ class BaseCache(Command):
     log_size = 10
     dry_run = False
 
-    def __init__(self, args=[]):
+    def __init__(self, args=None):
+        if args is None:
+            args = []
         args += [
             ArgparseArgument(
                 '--commit', action='store', type=str, default='HEAD', help='the commit to pick artifact from'
@@ -305,7 +307,9 @@ class GenCache(BaseCache):
     doc = N_('Generate build cache from current state.')
     name = 'gen-cache'
 
-    def __init__(self, args=[]):
+    def __init__(self, args=None):
+        if args is None:
+            args = []
         BaseCache.__init__(self, args)
 
     def create_tarball_tarfile(self, workdir, out_file, *in_files, exclude=None):
@@ -405,7 +409,9 @@ class UploadCache(BaseCache):
     doc = N_('Build build cache to external storage.')
     name = 'upload-cache'
 
-    def __init__(self, args=[]):
+    def __init__(self, args=None):
+        if args is None:
+            args = []
         BaseCache.__init__(self, args)
 
     def upload_dep(self, config, args, deps):

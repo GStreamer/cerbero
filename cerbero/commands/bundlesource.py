@@ -31,7 +31,7 @@ class BundleSource(Command):
     doc = N_('Bundle Source code of recipes and Cerbero')
     name = 'bundle-source'
 
-    def __init__(self, args=[]):
+    def __init__(self, args=None):
         args = [
             ArgparseArgument('bundlepackages', nargs='+', help=_('packages to bundle')),
             ArgparseArgument('--add-recipe', action='append', default=[], help=_('additional recipes to bundle')),

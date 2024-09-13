@@ -26,7 +26,11 @@ class RecursiveLister:
     def list_file_deps(self, prefix, path):
         raise NotImplementedError()
 
-    def find_deps(self, prefix, lib, state={}, ordered=[]):
+    def find_deps(self, prefix, lib, state=None, ordered=None):
+        if state is None:
+            state = {}
+        if ordered is None:
+            ordered = []
         if state.get(lib, 'clean') == 'processed':
             return
         if state.get(lib, 'clean') == 'in-progress':

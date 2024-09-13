@@ -66,7 +66,9 @@ class Deps(Command):
                 m.message(recipe.name)
         else:
 
-            def print_dep(cookbook, recipe, level=0, already_shown=[]):
+            def print_dep(cookbook, recipe, level=0, already_shown=None):
+                if already_shown is None:
+                    already_shown = []
                 m.message('%s%s' % (' ' * 3 * level, recipe.name))
                 already_shown.append(recipe)
                 for r in [cookbook.get_recipe(x) for x in recipe.list_deps()]:
