@@ -4,7 +4,7 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libjpeg-turbo'
-    version = '3.0.3'
+    version = '3.0.4'
     licenses = [{License.BSD_like: ['LICENSE.md']}]
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
@@ -12,7 +12,7 @@ class Recipe(recipe.Recipe):
     cmake_generator = 'ninja'
     can_msvc = True
     url = 'https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/%(version)s/libjpeg-turbo-%(version)s.tar.gz'
-    tarball_checksum = '343e789069fc7afbcdfe44dbba7dbbf45afa98a15150e079a38e60e44578865d'
+    tarball_checksum = '99130559e7d62e8d695f2c0eaeef912c5828d5b84a0537dcb24c9678c9d5b76b'
 
     configure_options = ' -DWITH_JPEG8=ON -DWITH_TURBOJPEG=ON '
 
