@@ -961,6 +961,13 @@ class EnvValuePath(EnvValue):
 
 
 def merge_str_env(old_env, new_env, override_env=()):
+    """
+    Returns a new env dict with the `old_env` as a base, where vars are overridden
+    by vars from `new_env` dict using `EnvVar.is_*(k)` checks,
+    or without checks if var name is in `override_env` tuple.
+
+    Values are checked for being `str` type.
+    """
     ret_env = {}
     for k in new_env.keys():
         new_v = new_env[k]
@@ -989,6 +996,15 @@ def merge_str_env(old_env, new_env, override_env=()):
 
 
 def merge_env_value_env(old_env, new_env):
+    """
+    Returns a new env dict with the `old_env` as a base, where vars are overridden
+    by vars from `new_env` dict if they are not `EnvValuePath` or `EnvValueArg`,
+    otherwise, values are concatenated.
+
+    Changed values from `old_env` are checked for being `EnvValue` type.
+
+    Values from `new_env` are converted to `EnvValue` using `EnvValue.from_key(k, new_v)`.
+    """
     ret_env = {}
     # Set/merge new values
     for k, new_v in new_env.items():
