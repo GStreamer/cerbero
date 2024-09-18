@@ -1,33 +1,35 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
+from cerbero.tools.libtool import LibtoolLibrary
+
 
 class Recipe(recipe.Recipe):
     name = 'mpg123'
-    version = '1.26.3'
+    version = '1.32.7'
     stype = SourceType.TARBALL
+    btype = BuildType.MESON
     url = 'sf://.tar.bz2'
-    tarball_checksum = '30c998785a898f2846deefc4d17d6e4683a5a550b7eacf6ea506e30a7a736c6e'
+    tarball_checksum = '3c8919243707951cac0e3c39bbf28653bcaffc43c98ff16801a27350db8f0f21'
     licenses = [License.LGPLv2_1Plus]
-    configure_options = '--with-audio=dummy --enable-static'
-    patches = ['mpg123/0001-Only-build-libmpg123-under-libraries.patch']
+    # https://gitlab.freedesktop.org/gstreamer/meson-ports/libmpg123/
+    patches = [
+        f'{name}/0001-Add-Meson-build.patch',
+    ]
+
+    # Optimizations are supported by GNU assembler only
+    # Make sure to only use 64-bit APIs downstream (MSVC's off_t is 32-bit)
+    can_msvc = False
+
+    meson_options = {
+        'libout123': 'disabled',
+        'libsyn123': 'disabled',
+        'programs': 'disabled',
+    }
 
     files_libs = ['libmpg123']
     files_devel = ['include/mpg123.h', 'include/fmt123.h', '%(libdir)s/pkgconfig/libmpg123.pc']
 
-    def prepare(self):
-        if self.config.target_platform in [Platform.ANDROID]:
-            if self.config.target_arch == Architecture.ARM:
-                # Disable thumb mode to get the optimizations compiled properly
-                self.append_env('CFLAGS', '-marm')
-                self.append_env('CCASFLAGS', '-marm')
-            elif self.config.target_arch == Architecture.X86:
-                # The custom assembly breaks compiling an application by
-                # using relocations.
-                self.configure_options += ' --with-cpu=generic '
-        if self.config.target_platform in [Platform.IOS]:
-            if self.config.target_arch == Architecture.X86:
-                # make sure we use 32bit asm
-                self.configure_options += ' --with-cpu=x86 '
-        # Only install the libmpg123 library and things needed for it
-        self.make_install = self.make + ['install-libLTLIBRARIES', 'install-pkgconfigDATA',
-                                         'install-includeHEADERS', 'install-nodist_includeHEADERS']
-        self.make += ['src/libmpg123/libmpg123.la']
+    def post_install(self):
+        libtool_la = LibtoolLibrary('mpg123', None, None, None, self.config.libdir,
+                self.config.target_platform)
+        libtool_la.save()
+        super().post_install()

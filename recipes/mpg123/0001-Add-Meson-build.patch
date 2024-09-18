@@ -1,0 +1,3333 @@
+From 9a6433dbcab9f3104dc9502cefc3acf66e7d30f1 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Tue, 20 Aug 2024 22:54:24 -0300
+Subject: [PATCH] Add Meson build
+
+
+diff --git a/man1/meson.build b/man1/meson.build
+new file mode 100644
+index 0000000..376cef4
+--- /dev/null
++++ b/man1/meson.build
+@@ -0,0 +1,8 @@
++if build_programs
++    install_man(
++        files(
++            'mpg123.1',
++            'out123.1',
++        ),
++    )
++endif
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..ac5c890
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,1293 @@
++project('mpg123', 'c',
++  meson_version: '>= 1.3.0',
++  license: 'LGPL2.1+',
++  default_options: [ 'buildtype=debugoptimized', 'c_std=c11', 'default_library=shared', 'b_lundef=true'],
++  version: '1.32.7',
++)
++
++libs = []
++
++cc = meson.get_compiler('c')
++
++os = host_machine.system()
++meson_cpu = host_machine.cpu_family()
++
++conf = configuration_data()
++conf.set_quoted('PACKAGE_NAME', meson.project_name())
++conf.set_quoted('PACKAGE_VERSION', meson.project_version())
++
++librt_dep = cc.find_library('rt', required: false)
++# NOTE: provided by winpthread, there's a fallback on out123 to Win32 APIs
++conf.set('HAVE_CLOCK_GETTIME', cc.has_function('clock_gettime', dependencies: librt_dep) and os != 'windows')
++
++modules = get_option('modules').enable_if(
++    get_option('default_library') == 'shared'
++)
++
++conf.set('DYNAMIC_BUILD', modules.allowed())
++
++conf.set('HAVE_WINDOWS_H', os in ['windows', 'cygwin'] and cc.has_header('windows.h'))
++win32_specific_codes = conf.get('HAVE_WINDOWS_H', false) and os != 'cygwin'
++
++uwp_build = cc.compiles('''
++    #include <winapifamily.h>
++    #if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
++    # error Win32 Desktop build
++    #endif
++    int main() { return 0; }
++''',
++    name: 'this is a UWP build'
++)
++conf.set('WINDOWS_UWP', uwp_build)
++
++android_build = os == 'android'
++
++if os in ['windows', 'cygwin'] and modules.allowed() and win32_specific_codes
++    modules = modules.disable_auto_if(
++        not cc.has_function('GetThreadErrorMode', prefix: '#include <windows.h>')
++    )
++endif
++
++
++deps = []
++libdl = []
++if modules.disabled()
++    message('Modules disabled, not checking for dynamic loading.')
++elif os in ['windows', 'cygwin']
++    # NOTE: Because it needs declspec --amyspark
++    modules = modules.disable_auto_if(
++        cc.has_define('_MSC_VER')
++    )
++    modules = modules.enable_auto_if(
++        cc.compiles('''
++            #include <windows.h>
++
++            int main() {
++                LoadLibraryW(0);
++                GetProcAddress(0, 0);
++                FreeLibrary(0);
++            }
++        ''',
++            name: 'LoadLibrary should be used'
++        )
++    )
++else
++    dep = cc.find_library('dl')
++    dlopen = cc.has_function('dlopen', dependencies: dep)
++    dlsym = cc.has_function('dlsym', dependencies: dep)
++    dlclose = cc.has_function('dlclose', dependencies: dep)
++
++    conf.set('HAVE_DLOPEN', dlopen)
++    conf.set('HAVE_DLSYM', dlsym)
++    conf.set('HAVE_DLCLOSE', dlclose)
++    conf.set('HAVE_DLFCN_H', cc.has_header('dlfcn.h', dependencies: dep))
++    modules = modules.enable_auto_if(dlopen and dlclose and dlsym)
++    if modules.allowed()
++        libdl = dep
++    endif
++endif
++
++if modules.allowed()
++    message('We found a runtime loader: Modules enabled.')
++    conf.set('USE_MODULES', modules.allowed())
++    conf.set('HAVE_MODULES', modules.allowed())
++    conf.set_quoted('LT_MODULE_EXT', os == 'windows' ? '.dll' : '.so')
++    conf.set_quoted('PKGLIBDIR', get_option('libdir') / meson.project_name())
++else
++    warning('We did not find a runtime loader: Modules disabled.')
++endif
++
++build_programs = get_option('programs').allowed()
++build_libmpg123 = get_option('libmpg123').allowed()
++build_libout123 = get_option('libout123').allowed()
++build_libout123_modules = get_option('libout123-modules').allowed()
++build_libsyn123 = get_option('libsyn123').allowed()
++
++conf.set('BUILD_PROGRAMS', build_programs)
++conf.set('BUILD_LIBMPG123', build_libmpg123)
++conf.set('BUILD_LIBOUT123', build_libout123)
++conf.set('BUILD_LIBOUT123_MODULES', build_libout123_modules)
++conf.set('BUILD_LIBOUT123_OR_MODULES', build_libout123 or build_libout123_modules)
++conf.set('BUILD_LIBSYN123', build_libsyn123 )
++# If we install libraries, prompting pkgconfig and include directories.
++conf.set('NEED_LIB', build_libmpg123 or build_libout123 or build_libout123_modules or build_libsyn123)
++conf.set('NEED_MAINLIB', build_libmpg123 or build_libout123 or build_libsyn123)
++
++components = []
++
++if build_programs
++    components += ['programs']
++endif
++
++if build_libmpg123
++    components += ['libmpg123']
++endif
++if build_libout123
++    components += ['libout123']
++endif
++if build_libout123_modules
++    components += ['libout123-modules']
++endif
++if build_libsyn123
++    components += ['libsyn123']
++endif
++
++############## Configurable Options
++# Set default options (I won't make them configurable)
++xdebug = get_option('xdebug')
++conf.set('XDEBUG', xdebug)
++conf.set('GAPLESS', true)
++fifo = get_option('fifo')
++conf.set('HAVE_MKFIFO', fifo.allowed())
++id3v2 = get_option('id3v2')
++conf.set('HAVE_STRING', true)
++conf.set('NO_ID3V2', not id3v2.allowed())
++conf.set('HAVE_ICY', true)
++ntom = get_option('ntom')
++conf.set('HAVE_NTOM', ntom.allowed())
++if not ntom.allowed()
++    conf.set('NO_NTOM', true)
++endif
++downsample = get_option('downsample')
++conf.set('NO_DOWNSAMPLE', not downsample.allowed())
++feeder = get_option('feeder')
++conf.set('NO_FEEDER', not feeder.allowed())
++moreinfo = get_option('moreinfo')
++conf.set('NO_MOREINFO', not moreinfo.allowed())
++messages = get_option('messages')
++if not messages.allowed()
++    conf.set('NO_WARNING', true)
++    conf.set('NO_ERRORMSG', true)
++    conf.set('NO_ERETURN', true)
++endif
++runtimetables = get_option('runtime-tables')
++conf.set('RUNTIME_TABLES', runtimetables.allowed())
++new_huffman = get_option('new-huffman')
++conf.set('USE_NEW_HUFFTABLE', new_huffman.allowed())
++int_quality = get_option('int-quality')
++conf.set('ACCURATE_ROUNDING', int_quality.allowed())
++conf.set('HAVE_ACCURATE', int_quality.allowed())
++# FIXME: depths: int16, int8, int32, real
++# FIXME: equalizer
++# FIXME: I'm not letting IEEE 754 be disabled
++conf.set('IEEE_FLOAT', true)
++specialcases = get_option('cases')
++conf.set('SYN123_NO_CASES', not specialcases.allowed())
++
++cpu = get_option('cpu')
++newoldwritesample = get_option('newoldwritesample')
++# The optimizations are written in GAS assembler --amyspark
++if cpu == 'generic_dither' and not cc.has_define('_MSC_VER')
++    if meson_cpu == 'aarch64'
++        cpu = 'aarch64'
++        newoldwritesample = newoldwritesample.enable_auto_if(
++            os in ['linux', 'darwin', 'ios'] or os.contains('bsd')
++        )
++    elif meson_cpu == 'arm'
++        cpu = 'arm_fpu'
++        newoldwritesample = newoldwritesample.disable_auto_if(
++            os in ['linux', 'darwin', 'ios']
++        )
++    elif meson_cpu == 'x86_64'
++        cpu = 'x86-64'
++    # NOTE: for Android see
++    # https://gitlab.freedesktop.org/gstreamer/cerbero/-/commit/3bfe13ba1a22237894c576f7998baf4ec9f3a10e
++    elif meson_cpu == 'x86' and not cc.has_define('__ANDROID__')
++        cpu = 'x86'
++        newoldwritesample = newoldwritesample.disable_auto_if(
++            os in ['linux', 'darwin', 'ios'] or os.contains('bsd')
++        )
++    elif meson_cpu == 'ppc64'
++        cpu = 'altivec'
++    else
++        add_project_arguments('-DGENERIC', language: 'c')
++    endif
++endif
++
++buffer = get_option('buffer')
++buffer = buffer.disable_auto_if(
++    cpu == 'generic_fpu' or cc.has_define('__MINGW32__') or cc.has_define('__MINGW64__')
++)
++
++# FIXME: all my supported CPUs require float
++# FIXME: int16 etc.
++conf.set('HAVE_SYNTH16', true)
++conf.set('HAVE_SYNTH8', true)
++conf.set('HAVE_SYNTH32', true)
++conf.set('HAVE_SYNTHREAL', true)
++
++equalizer = get_option('equalizer')
++conf.set('HAVE_EQUALIZER', equalizer.allowed())
++conf.set('NO_EQUALIZER', not equalizer.allowed())
++
++layer1 = get_option('layer1')
++conf.set('HAVE_LAYER1', layer1.allowed())
++layer2 = get_option('layer2')
++conf.set('HAVE_LAYER2', layer2.allowed())
++layer3 = get_option('layer3')
++conf.set('HAVE_LAYER3', layer3.allowed())
++
++seektable = get_option('seektable')
++
++if cc.compiles('int main() { __asm__(".balign 4"); return 0; }', name: '.balign is present')
++    conf.set('ASMALIGN_BALIGN', true)
++elif cc.compiles('int main() { __asm__(".align 3"); return 0; }', name: 'Define if .align takes 3 for alignment of 2^3=8 bytes instead of 8.')
++    conf.set('ASMALIGN_EXP', true)
++else
++    conf.set('ASMALIGN_BYTE', true)
++endif
++
++ccalign = cc.compiles('int main() { __attribute__((aligned(16))) float var; return 0; }', name: 'align(16) is supported')
++
++avx_support = false
++check_yasm = false
++if cpu.contains('x86') and not cc.has_define('_MSC_VER')
++    check = '.text\nvaddps %ymm0,%ymm0,%ymm0\n'
++    python3 = import('python').find_installation()
++    f = configure_file(
++            command: [python3, '-c', 'import sys; print(sys.argv[1])', '@0@'.format(check)],
++        input: 'configure',
++        output: '@0@.asm'.format(check[1]),
++        capture: true,
++    )
++    avx_support = cc.compiles(
++        f,
++        args: ['-x', 'assembler'],
++        name: 'assembler supports AVX instructions'
++    )
++
++    if not avx_support
++        check_yasm = add_languages('nasm', required: false, native: false)
++        if check_yasm
++            x86asm = meson.get_compiler('nasm')
++
++            if x86asm.compiles('.text\nvaddps %ymm0,%ymm0,%ymm0\n',
++                args: ['-pgas', '-rcpp'],
++                name: 'NASM supports GAS syntax and AVX instructions',
++            )
++                add_project_arguments(['-pgas', '-rcpp'], language: 'nasm')
++                avx_support = true
++            endif
++        endif
++    endif
++endif
++
++############### Really basic headers, needed for other checks.
++
++headers = [
++    # These come from autoconf and are not listed
++    'stdio.h',
++    'stdlib.h',
++    'string.h',
++    'inttypes.h',
++    'stdint.h',
++    'strings.h',
++    'sys/stat.h',
++    'sys/types.h',
++
++    'unistd.h',
++    'sched.h',
++    'sys/ioctl.h',
++    'sys/types.h',
++    'sys/time.h',
++    'sys/wait.h',
++    'sys/resource.h',
++    'sys/signal.h',
++    'signal.h',
++    'sys/select.h',
++    'dirent.h',
++    'sys/stat.h',
++]
++
++foreach h : headers
++    id = 'HAVE_@0@'.format(h.to_upper().underscorify())
++    if cc.has_header(h)
++        conf.set10(id, true)
++    endif
++endforeach
++
++############## LFS stuff
++
++portable_api = get_option('portable')
++conf.set('PORTABLE_API', portable_api.allowed())
++conf.set('HAVE_LFS_WRAP', not portable_api.allowed())
++
++# Check for shape-shifting off_t just for the mpg123 client application.
++switched_off_size = cc.sizeof('off_t',
++    prefix: '''
++        #undef  _FILE_OFFSET_BITS
++        #define _FILE_OFFSET_BITS 64
++        #include <sys/types.h>
++    '''
++)
++unswitched_off_size = cc.sizeof('off_t',
++    prefix: '''
++        #undef  _FILE_OFFSET_BITS
++        #include <sys/types.h>
++    '''
++)
++# Now the size without meddling, possibly enforced to 64 bits by system settings.
++sizeof_off_t = cc.sizeof('off_t',
++    prefix: '''
++        #include <sys/types.h>
++    '''
++)
++conf.set('SIZEOF_OFF_T', sizeof_off_t)
++# Some paranoia about the limited choices we accept.
++# 32 or 64 bit offsets, an the switched one better not be smaller.
++if sizeof_off_t == -1
++    error('Not even off_t found. I need some POSIX.')
++elif sizeof_off_t != 4 and sizeof_off_t != 8
++    error('unexpected size of off_t')
++elif sizeof_off_t != switched_off_size
++    if switched_off_size != 8
++        error('bad switched off_t size')
++    endif
++    conf.set('LFS_SENSITIVE', true)
++endif
++
++if unswitched_off_size != sizeof_off_t
++    if sizeof_off_t == 8
++        message('Detected system with enforced 64 bit offsets, dropping suffixless symbols for uncryptic ABI breakage.')
++        conf.set('FORCED_OFF_64', true)
++    endif
++endif
++
++# Large file support without the magic. Check for the API explicitly.
++# The shape-shifting off_t has to be avoided for the library builds.
++# The mpg123 application might still use it to check if the API works.
++# Or we limit it to portable, off_t-less API at some point.
++
++use_largefile = sizeof_off_t == 8 or get_option('largefile').enabled()
++
++if not use_largefile
++    have_lseek64 = cc.has_function('lseek64')
++    conf.set('HAVE_LSEEK64', have_lseek64)
++    have_off64_t = cc.has_type('off64_t', prefix: '''
++        #define _LARGEFILE64_SOURCE
++        #include <sys/types.h>
++        #include <unistd.h>
++    ''')
++    if have_lseek64 and have_off64_t
++        use_largefile = true
++        conf.set('LFS_LARGEFILE_64', true)
++        conf.set('HAVE_O_LARGEFILE', cc.compiles('''
++            #define _LARGEFILE64_SOURCE
++            #include <sys/types.h>
++            #include <sys/stat.h>
++            #include <unistd.h>
++            #include <fcntl.h>
++
++            int foo()
++            {
++            return open("foo", O_RDONLY|O_LARGEFILE);
++            }
++        ''', name: 'we have O_LARGEFILE'))
++    endif
++endif
++
++############## Function Checks
++
++have_mmap = cc.has_function('mmap')
++conf.set('HAVE_MMAP', have_mmap)
++if not have_mmap
++    headers = ['sys/ipc.h', 'sys/shm.h']
++    funcs = ['shmget', 'shmat', 'shmdt', 'shmctl']
++    foreach h : headers
++        v = cc.has_header(h)
++        conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), v)
++        buffer = buffer.disable_auto_if(not v)
++    endforeach
++    foreach f : funcs
++        v = cc.has_function(f)
++        conf.set('HAVE_@0@'.format(f.to_upper().underscorify()), v)
++        buffer = buffer.disable_auto_if(not v)
++    endforeach
++endif
++
++# Check if system supports termios
++posix_termios = cc.has_header('termios.h')
++header_wincon_h = cc.has_function('ReadConsoleInput', prefix: '''
++#include <windows.h>
++#include <wincon.h>
++''')
++conf.set('HAVE_TERMIOS', posix_termios)
++conf.set('HAVE_WINCON_H', header_wincon_h)
++
++term_type = 'none'
++if posix_termios
++    term_type = 'posix'
++elif header_wincon_h
++    term_type = 'win32'
++endif
++
++funcs = [
++    'random', 'setenv', 'unsetenv',
++    'sched_setscheduler', 'setuid', 'getuid',
++    'setpriority',
++    'strerror', 'strerror_l', 'uselocale',
++    'setlocale', 'nl_langinfo', 'mbstowcs', 'wcstombs', 'wcswidth', 'iswprint',
++    'atoll',
++    'mkfifo',
++    'fork', 'execvp',
++    'ctermid',
++]
++foreach f : funcs
++    conf.set('HAVE_@0@'.format(f.to_upper()), cc.has_function(f))
++endforeach
++
++have_mkfifo = conf.get('HAVE_MKFIFO')
++# NOTE: This tests `__builtin_fork` on MinGW
++have_fork = conf.get('HAVE_FORK') and conf.get('HAVE_EXECVP') and os != 'windows'
++
++if not cc.has_define('STDIN_FILENO', prefix: '#include <stdio.h>')
++    # FIXME: control_generic.c wants contants
++    conf.set('STDIN_FILENO', 0) #'(_fileno(stdin))')
++    conf.set('STDOUT_FILENO', 1) #'(_fileno(stdout))')
++    conf.set('STDERR_FILENO', 2) #'(_fileno(stderr))')
++endif
++
++conf.set('HAVE__SETMODE', cc.compiles('''
++#include <io.h>
++#include <fcntl.h>
++#include <stdio.h>
++
++#ifndef STDIN_FILENO
++#define STDIN_FILENO (_fileno(stdin))
++#define STDOUT_FILENO (_fileno(stdout))
++#define STDERR_FILENO (_fileno(stderr))
++#endif
++
++int main()
++{
++  _setmode(STDIN_FILENO, _O_BINARY);
++  _setmode(STDOUT_FILENO, _O_TEXT);
++  return 0;
++}
++''', name: 'Win/DOS system with _setmode()'))
++
++conf.set('HAVE_SETMODE', cc.compiles('''
++#include <io.h>
++#include <fcntl.h>
++#include <stdio.h>
++
++#ifndef STDIN_FILENO
++#define STDIN_FILENO (_fileno(stdin))
++#define STDOUT_FILENO (_fileno(stdout))
++#define STDERR_FILENO (_fileno(stderr))
++#endif
++
++int main()
++{
++  setmode(STDIN_FILENO, _O_BINARY);
++  setmode(STDOUT_FILENO, _O_TEXT);
++  return 0;
++}
++''', name: 'Win/DOS system with setmode()'))
++
++############## Header and Library Checks
++
++headers = [
++    'locale.h', 'langinfo.h', 'wchar.h', 'wctype.h',
++    'netdb.h', 'sys/param.h', 'sys/socket.h', 'netinet/in.h', 'arpa/inet.h'
++]
++foreach h : headers
++    # FIXME: locale.h in compat_str.c
++    if h == 'locale.h'
++        conf.set10('HAVE_@0@'.format(h.to_upper().underscorify()), true)
++    else
++        conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), cc.has_header(h))
++    endif
++endforeach
++
++network_internal = 'unknown'
++have_network = false
++if conf.get('HAVE_NETDB_H') and conf.get('HAVE_SYS_PARAM_H') and conf.get('HAVE_SYS_SOCKET_H') and conf.get('HAVE_NETINET_IN_H') and conf.get('HAVE_ARPA_INET_H')
++    network_internal = 'posix'
++    have_network = true
++endif
++
++network_deps = []
++if not cc.has_function('gethostbyname')
++    deps = [
++        cc.find_library('nsl', required: false),
++        cc.find_library('socket', required: false),
++        cc.find_library('network', required: false)
++    ]
++    foreach dep : deps
++        if cc.has_function('gethostbyname', dependencies: dep)
++            network_deps += [dep]
++            break
++        endif
++    endforeach
++endif
++
++if not cc.has_function('socket', dependencies: network_deps)
++    dep = cc.find_library('socket', required: false)
++    if cc.has_function('socket', dependencies: dep)
++        network_deps += [dep]
++    endif
++endif
++
++conf.set('HAVE_GETADDRINFO', cc.has_function('getaddrinfo', dependencies: network_deps))
++have_ipv6 = conf.get('HAVE_GETADDRINFO')
++
++m_dep = [cc.find_library('m', required: false), cc.find_library('mx', required: false)]
++cc.has_function('sqrt', dependencies: m_dep, required: true)
++cc.has_function('powf', dependencies: m_dep, required: true)
++
++conf.set('HAVE_BYTESWAP_H', cc.has_header('byteswap.h'))
++
++############## Choose compiler flags and CPU
++
++conf.set('HAVE_OS2_H', cc.has_header('os2.h'))
++conf.set('ABI_ALIGN_FUN', cpu == 'x86')
++
++# Choice of extra libmpg12 sources via lots of AM_CONDITIONALS.
++# Those are defined after this block of CPU selection. Make sure
++# that any new conditional gets added down there before using it
++# here in definitions.
++
++s_altivec = ['HAVE_ALTIVEC']
++s_i386 = ['HAVE_I386']
++s_i486 = s_i386 + ['HAVE_I486']
++s_i586 = s_i386 + ['HAVE_I586']
++s_i586d = s_i386 + ['HAVE_I586_DITHER']
++s_3dnow = s_i386 + ['HAVE_3DNOW']
++s_3dnowext = s_i386 + ['HAVE_3DNOWEXT', 'HAVE_MMXTAB']
++s_3dnow_vintage = s_3dnow + ['HAVE_3DNOW_VINTAGE']
++s_3dnowext_vintage = s_3dnowext + ['HAVE_3DNOWEXT_VINTAGE']
++
++s_mmx = s_i386 + ['HAVE_MMX', 'HAVE_MMXTAB']
++s_sse_vintage = s_i386 + ['HAVE_MMXTAB', 'HAVE_SSE_VINTAGE']
++s_sse = s_sse_vintage + ['HAVE_SSE']
++s_x86_64 = ['HAVE_X86_64', 'HAVE_X86_64_MONO']
++s_x86_64_mono_synths = ['HAVE_X86_64_MONO']
++s_x86_64_avx = ['HAVE_AVX']
++s_x86multi = ['HAVE_GETCPUFLAGS']
++s_x86_64_multi = ['HAVE_GETCPUFLAGS_X86_64']
++s_dither = ['HAVE_DITHER']
++s_neon = ['HAVE_NEON']
++s_neon64 = ['HAVE_NEON64']
++s_arm_multi = ['HAVE_GETCPUFLAGS_ARM']
++s_arm = ['HAVE_ARM']
++
++# See earlier fixme -- int32 and real are forcibly allowed
++conf.set('HAVE_FLOATDCT', true)
++
++more_sources = []
++if cpu == 'generic_dither'
++    add_project_arguments('-DOPT_GENERIC_DITHER', '-DREAL_IS_FLOAT', language: 'c')
++    more_sources = s_dither
++    ccalign = false
++elif cpu == 'altivec'
++    add_project_arguments('-maltivec', '-DREAL_IS_FLOAT', '-DOPT_ALTIVEC', language: 'c')
++    add_project_arguments(
++        cc.get_supported_arguments('-faltivec'),
++        language: 'c'
++    )
++    more_sources = s_altivec
++elif cpu == 'arm_fpu'
++    # NOTE: for -marm see
++    # https://gitlab.freedesktop.org/gstreamer/cerbero/-/commit/3ac267f431af44bbdaa2e9e7404323edeace0750
++    add_project_arguments(['-marm', '-DOPT_MULTI', '-DOPT_GENERIC', '-DOPT_GENERIC_DITHER', '-DOPT_NEON', '-DREAL_IS_FLOAT'], language: 'c')
++    more_sources = s_neon + s_dither + s_arm_multi
++elif cpu == 'aarch64'
++    add_project_arguments(['-DOPT_MULTI', '-DOPT_GENERIC', '-DOPT_GENERIC_DITHER', '-DOPT_NEON64', '-DREAL_IS_FLOAT'], language: 'c')
++    more_sources = s_neon64 + s_dither + s_arm_multi
++elif cpu == 'x86'
++    add_project_arguments(['-DOPT_MULTI', '-DOPT_GENERIC', '-DOPT_GENERIC_DITHER', '-DOPT_I386', '-DOPT_I586', '-DOPT_I586_DITHER', '-DOPT_MMX', '-DOPT_3DNOW', '-DOPT_3DNOW_VINTAGE', '-DOPT_3DNOWEXT', '-DOPT_3DNOWEXT_VINTAGE', '-DOPT_SSE', '-DOPT_SSE_VINTAGE', '-DREAL_IS_FLOAT'], language: 'c')
++    more_sources = s_i386 + s_i586 + s_i586d + s_mmx + s_3dnow_vintage + s_3dnowext_vintage + s_sse + s_x86multi + s_dither
++elif cpu == 'x86-64'
++    add_project_arguments(['-DOPT_MULTI', '-DOPT_X86_64', '-DOPT_GENERIC', '-DOPT_GENERIC_DITHER', '-DREAL_IS_FLOAT'], language: 'c')
++    more_sources = s_x86_64 + s_dither + s_x86_64_multi
++    if avx_support
++        more_sources += s_x86_64_avx
++        add_project_arguments('-DOPT_AVX', language: 'c')
++    endif
++else
++    error('Unknown CPU type @0@'.format(cpu))
++endif
++
++conf.set('HAVE_ALTIVEC', more_sources.contains('HAVE_ALTIVEC'))
++conf.set('HAVE_I386', more_sources.contains('HAVE_I386'))
++conf.set('HAVE_I486', more_sources.contains('HAVE_I486'))
++conf.set('HAVE_I586', more_sources.contains('HAVE_I586'))
++conf.set('HAVE_I586_DITHER', more_sources.contains('HAVE_I586_DITHER'))
++conf.set('HAVE_3DNOW', more_sources.contains('HAVE_3DNOW'))
++conf.set('HAVE_3DNOWEXT', more_sources.contains('HAVE_3DNOWEXT'))
++conf.set('HAVE_MMXTAB', more_sources.contains('HAVE_MMXTAB'))
++conf.set('HAVE_3DNOW_VINTAGE', more_sources.contains('HAVE_3DNOW_VINTAGE'))
++conf.set('HAVE_3DNOWEXT_VINTAGE', more_sources.contains('HAVE_3DNOWEXT_VINTAGE'))
++conf.set('HAVE_MMX', more_sources.contains('HAVE_MMX'))
++conf.set('HAVE_SSE_VINTAGE', more_sources.contains('HAVE_SSE_VINTAGE'))
++conf.set('HAVE_SSE', more_sources.contains('HAVE_SSE'))
++conf.set('HAVE_X86_64', more_sources.contains('HAVE_X86_64'))
++conf.set('HAVE_X86_64_MONO', more_sources.contains('HAVE_X86_64_MONO'))
++conf.set('HAVE_AVX', more_sources.contains('HAVE_AVX'))
++conf.set('HAVE_GETCPUFLAGS', more_sources.contains('HAVE_GETCPUFLAGS'))
++conf.set('HAVE_GETCPUFLAGS_X86_64', more_sources.contains('HAVE_GETCPUFLAGS_X86_64'))
++conf.set('HAVE_DITHER', more_sources.contains('HAVE_DITHER'))
++conf.set('HAVE_NEON', more_sources.contains('HAVE_NEON'))
++conf.set('HAVE_NEON64', more_sources.contains('HAVE_NEON64'))
++conf.set('HAVE_GETCPUFLAGS_ARM', more_sources.contains('HAVE_GETCPUFLAGS_ARM'))
++conf.set('HAVE_ARM', more_sources.contains('HAVE_ARM'))
++
++conf.set('HAVE_FEATURE', true)
++
++# Finally insert the code switch for alignment, above cpu selection having possibly changed the setting.
++conf.set('CCALIGN', ccalign)
++
++############## Output module choice
++
++# The full list of supported modules to check, first come, first serve.
++check_modules = get_option('audio')
++output_modules = []
++check_forced = false
++
++if check_modules != []
++    message('Limiting outputs to build according to your preference')
++    check_forced = true
++else
++    check_modules = [
++        'pulse', 'alsa', 'tinyalsa', # 'oss',
++        'coreaudio', 'sndio', # 'sun',
++        'win32', 'win32_wasapi', # 'os2', 'esd',
++        'jack', 'portaudio', 'sdl', # 'nas', 'arts',
++        'openal',
++    ]
++    # NOTE: openal isn't declared in --with-audio -- amyspark
++endif
++
++# Dummy output module is always built alongside libout123, but not
++# when just building the modules.
++if build_libout123 and 'dummy' not in check_modules
++    check_modules += ['dummy']
++endif
++
++foreach m : check_modules
++    if m == 'dummy'
++        output_modules += [m]
++        conf.set('HAVE_@0@'.format(m.to_upper()), true)
++    elif m == 'tinyalsa'
++        tinyalsa_dep = dependency('tinyalsa', required: check_forced)
++        if tinyalsa_dep.found() and cc.has_function('pcm_open',
++            prefix: '#include <tinyalsa/asoundlib.h>',
++            dependencies: tinyalsa_dep, required: check_forced)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'alsa'
++        alsa_dep = cc.find_library('asound', required: check_forced)
++        if alsa_dep.found() and cc.has_function('snd_pcm_open', prefix: '#include <alsa/asoundlib.h>', dependencies: alsa_dep, required: check_forced)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'jack'
++        jack_dep = dependency('jack', required: check_forced)
++        # JACK module uses semaphores, hence -lpthread.
++        # Assuming a good install exposing -lpthread.
++        if jack_dep.found() and cc.has_function('sem_post', dependencies: jack_dep, required: check_forced)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'pulse'
++        pulse_dep = dependency('libpulse-simple', required: check_forced)
++        if pulse_dep.found()
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'portaudio'
++        # Assuming a good install of portaudio, with pkg-config.
++        # NOTE: if this doesn't link, add kernel32, ole32, setupapi, winmm
++        portaudio_dep = dependency('portaudio-2.0', required: check_forced)
++        if portaudio_dep.found() and cc.has_function('Pa_Initialize', prefix: '#include <portaudio.h>', dependencies: portaudio_dep)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++            if not cc.has_function('Pa_GetVersion', dependencies: portaudio_dep)
++                # portaudio v18 API is wanted.
++                conf.set('PORTAUDIO18', true)
++            endif
++        endif
++    elif m == 'sdl'
++        sdl_dep = dependency('sdl2', required: check_forced, fallback: 'sdl')
++        if sdl_dep.found()
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'win32'
++        win32_dep = cc.find_library('winmm', required: check_forced)
++        if cc.has_function('waveOutOpen', prefix: '#include <windows.h>', dependencies: win32_dep, required: check_forced)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'win32_wasapi'
++        win32_wasapi_dep = [
++            cc.find_library('ole32', required: check_forced),
++            cc.find_library('avrt', required: check_forced)
++        ]
++        if cc.compiles('''
++            #define COBJMACROS 1
++            #define _WIN32_WINNT 0x601
++            #include <initguid.h>
++            #include <audioclient.h>
++            #include <mmdeviceapi.h>
++            #include <avrt.h>
++            int main(){
++                /* UUID Checks */
++                GUID *IDs[] = {
++                    &CLSID_MMDeviceEnumerator,
++                    &IID_IMMDeviceEnumerator,
++                    &IID_IAudioClient,
++                    &IID_IAudioRenderClient
++                };
++                return 0;
++            }
++            ''', name: 'we have WASAPI headers', dependencies: win32_wasapi_dep)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif check_forced
++            # FIXME supported in Meson 1.5+
++            error('A required check for @0@ failed'.format(m))
++        endif
++    elif m == 'sndio'
++        sndio_dep = dependency('sndio', required: check_forced)
++        if sndio_dep.found()
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        endif
++    elif m == 'sun'
++        headers = ['sun/audioio.h', 'sys/audioio.h', 'asm/audioio.h', 'sys/audio.h']
++        check = false
++        foreach h : headers
++            v = cc.has_header(h)
++            conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), v)
++            check = check or v
++        endforeach
++        if check
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif check_forced
++            error('A required header for @0@ is missing'.format(m))
++        endif
++    elif m == 'coreaudio'
++        coreaudio_dep = [
++            dependency('appleframeworks', modules : 'AudioToolbox', required: check_forced)
++        ]
++        headers = ['AudioUnit/AudioUnit.h', 'AudioToolbox/AudioToolbox.h']
++        check = true
++        foreach h : headers
++            v = cc.has_header(h, dependencies: coreaudio_dep)
++            conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), v)
++            check = check and v
++        endforeach
++        if check
++            if not cc.links('''
++                #include <AudioUnit/AudioUnit.h>
++                int main()
++                {
++                    AudioUnitInitialize(NULL);
++                    return 0;
++                }
++            ''', name: 'if AudioUnit functions are available within AudioToolbox')
++                coreaudio_dep += [
++                    dependency('appleframeworks', modules : 'AudioUnit', required: check_forced)
++                ]
++            endif
++            headers = ['CoreServices/CoreServices.h']
++            foreach h : headers
++                v = cc.has_header(h)
++                conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), v)
++            endforeach
++            buffer = buffer.require(not modules.disabled())
++            if modules.disabled()
++                warning('Disabling buffer because of directly linked CoreAudio! Use the module if you need the buffer.')
++            endif
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif check_forced
++            error('A required header for @0@ is missing'.format(m))
++        endif
++    elif m == 'openal'
++        # Assuming openal-soft and OpenAL.framework for sanity reasons.
++        openal_dep = dependency('appleframeworks', modules : 'OpenAL', required: false)
++        headers = ['OpenAL/al.h', 'OpenAL/alc.h', 'AL/al.h', 'AL/alc.h', 'al.h', 'alc.h']
++        if not openal_dep.found()
++            openal_dep = dependency('openal', required: check_forced)
++        endif
++        foreach h : headers
++            v = cc.has_header(h, dependencies: openal_dep)
++            conf.set('HAVE_@0@'.format(h.to_upper().underscorify()), v)
++        endforeach
++        if conf.get('HAVE_OPENAL_AL_H', false) and conf.get('HAVE_OPENAL_ALC_H', false)
++            conf.set('OPENAL_SUBDIR_OPENAL', true)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif conf.get('HAVE_AL_AL_H', false) and conf.get('HAVE_AL_ALC_H', false)
++            conf.set('OPENAL_SUBDIR_AL', true)
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif conf.get('HAVE_AL_H', false) and conf.get('HAVE_ALC_H', false)
++            # Windows?
++            output_modules += [m]
++            conf.set('HAVE_@0@'.format(m.to_upper()), true)
++        elif check_forced
++            error('A required header for @0@ is missing'.format(m))
++        endif
++    else
++        error('Unsupported/-known output @0@ demanded!'.format(m))
++    endif
++endforeach
++
++# Did user choose default audio subsystem ?
++# That's (beginning of) the list for mpg123's internal default.
++with_default_audio = get_option('with_default_audio')
++default_output_modules = []
++if with_default_audio.length() != 0
++    default_output_modules = with_default_audio
++else
++    foreach m : output_modules
++        if m == 'dummy'
++            continue
++        else
++            default_output_modules += [m]
++        endif
++    endforeach
++endif
++
++default_output_module = ''
++if default_output_modules.length() != 0
++    default_output_module = default_output_modules[0]
++endif
++
++# Without actual modules, there is only the builtin one.
++if modules.disabled()
++  # Module-less build needs _some_ default module.
++  if default_output_module == ''
++    default_output_module = 'dummy'
++  endif
++  default_output_modules = [default_output_module]
++endif
++
++# Setup the static build.
++conf.set('BUILD_@0@'.format(default_output_module.to_upper()), true)
++# FIXME: this doesn't make sense
++conf.set_quoted('DEFAULT_OUTPUT_MODULE', ','.join(default_output_modules))
++
++############## Compiler Optimizations
++
++conf.set('BUILD_BUFFER', buffer.allowed())
++if buffer.disabled()
++    add_project_arguments('-DNOXFERMEM', language: 'c')
++endif
++if newoldwritesample.allowed()
++    add_project_arguments('-DNEWOLD_WRITE_SAMPLE', language: 'c')
++endif
++
++if get_option('optimization').version_compare('>= 2')
++    add_project_arguments(
++        cc.get_supported_arguments([
++            '-fomit-frame-pointer', '-funroll-all-loops', '-finline-functions', '-ffast-math',
++            '/fp:fast',
++        ]),
++        language: 'c'
++    )
++endif
++
++############## Seektable size
++
++if seektable > 0
++    conf.set('FRAME_INDEX', 1)
++endif
++# Define that always... also without frame index enabled.
++conf.set('INDEX_SIZE', seektable)
++
++############## Win32 function checks
++
++# Check if we want Unicode for Win32. Cygwin and Midipix does not need _wopen
++compat_libs = []
++
++win32_unicode = 'unneeded'
++win32_sockets_working = false
++win32_wide_working = false
++win32_winver_bump = false
++
++# mingw-w64 has the _mingw_mac.h header, skip its test
++
++if win32_specific_codes
++    #### Check for Wide functions
++    win32_unicode = cc.has_function('_wopen', prefix: '#include <io.h>')
++    if uwp_build
++        conf.set('WANT_WIN32_UNICODE', true)
++    elif win32_unicode
++        shlwapi_dep = cc.find_library('shlwapi')
++        if cc.links('''
++            #include <windows.h>
++            #include <shlwapi.h>
++            #include <stdlib.h>
++            int main()
++            {
++                MultiByteToWideChar (0, 0, NULL, 0, NULL, 0);
++                WideCharToMultiByte (0, 0, NULL, 0, NULL, 0, NULL, NULL);
++                PathCombineW(0,0,0);
++                return 0;
++            }''', name: 'Unicode functions working', dependencies: shlwapi_dep)
++            win32_wide_working = true
++        elif not win32_winver_bump
++            win32_winver_bump = true
++        endif
++
++        if not win32_wide_working
++            win32_wide_working = cc.links('''
++                #define WINVER 0x501
++                #define _WIN32_WINNT 0x501
++                #include <windows.h>
++                #include <shlwapi.h>
++                #include <stdlib.h>
++                int main()
++                {
++                    MultiByteToWideChar (0, 0, NULL, 0, NULL, 0);
++                    WideCharToMultiByte (0, 0, NULL, 0, NULL, 0, NULL, NULL);
++                    PathCombineW(0,0,0);
++                    return 0;
++                }''', name: 'Unicode functions working with WINVER bump')
++        endif
++
++        if win32_wide_working
++            compat_libs += [shlwapi_dep]
++            conf.set('WANT_WIN32_UNICODE', true)
++        else
++            error('Unicode support for Win32 not working')
++        endif
++    else
++        error('Unicode File Open for Win32 not available')
++    endif
++
++    # Only implemented in the CMake port
++    if conf.get('WANT_WIN32_UNICODE', false)
++        conf.set('strcasecmp', '_stricmp')
++        conf.set('strncasecmp', '_strnicmp')
++        #endif
++    endif
++
++    #### Check for Network functions
++    win32_sockets = cc.has_header('ws2tcpip.h')
++    if not win32_sockets
++        error('Please update your headers to support winsock 2.2.')
++    endif
++    conf.set('HAVE_WS2TCPIP_H', win32_sockets)
++    if win32_sockets
++        ws2_32_dep = cc.find_library('ws2_32')
++        if cc.links('''
++            #include <winsock2.h>
++            #include <ws2tcpip.h>
++            #include <stdlib.h>
++            int main()
++            {
++                getaddrinfo(NULL, NULL, NULL, NULL);
++                freeaddrinfo(NULL);
++                return 0;
++            }''', name: 'if winsock2 API is available', dependencies: ws2_32_dep)
++            win32_sockets_working = true
++        elif not win32_winver_bump
++            win32_winver_bump = true
++        endif
++
++        if not win32_sockets_working
++            win32_sockets_working = cc.links('''
++                #define WINVER 0x501
++                #define _WIN32_WINNT 0x501
++                #include <winsock2.h>
++                #include <ws2tcpip.h>
++                #include <stdlib.h>
++                int main()
++                {
++                    getaddrinfo(NULL, NULL, NULL, NULL);
++                    freeaddrinfo(NULL);
++                    return 0;
++                }
++            ''', name: 'deeper if winsock2 API is available', dependencies: ws2_32_dep)
++        endif
++
++        if win32_sockets_working
++            network_internal = 'winsock2'
++            have_network = true
++            have_ipv6 = true
++        else
++            error('Please update your headers to support winsock 2.2.')
++        endif
++    endif
++
++    #### Check for Win32 Named Pipe functions
++    win32_fifo_working = false
++    if fifo.allowed()
++        if cc.links('''
++            #include <windows.h>
++            int main(){
++                CreateNamedPipeA(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
++                CreateNamedPipeW(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
++                return 0;
++            }''', name: 'we have Named Pipes')
++            win32_fifo_working = true
++        elif not win32_winver_bump
++            win32_winver_bump = true
++        endif
++
++        if not win32_fifo_working
++            win32_fifo_working = cc.links('''
++                #define WINVER 0x501
++                #define _WIN32_WINNT 0x501
++                #include <windows.h>
++                int main(){
++                    CreateNamedPipeA(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
++                    CreateNamedPipeW(NULL,PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED,PIPE_TYPE_BYTE,1,255,255,0,NULL);
++                    return 0;
++                }''', name: 'we have Named Pipes with WINVER bump')
++        endif
++
++        have_mkfifo = win32_fifo_working
++        if win32_fifo_working
++            # FIXME: control_generic.h
++            conf.set10('WANT_WIN32_FIFO', true)
++        else
++            error('Unicode support for Win32 not working')
++        endif
++    else
++        error('Unicode File Open for Win32 not available')
++    endif
++
++    #### WINVER Bump
++    if win32_winver_bump
++        # Windows Vista and later APIs
++        conf.set('WINVER', '0x0600')
++        conf.set('_WIN32_WINNT', '0x0600')
++        # getaddrinfo and freeaddrinfo are available for Win2K and above
++        # Bug: MinGW.org w32api ws2tcpip.h incorrectly wants (_WIN32_WINNT >= 0x0501) for getaddrinfo and freeaddrinfo
++        # MultiByteToWideChar and WideCharToMultiByte are available for Win2K and above
++        # GetThreadErrorMode only available on Vista and Later
++    endif
++endif
++
++#### Check mingw.org for EOVERFLOW
++eoverflow_present = cc.has_header_symbol('errno.h', 'EOVERFLOW')
++if not eoverflow_present
++    conf.set('EOVERFLOW', 'EFBIG')
++endif
++
++conf.set('WIN32_CODES', win32_specific_codes)
++
++ipv6 = get_option('ipv6')
++
++# make it clear that auto is the default for both enable and with options.
++network_type = get_option('network')
++
++if network_type == 'auto'
++    if have_fork
++        network_type = 'exec'
++    elif win32_specific_codes
++        network_type = 'wininethttp'
++    elif have_network
++        network_type = 'internal'
++    else
++        network_type = 'disabled'
++    endif
++endif
++
++if network_type == 'exec' and not have_fork
++  error('exec network support selected but fork not available')
++endif
++
++#### Use Win32 support codes
++
++ipv6 = ipv6.enable_auto_if(have_ipv6 and network_type != 'disabled')
++
++if network_type != 'disabled' and network_internal == 'winsock2'
++    conf.set('WANT_WIN32_SOCKETS', 1)
++endif
++
++conf.set('NETWORK_WINSOCK', network_type != 'disabled' and network_internal == 'winsock2')
++# new net123
++conf.set('NET123', network_type != 'disabled')
++conf.set('NET123_EXEC', network_type == 'exec')
++conf.set('NET123_WINHTTP', network_type == 'wininethttp') # or winhttp
++conf.set('NET123_WININET', network_type == 'wininethttp') # or wininet
++
++## FIXME: MSVC doesn't define WINBOOL, it looks like an
++## historical artifact? -amyspark
++if conf.get('NET123_WINHTTP', false) or conf.get('NET123_WININET', false)
++    if not cc.has_type('WINBOOL', prefix: '#include <minwindef.h>')
++        conf.set('WINBOOL', 'BOOL')
++    endif
++endif
++
++############## Terminal choice
++
++conf.set('TERM_POSIX', term_type == 'posix')
++conf.set('TERM_NONE', term_type == 'none')
++conf.set('TERM_WIN32', term_type == 'win32')
++
++############## FIFO enable
++
++fifo = fifo.enable_auto_if(have_mkfifo)
++
++if fifo.allowed()
++    conf.set('FIFO', true)
++    if not have_mkfifo
++        warning('You forced FIFO code while I think there is no mkfifo() available!')
++    endif
++endif
++
++############## Network enable
++if network_type != 'disabled'
++    conf.set('NETWORK', true)
++    if not have_network
++        warning('You forced network code while I think there is support missing!')
++    endif
++endif
++
++if ipv6.allowed()
++    conf.set('IPV6', true)
++    if not have_ipv6
++        warning('You forced IPv6 code while I think there is no getaddrinfo() available!')
++    endif
++endif
++
++############## Library cleanup
++
++# MSVC requires declspec on symbols when importing from a shared library.
++if get_option('default_library') in ['shared', 'both']
++    if cc.has_define('_MSC_VER')
++        error('Shared library build is only supported on Unix platforms')
++    endif
++endif
++
++makedef = find_program('meson/makedef.py')
++
++makedef_args = [makedef]
++
++if cc.has_define('_MSC_VER')
++    dumpbin = find_program('dumpbin', required: true)
++    makedef_args += ['--dumpbin', dumpbin]
++else
++    nm = find_program('nm', required: true)
++    makedef_args += ['--nm', nm]
++endif
++
++extern_prefix = cc.symbols_have_underscore_prefix() ? '_' : ''
++
++makedef_args += ['--prefix', extern_prefix]
++
++if os in ['windows', 'cygwin']
++    vflag = ''
++    makedef_os_args = ['--os', 'win']
++elif os in ['darwin', 'ios']
++    vflag = '-Wl,-exported_symbols_list,@0@'
++    makedef_os_args = ['--os', 'darwin']
++else
++    vflag = '-Wl,--version-script,@0@'
++    makedef_os_args = ['--os', 'linux']
++endif
++
++subdir('src')
++
++############## Final Output
++
++pkg = import('pkgconfig')
++
++if conf.get('NEED_MAINLIB', false)
++    # Pkg-config files and library includes.
++    if build_libmpg123
++        pkg.generate(libmpg123,
++            name: 'libmpg123',
++            description: 'An optimised MPEG Audio decoder',
++            version: meson.project_version(),
++        )
++    endif
++    if build_libout123
++        pkg.generate(libout123,
++            name: 'libout123',
++            description: 'A streaming audio output API derived from mpg123',
++            version: meson.project_version(),
++        )
++    endif
++    if build_libsyn123
++        pkg.generate(libsyn123,
++            name: 'libsyn123',
++            description: 'A signal synthesis library accompanying mpg123',
++            version: meson.project_version(),
++        )
++    endif
++endif
++
++subdir('man1')
++
++############## Display Message
++
++summary({
++    'Install path': get_option('prefix'),
++    'Components': components,
++    'CPU optimization': cpu,
++    'Compiler Optimization': get_option('optimization'),
++    'Use yasm (for AVX only)': get_variable('check_yasm', false),
++    'Gapless Support': conf.get('GAPLESS', false),
++    'Debugging': get_option('debug'),
++    'Terminal control': term_type,
++    'Extreme debugging': conf.get('XDEBUG', false),
++    'Seek table size': seektable,
++    'FIFO support': fifo,
++    'Buffer': buffer,
++    'External network': network_type,
++    'Internal network type': network_internal,
++    'IPv6 (getaddrinfo)': ipv6,
++    'largefile sensitive': conf.get('LFS_SENSITIVE', false),
++    'default offsets': sizeof_off_t * 8,
++    'explicit 64 bit offsets': use_largefile,
++    'forced 64 bit offsets': conf.get('FORCED_OFF_64', false),
++    'only portable API': conf.get('PORTABLE_API', false),
++})
++
++if conf.get('FORCED_OFF_64', false)
++    warning('Ensure that client programs are built with _FILE_OFFSET_BITS defined to 64, too.\nOld binaries built for 32 bit off_t may fail missing symbols in mpg123 libraries.')
++endif
++
++summary({
++    'Layer I': layer1,
++    'Layer II': layer2,
++    'Layer III': layer3,
++    'NtoM resampling': ntom,
++    'downsampled decoding': downsample,
++    'Feeder/buffered input': feeder,
++    'ID3v2 parsing': id3v2,
++    'String API': conf.get('HAVE_STRING', false),
++    'ICY parsing/conversion': conf.get('HAVE_ICY', false),
++    'Error/warning messages': messages,
++    'Win32 Unicode File Open.': win32_unicode,
++    'Feature Report Function.': conf.get('HAVE_FEATURE', false),
++    'Equalizer': equalizer,
++}, section: 'Core libmpg123 features')
++
++# FIXME implement if needed
++summary({
++    '8 bit integer': not conf.get('NO_8BIT', false),
++    '16 bit integer': not conf.get('NO_16BIT', false),
++    '32/24 bit integer': not conf.get('NO_32BIT', false),
++    'real (32 bit float)': not conf.get('NO_REAL', false),
++}, section: 'Output formats (nofpu will disable all but 16 or 8 bit!)')
++
++summary({
++    'Integer conversion': int_quality,
++    'IEEE 754 hackery': conf.get('IEEE_FLOAT', false),
++    'New/old WRITE_SAMPLE': newoldwritesample,
++    'new Huffman scheme': new_huffman,
++    'runtime tables': runtimetables,
++}, section: 'Optimization detail')
++
++message('Disabling core features is not commonly done and some combinations might not build/work. If you encounter such a case, help yourself (and provide a patch) or just poke the maintainers.')
++
++summary({
++    'libsyn123 special cases': specialcases,
++    'Modules': modules,
++    'Checked audio modules': check_modules,
++    'Detected audio support': output_modules,
++    'Runtime order': default_output_modules,
++})
+diff --git a/meson/makedef.py b/meson/makedef.py
+new file mode 100644
+index 0000000..726f903
+--- /dev/null
++++ b/meson/makedef.py
+@@ -0,0 +1,177 @@
++#!/usr/bin/env python3
++# Copyright (c) 2022 L. E. Segovia <amy@amyspark.me>
++#
++# This file is part of the FFmpeg Meson build
++#
++# This library is free software; you can redistribute it and/or
++# modify it under the terms of the GNU Lesser General Public
++# License as published by the Free Software Foundation; either
++# version 2.1 of the License, or (at your option) any later version.
++#
++# This library is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++# Lesser General Public License for more details.
++#
++# You should have received a copy of the GNU Lesser General Public
++# License along with this library; if not, see <http://www.gnu.org/licenses/>.
++
++import argparse
++import errno
++import os
++import pathlib
++import re
++import subprocess
++
++
++def output(platform, symbols):
++    if platform == 'win':
++        print("EXPORTS")
++        print(*[f'    {symbol}' for symbol in sorted(set(symbols))], sep='\n')
++    elif platform == 'darwin':
++        print(*[f'{prefix}{symbol}' for symbol in sorted(set(symbols))], sep='\n')
++    else:
++        print('{')
++        print('    global:')
++        print(
++            *[f'        {prefix}{symbol};' for symbol in sorted(set(symbols))], sep='\n')
++        print('    local:')
++        print('        *;')
++        print('};')
++
++
++if __name__ == '__main__':
++    arg_parser = argparse.ArgumentParser(
++        description='Craft the symbols exports file')
++
++    arg_parser.add_argument('--prefix', metavar='PREFIX',
++                            help='Prefix for extern symbols')
++    g = arg_parser.add_argument_group('Library parsing tool')
++    group = g.add_mutually_exclusive_group(required=True)
++    group.add_argument('--nm', metavar='NM_PATH', type=pathlib.Path,
++                       help='If specified, runs this instead of dumpbin (MinGW)')
++    group.add_argument('--dumpbin', metavar='DUMPBIN_PATH', type=pathlib.Path,
++                       help='If specified, runs this instead of nm (MSVC)')
++    group.add_argument(
++        '--list', action='store_true', help='If specified, consider FILE as an exported symbols list instead of a library')
++    g = arg_parser.add_argument_group('Symbol naming')
++    group = g.add_mutually_exclusive_group(required=True)
++    group.add_argument('--regex', metavar='REGEX', type=str,
++                       nargs='+',
++                       help='Regular expression for exported symbols')
++    group.add_argument('--vscript', metavar='VERSION_SCRIPT',
++                       type=argparse.FileType('r'), help='Version script')
++    arg_parser.add_argument('--os', type=str, choices=('win', 'linux', 'darwin'),
++                            default='linux', required=True,
++                            help='Target operating system for the exports file (win = MSVC module definition file, linux = version script, darwin = exported symbols list)')
++    arg_parser.add_argument('libname', metavar='FILE', type=pathlib.Path,
++                            help='Source file to parse')
++
++    args = arg_parser.parse_args()
++
++    libname = args.libname
++
++    if not libname.exists():
++        raise FileNotFoundError(
++            errno.ENOENT, os.strerror(errno.ENOENT), libname)
++
++    prefix = args.prefix or ''
++    started = 0
++    regex = []
++
++    if args.vscript:
++        for line in args.vscript:
++            # We only care about global symbols
++            if re.match(r'^\s+global:', line):
++                started = 1
++                line = re.sub(r'^\s+global: *', '', line)
++            else:
++                if re.match(r'^\s+local:', line):
++                    started = 0
++
++            if started == 0:
++                continue
++
++            line = line.replace(';', '')
++
++            for exp in line.split():
++                # Remove leading and trailing whitespace
++                regex.append(exp.strip())
++    else:
++        regex.extend(args.regex)
++
++    if args.list:
++        dump = libname.open('r', encoding='utf-8').readlines()
++        # Strip whitespaces
++        dump = [x.strip() for x in dump]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++    elif args.nm is not None:
++        # Use eval, since NM="nm -g"
++        # Add -j to ensure only symbol names are output (otherwise in macOS
++        # a race condition can occur in the redirection)
++        # And use `--no-llvm-bc` in case it's /usr/bin/nm on macOS
++        s = subprocess.run(
++            [args.nm, '-U', '-g', '-j', '--no-llvm-bc', libname],
++            stdout=subprocess.PIPE,
++            stderr=subprocess.STDOUT,
++            universal_newlines=True,
++            check=False,
++        )
++        if s.returncode != 0:
++            # If it fails, retry without skipping LLVM bitcode (macOS flag)
++            # Don't use -U, as that was an alias for --unicode= instead of
++            # --defined-only before Binutils 2.39
++            s = subprocess.run(
++                [args.nm, '--defined-only', '-g', '-j', libname],
++                stdout=subprocess.PIPE,
++                stderr=subprocess.STDOUT,
++                universal_newlines=True,
++                check=False,
++            )
++        if s.returncode != 0:
++            # -j was added only in Binutils 2.37
++            s = subprocess.run(
++                [args.nm, '--defined-only', '-g', libname],
++                stdout=subprocess.PIPE,
++                stderr=subprocess.DEVNULL,
++                universal_newlines=True,
++                check=True,
++            )
++        dump = s.stdout.splitlines()
++        # Exclude lines with ':' (object name)
++        dump = [x for x in dump if ":" not in x]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++        # Subst the prefix out
++        dump = [re.sub(f'^{prefix}', '', x) for x in dump]
++    else:
++        dump = subprocess.run([args.dumpbin, '-linkermember:1', libname],
++                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True).stdout.splitlines()
++        # Find the index of the first line with
++        # "public symbols", keep the rest
++        # Then the line with " Summary",
++        # delete it and the rest
++        for i, line in enumerate(dump):
++            if 'public symbols' in line:
++                start = i
++            elif re.match(r'\s+Summary', line):
++                end = i
++        dump = dump[start:end]
++        # Substitute prefix out
++        dump = [re.sub(fr'\s+{prefix}', ' ', x) for x in dump]
++        # Substitute big chonky spaces out
++        dump = [re.sub(r'\s+', ' ', x) for x in dump]
++        # Exclude blank lines
++        dump = [x for x in dump if len(x) > 0]
++        # Take only the *second* field (split by spaces)
++        # Python's split excludes whitespace at the beginning
++        dump = [x.split()[1] for x in dump]
++
++    symbols = []
++    for exp in regex:
++        for i in dump:
++            if re.match(exp, i):
++                symbols.append(i)
++
++    output(args.os, symbols)
+diff --git a/meson_options.txt b/meson_options.txt
+new file mode 100644
+index 0000000..2d60cf2
+--- /dev/null
++++ b/meson_options.txt
+@@ -0,0 +1,34 @@
++option('modules', type: 'feature', value: 'auto', description: 'Dynamically loadable output module support (default enabled in shared library builds)')
++option('programs', type: 'feature', value: 'auto', description: 'Build programs')
++option('libmpg123', type: 'feature', value: 'auto', description: 'Build libmpg123')
++option('libout123', type: 'feature', value: 'auto', description: 'Build libout123')
++option('libout123-modules', type: 'feature', value: 'auto', description: 'Build libout123 modules')
++option('libsyn123', type: 'feature', value: 'auto', description: 'Build libsyn123')
++option('fifo', type: 'feature', value: 'auto', description: 'FIFO support for control interface (auto-enabled on linux)')
++option('id3v2', type: 'feature', value: 'enabled', description: 'ID3v2 parsing')
++option('ntom', type: 'feature', value: 'enabled', description: 'flexible resampling')
++option('downsample', type: 'feature', value: 'enabled', description: 'downsampled decoding')
++option('feeder', type: 'feature', value: 'enabled', description: 'feeder decoding and buffered readers')
++option('moreinfo', type: 'feature', value: 'enabled', description: 'extra information for frame analyzers')
++option('messages', type: 'feature', value: 'enabled', description: 'output error/warning messages on the console')
++option('runtime-tables', type: 'feature', value: 'disabled', description: 'calculate tables at runtime saving size at the expense of additional computation at load time')
++option('new-huffman', type: 'feature', value: 'enabled', description: 'new huffman decoding scheme by Taihei (faster on modern CPUs at least, so on by default)')
++option('int-quality', type: 'feature', value: 'enabled', description: 'when disabled, use rounding instead of fast truncation for integer output, where possible')
++option('equalizer', type: 'feature', value: 'enabled', description: 'equalizer support')
++# FIXME: do we need extra options?
++option('cpu', type: 'combo', choices: ['generic_dither', 'x86', 'x86-64', 'altivec', 'arm_fpu', 'aarch64'], value: 'generic_dither', description: 'select CPU optimization (see configure.ac for descriptions)')
++option('cases', type: 'feature', value: 'enabled', description: 'include special cases for likely parameter values (channel count, encoding sizes in libsyn123 routines) in the hope of better optimization at the expense of some code bloat')
++option('buffer', type: 'feature', value: 'auto', description: 'audio buffer code (default enabled by some heuristics)')
++option('newoldwritesample', type: 'feature', value: 'auto', description: 'new/old WRITE_SAMPLE macro for non-accurate 16 bit output, faster on certain CPUs (default on on 32 bit x86)')
++option('layer1', type: 'feature', value: 'enabled', description: 'layer I decoding')
++option('layer2', type: 'feature', value: 'enabled', description: 'layer II decoding')
++option('layer3', type: 'feature', value: 'enabled', description: 'layer III decoding')
++# FIXME: do we need extra options?
++option('seektable', type: 'integer', min: 0, max: 10000, value: 1000, description: 'size of seek index table (0 disables it)')
++option('portable', type: 'feature', value: 'disabled', description: 'only build portable API (no off_t, no internal I/O)')
++option('largefile', type: 'feature', value: 'auto', description: 'attempt to use 64 bit file offsets internally')
++option('audio', type: 'array', choices: ['alsa', 'tinyalsa', 'dummy', 'jack', 'coreaudio', 'portaudio', 'pulse', 'sdl', 'sndio', 'win32', 'win32_wasapi', 'openal'], value: ['dummy'], description: 'audio output modules')
++option('with_default_audio', type: 'array', value: ['dummy'], description: 'Use these modules as the default output')
++option('ipv6', type: 'feature', value: 'auto', description: 'IPv6 support in internal network stack')
++option('network', type: 'combo', choices: ['auto', 'none', 'internal', 'wininethttp', 'exec'],  value: 'auto', description: 'Available options, depending on platform, are auto, none, internal, wininethttp, and exec (wget or curl binaries).\nThe internal code is always built in addition to external options for plain HTTP (esp. Shoutcast v1) support.\nThe external option is for HTTPS by default, but can be used for HTTP, too.')
++option('xdebug', type: 'boolean', value: false, description: 'Turn on (yet more) extreme debugging printouts')
+diff --git a/src/common/meson.build b/src/common/meson.build
+new file mode 100644
+index 0000000..1d752f1
+--- /dev/null
++++ b/src/common/meson.build
+@@ -0,0 +1,8 @@
++# common headers shared between subprojects
++common_srcs = files(
++  'abi_align.h',
++  'debug.h',
++  'sample.h',
++  'swap_bytes_impl.h',
++  'true.h'
++)
+diff --git a/src/compat/meson.build b/src/compat/meson.build
+new file mode 100644
+index 0000000..c5bdb65
+--- /dev/null
++++ b/src/compat/meson.build
+@@ -0,0 +1,46 @@
++src_compat_libcompat_sources = files(
++    'compat_str.c',
++    'compat.c',
++    'wpathconv.h',
++    'compat.h'
++)
++
++libcompat = static_library(
++    'compat',
++    src_compat_libcompat_sources,
++    include_directories: includes,
++    dependencies: compat_libs,
++    gnu_symbol_visibility: 'hidden',
++    install: false,
++)
++
++# A smaller one for the output modules. Do not want to grow them
++# unnecessarily with unused code.
++src_compat_libcompat_str_sources = files(
++    'compat_str.c',
++    'compat.h',
++)
++
++libcompat_str = static_library(
++    'compat_str',
++    src_compat_libcompat_str_sources,
++    include_directories: includes,
++    gnu_symbol_visibility: 'hidden',
++    install: false,
++)
++
++# A separate lib for the dlopen stuff, less linker noise.
++src_compat_libcompat_dl_sources = files(
++    'compat_dl.c',
++    'wpathconv.h',
++    'compat.h',
++)
++
++libcompat_dl = static_library(
++    'compat_dl',
++    src_compat_libcompat_dl_sources,
++    dependencies: libdl,
++    include_directories: includes,
++    gnu_symbol_visibility: 'hidden',
++    install: false,
++)
+diff --git a/src/include/meson.build b/src/include/meson.build
+new file mode 100644
+index 0000000..d560dc8
+--- /dev/null
++++ b/src/include/meson.build
+@@ -0,0 +1,30 @@
++headers = files()
++
++if build_libmpg123
++    headers += files(
++        'mpg123.h',
++    )
++endif
++
++if build_libsyn123
++    headers += files(
++        'syn123.h',
++    )
++endif
++
++if build_libout123
++    headers += files(
++        'out123.h',
++    )
++endif
++
++if conf.get('NEED_LIB', false) and conf.get('NEED_MAINLIB', false)
++    # All main libraries need fmt123 header installed.
++    headers += files(
++        'fmt123.h',
++    )
++endif
++
++install_headers(headers)
++
++includes = [include_directories('.')]
+diff --git a/src/libmpg123/meson.build b/src/libmpg123/meson.build
+new file mode 100644
+index 0000000..9efb80f
+--- /dev/null
++++ b/src/libmpg123/meson.build
+@@ -0,0 +1,470 @@
++if conf.get('HAVE_GETCPUFLAGS', false)
++    testcpu = executable(
++        'testcpu',
++        files('testcpu.c', 'getcpuflags.S'),
++        include_directories: includes,
++        link_with: [libcompat],
++        install: false,
++    )
++endif
++
++# Uses VLA with specified dimensions in Y
++build_options = []
++if cc.compiles('''#include <stdint.h>
++    #include <stdio.h>
++    extern void print_array( int statick, int fixed, double fixed_scale
++    ,	const char *indent, const char *name
++    ,	size_t count, double tab[], int calc );
++    void print_array2d( int fixed, double fixed_scale
++    ,	const char *name, size_t x, size_t y
++    , double tab[][y], int calc )
++    {
++        if(calc)
++        {
++            if(!fixed)
++                printf("static ALIGNED(16) real %s[%zu][%zu];\n", name, x, y);
++            return;
++        }
++        printf( "static const%s real %s[%zu][%zu] = \n{\n", fixed ? "" : " ALIGNED(16)"
++        ,	name, x, y );
++        for(size_t i=0; i<x; ++i)
++        {
++            if(i)
++                printf(",");
++            print_array(1, fixed, fixed_scale, "\t", NULL, y, tab[i], calc);
++        }
++        printf("};\n");
++    }
++    int main()
++    {
++        return 0;
++    }''', name: 'tolerates VLA')
++    calctables = executable(
++        'calctables',
++        files('calctables.c', 'init_costabs.h', 'init_layer12.h', 'init_layer3.h'),
++        include_directories: includes,
++        dependencies: m_dep,
++        install: false
++    )
++endif
++
++if build_libmpg123
++    libmpg123_sources = files(
++        'mpeghead.h',
++        'parse.c',
++        'parse.h',
++        'frame.c',
++        'format.c',
++        'frame.h',
++        'reader.h',
++        'decode.h',
++        'dct64.c',
++        'synth.h',
++        'synth_mono.h',
++        'synth_ntom.h',
++        'synth_8bit.h',
++        'synths.h',
++        'huffman.h',
++        'newhuffman.h',
++        'icy.h',
++        'icy2utf8.h',
++        'id3.h',
++        'id3.c',
++        'getbits.h',
++        'optimize.h',
++        'optimize.c',
++        'readers.c',
++        'lfs_wrap.h',
++        'costabs.h',
++        'tabinit.c',
++        'libmpg123.c',
++        'gapless.h',
++        'mpg123lib_intern.h',
++        'mangle.h',
++        'getcpuflags.h',
++        'index.h',
++        'index.c',
++    )
++
++    if conf.get('HAVE_LAYER1', false)
++        libmpg123_sources += files('layer1.c')
++    endif
++
++    if conf.get('HAVE_LAYER2', false)
++        libmpg123_sources += files('layer2.c')
++    endif
++
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('layer3.c')
++    endif
++
++    if conf.get('HAVE_EQUALIZER', false)
++        libmpg123_sources += files('equalizer.c')
++    endif
++
++    if conf.get('HAVE_DITHER', false)
++        libmpg123_sources += files('dither.c')
++    endif
++
++    if conf.get('HAVE_SYNTH8', false)
++        libmpg123_sources += files('synth_8bit.c')
++    endif
++
++    if conf.get('HAVE_SYNTH16', false)
++        libmpg123_sources += files('synth.c')
++    endif
++
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_s32.c')
++    endif
++
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_real.c')
++    endif
++
++    if conf.get('HAVE_LFS_WRAP', false)
++        libmpg123_sources += files('lfs_wrap.c')
++    endif
++
++    if conf.get('HAVE_ICY', false)
++        libmpg123_sources += files('icy.c', 'icy2utf8.c')
++    endif
++
++    if conf.get('HAVE_FEATURE', false)
++        libmpg123_sources += files('feature.c')
++    endif
++
++    if conf.get('HAVE_NTOM', false)
++        libmpg123_sources += files('ntom.c')
++    endif
++
++    if conf.get('HAVE_STRING', false)
++        libmpg123_sources += files('stringbuf.c')
++    endif
++
++    if conf.get('HAVE_GETCPUFLAGS', false)
++        libmpg123_sources += files('getcpuflags.S')
++    endif
++
++    if conf.get('HAVE_GETCPUFLAGS_X86_64', false)
++        libmpg123_sources += files('getcpuflags_x86_64.S')
++    endif
++
++    if conf.get('HAVE_GETCPUFLAGS_ARM', false)
++        libmpg123_sources += files('getcpuflags_arm.c', 'check_neon.S')
++    endif
++
++    if conf.get('HAVE_ALTIVEC', false)
++        libmpg123_sources += files('synth_altivec.c', 'dct64_altivec.c')
++    endif
++
++    if conf.get('HAVE_I386', false)
++        libmpg123_sources += files('dct64_i386.c')
++    endif
++
++    if conf.get('HAVE_I486', false)
++        libmpg123_sources += files('synth_i486.c', 'dct64_i486.c')
++    endif
++
++    if conf.get('HAVE_I586', false)
++        libmpg123_sources += files('synth_i586.S')
++    endif
++
++    if conf.get('HAVE_I586_DITHER', false)
++        libmpg123_sources += files('synth_i586_dither.S')
++    endif
++
++    if conf.get('HAVE_3DNOW', false)
++        libmpg123_sources += files('synth_3dnow.S', 'dct64_3dnow.S')
++    endif
++
++    if conf.get('HAVE_3DNOW', false)
++    if conf.get('HAVE_EQUALIZER', false)
++        libmpg123_sources += files('equalizer_3dnow.S')
++    endif
++    endif
++
++    if conf.get('HAVE_3DNOW_VINTAGE', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_3dnow.S')
++    endif
++    endif
++
++    if conf.get('HAVE_3DNOWEXT', false)
++        libmpg123_sources += files('dct64_3dnowext.S', 'synth_3dnowext.S')
++    endif
++
++    if conf.get('HAVE_3DNOWEXT_VINTAGE', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_3dnowext.S')
++    endif
++    endif
++
++    if conf.get('HAVE_MMXTAB', false)
++        libmpg123_sources += files('tabinit_mmx.S')
++    endif
++
++    if conf.get('HAVE_MMX', false)
++        libmpg123_sources += files('dct64_mmx.S', 'synth_mmx.S')
++    endif
++
++    if conf.get('HAVE_SSE_VINTAGE', false)
++    if conf.get('HAVE_FLOATDCT', false)
++        libmpg123_sources += files('dct64_sse_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_SSE_VINTAGE', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_sse_float.S', 'synth_stereo_sse_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_SSE_VINTAGE', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_sse_s32.S', 'synth_stereo_sse_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_SSE', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_sse.S')
++    endif
++    endif
++
++    if conf.get('HAVE_SSE_VINTAGE', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_sse_accurate.S', 'synth_stereo_sse_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_SSE_VINTAGE', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('dct64_sse.S', 'synth_sse.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_x86_64.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_stereo_x86_64_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_stereo_x86_64_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_stereo_x86_64_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('dct64_x86_64.S', 'synth_stereo_x86_64.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64', false)
++    if conf.get('HAVE_FLOATDCT', false)
++        libmpg123_sources += files('dct64_x86_64_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64_MONO', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_x86_64_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64_MONO', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_x86_64_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64_MONO', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_x86_64_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_X86_64_MONO', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_x86_64.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_avx.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if conf.get('HAVE_FLOATDCT', false)
++        libmpg123_sources += files('dct64_avx_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_stereo_avx_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_stereo_avx_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_stereo_avx_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_AVX', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('dct64_avx.S', 'synth_stereo_avx.S')
++    endif
++    endif
++
++    if conf.get('HAVE_ARM', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_arm_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_ARM', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_arm.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_neon.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if conf.get('HAVE_FLOATDCT', false)
++        libmpg123_sources += files('dct64_neon_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_neon_float.S', 'synth_stereo_neon_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_neon_s32.S', 'synth_stereo_neon_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_neon_accurate.S', 'synth_stereo_neon_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('dct64_neon.S', 'synth_neon.S', 'synth_stereo_neon.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if conf.get('HAVE_LAYER3', false)
++        libmpg123_sources += files('dct36_neon64.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if conf.get('HAVE_FLOATDCT', false)
++        libmpg123_sources += files('dct64_neon64_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if conf.get('HAVE_SYNTHREAL', false)
++        libmpg123_sources += files('synth_neon64_float.S', 'synth_stereo_neon64_float.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if conf.get('HAVE_SYNTH32', false)
++        libmpg123_sources += files('synth_neon64_s32.S', 'synth_stereo_neon64_s32.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('synth_neon64_accurate.S', 'synth_stereo_neon64_accurate.S')
++    endif
++    endif
++
++    if conf.get('HAVE_NEON64', false)
++    if not conf.get('HAVE_ACCURATE', false)
++        libmpg123_sources += files('dct64_neon64.S', 'synth_neon64.S', 'synth_stereo_neon64.S')
++    endif
++    endif
++
++    libmpg123_sources += files(
++        'l2tables.h',
++        'l12tabs.h',
++        'l3bandgain.h',
++        'l3tabs.h',
++        'dither.h',
++        'dither_impl.h',
++        'synth_sse3d.h',
++    ) + [config_h]
++
++    static_lib = static_library('mpg123-static',
++        libmpg123_sources,
++        include_directories: includes,
++        dependencies: [m_dep, network_deps, compat_libs],
++        link_with: [libcompat],
++        install: false,
++    )
++
++    vs_module_def = custom_target('mpg123-def',
++        output: 'mpg123.def',
++        command: [makedef_args, '--regex', '^mpg123_', makedef_os_args, '@INPUT0@'],
++        input: [
++            static_lib
++        ],
++        capture: true
++    )
++
++    libmpg123 = library('mpg123',
++        link_whole: static_lib,
++        link_args: vflag.format(vs_module_def.full_path()),
++        include_directories: includes,
++        vs_module_defs: vs_module_def,
++        version: meson.project_version(),
++        install: true,
++    )
++
++    libmpg123_dep = declare_dependency(
++        link_with: libmpg123,
++        dependencies: [m_dep, network_deps, compat_libs],
++        include_directories: includes,
++    )
++else
++    libmpg123_dep = disabler()
++endif
+diff --git a/src/libout123/meson.build b/src/libout123/meson.build
+new file mode 100644
+index 0000000..dbd2f76
+--- /dev/null
++++ b/src/libout123/meson.build
+@@ -0,0 +1,88 @@
++# Component selection:
++# If HAVE_MODULES, the library can be built fully independently.
++# If not, the library depends on the one builtin module from
++# the subdirectory.
++
++subdir('modules')
++
++libout123_sources = files(
++  'libout123.c',
++  'stringlists.h',
++  'stringlists.c',
++  'out123_int.h',
++  'wav.c',
++  'wav.h',
++  'hextxt.c',
++  'hextxt.h',
++  'wavhead.h',
++)
++
++if conf.get('BUILD_BUFFER', false)
++    libout123_sources += files(
++        'buffer.c',
++        'buffer.h',
++        'xfermem.c',
++        'xfermem.h',
++    )
++endif
++
++libmodule_sources = files('module.h')
++if conf.get('HAVE_MODULES', false)
++    libmodule_sources += files('module.c')
++else
++    libmodule_sources += files('legacy_module.c')
++endif
++
++libmodule = static_library(
++    'module',
++    libmodule_sources,
++    include_directories: includes,
++    install: false
++)
++
++libout123_deps = [librt_dep, m_dep, compat_libs]
++libout123_libs = [libmodule, libcompat]
++
++if conf.get('HAVE_MODULES', false)
++    libout123_libs += [libcompat_dl]
++else
++    libout123_deps += [libdefaultmodule_deps]
++    libout123_libs += [libdefaultmodule]
++endif
++
++if conf.get('NEED_MAINLIB', false) and build_libout123
++    static_lib = static_library('out123-static',
++        libout123_sources,
++        include_directories: includes,
++        dependencies: libout123_deps,
++        link_with: libout123_libs,
++        install: false,
++    )
++
++    vs_module_def = custom_target('out123-def',
++        output: 'out123.def',
++        command: [makedef_args, '--regex', '^out123_', makedef_os_args, '@INPUT0@'],
++        input: [
++            static_lib
++        ],
++        capture: true
++    )
++
++    libout123 = library(
++        'out123',
++        link_whole: static_lib,
++        link_args: vflag.format(vs_module_def.full_path()),
++        gnu_symbol_visibility: 'hidden',
++        vs_module_defs: vs_module_def,
++        version: meson.project_version(),
++        install: true
++    )
++
++    libout123_dep = declare_dependency(
++        link_with: libout123,
++        dependencies: libout123_deps,
++        include_directories: includes,
++    )
++else
++    libout123_dep = disabler()
++endif
+diff --git a/src/libout123/modules/meson.build b/src/libout123/modules/meson.build
+new file mode 100644
+index 0000000..8e8ca34
+--- /dev/null
++++ b/src/libout123/modules/meson.build
+@@ -0,0 +1,54 @@
++# Do not include unneeded headers from mpg123app.h .
++libout123_mod_cppflags = ['-DBUILDING_OUTPUT_MODULES=1']
++
++# On macOS, the default suffix for loadable modules is .so, but meson uses
++# .dylib by default. Since the code expects .so and autotools was using .so,
++# make meson do the same.
++# See https://github.com/p11-glue/p11-kit/commit/8a4348e8468d08d992cb7d22a4d887d0191383f6
++module_suffix = []
++if os in ['darwin', 'ios']
++  module_suffix = 'so'
++endif
++
++foreach mod : output_modules
++    mod_f = files(
++        '@0@.c'.format(mod)
++    )
++    mod_dep = get_variable('@0@_dep'.format(mod), [])
++    if conf.get('HAVE_MODULES', false)
++        have = 'HAVE_@0@'.format(mod.to_upper())
++        if conf.get('BUILD_LIBOUT123_MODULES', false) and conf.get(have, false)
++            output_module = shared_module(
++                'output_@0@'.format(mod),
++                mod_f,
++                c_args: libout123_mod_cppflags,
++                include_directories: includes,
++                link_with: libcompat_str,
++                dependencies: mod_dep,
++                name_prefix: '',
++                name_suffix: module_suffix,
++                gnu_symbol_visibility: 'default',
++                install: build_libout123,
++                install_dir: get_option('libdir') / meson.project_name()
++            )
++        endif
++    else
++        have = 'BUILD_@0@'.format(mod.to_upper())
++        if conf.get(have, false)
++            libdefaultmodule_sources = mod_f
++            libdefaultmodule_deps = mod_dep
++        endif
++    endif
++endforeach
++
++if conf.get('HAVE_MODULES', false)
++    libdefaultmodule = []
++else
++    libdefaultmodule = static_library(
++        'defaultmodule',
++        libdefaultmodule_sources,
++        include_directories: includes,
++        dependencies: libdefaultmodule_deps,
++        install: false
++    )
++endif
+diff --git a/src/libsyn123/meson.build b/src/libsyn123/meson.build
+new file mode 100644
+index 0000000..1fc7744
+--- /dev/null
++++ b/src/libsyn123/meson.build
+@@ -0,0 +1,48 @@
++# This builds libsyn123, a basic library for some sound synthesis
++# and format conversion for the mpg123 project.
++
++if build_libsyn123
++    static_lib = static_library('syn123-static',
++        files(
++            'syn123_int.h',
++            'g711_impl.h',
++            'pinknoise.c',
++            'geiger.c',
++            'libsyn123.c',
++            'volume.c',
++            'resample.c',
++            'filter.c',
++            'sampleconv.c',
++        ),
++        include_directories: includes,
++        link_with: [libcompat_str],
++        dependencies: [m_dep],
++        install: false,
++    )
++
++    vs_module_def = custom_target('syn123-def',
++        output: 'syn123.def',
++        command: [makedef_args, '--regex', '^syn123_', makedef_os_args, '@INPUT0@'],
++        input: [
++            static_lib
++        ],
++        capture: true
++    )
++
++    libsyn123 = library(
++        'syn123',
++        link_whole: static_lib,
++        link_args: vflag.format(vs_module_def.full_path()),
++        vs_module_defs: vs_module_def,
++        version: meson.project_version(),
++        install: true
++    )
++
++    libsyn123_dep = declare_dependency(
++        link_with: libsyn123,
++        dependencies: [m_dep],
++        include_directories: includes,
++    )
++else
++    libsyn123_dep = disabler()
++endif
+diff --git a/src/meson.build b/src/meson.build
+new file mode 100644
+index 0000000..bc2a881
+--- /dev/null
++++ b/src/meson.build
+@@ -0,0 +1,166 @@
++config_h = configure_file(
++    output: 'config.h',
++    configuration: conf
++)
++
++subdir('include')
++
++includes += include_directories('.')
++
++subdir('compat')
++subdir('common')
++if conf.get('NEED_LIB', false)
++    subdir('libout123')
++    if conf.get('NEED_MAINLIB', false)
++        subdir('libmpg123')
++        subdir('libsyn123')
++    endif
++endif
++
++mpg123_sources = files(
++    'audio.c',
++    'audio.h',
++    'common.c',
++    'common.h',
++    'sysutil.c',
++    'sysutil.h',
++    'control_generic.c',
++    'equalizer.c',
++    'getlopt.c',
++    'getlopt.h',
++    'httpget.c',
++    'httpget.h',
++    'resolver.c',
++    'resolver.h',
++    'genre.h',
++    'genre.c',
++    'mpg123.c',
++    'mpg123app.h',
++    'metaprint.c',
++    'metaprint.h',
++    'local.h',
++    'local.c',
++    'playlist.c',
++    'playlist.h',
++    'streamdump.h',
++    'streamdump.c',
++    'term.c',
++    'term.h',
++    'terms.h',
++    'win32_support.h',
++)
++
++out123_sources = files(
++    'sysutil.c',
++    'sysutil.h',
++    'common.h',
++    'getlopt.c',
++    'getlopt.h',
++    'local.h',
++    'local.c',
++    'filters.h',
++    'filters.c',
++    'out123.c',
++    'mpg123app.h',
++    'win32_support.h',
++)
++
++mpg123_id3dump_sources = files(
++  'mpg123-id3dump.c',
++  'getlopt.c',
++  'getlopt.h',
++)
++
++mpg123_strip_sources = files(
++  'mpg123-strip.c',
++  'getlopt.c',
++  'getlopt.h',
++)
++
++mpg123_deps = [libmpg123_dep, libout123_dep, libsyn123_dep]
++mpg123_libs = []
++if conf.get('TERM_POSIX', false)
++mpg123_sources += files('term_posix.c')
++endif
++
++if conf.get('TERM_WIN32', false)
++mpg123_sources += files('term_win32.c')
++endif
++
++if conf.get('TERM_NONE', false)
++mpg123_sources += files('term_none.c')
++endif
++
++if conf.get('NET123', false)
++mpg123_sources += files('net123.h')
++endif
++
++if conf.get('NET123_EXEC', false)
++mpg123_sources += files('net123_exec.c')
++endif
++
++if conf.get('NET123_WINHTTP', false)
++mpg123_sources += files('net123_winhttp.c')
++mpg123_deps += [cc.find_library('winhttp', required: true)]
++endif
++
++if conf.get('NET123_WININET', false)
++mpg123_sources += files('net123_wininet.c')
++mpg123_deps += [cc.find_library('wininet', required: true)]
++endif
++
++if conf.get('WIN32_CODES', false)
++mpg123_sources += files('win32_support.c')
++
++if conf.get('NETWORK_WINSOCK', false)
++mpg123_sources += files('win32_net.c')
++mpg123_deps += [cc.find_library('ws2_32', required: true)]
++endif
++
++out123_sources += files('win32_support.c')
++
++mpg123_id3dump_sources += files('win32_support.c')
++endif
++
++if build_programs
++    out123 = executable(
++        'out123',
++        out123_sources,
++        include_directories: includes,
++        link_with: [libcompat],
++        dependencies: [libout123_dep, libsyn123_dep],
++        gnu_symbol_visibility: 'hidden',
++        install: true,
++    )
++    if conf.get('HAVE_LFS_WRAP', false)
++        mpg123 = executable(
++            'mpg123',
++            mpg123_sources,
++            include_directories: includes,
++            link_with: [libcompat],
++            dependencies: mpg123_deps,
++            gnu_symbol_visibility: 'hidden',
++            install: true,
++        )
++
++        mpg123_id3dump = executable(
++            'mpg123-id3dump',
++            mpg123_id3dump_sources,
++            include_directories: includes,
++            link_with: [libcompat],
++            dependencies: libmpg123_dep,
++            gnu_symbol_visibility: 'hidden',
++            install: true,
++        )
++
++        mpg123_strip = executable(
++            'mpg123-strip',
++            mpg123_strip_sources,
++            include_directories: includes,
++            link_with: [libcompat],
++            dependencies: libmpg123_dep,
++            gnu_symbol_visibility: 'hidden',
++            install: true,
++        )
++    endif
++endif
+-- 
+2.47.0.windows.2
+
+
+From f53792b2f8a40d98a57f1723eeaa484901e61d92 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 18 Sep 2024 09:17:38 -0300
+Subject: [PATCH] msvc: Fix warnings usage interfering with pragma
+
+See https://sourceforge.net/p/mpg123/bugs/308/
+
+diff --git a/src/libmpg123/parse.c b/src/libmpg123/parse.c
+index 1a9d76c..ee3da60 100644
+--- a/src/libmpg123/parse.c
++++ b/src/libmpg123/parse.c
+@@ -11,8 +11,6 @@
+ #include <sys/stat.h>
+ #include <fcntl.h>
+ 
+-#include "getbits.h"
+-
+ #if defined (WANT_WIN32_SOCKETS)
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
+@@ -30,7 +28,7 @@
+ 
+ #include "mpeghead.h"
+ 
+-#include "../common/debug.h"
++#include "getbits.h"
+ 
+ #define bsbufid(fr) (fr)->bsbuf==(fr)->bsspace[0] ? 0 : ((fr)->bsbuf==fr->bsspace[1] ? 1 : ( (fr)->bsbuf==(fr)->bsspace[0]+512 ? 2 : ((fr)->bsbuf==fr->bsspace[1]+512 ? 3 : -1) ) )
+ 
+diff --git a/src/net123_winhttp.c b/src/net123_winhttp.c
+index d1a379f..51a70dc 100644
+--- a/src/net123_winhttp.c
++++ b/src/net123_winhttp.c
+@@ -2,9 +2,9 @@
+ #include "version.h"
+ #include "net123.h"
+ #include "compat/compat.h"
+-#include "common/debug.h"
+ #include <ws2tcpip.h>
+ #include <winhttp.h>
++#include "common/debug.h"
+ 
+ // The network implementation defines the struct for private use.
+ // The purpose is just to keep enough context to be able to
+diff --git a/src/net123_wininet.c b/src/net123_wininet.c
+index e23c919..60f30ab 100644
+--- a/src/net123_wininet.c
++++ b/src/net123_wininet.c
+@@ -2,9 +2,9 @@
+ #include "version.h"
+ #include "net123.h"
+ #include "compat/compat.h"
+-#include "common/debug.h"
+ #include <ws2tcpip.h>
+ #include <wininet.h>
++#include "common/debug.h"
+ 
+ // The network implementation defines the struct for private use.
+ // The purpose is just to keep enough context to be able to
+-- 
+2.47.0.windows.2
+
+
+From 574cdc837b32c87749feb6d0d0741e28a485ed90 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 18 Sep 2024 09:18:10 -0300
+Subject: [PATCH] msvc: Fix unguarded inclusion
+
+
+diff --git a/src/resolver.c b/src/resolver.c
+index 09435b5..43ab69e 100644
+--- a/src/resolver.c
++++ b/src/resolver.c
+@@ -38,7 +38,9 @@
+ #ifdef HAVE_SYS_TYPES_H
+ #include <sys/types.h>
+ #endif
++#ifdef HAVE_UNISTD_H
+ #include <unistd.h>
++#endif
+ #include "common/debug.h"
+ 
+ int split_url(mpg123_string *url, mpg123_string *auth, mpg123_string *host, mpg123_string *port, mpg123_string *path)
+-- 
+2.47.0.windows.2
+
+
+From 37b7c1e0242ae6f0cb02dcd20f8e8b51f773635f Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 18 Sep 2024 09:21:19 -0300
+Subject: [PATCH] msvc: Fix build post VS 2015
+
+
+diff --git a/src/win32_support.c b/src/win32_support.c
+index c8d148e..afb5184 100644
+--- a/src/win32_support.c
++++ b/src/win32_support.c
+@@ -4,6 +4,12 @@
+ 
+ #ifdef WANT_WIN32_UNICODE
+ 
++// This can be used from XP onwards (GetCommandLineW)
++#if defined(_UCRT) || WINVER >= 0x501
++#include <windows.h>
++#include <shellapi.h>
++#define USE_COMPLIANT_ARGV
++#else
+ /* Obscure and undocumented call from MS C Runtime "MSVCRT.DLL" */
+ typedef struct
+ {
+@@ -11,27 +17,36 @@ typedef struct
+ } _startupinfo;
+ 
+ /* XP and later has an int return though */
+-void __cdecl __declspec(dllimport) __wgetmainargs (
++void __wgetmainargs (
+ 	int *_Argc,
+ 	wchar_t ***_Argv,
+ 	wchar_t ***_Env,
+ 	int _DoWildCard,
+ 	_startupinfo * _StartInfo
+ );
++#endif
+ 
+ int win32_cmdline_utf8(int * argc, char *** argv)
+ {
+ 	int argcounter;
+ 	wchar_t **argv_wide;
++#ifndef USE_COMPLIANT_ARGV
+ 	wchar_t **env;
++#endif
+ 	char *argvptr;
++#ifndef USE_COMPLIANT_ARGV
+ 	_startupinfo startup;
++#endif
+ 
+ 	/* That's too lame. */
+ 	if(argv == NULL || argc == NULL) return -1;
+ 
++#ifdef USE_COMPLIANT_ARGV
++	argv_wide = CommandLineToArgvW(GetCommandLineW(), argc);
++#else
+ 	startup.newmode = 0;
+ 	__wgetmainargs(argc, &argv_wide,&env,1, &startup);
++#endif
+ 	*argv = (char **)calloc(sizeof (char *), *argc);
+ 	if(*argv == NULL){ error("Cannot allocate memory for command line."); return -1; }
+ 
+-- 
+2.47.0.windows.2
+
+
+From 1ec2f696bc82b41873af04376abee1db0e182bcd Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:17:28 -0300
+Subject: [PATCH] meson: Ensure modules are only used with no MSVC ABI
+
+
+diff --git a/meson.build b/meson.build
+index ac5c890..1fbc576 100644
+--- a/meson.build
++++ b/meson.build
+@@ -21,7 +21,8 @@ librt_dep = cc.find_library('rt', required: false)
+ conf.set('HAVE_CLOCK_GETTIME', cc.has_function('clock_gettime', dependencies: librt_dep) and os != 'windows')
+ 
+ modules = get_option('modules').enable_if(
+-    get_option('default_library') == 'shared'
++    # MSVC requires declspec on symbols when exporting from a shared library.
++    get_option('default_library') == 'shared' and not cc.has_define('_MSC_VER')
+ )
+ 
+ conf.set('DYNAMIC_BUILD', modules.allowed())
+-- 
+2.47.0.windows.2
+
+
+From 40d7d15dc7224c5c20bd16331e83bd20063311e2 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:17:49 -0300
+Subject: [PATCH] meson: Fix missing WIN32 define
+
+
+diff --git a/meson.build b/meson.build
+index 1fbc576..6b738ee 100644
+--- a/meson.build
++++ b/meson.build
+@@ -16,6 +16,11 @@ conf = configuration_data()
+ conf.set_quoted('PACKAGE_NAME', meson.project_name())
+ conf.set_quoted('PACKAGE_VERSION', meson.project_version())
+ 
++# All the defines use the unprefixed macro.
++if cc.has_define('_WIN32') and not cc.has_define('WIN32')
++    add_project_arguments('-DWIN32', language: 'c')
++endif
++
+ librt_dep = cc.find_library('rt', required: false)
+ # NOTE: provided by winpthread, there's a fallback on out123 to Win32 APIs
+ conf.set('HAVE_CLOCK_GETTIME', cc.has_function('clock_gettime', dependencies: librt_dep) and os != 'windows')
+@@ -1155,13 +1160,6 @@ endif
+ 
+ ############## Library cleanup
+ 
+-# MSVC requires declspec on symbols when importing from a shared library.
+-if get_option('default_library') in ['shared', 'both']
+-    if cc.has_define('_MSC_VER')
+-        error('Shared library build is only supported on Unix platforms')
+-    endif
+-endif
+-
+ makedef = find_program('meson/makedef.py')
+ 
+ makedef_args = [makedef]
+-- 
+2.47.0.windows.2
+
+
+From ba01d9db4aeace70d1a0c9af808ca0399ddebf77 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:19:25 -0300
+Subject: [PATCH] meson: Simplify exports for Windows
+
+
+diff --git a/src/libmpg123/meson.build b/src/libmpg123/meson.build
+index 9efb80f..b6812de 100644
+--- a/src/libmpg123/meson.build
++++ b/src/libmpg123/meson.build
+@@ -434,28 +434,12 @@ if build_libmpg123
+         'synth_sse3d.h',
+     ) + [config_h]
+ 
+-    static_lib = static_library('mpg123-static',
++    libmpg123 = library('mpg123',
+         libmpg123_sources,
+         include_directories: includes,
+         dependencies: [m_dep, network_deps, compat_libs],
+         link_with: [libcompat],
+-        install: false,
+-    )
+-
+-    vs_module_def = custom_target('mpg123-def',
+-        output: 'mpg123.def',
+-        command: [makedef_args, '--regex', '^mpg123_', makedef_os_args, '@INPUT0@'],
+-        input: [
+-            static_lib
+-        ],
+-        capture: true
+-    )
+-
+-    libmpg123 = library('mpg123',
+-        link_whole: static_lib,
+-        link_args: vflag.format(vs_module_def.full_path()),
+-        include_directories: includes,
+-        vs_module_defs: vs_module_def,
++        gnu_symbol_visibility: 'hidden', 
+         version: meson.project_version(),
+         install: true,
+     )
+diff --git a/src/libout123/meson.build b/src/libout123/meson.build
+index dbd2f76..dbbdd7f 100644
+--- a/src/libout123/meson.build
++++ b/src/libout123/meson.build
+@@ -51,29 +51,13 @@ else
+ endif
+ 
+ if conf.get('NEED_MAINLIB', false) and build_libout123
+-    static_lib = static_library('out123-static',
++    libout123 = library(
++        'out123',
+         libout123_sources,
+         include_directories: includes,
+         dependencies: libout123_deps,
+         link_with: libout123_libs,
+-        install: false,
+-    )
+-
+-    vs_module_def = custom_target('out123-def',
+-        output: 'out123.def',
+-        command: [makedef_args, '--regex', '^out123_', makedef_os_args, '@INPUT0@'],
+-        input: [
+-            static_lib
+-        ],
+-        capture: true
+-    )
+-
+-    libout123 = library(
+-        'out123',
+-        link_whole: static_lib,
+-        link_args: vflag.format(vs_module_def.full_path()),
+         gnu_symbol_visibility: 'hidden',
+-        vs_module_defs: vs_module_def,
+         version: meson.project_version(),
+         install: true
+     )
+diff --git a/src/libsyn123/meson.build b/src/libsyn123/meson.build
+index 1fc7744..67cae49 100644
+--- a/src/libsyn123/meson.build
++++ b/src/libsyn123/meson.build
+@@ -2,7 +2,8 @@
+ # and format conversion for the mpg123 project.
+ 
+ if build_libsyn123
+-    static_lib = static_library('syn123-static',
++    libsyn123 = library(
++        'syn123',
+         files(
+             'syn123_int.h',
+             'g711_impl.h',
+@@ -17,23 +18,7 @@ if build_libsyn123
+         include_directories: includes,
+         link_with: [libcompat_str],
+         dependencies: [m_dep],
+-        install: false,
+-    )
+-
+-    vs_module_def = custom_target('syn123-def',
+-        output: 'syn123.def',
+-        command: [makedef_args, '--regex', '^syn123_', makedef_os_args, '@INPUT0@'],
+-        input: [
+-            static_lib
+-        ],
+-        capture: true
+-    )
+-
+-    libsyn123 = library(
+-        'syn123',
+-        link_whole: static_lib,
+-        link_args: vflag.format(vs_module_def.full_path()),
+-        vs_module_defs: vs_module_def,
++        gnu_symbol_visibility: 'hidden',
+         version: meson.project_version(),
+         install: true
+     )
+-- 
+2.47.0.windows.2
+
+
+From aa327a26c776cf7cdbe244e0686d1eeee14509a6 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:25:15 -0300
+Subject: [PATCH] win32: Fix MSVC visibility of out123_stringlists_free
+
+
+diff --git a/src/libout123/stringlists.c b/src/libout123/stringlists.c
+index 8630ffa..a16a7e9 100644
+--- a/src/libout123/stringlists.c
++++ b/src/libout123/stringlists.c
+@@ -11,7 +11,7 @@
+ */
+ 
+ #include "../compat/compat.h"
+-#include "out123.h"
++#include "out123_int.h"
+ 
+ static char* always_strdup(const char *in)
+ {
+-- 
+2.47.0.windows.2
+
+
+From 2ebff50f928d65f6c3f51e35bd5d8afaea880435 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:25:32 -0300
+Subject: [PATCH] win32: Fix MSVC visibility of syn123_strerror
+
+
+diff --git a/src/include/syn123.h b/src/include/syn123.h
+index 4810308..ef45dc0 100644
+--- a/src/include/syn123.h
++++ b/src/include/syn123.h
+@@ -193,6 +193,7 @@ enum syn123_error
+  *  \param errcode the code returned by an API function
+  *  \return error phrase
+  */
++MPG123_EXPORT
+ const char* syn123_strerror(int errcode);
+ 
+ /** Create new handle with specified output format.
+-- 
+2.47.0.windows.2
+
+
+From e5d85ed8074d5fcd518f3ae837fb51f1fb759dda Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Mon, 23 Sep 2024 14:27:34 -0300
+Subject: [PATCH] win32: Fix missing libmpg123 function exports with
+ -fvisibility=hidden
+
+
+diff --git a/src/include/mpg123.h b/src/include/mpg123.h
+index bc89d4b..a04a0ee 100644
+--- a/src/include/mpg123.h
++++ b/src/include/mpg123.h
+@@ -30,9 +30,12 @@
+  * imports the functions from the DLL. 
+  */
+ #ifdef BUILD_MPG123_DLL
+-/* The dll exports. */
++#ifdef _WIN32
+ #define MPG123_EXPORT __declspec(dllexport)
+ #else
++#define MPG123_EXPORT __attribute__((visibility("default")))
++#endif
++#else
+ #ifdef LINK_MPG123_DLL
+ /* The exe imports. */
+ #define MPG123_EXPORT __declspec(dllimport)
+@@ -170,12 +173,14 @@ typedef struct mpg123_handle_struct mpg123_handle;
+  * \param patch optional address to store patchlevel version number
+  * \return full version string (like "1.2.3-beta4 (experimental)")
+  */
++MPG123_EXPORT
+ const char *mpg123_distversion(unsigned int *major, unsigned int *minor, unsigned int *patch);
+ 
+ /** Get API version of library build.
+  * \param patch optional address to store patchlevel
+  * \return API version of library
+  */
++MPG123_EXPORT
+ unsigned int mpg123_libversion(unsigned int *patch);
+ 
+ /** Useless no-op that used to do initialization work.
+diff --git a/src/libmpg123/lfs_wrap.c b/src/libmpg123/lfs_wrap.c
+index 4a7b8b6..64ae4d5 100644
+--- a/src/libmpg123/lfs_wrap.c
++++ b/src/libmpg123/lfs_wrap.c
+@@ -411,102 +411,124 @@ int attribute_align_arg mpg123_position( mpg123_handle *mh, off_t INT123_frame_o
+ // The open routines are trivial now. I only have differeing symbols suffixes
+ // to keep legacy ABI.
+ 
++// These must have MPG123_EXPORT applied manually because they're not defined in
++// libmpg123.c (where MPG123_PORTABLE_API is forced) -- amyspark
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_32(mpg123_handle *mh, const char *path)
+ {
+ 	return mpg123_open(mh, path);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fixed_32( mpg123_handle *mh, const char *path
+ ,	int channels, int encoding )
+ {
+ 	return mpg123_open_fixed(mh, path, channels, encoding);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fd_32(mpg123_handle *mh, int fd)
+ {
+ 	return mpg123_open_fd(mh, fd);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_handle_32(mpg123_handle *mh, void *iohandle)
+ {
+ 	return mpg123_open_handle(mh, iohandle);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_framebyframe_decode_32(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes)
+ {
+ 	return mpg123_framebyframe_decode(mh, num, audio, bytes);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_decode_frame_32(mpg123_handle *mh, off_t *num, unsigned char **audio, size_t *bytes)
+ {
+ 	return mpg123_decode_frame(mh, num, audio, bytes);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_timeframe_32(mpg123_handle *mh, double seconds)
+ {
+ 	return mpg123_timeframe64(mh, seconds);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_tell_32(mpg123_handle *mh)
+ {
+ 	return mpg123_tell(mh);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_tellframe_32(mpg123_handle *mh)
+ {
+ 	return mpg123_tellframe(mh);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_tell_stream_32(mpg123_handle *mh)
+ {
+ 	return mpg123_tell_stream(mh);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_seek_32(mpg123_handle *mh, off_t sampleoff, int whence)
+ {
+ 	return mpg123_seek(mh, sampleoff, whence);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_feedseek_32(mpg123_handle *mh, off_t sampleoff, int whence, off_t *input_offset)
+ {
+ 	return mpg123_feedseek(mh, sampleoff, whence, input_offset);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_seek_frame_32(mpg123_handle *mh, off_t offset, int whence)
+ {
+ 	return mpg123_seek_frame(mh, offset, whence);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_set_filesize_32(mpg123_handle *mh, off_t size)
+ {
+ 	return mpg123_set_filesize(mh, size);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_framelength_32(mpg123_handle *mh)
+ {
+ 	return mpg123_framelength(mh);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_length_32(mpg123_handle *mh)
+ {
+ 	return mpg123_length(mh);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_index_32(mpg123_handle *mh, off_t **offsets, off_t *step, size_t *fill)
+ {
+ 	return mpg123_index(mh, offsets, step, fill);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_set_index_32(mpg123_handle *mh, off_t *offsets, off_t step, size_t fill)
+ {
+ 	return mpg123_set_index(mh, offsets, step, fill);
+ }
+ 
++MPG123_EXPORT
+ off_t attribute_align_arg mpg123_framepos_32(mpg123_handle *mh)
+ {
+ 	return mpg123_framepos(mh);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_position_32( mpg123_handle *mh, off_t INT123_frame_offset
+ ,	off_t buffered_bytes, off_t *current_frame, off_t *frames_left
+ ,	double *current_seconds, double *seconds_left )
+@@ -532,104 +554,124 @@ int attribute_align_arg mpg123_position_32( mpg123_handle *mh, off_t INT123_fram
+ // When 64 bit offsets are enforced, libmpg123.c defines the _64 functions directly.
+ // There is no actual wrapper work, anyway.
+ 
++// Same as above re: exports --amyspark
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_64(mpg123_handle *mh, const char *path)
+ {
+ 	return mpg123_open(mh, path);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fixed_64( mpg123_handle *mh, const char *path
+ ,	int channels, int encoding )
+ {
+ 	return mpg123_open_fixed(mh, path, channels, encoding);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fd_64(mpg123_handle *mh, int fd)
+ {
+ 	return mpg123_open_fd(mh, fd);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_handle_64(mpg123_handle *mh, void *iohandle)
+ {
+ 	return mpg123_open_handle(mh, iohandle);
+ }
+ #endif
+ 
+-
++MPG123_EXPORT
+ int attribute_align_arg mpg123_framebyframe_decode_64(mpg123_handle *mh, OFF64 *num, unsigned char **audio, size_t *bytes)
+ {
+ 	return mpg123_framebyframe_decode64(mh, (int64_t*)num, audio, bytes);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_decode_frame_64(mpg123_handle *mh, OFF64 *num, unsigned char **audio, size_t *bytes)
+ {
+ 	return mpg123_decode_frame64(mh, (int64_t*)num, audio, bytes);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_timeframe_64(mpg123_handle *mh, double seconds)
+ {
+ 	return mpg123_timeframe64(mh, seconds);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_tell_64(mpg123_handle *mh)
+ {
+ 	return mpg123_tell64(mh);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_tellframe_64(mpg123_handle *mh)
+ {
+ 	return mpg123_tellframe64(mh);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_tell_stream_64(mpg123_handle *mh)
+ {
+ 	return mpg123_tell_stream64(mh);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_seek_64(mpg123_handle *mh, OFF64 sampleoff, int whence)
+ {
+ 	return mpg123_seek64(mh, (int64_t)sampleoff, whence);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_feedseek_64(mpg123_handle *mh, OFF64 sampleoff, int whence, OFF64 *input_offset)
+ {
+ 	return mpg123_feedseek64(mh, (int64_t)sampleoff, whence, (int64_t*)input_offset);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_seek_frame_64(mpg123_handle *mh, OFF64 offset, int whence)
+ {
+ 	return mpg123_seek_frame64(mh, (int64_t)offset, whence);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_set_filesize_64(mpg123_handle *mh, OFF64 size)
+ {
+ 	return mpg123_set_filesize64(mh, (int64_t)size);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_framelength_64(mpg123_handle *mh)
+ {
+ 	return mpg123_framelength64(mh);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_length_64(mpg123_handle *mh)
+ {
+ 	return mpg123_length64(mh);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_index_64(mpg123_handle *mh, OFF64 **offsets, OFF64 *step, size_t *fill)
+ {
+ 	return mpg123_index64(mh, (int64_t**)offsets, (int64_t*)step, fill);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_set_index_64(mpg123_handle *mh, OFF64 *offsets, OFF64 step, size_t fill)
+ {
+ 	return mpg123_set_index64(mh, (int64_t*)offsets, (int64_t)step, fill);
+ }
+ 
++MPG123_EXPORT
+ OFF64 attribute_align_arg mpg123_framepos_64(mpg123_handle *mh)
+ {
+ 	return mpg123_framepos64(mh);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_position_64( mpg123_handle *mh, OFF64 INT123_frame_offset
+ ,	OFF64 buffered_bytes, OFF64 *current_frame, OFF64 *frames_left
+ ,	double *current_seconds, double *seconds_left )
+@@ -879,6 +921,8 @@ static mpg123_ssize_t fallback_read(int fd, void *buf, size_t count)
+ #endif
+ 
+ /* Reader replacement prepares the hidden handle storage for next mpg123_open_fd() or plain mpg123_open(). */
++
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader(mpg123_handle *mh, mpg123_ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int) )
+ {
+ 	struct wrap_data* ioh;
+@@ -909,6 +953,7 @@ int attribute_align_arg mpg123_replace_reader(mpg123_handle *mh, mpg123_ssize_t
+ 	return MPG123_OK;
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_handle(mpg123_handle *mh, mpg123_ssize_t (*r_read) (void*, void *, size_t), off_t (*r_lseek)(void*, off_t, int), void (*cleanup)(void*))
+ {
+ 	struct wrap_data* ioh;
+@@ -930,11 +975,14 @@ int attribute_align_arg mpg123_replace_reader_handle(mpg123_handle *mh, mpg123_s
+ }
+ 
+ #if SIZEOF_OFF_T == 4
++
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_32(mpg123_handle *mh, mpg123_ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int) )
+ {
+ 	return mpg123_replace_reader(mh, r_read, r_lseek);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_handle_32(mpg123_handle *mh, mpg123_ssize_t (*r_read) (void*, void *, size_t), off_t (*r_lseek)(void*, off_t, int), void (*cleanup)(void*))
+ {
+ 	return mpg123_replace_reader_handle(mh, r_read, r_lseek, cleanup);
+@@ -944,6 +992,7 @@ int attribute_align_arg mpg123_replace_reader_handle_32(mpg123_handle *mh, mpg12
+ 
+ #ifdef LFS_LARGEFILE_64
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (int, void *, size_t), off64_t (*r_lseek)(int, off64_t, int) )
+ {
+ 	struct wrap_data* ioh;
+@@ -974,6 +1023,7 @@ int attribute_align_arg mpg123_replace_reader_64(mpg123_handle *mh, mpg123_ssize
+ 	return MPG123_OK;
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_handle_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (void*, void *, size_t), off64_t (*r_lseek)(void*, off64_t, int), void (*cleanup)(void*))
+ {
+ 	struct wrap_data* ioh;
+@@ -998,11 +1048,14 @@ int attribute_align_arg mpg123_replace_reader_handle_64(mpg123_handle *mh, mpg12
+ 
+ // If 64 bit off_t is enforced, libmpg123.c already defines the _64 functions.
+ #ifndef FORCED_OFF_64
++
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (int, void *, size_t), off_t (*r_lseek)(int, off_t, int) )
+ {
+ 	return mpg123_replace_reader(mh, r_read, r_lseek);
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_replace_reader_handle_64(mpg123_handle *mh, mpg123_ssize_t (*r_read) (void*, void *, size_t), off_t (*r_lseek)(void*, off_t, int), void (*cleanup)(void*))
+ {
+ 	return mpg123_replace_reader_handle(mh, r_read, r_lseek, cleanup);
+diff --git a/src/libmpg123/libmpg123.c b/src/libmpg123/libmpg123.c
+index 2a1c5ee..d7c5a07 100644
+--- a/src/libmpg123/libmpg123.c
++++ b/src/libmpg123/libmpg123.c
+@@ -570,6 +570,8 @@ double attribute_align_arg mpg123_geteq2(mpg123_handle *mh, int channel, int ban
+ #endif
+ 
+ /* plain file access, no http! */
++
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open(mpg123_handle *mh, const char *path)
+ {
+ 	if(mh == NULL) return MPG123_BAD_HANDLE;
+@@ -624,6 +626,7 @@ static int INT123_open_fixed_post(mpg123_handle *mh, int channels, int encoding)
+ 	return err;
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fixed( mpg123_handle *mh, const char *path
+ ,	int channels, int encoding )
+ {
+@@ -635,6 +638,7 @@ int attribute_align_arg mpg123_open_fixed( mpg123_handle *mh, const char *path
+ 	return err;
+ }
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_fd(mpg123_handle *mh, int fd)
+ {
+ 	if(mh == NULL) return MPG123_BAD_HANDLE;
+@@ -650,6 +654,7 @@ int attribute_align_arg mpg123_open_fd(mpg123_handle *mh, int fd)
+ }
+ #endif // PORTABLE_API
+ 
++MPG123_EXPORT
+ int attribute_align_arg mpg123_open_handle(mpg123_handle *mh, void *iohandle)
+ {
+ 	if(mh == NULL) return MPG123_BAD_HANDLE;
+-- 
+2.47.0.windows.2
+
+From f749c9785bc0baa7135b721f78e9cfce83a2f257 Mon Sep 17 00:00:00 2001
+From: "L. E. Segovia" <amy@centricular.com>
+Date: Wed, 6 Nov 2024 01:32:32 +0000
+Subject: [PATCH] meson: Fix symbol visibility with fvisibility=hidden
+
+---
+ src/libmpg123/meson.build | 1 +
+ src/libout123/meson.build | 1 +
+ src/libsyn123/meson.build | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/src/libmpg123/meson.build b/src/libmpg123/meson.build
+index b6812de..cf1ffd0 100644
+--- a/src/libmpg123/meson.build
++++ b/src/libmpg123/meson.build
+@@ -439,6 +439,7 @@ if build_libmpg123
+         include_directories: includes,
+         dependencies: [m_dep, network_deps, compat_libs],
+         link_with: [libcompat],
++        c_shared_args: ['-DBUILD_MPG123_DLL'],
+         gnu_symbol_visibility: 'hidden', 
+         version: meson.project_version(),
+         install: true,
+diff --git a/src/libout123/meson.build b/src/libout123/meson.build
+index dbbdd7f..38ca70e 100644
+--- a/src/libout123/meson.build
++++ b/src/libout123/meson.build
+@@ -57,6 +57,7 @@ if conf.get('NEED_MAINLIB', false) and build_libout123
+         include_directories: includes,
+         dependencies: libout123_deps,
+         link_with: libout123_libs,
++        c_shared_args: ['-DBUILD_MPG123_DLL'],
+         gnu_symbol_visibility: 'hidden',
+         version: meson.project_version(),
+         install: true
+diff --git a/src/libsyn123/meson.build b/src/libsyn123/meson.build
+index 67cae49..ed9684b 100644
+--- a/src/libsyn123/meson.build
++++ b/src/libsyn123/meson.build
+@@ -18,6 +18,7 @@ if build_libsyn123
+         include_directories: includes,
+         link_with: [libcompat_str],
+         dependencies: [m_dep],
++        c_shared_args: ['-DBUILD_MPG123_DLL'],
+         gnu_symbol_visibility: 'hidden',
+         version: meson.project_version(),
+         install: true
+-- 
+2.46.1
+
