@@ -4,18 +4,17 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'libpng'
-    version = '1.6.43'
+    version = '1.6.44'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     library_type = LibraryType.BOTH
     cmake_generator = 'ninja'
     can_msvc = True
     url = 'sf://'
-    tarball_checksum = '6a5ca0652392a2d7c9db2ae5b40210843c0bbc081cbd410825ab00cc59f14a6c'
+    tarball_checksum = '60c4da1d5b7f0aa8d158da48e8f8afa9773c1c8baa5d21974df61f1886b8ce8e'
     licenses = [{License.LibPNG: ['LICENSE']}]
     deps = ['zlib']
     patches = [
-        f'{name}/0001-neon-fix-function-export-names-for-iOS-armv7.patch',
         f'{name}/0002-cmake-Force-enable-pkg-config-modules-everywhere.patch',
         f'{name}/0003-cmake-Fix-naming-convention-breaking-rustc-library-l.patch',
     ]
