@@ -15,18 +15,24 @@ class Recipe(recipe.Recipe):
     files_libs = ['libwinpthread-1', 'libstdc++-6']
     files_devel = ['lib/libstdc++.a', 'lib/libstdc++.la']
     files_static = []
-    files_headers = ['include/GL']
+    files_headers = ['include/GL', 'include/KHR']
 
     def prepare(self):
         if self.config.target_platform != Platform.WINDOWS:
             raise InvalidRecipeError(self, "Invalid platform")
         if self.config.variants.uwp:
             self.runtime_dep = False
+        lib_suffix = ''
+        if self.config.platform != Platform.WINDOWS:
+            lib_suffix = f'/{self.config.build}'
         if self.config.target_arch == Architecture.X86:
-            gcclib = 'lib/gcc/x86_64-w64-mingw32/8.2.0/32/'
+            gcclib = f'lib{lib_suffix}/gcc/x86_64-w64-mingw32/14.2.0/32/'
+            # MinGW x86 requires changing GCC's exception model to DWARF2
+            # See https://fedoraproject.org/wiki/Changes/Mingw32GccDwarf2
+            # self._ehlib = 'libgcc_s_dw2-1'
             self._ehlib = 'libgcc_s_sjlj-1'
         else:
-            gcclib = 'lib/gcc/x86_64-w64-mingw32/8.2.0/'
+            gcclib = f'lib{lib_suffix}/gcc/x86_64-w64-mingw32/14.2.0/'
             self._ehlib = 'libgcc_s_seh-1'
 
         # mingw's static libraries
@@ -71,6 +77,11 @@ class Recipe(recipe.Recipe):
             shutil.copy(
                 os.path.join(libmingw, f),
                 os.path.join(self.config.prefix, 'bin', f))
+            # and to <toolchain>/bin because dlltool depends on it
+            binwinpthread = os.path.join(self.config.toolchain_prefix, 'bin', f)
+            if not os.path.exists(binwinpthread):
+                shutil.copy(
+                    os.path.join(libmingw, f), binwinpthread)
         for f in ['libstdc++-6.dll']:
             shutil.copy(
                 os.path.join(libdir, f),

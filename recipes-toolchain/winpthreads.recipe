@@ -96,3 +96,6 @@ class Recipe(recipe.Recipe):
         dest_winpthread_dll = os.path.join(libdir, "libwinpthread-1.dll")
         Path(dest_winpthread_dll).unlink(missing_ok=True)
         shutil.move(src_winpthread_dll, libdir)
+        # and to <toolchain>/bin because dlltool depends on it
+        bindir = os.path.join(self.config.prefix, 'bin')
+        shutil.copy(libdir / "libwinpthread-1.dll", bindir)
