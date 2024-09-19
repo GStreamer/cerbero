@@ -20,7 +20,7 @@ do
   else
       PLAT=linux
   fi
-  TC=mingw-12.0.0-gcc-14.1.0-$PLAT-multilib.tar.xz
+  TC=mingw-12.0.0-gcc-14.2.0-$PLAT-multilib.tar.xz
   echo "Creating tarball $TC"
   cd  ~/mingw/$PLAT/multilib
   XZ_OPT=-9 tar cJf $CURDIR/$TC *

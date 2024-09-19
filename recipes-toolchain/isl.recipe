@@ -8,6 +8,7 @@ class Recipe(recipe.Recipe):
     tarball_checksum = 'a0b5cb06d24f9fa9e77b55fabbe9a3c94a336190345c2555f9915bb38e976504'
     stype = SourceType.TARBALL
     licenses = [License.LGPLv3Plus]
+    autoreconf = True
     configure_options = '--disable-shared '\
             '--enable-static ' \
             '--with-gmp=system '\

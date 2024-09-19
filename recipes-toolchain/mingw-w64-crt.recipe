@@ -7,6 +7,8 @@ class Recipe(recipe.Recipe):
     configure_options = ' --with-default-msvcrt=ucrt '
     deps = ['mingw-w64-sources', 'binutils']
     requires_non_src_build = True
+    # Race condition in onecoreuap
+    allow_parallel_build = False
     can_msvc = False
 
     def prepare(self):

@@ -14,7 +14,7 @@ diff --git a/gcc/diagnostic-color.cc b/gcc/diagnostic-color.cc
 index f01a0fc2e..1dccf6993 100644
 --- a/gcc/diagnostic-color.cc
 +++ b/gcc/diagnostic-color.cc
-@@ -216,9 +216,38 @@ should_colorize (void)
+@@ -211,9 +211,38 @@ should_colorize (void)
    HANDLE h;
    DWORD m;
  

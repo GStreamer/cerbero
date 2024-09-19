@@ -4,27 +4,26 @@ from cerbero.utils import shell
 # will be used by gcc-bootstrap and gcc recipes
 class Recipe(recipe.Recipe):
     name = 'gcc-sources'
-    version = '14.1.0'
+    version = '14.2.0'
     url = 'https://ftpmirror.gnu.org/gnu/gcc/gcc-%(version)s/gcc-%(version)s.tar.xz'
-    tarball_checksum = 'e283c654987afe3de9d8080bc0bd79534b5ca0d681a73a11ff2b5d3767426840'
+    tarball_checksum = 'a7b39bc69cbf9e25826c5a60ab26477001f7c08d85cec04bc0e29cabed6f3cc9'
     stype = SourceType.TARBALL
     btype = BuildType.CUSTOM
     licenses = [License.GPLv3Plus]
     autoreconf = True
     patches = [
-        f'{name}/0001-PR-target-114968.patch',
         f'{name}/0003-Windows-Follow-Posix-dir-exists-semantics-more-close.patch',
         f'{name}/0005-Windows-Don-t-ignore-native-system-header-dir.patch',
         f'{name}/0007-Build-EXTRA_GNATTOOLS-for-Ada.patch',
         f'{name}/0008-Prettify-linking-no-undefined.patch',
         f'{name}/0011-Enable-shared-gnat-implib.patch',
         f'{name}/0012-Handle-spaces-in-path-for-default-manifest.patch',
-        f'{name}/0014-clone_function_name_1-Retain-any-stdcall-suffix.patch',
+        f'{name}/0014-gcc-9-branch-clone_function_name_1-Retain-any-stdcall-suffix.patch',
         f'{name}/0020-libgomp-Don-t-hard-code-MS-printf-attributes.patch',
-        f'{name}/0021-Allow-a-PCH-to-be-mapped-to-a-different-address.patch',
+        f'{name}/0021-PR14940-Allow-a-PCH-to-be-mapped-to-a-different-addr.patch',
         f'{name}/0140-gcc-Enable-diagnostic-colors-under-mintty.patch',
+        f'{name}/0200-add-m-no-align-vector-insn-option-for-i386.patch',
         f'{name}/2001-gcc-update-to-14.1.0.patch',
-        f'{name}/3001-gcc-apply-proposed-upstream-patch-for-seh_cfa_offset.patch',
         f'{name}/9999-gcc-build-without-sysroot-hack.patch',
         f'{name}/10000-gcc-cp-Make-lang.in-Fix-spurious-directory-separator.patch',
     ]

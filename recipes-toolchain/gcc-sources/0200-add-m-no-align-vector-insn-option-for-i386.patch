@@ -1,7 +1,7 @@
-From 56a07769cc12ecd4cb62335ce65df2b48d209643 Mon Sep 17 00:00:00 2001
+From 0deafca3ea0d75a062681f14ad1502a29ec30e28 Mon Sep 17 00:00:00 2001
 From: Kai Tietz <ktietz@anaconda.com>
 Date: Wed, 21 Apr 2021 07:54:59 +0200
-Subject: [PATCH 12/15] add -m(no-)align-vector-insn option for i386
+Subject: [PATCH 15/16] add -m(no-)align-vector-insn option for i386
 
 ---
  gcc/config/i386/i386-options.cc |  9 +++++--
@@ -12,7 +12,7 @@ Subject: [PATCH 12/15] add -m(no-)align-vector-insn option for i386
  5 files changed, 55 insertions(+), 9 deletions(-)
 
 diff --git a/gcc/config/i386/i386-options.cc b/gcc/config/i386/i386-options.cc
-index ac48b5c61..27671af84 100644
+index acb2291e70f..2de64ed5cde 100644
 --- a/gcc/config/i386/i386-options.cc
 +++ b/gcc/config/i386/i386-options.cc
 @@ -419,6 +419,7 @@ ix86_target_string (HOST_WIDE_INT isa, HOST_WIDE_INT isa2,
@@ -39,7 +39,7 @@ index ac48b5c61..27671af84 100644
      IX86_ATTR_YES ("recip",
  		   OPT_mrecip,
 diff --git a/gcc/config/i386/i386.opt b/gcc/config/i386/i386.opt
-index d5f793a9e..1d02e489e 100644
+index 0dbaacb57ed..3b1a644e2b6 100644
 --- a/gcc/config/i386/i386.opt
 +++ b/gcc/config/i386/i386.opt
 @@ -256,6 +256,10 @@ malign-stringops
@@ -65,7 +65,7 @@ index d5f793a9e..1d02e489e 100644
  Target RejectNegative Joined UInteger Var(ix86_preferred_stack_boundary_arg)
  Attempt to keep stack aligned to this power of 2.
 diff --git a/gcc/config/i386/mingw32.h b/gcc/config/i386/mingw32.h
-index 58304fc55..32dcef0b8 100644
+index baf80400862..2ff2a99e31b 100644
 --- a/gcc/config/i386/mingw32.h
 +++ b/gcc/config/i386/mingw32.h
 @@ -30,7 +30,7 @@ along with GCC; see the file COPYING3.  If not see
@@ -78,7 +78,7 @@ index 58304fc55..32dcef0b8 100644
  #ifndef TARGET_USING_MCFGTHREAD
  #define TARGET_USING_MCFGTHREAD  0
 diff --git a/gcc/config/i386/predicates.md b/gcc/config/i386/predicates.md
-index 2a97776fc..6e6d87a87 100644
+index c4141a96735..0ee5a9054ee 100644
 --- a/gcc/config/i386/predicates.md
 +++ b/gcc/config/i386/predicates.md
 @@ -1694,7 +1694,7 @@
@@ -91,7 +91,7 @@ index 2a97776fc..6e6d87a87 100644
  ;; Return true if OP is a parallel for an mov{d,q,dqa,ps,pd} vec_select,
  ;; where one of the two operands of the vec_concat is const0_operand.
 diff --git a/gcc/config/i386/sse.md b/gcc/config/i386/sse.md
-index 1bf50726e..c86293833 100644
+index 076064f97e6..b224b578676 100644
 --- a/gcc/config/i386/sse.md
 +++ b/gcc/config/i386/sse.md
 @@ -1847,7 +1847,8 @@
@@ -187,5 +187,5 @@ index 1bf50726e..c86293833 100644
    [(set (match_operand:V2DF 0 "nonimmediate_operand")
  	(vec_concat:V2DF
 -- 
-2.44.0.windows.1
+2.46.0
 

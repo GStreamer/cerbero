@@ -5,12 +5,11 @@ from pathlib import Path
 # real final compiler.
 class Recipe(recipe.Recipe):
     name = 'gcc-bootstrap'
-    version = '14.1.0'
+    version = '14.2.0'
     stype = SourceType.CUSTOM
     licenses = [License.GPLv3Plus]
     override_libtool = False
-    configure_options = '--with-newlib ' \
-                        '--disable-maintainer-mode ' \
+    configure_options = '--disable-maintainer-mode ' \
                         '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\' ' \
                         '--disable-shared ' \
                         '--disable-libgomp ' \
@@ -23,7 +22,7 @@ class Recipe(recipe.Recipe):
                         '--enable-threads=no ' \
                         '--enable-__cxa_atexit ' \
                         '--enable-lto ' \
-                        '--enable-languages=c,lto ' \
+                        '--enable-languages=c,c++,lto ' \
                         '--enable-multiarch ' \
                         ''
     requires_non_src_build = True

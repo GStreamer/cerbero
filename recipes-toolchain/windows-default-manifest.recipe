@@ -35,22 +35,21 @@ class Recipe(recipe.Recipe):
         # this recipe builds winpthreads for both x86_64 and x86
         Path(self.build_dir_32).mkdir(exist_ok=True)
         flags = "WINDRES=x86_64-w64-mingw32-windres "
-        host = 'i386-w64-mingw32'
+        target = 'i386-w64-mingw32'
         libdir = "/usr/%s/lib32" % self.host
 
-        self.configure_options += ' --target=%s' % host
-        self.configure_options += ' --build=%s' % host
+        self.configure_options += ' --build=%s' % self.host
         # i686 is always a cross build
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, target, target, self.configure_options),
                 self.build_dir_32, logfile=self.logfile, env=self.env)
 
         Path(self.build_dir_64).mkdir(exist_ok=True)
         flags = "WINDRES=x86_64-w64-mingw32-windres "
-        host = 'x86_64-w64-mingw32'
+        target = 'x86_64-w64-mingw32'
         libdir = "/usr/%s/lib" % self.host
         shell.new_call('%s ../configure --bindir=%s --libdir=%s --prefix=/usr/%s --host=%s %s' %\
-                (flags, libdir, libdir, host, host, self.configure_options),
+                (flags, libdir, libdir, target, target, self.configure_options),
                 self.build_dir_64, logfile=self.logfile, env=self.env)
 
     async def compile(self):

@@ -6,7 +6,7 @@ from cerbero.utils import shell
 
 class Recipe(recipe.Recipe):
     name = 'gcc'
-    version = '14.1.0'
+    version = '14.2.0'
     licenses = [License.GPLv3Plus]
     stype = SourceType.CUSTOM
     add_host_build_target = False
@@ -17,7 +17,7 @@ class Recipe(recipe.Recipe):
 
     # Note: on 8.2.0, the --disable-maintainer-mode flag was improperly
     # spaced, that meant we've been shipping --enable-shared all along!
-    # For consistency I'm explicitly enabling it with 14.1.0
+    # For consistency I'm explicitly enabling it with 14.1.0+
     configure_options = '--with-host-libstdcxx=\'-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm\' ' \
                         '--disable-maintainer-mode ' \
                         '--enable-shared ' \
