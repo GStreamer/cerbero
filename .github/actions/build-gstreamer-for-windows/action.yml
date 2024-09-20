@@ -38,6 +38,10 @@ inputs:
     description: 'Whether to clean the Cerbero build directory'
     required: false
     default: 'true'
+  no-cache:
+    description: 'Whether to disable restoring from cache'
+    required: false
+    default: 'false'
 outputs:
   gstreamer-version:
     description: 'GStreamer version'
@@ -207,7 +211,7 @@ runs:
         echo "config-hash=${config_hash}" >> $GITHUB_OUTPUT
 
     - id: restore-cerbero-sources-cache
-      if: ${{ steps.variables.outputs.do-build }}
+      if: ${{ steps.variables.outputs.do-build && inputs.no-cache != 'true' }}
       uses: actions/cache/restore@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-sources }}
@@ -218,7 +222,7 @@ runs:
           cerbero-sources-
 
     - id: restore-cerbero-deps-cache
-      if: ${{ steps.variables.outputs.do-build }}
+      if: ${{ steps.variables.outputs.do-build && inputs.no-cache != 'true' }}
       uses: actions/cache/restore@v4
       with:
         path: ${{ steps.cerbero-config.outputs.cerbero-home }}\cerbero-deps.tar.xz
