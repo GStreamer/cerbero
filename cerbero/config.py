@@ -289,6 +289,7 @@ class Config(object):
         'tomllib_path',
         'qt6_qmake_path',
         'system_build_tools',
+        'package_origin',
     ]
 
     cookbook = None
@@ -694,6 +695,7 @@ class Config(object):
         self.set_property('extra_mirrors', [])
         self.set_property('extra_bootstrap_packages', {})
         self.set_property('bash_completions', set())
+        self.set_property('package_origin', None)
         # Increase open-files limits
         set_nofile_ulimit()
 
