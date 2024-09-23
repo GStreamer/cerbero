@@ -1,18 +1,14 @@
-From 3ad4cbed1f22413ba3bd2cc953a8a7319b99aad4 Mon Sep 17 00:00:00 2001
+From b78029f2b2c57eedbbb379b2a2a3b3e297c406b0 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
-Date: Wed, 17 Jan 2024 23:14:09 +0200
-Subject: [PATCH 7/8] Compile WebDriver as a library
+Date: Mon, 23 Sep 2024 13:51:10 +0300
+Subject: [PATCH 07/12] Compile WebDriver as a library.
 
 ---
- Source/WebDriver/CMakeLists.txt           |  4 ++--
- Source/WebDriver/SessionHost.h            | 10 ++++++----
- Source/WebDriver/WebDriverMain.cpp        | 11 ++++++++++-
- Source/WebDriver/WebDriverService.cpp     |  9 +--------
- Source/WebDriver/WebDriverService.h       |  2 --
- Source/WebDriver/config.h                 |  3 +++
- Source/WebDriver/glib/SessionHostGlib.cpp | 19 ++++++++++++++++---
- Source/cmake/WebKitCommon.cmake           |  1 +
- 8 files changed, 39 insertions(+), 20 deletions(-)
+ Source/WebDriver/CMakeLists.txt    |  4 ++--
+ Source/WebDriver/WebDriverMain.cpp | 11 ++++++++++-
+ Source/WebDriver/config.h          |  3 +++
+ Source/cmake/WebKitCommon.cmake    |  1 +
+ 4 files changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/Source/WebDriver/CMakeLists.txt b/Source/WebDriver/CMakeLists.txt
 index 2ce0c46d4086..6e64701763ed 100644
@@ -34,37 +30,6 @@ index 2ce0c46d4086..6e64701763ed 100644
  
  install(TARGETS WebDriver
      RUNTIME DESTINATION "${EXEC_INSTALL_DIR}"
-diff --git a/Source/WebDriver/SessionHost.h b/Source/WebDriver/SessionHost.h
-index 90d69669cf29..d4da4255ee8c 100644
---- a/Source/WebDriver/SessionHost.h
-+++ b/Source/WebDriver/SessionHost.h
-@@ -56,9 +56,7 @@ public:
-     }
-     ~SessionHost();
- 
--#if USE(INSPECTOR_SOCKET_SERVER)
-     void setHostAddress(const String& ip, uint16_t port) { m_targetIp = ip; m_targetPort = port; }
--#endif
-     bool isConnected() const;
- 
-     const String& sessionID() const { return m_sessionID; }
-@@ -122,10 +120,14 @@ private:
-     RefPtr<SocketConnection> m_socketConnection;
-     GRefPtr<GCancellable> m_cancellable;
- #elif USE(INSPECTOR_SOCKET_SERVER)
--    String m_targetIp;
--    uint16_t m_targetPort { 0 };
-     Function<void(bool, std::optional<String>)> m_startSessionCompletionHandler;
-     std::optional<Inspector::ConnectionID> m_clientID;
-+#endif
-+    String m_targetIp;
-+    uint16_t m_targetPort { 0 };
-+
-+#if defined(__ANDROID__)
-+    bool m_connected = false;
- #endif
- };
- 
 diff --git a/Source/WebDriver/WebDriverMain.cpp b/Source/WebDriver/WebDriverMain.cpp
 index cbe30a6f434a..d83ffe8f7be0 100644
 --- a/Source/WebDriver/WebDriverMain.cpp
@@ -92,80 +57,6 @@ index cbe30a6f434a..d83ffe8f7be0 100644
  }
 +
 +}
-diff --git a/Source/WebDriver/WebDriverService.cpp b/Source/WebDriver/WebDriverService.cpp
-index 492b8013807e..4653f8bf81a1 100644
---- a/Source/WebDriver/WebDriverService.cpp
-+++ b/Source/WebDriver/WebDriverService.cpp
-@@ -59,11 +59,10 @@ int WebDriverService::run(int argc, char** argv)
- {
-     String portString;
-     std::optional<String> host;
--#if USE(INSPECTOR_SOCKET_SERVER)
-     String targetString;
-     if (const char* targetEnvVar = getenv("WEBDRIVER_TARGET_ADDR"))
-         targetString = String::fromLatin1(targetEnvVar);
--#endif
-+
-     for (int i = 1 ; i < argc; ++i) {
-         const char* arg = argv[i];
-         if (!strcmp(arg, "-h") || !strcmp(arg, "--help")) {
-@@ -92,7 +91,6 @@ int WebDriverService::run(int argc, char** argv)
-             continue;
-         }
- 
--#if USE(INSPECTOR_SOCKET_SERVER)
-         if (!strcmp(arg, "-t") && targetString.isNull()) {
-             if (++i == argc) {
-                 printUsageStatement(argv[0]);
-@@ -107,7 +105,6 @@ int WebDriverService::run(int argc, char** argv)
-             targetString = String::fromLatin1(arg + targetStrLength);
-             continue;
-         }
--#endif
-     }
- 
-     if (portString.isNull()) {
-@@ -115,7 +112,6 @@ int WebDriverService::run(int argc, char** argv)
-         return EXIT_FAILURE;
-     }
- 
--#if USE(INSPECTOR_SOCKET_SERVER)
-     if (!targetString.isEmpty()) {
-         auto position = targetString.reverseFind(':');
-         if (position != notFound) {
-@@ -123,7 +119,6 @@ int WebDriverService::run(int argc, char** argv)
-             m_targetPort = parseIntegerAllowingTrailingJunk<uint16_t>(StringView { targetString }.substring(position + 1)).value_or(0);
-         }
-     }
--#endif
- 
-     auto port = parseInteger<uint16_t>(portString);
-     if (!port) {
-@@ -834,9 +829,7 @@ void WebDriverService::connectToBrowser(Vector<Capabilities>&& capabilitiesList,
- 
-     auto sessionHost = makeUnique<SessionHost>(capabilitiesList.takeLast());
-     auto* sessionHostPtr = sessionHost.get();
--#if USE(INSPECTOR_SOCKET_SERVER)
-     sessionHostPtr->setHostAddress(m_targetAddress, m_targetPort);
--#endif
-     sessionHostPtr->connectToBrowser([this, capabilitiesList = WTFMove(capabilitiesList), sessionHost = WTFMove(sessionHost), completionHandler = WTFMove(completionHandler)](std::optional<String> error) mutable {
-         if (error) {
-             completionHandler(CommandResult::fail(CommandResult::ErrorCode::SessionNotCreated, makeString("Failed to connect to browser: ", error.value())));
-diff --git a/Source/WebDriver/WebDriverService.h b/Source/WebDriver/WebDriverService.h
-index 7bb1680e7870..ab033d3278b3 100644
---- a/Source/WebDriver/WebDriverService.h
-+++ b/Source/WebDriver/WebDriverService.h
-@@ -143,10 +143,8 @@ private:
-     HTTPServer m_server;
-     RefPtr<Session> m_session;
- 
--#if USE(INSPECTOR_SOCKET_SERVER)
-     String m_targetAddress;
-     uint16_t m_targetPort { 0 };
--#endif
- };
- 
- } // namespace WebDriver
 diff --git a/Source/WebDriver/config.h b/Source/WebDriver/config.h
 index 9c74f967b636..31c0b5443c51 100644
 --- a/Source/WebDriver/config.h
@@ -178,69 +69,8 @@ index 9c74f967b636..31c0b5443c51 100644
 +#define ALOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, "WPEDebug", __VA_ARGS__)
 +
  #endif // __cplusplus
-diff --git a/Source/WebDriver/glib/SessionHostGlib.cpp b/Source/WebDriver/glib/SessionHostGlib.cpp
-index 2c33644dc0f3..6fd65d5228fa 100644
---- a/Source/WebDriver/glib/SessionHostGlib.cpp
-+++ b/Source/WebDriver/glib/SessionHostGlib.cpp
-@@ -100,8 +100,12 @@ void SessionHost::connectToBrowser(Function<void (std::optional<String> error)>&
- 
- bool SessionHost::isConnected() const
- {
-+#if defined(__ANDROID__)
-+    return m_connected  && (!m_socketConnection || !m_socketConnection->isClosed());
-+#else
-     // Session is connected when launching or when socket connection hasn't been closed.
-     return m_browser && (!m_socketConnection || !m_socketConnection->isClosed());
-+#endif
- }
- 
- struct ConnectToBrowserAsyncData {
-@@ -135,9 +139,11 @@ static guint16 freePort()
- void SessionHost::launchBrowser(Function<void (std::optional<String> error)>&& completionHandler)
- {
-     m_cancellable = adoptGRef(g_cancellable_new());
-+    GUniquePtr<char> inspectorAddress(
-+        g_strdup_printf("%s:%u", m_targetIp.isEmpty()?"127.0.0.1":m_targetIp.latin1().data(), m_targetPort > 0 ? m_targetPort :freePort())
-+    );
-+#if !defined(__ANDROID__)
-     GRefPtr<GSubprocessLauncher> launcher = adoptGRef(g_subprocess_launcher_new(G_SUBPROCESS_FLAGS_NONE));
--    guint16 port = freePort();
--    GUniquePtr<char> inspectorAddress(g_strdup_printf("127.0.0.1:%u", port));
-     g_subprocess_launcher_setenv(launcher.get(), "WEBKIT_INSPECTOR_SERVER", inspectorAddress.get(), TRUE);
- #if PLATFORM(GTK)
-     g_subprocess_launcher_setenv(launcher.get(), "GTK_OVERLAY_SCROLLING", m_capabilities.useOverlayScrollbars.value() ? "1" : "0", TRUE);
-@@ -164,14 +170,18 @@ void SessionHost::launchBrowser(Function<void (std::optional<String> error)>&& c
-         auto* sessionHost = static_cast<SessionHost*>(userData);
-         sessionHost->m_browser = nullptr;
-     }, this);
--
-+#endif
-     connectToBrowser(makeUnique<ConnectToBrowserAsyncData>(this, WTFMove(inspectorAddress), m_cancellable.get(), WTFMove(completionHandler)));
- }
- 
- void SessionHost::connectToBrowser(std::unique_ptr<ConnectToBrowserAsyncData>&& data)
- {
-+#if !defined(__ANDROID__)
-     if (!m_browser)
-         return;
-+#else
-+    m_connected = true;
-+#endif
- 
-     RunLoop::main().dispatchAfter(100_ms, [connectToBrowserData = WTFMove(data)]() mutable {
-         auto* data = connectToBrowserData.release();
-@@ -205,6 +215,9 @@ void SessionHost::connectToBrowser(std::unique_ptr<ConnectToBrowserAsyncData>&&
- void SessionHost::connectionDidClose()
- {
-     m_browser = nullptr;
-+#if defined(__ANDROID__)
-+    m_connected = false;
-+#endif
-     inspectorDisconnected();
-     m_socketConnection = nullptr;
- }
 diff --git a/Source/cmake/WebKitCommon.cmake b/Source/cmake/WebKitCommon.cmake
-index f20a8d06d914..6fdf6ecb9a7e 100644
+index 38ac0c471add..359906540cc8 100644
 --- a/Source/cmake/WebKitCommon.cmake
 +++ b/Source/cmake/WebKitCommon.cmake
 @@ -166,6 +166,7 @@ if (NOT HAS_RUN_WEBKIT_COMMON)

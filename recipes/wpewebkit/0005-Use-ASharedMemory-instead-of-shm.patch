@@ -1,14 +1,14 @@
-From 7aea114def7d59fa0bdf99c8936f0a95add5dba3 Mon Sep 17 00:00:00 2001
+From 890959f49930b51a84b7af799825b3222f99b0e8 Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 28 Sep 2022 15:13:08 +0300
-Subject: [PATCH 5/8] Use ASharedMemory instead of shm
+Subject: [PATCH 05/12] Use ASharedMemory instead of shm
 
 ---
  .../platform/unix/SharedMemoryUnix.cpp        | 63 +++++++++----------
  1 file changed, 30 insertions(+), 33 deletions(-)
 
 diff --git a/Source/WebCore/platform/unix/SharedMemoryUnix.cpp b/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
-index c516acfa4b2b..bab2342b8af2 100644
+index e4a63f02f3da..75036fc8a95d 100644
 --- a/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
 +++ b/Source/WebCore/platform/unix/SharedMemoryUnix.cpp
 @@ -50,6 +50,8 @@
@@ -53,7 +53,7 @@ index c516acfa4b2b..bab2342b8af2 100644
 -#else
      CString tempName;
      for (int tries = 0; fileDescriptor == -1 && tries < 10; ++tries) {
-         auto name = makeString("/WK2SharedMemory.", cryptographicallyRandomNumber<unsigned>());
+         auto name = makeString("/WK2SharedMemory."_s, cryptographicallyRandomNumber<unsigned>());
          tempName = name.utf8();
  
          do {

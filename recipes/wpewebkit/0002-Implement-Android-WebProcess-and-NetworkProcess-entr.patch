@@ -1,7 +1,7 @@
-From 3e51ac2a9cd6f3cba126a893db9b32d822b2cc72 Mon Sep 17 00:00:00 2001
+From ae486ebcc2ca2f5c40723af5c8e2f7a4f96909c4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Fernando=20Jim=C3=A9nez=20Moreno?= <ferjmoreno@gmail.com>
 Date: Tue, 25 May 2021 13:51:14 +0200
-Subject: [PATCH 2/8] Implement Android WebProcess and NetworkProcess entry
+Subject: [PATCH 02/12] Implement Android WebProcess and NetworkProcess entry
  points
 
 ---
@@ -58,10 +58,10 @@ index f98cd65a0ea1..3dae162d5cfa 100644
 +
 +}
 diff --git a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
-index 066fdb879253..0bd96093b358 100644
+index 3d4a611d830a..a9f624a87b82 100644
 --- a/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
 +++ b/Source/WebKit/WebProcess/wpe/WebProcessMainWPE.cpp
-@@ -76,3 +76,16 @@ int WebProcessMain(int argc, char** argv)
+@@ -92,3 +92,16 @@ int WebProcessMain(int argc, char** argv)
  }
  
  } // namespace WebKit
@@ -79,10 +79,10 @@ index 066fdb879253..0bd96093b358 100644
 +
 +}
 diff --git a/Source/WebKit/webkitglib-symbols.map b/Source/WebKit/webkitglib-symbols.map
-index 8b5340f55b9f..2288372b709a 100644
+index 52848c533dbd..a063b509164a 100644
 --- a/Source/WebKit/webkitglib-symbols.map
 +++ b/Source/WebKit/webkitglib-symbols.map
-@@ -9,6 +9,7 @@ global:
+@@ -8,6 +8,7 @@ global:
      "WebKit::WebProcessExtensionManager::singleton()";
      "WebKit::WebProcessMain(int, char**)";
    };

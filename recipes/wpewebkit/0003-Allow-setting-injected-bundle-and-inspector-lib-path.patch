@@ -1,8 +1,8 @@
-From 2e0f928912f43bfa0921e082d7766e8438fafc81 Mon Sep 17 00:00:00 2001
+From e20f3344536da81cb533e03865fba97e59f3927f Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Thu, 24 Mar 2022 09:41:17 +0200
-Subject: [PATCH 3/8] Allow setting injected bundle and inspector lib paths in
- non dev mode
+Subject: [PATCH 03/12] Allow setting injected bundle and inspector lib paths
+ in non dev mode
 
 ---
  .../inspector/remote/glib/RemoteInspectorUtils.cpp            | 4 ++--
@@ -10,7 +10,7 @@ Subject: [PATCH 3/8] Allow setting injected bundle and inspector lib paths in
  2 files changed, 2 insertions(+), 4 deletions(-)
 
 diff --git a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
-index 9421a8b66d2a..ba21ead35b89 100644
+index 04a49a2af4b5..c394cb86554a 100644
 --- a/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
 +++ b/Source/JavaScriptCore/inspector/remote/glib/RemoteInspectorUtils.cpp
 @@ -43,13 +43,13 @@ GRefPtr<GBytes> backendCommands()
@@ -30,10 +30,10 @@ index 9421a8b66d2a..ba21ead35b89 100644
          GModule* resourcesModule = g_module_open(bundleFilename.get(), G_MODULE_BIND_LAZY);
          if (!resourcesModule) {
 diff --git a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
-index d897f14bbc9c..3dc279b7cbfb 100644
+index 5ebc00dd4b58..1fe752e7e7b1 100644
 --- a/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
 +++ b/Source/WebKit/UIProcess/API/glib/WebKitWebContext.cpp
-@@ -331,11 +331,9 @@ void webkitWebContextWillCloseAutomationSession(WebKitWebContext* webContext)
+@@ -337,11 +337,9 @@ void webkitWebContextWillCloseAutomationSession(WebKitWebContext* webContext)
  
  static const char* injectedBundleDirectory()
  {

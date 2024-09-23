@@ -16,6 +16,6 @@ class Recipe(recipe.Recipe):
     allow_parallel_build = True
     autoreconf = True
 
-    files_devel = ['lib/pkgconfig/libwebp.pc', 'lib/pkgconfig/libwebpdemux.pc']
-    files_libs = ['libwebp', 'libwebpdemux']
+    files_devel = ['lib/pkgconfig/libwebp.pc', 'lib/pkgconfig/libwebpmux.pc', 'lib/pkgconfig/libwebpdemux.pc']
+    files_libs = ['libwebp', 'libwebpmux', 'libwebpdemux']
 

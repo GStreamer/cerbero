@@ -2,11 +2,11 @@
 
 class Recipe(recipe.Recipe):
     name = 'wpewebkit'
-    version = '2.44.1'
+    version = '2.46.0'
     stype = SourceType.TARBALL
     btype = BuildType.CMAKE
     url = 'https://wpewebkit.org/releases/wpewebkit-{0}.tar.xz'.format(version)
-    tarball_checksum = '2c9fbf4fcf8884d34102283e2b008ce0b0bc2cf07de78f564a8b34347e7bc19b'
+    tarball_checksum = '301550fbd8703f3ba4c4a65fe596686960569f8a3b0f6668243179cbc77bbc50'
     deps = [
         'icu',
         'cairo',
@@ -48,7 +48,9 @@ class Recipe(recipe.Recipe):
         -DUSE_LIBDRM=OFF \
         -DUSE_JPEGXL=OFF \
         -DUSE_LIBBACKTRACE=OFF \
+        -DUSE_SYSPROF_CAPTURE=OFF \
         -DENABLE_WEBDRIVER=ON \
+        -DENABLE_WPE_PLATFORM=OFF \
         -DCMAKE_BUILD_TYPE=Release \
     '
     cmake_generator = 'ninja'
@@ -196,7 +198,12 @@ class Recipe(recipe.Recipe):
                 'wpewebkit/0005-Use-ASharedMemory-instead-of-shm.patch',
                 'wpewebkit/0006-Enable-Android-on-ANGLE-for-WebGL-support.patch',
                 'wpewebkit/0007-Compile-WebDriver-as-a-library.patch',
-                'wpewebkit/0008-Scale-mouse-location-according-to-device-scale-facto.patch'
+                'wpewebkit/0008-WebDriver-WPE-Mouse-interaction-simulation-needs-to-.patch',
+                'wpewebkit/0009-CMake-WPE-ENABLE_WPE_PLATFORM-cannot-be-toggled.patch',
+                'wpewebkit/0010-GTK-WPE-IPC-Connection-fails-to-unset-FD_CLOEXEC.patch',
+                'wpewebkit/0011-WPE-Auxiliary-processes-fail-to-launch-if-ProcessPro.patch',
+                'wpewebkit/0012-Add-Android-support-to-Skia-integration.patch'
+
             ]
         else:
             self.append_env('LDFLAGS', '-lrt')

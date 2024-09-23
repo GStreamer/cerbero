@@ -1,7 +1,7 @@
-From 08f5015a97402360198df94b6e01c298b6e3c4d9 Mon Sep 17 00:00:00 2001
+From 052e869d493ae989b1cd2141f4a95bfe0a355ecd Mon Sep 17 00:00:00 2001
 From: Jani Hautakangas <jani@igalia.com>
 Date: Wed, 25 Oct 2023 23:46:04 +0300
-Subject: [PATCH 6/8] Enable Android on ANGLE for WebGL support
+Subject: [PATCH 06/12] Enable Android on ANGLE for WebGL support
 
 ---
  Source/ThirdParty/ANGLE/CMakeLists.txt                      | 2 ++
@@ -37,7 +37,7 @@ index f734f599b385..d5792550bec7 100644
  
  if (USE_OPENGL)
 diff --git a/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp b/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
-index caafdc6f1a10..dabc90cd99ff 100644
+index 832a1f22023a..a6959bf5afd0 100644
 --- a/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
 +++ b/Source/WebCore/platform/graphics/angle/PlatformDisplayANGLE.cpp
 @@ -44,8 +44,10 @@ EGLDisplay PlatformDisplay::angleEGLDisplay() const
