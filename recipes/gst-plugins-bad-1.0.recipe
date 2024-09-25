@@ -31,6 +31,7 @@ class Recipe(custom.GStreamer):
                      'ladspa': 'auto', # lrdf is optional
                      'openh264': 'enabled',
                      'openjpeg': 'enabled',
+                     'qroverlay': 'enabled',
                      'opus': 'enabled',
                      'rtmp': 'enabled',
                      'rtmp2': 'enabled',
@@ -88,7 +89,7 @@ class Recipe(custom.GStreamer):
             'libsrtp', 'libdca', 'libdvdnav', 'libnice',
             'soundtouch', 'vo-aacenc', 'openjpeg',
             'pango', 'spandsp', 'webrtc-audio-processing', 'sbc', 'ladspa',
-            'srt', 'zbar', 'libltc']
+            'srt', 'zbar', 'libltc', 'qrencode', 'json-glib']
     use_system_libs = True
 
     files_lang = ['gst-plugins-bad-1.0']
@@ -183,6 +184,7 @@ class Recipe(custom.GStreamer):
              '%(libdir)s/gstreamer-1.0/libgstivtc%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstlegacyrawparse%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstproxy%(mext)s',
+             '%(libdir)s/gstreamer-1.0/libgstqroverlay%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstremovesilence%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsegmentclip%(mext)s',
              '%(libdir)s/gstreamer-1.0/libgstsmooth%(mext)s',
