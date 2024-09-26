@@ -4,11 +4,11 @@ from cerbero.tools.libtool import LibtoolLibrary
 
 class Recipe(recipe.Recipe):
     name = 'fribidi'
-    version = '1.0.14'
+    version = '1.0.16'
     stype = SourceType.TARBALL
     btype = BuildType.MESON
     url = 'https://github.com/fribidi/fribidi/releases/download/v%(version)s/fribidi-%(version)s.tar.xz'
-    tarball_checksum = '76ae204a7027652ac3981b9fa5817c083ba23114340284c58e756b259cd2259a'
+    tarball_checksum = '1b1cde5b235d40479e91be2f0e88a309e3214c8ab470ec8a2744d82a5a9ea05c'
     licenses = [License.LGPLv2_1Plus]
 
     # gen.tab/gen-unicode-version needs to be built and run during compilation
