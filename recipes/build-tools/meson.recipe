@@ -23,6 +23,10 @@ class Recipe(recipe.Recipe):
     files_bin = ['bin/meson']
     files_python = []
 
+    patches = [
+        f'{name}/0001-nasm-Add-mms-bitfields-to-the-list-of-ignored-flags.patch'
+    ]
+
     async def install(self):
         # setup.py barfs if using posix paths on Windows
         if self.config.platform == Platform.WINDOWS:

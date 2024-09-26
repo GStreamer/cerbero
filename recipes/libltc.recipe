@@ -12,7 +12,10 @@ class Recipe(recipe.Recipe):
     btype = BuildType.MESON
     meson_options = {}
 
-    patches = ['libltc/0001-Add-minimal-meson-build-system.patch']
+    patches = [
+        'libltc/0001-Add-minimal-meson-build-system.patch',
+        'libltc/0001-Fix-Windows-build.patch',
+    ]
 
     files_libs = ['libltc']
     files_devel = ['include/ltc.h', '%(libdir)s/pkgconfig/ltc.pc']

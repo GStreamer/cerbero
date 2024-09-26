@@ -4,7 +4,7 @@ from cerbero.utils import shell
 class Recipe(custom.GStreamer):
     name = 'gstreamer-1.0'
     btype = BuildType.MESON
-    tarball_checksum = '2bdef209252bf146351843134b797db6b6e7adb4c00d82e83bd5abe608253a7b'
+    tarball_checksum = 'b807dbf36c5d2b3ce1c604133ed0c737350f9523ce4d8d644a1177c5f9d6ded3'
     deps = ['glib']
     bash_completions = ['gst-inspect-1.0', 'gst-launch-1.0']
 
@@ -86,13 +86,3 @@ class Recipe(custom.GStreamer):
         # If package origin is specified, set it on the meson meson_options
         if self.config.package_origin:
             self.meson_options['package-origin'] = self.config.package_origin
-
-    def post_install(self):
-        if self.config.platform in (Platform.DARWIN, Platform.IOS):
-            files = [
-                f'{self.config.libdir}/pkgconfig/gstreamer-1.0.pc',
-            ]
-            for f in files:
-                shell.replace(f, {'Libs:': 'Libs: -Wl,-rpath,${libdir}'})
-
-        super().post_install()

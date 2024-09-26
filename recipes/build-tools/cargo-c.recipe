@@ -25,3 +25,4 @@ class Recipe(recipe.Recipe):
         if self.config.platform == Platform.DARWIN:
             self.set_env('OPENSSL_LIB_DIR', self.config.libdir)
             self.set_env('OPENSSL_INCLUDE_DIR', os.path.join(self.config.prefix, 'include'))
+            self.set_env('RUSTFLAGS', "-C link-args=-Wl,-headerpad_max_install_names")

@@ -55,7 +55,10 @@ class Recipe(recipe.Recipe):
         f'{name}/0010-glib-gthread-posix-Fix-name-of-the-futex_time64-2-te.patch',
         f'{name}/0011-glib-gthread-posix-Use-the-config.h-macros-to-detect.patch',
         f'{name}/0012-glib-gthread-posix-Fix-missing-saved_errno-variable-.patch',
-        'glib/0001-drop-gslice.patch'
+        'glib/0001-drop-gslice.patch',
+        # https://gitlab.gnome.org/GNOME/glib/-/merge_requests/3237
+        # backported into 2.74.6
+        'glib/0001-Fix-safe_wspawnve-define.patch',
     ]
 
     files_libs = [
@@ -251,11 +254,6 @@ class Recipe(recipe.Recipe):
                 raise FatalError(_("Add specific for other Linux distributions here"))
             self._set_gio_flags(path1, path2, use_old_uri_scheme)
 
-        if self.config.platform in [Platform.DARWIN, Platform.IOS]:
-            # Meson doesn't yet introduce rpaths properly.
-            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
-            self.append_env('LDFLAGS', f'-Wl,-rpath,{self.config.libdir}')
-
         if self.config.variants.noasserts:
             self.meson_options.update({'glib_assert': 'false'})
 
@@ -284,6 +282,16 @@ class Recipe(recipe.Recipe):
             with open(os.path.join(self.config.libdir, 'glib-2.0',
                                    'include', 'glibconfig.h'), 'w+') as f:
                 f.write(GLIB_CONFIG_UNVERSAL)
+
+        if self.config.platform in (Platform.DARWIN, Platform.IOS):
+            # Meson doesn't yet introduce rpaths properly.
+            # https://github.com/mesonbuild/meson/issues/2121#issuecomment-347535874
+            files = [
+                f'{self.config.libdir}/pkgconfig/glib-2.0.pc',
+            ]
+            for f in files:
+                shell.replace(f, {'Libs:': 'Libs: -Wl,-rpath,${libdir}'})
+
         major, minor, micro = get_libtool_versions(self.version)
         # Meson does not generate la files
         LibtoolLibrary('glib-2.0', major, minor, micro,

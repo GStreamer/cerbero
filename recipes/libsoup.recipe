@@ -13,6 +13,10 @@ class Recipe(recipe.Recipe):
     meson_options = {'gnome': 'false', 'vapi': 'disabled', 'tls_check': 'false', 'tests' : 'false'}
     deps = ['libxml2', 'glib', 'glib-networking', 'libpsl']
 
+    patches = [
+        'libsoup/0001-Workaround-MinGW-build-werror.patch',
+    ]
+
     # sqlite ships with the system on macOS and iOS. Android also ships with
     # sqlite3, but it's not available from the NDK; only from Java.
     # We also build it on Linux to avoid the potential for bugs with
